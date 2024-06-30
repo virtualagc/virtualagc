@@ -13,9 +13,17 @@
   //                          I checked it and changed the name from "guess"
   //                          to "patch".
 
-  // Note that this instruction is the target of an EX, and not executed
-  // directly, so the truth is that it doesn't matter if we patch the CALL
-  // INLINE or not.
+  // Note that this instruction is not reachable, as far as I can see.  It's
+  // preceded by a GO TO START, and is not labeled, thus itself cannot be the
+  // target of an XPL GO TO.  In principle, since it's extremely close to the
+  // beginning of PROCEDURE, it's possible (if difficult) for later CALL INLINE
+  // statements to branch to it by indexing off the beginning address of the
+  // procedure.  However, there is no such manipulation in succeeding
+  // CALL INLINE statements.  I infer that this was active code at one time,
+  // but became dead code when the GO TO START was added, and for some reason
+  // was never subsequently removed.  Alternatively, a debugger could reach
+  // it and change the LOWER_BOUND and MODE for COMPACTIFY, so perhaps it's
+  // there for debugging purposes.
 
 p0_0: ;
   // (0)    CALL INLINE("50", 2, 0, LOWER_BOUND);                                        

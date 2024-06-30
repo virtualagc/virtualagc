@@ -13,7 +13,7 @@ Mods:       2024-06-24 RSB  Began.
 
 import sys
 import datetime
-from parseCommandLine import indentationQuantum, lines, ifdefs
+from parseCommandLine import indentationQuantum, lines, ifdefs, traceInlines
 from auxiliary import getAttributes, findParentProcedure
 
 # The `guessFiles` dictionary has keys which are the starting patch numbers
@@ -162,9 +162,10 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     X = 0
     B = 0
     D = 0
+    sD = "0"
     identifierD = None
     def getXBD(iBD, anyX = False):
-        nonlocal X, B, D, identifierD
+        nonlocal X, B, D, identifierD, sD
         address = ""
         count = 0
         if iBD >= len(parameters):
@@ -195,6 +196,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
                 return count, None
             B = regB
             D = tokenD["number"]
+            sD = "%d" % D
             identifierD = None
         elif "identifier" in tokenB:
             count += 1
@@ -204,11 +206,16 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
                 return count, None
             B = 0
             D = attributes["address"]
+            #sD = identifier
+            sD = "%d" % D
             identifierD = identifier
         else:
             return count, None
-        address = address + ("%d" % D)
-        return count, address
+        if isinstance(D, str):
+            address += D
+        else:
+            address = address + ("%d" % D)
+        return count, "(" + address + ") & 0xFFFFFF"
     
     # Similar to getXBD(), but just for a single register.  Returns the register
     # number, or None on failure.  It returns a number rather than a string for
@@ -245,7 +252,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         indent1 = indent + indentationQuantum
         if negative:
             parentProcedure = findParentProcedure(scope)
-            labels = list(parentProcedure["labels"])
+            labels = parentProcedure["allLabels"]
             if len(labels) == 0:
                 thisLine.append(indent + "// " + str(labels))
                 thisLine.append(indent + ";" + FIXME + \
@@ -308,6 +315,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     
     indent1 = indent + indentationQuantum
     indent2 = indent1 + indentationQuantum
+    indent3 = indent2 + indentationQuantum
     
     thisLine.append(indent + "// (%d) %s" % (inlineCounter, lines[errxitRef]))
     length = len(parameters)
@@ -349,8 +357,8 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
             thisLine.append(indent + "address360B = %s;" % address360B)
         else:
             return endOfInstruction(FIXME + "Cannot compute address in RX type")
-        stringified = mnemonic + "\t" + "%d,%d(%d,%d)" % \
-                                 (R1, D, X, B)
+        stringified = mnemonic + "\t" + "%d,%s(%d,%d)" % \
+                                 (R1, sD, X, B)
     elif typeName == "SS":
         msNibble = parameters[1]["token"]["number"]
         lsNibble = parameters[2]["token"]["number"]
@@ -363,6 +371,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         X1 = X
         B1 = B
         D1 = D
+        sD1 = "" + sD
         count, address360B = getXBD(3 + count, False)
         if address360B != None:
             thisLine.append(indent + "address360B = %s;" % address360B)
@@ -371,15 +380,16 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         X2 = X
         B2 = B
         D2 = D
-        stringified = mnemonic + "\t" + "%d(%d,%d),%d(%d)" %\
-                                 (D1, L, B1, D2, B2)
+        sD2 = sD
+        stringified = mnemonic + "\t" + "%s(%d,%d),%s(%d)" %\
+                                 (sD1, L, B1, sD2, B2)
     elif typeName == "RS":
         R1 = getR(1)
         R3 = getR(2)
         count, address360B = getXBD(3, False)
         if R1 == None or R3 == None or address360B == None:
             return endOfInstruction(FIXME + "Cannot get R1, R3, or address in RS type")
-        stringified = mnemonic + "\t" + "%d,%d,%d(%d)" % (R1, R3, D, B)
+        stringified = mnemonic + "\t" + "%d,%d,%s(%d)" % (R1, R3, sD, B)
     elif typeName == "SI":
         msNibble = parameters[1]["token"]["number"]
         lsNibble = parameters[2]["token"]["number"]
@@ -391,13 +401,16 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
             return endOfInstruction(FIXME + "Cannot compute address in SI type")
         if I2 == None:
             return endOfInstruction(FIXME + "Immediate value not a number in SI type")
-        stringified = mnemonic + "\t" + "%d(%d),%d" % (D, B, I2)
+        stringified = mnemonic + "\t" + "%s(%d),%d" % (sD, B, I2)
     else:
         return endOfInstruction(FIXME + "Unsupported instruction type %s" % typeName)
     
     thisLine.append(indent + "// Type %s, " % typeName \
                     + "p. %s:\t\t%s" % (pageNumber, stringified))
     
+    if traceInlines:
+        thisLine.append(indent + 'detailedInlineBefore(%d, "%s");' % \
+                        (inlineCounter, stringified))
     # Generated proposed code.
     if opcode == 0x05: # BALR p. 7-14
         thisLine.append(indent + "GR[%d] = %d;" % (R1, nextPc))
@@ -446,7 +459,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "setCCd();")
         thisLine.append(indent + "FR[%d] = scratchd;" % R1)
     elif opcode == 0x41: # LA p. 7-78
-        thisLine.append(indent + "GR[%d] = address360B;" % R1)
+        thisLine.append(indent + "GR[%d] = address360B & 0xFFFFFF;" % R1)
     elif opcode == 0x43: # IC p. 7-76
         thisLine.append(indent + \
               "GR[%d] = (memory[address360B] << 24) | (GR[%d] & 0xFFFFFF);" \
@@ -461,7 +474,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         elif X == 0:
             thisLine.append(indent + "mask360 = %d;" % R1)
             thisLine.append(indent + "if (%s)" % condition)
-            if generateJumpTable(indent1, "%s" % address360B, False):
+            if generateJumpTable(indent1, "address360B", False):
                 return endOfInstruction()
         else:
             return endOfInstruction(FIXME + 
@@ -481,9 +494,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "setCC();")
         thisLine.append(indent + "GR[%d] = scratch;" % R1)
     elif opcode == 0x60: # STD p. 9-11
-        thisLine.append(indent + "toFloatIBM(&msw360, &lsw360, FR[%d]);" % R1)
-        thisLine.append(indent + "COREWORD2(address360B, msw360);")
-        thisLine.append(indent + "COREWORD2(address360B + 4, lsw360);")
+        thisLine.append(indent + "std(%d, address360B);")
     elif opcode == 0x68: # LD p. 9-10
         thisLine.append(indent + \
             "FR[%d] = fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));"\
@@ -506,31 +517,28 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "setCCd();")
         thisLine.append(indent + "FR[%d] = scratchd;" % R1)
     elif opcode == 0x6E: # AW p. 18-10
-        thisLine.append(indent + "scratchd = FR[%d];" % R1)
-        thisLine.append(indent + \
-              "scratchd += fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "aw(%d, address360B);" % R1)
     elif opcode == 0x70: # STE p. 9-11
         thisLine.append(indent + "toFloatIBM(&msw360, &lsw360, FR[%d]);" % R1)
         thisLine.append(indent + "COREWORD2(address360B, msw360);")
     elif opcode == 0x78: # LE p. 9-10
         thisLine.append(indent + "FR[%d] = fromFloatIBM(COREWORD(address360B), 0);" % R1)
     elif opcode == 0xD2: # MVC p. 7-83
-        thisLine.append(indent + \
-              "memmove(&memory[address360A & 0xFFFFFF], &memory[address360B & 0xFFFFFF], %d);" % \
-              (L + 1))
+        thisLine.append(indent + "mvc(address360A, address360B, %d);" % L)
     elif opcode == 0xDC: # TR p. 7-131
         # I'm sure there's some standard C library function to do this, but
         # I couldn't find it.
-        indent2 = indent + indentationQuantum
-        thisLine.append(indent + "int i;")
-        thisLine.append(indent + "for (i = 0; i < %d; i++)" % (L + 1))
-        thisLine.append(indent2 + 
-              "memory[address360A + i] = memory[memory[address360B + i]];")
+        thisLine.append(indent + "for (i360 = 0; i360 <= %d; i360++)" % L)
+        thisLine.append(indent1 + 
+              "memory[address360A + i360] = memory[address360B + memory[address360A + i360]];")
+    elif opcode == 0xDD: # TRT p. 7-132
+        thisLine.append(indent + "trt(address360A, address360B, length;")
     elif opcode == 0x88: # SRL p. 7-121
-        thisLine.append(indent + "GR[%d] = GR[%d] >> ((%s) & 0x3F);" % \
-              (R1, R1, address360B))
+        thisLine.append(indent + "scratch = (%s) & 0x3f;");
+        thisLine.append(indent + "if (scratch < 32");
+        thisLine.append(indent1 + "GR[%d] = GR[%d] >> scratch;" % (R1, R1))
+        thisLine.append(indent + "else");
+        thisLine.append(indent1 + "GR[%d] = 0;" % R1);
     elif opcode == 0x8D: # SLDL p. 7-119
         thisLine.append(indent + 
               "scratch = (((int64_t) GR[%d]) << 32) | GR[%d];" % (R1, R1 + 1))
@@ -538,7 +546,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "GR[%d] = scratch >> 32;" % R1)
         thisLine.append(indent + "GR[%d] = scratch & 0xFFFFFFFF;" % (R1 + 1))
     elif opcode == 0x92: # MVI p. 7-83
-        thisLine.append(indent + "COREWORD2(address360A, %d);" % I2)
+        thisLine.append(indent + "memory[address360A] = %d;" % I2)
     elif opcode == 0x97: # XI p. 7-74
         thisLine.append(indent + "scratch = %d ^ COREWORD(address360A);" % I2)
         thisLine.append(indent + "CC = (scratch != 0);")
@@ -547,5 +555,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         return endOfInstruction(FIXME + "Implementation error %d,%s" % \
                                 (opcode, mnemonic))
     returnValue = True
+    if traceInlines:
+        thisLine.append(indent + "detailedInlineAfter();")
     return endOfInstruction()
 

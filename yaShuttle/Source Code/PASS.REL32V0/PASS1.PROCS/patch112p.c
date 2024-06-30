@@ -22,18 +22,13 @@ p112_4: ;
   // (113)          CALL INLINE("6E", 0, 0, 1, 0);            /* AW   0,0(0,1)           */
   address360B = GR[1] + 0;
   // Type RX, p. 18-10:		AW	0,0(0,1)
-  scratchd = FR[0];
-  scratchd += fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));
-  setCCd();
-  FR[0] = scratchd;
+  aw(0, address360B);
 
 p112_8: ;
   // (114)          CALL INLINE("60",0,0,3,8);                /* STD  0,8(0,3)           */
   address360B = GR[3] + 8;
   // Type RX, p. 9-11:		STD	0,8(0,3)
-  toFloatIBM(&msw360, &lsw360, FR[0]);
-  COREWORD2(address360B, msw360);
-  COREWORD2(address360B + 4, lsw360);
+  std(0, address360B);
 
 p112_12: ;
 }

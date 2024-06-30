@@ -64,27 +64,6 @@ int DD_OUTS_EXISTED[DD_MAX] = { 0 };
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
-// Variables and functions to simplify IBM 360 CALL INLINEs.
-uint32_t GR[16]; // General registers.
-double FR[16];   // Floating-point registers.
-uint8_t CC;      // Condition codes.
-int64_t scratch; // Holds temporary results of IBM 360 operations.
-double scratchd;
-int32_t address360A, address360B, msw360, lsw360, mask360;
-void
-setCC(void) {
-  if (scratch > 0xFFFFFFFF || scratch < -0x100000000) CC = 3;
-  else if (scratch > 0) CC = 2;
-  else if (scratch < 0) CC = 1;
-  else CC = 0;
-}
-void
-setCCd(void) {
-  if (scratchd > 0) CC = 2;
-  else if (scratchd < 0) CC = 1;
-  else CC = 0;
-}
-
 // Starting time of the program run, more or less.
 struct timeval startTime;
 
@@ -871,6 +850,13 @@ parseCommandLine(int argc, char **argv)
               printf("\n");
             }
         }
+      else if (!strcmp ("--trace-inlines", argv[i]))
+        traceInlineEnable = 1;
+      else if (!strcmp("--detailed-inlines", argv[i]))
+        {
+          detailedInlineEnable = 1;
+          traceInlineEnable = 1;
+        }
       else if (!strcmp("--help", argv[i]))
         {
           printf("\n");
@@ -923,6 +909,10 @@ parseCommandLine(int argc, char **argv)
           printf("              have been provided in JCL.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
           printf("              (Not presently functional in Windows.\n");
+          printf("--trace-inlines If available, trace execution of patched\n");
+          printf("              blocks of CALL INLINE statements.\n");
+          printf("--detailed-inlines Expanded trace message for CALL INLINE\n");
+          printf("              statements; automatically sets --trace-inlines.\n");
           printf("--extra=N,L   L represents a string and N represents a device\n");
           printf("              number for INPUT(N).  This option causes the\n");
           printf("              string L to be returned upon the *first* use of\n");
@@ -2378,6 +2368,10 @@ MONITOR9(uint32_t op) {
    * the less-significant part.  The first two entries in the working area
    * specified by MONITOR(5) comprise operand0 (and the result), while the
    * second two entries comprise operand1 (if needed).
+   *
+   * Although the result of the operation is placed in DW[0],DW[1], I believe
+   * that a side effect is that it's also left in IBM 360 CPU floating-point
+   * register FR0.
    */
   double operand0, operand1;
   uint32_t msw, lsw, address;
@@ -2428,6 +2422,7 @@ MONITOR9(uint32_t op) {
   else
     return 1;
   // Convert the result back to IBM floats, and store in working area.
+  FR[0] = operand0;
   toFloatIBM(&msw, &lsw, operand0);
   putFIXED(address, msw);
   putFIXED(address + 4, lsw);
@@ -2441,7 +2436,9 @@ MONITOR10(descriptor_t *fpstring) {
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
   address = dwAddress;
-  toFloatIBM(&msw, &lsw, atof(descriptorToAscii(fpstring)));
+  s = descriptorToAscii(fpstring);
+  FR[0] = atof(s);
+  toFloatIBM(&msw, &lsw, FR[0]);
   putFIXED(address, msw);
   putFIXED(address + 4, lsw);
   return 0;
@@ -3420,6 +3417,68 @@ void
 debugInline(int inlineCounter) {
   fprintf(stderr, "Unpatched CALL INLINE %d\n", inlineCounter);
 }
+
+int traceInlineEnable = 0;
+int detailedInlineEnable = 0;
+#ifdef TRACE_INLINES
+void
+traceInline(int inlineCounter) {
+  if (traceInlineEnable)
+    fprintf(stderr,
+        "\nTrace Patch file %d -------------------------------------------\n",
+        inlineCounter);
+}
+
+void
+detailedInlineBefore(int inlineCounter, char *instruction) {
+  if (detailedInlineEnable)
+    {
+      fprintf(stdout, "\n");
+      fflush(stdout);
+      fprintf(stderr, "CALL INLINE %d:\n", inlineCounter);
+      detailedInlineAfter();
+      fprintf(stderr, "\t\tExecute:\t\t%s\n", instruction);
+      fflush(stderr);
+    }
+}
+
+void
+detailedInlineAfter(void) {
+  int i, value;
+  if (detailedInlineEnable)
+    {
+      for (i = 0; i < 16; i++)
+        {
+          fprintf(stderr, "  GR%02d=%08X(%-11d)", i, GR[i], GR[i]);
+          if (3 == i % 4)
+            fprintf(stderr, "\n");
+        }
+      for (i = 0; i < 16; i++)
+        {
+          fprintf(stderr, "  FR%02d=%-21F", i, FR[i]);
+          if (3 == i % 4)
+            fprintf(stderr, "\n");
+        }
+      if (address360A >=0 && address360A <= 0x1000000-4)
+        {
+          value = COREWORD(address360A);
+          fprintf(stderr, "  A=%06X (A)=%08X(%-11d)", address360A, value, value);
+        }
+      else
+        fprintf(stderr, "  A=%06X (A)=%21s", address360A, "(out of range)");
+      if (address360B >=0 && address360B <= 0x1000000-4)
+        {
+          value = COREWORD(address360B);
+          fprintf(stderr, "  B=%06X (B)=%08X(%-11d)", address360B, value, value);
+        }
+      else
+        fprintf(stderr, "  B=%06X (B)=%21s", address360B, "(out of range)");
+      fprintf(stderr, "  CC=%d", CC);
+      fprintf(stderr, "\n");
+      fflush(stderr);
+    }
+}
+#endif // TRACE_INLINES
 
 // Some test code.
 #if 0

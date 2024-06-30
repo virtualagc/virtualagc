@@ -83,7 +83,8 @@ quiet = False
 debuggingAid = False
 reentryGuard = False
 #autoInline = False
-guessInlines = False
+guessInlines = []
+traceInlines = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -229,14 +230,13 @@ The available OPTIONS are:
                 `CALL INLINEs`.  `CALL INLINE`s which embed C code are not 
                 affected.  Only the first `CALL INLINE` in any adjacent sequence
                 is affected.
---guess-inlines Disable loading of patch-files for `CALL INLINE` statements, and
-                instead produce approximate files with proposed translations of
-                `CALL INLINE` statemements.  Automatically sets --debug-inlines.
+--guess=N,M,... Produce approximate files with proposed translations of 
+                `CALL INLINE` statemements for patchN.c, patchM.c, etc.  Can
+                use -1 to mean all patches.  Automatically sets --debug-inlines.
                 Since the files which are produced have names of the form
-                guessN.c, guessNp.c, and/or guessNb.c, where N is a positive
-                integer, it's advisable to preserve any such files to which
-                manual changes have been made and to delete the remainder from
-                the current working directory beforehand.
+                guessN.c, guessNp.c, and/or guessNb.c, where N>=0 is an
+                integer, it's advisable to preserve or delete conflicting files
+                beforehand.
 --debugging-aid Include extra functions in the runtime library that may be 
                 useful for debugging XCOM-I itself.
 --reentry-guard Add extra runtime code which automatically detects illegal 
@@ -278,9 +278,18 @@ for parm in sys.argv[1:]:
         break
     #elif parm == "--auto-inline":
     #    autoInline = True
-    elif parm == "--guess-inlines":
-        guessInlines = True
+    elif parm == "--trace-inlines":
+        traceInlines = True
+    elif parm.startswith("--guess="):
+        fields = parm[8:].split(",")
+        try:
+            for field in fields:
+                guessInlines.append(int(field))
+        except:
+            print("Non-integer in --guess option", file=sys.stderr)
+            sys.exit(1)
         debugInlines = True
+        traceInlines = True
     elif parm == "--debugging-aid":
         debuggingAid = True
     elif parm == "--reentry-guard":

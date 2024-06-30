@@ -22,7 +22,7 @@ p17_4: ;
   // (18)          CALL INLINE("92", 0, 0, 1, 0);       /* MVI 0(1),X'00'               */
   address360A = GR[1] + 0;
   // Type SI, p. 7-83:		MVI	0(1),0
-  COREWORD2(address360A, 0);
+  memory[address360A] = 0;
 
 p17_8: ;
 }

@@ -1,0 +1,1 @@
+This folder contains HAL/S "bench test" files, intended to exercise various HAL/S features.  They can serve as part of a test suite for HAL/S-FC (the HAL/S compiler).

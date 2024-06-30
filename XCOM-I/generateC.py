@@ -755,8 +755,8 @@ def generateADDR(scope, parameter):
         # Treat labels specially.  Return negative number indicative of the
         # order in which labels are encountered in the enclosing procedure:
         parentProcedure = findParentProcedure(scope)
-        if bVar in parentProcedure["labels"]:
-            negativeIndex = -(1 + list(parentProcedure["labels"]).index(bVar))
+        if bVar in parentProcedure["allLabels"]:
+            negativeIndex = -(1 + parentProcedure["allLabels"].index(bVar))
             return "%d" % negativeIndex
         # XCOM3 uses ADDR(COMPACTIFY) to generate an address for an error 
         # message.  Rather than mess with it, just treat it ad hoc.
@@ -1547,6 +1547,8 @@ def applyInlinePatch(scope, indent, originalInline):
         return False
     indent2 = indent + indentationQuantum
     print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
+    if traceInlines:
+        print(indent2 + "traceInline(%d);" % inlineCounter)
     #first = True
     for patchLine in patchFile:
         '''
@@ -2197,13 +2199,12 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 print(indent + line["parameters"][0]["token"]["string"])
                 lastCallInline = 0
                 inlineCounter -= 1
-            elif guessInlines:
-                if lastCallInline != lineCounter - 1:
-                    guessFiles[inlineCounter] = []
-                guessINLINE(scope, functionName, line["parameters"], \
-                               inlineCounter, errxitRef, indexInScope)
-                lastCallInline = lineCounter
             else: #elif inhibitInline == 0:
+                if len(guessInlines) > 0:
+                    if lastCallInline != lineCounter - 1:
+                        guessFiles[inlineCounter] = []
+                    guessINLINE(scope, functionName, line["parameters"], \
+                                   inlineCounter, errxitRef, indexInScope)
                 if not applyInlinePatch(scope, indent, originalInline):
                     if debugInlines and lastCallInline != lineCounter - 1:
                         print(indent + "debugInline(%d); // (%d) %s" % \
@@ -2913,6 +2914,8 @@ def generateC(globalScope):
         print("#define BFS", file=f)
     if standardXPL:
         print("#define STANDARD_XPL", file=f)
+    if traceInlines:
+        print("#define TRACE_INLINES", file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)
@@ -2982,9 +2985,12 @@ def generateC(globalScope):
     pf.close()
     
     # Output the approximated patches.
-    if guessInlines:
+    if len(guessFiles) > 0:
         fixmeFiles = []
+        count = 0
         for n in guessFiles:
+            if -1 not in guessInlines and n not in guessInlines:
+                continue
             base = "guess%d" % n
             if "P" in ifdefs:
                 filename = base + "p.c"
@@ -3001,8 +3007,9 @@ def generateC(globalScope):
                     if "***FIXME***" in guessLine and filename not in fixmeFiles:
                         fixmeFiles.append(filename)
             fp.close()
+            count += 1
         print("%d approximate patch-files guess*.c were produced in %s" % \
-              (len(guessFiles), os.getcwd()), file=sys.stderr)
+              (count, os.getcwd()), file=sys.stderr)
         if len(fixmeFiles) == 0:
             print("None of the files are known to require fixes")
         else:
@@ -3031,7 +3038,8 @@ if __name__ == "__main__":
         "blockCount" : 0,
         "lineNumber" : 0,
         "lineText" : '',
-        "lineExpanded" : ''
+        "lineExpanded" : '',
+        "allLabels": []
         }
 
     print("Any of the following are accepted as input:")

@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <math.h>
+#include "inline360.h"
 
 #define MAX_XPL_STRING 256
 #if 0
@@ -108,18 +109,6 @@ typedef struct {
   type2_t type2[MAX_TYPE2];
 } optionsProcessor_t;
 extern optionsProcessor_t *optionsProcessor, *USEROPT;
-
-// The following represents IBM 360 stuff.
-extern uint32_t GR[16]; // General registers.
-extern double FR[16];   // Floating-point registers.
-extern uint8_t CC;      // Condition codes.
-extern int64_t scratch; // Holds temporary results of IBM 360 operations.
-extern double scratchd;
-extern int32_t address360A, address360B, msw360, lsw360, mask360;
-void
-setCC(void);
-void
-setCCd(void);
 
 #ifdef DEBUGGING_AID
 
@@ -643,5 +632,20 @@ XPL_COMPILER_VERSION(uint32_t index);
 
 void
 debugInline(int inlineCounter);
+
+extern int traceInlineEnable;
+extern int detailedInlineEnable;
+#ifdef TRACE_INLINES
+void
+traceInline(int inlineCounter);
+void
+detailedInlineBefore(int inlineCounter, char *instruction);
+void
+detailedInlineAfter(void);
+#else
+#define traceInline(x)
+#define detailedInlineBefore(x, y)
+#define detailedInlineAfter()
+#endif
 
 #endif // RUNTIMEC_H

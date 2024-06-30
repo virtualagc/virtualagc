@@ -91,8 +91,11 @@ def createNewScope(symbol = '', parent = None):
         # appearing in the current scope.)
         "variables" : {},
         # `labels` is a Python set object giving all of the labels appearing
-        # within the scope.
+        # within the scope, not including child scopes.
         "labels" : set(),
+        # `allLabels` is a list, for scopes which are procedures, including
+        # all labels within the scope or child scopes.
+        "allLabels" : [],
         # `code` contains a representation as a list of dictionaries of the 
         # executable source code of the current scope.  Note that in 
         # contrast to HAL/S, XPL/I does allow executable source code in the 
@@ -587,7 +590,10 @@ def fixProcedureScopes(scope, extra=None):
             break
         nscope = nscope["parent"]
     if nscope == scope:
+        for symbol in scope["labels"]:
+            scope["allLabels"].append(symbol)
         return
+    allLabels = nscope["allLabels"]
     if ORIGINAL_PROMOTION:
         # Now promote all PROCEDURE definitions and LABELs from the current scope
         # to the enclosing PROCEDURE's scope.
@@ -612,6 +618,8 @@ def fixProcedureScopes(scope, extra=None):
                     error("%s multiply-defined in %s" % (symbol, nscope["symbol"]),
                           scope)
             nscope["variables"][symbol] = scope["variables"][symbol]
+            if symbol not in allLabels and symbol in scope["labels"]:
+                allLabels.append(symbol)
         scope["variables"] = {}
 walkModel(globalScope, fixProcedureScopes)
 
@@ -643,6 +651,8 @@ if targetLanguage == "C":
         os.mkdir(outputFolder)
         shutil.copy2(basePath + "runtimeC.c", outputFolder)
         shutil.copy2(basePath + "runtimeC.h", outputFolder)
+        shutil.copy2(basePath + "inline360.c", outputFolder)
+        shutil.copy2(basePath + "inline360.h", outputFolder)
         shutil.copy2(basePath + "debuggingAid.c", outputFolder)
         shutil.copy2(basePath + "Makefile.template", outputFolder + "/Makefile")
     except:
@@ -658,7 +668,3 @@ if not quiet and reservedMemory["numReserved"] > 0:
     print("Reserved count: %d" % reservedMemory["numReserved"])
     print("Reserved space: %d" % (0x1000000 - reservedMemory["nextReserved"]))
 
-if guessInlines:
-    # This is not really an error, but we want Makefiles that combine XCOM-I
-    # with compilation of the C code *not* to continue to the compilation step.
-    sys.exit(1)

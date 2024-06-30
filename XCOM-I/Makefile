@@ -24,7 +24,9 @@
 # A successful bootstrap is a test of both XCOM-I and of sim360.
 #
 # The options CC, EXTRA, and XEXTRA described in Makefile.template can be used 
-# as usual with the bootstrapping targets.
+# as usual with the bootstrapping targets.  There's also an extra options
+# REXTRA, which can be used to pass extra command-line parameters to the 
+# XCOMn-native program.
 #
 # Warning:  Building these targets requires programs and BASH (or a similar
 # command shell) not normally available on Windows, and maybe not in full on
@@ -144,7 +146,7 @@ bootstrap: sim360
 		--output=$(BASE)-native \
 		$(XPLFILE)
 	@make -s -C $(BASE)-native
-	@$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' \
+	@$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' $(REXTRA) \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \

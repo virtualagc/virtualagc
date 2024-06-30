@@ -1,4 +1,4 @@
-/* inlines=5,0
+/*
  * License:     Public Domain, use or modify freely for any purpose.
  * Filename:    PASS2.PROCS/patch32.c
  * Purpose:     PFS only:  C-language patch for CALL INLINEs #32-36 in
@@ -6,8 +6,6 @@
  *                         HAL/S-FC PASS2.
  * History:     2024-06-19 RSB  Created.
  */
-
-#ifdef PFS
 
 // CALL INLINE("58", 1, 0, ADDR_FIXER);         /* L    1,ADDR_FIXER */ 02104000
 GR[1] = COREWORD(mADDR_FIXER);
@@ -28,5 +26,3 @@ uint32_t dummy;
 toFloatIBM((uint32_t *) &memory[GR[1] + 8],  // DW[2]
            &dummy,
            FR[2]);                           // MSW of FR2 -> DW[2].
-
-#endif // PFS

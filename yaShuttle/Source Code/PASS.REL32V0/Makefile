@@ -79,7 +79,7 @@ regression:
 		>py.rpt
 	
 	@echo Processing $(RTARGET) with PASS1 ...
-	-./PASS1 \
+	-./PASS1 $(REXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,$(HAL_S_FC_DIR)/$(RTARGET).hal \
 		--ddo=2,listing2.txt \
