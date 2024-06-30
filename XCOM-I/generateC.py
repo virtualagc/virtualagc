@@ -3008,9 +3008,9 @@ def generateC(globalScope):
                         fixmeFiles.append(filename)
             fp.close()
             count += 1
-        print("%d approximate patch-files guess*.c were produced in %s" % \
-              (count, os.getcwd()), file=sys.stderr)
         if count > 0:
+            print("%d approximate patch-files guess*.c were produced in %s" % \
+                  (count, os.getcwd()), file=sys.stderr)
             if len(fixmeFiles) == 0:
                 print("None of the files are known to require fixes")
             else:
@@ -3018,6 +3018,9 @@ def generateC(globalScope):
                 for filename in fixmeFiles:
                     print("\t%s" % filename)
                 print('To fix them, search for the string "***FIXME***".')
+        else:
+            print("No approximate patch-files were produced.", file=sys.stderr)
+
     
 #-----------------------------------------------------------------------------
 # Interactive test mode for running this file in a stand-alone fashion rather
