@@ -494,7 +494,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "setCC();")
         thisLine.append(indent + "GR[%d] = scratch;" % R1)
     elif opcode == 0x60: # STD p. 9-11
-        thisLine.append(indent + "std(%d, address360B);")
+        thisLine.append(indent + "std(%d, address360B);" % R1)
     elif opcode == 0x68: # LD p. 9-10
         thisLine.append(indent + \
             "FR[%d] = fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));"\
