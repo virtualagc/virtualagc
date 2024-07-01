@@ -59,8 +59,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
   
 </ul>
 
-<li><a moz-do-not-send="true" href="#hooks">Patches for Basic Assembly Language Code</a>
+<li><a moz-do-not-send="true" href="#hooks">Patches for Insertion of Inline Code</a></li>
+<li><a moz-do-not-send="true" href="inlines">IBM 360 Inline Code</a><br>
 </li>
+
 </ul>
 
 
@@ -235,11 +237,7 @@ There's one final complication:&nbsp; In legacy XPL or XPL/I source
 code, it was typical to intersperse the XPL or XPL/I (thankfully, 
 sparingly!) with code written in IBM 
 System/360 Basic Assembly
- Language (BAL).&nbsp; Alas, <b>XCOM-I</b> cannot translate BAL into 
-anything meaningful.&nbsp; But <b>XCOM-I</b> does provide hooks so that you can 
-patch in replacement code, written in C, for the embedded BAL 
-code.&nbsp; 
-Those hooks will be discussed later on.<br>
+ Language (BAL).&nbsp; Several sections below discuss this topic.<br>
 <h1><a name="compiling"></a>Processing a Program Written in XPL, Using XCOM-I<br>
 </h1>
 <p>Despite the title of this section, there's actually little difference
@@ -260,47 +258,98 @@ discussion of XPL/I compilation until later.
 
 <h2><a name="installation"></a>Installation of XCOM-I</h2>
 <p>Or more precisely, "installation of XCOM-I and other stuff needed to 
-follow the instructions given below".&nbsp; Here's what I would suggest.<br>
+follow the instructions given below". <br>
 </p>
-<p>First, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc">get the Virtual AGC source tree from our repository</a>.&nbsp; For the sake of discussion only, I'm going to assume that this ends up as a folder called <i>virtualagc</i>, but you need to substitute the actual name in the instructions below.<br>
+<h3>Linux or Mac<br>
+</h3>
+<p>
 </p>
-<p>On Linux or Mac OS, I'd then suggest adding the folders <i>virtualagc</i>/XCOM-I and <i>virtualagc</i>/yaShuttle/ported/PASS1.PROCS to your PATH.<br>
-</p>
-I don't have any pleasant, easy, universally-palatable solution for you 
-Windows users.&nbsp; I experimented with it a while, enough to determine
- that while it <i>can</i> be made to work on Windows 11, and will eventually be made to work smoothly, for <i>right now</i> it's simply a much greater investment of time than I'm willing to put into it.&nbsp; Getting it to work <i>fully</i>
- on Linux (and Mac OS) is simply a much higher priority than getting the
- current, incomplete version working on Windows.&nbsp; So for now, if 
-you want to try it out, please use Linux.&nbsp; And if you don't have 
-Linux, use a Linux virtual machine; I recommend Linux Mint, since it's 
-what I'm using.<br>
-<blockquote><font size="-1"><strike><b>Aside:</b>&nbsp; Yes, I attempted
- to work with WSL, and with Visual Studio, and with Msys, thanks for 
-asking!&nbsp; I'm sure there are many possible solutions that would work
- for you if you're expert on the platform and highly motivated, neither 
-of which describes me. &nbsp; Here's what I ended up with, on Windows 
-11: </strike><br>
-  </font>
-  <ul>
-    <li><font size="-1"><strike>Installed Python, from the Microsoft Store.</strike></font></li>
-    <li><font size="-1"><strike><a moz-do-not-send="true" href="https://gitforwindows.org/">Installed Git for Windows</a></strike><strike>.&nbsp; (If you already have </strike><strike><b>git</b></strike><strike>, you may not think this is needed.&nbsp; But it additionally provides a number of other programs you'll need, like </strike><strike><b>bash</b></strike><strike>, </strike><strike><b>cmp</b></strike><strike>, and so on.)</strike><strike><br>
-        </strike></font></li>
-    <li><font size="-1"><strike><a moz-do-not-send="true" href="https://gnuwin32.sourceforge.net/packages/make.htm">
-Installed GNU Make for Windows</a></strike></font></li>
-    <li><font size="-1"><strike><a moz-do-not-send="true" href="https://www.mingw-w64.org/">Installed MinGW</a></strike></font></li>
-    <li><font size="-1"><strike><a moz-do-not-send="true" href="https://www.di-mgt.com.au/hexdump-for-windows.html#downloads">Installed hexdump for Windows</a></strike><strike>, and copied hexdump.exe into the </strike><strike><i>virtualagc</i></strike><strike>\</strike><strike>XCOM-I folder.</strike><strike><br>
-        </strike></font></li>
-    <li><font size="-1"><strike>Added the following to the PATH:</strike></font></li>
-    <ul>
-      <li><font size="-1"><strike>The </strike><strike><i>virtualagc</i></strike><strike>\XCOM-I </strike><strike>and</strike><strike> </strike><strike><i>virtualagc</i></strike><strike>\yaShuttle\ported\PASS1.PROCS folders from the Virtual AGC source-tree (as downloaded from GitHub).</strike></font></li>
-      <li><font size="-1"><strike>C:\Program Files\Git\usr\bin</strike><strike><br>
-          </strike></font></li>
-      <li><font size="-1"><strike>C:\Program Files (x86)\GnuWin32\bin</strike></font></li>
-      <li><font size="-1"><strike>C:\MinGW\bin</strike><br>
-        </font></li>
-    </ul>
-  </ul>
+
+<ul>
+  <li>First, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc">get the Virtual AGC source tree from our repository</a>.&nbsp; For the sake of discussion only, I'm going to assume that this ends up as a folder called <i>virtualagc</i>, but you need to substitute the actual name in the instructions below.<br>
+
+  </li>
+  <li>Add the folders <i>virtualagc</i>/XCOM-I and <i>virtualagc</i>/yaShuttle/ported/PASS1.PROCS to your PATH.&nbsp; I'm hoping you know how to do that on your system of choice.<br>
+  </li>
+  <li>Install extra Python3 modules:&nbsp; <font color="#663300"><code>pip3 install ebcdic</code></font>, or possibly <font color="#663300"><code>pip install ebcdic</code></font>.</li>
+  <li>On Linux, install <b>clang-format</b> from your package repository.&nbsp; I believe it's already installed if you have <b>clang</b> on the Mac, which I think all current Macs do.<br>
+  </li>
+</ul>
+Having done this, I find that everything described elsewhere on this 
+page works identically on my up-to-date Linux Mint system as on my 
+mid-2007 Mac OS 10.7.5 system, albeit much more slowly on the 
+latter.&nbsp; Admittedly, I fire up the Mac only to check stuff like 
+this — that is to say, <i>very seldom</i> — so experience on the Mac may vary on a day-to-day basis. <br>
+<h3><a name="Windows"></a>Windows<br>
+</h3>
+
+
+The situation for Windows is less palatable.&nbsp; Everyone just wants 
+to use Visual Studio, but that's not going to work without irritating 
+modifications.&nbsp; There are potential easy solutions, such as WSL, 
+which I'm unfortunately not in a position to try, and many candidates 
+for more-native solutions, which I had no luck with.&nbsp; Of course, 
+running a Linux virtual machine on your Windows system is free and easy,
+ so there's that!&nbsp; Short of running a Linux virtual machine, 
+though, a somewhat more light-weight solution I used on Windows 11 Pro 
+is this:<br>
+<ol>
+  <li>Install <b><a moz-do-not-send="true" href="https://www.msys2.org/">Msys2</a></b>, which gives you a Linux/Mac-like command-line working environment for compiling stuff.&nbsp; <br>
+  </li>
+  <li>Start up <b>Msys2</b> from the Windows start menu and do all of 
+the remaining installation steps, as well as the various other 
+instructions I give you elsewhere on this page, within that <b>Msys2</b> command-line environment.</li>
+  <li>Install various packages:&nbsp; <font color="#663300"><code>pacman -S git diffutils gcc make python3 python3-pip vim</code></font>.</li>
+  <li>Install extra Python3 module(s):&nbsp; <font color="#663300"><code>pip3 install ebcdic</code></font>.</li>
+  <li>Get the Virtual AGC source tree with this command:&nbsp; <font color="#663300"><code>git clone --depth=1 https://github.com/virtualagc/virtualagc.git</code></font>.</li>
+  <li>To add folders to your PATH, you'll need to edit the file .bashrc (notice the leading dot) in your <b>Msys2</b> home directory.&nbsp; If you're familiar with <b>vim</b>, which you just now installed, you can do it with the command <font color="#663300"><code>vim ~/.bashrc</code></font>; if not, you can use another text editor that you're more familiar with, but outside of the <b>Msys2</b> environment you'll have to know where to find .bashrc to edit it.&nbsp; With the default options in the <b>Msys2</b> installation, I found it at c:\msys64\home\<i>username</i>\.bashrc and edited it with <b>notepad</b>.&nbsp; What you do is insert the line I've highlighted in <font color="#009900">green</font>:</li>
+</ol>
+<blockquote>
+  <blockquote>
+    <pre>.<br>.<br>.<br># User dependent .bashrc file<br><br># If not running interactively, don't do anything<br>[[ "$-" != *i* ]] &amp;&amp; return<br><br><font color="#009900">PATH=$PATH:~/<i>virtualagc</i>/XCOM-I:~/<i>virtualagc</i>/yaShuttle/ported/PASS1.PROCS</font><br><br># Shell Options<br>.<br>.<br>.<br></pre>
+  </blockquote>
 </blockquote>
+<ol start="6">
+  <li>After saving that file, close your <b>Msys2</b> command line, and then run <b>Msys2</b> again to put the new PATH into effect.<br>
+  </li>
+</ol>
+This installation seems to function quite well, other than a very slight loss of functionality in Windows (vs Linux/Mac):<br>
+<ul>
+  <li>Optional backtraces are no longer available in the <b>XCOM-I</b> runtime library.</li>
+  <li>The <b>XCOM-I</b> command-line option <font color="#663300"><code>--pp</code></font> for "pretty-printing" the C code output by <b>XCOM-I</b> no longer works.</li>
+</ul>
+<blockquote>
+  <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; Actually, you <i>can</i> make <font color="#663300"><code>--pp</code></font> work, but I didn't suggest it above because it's such massive overkill.&nbsp; The <font color="#663300"><code>--pp</code></font> option relies on the program <b>clang-format</b>, which you can get by installing the entire <b>clang/llvm</b> compiler infrastructure.&nbsp; Even I wouldn't bother.&nbsp; On the other hand, if you do, you'd also have the <b>clang</b> compiler to choose from as an alternative to <b>gcc</b>.&nbsp;
+ Note that you'll also have to add it to the PATH, as in step #6 
+above.&nbsp; Instead of the line shown in step #6, insert this line into
+ .bashrc:<br>
+    </font></p>
+  <blockquote>
+    <pre><font color="#009900">PATH=$PATH:~/<i>virtualagc</i>/XCOM-I:~/<i>virtualagc</i>/yaShuttle/ported/PASS1.PROCS:/c/"Program Files"/LLVM/bin</font></pre>
+
+  </blockquote>
+</blockquote>
+<h3>Testing the Installation</h3>
+<p>Following the instructions on the remainder of this page essentially 
+tests the installation.&nbsp; However, in brief, what I do to verify 
+operation is:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300"><code>cd </code><code><i>virtualagc</i></code><code>/XCOM-I</code><code><br></code><code>make -f Makefile-regression &amp;&amp; make</code><code><br></code><code>cd ../yaShuttle/"Source Code"/PASS.REL32V0</code><code><br></code><code>make -s<br>make -s regression<br></code></font></pre>
+</blockquote>
+<p>Remember to use the path to where you installed the Virtual AGC source tree, in place of <i>virtualagc</i>. <br>
+</p>
+<p>Messages will be printed that give you a pretty clear idea as to success or failure.&nbsp; What's tested is:<br>
+</p>
+<ul>
+  <li>The action of <b>XCOM-I</b>.<br>
+  </li>
+  <li>The action of some compilers originally written in XPL but now compiled by <b>XCOM-I</b>:&nbsp; in particular, XPL compilers <b>XCOM3</b> and <b>XCOM4</b>, and HAL/S compiler <b>HAL/S-FC</b>.<br>
+  </li>
+  <li>The action of <i>those</i> compilers, in compiling additional XPL or HAL/S programs.</li>
+  <li>The action of the IBM 360 emulator, <b>sim360</b>.<br>
+  </li>
+</ul>
 <h2><a name="xpl"></a>Compiling and Running XPL Programs<br>
 </h2>
 There are several standard XPL programs present in the folder 
@@ -1219,7 +1268,11 @@ something italicized, such as <i><code>HALMAT</code></i> in <code><font color="#
  I mean to imply that you may or may not want to choose a different name
  than I have, or to use different names for different compiler passes; 
 however, the names must be consistent between the passes outputting them
- and the passes using them as input.<br>
+ and the passes using them as input.&nbsp; The cells that have been highlighted in color emphasize those places in which the <i>same</i>
+ file must be used on successive passes; in the case of the 
+virtual-memory file, I don't know if the same file is used on successive
+ passes or not, so I haven't highlighted it, but I've been using the 
+same file without any apparent difficulty.<br>
 </p>
 <table width="100%" cellspacing="2" cellpadding="2" border="1">
   <tbody>
@@ -1246,61 +1299,65 @@ however, the names must be consistent between the passes outputting them
     <tr>
       <td valign="middle" align="center">Input HAL source code<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--ddi=0,<i>SOURCECODE</i>.hal</font></code> or <code><font color="#663300">stdin<br>
-          </font></code></td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center"><b><code><font color="#663300">--ddi=0,<i>SOURCECODE</i>.hal</font></code></b><b> or </b><b><code><font color="#663300">stdin<br>
+          </font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="middle"><br>
       </td>
     </tr>
     <tr>
       <td valign="middle" align="center">Output report<br>
       </td>
-      <td valign="top" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font><br>
+      <td valign="top" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font> or <font color="#663300"><code>stdout</code></font></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
       <td valign="middle"><br>
       </td>
     </tr>
     <tr>
       <td valign="middle" align="center">Output error messages<br>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font><br>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code>stderr</code></font></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
       <td valign="middle"><br>
       </td>
     </tr>
     <tr>
       <td valign="middle" align="center">Extra listing file, plus SPACELIB error messages<br>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font><br>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><br>
+      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></td>
+      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><br>
+      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><br>
+      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><br>
+      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
       </td>
       <td valign="middle">This file is produced by <b>PASS1</b> if "LISTING2" is among the options in PARM='...', and I don't show it in the sample <b>PASS1</b>
  invocation above, because LISTING2 isn't among the chosen PARM 
@@ -1310,21 +1367,53 @@ specified.<br>
       </td>
     </tr>
     <tr>
+  <td valign="middle" align="center">AP-101S object code<br>
+  </td>
+  <td valign="middle" align="center"><b>n/a</b><b><br>
+    </b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><font color="#663300"><code>--ddo=3,<i>CARDFILE</i>.bin,U</code></font><br>
+  </td>
+  <td valign="middle" align="center"><b><br>
+    </b></td>
+  <td valign="middle" align="center"><b><br>
+    </b></td>
+  <td valign="top"><a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">I think that object code output by <b>PASS2</b> is provided in a punch-card format similar to the way IBM 360 object code is</a>.&nbsp; Possibly device 3 is an actual card-punch (SYSPUNCH); I'm not sure.<br>
+  </td>
+</tr>
+<tr>
+  <td valign="middle" align="center">Object code "deck"<br>
+  </td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><font color="#663300"><code>--ddo=4,<i>DECK</i>.bin,U</code></font></td>
+  <td valign="top"><br>
+  </td>
+  <td valign="top"><br>
+  </td>
+  <td valign="middle" align="left">An optional copy of <font color="#663300"><code><i>CARDFILE</i></code></font>.&nbsp; (Which only makes sense if device 3 is a physical card-punch as speculated above.)<br>
+  </td>
+</tr>
+<tr>
       <td valign="middle" align="center">Input error-message library<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300"><font color="#663300">--pdsi=5,ERRORLIB</font></font></code></td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b><code><font color="#663300"><font color="#663300">--pdsi=5,ERRORLIB</font></font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
+      <td valign="middle" align="center"><font color="#663300"><code>--pdsi=5,ERRORLIB</code></font><br>
+</td>
       <td valign="middle" align="center"><br>
-      </td>
+</td>
       <td valign="middle" align="center"><br>
-      </td>
-      <td valign="middle" align="center"><br>
-      </td>
+</td>
       <td valign="middle">The 
 compiler requires access to the library of HAL/S error messages, which 
 is the folder PASS.REL32V0/ERRORLIB/.&nbsp; Note that "ERRORLIB" is 
@@ -1337,18 +1426,18 @@ absolute or relative path to ERRORLIB.<br>
     <tr>
       <td valign="middle" align="center">Input access-rights library<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--pdsi=6,ACCESS</font></code></td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b><code><font color="#663300">--pdsi=6,ACCESS</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><b>n/a</b>
       </td>
       <td valign="middle">The compiler also requires access to the library of access rights, 
 namely the folder PASS.REL32V0/ACCESS/.&nbsp; The folder is empty, yes, because <i>you</i>
@@ -1360,15 +1449,30 @@ fine only if you're running the compiler directly from the PASS.REL32V0/
       </td>
     </tr>
     <tr>
+  <td valign="middle" align="center">Extra listing<br>
+  </td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><b>n/a</b></td>
+  <td valign="middle" align="center"><font color="#663300"><code>--ddo=7,<i>EXTRA</i>.txt</code></font></td>
+  <td valign="top"><br>
+  </td>
+  <td valign="top"><br>
+  </td>
+  <td valign="top"><br>
+  </td>
+</tr>
+<tr>
       <td valign="middle" align="center">Output or input HALMAT<br>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#999900"><b><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#999900"><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="top">This is a "random-access file" storing "HALMAT".&nbsp; For some passes (such as <b>PASS1</b>) this is output; for others (such as <b>FLO</b>) it is input.&nbsp; When output, it doesn't need
  to 
 previously exist.&nbsp; Recall that HALMAT is the name of the 
@@ -1382,44 +1486,54 @@ binary format into a somewhat-human-readable form.<br>
     <tr>
       <td valign="middle" align="center">Literal file<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="middle">This is a "random-access file" that the compiler uses to store the 
 values of literals.</td>
     </tr>
     <tr>
-      <td valign="middle" align="center">I/C queue file<br>
+      <td valign="middle" align="center">Varies(?)<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1560,3,<i>ICFILE</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code></code>n/a<br>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1560,3,<i>ICFILE</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle">This is the INITIAL/CONSTANT queue.&nbsp; I <i>think</i> that the compiler can only hold
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1600,3,<i>OBJFILE</i>.bin<br>
+</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle">By <i><font color="#663300"><code>ICFILE</code></font></i>, I mean the INITIAL/CONSTANT queue.&nbsp; I <i>think</i> that the compiler can only hold
  a certain number of initializers in memory at once, and this file is 
-used to swap any overflow of the initializers from memory.</td>
+used to swap any overflow of the initializers from memory.<br>
+<br>
+By <i><code>OBJFILE</code></i>, I mean a work-file that accepts data 
+related to object-code generation when it overflows the provided memory 
+buffer for it.&nbsp; It is not object code as such.<br>
+</td>
     </tr>
     <tr>
       <td valign="middle" align="center">Second HALMAT file<br>
       </td>
-      <td valign="middle" align="center"><code></code>n/a<br>
+      <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><code><font color="#663300">--raf=B,7200,4,<i>HALMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><code><font color="#663300">--raf=B,7200,4,<i>HALMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code></code>n/a</td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center" bgcolor="#cc9933"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#cc9933"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></td>
+      <td valign="middle" align="center" bgcolor="#cc9933"><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></td>
+      <td valign="middle" align="center"><b><code></code></b><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="top">Secondary HALMAT file.&nbsp; As you can see, we somehow end up with three separate HALMAT files:&nbsp; <br>
         <ul>
           <li><font color="#663300"><code><i>HALMAT</i>.bin</code></font>, produced by <b>PASS1</b> and used by lots of other passes.<br>
@@ -1435,13 +1549,13 @@ used to swap any overflow of the initializers from memory.</td>
     <tr>
       <td valign="middle" align="center">SDF<br>
       </td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,1680,5,<i>SDF</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1680,5,<i>SDF</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="top"><br>
       </td>
     </tr>
@@ -1449,14 +1563,15 @@ used to swap any overflow of the initializers from memory.</td>
       <td valign="middle" align="center">Virtual-memory<br>
 file<br>
       </td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center">n/a</td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></td>
-      <td valign="middle" align="center"><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></td>
-      <td valign="middle" align="center">n/a</td>
+      <td valign="middle" align="center"><b>n/a</b></td>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
+      <td valign="middle" align="center"><b>n/a</b></td>
       <td valign="middle">This is a "random-access file" that the compiler uses to store blocks of virtual 
 memory which have been temporarily unloaded from memory.<br>
       </td>
@@ -1464,14 +1579,15 @@ memory which have been temporarily unloaded from memory.<br>
     <tr>
       <td valign="middle" align="center">Input <font color="#663300"><code>COMMON</code></font> file<br>
       </td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffff99"><font color="#663300"><code>--commoni=</code><code><i>COMMON1</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#99ff99"><font color="#663300"><code>--commoni=</code><code><i>COMMONf</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#99ffff"><font color="#663300"><code>--commoni=</code><code><i>COMMONo</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#ff6666"><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>a</i>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#ff99ff"><font color="#663300"><code>--commoni=</code><code><i>COMMON2</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#cccccc"><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>3</i>.out</code></font></td>
+      <td valign="middle" align="center" bgcolor="#ffff99"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON1</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#99ff99"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONf</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#99ffff"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONo</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#ff6666"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>a</i>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON2</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#cccccc"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>3</i>.out</code></font></b></td>
       <td valign="middle">On the IBM 360, certain areas of memory, known as <font color="#663300"><code>COMMON</code></font>,
  were expected to retain their contents when one pass of the compiler 
 was unloaded from memory, and the next pass loaded into it.&nbsp; Of 
@@ -1484,14 +1600,16 @@ literally called "COMMON.out", while input is disabled.&nbsp; For <b>PASS1</b>, 
     <tr>
       <td valign="middle" align="center">Output <font color="#663300"><code>COMMON</code></font> file<br>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffff99"><font color="#663300"><code>--commono=</code><code><i>COMMON1</i></code><code>.out</code></font><br>
+      <td valign="middle" align="center" bgcolor="#ffff99"><b><font color="#663300"><code>--commono=</code><code><i>COMMON1</i></code><code>.out</code></font></b><b><br>
+</b>
       </td>
-      <td valign="middle" align="center" bgcolor="#99ff99"><font color="#663300"><code>--commono=</code><code><i>COMMONf</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#99ffff"><font color="#663300"><code>--commono=</code><code><i>COMMONo</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#ff6666"><font color="#663300"><code>--commono=</code><code><i>COMMONa</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#ff99ff"><font color="#663300"><code>--commono=</code><code><i>COMMON2</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center" bgcolor="#cccccc"><font color="#663300"><code>--commono=</code><code><i>COMMON3</i></code><code>.out</code></font></td>
-      <td valign="middle" align="center">n/a<br>
+      <td valign="middle" align="center" bgcolor="#99ff99"><b><font color="#663300"><code>--commono=</code><code><i>COMMONf</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#99ffff"><b><font color="#663300"><code>--commono=</code><code><i>COMMONo</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#ff6666"><b><font color="#663300"><code>--commono=</code><code><i>COMMONa</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><b><font color="#663300"><code>--commono=</code><code><i>COMMON2</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center" bgcolor="#cccccc"><b><font color="#663300"><code>--commono=</code><code><i>COMMON3</i></code><code>.out</code></font></b></td>
+      <td valign="middle" align="center"><b>n/a</b><b><br>
+</b>
       </td>
       <td valign="middle">See the comment above.&nbsp; It is, of course, possible to omit all of the <font color="#663300"><code>--commono</code></font> options entirely, and to use <font color="#663300"><code>--commoni=</code><code>COMMON</code><code>.out</code></font> everywhere.&nbsp; This is perfectly workable, and its only drawback is the lose of transparency of what happens between passes.<br>
       </td>
@@ -1742,7 +1860,7 @@ the little-endian byte order used in most personal computers today.)<br></li><li
  containing the individual characters of the string, encoded in 
 EBCDIC.&nbsp; The descriptor has 8 bits specifying the string length 
 (minus 1) and 24-bits providing the starting memory-address of the 
-character data.</li><li><font color="#663333"><code>BIT(n)</code></font>, where <font color="#663333"><code>n</code></font> is from 1 to 2048, is an <font color="#663333"><code>n</code></font>-bit object.&nbsp; The amount of storage varies by the precision:</li><ul><li><font color="#663333"><code>BIT(1)</code></font> through <font color="#663333"><code>B(8)</code></font> are stored in memory as single bytes.</li><li><font color="#663333"><code>BIT(9)</code></font> through <font color="#663333"><code>BIT(16)</code></font> are stored as 2-byte "half-words".</li><li><font color="#663333"><code>BIT(17)</code></font> through <font color="#663333"><code>BIT(32)</code></font> are stored as 32-bit words.</li>
+character data.</li><li><font color="#663333"><code>BIT(<i>n</i>)</code></font>, where <i><font color="#663333"><code>n</code></font></i> is from 1 to 2048, is an <font color="#663333"><code>n</code></font>-bit object.&nbsp; The amount of storage varies by the precision:</li><ul><li><font color="#663333"><code>BIT(1)</code></font> through <font color="#663333"><code>B(8)</code></font> are stored in memory as single bytes.</li><li><font color="#663333"><code>BIT(9)</code></font> through <font color="#663333"><code>BIT(16)</code></font> are stored as 2-byte "half-words".</li><li><font color="#663333"><code>BIT(17)</code></font> through <font color="#663333"><code>BIT(32)</code></font> are stored as 32-bit words.</li>
   <li><font color="#663300"><code>BIT(33)</code></font> through <font color="#663300"><code>BIT(2048)</code></font> are stored similarly to <font color="#663300"><code>CHARACTER</code></font>
  variables: There's a 32-bit "descriptor", of which 8 bits is the number
  of bytes needed to store all of the bits, minus 1, and 24 bits area 
@@ -1767,10 +1885,25 @@ interpretation.</font><br></p>
 
 </ul>
 
+<p>Regarding the <font color="#663300"><code>BIT(<i>n</i>)</code></font> datatypes, you might suppose that since one has gone to all the trouble to define separate datatypes like <font color="#663300"><code>BIT(1)</code></font>, <font color="#663300"><code>BIT(2)</code></font>, ..., <font color="#663300"><code>BIT(8)</code></font>, that there is some distinction between them.&nbsp; That they behave differently in some way.&nbsp; That there's some <i>reason</i>
+ for making such a distinction.&nbsp; You would be cruelly mistaken, as I
+ was.&nbsp; There is literally no difference between these 8 
+datatypes.&nbsp; Nor is there any distinction between the 8 datatypes <font color="#663300"><code>BIT(9)</code></font> through <font color="#663300"><code>BIT(16)</code></font>.&nbsp; Nor is there any distinction between the 16 datatypes <font color="#663300"><code>BIT(17)</code></font> through <font color="#663300"><code>BIT(32)</code></font>.&nbsp; The distinctions between the <font color="#663300"><code>BIT(<i>n</i>) </code></font>datatypes for <font color="#663300"><code><i>n</i>&gt;32</code></font> are left as a thought experiment for the reader.&nbsp; Thus we're left with seemingly ridiculous code, like the following from <b>PASS1</b> of <b>HAL/S-FC</b>:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">DECLARE COMPILING BIT(1);
+...<br>IF (COMPILING&amp;"80")^=0 THEN<br>    ...</font><br></pre>
+</blockquote>
+<p>Or in other words, first you declare <font color="#663300"><code>COMPILING</code></font>
+ to have a single bit, and then later you check it to see what the value
+ of its 8th bit is!&nbsp; This particular bit of hilarity caused me 
+months worth of trouble.<br>
+</p>
 <p>The storage formats in memory duplicate those that would have been 
 expected on an IBM System/360 computer, within the limits of my ability 
 to infer what those formats were.&nbsp; While the storage formats are 
-not significant in abstract terms, they'll be seen to be <i>quite</i> significant in dealing with certain aspects of <b>HAL/S-FC</b>'s source code, such as its so-called "virtual memory" system, and indeed I think it would be impossible to run <b>HAL/S-FC</b> unless these underlying IBM 360 storage formats were used.<br></p>You'll notice that there is no floating-point datatype, a fact which will be discussed in some detail later. <br>
+not significant in abstract terms, they'll be seen to be <i>quite</i> significant in dealing with certain aspects of <b>HAL/S-FC</b>'s source code, such as its so-called "virtual memory" system, and indeed I think it would be impossible to run <b>HAL/S-FC</b> unless these underlying IBM 360 storage formats were used.<br></p>
+You'll notice that there is no floating-point datatype, a fact which will be discussed in some detail later. <br>
 <br>
 
 The three basic datatypes can also be incorporated into single-dimension arrays. 
@@ -1917,7 +2050,8 @@ These numeric literals are the only syntactical reason that the double-quote cha
 <br>
 Another important attribute is <font color="#663300"><code>LITERALLY</code></font>. It's not strictly related to declaration of variables, even though appearing in <font color="#663300"><code>DECLARE</code></font> statements and so it's discussed in the next section instead.<br>
 <h4>
-<a name="basedManagement"></a>XPL/I ARRAY and BASED Data</h4>
+<a name="basedManagement"></a>XPL/I ARRAY and BASED Data ... and an Exception<br>
+</h4>
 
 XPL/I provides a separate kind of statement which can declare arrays, which syntactically differs only in that the keyword <font color="#663300"><code>ARRAY</code></font> is used in place of the keyword <font color="#663300"><code>DECLARE</code></font>, and in that it can only be used for arrays of <font color="#663300"><code>FIXED</code></font> or <font color="#663300"><code>BIT</code></font>, and not for <font color="#663300"><code>CHARACTER</code></font>.<br>
 <blockquote><font size="-1"><b>Aside:</b> For the original XPL/I compiler, I believe there was a distinction in the way <font color="#663300"><code>ARRAY</code></font> variables were stored in memory vs <font color="#663300"><code>DECLARE</code></font> variables.&nbsp; At the present time, I don't see this distinction as being operationally significant, so <b>XCOM-I</b>
@@ -1955,23 +2089,31 @@ user code.&nbsp; Thus <b>XCOM-I</b> has knowledge of the <i>size</i> of each arr
 structure is referred to as a "dope vector". &nbsp; In other words, if 
 you had a <font color="#663300"><code>BASED</code></font> called (say) <font color="#663300"><code>MYBASED</code></font> and you executed the built-in function <font color="#663300"><code>ADDR(MYBASED)</code></font>, it would return the address of the dope vector for <font color="#663300"><code>MYBASED</code></font>.&nbsp; As usual, the <b>HAL/S-FC</b>
  documentation and source code do not actually provide any useful facts 
-about this setup, but various factoids can be inferred from <b>HAL/S-FC</b> source code, to a greater or lesser degree of confidence, and here are my feeble inferences about the fields of dope vectors:<br>
+about this setup, but various factoids can be inferred from <b>HAL/S-FC</b>
+ source code, to a greater or lesser degree of confidence, and here are 
+my feeble inferences about the fields of dope vectors.&nbsp; The fields 
+with <font color="#009900">green</font> highlighting are those of 
+conceivable interest to an application programmer, though all of them 
+are managed entirely transparently in most cases.<br>
 
   </font><ol>
     </ol>
 <ul>
+
   <li><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 0:&nbsp; </font><code>FIXED</code></font> pointer giving the address of the actual data.</font></li>
   <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 4:&nbsp; </font></font></font><code>BIT(16)</code></font> giving the size in bytes of each record.</font></li>
   <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 6:&nbsp; </font></font></font></font></font><code>BIT(16)</code></font></font><font size="-1"> <font color="#009900">gives the number of <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT(≥32)</code></font> fields in each <font color="#663300"><code>BASED RECORD</code></font>, or 1 if it's a <font color="#663300"><code>BASED CHARACTER</code></font> or <font color="#663300"><code>BASED </code><code>BIT(≥32)</code></font>, or 0 otherwise.  The point is that it's the number of "string descriptors" associated with each element of the <font color="#663300"><code>BASED</code></font> array.  This information is used by </font><font color="#663300"><code>COMPACTIFY</code></font>.  (<a moz-do-not-send="true" href="#compactify">See below</a>.)  While I don't fully understand the calculations being performed, I'd venture the opinion that for <font color="#663300"><code>COMPACTIFY</code></font> to use this information efficiently, it's necessary for the XPL/I compiler to rearrange the fields of <font color="#009900"><font color="#663300"><code>BASED RECORD</code></font></font> from their declared order in such a way that all of string-descriptor fields come first in the record. </font></li>
   <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 8:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font> giving the total number of array entries for which space has been <i>allocated</i>.</font></li>
   <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 12:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font> giving the total number of array entries actually <i>used</i> so far.</font></li>
-  <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 16:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font></font><font size="-1">.
-  I think that perhaps all of the dope vectors form a linked list, and 
-that this is the address of the next dope vector in the list, presumably
- in order of increasing pointers.  The list is terminated when a value 
-of 0 is found.  Thus the process of finding usable holes in memory — or 
-at least the portion of memory dedicated to <font color="#009900"><font color="#663300"><code>BASED</code></font></font> variables (vs character strings) — is just the process of searching this linked list.<br>
-</font></li>
+  
+  <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 16:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font></font><font size="-1">.&nbsp; The dope vectors for all <font color="#663300"><code>BASED</code></font> variables for which memory has been allocated form a linked list.&nbsp; The global variable <font color="#663300"><code>FIRSTRECORD</code></font>
+ gives the address of the first dope vector on the list, and this field 
+at offset 16 in the dope vector points to the next dope vector, or 0 if 
+there is no next one (or if space hasn't been allocated).&nbsp; The 
+ordering is TBD, since I haven't traced through the code in all of its 
+gory detail, but I believe they are ordered according to <i>decreasing</i> address fields (i.e., the field at offset 0), which at least initially is also the order in which the <font color="#663300"><code>RECORD_CONST</code></font> or <font color="#663300"><code>ALLOCATE_SPACE</code></font> macros (see below) were executed to allocate memory for them.<br>
+    </font></li>
+
   <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 20:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font><font size="-1">.  It appears to me that this field supplies some properties of the <font color="#663300"><code>BASED</code></font> in the form of bit fields. It is laid out as follows:</font></li>
   <ul>
     <li><font size="-1">Bit 24 indicates the <font color="#663300"><code>BASED</code></font> is "constant", which appears to mean that you cannot incrementally grow it.  (The macro <font color="#663300"><code>NEXT_ELEMENT(<i>based</i>)</code></font> is used to increase the size of the specified <font color="#663300"><code><i>based</i></code></font> by 1 record, an operation which fails if the <font color="#663300"><code><i>based</i></code></font> is "constant".)</font></li>
@@ -1986,6 +2128,7 @@ not unmovable, then the <font color="#663300"><code><i>based</i></code></font> m
   <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 26:&nbsp; </font></font></font></font></font><code>BIT(16)</code></font></font><font size="-1"> is referred to as "group factor".  As far as I can see, all uses of this are commented out in <b>HAL/S-FC</b>, so perhaps it ended up being unused.<br>
 </font></li>
 </ul>
+
 <ol>
 
   
@@ -2050,6 +2193,22 @@ accessing fields of structures or classes.&nbsp; Some examples include:<br>
   <pre><font color="#663300">MYNEWBASED(6).F = 12;<br>MYNEWBASED(10).C = 'XPL is where it is at!';<br>MYNEWBASED(20).A(6) = 15;<br>X = MYNEWBASED(6).F;</font><br></pre>
 </blockquote>
 and so on.<br>
+<div align="center"><b><font size="-1">The Exception<br>
+    </font></b></div>
+<blockquote><font size="-1">There is one — count 'em, <i>one</i>! — exception I've found to the <i>documented</i> behavior I've described above.&nbsp; This undocumented use is seen in the <font color="#663300"><code>IND_STACK</code></font> variable found in <b>PASS2</b> of <b>HAL/S-FC</b>.&nbsp; </font><font size="-1"><font size="-1"><font color="#663300"><code>IND_STACK</code></font></font> is declared using the following bastardized mash-up of a <font color="#663300"><code>DECLARE</code></font> statement and a <font color="#663300"><code>BASED</code></font> statement:<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#663300">   DECLARE IND_STACK(STACK_SIZE) RECORD:<br>         I_CONST        FIXED,<br>         I_INX_CON      FIXED, <br>         I_STRUCT_CON   FIXED,<br>         ...<br>         I_LIVREMT      BIT(8),<br>         I_NAMEVAR      BIT(8),<br>         I_STRUCT_WALK  BIT(8),<br>         I_AIADONE      BIT(8),<br>      END;</font><br></pre>
+  </blockquote>
+  <font size="-1">Unlike a </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font>
+ declaration, in which specifying an array size at compile time is 
+illegal, or as IR-182-1 states, "ignored if present", the array size is 
+indeed found in this declaration.&nbsp; Nor is there any runtime 
+adjustment to the size, as would be expected with a </font><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font></font>.&nbsp; Nonetheless, </font><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>IND_STACK</code></font></font></font> is subsequently accessed by the dotted, structure-type notation used only by </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> variables. <br>
+    <br>
+Rather than implement an entirely new but undocumented class of structure objects to handle this single instance, <b>XCOM-I</b> implements this case as if it were a </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> declaration followed by an appropriate <font color="#663300"><code>RECORD_CONSTANT</code></font> operation.&nbsp; </font><font size="-1"><font size="-1"><font color="#663300"><code>IND_STACK</code></font></font> is one of the very few objects stored in <a moz-do-not-send="true" href="#MemoryModel">region 7 of the XPL memory model</a>, and by far the largest of them.<br>
+  </font></blockquote>
+
 <h3>LITERALLY and Macros</h3>Another attribute that can appear in <font color="#663300"><code>DECLARE</code></font> statements is the <font color="#663300"><code>LITERALLY</code></font> attribute.&nbsp; Here's an example:<br>
 <blockquote>
   <pre><font color="#663300">DECLARE ARRAYTOP LITERALLY '255';<br>DECLARE MYARRAY(ARRAYTOP) FIXED;</font><br></pre>
@@ -2235,7 +2394,11 @@ Syntactically, <font color="#663300"><code>COMMON</code></font> data is declared
 necessity for remaining at the same location when successor programs are
  executed is part of the reason for this feature.<br>
 </p>
-<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; If <b>BASED</b> variables were always manipulated as intended by the compiler design — i.e., allowing SPACELIB to manipulate them via their dope vectors — there would be no reason for these restrictions on moveability.&nbsp; However, the "virtual memory" system employed by <b>HAL/S-FC</b>, as implemented by the files HALINCL/VMEM<i>x</i>.xpl,
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; If <b>BASED</b>
+ variables were always manipulated by XPL/I program as intended by the original compiler design — 
+i.e., allowing SPACELIB to manipulate them via their dope vectors — 
+there would be no reason for these restrictions on moveability.&nbsp; 
+However, the "virtual memory" system employed by <b>HAL/S-FC</b>, as implemented by the files HALINCL/VMEM<i>x</i>.xpl,
  bypasses the dope-vector system.&nbsp; Specifically, "pages" of memory 
 managed by the virtual-memory system are tracked only by an array of 
 addresses (rather than dope vectors).&nbsp; But SPACELIB manages dope 
@@ -2249,11 +2412,28 @@ known enough engineers to be pretty sure they'd think that since it
 worked for them, that was good enough.</font><br>
 </blockquote>
 
+<blockquote>
+  <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; Speaking of the relationship between <font color="#663300"><code>BASED</code></font> variables and <font color="#663300"><code>COMMON</code></font> memory, it's important to note the following points:<br>
+    </font></p>
+  <ul>
+    <li><font size="-1">For </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> variables appearing in </font><font size="-1"><font size="-1"><font color="#663300"><code>COMMON</code></font></font>, space is allocated for them via <font color="#663300"><code>RECORD_CONSTANT</code></font> or <font color="#663300"><code>ALLOCATE_SPACE</code></font> <i>only</i>
+ in the first of the chained programs that needs to use them.&nbsp; 
+Subsequent programs in the chain use them as-is, without allocation.</font></li>
+    <li><font size="-1">Memory for </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> variables <i>not</i> appearing in </font><font size="-1"><font size="-1"><font color="#663300"><code>COMMON</code></font></font> must be explicitly freed via <font color="#663300"><code>RECORD_FREE</code></font>
+ prior to exiting whatever program of the chain allocated their 
+memory.&nbsp; If this is not done, then the memory-management system 
+(Intermetrics SPACELIB) will abort the program with an error and fail to
+ prepare the <font color="#663300"><code>COMMON</code></font> data for use by the next program in the chain.<br>
+      </font></li>
+  </ul>
+</blockquote>
 <p>Of course, <b>XCOM-I</b> makes no effort at all to pass <font color="#663300"><code>COMMON</code></font>
- data from one application to another using actual memory, even if in 
-some cases it does choose to return data to its original memory 
-location.  Rather, each XPL/I application program compiled by <b>XCOM-I</b> can optionally (depending on its command-line options) load a <i>file</i> containing data into its <font color="#663300"><code>COMMON</code></font> areas of memory; and similarly, it automatically writes out its <font color="#663300"><code>COMMON</code></font> areas of memory into a file upon termination.  By using the <font color="#663300"><code>--commoni</code></font> and <font color="#663300"><code>--commono</code></font> command-line switches of the application, a close degree of control can be exercised over which previously-saved <font color="#663300"><code>COMMON</code></font> blocks, if any, are passed to which application programs.&nbsp; The command-line options are needed because by <i>default</i>, an executable produced by <b>XCOM-I</b> does not read in a <font color="#663300"><code>COMMON</code></font> file at startup, and outputs a file called COMMON.out upon termination.&nbsp; The command-line options override those defaults.<br>
+ data from one application to another using actual memory.  Rather, each XPL/I application program compiled by <b>XCOM-I</b> can optionally (depending on its command-line options) load a <i>file</i> containing data into its <font color="#663300"><code>COMMON</code></font> areas of memory; and similarly, it automatically writes out its <font color="#663300"><code>COMMON</code></font> areas of memory into a file upon termination.  By using the <font color="#663300"><code>--commoni</code></font> and <font color="#663300"><code>--commono</code></font> command-line switches of the application, a close degree of control can be exercised over which previously-saved <font color="#663300"><code>COMMON</code></font> blocks, if any, are passed to which application programs.&nbsp; The command-line options are needed because by <i>default</i>, an executable produced by <b>XCOM-I</b> does not read in a <font color="#663300"><code>COMMON</code></font>
+ file at startup, and outputs a file literally called "COMMON.out" upon 
+termination.&nbsp; The command-line options override either or both of 
+those defaults.<br>
 </p>
+
 <p><font color="#663300"><code>COMMON</code></font> files are in a human-readable format.&nbsp; See the comments for the <font color="#663300"><code>writeEntryCommon</code></font>
  function in the runtime-library file runtimeC.c if you have any 
 interest in the file format.&nbsp; It's actually pretty useful for 
@@ -2306,24 +2486,22 @@ from <font color="#663300"><code>FREEBASE</code></font> to <font color="#663300"
 unallocate chunk of memory rather than moving the entire array.&nbsp; 
 However, if I am reading the code in SPACELIB correctly this does not 
 appear to be the case:&nbsp; Indices of </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> variables seem to increase upward in memory, just as they do in any other XPL/I array.&nbsp; </font><br>
-</blockquote>Region 7 is a bit trickier to explain.&nbsp; For an XPL 
-program, it doesn't exist at all.&nbsp; For an XPL/I program, it is an 
-area dedicated to dynamic data exempt from the normal memory-management 
-procedures applied to regions 5 and 6.&nbsp; <br>
+</blockquote>Region 7 is a bit trickier to explain.&nbsp; It is an 
+area dedicated to data which <b>XCOM-I</b> wants to use for XPL objects 
+it creates at compile time that need to be accessible to the XPL program
+ as normal XPL variables, but that need to be exempt from the normal 
+memory-management 
+procedures applied to regions 5 and 6.&nbsp; These are items which the 
+original XPL compilers would have stored in regions 1 through 6, but 
+that the different implementation of <b>XCOM-I</b> would have made difficult.&nbsp; <b>XCOM-I</b> allocates this area and the objects in it at compile-time.&nbsp; Though shown as beginning at <font color="#663300"><code>0xFFE000</code></font>, that's misleading.&nbsp; The <font color="#663300"><code>0xFFE000</code></font> limit is the default, and is appropriate for compiling <b>HAL/S-FC</b>, but in fact is controlled by <b>XCOM-I</b>'s <font color="#663300"><code>--reserved=<i>N</i></code></font>
+ (default 8192) command-line option.&nbsp; There will be compile-time 
+messages if the size of the reserved memory needs to be increased.&nbsp;
+ It's important to note that all XPL programs sharing the same <font color="#663300"><code>COMMON</code></font> memory need to have the same size for region 7.&nbsp; Specifically, all passes of <b>HAL/S-FC</b> need to have the same size of reserved memory, and that's why this particular default value for it was chosen.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; In fact, the use of 
+reserved memory has proven to be extremely rare.&nbsp; The only 
+instances of use, to date, have been in <b>PASS2</b> and <b>PASS4</b> of <b>HAL/S-FC</b>, each of which stores a single object declared in a previously-unencountered, idiosyncratic way.</font><br>
+</blockquote>
 <br>
-The alternate methods used to manage region 7 are <a moz-do-not-send="true" href="#monitor">the <font color="#663300"><code>MONITOR</code></font> calls</a>
- 6, 7, and 21, which (respectively) allocate system memory, deallocate 
-system memory, and check the size of the largest remaining contiguous 
-block of free system memory.&nbsp; <br>
-<br>
-At startup, there is single allocated block of system memory, and it 
-basically fills the entire physical memory as depicted in the diagram to
- the right.&nbsp; At that time, region 7 is of size 0, as is region 6, 
-so regions 0-5z fill physical memory.&nbsp; One of the first steps that 
-occurs during initialization by an XPL/I program like <b>HAL/S-FC</b>, prior to allocating space for any <font color="#663300"><code>BASED</code></font> variables, is to compute the amount of memory it wants to reserve for region 7.&nbsp; It then deallocates that space (using <font color="#663300"><code>MONITOR(7)</code></font>) and reduces <font color="#663300"><code>FREELIMIT</code></font>
- by a corresponding amount.&nbsp; After that point, the boundary between
- regions 6 and 7 is fixed, and never changed again.&nbsp; All subsequent
- <font color="#663300"><code>MONITOR(6)</code></font>, <font color="#663300"><code>MONITOR(7)</code></font>, and <font color="#663300"><code>MONITOR(21)</code></font> calls pertain only to region 7.<br>
 <blockquote>
 </blockquote>
 
@@ -2344,9 +2522,12 @@ occurs during initialization by an XPL/I program like <b>HAL/S-FC</b>, prior to 
 </tr>
 
 <tr>
-  <td valign="top" align="right"><font color="#663300"><code><font size="-1">0xFFFFFF</font></code></font></td>
-  <td valign="middle" align="center"><font size="-1"><br>
-Special data<br>
+  <td valign="top" align="right"><font color="#663300"><code><font size="-1">0xFFFFFF<br>
+<br>
+<br>
+0xFFE000<br>
+</font></code></font></td>
+  <td valign="middle" align="center"><font size="-1"><br>Reserved memory<br>
       <br>
     </font></td>
   <td valign="middle" align="center">7<br>
@@ -2387,6 +2568,7 @@ Data pointed to by "dope vectors" of </font><font size="-1"><font size="-1"><fon
 FREEPOINT<br>
                   <br>
 <br>
+<br>
 FREEBASE</font><br>
               </code></font></td>
 <td valign="middle" align="center"><br>
@@ -2403,7 +2585,7 @@ FREEBASE</font><br>
   <td valign="middle" align="center"><font size="-1"><br>
     </font></td>
   <td valign="middle" align="center"><font size="-1"><font size="-1"><font color="#663300"><code><br>
-BASED</code></font></font> dope vectors<br>
+BASED</code></font></font> dope vectors for non-<font color="#663300"><code>COMMON</code></font><br>
       <br>
     </font></td><td valign="middle" align="center">4<br>
 </td>
@@ -2423,7 +2605,7 @@ CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font c
       <td valign="bottom" align="right"><br>
 </td>
 <td valign="middle" align="center"><font size="-1"><br>
-            </font><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables</font></font></font><font size="-1"><font color="#663300"><font color="#000000"> for non-<font color="#663300"><code>COMMON</code></font></font></font></font><font size="-1"><br>
+            </font><font color="#663300"><font size="-1" color="#000000"><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font>, <font color="#663300"><code>BIT(</code><code>≤32)</code></font> , and <font color="#663300"><code>BASED</code></font> dope vectors for</font></font></font></font></font><font size="-1"><font color="#663300"><font color="#000000"> non-<font color="#663300"><code>COMMON</code></font></font></font></font><font size="-1"><br>
             <br>
           </font>
       </td><td valign="middle" align="center">2<br>
@@ -2434,7 +2616,7 @@ CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font c
             <td valign="top"><br>
             </td>
             <td valign="middle" align="center"><font color="#663300"><code><br>
-</code></font><font color="#663300"><font size="-1" color="#000000"><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables for </font><code>COMMON</code></font></font><font color="#663300"><code></code></font></font><code><br>
+</code></font><font color="#663300"><font size="-1" color="#000000"><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font>, <font color="#663300"><code>BIT(</code><code>≤32)</code></font> , and <font color="#663300"><code>BASED</code></font> dope vectors for </font><code>COMMON</code></font></font><font color="#663300"><code></code></font></font><code><br>
                   <br>
                 </code></font></td><td valign="middle" align="center">1<br>
 </td>
@@ -2767,7 +2949,7 @@ least-significant bit is 0.&nbsp; When I say they are "integers", I don't mean t
  is executed; and so on.  At most, a single statement is executed, and 
 there is no "fall through" from one statement to the next.  If the <i><font color="#663300"><code>EXPRESSION</code></font></i>
  is negative or beyond the number of available statements, McKeeman 
-tells us that "a random jump is executed".  In XCOM-I, no statement is 
+tells us that "a random jump is executed".  In <b>XCOM-I</b>, no statement is 
 executed under those circumstances, and control passes to the next 
 statement after the <font color="#663300"><code>END</code></font>.<br></p>
 <h3><code>ESCAPE</code> and <code>REPEAT</code><br>
@@ -2841,7 +3023,7 @@ it appears to be undocumented what value <font color="#663300"><code>I</code></f
  in the same way.&nbsp; My considered opinion is that the loop counter 
 holds the value at which the condition for continuation fails: in this 
 example, 101.&nbsp; Or, if the loop is broken prematurely (as with <font color="#663300"><code><font color="#663300"><code>ESCAPE</code></font></code></font> from the preceding section), then the value the counter held when the <font color="#663300"><code><font color="#663300"><code>ESCAPE</code></font></code></font> occurred is retained.<br>
-<blockquote><font size="-1"><b>Aside:</b></font>&nbsp; In Python, for 
+<blockquote><font size="-1"><b>Aside:</b></font>&nbsp; This would match the behavior of C.&nbsp; Whereas in Python, for 
 example, the counter for an equivalent loop would have the value 100 
 rather than 101 after normal termination of the loop.<br>
 </blockquote>
@@ -2851,8 +3033,8 @@ many different programs under discussion, and all or most of them have
 their own sets of program options, or sometimes even their own unique 
 ways of specifying those options.  There's <b>XCOM-I</b>, whose program options you can discover with the command "<font color="#663300"><code>XCOM-I.py --help</code></font>".  Then too, when you use <b>XCOM-I</b> to compile an XPL or XPL/I program, <b>XCOM-I</b> endows the executables it produces with a uniform set of options; if (say) you had compiled an XPL program such as <i>MyProgram</i>.xpl, via a command like "<font color="#663300"><code>XCOM-I.py <i>MyProgram</i>.xpl</code></font>", you could find out what <i><b>MyProgram</b></i>'s uniform options were with the command "<i>MyProgram</i> --help".<br></p>
 <p>But that tells us only about options that are the same in all 
-programs of the XCOM-iverse.  What about options that influence the XPL 
-or XPL/I program itself in program-specific ways?  What options specific to <i>MyProgram</i>.xpl are there, and how can those options be selected?<br></p>
+programs of the XCOM-verse.  What about options that influence the XPL 
+or XPL/I program itself in program-specific ways?  What options specific to <i>MyProgram</i>.xpl are there, and how can those options be selected?&nbsp; What options did (say) <b>HAL/S-FC</b> have originally, and how are those options applied to it now?<br></p>
 <p>Originally, programs run on the IBM 360 would have been associated 
 with Job Control Language (JCL) cards that (among other things) would 
 have set the program options via what's called the "PARM field".  For 
@@ -2884,7 +3066,7 @@ program (XMON.bal) does various things with parameters of those
 suggested names.&nbsp; Indeed, I think all of McKeemans suggested parameters 
 affect only the submonitor, which doesn't exist at all in <b>XCOM-I</b>, so none of these suggested options are implemented in <b>XCOM-I</b>.&nbsp; Or at least, not supported in the same way, as you'll see some or all of them reappear in a little bit.<br>
 <br>
-In other words, there's not meaningful support for program parameters for standard XPL in <b>XCOM-I</b>, because standard XPL itself had no standard method for dealing with them. <br>
+In other words, there's not meaningful support for program parameters for <i>standard</i> XPL in <b>XCOM-I</b>, because standard XPL itself had no standard method for dealing with them. <br>
 <br>
 For XPL/I, on the other hand, Intermetrics had an elaborate set of parameters for <b>HAL/S-FC</b>, as well as a system for making those parameters available available to the XPL/I program.&nbsp; <b>XCOM-I</b>
  fully supports passing these Intermetrics parameters to the XPL/I 
@@ -2923,17 +3105,17 @@ There's pretty good documentation of quite a few of them in the HAL/S-FC
  which I assume you'll be able to read without my predigesting it for 
 you.&nbsp; (That's a lie, by the way; I just don't understand all of 
 them well enough to regurgitate them, or else I'm sure I would!)<br>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; I will comment on one of the parameters, though, namely the <font color="#663300"><code>TITLE</code></font>
+<blockquote><font size="-1"><b><a name="titan"></a>Aside:</b>&nbsp; I will comment on one of the parameters, though, namely the <font color="#663300"><code>TITLE</code></font>
  parameter.&nbsp; As I mentioned above, it's used to change the name of 
 the company name in the page headings of printouts.&nbsp; The default 
 company name is <font color="#663300"><code>'T I T A N&nbsp; S Y S T E M S&nbsp; C O R P .'</code></font>&nbsp; The program comments indicate that it was changed in March of 2002 from "Intermetrics".&nbsp; Why?&nbsp; According to <a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/AverStar">Wikipedia</a>,
  Intermetrics went through a sequence of mergers, acquisitions, and name
  changes, at one point of which was a merger with the Titan Corporation 
 in March of 2000.&nbsp; So I guess that a couple of years after that, 
-somebody was finally instructed to enshrine this change in the HAL/S-FC 
+somebody was finally instructed to enshrine this change in the <b>HAL/S-FC </b>
 source code.&nbsp; Naturally, that only lasted a couple of years before 
 Titan was acquired by L-3 Communications.&nbsp; I wonder if the name was
- ever updated after that?&nbsp; Our copy of HAL/S-FC seems to be from 
+ ever updated after that?&nbsp; Our copy of <b>HAL/S-FC</b> seems to be from 
 mid-2005, so presumably the final name change wouldn't have had a chance
  to percolate into the source code yet by that point.</font><br>
 </blockquote>
@@ -2947,9 +3129,10 @@ parsed contents to the XPL/I program.&nbsp; These options processors are
  specific to the XPL/I program you're compiling.&nbsp; The existing 
 options processors built into the runtime library go by the names<br>
 <ul>
-  <li>COMPOPT (default)<br>
+  <li>COMPOPT (default).&nbsp; [Note that this is the options processor appropriate for <b>PASS1</b> of <b>HAL/S-FC</b>.&nbsp; Subsequent passes of <b>HAL/S-FC</b> prior to <b>PASS4</b> do not use <font color="#663300"><code>MONITOR(13)</code></font>, but instead receive command-line parameters from <b>PASS1</b> via <font color="#663300"><code>COMMON</code></font> memory.]<br>
 </li>
-  <li>LISTOPT</li>
+  <li>LISTOPT.&nbsp; [Note that this is the options processor appropriate for <b>PASS4</b> of <b>HAL/S-FC</b>.]<br>
+</li>
   <li>MONOPT<br></li>
 </ul>
 With <font color="#663300"><code>MONITOR(13)</code></font>, <i>one</i> 
@@ -3591,20 +3774,29 @@ BFS<br>
     </tr>
   </tbody>
 </table>
-<br>
+<br>If you've been eagerly absorbing every detail I've discussed — and I fail to see any reason you <i>wouldn't</i> have! — then you'll recall that <b>HAL/S-FC</b> has seven passes (<b>PASS1</b>, <b>FLO</b>, <b>OPT</b>,
+ and so on), each of which is a stand-alone program.&nbsp; So you'll 
+wondering why (or more likely, thanking your lucky stars) that I've 
+listed a bunch of "<b>HAL/S-FC</b> options", without instead listing seven separate tables of <b>PASS1</b>'s options, <b>FLO</b>'s options, etc.&nbsp; That's because all of these PARM-field options were fed only into <b>PASS1</b>.&nbsp; The other passes accessed the options only via invormation passed to them by <b>PASS1</b> in <font color="#663300"><code>COMMON</code></font> memory, in some pre-digested form.<br>
 <br>
 In addition to these named parameters, <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=830">early documentation</a> indicates that <i>control toggles</i>
- can also appear in the PARM field.&nbsp; Control toggles are 
+ can also appear in the PARM field. <br>
+
+<br>
+
+Control toggles are 
 two-character strings which normally would be embedded in program 
 comments.&nbsp; Generally speaking, program comments are ignored by 
 compilers.&nbsp; But when these particular two-character strings are 
 found within a program comment of an XPL program, they are used to 
 enable certain program features from the point they appear until a 
-countermanding control toggle is found.&nbsp; The control toggles I'm aware of that were supported by one or another version of <b>XCOM</b> are listed below.&nbsp; Not all of them are necessarily suitable for command-line usage; for example, the action of "<font color="#663300"><code>$|</code></font>"
- depends on its particular column.&nbsp; The list below has been merged 
+countermanding control toggle is found.&nbsp; The control toggles I'm aware of that were supported by one or another version of <b>XCOM</b> are listed below.&nbsp; Not all of them are necessarily suitable for command-line usage anyway; for example, the action of "<font color="#663300"><code>$|</code></font>"
+ depends on its particular punch-card column in which it appears.&nbsp; The list below has been merged 
 from McKeeman (p. 148), IR-182-1 (section 13.4), and SUNY XCOM 4.5 
 source code:<br>
+
 <ul>
+
   <li><font color="#663300"><code>$B</code></font> — Interlist code bytes in hexadecimal.</li>
   <li><font color="#663300"><code>$D</code></font> — Print compilation statistics and symbol table at the end of compilation (initially enabled).</li>
   <li><font color="#663300"><code>$E</code></font> — Interlist emitted code (assembly format) and data.</li>
@@ -3637,6 +3829,7 @@ The portion of succeeding cards starting from the column containing the |
  width <i>shorter</i> than 80 columns.<br>
   </li>
 </ul>
+
 If control 
 toggles were able to appear in the PARM field (as well as inside of 
 program comments), then in effect they'd act like unnamed Type 1 
@@ -3647,13 +3840,15 @@ not, and whether they're acceptable in PARM fields.&nbsp; Currently, parameters 
  are 
 accepted (in the sense that there's no error message or abend) in PARM 
 fields, but 
-ignored.&nbsp; However, there is a command-line option that can be made 
+ignored.&nbsp; However, in <b>XCOM-I</b>, there is a command-line option that can be made 
 to serve the same purpose as control toggles in the PARM field:&nbsp; 
 The <font color="#663300"><code>--extra=<i>N</i>,'<i>STRING</i>'</code></font> option causes the <font color="#663300"><code><i>STRING</i></code></font> to be returned to the XPL program upon the first invocation of <font color="#663300"><code>INPUT(<i>N</i>)</code></font>; subsequent invocations of <font color="#663300"><code>INPUT(<i>N</i>)</code></font> get data from the file attached to input <font color="#663300"><code><i>N</i></code></font>.&nbsp; So for example, if you wanted to use the control toggle <font color="#663300"><code>$E</code></font>, but didn't want to modify your XPL source code to add it into a comment, you could use the command-line option <font color="#663300"><code>--extra=0,'/* $E */'</code></font>.<br>
+
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; </font><font size="-1">Again, to be clear, <b>XCOM-I</b>
  itself has no cognizance whatever of control toggles.&nbsp; Control 
-toggles, if available, are provided to and used by legacy versions of <b>XCOM</b> which <b>XCOM-I</b> may have compiled for you.</font><br>
+toggles, if available, are provided to and used by legacy versions of <b>XCOM</b> which <b>XCOM-I</b> may have compiled for yo</font>
 </blockquote>
+
 
 
 
@@ -3792,10 +3987,40 @@ returned address is that of a specific array element, rather than of the
  for the variable, and if you want to find the actual data, you then 
 must first fetch the value of the descriptor and then massage it 
 further.&nbsp; For XPL/I's <font color="#663300"><code>BASED</code></font> variables (see IR-182-1 p. 13-3), using the unsubscribed name of the variable for <code><font color="#663300">V</font></code><font color="#663300"><code></code></font> will return the address in memory where the pointer to the <font color="#663300"><code>BASED</code></font> variable's data is stored; whereas adding the subscript <font color="#663300"><code>(0)</code></font> to <code><font color="#663300">V</font></code><font color="#663300"><code></code></font> returns the address of the variable's data itself.<br>
-      </td>
-    </tr>
-    <tr>
-      <td valign="middle" align="center"><font color="#663300"><code>BYTE(DE,NE)<br>
+<br>
+There are two exceptional cases, due to the fact that unlike the original XPL compilers, program code in <b>XCOM-I</b>
+ exists in a separate memory space outside of the simulated XPL memory 
+in which variable exist.&nbsp; Therefore, attempts to use <font color="#663300"><code>ADDR(V)</code></font>
+ to find addresses in code space, such as addresses of XPL built-ins or 
+of program labels, have to be treated very differently than addresses of
+ variables, if sensible results are to be obtained.<br>
+<br>
+Insofar as addresses of runtime-library functions are concerned, the only case I'm aware of is <font color="#663300"><code>ADDR(DESCRIPTOR)</code></font>.&nbsp; In this case, <font color="#663300"><code>ADDR</code></font> returns the address immediately following <a moz-do-not-send="true" href="#common"><font color="#663300"><code>COMMON</code></font> memory</a>.&nbsp; The reason for this <i>ad hoc</i> behavior is that the XPL/I memory-management system (SPACELIB) uses the location of the built-in variable <font color="#663300"><code>DESCRIPTOR</code></font> (see below) to determine the cutoff between <font color="#663300"><code>COMMON</code></font> (in low memory) and non-<font color="#663300"><code>COMMON</code></font>
+ (in higher memory).&nbsp; But I realized this fact too late in the 
+development process, after I had made decisions about implementation and
+ memory layout that were incompatible with the interpretation of <font color="#663300"><code>DESCRIPTOR</code></font> as a normal variable with the desired properties.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp;&nbsp; It isn't <i>terribly</i>
+ difficult to undo the incompatible design decisions I mentioned, and 
+sometime in the future I may do so.&nbsp; Technically, I think it's 
+mainly a matter of swapping <a moz-do-not-send="true" href="#MemoryModel">memory regions 2 and 3</a>.&nbsp; Again technically, it is necessary for <a moz-do-not-send="true" href="#basedManagement">the dope vectors of all BASED variables</a> to reside in the lowest 64K of memory, so it would have the effect of reducing the possible number of non-<font color="#663300"><code>COMMON BASED</code></font> variables; fortunately, if existing XPL/I code is any guide, that's a pretty-negligible problem.<br>
+</font></blockquote>Insofar as program labels are concerned, as far as I
+ know, there's no mechanism in XPL itself for using the memory address 
+of a program label.&nbsp; Consequently, the only reason for finding the 
+address of an XPL program label is that assembly language (in a <font color="#663300"><code>CALL INLINE</code></font>) wants either to branch to that address, or else to somehow use the data in another <font color="#663300"><code>CALL INLINE</code></font> at that address.&nbsp; But this notion is based on various assumptions that are false in <b>XCOM-I</b>. &nbsp; Nevertheless, in spite of that fact, we still need some uniform method of handling such "addresses" that allows <font color="#663300"><code>ADDR</code></font> and <font color="#663300"><code>CALL INLINE</code></font> to interact smoothly.&nbsp; <br>
+<br>
+<b>XCOM-I</b> handles addresses of XPL labels as follows:&nbsp; The labels in any <font color="#663300"><code>PROCEDURE</code></font> are assigned a predictable sequence of unique <i>negative</i>
+ addresses.&nbsp; Thus the first label encountered has the address -1, 
+the second has address -2, and so on.&nbsp; The addresses are local to 
+the <font color="#663300"><code>PROCEDURE</code></font>, and restart at -1 in each <font color="#663300"><code>PROCEDURE</code></font>.&nbsp; <font color="#663300"><code>ADDR</code></font> returns these negative addresses.&nbsp; C implementations of the branch instructions in <font color="#663300"><code>CALL INLINE</code></font> statements can exploit that by having a jump table of a form similar to:<br>
+<blockquote>
+  <pre>switch (address) {<br>  case -1: goto LABEL1;<br>  case -2: goto LABEL2;<br>  ...<br>}<br></pre>
+</blockquote>
+Admittedly, this is not a terribly-efficient solution, but C has no 
+practical computed-goto other than this, as far as I'm aware. <br>
+<blockquote><font size="-1">
+  </font></blockquote>
+
+</td></tr><tr><td valign="middle" align="center"><font color="#663300"><code>BYTE(DE,NE)<br>
           </code></font></td>
       <td valign="middle">A function with numeric value given by the <font color="#663300"><code>NE</code></font><font size="-1"><sup>th</sup></font> 8 bits of the string described <font color="#663300"><code>DE</code></font>.<br>
       </td>
@@ -3977,7 +4202,7 @@ Consequently, the <font color="#663300"><code>DATE</code></font> and <font color
           </code></font></td>
       <td valign="middle">The description of the <font color="#663300"><code>NE</code></font><font size="-1"><sup>th</sup></font> string as a numeric value.<br>
       </td>
-      <td valign="middle">I believe that this cryptic description is 
+      <td valign="middle">This cryptic description is 
 referring to the fact that in the way memory is allocated for the 
 variables declared by <b>XCOM</b>, the 32-bit string descriptors for all <font color="#663300"><code>CHARACTER</code></font> and <font color="#663300"><code>BIT(n)</code></font> (<font color="#663300"><code>n</code></font>&gt;32) variables appear consecutively in memory.&nbsp; By symbolically labeling the very first of those descriptors as <font color="#663300"><code>DESCRIPTOR</code></font>, and treating <font color="#663300"><code>DESCRIPTOR</code></font> as of the <font color="#663300"><code>FIXED</code></font> datatype, <font color="#663300"><code>DESCRIPTOR</code></font>
  becomes an easily-accessible array of all the string descriptors.&nbsp;
@@ -4089,21 +4314,40 @@ In XPL, all memory beyond <font color="#663300"><code>FREELIMIT</code></font> is
           </code></font></td>
       <td valign="middle">Inserts arbitrary IBM System/360 machine code directly into the instruction stream.<br>
       </td>
-      <td valign="middle">I've replaced McKeeman's lengthy description 
-with a short synopsis, because the applicability of the original 
+      <td valign="middle">The applicability of the original 
 functionality has change drastically in the 55 years (as of this 
-writing) since <i>A Compiler Generator</i> was written.<br>
+writing) since <i>A Compiler Generator</i> was written.&nbsp; <b>XCOM-I</b>
+ provides three different mechanisms for supporting direct insertion of 
+inline non-XPL code, none of which are identical to those in 
+McKeeman.&nbsp; Thankfully, no available legacy <i>standard</i> XPL program I've encountered contains any <font color="#663300"><code>CALL INLINE</code></font> statements, so the difficulties presented by them are limited to XPL/I code such as <b>HAL/S-FC</b>.<br>
+<br>
+<b>Support mechanism 1:&nbsp; insertion of C code</b><br>
         <br>
-        <b>XCOM-I</b> does <i>not</i> support the originally-described functionality as-is.&nbsp; Instead, you can use <br>
-        <blockquote><font color="#663300"><code>CALL INLINE(DE);</code></font><br>
+        You can use <br>
+        <blockquote><font color="#663300"><code>CALL INLINE('<i>C-language source code</i>');</code></font><br>
         </blockquote>
-to perform the conceptually-similar task of inserting an arbitrary 
-string of C-language code directly into the instruction stream.&nbsp; If
- the string contains newline characters (<font color="#663300"><code>'\n'</code></font>), then a single <font color="#663300"><code>INLINE</code></font> can insert multiple lines of C code.&nbsp; (But recall, an XPL string can be no longer than 256 characters.)<br>
+to insert an arbitrary 
+string of C-language source code directly into the instruction stream.&nbsp; If
+ the string contains newline characters (<font color="#663300"><code>'\n'</code></font>), then a single <font color="#663300"><code>INLINE</code></font>
+ can insert multiple lines of C code.&nbsp; But recall that an XPL 
+string can be no longer than 256 characters, so the inserted C code can 
+be no longer than 256 characters in any one <font color="#663300"><code>CALL INLINE</code></font> statement.<br>
         <br>
-More-importantly, in <b>XCOM-I</b>, there is also a different mechanism for using legacy <font color="#663300"><code>CALL INLINE</code></font> statements to patch lengthy C-language replacements for the original BAL code represented by the <font color="#663300"><code>INLINE</code></font>s into the instruction stream, while leaving the original XPL/I source code unchanged.&nbsp; <a moz-do-not-send="true" href="#hooks">This important but far from automatic mechanism is the topic of a later section</a>.<br>
-        <br>
-Thankfully, no available legacy standard XPL program contains any <font color="#663300"><code>CALL INLINE</code></font> statements, so the difficulties presented by them are limited to XPL/I code such as <b>HAL/S-FC</b>.<br>
+<b>Support mechanism 2:&nbsp; insertion of IBM 360 machine code</b><br>
+<br>
+<b>XCOM-I</b> will automatically translate IBM 360 machine code to 
+C.&nbsp; Full-blown IBM 360 emulation is not provided, but support is 
+available for those IBM 360 instructions used in XPL code I have 
+personally encountered, which includes the entire source-code base of <b>HAL/S-FC</b>.&nbsp; Instructions that are not (yet) supported cause compilation to abort.<br>
+<br>
+This feature is not normally enabled.&nbsp; You must use the <b>XCOM-I</b> command-line switch <font color="#663300"><code>--auto-inline</code></font> to enable it.<br>
+<br>
+<b>Support mechanism 3:&nbsp; other</b><br>
+<br>
+If <font color="#663300"><code>--auto-inline</code></font> is not 
+enabled (see support mechanism 2 above), any CALL INLINE statements not 
+caught by support mechanism 1 are commented out by default, but 
+"patched" with C code if a "patch file" is available.&nbsp; &nbsp; <a moz-do-not-send="true" href="#hooks">This important but far from automatic mechanism is the topic of a later section</a>.<br>
       </td>
     </tr>
     <tr>
@@ -4300,8 +4544,12 @@ line.  This doesn't print anything, but takes the remainder of the line
 and sets it as the heading for subsequent pages.</li>
           <li>'<font color="#663300"><code>2</code></font>' — Subheading
  line.  This doesn't print anything, but takes the remainder of the line
- and sets it as the subheading for subsequent pages.</li>
-        </ul>
+ and sets it as the subheading for subsequent pages.</li></ul>
+<blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; What this explanation of </font><font size="-1"><font color="#663300"><code>OUTPUT(1)</code></font> fails to explain is what happens if the string <i>doesn't have</i>
+ a first character; i.e., what if it's empty?&nbsp; Well, the obvious 
+response would be that that would be an illegal use.&nbsp; Unfortunately
+ for us, that obvious fact didn't stop some of the coders of <b>HAL/S-FC</b> from strewing their code — perhaps an exaggeration —  with assignments <font color="#663300"><code>OUTPUT(1) = ''</code></font>, thus forcing us to deal with it.&nbsp; Lacking any particular rationale for what such a thing might mean, <b>XCOM-I</b> treats it as <font color="#663300"><code>OUTPUT(0) = ''</code></font>; i.e., it prints a newline.<br>
+  </font></blockquote>
 If you experiment with <font color="#663300"><code>OUTPUT(1)</code></font>, and even to a certain extent with <font color="#663300"><code>OUTPUT(0)</code></font>, you may become very confused, because various things won't work as you expect.&nbsp; Or at least, <i>I</i> was very confused at first.&nbsp; To get past this confusion, you need to grasp the following<br>
         <blockquote><b>Very important point</b>:&nbsp; For the computer 
 systems most people are familiar with today, when we print a line of 
@@ -4527,7 +4775,31 @@ which turns off run-time trace.<br>
       </td>
       <td valign="middle">See <font color="#663300"><code>TRACE</code></font>.<br>
       </td>
-    </tr>
+    </tr><tr>
+  <td valign="middle" align="center"><font color="#663300"><code>XPL_COMPILER_VERSION</code></font><br>
+  </td>
+  <td valign="middle"><code></code><code></code><font color="#663300"><code></code></font> An array of length 2 — actually a function in the <b>XCOM-I</b> runtime library —  in which the first element is the major version of the XPL compiler (<b>XCOM-I</b> in this case), and the second element is the minor version, both in the range 0-99.<br>
+  </td>
+  <td valign="middle">This is just speculation on my part, based on how 
+an undeclared variable with this name is used when it appears a couple 
+of times in <b>PASS2</b> of <b>HAL/S-FC</b>.&nbsp; Nearby code also provides the interesting information that the XPL version <i>name</i> is "TITAN--XPL".&nbsp; You may recall my <a moz-do-not-send="true" href="#titan">earlier observation</a>
+ that Intermetrics merged with Titan Corporation in March 2000, which is
+ obviously the origin of the "TITAN" portion of the name.&nbsp; The 
+other interesting&nbsp; point is that no effort is made to distinguish 
+it in any way from <i>standard</i> XPL.<br>
+    <br>
+Of course, I have no inkling whatever of how the versions for the 
+Intermetrics/Titan XPL compiler were numbered.&nbsp; I was tempted to 
+set the major version to 32 and the minor version to 0, but that would 
+only serve to obscure the fact that <b>XCOM-I</b> is in fact <i>not</i> TITAN--XPL, nor even related to it other than that I've tried to imitate it.&nbsp; Instead, <b>XCOM-I</b>
+ will always return a major and minor versions appropriate to 
+itself:&nbsp; major = 0 preliminary versions, 1 for first release, and 
+so on.<br>
+    <br>
+As an <i>ad hoc</i> measure, <b>XCOM-I</b> also transparently performs string substitions replacing 'TITAN--XPL', wherever it may be found, by 'RSB-XCOM-I'.<br>
+  </td>
+</tr>
+
   </tbody>
 </table>
 <br>
@@ -4953,12 +5225,70 @@ presented in the order listed in the discussion of program options. <br></li>
     <tr>
       <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>F</i>=MONITOR(14,<i>n</i>,<i>a</i>);<br>
     </font></code></td>
-      <td valign="middle">N/A<br>
+      <td valign="middle">For creating Simulation Data Files.&nbsp; The value of <code><font color="#663300"><i>n</i></font></code> selects a function; the value of <code><font color="#663300"><i>a</i></font></code> supplies supplementary data:<br>
+<br>
+<table align="center" cellspacing="2" cellpadding="2" border="1">
+  <tbody>
+    <tr>
+      <th valign="top"><code><font color="#663300"><i>n</i></font></code></th>
+      <th valign="top">Function<br>
+      </th>
+      <th valign="top"><code><font color="#663300"><i>a</i></font></code></th>
+    </tr>
+    <tr>
+      <td valign="middle" align="center">0<br>
+      </td>
+      <td valign="middle" align="center">Open<br>
+      </td>
+      <td valign="middle" align="center">option flags<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center">1<br>
+      </td>
+      <td valign="middle" align="center">Write<br>
+      </td>
+      <td valign="middle" align="center">area address<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center">2<br>
+      </td>
+      <td valign="middle" align="center">Stow &amp; Close<br>
+      </td>
+      <td valign="middle" align="center">member name<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </td>
-      <td valign="middle">This is a no-op for <b>XCOM-I</b> but may be implemented in the future.&nbsp; It is related to so-called Simulation Data Files (SDF), which are only relevant to <b>HAL/S-FC</b>
- compiler passes 3 and 4, which are not currently on Virtual AGC's 
-roadmap for implementation since none of the support software for SDF 
-has survived.<br>
+      <td valign="middle">Unfortunately, the only documentation of this is from 1976, and it may be somewhat preliminary in nature.<br>
+<br>
+For example, from the source code of <b>HALS/FC</b> (see the <font color="#663300"><code>OUTPUT_SDF</code></font> procedure in <b>PASS3</b>), the function numbers (<code><font color="#663300"><i>n</i></font></code>) appear to be 0, 4, and 8 (rather than 0, 1, and 2 as it says in the description to the neighboring column).<br>
+<br>
+It appears to me that it's used somewhat like this:&nbsp; <br>
+<ol>
+  <li>First you "open" the SDF file.&nbsp; It apparently consists of 
+"pages", numbered from 0 upward.&nbsp; The only "option" you can give it
+ is the maximum page number.</li>
+  <li>Then you "write" to the file a page at a time, starting at page 
+0.&nbsp; Each "write" transfers data from the "area address" you specify
+ to the next higher page in the buffer.</li>
+  <li>Finally, you "stow&amp;close" the SDF file.&nbsp; This is the step
+ which writes the memory buffer out to the actual SDF file (if it hasn't
+ been doing so already), which is a partitioned data set (PDS).&nbsp; 
+The member name of the PDS is assigned at this point.&nbsp; Note that 
+the member name can be one that already exists in the PDS, which will 
+cause the existing member to be overwritten.<br>
+  </li>
+</ol>
+<p>Thus you start with a presumably-empty PDS (which happens to be 
+attached to output device 5), and end up with a PDS populated with lots 
+of named members, each one of which consists of some integral number of 
+"pages".<br>
+</p>
+
 </td>
     </tr>
     <tr>
@@ -5026,12 +5356,59 @@ have found the largest free block wherever it was located, whereas <b>XCOM-I</b>
 </td>
     </tr>
     <tr>
-      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>F</i>=MONITOR(22,<i>n<sub>1</sub></i>);</font></code><br>
-<code><font color="#663300"><code><font color="#663300"><i>F</i>=MONITOR(22,0,<i>n<sub>2</sub></i>);</font></code>
+      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i><code><font color="#663300"><code><font color="#663300"><i>F</i></font></code></font></code></i><code><font color="#663300"><code><font color="#663300">=MONITOR(22,0,<i>n</i><i><sub>2</sub></i>);</font></code></font></code><i><code><font color="#663300"><code><font color="#663300"><br>
+            </font></code></font></code>F</i>=MONITOR(22,<i>n<sub>1</sub></i>);</font></code><br>
+<code><font color="#663300"><code></code>
     </font></code></td>
       <td valign="middle">Calls SDF access package.<br>
 </td>
-      <td valign="middle">I don't know what this means, nor what the parameters represent.<br>
+      <td valign="middle">SDF stands for Simulation Data File.&nbsp; The
+ "SDF access package" (SDFPKG) was a separate program, similar to the 
+submonitor itself, with which the XPL/I program could communicate via <font color="#663300"><code>MONITOR(22)</code></font>.&nbsp; And like the submonitor, in the <b>XCOM-I</b>
+ framework, SDFPKG equivalents are built into the runtime library rather
+ than being provided by a separate SDFPKG program.&nbsp; <br>
+<br>
+Documentation can be found in TBD.&nbsp; There is not space for a full 
+description here, so I'm only giving a brief summary; the documentation 
+should be consulted for more details.<br>
+<br>
+The first form, <code><font color="#663300"><code><font color="#663300"><code><font color="#663300"><code><font color="#663300"><i><code><font color="#663300"><code><font color="#663300"><i>F</i></font></code></font></code></i><code><font color="#663300"><code><font color="#663300">=</font></code></font></code></font></code>MONITOR(22,0,<i>n</i><i><sub>2</sub></i>)</font></code></font></code></font></code>, initializes the SDFPKG functionality.&nbsp; The <code><font color="#663300"><code><font color="#663300"><code><font color="#663300"><i>n</i><i><sub>2</sub></i></font></code></font></code></font></code> parameter points to an array of 30 <font color="#663300"><code>FIXED</code></font> values which serves as a "communications area" holding data for subsequent calls. <br>
+<br>
+For calls of the second form, <code><font color="#663300"><i>F</i>=MONITOR(22,<i>n<sub>1</sub></i>)</font></code>, the <code><font color="#663300"><i>n<sub>1</sub></i></font></code> parameter specifies a function number ("mode"):<br>
+<ol>
+  <li>Terminate SDFPKG.</li>
+  <li>Augment paging area.</li>
+  <li>Rescind paging area augments.</li>
+  <li>Select an SDF.</li>
+  <li>Locate pointer.</li>
+  <li>Set disposition parameters.</li>
+  <li>Locate directory root cell.</li>
+  <li>Locate block data cell given block number.</li>
+  <li>Locate symbol data cell given symbol number.</li>
+  <li>Locate statement data cell given statement number.</li>
+  <li>Locate block data cell given block name.</li>
+  <li>Locate symbol data cell given block name and symbol name.</li>
+  <li>Locate symbol data cell given only symbol name.</li>
+  <li>Locate statement data cell given SRN.</li>
+  <li>Locate block node given block number.</li>
+  <li>Locate symbol node given symbol number.</li>
+  <li>Locate statement node given statement number.</li>
+  <li>Locate initialization data given symbol number. <br>
+  </li>
+  <li>Deselect an SDF.<br>
+  </li>
+</ol>
+There's some confusion in the available software/documentation, in that 
+sometimes function #19 is missing; and when #19 is missing, #18 may 
+either be as shown or else may be deselection of the SDF.&nbsp; I have 
+no explanation for that discrepancy.&nbsp; However, the functional 
+lineup listed above is consistent with the version of HAL/S-FC source 
+code we have.<br>
+<br>
+Additionally, the function number <code><font color="#663300"><i>n<sub>1</sub></i></font></code> may have high-order bits set, such as 0x10000006 or 0x80000007.&nbsp; The significance of that is TBD.<br>
+<br>
+The return code, <code><font color="#663300"><i><code><font color="#663300"><code><font color="#663300"><i>F</i></font></code></font></code></i></font></code>, for all calls is 0 upon success, or non-zero for various failures.&nbsp; See section 11 of the documentation.<br>
+
 </td>
     </tr>
     <tr>
@@ -5229,36 +5606,53 @@ Thus while we have lots of global and local variables and function parameters na
 <h1>
 
 
-  <a name="hooks"></a>Patches for Basic Assembly Language Code<br>
-</h1>A serious difficulty in working with XPL or XPL/I code is that they are often not 
-written entirely in XPL/I, but also have insertions of inline IBM System/360 basic
- assembly-language (BAL) code at various junctures.&nbsp; For example, <b>XCOM45</b> and <b>HAL/S-FC</b> source code both have such inlined code.&nbsp; However good 
-<b>XCOM-I</b> may (or may not) be at translating XPL or XPL/I to C, it is <i>not</i> capable of inferring the intent of arbitrary BAL code, nor of translating such code into C.<br>
+  <a name="hooks"></a>Patches for Insertion of Arbitrary Inline Code</h1>A serious difficulty in working with XPL or XPL/I code is that they are often not 
+written entirely in XPL/I, but also have insertions of inline machine code at various junctures.&nbsp; <br>
+<br>
+For example, <b>XCOM45</b> and <b>HAL/S-FC</b> source code both have such inlined code.&nbsp; However good 
+<b>XCOM-I</b> may (or may not) be at translating XPL or XPL/I to C, it 
+is not capable of inferring the intent of arbitrary assembly language, 
+nor of translating such code into C with the level of reliability 
+required for automating it.&nbsp;&nbsp; While it can <i>help</i> with such translation (as described in the <a moz-do-not-send="true" href="#inlines">next section</a>),
+ some amount of manual intervention is still required on the part of the
+ coder.&nbsp; The basic principles underlying the framework provided for
+ that are discussed in this section.<br>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; In reality, such inlined code is numerical in nature, and consists of IBM 360 <i>machine code</i>
  ... whereas the term "assembly language" implies that the insertions 
 are symbolic in nature rather than just numbers.&nbsp; I'll continue to 
 call the insertions BAL, because they undoubtedly began as BAL before 
 somebody assembled them to determine which numerical values to 
-use.&nbsp; But it is certainly technically incorrect to do so.</font><br>
+use.&nbsp; But it is certainly technically incorrect to do so.<br>
+</font>
+</blockquote>Of course, one possible approach would be to replace 
+offending inline code directly by C code in the XPL source-code files of
+ the program being compiled, using the property of the <b>XCOM-I</b> built-in <font color="#663300"><code>INLINE</code></font> function,<br>
+<blockquote>
+  <pre>CALL INLINE('<i>...arbitrary C code of no more than 256 characters...</i>');<br></pre>
 </blockquote>
-
-Moreover, there is a second problem associated with BAL code that has 
-been inlined into XPL/I code, which is that while I can imagine 
-replacing such BAL code by C-language code that provides the same 
-functionality, I do <i>not</i> want to do it in a way that necessitates 
-altering the original XPL/I source code!&nbsp; Why is that?&nbsp; The simplest answer to that is that the Virtual AGC Project's <i>raison d'être</i>
- is to present the demonstrably authentic contemporary software for 
-now-classic space missions such those of Apollo and the Space 
-Shuttle.&nbsp; And <i>the less you change the source code</i>, the 
-easier it is to be demonstrably authentic.&nbsp; In fact, there's hardly
- any leeway to change the source code at all, from that perspective. 
-Guaranteed authenticity may not be something you care about personally, 
-but then on the other hand, <i>you're</i> free to make whatever changes 
-you like to XPL source code you have on hand, as long as you don't 
-insist that I follow your lead.<br>
-<br>
+In your use case, whatever that may be, perhaps that's adequate.&nbsp; 
+However, the Virtual AGC Project aims to provide a way to work with 
+legacy code — i.e., code from the past, rather than newly-written code 
+—, and that implies being able to compile such source code as-is, 
+without syntactical or functional modification to source code.&nbsp; 
+Which means that from our point of view, irreversible modification of 
+legacy source code is unacceptable.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; It is, of course, 
+arguable the extent to which modifications are acceptable.&nbsp; The 
+Virtual AGC Project allows insertion of modern comments, as long as 
+modern comments are clearly distinguishable from original program 
+comments.&nbsp; It has occasionally allowed clearly-commented simple 
+changes of a line or two of code, when it was thought impossible for 
+modern compilers to duplicate some undocumented behavior of the original
+ compilers ... although improvements to the modern compilers almost 
+always eventually allowed reversal of such modifications.&nbsp; My 
+personal judgment is that replacement of dozens or hundreds of lines of 
+code by code that's not obviously functionally identical, written in 
+another language, is taking it farther than I'd like.&nbsp; Better to 
+leave the source code the same, so that it's verifiable by the user.</font><br>
+</blockquote>
 Don't worry!&nbsp; <b>XCOM-I</b> lets us satisfy these criteria.&nbsp; But to understand <i>how</i>, you need to know a 
-little more about this BAL code that's causing the problem.<br>
+little more about this IBM Basic Assembly Language (BAL) code that's causing the problem.<br>
 <br>
 Let's let a real-life example guide the discussion.&nbsp; The XPL source-code for SUNY's <b>XCOM45</b>
  program — which as you'll recall is an XPL compiler from the State 
@@ -5283,7 +5677,14 @@ Basically, <b>XCOM-I</b> has simply commented out each <font color="#663300"><co
  we bother compiling it at all?&nbsp; The answer is that we want the 
 parenthesized numbers that have been added to the comments!&nbsp; The 
 parenthesized numbers will be the same every time we compile <b>XCOM45</b>, unless you take it upon yourself to mess us up by removing some of the <font color="#663300"><code>CALL INLINE</code></font> statements or adding new ones in the meantime.&nbsp; <b>Pro tip:</b>&nbsp; Don't do that!<br>
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; There is even one (!) instance in <b>HAL/S-FC</b> in which there is a <font color="#663300"><code>RETURN INLINE</code></font> statement as well, and it is treated by <b>XCOM-I</b> the same way as <font color="#663300"><code>CALL INLINE</code></font>s
+ are treated:&nbsp; namely, it is numbered and commented out.&nbsp; As 
+it happens, McKeeman does not give even the slightest hint that <font color="#663300"><code>INLINE</code></font> can return a value.&nbsp; In point of fact, I don't think the value returned by the </font><font size="-1"><font color="#663300"><code>RETURN INLINE</code></font> statement in the case I mention even comes from the </font><font size="-1"><font size="-1"><font color="#663300"><code>INLINE</code></font></font> at all, but is instead generated by other means.&nbsp; Technically, I think that if you have a block of <font color="#663300"><code>CALL INLINE</code></font>s terminated by a <font color="#663300"><code>RETURN INLINE</code></font>, then whatever value happens to remain in the CPU's R0 register will be returned, regardless of where in the block of </font><font size="-1"><font size="-1"><font color="#663300"><code>INLINE</code></font>s</font> R0 was set up.&nbsp; But regardless of the underlying details, it demonstrates that <i>syntactically</i>, both <font color="#663300"><code>CALL INLINE</code></font> and <font color="#663300"><code>RETURN INLINE</code></font> are possible in XPL/I source code.<br>
 <br>
+<b>Important note:</b>&nbsp; If you must write a C-language patch-file for a block of <font color="#663300"><code>INLINE</code></font>s that include an </font><font size="-1"><font size="-1">XPL </font><font size="-1"><font size="-1"><font color="#663300"><code>RETURN INLINE(...)</code></font></font></font>, you should use the C macro <font color="#663300"><code>RETURN()</code></font> rather than simply <font color="#663300"><code>return</code></font>, or </font><font size="-1"><font size="-1"><font color="#663300"><code>RETURN(<i>something</i>)</code></font></font> rather than <font color="#663300"><code>return <i>something</i></code></font>.&nbsp; That's because the </font><font size="-1"><font size="-1"><font color="#663300"><code>RETURN(...)</code></font></font> macro takes into account extra code which <b>XCOM-I</b> may need to insert in conjunction with XPL </font><font size="-1"><font size="-1"><font color="#663300"><code>RETURN</code></font></font> statements.&nbsp; For example, if <b>XCOM-I</b> is run with its <font color="#663300"><code>--reentry-guard</code></font> switch, then <b>XCOM-I</b> inserts code at the entry point and exit points of each XPL <font color="#663300"><code>PROCEDURE</code></font> that allows the runtime library to detect illegal reentries.&nbsp; (Recall that recursion is illegal in XPL.)&nbsp; The </font><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>RETURN(...)</code></font></font></font> macro handles this for you transparently, and if a simple </font><font size="-1"><font size="-1"><font color="#663300"><code>return</code></font></font> is used instead, then the runtime library will falsely detect recursion the second time any individual </font><font size="-1"><font size="-1"><font color="#663300"><code>PROCEDURE</code></font></font> is executed.<br>
+  </font></blockquote>
+
+
 In this particular example, since <b>XCOM45</b> has a single block of <font color="#663300"><code>CALL INLINE</code></font> statements, we were guaranteed in advance that the block would start with number 0.&nbsp; In a more-complex example like <b>HAL/S-FC</b>, there would be a number of blocks of inlines, strewn throughout the source code, and lieu of <b>XCOM-I</b>
  printing them all out for us the numbering would be 
 unpredictable.&nbsp; But because the numbers never change, we can use 
@@ -5298,34 +5699,336 @@ option (<font color="#663300"><code>--patch=<i>PATHNAME</i></code></font>)
  that allows a different folder to be specified.&nbsp; When <b>XCOM-I</b> encounters a <font color="#663300"><code>CALL INLINE</code></font> statement, it looks for a patch file with the same number, and <i>if</i>
  it finds one, it directly inserts the contents of the patch file into 
 the object code. &nbsp; If there's no matching patch file, then the <font color="#663300"><code>CALL INLINE</code></font> simply remains a comment.&nbsp; In principle, you could have a different patch file for each <font color="#663300"><code>CALL INLINE</code></font>, but it's usually more practical and more aesthetically pleasing to have a single patch file for each contiguous block of <font color="#663300"><code>CALL INLINE</code></font> statements.&nbsp; <br>
-<br>
-In this real-life example, since there's a single block of <font color="#663300"><code>CALL INLINE</code></font> statements, we need a single patch file, patch0.c:<br>
+<blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; In working with the source code for <b>HAL/S-FC</b>
+ specifically, it's a little more complex than what I just 
+indicated.&nbsp; As I've mentioned previously, there are two different 
+methods of compiling <b>HAL/S-FC</b> source code:&nbsp; One to create a compiler intended to compile Primary Flight Software (PFS) via <b>XCOM-I</b>'s <font color="#663300"><code>--cond=P</code></font> command-line switch, and one to create a compiler intended to compile Backup Flight Software (BFS) via <b>XCOM-I</b>'s <font color="#663300"><code>--cond=B</code></font> command-line switch.&nbsp; Unfortunately, the numbering of the <font color="#663300"><code>CALL INLINE</code></font> statements is a bit different in these two cases, which makes it unwieldy to rely on the generic naming patch<i>N</i>.c for the patch files.&nbsp; My description above is what happens when neither </font><font size="-1"><font size="-1"><font color="#663300"><code>--cond=P</code></font></font> nor </font><font size="-1"><font size="-1"><font color="#663300"><code>--cond=B</code></font></font> is used.&nbsp; But if </font><font size="-1"><font size="-1"><font color="#663300"><code>--cond=P</code></font></font> is used, then <b>XCOM-I</b> actually looks for patch files with names like patch<i>N</i>p.c first, falling back to patch<i>N</i>.c if patch<i>N</i>p.c isn't found.&nbsp; And similarly, if </font><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>--cond=B</code></font></font></font> is used, it prefers patch files named patch<i>N</i>b.c, falling back to patch<i>N</i>.c.&nbsp; This method allows the generic names patch<i>N</i>.c to be used up the point at which the numbering of the </font><font size="-1"><font color="#663300"><code>INLINE</code></font>s begins to differ, switching to the patch<i>N</i>p.c/patch<i>N</i>b.c naming thereafter, without any ambiguity or conflicts between the two.</font><br>
+</blockquote>
+
+
+In this real-life example, since there's a single block of <font color="#663300"><code>CALL INLINE</code></font> statements, we need a single patch file, patch0.c.<br>
+
 <blockquote>
   <pre><font color="#663300">/*<br> * This is a C-language "patch" for CALL INLINE #0 in xcom4.xpl, as compiled<br> * by XCOM-I.py.<br> *<br> * The patch spans the entirety of the `SCAN_FINDS` procedure embedded in<br> * the `SCAN` procedure.  This comprises every `CALL INLINE` statement in<br> * the entire xcom4 program.<br> *<br> * What the procedure does is this:  It's given the address of a "translation<br> * table" of one of the following types:<br> *      `BLANKTABLE`  (Blanks)<br> *      `ALPHATABLE`  (Identifier)<br> *      `STRINGTABLE` (Quoted string)<br> *      `COMMENTABLE` (Comment)<br> * Starting at position `CP=0` (already set up upon entry so that we know the<br> * first character is of the asked-for type) in the string `TEXT`, searches<br> * for the end of the pattern of the selected type, and updates `CP` to the<br> * length of the found string.  It returns 0 on failure and 1 on success.  An<br> * empty string counts as a failure.<br> *<br> * This was apparently coded in BAL because the IBM 360 has a translation-table<br> * instruction, TRT, that does this efficiently.  But from my perspective,<br> * considering that there's no other embedded BAL code in the entire program,<br> * it seems as though it's a big price to pay, maintenance-wise and<br> * portability-wise, for a pretty small gain in efficiency.  Yes, you can<br> * always make assembly-language go faster than a high-level language; this is<br> * news?<br> */<br><br>static memoryMapEntry_t *mapCP = NULL, *mapTEXT = NULL, *mapTABLE,<br>      *mapBLANKTABLE, *mapALPHATABLE, *mapSTRINGTABLE, *mapCOMMENTABLE;<br>char *s, *TEXT;<br>uint32_t TABLE;<br><br>if (mapCP == NULL)<br>  {<br>    mapCP = lookupVariable("CP");<br>    mapTEXT = lookupVariable("TEXT");<br>    mapTABLE = lookupVariable("SCANxSCAN_FINDS_END_OFxTABLE");<br>    mapBLANKTABLE = lookupVariable("BLANKTABLE");<br>    mapALPHATABLE = lookupVariable("ALPHATABLE");<br>    mapSTRINGTABLE = lookupVariable("STRINGTABLE");<br>    mapCOMMENTABLE = lookupVariable("COMMENTABLE");<br>  }<br><br>TABLE = getFIXED(mapTABLE-&gt;address);<br>TEXT = descriptorToAscii(getCHARACTER(mapTEXT-&gt;address));<br><br>if (*TEXT == 0)<br>  return fixedToBit(1, 0);<br>if (TABLE == mapBLANKTABLE-&gt;address)<br>  {<br>    for (s = TEXT; *s == ' ' || *s == '\t'; s++);<br>  }<br>else if (TABLE == mapALPHATABLE-&gt;address)<br>  {<br>    for (s = TEXT;<br>         isalnum(*s) || *s == '_' || *s == '@' || *s == '#' || *s == '$';<br>         s++);<br>  }<br>else if (TABLE == mapSTRINGTABLE-&gt;address)<br>  {<br>    for (s = TEXT; *s &amp;&amp; *s != '\''; s++);<br><br>  }<br>else if (TABLE == mapCOMMENTABLE-&gt;address)<br>  {<br>    for (s = TEXT; *s &amp;&amp; *s != '*' &amp;&amp; *s != '$'; s++);<br>  }<br>else<br>  abend("Requested translation table for SCAN_FINDS_END_OF not found");<br>if (*s == 0)<br>  {<br>    putFIXED(mapCP-&gt;address, s + 1 - TEXT);<br>    return fixedToBit(1, 0);<br>  }<br>putFIXED(mapCP-&gt;address, s - TEXT);<br>return fixedToBit(1, 1);<br></font><br></pre>
 </blockquote>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; I'm not here to claim 
-that it's easy to come up with C replacement code like this for IBM 
-Basic Assembly Language inlined code, nor even that it's necessarily 
-obvious that C code like this actually is a suitable replacement.&nbsp; 
-At least it wasn't easy for me.&nbsp; But then, I don't understand IBM 
-360 assembly language.&nbsp; Anybody who does understand it is going to 
-find this process much easier.&nbsp; But regardless, the ease (or not) 
-of developing the patch isn't at issue in this discussion.&nbsp; What's 
-at issue is how to deliver that patch code to <b>XCOM-I</b> for incorporation into the XPL program being compiled.</font><br>
-</blockquote>
+
 Now that we actually have a patch file, when <b>XCOM-I</b> again compiles <b>XCOM45</b>, the <font color="#663300"><code>SCAN_FINDS_END_OF</code></font> procedure is now translated to the following C code:<br>
 <blockquote>
   <pre><font color="#663300">/*<br>  File SCANxSCAN_FINDS_END_OF.c generated by XCOM-I, 2024-05-25 14:05:21.<br>*/<br><br>#include "runtimeC.h"<br><br>descriptor_t *<br>SCANxSCAN_FINDS_END_OF(void)<br>{<br><br>  { // (0) CALL INLINE ( 88, 3, 0,TEXT);<br>    /*<br>     * This is a C-language "patch" for CALL INLINE #0 in xcom4.xpl, as compiled<br>     * by XCOM-I.py.<br>     *<br>     * The patch spans the entirety of the `SCAN_FINDS` procedure embedded in<br>     * the `SCAN` procedure.  This comprises every `CALL INLINE` statement in<br>     * the entire xcom4 program.<br>     *<br>     * What the procedure does is this:  It's given the address of a "translation<br>     * table" of one of the following types:<br>     *      `BLANKTABLE`  (Blanks)<br>     *      `ALPHATABLE`  (Identifier)<br>     *      `STRINGTABLE` (Quoted string)<br>     *      `COMMENTABLE` (Comment)<br>     * Starting at position `CP=0` (already set up upon entry so that we know the<br>     * first character is of the asked-for type) in the string `TEXT`, searches<br>     * for the end of the pattern of the selected type, and updates `CP` to the<br>     * length of the found string.  It returns 0 on failure and 1 on success.  An<br>     * empty string counts as a failure.<br>     *<br>     * This was apparently coded in BAL because the IBM 360 has a translation-table<br>     * instruction, TRT, that does this efficiently.  But from my perspective,<br>     * considering that there's no other embedded BAL code in the entire program,<br>     * it seems as though it's a big price to pay, maintenance-wise and<br>     * portability-wise, for a pretty small gain in efficiency.  Yes, you can<br>     * always make assembly-language go faster than a high-level language; this is<br>     * news?<br>     */<br>    <br>    static memoryMapEntry_t *mapCP = NULL, *mapTEXT = NULL, *mapTABLE,<br>          *mapBLANKTABLE, *mapALPHATABLE, *mapSTRINGTABLE, *mapCOMMENTABLE;<br>    char *s, *TEXT;<br>    uint32_t TABLE;<br>    <br>    if (mapCP == NULL)<br>      {<br>        mapCP = lookupVariable("CP");<br>        mapTEXT = lookupVariable("TEXT");<br>        mapTABLE = lookupVariable("SCANxSCAN_FINDS_END_OFxTABLE");<br>        mapBLANKTABLE = lookupVariable("BLANKTABLE");<br>        mapALPHATABLE = lookupVariable("ALPHATABLE");<br>        mapSTRINGTABLE = lookupVariable("STRINGTABLE");<br>        mapCOMMENTABLE = lookupVariable("COMMENTABLE");<br>      }<br>    <br>    TABLE = getFIXED(mapTABLE-&gt;address);<br>    TEXT = descriptorToAscii(getCHARACTER(mapTEXT-&gt;address));<br>    <br>    if (*TEXT == 0)<br>      return fixedToBit(1, 0);<br>    if (TABLE == mapBLANKTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s == ' ' || *s == '\t'; s++);<br>      }<br>    else if (TABLE == mapALPHATABLE-&gt;address)<br>      {<br>        for (s = TEXT;<br>             isalnum(*s) || *s == '_' || *s == '@' || *s == '#' || *s == '$';<br>             s++);<br>      }<br>    else if (TABLE == mapSTRINGTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s &amp;&amp; *s != '\''; s++);<br>    <br>      }<br>    else if (TABLE == mapCOMMENTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s &amp;&amp; *s != '*' &amp;&amp; *s != '$'; s++);<br>      }<br>    else<br>      abend("Requested translation table for SCAN_FINDS_END_OF not found");<br>    if (*s == 0)<br>      {<br>        putFIXED(mapCP-&gt;address, s + 1 - TEXT);<br>        return fixedToBit(1, 0);<br>      }<br>    putFIXED(mapCP-&gt;address, s - TEXT);<br>    return fixedToBit(1, 1);<br>  }<br>  ; // (1) CALL INLINE ( 27, 2, 2);<br>  ; // (2) CALL INLINE ( 25, 3, 2);<br>  ; // (3) CALL INLINE ( 7, 8, 12);<br>  ; // (4) CALL INLINE ( 141, 2, 0,0,8);<br>  ; // (5) CALL INLINE ( 136, 3, 0,0,8);<br>  ; // (6) CALL INLINE ( 88, 1, 0,TABLE);<br>  ; // (7) CALL INLINE ( 65, 12, 0,TRT);<br>  ; // (8) CALL INLINE ( 68, 2, 0,12,0);<br>  ; // (9) CALL INLINE ( 5, 12, 0);<br>  ; // (10) CALL INLINE ( 71, 7, 0,12,18);<br>  ; // (11) CALL INLINE ( 24, 1, 2);<br>  ; // (12) CALL INLINE ( 65, 0, 0,0,1);<br>  ; // (13) CALL INLINE ( 26, 1, 0);<br>  ; // (14) CALL INLINE ( 27, 3, 3);<br>  ; // (15) CALL INLINE ( 71, 15, 0,12,24);<br>  ; // (16) CALL INLINE ( 27, 1, 3);<br>  ; // (17) CALL INLINE ( 65, 3, 0,0,1);<br>  ; // (18) CALL INLINE ( 80, 1, 0,CP);<br>  return 0;<br>}<br></font><br></pre>
 </blockquote>
-Notice that the patch is automatically placed within a C <font color="#663300"><code>{...}</code></font> block, which is important if the <font color="#663333"><code>CALL INLINE(...)</code></font> happens to have been preceded by something like <code><font color="#663300">IF ... THEN</font></code> or <font color="#663300"><code>ELSE</code></font>. <br>
-<br>Finally in <b>XCOM-I</b>, if <font color="#663333"><code>CALL INLINE(...) </code></font>is
- used with a <i>single</i> parameter that's a string, then no patch file is 
-sought.&nbsp; Rather, <b>XCOM-I</b> treats that single string parameter as a 
-line of C code, and inserts the line directly into the output C 
-code.&nbsp; Thus if you were willing to modify the original XPL source 
-code rather than leaving it unchanged and using the patch-file 
-technique, you might be able to do so just by altering the parameters of
- the <font color="#663333"><code>CALL INLINE(...) </code></font>statements to contain C source code rather than BAL source code.<br>
+Notice that the patch is <i>automatically</i> placed within a C <font color="#663300"><code>{...}</code></font> block, which is important if the <font color="#663333"><code>CALL INLINE(...)</code></font> happens to have been preceded by something like <code><font color="#663300">IF ... THEN</font></code> or <font color="#663300"><code>ELSE</code></font>. <br>
+<h1><a name="inlines"></a>IBM 360 Inline Code<br>
+</h1>
+<p>Let's start with the executive summary: <br>
+</p>
+<p>In this section, we revisit the problem of inline machine code discussed in <a moz-do-not-send="true" href="#hooks">the preceding section</a>, describing a tool that may be of assistance in writing patch files for IBM 360 inline code.&nbsp; In brief, if you run <b>XCOM-I</b> with the command-line switch <font color="#663300"><code>--guess=-1</code></font>,&nbsp; it will create a set of files (guess*.c) that are <b>XCOM-I</b>'s best guess of what the patch-files (patch*.c) should be like.&nbsp; (You can also use <font color="#663300"><code>--guess=<i>N</i><i><sub>1</sub></i>,<i>N</i><sub><i>2</i></sub>,<i>N<sub>3</sub></i>,...</code></font> to generate just the files for specific patch numbers, whereas -1 generates <i>every</i>
+ patch.)&nbsp; You can then manually tweak these "guessed" files with 
+(hopefully!) much-reduced effort to get patch-files you're satisfied 
+with.&nbsp; There are three ways in which this guessing facility is 
+known to fail,&nbsp; and thus to require manual fixes:<br>
+</p>
+<ol>
+  <li>Only the IBM 360 instructions I've actually encountered in legacy XPL programs (specifically, <b>XCOM3</b>, <b>XCOM4</b>, and <b>HAL/S-FC</b>) are supported.&nbsp; At this writing, that's about ~10% of the full IBM 360 instruction set.</li>
+  <li>Self-modifying code, or pseudo-self-modifying code due to the use of the IBM 360 instruction EX, will not work properly.&nbsp;
+ Translations of the EX instruction are specifically detected and marked
+ with a comment of "***FIXME***".&nbsp; In my experience, most manual 
+tweaks are related to these EX instructions, and specifically to the use
+ of EX to execute modified MVC instructions; this is covered in more 
+detail later.<br>
+  </li>
+  <li>Code which accesses or modifies CPU registers associated with subroutine linkage requires attention, because XCOM-I does <i>not</i>
+ set up these registers upon entry to a procedure, nor does it use the 
+contents of these registers upon exit from a procedure.&nbsp; Or more 
+succinctly, C translations of XPL procedures do not follow IBM 360 
+calling conventions.&nbsp; This is rare problem in my experience.<br>
+  </li>
+</ol>
+<p>That's the summary, which may be everything you actually need to know.&nbsp; Here's the longer explanation.<br>
+</p>
+Having now gone through the process of manually writing many patch files
+ for IBM 360 inline code, I've come to realize that I had overestimated 
+the difficulty of translating that inline code to C code.&nbsp; With 
+experience, I've now observed that:
+<ul>
+  <li>The number of different IBM 360 instructions used in these is very
+ limited, with just a handful of mostly-simple instructions making up 
+the bulk of them.</li>
+  <li>All those instructions do is to read and write to memory and to a 
+subset of the CPU's general registers, floating-point registers, and 
+condition-code register.<br>
+  </li>
+  <li>And, of those particular CPU registers inlined in legacy XPL or XPL/I code, you can <i>mostly</i> assume that there are no side effects associated with doing so.</li>
+</ul>
+As part of a systematic framework for exploiting this, the <b>XCOM-I</b> the runtime library defines the IBM 360 CPU registers as the following global variables:
+<blockquote>
+  <pre><font color="#663300">int32_t GR[16]; // CPU general-purpose registers.<br>double FR[16];  // CPU floating-point registers.<br></font><font color="#663300">uint8_t CC; // CPU condition code register. Only the least two bits are significant.</font><br></pre>
+</blockquote>
+<blockquote>
+  <p><font size="-1"><b>Aside:</b> If unlike me you're actually familiar
+ with IBM 360 programming, I'm sure you'll call the CPU's 
+general-purpose registers R0, R1, R2, and so on.&nbsp; IBM documentation
+ calls them that.&nbsp; It also calls the floating-point registers, which are completely separate and independent of the general-purpose registers,
+ by those very same names:&nbsp; R0, R1, R2, ....&nbsp; Perhaps it's 
+just me, but I found that confusing.&nbsp; And because I was so stupid 
+as to be confused by this <i>apparently</i> obvious and trivial point, 
+it has cost me considerable amount of time.&nbsp; Consequently, I now 
+make a point of calling the general-purpose registers GR<i>n</i> and the floating-point registers FR<i>n</i>.&nbsp;
+ Yes, it's a departure from tradition.&nbsp; No, in this particular case
+ I don't care that I've departed from tradition.&nbsp; A foolish 
+consistency is the hobgoblin of little minds.</font><br>
+  </p>
+</blockquote>
+<p>Meanwhile, memory can always be accessed and/or converted from IBM 360 formats to native C formats, also via <b>XCOM-I</b> runtime-library features:<br>
+</p>
+<ul>
+  <li><font color="#663300"><code>uint8_t memory[0x1000000]</code></font> — for reading and writing 8-bit bytes from/to memory.</li>
+  <li><font color="#663300"><code>int32_t COREWORD(uint32_t <i>address</i>)</code></font> and <font color="#663300"><code>void COREWORD2(uint32_t <i>address</i>, int32_t <i>value</i>)</code></font> <font color="#663300"><code></code></font> — for reading and writing 32-bit words from/to memory, respectively.</li>
+  <li><font color="#663300"><code>int16_t COREHALFWORD(uint32_t <i>address</i>)</code></font> and <font color="#663300"><code>void COREHALFWORD2(uint32_t <i>address</i>, int16_t <i>value</i>)</code></font> <font color="#663300"><code></code></font> — for reading and writing 16-bit half-words from/to memory, respectively.</li>
+  <li><font color="#663300"><code>double fromFloatIBM(uint32_t <i>msw</i>, uint32_t <i>lsw</i>)</code></font> and <font color="#663300"><code>void toFloatIBM(uint32_t *<i>msw</i>, uint32_t *<i>lsw</i>, double <i>value</i>)</code></font> <font color="#663300"><code></code></font> — for converting pairs of 32-bit words to/from C double-precision floats, respectively.</li>
+  <li><font color="#663300"><code>void setCC(void)</code></font> and <font color="#663300"><code>void setCCd(void)</code></font> <font color="#663300"><code></code></font> — for adjusting the condition-code register after integer operations or floating-point operations, respectively.<br>
+  </li>
+</ul>
+<p>Additional globals are provided by the runtime library for holding commonly-needed temporary results:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">int32_t address360A, address360B, dsw360, lsw360;<br>int64_t scratch;   // Results of integer operations; input to setCC (see above).<br>double scratchd;   // Results of floating-point operations; input to setCCd (see above).<br>int64_t dummy360;  // Use for anything you like.<br>double dummy360d; </font><font color="#663300"><font color="#663300"> // Use for anything you like.</font>
+double epsilon360; // A small number, used for tolerance in some floating-point comparisons.<br></font></pre>
+</blockquote>
+For floating-point operations, native C formats and arithmetical 
+operators are used.&nbsp; Conversion from/to IBM hexadecimal format 
+occurs only when floating-point values are read from the memory array or
+ written into the memory array.&nbsp; This is why the CPU's 
+floating-point registers are modeled as the C <font color="#663300"><code>double</code></font> type.&nbsp; The alternative would have been to model them as pairs of <font color="#663300"><code>uint32_t</code></font>
+ values, and to provide C functions that directly implemented exact IBM 
+360 arithmetic (like addition, subtraction, and so on) directly upon 
+such pairs.&nbsp; I admit that wisdom of my decision is arguable, but 
+have no present plans to change the implementation.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Actually, there is one 
+case in which this decision causes problems, and that involves the IBM 
+360 instructions which perform "unnormalized" floating-point 
+arithmetic.&nbsp; Recall that floating-point numbers have two parts, the
+ <i>exponent</i> and the <i>significand</i>.&nbsp; For example, in 3.14156×<sup><super>10</super></sup>,
+ the exponent is 10 and the significand is 3.14156. &nbsp; Almost all 
+floating-point arithmetic on the IBM 360 is in "normalized" form, which 
+means that the exponent and significant are adjusted so as to produce 
+the maximum precision (number of bits) in the significand, given the 
+number of bytes of storage allocated for the number in memory and the 
+nature of the format used for storage.&nbsp; Thus in principle, 3.14156×<sup><super>10</super></sup> is more precise than 0.03142×<sup><super>12</super></sup>, and is less precise than 314.15654×<sup><super>8</super></sup>.&nbsp;
+ In the case of IBM hexadecimal floating-point, the exponent field is 7 
+bits wide and represents a power of 64 (rather than 10), and is offset 
+by 64.&nbsp; I.e., if the exponent is (say) E, then the powers 
+represented are 64<sup>-64</sup> through 64<sup>+63</sup>.&nbsp; The 
+significand, meanwhile, is 56 bits wide and always positive, since 
+there's a separate sign bit&nbsp; So in principle, an IBM hexadecimal 
+double-precision floating-point number could represent exact positive or
+ negative 56-bit integers.&nbsp; That'll be important in a minute.<br>
+    <br>
+Supplementing the instructions for normalized arithmetic, the IBM 360 includes instructions for both <i>unnormalized</i>
+ addition and subtraction as well, which means they perform the 
+indicated operations, but the results are taken as-is, without any 
+normalization.&nbsp; Whereas the choice to use C <font color="#663300"><code>double</code></font> for all arithmetic in the <b>XCOM-I</b> framework means that all arithmetical results have maximum precision all the time.<br>
+    <br>
+Doesn't sound like a problem to you?&nbsp; Well, in practice <font color="#663300"><code>CALL INLINE</code></font>
+ code uses a single unnormalized instruction, namely AW, which adds two 
+floating-point numbers (normalized or unnormalized), producing an 
+unnormalized result.&nbsp; It always does so in precisely the same 
+manner, in order to perform the trick of converting a positive 
+floating-point number (in IBM hexadeximal format) to a binary 
+integer.&nbsp; In assembly language, that trick works as follows:<br>
+  </font>
+  <ul>
+    <li><font size="-1">Somewhere — in <b>HAL/S-FC</b>, it's in the floating-point working area <font color="#663300"><code>DW(6)</code></font> and <font color="#663300"><code>DW(7)</code></font>, pointed to by the variable <font color="#663300"><code>ADDR_FIXER</code></font>
+  — a representation of the number 0.0 is stored as the pair of words 
+0x4E000000,0x00000000.&nbsp; (Note that there's no unique representation
+ of 0.0 in IBM hexadecimal floating point, because the exponent is 
+indeterminate when the signifcand is 0, but this particular choice of 
+exponent is important.)</font></li>
+    <li><font size="-1">AW is used to perform an unnormalized addition of the </font><font size="-1"><font size="-1"><font color="#663300"><code>ADDR_FIXER</code></font></font> representation 0.0 with a non-negative floating-point number that represents an integer.</font></li>
+    <li><font size="-1">The unnormalized result of the addition has an 
+exponent field that's 0x4E and a significand that's a non-negative 
+56-bit binary integer.&nbsp; Specifically, the least-significant word is
+ the least-significant 32 bits of the integer.<br>
+      </font></li>
+    <li><font size="-1">The least-significant word, being the desired <font color="#663300"><code>FIXED</code></font>
+ data, is immediately stored someplace via the IBM 360 instruction STD 
+for whatever further use the program has for that integer.<br>
+      </font></li>
+  </ul>
+  <p><font size="-1">You probably don't care, but the reason this trick 
+works is that IBM floating-point addition functions by unnormalizing the
+ operand with the smaller exponent to match the exponent of the other 
+operand, and then performing a binary addition of the 
+significands.&nbsp; But no 56-bit integer can have an exponent in IBM 
+hexadecimal format that's larger than 0x4E, so the representation of 0.0
+ to have an exponent of 0x4E guarantees that it's the other operand that
+ becomes unnormalized, and the way in which it's unnormalized is to be 
+shifted rightward by exactly the right number of bits to turn into a 
+binary representation of the integer.<br>
+    </font></p>
+  <p><font size="-1">Regardless of how it works, the reason this causes 
+us a problem is that the native-C arithmetic we perform doesn't track 
+any of this, so the AW is wasted, and <i>doesn't</i> produce an integer usable by the STD instructions that succeed the AW instructions.&nbsp; In other words, after the AW occurs, the <font color="#663300"><code>CALL INLINE</code></font> for the STD instruction that's supposed to store the 2's-complement integer has no 2's-complement integer to store!<br>
+    </font></p>
+  <p><font size="-1">The workaround for this in the <b>XCOM-I</b> 
+runtime library, is that the floating-point registers are supplemented 
+by an additional array that tracks whether the register should be 
+treated as normalized or unnormalized, and then interprets the value 
+stored in that floating-point register accordingly when an STD 
+instruction is performed that stores the value in the register to 
+memory:<br>
+    </font></p>
+  <blockquote>
+    <pre><font size="-1" color="#663300">double FR[16];<br>uint8_t unnormFR[16]; // 0 to treat FRn as normalized, 1 as unnormalized.<br></font></pre>
+  </blockquote>
+  <p><font size="-1">Thus an AW instruction on <font color="#663300"><code>FR[<i>n</i>]</code></font> sets <font color="#663300"><code>unnormFR[<i>n</i>]</code></font>, while an STD instruction storing </font><font size="-1"><font size="-1"><font color="#663300"><code>FR[<i>n</i>]</code></font></font> resets </font><font size="-1"><font size="-1"><font color="#663300"><code>unnormFR[<i>n</i>]</code></font></font>.<br>
+&nbsp;<br>
+Yes, it's a bit of a hack, and if you were writing new <font color="#663300"><code>CALL INLINE</code></font> statements you could easily defeat it, but <i>for right now</i>
+ it seems more economical than reworking the entire floating-point 
+arithemetic system for a handful (less than 10) of uses of AW.&nbsp; My 
+advice to you is this:&nbsp; If you're writing new XPL code, <i>don't</i> try to subvert my hack with perverted usage of the AW instruction in </font><font size="-1"><font size="-1"><font color="#663300"><code>CALL INLINE</code></font></font> statements; AW (and </font><font size="-1"><font size="-1"><font color="#663300"><code>CALL INLINE</code></font></font>, for that matter) is perverted enough already, and doesn't need <i>your</i> help.</font><br>
+  </p>
+</blockquote>
+Let's get the question of IBM 360 
+calling conventions out of the way.&nbsp; The conventional usage of the 
+IBM 360 CPU's 
+general registers in calling subroutines, as I understand it, is 
+summarized in the bullet list below.&nbsp; But I've added a couple of 
+apparently non-traditional extensions or differences (highlighted in <font color="#006600">green</font>) that I've inferred from some of the <font color="#663300"><code>CALL INLINE</code></font> statements I've encountered in the legacy code; take them with a grain of salt!<br>
+<ul>
+  <li>GR0 — Upon exit holds the return value.</li>
+  <li>GR1 — Upon entry, holds the parameter (if there's only one) or else a pointer to a list of parameters.</li>
+  <li><font color="#006600">GR3 — Upon exit holds the return value (<i>rather</i> than GR0).</font></li>
+  <li><font color="#006600">GR12 </font><font color="#006600">— Upon 
+entry holds the address at the end of the procedure's explicit code 
+(prior to whatever linkage executes the actual return).<br>
+    </font></li>
+  <li>GR13 — Upon entry and exit, holds the address of an 18-word save 
+area which holds the state (i.e., the general registers and other 
+information) of the calling code. A procedure doesn't modify the 
+contents of this save area, and must provide a different save area 
+address to any procedures it calls itself<br>
+  </li>
+  <li>GR14 — Upon entry, holds the return address.</li>
+  <li>GR15 — Upon entry, holds the beginning address of the procedure itself.<br>
+  </li>
+</ul>
+
+
+<p>As for how a translation from IBM 360 machine code to C uses the 
+various concepts described above, consider the very common statement <font color="#663300"><code>CALL INLINE("58", <i>n</i>, <i>v</i>)</code></font>, where <i><font color="#663300"><code>n</code></font></i> is a an integer 0-15 and <i><font color="#663300"><code>v</code></font></i>
+ is the name of an XPL variable.&nbsp; This inline has IBM 360 opcode 
+0x58, which has the assembly-language mnemonic L, and means to load 
+register <font color="#663300"><code>GR[<i>n</i>]</code></font> with the contents of variable <i><font color="#663300"><code>v</code></font></i>.&nbsp; Such an inline can be translated into C as:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">GR[<i>n</i>] = COREWORD(ADDR(<i>v</i>));</font><br></pre>
+</blockquote>
+
+Or consider <font color="#663300"><code>CALL INLINE("41", <i>n</i>, <i>v</i>)</code><font color="#000000">, which has the mnemonic LA, to store the address of the variable into the register:</font></font><br>
+<blockquote>
+  <pre><font color="#663300">GR[<i>n</i>] = ADDR(<i>v</i>);</font><br></pre>
+</blockquote>
+
+
+<font color="#663300"><font color="#000000">Or </font></font><font color="#663300"><font color="#000000"><font color="#663300"><code>CALL INLINE("50", <i>n</i>, <i>v</i>)</code><font color="#000000">, mnemonic ST, </font></font>to store the value of a register into a variable:<br>
+  </font></font>
+<blockquote>
+  <pre><font color="#663300">COREWORD2(ADDR(<i>v</i>), GR[<i>n</i>]);</font><br></pre>
+</blockquote>
+In the 19-instruction patch used in the preceding section as an example,
+ 6 of the instructions used are already of one or the other of these 
+three types.&nbsp; Other instructions may have much-more-complex 
+implementations in C than these, of course.<br>
+<br>
+Recognizing that the majority of all <font color="#663300"><code>CALL INLINE</code></font> statements — though unfortunately not <i>all</i> of them — can be handled using these simple maneuvers, <b>XCOM-I</b> has a built-in tool that can create guessed versions of patch-files for you, in which most of the <font color="#663300"><code>INLINE</code></font>s have been translated, but with the ones that were too difficult for <b>XCOM-I</b> to handle left in the draft files for you to manually perfect.<br>
+<br>
+To use this tool, simply run <b>XCOM-I</b> as normal, using either or neither of the <font color="#663300"><code>--cond=P</code></font> or <font color="#663300"><code>--cond=B</code></font> options, <i>plus</i> the <font color="#663300"><code>--guess=...</code></font> switch as I summarized it earlier.&nbsp; When doing so, in addition to the normal compilation outputs, files named guess<i>N</i>.c, guess<i>N</i>p.c, or guess<i>N</i>b.c
+ are output as well.&nbsp; You can then make manual changes to the 
+guess-files and rename them as patch-files when you're satisfied.<br>
+<br>
+Regarding the effectiveness of the procedure, in the combined source code for the XPL programs <b>XCOM3</b>, <b>XCOM45</b>, and <b>HAL/S-FC</b>, there's a total of 81 blocks of <font color="#663300"><code>CALL INLINE</code></font>s, and thus in principle a total of 81 patch files.&nbsp; In generating guess-files for these programs, <b>XCOM-I</b> flags 11 of those guess-files with the comment <font color="#663300"><code>***FIXME***</code></font>, which you can easily search for in order to fix the associated issue.&nbsp; Problems <i>not</i> detectable by <font color="#663300"><code>--guess</code></font>, though rare, unfortunately are neither marked nor easy to find or fix.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Regarding the process of manually fixing up the EX instructions not supported by <b>XCOM-I</b> <font color="#663300"><code>--guess</code></font>, it's actually not that hard once you understand the trick involved.&nbsp; Admittedly, <i>right now</i> it will seem simpler to me than to you, given our relative positions on this particular learning curve.<br>
+    <br>
+An EX instruction is syntactically of the form<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#663300">EX	R1,D2(X2,B2)</font><font size="-1"><br></font></pre>
+  </blockquote>
+  <font size="-1">where R1 is the number of a CPU general register, and 
+D2(X2,B2) points to an IBM 360 machine code instruction.&nbsp; While it 
+looks confusing, it's always easy to figure out which instruction is 
+targeted, because in the XPL source code it will be set off by itself 
+and there will be no way to reach it in C to execute it directly.&nbsp; 
+Sometimes, the XPL source code will contain a binary representation of 
+that target instruction, which makes the task a lot harder for you, but 
+in the XPL I've seen it will almost always be represented as a <font color="#663300"><code>CALL INLINE</code></font>, which makes it much easier.&nbsp; The reason it's easy is because <b>XCOM-I</b> <font color="#663300"><code>--guess</code></font>
+ will have made a guessed patch file for it, and will have printed the 
+assembly-language syntax and the proposed C translation of it for you in
+ the patch file.&nbsp; <br>
+    <br>
+To make what I'm saying concrete, consider an example taken from <b>PASS1</b> of <b>HAL/S-FC</b>.&nbsp; Here's a small excerpt of the XPL source-code file HALINCL/VMEM.xpl:<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#663300">         ELSE DO;                                                               00102100<br>            ADDRTEMP = ADDR(MOVECHAR);                                          00102200<br>            CALL INLINE("18",0,4);           /* LR 0,4                        */00102300<br>            CALL INLINE("58",2,0,INTO);      /* L  2,INTO                     */00102400<br>            CALL INLINE("58",3,0,FROM);      /* L   3,FROM                    */00102500<br>            CALL INLINE("48",1,0,LEGNTH);    /* LH 1,LEGNTH                   */00102600<br>            CALL INLINE("06",1,0);           /* BCTR 1,0                      */00102700<br>            CALL INLINE("58",4,0,ADDRTEMP);  /* L 4,ADDRTEMP                  */00102800<br>            CALL INLINE("44",1,0,4,0);       /* EX 1,0(0,4)                   */00102900<br>            CALL INLINE("18",4,0);           /* LR 4,0                        */00103000<br>            RETURN;                                                             00103100<br>         END;                                                                   00103200<br>      END;                                                                      00103300<br>MOVECHAR:                                                                       00103400<br>      CALL INLINE("D2",0,0,2,0,3,0);  /* MVC 0(0,2),0(3)                      */00103500</font><font size="-1"><br></font></pre>
+  </blockquote>
+  <font size="-1"><font size="-1">Those blocks of <font color="#663300"><code>CALL INLINE</code></font> statements correspond to patches 25 and 32 respectively.&nbsp; Thus <b>XCOM-I</b> <font color="#663300"><code>--guess</code></font></font>
+ produces guessed patch files guess25p.c for lines 00102300-00103000 and
+ guess32p.c for line 00103500.&nbsp; The latter is the target 
+instruction for the EX instruction at line 00102900.&nbsp; It's visually
+ obvious (since it's separated!), but you can tell it from reading the 
+code too:&nbsp; Line 00102200 puts the address of the label <font color="#663300"><code>MOVECHAR</code></font> into the variable <font color="#663300"><code>ADDRTEMP</code></font>,
+ while line 00102800 it moves it into the CPU general register GR4, and 
+then at line 00102900 the EX instruction says that the base register GR4
+ holds the address of the target instruction.&nbsp; Here's how <b>XCOM-I</b> has done its best in guess25p.c to translate the EX instruction,<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#009900">p25_24: ;<br>  // (31)       CALL INLINE("44", 2, 0, 3, 0);        /* EX  2,0(0,3)          */         <br>  address360B = GR[3] + 0;<br>  // Type RX, p. 7-74:		EX	2,0(0,3)<br>    // ***FIXME*** Unsupported opcode EX</font><font size="-1"><br></font></pre>
+  </blockquote>
+  <font size="-1">and in guess32p.c the target instruction,<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#663300">p32_0: ;<br>  // (32)       CALL INLINE("D2", 0, 0, 1, 1, 1, 0);  /* MVC 1(0,1),0(1)       */         <br>  address360A = GR[1] + 1;<br>  address360B = GR[1] + 0;<br>  // Type SS, p. 7-83:		MVC	1(0,1),0(1)<br>  mvc(address360A, address360B, 0);</font><font size="-1"><br></font></pre>
+  </blockquote>
+  <font size="-1">In fact, in my experience, most EX instructions have 
+targeted MVC instructions, as this example does, so this is great for 
+covering the typical case! <br>
+    <br>
+Now, the action of an EX instruction is to replace bits 8-15 of the 
+target machine-code instruction by the contents of the general register 
+the EX instruction specifies, and then to execute that modified target 
+instruction (<i>without</i> actually jumping to it).&nbsp; All you have 
+to figure out is what in the C translation of the target instruction 
+corresponds to bits 8-15 of the machine code.&nbsp; It will usually be 
+something simple.&nbsp; For a target MVC instruction, I can tell you 
+that it's just the final parameter of the <font color="#663300"><code>mvc(...)</code></font>
+ function in the C translation.&nbsp; Thus, the change needed to the 
+guessed file guess25p.c, in which the "***FIXME***" is replaced by 
+actually-executable code, is this:<br>
+  </font>
+  <blockquote><font size="-1">
+  </font><pre><font color="#009900"><font size="-1">p25_24: ;<br>  // (31)       CALL INLINE("44", 2, 0, 3, 0);        /* EX  2,0(0,3)          */         <br>  address360B = GR[3] + 0;<br>  // Type RX, p. 7-74:		EX	2,0(0,3)<br>  address360A = GR[1] + 1;<br>  address360B = GR[1] + 0;<br>  // Type SS, p. 7-83:		MVC	1(0,1),0(1)<br>  mvc(address360A, address360B, GR[2]);</font>
+</font></pre></blockquote>
+</blockquote>
+
+Not perfect, of course, but not bad either.&nbsp; By my reckoning, close
+ to 90% of the guessed files seem to be perfect as-is.&nbsp;&nbsp;&nbsp;
+ And of the files which are not perfect, probably around 90% of the <font color="#663300"><code>CALL INLINE</code></font>s translated in those files are still perfect.<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; As an example where <b>XCOM-I</b> fails to produce a perfect guessed result <i>not</i> due to an EX instruction, I can point to the single block of <font color="#663300"><code>CALL INLINE</code></font>s in the legacy program <b>XCOM45</b>.&nbsp;
+ A number of its instructions involve use of the seemingly-uninitialized
+ register GR12, as well as usage of the register GR3, that make sense 
+(to me!) only if registers GR3 and GR12 are viewed as having a 
+non-traditional conventional role in the subroutine linkage for calling 
+their parent procedure (namely, <font color="#663300"><code>SCAN_FINDS_END_OF</code></font>):&nbsp;
+ i.e., GR3 contains the return value of the procedure (rather than GR0 
+as documented by IBM), and GR12 contains the size of the procedure's 
+code (other than the linkage code), in bytes.<br>
+    <br>
+  </font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1">As another example, I'd point to the one case I know of (in the <font color="#663300"><code>INTEGER_VALUED</code></font> procedure of program <b>HAL/S-FC</b>) in which a <code><font color="#663300">RETURN</font></code></font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code> INLINE</code></font> statement is used rather than a </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>CALL INLINE</code></font> statement.&nbsp; The </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>INLINE</code></font></font></font></font></font></font></font></font></font></font></font></font></font> XPL built-in is not specified in such a way as to return a value, but the calling procedure (<font color="#663300"><code>INTEGER_VALUE</code></font>) does check the returned value. &nbsp; Moreover, the </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>INLINE</code></font></font>s in </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>INTEGER_VALUED</code></font></font></font></font></font></font></font>
+ do in fact manipulate the GR3 register in such a way as to contain 
+either a 0 or a 1, without there being any other evident reason to do 
+so, so it's easy to suppose once again that GR3 is indeed the return 
+value.&nbsp; </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><br>
+            </font></font></font></font></font></font></blockquote>
 <br>
 
 
@@ -5343,7 +6046,7 @@ technique, you might be able to do so just by altering the parameters of
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-05-26<br>
+          2024-07-01<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

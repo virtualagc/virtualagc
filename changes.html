@@ -23,6 +23,93 @@ document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
+  <td valign="top">2024-07-01<br>
+  </td>
+  <td valign="top">
+    <ul>
+      <li><a moz-do-not-send="true" href="links2.html#RecentAdditions">Added 38 documents to the main library</a>,
+ all of them astrionics memos from 1965 through 1969, related to the 
+Saturn launch vehicle, and of course its computing system.&nbsp; I say 
+that they're all "memos", but a few are really substantial (unnumbered) 
+documents enclosed in memos.&nbsp; Mike sent me these nearly 3 months 
+ago, and I've just been so busy that I simply lost track of how much 
+time had passed while I sat on them.&nbsp; Sorry!</li>
+      <li>Added 3 documents I got (today!) to <a moz-do-not-send="true" href="links-shuttle.html#RecentAdditions">the Shuttle library</a>.&nbsp; These documents all relate largely or entirely to what are called Simulation Data Files (SDF).</li>
+    </ul>
+    <p>Surprisingly, that's actually all tied together.&nbsp; The <i>reason</i>
+ I've been too busy to look at the Astrionics memos I mentioned is that 
+I've been completely consumed by Shuttle-related work I've been 
+doing.&nbsp; As I've mentioned in other updates here, I've been working 
+on a compiler (which I call XCOM-I) for the XPL programming language as 
+it was extended in an undocumented fashion by a company called 
+Intermetrics.&nbsp; The reason is that Intermetrics wrote a compiler for
+ a computer language called HAL/S in this extended form of XPL.&nbsp; 
+That HAL/S compiler, called HAL/S-FC, was needed to compile the flight 
+software for the Space Shuttle, since that flight software was written 
+in HAL/S.<br>
+    </p>
+    <p>And the reason I have time today for those memos is that just 
+yesterday I reached a milestone on XCOM-I:&nbsp; Not only can it now 
+compile HAL/S-FC, but HAL/S-FC can itself compile HAL/S programs, and produce object code from them!&nbsp;
+ Or at least, it can compile the one HAL/S test program I throw at 
+it.&nbsp; The HAL/S test program I throw at it is called HELLO.hal, and 
+I'll let you guess what it does.&nbsp; Unfortunately, even though 
+HAL/S-FC can compile HELLO.hal, what you get out of that process is (of 
+course!) a program that runs <i>only</i> on one of the Space Shuttle's 
+IBM AP-101S computers, not on your personal computer.&nbsp; And lacking 
+any way to run AP-101S programs at the moment, there's therefore no way 
+yet to actually run the compiled HELLO program.&nbsp; The same would be 
+true, of course, if I compiled the Space Shuttle's flight 
+software.&nbsp; But progress is being made, one step at a time!&nbsp; 
+I'm hoping that Dan Weaver, who as I've mentioned before has written a <i>very</i>
+ nice IBM 360 simulator, will be writing a (very similar) AP-101S 
+simulator.&nbsp; At that point, we could run the compiled HELLO or other
+ compiled HAL/S program and really start cooking!<br>
+    </p>
+    <p>As to why any of that is relevant, as promised, to the 
+SDF-related documentation added to the Shuttle library today ... well, 
+that's another mouthful-and-a-half of explanation.&nbsp; HAL/S-FC, the 
+HAL/S compiler, actually consists of seven separate "passes" or 
+"phases", each of which is a stand-alone program.&nbsp; The seven 
+stand-alone programs are run in succession to perform a complete 
+compilation.&nbsp; Of course, you the user don't really have to worry 
+about all that nonsense if you're not interested in it, since you simply
+ experience HAL/S as a single command, and that command worries about 
+all of the details of fitting the separate passes together.<br>
+    </p>
+    <p>Nevertheless, when I say that XCOM-I can compile HAL/S-FC, I mean
+ that it can compile each of the seven separate programs comprising 
+HAL/S-FC.&nbsp; The AP-101S object code is not spit out until the fifth 
+pass, which is called PASS2.&nbsp; (Go figure!)&nbsp; That leaves two 
+compiler passes (called PASS3 and PASS4) which I haven't run yet.&nbsp; 
+PASS3 and PASS4 are entirely devoted to production of Simulation Data 
+Files (SDF).&nbsp; SDFs were what were used as input to the digital 
+simulation system that simulated running the Shuttle flight 
+software.&nbsp; They're quite fancy.&nbsp; I'm told by the author of 
+PASS3 and PASS4, Craig Schulenberg, that never has any other compiler of
+ any kind produced such complete data in support of simulation.<br>
+    </p>
+    <p>My own desired next step in the compiler development is to run 
+the compiler passes related to SDF generation.&nbsp; Simultaneously the 
+SDF documents appear in the Shuttle library.&nbsp; Nifty!&nbsp; 
+Kismet!&nbsp; Whether that's truly what I do next is TBD, but that's my 
+whim at the moment.<br>
+    </p>
+    <p>By the way, this is all being written up on <a moz-do-not-send="true" href="XPL.html">the XPL page of the website</a>,
+ basically in real time as I'm working on it.&nbsp; Which means that 
+it's a poorly-organized mess at the moment.&nbsp; Still, it's there if 
+anybody wants to read it.&nbsp; I hope that it won't be too much longer 
+before the compiler is debugged to the point where I can bless it as 
+completely working, and proceed to put the documentation in order.&nbsp;
+ Of course, wishes don't always come true.&nbsp; And anyone who's 
+familiar with my writing style — just take a gander at this blog entry! —
+ will realize that it still may not be very readable once I've 
+reorganized it.&nbsp; But at least it will be more readable than it is 
+now.&nbsp; I hope.<br>
+    </p>
+  </td>
+</tr>
+<tr>
   <td valign="top">2024-05-24<br>
   </td>
   <td valign="top">I updated <a moz-do-not-send="true" href="Block1.html#SelfTest">the Block I mini-tutorial</a> to demo running the SOLARIUM (and SUNRISE) self-tests.<br>
