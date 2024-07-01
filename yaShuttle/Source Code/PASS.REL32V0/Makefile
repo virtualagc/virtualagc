@@ -24,7 +24,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2,X6,LIST
+PARM_STRING := SRN,LISTING2,X6,LIST,VARSYM,ADDRS,HALMAT,TABDMP,TABLES,TABLST
 PARM4_STRING := 
 
 RTARGET := HELLO
@@ -159,5 +159,17 @@ regression:
 		--raf=B,7200,4,optmat2.bin \
 		--raf=B,3360,6,vmem2.bin \
 		>c2.rpt
+	
+	@echo Processing $(RTARGET) with PASS3 ...
+	cp vmem2.bin vmem3.bin
+	cp litfile2.bin litfile3.bin
+	./PASS3 \
+		--ddo=2,listing23.txt \
+		--raf=B,1680,5,sdf3.bin \
+		--commoni=COMMON-PASS2.out \
+		--commono=COMMON-PASS3.out \
+		--raf=B,1560,2,litfile3.bin \
+		--raf=B,3360,6,vmem3.bin \
+		>c3.rpt
 	
 	
