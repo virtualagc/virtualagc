@@ -27,6 +27,7 @@ from guessINLINE import guessINLINE, guessFiles
 stdoutOld = sys.stdout
 
 debug = False # Standalone interactive test of expression generation.
+sizeReducer = True # For reducing size of executable.
 
 ppFiles = { "filenames": "" }
 
@@ -2725,31 +2726,55 @@ def generateC(globalScope):
     print("", file=f)
     print("// Initial memory contents, prior to COMMON load ---------------\n",\
           file=f)
-    print("uint8_t memory[MEMORY_SIZE] = {", file=f)
-    for i in range(freePoint):
-        if 0 == i % 8:
-            print("  ", end="", file=f)
-        print("0x%02X" % memory[i], end="", file=f)
-        if i < freePoint - 1:
-            print(", ", end="", file=f)
+    if not sizeReducer:
+        print("uint8_t memory[MEMORY_SIZE] = {", file=f)
+        # This is my original behavior: To simply initialize the entirety of
+        # memory, almost all of it 0.
+        for i in range(freePoint):
+            if 0 == i % 8:
+                print("  ", end="", file=f)
+            print("0x%02X" % memory[i], end="", file=f)
+            if i < freePoint - 1:
+                print(", ", end="", file=f)
+                if 7 == i % 8:
+                    j = i & 0xFFFFF8
+                    print(" // %8d 0x%06X" % (j, j), file=f)
+        restart = physicalTop - 8 - (physicalTop % 8)
+        if variableAddress > 0:
+            print(",", end="", file=f)
+        print("  [0x%0X]=0x00," % (restart - 1), file=f)
+        for i in range(restart, physicalTop):
+            if 0 == i % 8:
+                print("  ", end="", file=f)
+            print("0x%02X" % memory[i], end="", file=f)
+            if i < physicalTop - 1:
+                print(", ", end="", file=f)
+                if 7 == i % 8:
+                    j = i & 0xFFFFF8
+                    print(" // %8d 0x%06X" % (j, j), file=f)
+        print("   // %8d 0x%06X" % (physicalTop - 8, physicalTop - 8), end="", file=f)
+        print("\n};", file=f)
+    else:
+        # Here's my attempt to reduce the size of the executable file: Initialize
+        # memory just to the point where it starts becoming all 0.
+        for i in range(len(memory) - 1, -1, -1):
+            if memory[i] != 0:
+                break
+        numInitialized = (i + 8) & ~7 
+        print("uint8_t memory[MEMORY_SIZE];", file=f)
+        print("uint8_t memoryInitializer[NUM_INITIALIZED] = {", file=f)
+        for i in range(numInitialized):
+            if 0 == i % 8:
+                print("  ", end="", file=f)
+            print("0x%02X" % memory[i], end="", file=f)
+            if i < numInitialized - 1:
+                print(", ", end="", file=f)
+            else:
+                print("  ", end="", file=f)
             if 7 == i % 8:
                 j = i & 0xFFFFF8
                 print(" // %8d 0x%06X" % (j, j), file=f)
-    restart = physicalTop - 8 - (physicalTop % 8)
-    if variableAddress > 0:
-        print(",", end="", file=f)
-    print("  [0x%0X]=0x00," % (restart - 1), file=f)
-    for i in range(restart, physicalTop):
-        if 0 == i % 8:
-            print("  ", end="", file=f)
-        print("0x%02X" % memory[i], end="", file=f)
-        if i < physicalTop - 1:
-            print(", ", end="", file=f)
-            if 7 == i % 8:
-                j = i & 0xFFFFF8
-                print(" // %8d 0x%06X" % (j, j), file=f)
-    print("   // %8d 0x%06X" % (physicalTop - 8, physicalTop - 8), end="", file=f)
-    print("\n};", file=f)
+        print("};", file=f)
     print("\n// Lists of fields of BASED variables ------------------------\n",\
           file=f)
     maxSymbolLength = 0
@@ -2936,6 +2961,8 @@ def generateC(globalScope):
     print("#define MAX_TYPE1 %d" % MAX_TYPES, file=f)
     print("#define MAX_TYPE2 %d" % MAX_TYPES, file=f)
     print("#define USER_MEMORY %d" % USER_MEMORY, file=f)
+    if sizeReducer:
+        print("#define NUM_INITIALIZED %d" % numInitialized, file=f)
     print("", file=f)
     print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)

@@ -651,6 +651,12 @@ parseCommandLine(int argc, char **argv)
   gettimeofday(&startTime, NULL);
   DD_INS[0] = DD_INS[1] = stdin;
   DD_OUTS[0] = DD_OUTS[1] = stdout;
+
+#ifdef NUM_INITIALIZED
+  extern uint8_t memoryInitializer[NUM_INITIALIZED];
+  memcpy(memory, memoryInitializer, NUM_INITIALIZED);
+#endif
+
   for (i = 1; i < argc; i++)
     {
       int lun, recordSize;
