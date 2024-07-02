@@ -163,73 +163,236 @@ bitToRadix(descriptor_t *b) {
   return returnValue;
 }
 
+// Get an integer-like value from memory
+int *
+getIntegerFromAddress(char *datatype, int bitWidth, int address) {
+  int value;
+  int *returnValue = &value;
+  if (!strcmp(datatype, "FIXED"))
+    value = COREWORD(address);
+  else if (!strcmp(datatype, "BIT"))
+    {
+      int numBytes = (bitWidth + 7) / 8;
+      if (numBytes == 3)
+        numBytes = 4;
+      if (numBytes == 1)
+        value = memory[address];
+      else if (numBytes == 2)
+        value = COREHALFWORD(address);
+      else if (numBytes == 4)
+        value = COREWORD(address);
+      else
+        returnValue = NULL;
+     }
+  else
+    returnValue = NULL;
+  return returnValue;
+}
+
+// Get value of an integer-like non-BASED non-indexed variable or a literal.
+// Returns a pointer to the value, or NULL if failure.
+int *
+getIntegerFromString(char *varString) {
+  static int value;
+  int *returnValue = &value;
+  memoryMapEntry_t *entry;
+  if (varString == NULL || *varString == 0)
+    returnValue = NULL;
+  else if (isdigit(*varString))
+    value = atoi(varString);
+  else
+    {
+      entry = lookupVariable(varString);
+      if (entry == NULL)
+        returnValue = NULL;
+      else
+        returnValue = getIntegerFromAddress(entry->datatype, entry->bitWidth,
+                                            entry->address);
+    }
+  return returnValue;
+}
+
 // This function could be used within a debugger to fetch the current value
 // of an identifier, perhaps subscripted.  Useful because XPL variables are
 // not modeled as C variables (easily accessed by the debugger) but rather
 // as indexes into the `memory` array and not encoded the way native C
 // variables are.  Because it's so easy (for me, at least) of making the
 // mistake of using brackets rather than parentheses, brackets are accepted
-// in places of parentheses.
-descriptor_t *
+// in places of parentheses.  Indices may be either literal decimal numbers
+// or non-BASED, non-subscripted identifiers of variables.
+char *
 getXPL(char *identifier) {
+  static char *errorMessage = "Cannot parse this";
+  static sbuf_t returnValue = "Cannot parse this";
   memoryMapEntry_t *entry;
-  char *base = NULL, *field = NULL;
+  char *s, *baseString = identifier, *baseIndexString = NULL,
+       *fieldString = NULL, *fieldIndexString = NULL;
+  int isBase = 1, isBaseIndex = 0, isField = 0, isFieldIndex = 0;
   int baseIndex = 0, fieldIndex = 0;
-  char *s;
-  for (s = identifier, base = identifier; *s; s++)
+  int i, *value, address;
+
+  // First, parse the input string into BASED name, BASED index, field name,
+  // and field index.
+  for (s = baseString; *s; s++)
     {
-      if (*s == '[')
-        *s = '(';
-      else if (*s == ']')
-        *s = ')';
-      else if (*s == '.')
+      if (*s == '.')
         {
-          if (field != NULL)
-            return cToDescriptor(NULL,
-                                 "Too many . separators in %s.", identifier);
+          isField = 1;
           *s = 0;
-          field = s + 1;
+          s++;
+          break;
         }
-    }
-  for (s = base; *s; s++)
-    {
       if (*s == '(')
         {
+          isBaseIndex = 1;
           *s = 0;
-          baseIndex = atoi(s + 1);
+          s++;
           break;
         }
     }
-  if (field != NULL)
-    for (s = field; *s; s++)
-      {
-        if (*s == '(')
-          {
-            *s = 0;
-            fieldIndex = atoi(s + 1);
-            break;
-          }
-      }
-  entry = lookupVariable(base);
-  if (entry == NULL)
-    return cToDescriptor(NULL,
-                         "Cannot find variable %s; could it be a macro?", base);
-  if (entry->basedFields == NULL)
+  if (*s == 0)
     {
-      if (field != NULL)
-        return cToDescriptor(NULL, "Variable %s is not BASED RECORD.", base);
-      field = base;
-      fieldIndex = baseIndex;
-      base = NULL;
-      baseIndex = 0;
+      // Was just a bare identifier, with no index or field separator.
+      fieldString = baseString;
+      isField = 1;
+      baseString = NULL;
+      isBase = 0;
+    }
+  else
+    {
+      if (isBaseIndex)
+        for (baseIndexString = s; *s; s++)
+          if (*s == ')')
+            {
+              *s = 0;
+              s++;
+              break;
+            }
+      if (*s == 0)
+        {
+          // The stuff already identified as baseString and baseIndexString
+          // are really just a non-BASED identifier and its index.
+          fieldString = baseString;
+          fieldIndexString = baseIndexString;
+          isField = 1;
+          isFieldIndex = isBaseIndex;
+          isBase = 0;
+          isBaseIndex = 0;
+        }
+      else if (*s == '.')
+        {
+          // Ready to parse the field name and its index.
+          s++;
+          fieldString = s;
+          isField = 1;
+          for (; *s; s++)
+            if (*s == '(')
+              {
+                isFieldIndex = 1;
+                *s = 0;
+                s++;
+                fieldIndexString = s;
+                break;
+              }
+          if (isFieldIndex)
+            for (; *s; s++)
+              if (*s == ')')
+                {
+                  *s = 0;
+                  break;
+                }
+        }
+      else
+        {
+          return errorMessage;
+        }
     }
 
-  return rawGetXPL(base, baseIndex, field, fieldIndex);
+  // At this point, we've parsed the various fields.  There are certain
+  // conditions we haven't checked, such as 0-length fields or the field index
+  // not being terminated by ')'.  Let's check now for empty strings, since
+  // those might actually cause a problem.  (Missing parenthesis? Not so much!)
+  if (isBase && !*baseString)
+    return errorMessage;
+  if (isBaseIndex && !*baseIndexString)
+    return errorMessage;
+  if (isField && !*fieldString)
+    return errorMessage;
+  if (isFieldIndex && !*fieldIndexString)
+    return errorMessage;
+
+  // The indices, if any, may be either literal numbers or else themselves
+  // the names of identifiers.
+  if (isBaseIndex)
+    {
+      value = getIntegerFromString(baseIndexString);
+      if (value == NULL)
+        return errorMessage;
+      baseIndex = *value;
+    }
+  if (isFieldIndex)
+    {
+      value = getIntegerFromString(fieldIndexString);
+      if (value == NULL)
+        return errorMessage;
+      fieldIndex = *value;
+    }
+
+  if (!isBase && isField)
+    {
+      entry = lookupVariable(fieldString);
+      if (entry == NULL)
+        return errorMessage;
+      address = entry->address + fieldIndex * entry->dirWidth;
+      if (!strcmp(entry->datatype, "CHARACTER"))
+        {
+          sprintf(returnValue, "'%s'", descriptorToAscii(getCHARACTER(address)));
+          return &returnValue[0];
+        }
+      value = getIntegerFromAddress(entry->datatype, entry->bitWidth, address);
+      if (value == NULL)
+        return errorMessage;
+      sprintf(returnValue, "%d (0x%X)", *value, *value);
+      return &returnValue[0];
+    }
+
+  if (isBase && !isField)
+    return errorMessage;
+
+  entry = lookupVariable(baseString);
+  if (entry == NULL)
+    return errorMessage;
+  if (strcmp(entry->datatype, "BASED"))
+    return errorMessage;
+  basedField_t *basedFields = entry->basedFields, *basedField;
+  for (i = 0; i < entry->numFieldsInRecord; i++)
+    if (!strcmp(basedFields[i].symbol, fieldString))
+      {
+        basedField = &basedFields[i];
+        address = entry->address + baseIndex * entry->recordSize +
+                  basedField->offset + basedField->dirWidth * fieldIndex;
+        if (!strcmp(basedField->datatype, "CHARACTER"))
+          {
+            sprintf(returnValue, "'%s'", descriptorToAscii(getCHARACTER(address)));
+            return &returnValue[0];
+          }
+        value = getIntegerFromAddress(basedField->datatype,
+                                      basedField->bitWidth, address);
+        if (value == NULL)
+          return errorMessage;
+        sprintf(returnValue, "%d (0x%X)", *value, *value);
+        return &returnValue[0];
+      }
+
+  return errorMessage;
+
 }
 
 void
 printXPL(char *identifier) {
-  printf("%s\n", getXPL(identifier)->bytes);
+  fflush(stdout);
+  fprintf(stderr, "\n%s", getXPL(identifier));
+  fflush(stderr);
 }
 
 descriptor_t *

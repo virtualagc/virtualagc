@@ -120,7 +120,7 @@ extern int bitBits;
 descriptor_t *
 bitToRadix(descriptor_t *b);
 
-descriptor_t *
+char *
 getXPL(char *identifier);
 
 void

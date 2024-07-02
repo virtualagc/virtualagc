@@ -2,19 +2,69 @@
 # U.S. law, and may be freely used, modified, or distributed for any purpose
 # whatever.
 
-# Required:	Parent folder is PASS.REL32V0/ in Virtual AGC source tree.
-#		BASH shell or similar ... i.e., probably for *NIX, not Windows.
-#		Python 3
-#		gcc
-#		make
-#		Various *NIX utilities (diff, egrep)
-
-# This Makefile is used to build the components of HAL/S-FC.  It can also be
-# used to perform some regression tests.
+# This Makefile is used to compile the individual passes of the HAL/S compiler,
+# HAL/S-FC, or else to use HAL/S-FC to compile a program written in HAL/S.
+# I expect that the Makefile will work out of the box on Linux or Mac OS, if 
+# all of the command-line utilities used are installed, but needs a lot of setup 
+# on Windows. (See https://www.ibiblio.org/apollo/XPL.html#Windows.)
+#
+# HAL/S-FC is compiled using XCOM-I to translate HAL/S-FC's XPL+BAL source code
+# to C, and then the C code is compiled using gcc or clang.
+#
+# HAL/S source code is compiled primarily by the version of HAL/S-FC just 
+# mentioned, running each of the 7 passes of HAL/S-FC (or at least, however many
+# passes are currently functional) in succession.  Additionally, though, there
+# is a Python3 port of HAL/S-FC's first pass, so it is also used to compile the
+# HAL/S program, and the results of the two first passes are compared.
+#
+# The useful targets of the Makefile are:
+#
+#	PASS1	(these first 7 targets each compile a single pass of HAL/S-FC)
+#	FLO
+#	OPT
+#	AUX
+#	PASS2
+#	PASS3
+#	PASS4
+#	all	(compiles all 7 passes of HAL/S-FC)
+#	compile	(uses HAL/S-FC to compile a HAL/S source-code file)
+#
+# Additional things specifiable on the `make` command line.
+#
+#	RTARGET=source.hal	By default, the HAL/S source-code file
+#				compiled by the `compile` target is
+#				HELLO.hal.  But it can be changed to
+#				any single HAL/S file.
+#	PARM_STRING="..."	By default, the compiler options used
+#				by HAL/S-FC are given by the variable
+#				`PARM_STRING` hard-coded below.  But it
+#				can be changed to something else.  See
+#				the HAL/S-FC User's Manual, section 5.1.
+#				(https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf)
+#	COND=B			By default, HAL/S-FC is built in its
+#				"PFS" version.  But COND=B changes to
+#				the "BFS" version instead.
+#	XEXTRA="..."		Extra command-line options for XCOM-I.
+#				You can see those options by running
+#					XCOM-I.py --help
+#	EXTRA="..."		Extra C-compiler command-line options.
+#				Typical options would be -ggdb (for
+#				embedding debugging info for gdb),
+#				-w to disable all warning messages,
+#				-O3 for optimization, and so on.  Check
+#				gcc or clang documentation.
+#	HEXTRA="..."		Extra options for HAL/S-FC passes.  
+#				Not compiler options as defined by the
+#				original documentation (which are in 
+#				`PARM_STRING`), but rather the kinds of
+#				options which XCOM-I endows uniformly
+#				on each of programs it produces.  You
+#				can see those options by running 
+#					PASS1 --help
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-COND := P	# P for PFS or B for BFS (or TBD?)
+COND := P	# P for PFS or B for BFS
 
 TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
 XCOM_DIR := ../../../../XCOM-I
@@ -24,10 +74,10 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2,X6,LIST,VARSYM,ADDRS,HALMAT,TABDMP,TABLES,TABLST
+PARM_STRING := SRN,LISTING2,X6,LIST,ADDRS,HALMAT,TABDMP,TABLES,TABLST
 PARM4_STRING := 
 
-RTARGET := HELLO
+RTARGET := $(HAL_S_FC_DIR)/HELLO
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
 comma := ,
@@ -70,18 +120,18 @@ cleanall: clean
             PASS4.PROCS/PASS4 -rf
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
-.PHONY: regression
-regression: 
+.PHONY: compile
+compile: 
 	@echo Processing $(RTARGET) with HAL_S_FC.py ...
 	$(HAL_S_FC_DIR)/HAL_S_FC.py \
 		$(sPARM_STRING) \
-		--hal=$(HAL_S_FC_DIR)/$(RTARGET) \
+		--hal=$(RTARGET) \
 		>py.rpt
 	
 	@echo Processing $(RTARGET) with PASS1 ...
-	-./PASS1 $(REXTRA) \
+	-./PASS1 $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
-		--ddi=0,$(HAL_S_FC_DIR)/$(RTARGET).hal \
+		--ddi=0,$(RTARGET).hal \
 		--ddo=2,listing2.txt \
 		--pdsi=5,ERRORLIB \
 		--pdsi=6,ACCESS  \
