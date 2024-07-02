@@ -1519,7 +1519,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP = g.FIXV[g.MP] | g.FIXV[g.SP];
             goto = "DO_LIT_BIT_FACTOR"
         else:
-            g.TEMP = XBOR;
+            g.TEMP = g.XBOR;
             goto = "DO_BIT_FACTOR"
     elif PRODUCTION_NUMBER == 101:  # reference 1010
         #  <RELATIONAL OP> ::= =

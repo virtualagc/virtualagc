@@ -81,10 +81,10 @@ from COMPRESS import COMPRESS_OUTER_REF
 '''
 
 MAX_SUM = 17
+CONDITION = (1, 1, 1, 0, 0, 1, 1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 2, 0)
 CLASS = (2, 2, 2, 1, 1, 2, 2, 2, 3, 2, 3, 0, 3, 6, 7, 3, 6, 7)
 TYPE = (0x48, 0x48, 0x48, 9, 9, 0x48, 0x48, 0x47, 0,
         0x47, 0, 0, 1, 0, 0x3E, 1, 0, 0x3E)
-CONDITION = (1, 1, 1, 0, 0, 1, 1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 2, 0)
 MASK = (3, 7, 5, 4, 2, 1, 6, 3, 3, 3, 3, 0, 0, 2, 2, 0, 2, 2)
 MASK2 = (0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0) # BIT(8(
 HEADING = (
@@ -178,9 +178,6 @@ def BLOCK_SUMMARY():
     # END CHECK_IDENT;
     
     def OUT_BLOCK_SUMMARY():
-        # No locals.  I have replaced references like CLASS(I) by 
-        # TYPE(I+10), in lieu of defining a new function g.CLASSf() just for
-        # a couple of instances.  See the comments for g.TYPEf().
         nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
         for J in range(g.OUTER_REF_PTR[g.NEST] & 0x7FFF, g.OUTER_REF_INDEX + 1):
             if g.OUTER_REF(J) == -1: 
@@ -189,22 +186,22 @@ def BLOCK_SUMMARY():
                 PTR = g.OUTER_REF(J);
                 g.TEMP1 = g.OUTER_REF_FLAGS(J);
                 if g.TEMP1 == 0:
-                    if g.TYPEf(I + 10) == 0: 
+                    if CLASS[I] == 0: 
                         OUTPUT_IDENT(g.TRUE);
                         g.OUTER_REF(J, -1);
                 else: 
                     INDIRECT();
-                    if g.SYT_CLASS(PTR) <= g.TYPEf(I + 10):
+                    if g.SYT_CLASS(PTR) <= CLASS[I]:
                         # DO CASE CONDITION(I);
                         ci = CONDITION[I]
                         if ci == 0:
-                            if g.SYT_TYPE(PTR) == g.TYPEf(I): 
+                            if g.SYT_TYPE(PTR) == TYPE[I]: 
                                 CHECK_IDENT();
                         elif ci == 1:
-                            if g.SYT_TYPE(PTR) >= g.TYPEf(I): 
+                            if g.SYT_TYPE(PTR) >= TYPE[I]: 
                                 CHECK_IDENT();
                         elif ci == 2:
-                            if g.SYT_CLASS(PTR) == g.TYPEf(I + 10): 
+                            if g.SYT_CLASS(PTR) == CLASS[I]: 
                                 CHECK_IDENT();
                         # END DO CASE
             # NEXT_ENTRY:
