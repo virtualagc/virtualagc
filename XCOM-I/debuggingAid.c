@@ -369,7 +369,7 @@ getXPL(char *identifier) {
     if (!strcmp(basedFields[i].symbol, fieldString))
       {
         basedField = &basedFields[i];
-        address = entry->address + baseIndex * entry->recordSize +
+        address = COREWORD(entry->address) + baseIndex * entry->recordSize +
                   basedField->offset + basedField->dirWidth * fieldIndex;
         if (!strcmp(basedField->datatype, "CHARACTER"))
           {
