@@ -113,7 +113,7 @@ def BLOCK_SUMMARY():
 
     def INDIRECT():
         # No Locals
-        nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
+        nonlocal PTR
         if g.SYT_CLASS(PTR) != g.LABEL_CLASS: 
             return;
         while g.SYT_TYPE(PTR) == g.IND_CALL_LAB:
@@ -122,7 +122,7 @@ def BLOCK_SUMMARY():
     
     def ISSUE_HEADER():
         # No locals
-        nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
+        nonlocal HEADER_ISSUED, FIRST_TIME
         if HEADER_ISSUED: 
             return;
         if FIRST_TIME:
@@ -136,9 +136,8 @@ def BLOCK_SUMMARY():
     
     def OUTPUT_IDENT(FLAG):
         # No locals
-        nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
         ISSUE_HEADER();
-        if FLAG:
+        if (FLAG & 1) != 0:
             if PTR == 0x3FFF: 
                 g.S = '*:*';
             else: 
@@ -162,7 +161,6 @@ def BLOCK_SUMMARY():
     
     def CHECK_IDENT():
         # No locals
-        nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
         if g.SYT_NEST(PTR) >= g.NEST: 
             return;
         if MASK2[I]: 
@@ -173,12 +171,12 @@ def BLOCK_SUMMARY():
                 return; 
             else: 
                 g.TEMP1 = 0;
-            OUTPUT_IDENT(g.TEMP1 & 6);
+        OUTPUT_IDENT(g.TEMP1 & 6);
         g.OUTER_REF(J, -1);
     # END CHECK_IDENT;
     
     def OUT_BLOCK_SUMMARY():
-        nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
+        nonlocal PTR
         for J in range(g.OUTER_REF_PTR[g.NEST] & 0x7FFF, g.OUTER_REF_INDEX + 1):
             if g.OUTER_REF(J) == -1: 
                 pass  # GO TO NEXT_ENTRY;
