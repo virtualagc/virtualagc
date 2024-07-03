@@ -49,12 +49,12 @@ def COMPRESS_OUTER_REF():
     for I in range(J, g.OUTER_REF_INDEX):
         if g.OUTER_REF(I) != -1:
             TMP = g.OUTER_REF(I);
-            for J in range(I + 1, g.OUTER_REF_INDEX):
+            for J in range(I + 1, g.OUTER_REF_INDEX + 1):
                 if TMP == g.OUTER_REF(J):
                     if g.OUTER_REF_FLAGS(I) == g.OUTER_REF_FLAGS(J):
                         g.OUTER_REF(J, -1);
     TMP = (g.OUTER_REF_PTR[g.NEST] & 0x7FFF) - 1;
-    for I in range(TMP + 1, g.OUTER_REF_INDEX):
+    for I in range(TMP + 1, g.OUTER_REF_INDEX + 1):
         if g.OUTER_REF(I) != -1:
             TMP = TMP + 1;
             g.OUTER_REF(TMP, g.OUTER_REF(I));

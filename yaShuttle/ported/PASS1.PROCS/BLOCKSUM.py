@@ -81,12 +81,12 @@ from COMPRESS import COMPRESS_OUTER_REF
 '''
 
 MAX_SUM = 17
-CONDITION = (1, 1, 1, 0, 0, 1, 1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 2, 0)
 CLASS = (2, 2, 2, 1, 1, 2, 2, 2, 3, 2, 3, 0, 3, 6, 7, 3, 6, 7)
 TYPE = (0x48, 0x48, 0x48, 9, 9, 0x48, 0x48, 0x47, 0,
         0x47, 0, 0, 1, 0, 0x3E, 1, 0, 0x3E)
+CONDITION = (1, 1, 1, 0, 0, 1, 1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 2, 0)
 MASK = (3, 7, 5, 4, 2, 1, 6, 3, 3, 3, 3, 0, 0, 2, 2, 0, 2, 2)
-MASK2 = (0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0) # BIT(8(
+MASK2 = (0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0) # BIT(8)
 HEADING = (
     'PROGRAMS AND TASKS SCHEDULED    PROGRAMS AND TASKS TERMINATED   ' + \
     'PROGRAMS AND TASKS CANCELLED    EVENTS SIGNALLED, SET OR RESET  ' + \
@@ -163,7 +163,7 @@ def BLOCK_SUMMARY():
         # No locals
         if g.SYT_NEST(PTR) >= g.NEST: 
             return;
-        if MASK2[I]: 
+        if 0 != (1 & MASK2[I]): 
             if g.SYT_NEST(PTR) > 0: 
                 return;
         if MASK[I] != 0: 
@@ -176,7 +176,7 @@ def BLOCK_SUMMARY():
     # END CHECK_IDENT;
     
     def OUT_BLOCK_SUMMARY():
-        nonlocal PTR
+        nonlocal J, PTR
         for J in range(g.OUTER_REF_PTR[g.NEST] & 0x7FFF, g.OUTER_REF_INDEX + 1):
             if g.OUTER_REF(J) == -1: 
                 pass  # GO TO NEXT_ENTRY;
