@@ -289,7 +289,7 @@ class cSYT_DUMP:  # Local variables for SYT_DUMP().
                          'INPUT-PARM AUTOMATIC  STATIC     INITIAL    ' + \
                          'CONSTANT   ACCESS     REENTRANT  EXCLUSIVE  ' + \
                          'EXTERNAL   REMOTE     INCREM     '
-        self.NAMER = 'NAME'
+        self.NAMER = 'NAME '
         self.LABEL_ON_END = g.FALSE
 
 
