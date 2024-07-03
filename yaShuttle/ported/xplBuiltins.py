@@ -685,20 +685,19 @@ def OUTPUT(fileNumber, string):
                 lc.LINE_COUNT = 0
                 if len(headingLine) > 0:
                     print(headingLine + ("     PAGE %d" % pageCount))
-                    lc.LINE_COUNT += 1
                 else:
                     print("PAGE %d" % pageCount)
+                lc.LINE_COUNT += 1
                 if len(subHeadingLine) > 0:
                     print(subHeadingLine)
                     lc.LINE_COUNT += 1
                 if lc.LINE_COUNT > 0:
                     print()
                     lc.LINE_COUNT += 1
+            print(queue[i], end='')
             if i < len(queue) - 1:
-                print(queue[i])
+                print()
                 lc.LINE_COUNT += 1
-            else:
-                print(queue[i], end='')
 
 '''
     fileNumber 0,1  stdin, presumably the source code.
