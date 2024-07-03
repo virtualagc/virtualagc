@@ -1181,14 +1181,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         didl = g.DO_INX[g.DO_LEVEL] & 0x7F
         if didl == 0:
             # SIMPLE DO
-            g.TEMP = g.QUALIFICATION;
+            g.TEMP = g.XESMP;
         elif didl == 1:
             # DO FOR
             g.TEMP = g.XEFOR;
         elif didl == 2:
             # DO CASE
             HALMAT_FIX_POPTAG(g.FIXV[g.MP], 1);
-            g.TEMP = g.QUALIFICATION;
+            g.TEMP = g.XECAS;
             g.INFORMATION = '';
             g.CASE_LEVEL = g.CASE_LEVEL - 1;
         elif didl == 3:
@@ -3987,7 +3987,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == None:
             g.XSET(0x11);
             g.FIXL[g.MPP1] = 0;
-            HALMAT_POP(g.QUALIFICATION, 1, 0, 0);
+            HALMAT_POP(g.XDSMP, 1, 0, 0);
             EMIT_PUSH_DO(0, 1, 0, g.MP - 1);
         if goto == "DO_DONE": goto = None
         g.FIXV[g.MP] = 0;
