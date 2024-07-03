@@ -674,7 +674,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 # END
             # END
         if l.MAX_E_LEVEL + MAX(l.MAX_S_LEVEL, g.SDL_OPTION) + 2 + \
-                LINE_COUNT > g.LINE_MAX:
+                lc.LINE_COUNT > g.LINE_MAX:
             ll.C = g.PAGE;
         else:
             ll.C = g.NEXT_CC;

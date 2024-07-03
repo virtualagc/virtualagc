@@ -556,7 +556,7 @@ def STREAM():
                     if g.LOOKED_RECORD_AHEAD == 0:
                         g.LOOKED_RECORD_AHEAD = LINE_LIM;
                         EJECT_PAGE();
-                    if LINE_COUNT + g.J > g.LOOKED_RECORD_AHEAD:
+                    if lc.LINE_COUNT + g.J > g.LOOKED_RECORD_AHEAD:
                         g.LOOKED_RECORD_AHEAD = 0;
                     else:
                         for ll.I in range(1, g.J + 1):

@@ -22,6 +22,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import json
 import math
 import ebcdic
+from virtualenv.create.via_global_ref.builtin import via_global_self_do
 
 # This is the root directory for imports.
 scriptFolder = os.path.dirname(__file__)  # Requires / at the end.
@@ -612,12 +613,19 @@ the so-called ANSI control characters:
 headingLine = ''
 subHeadingLine = ''
 pageCount = 0
-LINE_COUNT = 0
+# The reason I've turned LINE_COUNT into a class, is that I only realized 
+# belatedly that if xplBuiltins is imported as a module, the importers never
+# see any updates to the LINE_COUNT.  This was the cheapest way I could fix it
+# after the fact.
+class lineCount:
+    def __init__(self):
+        self.LINE_COUNT = 0
+lc = lineCount() 
 linesPerPage = 59  # Should get this from LINECT parameter.
 
 
 def OUTPUT(fileNumber, string):
-    global headingLine, subHeadingLine, pageCount, LINE_COUNT
+    global headingLine, subHeadingLine, pageCount
     if fileNumber > 1:
         file = outputDevices[fileNumber]
         if file == None:
@@ -658,7 +666,7 @@ def OUTPUT(fileNumber, string):
             queue.append('')
             pass
         elif ansi == '1':
-            LINE_COUNT = linesPerPage
+            lc.LINE_COUNT = linesPerPage
         elif ansi == 'H':
             headingLine = string[1:]
             return
@@ -670,26 +678,26 @@ def OUTPUT(fileNumber, string):
         else:
             queue.append(string[1:])
         for i in range(len(queue)):
-            if LINE_COUNT == 0 or LINE_COUNT >= linesPerPage:
+            if lc.LINE_COUNT == 0 or lc.LINE_COUNT >= linesPerPage:
                 if pageCount > 0:
                     print('\n\f', end='')
                 pageCount += 1
-                LINE_COUNT = 0
+                lc.LINE_COUNT = 0
                 if len(headingLine) > 0:
                     print(headingLine + ("     PAGE %d" % pageCount))
                 else:
                     print("PAGE %d" % pageCount)
-                LINE_COUNT += 1
+                lc.LINE_COUNT += 1
                 if len(subHeadingLine) > 0:
                     print(subHeadingLine)
-                    LINE_COUNT += 1
-                if LINE_COUNT > 0:
+                    lc.LINE_COUNT += 1
+                if lc.LINE_COUNT > 0:
                     print()
-                    LINE_COUNT += 1
+                    lc.LINE_COUNT += 1
             print(queue[i], end='')
             if i < len(queue) - 1:
                 print()
-                LINE_COUNT += 1
+                lc.LINE_COUNT += 1
 
 '''
     fileNumber 0,1  stdin, presumably the source code.
