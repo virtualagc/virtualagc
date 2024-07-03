@@ -1,6 +1,5 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-  <head>
+<html><head>
     <title>Virtual AGC FAQ Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="author" content="Ron Burkey">
@@ -17,6 +16,9 @@ document.write(headerTemplate.replace("@TITLE@","Frequently Asked Questions").re
       <li><a href="#Why_Does_it_Say_ibiblio_All_Over_these">Why Does it
           Say "ibiblio" All Over these Pages, and Yet the Site URL is
           "github" ... Maybe?</a></li>
+<li><a moz-do-not-send="true" href="#mess">Your Software Repository Is a Mess!</a><br>
+</li>
+
       <li><a href="#Whats_Up_With_the_Logo">What's Up With the Logo?</a><br>
       </li>
       <li><a href="faq.html#Is_this_site_mirrored_anywhere_">Is this
@@ -83,68 +85,188 @@ document.write(headerTemplate.replace("@TITLE@","Frequently Asked Questions").re
       <p>There are several websites associated with the Virtual AGC
         project:</p>
       <ul>
-        <li>Our official main Virtual AGC website:&nbsp; <a
-            href="https://www.ibiblio.org/apollo">https://www.ibiblio.org/apollo</a>
-          (or http:).</li>
-        <li>Our repository for basically everything is <i>not</i> a
-          scanned image is at GitHub.&nbsp; This includes the
-          sub-categories ("branches"):&nbsp; <br>
-        </li>
-        <ul>
-          <li>Software (both our software and transcriptions of the
-            original Project Apollo software to source code):&nbsp; <a
-              href="https://github.com/virtualagc/virtualagc">https://github.com/virtualagc/virtualagc</a></li>
-          <li>Project Apollo electrical schematics translated into
-            CAD:&nbsp; <a
-              href="https://github.com/virtualagc/virtualagc/tree/schematics">https://github.com/virtualagc/virtualagc/tree/schematics</a><br>
-          </li>
-          <li>Project Apollo mechanical drawings translated into 3D
-            models:&nbsp; <a
-              href="https://github.com/virtualagc/virtualagc/tree/mechanical">https://github.com/virtualagc/virtualagc/tree/mechanical</a><br>
-          </li>
-          <li>The source code for this website itself:&nbsp; <a
-              href="https://github.com/virtualagc/virtualagc/tree/gh-pages">https://github.com/virtualagc/virtualagc/tree/gh-pages</a>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            This is also <i>browsable</i> at <a
-              href="https://virtualagc.github.io/virtualagc/index.html">https://virtualagc.github.io/virtualagc/index.html</a>,
-            which may thus sometimes contain unstable modifications that
-            have not yet made it onto the main site, but is usually is
-            the same as the main site.<br>
-          </li>
-          <li>... and so on</li>
-        </ul>
-        <li>Our repository for the highest-available quality of our
+        <li><a moz-do-not-send="true" href="https://www.ibiblio.org/apollo">Our official main Virtual AGC website is at Ibiblio ("The Public's Library and Digital Archive")<br>
+</a></li>
+        <li><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/SundanceXXX/SundanceXXXDifferences.txt">Our repository for software source code and basically everything else that's not a
+          scanned image is at GitHub</a></li><li><a moz-do-not-send="true" href="https://archive.org/details/virtualagcproject">Our repository for the highest-available quality of our
           scanned documents, drawings, and program listings is at The
-          Internet Archive:&nbsp; <a
-            href="https://archive.org/details/virtualagcproject">https://archive.org/details/virtualagcproject</a><br>
+          Internet Archive</a></li></ul></blockquote>
+<h2><a name="mess"></a>Your Software Repository Is a Mess!</h2>
+<blockquote>
+  <p>That's not a question, and nobody ever asked it.&nbsp; But they may
+ as well have, since I was noticing the other day that after 20+ years 
+of collecting this material it has become an enormous repository of 
+buried treasure.&nbsp; Emphasis on the "buried".&nbsp; <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc">I'm speaking, of course, of our GitHub repository</a>.&nbsp; So let's take a very brief tour of what's in it.<br>
+  </p>
+  <p>First, what you see by default when you go to the link for the repository is the <i>master</i>
+ branch.&nbsp; The master branch is really where all of the complexity 
+is, so I'll get to it in a moment.&nbsp; But there are also a number of 
+alternate branches you can choose to look at.&nbsp; Those aren't as 
+complex as the master branch, so let's get those out of the way first.<br>
+  </p>
+  <ul>
+    <li>Branch: <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/schematics">schematics</a>.&nbsp;
+ This contains electrical schematics for the AGC, the DSKY, and various 
+other components of the Apollo guidance system, as transcribed for 
+computer-aided design (CAD).&nbsp; You don't get your choice of CAD 
+systems, though.&nbsp; The files are for the <a moz-do-not-send="true" href="http://kicad-pcb.org/">KiCad</a>
+ system, because it's open-source and available everywhere.&nbsp; (I've 
+endeavored to make these CAD drawings as visually similar as possible to
+ the original schematics as humanly possible.&nbsp; But if you insist on
+ having them, scans of the original schematics are available too, but 
+not in the software repository; you'll find them instead on <a moz-do-not-send="true" href="https://archive.org/details/virtualagcproject">our Internet Archive site</a>.&nbsp; But with 100K or so scans, it's a bit of trouble finding things there, too, so you should instead approach them via <a moz-do-not-send="true" href="ElectroMechanical.html">our website's Electromechanical Page</a>.)</li>
+    <li>Branch: <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/mechanical">mechanical</a>.&nbsp;
+ This contains 3D models some of the Apollo guidance-system components, 
+particularly the DSKY, in case you feel like 3D-printing them.</li>
+    <li>Branch: <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/gh-pages">gh-pages</a>.&nbsp;
+ This contains the master HTML files, imagery, and so on for the Virtual
+ AGC website, including this very page you're reading now, not including
+ the vast number of huge PDF files for the website's documentation 
+libraries.&nbsp; The actual website is a copy of these master files plus
+ the documents for the library, although you can browse <a moz-do-not-send="true" href="https://virtualagc.github.io/virtualagc/index.html">the master site directly at GitHub</a>, if you have some reason to do so.</li>
+    <li>Branch: <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/scenarios">scenarios</a>.&nbsp; This contains setups for various Apollo missions, for the NASSP add-on to the Orbiter spaceflight simulator.</li>
+    <li>... and many branches not likely to be of any concern to you.</li>
+  </ul>
+  <p>As for the master branch, it contains software source code, and 
+lots of it.&nbsp; The following list isn't exhaustive, but it covers 
+most of the folders in the master branch.<br>
+  </p>
+  <ul>
+    <li><i>Original flight and development software:</i><br>
+    </li>
+    <ul>
+      <li><i>Apollo Guidance Computer (AGC) software for various missions and engineering purposes</i>.&nbsp; Each version has its own separate folder, and you may need to look at our <a moz-do-not-send="true" href="Colossus.html">Colossus</a> or <a moz-do-not-send="true" href="Luminary.html">Luminary</a> website pages, or <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/links2.html#AssemblyListings">our document library</a>,
+ to know which versions are of interest.&nbsp; Look in the folders with 
+names like these (with the * indicating a variable version 
+number):&nbsp; <br>
+      </li>
+      <ul>
+        <li>Artemis*</li>
+        <li>Aurora*</li>
+        <li>Borealis* (not actually original; we wrote it)<br>
+        </li>
+        <li>Colossus*</li>
+        <li>Comanche*</li>
+        <li>Corona*</li>
+        <li>LMY*</li>
+        <li>LUM*</li>
+        <li>Luminary*</li>
+        <li>Manche*</li>
+        <li>Retread*</li>
+        <li>Skylark*</li>
+        <li>Solarium*</li>
+        <li>Sunburst*</li>
+        <li>Sundance*</li>
+        <li>Sundial*</li>
+        <li>Sunrise*</li>
+        <li>Superjob*</li>
+        <li>Trivium*</li>
+        <li>Validation* (not actually original; we wrote it)</li>
+        <li>Zerlina*</li>
+        <li>Rope-Module Dump Library:&nbsp; This folder contains dumps 
+made from AGC core-rope memory modules, rather than source code, mostly 
+for the AGC versions listed above.</li>
+      </ul>
+      <li><i>AGC software-development tools:</i></li>
+      <ul>
+        <li>YUL (assembler)<br>
         </li>
       </ul>
+      <li><i>Apollo Abort Guidance System (AGS) software</i>.&nbsp; Again, each version has its own folder, with names like: </li>
+      <ul>
+        <li>FP*.</li>
+      </ul>
+      <li><i>Apollo Launch Vehicle Digital Computer (LVDC) software</i>.&nbsp;
+ In general, you will not be able to find LVDC flight software in the 
+repository at present, due to ITAR-related fears.&nbsp; As for 
+non-flight software:</li>
+      <ul>
+        <li>PTC-ADAPT-Self-Test-Program (for the ground-test panel known as the PTC)<br>
+        </li>
+      </ul>
+      <li><i>Gemini:</i></li>
+      <ul>
+        <li>GeminiCatchUpandRendezvousProgram.&nbsp; Flight software for
+ the onboard computer remains unavailable.&nbsp; This is a Fortran II 
+program used for ground simulation, intermixed with some C files by me; 
+but I never was able to make it work</li>
+      </ul>
+      <li><i>Space Shuttle flight software (PASS, BFS)</i>:&nbsp; Not presently available in the repository, due to ITAR fears.</li>
+      <li><i>Space Shuttle development software:</i></li>
+      <ul>
+        <li>yaShuttle/Source Code/PASS.REL32V0.&nbsp; A cross-compiler 
+(HAL/S-FC) for the HAL/S computer language, used for compiling Space 
+Shuttle Primary Flight Software (PFS, sometimes known as PASS).<br>
+        </li>
+      </ul>
+    </ul>
+    <li><i>Modern development and simulation software, i.e., software written by or for the Virtual AGC project:</i></li>
+    <ul>
+      <li><i>AGC:<br>
+        </i></li>
+      <ul>
+        <li>Block II AGC CPU emulator:&nbsp; yaAGC</li>
+        <li>Block II DSKY simulator: yaDSKY2; yaDSKY (obsolete)</li>
+        <li>Telemetry terminal: yaTelemetry</li>
+        <li>Physics model: yaUniverse (obsolete)<br>
+        </li>
+        <li>ACA simulators: yaACA*</li>
+        <li>Assistant for joystick (ACA) configuration: jWiz<br>
+        </li>
+        <li>Block I AGC CPU emulator:&nbsp; yaAGCb1</li>
+        <li>Block I DSKY simulator: yaDSKYb1</li>
+        <li>Block I uplink transmitter: yaUplinkBlock1<br>
+        </li>
+        <li>Block I AGC CPU emulator (not integrated into Virtual AGC framework):&nbsp; yaAGC-Block1-Pultorak</li>
+        <li>AGC cross-assembler: yaYUL</li>
+        <li>Python program(s) for creating generic AGC peripheral devices: piPeripheral</li>
+        <li>GUI program for running AGC/AGS simulations:&nbsp; VirtualAGC<br>
+        </li>
+      </ul>
+      <li><i>AGS:</i><br>
+      </li>
+      <ul>
+        <li>AGS CPU emulator:&nbsp; yaAGS</li>
+        <li>DEDA simulator: yaDEDA2; yaDEDA (obsolete)</li>
+        <li>AGS cross-assembler: yaLEMAP<br>
+        </li>
+      </ul>
+      <li><i>LVDC:</i></li>
+      <ul>
+        <li>LVDC CPU emulator:&nbsp; yaLVDC</li>
+        <li>LVDC cross-assembler: yaASM.py</li>
+        <li>PTC (ground test panel) simulator: yaPanel</li>
+      </ul>
+      <li><i>Gemini:</i></li>
+      <ul>
+        <li>yaOBC.&nbsp; Gemini CPU emulator.</li>
+        <li>yaASM.&nbsp; Gemini Onboard Computer (OBC) cross-assembler, likely not syntactically-correct for the original flight software.</li>
+      </ul>
+      <li><i>Space Shuttle:</i></li>
+      <ul>
+        <li>yaShuttle/yaHAL-S.&nbsp; A compiler/interpreter/emulator 
+(yaHAL-S-FC.py) for a partial implementation of the HAL/S computer 
+language.</li>
+        <li>yaShuttle/port/PASS1.PROCS.&nbsp; A Python port (HAL_S_FC.py) of PASS1 of the original HAL/S cross-compiler (HAL/S-FC).</li>
+        <li>XCOM-I.&nbsp; A cross-compiler for an extended form of the 
+XPL computer language, suitable for compiling the original HAL/S 
+compiler (HAL/S-FC) and related utility programs.</li>
+        <li>XCOM-I/sim360-source/simulate.&nbsp; And IBM 360 simulator.<br>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</blockquote>
+<blockquote>
     </blockquote>
+
     <h2><a name="Whats_Up_With_the_Logo"></a>What's Up With the Logo?</h2>
     <blockquote>
       <p>If you're sharp-eyed enough, and visit here often enough, you
         might notice that the logo seems to change from time to
         time.&nbsp; Well, for many years, I exclusively used the logo<br>
       </p>
-      <div align="center"><img src="ApolloPatch2.png" alt="" width="200"
-          height="200"></div>
+      <div align="center"><img src="ApolloPatch2.png" alt="" width="200" height="200"></div>
       <p>which is a common version of one of the (I guess) official NASA
         Apollo patches that I simply downloaded from somewhere.&nbsp;
         But not everybody was happy with that design, for one reason or
@@ -160,11 +282,7 @@ document.write(headerTemplate.replace("@TITLE@","Frequently Asked Questions").re
         Gene!).&nbsp; Here were the top 4 candidates, and the website
         uses all but the 2nd one from the left:<br>
       </p>
-      <div align="center"><img src="ApolloPatchA.png" alt="" width="200"
-          height="200"><img src="ApolloPatchB.png" alt="" width="200"
-          height="200"><img src="ApolloPatchC.png" alt="" width="200"
-          height="200"><img src="ApolloPatchD.png" alt="" width="200"
-          height="200"><br>
+      <div align="center"><img src="ApolloPatchA.png" alt="" width="200" height="200"><img src="ApolloPatchB.png" alt="" width="200" height="200"><img src="ApolloPatchC.png" alt="" width="200" height="200"><img src="ApolloPatchD.png" alt="" width="200" height="200"><br>
         <div align="left"><br>
           As I say, though, there were lots of other designs as well,
           and if anybody grovels hard enough — oops, I mean "lobbies" —
@@ -183,8 +301,7 @@ document.write(headerTemplate.replace("@TITLE@","Frequently Asked Questions").re
       Mirroring, of course, entails downloading of our entire website
       onto your own server.&nbsp; But realize that just mirroring the
       main website doesn't get you any of the material at our
-      supplemental GitHub and Internet Archive sites <a
-        href="#Why_Does_it_Say_ibiblio_All_Over_these">mentioned earlier</a>.&nbsp;
+      supplemental GitHub and Internet Archive sites <a href="#Why_Does_it_Say_ibiblio_All_Over_these">mentioned earlier</a>.&nbsp;
 
 
 
@@ -308,8 +425,7 @@ are
     <div style="margin-left: 40px;"> There <i>is</i> a mailing list,
       thanks for asking!&nbsp; On the other hand, I'm told that mailing
       lists are old-fashioned, and that a newer approach would be
-      something like the <a
-        href="https://github.com/virtualagc/virtualagc/discussions">"Discussions"</a>
+      something like the <a href="https://github.com/virtualagc/virtualagc/discussions">"Discussions"</a>
       in our Virtual AGC GitHub repository.&nbsp; At the moment I'm
       writing this, the Discussions are completely new, so there's
       admittedly no content there, and therefore if you're interested in
@@ -321,9 +437,7 @@ are
       like to subscribe, changes the preferences of your existing
       subscription, or unsubscribe, go to<br>
       <br>
-      <div style="text-align: center;"> <a
-          class="moz-txt-link-freetext"
-          href="http://lists.ibiblio.org/mailman/listinfo/apollo">lists.ibiblio.org/mailman/listinfo/apollo</a><br>
+      <div style="text-align: center;"> <a class="moz-txt-link-freetext" href="http://lists.ibiblio.org/mailman/listinfo/apollo">lists.ibiblio.org/mailman/listinfo/apollo</a><br>
       </div>
     </div>
     <div style="text-align: center;">
@@ -364,8 +478,7 @@ are
     <h2><a name="I_have_some_of_the_documentation_you_"></a>I have some
       of the documentation you need, but what can I do with it?</h2>
     <div style="margin-left: 40px;"> A pretty complete description of
-      the available options can be found on our <a
-        href="HowToDigitize.html">"how to digitize" page</a>, but I
+      the available options can be found on our <a href="HowToDigitize.html">"how to digitize" page</a>, but I
       think that rather than frustrate yourself by reading it, just
       contact me directly at the email address given at the bottom of
       the page.&nbsp; I can advise better once I find out the nature and
@@ -387,8 +500,7 @@ are
       program in any way.&nbsp; Professionally, I write embedded
       software for airborne devices.&nbsp; I have a number of other
       open-source projects, which you can read about (along with a
-      more-extended write-up about me, Me, ME!) at <a
-        href="http://www.sandroid.org">my main website</a>.&nbsp; But
+      more-extended write-up about me, Me, ME!) at <a href="http://www.sandroid.org">my main website</a>.&nbsp; But
       all kidding aside, there's nothing interesting about me or my
       projects except Virtual AGC.<br>
       <br>
@@ -399,8 +511,7 @@ are
       somewhere?</h2>
     <div style="margin-left: 40px;"> Placing men on the moon is one of
       the greatest accomplishments of the United States of
-      America.&nbsp; It is arguable, indeed, that it is the <span
-        style="font-style: italic;">greatest</span> accomplishment (of
+      America.&nbsp; It is arguable, indeed, that it is the <span style="font-style: italic;">greatest</span> accomplishment (of
       any kind) in the history of the human race.&nbsp; If so, perhaps
       it makes sense to preserve the relics of the Apollo project.&nbsp;
       (Besides, I'm one of the 3. )<br>
@@ -442,14 +553,12 @@ are
       AGC back to life, and to allow anyone so inclined to use it or
       program it ... assuming, of course, that sufficient publicly
       information was available to do so.&nbsp; As it quickly turned
-      out, there was enough information publicly available, though <span
-        style="font-style: italic;">just barely</span> enough.&nbsp; The
+      out, there was enough information publicly available, though <span style="font-style: italic;">just barely</span> enough.&nbsp; The
       project turns out to be an interesting experiment in digital
       archaeology.<br>
       <br>
       <span style="font-style: italic;">News flash</span>:&nbsp; I found
-      a couple more geeks, bringing the total to 5.&nbsp; Here's their <a
-        href="http://www.calsoft.de/%7Echristian/AGC/">website</a>,
+      a couple more geeks, bringing the total to 5.&nbsp; Here's their <a href="http://www.calsoft.de/%7Echristian/AGC/">website</a>,
       where they're doing almost the same thing as me, inspired (no
       less) by <span style="font-style: italic;">From the Earth to the
         Moon</span>.<br>
@@ -475,10 +584,7 @@ are
     <div style="margin-left: 40px;"> Computer programmers are
       aware—though Apollo enthusiasts may not be—that "ya" is often
       added to computer program names to mean "yet another".&nbsp; Thus,
-      <span style="font-weight: bold;">yaYUL</span> is "yet another <span
-        style="font-weight: bold;">YUL</span>", <span
-        style="font-weight: bold;">yaDSKY</span> is "yet another <span
-        style="font-weight: bold;">DSKY</span>", and so on.&nbsp;<br>
+      <span style="font-weight: bold;">yaYUL</span> is "yet another <span style="font-weight: bold;">YUL</span>", <span style="font-weight: bold;">yaDSKY</span> is "yet another <span style="font-weight: bold;">DSKY</span>", and so on.&nbsp;<br>
     </div>
     <h2><a name="Whats_the_deal_with_verbs_and"></a>What's the deal with
       "verbs" and "nouns"?</h2>
@@ -520,8 +626,7 @@ are
       of software requirements for the AGC's user interface when the
       desire arose within the Instrumentation Laboratory to set up a
       demo guidance-computer unit with which to impress visitors to the
-      lab.&nbsp; Of course, this demo would have to <span
-        style="font-style: italic;">do</span> something, if it was going
+      lab.&nbsp; Of course, this demo would have to <span style="font-style: italic;">do</span> something, if it was going
       to be at all impressive, and to do something it would need some
       software. In short order, some of the coders threw together a demo
       program, inventing and using the verb/noun user-interface concept
@@ -534,8 +639,7 @@ are
       so.<br>
       <br>
       However, that does not mean that the verb/noun interface was
-      universally beloved.&nbsp; Ramón says that <span
-        style="font-style: italic;">many</span> objections were received
+      universally beloved.&nbsp; Ramón says that <span style="font-style: italic;">many</span> objections were received
       from naysayers, such as "it's not scientific", "it's not
       dignified", or even "astronauts won't understand it".&nbsp; Even
       though the coders of the demo hadn't seriously intended the
@@ -559,8 +663,7 @@ are
     <div style="margin-left: 40px;"> A lot of thought about usability
       went into the design of the guidance system, much more so than the
       story above about verbs and nouns would indicate.&nbsp; Questions
-      like what kinds of controls needed to be provided, or even <span
-        style="font-style: italic;">where</span> those controls would be
+      like what kinds of controls needed to be provided, or even <span style="font-style: italic;">where</span> those controls would be
       physically located, were extremely important&nbsp; (Thanks to
       George Silver for pointing this out.)&nbsp; Sadly, I don't know
       anything about these topics, and that's why I don't cover them
@@ -584,8 +687,7 @@ are
           speak.&nbsp; (Thanks to Allan Klumpp for this story.)</li>
         <li>And continuing on the topic of the 1201/1202 alarms in
           Apollo 11:&nbsp; These alarms were caused by the fact that
-          during the landing, both the landing radar <span
-            style="font-style: italic;">and</span> the rendezvous radar
+          during the landing, both the landing radar <span style="font-style: italic;">and</span> the rendezvous radar
           were turned on.&nbsp; Only the landing radar actually needed
           to be active, but it was felt by some that having the
           rendezvous radar turned on would be useful in case of a sudden
@@ -612,15 +714,13 @@ are
           commander, Jim Lovell, and describe why the new software
           (Luminary 131) would be so much better than the old.&nbsp; The
           next morning, Dick Battin dropped by Klumpp's office and
-          announced, "Allan Klumpp, your political <span
-            style="font-style: italic;">savoire-faire</span> has
+          announced, "Allan Klumpp, your political <span style="font-style: italic;">savoire-faire</span> has
           descended to a new low!"&nbsp; That was his way of saying that
           Luminary 131 would be used on Apollo 13 after all, because Jim
           Lovell wanted it.</li>
         <li>The original source code for the AGC assembler program
           called "YUL" is available <a href="YUL">here</a>.&nbsp;
-          Examine (say) pages <a href="YUL/yul-0005.jpg">2</a> and <a
-            href="YUL/yul-0006.jpg">3</a> carefully.&nbsp; I needn't
+          Examine (say) pages <a href="YUL/yul-0005.jpg">2</a> and <a href="YUL/yul-0006.jpg">3</a> carefully.&nbsp; I needn't
           comment further.<br>
         </li>
         <li>Not an AGC story, but I like it:&nbsp;&nbsp; I'm told that
@@ -646,8 +746,7 @@ are
           know what?&nbsp; I think it may actually be true.</li>
         <li>This one is not quite so amusing ... to me!&nbsp; Perhaps
           bittersweet is the proper word.&nbsp; As you have noticed from
-          reading our <a href="Luminary.html">Luminary</a> or <a
-            href="Colossus.html">Colossus</a> pages, or from various
+          reading our <a href="Luminary.html">Luminary</a> or <a href="Colossus.html">Colossus</a> pages, or from various
           other comments, I (we) are rather fanatical about finding all
           of the versions of the AGC software we can, so as to fill in
           all of the blanks and be able to tell you the complete story
@@ -726,28 +825,18 @@ are
         </li>
       </ul>
       <blockquote>
-        <table border="0" width="100%" cellspacing="2" cellpadding="2">
+        <table width="100%" cellspacing="2" cellpadding="2" border="0">
           <tbody>
             <tr>
-              <td align="center" valign="top"><a href="gulf_lm_med.jpg"><img
-                    alt="" title="Click to enlarge!"
-                    src="gulf_lm_med-thm.jpg" border="2" width="295"
-                    height="200"></a><br>
+              <td valign="top" align="center"><a href="gulf_lm_med.jpg"><img alt="" title="Click to enlarge!" src="gulf_lm_med-thm.jpg" width="295" height="200" border="2"></a><br>
               </td>
-              <td align="center" valign="top"><a
-                  href="gulflemfinished01.jpg"><img alt="" title="Click
-                    to enlarge!" src="gulflemfinished01-thm.jpg"
-                    border="2" width="191" height="200"></a><br>
+              <td valign="top" align="center"><a href="gulflemfinished01.jpg"><img alt="" title="Click
+                    to enlarge!" src="gulflemfinished01-thm.jpg" width="191" height="200" border="2"></a><br>
               </td>
-              <td align="center" valign="top"><a
-                  href="gulflemfinished02.jpg"><img alt="" title="Click
-                    to enlarge!" src="gulflemfinished02-thm.jpg"
-                    border="2" width="163" height="200"></a><br>
+              <td valign="top" align="center"><a href="gulflemfinished02.jpg"><img alt="" title="Click
+                    to enlarge!" src="gulflemfinished02-thm.jpg" width="163" height="200" border="2"></a><br>
               </td>
-              <td align="center" valign="top"><a href="gulf_lm_ins.gif"><img
-                    alt="" title="Click to enlarge!"
-                    src="gulf_lm_ins-small.png" border="2" width="255"
-                    height="200"></a><br>
+              <td valign="top" align="center"><a href="gulf_lm_ins.gif"><img alt="" title="Click to enlarge!" src="gulf_lm_ins-small.png" width="255" height="200" border="2"></a><br>
               </td>
             </tr>
           </tbody>
@@ -955,8 +1044,7 @@ are
       </blockquote>
       Tracking down these "Norton Documents" is a bit tricky.&nbsp;
       There's a notion floating around that the "Programmed Guidance
-      Equations" documents (like <a
-        href="Documents/j2-80-MSC-69-FS-4_text.pdf">this one for
+      Equations" documents (like <a href="Documents/j2-80-MSC-69-FS-4_text.pdf">this one for
         LUMINARY 1B</a>), are the Norton Documents, even though
       textually they purport to have been written entirely by MSC's
       Flight Software Branch, and barely mention TRW at all (let alone
@@ -965,9 +1053,7 @@ are
       aware of for this theory is the writing on the spine of this
       document in Don Eyles's collection:<br>
       <br>
-      <div align="center"><img src="NortonSpine.jpg" alt="" width="322"
-          height="400">&nbsp;&nbsp; <img src="NortonTitlePage.jpg"
-          alt="" width="300" height="400"><br>
+      <div align="center"><img src="NortonSpine.jpg" alt="" width="322" height="400">&nbsp;&nbsp; <img src="NortonTitlePage.jpg" alt="" width="300" height="400"><br>
       </div>
       <br>
       Is it a Norton Document?&nbsp; You decide.&nbsp; We don't yet have
@@ -1066,8 +1152,7 @@ are
       And speakings of the millions of dollars NASA was giving to MIT
       (as opposed to John Norton, I suppose), here is an amusing aside
       about Norton from MSC's Clark Neily:<br>
-      <blockquote><font size="2" color="black"
-          face="arial,helvetica,sansserif">Norton was under contract to
+      <blockquote><font size="2" color="black" face="arial,helvetica,sansserif">Norton was under contract to
           my group at MSC in Flight Procedures Branch of the Flight Crew
           Support Division. He was quite a phenomenon. He would have a
           detailed report in our office the day after the release. His
@@ -1079,8 +1164,7 @@ are
           time. I once stood behind him at the Clear Lake Savings and
           Trust and he had a sheaf of them in his hand...</font></blockquote>
       <blockquote>
-        <meta http-equiv="content-type" content="text/html;
-          charset=UTF-8">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       </blockquote>
       <blockquote>
         <blockquote><small> </small></blockquote>
@@ -1151,30 +1235,23 @@ Running
       the Simulation<br>
     </h3>
     <div style="margin-left: 40px;"> Various things to to look out for
-      are found in the <a
-        href="download.html#Some_platform-specific_odditities">quirks
+      are found in the <a href="download.html#Some_platform-specific_odditities">quirks
         list</a>, but here's a separate, supplemental list just to make
       it even more confusing:<br>
     </div>
     <ul>
-      <li>If you're running the simulation by separately running <span
-          style="font-weight: bold;">yaAGC</span> and <span
-          style="font-weight: bold;">yaDSKY</span> rather than through
+      <li>If you're running the simulation by separately running <span style="font-weight: bold;">yaAGC</span> and <span style="font-weight: bold;">yaDSKY</span> rather than through
         the <span style="font-weight: bold;">VirtualAGC</span> GUI,
         remember that the two programs have to be run from two different
-        command-line windows.&nbsp; A reason why you might <span
-          style="font-style: italic;">want</span> to do this is that on
+        command-line windows.&nbsp; A reason why you might <span style="font-style: italic;">want</span> to do this is that on
         some slow Win32 systems, there are some timing problems if the
         startup scripts are used.<br>
       </li>
       <li><span style="font-weight: bold;">VirtualAGC</span> enforces a
         certain ordering in the way the various components of the
-        simulation start up.&nbsp; If you bypass <span
-          style="font-weight: bold;">VirtualAGC</span>, you should note
+        simulation start up.&nbsp; If you bypass <span style="font-weight: bold;">VirtualAGC</span>, you should note
         that there some are some quirks in the startup and shutdown
-        ordering of <span style="font-weight: bold;">yaAGC</span> and <span
-          style="font-weight: bold;">yaDSKY</span>.&nbsp; If you <span
-          style="font-style: italic;">don't</span> stick to my
+        ordering of <span style="font-weight: bold;">yaAGC</span> and <span style="font-weight: bold;">yaDSKY</span>.&nbsp; If you <span style="font-style: italic;">don't</span> stick to my
         recommended ordering, you will probably encounter
         problems.&nbsp; <span style="font-style: italic;">In Win32</span>:&nbsp;
 You
@@ -1196,12 +1273,10 @@ You
 
 
 
-        can't start peripherals before you start <span
-          style="font-weight: bold;">yaAGC</span>; if you do, the
+        can't start peripherals before you start <span style="font-weight: bold;">yaAGC</span>; if you do, the
         programs will not be able to communicate amongst
         themselves.&nbsp; <span style="font-style: italic;">In Linux
-          (pre-20050131)</span>:&nbsp; You can't terminate <span
-          style="font-weight: bold;">yaAGC</span> before terminating
+          (pre-20050131)</span>:&nbsp; You can't terminate <span style="font-weight: bold;">yaAGC</span> before terminating
         peripherals; if you do, there will be a timeout (which may be a
         minute or two) before the operating system allows the port
         connecting the simulated CPU and peripherals to be reused.&nbsp;
@@ -1224,8 +1299,7 @@ You
 
 
 
-          -a</span>" --- or in Linux, the command "<span
-          style="font-family: monospace;">netstat -a | grep 19697</span>"
+          -a</span>" --- or in Linux, the command "<span style="font-family: monospace;">netstat -a | grep 19697</span>"
         --- is useful for detecting this condition.)&nbsp; The
         startup/shutdown procedure I'd recommend for both platforms is:<br>
       </li>
@@ -1247,24 +1321,17 @@ You
         abort.&nbsp; One thing that seems to help is to delay startup of
         <span style="font-weight: bold;">LM-Simulator</span> for several
         seconds, to insure that <span style="font-weight: bold;">yaAGC</span>
-        is up and waiting for connections before <span
-          style="font-weight: bold;">LM-Simulator</span> even tries to
+        is up and waiting for connections before <span style="font-weight: bold;">LM-Simulator</span> even tries to
         connect.<br>
       </li>
       <li>The main place (I think/hope) where things could go wrong
-        would be in the TCP socket interface connecting <span
-          style="font-weight: bold;">yaAGC</span> and <span
-          style="font-weight: bold;">yaDSKY</span>.&nbsp; If some other
+        would be in the TCP socket interface connecting <span style="font-weight: bold;">yaAGC</span> and <span style="font-weight: bold;">yaDSKY</span>.&nbsp; If some other
         service on your computer was already using port 19697—if, for
-        example, you were simultaneously running two copies of <span
-          style="font-weight: bold;">yaAGC</span> or <span
-          style="font-weight: bold;">yaDSKY</span>—then there could be a
+        example, you were simultaneously running two copies of <span style="font-weight: bold;">yaAGC</span> or <span style="font-weight: bold;">yaDSKY</span>—then there could be a
         problem.&nbsp; You can check this by closing out all instances
-        of <span style="font-weight: bold;">yaAGC</span> and <span
-          style="font-weight: bold;">yaDKSY</span> (in Win32 with
+        of <span style="font-weight: bold;">yaAGC</span> and <span style="font-weight: bold;">yaDKSY</span> (in Win32 with
         ctrl-alt-del, or in Linux with "<span style="font-family:
-          monospace;">killall -KILL yaDSKY</span>" and "<span
-          style="font-family: monospace;">killall -KILL yaAGC</span>"),
+          monospace;">killall -KILL yaDSKY</span>" and "<span style="font-family: monospace;">killall -KILL yaAGC</span>"),
         and then trying this:&nbsp; "<span style="font-family:
           monospace;">telnet localhost 19697</span>".&nbsp; If telnet
         says it connected to something, then you definitely have another
@@ -1301,8 +1368,7 @@ You
       Alphabet Soup!&nbsp; What does it all mean?<br>
     </h2>
     <table summary="" style="width: 50%; text-align: left; margin-left:
-      auto; margin-right: auto;" border="0" cellspacing="2"
-      cellpadding="2">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">ACA<br>
@@ -1460,8 +1526,7 @@ You
       </p>
       <p>Until early in 2016, our own subversion-based source-code
         repository had resided at Google Code for about 10 years.&nbsp;
-        However, that earlier repository at <a
-          href="http://code.google.com/p/virtualagc/source/checkout">Google
+        However, that earlier repository at <a href="http://code.google.com/p/virtualagc/source/checkout">Google
 
 
 
@@ -1486,8 +1551,7 @@ You
         official GitHub repository is<br>
       </p>
       <ul>
-        <li><a href="https://github.com/virtualagc/virtualagc"
-            moz-do-not-send="true">Official Virtual AGC GitHub
+        <li><a href="https://github.com/virtualagc/virtualagc" moz-do-not-send="true">Official Virtual AGC GitHub
             repository</a></li>
       </ul>
       <p>Accept no substitutes!<br>
@@ -1497,23 +1561,19 @@ You
       look at?<br>
     </h2>
     <div style="margin-left: 40px;">A non-AGC, non-Apollo, non-NASA site
-      you might enjoy (hint: it's about Vostok and Soyuz) is <a
-        moz-do-not-send="true"
-        href="https://vostoksupersite.weebly.com/">the Vostok Supersite</a>.&nbsp;
+      you might enjoy (hint: it's about Vostok and Soyuz) is <a moz-do-not-send="true" href="https://vostoksupersite.weebly.com/">the Vostok Supersite</a>.&nbsp;
       <br>
       <br>
       Here are some folks who have done wacky stuff with the AGC
       (including, of course, our AGC simulation), generating lots and
       lots of media coverage in the process:<br>
       <ul>
-        <li>An anonymous programmer has modified the <a
-            href="Colossus.html#COMANCHE51">AGC Comanche 55 software</a>
+        <li>An anonymous programmer has modified the <a href="Colossus.html#COMANCHE51">AGC Comanche 55 software</a>
           — i.e., the Command Module's AGC software for Apollo — to
           solve the "Dodge the Lasers" problem for Google's Foo.Bar
           Coding Challenge ... which is not something I had previously
           heard of, apparently because the Foo.Bar Coding Challenge is
-          secret and by invitation only.&nbsp; <a
-            href="https://www.geeksforgeeks.org/google-foo-bar-challenge/">But
+          secret and by invitation only.&nbsp; <a href="https://www.geeksforgeeks.org/google-foo-bar-challenge/">But
 
 
 
@@ -1526,8 +1586,7 @@ You
 
             here's a write-up of it I found online</a>.&nbsp; At any
           rate, our anonymous benefactor has provided his/her modified
-          Comanche code in <a
-            href="https://github.com/1969-07-20/Comanche055_DodgeTheLasers">a
+          Comanche code in <a href="https://github.com/1969-07-20/Comanche055_DodgeTheLasers">a
             GitHub repository</a>, from which you can compile it and run
           it; the repository includes instructions, as well as a bit of
           a write-up of the Dodge the Lasers problem itself.&nbsp; Plus,
@@ -1557,8 +1616,7 @@ You
 
 
 
-            restoration</a> team, <a
-href="http://www.righto.com/2019/07/bitcoin-mining-on-apollo-guidance.html">has
+            restoration</a> team, <a href="http://www.righto.com/2019/07/bitcoin-mining-on-apollo-guidance.html">has
 
 
 
@@ -1576,11 +1634,9 @@ href="http://www.righto.com/2019/07/bitcoin-mining-on-apollo-guidance.html">has
             written some bitcoin-mining code for the AGC</a>, and
           provided his code for it as well (though you have to dig a bit
           to find his GitHub link to it).</li>
-        <li>David Given has created <a
-            href="http://cowlark.com/cowgol/index.html">an "Ada-inspired
+        <li>David Given has created <a href="http://cowlark.com/cowgol/index.html">an "Ada-inspired
             language for very small systems (6502, Z80, etc.) called
-            Cowgol</a>.&nbsp; As a lark, <a
-            href="http://cowlark.com/2019-07-20-cowgol-agc/index.html">he
+            Cowgol</a>.&nbsp; As a lark, <a href="http://cowlark.com/2019-07-20-cowgol-agc/index.html">he
 
 
 
@@ -1612,16 +1668,13 @@ href="http://www.righto.com/2019/07/bitcoin-mining-on-apollo-guidance.html">has
     <ul style="margin-left: 40px;">
       <li><a href="http://tindallgrams.net/">Tindallgrams.net</a>.&nbsp;
         This is a delightful site devoted entirely to making available
-        the many, many memos written by <a
-          href="https://en.wikipedia.org/wiki/Bill_Tindall">Bill Tindall</a>,
+        the many, many memos written by <a href="https://en.wikipedia.org/wiki/Bill_Tindall">Bill Tindall</a>,
         colloquially known as "Tindallgrams".&nbsp; The memos are quite
         fun now (50 years later), and chock full of useful information,
         though I'm sure that at the time there was a lot of hair-pulling
         associated with them.<br>
-        <a
-          href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents"></a></li>
-      <li><a
-          href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents">De
+        <a href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents"></a></li>
+      <li><a href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents">De
 la
 
 
@@ -1650,11 +1703,9 @@ la
         references.&nbsp; The following links were particularly valuable
         for me:</li>
       <ul>
-        <li><a
-            href="http://history.nasa.gov/SP-4029/Apollo_18-10_Designations.htm">
+        <li><a href="http://history.nasa.gov/SP-4029/Apollo_18-10_Designations.htm">
             Apollo Designations</a>.</li>
-        <li><a
-href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">Chapter
+        <li><a href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">Chapter
 
 
 
@@ -1725,8 +1776,7 @@ This
         terrific talk by Don Eyles, covering the infamous Apollo 11 1202
         alarms, the Apollo 14 solder-ball incident, and more.<br>
       </li>
-      <li>And last, but not least, the <a
-          href="http://www.hq.nasa.gov/alsj/">Apollo Lunar Surface
+      <li>And last, but not least, the <a href="http://www.hq.nasa.gov/alsj/">Apollo Lunar Surface
           Journal</a> and <a href="https://history.nasa.gov/afj/">Apollo
 Flight
 
@@ -1784,12 +1834,10 @@ The
       <li>John Pultorak has recreated a <span style="font-style:
           italic;">working</span> Block I AGC, has recreated some of its
         software and back-ported some Block II software to it, and
-        offers us instructions for doing the same.&nbsp; <a
-          href="Pultorak.html">Must see!</a>&nbsp;<br>
+        offers us instructions for doing the same.&nbsp; <a href="Pultorak.html">Must see!</a>&nbsp;<br>
       </li>
       <li><a href="http://www.cems.uwe.ac.uk/%7Ejtwebb/agc/">www.cems.uwe.ac.uk/~jtwebb/agc/</a>,
-        by Julian Webb.&nbsp; Click <a
-          href="http://klabs.org/mapld04/abstracts/webb_a.doc">here</a>
+        by Julian Webb.&nbsp; Click <a href="http://klabs.org/mapld04/abstracts/webb_a.doc">here</a>
         to see Julian's abstract for the September 2004 MAPLD
         conference.<br>
       </li>
@@ -1806,8 +1854,7 @@ The
         simulator, freeware though not open source.&nbsp; Doesn't use
         Virtual AGC.<br>
       </li>
-      <li><a name="Orbiter" id="Orbiter"></a><a
-          href="http://www.medphys.ucl.ac.uk/%7Emartins/orbit/orbit.html">www.medphys.ucl.ac.uk/~martins/orbit/orbit.html</a>.
+      <li><a name="Orbiter" id="Orbiter"></a><a href="http://www.medphys.ucl.ac.uk/%7Emartins/orbit/orbit.html">www.medphys.ucl.ac.uk/~martins/orbit/orbit.html</a>.
         &nbsp;The home of the freeware <b>Orbiter</b> space-flight
         simulator.&nbsp;&nbsp;</li>
       <li><a href="http://nassp.sourceforge.net/">nassp.sourceforge.net/</a>.&nbsp;
@@ -1848,8 +1895,7 @@ The
     </div>
     <br>
     <table summary="" style="width: 95%; text-align: left; margin-left:
-      auto; margin-right: auto;" border="1" cellspacing="2"
-      cellpadding="2">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="font-weight: bold; text-align: left;
@@ -1869,18 +1915,14 @@ The
           </td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;">GNU <span
-              style="font-weight: bold;">gcc</span>, <span
-              style="font-weight: bold;">make</span>, etc.<br>
+          <td style="text-align: left; vertical-align: middle;">GNU <span style="font-weight: bold;">gcc</span>, <span style="font-weight: bold;">make</span>, etc.<br>
           </td>
           <td style="text-align: left; vertical-align: middle;">
             Provided automatically by almost all Linux distributions.<br>
           </td>
-          <td style="text-align: left; vertical-align: middle;"> &nbsp;<a
-              href="http://www.mingw.org/">www.mingw.org</a></td>
+          <td style="text-align: left; vertical-align: middle;"> &nbsp;<a href="http://www.mingw.org/">www.mingw.org</a></td>
           <td style="text-align: left; vertical-align: middle;">Apple
-            developer CD, or download from <a
-              href="http://www.apple.com/">www.apple.com</a>.<br>
+            developer CD, or download from <a href="http://www.apple.com/">www.apple.com</a>.<br>
           </td>
           <td style="text-align: left; vertical-align: middle;">Often
             provided automatically.&nbsp; Note that although GNU tools
@@ -1891,9 +1933,7 @@ The
         <tr>
           <td style="vertical-align: top;">wxWidgets cross-platform GUI
             toolkit for building <span style="font-weight: bold;">VirtualAGC</span>,
-            <span style="font-weight: bold;">yaDSKY2</span>, <span
-              style="font-weight: bold;">yaDEDA2</span>, and <span
-              style="font-weight: bold;">yaACA2</span>.<br>
+            <span style="font-weight: bold;">yaDSKY2</span>, <span style="font-weight: bold;">yaDEDA2</span>, and <span style="font-weight: bold;">yaACA2</span>.<br>
           </td>
           <td>Provided automatically by many Linux distributions.&nbsp;
             Otherwise, download from <a href="http://www.widgets.org/">www.wxwidgets.org</a></td>
@@ -1901,18 +1941,12 @@ The
           <td>Provided in Mac OS X 10.5, but you may need to
             update.&nbsp; The version provided in Mac OS X 10.4 is too
             early, so download from <a href="http://www.widgets.org/">www.wxwidgets.org</a></td>
-          <td>If not provided, download from <a
-              href="http://www.widgets.org/">www.wxwidgets.org</a></td>
+          <td>If not provided, download from <a href="http://www.widgets.org/">www.wxwidgets.org</a></td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;"> <span
-              style="font-weight: bold; color: rgb(153, 153, 153);">gtk+</span><span
-              style="color: rgb(153, 153, 153);">cross-platform GUI
+          <td style="text-align: left; vertical-align: middle;"> <span style="font-weight: bold; color: rgb(153, 153, 153);">gtk+</span><span style="color: rgb(153, 153, 153);">cross-platform GUI
               toolkit for building</span> <span style="font-weight:
-              bold; color: rgb(153, 153, 153);">yaDSKY</span> <span
-              style="color: rgb(153, 153, 153);">and</span> <span
-              style="font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span
-              style="color: rgb(153, 153, 153);">.</span><br>
+              bold; color: rgb(153, 153, 153);">yaDSKY</span> <span style="color: rgb(153, 153, 153);">and</span> <span style="font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span style="color: rgb(153, 153, 153);">.</span><br>
             <br>
             No longer needed for the <span style="font-weight: bold;">yaDSKY2</span>
             and <span style="font-weight: bold;">yaDEDA2</span>
@@ -1921,8 +1955,7 @@ The
           </td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> Provided automatically by many Linux
-            distributions.&nbsp; Otherwise, download from <a
-              href="http://www.gtk.org/">www.gtk.org</a></td>
+            distributions.&nbsp; Otherwise, download from <a href="http://www.gtk.org/">www.gtk.org</a></td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> <a href="http://www.gtk.org/">www.gtk.org</a></td>
           <td style="text-align: left; vertical-align: middle; color:
@@ -1930,15 +1963,10 @@ The
               bold;" href="http://fink.sourceforge.net/">fink</a></td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> Sometimes provided
-            automatically.&nbsp; Otherwise, download from <a
-              href="http://www.gtk.org/">www.gtk.org</a></td>
+            automatically.&nbsp; Otherwise, download from <a href="http://www.gtk.org/">www.gtk.org</a></td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;"> <span
-              style="color: rgb(153, 153, 153);">Optional</span> <span
-              style="font-weight: bold; color: rgb(153, 153, 153);">glade</span><span
-              style="color: rgb(153, 153, 153);">GUI builder for</span><span
-              style="font-weight: bold; color: rgb(153, 153, 153);">gtk+.</span><br>
+          <td style="text-align: left; vertical-align: middle;"> <span style="color: rgb(153, 153, 153);">Optional</span> <span style="font-weight: bold; color: rgb(153, 153, 153);">glade</span><span style="color: rgb(153, 153, 153);">GUI builder for</span><span style="font-weight: bold; color: rgb(153, 153, 153);">gtk+.</span><br>
             <br>
             No longer needed for the <span style="font-weight: bold;">yaDSKY2</span>
             and <span style="font-weight: bold;">yaDEDA2</span>
@@ -1946,8 +1974,7 @@ The
               bold;">yaDSKY</span> and <span style="font-weight: bold;">yaDEDA</span>!</td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> Provided automatically by many Linux
-            distributions.&nbsp; Otherwise, download from <a
-              href="http://glade.gnome.org/">glade.gnome.org</a></td>
+            distributions.&nbsp; Otherwise, download from <a href="http://glade.gnome.org/">glade.gnome.org</a></td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> <a href="http://glade.gnome.org/">glade.gnome.org</a></td>
           <td style="text-align: left; vertical-align: middle; color:
@@ -1955,8 +1982,7 @@ The
           </td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> Sometimes provided
-            automatically.&nbsp; Otherwise, download from <a
-              href="http://glade.gnome.org/">glade.gnome.org</a></td>
+            automatically.&nbsp; Otherwise, download from <a href="http://glade.gnome.org/">glade.gnome.org</a></td>
         </tr>
         <tr>
           <td style="text-align: left; vertical-align: middle;"> Thread
@@ -1965,8 +1991,7 @@ The
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)<br>
           </td>
-          <td style="text-align: left; vertical-align: middle;"> <a
-              href="http://sources.redhat.com/pthreads-win32/">POSIX
+          <td style="text-align: left; vertical-align: middle;"> <a href="http://sources.redhat.com/pthreads-win32/">POSIX
               Threads for Win32</a></td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)<br>
@@ -1976,54 +2001,43 @@ The
           </td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;"> <span
-              style="font-weight: bold; color: rgb(153, 153, 153);">Allegro</span><span
-              style="color: rgb(153, 153, 153);">cross-platform GUI
+          <td style="text-align: left; vertical-align: middle;"> <span style="font-weight: bold; color: rgb(153, 153, 153);">Allegro</span><span style="color: rgb(153, 153, 153);">cross-platform GUI
               toolkit for building</span> <span style="font-weight:
-              bold; color: rgb(153, 153, 153);">yaACA</span><span
-              style="color: rgb(153, 153, 153);">.</span><br>
+              bold; color: rgb(153, 153, 153);">yaACA</span><span style="color: rgb(153, 153, 153);">.</span><br>
             <br>
             No longer needed for the <span style="font-weight: bold;">yaACA2</span>
             program that has superceded <span style="font-weight:
               bold;">yaACA</span>!</td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> Provided automatically by some Linux
-            distributions.&nbsp; Otherwise, download from <a
-              href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
+            distributions.&nbsp; Otherwise, download from <a href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
           <td style="text-align: left; vertical-align: middle; color:
-            rgb(153, 153, 153);"> <a
-              href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
+            rgb(153, 153, 153);"> <a href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
           <td style="text-align: left; vertical-align: middle; color:
-            rgb(153, 153, 153);"> <a
-              href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
+            rgb(153, 153, 153);"> <a href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
           <td style="text-align: left; vertical-align: middle; color:
             rgb(153, 153, 153);"> May be provided automatically.&nbsp;
-            Otherwise, download from <a
-              href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
+            Otherwise, download from <a href="http://alleg.sourceforge.net/">alleg.sourceforge.net</a></td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;"> <span
-              style="font-weight: bold;">bzip2</span> for unpacking
+          <td style="text-align: left; vertical-align: middle;"> <span style="font-weight: bold;">bzip2</span> for unpacking
             development snapshots.<br>
           </td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)</td>
-          <td style="text-align: left; vertical-align: middle;"> <a
-              href="http://sources.redhat.com/bzip2/">sources.redhat.com/bzip2/</a></td>
+          <td style="text-align: left; vertical-align: middle;"> <a href="http://sources.redhat.com/bzip2/">sources.redhat.com/bzip2/</a></td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)</td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)</td>
         </tr>
         <tr>
-          <td style="text-align: left; vertical-align: middle;"> <span
-              style="font-weight: bold;">tar</span> for unpacking
+          <td style="text-align: left; vertical-align: middle;"> <span style="font-weight: bold;">tar</span> for unpacking
             development snapshots.<br>
           </td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)</td>
-          <td style="text-align: left; vertical-align: middle;"> <a
-              href="http://www.gnu.org/software/tar/tar.html">www.gnu.org/software/tar/tar.html</a></td>
+          <td style="text-align: left; vertical-align: middle;"> <a href="http://www.gnu.org/software/tar/tar.html">www.gnu.org/software/tar/tar.html</a></td>
           <td style="text-align: left; vertical-align: middle;">(Not
             needed.)</td>
           <td style="text-align: left; vertical-align: middle;">(Not
@@ -2031,8 +2045,7 @@ The
         </tr>
         <tr>
           <td style="vertical-align: top;"><span style="font-weight:
-              bold;">Tcl/Tk</span> scripting language for <span
-              style="font-weight: bold;">LM_Simulator</span>.<br>
+              bold;">Tcl/Tk</span> scripting language for <span style="font-weight: bold;">LM_Simulator</span>.<br>
           </td>
           <td colspan="4" rowspan="1" style="text-align: center;
             vertical-align: middle;"><a href="http://www.tcl.tk/">www.tcl.tk/</a><br>
@@ -2050,8 +2063,7 @@ The
       answer that!&nbsp; Unfortunately, I know the answer already.)<br>
     </p>
     <ul>
-      <li><a
-href="https://theorbitalmechanics.com/show-notes/hugh-blair-smith?rq=hugh%20blair-smith">The
+      <li><a href="https://theorbitalmechanics.com/show-notes/hugh-blair-smith?rq=hugh%20blair-smith">The
 
 
 
@@ -2071,8 +2083,7 @@ href="https://theorbitalmechanics.com/show-notes/hugh-blair-smith?rq=hugh%20blai
       </li>
       <li><a href="http://londonpodcast.net/?p=643">The London Podcast</a>,
         "Apollo 50 &amp; Lunar London", July 20, 2019.</li>
-      <li><a
-          href="https://theorbitalmechanics.com/show-notes/ron-burkey">The
+      <li><a href="https://theorbitalmechanics.com/show-notes/ron-burkey">The
 
 
 
@@ -2089,8 +2100,7 @@ href="https://theorbitalmechanics.com/show-notes/hugh-blair-smith?rq=hugh%20blai
 
 
           Orbital Mechanics</a>, "Ron Burkey", July 23, 2019.</li>
-      <li>Well ... not a podcast, but rather <a moz-do-not-send="true"
-href="https://youtu.be/YU6C0udixgs?list=PLD2VqrZz2-u0r6iMFMLrZIeNw6vodIadz">a
+      <li>Well ... not a podcast, but rather <a moz-do-not-send="true" href="https://youtu.be/YU6C0udixgs?list=PLD2VqrZz2-u0r6iMFMLrZIeNw6vodIadz">a
           video presentation</a> I gave about the Virtual AGC Project
         for the Software Heritage's SWHAP Days conference in October
         2022.&nbsp; Fifteen minutes is nowhere near enough time for that
@@ -2099,8 +2109,7 @@ href="https://youtu.be/YU6C0udixgs?list=PLD2VqrZz2-u0r6iMFMLrZIeNw6vodIadz">a
         as I could; how well I succeeded is a matter of opinion.&nbsp; I
         hope.&nbsp; Do select the 1080p resolution than the default (on
         my computer, anyway) 360p resolution.&nbsp; In case you don't
-        know, <a moz-do-not-send="true"
-          href="https://www.softwareheritage.org/">Software Heritage</a>
+        know, <a moz-do-not-send="true" href="https://www.softwareheritage.org/">Software Heritage</a>
         concerns itself with software preservation, and hence that's
         what I focused my talk on.&nbsp; The other conference
         presentations and the separate Q&amp;A can also be found at the
@@ -2109,8 +2118,7 @@ href="https://youtu.be/YU6C0udixgs?list=PLD2VqrZz2-u0r6iMFMLrZIeNw6vodIadz">a
     </ul>
     <h3>Magazine</h3>
     <ul>
-      <li><a
-          href="https://www.americanscientist.org/article/moonshot-computing">"Moonshot
+      <li><a href="https://www.americanscientist.org/article/moonshot-computing">"Moonshot
 
 
 
@@ -2129,15 +2137,13 @@ href="https://youtu.be/YU6C0udixgs?list=PLD2VqrZz2-u0r6iMFMLrZIeNw6vodIadz">a
 
 
 
-          Computing"</a> by Brian Hayes, <a
-          href="https://www.americanscientist.org/">American Scientist
+          Computing"</a> by Brian Hayes, <a href="https://www.americanscientist.org/">American Scientist
           magazine</a>, volume 107, number 3.&nbsp; An article primarily
         about the AGC, containing amusing things such as the author
         stepping through some of the code himself.&nbsp; Plus Virtual
         AGC gets a mention, which is always good.<br>
       </li>
-      <li>"<a
-href="http://www.slow-journalism.com/agc-apollo-guidance-computer-code-that-flew-us-to-the-moon">Houston,
+      <li>"<a href="http://www.slow-journalism.com/agc-apollo-guidance-computer-code-that-flew-us-to-the-moon">Houston,
 We
 
 
@@ -2158,8 +2164,7 @@ We
 
 
           Have a Program — Rescuing the Computer Code that Flew Us to
-          the Moon</a>" by Chris Bourn, <a
-          href="http://www.slow-journalism.com">Delayed Gratification
+          the Moon</a>" by Chris Bourn, <a href="http://www.slow-journalism.com">Delayed Gratification
           Magazine</a>, issue #24.&nbsp; The focus of the article is the
         Virtual AGC project, rather than the AGC itself, and (from my
         standpoint) is a lot of fun.&nbsp; The magazine is interesting
@@ -2171,8 +2176,7 @@ We
         the magazine does put a few of their print articles online, and
         that has happened (at least for the moment) with this article,
         so I can give a link to it.&nbsp; Chris has also written another
-        fun article, this time about <a
-          href="https://www.primotoys.com/blog/2017/03/coding-as-storytelling/">the
+        fun article, this time about <a href="https://www.primotoys.com/blog/2017/03/coding-as-storytelling/">the
 relationship
 
 
@@ -2194,8 +2198,7 @@ relationship
 
           of story-telling to computer programming</a>, in which the
         Virtual AGC project appears.</li>
-      <li>"<a
-href="https://qz.com/726338/the-code-that-took-america-to-the-moon-was-just-published-to-github-and-its-like-a-1960s-time-capsule/">BURN,
+      <li>"<a href="https://qz.com/726338/the-code-that-took-america-to-the-moon-was-just-published-to-github-and-its-like-a-1960s-time-capsule/">BURN,
 BABY!
 
 
@@ -2216,8 +2219,7 @@ BABY!
 
 
           BURN!</a>" by Keith Collins, at Quartz.</li>
-      <li>"<a
-href="http://www.rollingstone.com/politics/news/extra-weird-looking-freak-saves-apollo-14-19710318">Don
+      <li>"<a href="http://www.rollingstone.com/politics/news/extra-weird-looking-freak-saves-apollo-14-19710318">Don
 Eyles:
 
 
@@ -2243,8 +2245,7 @@ Eyles:
     <h3>Books<br>
     </h3>
     <ul>
-      <li><a
-href="https://www.amazon.com/Sunburst-Luminary-Apollo-Don-Eyles/dp/0986385905"><i>SUNBURST
+      <li><a href="https://www.amazon.com/Sunburst-Luminary-Apollo-Don-Eyles/dp/0986385905"><i>SUNBURST
 
 
 
@@ -2266,8 +2267,7 @@ href="https://www.amazon.com/Sunburst-Luminary-Apollo-Don-Eyles/dp/0986385905"><
             and LUMINARY, an Apollo Memoir</i></a>, by Don Eyles.&nbsp;
         Go buy it right now!<br>
       </li>
-      <li><a
-href="https://www.amazon.com/Left-Brains-Right-Stuff-Computers/dp/0996434534"><i>Left
+      <li><a href="https://www.amazon.com/Left-Brains-Right-Stuff-Computers/dp/0996434534"><i>Left
 
 
 
@@ -2289,9 +2289,7 @@ href="https://www.amazon.com/Left-Brains-Right-Stuff-Computers/dp/0996434534"><i
             Brains for the Right Stuff: Computers, Space, and History</i></a>,
         by Hugh Blair-Smith.&nbsp; A terrific book, not to be missed!<br>
       </li>
-      <li><a
-href="https://www.amazon.com/Apollo-Guidance-Computer-Architecture-Operation/dp/1441908765"><span
-            style="font-style: italic;">The Apollo Guidance Computer:
+      <li><a href="https://www.amazon.com/Apollo-Guidance-Computer-Architecture-Operation/dp/1441908765"><span style="font-style: italic;">The Apollo Guidance Computer:
             Architecture and Operation</span></a>, by Frank
         O'Brien.&nbsp; Chichester, UK: Springer/Praxis Publishing,
         2010.&nbsp; The title says it all.&nbsp; I think you'll find
@@ -2301,9 +2299,7 @@ href="https://www.amazon.com/Apollo-Guidance-Computer-Architecture-Operation/dp/
         website came from Frank originally, so I guess what goes around
         comes around.&nbsp; Good job, Frank!<br>
       </li>
-      <li><a
-href="https://www.amazon.com/Journey-Moon-History-Guidance-Computer/dp/156347185X"><span
-            style="font-style: italic;">Journey to the Moon:&nbsp; The
+      <li><a href="https://www.amazon.com/Journey-Moon-History-Guidance-Computer/dp/156347185X"><span style="font-style: italic;">Journey to the Moon:&nbsp; The
             History of the Apollo Guidance Computer</span></a>, by Eldon
         Hall.&nbsp; Reston, Virginia:&nbsp; American Institute of
         Aeronautics and Astronautics, 1996.&nbsp; If you're at all
@@ -2314,13 +2310,11 @@ href="https://www.amazon.com/Journey-Moon-History-Guidance-Computer/dp/156347185
         by the author -- $50.&nbsp; Unsigned -- $55."&nbsp; (And no,
         that's not a misprint.&nbsp; Either price was a bargain compared
         to amazon.com, so I cleverly bid it up to $60.)&nbsp; Also, you
-        should read Hugh Blair-Smith's <a
-          href="hrst/HughBlairSmithsAnnotations.html"> annotations to
+        should read Hugh Blair-Smith's <a href="hrst/HughBlairSmithsAnnotations.html"> annotations to
           the book</a>.</li>
       <li><a href="Documents/dobson_mosteirin_moonbit_ebook.pdf.pdf"><i>Moonbit</i></a>,
         by James E. Dobson and Rena J. Mosteirin.&nbsp; This a book of
-        (and about) "<a
-          href="https://en.wikipedia.org/wiki/Erasure_%28artform%29">erasure
+        (and about) "<a href="https://en.wikipedia.org/wiki/Erasure_%28artform%29">erasure
 
 
 
@@ -2368,16 +2362,13 @@ href="https://www.amazon.com/Journey-Moon-History-Guidance-Computer/dp/156347185
     </h3>
     <ul>
       <li>A reader (thanks, Frank Kannemann!) has pointed out this short
-        <a moz-do-not-send="true"
-          href="https://www.pluralsight.com/courses/moon-landing-apollo-11">online
+        <a moz-do-not-send="true" href="https://www.pluralsight.com/courses/moon-landing-apollo-11">online
 
 
 
           lecture, "1969 Moon Landing: The Code of the Apollo 11
           Guidance Computer (AGC)"</a> which seems to cover a lot of the
-        same topics we deal with on this website.&nbsp; <a
-          moz-do-not-send="true"
-href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-a-course-on-it-0y99382u">See
+        same topics we deal with on this website.&nbsp; <a moz-do-not-send="true" href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-a-course-on-it-0y99382u">See
 
 
 
@@ -2416,8 +2407,7 @@ href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-
         missions, consisting principally of interview material with a
         large number of Apollo astronauts.&nbsp; It doesn't really have
         anything to do with the AGC, but I'd recommend it highly anyway.</li>
-      <li>The <a
-          href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents">
+      <li>The <a href="http://www.de-la-terre-a-la-lune.com/apollo.php?page=documents">
           AGC (and other) episodes</a> of the Science Channel series
         "Moon Machines".&nbsp; This has lately also become available on
         DVD.</li>
@@ -2429,8 +2419,7 @@ href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-
       </p>
       <blockquote>
         <p>
-          <meta http-equiv="content-type" content="text/html;
-            charset=UTF-8">
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8">
           Looking over the AGC project there doesn’t seem to be a short
           course in astrodynamics or any theoretical explanation of what
           is going on at the detailed level.&nbsp; If anyone wants to
@@ -2446,16 +2435,14 @@ href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-
           outlook dot com</b>.<br>
       </p>
       <p>Charles also points out that MIT has posted online course
-        materials, including lecture notes, from <a
-          href="https://ocw.mit.edu/courses/16-346-astrodynamics-fall-2008/">a
+        materials, including lecture notes, from <a href="https://ocw.mit.edu/courses/16-346-astrodynamics-fall-2008/">a
           course that Richard Battin gave on this very subject in 2008</a>.&nbsp;
 
 
 
 
         The posting doesn't have enough information in it to
-        unambiguously say whether or not this is the same <a
-          href="https://en.wikipedia.org/wiki/Richard_Battin">Richard
+        unambiguously say whether or not this is the same <a href="https://en.wikipedia.org/wiki/Richard_Battin">Richard
           Battin</a> from the original team at the MIT Instrumentation
         Laboratory that developed the AGC, but it's my supposition that
         it was.<br>
@@ -2473,25 +2460,20 @@ href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-
       code.&nbsp; (Joke!)&nbsp;<br>
       <br>
       But seriously, I've found the blog of some thinker who has used
-      the existence of our Virtual AGC project itself as <span
-        style="font-style: italic;">evidence</span> that the moon
+      the existence of our Virtual AGC project itself as <span style="font-style: italic;">evidence</span> that the moon
       landing was faked.&nbsp; His reasoning goes as follows:&nbsp; a)
-      Virtual AGC simulates some Apollo hardware; b) therefore, it is <span
-        style="font-style: italic;">possible</span> to simulate Apollo
-      missions; and c) therefore Apollo missions <span
-        style="font-style: italic;">were</span> fake 40 years ago.&nbsp;
+      Virtual AGC simulates some Apollo hardware; b) therefore, it is <span style="font-style: italic;">possible</span> to simulate Apollo
+      missions; and c) therefore Apollo missions <span style="font-style: italic;">were</span> fake 40 years ago.&nbsp;
       Well, you hardly need Virtual AGC as a step in that reasoning,
       since lots of people already know that the astronauts trained
       extensively in simulated spacecraft.&nbsp; The simulators being
       used in the 1960s and 70s were far better and more accurate than
       our 21st-century software-only simulations.<br>
       <br>
-      Amusingly to me, the Virtual AGC project has <span
-        style="font-style: italic;">also</span> been used as a
+      Amusingly to me, the Virtual AGC project has <span style="font-style: italic;">also</span> been used as a
       counter-argument to those who believe in the hoax theory, so I
       guess the pluses and minuses of our project, hoax-wise, tend to
-      balance out.&nbsp; I quite like <a
-        href="http://www.youtube.com/watch?v=bic-z2b0mSU">a YouTube
+      balance out.&nbsp; I quite like <a href="http://www.youtube.com/watch?v=bic-z2b0mSU">a YouTube
         video</a> in which a Microsoft Windows based compilation of our
       AGC assembler (<span style="font-weight: bold;">yaYUL</span>) is
       performed, and then <span style="font-weight: bold;">yaYUL</span>
@@ -2511,8 +2493,7 @@ href="https://hackernoon.com/you-can-get-the-source-code-for-apollo-11-and-take-
       assembled.&nbsp; Naturally, this was not very conclusive as far as
       the believer whose argument being debunked was concerned.<br>
       <br>
-      A case in point is the <a
-        href="http://www.angelfire.com/moon2/xpascal/MoonHoax/AGC/AGC.HTM">the
+      A case in point is the <a href="http://www.angelfire.com/moon2/xpascal/MoonHoax/AGC/AGC.HTM">the
 extraordinarily
 
 
@@ -2558,8 +2539,7 @@ extraordinarily
             medium; font-style: normal; font-variant: normal;
             letter-spacing: normal; line-height: normal; text-align:
             start; text-indent: 0px; text-transform: none; white-space:
-            normal; widows: 1; word-spacing: 0px;"><span
-              style="font-size: 16pt;"></span></span></i></font>I admit
+            normal; widows: 1; word-spacing: 0px;"><span style="font-size: 16pt;"></span></span></i></font>I admit
       that I haven't read most of the rest of the argument — the fact
       that it says in the very first paragraph that the AGC software
       can't be assembled (even though our project provides an assembler
@@ -2592,10 +2572,8 @@ extraordinarily
     </div>
     <h2><a name="How_can_the_Virtual_AGC_project_be"></a>How can the
       Virtual AGC project be contacted?</h2>
-    <div style="margin-left: 40px;"> Email to <big><font size="-1"><big><a
-              href="mailto:info@sandroid.org">Ron Burkey
-              &lt;info@sandroid.org&gt;</a>.&nbsp; <a
-              href="mailto:info@sandroid.org"><br>
+    <div style="margin-left: 40px;"> Email to <big><font size="-1"><big><a href="mailto:info@sandroid.org">Ron Burkey
+              &lt;info@sandroid.org&gt;</a>.&nbsp; <a href="mailto:info@sandroid.org"><br>
             </a></big></font></big> </div>
     <br>
     <hr style="width: 100%; height: 2px;">
@@ -2607,8 +2585,7 @@ extraordinarily
         text-transform: none; white-space: normal; widows: 1;
         word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
         inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a
-          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+        255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
 
 
@@ -2629,14 +2606,14 @@ Commons
 
 
           No Rights Reserved License</a></span><br>
-      <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-05-31.<br>
+      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2024-07-03.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
               by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
-  </body>
-</html>
+  
+
+</body></html>
