@@ -1685,7 +1685,7 @@ int pendingNewline = 0;
 void
 OUTPUT(uint32_t lun, descriptor_t *string) {
   char ansi = ' '; // ANSI carriage-control character.
-  char *s = descriptorToAscii(string); // Printable character data.
+  char *ss, *s = descriptorToAscii(string); // Printable character data.
   FILE *fp;
   int i;
   if (lun < 0 || lun >= DD_MAX || DD_OUTS[lun] == NULL)
@@ -1725,8 +1725,12 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
         {
           // This should overstrike the line.  I.e., it's like a carriage return
           // without a line feed.  But I have no actual way to do that, so we
-          // need to advance to the next line.
+          // need to advance to the next line.  Carats just work better than
+          // underscores in these overstrikes (in my opinion).
           strcpy(queue[linesInQueue++], "");
+          for (ss = s; *ss; ss++)
+            if (*ss == '_')
+              *ss = '^';
         }
       else if (ansi == '1')
         LINE_COUNT = linesPerPage;
@@ -1748,6 +1752,10 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
               if (pageCount > 0)
                 {
                   fprintf(fp, "\n\f");
+                  fprintf(fp, "----------------------------------------");
+                  fprintf(fp, "----------------------------------------");
+                  fprintf(fp, "----------------------------------------");
+                  fprintf(fp, "------------------------------\n");
                   pendingNewline = 0;
                 }
               pageCount++;

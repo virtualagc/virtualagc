@@ -675,9 +675,11 @@ def OUTPUT(fileNumber, string):
         elif ansi == '+':
             # This would overstrike the line.  I.e., it's like a carriage return
             # without a line feed.  But I have no actual way to do that, so we 
-            # need to advance to the next line.
+            # need to advance to the next line.  What's typically in these 
+            # overstrikes is underscores, which don't actually work very well,
+            # so I replace those with carats.
             queue.append('')
-            pass
+            string = string.replace("_", "^")
         elif ansi == '1':
             lc.LINE_COUNT = linesPerPage
         elif ansi == 'H':

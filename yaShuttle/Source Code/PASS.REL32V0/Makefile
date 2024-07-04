@@ -15,7 +15,9 @@
 # mentioned, running each of the 7 passes of HAL/S-FC (or at least, however many
 # passes are currently functional) in succession.  Additionally, though, there
 # is a Python3 port of HAL/S-FC's first pass, so it is also used to compile the
-# HAL/S program, and the results of the two first passes are compared.
+# HAL/S program, and the results of the two first passes are compared.  I.e.,
+# the first compiler pass is always run twice on the same HAL/S-FC source-code
+# file, using two different implementations of the first pass.
 #
 # The useful targets of the Makefile are:
 #
@@ -109,15 +111,15 @@ $(TARGETS):
 # `cleanall` does clean everything.
 .PHONY: clean
 clean:
-	-rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
+	-@rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
 	    *.rpt optmat*.bin auxmat*.bin objcode*.obj cards*.txt \
-	    extra*.txt deck*.txt monitor13.parms
+	    extra*.txt deck*.txt monitor13.parms 2>/dev/null
 
 .PHONY: cleanall
 cleanall: clean
-	-rm $(TARGETS) PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
+	-@rm $(TARGETS) PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
             AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
-            PASS4.PROCS/PASS4 -rf
+            PASS4.PROCS/PASS4 -rf 2>/dev/null
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: compile
