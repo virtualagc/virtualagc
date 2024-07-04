@@ -1629,6 +1629,16 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         print(indent + "{")
         oldIndent = indent
         indent += indentationQuantum
+        # Note that McKeeman p. 137 specifies that multiple assignments are done
+        # right to left.  The order is important if you had an assignment like
+        # X(I),I = J since the value X(I) gets assigned is different if the 
+        # order is different.  But if I do it the way McKeeman specifies, I get
+        # infinite loops not only in HAL/S-FC PASS1, but also in HAL_S_FC.py.
+        # I think that the Intermetrics XPL compiler did it in left-to-right
+        # order.  Whether McKeeman mispoke or not is hard to say, since none
+        # of the legacy standard XPL code I've encountered has any problematic
+        # multiple assignments affected by the order. 
+        #LHSs = list(reversed(line["LHS"]))
         LHSs = line["LHS"]
         RHS = line["RHS"]
         # Assignments involving `FILE` are special, in my current 

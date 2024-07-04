@@ -121,9 +121,9 @@ cleanall: clean
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: compile
-compile: 
+compile: clean
 	@echo Processing $(RTARGET) with HAL_S_FC.py ...
-	$(HAL_S_FC_DIR)/HAL_S_FC.py \
+	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
 		$(sPARM_STRING) \
 		--hal=$(RTARGET) \
 		>py.rpt
@@ -210,16 +210,16 @@ compile:
 		--raf=B,3360,6,vmem2.bin \
 		>c2.rpt
 	
-	@echo Processing $(RTARGET) with PASS3 ...
-	cp vmem2.bin vmem3.bin
-	cp litfile2.bin litfile3.bin
-	./PASS3 \
-		--ddo=2,listing23.txt \
-		--raf=B,1680,5,sdf3.bin \
-		--commoni=COMMON-PASS2.out \
-		--commono=COMMON-PASS3.out \
-		--raf=B,1560,2,litfile3.bin \
-		--raf=B,3360,6,vmem3.bin \
-		>c3.rpt
+	#@echo Processing $(RTARGET) with PASS3 ...
+	#cp vmem2.bin vmem3.bin
+	#cp litfile2.bin litfile3.bin
+	#./PASS3 \
+	#	--ddo=2,listing23.txt \
+	#	--raf=B,1680,5,sdf3.bin \
+	#	--commoni=COMMON-PASS2.out \
+	#	--commono=COMMON-PASS3.out \
+	#	--raf=B,1560,2,litfile3.bin \
+	#	--raf=B,3360,6,vmem3.bin \
+	#	>c3.rpt
 	
 	
