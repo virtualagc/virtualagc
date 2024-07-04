@@ -67,7 +67,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 		       '%^Assignments .*%' >/dev/null
 	-@cd bitsizeDemo && \
 	egrep --invert-match \
-	       '(^Assignments |^.PAGE [0-9]|^$$)' xx01 > xxxxA
+	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
 	@diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	@cd bitsizeDemoCommon && \
@@ -82,7 +82,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	       > xxxx
 	-@cd bitsizeDemoCommon && \
 	egrep --invert-match \
-	       '(^Assignments |^.PAGE [0-9]|^$$)' xx01 > xxxxA
+	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
 	@diff -s -q bitsizeDemo/xxxxA bitsizeDemoCommon/xxxxA
 	
 	@cd bitsizeDemoCommonIn && \
@@ -92,7 +92,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	-@cd bitsizeDemoCommonIn && \
 	cat xx00 | \
 	egrep --invert-match \
-	       '(^COMMON |^.PAGE [0-9]|^$$)' > xxxx
+	       '(^COMMON |^.?PAGE [0-9]|^$$)' > xxxx
 	@diff -s -q bitsizeDemoCommon/xxxxA bitsizeDemoCommonIn/xxxx
 	@sed 's/^;.*//' bitsizeDemoCommon/COMMON.out >bitsizeDemoCommon/COMMONa.out
 	@sed 's/^;.*//' bitsizeDemoCommonIn/COMMON.out >bitsizeDemoCommonIn/COMMONa.out
