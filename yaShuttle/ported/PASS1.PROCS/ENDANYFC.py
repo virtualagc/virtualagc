@@ -257,7 +257,7 @@ def END_ANY_FCN():
                     # DO
                         if (g.BI_FLAGS[0] & 0x80) != 0: 
                             g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
-                                SHL(g.PSEUDO_LENGTH[MAXPTR], 8) | \
+                                (SHL(g.PSEUDO_LENGTH[MAXPTR], 8) & 0xFFFF) | \
                                 SHR(g.PSEUDO_LENGTH[MAXPTR], 8);
                         else: 
                             g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];

@@ -112,7 +112,7 @@ def ATTACH_SUB_COMPONENT(SUBp):
                         g.PSEUDO_TYPE[I] = g.VEC_TYPE;
                         g.PSEUDO_LENGTH[I] = T1 + g.FIX_DIM - 1;
                     # END
-                    else: g.PSEUDO_LENGTH[I] = SHL(T1, 8) | g.FIX_DIM;
+                    else: g.PSEUDO_LENGTH[I] = (SHL(T1, 8) | g.FIX_DIM) & 0xFFFF;
                     if g.PSEUDO_TYPE[I] != g.SCALAR_TYPE: 
                         g.VAL_P[I] = g.VAL_P[I] | 0x10;
                     SUBp = SUBp - 2;

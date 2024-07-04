@@ -953,7 +953,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 else:
                     g.TEMP_SYN = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
                     g.TEMP1 = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
-                    g.PSEUDO_LENGTH[g.TEMP] = SHL(g.TEMP_SYN, 8) | g.TEMP1;
+                    g.PSEUDO_LENGTH[g.TEMP] = (SHL(g.TEMP_SYN, 8) & 0xFFFF) | g.TEMP1;
                     g.INX[g.TEMP] = g.TEMP_SYN * g.TEMP1;
             elif fm == 1:
                 #  VECTOR
@@ -2228,7 +2228,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR[g.MP], g.TEMP = g.PTR[g.MPP1];
         g.LOC_P[g.TEMP] = 0;
         if g.INX[g.TEMP] > 0: 
-            if g.PSEUDO_LENGTH[g.TEMP] >= 0 | g.VAL_P[g.TEMP] >= 0: 
+            if g.PSEUDO_LENGTH[g.TEMP] >= 0 or g.VAL_P[g.TEMP] >= 0: 
                 ERROR(d.CLASS_QS, 12);
             if g.PSEUDO_FORM[g.TEMP] != 0: 
                 ERROR(d.CLASS_QS, 13);
