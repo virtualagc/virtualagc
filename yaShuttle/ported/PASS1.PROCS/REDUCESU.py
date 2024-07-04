@@ -65,8 +65,12 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
     
     def STEPPER():
         g.NEXT_SUB = g.NEXT_SUB + 1;
-        g.PSEUDO_LENGTH[g.IND_LINK] = g.NEXT_SUB
-        g.IND_LINK = g.NEXT_SUB;
+        if leftToRightAssignments:
+            g.PSEUDO_LENGTH[g.IND_LINK] = g.NEXT_SUB
+            g.IND_LINK = g.NEXT_SUB;
+        else:
+            g.IND_LINK = g.NEXT_SUB;
+            g.PSEUDO_LENGTH[g.IND_LINK] = g.NEXT_SUB
         if g.INX[g.NEXT_SUB] != 1:
              if MODE == 0x8: 
                  g.VAL_P[g.PTR[g.MP]] = g.VAL_P[g.PTR[g.MP]] | 0x2000;

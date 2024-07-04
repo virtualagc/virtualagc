@@ -24,6 +24,19 @@ import math
 import ebcdic
 from virtualenv.create.via_global_ref.builtin import via_global_self_do
 
+# McKeeman p. 137 specifies that in mulit-assignments like
+#    X1, X2, ..., XN = Y;
+# the assignments are in right-to-left order; i.e., 
+#    XN = Y;
+#    ...
+#    X1 = Y;
+# However, I've had problems with infinite loops in HAL/S-FC PASS1 doing it
+# that way, so I prefer the left-to-right order.  The following variable
+# determines that order, but only for a couple of known problematic cases
+# of the form
+#    X(I),I = J;
+leftToRightAssignments = True
+
 # This is the root directory for imports.
 scriptFolder = os.path.dirname(__file__)  # Requires / at the end.
 scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())

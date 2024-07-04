@@ -55,10 +55,14 @@ def AST_STACKER(MODE, NUM):
         ERROR(d.CLASS_SS, 1, g.VAR[g.MP]);
     for NUM in range(1, NUM + 1):
         I = PUSH_INDIRECT(1);
-        g.LOC_P[I] = 0
         g.VAL_P[I] = 0;
+        g.LOC_P[I] = 0
         g.PSEUDO_TYPE[I] = 0;
         g.PSEUDO_FORM[I] = g.XAST;
         g.INX[I] = MODE;
-        g.PSEUDO_LENGTH[g.IND_LINK] = I
-        g.IND_LINK = I;
+        if leftToRightAssignments:
+            g.PSEUDO_LENGTH[g.IND_LINK] = I        
+            g.IND_LINK = I;
+        else:
+            g.IND_LINK = I;
+            g.PSEUDO_LENGTH[g.IND_LINK] = I
