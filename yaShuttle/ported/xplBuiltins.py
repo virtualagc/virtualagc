@@ -694,6 +694,10 @@ def OUTPUT(fileNumber, string):
             if lc.LINE_COUNT == 0 or lc.LINE_COUNT >= linesPerPage:
                 if pageCount > 0:
                     print('\n\f', end='')
+                    print('----------------------------------------' \
+                          '----------------------------------------' \
+                          '----------------------------------------' \
+                          '----------------------------------------')
                 pageCount += 1
                 lc.LINE_COUNT = 0
                 if len(headingLine) > 0:
