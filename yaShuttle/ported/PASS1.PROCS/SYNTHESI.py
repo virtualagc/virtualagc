@@ -845,7 +845,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if (g.PSEUDO_FORM[g.I] == g.XSYT)or(g.PSEUDO_FORM[g.I] == g.XXPT):
                 if g.VAR[g.SP] == 'T': 
                     HALMAT_TUPLE(g.XMTRA, 0, g.MP, 0, 0);
-                    SETUP_VAC(g.MP, g.TEMP, SHL(g.TEMP2, 8) | SHR(g.TEMP2, 8));
+                    SETUP_VAC(g.MP, g.TEMP, SHL(g.TEMP2 & 0xFF, 8) | SHR(g.TEMP2 & 0xFF00, 8));
                     if g.IMPLICIT_T:
                         g.SYT_FLAGS(g.LOC_P[g.I], g.SYT_FLAGS(g.LOC_P[g.I]) | g.IMPL_T_FLAG);
                         g.IMPLICIT_T = g.FALSE;
@@ -953,7 +953,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 else:
                     g.TEMP_SYN = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
                     g.TEMP1 = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
-                    g.PSEUDO_LENGTH[g.TEMP] = (SHL(g.TEMP_SYN, 8) & 0xFFFF) | g.TEMP1;
+                    g.PSEUDO_LENGTH[g.TEMP] = SHL(g.TEMP_SYN & 0xFF, 8) | g.TEMP1;
                     g.INX[g.TEMP] = g.TEMP_SYN * g.TEMP1;
             elif fm == 1:
                 #  VECTOR

@@ -122,7 +122,7 @@ def MULTIPLY_SYNTHESIZE(I, J, K, DOCASE):
     elif DOCASE == 5:
         # CASE 5,VECTOR  VECTOR */
         HALMAT_TUPLE(g.XVVPR, 0, I, J, 0);
-        SETUP_VAC(K, g.MAT_TYPE, (SHL(g.PSEUDO_LENGTH[g.PTR[I]], 8) & 0xFFFF) + \
+        SETUP_VAC(K, g.MAT_TYPE, SHL(g.PSEUDO_LENGTH[g.PTR[I]] & 0xFF, 8) + \
                              (g.PSEUDO_LENGTH[g.PTR[J]] & 0xFF));
     elif DOCASE == 6:
         # CASE 6 : VECTOR MATRIX */
