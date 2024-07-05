@@ -111,7 +111,7 @@ def INCLUDE_OK():
     g.INCLUDE_LIST = l.LIST_FLAG
     g.INCLUDE_LIST2 = l.LIST_FLAG;
     g.INCLUDE_OFFSET = g.CARD_COUNT + 1;
-    if g.SIMULATING:
+    if 0 != (g.SIMULATING & 1):
         MAKE_INCL_CELL(g.MEMBER, l.INCL_FLAGS, g.REV_CAT);
     g.INCLUDING = g.TRUE;
     g.INPUT_DEV = 4;

@@ -75,7 +75,7 @@ def CHECK_ASSIGN_CONTEXT(LOC):
         ERROR(d.CLASS_A, 1, g.VAR[LOC]);
     if (g.SYT_FLAGS(FIX) & g.ACCESS_FLAG) != 0:
         ERROR(d.CLASS_PS, 8, g.VAR[LOC]);
-    if g.SIMULATING: 
+    if 0 != (g.SIMULATING & 1): 
         STAB_VAR(LOC);
     SET_XREF_RORS(LOC, 0, g.XREF_ASSIGN);
     if SHR(T, 5) & 1: 

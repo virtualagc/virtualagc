@@ -63,7 +63,7 @@ def EMIT_SMRK(T=3):
         HALMAT_POP(g.XIMRK,1,g.XCO_N,g.STATEMENT_SEVERITY);
         HALMAT_PIP(g.STMT_NUM(), 0, g.SMRK_FLAG, T>1);
     g.STATEMENT_SEVERITY=0;
-    if g.SIMULATING: 
+    if 0 != (g.SIMULATING & 1): 
         if T==3: 
             STAB_HDR();
     if g.SRN_PRESENT: 

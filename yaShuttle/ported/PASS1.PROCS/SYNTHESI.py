@@ -1863,7 +1863,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXF[g.MP] = 8;  # DO CHAIN EXISTS FOR CURRENT DO
         g.CONTEXT = 0;
         g.FACTORING = g.TRUE;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_VAR(g.MP);
         SET_XREF(g.ID_LOC, g.XREF_ASSIGN);
     elif PRODUCTION_NUMBER == 165:  # reference 1650
@@ -2607,7 +2607,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.SYT_LINK2(g.TEMP, g.SYT_LINK2(0));
                 g.SYT_LINK2(0, g.TEMP);
         g.LABEL_COUNT = g.LABEL_COUNT + 1;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_LAB(g.FIXL[g.MP]);
         g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP], \
                         g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP]) | g.LABEL_FLAG);
@@ -2633,7 +2633,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.EXTERNAL_MODE = 1;  # JUST A FLAG FOR NOW
             if g.BLOCK_MODE[0] > 0: 
                 ERROR(d.CLASS_PE, 2);
-            if g.SIMULATING:
+            if 0 != (g.SIMULATING & 1):
                 g.STAB2_STACKTOP = g.STAB2_STACKTOP - 1;
                 g.SIMULATING = 2;
     # reference 3110 relocated
@@ -2687,7 +2687,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SYT_TYPE(g.I, g.UNSPEC_LABEL);
         g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | g.DEFINED_LABEL);
         g.VAR_LENGTH(g.I, 2);
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_LAB(g.FIXL[g.MP]);
         goto = "UPDATE_HEAD"
     # reference 3160 relocated
@@ -2755,7 +2755,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 333:  # reference 3330
         #  <DECLARE ELEMENT>  ::=  <DECLARE STATEMENT>
         g.STMT_TYPE = c19.DECL_STMT_TYPE;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_HDR();
         EMIT_SMRK(1);
     # reference 3340 relocated.
@@ -2764,7 +2764,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SYT_ADDR(g.REF_ID_LOC, g.STRUC_SIZE);
         g.REF_ID_LOC = 0;
         g.STMT_TYPE = c19.STRUC_STMT_TYPE;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_HDR();
         goto = "EMIT_NULL";
     elif PRODUCTION_NUMBER == 336:  # reference 3360
@@ -2808,7 +2808,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         CHECK_ARRAYNESS();
         g.PTR_TOP = g.PTR[g.SP - 1] - 1;
         g.STMT_TYPE = c19.EQUATE_TYPE;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_HDR();
         goto = "EMIT_NULL";
     elif PRODUCTION_NUMBER == 337:  # reference 3370
@@ -2830,7 +2830,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "NEXT_ARG"
     elif PRODUCTION_NUMBER == 342:  # reference 3420
         #  <TEMPORARY STMT>  ::=  TEMPORARY  <DECLARE BODY>  ;
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             g.STMT_TYPE = TEMP_TYPE;
         STAB_HDR();
         goto = "DECL_STAT"
@@ -4145,7 +4145,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         SET_XREF_RORS(g.MPP1, 0, g.XREF_ASSIGN);
         if CHECK_ARRAYNESS(): 
             ERROR(d.CLASS_RT, 8);
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_VAR(g.MPP1);
         g.PTR[g.MP] = g.PTR[g.MPP1];
         g.INX[g.PTR[g.MP]] = g.TEMP;
@@ -4833,7 +4833,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.NAME_HASH = HASH(g.VAR[g.MP], g.SYT_HASHSIZE);
         g.FIXL[g.MP] = ENTER(g.VAR[g.MP], g.FUNC_CLASS);
         g.FIXL[g.MP] = g.I
-        if g.SIMULATING: 
+        if 0 != (g.SIMULATING & 1): 
             STAB_LAB(g.I);
         SET_XREF(g.I, g.XREF_REF);
         g.SYT_TYPE(g.I, g.TYPE);
@@ -4910,7 +4910,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <DECLARE ELEMENT>  ::=  <REPLACE STMT>  ;
         if goto == None:
             g.STMT_TYPE = c19.REPLACE_STMT_TYPE;
-            if g.SIMULATING: 
+            if 0 != (g.SIMULATING & 1): 
                 STAB_HDR();
         if goto == "EMIT_NULL": goto = None
         OUTPUT_WRITER();
