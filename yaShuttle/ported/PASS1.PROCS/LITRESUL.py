@@ -39,7 +39,9 @@ import g
 
 def LIT_RESULT_TYPE(LOC1, LOC2):
     '''
-    # No idea what the following does.  Ignore for now.
+    # What the following inlines do is to determine whether the IBM Hex
+    # floating-point value stored in DW(0),DW(1) is in-range for a 32-bit
+    # integer.  It stores a value in DW[2] which is >0 if not and <=0 if is.
     INLINE("58", 1, 0, g.DW_AD);  # L   1,DW_AD
     INLINE("68", 0, 0, 1, 0);  # LD  0,0(0,1)
     INLINE("20", 0, 0);  # LPDR 0,0
@@ -47,6 +49,12 @@ def LIT_RESULT_TYPE(LOC1, LOC2):
     INLINE("6B", 0, 0, 2, 0);  # SD  0,0(0,2)
     INLINE("60", 0, 0, 1, 8);  # STD 0,8(0,1)
     '''
+    d = fromFloatIBM(g.DW[0], g.DW[1])
+    if d > 0x7FFFFFFF or d < -0x80000000:
+        g.DW[2] = 1
+    else:
+        g.DW[2] = -1
+    
     if g.PSEUDO_TYPE[g.PTR[LOC1]] == g.INT_TYPE:
         if g.PSEUDO_TYPE[g.PTR[LOC2]] == g.INT_TYPE:
             if g.DW[2] <= 0:
