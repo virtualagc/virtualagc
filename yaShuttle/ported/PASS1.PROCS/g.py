@@ -207,6 +207,17 @@ for parm in sys.argv[1:]:
         print("Use --help for more information.")
         sys.exit(1)
 
+# Catch some compiler parameters that aren't (yet?) supported. TABLES isn't
+# supported because it requires virtual-memory features (and possibly lots of
+# other stuf) that I didn't manage to implement while I was originally 
+# developing HAL_S_FC.
+if "TABLES" in pCON:
+    print("HAL_S_FC does not presently support the TABLES parameter.", \
+          file = sys.stderr)
+    print("Please specify NOTABLES in the command-line parameters.", \
+          file = sys.stderr)
+    sys.exit(1)
+
 '''
 The following code relates to determining and printing out the compiler
 options which have been supplied originally by JCL, but for us by 
