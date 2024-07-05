@@ -51,3 +51,5 @@ def SETUP_VAC(LOC, TYPE, SIZE=-1):
     g.PSEUDO_TYPE[g.PTR[LOC]] = TYPE;
     if SIZE > 0:
         g.PSEUDO_LENGTH[g.PTR[LOC]] = SIZE;
+
+            

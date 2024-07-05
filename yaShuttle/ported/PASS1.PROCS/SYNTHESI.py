@@ -67,6 +67,7 @@ from EMITPUSH import EMIT_PUSH_DO
 from EMITSMRK import EMIT_SMRK
 from EMITSUBS import EMIT_SUBSCRIPT
 from ENDANYFC import END_ANY_FCN
+from ENDSUBBI import END_SUBBIT_FCN
 from ERROR    import ERROR
 from ERRORSUB import ERROR_SUB
 from GETICQ   import GET_ICQ
@@ -1465,7 +1466,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "INLINE_SCOPE"
     elif PRODUCTION_NUMBER == 89:  # reference 890
         #  <BIT PRIM>  ::=  <SUBBIT HEAD>  <EXPRESSION>  )
-        END_SUBBIT_FCN;
+        END_SUBBIT_FCN();
         SET_BI_XREF(SBIT_NDX);
         goto = "NON_EVENT"
     elif PRODUCTION_NUMBER == 90:  # reference 900
@@ -2092,7 +2093,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             g.TEMP = 0;
         END_SUBBIT_FCN(g.TEMP);
-        SET_BI_XREF(SBIT_NDX);
+        SET_BI_XREF(g.SBIT_NDX);
         g.VAL_P[g.PTR[g.MP]] = g.VAL_P[g.PTR[g.MPP1]] | 0x80;
     elif PRODUCTION_NUMBER == 198:  # reference 1980
         #  <VARIABLE> ::= <CHAR VAR>
@@ -2226,7 +2227,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                       g.TOKEN_FLAGS(g.STACK_PTR[g.SP]) | 0x20);
     elif PRODUCTION_NUMBER == 224:  # reference 2240
         # <SUBBIT HEAD>::= <SUBBIT KEY> <SUBSCRIPT>(
-        g.PTR[g.MP], g.TEMP = g.PTR[g.MPP1];
+        g.PTR[g.MP] = g.PTR[g.MPP1];
+        g.TEMP = g.PTR[g.MPP1];
         g.LOC_P[g.TEMP] = 0;
         if g.INX[g.TEMP] > 0: 
             if g.PSEUDO_LENGTH[g.TEMP] >= 0 or g.VAL_P[g.TEMP] >= 0: 
@@ -3176,7 +3178,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXV[g.MP] = g.LOCK_FLAG;
     elif PRODUCTION_NUMBER == 407:  # reference 4070
         #  <MINOR ATTRIBUTE>  ::=  REMOTE
-        g.FIXL[g.MP], g.FIXV[g.MP] = g.REMOTE_FLAG;
+        g.FIXL[g.MP] = g.REMOTE_FLAG;
+        g.FIXV[g.MP] = g.REMOTE_FLAG;
     elif PRODUCTION_NUMBER == 408:  # reference 4080
         #  <MINOR ATTRIBUTE> ::= RIGID
         g.FIXL[g.MP] = g.RIGID_FLAG
@@ -4081,7 +4084,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.CASE_STACK[g.CASE_LEVEL] = g.CASE_STACK[g.CASE_LEVEL] + 1;
                 g.TEMP = 0;
                 while (g.TEMP < g.CASE_LEVEL) and (g.TEMP < g.CASE_LEVEL_LIM):
-                    g.INFORMATION = g.INFORMATION + g.CASE_STACK[g.TEMP] + g.PERIOD;
+                    g.INFORMATION = g.INFORMATION + str(g.CASE_STACK[g.TEMP]) + g.PERIOD;
                     g.TEMP = g.TEMP + 1;
                 g.INFORMATION = g.INFORMATION + str(g.CASE_STACK[g.TEMP]);
                 HALMAT_POP(g.XCLBL, 2, g.XCO_N, 0);

@@ -990,16 +990,40 @@ parseCommandLine(int argc, char **argv)
   return returnValue;
 }
 
-// `nextBuffer` is sort of a cut-rate memory-management system for built-ins
-// that return CHARACTER values or BIT values.  In order to avoid having to
-// allocate new memory for such output, or more importantly to free such
-// memory later, we instead maintain a circular array of buffers, and
-// each call to a built-in that returns a string or a BIT simply uses the next
-// buffer in that array.  The reason this is okay is that functions returning
-// strings or BITs are invoked only in the context of expressions, and the
-// number of function calls an expression can make isn't very large. So we can
-// just make the circular array very large and not worry about it.  I hope.
-#define MAX_BUFFS 1024
+/*
+ * `nextBuffer` is sort of a cut-rate memory-management system for built-ins
+ * that return CHARACTER values or BIT values.  In order to avoid having to
+ * allocate new memory for such output, or more importantly to free such
+ * memory later, we instead maintain a circular array of buffers, and
+ * each call to a built-in that returns a string or a BIT simply uses the next
+ * buffer in that array.  The reason this is okay is that functions returning
+ * strings or BITs are invoked only in the context of expressions, and the
+ * number of function calls an expression can make isn't very large. So we can
+ * just make the circular array very large and not worry about it.  I hope.
+ *
+ * Later ... I was so, so wrong!  It's true that if you think of a simple
+ * expression like S = S0 || S1 || ... || SN that it can use up very few
+ * buffers.  But suppose, say, you had a procedure P() that had two parameters
+ * which were CHARACTER or BIT(>32).  And supposed you used two functions that
+ * returned CHARACTER or BIT(>32) as the parameters:
+ *      CALL P(bitFunction1(), bitFunction2();
+ * When this executes, bitFunction2() will execute first, returning a
+ * descriptor_t * which just sits around doing nothing while bitFunction1()
+ * executes.  If bitFunction1() itself calls nextBuffer() lots of times, because
+ * perhaps it's printing a big report, then nextBuffer() may wrap around and hit
+ * the returned descriptor_t * from bitFunction2() before bitFunction1() ever
+ * returns.
+ *
+ * Unfortunately, this is not merely theoretical, because it actually happens
+ * in printing the symbol table for HAL/S-FC PASS1, causing "random" errors in
+ * the symbol-table printout, depending on how big MAX_BUFFS is.  1024 is
+ * definitely too small!  I'm increasing MAX_BUFFS tremendously to account for
+ * it temporarily, but the entire nextBuffer system needs to be rethought and
+ * fixed. But I find that LISTING2 is even more sensitive to this problem than
+ * symbol-table printout, even MAX_BUFFS as large as 100000 don't fix it.
+ * ***FIXME***
+ */
+#define MAX_BUFFS 10000 // 1024
 descriptor_t *
 nextBuffer(void)
 {
