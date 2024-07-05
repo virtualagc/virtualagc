@@ -13,6 +13,7 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.VMEM2 as v2
+from HALINCL.VMEM3 import GET_CELL, MOVE
 from HALINCL.SPACELIB import NEXT_ELEMENT
 
 
@@ -22,7 +23,8 @@ from HALINCL.SPACELIB import NEXT_ELEMENT
 class cFINISH_MACRO_TEXT:
 
     def __init__(self):
-        self.NODE_F = []  # Array of integer.
+        self.NODE_F0 = 0
+        self.NODE_F1 = 0
         self.ARG_FLAG = 0
         self.NEXT_CELL_PTR = 0
         self.TEXT_PTR = 0
@@ -30,8 +32,7 @@ class cFINISH_MACRO_TEXT:
         self.CELLSIZE = 0
         self.TEXT_SIZE = 0
         self.II = 0
-
-
+        
 lFINISH_MACRO_TEXT = cFINISH_MACRO_TEXT()
 
 
@@ -72,9 +73,9 @@ def FINISH_MACRO_TEXT():
             if g.MACRO_TEXT(l.TEXT_PTR - 1) == 0xEE:
                 l.TEXT_PTR = l.TEXT_PTR + 1;
                 l.CELLSIZE = l.CELLSIZE - 1;
-            g.REPLACE_TEXT_PTR, l.NODE_F = GET_CELL(l.CELLSIZE + 6, v2.MODF);
-            l.NODE_F[0] = l.NEXT_CELL_PTR;
-            l.NODE_F[1] = SHL(l.CELLSIZE, 16);
+            g.REPLACE_TEXT_PTR, l.NODE_F0 = GET_CELL(l.CELLSIZE + 6, v2.MODF);
+            l.NODE_F0 = l.NEXT_CELL_PTR;
+            l.NODE_F1 = SHL(l.CELLSIZE, 16);
             g.MACRO_BYTES(g.MACRO_BYTES() + g.MACRO_CELL_LIM);
             MOVE(l.CELLSIZE, (g.MACRO_TEXT(l.TEXT_PTR), 0), \
                  v2.VMEM_LOC_ADDR + 6);
@@ -82,16 +83,16 @@ def FINISH_MACRO_TEXT():
             l.TEXT_PTR = l.TEXT_PTR - g.MACRO_CELL_LIM;
             l.TEXT_SIZE = l.TEXT_SIZE - l.CELLSIZE;
         if l.TEXT_SIZE > 0:
-            g.REPLACE_TEXT_PTR, l.NODE_F = GET_CELL(l.TEXT_SIZE + 6, v2.MODF);
-            l.NODE_F[0] = l.NEXT_CELL_PTR;
-            l.NODE_F[1] = SHL(l.TEXT_SIZE, 16);
+            g.REPLACE_TEXT_PTR, l.NODE_F0 = GET_CELL(l.TEXT_SIZE + 6, v2.MODF);
+            l.NODE_F0 = l.NEXT_CELL_PTR;
+            l.NODE_F1 = SHL(l.TEXT_SIZE, 16);
             l.NEXT_CELL_PTR = g.REPLACE_TEXT_PTR;
             g.MACRO_BYTES(g.MACRO_BYTES() + ((l.TEXT_SIZE + 3) & 0xFFFC));
             MOVE(l.TEXT_SIZE, (g.MACRO_TEXT(g.START_POINT), 0), \
                  v2.VMEM_LOC_ADDR + 6);
-        g.REPLACE_TEXT_PTR, l.NODE_F = GET_CELL(8, v2.MODF);
-        l.NODE_F[0] = l.NEXT_CELL_PTR;
-        l.NODE_F[1] = 0xFFFF0000 + l.BLANK_BYTES;
+        g.REPLACE_TEXT_PTR, l.NODE_F0 = GET_CELL(8, v2.MODF);
+        l.NODE_F0 = l.NEXT_CELL_PTR;
+        l.NODE_F1 = 0xFFFF0000 + l.BLANK_BYTES;
         g.REPLACE_TEXT_PTR = g.REPLACE_TEXT_PTR | l.ARG_FLAG;
     g.FIRST_FREE(g.FIRST_FREE() + 1);
     NEXT_ELEMENT(g.MACRO_TEXTS);

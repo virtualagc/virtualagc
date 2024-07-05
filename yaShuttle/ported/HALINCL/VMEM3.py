@@ -101,7 +101,10 @@ def MOVE(LENGTH, FROM, INTO):
     else:
         if isinstance(destObject, bytearray):
             print("MOVE not yet implemented for this case", file=sys.stderr)
-            0 / 0
+            print("Length:", LENGTH, file=sys.stderr)
+            print("Source:", sourceObject, file=sys.stderr)
+            print("Dest: ", destObject, file=sys.stderr)
+            sys.exit(1);
         else:
             print("MOVE not yet implemented for this case", file=sys.stderr)
             0 / 0

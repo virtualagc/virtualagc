@@ -210,92 +210,48 @@ for parm in sys.argv[1:]:
 '''
 The following code relates to determining and printing out the compiler
 options which have been supplied originally by JCL, but for us by 
-command-line options.  The available options are described by the "HAL/S-FC
-User's Manual" (chapter 5), while the organization of these in IBM 
-System/360 system memory (as we would need it to work with the following
-code) is described in the "HAL/S-FC and HAL/S-360 Compiler System Program 
-Description" (IR-182-1) around p. 696. In neither source is there an 
-explanation of how the options specifically relate to the bit-flags in
-the 32-bit variable OPTIONS_WORD, so whatever I know about that has been
-gleaned from looking at how the source code processes that word.
-    Flag          Pass         Keyword (abbreviation)
-    ----          ----         ----------------------
-    0x40000000    1            REGOPT (R) for BFS
-    0x10000000    3            DEBUG
-    0x08000000    3            DLIST
-    0x04000000    1            MICROCODE (MC)
-    0x02000000    1            REGOPT (R) for PFS
-    0x01000000    ?            STATISTICS
-    0x00800000    1            SDL (NONE)
-    0x00400000    4            DECK (D)
-    0x00200000    1            LFXI (NONE)
-    0x00100000    1            ADDRS (A)
-    0x00080000    1            SRN (NONE)
-    0x00040000    1            HALMAT (HM)
-    0x00020000    1            CODE_LISTING_REQUESTED
-    0x00010000    1            PARTIAL_PARSE
-    0x00008000    3,4          SDF_SUMMARY, TABLST (TL)
-    0x00004000    1            EXTRA_LISTING
-    0x00002000    1            SREF (SR)
-    0x00001000    3,4          TABDMP (TBD)
-    0x00000800    1            SIMULATING
-    0x00000400    1            Z_LINKAGE ... perhaps ZCON (Z)
-    0x00000200    ?            TRACE
-    0x00000080    3            HIGHOPT (HO)
-    0x00000040    1,2,4        NO_VM_OPT, ?, BRIEF
-    0x00000020    4            ALL
-    0x00000010    1            TEMPLATE (TP)
-    0x00000008    2,3          TRACE
-    0x00000004    1            LIST (L)
-    0x00000002    1            LISTING2 (L2)
-    ?                          DUMP (DP)
-    ?                          LSTALL (LA)
-    ?                          SCAL (SC) for BFS only
-    ?                          TABLES (TBL)
-    ?                          VARSYM (VS)
+command-line options. 
 '''
-
 if pfs:
     regoptFlag = 0x02000000
     scalFlag = None
 else:
     regoptFlag = 0x40000000
-    scalFlag = None
+    scalFlag =   0x02000000
 parmFlags = {
-    "REGOPT": regoptFlag,
-    "DEBUG": 0x10000000,
-    "DLIST": 0x08000000,
-    "MICROCODE": 0x04000000,
-    "STATISTICS": 0x01000000,
-    "SDL": 0x00800000,
-    "DECK": 0x00400000,
-    "LFXI": 0x00200000,
-    "ADDRS": 0x00100000,
-    "SRN": 0x00080000,
-    "HALMAT": 0x00040000,
-    "CODE_LISTING_REQUESTED": 0x00020000,
-    "PARSE": 0x00010000,
-    "TABLST": 0x00008000,
-    "SDF_SUMMARY": 0x00008000,
-    "EXTRA_LISTING": 0x00004000,
-    "SREF": 0x00004000,
-    "TABDMP": 0x00001000,
-    "SIMULATING": 0x00000800,
-    "ZCON": 0x00000400,
-    "TRACE": 0x00000200,
-    "HIGHOPT": 0x00000080,
-    "NO_VM_OPT": 0x00000040,
-    "BRIEF": 0x00000040,
-    "LSTALL": 0x00000020,
+    "XF":       0x80000000,
+    "XE":       0x40000000,
+    "QUASI":    0x20000000,
+    "XC":       0x10000000,
+    "XB":       0x08000000,
+    "MICROCODE":0x04000000,
+    "REGOPT":   regoptFlag,
+    "SCAL":     scalFlag,
+    "X6":       0x01000000,
+    "SDL":      0x00800000,
+    "DECK":     0x00400000,
+    "LFXI":     0x00200000,
+    "ADDRS":    0x00100000,
+    "SRN":      0x00080000,
+    "HALMAT":   0x00040000,
+    "LSTALL":   0x00020000,
+    "PARSE":    0x00010000,
+    "TABLST":   0x00008000,
+    "XA":       0x00004000,
+    "SREF":     0x00002000,
+    "TABDMP":   0x00001000,
+    "TABLES":   0x00000800,
+    "ZCON":     0x00000400,
+    "X5":       0x00000200,
+    "X4":       0x00000100,
+    "HIGHOPT":  0x00000080,
+    "VARSYM":   0x00000040,
+    "X1":       0x00000020,
     "TEMPLATE": 0x00000010,
-    "TRACE": 0x00000008,
-    "LIST": 0x00000004,
+    "TRACE":    0x00000008,
+    "LIST":     0x00000004,
     "LISTING2": 0x00000002,
-    "DUMP": None,  # TBD
-    "LSTALL": None,  # TBD
-    "SCAL": None,  # TBD for BFS, none for PFS
-    "TABLES": None,  # TBD
-    "VARSYM": None  # TBD
+    "DUMP":     0x00000001
     }
 
 PARM_FIELD = ""
