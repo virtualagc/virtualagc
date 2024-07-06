@@ -136,9 +136,6 @@ g0(char *identifier, memoryMapEntry_t *me);
 char *
 g(char *identifier); // For interactive debugging.
 
-int
-guardReentry(int reentryGuard, char *functionName);
-
 #ifdef IS_PASS2
 void
 checkoutPASS2(void);
@@ -146,13 +143,16 @@ checkoutPASS2(void);
 
 #endif // DEBUGGING_AID
 
+int
+guardReentry(int reentryGuard, char *functionName);
+
 // Some functions that are perhaps useful for CALL INLINE or for running
 // the C code in a debugger.
 
 void abend(const char *fmt, ...);
 
 // Returns an empty string.
-#define MAX_BUFFS 20000 // 1024
+#define MAX_BUFFS 1024
 descriptor_t *
 nextBuffer(void);
 // Count the number of buffers allocated.
@@ -354,6 +354,9 @@ SUBSTR2(descriptor_t *s, int32_t start);
 // coding (presumably ASCII), because they're intended to operate on data
 // from CHARACTER variables.  BYTE2 performs no such conversion, because it's
 // intended to operate on the data of BIT variables.
+
+uint8_t
+BYTE0(uint32_t address);
 
 uint8_t
 BYTE(descriptor_t *s, uint32_t index);

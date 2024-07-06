@@ -924,6 +924,22 @@ def reserveLiteral(string):
 # runtime.
 def autoconvert(current, allowed, source=None):
     conversions = []
+    
+    # A special case:
+    if current == "BIT" and "FIXED" in allowed and source != None and \
+            source.startswith("getBIT("):
+        # In this case, the stuff below would convert getBIT(n,...) to 
+        # bitToFixed(getBIT(n,...)), which is kind of silly, so we just
+        # take care of it directly.  Start by getting the bitWidth:
+        fields = source[7:].split(",", 1)
+        bitWidth = int(fields[0])
+        if bitWidth <= 8:
+            return "FIXED", "BYTE0(" + fields[1]
+        elif bitWidth <= 16:
+            return "FIXED", "COREHALFWORD(" + fields[1]
+        elif bitWidth <= 32:
+            return "FIXED", "COREWORD(" + fields[1]
+    
     if current == "CHARACTER":
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "%s"))
@@ -1001,12 +1017,19 @@ def generateOperation(scope, expression):
     allowedDatatypes = {}
     for datatype in ["FIXED", "BIT", "CHARACTER"]:
         if operator in operatorTypes[numOperands][datatype]:
-            allowedDatatypes[datatype] = operatorTypes[numOperands][datatype][operator]
+            allowedDatatypes[datatype] = \
+                operatorTypes[numOperands][datatype][operator]
     if numOperands == 1:
         type1, source1 = autoconvert(type1, allowedDatatypes, source1)
         datatype, function = allowedDatatypes[type1]
         return datatype, "%s(%s)" % (function, source1)
     # Binary operator.
+    if type1 in ["BIT", "FIXED"] and type2 in ["BIT", "FIXED"] and \
+            operator in operatorTypes[2]["FIXED"]:
+        type1, source1 = autoconvert(type1, ["FIXED"], source1)
+        type2, source2 = autoconvert(type2, ["FIXED"], source2)
+        datatype, function = operatorTypes[2]["FIXED"][operator]
+        return datatype, "%s(%s, %s)" % (function, source1, source2)
     autoconversions1 = autoconvert(type1, allowedDatatypes)
     autoconversions2 = autoconvert(type2, allowedDatatypes)
     for autoconversion1 in autoconversions1:
@@ -2512,6 +2535,25 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         indent2 = indent1 + indentationQuantum
         # Let's guard against reentry.
         if reentryGuard:
+            '''
+            attributes = getAttributes(scope, scopeName)
+            if attributes != None and "parameters" in attributes:
+                reentryDescriptors = ""
+                n = 0
+                for formalParm in attributes["parameters"]:
+                    a = scope["variables"][formalParm]
+                    if "BIT" not in a and "CHARACTER" not in a:
+                        continue
+                    n += 1
+                    if len(reentryDescriptors) == 0:
+                        reentryDescriptors = "{ %s" % formalParm
+                    else:
+                        reentryDescriptors = reentryDescriptors + ", %s" % formalParm
+                if len(reentryDescriptors) == 0:
+                    reentryDescriptors = "{ }"
+                else:
+                    reentryDescriptors = reentryDescriptors + " }"
+            '''
             print(indent1 + "static int reentryGuard = 0;")
             print(indent1 + 'reentryGuard = guardReentry(reentryGuard, "%s");' % \
                                                functionName)
