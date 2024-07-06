@@ -836,8 +836,11 @@ allOperators = {"|", "&", "~", "+", "-", "*", "/", "mod", "||", "=", "<", ">",
                 "~=", "~<", "~>", "<=", ">="}
 operatorTypes = {
     1: { 
-        "FIXED": { "-": ("FIXED", "xminus") },
-        "BIT": { "~": ("BIT", "xNOT") },
+        "FIXED": { 
+            "-": ("FIXED", "xminus"),
+            "~": ("FIXED", "xNOT")
+            },
+        "BIT": {  },
         "CHARACTER": {}
         },
     2: {
@@ -847,29 +850,28 @@ operatorTypes = {
             "*": ("FIXED", "xmultiply"),
             "/": ("FIXED", "xdivide"),
             "mod": ("FIXED", "xmod"),
-            "=": ("BIT", "xEQ"),
-            "<": ("BIT", "xLT"),
-            ">": ("BIT", "xGT"),
-            "~=": ("BIT", "xNEQ"),
-            "~<": ("BIT", "xGE"),
-            "~>": ("BIT", "xLE"),
-            "<=": ("BIT", "xLE"),
-            ">=": ("BIT", "xGE")
+            "=": ("FIXED", "xEQ"),
+            "<": ("FIXED", "xLT"),
+            ">": ("FIXED", "xGT"),
+            "~=": ("FIXED", "xNEQ"),
+            "~<": ("FIXED", "xGE"),
+            "~>": ("FIXED", "xLE"),
+            "<=": ("FIXED", "xLE"),
+            ">=": ("FIXED", "xGE"),
+            "|": ("FIXED", "xOR"), 
+            "&": ("FIXED", "xAND")
             },
-        "BIT": {
-            "|": ("BIT", "xOR"), 
-            "&": ("BIT", "xAND")
-            },
+        "BIT": { },
         "CHARACTER": {
             "||": ("CHARACTER", "xsCAT"),
-            "=": ("BIT", "xsEQ"),
-            "<": ("BIT", "xsLT"),
-            ">": ("BIT", "xsGT"),
-            "~=": ("BIT", "xsNEQ"),
-            "~<": ("BIT", "xsGE"),
-            "~>": ("BIT", "xsLE"),
-            "<=": ("BIT", "xsLE"),
-            ">=": ("BIT", "xsGE")
+            "=": ("FIXED", "xsEQ"),
+            "<": ("FIXED", "xsLT"),
+            ">": ("FIXED", "xsGT"),
+            "~=": ("FIXED", "xsNEQ"),
+            "~<": ("FIXED", "xsGE"),
+            "~>": ("FIXED", "xsLE"),
+            "<=": ("FIXED", "xsLE"),
+            ">=": ("FIXED", "xsGE")
         }
     }
 }
@@ -1143,7 +1145,7 @@ def generateExpression(scope, expression):
                             .replace('"', '\\\"')\
                             .replace(replacementQuote, "'") + '")'
     elif operator == ".":
-        # The operator is the separator between a the name of a  BASED RECORD 
+        # The operator is the separator between the name of a  BASED RECORD 
         # (possibly subscripted) and the name of one of its fields (also 
         # possibly subscripted).
         if len(expression["children"]) != 2:
@@ -1988,6 +1990,10 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     errxit("Unsupported builtin " + builtin)
             else:
                 errxit("Bad LHS " + str(LHS))
+        if definedB:
+            print(indent + "bitRHS->inUse = 0;")
+        if definedS:
+            print(indent + "stringRHS->inUse = 0;")
         indent = indent[: -len(indentationQuantum)]
         print(indent + "}")
     elif "FOR" in line:
@@ -2574,6 +2580,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             if nonCommonBase > commonBase:
                 #print(indent + "writeCOMMON(COMMON_OUT);")
                 print(indent + "RECORD_LINK();")
+        #print(indent + \
+        #      'fprintf(stderr, "FYI: %d of %d buffers still active.\\n", countBuffers(), MAX_BUFFS);')
         #print(indent + "if (LINE_COUNT)")
         #print(indent + indentationQuantum + \
         #      "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")

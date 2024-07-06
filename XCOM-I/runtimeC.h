@@ -50,6 +50,7 @@ typedef struct {
   uint16_t bitWidth; // Number of bits (0 for CHARACTER).
   uint8_t bytes[MAX_XPL_STRING+2]; // The data itself.
   int32_t address; // Address from which was loaded, or -1 if none.
+  uint8_t inUse; // 0 if available for reuse.
 } descriptor_t;
 typedef char sbuf_t[MAX_XPL_STRING + 1];
 #endif
@@ -151,8 +152,11 @@ checkoutPASS2(void);
 void abend(const char *fmt, ...);
 
 // Returns an empty string.
+#define MAX_BUFFS 20000 // 1024
 descriptor_t *
 nextBuffer(void);
+// Count the number of buffers allocated.
+int countBuffers(void);
 
 descriptor_t *
 asciiToDescriptor(char *c);
@@ -280,40 +284,40 @@ int32_t
 xdivide(int32_t i1, int32_t i2);
 int32_t
 xmod(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xEQ(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xLT(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xGT(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xNEQ(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xLE(int32_t i1, int32_t i2);
-descriptor_t *
+int32_t
 xGE(int32_t i1, int32_t i2);
-descriptor_t *
-xNOT(descriptor_t *i1);
+int32_t
+xNOT(int32_t i1);
 #ifndef xOR
-descriptor_t *
-xOR(descriptor_t *i1, descriptor_t *i2);
+int32_t
+xOR(int32_t i1, int32_t i2);
 #endif // xOR
 #ifndef xAND
-descriptor_t *
-xAND(descriptor_t *i1, descriptor_t *i2);
+int32_t
+xAND(int32_t i1, int32_t i2);
 #endif // xAND
 
-descriptor_t *
+int32_t
 xsEQ(descriptor_t *s1, descriptor_t *s2);
-descriptor_t *
+int32_t
 xsLT(descriptor_t *s1, descriptor_t *s2);
-descriptor_t *
+int32_t
 xsGT(descriptor_t *s1, descriptor_t *s2);
-descriptor_t *
+int32_t
 xsNEQ(descriptor_t *s1, descriptor_t *s2);
-descriptor_t *
+int32_t
 xsLE(descriptor_t *s1, descriptor_t *s2);
-descriptor_t *
+int32_t
 xsGE(descriptor_t *s1, descriptor_t *s2);
 
 descriptor_t *

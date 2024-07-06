@@ -1023,13 +1023,22 @@ parseCommandLine(int argc, char **argv)
  * symbol-table printout, even MAX_BUFFS as large as 100000 don't fix it.
  * ***FIXME***
  */
-#define MAX_BUFFS 10000 // 1024
+static descriptor_t buffers[MAX_BUFFS];
+static int currentBuffer;
 descriptor_t *
 nextBuffer(void)
 {
-  static descriptor_t buffers[MAX_BUFFS];
-  static int currentBuffer;
-  descriptor_t *returnValue = &(buffers[currentBuffer++]);
+  descriptor_t *returnValue = NULL;
+  int start = currentBuffer;
+  while (0 && buffers[currentBuffer].inUse)
+    {
+      currentBuffer++;
+      if (currentBuffer >= MAX_BUFFS)
+        currentBuffer = 0;
+      if (currentBuffer == start)
+        abend("No more free buffers.");
+    }
+  returnValue = &(buffers[currentBuffer++]);
   if (currentBuffer >= MAX_BUFFS)
     currentBuffer = 0;
   returnValue->type = ddCHARACTER;
@@ -1037,7 +1046,17 @@ nextBuffer(void)
   returnValue->bitWidth = 0;
   returnValue->bytes[0] = 0;
   returnValue->address = -1;
+  returnValue->inUse = 1;
   return returnValue;
+}
+
+int
+countBuffers(void) {
+  int i, count = 0;
+  for (i = 0; i <= MAX_BUFFS; i++)
+    if (buffers[i].inUse)
+      count++;
+  return count;
 }
 
 descriptor_t *
@@ -1502,120 +1521,53 @@ xmod(int32_t i1, int32_t i2)
   return i1 % i2;
 }
 
-descriptor_t *
+int32_t
 xEQ(int32_t i1, int32_t i2)
 {
-  return fixedToBit(1, i1 == i2);
+  return i1 == i2;
 }
 
-descriptor_t *
+int32_t
 xLT(int32_t i1, int32_t i2) {
-  return fixedToBit(1, i1 < i2);
+  return i1 < i2;
 }
 
-descriptor_t *
+int32_t
 xGT(int32_t i1, int32_t i2) {
-  return fixedToBit(1, i1 > i2);
+  return i1 > i2;
 }
 
-descriptor_t *
+int32_t
 xNEQ(int32_t i1, int32_t i2) {
-  return fixedToBit(1, i1 != i2);
+  return i1 != i2;
 }
 
-descriptor_t *
+int32_t
 xLE(int32_t i1, int32_t i2) {
-  return fixedToBit(1, i1 <= i2);
+  return i1 <= i2;
 }
 
-descriptor_t *
+int32_t
 xGE(int32_t i1, int32_t i2) {
-  return fixedToBit(1, i1 >= i2);
+  return i1 >= i2;
 }
 
-descriptor_t *
-xNOT(descriptor_t *i1) {
-  descriptor_t *result = nextBuffer();
-  int i, mask, bitWidth = i1->bitWidth, numBytes = i1->numBytes;
-  uint8_t *bytes = i1->bytes;
-  result->bitWidth = bitWidth;
-  result->numBytes = numBytes;
-  for (i = numBytes - 1; i >= 0; i--)
-    result->bytes[i] = ~(i1->bytes[i]);
-  return result;
+int32_t
+xNOT(int32_t i1) {
+  return ~i1;
 }
 
 #ifndef xOR
-descriptor_t *
-xOR(descriptor_t *i1, descriptor_t *i2) {
-  descriptor_t *result = nextBuffer();
-  int i, numBytes, bitWidth,
-      bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
-      numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
-  uint8_t *bytes1 = i1->bytes, *bytes2 = i2->bytes, *bytes = result->bytes;
-  numBytes = numBytes1;
-  if (numBytes2 > numBytes)
-    numBytes = numBytes2;
-  bitWidth = bitWidth1;
-  if (bitWidth2 > bitWidth)
-    bitWidth = bitWidth2;
-  result->numBytes = numBytes;
-  result->bitWidth = bitWidth;
-  bytes1 += numBytes1 - 1;
-  bytes2 += numBytes2 - 1;
-  bytes += numBytes - 1;
-  for (; numBytes > 0; numBytes--, numBytes1--, numBytes2--,
-                       bytes1--, bytes2--, bytes--)
-    {
-      uint8_t b1, b2;
-      if (numBytes1 >= 0)
-        b1 = *bytes1;
-      else
-        b1 = 0;
-      if (numBytes2 >= 0)
-        b2 = *bytes2;
-      else
-        b2 = 0;
-      *bytes = b1 | b2;
-    }
-  return result;
+int32_t
+xOR(int32_t i1, int32_t i2) {
+  return i1 | i2;
 }
 #endif // xOR
 
 #ifndef xAND
-descriptor_t *
-xAND(descriptor_t *i1, descriptor_t *i2){
-  descriptor_t *result = nextBuffer();
-  int i, numBytes, bitWidth,
-      bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
-      numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
-  uint8_t *bytes1 = i1->bytes, *bytes2 = i2->bytes, *bytes = result->bytes;
-  numBytes = numBytes1;
-  if (numBytes2 < numBytes)
-    numBytes = numBytes2;
-  bitWidth = bitWidth1;
-  if (bitWidth2 < bitWidth)
-    bitWidth = bitWidth2;
-  result->numBytes = numBytes;
-  result->bitWidth = bitWidth;
-  bytes1 += numBytes1 - 1;
-  bytes2 += numBytes2 - 1;
-  bytes += numBytes - 1;
-  for (; numBytes > 0; numBytes--, numBytes1--, numBytes2--,
-                       bytes--, bytes1--, bytes2--)
-    {
-      uint8_t b1, b2;
-      if (numBytes1 > 0)
-        b1 = *bytes1;
-      else
-        b1 = 0;
-      if (numBytes2 > 0)
-        b2 = *bytes2;
-      else
-        b2 = 0;
-      *bytes = b1 & b2;
-    }
-  return result;
+int32_t
+xAND(int32_t i1, int32_t i2){
+  return i1 & i2;
 }
 #endif // xAND
 
@@ -1623,7 +1575,7 @@ xAND(descriptor_t *i1, descriptor_t *i2){
 
 // Used by `xsXXX` functions, and not expected to be called directly.
 enum stringRelation_t { EQ, NEQ, LT, GT, LE, GE };
-descriptor_t *
+int32_t
 stringRelation(enum stringRelation_t relation,
                descriptor_t *d1,
                descriptor_t *d2) {
@@ -1641,35 +1593,35 @@ stringRelation(enum stringRelation_t relation,
         if (e1 > e2) { comparison = 1; break; }
         else if (e1 < e2) { comparison = -1; break; }
       }
-  if (relation == EQ) return fixedToBit(1, comparison == 0);
-  if (relation == NEQ) return fixedToBit(1, comparison != 0);
-  if (relation == LT) return fixedToBit(1, comparison == -1);
-  if (relation == GT) return fixedToBit(1, comparison == 1);
-  if (relation == LE) return fixedToBit(1, comparison != 1);
-  if (relation == GE) return fixedToBit(1, comparison != -1);
-  return NULL; // Shouldn't happen.
+  if (relation == EQ) return comparison == 0;
+  if (relation == NEQ) return comparison != 0;
+  if (relation == LT) return comparison == -1;
+  if (relation == GT) return comparison == 1;
+  if (relation == LE) return comparison != 1;
+  if (relation == GE) return comparison != -1;
+  return 0; // Shouldn't ever get to here.
 }
-descriptor_t *
+int32_t
 xsEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(EQ, s1, s2);
 }
-descriptor_t *
+int32_t
 xsLT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LT, s1, s2);
 }
-descriptor_t *
+int32_t
 xsGT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GT, s1, s2);
 }
-descriptor_t *
+int32_t
 xsNEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(NEQ, s1, s2);
 }
-descriptor_t *
+int32_t
 xsLE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LE, s1, s2);
 }
-descriptor_t *
+int32_t
 xsGE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GE, s1, s2);
 }
@@ -2472,7 +2424,7 @@ MONITOR10(descriptor_t *fpstring) {
   char *s;
   uint32_t msw, lsw, address;
   if (dwAddress == -1)
-    abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+    abend("Needed CALL MONITOR(5) prior to CALL MONITOR(10)");
   address = dwAddress;
   s = descriptorToAscii(fpstring);
   FR[0] = atof(s);
@@ -2496,7 +2448,7 @@ MONITOR12(uint32_t precision) {
   char *ss;
   uint32_t address;
   if (dwAddress == -1)
-    abend("CALL MONITOR(5) must precede CALL MONITOR(9)");
+    abend("CALL MONITOR(5) must precede CALL MONITOR(12)");
   address = dwAddress;
   value = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   /*
@@ -3045,8 +2997,11 @@ cmpAllocations(const void *e1, const void *e2)
  *      +       A non-BASED variable.
  *      /       A BASED variable.
  *      .       A field of the preceding BASED variable.
+ *      :       Internal state of the XCOM-I runtime library.
  * Comment lines have only 2 fields (the leading ';' and the body of
- * the comment), while all other lines have 5 fields:
+ * the comment).  XCOM-I internal-state lines have the leading ':' and as
+ * many fields as needed; presently, that's only the dwAddress.  All other
+ * lines have 5 fields:
  *      1.      The leading character, described above.
  *      2.      The name of the variable or the field.  Note that a
  *              BASED variable *not* declared with a *RECORD* has a
@@ -3206,6 +3161,7 @@ writeCOMMON(FILE *fp) {
     return 1;
 #ifndef STANDARD_XPL
   int i;
+  fprintf(fp, ":\t%d\n", dwAddress);
   for (i = 0; i < NUM_SYMBOLS; i++)
     writeEntryCOMMON(fp, &memoryMap[i], 0, "(root)");
 #endif
@@ -3228,6 +3184,13 @@ readCOMMON(FILE *fp) {
     {
       if (line[0] == ';') // A comment?
         continue;
+      if (line[0] == ':') // Internal state?
+        {
+          if (1 == sscanf(line, ":\t%d", &dwAddress))
+            continue;
+          else
+            abend("Unrecognized line in COMMON: %s", line);
+        }
       if (3 == sscanf(line, "/\t%s\t%d\tBASED\t%[^\n\r]",
                       field, &fieldIndex, svalue))
         {

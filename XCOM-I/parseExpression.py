@@ -462,7 +462,7 @@ def parseExpression(tokenized, start):
             if not isinstance(value, int):
                 return
             if operator == "~":
-                tree["token"] = {"number": ~value }
+                tree["token"] = {"number": 0xFFFFFFFF & ~value }
             elif operator == "+":
                 tree["token"] = {"number": value }
             elif operator == "-":
