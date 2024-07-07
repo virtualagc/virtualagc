@@ -22,21 +22,25 @@ to PRINT_COMMENT don't have it, but *some* do.  Defaulting it to an empty
 string is just my guess.
 '''
 
-
-def PRINT_COMMENT(PRINT, CURRENT_DIR=''):
+# The parameter `l` provides local variables from the calling context.  I 
+# know specifically that `I` is one of the variables needed; there may be others
+# of which I'm unaware, but it's `I` (when `PRINT_COM` is included in `STREAM`)
+# that specifically caused me problems in `PRINT2`, so I was motivated to 
+# find it!
+def PRINT_COMMENT(PRINT, l, CURRENT_DIR=''):
     # FORMAT_CHAR, C, T, and R are locals, but don't appear to need persistence.
     
     FORMAT_CHAR = '|';
     if not g.INCLUDE_LIST2:
         return;
-    g.I = 1;
-    if g.COMMENTING:
+    l.I = 1;
+    if 0 != (1 & g.COMMENTING):
         C = g.X1;
     else:
         g.SQUEEZING = g.FALSE;
-        g.I = 2;
+        l.I = 2;
         C = g.DOUBLE;
-        if g.IF_FLAG:
+        if 0 != (1 & g.IF_FLAG):
             g.STMT_NUM(g.STMT_NUM() - 1);
             g.SAVE_SRN2 = g.SRN[2][:];
             g.SRN[2] = g.SAVE_SRN1[:];
@@ -62,39 +66,39 @@ def PRINT_COMMENT(PRINT, CURRENT_DIR=''):
         R = I_FORMAT(g.STMT_NUM(), 4);
     else:
         R = g.X4;
-    if g.INCLUDING:
+    if 0 != (1 & g.INCLUDING):
         g.INCLUDE_CHAR = g.PLUS;
         T = g.PAD1[:];
-        if g.SRN_PRESENT:
+        if 0 != (1 & g.SRN_PRESENT):
             R = g.PAD1[:];
     else:
         g.INCLUDE_CHAR = g.X1;
-        if g.SRN_PRESENT:
+        if 0 != (1 & g.SRN_PRESENT):
             # PRINT THE STATEMENT NUMBER FOR D INCLUDE.
             # IF PRINTING SRNS, ADD THE STATEMENT NUMBER TO THE SRN IN R.
             R = PAD(SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1, 6), 7) + R;
-        if g.SDL_OPTION:
+        if 0 != (1 & g.SDL_OPTION):
             T = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 7, 2);
             if LENGTH(g.CURRENT_CARD) >= g.TEXT_LIMIT[0] + 17:
                 T = T + g.X1 + SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 9, 8);
             else:
                 T = T + SUBSTR(g.X70, 0, 9);
-    if g.LISTING2:
+    if 0 != (1 & g.LISTING2):
         PRINT2(C + SUBSTR(g.X8, 1) + g.INCLUDE_CHAR + \
             SUBSTR(g.CURRENT_CARD, 0, 1) + g.VBAR + \
-            SUBSTR(g.CURRENT_CARD, 1) + g.VBAR + g.S + g.X1 + g.CURRENT_SCOPE, g.I);
-    if PRINT:
+            SUBSTR(g.CURRENT_CARD, 1) + g.VBAR + g.S + g.X1 + g.CURRENT_SCOPE, l.I);
+    if 0 != (1 & PRINT):
         if g.LINE_MAX == 0:
             g.LINE_MAX = g.LINE_LIM;
             C = g.PAGE;
-        g.I = 100 - g.TEXT_LIMIT[0];
+        l.I = 100 - g.TEXT_LIMIT[0];
         # MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF
         # THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.
-        if g.SDL_OPTION:
+        if 0 != (1 & g.SDL_OPTION):
             g.S = FORMAT_CHAR + SUBSTR(T, 0, 2) + FORMAT_CHAR + g.SAVE_SCOPE;
         else:
             g.S = FORMAT_CHAR + g.SAVE_SCOPE;
-        g.S = SUBSTR(g.CURRENT_CARD, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, g.I) + g.S;
+        g.S = SUBSTR(g.CURRENT_CARD, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, l.I) + g.S;
         OUTPUT(1, C + R + g.INCLUDE_CHAR + SUBSTR(g.CURRENT_CARD, 0, 1) + g.VBAR + g.S);
     g.NEXT_CC = ' ';
     '''

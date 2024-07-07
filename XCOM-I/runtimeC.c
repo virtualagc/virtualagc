@@ -1258,7 +1258,7 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
       freepoint += numBytes;
       if (freepoint > freelimit)
         {
-          COMPACTIFY(); // Will abort the program upon failure.
+          COMPACTIFY(0); // Will abort the program upon failure.
           descriptor = getFIXED(address);
           destAddress = descriptor & 0xFFFFFF;
         }
@@ -1395,7 +1395,7 @@ putCHARACTER(uint32_t address, descriptor_t *str)
   freepoint += length;
   if (freepoint > freelimit)
     {
-      COMPACTIFY(); // Will abort the program upon failure.
+      COMPACTIFY(0); // Will abort the program upon failure.
       descriptor = getFIXED(address);
       index = descriptor & 0xFFFFFF;
     }
@@ -2969,7 +2969,7 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
 
 /*
 void
-RECORD_LINK(void) {
+RECORD_LINK(int reset) {
 }
 */
 
@@ -3176,7 +3176,7 @@ writeCOMMON(FILE *fp) {
 int
 readCOMMON(FILE *fp) {
 #ifndef STANDARD_XPL
-  int32_t _ALLOCATE_SPACE(void);
+  int32_t _ALLOCATE_SPACE(int reset);
   char line[1024], prefix, svalue[sizeof(sbuf_t) + 100], *bVar;
   sbuf_t symbol, field, lastBased = "";
   int index, ivalue, fieldIndex, allocated, lastBasedIndex, bIndex,
@@ -3218,7 +3218,7 @@ readCOMMON(FILE *fp) {
                 {
                   putFIXED(m_ALLOCATE_SPACExDOPE, dopeVectorAddress);
                   putFIXED(m_ALLOCATE_SPACExHIREC, allocated - 1);
-                  _ALLOCATE_SPACE();
+                  _ALLOCATE_SPACE(0);
                 }
               COREWORD2(dopeVectorAddress + 12, used);
               COREWORD2(dopeVectorAddress + 20, flags);
@@ -3445,17 +3445,8 @@ sbuf_t lastWatchFunction = "(Initial)";
 int lastWatchValue = -1;
 int
 guardReentry(int reentryGuard, char *functionName) {
-  if (reentryGuard) {
-      fprintf(stderr, "\nIllegal reentry of function %s\n", functionName);
-      printBacktrace();
-      exit(1);
-  }
-  //if (memory[mNEXT_CHAR] == 0x4A && lastWatchValue != 0x4A)
-  //  fprintf(stderr,"\n%s: NEXT_CHAR = 0x4A\n", functionName);
-  //lastWatchValue = memory[mNEXT_CHAR];
-  //if (memoryRegions[0].end != lastWatchValue)
-  //  fprintf(stderr, "\n***DEBUG mem %s\n", functionName);
-  //lastWatchValue = memoryRegions[0].end;
+  if (reentryGuard)
+    abend("Illegal reentry of function %s", functionName);
   if (watchpoint != -1)
     {
       uint8_t value = memory[watchpoint];

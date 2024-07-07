@@ -486,6 +486,10 @@ def STREAM():
     D_TOKEN calls PRINT_COMMENT() (in PRINTCOM), but I'm not sure as of 
     yet why that means PRINT_COMMENT has to be embedded here, and perhaps
     I'll come back to that issue later. 
+    Later ... PRINT_COMMENT() needs to be included here specifically because
+    it need to use the local variable `I` from `STREAM`, whereas otherwise
+    it would be using the global variable `I`, which would mess up pagination
+    in the procedure `PRINT2`.  There may be other reasons as well.
         
     As for the inclusion of INCSDF, its PROCEDURE INCLUDE_SDF() is similar 
     to D_TOKEN(), in that it accesses (and modifies) D_CONTINUATION_OK, so
@@ -530,13 +534,13 @@ def STREAM():
             return g.VAL;
 
         if BYTE(g.CURRENT_CARD) == BYTE('C'):
-            PRINT_COMMENT(g.TRUE);
+            PRINT_COMMENT(g.TRUE, l);
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
             # A DIRECTIVE CARD 
             hd.D_INDEX = 1;
             ll.C[0] = hd.D_TOKEN();
             if (ll.C[0] == ll.EJECT_DIR) or (ll.C[0] == ll.SPACE_DIR):
-                PRINT_COMMENT(g.FALSE);
+                PRINT_COMMENT(g.FALSE, l);
                 if ll.C[0] == ll.EJECT_DIR:
                     if not g.PAGE_THROWN or g.LOOKED_RECORD_AHEAD != 0:
                         g.LOOKED_RECORD_AHEAD = 0;
@@ -562,7 +566,7 @@ def STREAM():
                         for ll.I in range(1, g.J + 1):
                             OUTPUT(0, g.X1);
                 return;
-            PRINT_COMMENT(g.TRUE, ll.C[0]);
+            PRINT_COMMENT(g.TRUE, l, ll.C[0]);
             if (ll.C[0] == 'EB') or (ll.C[0] == 'EBUG'):  # DEBUG DIRECTIVE
                 
                 ll.C[0] = hd.D_TOKEN();
@@ -777,7 +781,7 @@ def STREAM():
             elif ll.C[0] == 'DEFINE':
                 
                 def COPY_TO_8():
-                    PRINT_COMMENT(ll.LIST_FLAG);
+                    PRINT_COMMENT(ll.LIST_FLAG, l);
                     OUTPUT(8, g.CURRENT_CARD);
                     ll.RECORD_NOT_WRITTEN = g.FALSE;
                     MONITOR(16, 0x10);
@@ -828,7 +832,7 @@ def STREAM():
                                 if INCLUDE_OK():
                                     OUTPUT(8, ll.XC + g.STARS + ll.START + g.INCLUDE_MSG + g.STARS);
                             elif ll.C[0] == 'CLOSE':  # END OF INLINE BLOCK
-                                PRINT_COMMENT(g.TRUE);
+                                PRINT_COMMENT(g.TRUE, l);
                                 ll.C[0] = hd.D_TOKEN();
                                 if LENGTH(ll.C[0]) >= 8:
                                     ll.C[0] = SUBSTR(ll.C[0], 0, 8);

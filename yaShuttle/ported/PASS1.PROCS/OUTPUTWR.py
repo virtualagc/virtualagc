@@ -1208,6 +1208,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.SAVE_S_C[g.I] = g.C[g.I];
                                                     l.S_CHAR_PTR_MAX = \
                                                         l.S_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
+                                                g.I = 2
                                                 l.S_PTR = l.S_PTR + l.SPACE_NEEDED;
                                         if goto in [None, "MORE_S_C"]:
                                             if goto == "MORE_S_C": goto = None
@@ -1381,6 +1382,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.SAVE_E_C[g.I] = g.C[g.I];
                                                     l.E_CHAR_PTR_MAX = l.E_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
                                                 # END
+                                                g.I = 2
                                                 l.E_PTR = l.E_PTR + l.SPACE_NEEDED;
                                         if goto in [None, "MORE_E_C"]:
                                             if goto == "MORE_E_C": goto = None
@@ -1499,6 +1501,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         for g.I in range(0, 2 + 1):
                             l.M_CHAR_PTR_MAX = l.M_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
                         # END
+                        g.I = 2
                         l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
                     goto = "MORE_M_C"
                     while goto == "MORE_M_C":

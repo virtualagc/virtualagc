@@ -476,7 +476,7 @@ checkoutPASS2(void) {
   for (i = 1; i <= LIB_NUM; i++)
     {
       name = getCHARACTER(mLIB_NAME_INDEX + 4 * i);
-      hashcode = ( putCHARACTER(mHASHxNAME, name), HASH() );
+      hashcode = ( putCHARACTER(mHASHxNAME, name), HASH(0) );
       lib_start = COREHALFWORD(mLIB_START + 2 * hashcode);
       lib_name = getCHARACTER(mLIB_NAME_INDEX + 4 * abs(lib_start));
       lib_link = COREHALFWORD(mLIB_LINK + 2 * abs(lib_start));

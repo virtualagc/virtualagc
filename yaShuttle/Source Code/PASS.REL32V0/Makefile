@@ -124,13 +124,13 @@ cleanall: clean
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: compile
 compile: clean
-	@echo Processing $(RTARGET) with HAL_S_FC.py ...
+	@echo Processing $(RTARGET) ...
+	
 	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
 		$(sPARM_STRING) \
 		--hal=$(RTARGET) \
 		>py.rpt
 	
-	@echo Processing $(RTARGET) with PASS1 ...
 	-./PASS1 $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,$(RTARGET).hal \
@@ -149,7 +149,6 @@ compile: clean
 	@diff -s $(PORTED)/FILE1.bin halmat.bin
 	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
 	
-	@echo Processing $(RTARGET) with FLO ...
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
@@ -162,7 +161,6 @@ compile: clean
 		--raf=B,3360,6,vmemf.bin \
 		>f.rpt
 	
-	@echo Processing $(RTARGET) with OPT ...
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
@@ -176,7 +174,6 @@ compile: clean
 		--raf=B,3360,6,vmemo.bin \
 		>o.rpt
 	
-	@echo Processing $(RTARGET) with AUX ...
 	cp vmemo.bin vmema.bin
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
@@ -191,7 +188,6 @@ compile: clean
 		--raf=B,3360,6,vmema.bin \
 		>a.rpt
 	
-	@echo Processing $(RTARGET) with PASS2 ...
 	cp vmema.bin vmem2.bin
 	cp halmata.bin halmat2.bin
 	cp litfilea.bin litfile2.bin
@@ -212,7 +208,6 @@ compile: clean
 		--raf=B,3360,6,vmem2.bin \
 		>c2.rpt
 	
-	#@echo Processing $(RTARGET) with PASS3 ...
 	#cp vmem2.bin vmem3.bin
 	#cp litfile2.bin litfile3.bin
 	#./PASS3 \

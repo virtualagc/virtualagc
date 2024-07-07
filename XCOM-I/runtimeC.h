@@ -563,7 +563,7 @@ rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
  * code that uses it prior to the definition won't have a forward declaration.
  * So we declare it here. */
 int32_t
-COMPACTIFY(void);
+COMPACTIFY(int reset);
 //void
 //RECORD_LINK(void);
 

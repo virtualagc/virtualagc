@@ -1268,7 +1268,7 @@ def generateExpression(scope, expression):
                     outerParameters = expression["children"]
                     mangled = attributes["mangled"]
                     if len(outerParameters) == 0:
-                        source = mangled + "()"
+                        source = mangled + "(0)"
                     else:
                         innerParameters = attributes["parameters"] 
                         innerScope = attributes["PROCEDURE"]
@@ -1295,7 +1295,7 @@ def generateExpression(scope, expression):
                                 function = "put" + toType + "("
                             source = source + function + \
                                  innerAddress + ", " + parm + "), "
-                        source = source + mangled + "() )"
+                        source = source + mangled + "(0) )"
                     if "return" in attributes:
                         tipe = attributes["return"]
                     else:
@@ -2132,6 +2132,21 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         procScope = findParentProcedure(scope)
         if "longjmpLabels" in procScope and label in procScope["longjmpLabels"]:
             mangled = procScope["longjmpLabels"][label]["mangled"]
+            '''
+            Using a `longjmp` to escape the current procedure has the 
+            disadvantage of defeating the mechanism for guarding against 
+            reentry of the procedure ... not just for the current procedure,
+            but for all of the procedures in the calling sequence, up to but 
+            not including the procedure containing the target `setjmp`.  Note
+            that this may *not* be the same functions that are the parents
+            scope-wise.  It's really tricky, though, to have a backtrace on the
+            calling sequence, even though in principle we are able to print out
+            one for debugging purposes on some platforms.  So what I do instead
+            is to reset all of the reentry guards on all functions when a 
+            longjmp occurs.  I don't think this will cause a big problem, though
+            it's irritating. .
+            '''
+            print(indent + "resetAllReentryGuards();")
             print(indent + "longjmp(jb%s, 1);" % mangled)
         else:
             print(indent + "goto " + normalizedLabel(label) + ";")
@@ -2191,7 +2206,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if standardXPL:
                     print(indent2 + "exit(%s);" % source)
                 else:
-                    print(indent2 + "RECORD_LINK();")
+                    print(indent2 + "RECORD_LINK(0);")
                 print(indent + "}")
                 return;
         procedureName = procScope["symbol"]
@@ -2263,14 +2278,17 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             # Some builtins can be CALL'd
             elif procedure in ["LINK", "COMPACTIFY", "RECORD_LINK", "TRACE", 
                              "UNTRACE", "EXIT", "MONITOR"]:
-                parameters = line["parameters"]
                 print(indent + procedure + "(", end = '')
-                for i in range(len(parameters)):
-                    if i > 0:
-                        print(", ", end = '')
-                    parm = parameters[i]
-                    tipe, parme = generateExpression(scope, parm)
-                    print(parme, end = '')
+                if procedure in ["COMPACTIFY", "RECORD_LINK"]:
+                    print("0", end="")
+                else:
+                    parameters = line["parameters"]
+                    for i in range(len(parameters)):
+                        if i > 0:
+                            print(", ", end = '')
+                        parm = parameters[i]
+                        tipe, parme = generateExpression(scope, parm)
+                        print(parme, end = '')
                 print(");")
             else:
                 outerParameters = line["parameters"] 
@@ -2282,7 +2300,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                            % (procedure, str(attributes)))
                 mangled = attributes["mangled"]
                 if len(outerParameters) == 0:
-                    print(indent + mangled + "();")
+                    print(indent + mangled + "(0);")
                 else:
                     innerScope = attributes["PROCEDURE"]
                     indent2 = indent + indentationQuantum
@@ -2305,7 +2323,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent2 + function + \
                                  innerAddress + ", " + \
                                  str(parm) + "); ")
-                    print(indent2 + mangled + "();")
+                    print(indent2 + mangled + "(0);")
                     print(indent + "}")
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
@@ -2527,40 +2545,33 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                 returnType = "descriptor_t *"
             elif returnType == "CHARACTER":
                 returnType = "descriptor_t *"
-            header = returnType + "\n" + functionName + "(void)"
+            header = returnType + "\n" + functionName + "(int reset)"
             print("\n" + header + ";", file=pf)
             print(header + "\n{")
-            print()
+            #print()
         indent1 = indent + indentationQuantum
         indent2 = indent1 + indentationQuantum
         # Let's guard against reentry.
         if reentryGuard:
-            '''
-            attributes = getAttributes(scope, scopeName)
-            if attributes != None and "parameters" in attributes:
-                reentryDescriptors = ""
-                n = 0
-                for formalParm in attributes["parameters"]:
-                    a = scope["variables"][formalParm]
-                    if "BIT" not in a and "CHARACTER" not in a:
-                        continue
-                    n += 1
-                    if len(reentryDescriptors) == 0:
-                        reentryDescriptors = "{ %s" % formalParm
-                    else:
-                        reentryDescriptors = reentryDescriptors + ", %s" % formalParm
-                if len(reentryDescriptors) == 0:
-                    reentryDescriptors = "{ }"
-                else:
-                    reentryDescriptors = reentryDescriptors + " }"
-            '''
             print(indent1 + "static int reentryGuard = 0;")
+            if functionName != "main":
+                print(indent1 + "if (reset) { reentryGuard = 0; return (%s) 0; }" \
+                      % returnType)
             print(indent1 + 'reentryGuard = guardReentry(reentryGuard, "%s");' % \
                                                functionName)
         # If there's a need to initialize buffers for calls to `setjmp`, we
-        # have to do that right now.
+        # have to do that right now.  I used to declare `setjmpInitialized`
+        # as `static`.  However, I later noticed the warning from gnu.org
+        # (https://www.gnu.org/software/libc/manual/html_node/Non_002dLocal-Details.html)
+        # that "Return points are valid only during the dynamic extent of the
+        # function that called setjmp to establish them. If you longjmp to a 
+        # return point that was established in a function that has already 
+        # returned, unpredictable and disastrous things are likely to happen."
+        # So we in fact have to reinitialize the `setjmp` buffers every time
+        # the function is called, which means that `setjmpInitialize` cannot
+        # be static.
         if "sortedSetjmpLabels" in scope and len(scope["sortedSetjmpLabels"]) > 0:
-            print(indent1 + "static int setjmpInitialize = 1;") 
+            print(indent1 + "int setjmpInitialize = 1;") 
             print(indent1 + "if (setjmpInitialize) { ")
             print(indent2 + "goto %s; " % normalizedLabel(scope["sortedSetjmpLabels"][0]))
             print(indent2 + "setjmpInitialized: setjmpInitialize = 0;")
@@ -2621,7 +2632,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         if not standardXPL:
             if nonCommonBase > commonBase:
                 #print(indent + "writeCOMMON(COMMON_OUT);")
-                print(indent + "RECORD_LINK();")
+                print(indent + "RECORD_LINK(0);")
         #print(indent + \
         #      'fprintf(stderr, "FYI: %d of %d buffers still active.\\n", countBuffers(), MAX_BUFFS);')
         #print(indent + "if (LINE_COUNT)")
@@ -2753,7 +2764,7 @@ def generateC(globalScope):
     regions.append( [variableAddress, physicalMemoryLimit] )
     nonCommonBase = regions[2][0]
     
-    # Make #define's or all of these variables in procedures.h
+    # Make #define's for all of these variables in procedures.h
     print("// #defines for XPL variable names", file=pf)
     for address in memoryMap:
         variable = memoryMap[address]
@@ -2988,6 +2999,9 @@ def generateC(globalScope):
         print("#define DEBUGGING_AID", file=f)
     if reentryGuard:
         print("#define REENTRY_GUARD", file=f)
+        print("void resetAllReentryGuards();", file=f)
+    else:
+        print("#define resetAllReentryGuards()", file=f)
     print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
     print("#define XCOM_I_START_DATE %d" % DATE_OF_GENERATION, file=f)
@@ -3070,6 +3084,29 @@ def generateC(globalScope):
     walkModel(globalScope, generateCodeForScope, { "of": None, "indent": ""})
     
     pf.close()
+    
+    # Create resetAllReentryGuards.c
+    if reentryGuards:
+        rf = open(outputFolder + "/resetAllReentryGuards.c", "w")
+        print("/*", file=rf)
+        print("  File resetAllReentryGuards.c was generated by XCOM-I, " + \
+              datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".", 
+              file=rf)
+        print("*/", file=rf)
+        print("", file=rf)
+        print('#include "runtimeC.h"', file=rf)
+        print("", file=rf)
+        print("void", file=rf)
+        print("resetAllReentryGuards(void) {", file=rf)
+        def resetGuardsInScope(scope, extra=None):
+            for identifier in scope["variables"]:
+                attributes = scope["variables"][identifier]
+                if "PROCEDURE" in attributes:
+                    print(indentationQuantum + attributes["mangled"] + "(1);", \
+                          file=rf)
+        walkModel(globalScope, resetGuardsInScope, None)
+        print("}", file=rf)
+        rf.close()    
     
     # Output the approximated patches.
     if len(guessFiles) > 0:
