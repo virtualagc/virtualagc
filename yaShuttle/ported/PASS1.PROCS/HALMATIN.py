@@ -110,12 +110,66 @@ def HALMAT_INIT_CONST ():
     #  ALLOWED INTEGERS OR IT RETURNS TRUE AND THE ROUNDED NUMBER IS IN DW().
     def ROUND_SCALAR(PTR):
         PTR = GET_LITERAL(PTR)
-        x = fromFloatIBM(g.LIT2(PTR), g.LIT3(PTR))
-        x = hround(x)
-        if x > maxFIXED or x < minFIXED:
-            return g.FALSE
-        g.DW[0], g.DW[1] = toFloatIBM(x)
-        return g.TRUE
+        if True:
+            # My original implementation, based just on reading the
+            # comments in the XPL code.
+            x = fromFloatIBM(g.LIT2(PTR), g.LIT3(PTR))
+            x = hround(x)
+            if x > maxFIXED or x < minFIXED:
+                return g.FALSE
+            g.DW[0], g.DW[1] = toFloatIBM(x)
+            return g.TRUE
+        else:
+            # My replacement implementation, based converting the C-language
+            # patchfiles of HALMAT_INIT_CONSTxROUND_SCALAR of HAL/S-FC PASS1
+            # to Python.  I've admittedly simplified them somewhat, but I hope
+            # it's close enough.
+            ADJ_NEG = 0x41100000
+            g.DW[0] = g.LIT2(PTR)
+            g.DW[1] = g.LIT3(PTR)
+            #PTR = ADDR(LIMIT_OK) for branches to LIMIT_OK.
+            NEG = SHR(g.DW[0], 31)
+            # The `while` is so that `GOTO LIMIT_OK` can be `break`. The `while`
+            # doesn't actually loop at all, since it ends with a `return`.
+            while True: 
+                # start of patch92p.c
+                g.FR[0] = fromFloatIBM(g.DW[0], g.DW[1]) # p92_2, _4.
+                g.FR[0] = abs(g.FR[0]) # p92_8
+                g.FR[0] += fromFloatIBM(0x407FFFFF, 0xFFFFFFFF) # 0.5 p92_10, 14
+                scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p92_18, 22, 26
+                if scratch <= 0: # <= max integer p92_30
+                    break # go to LIMIT_OK
+                # end of patch92p.c
+                if 0 != (NEG & 1):
+                    # start of patch101p.c
+                    g.FR[4] = fromFloatIBM(g.DW[0], g.DW[1]) # p101_0
+                    g.FR[4] = abs(g.FR[4]) # p101_4
+                    g.FR[2] = 0.0 # p101_6
+                    g.FR[2] = fromFloatIBM(ADJ_NEG, 0) # 1.0 p101_8
+                    g.FR[4] -= g.FR[2] # p101_12
+                    g.FR[4] += fromFloatIBM(0x407FFFFF, 0xFFFFFFFF) # 0.5 p101_14, 18
+                    scratch = g.FR[4] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # max int p101_22, 26, 30
+                    if scratch <= 0: # p101_34
+                        break # goto LIMIT_OK
+                    # end of patch101p.c
+                return g.FALSE
+            #LIMIT_OK:
+            # start of patch112p.c
+            g.DW[2] = 0 # p112_0, 4, 8
+            g.DW[3] = int(round(FR[0]))
+            # end of patch112p.c
+            g.DW[0] = g.DW[8]
+            if 0 != (NEG & 1):
+                # start of patch115p.c
+                g.DW[0] = g.DW[0] ^ 0x80000000
+                # end of patch115p.c
+            g.DW[1] = g.DW[3]
+            # start of patch117p.c
+            g.FR[0] = 0 # p117_0, 4
+            g.FR[0] = fromFloatIBM(g.DW[0], g.DW[1]) # p117_6
+            g.DW[0], g.DW[1] = toFloatIBM(g.FR[0]) # p117_10
+            # end of patch117p.c
+            return g.TRUE
     # END ROUND_SCALAR;
     
     if g.IC_FOUND == 0:  #  RETURN IN CASE OF NO INITIALIZATION
