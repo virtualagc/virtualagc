@@ -455,7 +455,9 @@ def MONITOR(function, arg2=None, arg3=None):
             exit(1)
         s = arg2
         try:
-            dwArea[0], dwArea[1] = toFloatIBM(float(s))
+            from g import FR
+            FR[0] = float(s)
+            dwArea[0], dwArea[1] = toFloatIBM(FR[0])
             return 0
         except:
             return 1

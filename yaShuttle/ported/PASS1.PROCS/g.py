@@ -1634,7 +1634,7 @@ SUB_START_TOKEN = 206
 
 # TOKEN IS THE INDEX INTO THE VOCABULARY V() OF THE LAST SYMBOL SCANNED,
 #   BCD IS THE LAST SYMBOL SCANNED (LITERAL CHARACTER STRING).
-TOKEN = -1
+TOKEN = 0
 BCD = ''
 CLOSE_BCD = ''
 
@@ -3742,3 +3742,10 @@ INCL_REMOTE_FLAG = 0x01
 # it here in order to watchpoint its changes more easily.  There's no naming
 # conflict, so it still behaves the same as it did as a local.
 NEWSIZE = None
+
+# Here are some variables I use for helping with CALL INLINE statements. 
+# However, I did not start out by dealing with these statements in any manner
+# that you could think of as rigorous, and am only doing so in the very 
+# tail-end of development, so these variables are only used in dealing with
+# a handful of patches for the inlines.
+FR = [ 0.0 ] * 16

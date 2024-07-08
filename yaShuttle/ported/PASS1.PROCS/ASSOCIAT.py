@@ -103,7 +103,7 @@ def ASSOCIATE(TAG=-1):
     # ARR_STRUC_CHECK:
     K = g.STACK_PTR[g.MP];
     J = g.VAL_P[g.PTR[g.MP]];
-    if g.DELAY_CONTEXT_CHECK: 
+    if 0 != (1 & g.DELAY_CONTEXT_CHECK): 
         if g.SUBSCRIPT_LEVEL == 0:
             SAVE_ARRAYNESS();
             if (J & 0x206) == 0x202:
