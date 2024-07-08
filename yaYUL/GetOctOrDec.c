@@ -24,6 +24,7 @@
                 01/28/17 MAS   Added support for implicit decimals
                                (numbers are automatical decimal if they
                                have an 8 or a 9)
+                07/08/24 RSB   Fixed issue #1227.
 */
 
 #include "yaYUL.h"
@@ -44,6 +45,9 @@ GetOctOrDec(const char *s, int *Value)
 
   if (*ss == '+' || *ss == '-')
     ss++;
+
+  if (*ss == 0 || *ss == 'D')
+    return (1);
 
   for (; *ss; ss++)
     if (*ss < '0' || *ss > '7')
