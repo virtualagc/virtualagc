@@ -267,7 +267,7 @@ redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # For MONITOR(8).
 
 def MONITOR(function, arg2=None, arg3=None):
     global inputDevices, outputDevices, dwArea, compilationReturnBits, \
-            namePassedToCompiler, files, redirections
+            namePassedToCompiler, files, redirections, FR
     
     def error(msg=''):
         if len(msg) > 0:
@@ -443,6 +443,7 @@ def MONITOR(function, arg2=None, arg3=None):
             else:
                 return 1
             # Convert the result back to IBM floats, and store in working area.
+            FR[0] = value0
             dwArea[0], dwArea[1] = toFloatIBM(value0)
             return 0
         except:

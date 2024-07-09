@@ -390,6 +390,7 @@ def INITIALIZATION():
     RECORD_USED(h.LIT_PG, RECORD_ALLOC(h.LIT_PG));
     # I think the following lines probably store the addresses of LIT_NDX[]
     # and FOR_DW[] in the variables LIT_CHAR_AD and DW_AD. 
+    g.traceInline("INITIALIZATION p121")
     #CALL INLINE("58",1,0,LIT_NDX);
     #CALL INLINE("50",1,0,LIT_CHAR_AD);           /* ST  1,LIT_CHAR_AD */
     #CALL INLINE("58",1,0,FOR_DW);

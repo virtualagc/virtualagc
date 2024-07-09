@@ -644,7 +644,7 @@ extern int traceInlineEnable;
 extern int detailedInlineEnable;
 #ifdef TRACE_INLINES
 void
-traceInline(int inlineCounter);
+traceInline(char *msg);
 void
 detailedInlineBefore(int inlineCounter, char *instruction);
 void

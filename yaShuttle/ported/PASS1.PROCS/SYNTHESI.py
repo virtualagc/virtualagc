@@ -773,11 +773,19 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 6:  # reference 60
         #  <ARITH EXP> ::= -1 <TERM>
         if ARITH_LITERAL(g.SP, 0):
-            # My guess is that INLINE code is being used here, unnecessarily,
-            # as an optimization for quickly negating a numeric literal
-            # previously stored as an IBM DP float in DW[0] and DW[1].  
-            negatedValue = -fromFloatIBM(g.DW[0], g.DW[1])
-            g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, negatedValue);
+            if False:
+                # Original implementation
+                # My guess is that INLINE code is being used here, unnecessarily,
+                # as an optimization for quickly negating a numeric literal
+                # previously stored as an IBM DP float in DW[0] and DW[1].  
+                negatedValue = -fromFloatIBM(g.DW[0], g.DW[1])
+                g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, negatedValue);
+            else:
+                # Replacement implementation
+                g.traceInline("SYNTHESIZE p125")
+                g.DW[0] = 0x80000000 ^ g.DW[0] # p125_0, 4
+                g.LOC_P[g.PTR[g.SP]] = \
+                        SAVE_LITERAL(1, fromFloatIBM(g.DW[0], g.DW[1]));
         else:
             g.TEMP = g.PSEUDO_TYPE[g.PTR[g.SP]];
             HALMAT_TUPLE(g.XMNEG[g.TEMP - g.MAT_TYPE], 0, g.SP, 0, 0);
@@ -2006,9 +2014,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if (g.TYPE == g.SCALAR_TYPE) or (g.FACTORED_TYPE == g.SCALAR_TYPE) or \
                 (g.TYPE == g.INT_TYPE) or (g.FACTORED_TYPE == g.INT_TYPE) or \
                 ((g.TYPE == 0) and (g.FACTORED_TYPE == 0)):
-            if ((g.ATTRIBUTES & g.DOUBLE_FLAG) != 0) and \
-                    ((g.FIXV[g.MP - 1] & g.CONSTANT_FLAG) != 0):
-                g.LIT1(GET_LITERAL(g.LOC_P[g.PTR[g.MP]]), 5);
+            if (g.ATTRIBUTES & g.DOUBLE_FLAG) != 0 and \
+                    (g.FIXV[g.MP - 1] & g.CONSTANT_FLAG) != 0:
+                g.LIT1(GET_LITERAL(g.LOC_P[g.PTR[g.MP]]), 5)
     elif PRODUCTION_NUMBER == 182:  # reference 1820
         #  <EXPRESSION> ::= <BIT EXP>
         g.EXT_P[g.PTR[g.MP]] = 0;
@@ -3911,7 +3919,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     # CHARACTER IS SCALAR AND SHOULD BE IN DOUBLE
                     # PRECISION (DOUBLELIT=TRUE).  IF TRUE, THEN SET
                     # LIT1 EQUAL TO 5.
-                    if (g.PSEUDO_TYPE[g.PTR[g.SP]] == g.SCALAR_TYPE) and g.DOUBLELIT:  # "
+                    if (g.PSEUDO_TYPE[g.PTR[g.SP]] == g.SCALAR_TYPE) and \
+                            0 != (1 & g.DOUBLELIT):  # "
                         g.LIT1(GET_LITERAL(g.LOC_P[g.PTR[g.SP]]), 5);
                 elif pt == 3:
                     MATRIX_COMPARE(g.MP, g.SP, d.CLASS_AV, 2);  # MATRIX

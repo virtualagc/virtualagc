@@ -22,9 +22,9 @@ p125_4: ;
   // (126)           CALL INLINE("97",8,0,1,0);                     /* XI  0(1),X'80'    */
   address360A = GR[1] + 0;
   // Type SI, p. 7-74:		XI	0(1),128
-  scratch = 128 ^ COREWORD(address360A);
+  scratch = 128 ^ memory[address360A];
   CC = (scratch != 0);
-  COREWORD2(address360A, (int32_t) scratch);
+  memory[address360A] = scratch;
 
 p125_8: ;
 }

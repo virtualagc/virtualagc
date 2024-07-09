@@ -1572,9 +1572,14 @@ def applyInlinePatch(scope, indent, originalInline):
     if not found:
         return False
     indent2 = indent + indentationQuantum
-    print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
+    if debugInlines and lastCallInline != lineCounter - 1:
+        print(indent + "{ debugInline(%d); // (%d) %s" % \
+              (inlineCounter, inlineCounter, originalInline))
+    else:
+        print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
     if traceInlines:
-        print(indent2 + "traceInline(%d);" % inlineCounter)
+        print(indent2 + 'traceInline("%s p%d");' % \
+              (findParentProcedure(scope)["symbol"], inlineCounter))
     #first = True
     for patchLine in patchFile:
         '''

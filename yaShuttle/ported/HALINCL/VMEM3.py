@@ -124,6 +124,9 @@ def MOVE(LENGTH, FROM, INTO):
 # NOTE: 1<= COUNT <= 256
 def ZERO_256(CORE_ADDR, COUNT):
     
+    from g import traceInline
+    traceInline("ZERO_256 p19")
+    
     object, index, isString = normalize(CORE_ADDR);
     if isString:
         print("Zeroing a string not implemented", file=sys.stderr)

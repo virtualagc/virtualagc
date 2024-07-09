@@ -114,7 +114,7 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
                     g.INX[g.IND_LINK] = MODE | 0x1;
                 elif (T2 < T1 and goto == None) or goto == "SR_ERR2":
                     if goto == "SR_ERR2": goto = None
-                    ERROR(CLASS_SR, 2, g.VAR[g.MP]);
+                    ERROR(d.CLASS_SR, 2, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
                 else: 
                     g.FIX_DIM = T2 - T1 + 1;

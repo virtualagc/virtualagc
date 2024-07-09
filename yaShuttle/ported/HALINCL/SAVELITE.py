@@ -38,26 +38,22 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     if TYPE == 0:
     # CHARACTER
     # DO
-        '''
-        It would appear that this procedure implicitly makes use of the 
-        knowledge of the internal forms of the object (VAL) which is passed 
-        to a function in lieu of the actual contents of the string being 
-        referenced.  That, of course, is of no value to us whatsoever, given
-        that we don't have a System/360 environment and whatever conventions
-        it used for subroutine linkage.  We will have to treat VAL as a Python
-        string, and fill in the rest with our imagination.  It further appears
-        that strings are saved in whatever character encoding happens to be
-        of use.
-        '''
         length = len(VAL)
-        if length > 256:
+        if length == 0: # DO;
+            g.LIT2(g.LIT_PTR, 0)
+            return g.LIT_TOP()
+        # END;
+        # There's a check here ("IF (RECORD_ALLOC(LIT_NDX) ...") of whether the
+        # amount of space allocated for `LIT_NDX` is enough to hold the string
+        # `VAL`.  We'll just skip that check, since I'm not sure it's valid for
+        # this Python implementation, and don't know how to do it anyway.
+        if length > 256: # Not needed in the original code.
             length = 256
-        if length == 0:  # DO
-            g.LIT2(g.LIT_PTR, 0);
-            return g.LIT_TOP();
-        # END
         top = length - 1
-        # Copy the contents of the string to LIT_CHAR[].
+        # Copy the contents of the string to LIT_CHAR[].  This is the same
+        # as patchfile 52p and 56p.
+        g.traceInline("SAVE_LITERAL p52")
+        g.traceInline("SAVE_LITERAL p56")
         a = g.LIT_CHAR_AD()
         for i in range(length):
             g.LIT_CHAR(a, VAL[i])

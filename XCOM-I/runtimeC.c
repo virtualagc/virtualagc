@@ -3421,7 +3421,7 @@ XPL_COMPILER_VERSION(uint32_t index){
 
 void
 debugInline(int inlineCounter) {
-  fprintf(stderr, "Unpatched CALL INLINE %d\n", inlineCounter);
+  fprintf(stderr, "FYI: CALL INLINE %d\n", inlineCounter);
 }
 
 /*
@@ -3464,11 +3464,12 @@ int traceInlineEnable = 0;
 int detailedInlineEnable = 0;
 #ifdef TRACE_INLINES
 void
-traceInline(int inlineCounter) {
+traceInline(char *msg) {
   if (traceInlineEnable)
-    fprintf(stderr,
-        "\nTrace Patch file %d -------------------------------------------\n",
-        inlineCounter);
+    {
+      fprintf(stdout, "\nTrace INLINE: %s", msg);
+      fflush(stdout);
+    }
 }
 
 void
@@ -3476,11 +3477,10 @@ detailedInlineBefore(int inlineCounter, char *instruction) {
   if (detailedInlineEnable)
     {
       fprintf(stdout, "\n");
-      fflush(stdout);
-      fprintf(stderr, "CALL INLINE %d:\n", inlineCounter);
+      fprintf(stdout, "\nCALL INLINE %d:", inlineCounter);
       detailedInlineAfter();
-      fprintf(stderr, "\t\tExecute:\t\t%s\n", instruction);
-      fflush(stderr);
+      fprintf(stdout, "\n\t\tExecute:\t\t%s", instruction);
+      fflush(stdout);
     }
 }
 
@@ -3491,33 +3491,33 @@ detailedInlineAfter(void) {
     {
       for (i = 0; i < 16; i++)
         {
-          fprintf(stderr, "  GR%02d=%08X(%-11d)", i, GR[i], GR[i]);
-          if (3 == i % 4)
-            fprintf(stderr, "\n");
+          if (0 == i % 4)
+            fprintf(stdout, "\n");
+          fprintf(stdout, "  GR%02d=%08X(%-11d)", i, GR[i], GR[i]);
         }
       for (i = 0; i < 16; i++)
         {
-          fprintf(stderr, "  FR%02d=%-21F", i, FR[i]);
-          if (3 == i % 4)
-            fprintf(stderr, "\n");
+          if (0 == i % 4)
+            fprintf(stdout, "\n");
+          fprintf(stdout, "  FR%02d=%-21F", i, FR[i]);
         }
+      fprintf(stdout, "\n");
       if (address360A >=0 && address360A <= 0x1000000-4)
         {
           value = COREWORD(address360A);
-          fprintf(stderr, "  A=%06X (A)=%08X(%-11d)", address360A, value, value);
+          fprintf(stdout, "  A=%06X (A)=%08X(%-11d)", address360A, value, value);
         }
       else
-        fprintf(stderr, "  A=%06X (A)=%21s", address360A, "(out of range)");
+        fprintf(stdout, "  A=%06X (A)=%21s", address360A, "(out of range)");
       if (address360B >=0 && address360B <= 0x1000000-4)
         {
           value = COREWORD(address360B);
-          fprintf(stderr, "  B=%06X (B)=%08X(%-11d)", address360B, value, value);
+          fprintf(stdout, "  B=%06X (B)=%08X(%-11d)", address360B, value, value);
         }
       else
-        fprintf(stderr, "  B=%06X (B)=%21s", address360B, "(out of range)");
-      fprintf(stderr, "  CC=%d", CC);
-      fprintf(stderr, "\n");
-      fflush(stderr);
+        fprintf(stdout, "  B=%06X (B)=%21s", address360B, "(out of range)");
+      fprintf(stdout, "  CC=%d", CC);
+      fflush(stdout);
     }
 }
 #endif // TRACE_INLINES

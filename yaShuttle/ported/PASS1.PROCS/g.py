@@ -41,6 +41,7 @@ intersection = False
 extraTrace = False
 debugwr = False
 templib = False
+traceInlines = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -86,9 +87,15 @@ pVALS = ["", "59", "2500", "200", "500", "2000", "0", "2000", "", "1200",
          "1", "400", ""]
 PARM_STRING = ""
 
+def traceInline(msg):
+    if traceInlines:
+        print("\nTrace INLINE:", msg, end="")
+
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
         pass  # This case is handled in xplBuiltins.py.
+    elif parm == "--trace-inlines":
+        traceInlines = True
     elif parm == "--no-syn":
         pass  # This case is handled by SYNTHESI.py.
     elif parm.startswith("--dummy="):
@@ -170,6 +177,7 @@ for parm in sys.argv[1:]:
         # print('--scan1          Use SCAN1 rather than SCAN')
         # print('--scan2          Use SCAN2 rather than SCAN')
         print('--debugwr        Print debugging messages for OUTPUTWR.')
+        print('--trace-inlines  Print messages for CALL INLINE.')
         print('--intersection   Helps test overlap between globals/locals.')
         print('Additionally, many of the options from the original JCL')
         print('PARMLISTs can be used.  For "type 1" options (i.e., those')

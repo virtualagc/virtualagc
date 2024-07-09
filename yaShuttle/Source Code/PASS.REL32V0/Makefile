@@ -49,6 +49,7 @@
 #	XEXTRA="..."		Extra command-line options for XCOM-I.
 #				You can see those options by running
 #					XCOM-I.py --help
+#	PEXTRA="..."            Extra command-line options for HAL_S_FC.py.
 #	EXTRA="..."		Extra C-compiler command-line options.
 #				Typical options would be -ggdb (for
 #				embedding debugging info for gdb),
@@ -127,7 +128,7 @@ compile: clean
 	@echo Processing $(RTARGET) ...
 	
 	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
-		$(sPARM_STRING) \
+		$(sPARM_STRING) $(PEXTRA) \
 		--hal=$(RTARGET) \
 		>py.rpt
 	

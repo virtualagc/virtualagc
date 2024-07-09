@@ -72,27 +72,28 @@ def PREP_LITERAL():
             g.TOKEN = g.CPD_NUMBER
             break # GOTO SAVE_NUMBER
         
+        g.traceInline("PREP_LITERAL p59")
         # TEMP1 = ADDR(NOT_EXACT)
-        g.FR[6] = g.FR[0]  # FR[0] was loaded by MONITOR(10)
-        g.FR[0] = abs(g.FR[0])
-        scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF)
-        if scratch > 0:
+        g.FR[6] = g.FR[0]  # p59_8 FR[0] was loaded by MONITOR(10)
+        g.FR[0] = abs(g.FR[0]) # p59_10
+        scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p59_12
+        if scratch > 0: # p59_16
             goto = "NOT_EXACT"
             continue
-        g.FR[4] = 0.0
-        g.FR[2] = g.FR[0]
-        g.FR[0] += fromFloatIBM(0x4E000000, 0x00000000)
-        g.DW[6] = 0
-        g.DW[7] = int(round(g.FR[0]))
-        g.FR[0] += g.FR[4]
-        g.FR[2] -= g.FR[0]
-        if g.FR[2] != 0:
+        g.FR[4] = 0.0 # p59_18
+        g.FR[2] = g.FR[0] # p59_20
+        g.DW[6] = 0 # p59_22, 26, 30, 34
+        g.DW[7] = int(hround(g.FR[0]))
+        g.FR[0] += g.FR[4] # p59_38
+        g.FR[2] -= g.FR[0] # p 59_40
+        if g.FR[2] != 0: # p59_42
             goto = "NOT_EXACT"
             continue
-        g.VALUE = g.DW[7]
+        g.VALUE = g.DW[7] # p59_44, 48
     
     #SAVE_NUMBER:    
-    g.DW[6], g.DW[7] = toFloatIBM(g.FR[6])
+    g.traceInline("PREP_LITERAL p76")
+    g.DW[6], g.DW[7] = toFloatIBM(g.FR[6]) # p76_0, 4
 
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
     g.SYT_INDEX = SAVE_LITERAL(1, g.DW_AD());

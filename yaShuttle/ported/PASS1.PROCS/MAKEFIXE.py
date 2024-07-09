@@ -76,8 +76,30 @@ def MAKE_FIXED_LIT(PTR):
     PTR=GET_LITERAL(PTR);
     g.DW[0]=g.LIT2(PTR);
     g.DW[1]=g.LIT3(PTR);
-    i = hround(fromFloatIBM(g.DW[0], g.DW[1]))
-    if i < 0:
-        i = -i
-    return i
+    if False:
+        # Original implementation
+        i = hround(fromFloatIBM(g.DW[0], g.DW[1]))
+        if i < 0:
+            i = -i
+        return i
+    else:
+        # Replacement implementation
+        g.traceInline("MAKE_FIXED_LIT p33")
+        #PTR = ADDR(LIMIT_OK);
+        g.FR[0] = fromFloatIBM(g.DW[0], g.DW[1]) # p33_0, 4
+        g.FR[0] = abs(g.FR[0]) # p33_8
+        g.FR[0] += fromFloatIBM(0x407FFFFF, 0xFFFFFFFF) # p33_10,14
+        scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p33_18,22,26
+        if scratch <= 0: # p33_30
+            pass # branch to LIMIT_OK
+        else:
+            g.FR[0] = fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p33_32
+        #LIMIT_OK:
+        g.traceInline("MAKE_FIXED_LIT p43")
+        g.DW[2] = 0 # p43 (all)
+        g.DW[3] = int(g.FR[0])
+        
+        if 0 != (1 & SHR(g.DW[0], 31)):
+            return -g.DW[3]
+        return g.DW[3]
 # END MAKE_FIXED_LIT;

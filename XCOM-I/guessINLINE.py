@@ -548,9 +548,9 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     elif opcode == 0x92: # MVI p. 7-83
         thisLine.append(indent + "memory[address360A] = %d;" % I2)
     elif opcode == 0x97: # XI p. 7-74
-        thisLine.append(indent + "scratch = %d ^ COREWORD(address360A);" % I2)
+        thisLine.append(indent + "scratch = %d ^ memory[address360A];" % I2)
         thisLine.append(indent + "CC = (scratch != 0);")
-        thisLine.append(indent + "COREWORD2(address360A, (int32_t) scratch);")
+        thisLine.append(indent + "memory[address360A] = scratch);")
     else:
         return endOfInstruction(FIXME + "Implementation error %d,%s" % \
                                 (opcode, mnemonic))
