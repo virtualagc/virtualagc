@@ -3,7 +3,7 @@ C/ From PDF p. 170 of "Programming in HAL/S".
   OUTER:
   PROGRAM;
      DECLARE SCALAR,
-     		G1 INITIAL(8), G2 CONSTANT(9);
+                G1 INITIAL(8), G2 CONSTANT(9);
      STRUCTURE UTIL_PARM:
         1 V VECTOR,
         1 S1 SCALAR,
@@ -13,12 +13,12 @@ C/ From PDF p. 170 of "Programming in HAL/S".
   UTIL:
   FUNCTION(X) VECTOR;
      DECLARE X UTIL_PARM-STRUCTURE;
-     	     
-C	.
-C	.
-C	.
+             
+C       .
+C       .
+C       .
 
-E	      -
+E             -
 M    RETURN X.V;
   CLOSE UTIL;
   NESTED:
@@ -27,26 +27,26 @@ M    RETURN X.V;
      DECLARE LOCAL UTIL_PARM-STRUCTURE INITIAL(0, 1, 0, 0, 83, 0, OFF);
      
 C  NOTE THAT THE TEMPLATE IS NOT REPEATED
-     	     
+             
      LOCAL.S1 = G1 / 3;
      LOCAL.S2 = SIN(G1 + G2);
      
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
      
 E      -
 M    RESULT = UTIL(LOCAL);
 
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   CLOSE NESTED;
   
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   CLOSE OUTER;
   

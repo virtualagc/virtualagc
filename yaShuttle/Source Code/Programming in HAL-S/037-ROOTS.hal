@@ -6,39 +6,39 @@ C/ polynomial using the roots, and to allow complex roots.
   ROOTS: PROGRAM;
     DECLARE SCALAR, A, B, C, D, ROOT1, ROOT2;
     DO WHILE TRUE;
-    	WRITE(6) ;
-    	WRITE(6) 'Enter A, B, C (0,0,0 to quit):';
-    	READ(5) A, B, C;
-    	IF A = 0 AND B = 0 AND C = 0 THEN
-    	    DO;
-    	    	WRITE(6) 'Quitting ...';
-    	    	EXIT;
-    	    END;
-    	D = B**2 - 4 A C;
-    	IF D >= 0 THEN 
-    	    DO;
-    	    	D = D**0.5;
-	        ROOT1 = (-B + D) / (2 A);
-	        ROOT2 = (-B - D) / (2 A);
-	        WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 
-	                 'are:', ROOT1, ROOT2;
-	        WRITE(6) 'Check:', 
-	        	A ROOT1**2 + B ROOT1 + C,
-	        	A ROOT2**2 + B ROOT2 + C;
-    	    END;
-    	ELSE
-    	    DO;
-    	        TEMPORARY RE, IM, RE2, IM2;
-    	        D = (-D)**0.5;
-    	        RE = -B / (2 A);
-    	        IM = D / (2 A);
-    	        WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', 
-    	                 C, 'are:', RE, '+/-', IM, 'i';
-	        RE2 = RE**2 - IM**2; /* Square of RE2 +/- IM2 i. */
-	        IM2 = 2 RE IM;
-	        WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', 
-	                 A IM2 + B IM, 'i';
-	    END;
+        WRITE(6) ;
+        WRITE(6) 'Enter A, B, C (0,0,0 to quit):';
+        READ(5) A, B, C;
+        IF A = 0 AND B = 0 AND C = 0 THEN
+            DO;
+                WRITE(6) 'Quitting ...';
+                EXIT;
+            END;
+        D = B**2 - 4 A C;
+        IF D >= 0 THEN 
+            DO;
+                D = D**0.5;
+                ROOT1 = (-B + D) / (2 A);
+                ROOT2 = (-B - D) / (2 A);
+                WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 
+                         'are:', ROOT1, ROOT2;
+                WRITE(6) 'Check:', 
+                        A ROOT1**2 + B ROOT1 + C,
+                        A ROOT2**2 + B ROOT2 + C;
+            END;
+        ELSE
+            DO;
+                TEMPORARY RE, IM, RE2, IM2;
+                D = (-D)**0.5;
+                RE = -B / (2 A);
+                IM = D / (2 A);
+                WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', 
+                         C, 'are:', RE, '+/-', IM, 'i';
+                RE2 = RE**2 - IM**2; /* Square of RE2 +/- IM2 i. */
+                IM2 = 2 RE IM;
+                WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', 
+                         A IM2 + B IM, 'i';
+            END;
     END;
   CLOSE ROOTS;
   

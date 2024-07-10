@@ -12,12 +12,12 @@ C/   DECLARE PROCEDURE, READ_IMU, SELECT_BEST, GUIDANCE, OTHER_SW;
 
      DO FOR TEMPORARY I = 1 TO 3;
 M       CALL READ_IMU(I) ASSIGN(VEL  );
-S				   I;
+S                                  I;
 
      END;
      CALL SELECT_BEST(VEL) ASSIGN(BEST);
 M    CALL GUIDANCE(VEL     );
-S		      BEST;
+S                     BEST;
 
 M    CALL OTHER_SW(VEL     );
 S                     BEST;
@@ -26,7 +26,7 @@ S                     BEST;
   PROCEDURE(V) ASSIGN(SELECTED);
   
      DECLARE V SUPER_VECTOR-STRUCTURE(3),
-     	     SELECTED INTEGER;
+             SELECTED INTEGER;
      DECLARE N INTEGER;
      DECLARE MOST_RECENT SCALAR INITIAL(0) AUTOMATIC;
      DO FOR N = 1 TO 3;
@@ -46,28 +46,28 @@ S                                    N;
            END;
      END;
      IF MOST_RECENT = 0 THEN
-        SELECTED = 1;				/*ALL EQUALLY BAD*/
+        SELECTED = 1;                           /*ALL EQUALLY BAD*/
   CLOSE SELECT_BEST;
   GUIDANCE:
   PROCEDURE(BEST_VEL);
      DECLARE BEST_VEL SUPER_VECTOR-STRUCTURE;
      
-C	...
+C       ...
 
   CLOSE GUIDANCE;
   OTHER_SW:
   PROCEDURE(V);
      DECLARE V SUPER_VECTOR-STRUCTURE;
      
-C	...
+C       ...
 
   CLOSE OTHER_SW;
   READ_IMU:
   PROCEDURE(UNIT_NUM) ASSIGN(STRUC);
      DECLARE UNIT_NUM INTEGER,
-     	     STRUC SUPER_VECTOR-STRUCTURE;
-     	     
-C	...
+             STRUC SUPER_VECTOR-STRUCTURE;
+             
+C       ...
 
   CLOSE READ_IMU;
   CLOSE EXAMPLE_N;

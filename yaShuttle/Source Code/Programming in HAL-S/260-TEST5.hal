@@ -11,18 +11,18 @@ D INCLUDE TEMPLATE CPL189
      DECLARE PITCH_ANGLE SCALAR;
  
 M    CALL XTRA ASSIGN(IMU_INPT     );
-S			      BEST;
+S                             BEST;
 
   XTRA:
   PROCEDURE ASSIGN(BEST_IMU);
      DECLARE BEST_IMU IMU_DATA-STRUCTURE;
      
-C		...
+C               ...
 
 M    PITCH_ANGLE = SCALAR(BEST_IMU.ATTITUDE  );
-S					   1
+S                                          1
 
-C		...
+C               ...
 
   CLOSE XTRA;
  

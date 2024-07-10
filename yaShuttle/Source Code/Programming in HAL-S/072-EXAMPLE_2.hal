@@ -6,20 +6,20 @@ C/ declaration group.
   EXAMPLE_2:
   PROGRAM;
      DECLARE VEL VECTOR INITIAL(1, 2, 3),
-     	     MY_FRAME MATRIX INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9);
+             MY_FRAME MATRIX INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9);
      DECLARE VECTOR,
-     	     RESULT1, RESULT2, E INITIAL(3, 2, 1);
-     	     
+             RESULT1, RESULT2, E INITIAL(3, 2, 1);
+             
 C     ...
 
      DO;
-     	TEMPORARY V_PRIME VECTOR;
+        TEMPORARY V_PRIME VECTOR;
 E          -         *      -
-M    	V_PRIME = MY_FRAME VEL;
+M       V_PRIME = MY_FRAME VEL;
 E          -              -
-M    	RESULT1 = UNIT(V_PRIME);
+M       RESULT1 = UNIT(V_PRIME);
 E          -         -      -
-M    	RESULT2 = V_PRIME * E;
+M       RESULT2 = V_PRIME * E;
      END;
   CLOSE EXAMPLE_2;
   

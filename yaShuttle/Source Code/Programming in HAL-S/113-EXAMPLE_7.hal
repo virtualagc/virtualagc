@@ -5,26 +5,26 @@ C/ legal HAL/S syntax.
   EXAMPLE_7:
   PROGRAM;
      DECLARE ATTITUDE ARRAY(4, 3) SCALAR INITIAL(1, 2, 3,
-     						 1, 3, 2,
-     						 1, 2, 3,
-     						 1, 3, 2);
+                                                 1, 3, 2,
+                                                 1, 2, 3,
+                                                 1, 3, 2);
      DECLARE MISMATCH ARRAY(4, 4) INTEGER;
      DECLARE INTEGER,
-     		I, J;
+             I, J;
      DO FOR I = 1 TO 4;
 M       MISMATCH    = 0;
-S       	I,I
+S               I,I
 
         DO FOR J = I + 1 TO 4;
-M	   IF ATTITUDE    ~= ATTITUDE    THEN
-S		      I,*            J,*
+M          IF ATTITUDE    ~= ATTITUDE    THEN
+S                     I,*            J,*
 
-M	      MISMATCH   , MISMATCH    = 1;
-S		      J,I	   I,J
+M             MISMATCH   , MISMATCH    = 1;
+S                     J,I          I,J
 
-	   ELSE
-M	      MISMATCH   , MISMATCH    = 0;
-S		      J,I	   I,J
+           ELSE
+M             MISMATCH   , MISMATCH    = 0;
+S                     J,I          I,J
 
         END;
      END;

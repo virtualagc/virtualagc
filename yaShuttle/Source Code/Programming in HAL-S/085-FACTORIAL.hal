@@ -3,16 +3,16 @@ C/ Adapted from PDF p. 85 of "Programming in HAL/S".
   FACTORIAL:
   PROGRAM;
      DECLARE INTEGER,
-     		RESULT, N_MAX, I;
+             RESULT, N_MAX, I;
      DO WHILE TRUE;
-     	     WRITE(6) 'Input a positive integer (0 to quit):';
-	     READ(5) N_MAX;
-	     IF N_MAX < 1 THEN EXIT;
-	     RESULT = 1;
-	     DO FOR I = 2 TO N_MAX BY 1;
-	     	RESULT = I RESULT;
-	     END;
-	     WRITE(6) 'FACTORIAL=', RESULT;
+             WRITE(6) 'Input a positive integer (0 to quit):';
+             READ(5) N_MAX;
+             IF N_MAX < 1 THEN EXIT;
+             RESULT = 1;
+             DO FOR I = 2 TO N_MAX BY 1;
+                RESULT = I RESULT;
+             END;
+             WRITE(6) 'FACTORIAL=', RESULT;
      END;
   CLOSE FACTORIAL;
   

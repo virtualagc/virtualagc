@@ -12,7 +12,7 @@ C/ value) to smallest, and the replacement process maintains that order.
   PROGRAM;
      DECLARE V ARRAY(999) VECTOR(3);
      DECLARE BIGTHREE ARRAY(3) VECTOR(3) INITIAL(0) AUTOMATIC;
-     DECLARE N INTEGER;	        /*NUMBER OF ACTUAL ENTRIES IN V*/
+     DECLARE N INTEGER;         /*NUMBER OF ACTUAL ENTRIES IN V*/
      
      N = 25;
      DO FOR TEMPORARY I = 1 TO N;
@@ -23,23 +23,23 @@ C/ value) to smallest, and the replacement process maintains that order.
   INNER:
         DO FOR TEMPORARY J = 1 TO 3;
 E                   -               -
-M	   IF ABVAL(V  ) > ABVAL(BIGTHREE  ) THEN
-S		     I:                  J:
+M          IF ABVAL(V  ) > ABVAL(BIGTHREE  ) THEN
+S                    I:                  J:
 
-	      DO;
-	         DO FOR TEMPORARY K = 3 TO J + 1 BY -1;
+              DO;
+                 DO FOR TEMPORARY K = 3 TO J + 1 BY -1;
 E                      -            -
-M		    BIGTHREE   = BIGTHREE    ;
-S			    K:           K-1:
+M                   BIGTHREE   = BIGTHREE    ;
+S                           K:           K-1:
 
-		 END;
+                 END;
 E                   -         -
-M		 BIGTHREE   = V  ;
-S			 J:    I:
+M                BIGTHREE   = V  ;
+S                        J:    I:
 
-		 EXIT INNER;		  		/* TRY NEW I */
-	      END;
-	END INNER;
+                 EXIT INNER;                          /* TRY NEW I */
+              END;
+        END INNER;
      END;
      
      DO FOR TEMPORARY I = 1 TO 3;

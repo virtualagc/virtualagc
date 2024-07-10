@@ -43,26 +43,26 @@ C           OR AT END OF QUEUE
      IF NEW.TIME < ACTV_Q.TIME THEN
         DO;
 
-           NAME(NEW.NEXT) = NAME(ACTV_Q);	/* PUT FIRST */
+           NAME(NEW.NEXT) = NAME(ACTV_Q);       /* PUT FIRST */
 
            NAME(ACTV_Q) = NAME(NEW);
 
-	   RETURN;
-	END;
+           RETURN;
+        END;
 
-     NAME(ENT) = NAME(ACTV_Q);			/*START AT TOP*/
+     NAME(ENT) = NAME(ACTV_Q);                  /*START AT TOP*/
 
-     DO UNTIL NAME(ENT.NEXT) = NAME(NULL);	/* SEARCH Q*/
+     DO UNTIL NAME(ENT.NEXT) = NAME(NULL);      /* SEARCH Q*/
 
-        NAME(ENT) = NAME(ACTV_Q);		/*START AT TOP*/
+        NAME(ENT) = NAME(ACTV_Q);               /*START AT TOP*/
         IF ENT.NEXT.TIME > NEW.TIME THEN
            DO;
               NAME(NEW.NEXT) = NAME(ENT.NEXT);
               NAME(ENT.NEXT) = NAME(NEW);
-              RETURN;				/*NEW ENTRY INSERTED*/
-	   END;
+              RETURN;                           /*NEW ENTRY INSERTED*/
+           END;
 
- 	NAME(ENT) = NAME(ENT.NEXT);		/* TRY NEXT ENTRY*/     
+        NAME(ENT) = NAME(ENT.NEXT);             /* TRY NEXT ENTRY*/     
      END;
      
 C  AT THIS POINT, THE WHOLE Q HAS BEEN SEARCHED UNSUCCESSFULLY,

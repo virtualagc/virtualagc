@@ -3,20 +3,20 @@ C/ From PDF p. 169 of "Programming in HAL/S".
   OUTER:
   PROGRAM;
      DECLARE SCALAR,
-     		G1 INITIAL(6), G2 INITIAL(7);
+                G1 INITIAL(6), G2 INITIAL(7);
   UTIL:
   FUNCTION(A, B, C, D, E) VECTOR;
      DECLARE A VECTOR;
      DECLARE SCALAR,
-     		B, D;
+                B, D;
      DECLARE C INTEGER,
-     	     E BOOLEAN;
-     	     
-C	.
-C	.
-C	.
+             E BOOLEAN;
+             
+C       .
+C       .
+C       .
 
-E	    -
+E           -
 M    RETURN A;
   CLOSE UTIL;
   NESTED:
@@ -27,27 +27,27 @@ C  A PROCEDURE WHICH INVOKES UNTIL
      DECLARE RESULT VECTOR;
      DECLARE V VECTOR INITIAL(0, 1, 0);
      DECLARE SCALAR,
-     		S1, S2;
+                S1, S2;
      DECLARE C INTEGER INITIAL(83),
-     	     E BOOLEAN INITIAL(OFF);
-     	     
-C	.
-C	.
-C	.
+             E BOOLEAN INITIAL(OFF);
+             
+C       .
+C       .
+C       .
 
      S1 = G1 / 3;
      S2 = SIN(G1 + G2);
 E      -           -             .
 M    RESULT = UTIL(V, S1, C, S2, E);
 
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   CLOSE NESTED;
   
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   CLOSE OUTER;

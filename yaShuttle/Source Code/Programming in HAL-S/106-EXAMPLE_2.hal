@@ -3,16 +3,16 @@ C/ Adapted from PDF p. 106 of "Programming in HAL/S".
   EXAMPLE_2:
   PROGRAM;
      DECLARE GYRO_INPUT ARRAY(4, 3) INTEGER 
-     		         INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+             INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
      DECLARE ATT_RATE ARRAY(4, 3) SCALAR;
      DECLARE SCALE ARRAY(3) CONSTANT(.013, .026, .013);
      DECLARE BIAS SCALAR INITIAL(57.296);
      DO FOR TEMPORARY I = 1 TO 4;
         DO FOR TEMPORARY J = 1 TO 3;
-M	   ATT_RATE    = GYRO_INPUT    SCALE  + BIAS;
-S		   I,J             I,J      J
+M          ATT_RATE    = GYRO_INPUT    SCALE  + BIAS;
+S                  I,J             I,J      J
 
-	END;
+        END;
      END;
      WRITE(6) ATT_RATE;
   CLOSE EXAMPLE_2;

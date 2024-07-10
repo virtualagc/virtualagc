@@ -14,15 +14,15 @@ C/ From PDF p. 167 of "Programming in HAL/S".
      DECLARE IO PROCEDURE NONHAL(1);
      REPLACE OPSYS BY "1";
      DO CASE OPSYS;
-     	%SVC(9);				/*PERCENT MACRO*/
+        %SVC(9);                                /*PERCENT MACRO*/
 
-        CALL IO(FWDSENSORS);			/*ASSEMBLY LANGUAGE*/
+        CALL IO(FWDSENSORS);                    /*ASSEMBLY LANGUAGE*/
 
 E        .
 M       MEM          = ON;
 S          GEARDOWN:
 
-        SIGNAL DO_NAV_READ;			/*EVENT VARIABLE*/
-        ;					/*NO-OP*/
+        SIGNAL DO_NAV_READ;                     /*EVENT VARIABLE*/
+        ;                                       /*NO-OP*/
      END;
   CLOSE ASSORTEDIO;

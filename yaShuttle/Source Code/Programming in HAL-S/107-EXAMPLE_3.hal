@@ -5,15 +5,15 @@ C/ datatypes.
   EXAMPLE_3:
   PROGRAM;
      DECLARE ARRAY(3, 3),
-     		M1, M2 CONSTANT(1, 2, 3, 4, 5, 6, 7, 8, 9), 
-     		M3 INITIAL(11, 12, 13, 14, 15, 16, 17, 18, 19);
+             M1, M2 CONSTANT(1, 2, 3, 4, 5, 6, 7, 8, 9), 
+             M3 INITIAL(11, 12, 13, 14, 15, 16, 17, 18, 19);
      DECLARE INTEGER,
-     		ROW, COL;
+             ROW, COL;
      DO FOR ROW = 1 TO 3;  DO FOR COL = 1 TO 3;
 M       M1        = M2      M3      + M2      M3      + M2      M3     ;
 S         ROW,COL     ROW,1   1,COL     ROW,2   2,COL     ROW,3   3,COL
 
-	END;
+        END;
      END;
      DO FOR ROW = 1 TO 3;
         WRITE(6) M1$(ROW,*);

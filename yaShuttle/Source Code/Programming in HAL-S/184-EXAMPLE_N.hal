@@ -9,15 +9,15 @@ C/ From PDF p. 184 of "Programming in HAL/S".
      DECLARE VEL SUPER_VECTOR-STRUCTURE(3);
      DECLARE BEST INTEGER;
 C     DECLARE READ_IMU PROCEDURE, SELECT_BEST PROCEDURE, 
-C     	     GUIDANCE PROCEDURE, OTHER_SW PROCEDURE;
+C            GUIDANCE PROCEDURE, OTHER_SW PROCEDURE;
      DO FOR TEMPORARY I = 1 TO 3;
 M       CALL READ_IMU(I) ASSIGN(VEL  );
-S				   I;
+S                                  I;
 
      END;
 M    CALL SELECT_BEST(VEL) ASSIGN(BEST);
 M    CALL GUIDANCE(VEL     );
-S		      BEST;
+S                     BEST;
 
 M    CALL OTHER_SW(VEL     );
 S                     BEST;
@@ -33,7 +33,7 @@ S                  N;
 
            REPEAT;
 
-C	   ...
+C          ...
 
      END;
   CLOSE SELECT_BEST;
@@ -41,22 +41,22 @@ C	   ...
   PROCEDURE(BEST_VEL);
      DECLARE BEST_VEL SUPER_VECTOR-STRUCTURE;
      
-C	...
+C       ...
 
   CLOSE GUIDANCE;
   OTHER_SW:
   PROCEDURE(V);
      DECLARE V SUPER_VECTOR-STRUCTURE;
      
-C	...
+C       ...
 
   CLOSE OTHER_SW;
   READ_IMU:
   PROCEDURE(UNIT_NUM) ASSIGN(STRUC);
      DECLARE UNIT_NUM INTEGER,
-     	     STRUC SUPER_VECTOR-STRUCTURE;
-     	     
-C	...
+             STRUC SUPER_VECTOR-STRUCTURE;
+             
+C       ...
 
   CLOSE READ_IMU;
   CLOSE EXAMPLE_N;

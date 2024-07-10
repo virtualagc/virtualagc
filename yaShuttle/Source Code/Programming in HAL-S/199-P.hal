@@ -3,27 +3,27 @@ C/ From PDF p. 199 in "Programming in HAL/S".
   P:
   PROGRAM;
      DECLARE SCALAR,
-     		A INITIAL(10), B CONSTANT(11), C INITIAL(12);
+                A INITIAL(10), B CONSTANT(11), C INITIAL(12);
      DECLARE INTEGER,
-     		X CONSTANT(13), Y INITIAL(14), Z CONSTANT(15);
+                X CONSTANT(13), Y INITIAL(14), Z CONSTANT(15);
      ON ERROR
         DO;
            WRITE(6) A, B, C, X, Y, Z;
            RETURN;
         END;
 M    ON ERROR
-S	     10:5
+S            10:5
 
         RETURN;
 M    ON ERROR    IGNORE;
-S	     10:
+S            10:
 
 M    ON ERROR    SYSTEM;
-S	     4:2
+S            4:2
 
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   LAST_CARD:
   CLOSE P;

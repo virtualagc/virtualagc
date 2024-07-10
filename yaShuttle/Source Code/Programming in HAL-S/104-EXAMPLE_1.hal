@@ -8,46 +8,46 @@ C/ determines the average time required to do so.
      DECLARE N MATRIX(5, 5);
      DECLARE TIME ARRAY(100) SCALAR INITIAL(0);
      DECLARE SCALAR,
-     		TMIN, TMAX, TMEAN;
+             TMIN, TMAX, TMEAN;
      DECLARE INTEGER,
-     		I, J, K;
+             I, J, K;
      DO FOR I = 1 TO 100;
-     	DO FOR J = 1 TO 5;
-     	   DO FOR K = 1 TO 5;     	   
-M	      M    = RANDOM;
-S	       J,K
+        DO FOR J = 1 TO 5;
+           DO FOR K = 1 TO 5;                
+M             M    = RANDOM;
+S               J,K
 
-	   END;
-	END;
-M	TIME  = RUNTIME;
-S	    I
+           END;
+        END;
+M       TIME  = RUNTIME;
+S           I
 
-E	*   *-1
-M	N = M  ;
-M	TIME  = RUNTIME - TIME ;
-S	    I                 I
+E       *   *-1
+M       N = M  ;
+M       TIME  = RUNTIME - TIME ;
+S           I                 I
 
      END;  
 C NOW PROCESS THE HUNDRED-SAMPLES IN THE ARRAY (TIME)
 
 M    TMAX, TMEAN, TMIN = TIME  ;
-S			     1
+S                             1
 
      DO FOR I = 2 TO 100;
-M	TMEAN = TMEAN + TIME ;
-S			    I
+M       TMEAN = TMEAN + TIME ;
+S                           I
 
-M	IF TIME  > TMAX THEN
-S	       I
+M       IF TIME  > TMAX THEN
+S              I
 
-M	   TMAX = TIME ;
-S		      I
+M          TMAX = TIME ;
+S                     I
 
-M	IF TIME  < TMIN THEN
-S	       I
+M       IF TIME  < TMIN THEN
+S              I
 
-M	   TMIN = TIME ;
-S	   	      I
+M          TMIN = TIME ;
+S                     I
 
      END;
      TMEAN = TMEAN / 100;

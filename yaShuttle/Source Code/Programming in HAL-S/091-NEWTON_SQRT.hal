@@ -6,17 +6,17 @@ C/ Adapted from PDF p. 91 of "Programming in HAL/S".
      DECLARE EPSILON CONSTANT(.000001);
      DECLARE SCALAR, OLD_APPROX, NEW_APPROX;
      DO WHILE TRUE;
-     	     WRITE(6) 'Input a number (negative to quit):';
-	     READ(5) X;
-	     IF X < 0 THEN EXIT;
-	     NEW_APPROX = X / 2;
-	     OLD_APPROX = 0;
-	     DO WHILE ABS(NEW_APPROX - OLD_APPROX) > EPSILON;
-	     	OLD_APPROX = NEW_APPROX;
-	     	NEW_APPROX = (OLD_APPROX + X / OLD_APPROX) / 2;
-	     END;
-	     WRITE(6) 'SQRT OF ', X, ' IS ', NEW_APPROX;
-	     WRITE(6) 'CHECK:', NEW_APPROX**2;
+             WRITE(6) 'Input a number (negative to quit):';
+             READ(5) X;
+             IF X < 0 THEN EXIT;
+             NEW_APPROX = X / 2;
+             OLD_APPROX = 0;
+             DO WHILE ABS(NEW_APPROX - OLD_APPROX) > EPSILON;
+                OLD_APPROX = NEW_APPROX;
+                NEW_APPROX = (OLD_APPROX + X / OLD_APPROX) / 2;
+             END;
+             WRITE(6) 'SQRT OF ', X, ' IS ', NEW_APPROX;
+             WRITE(6) 'CHECK:', NEW_APPROX**2;
      END;
   CLOSE NEWTON_SQRT;
  

@@ -3,9 +3,9 @@ C/ From PDF p. 160 of "Programming in HAL/S".
   REFORMAT:
   FUNCTION(X, DECIMALS, WIDTH) CHARACTER(20);
      DECLARE X SCALAR,
-     	     DECIMALS INTEGER,
-     	     WIDTH INTEGER;
-     	     
+             DECIMALS INTEGER,
+             WIDTH INTEGER;
+             
 C  X IS THE NUMBER TO BE CONVERTED, DECIMALS IS THE NUMBER OF
 C  DIGITS TO BE PRINTED AFTER THE DECIMAL POINT, AND WIDTH IS
 C  THE TOTAL LENGTH OF THE STRING RETURNED
@@ -17,28 +17,28 @@ C  THE TOTAL LENGTH OF THE STRING RETURNED
      IF X < 0 THEN
         DO;
            Y = -X;
-E	   ,
+E          ,
 M          S = '-';
         END;
      ELSE
         DO;
            Y = X;
-E	   ,
+E          ,
 M          S = ' ';
         END;
 E                                   DECIMALS
 M    C = CHARACTER(INTEGER       (10         Y));
 S                         @DOUBLE
 
-E	       ,
+E              ,
 M    IF LENGTH(C) < DECIMALS THEN
-E	,     ,				    ,
+E       ,     ,                             ,
 M       C = ZEROS                        || C;
 S                1 TO DECIMALS-LENGTH(C)
 
 E              ,    ,                        ,
 M RETURN RJUST(S || C                || '.'||C                 , WIDTH);
-S	             1 TO #-DECIMALS          #-DECIMALS-1 TO #
+S                    1 TO #-DECIMALS          #-DECIMALS-1 TO #
 
   CLOSE REFORMAT;
   

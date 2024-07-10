@@ -3,25 +3,25 @@ C/ From PDF p. 97 of "Programming in HAL/S".
   SAMPLE_FLOW:
   PROGRAM;
      DECLARE INTEGER,
-     		I INITIAL(1), J INITIAL(2), 
-     		K, L, M INITIAL(3), N INITIAL(4);
+             I INITIAL(1), J INITIAL(2), 
+             K, L, M INITIAL(3), N INITIAL(4);
      DO UNTIL FALSE;
-     	IF I = 0 THEN
-     	   DO;
-     	      J = 0;
-     	      REPEAT;
-     	   END;
-     	ELSE
-     	   EXIT;
+        IF I = 0 THEN
+           DO;
+              J = 0;
+              REPEAT;
+           END;
+        ELSE
+           EXIT;
   LOOP2:
         DO FOR K = 1 TO 10;
     LOOP3: DO FOR L = M, N, M + N;
-    	      IF J = 0 THEN
-    	         REPEAT LOOP2;
-    	      ELSE
-    	         EXIT;
-    	   END;
-    	END;
+              IF J = 0 THEN
+                 REPEAT LOOP2;
+              ELSE
+                 EXIT;
+           END;
+        END;
      END;
   CLOSE SAMPLE_FLOW;
   

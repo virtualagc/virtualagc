@@ -3,17 +3,17 @@ C/ From PDF p. 241 in "Programming in HAL/S".
   P:
   PROGRAM;
      DECLARE EVENT,
-     		ENGINE_OFF,
-     		ORBIT LATCHED;
+                ENGINE_OFF,
+                ORBIT LATCHED;
      SCHEDULE RE_IGNITE PRIORITY(999);
   RE_IGNITE:
   TASK;
      DO WHILE TRUE;
         WAIT FOR ENGINE_OFF & ~ORBIT;
         
-C		.
-C		.
-C		.
+C               .
+C               .
+C               .
 
      END;
   CLOSE RE_IGNITE;

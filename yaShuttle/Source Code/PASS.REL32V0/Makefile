@@ -36,7 +36,11 @@
 #	RTARGET=source.hal	By default, the HAL/S source-code file
 #				compiled by the `compile` target is
 #				HELLO.hal.  But it can be changed to
-#				any single HAL/S file.
+#				any single HAL/S file.  The extension ".hal"
+#				is optional, and will be added or deleted 
+#				transparently as needed, but the physical 
+#				filename must have that extension regardless
+#				of whether or not it's present in RTARGET.
 #	PARM_STRING="..."	By default, the compiler options used
 #				by HAL/S-FC are given by the variable
 #				`PARM_STRING` hard-coded below.  But it
@@ -81,6 +85,7 @@ PARM_STRING := SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES
 PARM4_STRING := 
 
 RTARGET := $(HAL_S_FC_DIR)/HELLO
+RTARGET2 := $(subst .hal,,$(RTARGET))
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
 comma := ,
@@ -125,16 +130,16 @@ cleanall: clean
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: compile
 compile: clean
-	@echo Processing $(RTARGET) ...
+	@echo Processing $(RTARGET2) ...
 	
 	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
 		$(sPARM_STRING) $(PEXTRA) \
-		--hal=$(RTARGET) \
+		--hal='$(RTARGET2)' \
 		>py.rpt
 	
 	-./PASS1 $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
-		--ddi=0,$(RTARGET).hal \
+		--ddi=0,'$(RTARGET2).hal' \
 		--ddo=2,listing2.txt \
 		--pdsi=5,ERRORLIB \
 		--pdsi=6,ACCESS  \

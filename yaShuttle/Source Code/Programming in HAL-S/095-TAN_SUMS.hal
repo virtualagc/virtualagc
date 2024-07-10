@@ -9,19 +9,19 @@ C   CLOSE TO A SINGULARITY. */
 
   TAN_SUMS:
   PROGRAM;
-     REPLACE CARDS BY "5";		/* CARD READER IS DEVICE 5 */
-     REPLACE LIST BY "6";		/* PRINTER IS DEVICE 6 */
+     REPLACE CARDS BY "5";               /* CARD READER IS DEVICE 5 */
+     REPLACE LIST BY "6";                /* PRINTER IS DEVICE 6 */
      DECLARE SCALAR,
-     		X,
-     		TOTAL INITIAL(0),
-     		PI CONSTANT(3.1415926),
-     		RAD_PER_DEGREE CONSTANT(PI / 180),
-     		SHIFT CONSTANT(PI / 2);
+             X,
+             TOTAL INITIAL(0),
+             PI CONSTANT(3.1415926),
+             RAD_PER_DEGREE CONSTANT(PI / 180),
+             SHIFT CONSTANT(PI / 2);
      DO UNTIL TOTAL > 5 PI;
-     	READ(CARDS) X;
-     	TOTAL = TOTAL + X RAD_PER_DEGREE;
-     	IF MOD(TOTAL - SHIFT, PI) < .001 THEN
-      	   REPEAT;
-      	WRITE(LIST) TOTAL, TAN(TOTAL);
+        READ(CARDS) X;
+        TOTAL = TOTAL + X RAD_PER_DEGREE;
+        IF MOD(TOTAL - SHIFT, PI) < .001 THEN
+            REPEAT;
+        WRITE(LIST) TOTAL, TAN(TOTAL);
      END;
   CLOSE TAN_SUMS;

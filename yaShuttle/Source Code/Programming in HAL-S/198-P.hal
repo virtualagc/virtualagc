@@ -3,31 +3,31 @@ C/ From PDF pp. 197-198 of "Programming in HAL/S".
   P:
   PROGRAM;
      DECLARE M MATRIX,
-     	     I INTEGER;
+             I INTEGER;
      DO FOR I = 1 TO 10;
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 M       ON ERROR
 S               4:27
 
            DO;
 E             *
-M	      M = 0;
-	      GO TO L1;
-	   END;
+M             M = 0;
+              GO TO L1;
+           END;
 E       *   *-1
 M       M = M  ;
 E                *
 M   L1: WRITE(6) M;
-C 	.
-C	.
-C	.
+C       .
+C       .
+C       .
      END;
 M    ON ERROR     SYSTEM;
-S	     4:27
+S            4:27
 
-C	.
-C	.
-C	.
-  CLOSE P;	   
+C       .
+C       .
+C       .
+  CLOSE P;         

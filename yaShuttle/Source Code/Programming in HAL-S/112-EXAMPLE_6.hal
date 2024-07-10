@@ -5,14 +5,14 @@ C/ syntax.
   EXAMPLE_6:
   PROGRAM;
      DECLARE ARRAY(4,3),  
-     	GYRO_INPUT INTEGER INITIAL(1, 2, 3, 4, 5, 6, 7, 
-     	                           8, 9, 10, 11, 12), 
-     	ATT_RATE SCALAR;
+        GYRO_INPUT INTEGER INITIAL(1, 2, 3, 4, 5, 6, 7, 
+                                   8, 9, 10, 11, 12), 
+        ATT_RATE SCALAR;
      DECLARE SCALE ARRAY(3) SCALAR CONSTANT(.013, .026, .013);
      DECLARE BIAS SCALAR CONSTANT(57.296);
      DO FOR TEMPORARY DEVICE = 1 TO 4;
-M	ATT_RATE         = GYRO_INPUT         SCALE + BIAS;
-S		DEVICE,*	     DEVICE,*
+M       ATT_RATE         = GYRO_INPUT         SCALE + BIAS;
+S               DEVICE,*             DEVICE,*
 
      END;
      DO FOR TEMPORARY I = 1 TO 4; WRITE(6) ATT_RATE$(I, *); END;

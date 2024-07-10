@@ -32,7 +32,7 @@ C/ not be executed without actually supplying a READ_ACC() function too.
      DECLARE STATE2 S2-STRUCTURE;
      REPLACE TEST_DATA BY "1";
      DECLARE CYCLE INTEGER INITIAL(0);
-     DECLARE DELTA_T CONSTANT(1 / 10);	/*TIME BETWEEN SAMPLES*/
+     DECLARE DELTA_T CONSTANT(1 / 10);  /*TIME BETWEEN SAMPLES*/
           
      STATE2.STATE.ACCEL = READ_ACC(17);
 
@@ -46,14 +46,14 @@ C  ASSUME THAT 17 SELECTS THE CORRECT ACCELEROMETER
   INTEGRATE:
   PROCEDURE(INPUT) ASSIGN(OUTPUT);
      DECLARE SUPER_VECTOR-STRUCTURE,
-     		INPUT, OUTPUT;
+                INPUT, OUTPUT;
 E               .
 M    IF INPUT.STATUS = FALSE THEN
         DO;
 E                   .
 M         OUTPUT.STATUS = FALSE;
-  	   RETURN;
- 	END;
+           RETURN;
+        END;
      OUTPUT.TIMETAG = INPUT.TIMETAG;
 E           -          -         -
 M    OUTPUT.V = OUTPUT.V + INPUT.V DELTA_T;

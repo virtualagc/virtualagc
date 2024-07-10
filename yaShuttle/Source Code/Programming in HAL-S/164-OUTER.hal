@@ -4,14 +4,14 @@ C/ From PDF p. 164 of "Programming in HAL/S".
   PROGRAM;
   
      DECLARE SCALAR,
-     		PHI, ALPHA;
+                PHI, ALPHA;
      DECLARE INITIAL_POSN VECTOR DOUBLE;
      DECLARE MODE INTEGER,
-     		PRINT BOOLEAN;
-     		
-C	.
-C	.
-C	.
+                PRINT BOOLEAN;
+                
+C       .
+C       .
+C       .
 
   INITIALIZE:
   PROCEDURE;
@@ -30,15 +30,15 @@ C/ which seems wrong.
         IF VNAME = 'PRINT' THEN READ(INFILE) SKIP(0), COLUMN(9), PRINT;
         IF VNAME = 'END' THEN EXIT;
      END;
-E	  .
+E         .
 M    IF PRINT THEN
 E                                 -
 M       WRITE(6) PHI, ALPHA, INITIAL_POSN, MODE;
   CLOSE INITIALIZE;
   
-C	.
-C	.
-C	.
+C       .
+C       .
+C       .
 
   CLOSE OUTER;
   

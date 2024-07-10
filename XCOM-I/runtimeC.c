@@ -675,8 +675,8 @@ parseCommandLine(int argc, char **argv)
             }
           DD_INS_EXTRA[lun] = 1 + strstr(argv[i], ",");
         }
-      else if (2 == sscanf(argv[i], "--ddi=%d,%s", &lun, filename) ||
-               2 == sscanf(argv[i], "--pdsi=%d,%s", &lun, filename))
+      else if (2 == sscanf(argv[i], "--ddi=%d,%[^\n]", &lun, filename) ||
+               2 == sscanf(argv[i], "--pdsi=%d,%[^\n]", &lun, filename))
         {
           if (lun < 0 || lun >= DD_MAX)
             {

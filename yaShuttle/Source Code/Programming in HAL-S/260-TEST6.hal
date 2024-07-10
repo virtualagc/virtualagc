@@ -19,7 +19,7 @@ D INCLUDE TEMPLATE CPL189
      CALL TBD ASSIGN(BEST);
      
 M    NAME(BEST_IMU) = NAME(IMU_INPT     );
-S     				   BEST;
+S                                  BEST;
 
   CLOSE LOW_RATE;
   
@@ -28,12 +28,12 @@ C
   HI_RATE:
   TASK;
   
-C	...
+C       ...
 
 M    PITCH_ANGLE = SCALAR(BEST_IMU.ATTITUDE );
 S                                          1
 
-C	...
+C       ...
 
   CLOSE HI_RATE;
   
