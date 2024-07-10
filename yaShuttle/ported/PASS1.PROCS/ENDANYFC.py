@@ -383,14 +383,15 @@ def END_ANY_FCN():
                     elif g.FIXL[g.SP - 1] != g.PSEUDO_LENGTH[ARGp]:
                         ERROR(d.CLASS_QA, 3);
                 # END
-                HALMAT_POP(g.TEMP2, g.CURRENT_ARRAYNESS[0], 0, g.FCN_LV);
-                HALMAT_PIP(g.CURRENT_ARRAYNESS[1], g.XIMD, g.PSEUDO_FORM[ARGp],
-                0);
-                for I in range(2, g.CURRENT_ARRAYNESS[0] + 1):
-                    HALMAT_PIP(g.CURRENT_ARRAYNESS[I], g.XIMD, 0, 0);
-                # END
-                if RESET_ARRAYNESS() == 3: ERROR(d.CLASS_QA, 4);
-            # END
+                if goto == None:
+                    HALMAT_POP(g.TEMP2, g.CURRENT_ARRAYNESS[0], 0, g.FCN_LV);
+                    HALMAT_PIP(g.CURRENT_ARRAYNESS[1], g.XIMD, g.PSEUDO_FORM[ARGp],
+                    0);
+                    for I in range(2, g.CURRENT_ARRAYNESS[0] + 1):
+                        HALMAT_PIP(g.CURRENT_ARRAYNESS[I], g.XIMD, 0, 0);
+                    # END
+                    if RESET_ARRAYNESS() == 3: ERROR(d.CLASS_QA, 4);
+             # END
             else:  # DO
                 #  VECTOR AND MATRIX
                 RESET_ARRAYNESS;
@@ -399,8 +400,9 @@ def END_ANY_FCN():
                 HALMAT_PIP(g.PSEUDO_LENGTH[ARGp], g.XIMD, g.PSEUDO_FORM[ARGp],
                 0);
             # END
-            SETUP_VAC(g.MP, g.PSEUDO_TYPE[ARGp]);
-            HALMAT_POP(g.XSFND, 0, g.XCO_N, g.FCN_LV);
+            if goto == None:
+                SETUP_VAC(g.MP, g.PSEUDO_TYPE[ARGp]);
+                HALMAT_POP(g.XSFND, 0, g.XCO_N, g.FCN_LV);
             if goto == "END_ARITH_SHAPERS": goto = None
             g.VAL_P[ARGp] = 0;
         # END
