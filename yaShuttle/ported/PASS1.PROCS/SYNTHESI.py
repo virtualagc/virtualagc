@@ -1093,7 +1093,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <BASIC STATEMENT>::=<ASSIGNMENT>
         g.XSET(0x4);
         g.PTR_TOP = g.PTR_TOP - g.INX[g.PTR[g.MP]];
-        if g.NAME_PSEUDOS: NAME_ARRAYNESS(g.MP);
+        if 0!= (1 & g.NAME_PSEUDOS): NAME_ARRAYNESS(g.MP);
         HALMAT_FIX_PIPp(g.LAST_POPp, g.INX[g.PTR[g.MP]]);
         EMIT_ARRAYNESS();
         goto = "FIX_NOLAB"
@@ -3886,7 +3886,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <ASSIGNMENT>::=<VARIABLE><=1><EXPRESSION>
         if goto == None:
             g.INX[g.PTR[g.SP]] = 2;
-            if g.NAME_PSEUDOS: 
+            if 0 & (1 & g.NAME_PSEUDOS): 
                 NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5);
                 HALMAT_TUPLE(g.XNASN, 0, g.SP, g.MP, 0);
                 if COPINESS(g.MP, g.SP) > 2: 

@@ -81,7 +81,7 @@ def ASSOCIATE(TAG=-1):
     if (g.SYT_FLAGS(I) & g.READ_ACCESS_FLAG) != 0:
         ERROR(d.CLASS_PS, 9, g.VAR[g.MP]);
     if (g.SYT_FLAGS(I) & g.LOCK_FLAG) != 0:  # LOCKED
-        if not g.ASSIGN_ARG_LIST:
+        if not (g.ASSIGN_ARG_LIST & 1):
             if g.UPDATE_BLOCK_LEVEL <= 0:
                 ERROR(d.CLASS_UI, 1, g.VAR[g.MP]);
     J = g.PSEUDO_TYPE[g.PTR[g.MP]];
