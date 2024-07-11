@@ -966,7 +966,7 @@ def BYTE(s, index=0, value=None):
             c = s[index]
             if c == '`':  # Replacement for cent sign
                 return 0x4A
-            elif c == '~':  # Replacement for logical-not sign
+            elif c in ['~', '^']:  # Replacement for logical-not sign
                 return 0x5F
             elif c == '\x04':  # Replacement for EOF.
                 return 0xFE
@@ -983,10 +983,6 @@ def BYTE(s, index=0, value=None):
     else:  # Everything else.
         c = bytearray([value]).decode('cp1140')
     return s[:index] + c + s[index + 1:]
-
-    dummy[i] = dummy[i].rstrip('\n\r').replace("¬", "~")\
-                        .replace("^", "~").replace("¢", "`").expandtabs(8)\
-                        .ljust(80)
 
 
 # STRING_GT() is completely undocumented, as far as I know.  I'm going to 

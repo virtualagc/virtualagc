@@ -195,138 +195,151 @@ def END_ANY_FCN():
             g.BI_INFO[0] = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
             ARGp = SHR(g.BI_INFO[0], 16) & 0xFF;
             ARGPTR = g.BI_INFO[0] & 0xFF;
-            if ARGp != g.FCN_ARG[g.FCN_LV]: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
-            elif (SHL(1, g.PSEUDO_TYPE[MAXPTR]) & \
-                    g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR]]) == 0:
-                ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
-            else:  # DO
-                if ARGp >= 2: 
-                    if (SHL(1, g.PSEUDO_TYPE[MAXPTR + 1]) & \
-                            g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR + 1]]) == 0:  # DO
-                        ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
-                        goto = "BI_FUNCS_DONE";
-                    # END
-                if ARGp == 3: 
-                    if (SHL(1, g.PSEUDO_TYPE[MAXPTR + 2]) & \
-                            g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR + 2]]) == 0:  # DO
-                        ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
-                        goto = "BI_FUNCS_DONE";
-                    # END
-                # DO CASE BI_ARG_TYPE(ARGPTR);
-                ba = g.BI_ARG_TYPE[ARGPTR]
-                if ba == 0:
-                    pass;
-                    # THIS CASE NOT USED
-                elif ba == 1:
-                    # DO
-                        # BIT TYPE
-                        if g.FCN_LOC[g.FCN_LV] == g.NEXTIME_LOC:  # DO
-                            # NEXTIME ARG
-                            if g.INX[MAXPTR] != 2:  # MUST BE PROCESS
-                                ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
+            # The following isn't really a loop, since it's executed just once.
+            # It's there because it allows "GOTO BI_FUNCS_EXIT to be just a
+            # `break`, rather than something much more complicated.
+            first = True
+            while first:
+                first = False
+                if ARGp != g.FCN_ARG[g.FCN_LV]: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
+                elif (SHL(1, g.PSEUDO_TYPE[MAXPTR]) & \
+                        g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR]]) == 0:
+                    ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
+                else:  # DO
+                    if ARGp >= 2: 
+                        if (SHL(1, g.PSEUDO_TYPE[MAXPTR + 1]) & \
+                                g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR + 1]]) == 0:  # DO
+                            ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
+                            goto = "BI_FUNCS_DONE";
                         # END
-                        else: 
-                            g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
-                                MAX(g.PSEUDO_LENGTH[MAXPTR], \
-                                    g.PSEUDO_LENGTH[MAXPTR + 1]);
-                    # END
-                elif ba == 2:
-                    #  CHARACTER TYPE
-                    # DO
-                        if g.PSEUDO_TYPE[MAXPTR] != g.CHAR_TYPE:  # DO
-                            HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE], \
-                                         0, g.SP - 1, 0, 0);
-                            SETUP_VAC(g.SP - 1, g.CHAR_TYPE);
+                    if ARGp == 3: 
+                        if (SHL(1, g.PSEUDO_TYPE[MAXPTR + 2]) & \
+                                g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR + 2]]) == 0:  # DO
+                            ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
+                            goto = "BI_FUNCS_DONE";
                         # END
-                        if ARGp == 2:  # DO
-                            if g.BI_ARG_TYPE[ARGPTR + 1] == g.CHAR_TYPE:  # DO
-                                if g.PSEUDO_TYPE[MAXPTR + 1] != g.CHAR_TYPE:  # DO
-                                    HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR + 1] - g.BIT_TYPE], \
-                                                 0, g.SP, 0, 0);
-                                    SETUP_VAC(g.SP, g.CHAR_TYPE);
+                    # DO CASE BI_ARG_TYPE(ARGPTR);
+                    ba = g.BI_ARG_TYPE[ARGPTR]
+                    if ba == 0:
+                        pass;
+                        # THIS CASE NOT USED
+                    elif ba == 1:
+                        # DO
+                            # BIT TYPE
+                            if g.FCN_LOC[g.FCN_LV] == g.NEXTIME_LOC:  # DO
+                                # NEXTIME ARG
+                                if g.INX[MAXPTR] != 2:  # MUST BE PROCESS
+                                    ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
+                            # END
+                            else: 
+                                g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
+                                    MAX(g.PSEUDO_LENGTH[MAXPTR], \
+                                        g.PSEUDO_LENGTH[MAXPTR + 1]);
+                        # END
+                    elif ba == 2:
+                        #  CHARACTER TYPE
+                        # DO
+                            if g.PSEUDO_TYPE[MAXPTR] != g.CHAR_TYPE:  # DO
+                                HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE], \
+                                             0, g.SP - 1, 0, 0);
+                                SETUP_VAC(g.SP - 1, g.CHAR_TYPE);
+                            # END
+                            if ARGp == 2:  # DO
+                                if g.BI_ARG_TYPE[ARGPTR + 1] == g.CHAR_TYPE:  # DO
+                                    if g.PSEUDO_TYPE[MAXPTR + 1] != g.CHAR_TYPE:  # DO
+                                        HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR + 1] - g.BIT_TYPE], \
+                                                     0, g.SP, 0, 0);
+                                        SETUP_VAC(g.SP, g.CHAR_TYPE);
+                                    # END
+                                # END
+                                elif g.PSEUDO_TYPE[MAXPTR + 1] == g.SCALAR_TYPE:  # DO
+                                    HALMAT_TUPLE(g.XSTOI, 0, g.SP, 0, 0);
+                                    SETUP_VAC(g.SP, g.INT_TYPE);
                                 # END
                             # END
-                            elif g.PSEUDO_TYPE[MAXPTR + 1] == g.SCALAR_TYPE:  # DO
-                                HALMAT_TUPLE(g.XSTOI, 0, g.SP, 0, 0);
-                                SETUP_VAC(g.SP, g.INT_TYPE);
+                        # END
+                    elif ba == 3:
+                        # MATRIX TYPE
+                        # DO
+                            if (g.BI_FLAGS[0] & 0x80) != 0: 
+                                g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
+                                    SHL(g.PSEUDO_LENGTH[MAXPTR] & 0xFF, 8) | \
+                                    SHR(g.PSEUDO_LENGTH[MAXPTR] & 0xFF00, 8);
+                            else: 
+                                g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];
+                            if (g.BI_FLAGS[0] & 0x40) != 0:  # DO
+                                if (g.PSEUDO_LENGTH[MAXPTR] & 0xFF) != \
+                                        SHR(g.PSEUDO_LENGTH[MAXPTR], 8):
+                                    ERROR(d.CLASS_FD, 6, g.VAR[g.MP]);
                             # END
                         # END
-                    # END
-                elif ba == 3:
-                    # MATRIX TYPE
-                    # DO
-                        if (g.BI_FLAGS[0] & 0x80) != 0: 
-                            g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
-                                SHL(g.PSEUDO_LENGTH[MAXPTR] & 0xFF, 8) | \
-                                SHR(g.PSEUDO_LENGTH[MAXPTR] & 0xFF00, 8);
-                        else: 
-                            g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];
-                        if (g.BI_FLAGS[0] & 0x40) != 0:  # DO
-                            if (g.PSEUDO_LENGTH[MAXPTR] & 0xFF) != \
-                                    SHR(g.PSEUDO_LENGTH[MAXPTR], 8):
-                                ERROR(d.CLASS_FD, 6, g.VAR[g.MP]);
-                        # END
-                    # END
-                elif ba == 4:
-                    #  VECTOR TYPE
-                    g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];
-                elif ba == 5:
-                    #  SCALAR TYPE
-                    # DO
-                        BI_COMPILE_TIME();
-                        if g.PSEUDO_TYPE[MAXPTR] == g.INT_TYPE:  # DO
-                            HALMAT_TUPLE(g.XITOS, 0, g.SP - 1, 0, 0);
-                            SETUP_VAC(g.SP - 1, g.SCALAR_TYPE);
-                        # END
-                        if ARGp >= 2: 
-                            if g.PSEUDO_TYPE[MAXPTR + 1] == g.INT_TYPE:  # DO
-                                HALMAT_TUPLE(g.XITOS, 0, g.SP, 0, 0);
-                                SETUP_VAC(g.SP, g.SCALAR_TYPE);
+                    elif ba == 4:
+                        #  VECTOR TYPE
+                        g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];
+                    elif ba == 5:
+                        #  SCALAR TYPE
+                        # DO
+                            BI_COMPILE_TIME();
+                            if goto == "BI_FUNCS_EXIT": # Maybe set by `BI_COMPILE_TIME`.
+                                break;
+                            if g.PSEUDO_TYPE[MAXPTR] == g.INT_TYPE:  # DO
+                                HALMAT_TUPLE(g.XITOS, 0, g.SP - 1, 0, 0);
+                                SETUP_VAC(g.SP - 1, g.SCALAR_TYPE);
                             # END
-                        if ARGp == 3: 
-                            if g.PSEUDO_TYPE[MAXPTR + 2] == g.INT_TYPE:  # DO
-                                HALMAT_TUPLE(g.XITOS, 0, g.SP - 2, 0, 0);
-                                SETUP_VAC(g.SP - 2, g.SCALAR_TYPE);
-                            # END
-                    # END
-                elif ba == 6:
-                    #  INTEGER TYPE
-                    # DO
-                        BI_COMPILE_TIME();
-                        if g.PSEUDO_TYPE[MAXPTR] == g.SCALAR_TYPE:  # DO
-                            HALMAT_TUPLE(g.XSTOI, 0, g.SP - 1, 0, 0);
-                            SETUP_VAC(g.SP - 1, g.INT_TYPE);
+                            if ARGp >= 2: 
+                                if g.PSEUDO_TYPE[MAXPTR + 1] == g.INT_TYPE:  # DO
+                                    HALMAT_TUPLE(g.XITOS, 0, g.SP, 0, 0);
+                                    SETUP_VAC(g.SP, g.SCALAR_TYPE);
+                                # END
+                            if ARGp == 3: 
+                                if g.PSEUDO_TYPE[MAXPTR + 2] == g.INT_TYPE:  # DO
+                                    HALMAT_TUPLE(g.XITOS, 0, g.SP - 2, 0, 0);
+                                    SETUP_VAC(g.SP - 2, g.SCALAR_TYPE);
+                                # END
                         # END
-                        if ARGp == 2: 
-                            if g.PSEUDO_TYPE[MAXPTR + 1] == g.SCALAR_TYPE:  # DO
-                                HALMAT_TUPLE(g.XSTOI, 0, g.SP, 0, 0);
-                                SETUP_VAC(g.SP, g.INT_TYPE);
+                    elif ba == 6:
+                        #  INTEGER TYPE
+                        # DO
+                            BI_COMPILE_TIME();
+                            if goto == "BI_FUNCS_EXIT": # Maybe set by `BI_COMPILE_TIME`.
+                                break;
+                            if g.PSEUDO_TYPE[MAXPTR] == g.SCALAR_TYPE:  # DO
+                                HALMAT_TUPLE(g.XSTOI, 0, g.SP - 1, 0, 0);
+                                SETUP_VAC(g.SP - 1, g.INT_TYPE);
                             # END
-                        g.PSEUDO_LENGTH[g.PTR[g.MP]] = 1;
+                            if ARGp == 2: 
+                                if g.PSEUDO_TYPE[MAXPTR + 1] == g.SCALAR_TYPE:  # DO
+                                    HALMAT_TUPLE(g.XSTOI, 0, g.SP, 0, 0);
+                                    SETUP_VAC(g.SP, g.INT_TYPE);
+                                # END
+                            g.PSEUDO_LENGTH[g.PTR[g.MP]] = 1;
+                        # END
+                    elif ba == 7:
+                        pass;
+                        # THIS CASE NOT USED
+                    elif ba == 8:
+                        #  IORS TYPE
+                        # DO
+                        if ARGp == 2: MATCH_SIMPLES(g.SP - 1, g.SP);
+                        if SHR(g.BI_INFO[0], 24) == g.IORS_TYPE:
+                            g.PSEUDO_TYPE[g.PTR[g.MP]] = g.PSEUDO_TYPE[MAXPTR];
+                        if ARGp == 1: 
+                            BI_COMPILE_TIME();
+                            if goto == "BI_FUNCS_EXIT": # Maybe set by `BI_COMPILE_TIME`.
+                                break;
+                        # END
+                    # END DO CASE
+                    HALMAT_POP(g.XBFNC, ARGp, 0, g.FCN_LOC[g.FCN_LV]);
+                    for I  in range(MAXPTR, MAXPTR + ARGp - 1 + 1):
+                        HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], g.PSEUDO_TYPE[I], 0);
                     # END
-                elif ba == 7:
-                    pass;
-                    # THIS CASE NOT USED
-                elif ba == 8:
-                    #  IORS TYPE
-                    # DO
-                    if ARGp == 2: MATCH_SIMPLES(g.SP - 1, g.SP);
-                    if SHR(g.BI_INFO[0], 24) == g.IORS_TYPE:
-                        g.PSEUDO_TYPE[g.PTR[g.MP]] = g.PSEUDO_TYPE[MAXPTR];
-                    if ARGp == 1: BI_COMPILE_TIME();
-                    # END
-                # END DO CASE
-                HALMAT_POP(g.XBFNC, ARGp, 0, g.FCN_LOC[g.FCN_LV]);
-                for I  in range(MAXPTR, MAXPTR + ARGp - 1 + 1):
-                    HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], g.PSEUDO_TYPE[I], 0);
+                    SETUP_VAC(g.MP, g.PSEUDO_TYPE[g.PTR[g.MP]]);
                 # END
-                SETUP_VAC(g.MP, g.PSEUDO_TYPE[g.PTR[g.MP]]);
-            # END
-            if goto == "BI_FUNCS_DONE": goto = None
-            if g.BI_FLAGS[0] & 1: 
-                ERROR(d.CLASS_XS, 1, \
-                      SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
-                             g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
+                if goto == "BI_FUNCS_DONE": goto = None
+                if g.BI_FLAGS[0] & 1: 
+                    ERROR(d.CLASS_XS, 1, \
+                          SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
+                                 g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
             if goto == "BI_FUNCS_EXIT": goto = None
         # END
     elif fn == 2:
