@@ -394,7 +394,7 @@ def END_ANY_FCN():
              # END
             else:  # DO
                 #  VECTOR AND MATRIX
-                RESET_ARRAYNESS;
+                RESET_ARRAYNESS();
                 if g.INX[ARGp] != g.FIXL[g.SP - 1]: ERROR(d.CLASS_QD, 1);
                 HALMAT_POP(g.TEMP2, 1, 0, g.FCN_LV);
                 HALMAT_PIP(g.PSEUDO_LENGTH[ARGp], g.XIMD, g.PSEUDO_FORM[ARGp],
