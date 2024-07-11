@@ -3156,7 +3156,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "SET_AUTSTAT"
     elif PRODUCTION_NUMBER == 403:  # reference 4030
         #  <MINOR ATTRIBUTE> ::= DENSE
-        if (g.TYPE == 0) and \
+        if (g.TYPE == 0) or \
            (0 != (1 & g.BUILDING_TEMPLATE) and (g.TYPE == g.BIT_TYPE) and \
             ((g.ATTRIBUTES & g.ARRAY_FLAG) == 0) and (not 0 != (1 & g.NAME_IMPLIED))):
             g.FIXL[g.MP] = g.ALDENSE_FLAGS;
