@@ -2262,7 +2262,56 @@ procedure in which they're defined, including embedded procedures.&nbsp;
  In neither case does a macro definition have any effect on source code 
 prior to it.<br>
   </font></blockquote>
+<h3>Perplexing Multiple Assignments</h3>
+<p>XPL allows multiple variables to be assigned the same value in a single assignment statement, with a syntax like:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">X1, X2, ..., XN = Y;</font><br></pre>
+</blockquote>
+<p>According to McKeeman (p. 137), these assignments are performed in right-to-left order.&nbsp; In other words, it <i>should</i> be equivalent to:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">XN = Y;<br>.<br>.<br>.<br>X1 = Y;</font><br></pre>
+</blockquote>
+<p>In most cases, the ordering of these assignments is of no significance, and in fact I've found no legacy <i>standard</i> XPL programs in which the ordering matters.&nbsp; However, there are instances in XPL/I code, specifically in <b>PASS1</b> of <b>HAL/S-FC</b> in which the order matters a lot.&nbsp; That's when you have assignments of the form:<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">Y(I), I = J;</font><br></pre>
+</blockquote>
+<p>because obviously<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">I = J;<br>Y(I) = J;</font><br></pre>
+</blockquote>
+<p>is a lot different than<br>
+</p>
+<blockquote>
+  <pre><font color="#663300">Y(I) = J;<br>I = J;</font><br></pre>
+</blockquote>
+<p><i>Unfortunately</i>, in the cases I've encountered, the XPL/I code 
+seems to rely on the latter interpretation.&nbsp; I.e., it seems to 
+believe that the assignments are performed in left-to-right order, in 
+direct contradiction to McKeeman.&nbsp; What's going on here?<br>
+</p>
+<p>Of course, we have no way of knowing what Intermetrics XCOM did with this, but as far as <i>A Compiler Generator</i>'s
+ XCOM, it appears (thanks to Dan Weaver for this explanation) that while
+ the assignments are indeed performed in a right-to-left manner as 
+documented, the peculiarities of the IBM 360 object-code generation in 
+McKeeman XCOM, shove the index <font color="#663300"><code>I</code></font> into a CPU register and reuse it without change throughout both assignments.&nbsp; So seemingly by accident, the net result is that the assignments <i>appear</i> to have been done in a left-to-right order.<br>
+</p>
+<p>I can only regard this a bug in McKeeman XCOM.&nbsp; Plus, it's not 
+reliable:&nbsp; what if there are more than 2 assignments on the 
+left-hand side, and if they don't all use the same index <font color="#663300"><code>I</code></font>?&nbsp; What would the order appear to be then?&nbsp; <br>
+</p>
+<p>As a result of all that:<br>
+</p>
+<blockquote><font size="-1"><b>Important Note</b>:&nbsp; <b>XCOM-I</b> <i>ignores</i> the statement in <i>A Compiler Generator</i>
+ that assignments are performed in a right-to-left manner.&nbsp; Rather,
+ they are performed in a left-to-right manner, and any indices of arrays
+ are computed at the moment the assignment is performed.</font><br>
+</blockquote>
 <h3>Logical Expressions</h3>
+
 <p>XPL's logical operators are <font color="#663300"><code>&amp;</code></font>, |, and <font color="#663300"><code>~</code></font> (<font color="#663300"><code>¬</code></font>, <font color="#663300"><code>^</code></font>), for "and", "or", and "not", respectively.  The documentation in <i>A Compiler Generator</i>
  is maddeningly unclear as to what these operators do.  True, table 
 6.8.1 calls them "logical and", "logical or", and "logical complement", 
@@ -4529,13 +4578,42 @@ With <font color="#663300"><code>OUTPUT(1)</code></font>, on the other
 hand, there's quite a bit of additional functionality.&nbsp; For 
 example, it isn't necessarily true that each use of <font color="#663300"><code>OUTPUT(1)</code></font> prints another line.&nbsp; The <i>first</i> character of each <font color="#663300"><code>OUTPUT(1)</code></font> isn't directly printed, but instead is a "carriage-control character" (or "ANSI control character"), as follows:<br>
         <ul>
-          <li>'<font color="#663300"><code> </code></font>' — Single-space the line and print.  This is the same behavior as <font color="#663300"><code>OUTPUT(0)</code></font>: i.e., any line you print to <font color="#663300"><code>OUTPUT(0)</code></font>, you could instead prefix it with a space character and send it to <font color="#663300"><code>OUTPUT(1)</code></font> instead.</li>
+          <li>'<font color="#663300"><code> </code></font>' (i.e., a space) — Single-space the line and print.  This is the same behavior as <font color="#663300"><code>OUTPUT(0)</code></font>: i.e., any line you print to <font color="#663300"><code>OUTPUT(0)</code></font>, you could instead prefix it with a space character and send it to <font color="#663300"><code>OUTPUT(1)</code></font> instead.</li>
           <li>'<font color="#663300"><code>0</code></font>' — Double-space the line and print.</li>
           <li>'<font color="#663300"><code>-</code></font>' — Triple-space the line and print.</li>
-          <li>'<font color="#663300"><code>+</code></font>' — Do <i>not</i>
- space the line at all, but print.  In other words, prints but doesn't 
-advance to the next line.  It behaves like an ASCII carriage-return 
-character (<font color="#663300"><code>'\r'</code></font>).  For a physical printer back in the day, this would allow you to overprint the line upon the next <font color="#663300"><code>OUTPUT</code></font>.  Unfortunately, for <font color="#663300"><code>stdout</code></font> on most computers, we can't emulate such overprinting in any meaningful way.  Thus in <b>XCOM-I</b>, the behavior is indistinguishable from the "single space and print" behavior.</li>
+          <li>'<font color="#663300"><code>+</code></font>' — Overstrike
+ the preceding line.  In other words, go back to column 1, without 
+advancing to the next line, and then print the remainder of the string. 
+ Unfortunately, that's behavior suitable for a physical printer, but not
+ really for outputting text to <font color="#663300"><code>stdout</code></font>
+ on most computers today.&nbsp; Yes, we may be able to emulate it using 
+strange maneuvers which most computers aren't set up for, but not in any
+ universal, easily-set-up way.&nbsp; So in <b>XCOM-I</b>, the string is instead printed on a new line, almost as if the ANSI control character had been '<font color="#663300"><code> </code></font>'&nbsp; (see above) rather than '<font color="#663300"><code>+</code></font>'.&nbsp; Almost!&nbsp; You see, what these overstruck lines are mostly used for is underlining text.&nbsp; In <b>HAL/S-FC</b>,
+ for example, text which has undergone replacement via macro expansion 
+is underlined in compiler reports.&nbsp; The temptation is to mimic 
+underlining by using underscore characters (_), but when underscore 
+characters are printed on a separate line from the text they're 
+underlining, they don't really look like underlining, but rather like 
+overlining on the succeeding line ... which while it may be better than 
+nothing, is absolutely <i>not</i> what you want it to look like!&nbsp; <b>XCOM-I</b>
+ thus takes a slightly-different approach:&nbsp; It replaces such 
+underscores by carats (^), which in my opinion are more-effective 
+visually.&nbsp; For example, where one would have gotten something like <br>
+</li></ul>
+<blockquote>
+  <blockquote>
+    <pre><font color="#663300">... <code><u>MYTEXT</u> ...</code></font> </pre>
+  </blockquote>
+</blockquote>
+<blockquote>on a line printer back in the olden times, today with <b>XCOM-I</b> you'll instead see the uglier but still effective<br>
+</blockquote>
+<blockquote>
+  <blockquote>
+    <pre><font color="#663300">... MYTEXT ...<br>    ^^^^^^</font><br></pre>
+  </blockquote>
+</blockquote>
+<ul>
+
           <li>'<font color="#663300"><code>1</code></font>' — Form feed.
   I.e., advance to the top of the next page, regardless of how many 
 left-over lines remain on the current page.  In <b>XCOM-I</b>, this is accomplished by embedding the ASCII form-feed character (<font color="#663300"><code>'\l'</code></font>) in the output.</li>
@@ -4544,7 +4622,9 @@ line.  This doesn't print anything, but takes the remainder of the line
 and sets it as the heading for subsequent pages.</li>
           <li>'<font color="#663300"><code>2</code></font>' — Subheading
  line.  This doesn't print anything, but takes the remainder of the line
- and sets it as the subheading for subsequent pages.</li></ul>
+ and sets it as the subheading for subsequent pages.</li>
+</ul>
+
 <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; What this explanation of </font><font size="-1"><font color="#663300"><code>OUTPUT(1)</code></font> fails to explain is what happens if the string <i>doesn't have</i>
  a first character; i.e., what if it's empty?&nbsp; Well, the obvious 
 response would be that that would be an illegal use.&nbsp; Unfortunately
@@ -5767,7 +5847,9 @@ As part of a systematic framework for exploiting this, the <b>XCOM-I</b> the run
   <p><font size="-1"><b>Aside:</b> If unlike me you're actually familiar
  with IBM 360 programming, I'm sure you'll call the CPU's 
 general-purpose registers R0, R1, R2, and so on.&nbsp; IBM documentation
- calls them that.&nbsp; It also calls the floating-point registers, which are completely separate and independent of the general-purpose registers,
+ calls them that.&nbsp; It also calls the floating-point registers, 
+which are completely separate and independent of the general-purpose 
+registers,
  by those very same names:&nbsp; R0, R1, R2, ....&nbsp; Perhaps it's 
 just me, but I found that confusing.&nbsp; And because I was so stupid 
 as to be confused by this <i>apparently</i> obvious and trivial point, 
@@ -5867,7 +5949,9 @@ binary representation of the integer.<br>
     </font></p>
   <p><font size="-1">Regardless of how it works, the reason this causes 
 us a problem is that the native-C arithmetic we perform doesn't track 
-any of this, so the AW is wasted, and <i>doesn't</i> produce an integer usable by the STD instructions that succeed the AW instructions.&nbsp; In other words, after the AW occurs, the <font color="#663300"><code>CALL INLINE</code></font> for the STD instruction that's supposed to store the 2's-complement integer has no 2's-complement integer to store!<br>
+any of this, so the AW is wasted, and <i>doesn't</i> produce an integer 
+usable by the STD instructions that succeed the AW instructions.&nbsp; 
+In other words, after the AW occurs, the <font color="#663300"><code>CALL INLINE</code></font> for the STD instruction that's supposed to store the 2's-complement integer has no 2's-complement integer to store!<br>
     </font></p>
   <p><font size="-1">The workaround for this in the <b>XCOM-I</b> 
 runtime library, is that the floating-point registers are supplemented 
