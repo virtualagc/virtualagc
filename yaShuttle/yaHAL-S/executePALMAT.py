@@ -902,7 +902,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 return None
             erroredUp = True
             if fetch:
-                print("!!", attributes)
+                #print("!!", attributes)
                 if "constant" in attributes:
                     value = sliceIt(attributes["constant"], fullSubscripts)
                 else:
@@ -1751,7 +1751,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scope = scopes[scopeNumber]
         elif "halt" in instruction:
             # Ends emulation.
-            printError(PALMAT, source, None, "Normal program termination")
+            #printError(PALMAT, source, None, "Normal program termination")
             return None
         elif "automatics" in instruction:
             for identifier in identifiers:
