@@ -51,7 +51,8 @@ def EMIT_SUBSCRIPT(MODE):
             HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], 0, 0);
             J = J + 1;
         # END
-        else: HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], g.INX[I], g.VAL_P[I]);
+        else: 
+            HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], g.INX[I], g.VAL_P[I]);
         J = J + 1;
         if I == g.IND_LINK:  # DO
             g.IND_LINK = 0;

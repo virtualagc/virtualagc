@@ -79,7 +79,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
         # IT TO A -2 TO DISTINGUISH IT FROM A CHECK_SUBSCRIPT RETURN
         # VALUE OF -1 WHICH INDICATES AN UNKNOWN SUBSCRIPT
         # (E.G. A VARIABLE).
-        if g.NEWSIZE == -1 and FLAG: 
+        if 0 != (1 & g.NEWSIZE == -1 & FLAG): 
             g.NEWSIZE = -2;
         g.PSEUDO_FORM[g.NEXT_SUB] = g.XIMD;
         g.PSEUDO_TYPE[g.NEXT_SUB] = g.INT_TYPE;
@@ -105,13 +105,13 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
     firstTry = True
     while firstTry or goto != None:
         firstTry = False
-        if (vn == 0 or goto != None) and not goto == "SHARP_PM":
+        if (vn == 0 or goto != None) and goto != "SHARP_PM":
             #  NO SHARP
             if goto in [None, "SHARP_GONE"]:
-                if goto == "SHARP_GONE ": goto = None
+                if goto == "SHARP_GONE": goto = None
                 if g.PSEUDO_FORM[g.NEXT_SUB] == g.XIMD:
                     g.PSEUDO_TYPE[g.NEXT_SUB] = 0;
-                    if FLAG: 
+                    if 0 != (1 & FLAG): 
                         return g.NEWSIZE;
                     if g.NEWSIZE < 1: 
                         ERROR(d.CLASS_SR, 4, g.VAR[g.MP]);
@@ -122,12 +122,12 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                     else: 
                         return g.NEWSIZE;
                 MODE = 0;
-            if goto == "SHARP_UNKNOWN ": goto = None
+            if goto == "SHARP_UNKNOWN": goto = None
             if (goto == None and g.PSEUDO_TYPE[g.NEXT_SUB] == g.SCALAR_TYPE) \
                     or goto == "SHARP_ELIM":
                 if goto == None:
                     HALMAT_POP(g.XSTOI, 1, 0, 0);
-                if goto == "SHARP_ELIM ": goto = None
+                if goto == "SHARP_ELIM": goto = None
                 HALMAT_PIP(g.LOC_P[g.NEXT_SUB], g.PSEUDO_FORM[g.NEXT_SUB], 0, 0);
                 g.LOC_P[g.NEXT_SUB] = g.LAST_POPp;
                 g.PSEUDO_FORM[g.NEXT_SUB] = g.XVAC;
@@ -139,7 +139,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 HALMAT_POP(g.NEWSIZE, 2, 0, 0);
                 HALMAT_PIP(SIZE, g.XIMD, 0, 0);
                 MODE = 0;
-                goto = "SHARP_ELIM "
+                goto = "SHARP_ELIM"
                 continue
             g.PSEUDO_TYPE[g.NEXT_SUB] = MODE;
             return -1;
@@ -148,7 +148,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
             g.PSEUDO_FORM[g.NEXT_SUB] = MODE;
             g.LOC_P[g.NEXT_SUB] = SHARP_LOC;
             g.PSEUDO_TYPE[g.NEXT_SUB] = g.INT_TYPE;
-            goto = "SHARP_GONE "
+            goto = "SHARP_GONE"
             continue
         elif (goto == None and vn == 2) or goto == "SHARP_PM":
             #  SHARP PLUS EXPRESSION
@@ -157,12 +157,12 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                     if MODE == g.XIMD: 
                         g.NEWSIZE = g.LOC_P[g.NEXT_SUB] + g.NEWSIZE;
                         g.LOC_P[g.NEXT_SUB] = g.NEWSIZE
-                        goto = "SHARP_GONE "
+                        goto = "SHARP_GONE"
                         continue
                 g.NEWSIZE = 0x10;
-            if goto == "SHARP_PM ": goto = None
+            if goto == "SHARP_PM": goto = None
             MODE = MODE | g.NEWSIZE;
-            goto = "SHARP_UNKNOWN "
+            goto = "SHARP_UNKNOWN"
             continue
         elif vn == 3:
             #  SHARP MINUS EXPRESSION
@@ -170,9 +170,9 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 if MODE == g.XIMD:
                     g.NEWSIZE = g.NEWSIZE - g.LOC_P[g.NEXT_SUB];
                     g.LOC_P[g.NEXT_SUB] = g.NEWSIZE
-                    goto = "SHARP_GONE "
+                    goto = "SHARP_GONE"
                     continue
             g.NEWSIZE = 0x20;
-            goto = "SHARP_PM "
+            goto = "SHARP_PM"
             continue
     # END of DO CASE
