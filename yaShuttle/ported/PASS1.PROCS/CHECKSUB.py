@@ -105,7 +105,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
     firstTry = True
     while firstTry or goto != None:
         firstTry = False
-        if (vn == 0 or goto != None) and goto != "SHARP_PM":
+        if (vn == 0 or goto != None) and not goto != "SHARP_PM":
             #  NO SHARP
             if goto in [None, "SHARP_GONE"]:
                 if goto == "SHARP_GONE": goto = None
