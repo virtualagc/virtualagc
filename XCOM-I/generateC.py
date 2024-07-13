@@ -2151,8 +2151,8 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             longjmp occurs.  I don't think this will cause a big problem, though
             it's irritating. .
             '''
-            print(indent + "resetAllReentryGuards();")
-            print(indent + "longjmp(jb%s, 1);" % mangled)
+            print(indent + "{ resetAllReentryGuards(); longjmp(jb%s, 1); }" \
+                            % mangled)
         else:
             print(indent + "goto " + normalizedLabel(label) + ";")
     elif "TARGET" in line:
