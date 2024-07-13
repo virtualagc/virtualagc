@@ -79,7 +79,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
         # IT TO A -2 TO DISTINGUISH IT FROM A CHECK_SUBSCRIPT RETURN
         # VALUE OF -1 WHICH INDICATES AN UNKNOWN SUBSCRIPT
         # (E.G. A VARIABLE).
-        if 0 != (1 & g.NEWSIZE == -1 & FLAG): 
+        if g.NEWSIZE == -1 and 0 != (1 & FLAG): 
             g.NEWSIZE = -2;
         g.PSEUDO_FORM[g.NEXT_SUB] = g.XIMD;
         g.PSEUDO_TYPE[g.NEXT_SUB] = g.INT_TYPE;
@@ -105,7 +105,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
     firstTry = True
     while firstTry or goto != None:
         firstTry = False
-        if (vn == 0 or goto != None) and not goto != "SHARP_PM":
+        if (vn == 0 or goto != None) and not goto == "SHARP_PM":
             #  NO SHARP
             if goto in [None, "SHARP_GONE"]:
                 if goto == "SHARP_GONE": goto = None
