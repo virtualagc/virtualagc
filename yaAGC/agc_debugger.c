@@ -188,7 +188,7 @@ DbgDisplayVersion (void)
 }
 
 int
-DbgHasBreakEvent ()
+DbgHasBreakEvent (void)
 {
   int BreakFlag = 0;
 
@@ -1097,7 +1097,7 @@ DbgGetCmdString (void)
 }
 
 static void
-DbgProcessLog ()
+DbgProcessLog (void)
 {
   if (LogFile != NULL)
     {
@@ -1127,7 +1127,7 @@ DbgProcessLog ()
 extern int DebuggerInterruptMasks[11];
 
 int
-DbgExecute ()
+DbgExecute (void)
 {
   char *s;
   char *sraw;

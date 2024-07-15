@@ -71,7 +71,7 @@ extern char* SourcePathName;
 extern char* DbgGetFrameNameByAddr(unsigned LinearAddress);
 
 /* Remove Last Added Backtracepoint should be used for TC Q or RETURN */
-void BacktraceRemove()
+void BacktraceRemove(void)
 {
 	if ( BacktraceCount > 0 )
 	{
