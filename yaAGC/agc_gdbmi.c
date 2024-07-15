@@ -189,7 +189,7 @@ GdbmiAdjustCmdPtr (int i)
  Adjust the command string pointer with the value given.
  */
 static inline void
-GdbmiSkipSpace ()
+GdbmiSkipSpace (void)
 {
   while (*sraw == ' ') GdbmiAdjustCmdPtr(1);
 }
@@ -198,7 +198,7 @@ GdbmiSkipSpace ()
  Skip to the next token.
  */
 static inline void
-GdbmiNextToken()
+GdbmiNextToken(void)
 {
   while (*sraw != ' ' && *sraw != '\0' ) {
     GdbmiAdjustCmdPtr(1);
