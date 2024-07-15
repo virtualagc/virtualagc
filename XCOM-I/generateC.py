@@ -940,7 +940,16 @@ def autoconvert(current, allowed, source=None):
         elif bitWidth <= 32:
             return "FIXED", "COREWORD(" + fields[1]
     
-    if current == "CHARACTER":
+    if current == "SDESC":
+        if "CHARACTER" in allowed:
+            conversions.append(("CHARACTER", "getCHARACTERd(%s)"))
+            if source != None:
+                return "CHARACTER", "getCHARACTERd(%s)" % source
+        if "FIXED" in allowed:
+            conversions.append(("FIXED", "%s"))
+            if source != None:
+                return "FIXED", source
+    elif current == "CHARACTER":
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "%s"))
         if "FIXED" in allowed and source != None:
@@ -1372,17 +1381,17 @@ def generateExpression(scope, expression):
                 parameter = parameters[0]
                 tipe, source = generateExpression(scope, parameter)
                 if source.startswith("getCHARACTER("):
-                    return "FIXED", "getFIXED(" + source[13:]
+                    return "SDESC", "getFIXED(" + source[13:]
                 if source.startswith("getFIXED("):
                     return "CHARACTER", "getCHARACTER(" + source[9:]
                 if tipe == "FIXED":
-                    return "FIXED", "getFIXED(" + source + ")"
+                    return "SDESC", source # "getFIXED(" + source + ")"
                 if tipe == "CHARACTER":
                     return tipe, source
                 tipe, source = autoconvert(tipe, ["FIXED"], source)
                 if tipe != "FIXED":
                     errxit("Cannot interpret argument of STRING")
-                return tipe, source
+                return "SDESC", source
             # Many builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",

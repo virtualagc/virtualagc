@@ -1640,6 +1640,23 @@ xsCAT(descriptor_t *s1, descriptor_t *s2) {
   return returnString;
 }
 
+// Sometimes strings for printing are prepared with unprintable control
+// characters in them.  I convert those transparently to spaces, since
+// I've found empirically that that's what's needed to not mess up the
+// columnar alignment.  (It's still messed up, but just not so badly.)
+static char *
+uncontrol(char *original) {
+  static sbuf_t buf;
+  char *s, *ss;
+  for (s = original, ss = buf; *s; s++)
+    if (*s >= 0x20 && *s <= 0x7F)
+      *ss++ = *s;
+    else
+      *ss++ = ' ';
+  *ss = 0;
+  return buf;
+}
+
 /*
 The following function replaces the XPL constructs
     OUTPUT(fileNumber) = string
@@ -1767,7 +1784,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
           if (outUTF8)
             {
               char c, *s, *s0;
-              for (s = s0 = queue[i]; *s != 0; s++)
+              for (s = s0 = uncontrol(queue[i]); *s != 0; s++)
                 if (*s == '`' || *s == '~')
                   {
                     c = *s;
@@ -1797,7 +1814,14 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
             }
           else
             {
-              fprintf(fp, "%s", queue[i]);
+              // There are circumstances (namely, when printing version codes
+              // from templates retrieved from the template library) that
+              // control codes which *apparently* were discarded by the
+              // contemporary line printers appear in the string.  I have no
+              // way to fully deal with these, given that they were in EBCDIC
+              // while at this point we're working with an ASCII string, but
+              // I can try:
+              fprintf(fp, "%s", uncontrol(queue[i]));
               pendingNewline = 1;
             }
           if (i < linesInQueue - 1)
@@ -1831,7 +1855,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
           if (DCB_OUTS[lun].ebcdic)
             fwrite(string->bytes, string->numBytes, 1, fp);
           else
-            fprintf(fp, "%s\n", s);
+            fprintf(fp, "%s\n", uncontrol(s));
         }
       pendingNewline = 0;
     }

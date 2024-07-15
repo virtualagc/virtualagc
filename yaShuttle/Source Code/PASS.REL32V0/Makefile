@@ -127,10 +127,14 @@ cleanall: clean
             AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
             PASS4.PROCS/PASS4 -rf 2>/dev/null
 
-# (Now removed.) COMPOOL.*VERSION is here only as a temporary measure, and 
-# should be removed once I figure out how the template versioning can be 
-# handled better.
-IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
+# Most lines ignored via `IGNORE_LINES` in comparisons are due to obvious 
+# reasons, such as having timestamps or other uncontrollable values in them.
+# COMPOOL.*VERSION is present because I haven't been able to figure out no way to
+# reconcile HAL/S-FC PASS1's habit of using single-byte EBCDIC codes as version
+# codes in "D VERSION c" compiler directives with HAL_S_FC's implementation
+# of strings as ASCII and it's use of JSON for storing PDS.  So I just ignore
+# those version codes as printed out in symbol tables.
+IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: compile
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
@@ -156,9 +160,21 @@ compile: clean
 	@echo Comparing ...
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >cA.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
-	@diff -q -s cA.rpt pyA.rpt
-	@diff -s $(PORTED)/FILE1.bin halmat.bin
-	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
+ifndef NOCHECK1
+	@diff $(DEXTRA) -q -s cA.rpt pyA.rpt
+else
+	@echo Skipping compiler-report check.
+endif
+ifndef NOCHECK2
+	@diff $(DEXTRA) -s $(PORTED)/FILE1.bin halmat.bin
+else
+	@echo Skipping HALMAT-file check.
+endif
+ifndef NOCHECK3
+	@diff $(DEXTRA) -q -s $(PORTED)/LISTING2.txt listing2.txt
+else
+	@echo Skipping secondary-listing check.
+endif
 	
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
