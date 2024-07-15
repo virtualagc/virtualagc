@@ -68,21 +68,49 @@ typedef char sbuf_t[MAX_XPL_STRING + 1];
 #define RETURN(...) return (__VA_ARGS__)
 #endif
 
-// Command-line variables.
-#define DD_MAX 9
-#define PDS_PARTNAME_SIZE 8
-typedef char pdsPartname_t[PDS_PARTNAME_SIZE + 1];
 extern int outUTF8;
-extern FILE *DD_INS[DD_MAX];
-extern char *DD_INS_FILENAMES[DD_MAX];
-extern uint8_t DD_INS_UPPERCASE[DD_MAX];
-extern int PDS_INS[DD_MAX];
-extern pdsPartname_t DD_INS_PARTNAMES[DD_MAX];
-extern FILE *DD_OUTS[DD_MAX];
-extern char *DD_OUTS_FILENAMES[DD_MAX];
-extern int PDS_OUTS[DD_MAX];
-extern pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX];
-extern int DD_OUTS_EXISTED[DD_MAX];
+// "Device control blocks" for sequential files and PDS.  These have nothing
+// to do with IBM 360 DCBs.
+#define DCB_MAX 10
+#define PDS_MEMBER_SIZE 8
+#define PDS_BUFFER_SIZE 1680
+typedef char pdsPartname_t[PDS_MEMBER_SIZE + 1];
+typedef struct {
+  FILE *fp;             // Pointer to the open file, if appropriate.
+  sbuf_t filename;      // Name of the open sequential file or PDS folder.
+  uint8_t redirection;  // Redirection from one device number to another.
+  uint8_t upperCase;    // 1 = translate to upper case, 0 (default) = don't.
+  uint8_t ebcdic;       // 0 (default) = translate ebcdic/ascii, 1 = don't.
+  uint8_t pds;          // 1 if PDS, 0 if sequential.
+  uint8_t existed;      // 1 if PDS member existed before stow, 0 if not.
+  char *extra;          // Optional line to prefix to first INPUT operation.
+  pdsPartname_t member; // Last selected PDS member name.
+  char buffer[PDS_BUFFER_SIZE]; // PDS output buffer.
+  int bufferLength;     // Current data size in PDS output buffer.
+  char fileFlags[4];    // Flags for `fopen`.
+} DCB_t;
+extern DCB_t DCB_INS[DCB_MAX];
+extern DCB_t DCB_OUTS[DCB_MAX];
+
+/*
+extern FILE *DD_INS[DCB_MAX];
+extern sbuf_t DD_INS_FILENAMES[DCB_MAX];
+extern uint8_t DD_INS_UPPERCASE[DCB_MAX];
+extern int PDS_INS[DCB_MAX];
+extern pdsPartname_t DD_INS_PARTNAMES[DCB_MAX];
+extern int DD_INS_redirection[DCB_MAX];
+extern FILE *DD_OUTS[DCB_MAX];
+extern sbuf_t DD_OUTS_FILENAMES[DCB_MAX];
+extern int PDS_OUTS[DCB_MAX];
+extern pdsPartname_t DD_OUTS_PARTNAMES[DCB_MAX];
+extern int DD_OUTS_EXISTED[DCB_MAX];
+extern int DD_OUTS_redirection[DCB_MAX];
+typedef struct {
+  int length;
+  char buffer[PDS_BUFFER_SIZE];
+} PDS_BUF_t;
+extern PDS_BUF_t PDS_OUTS_BUFFERS[DCB_MAX];
+*/
 extern FILE *COMMON_OUT;
 
 typedef struct {
@@ -471,6 +499,7 @@ MONITOR14(uint32_t n, uint32_t a);
 uint32_t
 MONITOR15(void);
 
+extern uint32_t flags16;
 void
 MONITOR16(uint32_t n);
 

@@ -172,16 +172,25 @@ The available OPTIONS are:
                     c=B    For the Backup Flight Software (PFS).
                     c=A    To produce debugging output for BASED management.
                     c=C    To produce debugging output for COMPACTIFY.
-                    c=V    Mark all runtime library functions "verified".
-                    c=W    Do not change the runtime-library verifications.
-                and one should use *either* --cond=P or --cond=B but not both.
-                The cases "--cond=V" and "--cond=W" are special, because 
-                using "--cond=W" (the default) *removes* "--cond=V", and vice-
-                versa.  These two cases target PASS2 of HAL/S-FC, which flags
-                some runtime-library functions because they never underwent
-                certification for use in the flight software.  The V switch
-                works around that, and allows all runtime-library functions to
-                be used without generating such errors.
+                Note that when compiling HAL/S-FC, one should use either 
+                --cond=P or --cond=B but not both at the same time. 
+                Additionally, the following conditionals, not specifically 
+                targetting HAL/S-FC (though currently only used in HAL/S-FC) 
+                are available:
+                    c=V    Enable Virtual AGC modifications.
+                    c=W    (Default) Disable Virtual AGC modifications.
+                These are mutually exclusive, in that selecting either one
+                deselects the other.  They are intended for use in compiling
+                legacy code, in which it is desirable either to compile "as-is" 
+                (W) or else with modern modifications by Virtual AGC.  In 
+                HAL/S-FC specifically, V enables two modifications:
+                    1.  In PASS1, when using the `D INCLUDE TEMPLATE`
+                        compiler directives, no attempt to load SDF files is
+                        made, compensating for the current non-implementation
+                        of SDFPKG.
+                    2.  In PASS2, all runtime library functions are treated
+                        as "validated", eliminating compiler warnings for use
+                        of statements such as `WRITE(6) ...`.
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.

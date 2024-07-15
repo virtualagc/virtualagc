@@ -49,18 +49,8 @@
 
 // Extern'd in runtimeC.h or configuration.h:
 int outUTF8 = 0;
-FILE *DD_INS[DD_MAX] = { NULL };
-char *DD_INS_FILENAMES[DD_MAX] = { NULL };
-int PDS_INS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
-pdsPartname_t DD_INS_PARTNAMES[DD_MAX] = { "" };
-uint8_t DD_INS_UPPERCASE[DD_MAX] = { 0 };
-char *DD_INS_EXTRA[DD_MAX] = { NULL };
-FILE *DD_OUTS[DD_MAX] = { NULL };
-char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
-uint8_t DD_OUTS_TRANSLATION[DD_MAX] = { 0 }; // 0=trans to ASCII, 1=don't.
-pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
-int PDS_OUTS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
-int DD_OUTS_EXISTED[DD_MAX] = { 0 };
+DCB_t DCB_INS[DCB_MAX];
+DCB_t DCB_OUTS[DCB_MAX];
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
@@ -642,6 +632,8 @@ parseParmField(int print) {
     putCHARACTER(address + 4 * i, &type1Actual[i]);
 }
 
+// Doesn't just parse the command line, but also performs some other
+// initialization.
 int
 parseCommandLine(int argc, char **argv)
 {
@@ -649,36 +641,48 @@ parseCommandLine(int argc, char **argv)
   char translation;
   FILE *COMMON_IN = NULL;
   gettimeofday(&startTime, NULL);
-  DD_INS[0] = DD_INS[1] = stdin;
-  DD_OUTS[0] = DD_OUTS[1] = stdout;
 
 #ifdef NUM_INITIALIZED
   extern uint8_t memoryInitializer[NUM_INITIALIZED];
   memcpy(memory, memoryInitializer, NUM_INITIALIZED);
 #endif
 
+  // Default setup of INPUT/OUTPUT DCBs.
+  for (i = 0; i < DCB_MAX; i++)
+    {
+      memset(&DCB_INS[i], 0, sizeof(DCB_t));
+      memset(&DCB_OUTS[i], 0, sizeof(DCB_t));
+      DCB_INS[i].redirection = i;
+      DCB_OUTS[i].redirection = i;
+      strcpy(DCB_INS[i].fileFlags, "rt");
+      strcpy(DCB_OUTS[i].fileFlags, "wt");
+    }
+  DCB_INS[0].fp = DCB_INS[1].fp = stdin;
+  DCB_OUTS[0].fp = DCB_OUTS[1].fp = stdout;
+
   for (i = 1; i < argc; i++)
     {
-      int lun, recordSize;
-      char c, filename[1024];
+      int n, lun, recordSize;
+      char c, c1, c2, filename[1024];
+      n = 0;
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
       else if (1 == sscanf(argv[i], "--watch=%d", &j))
         watchpoint = j;
       else if (2 == sscanf(argv[i], "--extra=%d,%c", &lun, &c))
         {
-          if (lun < 0 || lun >= DD_MAX)
+          if (lun < 0 || lun >= DCB_MAX)
             {
               fprintf(stderr, "Input logical unit number %d is out of range.\n",
                   lun);
               returnValue = -1;
             }
-          DD_INS_EXTRA[lun] = 1 + strstr(argv[i], ",");
+          DCB_INS[lun].extra = 1 + strstr(argv[i], ",");
         }
-      else if (2 == sscanf(argv[i], "--ddi=%d,%[^\n]", &lun, filename) ||
-               2 == sscanf(argv[i], "--pdsi=%d,%[^\n]", &lun, filename))
+      else if (2 <= (n = sscanf(argv[i], "--ddi=%d,%[^,],%c,%c", &lun, filename, &c1, &c2)) ||
+               2 <= (n = sscanf(argv[i], "--pdsi=%d,%[^,],%c", &lun, filename, &c1)))
         {
-          if (lun < 0 || lun >= DD_MAX)
+          if (lun < 0 || lun >= DCB_MAX)
             {
               fprintf(stderr, "Input logical unit number %d is out of range.\n",
                   lun);
@@ -687,19 +691,22 @@ parseCommandLine(int argc, char **argv)
           else
             {
               int len = strlen(filename);
-              char *pfilename = malloc(len + 1);
+              char *pfilename = DCB_INS[lun].filename;
+              if ((n >= 4 && c2 == 'U') || (n >= 3 && c1 == 'U'))
+                DCB_INS[lun].upperCase = 1;
+              if ((n >= 4 && c2 == 'E') || (n >= 3 && c1 == 'E'))
+                {
+                  DCB_INS[lun].ebcdic = 1;
+                  strcpy(DCB_INS[lun].fileFlags, "rb");
+                }
+              if ((n >= 4 && c2 != 'U' && c2 != 'E') ||
+                  (n >= 3 && c1 != 'U' && c1 != 'E'))
+                abend("Unknown --ddi/pdsi option");
               strcpy(pfilename, filename);
-              DD_INS_FILENAMES[lun] = pfilename;
               if (argv[i][2] == 'd')
                 {
-                  if (!strcmp(&pfilename[len-2], ",U"))
-                    {
-                      DD_INS_UPPERCASE[lun] = 1;
-                      pfilename[len-2] = 0;
-                    }
-                  PDS_INS[lun] = 0;
-                  DD_INS[lun] = fopen(pfilename, "r");
-                  if (DD_INS[lun] == NULL)
+                  DCB_INS[lun].fp = fopen(pfilename, DCB_INS[lun].fileFlags);
+                  if (DCB_INS[lun].fp == NULL)
                     {
                       fprintf(stderr, "Cannot open file %s for reading on unit %d\n",
                           pfilename, lun);
@@ -708,38 +715,38 @@ parseCommandLine(int argc, char **argv)
                 }
               else
                 {
-                  strcpy(DD_INS_PARTNAMES[lun], "");
-                  PDS_INS[lun] = 1;
+                  strcpy(DCB_INS[lun].member, "");
+                  DCB_INS[lun].pds = 1;
                 }
             }
         }
-      else if (2 <= (numArgs = sscanf(argv[i], "--ddo=%d,%[^ ,],%c",
-                                      &lun, filename, &translation)) ||
-               2 == sscanf(argv[i], "--pdso=%d,%s", &lun, filename))
+      else if (2 <= (n = sscanf(argv[i], "--ddo=%d,%[^,],%c",
+                                      &lun, filename, &c)) ||
+               2 <= (n = sscanf(argv[i], "--pdso=%d,%[^,],%c",
+                                      &lun, filename, &c)))
         {
-          if (lun < 0 || lun >= DD_MAX)
+          if (lun < 0 || lun >= DCB_MAX)
             {
               fprintf(stderr, "Output logical unit number %d is out of range.\n", lun);
               returnValue = -1;
             }
           else
             {
-              if (argv[i][2] == 'd')
+              if (n >= 3)
                 {
-                  DD_OUTS_FILENAMES[lun] = &argv[i][6];
-                  PDS_OUTS[lun] = 0;
-                  if (numArgs > 2)
+                  if (c == 'E')
                     {
-                      //fprintf(stderr, "Note: OUTPUT(%d) is binary.\n", lun);
-                      DD_OUTS_TRANSLATION[lun] = 1;
-                      DD_OUTS[lun] = fopen(filename, "wb");
+                      DCB_OUTS[lun].ebcdic = 1;
+                      strcpy(DCB_OUTS[lun].fileFlags, "wb");
                     }
                   else
-                    {
-                      DD_OUTS_TRANSLATION[lun] = 0;
-                      DD_OUTS[lun] = fopen(filename, "w");
-                    }
-                  if (DD_OUTS[lun] == NULL)
+                    abend("Unknown --ddo/pdso option %c", c);
+                }
+              strcpy(DCB_OUTS[lun].filename, filename);
+              if (argv[i][2] == 'd')
+                {
+                  DCB_OUTS[lun].fp = fopen(filename, DCB_OUTS[lun].fileFlags);
+                  if (DCB_OUTS[lun].fp == NULL)
                     {
                       fprintf(stderr, "Cannot create file %s for writing on unit %d\n",
                           filename, lun);
@@ -747,11 +754,7 @@ parseCommandLine(int argc, char **argv)
                     }
                 }
               else
-                {
-                  DD_OUTS_FILENAMES[lun] = &argv[i][7];
-                  strcpy(DD_OUTS_PARTNAMES[lun], "");
-                  PDS_OUTS[lun] = 1;
-                }
+                DCB_OUTS[lun].pds = 1;
             }
         }
       else if (4 == sscanf(argv[i], "--raf=%c,%d,%d,%[^\n\r]", &c,
@@ -878,22 +881,22 @@ parseCommandLine(int argc, char **argv)
           printf("              output when this program is run.  If that\n");
           printf("              is disturbing, you can try using the --utf8\n");
           printf("              to try outputs in UTF-8 encoding instead.\n");
-          printf("--ddi=N,F[,U] Attach filename F to the logical unit number\n");
+          printf("--ddi=N,F[,U][,E] Attach filename F to the logical unit number\n");
           printf("              N, for use with the INPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdin.\n");
           printf("              N can range from 0 through 9. If the optional\n");
           printf("              \",U\" is present, it causes all input to be\n");
           printf("              silently converted to upper case.  The \"U\"\n");
-          printf("              is literal.\n");
-          printf("--ddo=N,F[,U] Attach filename F to the logical unit number\n");
+          printf("              is literal.  If the optional literal E is\n");
+          printf("              present, then the input is treated as EBCDIC.\n");
+          printf("--ddo=N,F[,E] Attach filename F to the logical unit number\n");
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
-          printf("              N can range from 0 through 9.  For N>1, the\n");
-          printf("              optional U can be present.  (It can actually be\n");
-          printf("              any character, not just U.)  If so, then the\n");
-          printf("              output is binary  rather than textual. \n");
-          printf("--pdsi=N,F    Same as --ddi, but for a PDS file.\n");
-          printf("--pdso=N,F    Same as --ddo, but for a PDS file.\n");
+          printf("              N can range from 0 through 9.  The optional\n");
+          printf("              literal E indicates that the output is EBCDIC\n");
+          printf("              or binary.\n");
+          printf("--pdsi=N,F[,E] Same as --ddi, but for a PDS file.\n");
+          printf("--pdso=N,F[,E] Same as --ddo, but for a PDS file.\n");
           printf("--raf=I,R,N,F Attach filename F to device number N, for use\n");
           printf("              with the FILE(N) XPL built-in.  R is the\n");
           printf("              record size associated with the random-access\n");
@@ -1664,9 +1667,10 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
   char *ss, *s = descriptorToAscii(string); // Printable character data.
   FILE *fp;
   int i;
-  if (lun < 0 || lun >= DD_MAX || DD_OUTS[lun] == NULL)
+  if (lun < 0 || lun >= DCB_MAX || (DCB_OUTS[lun].fp == NULL && !DCB_OUTS[lun].pds))
     abend("Output file has not been assigned: Device = %d", lun);
-  fp = DD_OUTS[lun];
+  lun = DCB_OUTS[lun].redirection;
+  fp = DCB_OUTS[lun].fp;
   sbuf_t queue[MAX_QUEUE]; // SYSPRINT line-queue for current page.
   for (i = 0; i < strlen(s); i++)
     if (s[i] == 0xF0)
@@ -1806,10 +1810,29 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     }
   else
     {
-      if (DD_OUTS_TRANSLATION[lun])
-        fwrite(string->bytes, string->numBytes, 1, fp);
+      if (DCB_OUTS[lun].pds)
+        {
+          // Output to a PDS is buffered until the stow operation by MONITOR(1).
+          DCB_t *dcb = &DCB_OUTS[lun];
+          int length = string->numBytes;
+          if (dcb->bufferLength + length > PDS_BUFFER_SIZE)
+            abend("Overflow of PDS buffer %d", lun);
+          if (DCB_OUTS[lun].ebcdic)
+            {
+              strncpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
+              dcb->bufferLength += length;
+            }
+          else
+            dcb->bufferLength += sprintf(&dcb->buffer[dcb->bufferLength], "%s\n", s);
+        }
       else
-        fprintf(fp, "%s\n", s);
+        {
+          // Output to a sequential file is immediate.
+          if (DCB_OUTS[lun].ebcdic)
+            fwrite(string->bytes, string->numBytes, 1, fp);
+          else
+            fprintf(fp, "%s\n", s);
+        }
       pendingNewline = 0;
     }
   fflush(fp);
@@ -1823,59 +1846,65 @@ INPUT(uint32_t lun) {
   int i;
   char *s, *ss;
   FILE *fp;
-  if (lun < 0 || lun >= DD_MAX)
+  if (lun >= DCB_MAX)
     abend("Input device number out of range: Device = %d", lun);
-  if (DD_INS_EXTRA[lun] != NULL)
+  lun = DCB_INS[lun].redirection;
+  if (DCB_INS[lun].extra != NULL)
     {
-      s = DD_INS_EXTRA[lun];
-      DD_INS_EXTRA[lun] = NULL;
+      s = DCB_INS[lun].extra;
+      DCB_INS[lun].extra = NULL;
       return cToDescriptor(returnValue, "%-80s", s);
     }
-  fp = DD_INS[lun];
+  fp = DCB_INS[lun].fp;
   if (fp == NULL)
     abend("Input file not open for reading: Device = %d", lun);
   s = returnValue->bytes;
-  if (fgets(s, sizeof(returnValue->bytes), fp) == NULL) // End of file.
+  if (DCB_INS[lun].ebcdic)
     {
-      // McKeeman doesn't define how to detect an end-of-file on INPUT,
-      // but sample program 6.18.4 detects it by finding an empty string.
-      // XCOM certainly expects an empty return on INPUT(2) at the end of file.
-      // XCOM seems to expect that INPUT will silently reject all cards
-      // with a non-blank in column 1, but doesn't seem to care whether
-      // it does that or not, so I don't.
+      returnValue->numBytes = fread(returnValue->bytes, 1, 80, fp);
+    }
+  else // ASCII
+    {
+      if (fgets(s, sizeof(returnValue->bytes), fp) == NULL) // End of file.
+        {
+          // McKeeman doesn't define how to detect an end-of-file on INPUT,
+          // but sample program 6.18.4 detects it by finding an empty string.
+          // XCOM certainly expects an empty return on INPUT(2) at the end of file.
+          // XCOM seems to expect that INPUT will silently reject all cards
+          // with a non-blank in column 1, but doesn't seem to care whether
+          // it does that or not, so I don't.
+          returnValue->numBytes = strlen(s);
+          return returnValue;
+        }
+      s[strcspn(s, "\r\n")] = 0; // Strip off carriage-returns and/or line-feeds.
+      // Since input is expected to be arriving on punch-cards, we want to
+      // truncate or pad all input lines to be exactly 80 characters.  This isn't
+      // normally significant, but for a legacy compiler like XCOM.xpl or
+      // SKELETON.xpl it is.
+      for (i = strlen(s); i < 80; i++)
+        s[i] = ' ';
+      s[i] = 0;
+      if (DCB_INS[lun].upperCase)
+        {
+          // Convert to upper case.
+          for (ss = s; *ss; ss++)
+            *ss = toupper(*ss);
+        }
+      // Fix U.S. cent and logical-NOT UTF-8.
+      while (NULL != (ss = strstr(s, "\xC2\xA2")))
+        {
+          *ss = '`';
+          memmove(ss+1, ss+2, strlen(ss+2));
+        }
+      while (NULL != (ss = strstr(s, "\xC2\xAC")))
+        {
+          *ss = '~';
+          memmove(ss+1, ss+2, strlen(ss+2));
+        }
       returnValue->numBytes = strlen(s);
-      return returnValue;
+      for (s = returnValue->bytes; *s; s++)
+        *s = asciiToEbcdic[*s];
     }
-  s[strcspn(s, "\r\n")] = 0; // Strip off carriage-returns and/or line-feeds.
-  // Since input is expected to be arriving on punch-cards, we want to
-  // truncate or pad all input lines to be exactly 80 characters.  This isn't
-  // normally significant, but for a legacy compiler like XCOM.xpl or
-  // SKELETON.xpl it is.
-  for (i = strlen(s); i < 80; i++)
-    s[i] = ' ';
-  s[i] = 0;
-  if (DD_INS_UPPERCASE[lun])
-    {
-      // Convert to upper case.
-      for (ss = s; *ss; ss++)
-        *ss = toupper(*ss);
-    }
-  // Fix U.S. cent and logical-NOT UTF-8.
-  while (NULL != (ss = strstr(s, "\xC2\xA2")))
-    {
-      *ss = '`';
-      memmove(ss+1, ss+2, strlen(ss+2));
-    }
-  while (NULL != (ss = strstr(s, "\xC2\xAC")))
-    {
-      *ss = '~';
-      memmove(ss+1, ss+2, strlen(ss+2));
-    }
-  returnValue->numBytes = strlen(s);
-  for (s = returnValue->bytes; *s; s++)
-    *s = asciiToEbcdic[*s];
-  //if (lun == 0)
-  //  strcpy(lastInput0, returnValue->bytes);
   return returnValue;
 }
 
@@ -2020,13 +2049,14 @@ SHR(uint32_t value, uint32_t shift) {
 
 void
 MONITOR0(uint32_t dev) {
-  if (dev >= DD_MAX)
+  if (dev >= DCB_MAX)
     return;
-  if (DD_OUTS[dev] == NULL)
+  dev = DCB_OUTS[dev].redirection;
+  if (DCB_OUTS[dev].fp == NULL)
     return;
-  fflush(DD_OUTS[dev]);
-  fclose(DD_OUTS[dev]);
-  DD_OUTS[dev] = NULL;
+  fflush(DCB_OUTS[dev].fp);
+  fclose(DCB_OUTS[dev].fp);
+  DCB_OUTS[dev].fp = NULL;
 }
 
 uint32_t
@@ -2034,40 +2064,52 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
   int lenFile, lenPart;
   int existed;
   char *path = NULL, *cname;
-  if (dev >= DD_MAX)
+  DCB_t *dcb;
+  if (dev >= DCB_MAX)
     abend("Output device number out of range: Device number = %d >= %d",
-          dev, DD_MAX);
-  if (DD_OUTS[dev] != NULL)
+          dev, DCB_MAX);
+  dev = DCB_OUTS[dev].redirection;
+  dcb = &DCB_OUTS[dev];
+  if (DCB_OUTS[dev].fp != NULL)
     {
-      fflush(DD_OUTS[dev]);
-      fclose(DD_OUTS[dev]);
-      DD_OUTS[dev] = NULL;
+      fflush(DCB_OUTS[dev].fp);
+      fclose(DCB_OUTS[dev].fp);
+      DCB_OUTS[dev].fp = NULL;
     }
-  if (DD_OUTS_FILENAMES[dev] == NULL)
+  if (strlen(DCB_OUTS[dev].filename) == 0)
     abend("Attempt to use unassigned PDS file for output: Device number = %d", dev);
-  lenFile = strlen(DD_OUTS_FILENAMES[dev]);
-  if (mkdir(DD_OUTS_FILENAMES[dev], 0777) < 0)
-    abend("Unable to create PDS; note that PDS is implemented as a folder: "
-          "Device number %d, PDS = '%s'", dev, DD_OUTS_FILENAMES[dev]);
+  lenFile = strlen(DCB_OUTS[dev].filename);
+  //if (mkdir(DCB_OUTS[dev].filename, 0777) < 0)
+  //  abend("Unable to create PDS; note that PDS is implemented as a folder: "
+  //        "Device number %d, PDS = '%s'", dev, DCB_OUTS[dev].filename);
+  mkdir(DCB_OUTS[dev].filename, 0777);
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
   for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
-  if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
+  if (lenPart < 1 || lenPart > PDS_MEMBER_SIZE)
     abend("PDS partitions must have names from 1-8 characters long: "
           "Device number %d, PDS = '%s', part = '%s'",
-          dev, DD_OUTS_FILENAMES[dev], cname);
+          dev, DCB_OUTS[dev].filename, cname);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(1)");
-  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], cname);
-  strcpy(DD_OUTS_PARTNAMES[dev], cname);
-  existed = DD_OUTS_EXISTED[dev];
-  DD_OUTS_EXISTED[dev] = (access(path, F_OK) == 0); // Partition already exists?
-  DD_OUTS[dev] = fopen(path, "wt");
+  sprintf(path, "%s/%s", DCB_OUTS[dev].filename, cname);
+  strcpy(DCB_OUTS[dev].member, cname);
+  existed = DCB_OUTS[dev].existed;
+  DCB_OUTS[dev].existed = (access(path, F_OK) == 0); // Partition already exists?
+  DCB_OUTS[dev].fp = fopen(path, DCB_OUTS[dev].fileFlags);
   free(path);
-  if (DD_OUTS[dev] == NULL)
+  if (DCB_OUTS[dev].fp == NULL)
     abend("Cannot open PDS partition for OUTPUT: Device number %d, PDS = '%s'",
-          dev, DD_OUTS_FILENAMES[dev]);
+          dev, DCB_OUTS[dev].filename);
+  if (dcb->bufferLength > 0)
+    if (1 != fwrite(dcb->buffer, dcb->bufferLength, 1, DCB_OUTS[dev].fp))
+      abend("PDS write error to PDS %s member %s on device %d",
+            DCB_OUTS[dev].filename, cname, dev);
+  dcb->bufferLength = 0;
+  fflush(DCB_OUTS[dev].fp);
+  fclose(DCB_OUTS[dev].fp);
+  DCB_OUTS[dev].fp = NULL;
   return existed;
 }
 
@@ -2075,31 +2117,32 @@ uint32_t
 MONITOR2(uint32_t dev, descriptor_t *name) {
   int lenFile, lenPart, i;
   char *path = NULL, *cname;
-  if (dev >= DD_MAX)
-    abend("Input device number out of range: Device number %d >= %d", dev, DD_MAX);
-  if (DD_INS[dev] != NULL)
+  if (dev >= DCB_MAX)
+    abend("Input device number out of range: Device number %d >= %d", dev, DCB_MAX);
+  dev = DCB_INS[dev].redirection;
+  if (DCB_INS[dev].fp != NULL)
     {
-      fclose(DD_INS[dev]);
-      DD_INS[dev] = NULL;
+      fclose(DCB_INS[dev].fp);
+      DCB_INS[dev].fp = NULL;
     }
-  if (DD_INS_FILENAMES[dev] == NULL)
+  if (strlen(DCB_INS[dev].filename) == 0)
     abend("Attempt to use unassigned PDS file for input: Device number %d", dev);
-  lenFile = strlen(DD_INS_FILENAMES[dev]);
+  lenFile = strlen(DCB_INS[dev].filename);
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
   for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
-  if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
+  if (lenPart < 1 || lenPart > PDS_MEMBER_SIZE)
     abend("PDS partitions must have names from 1-8 characters long: "
           "Device number %d, PDS = '%s', part = '%s'",
-          dev, DD_INS_FILENAMES[dev], cname);
+          dev, DCB_INS[dev].filename, cname);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(2)");
-  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], cname);
-  strcpy(DD_INS_PARTNAMES[dev], cname);
-  DD_INS[dev] = fopen(path, "rt");
+  sprintf(path, "%s/%s", DCB_INS[dev].filename, cname);
+  strcpy(DCB_INS[dev].member, cname);
+  DCB_INS[dev].fp = fopen(path, DCB_INS[dev].fileFlags);
   free(path);
-  if (DD_INS[dev] == NULL)
+  if (DCB_INS[dev].fp == NULL)
     {
       return 1;
     }
@@ -2108,12 +2151,13 @@ MONITOR2(uint32_t dev, descriptor_t *name) {
 
 void
 MONITOR3(uint32_t dev) {
-  if (dev >= DD_MAX)
+  if (dev >= DCB_MAX)
     return;
-  if (DD_INS[dev] == NULL)
+  dev = DCB_INS[dev].redirection;
+  if (DCB_INS[dev].fp == NULL)
     return;
-  fclose(DD_INS[dev]);
-  DD_INS[dev] = NULL;
+  fclose(DCB_INS[dev].fp);
+  DCB_INS[dev].fp = NULL;
 }
 
 void
@@ -2270,7 +2314,14 @@ MONITOR7(uint32_t based, uint32_t n) {
 
 void
 MONITOR8(uint32_t dev, uint32_t filenum) {
-  abend("MONITOR(8) not yet implemented");
+  if (dev >= DCB_MAX)
+    abend("Device number in MONITOR(8, 0x%X, 0x%X) is out of range", dev, filenum);
+  if ((filenum & 0xFF) >= DCB_MAX)
+    abend("File number in MONITOR(8, 0x%X, 0x%X) is out of range", dev, filenum);
+  if (0 != (filenum & ~0xFF))
+    DCB_OUTS[dev].redirection = filenum & 0xFF;
+  else
+    DCB_INS[dev].redirection = filenum;
 }
 
 //----------------------------------------------------------------------------
@@ -2557,12 +2608,19 @@ MONITOR14(uint32_t n, uint32_t a) {
 
 uint32_t
 MONITOR15(void) {
-  abend("MONITOR(15) not yet implemented");
+  fflush(stdout);
+  fprintf(stderr, "FYI: MONITOR(15) only partially implemented\n");
+  fflush(stderr);
+  return 0xF0F00000;
 }
 
+uint32_t flags16;
 void
 MONITOR16(uint32_t n) {
-  abend("MONITOR(16) not yet implemented");
+  if (0 != (0x80000000 & n))
+    flags16 |= n & 0x7FFFFFFF;
+  else
+    flags16 = n;
 }
 
 // I don't know what this is supposed to be used for yet.
@@ -2604,12 +2662,28 @@ MONITOR21(void) {
 
 uint32_t
 MONITOR22(uint32_t n1) {
-  abend("MONITOR(22) not yet implemented");
+  static int notShownYet = 1;
+  if (notShownYet)
+    {
+      notShownYet = 0;
+      fflush(stdout);
+      fprintf(stderr, "\nFYI: MONITOR(22,n) not yet implemented\n");
+      fflush(stderr);
+    }
+  return 0;
 }
 
 uint32_t
 MONITOR22A(uint32_t n2) {
-  abend("MONITOR(22,0) not yet implemented");
+  static int notShownYet = 1;
+  if (notShownYet)
+    {
+      notShownYet = 0;
+      fflush(stdout);
+      fprintf(stderr, "FYI: MONITOR(22,0,n) not yet implemented\n");
+      fflush(stderr);
+    }
+  return 0;
 }
 
 descriptor_t *
@@ -3525,8 +3599,8 @@ detailedInlineAfter(void) {
 // Some test code.
 #if 0
 int outUTF8;
-FILE *DD_INS[DD_MAX];
-FILE *DD_OUTS[DD_MAX];
+FILE *DCB_INS[DCB_MAX];
+FILE *DCB_OUTS[DCB_MAX];
 typedef char sbuf_t[MAX_XPL_STRING + 1];
 uint8_t memory[MEMORY_SIZE];
 

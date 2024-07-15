@@ -197,7 +197,10 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
     try:
         f = open(name, mode)
     except:
-        f = open(scriptParentFolder + "/" + name, mode)
+        try:
+            f = open(scriptParentFolder + "/" + name, mode)
+        except:
+            f = open(name, "w+")
     inputDevice = {
         "file": f,
         "open": True,
@@ -205,7 +208,10 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
         "buf": []
         }
     if isPDS:
-        inputDevice["pds"] = json.load(f)
+        try:
+            inputDevice["pds"] = json.load(f)
+        except:
+            inputDevice["pds"] = {}
         inputDevice["mem"] = ""
     return inputDevice
 
@@ -518,7 +524,7 @@ def MONITOR(function, arg2=None, arg3=None):
         # halfword is treated as a short integer.  However,
         # I still don't understand where the data is supposed to 
         # come from.
-        return 0xF0F10000
+        return 0xF0F00000
     
     # Incorporate flags into return code.
     elif function == 16:

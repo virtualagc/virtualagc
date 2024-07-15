@@ -241,9 +241,11 @@ if __name__ == "__main__":
                 i += columns + 1
         # Save it:
         if to != None:
-            outf = open(to, "wb")
-            outf.write(ba)
-            outf.close()
+            if to == sys.stdout:
+                to.buffer.write(ba)
+            else:
+                to.write(ba)
+            to.close()
             return
         try:
             nfilename = folder + "/" + filename
@@ -314,9 +316,11 @@ if __name__ == "__main__":
             print("    --remove     Removes file headers added by the Virtual")
             print("                 AGC Project.  By default, these kept.")
             print("    --file=F     The requests conversion of a single file")
-            print("                 rather than an entire folder.  The output")
+            print("                 rather than an entire folder.  If the")
+            print("                 target encoding is ASCII or UTF-8, then")
+            print("                 output is to stdout.  Otherwise, the output")
             print("                 is to a file of the same name, but")
-            print("                 suffixed by \".converted\".")
+            print("                 suffixed by \".ebcdic\".")
             print("    --columns=N  Inserts a newline after every Nth column.")
             print("                 The default is to make no such insertions.")
             print("                 Only for --target=ASCII.")
@@ -326,7 +330,10 @@ if __name__ == "__main__":
             sys.exit(1)
             
     if file != None:
-        convert(file, to=file+".converted")
+        if target == "EBCDIC":
+            convert(file, to=open(file+".ebcdic", "wb"))
+        else:
+            convert(file, to=sys.stdout)
         sys.exit(0)
     try:
         outf = os.makedirs(folder)

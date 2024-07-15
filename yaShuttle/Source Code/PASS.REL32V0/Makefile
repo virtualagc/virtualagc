@@ -28,8 +28,8 @@
 #	PASS2
 #	PASS3
 #	PASS4
-#	all	(compiles all 7 passes of HAL/S-FC)
-#	compile	(uses HAL/S-FC to compile a HAL/S source-code file)
+#	all		(compiles all 7 passes of HAL/S-FC)
+#	compile		(uses HAL/S-FC to compile a HAL/S source-code file)
 #
 # Additional things specifiable on the `make` command line.
 #
@@ -81,7 +81,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES
+PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES
 PARM4_STRING := 
 
 RTARGET := $(HAL_S_FC_DIR)/HELLO
@@ -127,10 +127,13 @@ cleanall: clean
             AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
             PASS4.PROCS/PASS4 -rf 2>/dev/null
 
+# (Now removed.) COMPOOL.*VERSION is here only as a temporary measure, and 
+# should be removed once I figure out how the template versioning can be 
+# handled better.
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: compile
 compile: clean
-	@echo Processing $(RTARGET2) ...
+	@echo Processing $(RTARGET2) ==========================================
 	
 	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
 		$(sPARM_STRING) $(PEXTRA) \
@@ -141,8 +144,10 @@ compile: clean
 		--parm="$(PARM_STRING)" \
 		--ddi=0,'$(RTARGET2).hal' \
 		--ddo=2,listing2.txt \
+		--pdsi=4,TEMPLIB,E \
 		--pdsi=5,ERRORLIB \
 		--pdsi=6,ACCESS  \
+		--pdso=6,TEMPLIB,E \
 		--commono=COMMON-PASS1.out \
 		--raf=B,7200,1,halmat.bin \
 		--raf=B,1560,2,litfile.bin \
@@ -201,8 +206,8 @@ compile: clean
 	cp auxmata.bin auxmat2.bin
 	./PASS2 \
 		--ddo=2,listing22.txt \
-		--ddo=3,cards2.bin,U \
-		--ddo=4,deck2.bin,U \
+		--ddo=3,cards2.bin,E \
+		--ddo=4,deck2.bin,E \
 		--pdsi=5,ERRORLIB \
 		--ddo=7,extra2.txt \
 		--commoni=COMMON-AUX.out \
