@@ -1714,7 +1714,12 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         definedS = False
         definedN = False
         definedB = False
-        if tipeR == "FIXED":
+        if tipeR == "SDESC":
+            definedN = True
+            print(indent + "int32_t numberRHS = (int32_t) (" + sourceR + ");")
+            definedS = True
+            print(indent + "descriptor_t *stringRHS = getCHARACTERd(" + sourceR + ");")
+        elif tipeR == "FIXED":
             definedN = True
             print(indent + "int32_t numberRHS = (int32_t) (" + sourceR + ");")
         elif tipeR == "BIT":
@@ -1732,8 +1737,11 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             
             conversions = autoconvert(fromType, [toType])
             conversion = conversions[0][1]
-            
-            if fromType == "CHARACTER":
+            fromVar2 = None
+            if fromType == "SDESC":
+                fromVar = "numberRHS"
+                fromVar2 = "stringRHS"
+            elif fromType == "CHARACTER":
                 fromVar = "stringRHS"
             elif fromType == "FIXED":
                 fromVar = "numberRHS"
@@ -1744,7 +1752,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if not definedS:
                     print(indent + "descriptor_t *stringRHS;")
                     definedS = True
-                if toVar != fromVar:
+                if toVar != fromVar and toVar != fromVar2:
                     #print(indent + \
                     #      "stringRHS = cToDescriptor(NULL, \"%%s\", %s);" \
                     #      % (conversion % fromVar))
@@ -1754,7 +1762,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if not definedN:
                     print(indent + "int32_t %s;" % toVar)
                     definedN = True
-                if toVar != fromVar:
+                if toVar != fromVar and toVar != fromVar2:
                     print(indent + "%s = %s;" % (toVar, conversion % fromVar))
             elif toType == "BIT":
                 toVar = "bitRHS"

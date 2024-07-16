@@ -1663,7 +1663,7 @@ The following function replaces the XPL constructs
     OUTPUT = string      , which is shorthand for OUTPUT(0)=string.
 The carriage-control characters for fileNumber 1 may be
 the so-called ANSI control characters:
-    '_'    Single space the line and print
+    ' '    Single space the line and print
     '0'    Double space the line and print
     '-'    Triple space the line and print
     '+'    Do not space the line and print (but does return carriage to left!)
@@ -1886,6 +1886,9 @@ INPUT(uint32_t lun) {
   if (DCB_INS[lun].ebcdic)
     {
       returnValue->numBytes = fread(returnValue->bytes, 1, 80, fp);
+      if (returnValue->numBytes > 0)
+        while (returnValue->numBytes < 80)
+          returnValue->bytes[returnValue->numBytes++] = 0x40;
     }
   else // ASCII
     {
@@ -1897,17 +1900,10 @@ INPUT(uint32_t lun) {
           // XCOM seems to expect that INPUT will silently reject all cards
           // with a non-blank in column 1, but doesn't seem to care whether
           // it does that or not, so I don't.
-          returnValue->numBytes = strlen(s);
+          returnValue->numBytes = 0;
           return returnValue;
         }
       s[strcspn(s, "\r\n")] = 0; // Strip off carriage-returns and/or line-feeds.
-      // Since input is expected to be arriving on punch-cards, we want to
-      // truncate or pad all input lines to be exactly 80 characters.  This isn't
-      // normally significant, but for a legacy compiler like XCOM.xpl or
-      // SKELETON.xpl it is.
-      for (i = strlen(s); i < 80; i++)
-        s[i] = ' ';
-      s[i] = 0;
       if (DCB_INS[lun].upperCase)
         {
           // Convert to upper case.
@@ -1925,6 +1921,13 @@ INPUT(uint32_t lun) {
           *ss = '~';
           memmove(ss+1, ss+2, strlen(ss+2));
         }
+      // Since input is expected to be arriving on punch-cards, we want to
+      // pad all input lines to be at least 80 characters.  This isn't
+      // normally significant, but for a legacy compiler like XCOM.xpl or
+      // SKELETON.xpl it is.
+      for (i = strlen(s); i < 80; i++)
+        s[i] = ' ';
+      s[i] = 0;
       returnValue->numBytes = strlen(s);
       for (s = returnValue->bytes; *s; s++)
         *s = asciiToEbcdic[*s];

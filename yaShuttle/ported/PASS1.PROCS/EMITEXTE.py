@@ -225,7 +225,7 @@ def EMIT_EXTERNAL():
         if g.TPL_FLAG == 0:
             l.J = 0x01
             #l.VERSION = BYTE(l.VERSION, 10, 0x01);
-            l.VERSION = l.VERSION[:10] + ("%d" % 0x01)
+            l.VERSION = l.VERSION[:10] + ("%2d" % 0x01)
         else:
             while LENGTH(l.OLDBUFF) > 0:
                 l.NEWBUFF = l.OLDBUFF;
@@ -246,7 +246,7 @@ def EMIT_EXTERNAL():
                 if g.TPL_FLAG == 2:
                     l.J = l.I;
             #l.VERSION = BYTE(l.VERSION, 10, l.I);
-            l.VERSION = l.VERSION[:10] + ("%d" % l.I)
+            l.VERSION = l.VERSION[:10] + ("%2d" % l.I)
         g.SYT_LOCKp(g.BLOCK_SYTREF[1], l.J);
         #OUTPUT(6, l.VERSION + str(BYTE(l.VERSION, 10)));
         OUTPUT(6, l.VERSION)

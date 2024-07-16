@@ -776,9 +776,9 @@ def INPUT(fileNumber):
             data = file['pds'][mem]
         if index < len(data):
             file['ptr'] = index
-            line = data[index]
-            if len(line) == 0:
-                line = ' '
+            line = "%-80s" % data[index]
+            #if len(line) == 0:
+            #    line = ' '
             return line[:]
         else:
             return ''
