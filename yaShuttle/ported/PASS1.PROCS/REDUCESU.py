@@ -98,7 +98,7 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
                 g.VAL_P[g.NEXT_SUB] = 1;
                 STEPPER();
                 T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
-            if (not FLAG and goto == None) or goto != None:
+            if (not 0 != (1 & FLAG) and goto == None) or goto != None:
                 if ((T1 < 0 or T2 < 0) and goto == None) or goto == "SR_ERR1":
                     if goto == "SR_ERR1": goto = None
                     ERROR(CLASS_SR, 1, g.VAR[g.MP]);

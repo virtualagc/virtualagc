@@ -962,7 +962,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         g.I = 2;
         l.SDL_INFO = g.SRN[g.I];
         l.INCLUDE_COUNT = g.SRN_COUNT[g.I];
-        if not l.LINE_CONTINUED: 
+        if not 0 != (1 & l.LINE_CONTINUED): 
             l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
         if g.INLINE_INDENT_RESET >= 0: 
         # DO;
@@ -971,7 +971,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         # END
         if l.PTR_END == -1:
             l.PTR_END = g.STMT_PTR;
-        if (l.PTR_END == g.OUTPUT_STACK_MAX) and g.SQUEEZING:
+        if (l.PTR_END == g.OUTPUT_STACK_MAX) and 0 != (1 & g.SQUEEZING):
             l.PTR_END = l.PTR_END - 2;
         while ((g.GRAMMAR_FLAGS(l.PTR_START) & g.PRINT_FLAG) == 0) and \
                 (l.PTR_START <= l.PTR_END):
