@@ -18,7 +18,7 @@ static int gdbmi_status;
 
 
 
-static void gdbmiPrintHelpInfo()
+static void gdbmiPrintHelpInfo(void)
 {
 	printf("info breakpoints -- Status of user-settable breakpoints\n");
 	printf("info constants -- All constants or those matching REGEXP\n");
@@ -38,18 +38,18 @@ static void gdbmiPrintHelpInfo()
 	printf("info variables -- All variables or those matching REGEXP\n");
 }
 
-static void gdbmiPrintHelpShow()
+static void gdbmiPrintHelpShow(void)
 {
 	printf("show version -- Show what version of yaAGC this is\n");
 }
 
-static void gdbmiPrintHelpSet()
+static void gdbmiPrintHelpSet(void)
 {
 	printf("set prompt -- Set agc's prompt\n");
 	printf("set var -- assign value to variable or derefernced address\n");
 }
 
-static void gdbmiPrintHelpBreakpoints()
+static void gdbmiPrintHelpBreakpoints(void)
 {
 	printf("break -- Set breakpoint at specified line\n");
 	printf("delete -- Delete some breakpoints\n");
@@ -59,7 +59,7 @@ static void gdbmiPrintHelpBreakpoints()
 	printf("watch -- Set a watchpoint\n");
 }
 
-static void gdbmiPrintHelpData()
+static void gdbmiPrintHelpData(void)
 {
 	printf("disassemble -- Disassemble a specified section of memory\n");
 	printf("inspect -- Same as \"print\" command\n");
@@ -68,7 +68,7 @@ static void gdbmiPrintHelpData()
 	printf("x -- Examine memory: x/FMT ADDRESS\n");
 }
 
-static void gdbmiPrintHelpRunning()
+static void gdbmiPrintHelpRunning(void)
 {
 	printf("step -- Step program until it reaches a different source line\n");
 	printf("next -- Step program\n");
@@ -77,18 +77,18 @@ static void gdbmiPrintHelpRunning()
 	printf("quit -- Exit agc\n");
 }
 
-static void gdbmiPrintHelpFiles()
+static void gdbmiPrintHelpFiles(void)
 {
 	printf("list -- List specified function or line\n");
 }
 
-static void gdbmiPrintHelpStack()
+static void gdbmiPrintHelpStack(void)
 {
 	printf("bt -- Print backtrace of all stack frames\n");
 	printf("where -- Print backtrace of all stack frames\n");
 }
 
-static void gdbmiPrintHelpObscure()
+static void gdbmiPrintHelpObscure(void)
 {
 	printf("log -- Log instructions to a log file\n");
 	printf("getoct -- Converts EXP into octal value\n");
