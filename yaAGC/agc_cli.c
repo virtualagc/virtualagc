@@ -93,7 +93,7 @@ static void CliShowUsage(void)
 "                         to be used alongside yaAGS without conflict.\n"
 "--inhibit-alarms         Prevents the simulated hardware alarms (Night Watchman\n"
 "                         Rupt Lock, and TC Trap) from causing resets.\n"
-"--show-alarms           Prints notifications upon hardware alarm (Night Watchman\n"
+"--show-alarms            Prints notifications upon hardware alarm (Night Watchman\n"
 "                         Rupt Lock, and TC Trap).\n"
 "--cfg=file               The name of a configuration file.  Presently, the\n"
 "                         configuration files is used only for --debug-dsky\n"
