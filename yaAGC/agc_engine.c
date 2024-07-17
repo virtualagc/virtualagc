@@ -2027,7 +2027,9 @@ agc_engine (agc_t * State)
                   State->SbyStillPressed = 1;
 
                   // While this isn't technically an alarm, it causes GOJAM just like all the rest
+#ifdef TRAP_ALARMS
                   printf("Alarm: Standby\n");
+#endif
                   TriggeredAlarm = 1;
 
                   // Turn on the STBY light, and switch off the EL segments
@@ -2055,7 +2057,9 @@ agc_engine (agc_t * State)
           if (!State->Standby && State->NightWatchman)
             {
               // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
+#ifdef TRAP_ALARMS
               printf("Alarm: NightWatchman\n");
+#endif
               TriggeredAlarm = 1;
 
               // Set the NIGHT WATCHMAN bit in channel 77. Don't go through CpuWriteIO() because
@@ -2104,7 +2108,9 @@ agc_engine (agc_t * State)
           else if ((State->RuptLock || State->NoRupt) && 0300 == (0777 & State->InputChannel[ChanSCALER1]))
             {
               // We've either had no interrupts, or stuck in one, for 140ms. Sound the alarm!
+#ifdef TRAP_ALARMS
               printf("Alarm: Rupt (%i %i)\n", State->RuptLock, State->NoRupt);
+#endif
               TriggeredAlarm = 1;
 
               // Set the RUPT LOCK bit in channel 77.
@@ -2120,7 +2126,9 @@ agc_engine (agc_t * State)
           else if ((State->TCTrap || State->NoTC) && 000 == (037 & State->InputChannel[ChanSCALER1]))
             {
               // We've either executed no TC at all, or only TCs, for the past 5ms. Sound the alarm!
+#ifdef TRAP_ALARMS
               printf("Alarm: TC (%i %i)\n", State->TCTrap, State->NoTC);
+#endif
               TriggeredAlarm = 1;
 
               // Set the TC TRAP bit in channel 77.
