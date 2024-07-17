@@ -93,6 +93,8 @@ static void CliShowUsage(void)
 "                         to be used alongside yaAGS without conflict.\n"
 "--inhibit-alarms         Prevents the simulated hardware alarms (Night Watchman\n"
 "                         Rupt Lock, and TC Trap) from causing resets.\n"
+"--show-alarms            Prints notifications upon hardware alarm (Night Watchman\n"
+"                         Rupt Lock, and TC Trap).\n"
 "--cfg=file               The name of a configuration file.  Presently, the\n"
 "                         configuration files is used only for --debug-dsky\n"
 "                         mode.  It would typically be the same configuration\n"
@@ -188,6 +190,7 @@ static void CliInitializeOptions(void)
 	  Options.debug_deda = 0;
 	  Options.deda_quiet = 0;
 	  Options.inhibit_alarms = 0;
+	  Options.show_alarms = 0;
 	  Options.quiet = 0;
 	  Options.fullname = 0;
 	  Options.debug = 1;
@@ -235,6 +238,7 @@ static int CliProcessArgument(char* token)
 	else if (!strcmp (token, "-debug-deda")) Options.debug_deda = 1;
 	else if (!strcmp (token, "-deda-quiet")) Options.deda_quiet = 1;
 	else if (!strcmp (token, "-inhibit-alarms")) Options.inhibit_alarms = 1;
+	else if (!strcmp (token, "-show-alarms")) Options.show_alarms = 1;
 	else if (!strcmp (token, "-cdu-log")) Options.cdu_log = CduLog;
 	else if (!strncmp (token, "-cfg=", 5)) Options.cfg = strdup(&token[5]);
 	else if (!strcmp (token, "-fullname")) Options.fullname = 1;

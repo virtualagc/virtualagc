@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
     pthread_win32_process_attach_np ();
 #endif
 
-	/* Delclare Options and parse the command line */
+	/* Declare Options and parse the command line */
 	Options_t *Options = CliParseArguments(argc, argv);
 
 	/* Initialize the Simulator and debugger if enabled
