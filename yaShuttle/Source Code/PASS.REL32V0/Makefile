@@ -74,6 +74,7 @@ SHELL := /bin/bash # To use bash rather than sh.
 COND := P	# P for PFS or B for BFS
 
 TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
+TARGETSB := PASS1B OPTB PASS2B PASS3B
 XCOM_DIR := ../../../../XCOM-I
 XCOMI := $(XCOM_DIR)/XCOM-I.py
 XLIB := $(XCOM_DIR)/SPACELIB.xpl
@@ -93,7 +94,7 @@ empty :=
 space := $(empty) $(empty)
 sPARM_STRING := $(subst $(comma),$(space),$(PARM_STRING))
 
-all:	$(TARGETS)
+all:	$(TARGETS) $(TARGETSB)
 
 .PHONY: $(TARGETS)
 $(TARGETS):
@@ -104,10 +105,25 @@ $(TARGETS):
 	else \
 		cd $@.PROCS; \
 	fi && \
-	$(XCOMI) $(XEXTRA) --cond=$(COND) --cond=V --output=$@ \
+	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ \
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
-	make EXTRA="-DIS_$@ $(EXTRA)" -C $@ $@ && \
+	make -C $@ $@ && \
+	cp $@/$@ ..
+
+.PHONY: $(TARGETSB)
+$(TARGETSB):
+	@echo Building HAL/S-FC $@ ...
+	@if [[ "$@" == "AUXB" ]] ; \
+	then \
+		cd AUX_PROCS; \
+	else \
+		cd $(subst B,,$@).PROCS; \
+	fi && \
+	$(XCOMI) $(XEXTRA) --cond=B --cond=V --output=$@ \
+		--lib-file=$(XLIB) \
+		'##DRIVER.xpl' && \
+	make -C $@ $@ && \
 	cp $@/$@ ..
 
 # Note that `clean` doesn't clean everything that was built:  The executables
