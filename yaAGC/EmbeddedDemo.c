@@ -42,7 +42,7 @@
 		05/14/05 RSB	Corrected website references
 
   This minimalist demo of yaAGC uses only agc_engine.c (as-is, unmodified),
-  NullAPI.c (which you would modify to incoporate your own model of how
+  NullAPI.c (which you would modify to incorporate your own model of how
   you'd like i/o to work), and this main-program file, EmbeddedDemo.c (which
   you would presumably discard after copying its few useful portions).  So
   any difficulties you may have with compiling any of the OTHER files in
@@ -65,7 +65,7 @@
   2.  A linker script that defines a new const memory section for holding
       the CoreRope array (see below).
   3.  Cunning use of objdump (in the proper cross-version) during your build
-      proces to copy Luminary131.bin or Colossus249.bin into that memory
+      process to copy Luminary131.bin or Colossus249.bin into that memory
       section.
   4.  Modification of the template file NullAPI.c so that i/o operations
       affect your actual i/o signals.

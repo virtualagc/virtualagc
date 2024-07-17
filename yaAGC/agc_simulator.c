@@ -307,7 +307,7 @@ void SimExecute(void)
 			/* If debugging is enabled run the debugger */
 			if (Simulator.Options->debug && DbgExecute()) continue;
 
-			/* Execute a cyle of the AGC  engine */
+			/* Execute a cycle of the AGC engine */
 			SimExecuteEngine();
 
 			/* Adjust the CycleCount */

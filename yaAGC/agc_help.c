@@ -46,7 +46,7 @@ static void gdbmiPrintHelpShow(void)
 static void gdbmiPrintHelpSet(void)
 {
 	printf("set prompt -- Set agc's prompt\n");
-	printf("set var -- assign value to variable or derefernced address\n");
+	printf("set var -- assign value to variable or dereferenced address\n");
 }
 
 static void gdbmiPrintHelpBreakpoints(void)
@@ -102,7 +102,7 @@ printf("\
 Set the VAR to a value.\n\
 VAR can be a symbol (e.g. MPAC) or a dereferenced ADDRESS.\n\
 ADDRESS can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
-use the AGC native address format and speficy the bank and octal value.\n\
+use the AGC native address format and specify the bank and octal value.\n\
 \n\
 Examples setting values for the Multi Purpose Accumulator:\n\
   set MPAC=9\n\
@@ -214,7 +214,7 @@ printf("\
 Examine memory: x/FMT ADDRESS.\n\
 ADDRESS is an expression for the memory address to examine,\n\
 which can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
-use the AGC native address format and speficy the bank and octal value.\n\
+use the AGC native address format and specify the bank and octal value.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
 Format letters are o(octal), x(hex), d(decimal)\n\
 Size letters are b(byte), h(halfword), w(word).\n\
@@ -238,7 +238,7 @@ printf("\
 Print the value of symbol EXP.\n\
 EXP can be a symbol (e.g. MPAC or &MPAC) or a dereferenced ADDRESS.\n\
 ADDRESS can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
-use the AGC native address format and speficy the bank and octal value.\n\
+use the AGC native address format and specify the bank and octal value.\n\
 \n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command). Without the \n\

@@ -38,7 +38,7 @@
  * 				Showing source line when not using -fullname.
  * 		06/14/09 OH	Add the gdb style disassemble command
  * 		07/01/09 OH	Convert to command tables to prepare for machine
- * 				independence and change to GNU formating
+ * 				independence and change to GNU formatting
  * 		08/01/09 RSB	Adjusted to use NormalizeSourceName().
  * 		07/17/16 RSB	gdbmi_format was commented out everywhere
  * 				it appeared, since it wasn't being used
@@ -227,7 +227,7 @@ static inline void GdbmiParseFmt(GdbmiFmt_t* fmt)
 	GdbmiAdjustCmdPtr(2);
    }
    
-   /* Get extended type scalar if speficied */
+   /* Get extended type scalar if specified */
    if (*sraw == ':') {
       GdbmiAdjustCmdPtr(1);
       
@@ -595,7 +595,7 @@ GdbmiHandleInfoBreakpoints (int j)
   int i;
   char* disposition;
 
-  /* No CmdPtr adjust ment necessary so ignore input */
+  /* No CmdPtr adjustment necessary so ignore input */
 
   if (NumBreakpoints == 0)
     printf ("No breakpoints or watchpoints.\n");
