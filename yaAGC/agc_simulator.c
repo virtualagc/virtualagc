@@ -152,6 +152,7 @@ int SimInitialize(Options_t* Options)
 	DebugDeda = Options->debug_deda;
 	DedaQuiet = Options->deda_quiet;
 	InhibitAlarms = Options->inhibit_alarms;
+	ShowAlarms = Options->show_alarms;
 	initializeSunburst37 = Options->initializeSunburst37;
 
 	//Simulator.DumpInterval = Simulator.DumpInterval;
@@ -307,7 +308,7 @@ void SimExecute(void)
 			/* If debugging is enabled run the debugger */
 			if (Simulator.Options->debug && DbgExecute()) continue;
 
-			/* Execute a cyle of the AGC  engine */
+			/* Execute a cycle of the AGC engine */
 			SimExecuteEngine();
 
 			/* Adjust the CycleCount */

@@ -61,6 +61,7 @@ typedef struct
   int   debug_deda;
   int   deda_quiet;
   int   inhibit_alarms;
+  int   show_alarms;
   int   quiet;
   int   fullname;
   int   debug;

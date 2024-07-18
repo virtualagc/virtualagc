@@ -424,11 +424,13 @@ typedef struct
 #ifdef AGC_ENGINE_C
 int DebugDsky = 0;
 int InhibitAlarms = 0;
+int ShowAlarms = 0;
 int NumDebugRules = 0;
 DebugRule_t DebugRules[MAX_DEBUG_RULES];
 #else
 extern int DebugDsky;
 extern int InhibitAlarms;
+extern int ShowAlarms;
 extern int NumDebugRules;
 extern DebugRule_t DebugRules[MAX_DEBUG_RULES];
 extern int initializeSunburst37;

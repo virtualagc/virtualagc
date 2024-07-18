@@ -78,7 +78,7 @@ typedef struct {
   int  NumberLines;                     // # of SymbolLine_t structs
 } SymbolFile_t;
 
-// The Symbol_t sturcture represents a symbol within the symbol table
+// The Symbol_t structure represents a symbol within the symbol table
 // This structure has been added to for the purposes of debugging. Recent
 // modifications include adding a "type" to distinguish between symbols
 // which are labels in the code and symbols which are variable names, and
@@ -95,7 +95,7 @@ typedef struct {
 // Constants for the symbol type. A "register" is one of the basic
 // AGC registers such as A (accumulator) or Z (program counter) which
 // are found at the beginning of erasable memory. A "label" is a program
-// label to which control may be transfered (say, from a branch
+// label to which control may be transferred (say, from a branch
 // instruction like BZF). A "variable" is a names memory address which
 // stores some data (from ERASE or DEC/2DEC or OCT for example). A
 // "constant" is a compiler constant defined by EQUALS or "=". These

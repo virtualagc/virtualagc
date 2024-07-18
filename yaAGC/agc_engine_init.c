@@ -45,7 +45,7 @@
  * 		11/29/03 RSB.	Added the core-dump save/load.
  * 		05/06/04 RSB	Now use rfopen in looking for the binary.
  * 		07/12/04 RSB	Q is now 16 bits.
- * 		07/15/04 RSB	AGC data now aligned at bit 0 rathern then 1.
+ * 		07/15/04 RSB	AGC data now aligned at bit 0 rather than 1.
  * 		07/17/04 RSB	I/O channels 030-033 now default to 077777
  * 				instead of 00000, since the signals are
  * 				supposed to be inverted.

@@ -230,7 +230,7 @@ DbgHasBreakEvent (void)
   return BreakFlag;
 }
 /**
- * Delete a breakpoint from the debugger based on the BreapointId
+ * Delete a breakpoint from the debugger based on the BreakpointId
  * \param	The breakpoint identifier
  */
 void
@@ -411,7 +411,7 @@ DbgInitFrameData (void)
 	  for (i = 0; i < 38912; i++)
 	    Frames[i].Name = NULL;
 
-	  /* Vecter Table Frames */
+	  /* Vector Table Frames */
 	  Frames[0].Name = "MAIN";
 	  Frames[4].Name = "TIMER6";
 	  Frames[8].Name = "TIMER5";
@@ -812,7 +812,7 @@ DbgDisplayInnerFrame (void)
       SymbolLine_t *Line = ResolveLineAGC (CurrentZ, FB, SBB);
 
       // There are several ways this can fail, and if either does we
-      // just want to disasemble: if we didn't find the line in the
+      // just want to disassemble: if we didn't find the line in the
       // table or if ListSource() fails.
       if (Line)
 	{
