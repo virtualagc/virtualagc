@@ -28,7 +28,7 @@
 #	PASS2
 #	PASS3
 #	PASS4
-#	all		(compiles all 7 passes of HAL/S-FC)
+#	all		(compiles all 7 passes of HAL/S-FC, both PASS and BFS)
 #	compile		(uses HAL/S-FC to compile a HAL/S source-code file)
 #
 # Additional things specifiable on the `make` command line.
@@ -41,15 +41,19 @@
 #				transparently as needed, but the physical 
 #				filename must have that extension regardless
 #				of whether or not it's present in RTARGET.
+#	BFS=yes			By default, the `compile` target usses the 
+#				PASS version of the compiler to comile HAL/S
+#				files.  If BFS=yes is present, it instead uses
+#				the BFS version of the compiler.
 #	PARM_STRING="..."	By default, the compiler options used
 #				by HAL/S-FC are given by the variable
 #				`PARM_STRING` hard-coded below.  But it
 #				can be changed to something else.  See
 #				the HAL/S-FC User's Manual, section 5.1.
 #				(https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf)
-#	COND=B			By default, HAL/S-FC is built in its
-#				"PFS" version.  But COND=B changes to
-#				the "BFS" version instead.
+#				Regardless, DEMO.hal uses (different)
+#				hard-code parameters, which cannot be changed
+#				from the command line.
 #	XEXTRA="..."		Extra command-line options for XCOM-I.
 #				You can see those options by running
 #					XCOM-I.py --help
@@ -71,8 +75,6 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-COND := P	# P for PFS or B for BFS
-
 TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
 TARGETSB := PASS1B OPTB PASS2B PASS3B
 XCOM_DIR := ../../../../XCOM-I
@@ -82,7 +84,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES
+PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK
 PARM4_STRING := 
 
 RTARGET := $(HAL_S_FC_DIR)/HELLO
@@ -93,6 +95,16 @@ comma := ,
 empty :=
 space := $(empty) $(empty)
 sPARM_STRING := $(subst $(comma),$(space),$(PARM_STRING))
+
+ifdef BFS
+HCSUFFIX := B
+HCOPTION := --bfs
+CARDS := --pdso=3,cards2,E
+else
+HCSUFFIX :=
+HCOPTION := 
+CARDS := --ddo=3,cards2.bin,E
+endif
 
 all:	$(TARGETS) $(TARGETSB)
 
@@ -135,13 +147,17 @@ $(TARGETSB):
 clean:
 	-@rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
 	    *.rpt optmat*.bin auxmat*.bin objcode*.obj cards*.txt \
-	    extra*.txt deck*.txt monitor13.parms 2>/dev/null
+	    extra*.txt deck*.txt monitor13.parms -rf 2>/dev/null
 
 .PHONY: cleanall
 cleanall: clean
-	-@rm $(TARGETS) PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
+	-@rm $(TARGETS) $(TARGETSB) \
+	    PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
             AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
-            PASS4.PROCS/PASS4 -rf 2>/dev/null
+            PASS4.PROCS/PASS4 \
+	    PASS1.PROCS/PASS1B OPT.PROCS/OPTB \
+            PASS2.PROCS/PASS2B PASS3.PROCS/PASS3B \
+            -rf 2>/dev/null
 
 # Most lines ignored via `IGNORE_LINES` in comparisons are due to obvious 
 # reasons, such as having timestamps or other uncontrollable values in them.
@@ -150,24 +166,31 @@ cleanall: clean
 # codes in "D VERSION c" compiler directives with HAL_S_FC's implementation
 # of strings as ASCII and it's use of JSON for storing PDS.  So I just ignore
 # those version codes as printed out in symbol tables.
+# 
+# Regarding the differences between the PASS and BFS versions of the compiler:
+#    1. Passes FLO, AUX, and PASS4 are identical executables.
+#    2. For passes PASS1, OPT, PASS2, and PASS2, the BFS version has 'B'
+#	suffixed to the executable's name.
+#    3. HAL_S_FC.py differs only in that the switch --bfs is used.
+#    4. Different template libraries are used:  TEMPLIB[.json] vs TEMPLIBB[.json].
+#    5. The ERRORLIB[.json]'s are identical.
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: compile
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
 	
-	-$(HAL_S_FC_DIR)/HAL_S_FC.py \
+	-$(HAL_S_FC_DIR)/HAL_S_FC.py $(HCOPTION) \
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal='$(RTARGET2)' \
 		>py.rpt
-	
-	-./PASS1 $(HEXTRA) \
+	-./PASS1$(HCSUFFIX) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,'$(RTARGET2).hal' \
 		--ddo=2,listing2.txt \
-		--pdsi=4,TEMPLIB,E \
+		--pdsi=4,TEMPLIB$(HCSUFFIX),E \
 		--pdsi=5,ERRORLIB \
 		--pdsi=6,ACCESS  \
-		--pdso=6,TEMPLIB,E \
+		--pdso=6,TEMPLIB$(HCSUFFIX),E \
 		--commono=COMMON-PASS1.out \
 		--raf=B,7200,1,halmat.bin \
 		--raf=B,1560,2,litfile.bin \
@@ -176,21 +199,9 @@ compile: clean
 	@echo Comparing ...
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >cA.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
-ifndef NOCHECK1
 	@diff $(DEXTRA) -q -s cA.rpt pyA.rpt
-else
-	@echo Skipping compiler-report check.
-endif
-ifndef NOCHECK2
 	@diff $(DEXTRA) -s $(PORTED)/FILE1.bin halmat.bin
-else
-	@echo Skipping HALMAT-file check.
-endif
-ifndef NOCHECK3
 	@diff $(DEXTRA) -q -s $(PORTED)/LISTING2.txt listing2.txt
-else
-	@echo Skipping secondary-listing check.
-endif
 	
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
@@ -207,7 +218,7 @@ endif
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	./OPT   \
+	./OPT$(HCSUFFIX)   \
 		--ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out \
 		--commono=COMMON-OPT.out \
@@ -236,9 +247,9 @@ endif
 	cp litfilea.bin litfile2.bin
 	cp optmata.bin optmat2.bin
 	cp auxmata.bin auxmat2.bin
-	./PASS2 \
+	./PASS2$(HCSUFFIX) \
 		--ddo=2,listing22.txt \
-		--ddo=3,cards2.bin,E \
+		$(CARDS) \
 		--ddo=4,deck2.bin,E \
 		--pdsi=5,ERRORLIB \
 		--ddo=7,extra2.txt \
@@ -250,16 +261,19 @@ endif
 		--raf=B,7200,4,optmat2.bin \
 		--raf=B,3360,6,vmem2.bin \
 		>c2.rpt
+
+# Stuff not yet ready enough to be moved up in the `compile` target.	
+ignore:
+	cp vmem2.bin vmem3.bin
+	cp litfile2.bin litfile3.bin
+	./PASS3$(HCSUFFIX) \
+		--ddo=2,listing23.txt \
+		--raf=B,1680,5,sdf3.bin \
+		--commoni=COMMON-PASS2.out \
+		--commono=COMMON-PASS3.out \
+		--raf=B,1560,2,litfile3.bin \
+		--raf=B,3360,6,vmem3.bin \
+		>c3.rpt
 	
-	#cp vmem2.bin vmem3.bin
-	#cp litfile2.bin litfile3.bin
-	#./PASS3 \
-	#	--ddo=2,listing23.txt \
-	#	--raf=B,1680,5,sdf3.bin \
-	#	--commoni=COMMON-PASS2.out \
-	#	--commono=COMMON-PASS3.out \
-	#	--raf=B,1560,2,litfile3.bin \
-	#	--raf=B,3360,6,vmem3.bin \
-	#	>c3.rpt
-	
+	# Fill in PASS4 here ...
 	

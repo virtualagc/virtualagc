@@ -91,7 +91,8 @@ def traceInline(msg):
     if traceInlines:
         print("\nTrace INLINE:", msg, end="")
 
-for parm in sys.argv[1:]:
+for parmNum in range(1, len(sys.argv)):
+    parm = sys.argv[parmNum]
     if parm.startswith("--hal="):
         pass  # This case is handled in xplBuiltins.py.
     elif parm == "--trace-inlines":
@@ -101,6 +102,9 @@ for parm in sys.argv[1:]:
     elif parm.startswith("--dummy="):
         pass
     elif parm == '--bfs':
+        if parmNum > 1:
+            print("It is advised that --bfs be the leading command-line option", \
+                  file=sys.stderr)
         pfs = False
         pCON = pCONb
         pPRO = pPROb
@@ -165,6 +169,7 @@ for parm in sys.argv[1:]:
         print('                 automatically added if missing.')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
+        print('                 Note that if --bfs is used, place it first.')
         print('--templib        Identify &&TEMPLIB with TEMPLIB.')
         print('--utf8           (Default.) Use UTF-8 in program listings.')
         print('--ascii          Use ASCII in program listings.')
@@ -177,7 +182,11 @@ for parm in sys.argv[1:]:
         # print('--scan1          Use SCAN1 rather than SCAN')
         # print('--scan2          Use SCAN2 rather than SCAN')
         print('--debugwr        Print debugging messages for OUTPUTWR.')
-        print('--trace-inlines  Print messages for CALL INLINE.')
+        print('--trace-inlines  Print messages for CALL INLINE.  HAL_S_FC')
+        print('                 has no CALL INLINE statements, but the')
+        print('                 messages are at the points where CALL INLINES')
+        print('                 would be, to facilitate comparisons to other')
+        print('                 implementations of the compiler.')
         print('--intersection   Helps test overlap between globals/locals.')
         print('Additionally, many of the options from the original JCL')
         print('PARMLISTs can be used.  For "type 1" options (i.e., those')

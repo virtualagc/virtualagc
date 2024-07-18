@@ -284,7 +284,7 @@ def INITIALIZATION():
             if TYPE2_TYPE[SORT2[g.I]] & 1:
                 g.S = VALS[SORT2[g.I]];  # DECIMAL VALUE
             else:
-                g.S = STRING(VALS[SORT2[g.I]]);  # DESCRIPTER
+                g.S = STRING(VALS[SORT2[g.I]], VALS);  # DESCRIPTER
             if SORT2[g.I] != 12: 
                 OUTPUT(0, g.C[0] + EQUALS + g.S);
     g.LISTING2 = (g.OPTIONS_CODE() & 0x02) != 0;

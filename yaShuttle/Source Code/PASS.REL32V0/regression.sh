@@ -13,7 +13,8 @@ for file in 	"../Programming in HAL-S/189-IMU_DATA.hal" \
 		"../Programming in HAL-S/269-PROCESS_CONTROL.hal" \
 		"../Programming in HAL-S/264-TQE.hal"
 do
-	if ! make -s 	PEXTRA="--templib" \
+	if ! make -s 	"$@" \
+			PEXTRA="--templib" \
 			PARM_STRING="TEMPLATE,NOTABLES,LISTING2" \
 			HEXTRA="--pdsi=4,TEMPLIB,E --pdso=6,TEMPLIB,E" \
 			RTARGET="$file" \

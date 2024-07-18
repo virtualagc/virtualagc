@@ -42,6 +42,8 @@ scriptFolder = os.path.dirname(__file__)  # Requires / at the end.
 scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())
 
 outUTF8 = ("--utf8" in sys.argv[1:])
+bfs = ("--bfs" in sys.argv[1:])
+pfs = not bfs
 
 
 # Python's native round() function uses a silly method (in the sense that it is
@@ -566,7 +568,10 @@ def MONITOR(function, arg2=None, arg3=None):
     
     # Return program identification.
     elif function == 23:
-        return "REL32V0   "
+        if pfs:
+            return "REL32V0   "
+        elif bfs:
+            return "BFC-17.0  "
     
     # Read a block of a load module.
     elif function == 24:

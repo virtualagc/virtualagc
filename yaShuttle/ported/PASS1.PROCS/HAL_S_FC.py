@@ -139,7 +139,10 @@ if "--help" not in sys.argv:
         # Secondary output listing.
         outputDevices[2] = openGenericOutputDevice("LISTING2.txt")
     # Template library.
-    inputDevices[4] = openGenericInputDevice("TEMPLIB.json", True, templib)
+    if g.pfs:
+        inputDevices[4] = openGenericInputDevice("TEMPLIB.json", True, templib)
+    else:
+        inputDevices[4] = openGenericInputDevice("TEMPLIBB.json", True, templib)
     # Error-message library.
     inputDevices[5] = openGenericInputDevice("ERRORLIB.json", True)
     # File of module access rights.
