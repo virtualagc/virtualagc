@@ -85,6 +85,7 @@ std(int regnum, uint32_t address) {
   if (unnormFR[regnum])
     {
       int sign = 0;
+      unnormFR[regnum] = 0;
       dummy360d = FR[regnum];
       if (dummy360d < 0)
         {

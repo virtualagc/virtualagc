@@ -136,9 +136,10 @@ def createNewScope(symbol = '', parent = None):
 globalScope = createNewScope() # The top-level scope
 scope = globalScope # The current scope
 
-# A fictitious declaration for a dope vector I wand to store in `memory` that's
-# not declared in either the library or the user XPL.
+# A fictitious declaration for some dope vectors I want to store in `memory`
+# that's not declared in either the library or the user XPL.
 globalScope["variables"]["userMemory"] = { "BASED": True, "BIT": 8, "dirWidth": 28 }
+globalScope["variables"]["privateMemory"] = { "BASED": True, "BIT": 8, "dirWidth": 28 }
 
 for adhoc in adhocs:   
     globalScope["literals"][adhoc] = { "LITERALLY": adhocs[adhoc] }

@@ -65,7 +65,7 @@ includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = None
 adhocs = {}
 standardXPL = False
-identifierString = 'REL32V0   '  # String returned by MONITOR(23)
+identifierString = None  # String returned by MONITOR(23)
 merge = None
 firstFile = True
 noInclusionDirectives = False
@@ -78,7 +78,7 @@ displayInitializers = False
 debugInlines = False
 libraryCutoff = 0  # The line-number boundary between the library file and the
                    # main source.
-reservedMemory = 0x2000
+amountOfReservedMemory = 0x2000
 quiet = False
 debuggingAid = False
 reentryGuard = True # Do not change this.
@@ -304,7 +304,7 @@ for parm in sys.argv[1:]:
     elif parm == "--quiet":
         quiet = True
     elif parm.startswith("--reserved="):
-        reservedMemory = int(parm[11:])
+        amountOfReservedMemory = int(parm[11:])
     elif parm == "--debug-inlines":
         debugInlines = True
     elif parm == "--pp":
@@ -395,6 +395,15 @@ for parm in sys.argv[1:]:
             head, tail = os.path.split(parm)
             name, ext = os.path.splitext(tail)
             outputFolder = name
+
+if identifierString == None:
+    if "P" in ifdefs:
+        identifierString = 'REL32V0   '
+    elif "B" in ifdefs:
+        identifierString = 'BFS-17.0  '
+    else:
+        identifierString = "(TBD)     "
+
 if merge != None:
     f = open(merge, "w")
     f.writelines(lines)

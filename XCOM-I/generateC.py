@@ -32,7 +32,8 @@ sizeReducer = True # For reducing size of executable.
 ppFiles = { "filenames": "" }
 
 # Reserve the top of memory for some literal strings.
-physicalMemoryLimit = 0x1000000 - reservedMemory
+amountOfPrivateMemory = 10000
+physicalMemoryLimit = 0x1000000 - amountOfReservedMemory - amountOfPrivateMemory
 
 # Just for engineering
 errxitRef = 0
@@ -322,6 +323,10 @@ def putCHARACTER(address, s):
 baseRestriction = 0
 rootBASED = 0
 #lastBASED = 0
+reservedMemory = {
+    "numReserved": 0,
+    "nextReserved": 0x1000000
+    }
 def allocateVariables(scope, region):
     global variableAddress, memory, memoryMap, rootBASED, reservedMemory, \
            physicalMemoryLimit
@@ -888,10 +893,6 @@ operatorTypes = {
 # but also fooled the contemporary embedded comments in the SDFPROCE module to 
 # say that SDFNAM was an "EXTERNAL VARIABLE REFERENCED" rather than an 
 # "EXTERNAL VARIABLE CHANGED".
-reservedMemory = {
-    "numReserved": 0,
-    "nextReserved": 0x1000000
-    }
 def reserveLiteral(string):
     global reservedMemory, physicalMemoryLimit
     length = len(string)
@@ -962,6 +963,13 @@ def autoconvert(current, allowed, source=None):
                 # of a literal string.
                 descriptor = reserveLiteral(source[21:-2])
                 return "FIXED", descriptor
+            else:
+                # Otherwise, we construct a string descriptor (integer) from
+                # the descriptor_t we've been given.  However, unlike
+                # in real XPL (maybe!) this descriptor isn't guaranteed to be
+                # persistent forever, so we're taking a chance that the XPL
+                # code isn't going to use it as if it's permanent!
+                return "FIXED", "makeDescriptor(%s)" % source
         if "BIT" in allowed:
             convertions.append(("BIT", "%s"))
     elif current == "BIT":
@@ -2540,6 +2548,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             print("  // Setup for MONITOR(6), MONITOR(7), MONITOR(21).  Initially,")
             print("  // entire physical memory is a single pre-allocated block.")
             print("  MONITOR6a(USER_MEMORY, PHYSICAL_MEMORY_LIMIT, 0);")
+            print("  MONITOR6a(PRIVATE_MEMORY, PRIVATE_MEMORY_SIZE, 0);")
             print()
             print("  if (parseCommandLine(argc, argv)) exit(0);")
             print()
@@ -2938,12 +2947,15 @@ def generateC(globalScope):
     print("memoryMapEntry_t memoryMap[NUM_SYMBOLS] = {", file=f)
     i = 0
     USER_MEMORY = None
+    PRIVATE_MEMORY = None
     for address in memoryMap:
         i += 1
         variable = memoryMap[address]
         symbol = variable["mangled"]
         if symbol == "userMemory":
             USER_MEMORY = address;
+        if symbol == "privateMemory":
+            PRIVATE_MEMORY = address;
         datatype = variable["datatype"]
         if datatype == "BASED":
             numFieldsInRecord = variable["numFieldsInRecord"]
@@ -3043,6 +3055,7 @@ def generateC(globalScope):
     print("#define FREE_POINT 0x%06X // Initial value for `freepoint`" % \
           freePoint, file=f)
     print("#define PHYSICAL_MEMORY_LIMIT 0x%06X" % physicalMemoryLimit, file=f)
+    print("#define PRIVATE_MEMORY_SIZE 0x%06X" % amountOfPrivateMemory, file=f)
     print("#define FREE_LIMIT 0x%06X" % freeLimit, file=f)
     print("#define NUM_SYMBOLS", numSymbols, file=f)
     print("#define MAX_SYMBOL_LENGTH", maxSymbolLength, file=f)
@@ -3057,6 +3070,7 @@ def generateC(globalScope):
     print("#define MAX_TYPE1 %d" % MAX_TYPES, file=f)
     print("#define MAX_TYPE2 %d" % MAX_TYPES, file=f)
     print("#define USER_MEMORY %d" % USER_MEMORY, file=f)
+    print("#define PRIVATE_MEMORY %d" % PRIVATE_MEMORY, file=f)
     if sizeReducer:
         print("#define NUM_INITIALIZED %d" % numInitialized, file=f)
     print("", file=f)

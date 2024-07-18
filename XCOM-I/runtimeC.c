@@ -132,6 +132,33 @@ cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
   return descriptor;
 }
 
+// Construct a string descriptor for a descriptor_t not yet in `memory`.
+// We use a technique here similar to nextBuffer().  There's a reserved
+// area in `memory` that we can use for a circular buffer of slightly-persistent
+// string data, without performing any allocations, assuming that the data will
+// be stale enough to reuse if we ever have to wrap around to it.  It's
+// necessary that it be within `memory` rather than in C memory, because we
+// need to be able to form string descriptors to point to it.  It starts
+// at &memory[PRIVATE_MEMORY] and is PRIVATE_MEMORY_SIZE bytes long.
+uint32_t
+makeDescriptor(descriptor_t *descriptor) {
+  static int nextPrivate = 0; /* 0 to PRIVATE_DATA_SIZE-1 */
+  uint32_t returnValue = 0; /* default is NUL string */
+  if (descriptor->numBytes > 0)
+    {
+      uint32_t next = nextPrivate + descriptor->numBytes,
+               now = PRIVATE_MEMORY + nextPrivate;
+      if (next > PRIVATE_MEMORY_SIZE)
+        {
+          nextPrivate = 0;
+          next = descriptor->numBytes;
+        }
+      memmove(&memory[now], descriptor->bytes, descriptor->numBytes);
+      returnValue = ((descriptor->numBytes - 1) << 24) | now;
+      nextPrivate = next;
+    }
+  return returnValue;
+}
 
 // The "inverse" (in spirit) of `asciiToEbcdic` above, in which the ASCII
 // equivalent character is given for each printable EBCDIC code.  It performs
@@ -2130,9 +2157,12 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
     abend("Cannot open PDS partition for OUTPUT: Device number %d, PDS = '%s'",
           dev, DCB_OUTS[dev].filename);
   if (dcb->bufferLength > 0)
-    if (1 != fwrite(dcb->buffer, dcb->bufferLength, 1, DCB_OUTS[dev].fp))
-      abend("PDS write error to PDS %s member %s on device %d",
-            DCB_OUTS[dev].filename, cname, dev);
+    {
+      int numRecords = (dcb->bufferLength + PDS_RECORD_SIZE - 1) / PDS_RECORD_SIZE;
+      if (numRecords != fwrite(dcb->buffer, PDS_RECORD_SIZE, numRecords, DCB_OUTS[dev].fp))
+        abend("PDS write error to PDS %s member %s on device %d",
+              DCB_OUTS[dev].filename, cname, dev);
+    }
   dcb->bufferLength = 0;
   fflush(DCB_OUTS[dev].fp);
   fclose(DCB_OUTS[dev].fp);

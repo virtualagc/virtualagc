@@ -73,7 +73,9 @@ extern int outUTF8;
 // to do with IBM 360 DCBs.
 #define DCB_MAX 10
 #define PDS_MEMBER_SIZE 8
-#define PDS_BUFFER_SIZE 1680
+#define MAX_PDS_RECORDS 32
+#define PDS_RECORD_SIZE 1680
+#define PDS_BUFFER_SIZE (MAX_PDS_RECORDS * PDS_RECORD_SIZE)
 typedef char pdsPartname_t[PDS_MEMBER_SIZE + 1];
 typedef struct {
   FILE *fp;             // Pointer to the open file, if appropriate.
@@ -192,6 +194,9 @@ asciiToDescriptor(char *c);
 // "Print" a C string to a new or existing descriptor_t.
 descriptor_t *
 cToDescriptor(descriptor_t *descriptor, const char *fmt, ...);
+
+uint32_t
+makeDescriptor(descriptor_t *descriptor);
 
 char *
 descriptorToAscii(descriptor_t *descriptor);
