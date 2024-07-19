@@ -551,8 +551,8 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     elif opcode == 0xDD: # TRT p. 7-132
         thisLine.append(indent + "trt(address360A, address360B, length;")
     elif opcode == 0x88: # SRL p. 7-121
-        thisLine.append(indent + "scratch = (%s) & 0x3f;");
-        thisLine.append(indent + "if (scratch < 32");
+        thisLine.append(indent + "scratch = (%s) & 0x3f;" % address360B);
+        thisLine.append(indent + "if (scratch < 32)");
         thisLine.append(indent1 + "GR[%d] = GR[%d] >> scratch;" % (R1, R1))
         thisLine.append(indent + "else");
         thisLine.append(indent1 + "GR[%d] = 0;" % R1);
