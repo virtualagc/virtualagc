@@ -254,30 +254,28 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     #       the procedure.
     #    2. Positive addresses, again by convention, are the byte offset of an
     #       instruction within the current block.
-    # Whe know which is which at compile-time because the former come only from
+    # We know which is which at compile-time because the former come only from
     # RR-type instructions, and the other come from RX-type instructions.
+    # However, I think that's a false economy, and each jump table is generated
+    # with all known reachable local addresses.
     # Returns False on success, True on error
-    def generateJumpTable(indent, address, negative=True):
+    def generateJumpTable(indent, address):
         indent1 = indent + indentationQuantum
-        if negative:
-            parentProcedure = findParentProcedure(scope)
-            labels = parentProcedure["allLabels"]
-            if len(labels) == 0:
-                thisLine.append(indent + "// " + str(labels))
-                thisLine.append(indent + ";" + FIXME + \
-                    "No labels in this procedure for jump-table generation")
-                return True # Error!
-            thisLine.append(indent + "switch (%s) {" % address)
-            for i in range(len(labels)):
-                thisLine.append(indent1 + "case -%d: goto %s;" % (i+1, labels[i]))
-            thisLine.append(indent1 + 'default: abend("Branch address must be a label in this procedure");')
-        else: # Positive addresses
-            thisLine.append(indent + "switch (%s) {" % address)
-            for i in range(len(offsetsInBlock)):
-                thisLine.append(indent1 + "case %d: goto %s%d;" % \
-                                (offsetsInBlock[i], patchBase, offsetsInBlock[i]))
-            thisLine.append(indent1 + \
-                'default: abend("Branch address must be an instruction offset within this block");')
+        parentProcedure = findParentProcedure(scope)
+        labels = parentProcedure["allLabels"]
+        if len(labels) == 0 and len(offsetsInBlock) == 0:
+            thisLine.append(indent + "// " + str(labels))
+            thisLine.append(indent + ";" + FIXME + \
+                "No available targets for jump-table generation")
+            return True # Error!
+        thisLine.append(indent + "switch (%s) {" % address)
+        for i in range(len(labels)):
+            thisLine.append(indent1 + "case -%d: goto %s;" % (i+1, labels[i]))
+        for i in range(len(offsetsInBlock)):
+            thisLine.append(indent1 + "case %d: goto %s%d;" % \
+                            (offsetsInBlock[i], patchBase, offsetsInBlock[i]))
+        thisLine.append(indent1 + \
+            'default: abend("Unsupported target address in jump table");')
         thisLine.append(indent + "}")
         return False
     
@@ -491,7 +489,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
             #thisLine.append(indent + "if (%s)" % condition)
             thisLine.append(indent + condition1)
             thisLine.append(indent + condition2)
-            if generateJumpTable(indent1, "address360B", False):
+            if generateJumpTable(indent1, "address360B"):
                 return endOfInstruction()
         else:
             return endOfInstruction(FIXME + 
