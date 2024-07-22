@@ -145,9 +145,9 @@ $(TARGETSB):
 # `cleanall` does clean everything.
 .PHONY: clean
 clean:
-	-@rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
-	    *.rpt optmat*.bin auxmat*.bin objcode*.obj cards*.txt \
-	    extra*.txt deck*.txt monitor13.parms -rf 2>/dev/null
+	-@rm COMMON* listing2* vmem* halmat* litfile* \
+	    *.rpt optmat* auxmat* objcode* cards* \
+	    extra* deck* monitor13 -rf 2>/dev/null
 
 .PHONY: cleanall
 cleanall: clean
