@@ -1941,12 +1941,12 @@ INPUT(uint32_t lun) {
       while (NULL != (ss = strstr(s, "\xC2\xA2")))
         {
           *ss = '`';
-          memmove(ss+1, ss+2, strlen(ss+2));
+          memmove(ss+1, ss+2, strlen(ss+2) + 1);
         }
       while (NULL != (ss = strstr(s, "\xC2\xAC")))
         {
           *ss = '~';
-          memmove(ss+1, ss+2, strlen(ss+2));
+          memmove(ss+1, ss+2, strlen(ss+2) + 1);
         }
       // Since input is expected to be arriving on punch-cards, we want to
       // pad all input lines to be at least 80 characters.  This isn't
