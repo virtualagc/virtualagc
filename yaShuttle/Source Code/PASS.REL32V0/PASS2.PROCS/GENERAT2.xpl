@@ -6,6 +6,13 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
+                2024-08-07 RSB  Line 07013590 has had the cast STRING(...)
+                                added to the argument of EMITSTRING, 
+                                conditionally on /?V ... ?/.  That's
+                                because the argument is a FIXED, but
+                                expects a string descriptor.  XCOM-I
+                                does not understand this (without STRING)
+                                and autoconverts the FIXED to CHARACTER.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.
@@ -136,7 +143,7 @@ EMIT_LITERAL:                                                                   
          CONSTANT_PTR(PTR) = LOCCTR(INDEXNEST) + PROGDELTA;                     07013560
          DO CASE MODE;                                                          07013570
             DO;                                                                 07013580
-               CALL EMITSTRING(CONSTANTS(PTR));                                 07013590
+               CALL EMITSTRING(/?VSTRING(?/CONSTANTS(PTR)/?V)?/);               07013590
             END;                                                                07013600
             CALL EMITC(0, CONSTANTS(PTR));                                      07013610
             CALL EMITW(CONSTANTS(PTR));                                         07013620

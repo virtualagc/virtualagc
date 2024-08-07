@@ -174,6 +174,18 @@ cleanall: clean
 #    3. HAL_S_FC.py differs only in that the switch --bfs is used.
 #    4. Different template libraries are used:  TEMPLIB[.json] vs TEMPLIBB[.json].
 #    5. The ERRORLIB[.json]'s are identical.
+#
+# Regarding comparisons between PASS1 and HAL_S_FC.py, note that the literal
+# files (litfile.bin or ported/FILE2.bin, respectively) are incomparable.  That's
+# because HAL_S_FC.py does not mimic the AP-101S memory model.  Consequently,
+# string addresses in litfile.bin are correctly the absolute addresses of
+# locations within the LIT_NDX array, but string addresses in FILE2.bin are 
+# relative to the beginning of LIT_NDX. If all string addresses within FILE2.bin
+# were offset by the absolute starting address of LIT_NDX, the files would
+# then be comparable.  The starting address of LIT_NDX does appear in the
+# COMMON-memory file output by PASS1, so in principle we could pick this address
+# from there, adjust FILE2.bin, and perform the comparison  However, I don't
+# do that because it doesn't seem to be worth the effort.
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: compile
 compile: clean

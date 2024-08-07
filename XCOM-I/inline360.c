@@ -17,7 +17,7 @@ uint8_t unnormFR[16] = { 0 };  // Tracks whether to unnormalize FR[n].
 uint8_t CC;      // Condition codes.
 int64_t scratch, dummy360; // Holds temporary results of IBM 360 operations.
 double scratchd, dummy360d, epsilon360 = 1.0e-6;
-int32_t address360A, address360B, msw360, lsw360, mask360, i360;
+int32_t address360A, address360B, msw360, lsw360, mask360, i360, i360A;
 
 void
 setCC(void) {
