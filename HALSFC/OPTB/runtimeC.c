@@ -33,7 +33,16 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-#include <unistd.h>
+#ifdef _WIN32
+	#include <stdarg.h>
+	typedef struct timeval {
+	  long tv_sec;
+	  long tv_usec;
+	} timeval;
+	#define F_OK 0
+#else
+	#include <unistd.h>
+#endif
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/time.h> // For gettimeofday().
@@ -479,7 +488,10 @@ printBacktrace(void)
 #endif
 }
 
-__attribute__((noreturn)) void
+#ifndef _WIN32
+__attribute__((noreturn))
+#endif
+void
 abend(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -2381,8 +2393,8 @@ MONITOR8(uint32_t dev, uint32_t filenum) {
 //----------------------------------------------------------------------------
 // For conversion to/from IBM hexadecimal floating point
 
-#define twoTo56 (1L << 56)
-#define twoTo52 (1L << 52)
+#define twoTo56 (1LL << 56)
+#define twoTo52 (1LL << 52)
 
 // Convert a integer or floating point to IBM double-precision float.
 // Returns as a pair (msw,lsw), each of which are 32-bit integers,
@@ -2446,7 +2458,7 @@ fromFloatIBM(uint32_t msw, uint32_t lsw) {
     double x;
     s = (msw >> 31) & 1;
     e = ((msw >> 24) & 0x7f) - 64;
-    f = ((msw & 0x00ffffffL) << 32) | (lsw & 0xffffffff);
+    f = ((msw & 0x00ffffffLL) << 32) | (lsw & 0xffffffff);
     x = f * pow(16, e) / twoTo56;
     if (s != 0)
         x = -x;
@@ -2786,8 +2798,10 @@ TIME(void) {
 uint32_t
 TIME(void) {
   struct timeval tv;
+  time_t t;
   gettimeofday(&tv, NULL);
-  struct tm *timeStruct = localtime(&tv.tv_sec);
+  t = tv.tv_sec;
+  struct tm *timeStruct = localtime(&t);
   return timeStruct->tm_hour * 360000 +
          timeStruct->tm_min  * 6000 +
          timeStruct->tm_sec  * 100 +
