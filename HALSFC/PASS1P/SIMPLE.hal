@@ -1,0 +1,24 @@
+C This is my initial test program for the Python 3 port of HAL/S-FC.
+C It'll undoubtedly evolve as the work progresses.
+
+DEBUG `E`F
+ SIMPLE: PROGRAM;
+        DECLARE INTEGER INITIAL(1), A, B;
+        DECLARE VBL INTEGER CONSTANT(7), VB VECTOR(VBL);
+        DECLARE C INTEGER INITIAL(13), D; 
+        DECLARE V VECTOR(5) INITIAL(10,20,30, 40, 50);
+        DECLARE M MATRIX(3,2) INITIAL(1,2,3,4,5,6), S; /* A comment */
+        DECLARE E DOUBLE;
+        DECLARE F INTEGER;
+        DECLARE SS CHARACTER(10) INITIAL('HELLO');
+        DECLARE BB BIT(12) INITIAL(BIN'100101110110');
+        C = 4 2 A + 6 3 1.2 B + 1; /* Another inline comment */
+        D = V$2;
+        V$2 = 3;
+        D = M$(1,2);
+        D = C**2 + V$2;
+        D = C**2 + M$(1,2); /* Here is a really long inline comment */
+        S = M$(2,1);
+        V$2 = 12;
+        WRITE(6) A, B, 'HELLO', C, 3 A - 2 C - 6;
+ CLOSE SIMPLE;

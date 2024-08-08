@@ -1,3 +1,5 @@
+***Important note:***  This folder contains my original development for HAL_S_FC.py, a Python 3 port of PASS1 of HAL/S-FC, the Intermetrics compiler for the HAL/S language.  But neither the port itself, nor the stream-of-consciousness notes in this README are really very suited for easy dissemination.  Refer to the HALSFC/ folder instead for the production/distribution version of this software.
+
 # Table of Contents
 
   * [Introduction](#Introduction)
