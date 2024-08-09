@@ -33,6 +33,17 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
+
+// Anything conditionally compiled with _CL_ was put in because I thought
+// it would be nice to compile using the normal Windows C compiler (cl).
+// While I did manage to get it to compile, it didn't work afterward, so I've
+// segregated all of that nonsense with _CL_ to make it unreachable.  In other
+// words, ignore everything inside of an #ifdef _CL_, forever and ever! If you
+// want to compile for Windows, use Msys, Mingw, or some other non-MS approach.
+// Or figure out how to solve it form me, because I'm no longer going to waste
+// my time on it.
+#ifdef _CL_
+
 #if defined(_WIN32) && !defined(__MINGW32__)
 	// All the stuff here was just cut-and-pasted from googling "windows
 	// replacement for (whatever)".
@@ -57,14 +68,20 @@
 #else
 	#include <unistd.h>
 #endif
-
 #if !defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <sys/time.h> // For gettimeofday().
 #endif
-
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 // Linux or Mac.
 #include <execinfo.h> // For backtraces.
+#endif
+
+#else // not _CL_
+
+#include <unistd.h>
+#include <sys/time.h>
+#include <execinfo.h>
+
 #endif
 
 //---------------------------------------------------------------------------
@@ -502,7 +519,7 @@ printBacktrace(void)
 #endif
 }
 
-#ifndef _WIN32
+#ifndef _CL_
 __attribute__((noreturn))
 #endif
 void

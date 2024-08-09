@@ -1,3 +1,4 @@
+echo off
 :: This Windows batch script compiles a HAL/S program using the HAL/S-FC program,
 :: which is assumed to be in the PATH.  It has the following parameters:
 ::
@@ -81,7 +82,7 @@ if errorlevel 1 ( echo "Aborted after AUXP" & exit /b 1 )
 
 
 %PASS2% ^
-	$CARDS ^
+	%CARDS% ^
 	--ddo=4,deck.bin,E ^
 	--pdsi=5,ERRORLIB ^
 	--ddo=7,extra.txt ^
