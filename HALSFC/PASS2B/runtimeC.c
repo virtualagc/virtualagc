@@ -80,7 +80,7 @@
 
 #include <unistd.h>
 #include <sys/time.h>
-#ifndef __MINGW32__
+#if !defined(_WIN32) && !defined(__MINGW32__)
 #include <execinfo.h>
 #endif
 
