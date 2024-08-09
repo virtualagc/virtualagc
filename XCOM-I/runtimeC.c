@@ -80,7 +80,9 @@
 
 #include <unistd.h>
 #include <sys/time.h>
+#ifndef __MINGW32__
 #include <execinfo.h>
+#endif
 
 #endif
 

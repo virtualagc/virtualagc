@@ -79,12 +79,15 @@ endif
 ifeq ($(CC), cl)
         OUT = /Fe
         LIBS =
+        EXT = .exe
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
+        EXT = .exe
 else
         OUT = -o
         LIBS = -lm -rdynamic
+        EXT = 
 endif
 
 SOURCES := $(wildcard *.c)
@@ -94,10 +97,10 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS)
+	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGET)  # For Linux or Mac
-	-del $(TARGET) # For Windows
+	-rm $(TARGET) &>NUL # For Linux or Mac
+	-del $(TARGET) &>NUL # For Windows
 

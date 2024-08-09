@@ -13,17 +13,17 @@
 #
 # Additional options are specifiable on the `make` command line, including:
 #
-#	-s				"Silent".  Useful if you don't want a lot of confusing
-#					clutter on your screen during the build.
+#	-s		"Silent".  Useful if you don't want a lot of confusing
+#			clutter on your screen during the build.
 #
-#	EXTRA="..."		Extra C-compiler command-line options separated by spaces. 
-#					The Makefiles in the subdirectories describe various useful
-#					options.  See PASS1/Makefile.  Other typical options 
-#					would be -ggdb (useful for executing the compiler under
-#					a debugger such as gdb), -w to disable all warning messages
-#					useful if your C compiler produces huge numbers of warning
-#					messages), -O3 (useful for for optimizing the compiler), 
-#					and so on.  Check gcc documentation.
+#	EXTRA="..."	Extra C-compiler command-line options separated by spaces. 
+#			The Makefiles in the subdirectories describe various useful
+#			options.  See PASS1/Makefile.  Other typical options 
+#			would be -ggdb (useful for executing the compiler under
+#			a debugger such as gdb), -w to disable all warning messages
+#			useful if your C compiler produces huge numbers of warning
+#			messages), -O3 (useful for for optimizing the compiler), 
+#			and so on.  Check gcc documentation.
 
 TARGETS = PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB = PASS1B OPTB PASS2B PASS3B
@@ -34,7 +34,7 @@ all:	$(TARGETS) $(TARGETSB)
 $(TARGETS) $(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
 	make -C $@ $@
-	mv $@/$@ HALSFC-$@
+	if mv $@/$@ HALSFC-$@ &>NUL ; then mv $@/$@.exe HALSFC-$@.exe &>NUL ; fi
 
 .PHONY: clean
 clean:
@@ -54,8 +54,8 @@ clean:
 distclean: clean
 	-rm HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUXP HALSFC-PASS2 \
 		HALSFC-PASS3 HALSFC-PASS4 HALSFC-PASS1B HALSFC-OPTB HALSFC-PASS2B \
-		HALSFC-PASS3B HALSFC-*.exe
+		HALSFC-PASS3B HALSFC-*.exe &>NUL
 	-del HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUXP HALSFC-PASS2 \
 		 HALSFC-PASS3 HALSFC-PASS4 HALSFC-PASS1B HALSFC-OPTB HALSFC-PASS2B \
-		 HALSFC-PASS3B HALSFC-*.exe
+		 HALSFC-PASS3B HALSFC-*.exe &>NUL
 		

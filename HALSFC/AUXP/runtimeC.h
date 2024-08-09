@@ -20,8 +20,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <math.h>
-
-#include "../AUXP/inline360.h"
+#include "inline360.h"
 
 #define MAX_XPL_STRING 256
 #if 0
@@ -56,8 +55,8 @@ typedef struct {
 typedef char sbuf_t[MAX_XPL_STRING + 1];
 #endif
 
-#include "../AUXP/configuration.h"
-#include "../AUXP/procedures.h"
+#include "configuration.h"
+#include "procedures.h"
 
 // The macro `RETURN();` can be used in place of `return;`, while
 // `RETURN(something);` can be used in place of `return something;`.  The

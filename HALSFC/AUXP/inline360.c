@@ -9,7 +9,7 @@
  * Mods:        2024-06-30 RSB  Split off from runtimeC.c.
  */
 
-#include "../AUXP/runtimeC.h"
+#include "runtimeC.h"
 
 int32_t GR[16] = { 0 }; // General registers.
 double FR[16] = { 0.0 };   // Floating-point registers.

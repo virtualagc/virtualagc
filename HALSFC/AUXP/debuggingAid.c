@@ -14,7 +14,7 @@
  * maintainability of the production runtime library.
  */
 
-#include "../AUXP/runtimeC.h"
+#include "runtimeC.h"
 
 #ifdef DEBUGGING_AID
 

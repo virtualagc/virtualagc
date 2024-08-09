@@ -46,10 +46,13 @@
 #	Examples: 
 #		make CC=clang
 #		make CC=i686-w64-mingw32-gcc
+#               make CC=cl
 
 #	To include debugging info in the executable, so that it can be
-#	debugged with `gdb` (or whatever), you can use this:
+#	debugged with `gdb`, you can use this:
 #		make EXTRA=-ggdb
+#       The equivalent for the MS `cl` compiler would be
+#               make EXTRA=/DEBUG
 
 #	Or more generally, EXTRA can be used for any other compiler switches 
 #	you like:
@@ -73,6 +76,19 @@ TARGET := $(notdir $(lastword $(CURDIR)))
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
+ifeq ($(CC), cl)
+        OUT = /Fe
+        LIBS =
+        EXT = .exe
+else ifeq ($(findstring mingw,$(CC)),mingw)
+        OUT = -o
+        LIBS = -lm
+        EXT = .exe
+else
+        OUT = -o
+        LIBS = -lm -rdynamic
+        EXT = 
+endif
 
 SOURCES := $(wildcard *.c)
 HEADERS := $(wildcard *.h)
@@ -81,10 +97,10 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
+	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGET)  # For Linux or Mac
-	-del $(TARGET) # For Windows
+	-rm $(TARGET) &>NUL # For Linux or Mac
+	-del $(TARGET) &>NUL # For Windows
 

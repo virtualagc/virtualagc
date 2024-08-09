@@ -48,7 +48,7 @@ if "%TARGET%". == "BFS". (
 	--raf=B,1560,2,litfile.bin ^
 	--raf=B,3360,6,vmem.bin ^
 	>pass1.rpt
-if errorlevel 1 ( echo "Aborted after PASS1" & exit /b 1 )
+if errorlevel 1 ( echo Aborted after PASS1 & exit /b 1 )
 
 %FLO% ^
 	--commoni=COMMON0.out ^
@@ -57,7 +57,7 @@ if errorlevel 1 ( echo "Aborted after PASS1" & exit /b 1 )
 	--raf=B,1560,2,litfile.bin ^
 	--raf=B,3360,6,vmem.bin ^
 	>flo.rpt
-if errorlevel 1 ( echo "Aborted after FLO" & exit /b 1 )
+if errorlevel 1 ( echo Aborted after FLO & exit /b 1 )
 
 
 %OPT% ^
@@ -68,7 +68,7 @@ if errorlevel 1 ( echo "Aborted after FLO" & exit /b 1 )
 	--raf=B,7200,4,optmat.bin ^
 	--raf=B,3360,6,vmem.bin ^
 	>opt.rpt
-if errorlevel 1 ( echo "Aborted after OPT" & exit /b 1 )
+if errorlevel 1 ( echo Aborted after OPT & exit /b 1 )
 
 %AUXP% ^
 	--commoni=COMMON2.out ^
@@ -78,7 +78,7 @@ if errorlevel 1 ( echo "Aborted after OPT" & exit /b 1 )
 	--raf=B,7200,4,optmat.bin ^
 	--raf=B,3360,6,vmem.bin ^
 	>aux.rpt
-if errorlevel 1 ( echo "Aborted after AUXP" & exit /b 1 )
+if errorlevel 1 ( echo Aborted after AUXP & exit /b 1 )
 
 
 %PASS2% ^
@@ -94,9 +94,9 @@ if errorlevel 1 ( echo "Aborted after AUXP" & exit /b 1 )
 	--raf=B,7200,4,optmat.bin ^
 	--raf=B,3360,6,vmem.bin ^
 	>pass2.rpt
-if errorlevel 1 ( echo "Aborted after PASS2" & exit /b 1 )
+if errorlevel 1 ( echo Aborted after PASS2 & exit /b 1 )
 
 
 :: PASS3 and PASS4 aren't ready for use yet.
 
-echo "Compilation successful!"
+echo Compilation successful!

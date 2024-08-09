@@ -27,14 +27,24 @@
  * point in the future.
  */
 
-#include "../AUXP/runtimeC.h"
-
+#include "runtimeC.h"
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-#ifdef _WIN32
+
+// Anything conditionally compiled with _CL_ was put in because I thought
+// it would be nice to compile using the normal Windows C compiler (cl).
+// While I did manage to get it to compile, it didn't work afterward, so I've
+// segregated all of that nonsense with _CL_ to make it unreachable.  In other
+// words, ignore everything inside of an #ifdef _CL_, forever and ever! If you
+// want to compile for Windows, use Msys, Mingw, or some other non-MS approach.
+// Or figure out how to solve it form me, because I'm no longer going to waste
+// my time on it.
+#ifdef _CL_
+
+#if defined(_WIN32) && !defined(__MINGW32__)
 	// All the stuff here was just cut-and-pasted from googling "windows
 	// replacement for (whatever)".
 	#include <stdarg.h>
@@ -58,14 +68,22 @@
 #else
 	#include <unistd.h>
 #endif
-
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <sys/time.h> // For gettimeofday().
 #endif
-
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 // Linux or Mac.
 #include <execinfo.h> // For backtraces.
+#endif
+
+#else // not _CL_
+
+#include <unistd.h>
+#include <sys/time.h>
+#ifndef __MINGW32__
+#include <execinfo.h>
+#endif
+
 #endif
 
 //---------------------------------------------------------------------------
@@ -503,7 +521,7 @@ printBacktrace(void)
 #endif
 }
 
-#ifndef _WIN32
+#ifndef _CL_
 __attribute__((noreturn))
 #endif
 void
@@ -2160,7 +2178,11 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
   //if (mkdir(DCB_OUTS[dev].filename, 0777) < 0)
   //  abend("Unable to create PDS; note that PDS is implemented as a folder: "
   //        "Device number %d, PDS = '%s'", dev, DCB_OUTS[dev].filename);
+#ifdef __MINGW32__
+  mkdir(DCB_OUTS[dev].filename);
+#else
   mkdir(DCB_OUTS[dev].filename, 0777);
+#endif
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
   for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
@@ -2685,6 +2707,7 @@ MONITOR13(descriptor_t *namep) {
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
   abend("MONITOR(14) not yet implemented");
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 uint32_t
@@ -2722,6 +2745,7 @@ MONITOR18(void) {
 uint32_t
 MONITOR19(uint32_t *addresses, uint32_t *sizes) {
   abend("MONITOR(19) not yet implemented");
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 void
@@ -3574,6 +3598,7 @@ XPL_COMPILER_VERSION(uint32_t index){
   else if (index == 1)
     return MINOR_VERSION;
   abend("Bad index (%d) for XPL compiler version", index);
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 void
