@@ -77,11 +77,14 @@ ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
 ifeq ($(CC), cl)
-        COPTS = /Fe
+        OUT = /Fe
+        LIBS =
 else ifeq ($(findstring mingw,$(CC)),mingw)
-        COPTS = -lm -o
+        OUT = -o
+        LIBS = -lm
 else
-        COPTS = -lm -rdynamic -o
+        OUT = -o
+        LIBS = -lm -rdynamic
 endif
 
 SOURCES := $(wildcard *.c)
@@ -91,7 +94,7 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(COPTS) $@ $(SOURCES)
+	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS)
 
 .PHONY: clean
 clean:

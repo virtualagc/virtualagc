@@ -121,7 +121,7 @@ $(TARGETS):
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
 	make -C $@ $@ && \
-	cp $@/$@ ..
+	mv $@/$@* ..
 
 .PHONY: $(TARGETSB)
 $(TARGETSB):
@@ -136,7 +136,7 @@ $(TARGETSB):
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
 	make -C $@ $@ && \
-	cp $@/$@ ..
+	mv $@/$@* ..
 
 # Note that `clean` doesn't clean everything that was built:  The executables
 # from TARGETS remain in place in the current folder, and the build-folders

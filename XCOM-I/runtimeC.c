@@ -33,7 +33,7 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	// All the stuff here was just cut-and-pasted from googling "windows
 	// replacement for (whatever)".
 	#include <stdarg.h>
@@ -58,7 +58,7 @@
 	#include <unistd.h>
 #endif
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <sys/time.h> // For gettimeofday().
 #endif
 
@@ -2159,7 +2159,11 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
   //if (mkdir(DCB_OUTS[dev].filename, 0777) < 0)
   //  abend("Unable to create PDS; note that PDS is implemented as a folder: "
   //        "Device number %d, PDS = '%s'", dev, DCB_OUTS[dev].filename);
+#ifdef __MINGW32__
+  mkdir(DCB_OUTS[dev].filename);
+#else
   mkdir(DCB_OUTS[dev].filename, 0777);
+#endif
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
   for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
