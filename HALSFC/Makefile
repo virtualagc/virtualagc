@@ -34,7 +34,8 @@ all:	$(TARGETS) $(TARGETSB)
 $(TARGETS) $(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
 	make -C $@ $@
-	if mv $@/$@ HALSFC-$@ &>NUL ; then mv $@/$@.exe HALSFC-$@.exe &>NUL ; fi
+	-mv $@/$@ HALSFC-$@ &>NUL
+	-mv $@/$@.exe HALSFC-$@.exe &>NUL
 
 .PHONY: clean
 clean:
