@@ -18,7 +18,7 @@ then
 	PASS1=HALSFC-PASS1B
 	FLO=HALSFC-FLO
 	OPT=HALSFC-OPTB
-	AUX=HALSFC-AUX
+	AUXP=HALSFC-AUXP
 	PASS2=HALSFC-PASS2B
 	PASS3=HALSFC-PASS3B
 	PASS4=HALSFC-PASS4
@@ -28,7 +28,7 @@ else
 	PASS1=HALSFC-PASS1
 	FLO=HALSFC-FLO
 	OPT=HALSFC-OPT
-	AUX=HALSFC-AUX
+	AUXP=HALSFC-AUXP
 	PASS2=HALSFC-PASS2
 	PASS3=HALSFC-PASS3
 	PASS4=HALSFC-PASS4
@@ -70,15 +70,15 @@ $OPT \
 	>opt.rpt
 if [[ $? != 0 ]] ; then echo "Aborted after OPT" ; exit 1 ; fi
 
-$AUX \
+$AUXP \
 	--commoni=COMMON2.out \
 	--commono=COMMON3.out \
 	--raf=B,7200,1,auxmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,7200,4,optmat.bin \
 	--raf=B,3360,6,vmem.bin \
-	>aux.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after AUX" ; exit 1 ; fi
+	>auxp.rpt
+if [[ $? != 0 ]] ; then echo "Aborted after AUXP" ; exit 1 ; fi
 
 $PASS2 \
 	$CARDS \

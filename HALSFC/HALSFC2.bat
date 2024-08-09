@@ -16,7 +16,7 @@ if "%TARGET%". == "BFS". (
     set PASS1=HALSFC-PASS1B
     set FLO=HALSFC-FLO
     set OPT=HALSFC-OPTB
-    set AUX=HALSFC-AUX
+    set AUXP=HALSFC-AUXP
     set PASS2=HALSFC-PASS2B
     set PASS3=HALSFC-PASS3B
     set PASS4=HALSFC-PASS4
@@ -26,7 +26,7 @@ if "%TARGET%". == "BFS". (
     set PASS1=HALSFC-PASS1
     set FLO=HALSFC-FLO
     set OPT=HALSFC-OPT
-    set AUX=HALSFC-AUX
+    set AUXP=HALSFC-AUXP
     set PASS2=HALSFC-PASS2
     set PASS3=HALSFC-PASS3
     set PASS4=HALSFC-PASS4
@@ -69,7 +69,7 @@ if errorlevel 1 ( echo "Aborted after FLO" & exit 1 )
 	>opt.rpt
 if errorlevel 1 ( echo "Aborted after OPT" & exit 1 )
 
-%AUX% \
+%AUXP% \
 	--commoni=COMMON2.out \
 	--commono=COMMON3.out \
 	--raf=B,7200,1,auxmat.bin \
@@ -77,7 +77,7 @@ if errorlevel 1 ( echo "Aborted after OPT" & exit 1 )
 	--raf=B,7200,4,optmat.bin \
 	--raf=B,3360,6,vmem.bin \
 	>aux.rpt
-if errorlevel 1 ( echo "Aborted after AUX" & exit 1 )
+if errorlevel 1 ( echo "Aborted after AUXP" & exit 1 )
 
 
 %PASS2% \

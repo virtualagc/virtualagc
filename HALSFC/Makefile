@@ -6,7 +6,7 @@
 # default when either no target is specified, or with the target 'all'.  It is
 # also possible to individually build some subset of the 11 individual programs
 # comprising the compiler, by instead mixing-and-matching the targets
-# PASS1, PASS1B, FLO, OPT, OPTB, AUX, PASS2, PASS2B, PASS3, PASS3B, and PASS4.
+# PASS1, PASS1B, FLO, OPT, OPTB, AUXP, PASS2, PASS2B, PASS3, PASS3B, and PASS4.
 # However, this is normally needed only when there are changes in the XPL/I
 # compiler (XCOM-I) or in the BAL-to-C "patch files", and that is typically
 # performed in the XPL/I source-code directory rather than here.
@@ -25,7 +25,7 @@
 #					messages), -O3 (useful for for optimizing the compiler), 
 #					and so on.  Check gcc documentation.
 
-TARGETS = PASS1 FLO OPT AUX PASS2 PASS3 PASS4
+TARGETS = PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB = PASS1B OPTB PASS2B PASS3B
 
 all:	$(TARGETS) $(TARGETSB)
@@ -41,7 +41,7 @@ clean:
 	make -C PASS1 clean
 	make -C FLO clean
 	make -C OPT clean
-	make -C AUX clean
+	make -C AUXP clean
 	make -C PASS2 clean
 	make -C PASS3 clean
 	make -C PASS4 clean
@@ -52,10 +52,10 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	-rm HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUX HALSFC-PASS2 \
+	-rm HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUXP HALSFC-PASS2 \
 		HALSFC-PASS3 HALSFC-PASS4 HALSFC-PASS1B HALSFC-OPTB HALSFC-PASS2B \
 		HALSFC-PASS3B HALSFC-*.exe
-	-del HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUX HALSFC-PASS2 \
+	-del HALSFC-PASS1 HALSFC-FLO HALSFC-OPT HALSFC-AUXP HALSFC-PASS2 \
 		 HALSFC-PASS3 HALSFC-PASS4 HALSFC-PASS1B HALSFC-OPTB HALSFC-PASS2B \
 		 HALSFC-PASS3B HALSFC-*.exe
 		
