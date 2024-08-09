@@ -2684,6 +2684,7 @@ MONITOR13(descriptor_t *namep) {
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
   abend("MONITOR(14) not yet implemented");
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 uint32_t
@@ -2721,6 +2722,7 @@ MONITOR18(void) {
 uint32_t
 MONITOR19(uint32_t *addresses, uint32_t *sizes) {
   abend("MONITOR(19) not yet implemented");
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 void
@@ -3573,6 +3575,7 @@ XPL_COMPILER_VERSION(uint32_t index){
   else if (index == 1)
     return MINOR_VERSION;
   abend("Bad index (%d) for XPL compiler version", index);
+  return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
 void

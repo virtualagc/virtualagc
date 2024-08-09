@@ -34,64 +34,64 @@ if "%TARGET%". == "BFS". (
     set CARDS=--ddo=3,cards.bin,E
 )
 
-%PASS1% \
-	--parm="%PARM_STRING%" \
-	--ddi=0,"%HALS_FILE%" \
-	--ddo=2,listing2.txt \
-	--pdsi=4,%TEMPLIB%,E \
-	--pdsi=5,ERRORLIB \
-	--pdsi=6,ACCESS  \
-	--pdso=6,%TEMPLIB%,E \
-	--commono=COMMON0.out \
-	--raf=B,7200,1,halmat.bin \
-	--raf=B,1560,2,litfile.bin \
-	--raf=B,3360,6,vmem.bin \
+%PASS1% ^
+	--parm="%PARM_STRING%" ^
+	--ddi=0,"%HALS_FILE%" ^
+	--ddo=2,listing2.txt ^
+	--pdsi=4,%TEMPLIB%,E ^
+	--pdsi=5,ERRORLIB ^
+	--pdsi=6,ACCESS  ^
+	--pdso=6,%TEMPLIB%,E ^
+	--commono=COMMON0.out ^
+	--raf=B,7200,1,halmat.bin ^
+	--raf=B,1560,2,litfile.bin ^
+	--raf=B,3360,6,vmem.bin ^
 	>pass1.rpt
 if errorlevel 1 ( echo "Aborted after PASS1" & exit 1 )
 
-%FLO% \
-	--commoni=COMMON0.out \
-	--commono=COMMON1.out \
-	--raf=B,7200,1,halmat.bin \
-	--raf=B,1560,2,litfile.bin \
-	--raf=B,3360,6,vmem.bin \
+%FLO% ^
+	--commoni=COMMON0.out ^
+	--commono=COMMON1.out ^
+	--raf=B,7200,1,halmat.bin ^
+	--raf=B,1560,2,litfile.bin ^
+	--raf=B,3360,6,vmem.bin ^
 	>flo.rpt
 if errorlevel 1 ( echo "Aborted after FLO" & exit 1 )
 
 
-%OPT% \
-	--commoni=COMMON1.out \
-	--commono=COMMON2.out \
-	--raf=B,7200,1,halmat.bin \
-	--raf=B,1560,2,litfile.bin \
-	--raf=B,7200,4,optmat.bin \
-	--raf=B,3360,6,vmem.bin \
+%OPT% ^
+	--commoni=COMMON1.out ^
+	--commono=COMMON2.out ^
+	--raf=B,7200,1,halmat.bin ^
+	--raf=B,1560,2,litfile.bin ^
+	--raf=B,7200,4,optmat.bin ^
+	--raf=B,3360,6,vmem.bin ^
 	>opt.rpt
 if errorlevel 1 ( echo "Aborted after OPT" & exit 1 )
 
-%AUXP% \
-	--commoni=COMMON2.out \
-	--commono=COMMON3.out \
-	--raf=B,7200,1,auxmat.bin \
-	--raf=B,1560,2,litfile.bin \
-	--raf=B,7200,4,optmat.bin \
-	--raf=B,3360,6,vmem.bin \
+%AUXP% ^
+	--commoni=COMMON2.out ^
+	--commono=COMMON3.out ^
+	--raf=B,7200,1,auxmat.bin ^
+	--raf=B,1560,2,litfile.bin ^
+	--raf=B,7200,4,optmat.bin ^
+	--raf=B,3360,6,vmem.bin ^
 	>aux.rpt
 if errorlevel 1 ( echo "Aborted after AUXP" & exit 1 )
 
 
-%PASS2% \
-	$CARDS \
-	--ddo=4,deck.bin,E \
-	--pdsi=5,ERRORLIB \
-	--ddo=7,extra.txt \
-	--commoni=COMMON3.out \
-	--commono=COMMON4.out \
-	--raf=B,7200,1,auxmat.bin \
-	--raf=B,1560,2,litfile.bin \
-	--raf=B,1600,3,objcode.bin \
-	--raf=B,7200,4,optmat.bin \
-	--raf=B,3360,6,vmem.bin \
+%PASS2% ^
+	$CARDS ^
+	--ddo=4,deck.bin,E ^
+	--pdsi=5,ERRORLIB ^
+	--ddo=7,extra.txt ^
+	--commoni=COMMON3.out ^
+	--commono=COMMON4.out ^
+	--raf=B,7200,1,auxmat.bin ^
+	--raf=B,1560,2,litfile.bin ^
+	--raf=B,1600,3,objcode.bin ^
+	--raf=B,7200,4,optmat.bin ^
+	--raf=B,3360,6,vmem.bin ^
 	>pass2.rpt
 if errorlevel 1 ( echo "Aborted after PASS2" & exit 1 )
 
