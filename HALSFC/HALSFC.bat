@@ -9,8 +9,8 @@
 ::	"PFS" (default) or "BFS"
 
 set HALS_FILE="%1"
-set PARM_STRING="%1"
-set TARGET="%1"
+set PARM_STRING="%2"
+set TARGET="%3"
 
 if "%TARGET%". == "BFS". (
     set PASS1=HALSFC-PASS1B
