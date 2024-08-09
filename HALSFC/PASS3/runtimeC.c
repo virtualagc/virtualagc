@@ -50,8 +50,8 @@
 	{
 		struct timespec ts;
 		timespec_get(&ts, TIME_UTC);
-		tp->tv_sec = ts->tv_sec;
-		tp->tv_usec = ts->tv_nsec / 1000;
+		tp->tv_sec = ts.tv_sec;
+		tp->tv_usec = ts.tv_nsec / 1000;
 		return 0;
 	}
 #else
