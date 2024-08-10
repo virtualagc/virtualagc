@@ -80,13 +80,16 @@ ifeq ($(CC), cl)
         OUT = /Fe
         LIBS =
         EXT = .exe
+        RDYNAMIC = 
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
         EXT = .exe
+        RDYNAMIC =
 else
         OUT = -o
-        LIBS = -lm -rdynamic
+        LIBS = -lm
+        RDYNAMIC = -rdynamic
         EXT = 
 endif
 
@@ -97,7 +100,7 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS)
+	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS) $(RDYNAMIC)
 
 .PHONY: clean
 clean:

@@ -22,7 +22,7 @@ if "%TARGET%". == "BFS". (
     set PASS3=HALSFC-PASS3B
     set PASS4=HALSFC-PASS4
     set TEMPLIB=TEMPLIBB
-    set CARDS--pdso=3,cards,E
+    set CARDS=--pdso=3,cards,E
 ) else (
     set PASS1=HALSFC-PASS1
     set FLO=HALSFC-FLO
@@ -77,7 +77,7 @@ if errorlevel 1 ( echo Aborted after OPT & exit /b 1 )
 	--raf=B,1560,2,litfile.bin ^
 	--raf=B,7200,4,optmat.bin ^
 	--raf=B,3360,6,vmem.bin ^
-	>aux.rpt
+	>auxp.rpt
 if errorlevel 1 ( echo Aborted after AUXP & exit /b 1 )
 
 
