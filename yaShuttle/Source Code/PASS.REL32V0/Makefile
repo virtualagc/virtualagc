@@ -87,7 +87,7 @@ HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK
 PARM4_STRING := 
 
-RTARGET := $(HAL_S_FC_DIR)/HELLO
+RTARGET := regression/HELLO
 RTARGET2 := $(subst .hal,,$(RTARGET))
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
@@ -107,6 +107,38 @@ CARDS := --ddo=3,cards2.bin,E
 endif
 
 all:	$(TARGETS) $(TARGETSB)
+
+IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
+.PHONY: regression
+regression: all compile test
+	
+.PHONY: test
+test: 
+	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >pass1-new.rpt
+	-@egrep --invert-match "$(IGNORE_LINES)" regression/c.rpt >pass1-old.rpt
+	@diff $(DEXTRA) -q -s --strip-trailing-cr pass1-new.rpt pass1-old.rpt
+	@diff $(DEXTRA) -s halmat.bin regression/halmat.bin
+	@diff $(DEXTRA) -s litfile.bin regression/litfile.bin
+	@diff $(DEXTRA) -q -s --strip-trailing-cr listing2.txt regression/listing2.txt
+	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" COMMON-PASS1.out >COMMON-PASS1-new.out
+	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" regression/COMMON-PASS1.out >COMMON-PASS1-old.out
+	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS1-new.out COMMON-PASS1-old.out
+	@diff $(DEXTRA) -s optmato.bin regression/optmato.bin
+	@diff $(DEXTRA) -s auxmata.bin regression/auxmata.bin
+	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
+	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
+	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
+	@if [ `cmp -l cards2.bin regression/cards2.bin | wc -l` -le 7 ]; \
+	then \
+		echo "Object-code cards okay" ; \
+	else \
+		echo "Object-code comparison failed." ; \
+		exit 1 ; \
+	fi
+	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" COMMON-PASS2.out >COMMON-PASS2-new.out
+	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" regression/COMMON-PASS2.out >COMMON-PASS2-old.out
+	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS2-new.out COMMON-PASS2-old.out
+	@echo Regression test passed.
 
 .PHONY: $(TARGETS)
 $(TARGETS):
@@ -186,7 +218,6 @@ cleanall: clean
 # COMMON-memory file output by PASS1, so in principle we could pick this address
 # from there, adjust FILE2.bin, and perform the comparison  However, I don't
 # do that because it doesn't seem to be worth the effort.
-IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: compile
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================

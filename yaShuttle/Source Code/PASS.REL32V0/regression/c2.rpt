@@ -1,0 +1,410 @@
+PAGE 1
+
+
+   HAL/S COMPILER PHASE 2  --  VERSION OF AUGUST 13, 2024.  CLOCK TIME = 16:23:5.00
+
+HAL/S PHASE 2 ENTERED AUGUST 13, 2024.  CLOCK TIME = 16:27:28.83
+
+I  (1)  000002  002(1)  0
+J  (1)  000003  003(1)  0
+MY_NAME  (11)  000004  004(1)  0
+GOT STAK 1
+RET STACK 1
+GOT STAK 1
+GOT STAK 2
+RET STACK 2
+RET STACK 1
+GOT STAK 1
+GOT STAK 2
+RET STACK 2
+GOT STAK 2
+RET STACK 2
+RET STACK 1
+GOT STAK 1
+GOT STAK 2
+RET STACK 2
+RET STACK 1
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 5  1    0   5   6   0  0  0      0      3      0    0   0
+ 6  1    0   5   6   0  0  0      0      6      0    0   0
+GOT STAK 1
+GOT STAK 2
+GOT STAK 3
+GOT STAK 4
+GOT STAK 5
+RET STACK 5
+GOT STAK 5
+RET STACK 5
+GOT STAK 5
+RET STACK 5
+RET STACK 4
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 7  1    0   1   6   2  0  0      0      0      0    0   0   I
+GOT STAK 4
+GOT STAK 5
+RET STACK 5
+GOT STAK 5
+RET STACK 5
+RET STACK 4
+GOT STAK 4
+RET STACK 4
+GOT STAK 4
+GOT STAK 5
+RET STACK 5
+RET STACK 4
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 5  1    0   1   6   2  0  0      0      0      0    0   0   I
+ 6  1    0   5   6   0  0  0      0      6      0    0   0
+ 7  1    0   1   6   2  0  0      0      0      0    0   0   I
+GOT STAK 4
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 2
+
+GOT STAK 5
+GOT STAK 6
+GOT STAK 7
+GOT STAK 8
+RET STACK 8
+GOT STAK 8
+RET STACK 8
+GOT STAK 8
+RET STACK 8
+RET STACK 7
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 4  1    0   1   6   4  0  0      0      0      0    0   0   J
+GOT STAK 7
+GOT STAK 8
+RET STACK 8
+GOT STAK 8
+RET STACK 8
+RET STACK 7
+GOT STAK 7
+RET STACK 7
+GOT STAK 7
+GOT STAK 8
+RET STACK 8
+RET STACK 7
+GOT STAK 7
+GOT STAK 8
+RET STACK 8
+RET STACK 7
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 4  1    0   1   6   4  0  0      0      0      0    0   0   J
+ 5  1    0   1   6   4  0  0      0      0      0    0   0   J
+ 6  1    0   5   6   0  0  0      0      6      0    0   0
+GOT STAK 7
+GOT STAK 8
+GOT STAK 9
+RET STACK 9
+RET STACK 8
+GOT STAK 8
+RET STACK 8
+RET STACK 7
+GOT STAK 7
+RET STACK 7
+GOT STAK 7
+RET STACK 7
+RET STACK 6
+RET STACK 5
+RET STACK 4
+GOT STAK 4
+GOT STAK 5
+GOT STAK 6
+RET STACK 6
+RET STACK 5
+GOT STAK 5
+RET STACK 5
+RET STACK 4
+GOT STAK 4
+RET STACK 4
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 3
+
+GOT STAK 4
+RET STACK 4
+RET STACK 3
+RET STACK 2
+RET STACK 1
+GOT STAK 1
+GOT STAK 2
+RET STACK 2
+GOT STAK 2
+RET STACK 2
+RET STACK 1
+GOT STAK 1
+GOT STAK 2
+RET STACK 2
+RET STACK 1
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 5  1    0   5   6   4  0  0      0      3      0    0   0
+ 6  1    0   5   6   0  0  0      0      6      0    0   0
+ R USE LIN CTN TYP VAR XR XS     XC  CONST   XCON MULT VR2  NAME
+ 4  1   -1  10   6   4  0  0      0      0      0    0   0
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 4
+SYMBOL   TYPE  ID  ADDR  LEN(HEX)  LEN(DEC)         BLOCK NAME
+
+
+$0HELLO   SD 0001 000000 000040          64         HELLO
+#EHELLO   SD 0002 000000 000006           6
+#DHELLO   SD 0003 000000 000033          51
+@0HELLO   ER 0004                          
+#QIOINIT  ER 0005                          
+#QCOUT    ER 0006                          
+#QHOUT    ER 0007                          
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 5
+  LOC    CODE        EFFAD           LABEL   INSN   OPERANDS            SYMBOLIC OPERAND
+
+
+0000000                             ST#1     EQU    *
+00000                               #EHELLO  CSECT        ESDID= 0002
+00000 0000                                   DC     X'0000'             
+00001 0000                                   DC     X'0000'             
+00002 00000700                               DC     A'00000700'         #DHELLO
+00004 0000                                   DC     X'0000'             
+00005 0000                                   DC     X'0000'             
+00000                               $0HELLO  CSECT        ESDID= 0001
+0000000                             HELLO    EQU    *
+00000 E8F3 0000                              LHI    R0,0()              @0HELLO
+00002 E9F3 0000                              LHI    R1,0()              #DHELLO
+00004 B914           0005                    STH    R1,5(R0)            
+00005 E0FB 0014                              IAL    R0,20()             
+00007 EB11           0004                    LA     R3,4(R1)            
+00008 BB24           0009                    STH    R3,9(R0)            
+0000009                             ST#2     EQU    *
+0000009                             ST#3     EQU    *
+00009                               #DHELLO  CSECT        ESDID= 0003
+00009 000008                                 ORG    *-1
+00008 140A524F                               DC     X'140A524F'
+0000A 4E204255                               DC     X'4E204255'
+0000C 524B4559                               DC     X'524B4559'
+000000E                             ST#4     EQU    *
+000000E                             ST#5     EQU    *
+000000E                             ST#6     EQU    *
+00009                               $0HELLO  CSECT        ESDID= 0001
+00009 BEE8                                   LFXI   R6,6                
+0000A BDE5                                   LFXI   R5,3                
+0000B D0FF 3800                              SCAL@# R0,0(R1,R3)         #QIOINIT
+0000D EAAD           002B                    LA     R2,43(R1)           C'THE BEGINNING'
+0000E D0FF 3800                              SCAL@# R0,0(R1,R3)         #QCOUT
+0000010                             ST#7     EQU    *
+00010 BFE3                                   LFXI   R7,1                
+00011 DF84           0033                    BCF    7,*+34              B     LBL#3 (WITHIN ST#12)
+0000012                             LBL#4    EQU    *
+0000012                             ST#8     EQU    *
+00012 BEE8                                   LFXI   R6,6                
+00013 BDE5                                   LFXI   R5,3                
+00014 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QIOINIT
+00016 1DE7                                   LR     R5,R7               
+00017 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QHOUT
+00019 EA8D           0023                    LA     R2,35(R1)           C'HELLO, WORLD!'
+0001A D0FF 3800                              SCAL@# R0,0(R1,R3)         #QCOUT
+000001C                             ST#9     EQU    *
+0001C BCE4                                   LFXI   R4,2                
+0001D DF3C           002D                    BCF    7,*+16              B     LBL#5 (WITHIN ST#11)
+000001E                             LBL#6    EQU    *
+000001E                             ST#10    EQU    *
+0001E BEE8                                   LFXI   R6,6                
+0001F BDE5                                   LFXI   R5,3                
+00020 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QIOINIT
+00022 1DE4                                   LR     R5,R4               
+00023 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QHOUT
+00025 EA21           0008                    LA     R2,8(R1)            MY_NAME
+00026 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QCOUT
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 6
+  LOC    CODE        EFFAD           LABEL   INSN   OPERANDS            SYMBOLIC OPERAND
+
+00028 EA61           0018                    LA     R2,24(R1)           C'SAYS ISN'T THIS FUN?'
+00029 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QCOUT
+000002B                             ST#11    EQU    *
+0002B BCE4                                   LFXI   R4,2                
+0002C 840F           0007                    AH     R4,3(R3)            J
+000002D                             LBL#5    EQU    *
+0002D BC0F           0007                    STH    R4,3(R3)            J
+0002E B5E4 0008                              CHI    R4,8                
+00030 DE4E           001E                    BCB    6,*-18              BLE   LBL#6 (WITHIN ST#9)
+0000031                             LBL#7    EQU    *
+0000031                             ST#12    EQU    *
+00031 BFE3                                   LFXI   R7,1                
+00032 870B           0006                    AH     R7,2(R3)            I
+0000033                             LBL#3    EQU    *
+00033 BF0B           0006                    STH    R7,2(R3)            I
+00034 B5E7 0005                              CHI    R7,5                
+00036 DE96           0012                    BCB    6,*-36              BLE   LBL#4 (WITHIN ST#7)
+0000037                             LBL#8    EQU    *
+0000037                             ST#13    EQU    *
+00037 BEE8                                   LFXI   R6,6                
+00038 BDE5                                   LFXI   R5,3                
+00039 D0FF 3800                              SCAL@# R0,0(R1,R3)         #QIOINIT
+0003B EA4D           0013                    LA     R2,19(R1)           C'THE END'
+0003C D0FF 3800                              SCAL@# R0,0(R1,R3)         #QCOUT
+000003E                             ST#14    EQU    *
+000003E                             LBL#2    EQU    *
+0003E C9F9 0000      0000                    SVC    0(R1)               H'21', X'0015'
+0000E                               #DHELLO  CSECT        ESDID= 0003
+0000E 000000                                 ORG    *-14
+00000 0015                                   DC     X'0015'             
+00004 000013                                 ORG    *+15
+00013 00075448                               DC     X'00075448'
+00015 4520454E                               DC     X'4520454E'
+00017 4400                                   DC     X'4400'
+00018 00145341                               DC     X'00145341'
+0001A 59532049                               DC     X'59532049'
+0001C 534E2754                               DC     X'534E2754'
+0001E 20544849                               DC     X'20544849'
+00020 53204655                               DC     X'53204655'
+00022 4E3F                                   DC     X'4E3F'
+00023 000D4845                               DC     X'000D4845'
+00025 4C4C4F2C                               DC     X'4C4C4F2C'
+00027 20574F52                               DC     X'20574F52'
+00029 4C442100                               DC     X'4C442100'
+0002B 000D5448                               DC     X'000D5448'
+0002D 45204245                               DC     X'45204245'
+0002F 47494E4E                               DC     X'47494E4E'
+00031 494E4700                               DC     X'494E4700'
+                                             END
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 7
+
+
+RLD INFORMATION
+
+POS.ID (P) IS THE ESDID OF SD FOR THE CONTROL SECTION THAT CONTAINS THE ADDRESS CONSTANT
+REL.ID (R) IS THE ESDID OF ESD ENTRY FOR THE SYMBOL BEING REFERRED TO
+
+         FLAG        TYPE                                ACTION PERFORMED
+
+       V00000ST      YCON      RELOCATION FACTOR IS ADDED TO ADDRESS CONSTANT.  IF ADDRESS IS GREATER THAN 15 BITS, SET BIT "0" ON.
+       000001ST      ACON      RELOCATION FACTOR IS ADDED TO ADDRESS CONSTANT.
+       V00100ST      ZCON      ADD RELOCATION FACTOR TO FIRST HALFWORD.  IF GREATER THAN 15 BITS, UPDATE BSR FIELD.
+                               (BRANCH RELOCATION FOR 32-BIT BRANCH)
+       V10000ST      ZCON      UPDATE DSR FIELD WITH HIGH ORDER 4 BITS OF THE 19-BIT RELOCATION FACTOR.
+                               (DATA RELOCATION FOR 32-BIT BRANCH)
+       V01000ST      ZCON      UPDATE BSR FIELD WITH HIGH ORDER 4 BITS OF THE 19-BIT RELOCATION FACTOR.
+                               (BRANCH RELOCATION FOR 32-BIT DATA)
+       V10100ST      ZCON      ADD RELOCATION FACTOR TO FIRST HALFWORD.  IF GREATER THAN 15-BITS, UPDATE DSR FIELD.
+                               (DATA RELOCATION FOR 32-BIT DATA)
+
+       V = SIGN OF THE YCON IN THE TEXT RECORD
+            0 = THE YCON IS POSITIVE
+            1 = THE YCON IS THE ABSOLUTE VALUE OF A NEGATIVE NUMBER
+       S = DIRECTION OF RELOCATION
+            0 = POSITIVE
+            1 = NEGATIVE
+       T = TYPE OF NEXT RLD ITEM
+            0 = NEXT RLD ITEM HAS DIFFERENT R OR P POINTERS; THEY ARE IN THE NEXT ITEM
+            1 = NEXT RLD ITEM HAS SAME R AND P POINTERS; HENCE THEY ARE OMITTED
+
+ POS.ID    CSECT(P)    ADDRESS   FLAGS      REL.ID    CSECT(R)
+
+  0001     $0HELLO     000001     00         0004     @0HELLO 
+  0001     $0HELLO     000003     00         0003     #DHELLO 
+  0001     $0HELLO     00000C     00         0005     #QIOINIT
+  0001     $0HELLO     00000F     00         0006     #QCOUT  
+  0001     $0HELLO     000015     00         0005     #QIOINIT
+  0001     $0HELLO     000018     00         0007     #QHOUT  
+  0001     $0HELLO     00001B     00         0006     #QCOUT  
+  0001     $0HELLO     000021     00         0005     #QIOINIT
+  0001     $0HELLO     000024     00         0007     #QHOUT  
+  0001     $0HELLO     000027     00         0006     #QCOUT  
+  0001     $0HELLO     00002A     00         0006     #QCOUT  
+  0001     $0HELLO     00003A     00         0005     #QIOINIT
+  0001     $0HELLO     00003D     00         0006     #QCOUT  
+  0002     #EHELLO     000002     10         0001     $0HELLO 
+  0002     #EHELLO     000002     40         0003     #DHELLO 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 8
+
+
+
+ VARIABLE OFFSET TABLE
+    LOC IS THE CSECT-RELATIVE ADDRESS IN HEX OF THE DECLARED VARIABLE.
+    B IS THE BASE REGISTER USED FOR ADDRESSING THE DECLARED VARIABLE.  IF B IS NEGATIVE, THIS IS A VIRTUAL REGISTER AND CODE
+          MUST BE GENERATED TO LOAD A REAL REGISTER.
+    DISP IS THE DISPLACEMENT USED FOR GENERATING BASE-DISPLACEMENT ADDRESSES FOR ACCESSING THE DATA ITEMS.
+    LENGTH IS THE SIZE IN DECIMAL HALFWORDS OF THE VARIABLE.
+    BIAS IS THE AMOUNT OF THE ZEROTH ELEMENT OFFSET.
+    NAME IS THE NAME OF THE VARIABLE.
+
+
+  LOC    B DISP     LENGTH    BIAS   NAME
+
+         UNDER HELLO     STACK=20
+000006   1 006          1       0    I
+000008   1 008         11       0    MY_NAME
+000007   1 007          1       0    J
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 9
+
+
+
+MEMORY MAP FOR DATA CSECT #DHELLO
+
+NAME                  LEN(DEC)  OFFSET(DEC)   B  DISP(HEX)  SCOPE
+
+**LOCAL BLOCK DATA**        2         4                     HELLO
+I                           1         6       1    0006     HELLO
+J                           1         7       1    0007     HELLO
+MY_NAME                    11         8       1    0008     HELLO
+
+TOTAL SIZE OF ALIGNMENT GAPS FOR CSECT: 0 HW
+
+
+
+INSTRUCTION FREQUENCIES
+
+INSN  COUNT
+LFXI    12
+LR      2
+STH     4
+LA      6
+AH      2
+SCAL    11
+IAL     1
+BCB     2
+BCF     2
+SVC     1
+LHI     2
+CHI     2
+
+
+       OPTIONAL TABLE SIZES
+
+NAME       REQUESTED    USED
+^^^^       ^^^^^^^^^    ^^^^
+ 
+LITSTRINGS      2000      68
+LABELSIZE       1200       8
+ 
+ 
+42 HALMAT OPERATORS CONVERTED
+ 
+47 INSTRUCTIONS GENERATED
+ 
+70 HALFWORDS OF PROGRAM, 51 HALFWORDS OF DATA.
+ 
+MAX. OPERAND STACK SIZE            =9
+END  OPERAND STACK SIZE            =0
+MAX. STORAGE DESCRIPTOR STACK SIZE =1
+END  STORAGE DESCRIPTOR STACK SIZE =0
+NUMBER OF MINOR COMPACTIFIES       =0
+NUMBER OF MAJOR COMPACTIFIES       =0
+NUMBER OF REALLOCATIONS            =5
+FREE STRING AREA                   =16623416
+ 
+END OF HAL/S PHASE 2 AUGUST 13, 2024.  CLOCK TIME = 16:27:28.83
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PAGE 10
+ 
+
+TOTAL CPU TIME FOR PHASE 2       0:0:0.00
+CPU TIME FOR PHASE 2 SET UP      0:0:0.00
+CPU TIME FOR PHASE 2 GENERATION  0:0:0.00
+CPU TIME FOR PHASE 2 CLEAN UP    0:0:0.00
