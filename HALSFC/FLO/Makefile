@@ -54,11 +54,18 @@
 #       The equivalent for the MS `cl` compiler would be
 #               make EXTRA=/DEBUG
 
+#       In some environments, the compiler switch -rdynamic is not supported.
+#       We try to guess which environments those are, but aren't always 
+#       successful.  You can force -rdynamic to be used with
+#               make RDYNAMIC=-rdynamic
+#       or conversely can force it to be absent with
+#               make RDYNAMIC=
+
 #	Or more generally, EXTRA can be used for any other compiler switches 
 #	you like:
 #		make EXTRA='options'
-#	where the options are specific to the compiler.  The quotation
-#	marks need to be present if there are any spaces in the options.  In
+#	where the options, separated by spaces, are compiler-specific.  Quotes
+#	need to be present if there are any spaces in the options.  In
 #	Linux at least, you can use either single-quotes (') or double-quotes("),
 #	with the distinction that environment variables (like, say, $n) will be
 #	expanded within double-quotes but not within single quotes; but that's
@@ -102,8 +109,10 @@ all: $(TARGET)
 $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS) $(RDYNAMIC)
 
+# Note: Do not use NUL in place of /dev/null.  In Msys2, that can
+# create an actual file called "NUL" which is problematic to remove.
 .PHONY: clean
 clean:
-	-rm $(TARGET) &>NUL # For Linux or Mac
-	-del $(TARGET) &>NUL # For Windows
+	-rm $(TARGET) &>/dev/null # For Linux or Mac
+	-del $(TARGET) &>/dev/null # For Windows
 

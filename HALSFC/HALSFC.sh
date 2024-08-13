@@ -1,6 +1,7 @@
 #!/bin/bash
 # This Linux/Mac script compiles a HAL/S program using the HAL/S-FC program,
-# which is assumed to be in the PATH.  It has the following parameters:
+# which is assumed to be in the PATH.  It has the following parameters, all
+# optional except the first one:
 #
 #	The path to the HAL/S source-code file.
 #
@@ -13,6 +14,7 @@ HALS_FILE="$1"
 PARM_STRING="$2"
 TARGET="$3"
 EXT="$4"
+TEST="$5"
 
 if [[ "$TARGET" == "BFS" ]]
 then
@@ -51,6 +53,18 @@ $PASS1 \
 	--raf=B,3360,6,vmem.bin \
 	>pass1.rpt
 if [[ $? != 0 ]] ; then echo "Aborted after PASS1" ; exit 1 ; fi
+
+IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)'
+if [[ "$TEST" != "" ]]
+then
+        HALSFC-PASS1P.sh ${PARM_STRING//,/ } --hal="$HALS_FILE" >pass1p.rpt
+        echo Comparing ...
+        egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
+        egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
+        diff -q -s pass1A.rpt pass1pA.rpt
+        diff -s FILE1.bin halmat.bin
+        diff -q -s LISTING2.txt listing2.txt
+fi
 
 $FLO \
 	--commoni=COMMON0.out \
