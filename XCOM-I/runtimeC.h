@@ -57,6 +57,7 @@ typedef char sbuf_t[MAX_XPL_STRING + 1];
 
 #include "configuration.h"
 #include "procedures.h"
+#include "arguments.h"
 
 // The macro `RETURN();` can be used in place of `return;`, while
 // `RETURN(something);` can be used in place of `return something;`.  The

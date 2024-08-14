@@ -1,0 +1,24 @@
+/* This is a test of how arguments to functions are evaluated. */
+
+MYFUNC1: PROCEDURE(X, Y, Z) FIXED;
+        DECLARE X FIXED, Y FIXED, Z FIXED;
+        RETURN X + Y + Z;
+END MYFUNC1;
+
+MYFUNC2: PROCEDURE(X, Y, Z) FIXED;
+        DECLARE X FIXED, Y FIXED, Z FIXED;
+        RETURN X - Y + Z;
+END MYFUNC2;
+
+MYFUNC3: PROCEDURE(X, Y, Z) FIXED;
+        DECLARE X FIXED, Y FIXED, Z FIXED;
+        RETURN X + Y - Z;
+END MYFUNC3;
+
+MYFUNC4: PROCEDURE(X, Y, Z) FIXED;
+        DECLARE X FIXED, Y FIXED, Z FIXED;
+        RETURN X - Y - Z;
+END MYFUNC4;
+
+OUTPUT = MYFUNC4(MYFUNC1(1,2,3), MYFUNC2(4,5,6), MYFUNC3(7,8,9));
+EOF

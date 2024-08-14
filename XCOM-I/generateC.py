@@ -204,6 +204,17 @@ values are themselves dictionaries with the keys:
 '''
 memoryMap = {}
 
+# The following are used for enforcing order of argument evaluation in 
+# calls to library functions (including operators like +, ||, etc.).  Each
+# argument or operand in each instance of a call to such a function has its
+# own dedicated global variable used only for the purpose of holding the value
+# of the expression.  These are numbered sequentially.  Integers and descriptors
+# have separate counts, since they are separate types.  The global variables
+# themselves will have names like iarg%d or darg%d be in arguments.c, and the 
+# externs for them will be in arguments.h, which runtimeC.h will #include.
+currentInt = 0
+currentDesc = 0
+
 # The following functions are the Python equivalents of the functions
 # with the same names in runtimeC.c, and behave identically except that 
 # they are used at compile-time for initialization rather than run-time.
@@ -1015,6 +1026,7 @@ def autoconvertFull(scope, expression, toAttributes):
 # `generateOperation` is called by `generateExpression` to evaluate the result
 # of an operation from `operatorTypes`.  The global variable 
 def generateOperation(scope, expression):
+    global currentInt, currentDesc
     token = expression["token"]
     if "operator" not in token or token["operator"] not in allOperators:
         errxit("Non-operator in generateOperation")
@@ -1046,7 +1058,12 @@ def generateOperation(scope, expression):
         type1, source1 = autoconvert(type1, ["FIXED"], source1)
         type2, source2 = autoconvert(type2, ["FIXED"], source2)
         datatype, function = operatorTypes[2]["FIXED"][operator]
-        return datatype, "%s(%s, %s)" % (function, source1, source2)
+        #return datatype, "%s(%s, %s)" % (function, source1, source2)
+        cint1 = currentInt
+        cint2 = currentInt + 1
+        currentInt += 2
+        return datatype, "( iarg%d = %s, iarg%d = %s, %s(iarg%d, iarg%d) )" % \
+            (cint1, source1, cint2, source2, function, cint1, cint2)
     autoconversions1 = autoconvert(type1, allowedDatatypes)
     autoconversions2 = autoconvert(type2, allowedDatatypes)
     for autoconversion1 in autoconversions1:
@@ -1057,7 +1074,23 @@ def generateOperation(scope, expression):
                 source1 = autoconversion1[1] % source1
                 source2 = autoconversion2[1] % source2
                 datatype, function = allowedDatatypes[tipe]
-                return datatype, "%s(%s, %s)" % (function, source1, source2)
+                #return datatype, "%s(%s, %s)" % (function, source1, source2)
+                if tipe == "CHARACTER":
+                    dint1 = currentDesc
+                    dint2 = currentDesc + 1
+                    currentDesc += 2
+                    return datatype, "( darg%d = %s, darg%d = %s, %s(darg%d, darg%d) )" % \
+                        (dint1, source1, dint2, source2, function, dint1, dint2)
+                elif tipe == "FIXED":
+                    cint1 = currentInt
+                    cint2 = currentInt + 1
+                    currentInt += 2
+                    return datatype, "( iarg%d = %s, iarg%d = %s, %s(iarg%d, iarg%d) )" % \
+                        (cint1, source1, cint2, source2, function, cint1, cint2)
+                else:
+                    print("Info: Arg-order for function %s type %s not forced" %\
+                           (function, datatype), file=sys.stderr)
+                    return datatype, "%s(%s, %s)" % (function, source1, source2)
     errxit("No possible operand promotions found for operator %s" % operator)
 
 # The dictionary `monitorParameterTypes` tells how many parameters each MONITOR
@@ -3121,6 +3154,27 @@ def generateC(globalScope):
     
     pf.close()
     
+    # Generate arguments.c and arguments.h.
+    for ext in ["c", "h"]:
+        af = open(outputFolder + "/arguments." + ext, "w")
+        print("// Global variables for arguments of runtime-library functions.\n", file = af)
+        if ext == "c":
+            print('#include "runtimeC.h"\n', file = af)
+        else:
+            print("#ifndef ARGUMENTS_H", file = af)
+            print("#define ARGUMENTS_H", file=af)
+        for i in range(currentInt):
+            if ext == "h":
+                print("extern ", end="", file=af)
+            print("int32_t iarg%d;" % i, file=af)
+        for i in range(currentDesc):
+            if ext == "h":
+                print("extern ", end="", file=af)
+            print("descriptor_t *darg%d;" % i, file=af)
+        if ext == "h":
+            print("\n#endif // ARGUMENTS_H", file=af)
+        af.close()
+        
     # Create resetAllReentryGuards.c
     if reentryGuard:
         rf = open(outputFolder + "/resetAllReentryGuards.c", "w")

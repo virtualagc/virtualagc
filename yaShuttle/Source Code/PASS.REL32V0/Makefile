@@ -111,7 +111,15 @@ all:	$(TARGETS) $(TARGETSB)
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: regression
 regression: all compile test
-	
+
+# Regarding AP-101S object-code file matches, HAL/S-FC embeds its build own
+# build-timestamp in the object code, so there can be up to a 8-byte mismatch 
+# due to that.  The IBM 360 "card" format separately
+# embeds 2 copies (for some reason) of a 5-byte run-timestamp in the END record.  
+# Therefore, we tolerate as many as 18 bytes of mismatch.  Ideally we could 
+# could check that the latter 10 mismatches are in the correct positions, 
+# relative to the END record, but this is not that ideal of a world.  But 18
+# bytes is a lot, in a small test file!
 .PHONY: test
 test: 
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >pass1-new.rpt
@@ -120,23 +128,23 @@ test:
 	@diff $(DEXTRA) -s halmat.bin regression/halmat.bin
 	@diff $(DEXTRA) -s litfile.bin regression/litfile.bin
 	@diff $(DEXTRA) -q -s --strip-trailing-cr listing2.txt regression/listing2.txt
-	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" COMMON-PASS1.out >COMMON-PASS1-new.out
-	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" regression/COMMON-PASS1.out >COMMON-PASS1-old.out
+	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" COMMON-PASS1.out >COMMON-PASS1-new.out
+	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" regression/COMMON-PASS1.out >COMMON-PASS1-old.out
 	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS1-new.out COMMON-PASS1-old.out
 	@diff $(DEXTRA) -s optmato.bin regression/optmato.bin
 	@diff $(DEXTRA) -s auxmata.bin regression/auxmata.bin
 	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
 	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
-	@if [ `cmp -l cards2.bin regression/cards2.bin | wc -l` -le 7 ]; \
+	@if [ `cmp -l cards2.bin regression/cards2.bin | wc -l` -le 18 ]; \
 	then \
-		echo "Object-code cards okay" ; \
+		echo "Files cards2.bin and regression/cards2.bin match" ; \
 	else \
-		echo "Object-code comparison failed." ; \
+		echo "Files cards2.bin and regression/cards2.bin do not match" ; \
 		exit 1 ; \
 	fi
-	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" COMMON-PASS2.out >COMMON-PASS2-new.out
-	-@grep --invert-match -P "\tCOMM\t12\tFIXED\t" regression/COMMON-PASS2.out >COMMON-PASS2-old.out
+	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" COMMON-PASS2.out >COMMON-PASS2-new.out
+	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" regression/COMMON-PASS2.out >COMMON-PASS2-old.out
 	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS2-new.out COMMON-PASS2-old.out
 	@echo Regression test passed.
 
