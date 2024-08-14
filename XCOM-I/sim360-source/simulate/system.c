@@ -9,6 +9,7 @@
 /*
  * Modifications to Dan Weaver's code:
  * 2024-05-27 RSB   Removed the "Sim360 normal exit" message.
+ * 2024-08-14 RSB	Stubbed out `get_cpu_time`.
  */
 
 #include <stdio.h>
@@ -16,7 +17,7 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
+//#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -160,6 +161,9 @@ get_ibm_time(void)
 int
 get_cpu_time(void)
 {
+#if 1
+	return 0;
+#else
 	struct rusage info;
 	struct tm *now;
 	time_t sec;
@@ -170,6 +174,7 @@ get_cpu_time(void)
 	sec = ((now->tm_hour * 60) + now->tm_min) * 60 + now->tm_sec;
 
 	return (info.ru_utime.tv_usec / 10000) + sec * 100;	/* time */
+#endif
 }
 
 /*
