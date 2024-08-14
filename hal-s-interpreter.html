@@ -1,6 +1,5 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-  <head>
+<html><head>
     <title>Virtual AGC Document Library Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="Author" content="Ronald Burkey">
@@ -9,9 +8,19 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-    <script type="text/javascript">
+    
+<h1>
+  <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@SUBTITLE@","User's Manual"))
-</script><br>
+</script>Important Note</h1>
+<p>This page was written prior to the effort to port the original Intermetrics HAL/S compiler, <b>HAL/S-FC</b>, for modern usage.&nbsp; (<a moz-do-not-send="true" href="HAL.html">See here</a>.)&nbsp;
+ This page's use of the term "modern compiler" refers to the portion of 
+the HAL/S interpreter that functions as a stand-alone compiler (but has 
+now been obsoleted by <b>HAL/S-FC</b>).&nbsp; I apologize for this 
+confusion, but I don't quite see how to reduce the confusion other than 
+to warn you to watch out for it!<br>
+</p>
+
     <h1>Table of Contents </h1>
     <ul>
       <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
@@ -35,8 +44,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       today.&nbsp; Moreover, while several HAL/S compilers were created
       back in the day, none are presently available in a useful form, as
       far as we know.&nbsp; Therefore, in order to compile Space Shuttle
-      flight software, <a moz-do-not-send="true"
-        href="hal-s-compiler.html">a "modern" compiler for HAL/S is
+      flight software, <a moz-do-not-send="true" href="hal-s-compiler.html">a "modern" compiler for HAL/S is
         currently being developed by the Virtual AGC Project</a>.<br>
     </p>
     <p>However, the lack of public awareness of HAL/S is not reflected
@@ -55,17 +63,13 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     </p>
     <h1><a name="Readings"></a>Readings</h1>
     <p>Before working with the HAL/S interpreter too much, you might
-      want to read a few chapters in the excellent introductory book <a
-        moz-do-not-send="true"
-        href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+      want to read a few chapters in the excellent introductory book <a moz-do-not-send="true" href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
 
 
 
 
 
-          in HAL/S</i></a> and/or the more formal <a
-        moz-do-not-send="true"
-        href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf"><i>HAL/S
+          in HAL/S</i></a> and/or the more formal <a moz-do-not-send="true" href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf"><i>HAL/S
 
 
 
@@ -88,8 +92,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
           bothered writing the code to do it in the first place&nbsp; —
           but <i>you</i> may not care about it at all.&nbsp; It's your
           call whether or not to take my emphasis on colorization
-          seriously.&nbsp; You might want to briefly skim through <a
-            moz-do-not-send="true" href="#HelloWorld">the Hello World
+          seriously.&nbsp; You might want to briefly skim through <a moz-do-not-send="true" href="#HelloWorld">the Hello World
             section below</a> and try to imagine what all of the samples
           would like if they were simply black.<br>
         </font></p>
@@ -112,8 +115,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </ul>
       <ol>
       </ol>
-      <li>Download the installation-file <a moz-do-not-send="true"
-          href="Shuttle/yaHAL-S-FC.zip">yaHAL-S-FC.zip</a>.</li>
+      <li>Download the installation-file <a moz-do-not-send="true" href="Shuttle/yaHAL-S-FC.zip">yaHAL-S-FC.zip</a>.</li>
       <li>Unzip it someplace on your local drive.</li>
       <li>You may now proceed to the next section.&nbsp; But if when you
         actually try out the interpreter you keep getting unexplained
@@ -296,22 +298,18 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     we'll <i>temporarily</i> pretend is any line ending with a
     semicolon as the final character.&nbsp; When the <tt>--colorize</tt>
     command-line switch has been used, whatever <i>you</i> input is in
-    black, whereas whatever the interpreter outputs is by default in <font
-      color="#993399">magenta</font>.&nbsp; Otherwise, without the <tt>--colorize</tt>
+    black, whereas whatever the interpreter outputs is by default in <font color="#993399">magenta</font>.&nbsp; Otherwise, without the <tt>--colorize</tt>
     switch, everything is in black, or at least whatever default color
     your console's style setting dictate.&nbsp; You can also change the
-    coloring from magenta to something else.&nbsp; (See <a
-      moz-do-not-send="true" href="#Colorize">the explanation of the
+    coloring from magenta to something else.&nbsp; (See <a moz-do-not-send="true" href="#Colorize">the explanation of the
       interpreter's <tt>`colorize</tt> command</a>.)<br>
     <br>
     Input the following, making sure that the semicolon is the final
     character before you hit the Enter key:<br>
-    <blockquote><font color="#993399"><tt>HAL/S &gt;<font
-            color="#000000"> WRITE(6) 'Hello, world!';<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt;<font color="#000000"> WRITE(6) 'Hello, world!';<br>
           </font></tt></font></blockquote>
     In response, you should see:<br>
-    <blockquote><font color="#993399"><tt>HAL/S &gt;<font
-            color="#000000"> WRITE(6) 'Hello, world!';<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt;<font color="#000000"> WRITE(6) 'Hello, world!';<br>
             &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Hello,
 
 
@@ -369,13 +367,11 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     back and forth from loose mode to strict mode relatively
     easily.&nbsp; The interpreter command for enabling strict mode is<br>
     <blockquote><tt><font color="#993399">HAL/S &gt; </font>`strict</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">STRICT on.</font></tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">STRICT on.</font></tt><br>
     </blockquote>
     while you can return to loose mode with<br>
     <blockquote><tt><font color="#993399">HAL/S &gt; </font>`nostrict</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">STRICT off.</font></tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">STRICT off.</font></tt><br>
     </blockquote>
     Incidentally, this illustrates a general principle of the
     interpreter, namely that commands to the interpreter, as opposed to
@@ -404,18 +400,15 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     If you want to understand this response in detail, you'll want to
     read what our page dedicated to the modern HAL/S compiler has to say
     about "<a moz-do-not-send="true" href="hal-s-compiler.html#Scopes">scopes</a>"
-    and about the "<a moz-do-not-send="true"
-      href="hal-s-compiler.html#Data">data model</a>".&nbsp; But perhaps
+    and about the "<a moz-do-not-send="true" href="hal-s-compiler.html#Data">data model</a>".&nbsp; But perhaps
     not just yet!&nbsp; It's probably clear enough to you that this is
     saying <tt>I</tt> is an <tt>INTEGER</tt>, and that's good enough
     for right now.&nbsp; And I'll say more about it below, anyway.<br>
     <br>
     So now <tt>I</tt> has been declared, but it hasn't been assigned
     any value yet.&nbsp; Let's try this:<br>
-    <blockquote><tt><font color="#993399">HAL/S &gt;<font
-            color="#000000"> I = 1; </font></font>WRITE(6) 'I =', I;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">I = 1 </font></tt><font color="#993399"><tt><br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;<font color="#000000"> I = 1; </font></font>WRITE(6) 'I =', I;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">I = 1 </font></tt><font color="#993399"><tt><br>
         </tt></font><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
       </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; I: {'integer':
@@ -465,8 +458,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         whatever value had been assigned to <tt>I</tt> onto the
         stack.&nbsp; Instruction 4 takes everything currently on the
         stack, which in this case is '<tt>I =</tt>' and 1, and prints it
-        to the display.&nbsp; If you're interested, <a
-          moz-do-not-send="true" href="hal-s-compiler.html#PALMAT">you
+        to the display.&nbsp; If you're interested, <a moz-do-not-send="true" href="hal-s-compiler.html#PALMAT">you
           can read all about PALMAT on our HAL/S compiler page</a>,
         though as I said, it's not too likely to be of interest to you
         unless you're interested in helping advance HAL/S compiler
@@ -487,8 +479,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     HAL/S doesn't allow re-declaration of variables:<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> DECLARE I
         SCALAR INITIAL(1.5);</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Already declared: I</font></tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Already declared: I</font></tt><br>
     </blockquote>
     But the interpreter is a little bit forgiving, and does allow us to
     remove identifiers we've already defined.&nbsp; Subsequently we can
@@ -508,8 +499,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     By the way, you can get a list of all of the available interpreter
     commands as follows,<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> `help</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Note: Interpreter commands are
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Note: Interpreter commands are
           case-insensitive, while</font></tt><font color="#993399"><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; HAL/S source code
           is case-sensitive.&nbsp; Any input line</tt><tt><br>
@@ -527,8 +517,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .</tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .</tt></font><br>
     </blockquote>
-    I'll describe these commands in detail later, in <a
-      moz-do-not-send="true" href="#Tools">the Tools section</a>
+    I'll describe these commands in detail later, in <a moz-do-not-send="true" href="#Tools">the Tools section</a>
     below.&nbsp; Even though I've abbreviated this list, you can still
     see the most important interpreter command, <tt>`quit</tt>.<br>
     <br>
@@ -553,8 +542,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
       </tt><tt><font color="#993399">HAL/S &gt;</font> WRITE(6) 'First
         root =', X1, ' and second root =', X2;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">First root = -1.00000000000000E+00&nbsp; and
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">First root = -1.00000000000000E+00&nbsp; and
           second root = -2.00000000000000E+00</font> </tt><br>
     </blockquote>
     Or if we wanted to be really fancy, we <i>could</i> use HAL/S
@@ -565,8 +553,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     in this example.)&nbsp; We'd admittedly be daft to do so, because
     multi-line math so unwieldy for code entry, but it's certainly a
     possibility:<br>
-    <blockquote><tt><font color="#993399">HAL/S &gt; <font
-            color="#000000">`strict</font><br>
+    <blockquote><tt><font color="#993399">HAL/S &gt; <font color="#000000">`strict</font><br>
           &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; STRICT on.<br>
           HAL/S &gt; <font color="#000000">E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -593,8 +580,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
         WRITE(6) 'First root =', X1, ' and second root =', X2;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">First root = -1.00000000000000E+00&nbsp; and
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">First root = -1.00000000000000E+00&nbsp; and
           second root = -2.00000000000000E+00<br>
           HAL/S &gt; <font color="#000000">`nostrict</font><br>
           &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; STRICT off.<br>
@@ -604,8 +590,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     polynomial evaluates to 0:<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> WRITE(6) A
         X1**2 + B X1 + C, A X2**2 + B X2 + C;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font
-          color="#993399">&nbsp;&nbsp; 0.0&nbsp;&nbsp; 0.0 </font></tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#993399">&nbsp;&nbsp; 0.0&nbsp;&nbsp; 0.0 </font></tt><br>
     </blockquote>
     All of which is fine if all we need is a rather simple-minded
     calculator.&nbsp; But of course, we really wouldn't write the
@@ -747,11 +732,9 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     into the polynomials:<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> `reset<br>
         <font color="#993399">HAL/S &gt; </font>`strict</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">STRICT on.</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">STRICT on.</font></tt><tt><br>
       </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> `spool</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Now spooling input for later processing.</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Now spooling input for later processing.</font></tt><tt><br>
       </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> C/ This
         sample was adapted from p. 37 of "Programming in HAL/S".</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font> C/ It
@@ -876,6 +859,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
         ROOT1, ROOT2;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -888,8 +872,10 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
         A ROOT1**2 + B ROOT1 + C,</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -948,6 +934,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
         RE, '+/-', IM, 'i';</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -987,8 +974,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         CLOSE ROOTS;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>
         `unspool</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Halting spooling of input. Processing
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Halting spooling of input. Processing
           already-spooled input ...<br>
           HAL/S &gt;<br>
         </font></tt></blockquote>
@@ -1006,16 +992,13 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     run a <tt>PROGRAM</tt> from the interpreter, by using the
     interpreter's <tt>`run</tt> command:<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> `run ROOTS</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Running as the primary thread.</font></tt><font
-        color="#993399"><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Running as the primary thread.</font></tt><font color="#993399"><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter A, B,
           C (0,0,0 to quit):</tt><tt><br>
         </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 1 2
         3</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">Complex roots of&nbsp; 1.00000000000000E+00
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">Complex roots of&nbsp; 1.00000000000000E+00
           X**2 +&nbsp; 2.00000000000000E+00 X +&nbsp;
           3.00000000000000E+00 are: -1.00000000000000E+00 +/-&nbsp;
           1.41421356237310E+00 i</font></tt><font color="#993399"><tt><br>
@@ -1026,11 +1009,9 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
           C (0,0,0 to quit):</tt><tt><br>
         </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 1 3
         2</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">Real roots of&nbsp; 1.00000000000000E+00 X**2
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">Real roots of&nbsp; 1.00000000000000E+00 X**2
           +&nbsp; 3.00000000000000E+00 X +&nbsp; 2.00000000000000E+00
-          are: -1.00000000000000E+00&nbsp; -2.00000000000000E+00 </font></tt><font
-        color="#993399"><tt><br>
+          are: -1.00000000000000E+00&nbsp; -2.00000000000000E+00 </font></tt><font color="#993399"><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Check:&nbsp;
           0.0&nbsp;&nbsp; 0.0 </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt><br>
@@ -1038,8 +1019,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
           C (0,0,0 to quit):</tt><tt><br>
         </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 0,
         0, 0</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">Quitting ...</font></tt><font color="#993399"><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">Quitting ...</font></tt><font color="#993399"><tt><br>
         </tt></font><tt><font color="#993399">HAL/S &gt;</font> </tt><br>
     </blockquote>
     Something you may wonder about from the source code of <tt>PROGRAM
@@ -1243,8 +1223,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; l_SIMPLE:
           {'program': True, 'scope': 1}</tt><tt><br>
-        </tt></font><tt><font color="#993399">HAL/S &gt; <font
-            color="#000000">`palmat</font><br>
+        </tt></font><tt><font color="#993399">HAL/S &gt; <font color="#000000">`palmat</font><br>
           Scope 0, ROOT:<br>
           &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (No generated code)<br>
           HAL/S &gt;&nbsp; </font></tt><br>
@@ -1291,8 +1270,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     <br>
     But there are extended forms of the <tt>`data</tt> and <tt>`palmat</tt>
     commands which show us <i>all</i> of the scopes:<br>
-    <blockquote><font color="#993399"><tt>HAL/S &gt; <font
-            color="#000000">`data *</font></tt><tt><br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt; <font color="#000000">`data *</font></tt><tt><br>
         </tt><tt>Scope 0, ROOT:</tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; l_SIMPLE:
           {'program': True, 'scope': 1}</tt><tt><br>
@@ -1416,8 +1394,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     </blockquote>
     Finally, insofar as scope are concerned, as I mentioned they are in
     a hierarchical relationship that you can see as follows:<br>
-    <blockquote><font color="#993399"><tt>HAL/S &gt; <font
-            color="#000000">`scopes</font></tt><tt><br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt; <font color="#000000">`scopes</font></tt><tt><br>
         </tt><tt>Scope 0:</tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
           type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; root</tt><tt><br>
@@ -1601,8 +1578,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     </p>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> DO FOR
         TEMPORARY I = 1 TO 10; IF I &gt; 5 THEN WRITE(6) I; END;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
-          color="#993399">6 </font></tt><font color="#993399"><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993399">6 </font></tt><font color="#993399"><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7 </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9 </tt><tt><br>
@@ -1732,9 +1708,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font> poozer</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font> potato .</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font> `review</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
-          color="#993399">Review of spooled input:</font></tt><font
-        color="#993399"><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Review of spooled input:</font></tt><font color="#993399"><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; bm </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; bam </tt><tt><br>
         </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; poozer</tt><tt><br>
@@ -1854,18 +1828,16 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         text-transform: none; white-space: normal; widows: 1;
         word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
         inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a
-          href="https://creativecommons.org/publicdomain/zero/1.0/">
+        255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
-      <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-14<br>
+      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2024-08-13<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
-              hosted by ibiblio.org" src="hosted.png" width="300"
-              height="100"></a><br>
+              hosted by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i></center>
     <br>
-  </body>
-</html>
+  
+
+</body></html>

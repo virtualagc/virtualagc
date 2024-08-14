@@ -411,6 +411,9 @@ if shuttle:
     onboard computer systems.  See also <a href="Shuttle.html">Space Shuttle
     page</a>.
     <br><br>
+    If you're looking for documents related to Apollo or Gemini, refer instead
+    to <a href="links2.html">our main library page</a>.
+    <br><br>
     To avoid clutter on your screens, some details we have &mdash; download 
     size, archive from which the digitization was made, name of the person who scanned
     the document or financially subsidized it, the organizational affiliations of
@@ -479,6 +482,9 @@ else:
     blurbTop = """ 
     <i>(Our <a href="links.html">old version of this page</a> is still available, 
     but not likely to be updated in the future.)</i>
+    <br><br>
+    If you're looking for documents related to the Space Shuttle, refer instead
+    to <a href="links-shuttle.html">our Space Shuttle library page</a>.
     <br><br>
     This is our Virtual AGC Document Library.  New submissions are 
     always welcome. Suggestions of where physical documents can be found for 

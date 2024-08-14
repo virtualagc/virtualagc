@@ -31,7 +31,12 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
     
-<div align="center"><i>(This page is under construction.)</i><br>
+<div align="left"><b><font size="+1"><i>Rather than looking at this page, you would probably be better advised to consult <a moz-do-not-send="true" href="XPL-I.html">the XPL/I Page</a> if you're interested in XPL, or <a moz-do-not-send="true" href="HAL.html">the HAL/S page</a> if you're interested in HAL/S.&nbsp; <u>This</u>
+ page is a less-readable, less-organized jumble of the same material 
+appearing on those other two pages.&nbsp; This page will not receive 
+further updates.&nbsp; It has been kept, temporarily, just in case I 
+accidentally omitted useful material from those other two pages, but is 
+ultimately likely to be removed. </i></font></b><br>
     </div>
 
 
@@ -1262,7 +1267,9 @@ with the device numbers used in XPL source code <font color="#663300"><code>INPU
 somewhat-consistent scheme for associating filenames to file numbers, 
 though not all of the passes necessarily use all of the files.&nbsp; I 
 say "somewhat", because files output by one pass are sometimes input to 
-another pass using a different file number.&nbsp; Here's a handy table 
+another pass using a different file number.&nbsp; A useful though seemingly incomplete reference to the various files, is <a moz-do-not-send="true" href="Shuttle/hal-s_compiler_system_specification.pdf#page=484">the table on p. 7-4 of the "HAL/S Compiler System Specification"</a>.<br>
+</p>
+<p>Here's a handy table 
 that summarizes the file usage of each pass.&nbsp; When you see 
 something italicized, such as <i><code>HALMAT</code></i> in <code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code>,
  I mean to imply that you may or may not want to choose a different name
@@ -1274,206 +1281,310 @@ virtual-memory file, I don't know if the same file is used on successive
  passes or not, so I haven't highlighted it, but I've been using the 
 same file without any apparent difficulty.<br>
 </p>
+
 <table width="100%" cellspacing="2" cellpadding="2" border="1">
   <tbody>
     <tr>
-      <th valign="bottom">HAL/S-FC Usage<br>
+      <th valign="bottom"><font size="-1">HAL/S-FC Usage<br>
+</font>
       </th>
-      <th valign="bottom">PASS1<br>
+      <th valign="bottom"><font size="-1">PASS1<br>
+</font>
       </th>
-      <th valign="bottom">FLO<br>
+      <th valign="bottom"><font size="-1">FLO<br>
+</font>
       </th>
-      <th valign="bottom">OPT<br>
+      <th valign="bottom"><font size="-1">OPT<br>
+</font>
       </th>
-      <th valign="bottom">AUX<br>
+      <th valign="bottom"><font size="-1">AUX<br>
+</font>
       </th>
-      <th valign="bottom">PASS2<br>
+      <th valign="bottom"><font size="-1">PASS2<br>
+</font>
       </th>
-      <th valign="bottom">PASS3<br>
+      <th valign="bottom"><font size="-1">PASS3<br>
+</font>
       </th>
-      <th valign="bottom">PASS4<br>
+      <th valign="bottom"><font size="-1">PASS4<br>
+</font>
       </th>
-      <th valign="bottom">Notes<br>
+      <th valign="bottom"><font size="-1">Notes<br>
+</font>
       </th>
     </tr>
     <tr>
-      <td valign="middle" align="center">Input HAL source code<br>
+      <td valign="middle" align="center"><font size="-1">Input HAL source code<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--ddi=0,<i>SOURCECODE</i>.hal</font></code></b><b> or </b><b><code><font color="#663300">stdin<br>
-          </font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--ddi=0,<i>SOURCECODE</i>.hal</font></code></b><b> or </b><b><code><font color="#663300">stdin<br>
+          </font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle"><br>
-      </td>
-    </tr>
-    <tr>
-      <td valign="middle" align="center">Output report<br>
-      </td>
-      <td valign="top" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b><b><br>
-</b>
-      </td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-      <td valign="middle"><br>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle"><font size="-1"><br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Output error messages<br>
+      <td valign="middle" align="center"><font size="-1">Primary output listing<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b><b><br>
-</b>
+      <td valign="top" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-      <td valign="middle"><br>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=0,<i>REPORT</i>.txt</code></font></b><b> or </b><b><font color="#663300"><code>stdout</code></font></b></font></td>
+      <td valign="middle"><font size="-1"><br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Extra listing file, plus SPACELIB error messages<br>
+      <td valign="middle" align="center"><font size="-1">Output error messages<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>stderr</code></font></b></font></td>
+      <td valign="middle"><font size="-1"><br>
+</font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><font size="-1">Extra listing file, plus SPACELIB error messages<br>
+</font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code></code></font><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1" color="#663300"><code></code></font><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font>
+      <td valign="middle" align="center"><font size="-1" color="#663300"><code></code></font><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font>
       </td>
-      <td valign="middle">This file is produced by <b>PASS1</b> if "LISTING2" is among the options in PARM='...', and I don't show it in the sample <b>PASS1</b>
+      <td valign="middle" align="center"><font size="-1" color="#663300"><code></code></font><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font>
+      </td>
+      <td valign="middle" align="center"><font size="-1" color="#663300"><code></code></font><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font>
+      </td>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=2,<i>LISTING2</i>.txt</code></font></b></font>
+      </td>
+      <td valign="middle"><font size="-1">This file is produced by <b>PASS1</b> if "LISTING2" is among the options in PARM='...', and I don't show it in the sample <b>PASS1</b>
  invocation above, because LISTING2 isn't among the chosen PARM 
 options.&nbsp; However, SPACELIB directs certain error messages to it as
  well, so in some ways it's better to have it even if LISTING2 isn't 
 specified.<br>
+</font>
       </td>
     </tr>
     <tr>
-  <td valign="middle" align="center">AP-101S object code<br>
+  <td valign="middle" align="center"><font size="-1">AP-101S object module output<br>
+</font>
   </td>
-  <td valign="middle" align="center"><b>n/a</b><b><br>
-    </b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><font color="#663300"><code>--ddo=3,<i>CARDFILE</i>.bin,U</code></font><br>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+    </b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><font size="-2" color="#000000">(PASS)</font><code><br>
+--ddo=3,<i>CARDFILE</i>.bin,E<br>
+        <br>
+      </code><font size="-2" color="#000000">(BFS)</font><code><br>
+--pdso=3,<i>CARDFILE</i>,E</code></font></b><br>
+</font>
   </td>
-  <td valign="middle" align="center"><b><br>
-    </b></td>
-  <td valign="middle" align="center"><b><br>
-    </b></td>
-  <td valign="top"><a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">I think that object code output by <b>PASS2</b> is provided in a punch-card format similar to the way IBM 360 object code is</a>.&nbsp; Possibly device 3 is an actual card-punch (SYSPUNCH); I'm not sure.<br>
+  <td valign="middle" align="center"><font size="-1"><b><br>
+    </b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b><br>
+    </b></font></td>
+  <td valign="top"><font size="-1">For the PASS compiler, I think that this is in <a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the IBM 360 "card" format</a>.&nbsp; <br>
+  <br>
+For the BFS compiler, I'm unclear what this is. I think, perhaps, that 
+there's a PDS member for each "object" (COMPOOL, PROCEDURE, PROGRAM) 
+compiled, and if you don't clear the PDS, it will be every object for 
+every compilation you've compiled since the last time it was 
+cleared.&nbsp; Which makes sense.&nbsp; However, I don't understand the 
+data in these objects.<br>
+</font>
   </td>
 </tr>
 <tr>
-  <td valign="middle" align="center">Object code "deck"<br>
+  <td valign="middle" align="center"><font size="-1">Object module output ("deck")<br>
+  <br>
+Input from template library<br>
+</font>
   </td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><font color="#663300"><code>--ddo=4,<i>DECK</i>.bin,U</code></font></td>
-  <td valign="top"><br>
+  <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--pdsi=4,<i>TEMPLIB</i>,E</code></font></b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=4,<i>DECK</i>.bin,E</code></font></b></font></td>
+  <td valign="top"><font size="-1"><br>
+</font>
   </td>
-  <td valign="top"><br>
+  <td valign="top"><font size="-1"><br>
+</font>
   </td>
-  <td valign="middle" align="left">An optional copy of <font color="#663300"><code><i>CARDFILE</i></code></font>.&nbsp; (Which only makes sense if device 3 is a physical card-punch as speculated above.)<br>
+  <td valign="middle" align="left"><font size="-1">(PASS2) For the PASS compiler, an optional copy of <font color="#663300"><code><i>CARDFILE</i></code></font>.&nbsp; For the BFS compiler, the <i>only</i> copy.<br>
+  <br>
+(PASS1) The template library is similar to the collection of header files in C.&nbsp; Used only if <font color="#663300"><code>TEMPLATE</code></font> is present in the parameter string.<br>
+</font>
   </td>
 </tr>
 <tr>
-      <td valign="middle" align="center">Input error-message library<br>
+      <td valign="middle" align="center"><font size="-1">Simulation Data File (SDF) output<br>
+  <br>
+Input error-message library<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code><font color="#663300"><font color="#663300">--pdsi=5,ERRORLIB</font></font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300"><font color="#663300">--pdsi=5,ERRORLIB</font></font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><font color="#663300"><code>--pdsi=5,ERRORLIB</code></font><br>
+      <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--pdsi=5,ERRORLIB</code></font></b><br>
+</font>
 </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><font size="-1"><br>
+</font>
 </td>
-      <td valign="middle" align="center"><br>
+      <td valign="middle" align="center"><font size="-1"><br>
+</font>
 </td>
-      <td valign="middle">The 
+      <td valign="middle"><font size="-1">The 
 compiler requires access to the library of HAL/S error messages, which 
 is the folder PASS.REL32V0/ERRORLIB/.&nbsp; Note that "ERRORLIB" is 
 literally its name, and it's all you need in the command-line option if 
 you're running the compiler from the PASS.REL32V0/ directory.&nbsp; But 
 if you're running the compiler from a different directory, you need an 
 absolute or relative path to ERRORLIB.<br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Input access-rights library<br>
+      <td valign="middle" align="center"><font size="-1">Input access-rights library<br>
+  <br>
+Output to template library.<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--pdsi=6,ACCESS</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--pdsi=6,ACCESS<br>
+    <br>
+--pdso=6,<i>TEMPLIB</i>,E<br>
+</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font>
       </td>
-      <td valign="middle">The compiler also requires access to the library of access rights, 
+      <td valign="middle"><font size="-1">The compiler also requires access to the library of access rights, 
 namely the folder PASS.REL32V0/ACCESS/.&nbsp; The folder is empty, yes, because <i>you</i>
  have full access and there are no restrictions.&nbsp; But it's still 
 required!&nbsp; Note that "ACCESS" is literally its name.&nbsp; Like 
 ERRORLIB (see above), just using ACCESS in the command-line option is 
 fine only if you're running the compiler directly from the PASS.REL32V0/
  folder.<br>
+  <br>
+ Used only if <font color="#663300"><code>TEMPLATE</code></font> is 
+present in the parameter string.&nbsp; Note that the output template 
+library should not necessarily be the same as the input library on 
+device 4.<br>
+</font>
       </td>
     </tr>
     <tr>
-  <td valign="middle" align="center">Extra listing<br>
+  <td valign="middle" align="center"><font size="-1">Pseudo-assembly listing output<br>
+</font>
   </td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><b>n/a</b></td>
-  <td valign="middle" align="center"><font color="#663300"><code>--ddo=7,<i>EXTRA</i>.txt</code></font></td>
-  <td valign="top"><br>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+  <td valign="middle" align="center"><font size="-1"><b><font color="#663300"><code>--ddo=7,<i>EXTRA</i>.txt</code></font></b></font></td>
+  <td valign="top"><font size="-1"><br>
+</font>
   </td>
-  <td valign="top"><br>
+  <td valign="top"><font size="-1"><br>
+</font>
   </td>
-  <td valign="top"><br>
+  <td valign="top"><font size="-1"><br>
+</font>
   </td>
 </tr>
 <tr>
-      <td valign="middle" align="center">Output or input HALMAT<br>
+  <td valign="middle" align="center"><font size="-1">TBD<br>
+    </font></td>
+  <td valign="middle" align="center"><font size="-1" color="#663300"><b><code>--pdso=8,<i>TEMPINC</i></code></b><code><br>
+      </code></font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+</tr>
+<tr>
+  <td valign="middle" align="center"><font size="-1">Source code comparison<br>
+    </font></td>
+  <td valign="middle" align="center"><font size="-1">TBD<br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+  <td valign="top"><font size="-1"><br>
+    </font></td>
+</tr>
+<tr>
+      <td valign="middle" align="center"><font size="-1">Output or input HALMAT<br>
+</font>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#ffcccc"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#999900"><b><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#999900"><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="top">This is a "random-access file" storing "HALMAT".&nbsp; For some passes (such as <b>PASS1</b>) this is output; for others (such as <b>FLO</b>) it is input.&nbsp; When output, it doesn't need
+      <td valign="middle" align="center" bgcolor="#ffcccc"><font size="-1"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ffcccc"><font size="-1"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ffcccc"><font size="-1"><b><code><font color="#663300">--raf=B,7200,1,<i>HALMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#cccc00"><font size="-1"><b><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#cccc00"><font size="-1"><b><code><font color="#663300">--raf=B,7200,1,<i>AUXMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="top"><font size="-1">This is a "random-access file" storing "HALMAT".&nbsp; For some passes (such as <b>PASS1</b>) this is output; for others (such as <b>FLO</b>) it is input.&nbsp; When output, it doesn't need
  to 
 previously exist.&nbsp; Recall that HALMAT is the name of the 
 "intermediate language" into which <b>PASS1</b> converts your HAL/S source code.&nbsp; This file is the principal output of <b>PASS1</b>, and is what is sent along to the optimizing passes, some of which modify the HALMAT, and eventually to <b>PASS2</b>
@@ -1481,137 +1592,161 @@ previously exist.&nbsp; Recall that HALMAT is the name of the
 the apparent non-survival of adequate documentation related to HALMAT, 
 this file is presently incomprehensible even when translated from its 
 binary format into a somewhat-human-readable form.<br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Literal file<br>
+      <td valign="middle" align="center"><font size="-1">Literal file<br>
+</font>
       </td>
-      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle">This is a "random-access file" that the compiler uses to store the 
-values of literals.</td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><font size="-1"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><font size="-1"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><font size="-1"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><font size="-1"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff99ff"><font size="-1"><b><code><font color="#663300">--raf=B,1560,2,<i>LITFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle"><font size="-1">This is a "random-access file" that the compiler uses to store the 
+values of literals.&nbsp; <br>
+<br>
+<b>Note:</b> The value of a literal character-string (or a long bit-string) is actually a 32-bit <i>string descriptor</i>,
+ as opposed to the sequence of individual bytes comprising the string 
+data.&nbsp; These string descriptors in the literal file refer to the 
+areas in<font color="#663300"><code></code></font> memory in which those string-data bytes are stored.&nbsp; So the literal file is useful <i>only</i> as long as the string data memory remains intact, and has not been moved by compaction.<br>
+</font></td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Varies(?)<br>
+      <td valign="middle" align="center"><font size="-1">Phase 1 Init/Const work area, Phase 2 code generation work area<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1560,3,<i>ICFILE</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,1560,3,<i>ICFILE</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code></code></b><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1600,3,<i>OBJFILE</i>.bin<br>
-</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle">By <i><font color="#663300"><code>ICFILE</code></font></i>, I mean the INITIAL/CONSTANT queue.&nbsp; I <i>think</i> that the compiler can only hold
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,1600,3,<i>OBJFILE</i>.bin<br>
+</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle"><font size="-1">By <i><font color="#663300"><code>ICFILE</code></font></i>, I mean the INITIAL/CONSTANT queue.&nbsp; I <i>think</i> that the compiler can only hold
  a certain number of initializers in memory at once, and this file is 
 used to swap any overflow of the initializers from memory.<br>
-<br>
+</font>
+<font size="-1"><br>
+
 By <i><code>OBJFILE</code></i>, I mean a work-file that accepts data 
 related to object-code generation when it overflows the provided memory 
 buffer for it.&nbsp; It is not object code as such.<br>
+</font>
 </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Second HALMAT file<br>
+      <td valign="middle" align="center"><font size="-1">Phase 2 HALMAT work file<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b><code></code></b><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center" bgcolor="#cc9933"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#cc9933"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></td>
-      <td valign="middle" align="center" bgcolor="#cc9933"><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></td>
-      <td valign="middle" align="center"><b><code></code></b><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="top">Secondary HALMAT file.&nbsp; As you can see, we somehow end up with three separate HALMAT files:&nbsp; <br>
+      <td valign="middle" align="center" bgcolor="#ddaa33"><font size="-1"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ddaa33"><font size="-1"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ddaa33"><font size="-1"><b><code><font color="#663300">--raf=B,7200,4,<i>OPTMAT</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code></code></b><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="top"><font size="-1">Secondary HALMAT file.&nbsp; As you can see, we somehow end up with three separate HALMAT files:&nbsp; <br>
+</font>
         <ul>
-          <li><font color="#663300"><code><i>HALMAT</i>.bin</code></font>, produced by <b>PASS1</b> and used by lots of other passes.<br>
+          <li><font size="-1" color="#663300"><code><i>HALMAT</i>.bin</code></font><font size="-1">, produced by <b>PASS1</b> and used by lots of other passes.<br>
+</font>
           </li>
-          <li><font color="#663300"><code><i>OPTMAT</i>.bin</code></font>, produced by <b>OPT</b> and <i>apparently</i> not used.<br>
+          <li><font size="-1" color="#663300"><code><i>OPTMAT</i>.bin</code></font><font size="-1">, produced by <b>OPT</b> and <i>apparently</i> not used.<br>
+</font>
           </li>
-          <li><font color="#663300"><code><i>AUXMAT</i>.bin</code></font>, produced by <b>AUX</b> and used by <b>PASS2</b>.</li>
+          <li><font size="-1" color="#663300"><code><i>AUXMAT</i>.bin</code></font><font size="-1">, produced by <b>AUX</b> and used by <b>PASS2</b>.</font></li>
         </ul>
-        <p>Is <font color="#663300"><code><i>OPTMAT</i>.bin</code></font>, perhaps, the same as <font color="#663300"><code><i>AUXMAT</i>.bin</code></font>?<br>
+        <p><font size="-1">Is <font color="#663300"><code><i>OPTMAT</i>.bin</code></font>, perhaps, the same as <font color="#663300"><code><i>AUXMAT</i>.bin</code></font>?<br>
+</font>
         </p>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">SDF<br>
+      <td valign="middle" align="center"><font size="-1">Phase 3 paging area<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,1680,5,<i>SDF</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="top"><br>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,1680,5,<i>SDF</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="top"><font size="-1"><br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Virtual-memory<br>
-file<br>
+      <td valign="middle" align="center"><font size="-1">Statement data communication area<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></td>
-      <td valign="middle" align="center"><b>n/a</b></td>
-      <td valign="middle">This is a "random-access file" that the compiler uses to store blocks of virtual 
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b><code><font color="#663300">--raf=B,3360,6,<i>VMEM</i>.bin</font></code></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b></font></td>
+      <td valign="middle"><font size="-1">This is a "random-access file" that the compiler uses to store blocks of virtual 
 memory which have been temporarily unloaded from memory.<br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Input <font color="#663300"><code>COMMON</code></font> file<br>
+      <td valign="middle" align="center"><font size="-1">Input <font color="#663300"><code>COMMON</code></font> file<br>
+</font>
       </td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffff99"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON1</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#99ff99"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONf</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#99ffff"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONo</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#ff6666"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>a</i>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#ff99ff"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON2</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#cccccc"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>3</i>.out</code></font></b></td>
-      <td valign="middle">On the IBM 360, certain areas of memory, known as <font color="#663300"><code>COMMON</code></font>,
+      <td valign="middle" align="center" bgcolor="#ffff99"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON1</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#99ff99"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONf</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#99ffff"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMONo</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff6666"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>a</i>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ffccff"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON2</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#cccccc"><font size="-1"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>3</i>.out</code></font></b></font></td>
+      <td valign="middle"><font size="-1">On the IBM 360, certain areas of memory, known as <font color="#663300"><code>COMMON</code></font>,
  were expected to retain their contents when one pass of the compiler 
 was unloaded from memory, and the next pass loaded into it.&nbsp; Of 
 course, this will not happen any any computer you'll be likely to use, 
 and <b>XCOM-I</b> supports <font color="#663300"><code>COMMON</code></font> differently than that.&nbsp; Instead, each pass writes out <font color="#663300"><code>COMMON</code></font> as a file upon termination, and (optionally) inputs <font color="#663300"><code>COMMON</code></font>
  from a file upon startup.&nbsp; By default, output is to a file 
 literally called "COMMON.out", while input is disabled.&nbsp; For <b>PASS1</b>, these defaults are reasonable.&nbsp; However, each subsequent pass wants to take <font color="#663300"><code>COMMON</code></font> from the preceding pass, so the default input is no longer good. <br>
+</font>
       </td>
     </tr>
     <tr>
-      <td valign="middle" align="center">Output <font color="#663300"><code>COMMON</code></font> file<br>
+      <td valign="middle" align="center"><font size="-1">Output <font color="#663300"><code>COMMON</code></font> file<br>
+</font>
       </td>
-      <td valign="middle" align="center" bgcolor="#ffff99"><b><font color="#663300"><code>--commono=</code><code><i>COMMON1</i></code><code>.out</code></font></b><b><br>
-</b>
+      <td valign="middle" align="center" bgcolor="#ffff99"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMON1</i></code><code>.out</code></font></b><b><br>
+  </b></font>
       </td>
-      <td valign="middle" align="center" bgcolor="#99ff99"><b><font color="#663300"><code>--commono=</code><code><i>COMMONf</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#99ffff"><b><font color="#663300"><code>--commono=</code><code><i>COMMONo</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#ff6666"><b><font color="#663300"><code>--commono=</code><code><i>COMMONa</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#ff99ff"><b><font color="#663300"><code>--commono=</code><code><i>COMMON2</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center" bgcolor="#cccccc"><b><font color="#663300"><code>--commono=</code><code><i>COMMON3</i></code><code>.out</code></font></b></td>
-      <td valign="middle" align="center"><b>n/a</b><b><br>
-</b>
+      <td valign="middle" align="center" bgcolor="#99ff99"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMONf</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#99ffff"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMONo</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ff6666"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMONa</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#ffccff"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMON2</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center" bgcolor="#cccccc"><font size="-1"><b><font color="#663300"><code>--commono=</code><code><i>COMMON3</i></code><code>.out</code></font></b></font></td>
+      <td valign="middle" align="center"><font size="-1"><b>n/a</b><b><br>
+  </b></font>
       </td>
-      <td valign="middle">See the comment above.&nbsp; It is, of course, possible to omit all of the <font color="#663300"><code>--commono</code></font> options entirely, and to use <font color="#663300"><code>--commoni=</code><code>COMMON</code><code>.out</code></font> everywhere.&nbsp; This is perfectly workable, and its only drawback is the lose of transparency of what happens between passes.<br>
+      <td valign="middle"><font size="-1">See the comment above.&nbsp; It is, of course, possible to omit all of the <font color="#663300"><code>--commono</code></font> options entirely, and to use <font color="#663300"><code>--commoni=</code><code>COMMON</code><code>.out</code></font> everywhere.&nbsp; This is perfectly workable, and its only drawback is the lose of transparency of what happens between passes.<br>
+</font>
       </td>
     </tr>
   </tbody>
@@ -2297,7 +2432,10 @@ direct contradiction to McKeeman.&nbsp; What's going on here?<br>
  XCOM, it appears (thanks to Dan Weaver for this explanation) that while
  the assignments are indeed performed in a right-to-left manner as 
 documented, the peculiarities of the IBM 360 object-code generation in 
-McKeeman XCOM, shove the index <font color="#663300"><code>I</code></font> into a CPU register and reuse it without change throughout both assignments.&nbsp; So seemingly by accident, the net result is that the assignments <i>appear</i> to have been done in a left-to-right order.<br>
+McKeeman XCOM, shove the index <font color="#663300"><code>I</code></font>
+ into a CPU register and reuse it without change throughout both 
+assignments.&nbsp; So seemingly by accident, the net result is that the 
+assignments <i>appear</i> to have been done in a left-to-right order.<br>
 </p>
 <p>I can only regard this a bug in McKeeman XCOM.&nbsp; Plus, it's not 
 reliable:&nbsp; what if there are more than 2 assignments on the 
@@ -3895,7 +4033,7 @@ The <font color="#663300"><code>--extra=<i>N</i>,'<i>STRING</i>'</code></font> o
 
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; </font><font size="-1">Again, to be clear, <b>XCOM-I</b>
  itself has no cognizance whatever of control toggles.&nbsp; Control 
-toggles, if available, are provided to and used by legacy versions of <b>XCOM</b> which <b>XCOM-I</b> may have compiled for yo</font>
+toggles, if available, are provided to and used by legacy versions of <b>XCOM</b> which <b>XCOM-I</b> may have compiled for you.</font>
 </blockquote>
 
 
@@ -4739,7 +4877,10 @@ eject and header line will be printed.<br>
     </tr>
     <tr>
       <td valign="middle" align="center"><font color="#663300"><code>STRING(<i>IDENTIFIER</i>)<br>
-STRING(<i>INTEGER</i>)</code><code><br>
+STRING(<i>INTEGER</i>)<br>
+<br>
+STRINGD(<i>INTEGER</i>)<br>
+</code><code>
           </code></font></td>
       <td valign="middle">This function transforms the variable <font color="#663300"><code>NE</code></font> (which should be <font color="#663300"><code>FIXED</code></font> for proper usage) into a <font color="#663300"><code>CHARACTER</code></font> descriptor.&nbsp; <font color="#663300"><code>NE</code></font> should have the form:<br>
         <br>
@@ -4765,16 +4906,17 @@ STRING(<i>INTEGER</i>)</code><code><br>
 left is confusing.&nbsp; The whole concept is confusing.&nbsp; Here's my
  take on it:&nbsp; I believe that <font color="#663300"><code>STRING</code></font> is used in one of two situations:<br>
 <ul>
-  <li>You have an <font color="#663300"><code><i>IDENTIFIER</i></code></font> for a <font color="#663300"><code>CHARACTER</code></font> variable, and you want the string descriptor for the string contained in that variable; or</li>
-  <li>By some kind of arithmetical process, a <font color="#663300"><code><i>INTEGER</i></code></font> value has been created that you want to treat as a string descriptor.<br></li>
-</ul>
-These are respectively equivalent to<br>
-<ul>
-  <li><font color="#663300"><code>COREWORD(ADDR(IDENTIFIER))</code></font></li>
-  <li><font color="#663300"><code>INTEGER</code></font></li>
-</ul>
-<p><b>XCOM-I</b> implements <font color="#663300"><code>STRING</code></font> using these equivalences, and there is no runtime library function as such that's called <font color="#663300"><code>STRING</code></font>.<br></p>
-<p>To make things a bit more confusing, <font color="#663300"><code>STRING</code></font> is the one built-in I'm aware of that is <i>also</i>
+  <li>You have an <font color="#663300"><code><i>IDENTIFIER</i></code></font> for a <font color="#663300"><code>CHARACTER</code></font> variable, and you want the string descriptor; or else<br>
+</li>
+  <li>By some kind of arithmetical process, a string descriptor (an 
+integer) is available, and you want to make sure the compiler knows it's
+ a string descriptor rather than some arbitrary integer.&nbsp; <font color="#663300"><code><br>
+  </code></font></li>
+</ul><p>It is best to think of <font color="#663300"><code>STRING</code></font>
+ as a hint to the immediate consumer of the data that it represents a 
+string rather than an integer. Whatever hint is being supplied does not 
+persist beyond the very next operation. <b>XCOM-I</b> implements <font color="#663300"><code>STRING</code></font> using these conversions at compile time, and there is no runtime library function as such that's called <font color="#663300"><code>STRING</code></font>.<br>
+</p><p>To make things a bit more confusing, <font color="#663300"><code>STRING</code></font> is the one built-in I'm aware of that is <i>also</i>
  commonly used as a name for a variable.  If names of built-ins are 
 declared as variables (or procedures), the user's declaration overrides 
 the built-in for the scope of the declaration.<br></p>
@@ -5062,11 +5204,11 @@ The <i><font color="#663300"><code>filenum</code></font></i> parameter is tricki
  with a grain of salt.&nbsp; My inference, subject to change, is that if
  you have a dataset identified with the <font color="#663300"><code>DD</code></font> name "<font color="#663300"><code>INPUT<i>n</i></code></font>" (where <font color="#663300"><code><i>n</i></code></font> is a digit), then that is <font color="#663300"><code><i>filenum</i>=<i>n</i></code></font>; whereas a dataset named "<font color="#663300"><code>OUTPUT<i>n</i></code></font>" is associated with <font color="#663300"><code><i>filenum</i>="80000000"|<i>n</i></code></font>.&nbsp; Recall that <font color="#663300"><code>"80000000"</code></font> is XPL-speak for 0x80000000.&nbsp; So the <i><font color="#663300"><code>filenum</code></font></i> is implicit in the dataset name, and the most-significant bit is used to indicate the direction of data flow.<br>
 <br>
-For example, <font color="#663300"><code>INPUT(4)</code></font> invocations might normally input data from <font color="#663300"><code>INPUT4</code></font>, but you could associate it instead with <font color="#663300"><code>INPUT2</code></font> via<br>
+For example, <font color="#663300"><code>OUTPUT(4)</code></font> invocations might normally output data to <font color="#663300"><code>OUTPUT4</code></font>, but you could associate it instead with <code><font color="#663300">OUTPUT</font></code><font color="#663300"><code>2</code></font> via<br>
 <blockquote>
   <pre><font color="#663300">CALL MONITOR(8, 4, "80000000" | 2);</font><br></pre>
 </blockquote>
-and then reassociate it later with <font color="#663300"><code>INPUT4</code></font> via<br>
+and then reassociate it later with <code><font color="#663300">OUTPUT</font></code><font color="#663300"><code>4</code></font> via<br>
 <blockquote>
   <pre><font color="#663300">CALL MONITOR(8, 4, "80000000" | 4);<br></font></pre></blockquote>
 The description "Set PDS DDNAME" I've given as the description comes 
@@ -5379,7 +5521,38 @@ of named members, each one of which consists of some integral number of
 Revision Level from user data field as specified in the HAL/SDL ICD. The
  values are returned in the left and right halfwords of the result.<br>
 </td>
-      <td valign="middle">TBD<br>
+      <td valign="middle">I'm not fully up-to-speed as to what the 
+"revision level" and "catenation number" are, or how to obtain 
+them.&nbsp; Both terms refer to the properties of Partitioned Data Sets 
+(PDS).&nbsp; At present, the <b>XCOM-I</b> runtime library merely 
+returns the hexadecimal value F0F00000.&nbsp; As far as I know, the 
+values returned by this function are only for printing on compiler 
+reports, so the value returned may not be terribly significant.<br>
+<br>
+What follows is my (poor!) attempt to understand what this is <i>supposed</i>
+ to be going on.&nbsp; For this discussion, think of PDS as being a 
+directory on a disk drive, and think of the members of the PDS as being 
+files within that directory.<br>
+<ul>
+  <li>"Revision level":&nbsp; Apparently, whenever a member of a PDS is 
+overwritten, the preceding revisions of that member are not discarded, 
+but rather are persistent, and each is assigned a "revision 
+level".&nbsp; Or at least, whether or not the data is persistent, the 
+system is cognizant of the number of times the data has been 
+overwritten.&nbsp; Logically, the revision levels are 0 through 99, but 
+those are represented in the <code><font color="#663300">MONITOR(15)</font></code>
+ return value as pairs of EBCDIC digits.&nbsp; The revision increments 
+with each overwrite.&nbsp; In other words:&nbsp; F0F0 ("00"), F0F1 
+("01"), and so on.&nbsp; What happens after revision 99 isn't clear to 
+me.<br>
+  </li>
+  <li>"Catenation number":&nbsp; Also apparently, it was possible within JCL to attach a <i>list</i> of PDS to given device number, versus just a single PDS as currently allowed by <b>XCOM-I</b>. &nbsp; Then, presumably, when searching for a PDS member using <font color="#663300"><code>MONITOR(2)</code></font>,
+ those PDS would be searched in sequence until the desired member was 
+found.&nbsp; The "catenation number" was the index within that list of 
+PDS at which the member was found.</li>
+</ul>
+<p>Regarding potential future implementation of these concepts in the <b>XCOM-I</b> runtime library, I think it would involve prefixing the revision level to the filenames in which PDS member data is stored.<br>
+</p>
 </td>
     </tr>
     <tr>
@@ -5387,9 +5560,9 @@ Revision Level from user data field as specified in the HAL/SDL ICD. The
     </font></code></td>
       <td valign="middle">Sets flags in byte to be returned as high 
 order byte of return code at end of compilation. Flags are passed as 
-right most byte of fullword <code><font color="#663300"><i>n</i></font></code>. If high order bit of <code><font color="#663300"><i>n</i></font></code> is zero, flags are OR'ed into existing flags. If high order bit of <code><font color="#663300"><i>n</i></font></code> is one, flags replace existing flags.<br>
+rightmost byte of full word <code><font color="#663300"><i>n</i></font></code>. If high order bit of <code><font color="#663300"><i>n</i></font></code> is zero, flags are OR'ed into existing flags. If high order bit of <code><font color="#663300"><i>n</i></font></code> is one, flags replace existing flags.<br>
 </td>
-      <td valign="middle">TBD<br>
+      <td valign="middle">The flags are indeed accumulated in a global variable called <font color="#663300"><code>flags16</code></font> internal to the <b>XCOM-I</b> runtime library, but are not currently used as an exit code.<br>
 </td>
     </tr>
     <tr>
@@ -5397,7 +5570,7 @@ right most byte of fullword <code><font color="#663300"><i>n</i></font></code>. 
     </font></code></td>
       <td valign="middle">Causes <i><code><font color="#663300">name</font></code></i> to be copied to third parm field (if any) passed to <font color="#663300"><code>MONITOR</code></font> by the program that invoked the compiler. See HAL/SDL ICD.<br>
 </td>
-      <td valign="middle">TBD<br>
+      <td valign="middle">The <font color="#663300"><code>name</code></font> is presently saved in a variable called <font color="#663300"><code>programNamePassedToMonitor</code></font> within the <i>XCOM-I</i> runtime library, but is not used for anything.<br>
 </td>
     </tr>
     <tr>
@@ -5442,7 +5615,13 @@ have found the largest free block wherever it was located, whereas <b>XCOM-I</b>
     </font></code></td>
       <td valign="middle">Calls SDF access package.<br>
 </td>
-      <td valign="middle">SDF stands for Simulation Data File.&nbsp; The
+      <td valign="middle"><b>Note:</b>&nbsp; This function is not yet implemented in the <b>XCOM-I</b>
+ runtime library.&nbsp; However, unlike other unimplemented functions 
+(whose use results in a runtime abend), this function can be used 
+without negative effect other than printing an informative message on 
+stderr.<br>
+<br>
+SDF stands for Simulation Data File.&nbsp; The
  "SDF access package" (SDFPKG) was a separate program, similar to the 
 submonitor itself, with which the XPL/I program could communicate via <font color="#663300"><code>MONITOR(22)</code></font>.&nbsp; And like the submonitor, in the <b>XCOM-I</b>
  framework, SDFPKG equivalents are built into the runtime library rather
@@ -6130,7 +6309,7 @@ value.&nbsp; </font></font></font></font></font></font><font size="-1"><font siz
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-07-01<br>
+          2024-08-13<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
