@@ -25,7 +25,7 @@ import json
 import math
 #import ebcdic
 from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
-from virtualenv.create.via_global_ref.builtin import via_global_self_do
+#from virtualenv.create.via_global_ref.builtin import via_global_self_do
 
 # McKeeman p. 137 specifies that in mulit-assignments like
 #    X1, X2, ..., XN = Y;
