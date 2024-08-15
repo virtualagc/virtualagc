@@ -110,7 +110,7 @@ all:	$(TARGETS) $(TARGETSB)
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: regression
-regression: all compile test
+regression: PASS1 FLO OPT AUX PASS2 compile test
 
 # Regarding AP-101S object-code file matches, HAL/S-FC embeds its build own
 # build-timestamp in the object code, so there can be up to a 8-byte mismatch 
