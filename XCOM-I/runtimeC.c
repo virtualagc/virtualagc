@@ -1488,7 +1488,8 @@ putCHARACTER(uint32_t address, descriptor_t *str)
 
 descriptor_t *
 fixedToCharacter(int32_t i) {
-  return cToDescriptor(NULL, "%d", (int) i);
+  int j = i;
+  return cToDescriptor(NULL, "%d", j);
 }
 
 // Convert a BIT(1) through BIT(32) to FIXED.  As near as I can figure (see
