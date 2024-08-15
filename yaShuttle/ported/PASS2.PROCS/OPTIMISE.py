@@ -1,2 +1,0 @@
-def OPTIMISE(n):
-    return

@@ -1,2 +1,0 @@
-def DECODEPOP(n):
-    return

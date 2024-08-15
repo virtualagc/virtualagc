@@ -11,6 +11,8 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
                             (xplBuiltins.py) containing just functions, and g.py
                             (which continues to contain all of the variables
                             and constants).
+            2024-08-15 RSB  Eliminated standard `ebcdic` module in favor of
+                            my own `asciiToEbcdic`, for portability reasons.
 '''
 
 import sys
@@ -21,7 +23,8 @@ from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 import json
 import math
-import ebcdic
+#import ebcdic
+from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 from virtualenv.create.via_global_ref.builtin import via_global_self_do
 
 # McKeeman p. 137 specifies that in mulit-assignments like
@@ -982,7 +985,8 @@ def BYTE(s, index=0, value=None):
             elif c == '\x04':  # Replacement for EOF.
                 return 0xFE
             else:  # Everything else.
-                return c.encode('cp1140')[0]  # Get EBCDIC byte code.
+                #return c.encode('cp1140')[0]  # Get EBCDIC byte code.
+                return asciiToEbcdic[ord(c)]
         except:
             return 0
     if value == 0x4A:  # Replacement for cent sign.
@@ -992,16 +996,30 @@ def BYTE(s, index=0, value=None):
     elif value == 0xFE:  # Replacement for EOF.
         c = '\x04'
     else:  # Everything else.
-        c = bytearray([value]).decode('cp1140')
+        #c = bytearray([value]).decode('cp1140')
+        c = ebcdicToAscii[value]
     return s[:index] + c + s[index + 1:]
 
 
-# STRING_GT() is completely undocumented, as far as I know.  I'm going to 
-# assume it's a string-comparison operation.  As to whether the particular
-# collation sequence is significant or not ...
+# STRING_GT() is described on p. 13-4 of IR-182-1.
 def STRING_GT(s1, s2):
-    return s1.encode('cp1140') > s2.encode('cp1140')
-
+    length1 = len(s1)
+    length2 = len(s2)
+    length = max(length1, length2)
+    for i in range(length):
+        if i < length1:
+            c1 = asciiToEbcdic[ord(s1[i])]
+        else:
+            c1 = 0x40
+        if i < length2:
+            c2 = asciiToEbcdic[ord(s2[i])]
+        else:
+            c2 = 0x40
+        if c1 > c2:
+            return True
+        elif c1 < c2:
+            return False
+    return False
 
 # The following is supposed to give the address in memory of the variable that's
 # it's parameter.  Of course, that's specific to the IBM implementation, and
