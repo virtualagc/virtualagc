@@ -7,9 +7,10 @@
 **	Author: Daniel Weaver
 */
 /*
- * Modifications to Dan Weaver's code:
+ * Modifications to Dan Weaver's code, mostly on Dan's advice:
  * 2024-05-27 RSB   Removed the "Sim360 normal exit" message.
  * 2024-08-14 RSB	Stubbed out `get_cpu_time`.
+ * 2024-08-15 RSB	Changed `file_record_size` to `size_t`.
  */
 
 #include <stdio.h>
@@ -45,7 +46,8 @@ FILE *at_file[AT_FILES + 1];
 char at_text[512];
 int _rc, avp, xargc;
 char **xargv;
-int input_record_limit, file_record_size;
+int input_record_limit;
+size_t file_record_size;
 char *opt_letters = { "FLTAEDN" };
 
 /* Options and I/O variables */
@@ -872,7 +874,7 @@ start_simulation(void)
 	if (control['v']) {
 		printf("codesize=%08X, fetch_limit=%08X\n", codesize,
 		       fetch_limit);
-		printf("FILE() record length set to: %d\n", file_record_size);
+		printf("FILE() record length set to: %d\n", (int) file_record_size);
 	}
 	/* Set lowest modifiable address */
 	if (control['m'] == 0) {
