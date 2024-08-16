@@ -2479,7 +2479,7 @@ toFloatIBM(uint32_t *msw, uint32_t *lsw, double d) {
       return;
     }
   // x should now be in the right range, so lets just turn it into an integer.
-  f = lround(d);
+  f = llround(d);
   // Convert to a more-significant and less-significant 32-word:
   *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
   *lsw = f & 0xffffffff;
@@ -2492,7 +2492,7 @@ double
 fromFloatIBM(uint32_t msw, uint32_t lsw) {
     int s; // sign
     int e; // exponent
-    long int f;
+    long long int f;
     double x;
     s = (msw >> 31) & 1;
     e = ((msw >> 24) & 0x7f) - 64;
