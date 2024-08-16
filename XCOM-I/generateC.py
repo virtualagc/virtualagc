@@ -3029,19 +3029,22 @@ def generateC(globalScope):
     print("};", file=f)
     print("\n// Sorted list of all labels (mangled) -----------------------\n",\
           file=f)
-    print("char *mangledLabels[NUM_MANGLED] = {", file=f)
-    line = ""
-    for mangledLabel in sorted(mangledLabels):
-        if len(line) + len(mangledLabel) > 72:
-            print(line + ",", file=f)
-            line = ""
-        if len(line) == 0:
-            line = '  "' + mangledLabel + '"'
-        else:
-            line = line + ', "' + mangledLabel + '"'
-    if len(line) > 0:
-        print(line, file=f)
-    print("};", file=f)
+    if len(mangledLabels) == 0:
+        print("char *mangledLabels;", file=f)
+    else:
+        print("char *mangledLabels[NUM_MANGLED] = {", file=f)
+        line = ""
+        for mangledLabel in sorted(mangledLabels):
+            if len(line) + len(mangledLabel) > 72:
+                print(line + ",", file=f)
+                line = ""
+            if len(line) == 0:
+                line = '  "' + mangledLabel + '"'
+            else:
+                line = line + ', "' + mangledLabel + '"'
+        if len(line) > 0:
+            print(line, file=f)
+        print("};", file=f)
     print("\n// Initial memory regions ------------------------------------",\
           file=f)
     print("// Note that region 6 is often displaced downward by", file=f)
@@ -3107,7 +3110,10 @@ def generateC(globalScope):
     if sizeReducer:
         print("#define NUM_INITIALIZED %d" % numInitialized, file=f)
     print("", file=f)
-    print("extern char *mangledLabels[NUM_MANGLED];", file=f)
+    if len(mangledLabels) == 0:
+        print("extern char *mangledLabels;", file=f)
+    else:
+        print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
     print("typedef char datatype_t[MAX_DATATYPE_LENGTH + 1];", file=f)
     print("typedef struct {", file=f)

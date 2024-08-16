@@ -23,7 +23,7 @@ save:	.FORCE
 	tar -cf `date "+save/%m%d%Hsim.tar"` makefile *.c *.h
 
 clean:
-	rm -f *.o *.out *.tmp *.obj sim360 tags
+	-rm -f *.o *.out *.tmp *.obj sim360 sim360.exe tags
 
 .FORCE:
 

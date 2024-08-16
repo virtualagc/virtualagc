@@ -84,9 +84,9 @@ ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
 ifeq ($(CC), cl)
-        OUT = /Fe
+        OUT = /Fe:
         LIBS =
-        EXT = .exe
+        EXT = 
         RDYNAMIC = 
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o

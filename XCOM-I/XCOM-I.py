@@ -657,8 +657,8 @@ if targetLanguage == "C":
         shutil.copy2(basePath + "debuggingAid.c", outputFolder)
         shutil.copy2(basePath + "Makefile.template", outputFolder + "/Makefile")
     except:
-        error("Failed to create files runtimeC.c etc. in %s/" % outputFolder, \
-              scope)
+        error("Failed to copy files runtimeC.c etc. from %s into %s/" % \
+              (basePath, outputFolder), scope)
     generateC(globalScope)
     if prettyPrint:
         #print("Pretty-printing " + ppFiles["filenames"], file=sys.stderr)
