@@ -663,6 +663,9 @@ if targetLanguage == "C":
     except:
         error("Failed to copy files runtimeC.c etc. from %s into %s/" % \
               (basePath, outputFolder), scope)
+        if winKeep:
+            input()
+        sys.exit(1)
     generateC(globalScope)
     if prettyPrint:
         #print("Pretty-printing " + ppFiles["filenames"], file=sys.stderr)
