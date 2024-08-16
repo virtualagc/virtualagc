@@ -659,7 +659,8 @@ if targetLanguage == "C":
             pass
         for name in ["runtimeC.c", "runtimeC.h", "inline360.c", "inline360.h",
                   "debuggingAid.c", "Makefile.template"]:
-            shutil.copy(basePath + name, outputFolder + os.sep + name)
+            shutil.copy(basePath + name, outputFolder + os.sep + \
+                        name.replace(".template", ""))
     except:
         error("Failed to copy framework from %s into %s" % \
               (basePath, outputFolder), scope)
