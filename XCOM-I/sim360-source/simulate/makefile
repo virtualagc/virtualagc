@@ -5,11 +5,11 @@
 #
 CFLAGS=-Wall
 
-all:	sim360
-	cp sim360 ..
+all:	sim360$(EXE)
+	cp sim360$(EXE) ..
 
-sim360: system.o ibm360.o smop.o debug.o
-	$(CC) $(CFLAGS) system.o ibm360.o smop.o debug.o -lm -o sim360
+sim360$(EXE): system.o ibm360.o smop.o debug.o
+	$(CC) $(CFLAGS) system.o ibm360.o smop.o debug.o -lm -o sim360$(EXE)
 
 system.o: system.c
 ibm360.o: ibm360.c
