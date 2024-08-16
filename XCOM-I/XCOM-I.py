@@ -653,15 +653,15 @@ if targetLanguage == "C":
             shutil.rmtree(outputFolder, True)
         except:
             pass
-        os.mkdir(outputFolder)
-        shutil.copy(basePath + "runtimeC.c", outputFolder)
-        shutil.copy(basePath + "runtimeC.h", outputFolder)
-        shutil.copy(basePath + "inline360.c", outputFolder)
-        shutil.copy(basePath + "inline360.h", outputFolder)
-        shutil.copy(basePath + "debuggingAid.c", outputFolder)
-        shutil.copy(basePath + "Makefile.template", outputFolder + os.sep + "Makefile")
+        try:
+            os.mkdir(outputFolder)
+        except:
+            pass
+        for name in ["runtimeC.c", "runtimeC.h", "inline360.c", "inline360.h",
+                  "debuggingAid.c", "Makefile.template"]:
+            shutil.copy(basePath + name, outputFolder + os.sep + name)
     except:
-        error("Failed to copy files framework from %s into %s" % \
+        error("Failed to copy framework from %s into %s" % \
               (basePath, outputFolder), scope)
         if winKeep:
             input()
