@@ -64,15 +64,21 @@ all: bootstrap3 bootstrap45
 
 .PHONY: clean
 clean:
-	-rm -rf sim360 XCOM3* XCOM45* *.obj *.str *.dat *.rpt
-	-make -C $(DIR_SIM360) clean
+	-rm -rf sim360 sim360.exe XCOM3* XCOM45* *.obj *.str *.dat *.rpt
+	#-make -C $(DIR_SIM360) clean
 
 #----------------------------------------------------------------------------
 # For building sim360
 
-sim360: $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
-	make -C $(DIR_SIM360)
-	cp $(DIR_SIM360)/sim360 .
+sim360$(EXE): $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
+	$(CC) $(EXTRA) -o sim360$(EXE) \
+		$(DIR_SIM360)/system.c \
+		$(DIR_SIM360)/ibm360.c \
+		$(DIR_SIM360)/smop.c \
+		$(DIR_SIM360)/debug.c \
+		 -lm
+	#make -C $(DIR_SIM360)
+	#cp $(DIR_SIM360)/sim360$(EXE) .
 
 #----------------------------------------------------------------------------
 # Bootstrap tests for legacy source code of standard-XPL compilers.  To

@@ -59,7 +59,7 @@ XPL_APPS += ANALYZER SKELETON
 .PHONY: tests
 all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@cd bitsizeDemo && \
-	./bitsizeDemo >out.txt
+	./bitsizeDemo$(EXT) >out.txt
 	@cd bitsizeDemo && \
 	cat out.txt | \
 	csplit out.txt '%^Address Allocations .*%' \
@@ -71,7 +71,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@diff --strip-trailing-cr -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	@cd bitsizeDemoCommon && \
-	./bitsizeDemoCommon >out.txt && \
+	./bitsizeDemoCommon$(EXT) >out.txt && \
 	csplit out.txt '%^Address Allocations .*%' \
 		       '/^Initial Values .*/' \
 		       '%^Assignments .*%' >/dev/null
@@ -86,7 +86,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@diff --strip-trailing-cr -s -q bitsizeDemo/xxxxA bitsizeDemoCommon/xxxxA
 	
 	@cd bitsizeDemoCommonIn && \
-	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt
+	./bitsizeDemoCommonIn$(EXT) --commoni=../bitsizeDemoCommon/COMMON.out >out.txt
 	@cd bitsizeDemoCommonIn && \
 	csplit out.txt '%^COMMON .*%' >/dev/null
 	-@cd bitsizeDemoCommonIn && \
@@ -100,25 +100,25 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 
 	@e=Example-6.18.3 && \
 	cd $$e && \
-	./$$e <../Tests/testdata.txt >out.txt && \
+	./$$e$(EXT) <../Tests/testdata.txt >out.txt && \
 	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
 	@e=Example-6.18.4 && \
 	cd $$e && \
-	./$$e <../Tests/testdata.txt >out.txt && \
+	./$$e$(EXT) <../Tests/testdata.txt >out.txt && \
 	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
-	@Example-6.18.6/Example-6.18.6 | \
+	@Example-6.18.6/Example-6.18.6$(EXT) | \
 	egrep '^[0-9]+' | \
-	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
+	Example-6.18.5/Example-6.18.5$(EXT) >Example-6.18.5/out.txt && \
 	diff --strip-trailing-cr -s -q Example-6.18.5/out.txt Tests/Example-6.18.5-and-6.regression
 	
 	@e=breakCharactersDemo && \
 	cd $$e && \
-	./$$e >out.txt && \
+	./$$e$(EXT) >out.txt && \
 	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
-	@ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
+	@ANALYZER/ANALYZER$(EXT) <Tests/SKELETON.bnf | \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
 	>ANALYZER/out.txt && \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
@@ -137,11 +137,11 @@ testclean:
 $(XPL_APPS): 
 	@mkdir $@
 	@XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
+	$(CC) $(EXTRA) -o $@/$@$(EXT) $@/*.c -lm
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
 	@XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
+	$(CC) $(EXTRA) -o $@/$@$(EXT) $@/*.c -lm
 

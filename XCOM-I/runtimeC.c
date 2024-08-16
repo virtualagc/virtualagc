@@ -40,7 +40,7 @@
 // segregated all of that nonsense with _CL_ to make it unreachable.  In other
 // words, ignore everything inside of an #ifdef _CL_, forever and ever! If you
 // want to compile for Windows, use Msys, Mingw, or some other non-MS approach.
-// Or figure out how to solve it form me, because I'm no longer going to waste
+// Or figure out how to solve it for me, because I'm no longer going to waste
 // my time on it.
 #ifdef _CL_
 
