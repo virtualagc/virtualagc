@@ -234,7 +234,7 @@ compile: clean
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal='$(RTARGET2)' \
 		>py.rpt
-	-./PASS1$(HCSUFFIX) $(HEXTRA) \
+	-./PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,'$(RTARGET2).hal' \
 		--ddo=2,listing2.txt \
@@ -250,14 +250,14 @@ compile: clean
 	@echo Comparing ...
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >cA.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
-	@diff $(DEXTRA) -q -s cA.rpt pyA.rpt
-	@diff $(DEXTRA) -s $(PORTED)/FILE1.bin halmat.bin
-	@diff $(DEXTRA) -q -s $(PORTED)/LISTING2.txt listing2.txt
+	@diff $(DEXTRA) --strip-trailing-cr -q -s cA.rpt pyA.rpt
+	@diff $(DEXTRA) --strip-trailing-cr -s $(PORTED)/FILE1.bin halmat.bin
+	@diff $(DEXTRA) --strip-trailing-cr -q -s $(PORTED)/LISTING2.txt listing2.txt
 	
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	./FLO   \
+	./FLO$(EXT)   \
 		--ddo=2,listing2f.txt \
 		--commoni=COMMON-PASS1.out \
 		--commono=COMMON-FLO.out \
@@ -269,7 +269,7 @@ compile: clean
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	./OPT$(HCSUFFIX)   \
+	./OPT$(HCSUFFIX)$(EXT)   \
 		--ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out \
 		--commono=COMMON-OPT.out \
@@ -283,7 +283,7 @@ compile: clean
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	./AUX   \
+	./AUX$(EXT)   \
 		--ddo=2,listing2a.txt \
 		--commoni=COMMON-OPT.out \
 		--commono=COMMON-AUX.out \
@@ -298,7 +298,7 @@ compile: clean
 	cp litfilea.bin litfile2.bin
 	cp optmata.bin optmat2.bin
 	cp auxmata.bin auxmat2.bin
-	./PASS2$(HCSUFFIX) \
+	./PASS2$(HCSUFFIX)$(EXT) \
 		--ddo=2,listing22.txt \
 		$(CARDS) \
 		--ddo=4,deck2.bin,E \
