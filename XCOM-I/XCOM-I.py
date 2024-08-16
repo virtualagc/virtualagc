@@ -659,9 +659,9 @@ if targetLanguage == "C":
         shutil.copy(basePath + "inline360.c", outputFolder)
         shutil.copy(basePath + "inline360.h", outputFolder)
         shutil.copy(basePath + "debuggingAid.c", outputFolder)
-        shutil.copy(basePath + "Makefile.template", outputFolder + "/Makefile")
+        shutil.copy(basePath + "Makefile.template", outputFolder + os.sep + "Makefile")
     except:
-        error("Failed to copy files framework from %s into %s/" % \
+        error("Failed to copy files framework from %s into %s" % \
               (basePath, outputFolder), scope)
         if winKeep:
             input()

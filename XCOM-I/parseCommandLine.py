@@ -61,7 +61,7 @@ pseudoStatements = [] # One pseudo-statement per entry. See the
 psRefs = [] # One index into `lineRefs` for each `pseudoStatement`
 #sourceFiles = [] # Source filename for each line.
 verbose = True
-includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
+includeFolder = ".." + os.sep + "HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = None
 adhocs = {}
 standardXPL = False
@@ -100,7 +100,7 @@ winKeep = False
 replacementQuote = "\x12"
 replacementSpace = "\x14"
 # Folder where XCOM-I.py itself is.
-basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
+basePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 libFile = basePath + "SPACELIB.xpl"
 
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
@@ -125,17 +125,17 @@ def readFileIntoLines(filename):
             if not noInclusionDirectives:
                 if "/%INCLUDE" in line:
                     fields = line.split()
-                    readFileIntoLines(dirHALINCL + "/" + fields[1] + ".xpl")
+                    readFileIntoLines(dirHALINCL + os.sep + fields[1] + ".xpl")
                 elif None != re.search('/\\*.*\\$%.*\\*/', line):
                     # In case it isn't obvious, this was looking for 
                     # $%filename directives within a comment.
                     basename = line[:80].split('$%')[1]
                     basename = basename.split('*')[0].split()[0]
-                    readFileIntoLines(dirHALINCL + "/" + basename + ".xpl")
+                    readFileIntoLines(dirHALINCL + os.sep + basename + ".xpl")
                 elif line.lstrip().startswith('/**MERGE'):
                     fields =line.lstrip().split()
                     if baseSource != "":
-                        readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
+                        readFileIntoLines(baseSource + os.sep + fields[1] + ".xpl")
                     else:
                         readFileIntoLines(fields[1] + ".xpl")
         f.close()
@@ -405,7 +405,7 @@ for parm in sys.argv[1:]:
             if baseSource == None:
                 baseSource = os.path.dirname(parm)
             if baseSource != "":
-                dirHALINCL = baseSource + "/" + includeFolder
+                dirHALINCL = baseSource + os.sep + includeFolder
             else:
                 dirHALINCL = includeFolder
             if libFile != None:
