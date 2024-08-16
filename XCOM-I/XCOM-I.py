@@ -259,6 +259,8 @@ while True:
                 if ih not in digits["x"]:
                     error("Non-digit (%s) in double-quoted string" % \
                           ih, None)
+                    if winKeep:
+                        input()
                     sys.exit(1)
             # The leading space before the %d below relates to the fact
             # that " cannot be a character in an identifier, but digits
@@ -635,6 +637,8 @@ if False: # Print out a hierarchical tree of procedures.
                   variable["PROCEDURE"]["symbol"], \
                   variable["PROCEDURE"]["ancestors"])
     walkModel(globalScope, printProcedures)
+    if winKeep:
+        input()
     sys.exit(1)
 
 # At this point, we have generated a model of the program,

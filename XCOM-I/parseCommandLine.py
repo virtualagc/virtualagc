@@ -85,6 +85,7 @@ reentryGuard = True # Do not change this.
 #autoInline = False
 guessInlines = []
 traceInlines = False
+winKeep = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -140,6 +141,8 @@ def readFileIntoLines(filename):
         f.close()
     except:
         print("Failed to read file %s" % filename, file = sys.stderr)
+        if winKeep:
+            input()
         sys.exit(1)
 
 # Parse the command line, reading the lines of XPL source code in the
@@ -277,6 +280,11 @@ The available OPTIONS are:
                 XPL memory space for its own internal use.  If you get an 
                 out-of-reserved-memory error message from XCOM-I, you can use
                 this option to enlarge the amount of reserved memory.
+--winkeep       When running XCOM-I in Windows (but not from MSYS2), Python
+                programs run in a newly-created window that closes immediately
+                upon termination.  The side effect is that you cannot see any
+                error messages.  The --winkeep option causes the window to stay
+                open until there's a keypress.
 '''
 
 for parm in sys.argv[1:]:
@@ -286,6 +294,8 @@ for parm in sys.argv[1:]:
     #    autoInline = True
     elif parm == "--trace-inlines":
         traceInlines = True
+    elif parm == "--winkeep":
+        winKeep = True
     elif parm.startswith("--guess="):
         fields = parm[8:].split(",")
         try:
@@ -293,6 +303,8 @@ for parm in sys.argv[1:]:
                 guessInlines.append(int(field))
         except:
             print("Non-integer in --guess option", file=sys.stderr)
+            if winKeep:
+                input()
             sys.exit(1)
         debugInlines = True
         traceInlines = True
@@ -333,6 +345,8 @@ for parm in sys.argv[1:]:
         cond = parm[7:]
         if len(cond) != 1 or not cond.isupper():
             print("Illegal conditional %s" % parm, file=sys.stderr)
+            if winKeep:
+                input()
             sys.exit(1)
         if cond in ["V", "W"]:
             ifdefs -= { "V", "W" }
@@ -349,6 +363,8 @@ for parm in sys.argv[1:]:
         fields = parm[8:].split(",", 1)
         if len(fields) != 2:
             print("The --adhoc switch requires 2 sub-fields", file=sys.stderr)
+            if winKeep:
+                input()
             sys.exit(1)
         adhocs[fields[0]] = fields[1]
     elif parm.startswith("--debug="):
@@ -359,6 +375,8 @@ for parm in sys.argv[1:]:
             debugSink = sys.stderr
         else:
             print("Value for --debug not recognized", file = sys.stderr)
+            if winKeep:
+                input()
             sys.exit(1)
     elif parm == "--verbose":
         verbose = True
@@ -368,6 +386,8 @@ for parm in sys.argv[1:]:
         targetLanguage = parm[9:].upper()
         if targetLanguage not in ["C"]:
             print("Target language not supported", file = sys.stderr)
+            if winKeep:
+                input()
             sys.exit(1)
     elif parm.startswith("--output="):
         outputFolder = parm[9:]
@@ -377,6 +397,8 @@ for parm in sys.argv[1:]:
         showBacktrace = True
     elif parm.startswith("-"):
         print("Unknown option %s" % parm, file = sys.stderr)
+        if winKeep:
+            input()
         sys.exit(1)
     else:
         if firstFile:

@@ -48,10 +48,14 @@ def errxit(msg, action="abend"):
         print("Backtrace:", file=sys.stderr)
         traceback.print_stack(file=sys.stderr)
     if action == "abend":
+        if winKeep:
+            input()
         sys.exit(1)
     elif action == "return":
         return
     print("Unknown action (%s) requested", file = sys.stderr)
+    if winKeep:
+        input()
     sys.exit(2)
 
 def normalizedLabel(label):
