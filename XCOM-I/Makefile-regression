@@ -42,6 +42,22 @@ SHELL = /bin/bash
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
+ifeq ($(CC), cl)
+        OUT = /Fe:
+        LIBS =
+        EXT = 
+        RDYNAMIC = 
+else ifeq ($(findstring mingw,$(CC)),mingw)
+        OUT = -o
+        LIBS = -lm
+        EXT = .exe
+        RDYNAMIC =
+else
+        OUT = -o
+        LIBS = -lm
+        RDYNAMIC = -rdynamic
+        EXT = 
+endif
 
 XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
 XPL_APPS = Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
@@ -137,11 +153,11 @@ testclean:
 $(XPL_APPS): 
 	@mkdir $@
 	@XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
-	$(CC) $(EXTRA) -o $@/$@$(EXT) $@/*.c -lm
+	$(CC) $(EXTRA) $(OUT) $@/$@$(EXT) $@/*.c $(LIBS) $(RDYNAMIC)
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
 	@XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
-	$(CC) $(EXTRA) -o $@/$@$(EXT) $@/*.c -lm
+	$(CC) $(EXTRA) $(OUT) $@/$@$(EXT) $@/*.c $(LIBS) $(RDYNAMIC)
 
