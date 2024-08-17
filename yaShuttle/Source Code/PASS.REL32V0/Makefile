@@ -21,15 +21,21 @@
 #
 # The useful targets of the Makefile are:
 #
-#	PASS1	(these first 7 targets each compile a single pass of HAL/S-FC)
+#	PASS1	(these first 11 targets each compile a single pass of HAL/S-FC)
 #	FLO
 #	OPT
-#	AUX
+#	AUXP
 #	PASS2
 #	PASS3
 #	PASS4
+#	PASS1B
+#	OPTB
+#	PASS2B
+#	PASS3B
 #	all		(compiles all 7 passes of HAL/S-FC, both PASS and BFS)
 #	compile		(uses HAL/S-FC to compile a HAL/S source-code file)
+#	test
+#	regression
 #
 # Additional things specifiable on the `make` command line.
 #
@@ -75,7 +81,7 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
+TARGETS := PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB := PASS1B OPTB PASS2B PASS3B
 XCOM_DIR := ../../../../XCOM-I
 XCOMI := $(XCOM_DIR)/XCOM-I.py
@@ -110,7 +116,7 @@ all:	$(TARGETS) $(TARGETSB)
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: regression
-regression: PASS1 FLO OPT AUX PASS2 compile test
+regression: PASS1 FLO OPT AUXP PASS2 compile test
 
 # Regarding AP-101S object-code file matches, HAL/S-FC embeds its build own
 # build-timestamp in the object code, so there can be up to a 8-byte mismatch 
@@ -151,7 +157,7 @@ test:
 .PHONY: $(TARGETS)
 $(TARGETS):
 	@echo Building HAL/S-FC $@ ...
-	@if [[ "$@" == "AUX" ]] ; \
+	@if [[ "$@" == "AUXP" ]] ; \
 	then \
 		cd AUX_PROCS; \
 	else \
@@ -193,7 +199,7 @@ clean:
 cleanall: clean
 	-@rm $(TARGETS) $(TARGETSB) \
 	    PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
-            AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
+            AUX_PROCS/AUXP PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
             PASS4.PROCS/PASS4 \
 	    PASS1.PROCS/PASS1B OPT.PROCS/OPTB \
             PASS2.PROCS/PASS2B PASS3.PROCS/PASS3B \
@@ -208,7 +214,7 @@ cleanall: clean
 # those version codes as printed out in symbol tables.
 # 
 # Regarding the differences between the PASS and BFS versions of the compiler:
-#    1. Passes FLO, AUX, and PASS4 are identical executables.
+#    1. Passes FLO, AUXP, and PASS4 are identical executables.
 #    2. For passes PASS1, OPT, PASS2, and PASS2, the BFS version has 'B'
 #	suffixed to the executable's name.
 #    3. HAL_S_FC.py differs only in that the switch --bfs is used.
@@ -283,7 +289,7 @@ compile: clean
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	./AUX$(EXT)   \
+	./AUXP$(EXT)   \
 		--ddo=2,listing2a.txt \
 		--commoni=COMMON-OPT.out \
 		--commono=COMMON-AUX.out \
@@ -313,7 +319,7 @@ compile: clean
 		--raf=B,3360,6,vmem2.bin \
 		>c2.rpt
 
-# Stuff not yet ready enough to be moved up in the `compile` target.	
+# Stuff not yet ready enough to be moved up into the `compile` target.	
 ignore:
 	cp vmem2.bin vmem3.bin
 	cp litfile2.bin litfile3.bin

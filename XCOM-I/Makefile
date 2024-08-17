@@ -65,20 +65,17 @@ all: bootstrap3 bootstrap45
 .PHONY: clean
 clean:
 	-rm -rf sim360 sim360.exe XCOM3* XCOM45* *.obj *.str *.dat *.rpt
-	#-make -C $(DIR_SIM360) clean
 
 #----------------------------------------------------------------------------
 # For building sim360
 
-sim360$(EXE): $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
-	$(CC) $(EXTRA) -o sim360$(EXE) \
+sim360$(EXT): $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
+	$(CC) $(EXTRA) -o sim360$(EXT) \
 		$(DIR_SIM360)/system.c \
 		$(DIR_SIM360)/ibm360.c \
 		$(DIR_SIM360)/smop.c \
 		$(DIR_SIM360)/debug.c \
 		 -lm
-	#make -C $(DIR_SIM360)
-	#cp $(DIR_SIM360)/sim360$(EXE) .
 
 #----------------------------------------------------------------------------
 # Bootstrap tests for legacy source code of standard-XPL compilers.  To
@@ -144,7 +141,7 @@ bootstrap45w3:
 # embedded compile-time timestamp occupies 3 bytes.
 ELSE = else
 .PHONY: bootstrap
-bootstrap: sim360
+bootstrap: sim360$(EXT)
 	echo "Bootstrapping $(BASE) -----------------------------------------"
 	-@rm $(BASE)-360*.*
 	@XCOM-I.py $(XEXTRA) --xpl \
@@ -152,14 +149,14 @@ bootstrap: sim360
 		--output=$(BASE)-native \
 		$(XPLFILE)
 	@make -s -C $(BASE)-native
-	@$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' $(REXTRA) \
+	@$(BASE)-native/$(BASE)-native$(EXT) --extra=2,'/* $Y */' $(REXTRA) \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
 		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
 		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
 		&>$(BASE)-360.rpt
-	@sim360 --size=$(RECSIZE) \
+	@sim360$(EXT) --size=$(RECSIZE) \
 		-o0ET $(BASE)-360A.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \
@@ -168,7 +165,7 @@ bootstrap: sim360
 		-f3wb+ $(BASE)-360A.str \
 		$(BASE)-360.obj
 ifdef LEGACY
-	@sim360 --size=$(RECSIZE) \
+	@sim360$(EXT) --size=$(RECSIZE) \
 		-o0ET $(BASE)-360C.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \
