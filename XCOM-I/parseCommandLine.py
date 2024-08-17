@@ -337,6 +337,8 @@ for parm in sys.argv[1:]:
         noOverrides = True
     elif parm == "--help":
         print(helpMsg, file = sys.stderr)
+        if winKeep:
+            input()
         sys.exit(0)
     elif parm == "--xpl":
         standardXPL = True
