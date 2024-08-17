@@ -34,6 +34,12 @@
 #include <math.h>
 #include <ctype.h>
 
+#ifdef _MSC_VER
+// If the compiler identifies itself as Visual Studio C, then reenable the
+// stuff I had added and then disabled for it.
+#define _CL_
+#endif
+
 // Anything conditionally compiled with _CL_ was put in because I thought
 // it would be nice to compile using the normal Windows C compiler (cl).
 // While I did manage to get it to compile, it didn't work afterward, so I've
