@@ -45,7 +45,6 @@ ifeq ($(CC), cl)
         LIBS =
         EXT = 
         RDYNAMIC = 
-        SEP = \\
         NULL = NUL
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
@@ -53,7 +52,6 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
         LIBS = -lm
         EXT = .exe
         RDYNAMIC =
-        SEP = /
         NULL = /dev/null
 else
         SHELL = /bin/bash
@@ -61,7 +59,6 @@ else
         LIBS = -lm
         RDYNAMIC = -rdynamic
         EXT = 
-        SEP = /
         NULL = /dev/null
 endif
 
@@ -81,7 +78,7 @@ XPL_APPS += ANALYZER SKELETON
 .PHONY: tests
 all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@cd bitsizeDemo && \
-	.$(SEP)bitsizeDemo$(EXT) >out.txt
+	./bitsizeDemo$(EXT) >out.txt
 	@cd bitsizeDemo && \
 	cat out.txt | \
 	csplit out.txt '%^Address Allocations .*%' \
@@ -90,10 +87,10 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	-@cd bitsizeDemo && \
 	egrep --invert-match \
 	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
-	@diff --strip-trailing-cr -s -q bitsizeDemo$(SEP)out.txt Tests$(SEP)bitsizeDemo.regression
+	@diff --strip-trailing-cr -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	@cd bitsizeDemoCommon && \
-	.$(SEP)bitsizeDemoCommon$(EXT) >out.txt && \
+	./bitsizeDemoCommon$(EXT) >out.txt && \
 	csplit out.txt '%^Address Allocations .*%' \
 		       '/^Initial Values .*/' \
 		       '%^Assignments .*%' >$(NULL)
@@ -105,47 +102,47 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	-@cd bitsizeDemoCommon && \
 	egrep --invert-match \
 	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
-	@diff --strip-trailing-cr -s -q bitsizeDemo$(SEP)xxxxA bitsizeDemoCommon$(SEP)xxxxA
+	@diff --strip-trailing-cr -s -q bitsizeDemo/xxxxA bitsizeDemoCommon/xxxxA
 	
 	@cd bitsizeDemoCommonIn && \
-	.$(SEP)bitsizeDemoCommonIn$(EXT) --commoni=..$(SEP)bitsizeDemoCommon$(SEP)COMMON.out >out.txt
+	./bitsizeDemoCommonIn$(EXT) --commoni=../bitsizeDemoCommon/COMMON.out >out.txt
 	@cd bitsizeDemoCommonIn && \
 	csplit out.txt '%^COMMON .*%' >$(NULL)
 	-@cd bitsizeDemoCommonIn && \
 	cat xx00 | \
 	egrep --invert-match \
 	       '(^COMMON |^.?PAGE [0-9]|^$$)' > xxxx
-	@diff --strip-trailing-cr -s -q bitsizeDemoCommon$(SEP)xxxxA bitsizeDemoCommonIn$(SEP)xxxx
-	@sed 's/^;.*//' bitsizeDemoCommon$(SEP)COMMON.out >bitsizeDemoCommon$(SEP)COMMONa.out
-	@sed 's/^;.*//' bitsizeDemoCommonIn$(SEP)COMMON.out >bitsizeDemoCommonIn$(SEP)COMMONa.out
-	@diff --strip-trailing-cr -s -q bitsizeDemoCommon$(SEP)COMMONa.out bitsizeDemoCommonIn$(SEP)COMMONa.out
+	@diff --strip-trailing-cr -s -q bitsizeDemoCommon/xxxxA bitsizeDemoCommonIn/xxxx
+	@sed 's/^;.*//' bitsizeDemoCommon/COMMON.out >bitsizeDemoCommon/COMMONa.out
+	@sed 's/^;.*//' bitsizeDemoCommonIn/COMMON.out >bitsizeDemoCommonIn/COMMONa.out
+	@diff --strip-trailing-cr -s -q bitsizeDemoCommon/COMMONa.out bitsizeDemoCommonIn/COMMONa.out
 
 	@e=Example-6.18.3 && \
 	cd $$e && \
-	.$(SEP)$$e$(EXT) <..$(SEP)Tests$(SEP)testdata.txt >out.txt && \
-	diff --strip-trailing-cr -s -q out.txt ..$(SEP)Tests$(SEP)$$e.regression
+	./$$e$(EXT) <../Tests/testdata.txt >out.txt && \
+	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
 	@e=Example-6.18.4 && \
 	cd $$e && \
-	.$(SEP)$$e$(EXT) <..$(SEP)Tests$(SEP)testdata.txt >out.txt && \
-	diff --strip-trailing-cr -s -q out.txt ..$(SEP)Tests$(SEP)$$e.regression
+	./$$e$(EXT) <../Tests/testdata.txt >out.txt && \
+	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
-	@Example-6.18.6$(SEP)Example-6.18.6$(EXT) | \
+	@Example-6.18.6/Example-6.18.6$(EXT) | \
 	egrep '^[0-9]+' | \
-	Example-6.18.5$(SEP)Example-6.18.5$(EXT) >Example-6.18.5$(SEP)out.txt && \
-	diff --strip-trailing-cr -s -q Example-6.18.5$(SEP)out.txt Tests$(SEP)Example-6.18.5-and-6.regression
+	Example-6.18.5/Example-6.18.5$(EXT) >Example-6.18.5/out.txt && \
+	diff --strip-trailing-cr -s -q Example-6.18.5/out.txt Tests/Example-6.18.5-and-6.regression
 	
 	@e=breakCharactersDemo && \
 	cd $$e && \
-	.$(SEP)$$e$(EXT) >out.txt && \
-	diff --strip-trailing-cr -s -q out.txt ..$(SEP)Tests$(SEP)$$e.regression
+	./$$e$(EXT) >out.txt && \
+	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
-	@ANALYZER$(SEP)ANALYZER$(EXT) <Tests$(SEP)SKELETON.bnf | \
+	@ANALYZER/ANALYZER$(EXT) <Tests/SKELETON.bnf | \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
-	>ANALYZER$(SEP)out.txt && \
+	>ANALYZER/out.txt && \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
-	Tests$(SEP)ANALYZER-SKELETON.regression >ANALYZER$(SEP)out.regression && \
-	diff --strip-trailing-cr -s -q ANALYZER$(SEP)out.txt ANALYZER$(SEP)out.regression
+	Tests/ANALYZER-SKELETON.regression >ANALYZER/out.regression && \
+	diff --strip-trailing-cr -s -q ANALYZER/out.txt ANALYZER/out.regression
 	
 	@echo ""
 	@echo "*********** All regression tests passed! ***********"
@@ -158,12 +155,12 @@ testclean:
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
 	@mkdir $@
-	@XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests$(SEP)$@.xpl
-	$(CC) $(EXTRA) $(OUT) $@$(SEP)$@$(EXT) $@$(SEP)*.c $(LIBS) $(RDYNAMIC)
+	@XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
+	$(CC) $(EXTRA) $(OUT) $@/$@$(EXT) $@/*.c $(LIBS) $(RDYNAMIC)
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
-	@XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests$(SEP)$@.xpl
-	$(CC) $(EXTRA) $(OUT) $@$(SEP)$@$(EXT) $@$(SEP)*.c $(LIBS) $(RDYNAMIC)
+	@XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
+	$(CC) $(EXTRA) $(OUT) $@/$@$(EXT) $@/*.c $(LIBS) $(RDYNAMIC)
 
