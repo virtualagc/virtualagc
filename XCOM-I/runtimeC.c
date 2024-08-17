@@ -156,6 +156,9 @@ asciiToDescriptor(char *c) {
 }
 
 // "Print" a C string to a new or existing descriptor_t.
+#ifdef __clang__
+__attribute__((__format__ (__printf__, 3, 0)))
+#endif
 descriptor_t *
 cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
   if (descriptor == NULL)
