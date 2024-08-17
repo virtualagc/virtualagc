@@ -1,6 +1,6 @@
 {
   // File:      patch86.c
-  // For:       LIT_RESULT_TYPE.c
+  // For:       LITuRESULTuTYPE.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p86_0: ;
-  // (86)       CALL INLINE("58",1,0,DW_AD);               /* L   1,DW_AD     */          
-  address360B = (mDW_AD) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mDW_AD(0,0)
-  detailedInlineBefore(86, "L	1,mDW_AD(0,0)");
+  // (86)       CALL INLINE("58",1,0,DWuAD);               /* L   1,DWuAD     */
+  address360B = (mDWuAD) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mDWuAD(0,0)
+  detailedInlineBefore(86, "L	1,mDWuAD(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -38,10 +38,10 @@ p86_8: ;
   detailedInlineAfter();
 
 p86_10: ;
-  // (89)       CALL INLINE("58",2,0,ADDR_FIXED_LIMIT);    /* L 2,ADDR_FIXED_LIMIT */     
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(89, "L	2,mADDR_FIXED_LIMIT(0,0)");
+  // (89)       CALL INLINE("58",2,0,ADDRuFIXEDuLIMIT);    /* L 2,ADDRuFIXEDuLIMIT */
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(89, "L	2,mADDRuFIXEDuLIMIT(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 

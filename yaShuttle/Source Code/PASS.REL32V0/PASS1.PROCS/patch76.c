@@ -1,6 +1,6 @@
 {
   // File:      patch76.c
-  // For:       PREP_LITERAL.c
+  // For:       PREPuLITERAL.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p76_0: ;
-  // (76)       CALL INLINE("58",1,0,TABLE_ADDR);                                         
-  address360B = (mTABLE_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mTABLE_ADDR(0,0)
-  detailedInlineBefore(76, "L	1,mTABLE_ADDR(0,0)");
+  // (76)       CALL INLINE("58",1,0,TABLEuADDR);
+  address360B = (mTABLEuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mTABLEuADDR(0,0)
+  detailedInlineBefore(76, "L	1,mTABLEuADDR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

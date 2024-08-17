@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch17.c
-   * For:       ZERO_256.c
+   * For:       ZEROu256.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -15,10 +15,10 @@
    */
 
 p17_0: ;
-  // (17)          CALL INLINE("58", 1, 0, CORE_ADDR);  /* L   1,CORE_ADDR              */
-  address360B = (mZERO_256xCORE_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mZERO_256xCORE_ADDR(0,0)
-  detailedInlineBefore(17, "L	1,mZERO_256xCORE_ADDR(0,0)");
+  // (17)          CALL INLINE("58", 1, 0, COREuADDR);  /* L   1,COREuADDR              */
+  address360B = (mZEROu256xCOREuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mZEROu256xCOREuADDR(0,0)
+  detailedInlineBefore(17, "L	1,mZEROu256xCOREuADDR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

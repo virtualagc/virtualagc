@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch17.c
-   * For:       DUMP_SDFxINTEGERIZABLE.c
+   * For:       DUMPuSDFxINTEGERIZABLE.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -15,10 +15,10 @@
    */
 
 p17_0: ;
-  // (17)          CALL INLINE("58",1,0,FOR_DW);                                          
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(17, "L	1,mFOR_DW(0,0)");
+  // (17)          CALL INLINE("58",1,0,FORuDW);
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(17, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

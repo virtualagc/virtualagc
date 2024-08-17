@@ -1,6 +1,6 @@
 {
   // File:      patch82.c
-  // For:       STAB_HDR.c
+  // For:       STABuHDR.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,18 +13,18 @@
   //                            Inspected.
 
 p82_0: ;
-  // (82)             CALL INLINE("48", 1, 0, SRN_INX);                                   
-  address360B = (mSTAB_HDRxSRN_INX) & 0xFFFFFF;
-  // Type RX, p. 7-80:		LH	1,mSTAB_HDRxSRN_INX(0,0)
-  detailedInlineBefore(82, "LH	1,mSTAB_HDRxSRN_INX(0,0)");
+  // (82)             CALL INLINE("48", 1, 0, SRNuINX);
+  address360B = (mSTABuHDRxSRNuINX) & 0xFFFFFF;
+  // Type RX, p. 7-80:		LH	1,mSTABuHDRxSRNuINX(0,0)
+  detailedInlineBefore(82, "LH	1,mSTABuHDRxSRNuINX(0,0)");
   GR[1] = COREHALFWORD(address360B);
   detailedInlineAfter();
 
 p82_4: ;
-  // (83)             CALL INLINE("5A", 1, 0, NODE_H);                                    
-  address360B = (mSTAB_HDRxNODE_H) & 0xFFFFFF;
-  // Type RX, p. 7-12:		A	1,mSTAB_HDRxNODE_H(0,0)
-  detailedInlineBefore(83, "A	1,mSTAB_HDRxNODE_H(0,0)");
+  // (83)             CALL INLINE("5A", 1, 0, NODEuH);
+  address360B = (mSTABuHDRxNODEuH) & 0xFFFFFF;
+  // Type RX, p. 7-12:		A	1,mSTABuHDRxNODEuH(0,0)
+  detailedInlineBefore(83, "A	1,mSTABuHDRxNODEuH(0,0)");
   scratchd = GR[1] + COREWORD(address360B);
   setCC();
   GR[1] = scratch;

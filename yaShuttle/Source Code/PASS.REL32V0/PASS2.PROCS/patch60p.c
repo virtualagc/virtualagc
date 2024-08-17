@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch60p.c
-   * For:       OBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYM.c
+   * For:       OBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYM.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -16,17 +16,17 @@
 
 p60_0: ;
   // (60)             CALL INLINE("58", 1, 0, TEMP);                                      
-  address360B = (mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMP) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMP(0,0)
-  detailedInlineBefore(60, "L	1,mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMP(0,0)");
+  address360B = (mOBJECTuGENERATORxEMITuSYMuCARDSxTEMP) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mOBJECTuGENERATORxEMITuSYMuCARDSxTEMP(0,0)
+  detailedInlineBefore(60, "L	1,mOBJECTuGENERATORxEMITuSYMuCARDSxTEMP(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p60_4: ;
   // (61)             CALL INLINE("58", 2, 0, NAME);                                      
-  address360B = (mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME(0,0)
-  detailedInlineBefore(61, "L	2,mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME(0,0)");
+  address360B = (mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME(0,0)
+  detailedInlineBefore(61, "L	2,mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -41,9 +41,9 @@ p60_8: ;
 
 p60_10: ;
   // (63)             CALL INLINE("43", 3, 0, NAME);                                      
-  address360B = (mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME) & 0xFFFFFF;
-  // Type RX, p. 7-76:		IC	3,mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME(0,0)
-  detailedInlineBefore(63, "IC	3,mOBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYMxNAME(0,0)");
+  address360B = (mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME) & 0xFFFFFF;
+  // Type RX, p. 7-76:		IC	3,mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME(0,0)
+  detailedInlineBefore(63, "IC	3,mOBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYMxNAME(0,0)");
   GR[3] = memory[address360B] | (GR[3] & 0xFFFFFF00);
   detailedInlineAfter();
 
@@ -56,9 +56,9 @@ p60_14: ;
 
 p60_16: ;
   // (65)             CALL INLINE("58", 4, 0, TEMPL);                                     
-  address360B = (mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMPL) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	4,mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMPL(0,0)
-  detailedInlineBefore(65, "L	4,mOBJECT_GENERATORxEMIT_SYM_CARDSxTEMPL(0,0)");
+  address360B = (mOBJECTuGENERATORxEMITuSYMuCARDSxTEMPL) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	4,mOBJECTuGENERATORxEMITuSYMuCARDSxTEMPL(0,0)
+  detailedInlineBefore(65, "L	4,mOBJECTuGENERATORxEMITuSYMuCARDSxTEMPL(0,0)");
   GR[4] = COREWORD(address360B);
   detailedInlineAfter();
 

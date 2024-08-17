@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p0_0: ;
-  // (0)    CALL INLINE("50", 2, 0, LOWER_BOUND);                                        
-  address360B = (mCOMPACTIFYxLOWER_BOUND) & 0xFFFFFF;
-  // Type RX, p. 7-122:		ST	2,mCOMPACTIFYxLOWER_BOUND(0,0)
-  detailedInlineBefore(0, "ST	2,mCOMPACTIFYxLOWER_BOUND(0,0)");
+  // (0)    CALL INLINE("50", 2, 0, LOWERuBOUND);
+  address360B = (mCOMPACTIFYxLOWERuBOUND) & 0xFFFFFF;
+  // Type RX, p. 7-122:		ST	2,mCOMPACTIFYxLOWERuBOUND(0,0)
+  detailedInlineBefore(0, "ST	2,mCOMPACTIFYxLOWERuBOUND(0,0)");
   COREWORD2(address360B, GR[2]);
   detailedInlineAfter();
 

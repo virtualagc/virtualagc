@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch37.c
-   * For:       GENERATExENTER_CHAR_LIT.c
+   * For:       GENERATExENTERuCHARuLIT.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -16,14 +16,14 @@
 
 p37_0: ;
   // (37)       CALL INLINE("58", 1, 0, STR);                    /*  L   1,STR          */
-  address360B = (mGENERATExENTER_CHAR_LITxSTR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mGENERATExENTER_CHAR_LITxSTR(0,0)
-  detailedInlineBefore(37, "L	1,mGENERATExENTER_CHAR_LITxSTR(0,0)");
+  address360B = (mGENERATExENTERuCHARuLITxSTR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mGENERATExENTERuCHARuLITxSTR(0,0)
+  detailedInlineBefore(37, "L	1,mGENERATExENTERuCHARuLITxSTR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p37_4: ;
-  // (38)       CALL INLINE("58", 2, 0, LIT_CHAR_ADDR);          /*  L   2,LIT_CHAR_ADDR*/
+  // (38)       CALL INLINE("58", 2, 0, LITuCHARuADDR);          /*  L   2,LITuCHARuADDR*/
   address360B = (mCOMM) & 0xFFFFFF;
   // Type RX, p. 7-7:		L	2,mCOMM(0,0)
   detailedInlineBefore(38, "L	2,mCOMM(0,0)");
@@ -32,9 +32,9 @@ p37_4: ;
 
 p37_8: ;
   // (39)       CALL INLINE("58", 3, 0, TEMP);                   /*  L   3,TEMP         */
-  address360B = (mGENERATExENTER_CHAR_LITxTEMP) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	3,mGENERATExENTER_CHAR_LITxTEMP(0,0)
-  detailedInlineBefore(39, "L	3,mGENERATExENTER_CHAR_LITxTEMP(0,0)");
+  address360B = (mGENERATExENTERuCHARuLITxTEMP) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	3,mGENERATExENTERuCHARuLITxTEMP(0,0)
+  detailedInlineBefore(39, "L	3,mGENERATExENTERuCHARuLITxTEMP(0,0)");
   GR[3] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -44,9 +44,9 @@ p37_12: ;
 #if 0
   // (40)        CALL INLINE("D2", 0, 0, 3, 1, XSIZE);            /* MVC 1(0,3),XSIZE   */
   address360A = (GR[3] + 1) & 0xFFFFFF;
-  address360B = (mGENERATExENTER_CHAR_LITxXSIZE) & 0xFFFFFF;
-  // Type SS, p. 7-83:		MVC	1(0,3),mGENERATExENTER_CHAR_LITxXSIZE(0)
-  detailedInlineBefore(40, "MVC	1(0,3),mGENERATExENTER_CHAR_LITxXSIZE(0)");
+  address360B = (mGENERATExENTERuCHARuLITxXSIZE) & 0xFFFFFF;
+  // Type SS, p. 7-83:		MVC	1(0,3),mGENERATExENTERuCHARuLITxXSIZE(0)
+  detailedInlineBefore(40, "MVC	1(0,3),mGENERATExENTERuCHARuLITxXSIZE(0)");
   mvc(address360A, address360B, 0);
   detailedInlineAfter();
 #endif

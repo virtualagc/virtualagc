@@ -15,10 +15,10 @@
    */
 
 p25_0: ;
-  // (25)       CALL INLINE("58",1, 0, FOR_DW);                                           
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(25, "L	1,mFOR_DW(0,0)");
+  // (25)       CALL INLINE("58",1, 0, FORuDW);
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(25, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

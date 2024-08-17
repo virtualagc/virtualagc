@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch59p.c
-   * For:       OBJECT_GENERATORxEMIT_SYM_CARDSxEMIT_SYM.c
+   * For:       OBJECTuGENERATORxEMITuSYMuCARDSxEMITuSYM.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number

@@ -15,10 +15,10 @@
    */
 
 p1_0: ;
-  // (1)          CALL INLINE("58", 0, 0, LOWER_BOUND);                                  
-  address360B = (mCOMPACTIFYxLOWER_BOUND) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	0,mCOMPACTIFYxLOWER_BOUND(0,0)
-  detailedInlineBefore(1, "L	0,mCOMPACTIFYxLOWER_BOUND(0,0)");
+  // (1)          CALL INLINE("58", 0, 0, LOWERuBOUND);
+  address360B = (mCOMPACTIFYxLOWERuBOUND) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	0,mCOMPACTIFYxLOWERuBOUND(0,0)
+  detailedInlineBefore(1, "L	0,mCOMPACTIFYxLOWERuBOUND(0,0)");
   GR[0] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -31,10 +31,10 @@ p1_4: ;
   detailedInlineAfter();
 
 p1_8: ;
-  // (3)          CALL INLINE("58", 4, 0, UPPER_BOUND);  /* CORETOP PASSED IN R4 */      
-  address360B = (mCOMPACTIFYxUPPER_BOUND) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	4,mCOMPACTIFYxUPPER_BOUND(0,0)
-  detailedInlineBefore(3, "L	4,mCOMPACTIFYxUPPER_BOUND(0,0)");
+  // (3)          CALL INLINE("58", 4, 0, UPPERuBOUND);  /* CORETOP PASSED IN R4 */
+  address360B = (mCOMPACTIFYxUPPERuBOUND) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	4,mCOMPACTIFYxUPPERuBOUND(0,0)
+  detailedInlineBefore(3, "L	4,mCOMPACTIFYxUPPERuBOUND(0,0)");
   GR[4] = COREWORD(address360B);
   detailedInlineAfter();
 

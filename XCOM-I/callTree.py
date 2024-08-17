@@ -82,7 +82,7 @@ def callTree(globalScope):
         overrides = []
         junkProcs = [] + overrides;
         for procedure in procedureNames:
-            if procedure not in ["COMPACTIFY", "RECORD_LINK"]:
+            if procedure not in ["COMPACTIFY", "RECORDuLINK", "RECORD_LINK"]:
                 if procedureNames[procedure]["anyCalls"] == 0:
                     junkProcs.append(procedure)
         if len(junkProcs) != 0:

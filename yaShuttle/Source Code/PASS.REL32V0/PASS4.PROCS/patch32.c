@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch32.c
-   * For:       DUMP_SDFxINTEGERIZABLE.c
+   * For:       DUMPuSDFxINTEGERIZABLE.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -15,10 +15,10 @@
    */
 
 p32_0: ;
-  // (32)          CALL INLINE("58", 1, 0, ADDR_FIXER);        /* L 1,ADDR_FIXER */       
-  address360B = (mADDR_FIXER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXER(0,0)
-  detailedInlineBefore(32, "L	1,mADDR_FIXER(0,0)");
+  // (32)          CALL INLINE("58", 1, 0, ADDRuFIXER);        /* L 1,ADDRuFIXER */
+  address360B = (mADDRuFIXER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXER(0,0)
+  detailedInlineBefore(32, "L	1,mADDRuFIXER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -31,10 +31,10 @@ p32_4: ;
   detailedInlineAfter();
 
 p32_8: ;
-  // (34)          CALL INLINE("58",1,0,FOR_DW);                                          
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(34, "L	1,mFOR_DW(0,0)");
+  // (34)          CALL INLINE("58",1,0,FORuDW);
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(34, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

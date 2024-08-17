@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch56p.c
-   * For:       OBJECT_GENERATORxEMIT_CARD.c
+   * For:       OBJECTuGENERATORxEMITuCARD.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -16,17 +16,17 @@
 
 p56_0: ;
   // (56)          CALL INLINE ("58",1,0,S1);    /*LOAD DESCRIPTOR*/                      
-  address360B = (mOBJECT_GENERATORxS1) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mOBJECT_GENERATORxS1(0,0)
-  detailedInlineBefore(56, "L	1,mOBJECT_GENERATORxS1(0,0)");
+  address360B = (mOBJECTuGENERATORxS1) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mOBJECTuGENERATORxS1(0,0)
+  detailedInlineBefore(56, "L	1,mOBJECTuGENERATORxS1(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p56_4: ;
   // (57)          CALL INLINE ("41",2,0,COLUMN);    /*ADDRESS OF RECEIVING FIELD*/       
-  address360B = (mOBJECT_GENERATORxCOLUMN) & 0xFFFFFF;
-  // Type RX, p. 7-78:		LA	2,mOBJECT_GENERATORxCOLUMN(0,0)
-  detailedInlineBefore(57, "LA	2,mOBJECT_GENERATORxCOLUMN(0,0)");
+  address360B = (mOBJECTuGENERATORxCOLUMN) & 0xFFFFFF;
+  // Type RX, p. 7-78:		LA	2,mOBJECTuGENERATORxCOLUMN(0,0)
+  detailedInlineBefore(57, "LA	2,mOBJECTuGENERATORxCOLUMN(0,0)");
   GR[2] = address360B & 0xFFFFFF;
   detailedInlineAfter();
 

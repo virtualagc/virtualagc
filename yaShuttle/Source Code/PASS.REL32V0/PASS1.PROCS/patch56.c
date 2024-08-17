@@ -1,6 +1,6 @@
 {
   // File:      patch56.c
-  // For:       SAVE_LITERAL.c
+  // For:       SAVEuLITERAL.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -18,8 +18,8 @@ p56_0: ;
   address360B = (GR[1] + 0) & 0xFFFFFF;
   // Type SS, p. 7-83:		MVC	0(0,2),0(1)
   detailedInlineBefore(56, "MVC	0(0,2),0(1)");
-  // See the comments for inline p52_12 in patch52.c.
-  mvc(address360A, address360B, memory[mSAVE_LITERALxVAL]);
+  // See the comments for inline p52u12 in patch52.c.
+  mvc(address360A, address360B, memory[mSAVEuLITERALxVAL]);
   detailedInlineAfter();
 
 p56_6: ;

@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch50p.c
-   * For:       OBJECT_GENERATOR.c
+   * For:       OBJECTuGENERATOR.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -24,9 +24,9 @@ p50_0: ;
 
 p50_4: ;
   // (51)    CALL INLINE ("41",1,0,COLUMN);                                               
-  address360B = (mOBJECT_GENERATORxCOLUMN) & 0xFFFFFF;
-  // Type RX, p. 7-78:		LA	1,mOBJECT_GENERATORxCOLUMN(0,0)
-  detailedInlineBefore(51, "LA	1,mOBJECT_GENERATORxCOLUMN(0,0)");
+  address360B = (mOBJECTuGENERATORxCOLUMN) & 0xFFFFFF;
+  // Type RX, p. 7-78:		LA	1,mOBJECTuGENERATORxCOLUMN(0,0)
+  detailedInlineBefore(51, "LA	1,mOBJECTuGENERATORxCOLUMN(0,0)");
   GR[1] = address360B & 0xFFFFFF;
   detailedInlineAfter();
 

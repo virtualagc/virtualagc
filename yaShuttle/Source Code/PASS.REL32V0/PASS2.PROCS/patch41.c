@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch41.c
-   * For:       GENERATExENTER_CHAR_LIT.c
+   * For:       GENERATExENTERuCHARuLIT.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -20,7 +20,7 @@ p41_0: ;
   address360B = (GR[1] + 0) & 0xFFFFFF;
   // Type SS, p. 7-83:		MVC	0(0,2),0(1)
   detailedInlineBefore(41, "MVC	0(0,2),0(1)");
-  mvc(address360A, address360B, memory[mGENERATExENTER_CHAR_LITxXSIZE]);
+  mvc(address360A, address360B, memory[mGENERATExENTERuCHARuLITxXSIZE]);
   detailedInlineAfter();
 
 p41_6: ;

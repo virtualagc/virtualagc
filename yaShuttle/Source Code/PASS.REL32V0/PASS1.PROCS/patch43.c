@@ -1,6 +1,6 @@
 {
   // File:      patch43.c
-  // For:       MAKE_FIXED_LIT.c
+  // For:       MAKEuFIXEDuLIT.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p43_0: ;
-  // (43)       CALL INLINE("58", 1, 0, ADDR_FIXER);  /* L   1,ADDR_FIXER           */    
-  address360B = (mADDR_FIXER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXER(0,0)
-  detailedInlineBefore(43, "L	1,mADDR_FIXER(0,0)");
+  // (43)       CALL INLINE("58", 1, 0, ADDRuFIXER);  /* L   1,ADDRuFIXER           */
+  address360B = (mADDRuFIXER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXER(0,0)
+  detailedInlineBefore(43, "L	1,mADDRuFIXER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

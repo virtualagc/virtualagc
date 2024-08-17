@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch0.c
-   * For:       SCANxSCAN_FINDS_END_OF.c
+   * For:       SCANxSCANuFINDSuENDuOF.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -100,18 +100,18 @@ p0_14: ;
   detailedInlineAfter();
 
 p0_18: ;
-  // (6)       CALL INLINE ("58", 1, 0,TABLE);/* LOAD BASE ADDRESS OF TRANS_TABLE */     
-  address360B = (mSCANxSCAN_FINDS_END_OFxTABLE) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mSCANxSCAN_FINDS_END_OFxTABLE(0,0)
-  detailedInlineBefore(6, "L	1,mSCANxSCAN_FINDS_END_OFxTABLE(0,0)");
+  // (6)       CALL INLINE ("58", 1, 0,TABLE);/* LOAD BASE ADDRESS OF TRANSuTABLE */
+  address360B = (mSCANxSCANuFINDSuENDuOFxTABLE) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mSCANxSCANuFINDSuENDuOFxTABLE(0,0)
+  detailedInlineBefore(6, "L	1,mSCANxSCANuFINDSuENDuOFxTABLE(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p0_22: ;
   // (7)       CALL INLINE ("41", 12, 0,TRT); /* LOAD ADDRESS OF TRT INSTRUCTION */      
-  address360B = (mSCANxSCAN_FINDS_END_OFxTRT) & 0xFFFFFF;
-  // Type RX, p. 7-78:		LA	12,mSCANxSCAN_FINDS_END_OFxTRT(0,0)
-  detailedInlineBefore(7, "LA	12,mSCANxSCAN_FINDS_END_OFxTRT(0,0)");
+  address360B = (mSCANxSCANuFINDSuENDuOFxTRT) & 0xFFFFFF;
+  // Type RX, p. 7-78:		LA	12,mSCANxSCANuFINDSuENDuOFxTRT(0,0)
+  detailedInlineBefore(7, "LA	12,mSCANxSCANuFINDSuENDuOFxTRT(0,0)");
   GR[12] = address360B & 0xFFFFFF;
   detailedInlineAfter();
 

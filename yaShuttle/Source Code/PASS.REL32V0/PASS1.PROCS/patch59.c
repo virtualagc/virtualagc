@@ -1,6 +1,6 @@
 {
   // File:      patch59.c
-  // For:       PREP_LITERAL.c
+  // For:       PREPuLITERAL.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,18 +13,18 @@
   //                            Inspected.
 
 p59_0: ;
-  // (59)       CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);       /* L   1,ADDR_LIMIT */   
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(59, "L	1,mADDR_FIXED_LIMIT(0,0)");
+  // (59)       CALL INLINE("58", 1, 0, ADDRuFIXEDuLIMIT);       /* L   1,ADDRuLIMIT */
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(59, "L	1,mADDRuFIXEDuLIMIT(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p59_4: ;
   // (60)       CALL INLINE("58", 2, 0, TEMP1);                  /* L   2,TEMP1      */   
-  address360B = (mPREP_LITERALxTEMP1) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mPREP_LITERALxTEMP1(0,0)
-  detailedInlineBefore(60, "L	2,mPREP_LITERALxTEMP1(0,0)");
+  address360B = (mPREPuLITERALxTEMP1) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mPREPuLITERALxTEMP1(0,0)
+  detailedInlineBefore(60, "L	2,mPREPuLITERALxTEMP1(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -33,8 +33,8 @@ p59_8: ;
   // Type RR, p. 9-10:		LDR	6,0
   detailedInlineBefore(61, "LDR	6,0");
   // Where does the value of FR[0] come from?  Not from anywhere in
-  // `PREP_LITERAL`!  `PREP_LITERAL` is called from `SCAN`, immediately after
-  // `MONITOR(10, INTERNAL_BCD)`.  That must leave FR[0] populated as a
+  // `PREPuLITERAL`!  `PREPuLITERAL` is called from `SCAN`, immediately after
+  // `MONITOR(10, INTERNALuBCD)`.  That must leave FR[0] populated as a
   // side-effect.
   FR[6] = FR[0];
   detailedInlineAfter();
@@ -66,8 +66,8 @@ p59_16: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) ||
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto SAVE_NUMBER;
-      case -2: goto NOT_EXACT;
+      case -1: goto SAVEuNUMBER;
+      case -2: goto NOTuEXACT;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();
@@ -89,10 +89,10 @@ p59_20: ;
   detailedInlineAfter();
 
 p59_22: ;
-  // (67)       CALL INLINE("58", 1, 0, ADDR_FIXER);             /* L   1,ADDR_FIXER */   
-  address360B = (mADDR_FIXER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXER(0,0)
-  detailedInlineBefore(67, "L	1,mADDR_FIXER(0,0)");
+  // (67)       CALL INLINE("58", 1, 0, ADDRuFIXER);             /* L   1,ADDRuFIXER */
+  address360B = (mADDRuFIXER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXER(0,0)
+  detailedInlineBefore(67, "L	1,mADDRuFIXER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -105,10 +105,10 @@ p59_26: ;
   detailedInlineAfter();
 
 p59_30: ;
-  // (69)       CALL INLINE("58",1,0,TABLE_ADDR);                                         
-  address360B = (mTABLE_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mTABLE_ADDR(0,0)
-  detailedInlineBefore(69, "L	1,mTABLE_ADDR(0,0)");
+  // (69)       CALL INLINE("58",1,0,TABLEuADDR);
+  address360B = (mTABLEuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mTABLEuADDR(0,0)
+  detailedInlineBefore(69, "L	1,mTABLEuADDR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -146,8 +146,8 @@ p59_42: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) ||
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto SAVE_NUMBER;
-      case -2: goto NOT_EXACT;
+      case -1: goto SAVEuNUMBER;
+      case -2: goto NOTuEXACT;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();

@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p46_0: ;
-  // (46)          CALL INLINE("58",1,0,DW_AD);                                           
-  address360B = (mDW_AD) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mDW_AD(0,0)
-  detailedInlineBefore(46, "L	1,mDW_AD(0,0)");
+  // (46)          CALL INLINE("58",1,0,DWuAD);
+  address360B = (mDWuAD) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mDWuAD(0,0)
+  detailedInlineBefore(46, "L	1,mDWuAD(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

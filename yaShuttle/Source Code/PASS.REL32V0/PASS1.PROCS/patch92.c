@@ -1,6 +1,6 @@
 {
   // File:      patch92.c
-  // For:       HALMAT_INIT_CONSTxROUND_SCALAR.c
+  // For:       HALMATuINITuCONSTxROUNDuSCALAR.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p92_0: ;
-  // (92)          CALL INLINE("58", 3, 0, DW_AD);           /* L    3,DW_AD            */
-  address360B = (mDW_AD) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	3,mDW_AD(0,0)
-  detailedInlineBefore(92, "L	3,mDW_AD(0,0)");
+  // (92)          CALL INLINE("58", 3, 0, DWuAD);           /* L    3,DWuAD            */
+  address360B = (mDWuAD) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	3,mDWuAD(0,0)
+  detailedInlineBefore(92, "L	3,mDWuAD(0,0)");
   GR[3] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -38,10 +38,10 @@ p92_8: ;
   detailedInlineAfter();
 
 p92_10: ;
-  // (95)          CALL INLINE("58", 1, 0, ADDR_ROUNDER);    /* L    1,ADDR_ROUNDER     */
-  address360B = (mADDR_ROUNDER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_ROUNDER(0,0)
-  detailedInlineBefore(95, "L	1,mADDR_ROUNDER(0,0)");
+  // (95)          CALL INLINE("58", 1, 0, ADDRuROUNDER);    /* L    1,ADDRuROUNDER     */
+  address360B = (mADDRuROUNDER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuROUNDER(0,0)
+  detailedInlineBefore(95, "L	1,mADDRuROUNDER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -57,18 +57,18 @@ p92_14: ;
   detailedInlineAfter();
 
 p92_18: ;
-  // (97)          CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);/* L    1,ADDR_FIXED_LIMIT */
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(97, "L	1,mADDR_FIXED_LIMIT(0,0)");
+  // (97)          CALL INLINE("58", 1, 0, ADDRuFIXEDuLIMIT);/* L    1,ADDRuFIXEDuLIMIT */
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(97, "L	1,mADDRuFIXEDuLIMIT(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p92_22: ;
   // (98)          CALL INLINE("58", 2, 0, PTR);             /* L    2,PTR              */
-  address360B = (mHALMAT_INIT_CONSTxROUND_SCALARxPTR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mHALMAT_INIT_CONSTxROUND_SCALARxPTR(0,0)
-  detailedInlineBefore(98, "L	2,mHALMAT_INIT_CONSTxROUND_SCALARxPTR(0,0)");
+  address360B = (mHALMATuINITuCONSTxROUNDuSCALARxPTR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mHALMATuINITuCONSTxROUNDuSCALARxPTR(0,0)
+  detailedInlineBefore(98, "L	2,mHALMATuINITuCONSTxROUNDuSCALARxPTR(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -90,7 +90,7 @@ p92_30: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) ||
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto LIMIT_OK;
+      case -1: goto LIMITuOK;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();

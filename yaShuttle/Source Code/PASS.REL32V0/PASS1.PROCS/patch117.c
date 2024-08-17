@@ -1,6 +1,6 @@
 {
   // File:      patch117.c
-  // For:       HALMAT_INIT_CONSTxROUND_SCALAR.c
+  // For:       HALMATuINITuCONSTxROUNDuSCALAR.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p117_0: ;
-  // (117)          CALL INLINE("58",1,0,DW_AD);              /* L    1,DW_AD            */
-  address360B = (mDW_AD) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mDW_AD(0,0)
-  detailedInlineBefore(117, "L	1,mDW_AD(0,0)");
+  // (117)          CALL INLINE("58",1,0,DWuAD);              /* L    1,DWuAD            */
+  address360B = (mDWuAD) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mDWuAD(0,0)
+  detailedInlineBefore(117, "L	1,mDWuAD(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

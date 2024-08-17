@@ -59,7 +59,7 @@ def errxit(msg, action="abend"):
     sys.exit(2)
 
 def normalizedLabel(label):
-    return label.replace("@","a").replace("#","p").replace("$","d")
+    return label.replace("@","a").replace("#","p").replace("$","d").replace("_","u")
 
 '''
 Notes on the Translation of XPL or XPL/I Entities to C
@@ -635,7 +635,7 @@ def mangle(scope, extra = None):
     prefix = ""
     s = scope
     while True:
-        symbol = s["symbol"].replace("@", "a").replace("#", "p").replace("$","d")
+        symbol = s["symbol"].replace("@", "a").replace("#", "p").replace("$","d").replace("_","u")
         if symbol != "" and symbol[:1] != scopeDelimiter:
             prefix = symbol + "x" + prefix
         s = s["parent"]
@@ -643,13 +643,21 @@ def mangle(scope, extra = None):
             break
     scope["prefix"] = prefix
     for identifier in scope["variables"]:
+        attributes = scope["variables"][identifier]
         mangled = prefix + \
-            identifier.replace("@", "a").replace("#", "p").replace("$","d")
-        scope["variables"][identifier]["mangled"] = mangled
-        if "LABEL" in scope["variables"][identifier]:
+            identifier.replace("@", "a").replace("#", "p").replace("$","d").replace("_","u")
+        attributes["mangled"] = mangled
+        if "LABEL" in attributes:
             mangledLabels.append(mangled)
             if len(mangled) > maxLengthMangled:
                 maxLengthMangled = len(mangled)
+        if False and "RECORD" in attributes:
+            record = attributes["RECORD"]
+            newRecord = {}
+            for field in record:
+                newField = field.replace("@", "a").replace("#", "p").replace("$","d").replace("_","u")
+                newRecord[newField] = record[field]
+            attributes["RECORD"] = newRecord
 
 # A function for `walkModel` that collects some statistics about BASED RECORD.
 maxRecordFields = 0
@@ -2273,7 +2281,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if standardXPL:
                     print(indent2 + "exit(%s);" % source)
                 else:
-                    print(indent2 + "RECORD_LINK(0);")
+                    print(indent2 + "RECORDuLINK(0);")
                 print(indent + "}")
                 return;
         procedureName = procScope["symbol"]
@@ -2343,10 +2351,10 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 typem, sourcem = autoconvertMonitor(scope, line["parameters"])
                 print(indent + sourcem + ";")
             # Some builtins can be CALL'd
-            elif procedure in ["LINK", "COMPACTIFY", "RECORD_LINK", "TRACE", 
+            elif procedure in ["LINK", "COMPACTIFY", "RECORDuLINK", "TRACE", 
                              "UNTRACE", "EXIT", "MONITOR"]:
                 print(indent + procedure + "(", end = '')
-                if procedure in ["COMPACTIFY", "RECORD_LINK"]:
+                if procedure in ["COMPACTIFY", "RECORDuLINK"]:
                     print("0", end="")
                 else:
                     parameters = line["parameters"]
@@ -2497,7 +2505,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         functionName = "main"
     else:
         functionName = scopePrefix[:-1] # Remove final "x".
-        functionName.replace("#", "p").replace("@", "a").replace("$", "d")
+        functionName.replace("#", "p").replace("@", "a").replace("$", "d").replace("_","u")
     topLevel = False
     if of == None:
         ppFiles["filenames"] = ppFiles["filenames"] + " " + functionName + ".c"
@@ -2700,7 +2708,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         if not standardXPL:
             if nonCommonBase > commonBase:
                 #print(indent + "writeCOMMON(COMMON_OUT);")
-                print(indent + "RECORD_LINK(0);")
+                print(indent + "RECORDuLINK(0);")
         #print(indent + \
         #      'fprintf(stderr, "FYI: %d of %d buffers still active.\\n", countBuffers(), MAX_BUFFS);')
         #print(indent + "if (LINE_COUNT)")
@@ -2840,7 +2848,8 @@ def generateC(globalScope):
             continue
         symbol = "m" + variable["mangled"].replace("@", "a") \
                                           .replace("#", "p") \
-                                          .replace("$", "d")
+                                          .replace("$", "d") \
+                                          .replace("_", "u")
         print("#define %s %d" % (symbol, address), file=pf)
         if noLabels:
             variable["superMangled"] = "%d" % address
@@ -2963,7 +2972,9 @@ def generateC(globalScope):
             else:
                 offset = 0
             print(indentationQuantum + \
-                  '{ "%s", "%s", %d, %d, %d, %d }' % (key, subDatatype, size,
+                  '{ "%s", "%s", %d, %d, %d, %d }' % (
+                                                  key, 
+                                                  subDatatype, size,
                                                   dirWidth,
                                                   bitWidth, 
                                                   offset), \

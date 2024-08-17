@@ -40,10 +40,10 @@ p19_4: ;
   detailedInlineAfter();
 
 p19_6: ;
-  // (22)          CALL INLINE("78", 4, 0, FLT_NEGMAX);       /* LE 4,FLT_NEGMAX  */      
-  address360B = (mGENERATExINTEGERIZABLExFLT_NEGMAX) & 0xFFFFFF;
-  // Type RX, p. 9-10:		LE	4,mGENERATExINTEGERIZABLExFLT_NEGMAX(0,0)
-  detailedInlineBefore(22, "LE	4,mGENERATExINTEGERIZABLExFLT_NEGMAX(0,0)");
+  // (22)          CALL INLINE("78", 4, 0, FLTuNEGMAX);       /* LE 4,FLTuNEGMAX  */
+  address360B = (mGENERATExINTEGERIZABLExFLTuNEGMAX) & 0xFFFFFF;
+  // Type RX, p. 9-10:		LE	4,mGENERATExINTEGERIZABLExFLTuNEGMAX(0,0)
+  detailedInlineBefore(22, "LE	4,mGENERATExINTEGERIZABLExFLTuNEGMAX(0,0)");
   FR[4] = fromFloatIBM(COREWORD(address360B), 0);
   detailedInlineAfter();
 
@@ -71,17 +71,17 @@ p19_16: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) || 
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto LIT_NEGMAX;
-      case -2: goto NO_INTEGER;
+      case -1: goto LITuNEGMAX;
+      case -2: goto NOuINTEGER;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();
 
 p19_18: ;
-  // (26)          CALL INLINE("58", 1, 0, ADDR_ROUNDER);       /* L    1,ADDR_ROUNDR*/   
-  address360B = (mADDR_ROUNDER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_ROUNDER(0,0)
-  detailedInlineBefore(26, "L	1,mADDR_ROUNDER(0,0)");
+  // (26)          CALL INLINE("58", 1, 0, ADDRuROUNDER);       /* L    1,ADDRuROUNDR*/
+  address360B = (mADDRuROUNDER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuROUNDER(0,0)
+  detailedInlineBefore(26, "L	1,mADDRuROUNDER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -97,10 +97,10 @@ p19_22: ;
   detailedInlineAfter();
 
 p19_26: ;
-  // (28)          CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);   /* L    1,ADDR__LIMIT*/   
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(28, "L	1,mADDR_FIXED_LIMIT(0,0)");
+  // (28)          CALL INLINE("58", 1, 0, ADDRuFIXEDuLIMIT);   /* L    1,ADDRuuLIMIT*/
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(28, "L	1,mADDRuFIXEDuLIMIT(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -130,8 +130,8 @@ p19_38: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) || 
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto LIT_NEGMAX;
-      case -2: goto NO_INTEGER;
+      case -1: goto LITuNEGMAX;
+      case -2: goto NOuINTEGER;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();

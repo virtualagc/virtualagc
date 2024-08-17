@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch42.c
-   * For:       GENERATExINTEGER_VALUED.c
+   * For:       GENERATExINTEGERuVALUED.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -33,10 +33,10 @@ p42_2: ;
   detailedInlineAfter();
 
 p42_4: ;
-  // (44)          CALL INLINE("58", 1, 0, FOR_DW);              /* L   1,DW  */          
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(44, "L	1,mFOR_DW(0,0)");
+  // (44)          CALL INLINE("58", 1, 0, FORuDW);              /* L   1,DW  */
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(44, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

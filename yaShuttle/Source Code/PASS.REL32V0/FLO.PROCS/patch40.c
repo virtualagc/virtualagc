@@ -15,10 +15,10 @@
    */
 
 p40_0: ;
-  // (40)       CALL INLINE("58", 1, 0, ADDR_FIXER);        /* L 1,ADDR_FIXER */          
-  address360B = (mADDR_FIXER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXER(0,0)
-  detailedInlineBefore(40, "L	1,mADDR_FIXER(0,0)");
+  // (40)       CALL INLINE("58", 1, 0, ADDRuFIXER);        /* L 1,ADDRuFIXER */
+  address360B = (mADDRuFIXER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXER(0,0)
+  detailedInlineBefore(40, "L	1,mADDRuFIXER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -31,10 +31,10 @@ p40_4: ;
   detailedInlineAfter();
 
 p40_8: ;
-  // (42)       CALL INLINE("58", 1, 0, FOR_DW);                                          
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(42, "L	1,mFOR_DW(0,0)");
+  // (42)       CALL INLINE("58", 1, 0, FORuDW);
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(42, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

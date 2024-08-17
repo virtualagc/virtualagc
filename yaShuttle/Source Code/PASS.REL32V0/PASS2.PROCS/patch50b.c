@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch50b.c
-   * For:       OBJECT_GENERATORxMOVE_CHARS.c
+   * For:       OBJECTuGENERATORxMOVEuCHARS.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -15,37 +15,37 @@
    */
 
 p50_0: ;
-  // (50)    CALL INLINE("58", 1, 0, FROM_ADDR);                                          
-  address360B = (mOBJECT_GENERATORxMOVE_CHARSxFROM_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mOBJECT_GENERATORxMOVE_CHARSxFROM_ADDR(0,0)
-  detailedInlineBefore(50, "L	1,mOBJECT_GENERATORxMOVE_CHARSxFROM_ADDR(0,0)");
+  // (50)    CALL INLINE("58", 1, 0, FROMuADDR);
+  address360B = (mOBJECTuGENERATORxMOVEuCHARSxFROMuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mOBJECTuGENERATORxMOVEuCHARSxFROMuADDR(0,0)
+  detailedInlineBefore(50, "L	1,mOBJECTuGENERATORxMOVEuCHARSxFROMuADDR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p50_4: ;
-  // (51)    CALL INLINE("58", 2, 0, TO_ADDR);                                            
-  address360B = (mOBJECT_GENERATORxMOVE_CHARSxTO_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mOBJECT_GENERATORxMOVE_CHARSxTO_ADDR(0,0)
-  detailedInlineBefore(51, "L	2,mOBJECT_GENERATORxMOVE_CHARSxTO_ADDR(0,0)");
+  // (51)    CALL INLINE("58", 2, 0, TOuADDR);
+  address360B = (mOBJECTuGENERATORxMOVEuCHARSxTOuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mOBJECTuGENERATORxMOVEuCHARSxTOuADDR(0,0)
+  detailedInlineBefore(51, "L	2,mOBJECTuGENERATORxMOVEuCHARSxTOuADDR(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
 p50_8: ;
-  // (52)    CALL INLINE("48", 3, 0, BYTE_COUNT);                                         
-  address360B = (mOBJECT_GENERATORxMOVE_CHARSxBYTE_COUNT) & 0xFFFFFF;
-  // Type RX, p. 7-80:		LH	3,mOBJECT_GENERATORxMOVE_CHARSxBYTE_COUNT(0,0)
-  detailedInlineBefore(52, "LH	3,mOBJECT_GENERATORxMOVE_CHARSxBYTE_COUNT(0,0)");
+  // (52)    CALL INLINE("48", 3, 0, BYTEuCOUNT);
+  address360B = (mOBJECTuGENERATORxMOVEuCHARSxBYTEuCOUNT) & 0xFFFFFF;
+  // Type RX, p. 7-80:		LH	3,mOBJECTuGENERATORxMOVEuCHARSxBYTEuCOUNT(0,0)
+  detailedInlineBefore(52, "LH	3,mOBJECTuGENERATORxMOVEuCHARSxBYTEuCOUNT(0,0)");
   GR[3] = COREHALFWORD(address360B);
   detailedInlineAfter();
 
 p50_12: ;
-  // (53)    CALL INLINE("44", 3, 0, MVC_INSTRUCTION);                                    
-  address360B = (mOBJECT_GENERATORxMOVE_CHARSxMVC_INSTRUCTION) & 0xFFFFFF;
-  // Type RX, p. 7-74:		EX	3,mOBJECT_GENERATORxMOVE_CHARSxMVC_INSTRUCTION(0,0)
-  detailedInlineBefore(53, "EX	3,mOBJECT_GENERATORxMOVE_CHARSxMVC_INSTRUCTION(0,0)");
+  // (53)    CALL INLINE("44", 3, 0, MVCuINSTRUCTION);
+  address360B = (mOBJECTuGENERATORxMOVEuCHARSxMVCuINSTRUCTION) & 0xFFFFFF;
+  // Type RX, p. 7-74:		EX	3,mOBJECTuGENERATORxMOVEuCHARSxMVCuINSTRUCTION(0,0)
+  detailedInlineBefore(53, "EX	3,mOBJECTuGENERATORxMOVEuCHARSxMVCuINSTRUCTION(0,0)");
   // Unsupported opcode EX.  The target MVC instruction is actually given by
   // the statement:
-  //          DECLARE MVC_INSTRUCTION(1) FIXED INITIAL("D2002000","10000000");
+  //          DECLARE MVCuINSTRUCTION(1) FIXED INITIAL("D2002000","10000000");
   // This (surprise!) is an MVC instruction (p. 7-83) with an SS-style, that in
   // assembly-language (after being modified by EX) would read:
   //          MVC     0,0(2),0(1)

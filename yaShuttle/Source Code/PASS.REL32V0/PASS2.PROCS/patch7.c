@@ -15,10 +15,10 @@
    */
 
 p7_0: ;
-  // (7)          CALL INLINE("58", 1, 0, CORE_ADDR);  /* L   1,CORE_ADDR              */
-  address360B = (mZERO_256xCORE_ADDR) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mZERO_256xCORE_ADDR(0,0)
-  detailedInlineBefore(7, "L	1,mZERO_256xCORE_ADDR(0,0)");
+  // (7)          CALL INLINE("58", 1, 0, COREuADDR);  /* L   1,COREuADDR              */
+  address360B = (mZEROu256xCOREuADDR) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mZEROu256xCOREuADDR(0,0)
+  detailedInlineBefore(7, "L	1,mZEROu256xCOREuADDR(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -32,17 +32,17 @@ p7_4: ;
 
 p7_8: ;
   // (9)          CALL INLINE("48", 2, 0, COUNT);      /* LH  2,COUNT                  */
-  address360B = (mZERO_256xCOUNT) & 0xFFFFFF;
-  // Type RX, p. 7-80:		LH	2,mZERO_256xCOUNT(0,0)
-  detailedInlineBefore(9, "LH	2,mZERO_256xCOUNT(0,0)");
+  address360B = (mZEROu256xCOUNT) & 0xFFFFFF;
+  // Type RX, p. 7-80:		LH	2,mZEROu256xCOUNT(0,0)
+  detailedInlineBefore(9, "LH	2,mZEROu256xCOUNT(0,0)");
   GR[2] = COREHALFWORD(address360B);
   detailedInlineAfter();
 
 p7_12: ;
   // (10)          CALL INLINE("58", 3, 0, MVCTEMP);    /* L   3,MVCTEMP                */
-  address360B = (mZERO_256xMVCTEMP) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	3,mZERO_256xMVCTEMP(0,0)
-  detailedInlineBefore(10, "L	3,mZERO_256xMVCTEMP(0,0)");
+  address360B = (mZEROu256xMVCTEMP) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	3,mZEROu256xMVCTEMP(0,0)
+  detailedInlineBefore(10, "L	3,mZEROu256xMVCTEMP(0,0)");
   GR[3] = COREWORD(address360B);
   detailedInlineAfter();
 

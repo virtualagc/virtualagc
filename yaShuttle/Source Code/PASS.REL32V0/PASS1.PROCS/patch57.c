@@ -1,6 +1,6 @@
 {
   // File:      patch57.c
-  // For:       PREP_LITERAL.c
+  // For:       PREPuLITERAL.c
   // Notes:     1. Page references are from IBM "ESA/390 Principles of
   //               Operation", SA22-7201-08, Ninth Edition, June 2003.
   //            2. Labels are of the form p%d_%d, where the 1st number
@@ -13,10 +13,10 @@
   //                            Inspected.
 
 p57_0: ;
-  // (57)          CALL INLINE("58",1,0,ADDR_FIXED_LIMIT); /* L 1,ADDR_FIXED_LIMIT*/      
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(57, "L	1,mADDR_FIXED_LIMIT(0,0)");
+  // (57)          CALL INLINE("58",1,0,ADDRuFIXEDuLIMIT); /* L 1,ADDRuFIXEDuLIMIT*/
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(57, "L	1,mADDRuFIXEDuLIMIT(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

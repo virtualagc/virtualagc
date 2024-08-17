@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch19.c
-   * For:       DUMP_SDFxINTEGERIZABLE.c
+   * For:       DUMPuSDFxINTEGERIZABLE.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -40,18 +40,18 @@ p19_4: ;
   detailedInlineAfter();
 
 p19_6: ;
-  // (22)          CALL INLINE("78", 4, 0, FLT_NEGMAX);        /* LE 4,FLT_NEGMAX */      
-  address360B = (mDUMP_SDFxINTEGERIZABLExFLT_NEGMAX) & 0xFFFFFF;
-  // Type RX, p. 9-10:		LE	4,mDUMP_SDFxINTEGERIZABLExFLT_NEGMAX(0,0)
-  detailedInlineBefore(22, "LE	4,mDUMP_SDFxINTEGERIZABLExFLT_NEGMAX(0,0)");
+  // (22)          CALL INLINE("78", 4, 0, FLTuNEGMAX);        /* LE 4,FLTuNEGMAX */
+  address360B = (mDUMPuSDFxINTEGERIZABLExFLTuNEGMAX) & 0xFFFFFF;
+  // Type RX, p. 9-10:		LE	4,mDUMPuSDFxINTEGERIZABLExFLTuNEGMAX(0,0)
+  detailedInlineBefore(22, "LE	4,mDUMPuSDFxINTEGERIZABLExFLTuNEGMAX(0,0)");
   FR[4] = fromFloatIBM(COREWORD(address360B), 0);
   detailedInlineAfter();
 
 p19_10: ;
   // (23)          CALL INLINE("58", 2, 0, TEMP1);             /* L 2,TEMP1   */          
-  address360B = (mDUMP_SDFxINTEGERIZABLExTEMP1) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mDUMP_SDFxINTEGERIZABLExTEMP1(0,0)
-  detailedInlineBefore(23, "L	2,mDUMP_SDFxINTEGERIZABLExTEMP1(0,0)");
+  address360B = (mDUMPuSDFxINTEGERIZABLExTEMP1) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mDUMPuSDFxINTEGERIZABLExTEMP1(0,0)
+  detailedInlineBefore(23, "L	2,mDUMPuSDFxINTEGERIZABLExTEMP1(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -71,17 +71,17 @@ p19_16: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) || 
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto LIT_NEGMAX;
-      case -2: goto NO_INTEGER;
+      case -1: goto LITuNEGMAX;
+      case -2: goto NOuINTEGER;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();
 
 p19_18: ;
-  // (26)          CALL INLINE("58", 1, 0, ADDR_ROUNDER);      /* L 1,ADDR_ROUNDER */     
-  address360B = (mADDR_ROUNDER) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_ROUNDER(0,0)
-  detailedInlineBefore(26, "L	1,mADDR_ROUNDER(0,0)");
+  // (26)          CALL INLINE("58", 1, 0, ADDRuROUNDER);      /* L 1,ADDRuROUNDER */
+  address360B = (mADDRuROUNDER) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuROUNDER(0,0)
+  detailedInlineBefore(26, "L	1,mADDRuROUNDER(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -97,18 +97,18 @@ p19_22: ;
   detailedInlineAfter();
 
 p19_26: ;
-  // (28)          CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);  /* L 1,ADDR__LIMIT */      
-  address360B = (mADDR_FIXED_LIMIT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mADDR_FIXED_LIMIT(0,0)
-  detailedInlineBefore(28, "L	1,mADDR_FIXED_LIMIT(0,0)");
+  // (28)          CALL INLINE("58", 1, 0, ADDRuFIXEDuLIMIT);  /* L 1,ADDR__LIMIT */
+  address360B = (mADDRuFIXEDuLIMIT) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mADDRuFIXEDuLIMIT(0,0)
+  detailedInlineBefore(28, "L	1,mADDRuFIXEDuLIMIT(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p19_30: ;
   // (29)          CALL INLINE("58", 2, 0, TEMP);              /* L 2,TEMP    */          
-  address360B = (mDUMP_SDFxINTEGERIZABLExTEMP) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mDUMP_SDFxINTEGERIZABLExTEMP(0,0)
-  detailedInlineBefore(29, "L	2,mDUMP_SDFxINTEGERIZABLExTEMP(0,0)");
+  address360B = (mDUMPuSDFxINTEGERIZABLExTEMP) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mDUMPuSDFxINTEGERIZABLExTEMP(0,0)
+  detailedInlineBefore(29, "L	2,mDUMPuSDFxINTEGERIZABLExTEMP(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
@@ -130,8 +130,8 @@ p19_38: ;
   if ((CC == 0 && (mask360 & 8) != 0) || (CC == 1 && (mask360 & 4) != 0) || 
       (CC == 2 && (mask360 & 2) != 0) || (CC == 3 && (mask360 & 1) != 0))
     switch (GR[2]) {
-      case -1: goto LIT_NEGMAX;
-      case -2: goto NO_INTEGER;
+      case -1: goto LITuNEGMAX;
+      case -2: goto NOuINTEGER;
       default: abend("Branch address must be a label in this procedure");
     }
   detailedInlineAfter();

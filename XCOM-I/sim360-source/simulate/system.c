@@ -829,7 +829,7 @@ start_simulation(void)
 	}
 	modpoint = return_code = 0;
 	link_address = watch_point = CORESIZE;
-	obj = open(obj_filename, O_RDONLY | O_BINARY, 0);
+	obj = open(obj_filename, O_RDONLY | _O_BINARY, 0);
 	if (obj < 0) {
 		fprintf(stderr, "open failed: %s\n", obj_filename);
 		return_code = 1;

@@ -1,7 +1,7 @@
 {
   /*
    * File:      patch68p.c
-   * For:       OBJECT_GENERATORxEMIT_ESD_CARDS.c
+   * For:       OBJECTuGENERATORxEMITuESDuCARDS.c
    * Notes:     1. Page references are from IBM "ESA/390 Principles of
    *               Operation", SA22-7201-08, Ninth Edition, June 2003.
    *            2. Labels are of the form p%d_%d, where the 1st number
@@ -16,17 +16,17 @@
 
 p68_0: ;
   // (68)                   CALL INLINE ("58",2,0,S1);                                    
-  address360B = (mOBJECT_GENERATORxS1) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	2,mOBJECT_GENERATORxS1(0,0)
-  detailedInlineBefore(68, "L	2,mOBJECT_GENERATORxS1(0,0)");
+  address360B = (mOBJECTuGENERATORxS1) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	2,mOBJECTuGENERATORxS1(0,0)
+  detailedInlineBefore(68, "L	2,mOBJECTuGENERATORxS1(0,0)");
   GR[2] = COREWORD(address360B);
   detailedInlineAfter();
 
 p68_4: ;
   // (69)                   CALL INLINE ("58",1,0,TEMP);                                  
-  address360B = (mOBJECT_GENERATORxEMIT_ESD_CARDSxTEMP) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mOBJECT_GENERATORxEMIT_ESD_CARDSxTEMP(0,0)
-  detailedInlineBefore(69, "L	1,mOBJECT_GENERATORxEMIT_ESD_CARDSxTEMP(0,0)");
+  address360B = (mOBJECTuGENERATORxEMITuESDuCARDSxTEMP) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mOBJECTuGENERATORxEMITuESDuCARDSxTEMP(0,0)
+  detailedInlineBefore(69, "L	1,mOBJECTuGENERATORxEMITuESDuCARDSxTEMP(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 

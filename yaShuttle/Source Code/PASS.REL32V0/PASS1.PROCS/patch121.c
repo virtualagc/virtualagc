@@ -13,15 +13,15 @@
   //                            Inspected.
 
 p121_0: ;
-  // (121)       CALL INLINE("58",1,0,LIT_NDX);                                            
-  address360B = (mLIT_NDX) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mLIT_NDX(0,0)
-  detailedInlineBefore(121, "L	1,mLIT_NDX(0,0)");
+  // (121)       CALL INLINE("58",1,0,LITuNDX);
+  address360B = (mLITuNDX) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mLITuNDX(0,0)
+  detailedInlineBefore(121, "L	1,mLITuNDX(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p121_4: ;
-  // (122)       CALL INLINE("50",1,0,LIT_CHAR_AD);           /* ST  1,LIT_CHAR_AD */      
+  // (122)       CALL INLINE("50",1,0,LITuCHARuAD);           /* ST  1,LITuCHARuAD */
   address360B = (mCOMM) & 0xFFFFFF;
   // Type RX, p. 7-122:		ST	1,mCOMM(0,0)
   detailedInlineBefore(122, "ST	1,mCOMM(0,0)");
@@ -29,18 +29,18 @@ p121_4: ;
   detailedInlineAfter();
 
 p121_8: ;
-  // (123)       CALL INLINE("58",1,0,FOR_DW);                                             
-  address360B = (mFOR_DW) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mFOR_DW(0,0)
-  detailedInlineBefore(123, "L	1,mFOR_DW(0,0)");
+  // (123)       CALL INLINE("58",1,0,FORuDW);
+  address360B = (mFORuDW) & 0xFFFFFF;
+  // Type RX, p. 7-7:		L	1,mFORuDW(0,0)
+  detailedInlineBefore(123, "L	1,mFORuDW(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();
 
 p121_12: ;
-  // (124)       CALL INLINE("50",1,0,DW_AD);                   /* ST  1,DW_AD       */    
-  address360B = (mDW_AD) & 0xFFFFFF;
-  // Type RX, p. 7-122:		ST	1,mDW_AD(0,0)
-  detailedInlineBefore(124, "ST	1,mDW_AD(0,0)");
+  // (124)       CALL INLINE("50",1,0,DWuAD);                   /* ST  1,DWuAD       */
+  address360B = (mDWuAD) & 0xFFFFFF;
+  // Type RX, p. 7-122:		ST	1,mDWuAD(0,0)
+  detailedInlineBefore(124, "ST	1,mDWuAD(0,0)");
   COREWORD2(address360B, GR[1]);
   detailedInlineAfter();
 
