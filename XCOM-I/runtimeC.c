@@ -158,11 +158,11 @@ asciiToDescriptor(char *c) {
 // "Print" a C string to a new or existing descriptor_t.
 descriptor_t *
 cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
-  va_list args;
   if (descriptor == NULL)
     descriptor = nextBuffer();
   if (fmt == NULL)
     return descriptor;
+  va_list args;
   va_start(args, fmt);
   descriptor->numBytes =
       vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
