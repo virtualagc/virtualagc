@@ -26,6 +26,8 @@
 // For Windows with Virtual Studio
 #include <stdlib.h>
 #include <sys/types.h>
+#include <BaseTsd.h>
+typedef SSIZE_t ssize_t;
 // MSVC defines this in winsock2.h, but including that messes us up.
 typedef struct timeval {
 	long tv_sec;
