@@ -57,9 +57,15 @@ ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
 ifeq ($(CC), cl)
+        OUT = /Fe:
         CMP = fc /B
+        EXT = .exe
+        LIBS = 
 else
+        OUT = -o
         CMP = cmp -l
+        EXT =
+        LIBS = -lm
 endif
 
 DIR_SIM360 = sim360-source/simulate
@@ -75,12 +81,12 @@ clean:
 # For building sim360
 
 sim360$(EXT): $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
-	$(CC) $(EXTRA) -o sim360$(EXT) \
+	$(CC) $(EXTRA) $(OUT) sim360$(EXT) \
 		$(DIR_SIM360)/system.c \
 		$(DIR_SIM360)/ibm360.c \
 		$(DIR_SIM360)/smop.c \
 		$(DIR_SIM360)/debug.c \
-		 -lm
+		$(LIBS)
 
 #----------------------------------------------------------------------------
 # Bootstrap tests for legacy source code of standard-XPL compilers.  To
