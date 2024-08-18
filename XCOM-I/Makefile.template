@@ -79,7 +79,6 @@
 #	Conversely, if you're trying to figure out something XCOM-I and I 
 #	screwed up, you could use EXTRA='-Wall' to enable all warning messages.
 
-TARGET := $(basename $(notdir $(lastword $(CURDIR))))
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
@@ -89,22 +88,29 @@ ifeq ($(CC), cl)
         EXT = 
         RDYNAMIC = 
         CP = copy
+        MV = move
         NULL = NUL
+        RM = del
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
         EXT = .exe
         RDYNAMIC =
         CP = cp
+        MV = mv
         NULL = /dev/null
+        RM = rm
 else
         OUT = -o
         LIBS = -lm
         RDYNAMIC = -rdynamic
         EXT = 
         CP = cp
+        MV = mv
         NULL = /dev/null
+        RM = rm
 endif
+TARGET := $(basename $(notdir $(lastword $(CURDIR))))$(EXT)
 
 SOURCES := $(wildcard *.c)
 HEADERS := $(wildcard *.h)
@@ -113,11 +119,10 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS) $(RDYNAMIC)
-	$(CP) $@$(EXT) ..
+	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(RDYNAMIC)
+	$(MV) $@ ..
 
 .PHONY: clean
 clean:
-	-rm $(TARGET) >$(NULL) 2>$(NULL) # For Linux or Mac
-	-del $(TARGET) >$(NULL) 2>$(NULL) # For Windows
+	-$(RM) $(TARGET) *.exe *.o *.obj >$(NULL) 2>$(NULL)
 
