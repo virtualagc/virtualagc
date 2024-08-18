@@ -54,10 +54,8 @@ all:	sim360$(EXE)
 sim360$(EXE): system.o ibm360.o smop.o debug.o
 	$(CC) $(CFLAGS) system.o ibm360.o smop.o debug.o $(LIBS) $(RDYNAMIC) $(OUT) sim360$(EXT)
 
-system.o: system.c
-ibm360.o: ibm360.c
-debug.o: debug.c
-smop.o: smop.c
+%.o: %.c
+	$(CC) $(CFLAGS) -c $(OUT) $@ $^
 
 tags:
 	ctags system.c ibm360.c smop.c debug.c sim.h
