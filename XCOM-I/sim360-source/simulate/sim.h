@@ -12,8 +12,17 @@
 */
 /*
  * Modifications to Dan Weaver's code:
- * 2024-05-21 RSB   Added some `extern`'s.
+ * 2024-05-21 RSB   Added some extern's.
  */
+
+#if defined(_MSC_VER)
+// Visual Studio
+#include <stddef.h>
+#include <stdint.h>
+typedef intmax_t int64_t;
+typedef uintmax_t uint64_t;
+#define __XPL_TYPEDEFS
+#endif
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 /* C99 standard */

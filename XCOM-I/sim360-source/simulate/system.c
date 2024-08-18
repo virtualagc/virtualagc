@@ -34,7 +34,7 @@ int gettimeofday(struct timeval * tp, struct timezone * tzp)
 {
 	struct timespec ts;
 	timespec_get(&ts, TIME_UTC);
-	tp->tv_sec = ts.tv_sec;
+	tp->tv_sec = (long) ts.tv_sec;
 	tp->tv_usec = ts.tv_nsec / 1000;
 	return 0;
 }

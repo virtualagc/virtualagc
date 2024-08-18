@@ -9,9 +9,14 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+
+#ifdef _MSC_VER
+#include <stdlib.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "sim.h"
 
