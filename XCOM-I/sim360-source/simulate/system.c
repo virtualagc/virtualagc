@@ -25,7 +25,11 @@
 #ifdef _MSC_VER
 // For Windows with Virtual Studio
 #include <stdlib.h>
-#include <winsock2.h>
+// MSVC defines this in winsock2.h, but including that messes us up.
+typedef struct timeval {
+	long tv_sec;
+	long tv_usec;
+} timeval;
 int gettimeofday(struct timeval * tp, struct timezone * tzp)
 {
 	struct timespec ts;
