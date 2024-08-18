@@ -17,16 +17,28 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <sys/time.h>
 //#include <sys/resource.h>
-#ifdef _MSC_VER
-#include <stdlib.h>
-#else
-#include <unistd.h>
-#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <ctype.h>
+
+#ifdef _MSC_VER
+// For Windows with Virtual Studio
+#include <stdlib.h>
+#include <windox2.h>
+int gettimeofday(struct timeval * tp, struct timezone * tzp)
+{
+	struct timespec ts;
+	timespec_get(&ts, TIME_UTC);
+	tp->tv_sec = ts.tv_sec;
+	tp->tv_usec = ts.tv_nsec / 1000;
+	return 0;
+}
+#else
+// For everybody else.
+#include <unistd.h>
+#include <sys/time.h>
+#endif
 
 #ifndef _O_BINARY
 #define _O_BINARY 0

@@ -52,7 +52,8 @@ all:	sim360$(EXE)
 	$(CP) sim360$(EXE) ..
 
 sim360$(EXE): system.o ibm360.o smop.o debug.o
-	$(CC) $(CFLAGS) system.o ibm360.o smop.o debug.o $(LIBS) $(RDYNAMIC) $(OUT) sim360$(EXT)
+	$(CC) $(CFLAGS) system.o ibm360.o smop.o debug.o $(LIBS) \
+		$(RDYNAMIC) $(OUT) sim360$(EXT)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $(OUT) $@ $^
