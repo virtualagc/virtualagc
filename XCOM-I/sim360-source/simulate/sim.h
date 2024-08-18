@@ -19,8 +19,8 @@
 // Visual Studio
 #include <stddef.h>
 #include <stdint.h>
-typedef intmax_t int64_t;
-typedef uintmax_t uint64_t;
+typedef int64_t XPL_LONG;
+typedef uint64_t XPL_UNSIGNED_LONG;
 #define __XPL_TYPEDEFS
 #endif
 
