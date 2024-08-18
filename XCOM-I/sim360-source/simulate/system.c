@@ -11,6 +11,7 @@
  * 2024-05-27 RSB   Removed the "Sim360 normal exit" message.
  * 2024-08-14 RSB	Stubbed out `get_cpu_time`.
  * 2024-08-15 RSB	Changed `file_record_size` to `size_t`.
+ * 2024-08-18 RSB	Visual Studio related mods.
  */
 
 #include <stdio.h>
