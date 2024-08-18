@@ -152,23 +152,22 @@ bootstrap45w3:
 # Note that the condition for a successful bootstrap is that the XXX-360.obj
 # and XXX-360A.obj files differ by precisely 3 bytes.  That's because the 
 # embedded compile-time timestamp occupies 3 bytes.
-ELSE = else
 .PHONY: bootstrap
 bootstrap: sim360$(EXT)
 	echo Bootstrapping $(BASE) -----------------------------------------
 	-@rm $(BASE)-360*.*
-	@XCOM-I.py $(XEXTRA) --xpl \
+	@python XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
 		--output=$(BASE)-native \
 		$(XPLFILE)
-	@make -s -C $(BASE)-native
-	@$(BASE)-native/$(BASE)-native$(EXT) --extra=2,'/* $Y */' $(REXTRA) \
+	@make -s -C $(BASE)-native.build
+	@$(BASE)-native$(EXT) --extra=2,'/* $Y */' $(REXTRA) \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
 		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
 		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
-		&>$(BASE)-360.rpt
+		>$(BASE)-360.rpt
 	@sim360$(EXT) --size=$(RECSIZE) \
 		-o0ET $(BASE)-360A.rpt \
 		-i0AT $(XPLFILE) \

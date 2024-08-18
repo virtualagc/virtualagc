@@ -392,7 +392,7 @@ for parm in sys.argv[1:]:
                 input()
             sys.exit(1)
     elif parm.startswith("--output="):
-        outputFolder = parm[9:]
+        outputFolder = parm[9:] + ".build"
     elif parm.startswith("--indent="):
         indentationQuantum = " " * int(parm[9:])
     elif parm == "--backtrace":
@@ -418,7 +418,7 @@ for parm in sys.argv[1:]:
         if outputFolder == None:
             head, tail = os.path.split(parm)
             name, ext = os.path.splitext(tail)
-            outputFolder = name
+            outputFolder = name + ".build"
 
 if identifierString == None:
     if "P" in ifdefs:

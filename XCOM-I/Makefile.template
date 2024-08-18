@@ -79,7 +79,7 @@
 #	Conversely, if you're trying to figure out something XCOM-I and I 
 #	screwed up, you could use EXTRA='-Wall' to enable all warning messages.
 
-TARGET := $(notdir $(lastword $(CURDIR)))
+TARGET := $(basename $(notdir $(lastword $(CURDIR))))
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
@@ -88,16 +88,22 @@ ifeq ($(CC), cl)
         LIBS =
         EXT = 
         RDYNAMIC = 
+        CP = copy
+        NULL = NUL
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
         EXT = .exe
         RDYNAMIC =
+        CP = cp
+        NULL = /dev/null
 else
         OUT = -o
         LIBS = -lm
         RDYNAMIC = -rdynamic
         EXT = 
+        CP = cp
+        NULL = /dev/null
 endif
 
 SOURCES := $(wildcard *.c)
@@ -108,11 +114,10 @@ all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(EXTRA) $(OUT) $@$(EXT) $(SOURCES) $(LIBS) $(RDYNAMIC)
+	$(CP) $@$(EXT) ..
 
-# Note: Do not use NUL in place of /dev/null.  In Msys2, that can
-# create an actual file called "NUL" which is problematic to remove.
 .PHONY: clean
 clean:
-	-rm $(TARGET) &>/dev/null # For Linux or Mac
-	-del $(TARGET) &>/dev/null # For Windows
+	-rm $(TARGET) >$(NULL) 2>$(NULL) # For Linux or Mac
+	-del $(TARGET) >$(NULL) 2>$(NULL) # For Windows
 
