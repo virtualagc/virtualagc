@@ -19,7 +19,11 @@
 #include <time.h>
 #include <sys/time.h>
 //#include <sys/resource.h>
+#ifdef _MSC_VER
+#include <stdlib.h>
+#else
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <ctype.h>

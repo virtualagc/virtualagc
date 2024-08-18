@@ -112,6 +112,12 @@ HCOPTION :=
 CARDS := --ddo=3,cards2.bin,E
 endif
 
+ifeq ($(CC), cl)
+        CMP = fc /B
+else
+        CMP = cmp -l
+endif
+
 all:	$(TARGETS) $(TARGETSB)
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
@@ -142,7 +148,7 @@ test:
 	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
 	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
-	@if [ `cmp -l cards2.bin regression/cards2.bin | wc -l` -le 18 ]; \
+	@if [ `$(CMP) -l cards2.bin regression/cards2.bin | wc -l` -le 18 ]; \
 	then \
 		echo "Files cards2.bin and regression/cards2.bin match" ; \
 	else \

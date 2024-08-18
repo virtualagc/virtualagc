@@ -56,6 +56,11 @@ SHELL = /bin/bash
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
+ifeq ($(CC), cl)
+        CMP = fc /B
+else
+        CMP = cmp -l
+endif
 
 DIR_SIM360 = sim360-source/simulate
 
@@ -174,14 +179,14 @@ ifdef LEGACY
 		-f3wb+ $(BASE)-360C.str \
 		$(LEGACY)
 ifdef SELF
-	@if [ `cmp -l $(BASE)-360.obj $(LEGACY) | wc -l` -le 6 ] ; \
+	@if [ `$(CMP) -l $(BASE)-360.obj $(LEGACY) | wc -l` -le 6 ] ; \
 	then \
 		echo "Comparison to legacy load file successful!" ; \
 	else \
 		echo "Comparison to legacy load file fails!" ; \
 	fi
 endif # SELF
-	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 4 ] ; \
+	@if [ `$(CMP) -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Cross-comparison to legacy compiler's output successful!" ; \
 	else \
@@ -192,7 +197,7 @@ endif # SELF
 		echo "	meld $(BASE)-360.hex $(BASE)-360C.hex" ; \
 	fi
 endif # LEGACY
-	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 4 ] ; \
+	@if [ `$(CMP) -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Bootstrap of $(BASE) successful!" ; \
 	else \
