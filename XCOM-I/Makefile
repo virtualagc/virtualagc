@@ -57,11 +57,13 @@ ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
 ifeq ($(CC), cl)
+        CL = 1
         OUT = /Fe:
         CMP = fc /B
         EXT = .exe
         LIBS = 
 else
+	CL =
         OUT = -o
         CMP = cmp -l
         EXT =
@@ -185,31 +187,14 @@ ifdef LEGACY
 		-f3wb+ $(BASE)-360C.str \
 		$(LEGACY)
 ifdef SELF
-	@if [ `$(CMP) -l $(BASE)-360.obj $(LEGACY) | wc -l` -le 6 ] ; \
-	then \
-		echo "Comparison to legacy load file successful!" ; \
-	else \
-		echo "Comparison to legacy load file fails!" ; \
-	fi
+	cmp.py 6 $(BASE)-360.obj $(LEGACY) && \
+		( echo Comparison to legacy load file successful ) || \
+		( echo Comparison to legacy load file fails )
 endif # SELF
-	@if [ `$(CMP) -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 4 ] ; \
-	then \
-		echo "Cross-comparison to legacy compiler's output successful!" ; \
-	else \
-		hexdump -C $(BASE)-360.obj >$(BASE)-360.hex ; \
-		hexdump -C $(BASE)-360C.obj >$(BASE)-360C.hex ; \
-		echo "Cross-comparison to legacy compilers's output fails!" ; \
-		echo "For more info, try:" ; \
-		echo "	meld $(BASE)-360.hex $(BASE)-360C.hex" ; \
-	fi
+	cmp.py 4 $(BASE)-360.obj $(BASE)-360C.obj && \
+		( echo Cross-comparison to output of legacy compiler successful ) || \
+		( echo Cross-comparison to output of legacy compiler fails )
 endif # LEGACY
-	@if [ `$(CMP) -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 4 ] ; \
-	then \
-		echo "Bootstrap of $(BASE) successful!" ; \
-	else \
-		hexdump -C $(BASE)-360.obj >$(BASE)-360.hex ; \
-		hexdump -C $(BASE)-360A.obj >$(BASE)-360A.hex ; \
-		echo "Bootstrap of $(BASE) failed!  For more info, try:" ; \
-		echo "	meld $(BASE)-360.hex $(BASE)-360A.hex" ; \
-	fi
-	@echo ""
+	cmp.py 4 $(BASE)-360.obj $(BASE)-360A.obj && \
+		( echo Bootstrap of $(BASE) successful ) || \
+		( echo Bootstrap of $(BASE) failed )

@@ -82,8 +82,8 @@ cnv_ibm32(double n)
 void
 print_float(XPL_FLOAT *v)
 {
-	printf("%c %04x %016lx %-8lg", v->sign ? '-' : '+', (long) v->exp & 0xffff,
-		(long) v->fraction, cnv_double(v));
+	printf("%c %04x %016lx %-8lg", v->sign ? '-' : '+', (unsigned) v->exp & 0xffff,
+		(unsigned long) v->fraction, cnv_double(v));
 }
 
 /*
