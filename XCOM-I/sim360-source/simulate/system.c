@@ -25,7 +25,7 @@
 #ifdef _MSC_VER
 // For Windows with Virtual Studio
 #include <stdlib.h>
-#include <windox2.h>
+#include <winsock2.h>
 int gettimeofday(struct timeval * tp, struct timezone * tzp)
 {
 	struct timespec ts;
