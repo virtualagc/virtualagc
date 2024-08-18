@@ -155,7 +155,7 @@ bootstrap45w3:
 ELSE = else
 .PHONY: bootstrap
 bootstrap: sim360$(EXT)
-	echo "Bootstrapping $(BASE) -----------------------------------------"
+	echo Bootstrapping $(BASE) -----------------------------------------
 	-@rm $(BASE)-360*.*
 	@XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
