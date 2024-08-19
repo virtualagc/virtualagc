@@ -79,39 +79,39 @@ XPL_APPS += ANALYZER SKELETON
 all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@bitsizeDemo$(EXT) >bitsizeDemo.build/out.txt
 	@cd bitsizeDemo.build && \
-	csplit out.txt '%^Address Allocations .*%' \
-		       '/^Initial Values .*/' \
-		       '%^Assignments .*%' >$(NULL)
+	csplit out.txt "%^Address Allocations .*%" \
+		       "/^Initial Values .*/" \
+		       "%^Assignments .*%" >$(NULL)
 	-@cd bitsizeDemo.build && \
 	egrep --invert-match \
-	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
+	       "(^Assignments |^.?PAGE [0-9]|^$$)" xx01 > xxxxA
 	@diff --strip-trailing-cr -s -q bitsizeDemo.build/out.txt Tests/bitsizeDemo.regression
 	
 	@bitsizeDemoCommon$(EXT) --commono=bitsizeDemoCommon.build/COMMON.out >bitsizeDemoCommon.build/out.txt
 	@cd bitsizeDemoCommon.build && \
-	csplit out.txt '%^Address Allocations .*%' \
-		       '/^Initial Values .*/' \
-		       '%^Assignments .*%' >$(NULL)
+	csplit out.txt "%^Address Allocations .*%" \
+		       "/^Initial Values .*/" \
+		       "%^Assignments .*%" >$(NULL)
 	-@cd bitsizeDemoCommon.build && \
 	cat xx00 xx01 | \
 	egrep --invert-match \
-	       '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' \
+	       "(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)" \
 	       > xxxx
 	-@cd bitsizeDemoCommon.build && \
 	egrep --invert-match \
-	       '(^Assignments |^.?PAGE [0-9]|^$$)' xx01 > xxxxA
+	       "(^Assignments |^.?PAGE [0-9]|^$$)" xx01 > xxxxA
 	@diff --strip-trailing-cr -s -q bitsizeDemo.build/xxxxA bitsizeDemoCommon.build/xxxxA
 	
 	@bitsizeDemoCommonIn$(EXT) --commoni=bitsizeDemoCommon.build/COMMON.out --commono=bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/out.txt
 	@cd bitsizeDemoCommonIn.build && \
-	csplit out.txt '%^COMMON .*%' >$(NULL)
+	csplit out.txt "%^COMMON .*%" >$(NULL)
 	-@cd bitsizeDemoCommonIn.build && \
 	cat xx00 | \
 	egrep --invert-match \
-	       '(^COMMON |^.?PAGE [0-9]|^$$)' > xxxx
+	       "(^COMMON |^.?PAGE [0-9]|^$$)" > xxxx
 	@diff --strip-trailing-cr -s -q bitsizeDemoCommon.build/xxxxA bitsizeDemoCommonIn.build/xxxx
-	@sed 's/^;.*//' bitsizeDemoCommon.build/COMMON.out >bitsizeDemoCommon.build/COMMONa.out
-	@sed 's/^;.*//' bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/COMMONa.out
+	@sed "s/^;.*//" bitsizeDemoCommon.build/COMMON.out >bitsizeDemoCommon.build/COMMONa.out
+	@sed "s/^;.*//" bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/COMMONa.out
 	@diff --strip-trailing-cr -s -q bitsizeDemoCommon.build/COMMONa.out bitsizeDemoCommonIn.build/COMMONa.out
 
 	@e=Example-6.18.3 && \
@@ -125,7 +125,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
 	@Example-6.18.6$(EXT) | \
-	egrep '^[0-9]+' | \
+	egrep "^[0-9]+" | \
 	Example-6.18.5$(EXT) >Example-6.18.5.build/out.txt && \
 	diff --strip-trailing-cr -s -q Example-6.18.5.build/out.txt Tests/Example-6.18.5-and-6.regression
 	
@@ -135,9 +135,9 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	diff --strip-trailing-cr -s -q out.txt ../Tests/$$e.regression
 	
 	@ANALYZER$(EXT) <Tests/SKELETON.bnf | \
-	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
+	egrep --invert-match "ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME" \
 	>ANALYZER.build/out.txt && \
-	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
+	egrep --invert-match "ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME" \
 	Tests/ANALYZER-SKELETON.regression >ANALYZER.build/out.regression && \
 	diff --strip-trailing-cr -s -q ANALYZER.build/out.txt ANALYZER.build/out.regression
 	
