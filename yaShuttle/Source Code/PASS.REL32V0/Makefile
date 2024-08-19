@@ -89,11 +89,10 @@ endif
 ifeq ($(CC), cl)
         OUT = /Fe:
         LIBS =
-        EXT = 
+        EXT = .exe
         RDYNAMIC = 
         NULL = NUL
         PERCENT = %%
-        SETe = set e
         CMP = fc /B
         XCOMI = python $(shell which XCOM-I.py)
 else ifeq ($(findstring mingw,$(CC)),mingw)
@@ -104,7 +103,6 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
         RDYNAMIC =
         NULL = /dev/null
         PERCENT = %
-        SETe = e
         CMP = cmp -l
         XCOMI = XCOM-I.py
 else
@@ -115,7 +113,6 @@ else
         EXT = 
         NULL = /dev/null
         PERCENT = %
-        SETe = e
         CMP = cmp -l
         XCOMI = XCOM-I.py
 endif
