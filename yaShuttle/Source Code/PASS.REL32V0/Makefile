@@ -95,6 +95,7 @@ ifeq ($(CC), cl)
         RDYNAMIC = 
         NULL = NUL
         PERCENT = %%
+        export PYTHONUTF8 := 1
         XCOMI = python $(shell which XCOM-I.py)
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
