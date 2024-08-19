@@ -91,7 +91,7 @@ ifeq ($(CC), cl)
         MV = mv
         NULL = NUL
         RM = del
-        QUIET = >NUL
+        QUIET = /nologo >NUL
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
