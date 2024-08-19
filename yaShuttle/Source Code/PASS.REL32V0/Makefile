@@ -95,7 +95,7 @@ ifeq ($(CC), cl)
         PERCENT = %%
         SETe = set e
         CMP = fc /B
-        XCOMI = python XCOM-I.py
+        XCOMI = python $(shell which XCOM-I.py)
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
         OUT = -o
