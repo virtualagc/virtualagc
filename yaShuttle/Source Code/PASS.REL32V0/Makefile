@@ -245,7 +245,7 @@ cleanall: clean
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
 	
-	-python $(shell which HAL_S_FC.py) $(HCOPTION) \
+	-python $(shell which HAL_S_FC.py) $(HCOPTION) --ascii \
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal="$(RTARGET2)" \
 		>py.rpt
