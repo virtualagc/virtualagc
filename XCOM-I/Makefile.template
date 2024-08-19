@@ -91,6 +91,7 @@ ifeq ($(CC), cl)
         MV = mv
         NULL = NUL
         RM = del
+        QUIET = >NUL
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
         LIBS = -lm
@@ -119,7 +120,7 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(RDYNAMIC)
+	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(RDYNAMIC) $(QUIET)
 	$(MV) $@ ..
 
 .PHONY: clean
