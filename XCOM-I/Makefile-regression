@@ -79,7 +79,6 @@ XPL_APPS += ANALYZER SKELETON
 all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@bitsizeDemo$(EXT) >bitsizeDemo.build/out.txt
 	@cd bitsizeDemo.build && \
-	cat out.txt | \
 	csplit out.txt '%^Address Allocations .*%' \
 		       '/^Initial Values .*/' \
 		       '%^Assignments .*%' >$(NULL)
