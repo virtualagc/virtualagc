@@ -47,7 +47,6 @@ ifeq ($(CC), cl)
         RDYNAMIC = 
         NULL = NUL
         PERCENT = %%
-        SETe = set e
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
         OUT = -o
@@ -56,7 +55,6 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
         RDYNAMIC =
         NULL = /dev/null
         PERCENT = %
-        SETe = e
 else
         SHELL = /bin/bash
         OUT = -o
@@ -65,7 +63,6 @@ else
         EXT = 
         NULL = /dev/null
         PERCENT = %
-        SETe = e
 endif
 
 XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn

@@ -81,11 +81,48 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
+export PATH := .:$(PATH)
+
+ifeq ($(strip $(CC)),)
+	CC = gcc
+endif
+ifeq ($(CC), cl)
+        OUT = /Fe:
+        LIBS =
+        EXT = 
+        RDYNAMIC = 
+        NULL = NUL
+        PERCENT = %%
+        SETe = set e
+        CMP = fc /B
+        XCOMI = python XCOM-I.py
+else ifeq ($(findstring mingw,$(CC)),mingw)
+        SHELL = /bin/bash
+        OUT = -o
+        LIBS = -lm
+        EXT = .exe
+        RDYNAMIC =
+        NULL = /dev/null
+        PERCENT = %
+        SETe = e
+        CMP = cmp -l
+        XCOMI = XCOM-I.py
+else
+        SHELL = /bin/bash
+        OUT = -o
+        LIBS = -lm
+        RDYNAMIC = -rdynamic
+        EXT = 
+        NULL = /dev/null
+        PERCENT = %
+        SETe = e
+        CMP = cmp -l
+        XCOMI = XCOM-I.py
+endif
+
 TARGETS := PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB := PASS1B OPTB PASS2B PASS3B
-XCOM_DIR := ../../../../XCOM-I
-XCOMI := $(XCOM_DIR)/XCOM-I.py
-XLIB := $(XCOM_DIR)/SPACELIB.xpl
+XLIB := ../../../../SPACELIB.xpl
 PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
@@ -110,12 +147,6 @@ else
 HCSUFFIX :=
 HCOPTION := 
 CARDS := --ddo=3,cards2.bin,E
-endif
-
-ifeq ($(CC), cl)
-        CMP = fc /B
-else
-        CMP = cmp -l
 endif
 
 all:	$(TARGETS) $(TARGETSB)
@@ -148,13 +179,9 @@ test:
 	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
 	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
-	@if [ `$(CMP) -l cards2.bin regression/cards2.bin | wc -l` -le 18 ]; \
-	then \
-		echo "Files cards2.bin and regression/cards2.bin match" ; \
-	else \
-		echo "Files cards2.bin and regression/cards2.bin do not match" ; \
-		exit 1 ; \
-	fi
+	@python $(shell which cmp.py) 18 cards2.bin regression/cards2.bin && \
+		( echo Files cards2.bin and regression/cards2.bin match ) || \
+		( exit 1 )
 	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" COMMON-PASS2.out >COMMON-PASS2-new.out
 	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" regression/COMMON-PASS2.out >COMMON-PASS2-old.out
 	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS2-new.out COMMON-PASS2-old.out
@@ -163,53 +190,35 @@ test:
 .PHONY: $(TARGETS)
 $(TARGETS):
 	@echo Building HAL/S-FC $@ ...
-	@if [[ "$@" == "AUXP" ]] ; \
-	then \
-		cd AUX_PROCS; \
-	else \
-		cd $@.PROCS; \
-	fi && \
-	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ \
-		--lib-file=$(XLIB) \
-		'##DRIVER.xpl' && \
-	make -C $@ $@ && \
-	mv $@/$@* ..
+	@cd $(subst AUXP.,AUX_,$@.PROCS) && \
+	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
+	make -C $@.build && \
+	mv $@$(EXT) ..
 
 .PHONY: $(TARGETSB)
 $(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
-	@if [[ "$@" == "AUXB" ]] ; \
-	then \
-		cd AUX_PROCS; \
-	else \
-		cd $(subst B,,$@).PROCS; \
-	fi && \
-	$(XCOMI) $(XEXTRA) --cond=B --cond=V --output=$@ \
-		--lib-file=$(XLIB) \
-		'##DRIVER.xpl' && \
-	make -C $@ $@ && \
-	mv $@/$@* ..
+	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
+	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
+	make -C $@.build && \
+	mv $@$(EXT) ..
 
 # Note that `clean` doesn't clean everything that was built:  The executables
 # from TARGETS remain in place in the current folder, and the build-folders
-# for those (such as PASS1.PROCS/PASS1/) remain in place too.  What's cleaned is
-# the huge batch of intermediate files created by the builds.  Whereas
+# for those (such as PASS1.PROCS/PASS1.build/) remain in place too.  What's 
+# cleaned is the batch of intermediate files created by the builds.  Whereas
 # `cleanall` does clean everything.
 .PHONY: clean
 clean:
 	-@rm COMMON* listing2* vmem* halmat* litfile* \
 	    *.rpt optmat* auxmat* objcode* cards* \
-	    extra* deck* monitor13 -rf 2>/dev/null
+	    extra* deck* monitor13* -rf 2>$(NULL)
 
 .PHONY: cleanall
 cleanall: clean
-	-@rm $(TARGETS) $(TARGETSB) \
-	    PASS1.PROCS/PASS1 FLO.PROCS/FLO OPT.PROCS/OPT \
-            AUX_PROCS/AUXP PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
-            PASS4.PROCS/PASS4 \
-	    PASS1.PROCS/PASS1B OPT.PROCS/OPTB \
-            PASS2.PROCS/PASS2B PASS3.PROCS/PASS3B \
-            -rf 2>/dev/null
+	@find -name "*.build" -exec rm -rf {} \;
+	-@rm $(patsubst %, %$(EXT), $(TARGETS)) 2>$(NULL)
+	-@rm $(patsubst %, %$(EXT), $(TARGETSB)) 2>$(NULL)
 
 # Most lines ignored via `IGNORE_LINES` in comparisons are due to obvious 
 # reasons, such as having timestamps or other uncontrollable values in them.
@@ -246,7 +255,7 @@ compile: clean
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal='$(RTARGET2)' \
 		>py.rpt
-	-./PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
+	-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,'$(RTARGET2).hal' \
 		--ddo=2,listing2.txt \
@@ -269,7 +278,7 @@ compile: clean
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	./FLO$(EXT)   \
+	FLO$(EXT)   \
 		--ddo=2,listing2f.txt \
 		--commoni=COMMON-PASS1.out \
 		--commono=COMMON-FLO.out \
@@ -281,7 +290,7 @@ compile: clean
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	./OPT$(HCSUFFIX)$(EXT)   \
+	OPT$(HCSUFFIX)$(EXT)   \
 		--ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out \
 		--commono=COMMON-OPT.out \
@@ -295,7 +304,7 @@ compile: clean
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	./AUXP$(EXT)   \
+	AUXP$(EXT)   \
 		--ddo=2,listing2a.txt \
 		--commoni=COMMON-OPT.out \
 		--commono=COMMON-AUX.out \
@@ -310,7 +319,7 @@ compile: clean
 	cp litfilea.bin litfile2.bin
 	cp optmata.bin optmat2.bin
 	cp auxmata.bin auxmat2.bin
-	./PASS2$(HCSUFFIX)$(EXT) \
+	PASS2$(HCSUFFIX)$(EXT) \
 		--ddo=2,listing22.txt \
 		$(CARDS) \
 		--ddo=4,deck2.bin,E \
@@ -329,7 +338,7 @@ compile: clean
 ignore:
 	cp vmem2.bin vmem3.bin
 	cp litfile2.bin litfile3.bin
-	./PASS3$(HCSUFFIX) \
+	PASS3$(HCSUFFIX) \
 		--ddo=2,listing23.txt \
 		--raf=B,1680,5,sdf3.bin \
 		--commoni=COMMON-PASS2.out \
