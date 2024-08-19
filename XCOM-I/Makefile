@@ -161,7 +161,7 @@ bootstrap: sim360$(EXT)
 		--output=$(BASE)-native \
 		$(XPLFILE)
 	@make -s -C $(BASE)-native.build
-	@$(BASE)-native$(EXT) --extra=2,'/* $Y */' $(REXTRA) \
+	@$(BASE)-native$(EXT) --extra=2,"/* $Y */" $(REXTRA) \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
