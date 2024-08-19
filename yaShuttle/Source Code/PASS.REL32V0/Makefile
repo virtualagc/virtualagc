@@ -81,9 +81,9 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-PORTED := ../../ported
-HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
-export PATH := .:$(HAL_S_FC_DIR):$(PATH)
+PORTED := $(realpath ../../ported)
+HAL_S_FC_DIR := $(PORTED)/PASS1.PROCS
+export PATH := $(realpath .):$(HAL_S_FC_DIR):$(PATH)
 
 ifeq ($(strip $(CC)),)
 	CC = gcc
@@ -95,7 +95,6 @@ ifeq ($(CC), cl)
         RDYNAMIC = 
         NULL = NUL
         PERCENT = %%
-        CMP = fc /B
         XCOMI = python $(shell which XCOM-I.py)
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
@@ -105,7 +104,6 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
         RDYNAMIC =
         NULL = /dev/null
         PERCENT = %
-        CMP = cmp -l
         XCOMI = XCOM-I.py
 else
         SHELL = /bin/bash
@@ -115,7 +113,6 @@ else
         EXT = 
         NULL = /dev/null
         PERCENT = %
-        CMP = cmp -l
         XCOMI = XCOM-I.py
 endif
 
@@ -248,13 +245,13 @@ cleanall: clean
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
 	
-	-HAL_S_FC.py $(HCOPTION) \
+	-python $(shell which HAL_S_FC.py) $(HCOPTION) \
 		$(sPARM_STRING) $(PEXTRA) \
-		--hal='$(RTARGET2)' \
+		--hal="$(RTARGET2)" \
 		>py.rpt
 	-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
-		--ddi=0,'$(RTARGET2).hal' \
+		--ddi=0,"$(RTARGET2).hal" \
 		--ddo=2,listing2.txt \
 		--pdsi=4,TEMPLIB$(HCSUFFIX),E \
 		--pdsi=5,ERRORLIB \
