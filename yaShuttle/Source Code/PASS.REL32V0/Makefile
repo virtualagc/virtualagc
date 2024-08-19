@@ -81,7 +81,9 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-export PATH := .:$(PATH)
+PORTED := ../../ported
+HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
+export PATH := .:$(HAL_S_FC_DIR):$(PATH)
 
 ifeq ($(strip $(CC)),)
 	CC = gcc
@@ -120,8 +122,6 @@ endif
 TARGETS := PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB := PASS1B OPTB PASS2B PASS3B
 XLIB := ../../../../SPACELIB.xpl
-PORTED := ../../ported
-HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
 PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK
@@ -248,7 +248,7 @@ cleanall: clean
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
 	
-	-$(HAL_S_FC_DIR)/HAL_S_FC.py $(HCOPTION) \
+	-HAL_S_FC.py $(HCOPTION) \
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal='$(RTARGET2)' \
 		>py.rpt
