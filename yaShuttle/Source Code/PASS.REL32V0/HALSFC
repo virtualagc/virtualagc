@@ -7,14 +7,44 @@
 #
 #	The comma-delimited PARM_STRING of HAL/S-FC options, quoted if it contains 
 #	spaces.  For example, "SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK".
+#       However, if a PARM_STRING contains spaces, you may find that you cannot
+#       use parameter 5 (the TEST option)
 #
 #	"PFS" (default) or "BFS"
+#
+#       File extension for executables.  Defaults to blank, but should be .exe
+#       for cross-compilations.
+#
+#       Defaults to blank.  If anything non-blank, then tries to perform tests
+#       of the compilation.
 
 HALS_FILE="$1"
-PARM_STRING="$2"
-TARGET="$3"
-EXT="$4"
-TEST="$5"
+TEST="$2"
+PARM_STRING="$3"
+TARGET="$4"
+EXT="$5"
+
+if [[ ! -f "$HALS_FILE" ]]
+then
+        echo ""
+        echo This script compiles a HAL/S file to an AP-101S object-code file.
+        echo ""
+        echo "     HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]"
+        echo ""
+        echo Parameters appear in the indicated order.  Missing parameters
+        echo in the middle of the list should have \"\" used as place markers.
+        echo The parameters are interpreted as follows:
+        echo ""
+        echo "     SOURCE.hal        The HAL/S source-code file."
+        echo "     TEST              Perform all available validity tests."
+        echo "     PARMS             Comma-separated list of compiler options."
+        echo "     TARGET            Either PFS (default) or BFS."
+        echo "     EXT               Either blank (default) or .exe (cross compilation)"
+        echo ""
+        exit 1
+fi
+
+PARM_LIST=${PARM_STRING//,/ }
 
 if [[ "$TARGET" == "BFS" ]]
 then
@@ -57,13 +87,18 @@ if [[ $? != 0 ]] ; then echo "Aborted after PASS1" ; exit 1 ; fi
 IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)'
 if [[ "$TEST" != "" ]]
 then
-        HALSFC-PASS1P.sh ${PARM_STRING//,/ } --hal="$HALS_FILE" >pass1p.rpt
-        echo Comparing ...
+        echo ======================================================
+        ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
+        echo PASS1 cross-comparison test ... || exit 1
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
         egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
         diff -q -s pass1A.rpt pass1pA.rpt
         diff -s FILE1.bin halmat.bin
-        diff -q -s LISTING2.txt listing2.txt
+        if [[ "$PARM_LIST" == *LISTING2* ]]
+        then
+                diff -q -s LISTING2.txt listing2.txt
+        fi
+        echo ======================================================
 fi
 
 $FLO \

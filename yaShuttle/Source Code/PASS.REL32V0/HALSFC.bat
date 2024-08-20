@@ -10,8 +10,32 @@ echo off
 ::	"PFS" (default) or "BFS"
 
 set HALS_FILE="%1"
-set PARM_STRING="%2"
-set TARGET="%3"
+set TEST="%2"
+set PARM_STRING="%3"
+set TARGET="%4"
+:: No parameter 5
+
+if [[ ! -f "$HALS_FILE" ]]
+then
+        echo.
+        echo. This script compiles a HAL/S file to an AP-101S object-code file.
+        echo.
+        echo.      HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]"
+        echo.
+        echo. Parameters appear in the indicated order.  Missing parameters
+        echo. in the middle of the list should have \"\" used as place markers.
+        echo. The parameters are interpreted as follows:
+        echo.
+        echo.      SOURCE.hal        The HAL/S source-code file."
+        echo.      TEST              Perform all available validity tests."
+        echo.      PARMS             Comma-separated list of compiler options."
+        echo.      TARGET            Either PFS (default) or BFS."
+        echo.      EXT               Either blank (default) or .exe (cross compilation)"
+        echo.
+        exit 1
+fi
+
+set PARM_LIST=%PARM_STRING:,= %
 
 if "%TARGET%". == "BFS". (
     set PASS1=HALSFC-PASS1B
@@ -49,6 +73,22 @@ if "%TARGET%". == "BFS". (
 	--raf=B,3360,6,vmem.bin ^
 	>pass1.rpt
 if errorlevel 1 ( echo Aborted after PASS1 & exit /b 1 )
+
+set IGNORE_LINES=(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
+if not "%TEST%. == . (
+        echo ======================================================
+        ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && \
+        echo off || echo Utilities egrep or diff not available && exit 1
+        ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
+        echo PASS1 cross-comparison test ... || exit 1
+        egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
+        egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
+        diff -q -s pass1A.rpt pass1pA.rpt
+        diff -s FILE1.bin halmat.bin
+        if not "%PARM_LIST%." == "%PARM_LIST:LISTING2=%." \
+               diff -q -s LISTING2.txt listing2.txt
+        echo ======================================================
+)
 
 %FLO% ^
 	--commoni=COMMON0.out ^

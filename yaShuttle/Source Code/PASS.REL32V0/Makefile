@@ -188,7 +188,7 @@ $(TARGETS):
 	@cd $(subst AUXP.,AUX_,$@.PROCS) && \
 	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
-	mv $@$(EXT) ..
+	mv $@$(EXT) ../HALSFC-$@$(EXT)
 
 .PHONY: $(TARGETSB)
 $(TARGETSB):
@@ -196,7 +196,7 @@ $(TARGETSB):
 	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
 	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
-	mv $@$(EXT) ..
+	mv $@$(EXT) ../HALSFC-$@$(EXT)
 
 # Note that `clean` doesn't clean everything that was built:  The executables
 # from TARGETS remain in place in the current folder, and the build-folders
@@ -212,8 +212,8 @@ clean:
 .PHONY: cleanall
 cleanall: clean
 	@find -name "*.build" -exec rm -rf {} \;
-	-@rm $(patsubst %, %$(EXT), $(TARGETS)) 2>$(NULL)
-	-@rm $(patsubst %, %$(EXT), $(TARGETSB)) 2>$(NULL)
+	-@rm $(patsubst %, HALSFC-%$(EXT), $(TARGETS)) 2>$(NULL)
+	-@rm $(patsubst %, HALSFC-%$(EXT), $(TARGETSB)) 2>$(NULL)
 
 # Most lines ignored via `IGNORE_LINES` in comparisons are due to obvious 
 # reasons, such as having timestamps or other uncontrollable values in them.
@@ -250,7 +250,7 @@ compile: clean
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal="$(RTARGET2)" \
 		>py.rpt
-	-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
+	-HALSFC-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,"$(RTARGET2).hal" \
 		--ddo=2,listing2.txt \
@@ -273,7 +273,7 @@ compile: clean
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	FLO$(EXT)   \
+	HALSFC-FLO$(EXT)   \
 		--ddo=2,listing2f.txt \
 		--commoni=COMMON-PASS1.out \
 		--commono=COMMON-FLO.out \
@@ -285,7 +285,7 @@ compile: clean
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	OPT$(HCSUFFIX)$(EXT)   \
+	HALSFC-OPT$(HCSUFFIX)$(EXT)   \
 		--ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out \
 		--commono=COMMON-OPT.out \
@@ -299,7 +299,7 @@ compile: clean
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	AUXP$(EXT)   \
+	HALSFC-AUXP$(EXT)   \
 		--ddo=2,listing2a.txt \
 		--commoni=COMMON-OPT.out \
 		--commono=COMMON-AUX.out \
@@ -314,7 +314,7 @@ compile: clean
 	cp litfilea.bin litfile2.bin
 	cp optmata.bin optmat2.bin
 	cp auxmata.bin auxmat2.bin
-	PASS2$(HCSUFFIX)$(EXT) \
+	HALSFC-PASS2$(HCSUFFIX)$(EXT) \
 		--ddo=2,listing22.txt \
 		$(CARDS) \
 		--ddo=4,deck2.bin,E \
@@ -333,7 +333,7 @@ compile: clean
 ignore:
 	cp vmem2.bin vmem3.bin
 	cp litfile2.bin litfile3.bin
-	PASS3$(HCSUFFIX) \
+	HALSFC-PASS3$(HCSUFFIX) \
 		--ddo=2,listing23.txt \
 		--raf=B,1680,5,sdf3.bin \
 		--commoni=COMMON-PASS2.out \
@@ -342,5 +342,5 @@ ignore:
 		--raf=B,3360,6,vmem3.bin \
 		>c3.rpt
 	
-	# Fill in PASS4 here ...
+	# Fill in HALSFC-PASS4 here ...
 	

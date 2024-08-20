@@ -47,6 +47,7 @@ ifeq ($(CC), cl)
         RDYNAMIC = 
         NULL = NUL
         PERCENT = %%
+        export PYTHONUTF8 := 1
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
         OUT = -o
