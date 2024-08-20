@@ -12,17 +12,17 @@ if not exist "$HALS_FILE" (
         echo.
         echo. This script compiles a HAL/S file to an AP-101S object-code file.
         echo.
-        echo.      HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]"
+        echo.      HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]
         echo.
         echo. Parameters appear in the indicated order.  Missing parameters
         echo. in the middle of the list should have \"\" used as place markers.
         echo. The parameters are interpreted as follows:
         echo.
-        echo.      SOURCE.hal        The HAL/S source-code file."
-        echo.      TEST              Perform all available validity tests."
-        echo.      PARMS             Comma-separated list of compiler options."
-        echo.      TARGET            Either PFS (default) or BFS."
-        echo.      EXT               Either blank (default) or .exe (cross compilation)"
+        echo.      SOURCE.hal        The HAL/S source-code file.
+        echo.      TEST              Perform all available validity tests.
+        echo.      PARMS             Comma-separated list of compiler options.
+        echo.      TARGET            Either PFS (default) or BFS.
+        echo.      EXT               Either blank (default) or .exe (cross compilation)
         echo.
         exit 1
 )
