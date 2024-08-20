@@ -1,4 +1,4 @@
-echo off
+@echo off
 :: This Windows batch script compiles a HAL/S program using the HAL/S-FC program,
 :: which is assumed to be in the PATH.  
 
@@ -7,6 +7,11 @@ set TEST="%2"
 set PARM_STRING="%3"
 set TARGET="%4"
 :: No parameter 5
+
+:: For some reason, in Windows, an empty PARM_STRING is interpreted wrong by
+:: PASS1.  If it's empty, let's just set it to a safe default value.
+if "%PARM_STRING%". == . \
+        set PARM_STRING=TABLES
 
 if not exist "%HALS_FILE%" (
         echo.
@@ -65,7 +70,7 @@ if "%TARGET%". == "BFS". (
 	>pass1.rpt
 if errorlevel 1 ( echo Aborted after PASS1 & exit /b 1 )
 
-set IGNORE_LINES=(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
+set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CPU TIME FOR^|TODAY IS^|COMPOOL.*VERSION)
 if not "%TEST%. == . (
         echo ======================================================
         ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && \
