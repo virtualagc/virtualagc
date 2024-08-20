@@ -1,13 +1,6 @@
-echo off
+::echo off
 :: This Windows batch script compiles a HAL/S program using the HAL/S-FC program,
-:: which is assumed to be in the PATH.  It has the following parameters:
-::
-::	The path to the HAL/S source-code file.
-::
-::	The comma-delimited PARM_STRING of HAL/S-FC options, quoted if it contains 
-::	spaces.  For example, "SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK".
-::
-::	"PFS" (default) or "BFS"
+:: which is assumed to be in the PATH.  
 
 set HALS_FILE="%1"
 set TEST="%2"
