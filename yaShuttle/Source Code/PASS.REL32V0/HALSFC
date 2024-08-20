@@ -8,6 +8,19 @@ PARM_STRING="$3"
 TARGET="$4"
 EXT="$5"
 
+FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
+FILES_PORTED="$FILES_PORTED &&TEMPLIB.json &&TEMPINC.json SOURCECO.txt"
+FILES_PORTED="$FILES_PORTED LIT_CHAR.bin SYM_TAB.json LISTING2.txt"
+FILES_PORTED="$FILES_PORTED CROSS_REF.json TEMPLIB.json"
+FILES_LOCAL="listing2.txt TEMPLIB TEMPLIBB cards.bin COMMON0.out halmat.bin"
+FILES_LOCAL="$FILES_LOCAL litfile.bin vmem.bin COMMON1.out COMMON2.out"
+FILES_LOCAL="$FILES_LOCAL COMMON3.out COMMON4.out auxmat.bin objcode.bin"
+FILES_LOCAL="$FILES_LOCAL optmat.bin pass1.rpt pass1p.rpt pass1A.rpt"
+FILES_LOCAL="$FILES_LOCAL pass1pA.rpt flo.rpt opt.rpt aux.rpt pass2.rpt"
+FILES_LOCAL="$FILES_LOCAL pass3.rpt pass4.rpt cards monitor13.parms"
+FILES_LOCAL="$FILES_LOCAL auxp.rpt deck.bin extra.txt"
+rm $FILES_PORTED $FILES_LOCAL -rf &>/dev/null
+
 if [[ ! -f "$HALS_FILE" ]]
 then
         echo ""
@@ -72,8 +85,12 @@ IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME 
 if [[ "$TEST" != "" ]]
 then
         echo ======================================================
+        ported="`which HAL_S_FC.py`"
+        ported="`dirname -- \"$ported\"`"
+        ported="`dirname -- \"$ported\"`"
         ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
-        echo PASS1 cross-comparison test ... || exit 1
+        echo PASS1 cross-comparison test: || exit 1
+        for n in $FILES_PORTED ; do cp "$ported/$n" . ; done &>/dev/null
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
         egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
         diff -q -s pass1A.rpt pass1pA.rpt
@@ -131,4 +148,9 @@ if [[ $? != 0 ]] ; then echo "Aborted after PASS2" ; exit 1 ; fi
 
 # PASS3 and PASS4 aren't ready for use yet.
 
-echo "Compilation successful!"
+results=HALSFC-`date --iso-8601=seconds`.results
+mkdir $results &>/dev/null
+mv $FILES_PORTED $FILES_LOCAL $results &>/dev/null
+cp "$HALS_FILE" $results &>/dev/null
+
+echo "Compilation successful! Results stored in folder \"$results\"."
