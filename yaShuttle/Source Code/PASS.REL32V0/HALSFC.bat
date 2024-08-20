@@ -22,7 +22,7 @@ set FILES_LOCAL="%FILES_LOCAL:"=% optmat.bin pass1.rpt pass1p.rpt pass1A.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt opt.rpt aux.rpt pass2.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt cards monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
-del %FILES_PORTED% %FILES_LOCAL% >NUL 2>NUL
+del %FILES_PORTED:"=% %FILES_LOCAL:"=% >NUL 2>NUL
 
 if not exist "%HALS_FILE%" (
         echo.
