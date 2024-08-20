@@ -8,11 +8,11 @@ set PARM_STRING="%3"
 set TARGET="%4"
 :: No parameter 5
 
-if not exist "$HALS_FILE" (
+if not exist "%HALS_FILE%" (
         echo.
         echo. This script compiles a HAL/S file to an AP-101S object-code file.
         echo.
-        echo.      HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]
+        echo.      HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET ]]]
         echo.
         echo. Parameters appear in the indicated order.  Missing parameters
         echo. in the middle of the list can use \"\" as place markers for the.
