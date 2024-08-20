@@ -1,4 +1,4 @@
-::echo off
+echo off
 :: This Windows batch script compiles a HAL/S program using the HAL/S-FC program,
 :: which is assumed to be in the PATH.  
 
@@ -23,7 +23,7 @@ if not exist "$HALS_FILE" (
         echo.      PARMS             Comma-separated list of compiler options.
         echo.      TARGET            Use either PFS, the default, or BFS.
         echo.
-        exit 1
+        exit /B 1
 )
 
 set PARM_LIST=%PARM_STRING:,= %
