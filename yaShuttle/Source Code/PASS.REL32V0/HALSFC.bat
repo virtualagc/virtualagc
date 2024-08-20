@@ -70,10 +70,10 @@ if not "%TEST%. == . (
         echo ======================================================
         ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && \
         echo off || echo Utilities egrep or diff not available && exit 1
-        ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
+        ( HAL_S_FC.py %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt ) && \
         echo PASS1 cross-comparison test ... || exit 1
-        egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
-        egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
+        egrep -v "%IGNORE_LINES%" pass1.rpt >pass1A.rpt
+        egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt
         diff -q -s pass1A.rpt pass1pA.rpt
         diff -s FILE1.bin halmat.bin
         if not "%PARM_LIST%." == "%PARM_LIST:LISTING2=%." \
