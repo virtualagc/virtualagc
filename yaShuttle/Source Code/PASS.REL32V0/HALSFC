@@ -148,9 +148,9 @@ if [[ $? != 0 ]] ; then echo "Aborted after PASS2" ; exit 1 ; fi
 
 # PASS3 and PASS4 aren't ready for use yet.
 
-results=HALSFC-`date --iso-8601=seconds`.results
-mkdir $results &>/dev/null
-mv $FILES_PORTED $FILES_LOCAL $results &>/dev/null
-cp "$HALS_FILE" $results &>/dev/null
+results="HALSFC `date`.results"
+mkdir "$results" &>/dev/null
+mv $FILES_PORTED $FILES_LOCAL "$results" &>/dev/null
+cp "$HALS_FILE" "$results" &>/dev/null
 
-echo "Compilation successful! Results stored in folder \"$results\"."
+echo "Compilation successful. Results in \"$results\"."
