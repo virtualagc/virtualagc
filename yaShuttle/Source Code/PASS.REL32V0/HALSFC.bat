@@ -15,8 +15,7 @@ set PARM_STRING="%3"
 set TARGET="%4"
 :: No parameter 5
 
-if [[ ! -f "$HALS_FILE" ]]
-then
+if not exist "$HALS_FILE" (
         echo.
         echo. This script compiles a HAL/S file to an AP-101S object-code file.
         echo.
@@ -33,7 +32,7 @@ then
         echo.      EXT               Either blank (default) or .exe (cross compilation)"
         echo.
         exit 1
-fi
+)
 
 set PARM_LIST=%PARM_STRING:,= %
 
