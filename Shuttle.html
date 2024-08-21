@@ -241,7 +241,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 <div align="center"><img moz-do-not-send="true" src="DPS%20block%20diagram.png" alt="" width="805" height="445"><br>
       <div align="left"><br>
         As you can see, there were five separate GPCs.&nbsp; Each of the
-        GPCs was an AP-101S computer, designed and manufactured by IBM's
+        GPCs on later flights was an AP-101S computer, designed and manufactured by IBM's
         Federal Services Division (as were the Apollo LVDC or Gemini
         OBC, though the GPC was not similar to them in any noticeable way).&nbsp; Although I
         may not talk about the AP-101S much, it's worth mentioning that
@@ -249,10 +249,13 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
         mainframe, in that it shared roughly the same assembly language,
         known as <i>Basic Assembly Language (BAL)</i>.<br>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; To be perfectly <strike>pedantic</strike>accurate,
+
  the GPCs were originally AP-101B computers.&nbsp; The AP-101S is an 
 upgrade of the AP-101B, replacing 416KB of core memory with 1024KB of 
 semiconductor (CMOS) memory, and possibly other improvements that I've 
-so far not been able to identify.&nbsp; The upgrade effort began in 
+so far not been able to identify for certain, though there are various 
+machine-code instructions that I believe were newly-added in the 
+AP-101S.&nbsp; The upgrade effort began in 
 1989, and was first flown in 1991 on STS-37 with software version 
 OI-8F.&nbsp; More on the topic of flight-software versioning will appear
  later.</font><br>
@@ -291,7 +294,7 @@ OI-8F.&nbsp; More on the topic of flight-software versioning will appear
 PASS vs BFS rather than PFS vs BFS, and stare at you blankly if you 
 mention PFS to them.&nbsp; Since that is the common usage, I'm
             going to adopt it throughout the remainder of this article,
-            and will not pedantically use the acronym PFS (even though 
+            and will not bull-headedly use the acronym PFS (even though I think 
 it's technically correct) even where the
             distinction vs PASS is significant.</font><br>
         </blockquote>
@@ -316,7 +319,7 @@ it's technically correct) even where the
         LM.&nbsp; BFS was specialized for abort functionality, i.e.,
         reentry in the absence of a reliable set of GPCs running
         PASS.&nbsp; And as I said above, this capability was really
-        needed only during ascent or reentry.<br>
+        (potentially) needed only during ascent or reentry.<br>
         <br>The data buses interconnecting the GPCs and peripheral devices, physically and electrically,
         were MIL-STD-1553 buses.<br>
         <br>
@@ -438,7 +441,7 @@ it's technically correct) even where the
         <br>
         Like the AGC, AGS, and LVDC, which were programmed essentially in
         the assembly language native to their CPU types, the Flight
-        Control Operating System (FCOS) and were written in BAL, the assembly language of the AP-101S
+        Control Operating System (FCOS) and were written the assembly language of the AP-101S
         CPU.&nbsp; But once you get past those infrastructural software
         components, the bulk of PASS application code was written in a higher-level
         language called HAL/S, as was the BFS.&nbsp; <a moz-do-not-send="true" href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
@@ -460,8 +463,8 @@ it's technically correct) even where the
           <br>
           "Finally, each OPS has one or more Major Modes (MMs) that
           address individual events or subphases of the flight."<br></blockquote>
-          Schematically, schematically you can see how the application 
-software was structures, at least in one version of the flight 
+          Schematically, you can see how the application 
+software was structured, at least in one version of the flight 
 software.&nbsp; Over the decades in which the Shuttle's flight software 
 was in use, there were certainly changes to this structure.<br>
 
@@ -566,8 +569,7 @@ was in use, there were certainly changes to this structure.<br>
 
 
     
-<p>I have become aware of private individuals with copies of what I
-      think may be the complete very-late revisions of the Shuttle's 
+<p>I have become aware of the survival of late revisions of the Shuttle's 
 flight software, both primary (PFS/PASS) and backup (BFS).&nbsp;
       This is remarkable, given that a former developer of Shuttle
       software has told me that: <br>
@@ -602,12 +604,11 @@ agencies, preserving tax-payer investment!<br>
 </p>
 
 
-<p><i>Unfortunately</i>, identifying that the source code for the 
+<p><i>Unfortunately</i>, confirming that the source code for the 
 Shuttle's flight software still exists is not the same thing as saying 
-that I've convinced anybody to give me much of it.&nbsp; Without being 
-too specific, I will simply say that I presently have some
-PASS source-code files in hand, representing a small fraction 
-of the total, but that I am not at liberty to show them to you due to 
+that I've convinced anybody to give me all of it.&nbsp; Without being 
+too specific, I will simply say that I presently have significant quantities of
+PASS source-code files in hand, along with some BFS files, but that I am not at liberty to show them to you due to 
 issues which I hope can eventually be resolved.&nbsp; Indeed, I can't even necessarily <i>tell</i> you yet everything I have managed to acquire.&nbsp; It's an unpleasant situation that I hope and expect to improve over time.<br>
 </p>
 
@@ -622,9 +623,9 @@ issues which I hope can eventually be resolved.&nbsp; Indeed, I can't even neces
 <ul>
 
 
-      <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS and BFS.&nbsp; More specifically, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC release 32V0"</a>, written
+      <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS and BFS.&nbsp; More specifically, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC release 32V0</a>, written
         mostly in an enhanced version of the XPL high-level language, with bits in
-        BAL (IBM Basic Assembly Language) as well.&nbsp; <a moz-do-not-send="true" href="#Original">More on this below</a>.<br>
+        BAL (IBM 360 Basic Assembly Language) and in AP-101S assembly language as well.&nbsp; <a moz-do-not-send="true" href="#Original">More on this below</a>.<br>
 </li><li>XCOM — the source code for the original "standard" XPL compiler.&nbsp; Alas, it is guaranteed <i>not</i>
  to compile HAL/S-FC, since HAL/S-FC was written in an enhanced version 
 of the XPL language, which I call "XPL/I", but which Intermetrics 
@@ -634,7 +635,7 @@ important.&nbsp; Intermetrics's compiler
 for XPL/I, to the best of my knowledge, has not survived the end of the 
 Shuttle program.&nbsp; Nevertheless, there are reasons why the source 
 code for the standard compiler remains useful, and perhaps those reasons
- will become clear below.<br>
+ will become clear below.&nbsp; Although it is not the contemporary software used during Shuttle development, <a moz-do-not-send="true" href="XPL-I.html">I have myself written an XPL/I compiler called <b>XCOM-I</b> which is capable of compiling HAL/S-FC</a>.<br>
       </li>
 </ul>
 
@@ -1817,22 +1818,22 @@ characters of ASCII, but do appear among the 256 characters of <i>some</i> versi
 
 
     
-<p>HAL/S?&nbsp; HAL/S was a high-level programming language in which
+<p>HAL/S is a high-level programming language in which
       the PASS and BFS application software was written.&nbsp; Whereas
       infrastructural software (like operating systems and run-time
       libraries) was written in whatever assembly-languages were native
-      to the particular CPUs running that code, which for IBM computers was IBM's so-called Basic Assembly Language (BAL).<br>
+      to the particular CPUs running that code.<br>
     </p>
 
 
     
-<p>HAL/S was a compiled language, and the HAL/S flight-software
+<p>HAL/S is a compiled language, and the HAL/S flight-software
       source code was compiled down to a machine-code executable before
       it could be run.&nbsp; Compilers existed for it that could be used
       on several different types of computers.&nbsp; Some of the
       compilers produced code that could be run on an IBM System/360
       mainframe; others could produce executable code for the Shuttle's
-      IBM AP-101S onboard computers; for all I know, others produced
+      IBM AP-101S onboard computers; others produced
       executable code for other computers. <br>
     </p>
 
@@ -1883,13 +1884,11 @@ knows?&nbsp; It's fun to make up your
 
 
     
-<p>But I digress.&nbsp; As I was saying, the HAL/S software for the
-      Shuttle's PASS and BFS still survives in private stashes, which is
+<p>But I digress.&nbsp; As I was saying, the HAL/S software for some revisions of the
+      Shuttle's PASS and BFS still survives, which is
       much better than the alternative of it not existing 
-anywhere.&nbsp; But I have very little of it as of yet, and am enjoined 
-to keep that which I do have private.&nbsp; Whether or not I can get
-      any more of it — and the extent to which I'm required to keep it 
-private after I get it — depends very much on the kindness of strangers.<br>
+anywhere.&nbsp; At present, I am enjoined 
+to keep that which I do have private.<br>
     </p>
 
 
@@ -2373,6 +2372,7 @@ So were the HAL/S
 
 
 
+
             M**2</tt></div>
       </div>
     </blockquote>
@@ -2500,7 +2500,7 @@ My impression is that creating source code in this multi-line format
     '<tt>+</tt>', ...) which appear on the <tt>E</tt> lines
     to indicate vector vs scalar variables weren't really needed, since
     they don't show up in the single-line notation at all; in fact,
-    they're just eye-candy nice for readability, and are actually
+    they're just eye-candy that's nice for readability, and are actually
     discarded by the compiler.&nbsp; Whereas the subscript '<tt>2</tt>'
     which appears on the <tt>S</tt> line is in fact quite necessary,
     since <tt>VECTOR</tt>() isn't the same thing as <tt>VECTOR<sub>2</sub>()</tt>,
@@ -2966,7 +2966,7 @@ performed.&nbsp; Such invocations were underlined in printouts.<br>
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
-      of these factoids I'll use in the context of the present
+      of these factoids I'll make in the context of the present
       discussion is to refer from now on to what I've been calling the
       "extra processor" instead as the "DEU/IDP".<br>
     </p>
@@ -3180,834 +3180,26 @@ performed.&nbsp; Such invocations were underlined in printouts.<br>
 
     
 <h1><a name="Emulation"></a>HAL/S Processing<br>
-</h1>To resurrect Space Shuttle flight software to my satisfaction minimally requires achieving the following:<br>
-<ol>
-  <li>Acquire the full HAL/S source code for the flight software.</li>
-  <li>Create a HAL/S compiler (for modern generally-available computers)
- which can produce executable object code for the flight software.</li>
-  <li>Create means of emulating the Space Shuttle's computing 
-environment well enough to execute the object code generated by the 
-compiler.</li>
-</ol>
-<p>This section concerns itself entirely with the 2nd of these, namely compilation of HAL/S.<br>
-</p>
-<p>This turns out to be a complicated topic, both because the HAL/S 
-language is very complex in comparison to assembly languages like those 
-of the Apollo AGC, AGS, or LVDC, but also because it's hard to make an 
-effective compiler entirely independently of consideration of how the 
-object code will eventually be executed.&nbsp; As a result, compiler 
-development has proceeded in fits and starts, with tremendous amounts of
- work being done on one approach or another, only to be eventually 
-abandoned in an incomplete state.&nbsp; And yet, the abandoned work 
-remains useful in some ways, so I can't truly discard it in good 
-conscience.&nbsp; In the next subsection I'll discuss the current 
-approach to a HAL/S compiler, while the two subsections thereafter will 
-discuss those zombie approaches ... not quite dead, but not quite alive 
-either.<br>
-</p>
-<h2><a name="deathbyxpl"></a>Death by XPL</h2>
-<p>In my current thinking, the roadmap to a usable HAL/S compiler is this:<br>
-</p>
-<ol>
-  <li>Develop a compiler (<b>XCOM-I.py</b>) capable of compiling 
-programs written in Intermetrics's extended version of the XPL 
-programming language (XPL/I).&nbsp; Development of XCOM-I is proceeding 
-rapidly, and it is currently capable of compiling all (or almost all) of
- standard XPL, as well as some XPL/I.&nbsp; It is actually an XPL/I-to-C
- translator.&nbsp; <a moz-do-not-send="true" href="XPL.html">See the XCOM-I page</a> for links to XCOM-I, discussion of usage, and so forth.<br>
-  </li>
-  <li>Develop patches in the C language for the occasional inline Basic 
-Assembly Language instructions that appear in HAL/S-FC's XPL/I source 
-code.&nbsp; <a moz-do-not-send="true" href="XPL.html#hooks">Again, see the XCOM-I page</a>.</li>
-  <li>Use XCOM-I plus the C-language patches just mentioned to compile 
-HAL/S-FC's source code to C, and thence to native executable code on any
- modern computer of interest.</li>
-  <li>Use HAL/S-FC to compile the Space Shuttle flight software.</li>
-</ol>
-<p>In point of fact, HAL/S-FC had a total of 7 passes,</p>
-<ol>
-  <li>PASS1 — Convert XPL/I to the HALMAT intermediate language.<br>
-  </li>
-  <li>FLOW — Generate reports?<br>
-  </li>
-  <li>OPT  — Optimize the HALMAT.<br>
-  </li>
-  <li>AUX  — Optimize the HALMAT.<br>
-  </li>
-  <li>PASS2  — Convert HALMAT to executable object code for IBM 
-System/360 or IBM AP-101S (Shuttle's onboard computers).&nbsp; I.e., 
-translate HALMAT to Basic Assembly Language (BAL).<br>
-  </li>
-  <li>PASS3  — Work with simulation data files (SDF).<br>
-  </li>
-  <li>PASS4  — Work with simulation data files (SDF).</li>
-</ol>
-
-<p>each one of which was a standalone program that executed separately, 
-and each of these could in principle be compiled with HAL/S-FC.<br>
-</p>
-<p>Emulation, or alternatively generation of object-code for non-IBM-BAL
- computers, is outside the scope of this section.&nbsp; But it would 
-presumably either proceed from the HALMAT output of PASS1, or else from 
-the BAL output of PASS2.&nbsp; At this point, my vote would be for a 
-BAL-to-C translation system.&nbsp; In fact, <a moz-do-not-send="true" href="http://www.hercules-390.org/">emulators</a> already exist that could <i>presumably</i>
- run IBM System/360 object code generated by PASS2 of the compiler, 
-though I don't think that would be of much help in using the code within
- a spacecraft-simulation system. <br>
-</p>
-
-
-
-<h2><a name="Modern"></a> HAL/S Interpreter<br>
-</h2>
-
-
-<i>(This section describes a partially-completed but halted approach 
-towards HAL/S compilation and emulation that nevertheless remains useful
- as a tool for learning HAL/S.)</i><br>
-
-
-<br>
-
-
-The first (but now halted) of my approaches to a HAL/S compiler actually
- involved both compilation and emulation, and allowed combining those 
-two aspects so as to create an interactive HAL/S interpreter.&nbsp; Some
- HAL/S features were not yet implemented when the approach was 
-abandoned, but the convenience of being able to interactively enter 
-HAL/S statements and immediately see the results of doing so, while at 
-the same time being able to interactively examine the values of 
-variables or to alter those variables is valuable when used for learning
- about HAL/S.<br>
-<br>
-As an example, consider the following HAL/S short sample program
-    (called <tt>SIMPLE</tt>) which I've adapted from a program in the
-    excellent book <a moz-do-not-send="true" href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming in HAL/S</i></a> (1978) by Michael J.
-    Ryer.&nbsp; The program provides an input loop, into which the user
-    can enter numbers (<tt>R</tt>) from the keyboard, and then prints
-    out <tt>πR<sup>2</sup></tt>. <br>
-
-
-    
-<blockquote><tt>&nbsp; <font color="#663300">SIMPLE: PROGRAM;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp; DECLARE PI CONSTANT
-        (3.141592653589793);<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp; DECLARE R SCALAR;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp; WRITE(6) 'Input values of R to compute
-        PI R**2, or else -1 to quit.';<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp; DO WHILE TRUE;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; READ(5) R;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; IF R &lt; 0 THEN
-        EXIT;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; WRITE(6) 'R =', R,
-        'and PI R**2 =', PI R**2;<br>
-
-        &nbsp;&nbsp;&nbsp; &nbsp; END;<br>
-
-        &nbsp; CLOSE SIMPLE;</font></tt><br>
-    </blockquote>
-
-
-    HAL/S considers the <tt>PROGRAM</tt> to be the basic executable
-    unit, and thus at runtime the expectation would be that some
-    selection of <font color="#663300"><tt>PROGRAM</tt></font>s is running, and possibly
-    intercommunicating, and receiving timeslices to do so according to
-    the assigned execution-priorities.&nbsp; But with the interpreter,
-    we can just bypass all of that infrastructure and compute any values
-    we like, directly and immediately, without wrapping our code in a <font color="#663300"><tt>PROGRAM</tt></font>.&nbsp;
-
-
-
-
-    For example, by inputting a couple of hopefully-self-explanatory
-    lines of HAL/S code into the interpreter, I get the following<br>
-
-
-    
-<blockquote><font color="#663300"><tt>HAL/S &gt; DECLARE PI CONSTANT (3.141592653589793);</tt><tt><br>
-      </tt><tt>HAL/S &gt; DO FOR TEMPORARY I=0 TO 10; WRITE(6) I, I
-        PI**2; END;</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        0&nbsp;&nbsp; 0.0 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;
-        9.86960440108936E+00 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;
-        1.97392088021787E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;
-        2.96088132032681E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4&nbsp;&nbsp;
-        3.94784176043574E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5&nbsp;&nbsp;
-        4.93480220054468E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;
-        5.92176264065361E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;
-        6.90872308076255E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;
-        7.89568352087149E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9&nbsp;&nbsp;
-        8.88264396098042E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;
-        9.86960440108936E+01 </tt><tt><br>
-      </tt><tt>HAL/S &gt; </tt></font><font face="Courier New, Courier,
-        monospace"><br>
-      </font></blockquote>
-
-
-    Which is pretty convenient!&nbsp; But if we liked, we could still go
-    to the trouble (not much!) of inputting the entire <font color="#663300"><tt>SIMPLE</tt></font>
-    program into the interpreter, and then running it and inputting a
-    few numbers into it:<br>
-
-
-    
-<blockquote><font color="#663300"><tt>HAL/S &gt;
-        `spool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Now spooling input for
-        later processing.<br>
-        HAL/S &gt; SIMPLE: PROGRAM;<br>
-        &nbsp; ... &gt; DECLARE PI CONSTANT (3.141592653589793);<br>
-        &nbsp; ... &gt; DECLARE R SCALAR;<br>
-        &nbsp; ... &gt; WRITE(6) 'Input values of R to compute PI R**2,
-        or else -1 to quit.';<br>
-        &nbsp; ... &gt; DO WHILE TRUE;<br>
-        &nbsp; ... &gt; READ(5) R;<br>
-        &nbsp; ... &gt; IF R &lt; 0 THEN EXIT;<br>
-        &nbsp; ... &gt; WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;<br>
-        &nbsp; ... &gt; END;<br>
-        &nbsp; ... &gt; CLOSE SIMPLE;<br>
-        &nbsp; ... &gt; `unspool<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Halting spooling of input.
-        Processing already-spooled input ...<br>
-        HAL/S &gt; `run SIMPLE<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Running as the primary
-        thread.<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input values of R to
-        compute PI R**2, or else -1 to quit.<br>
-        READ&nbsp; &gt; 0 1 2 3 4 5&nbsp;&nbsp;&nbsp;&nbsp; <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp; 0.0 and PI
-        R**2 =&nbsp; 0.0 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        1.00000000000000E+00 and PI R**2 =&nbsp; 3.14159266000000E+00 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        2.00000000000000E+00 and PI R**2 =&nbsp; 1.25663706400000E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        3.00000000000000E+00 and PI R**2 =&nbsp; 2.82743339400000E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        4.00000000000000E+00 and PI R**2 =&nbsp; 5.02654825600000E+01 <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        5.00000000000000E+00 and PI R**2 =&nbsp; 7.85398165000000E+01 <br>
-        READ&nbsp; &gt; 6<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        6.00000000000000E+00 and PI R**2 =&nbsp; 1.13097335760000E+02 <br>
-        READ&nbsp; &gt; 7<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        7.00000000000000E+00 and PI R**2 =&nbsp; 1.53938040340000E+02 <br>
-        READ&nbsp; &gt; 8<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        8.00000000000000E+00 and PI R**2 =&nbsp; 2.01061930240000E+02 <br>
-        READ&nbsp; &gt; -1<br>
-        HAL/S &gt; </tt></font><br>
-    </blockquote>
-
-
-    In case you're wondering, user input that begins with a backtick (<font color="#663300">`</font>)
-    is a command to the interpreter itself rather than a statement in the HAL/S language. In this example, <font color="#663300"><tt>`spool</tt></font>
-    and <font color="#663300"><tt>`unspool</tt></font> are present to keep the interpreter from
-    trying to execute each statement in the definition of the <font color="#663300"><tt>SIMPLE</tt></font>
-    program individually, and instead treating them as an entire unit to
-    be processed together.&nbsp; Meanwhile, just defining the <font color="#663300"><tt>SIMPLE</tt></font>
-    program doesn't cause the <font color="#663300"><tt>SIMPLE</tt></font> program to <i>execute</i>,
-    and it's the actual execution that's triggered by <font color="#663300"><tt>`run SIMPLE</tt></font>.&nbsp;
-
-
-
-
-    And of course, <font color="#663300"><tt>SIMPLE</tt></font> doesn't vanish after we've finished
-    running it; the interpreter still recalls its definition, and we
-    could run it again if we liked:<br>
-
-
-    
-<blockquote><font color="#663300"><tt>HAL/S &gt; `run SIMPLE</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Running as the
-        primary thread.</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input values
-        of R to compute PI R**2, or else -1 to quit.</tt><tt><br>
-      </tt><tt>READ&nbsp; &gt; 20 21 -1</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        2.00000000000000E+01 and PI R**2 =&nbsp; 1.25663706143592E+03 </tt><tt><br>
-
-      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
-        2.10000000000000E+01 and PI R**2 =&nbsp; 1.38544236023310E+03 </tt><tt><br>
-      </tt><tt>HAL/S &gt; </tt></font><br>
-    </blockquote>
-
-
-
-    While the interpreter is far from complete (or correct!) that's just
-    a small sampling of what it can do.&nbsp; I won't elaborate on it
-    any more here.&nbsp; If you'd like to experiment with it yourself,
-    you should consult <a moz-do-not-send="true" href="hal-s-interpreter.html">the dedicated HAL/S Interpreter</a>
-    page for a lot more info on how to go about it.<br>
-
-
-    <br>
-
-
-    The interpreter was originally intended to be a compiler that produced object code in an intermediate language I call <i>PALMAT</i>.&nbsp;
- After a PALMAT emulator was also incorporated into the compiler, it 
-became possible to use the compiler as an interpreter.&nbsp; The 
-definition of the PALMAT language appears in the Appendix of <a moz-do-not-send="true" href="hal-s-compiler.html#PALMAT">a page that was originally intended as a discussion of the (now-abandoned) compiler</a>.&nbsp;
- While understanding of PALMAT isn't really necessary just to use the 
-HAL/S interpreter, PALMAT remains a potentially-useful tool for 
-emulation of HAL/S programs.<br>
-<blockquote><font size="-1"><b>Aside:</b> The reason this approach was 
-halted was mainly that it had become to unwieldy to continue adding the 
-still-unimplemented features of HAL/S to the compiler portion of 
-it.&nbsp; Moreover, I felt that the emulator portion, written in Python,
- while adequate, was slower in execution than I desired and too 
-difficult to integrate into spacecraft-simulation software.&nbsp; 
-Development on it could still continue someday, if desired.</font><br>
-</blockquote>
-
-
-
-<h2><a name="Original"></a>Port of the Original HAL/S Compiler</h2>
-
-
-<p><i><i>(This section describes a </i></i>completed<i><i> but now-abandoned approach 
-towards HAL/S compilation remains useful
- as a tool for cross-checking other approaches towards HAL/S compilation.)</i>
-</i></p>
-
-
-My second approach to the HAL/S compilation problem was to port the 
-original compiler, HAL/S-FC, from XPL/I to Python.&nbsp; HAL/S-FC 
-consisted of 7 passes:<br>
-<ol>
-  <li>PASS1 — Convert XPL/I to the HALMAT intermediate language.<br>
-  </li>
-  <li>FLOW — Generate reports?<br>
-  </li>
-  <li>OPT  — Optimize the HALMAT.<br>
-  </li>
-  <li>AUX  — Optimize the HALMAT.<br>
-  </li>
-  <li>PASS2  — Convert HALMAT to executable object code for IBM System/360 or IBM APS-100S (Shuttle's onboard computers).<br>
-  </li>
-  <li>PASS3  — Work with simulation data files (SDF).<br>
-  </li>
-  <li>PASS4  — Work with simulation data files (SDF).</li>
-</ol>
-
-<blockquote>
-  <p><font size="-1"><b>Note:</b>&nbsp; It's unfortunate that the Shuttle's Primary Avionics Software Subsystem (i.e., the flight software) is <i>also</i>
- referred to as "PASS".&nbsp; But do not be confused:&nbsp; PASS1, 
-PASS2, PASS3, and PASS4 refer to passes of the compiler, and not to the 
-PASS flight software.</font><br>
-  </p>
-</blockquote>
-<p>I had felt that only PASS1 of the compiler needed to be ported, and 
-that emulation or object-code generation could proceed directly from the
- HALMAT intermediate code produced by PASS1.&nbsp; I eventually turned 
-out not to be entirely correct in my thinking.&nbsp; Nevertheless, the 
-port of PASS1 was <i>completed</i>, apparently successfully, though it wasn't necessarily thoroughly tested. <br>
-  </p>
-
-
-
-<p><a name="OriginalInstallation"></a>Installation of the PASS1 port goes as follows:</p>
-
-
-
+</h1>To resurrect Space Shuttle flight software requires development 
+tools for the HAL/S language that can be run on modern (Linux, Mac OS, 
+Windows) computers.&nbsp; A minimum subset of tools would seem to be:<br>
 <ul>
-  <li>Install git.&nbsp; (How to do that varies by operating system.)<br>
-  </li>
-  <li>Install Python 3.&nbsp; (How to do that varies by operating system.)<br>
-  </li>
-  <li>Install the Python ebcdic module.&nbsp; (Generally "<tt>pip3 install ebcdic</tt>" or else "<tt>pip install ebcdic</tt>".)</li>
-  <li>To install the ported HAL/S compiler itself, I'd suggest 
-downloading the entire Virtual AGC source tree from our GitHub 
-repository.&nbsp; From a command line, 'cd' to whatever directory you'd 
-like to install it into, and then do:<br>
-  </li>
+  <li>A HAL/S compiler</li>
+  <li>An IBM AP-101S (and AP-101B) assembler</li>
+  <li>An IBM AP-101S linker</li>
+  <li>An IBM AP-101S emulator</li>
 </ul>
-<blockquote>
-  <blockquote><tt>git clone --depth=1 https://github.com/virtualagc/virtualagc.git</tt><br>
-  </blockquote>
-</blockquote>
-<blockquote>This is lots more than you need just for the HAL/S compiler,
- but it's by far the simplest and fastest way.&nbsp; And easy to update 
-later with the command "<tt>git pull</tt>".&nbsp; (GitHub provides a way
- to download just the folder you need, but it takes such an incredibly 
-long time that I won't waste your time or mine by describing it.&nbsp; 
-Google it if you want.)<br>
-</blockquote>
-<ul>
-  <li>Put the folder virtualagc/yaShuttle/ported/PASS1.PROCS/ into your <tt>PATH</tt>.<br>
-  </li>
-  <li><i>In Windows only</i>, you may need to make sure the environment variable <tt>PYTHONUTF8=1</tt>
- is set.&nbsp; Otherwise, any characters "¬" or "¢" appearing in your 
-source files may not be processed correctly.&nbsp; If you use our 
-recommended non-UTF-8 replacements ("~" and "`" respectively) in your 
-source code then it won't be a problem, but it's better to be prepared 
-for the worst case.<br>
-  </li>
-</ul>
-
-
-
-If you've completed this successfully, then from a command-line prompt 
-you should be able to 'cd' into any folder you like and see a meaningful
- response from the command <br>
-<blockquote><tt>HAL_S_FC.py --help</tt><br>
-</blockquote>
-If you do, you're ready to go!&nbsp; <br>
-
-
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; This command-line 
-interface to the HAL/S compiler is my own addition rather than a port 
-from the original.&nbsp; The IBM System/360 style computers on which the
- original HAL/S compiler ran had no such thing as a command line, and 
-therefore no such thing as command-line options.&nbsp; Rather, 
-invocation of the compiler, including specification of all of its 
-options, was performed by creating a Job Control Language (JCL) file 
-containing all of the necessary setup instructions, and of course <i>we</i>
- don't have any modern support for JCL.&nbsp; However, the command-line 
-interface supports most of the same options which the JCL did, except 
-for some which I haven't figured out well enough yet, plus a few of my 
-own devising.&nbsp; <br>
-    <br>
-But there are a <i>lot</i> of options, not all of which can be explained in just a few words, so the <tt>--help</tt>
- command mentioned in the preceding paragraph may turn out to be less 
-informative than you may hope ... for example, it tells you that the 
-option LFXI is available (vs NOLFXI), but do you want that option or 
-not?&nbsp; Well, you won't find out by looking at the <tt>--help</tt> message. In fact, I don't believe there's surviving documentation that describes the <i>complete</i>
- set of compiler options available.&nbsp; If you're interested beyond my
- limited attempt to spoon-feed you this info, my suggestion is to peruse
- <a moz-do-not-send="true" href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">Section 5 ("User-Specified Options") of the 2005 revision of the "HAL/S-FC User's Manual"</a>.&nbsp; However, in the next section, I'll provide my own recommendations as to which compiler options should be used.</font><br>
-</blockquote>
-
-
-<p><a name="OriginalUsage"></a>As far as using the port of the 
-compiler's PASS1 is concerned, everything you do with the HAL/S compiler
- is from a command line, so 
-everything I talk about below is something you're going to do or see on a
- command 
-line.&nbsp; <br>
+<p>To date, the HAL/S compiler has been created.&nbsp; <a moz-do-not-send="true" href="HAL.html">It is covered on its own dedicated page</a>.<br>
 </p>
-
-
-<p>Let's suppose you have a folder that contains HAL/S source-code 
-files.&nbsp; For example, if you followed the installation instructions 
-given above, you'll have downloaded the folder "yaShuttle/Source 
-Code/Programming in HAL-S/", which contains ~100 such files.&nbsp; But 
-regardless, 'cd' to the folder containing whatever HAL/S source-code 
-files you're interested in.<br>
+<p>The assembler and linker exist only as ideas so far.<br>
 </p>
-
-
-<p>Let's suppose, for the sake of argument, that you have a HAL/S 
-source-code file called HELLO.hal.&nbsp; In fact, there is such a file 
-in the folder yaShuttle/ported/, though naturally you don't have to use 
-it, but let's suppose you do indeed want to 
-use it, and that you have cd'd to the yaShuttle/ported/ folder to do 
-so.&nbsp; That particular HELLO.hal looks like this:<br>
+<p>Work on the emulator is in progress.<br>
 </p>
-
-
-<blockquote>
-  <blockquote><tt>&nbsp;HELLO: PROGRAM;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; DECLARE I INTEGER;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; DECLARE INTEGER, J;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; REPLACE PRINTER BY "6";</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; WRITE(PRINTER) 'THE BEGINNING';</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; DO FOR I = 1 TO 5;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WRITE(PRINTER) I, 'HELLO, WORLD!';</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DO FOR J = 2 TO 8 BY 2;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WRITE(¢PRINTER¢) J, 'ISN''T THIS FUN?';</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; END;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; END;</tt><tt><br>
-    </tt><tt>&nbsp;&nbsp;&nbsp; WRITE(6) 'THE END';</tt><tt><br>
-    </tt><tt>&nbsp;CLOSE HELLO;</tt></blockquote>
-</blockquote>
-
-
-<p>How to compile this?&nbsp; Well admittedly, the only up-to-date 
-operating system I'm using is Linux.&nbsp; The versions of Windows and 
-Mac OS available to me are <i>ancient</i> (Windows 7 and Mac OS 
-10.7.5).&nbsp; With that said, I have tried the ported HAL/S
- compiler on the versions I do have, and it works the same on every 
-platform.&nbsp; My suggestion is to invoke the HAL/S compiler as 
-follows:</p>
-
-
-<blockquote>
-  <pre>HAL_S_FC.py SRN --hal=HELLO<br></pre>
-</blockquote>The meaning of the <tt>--hal=HELLO</tt> switch here is pretty obvious, I suppose, and 
-it's only necessary to note that if you leave off the suffix ".hal" at 
-the end of a source-file name, the compiler will assume it's supposed to
- be there and will add it back.<br>
-
-
-
-
-<p>The option <tt>SRN</tt> tells the compiler to expect that there are 
-punch-card sequence numbers in columns 73-80 of the source-code lines 
-... which in HELLO.hal of course, there are not!&nbsp; In fact, you could leave off 
-this option with no difficulty for this example, or optionally use the 
-option <tt>NOSRN</tt> (which is also the default) instead.&nbsp; When <tt>SRN</tt> is present, columns 1-72 are allowed to contain source code, whereas when <tt>NOSRN</tt>
- is present, columns 1-80 contain source code.&nbsp; All of the sample 
-source-code files I provide do fit into 72 columns, and all of the 
-flight-software source-code files (which I can't presently provide) do 
-have card-sequence numbers in columns 73-80, so using the <tt>SRN</tt> 
-option works well with any HAL/S files I provide.&nbsp; If you're going to work with
- HAL/S source code, you'd better get used to thinking in terms of a 
-limited width, and perhaps to a limited width of 
-72 rather than a limited width of 80!<br>
-</p>
-<p>Here's the output listing you can expect to see from the compilation:<br>
-</p>
-
-
-<textarea style="overflow: auto; width: 100%; height: 600px;" wrap="off">  HAL/S REL32V0            T H E  V I R T U A L  A G C  P R O J E C T              OCTOBER 30, 2023    17:7:41.93
-
-
-   HAL/S COMPILER PHASE 1 -- VERSION OF OCTOBER 20, 2023.  CLOCK TIME = 0:0:0.00.
-
-
-TODAY IS OCTOBER 30, 2023.  CLOCK TIME = 17:7:41.93.
- 
-
-
- COMPLETE LIST OF COMPILE-TIME OPTIONS IN EFFECT
-
-
-       *** TYPE 1 OPTIONS ***
- 
-        NOLSTALL
-          LFXI
-        NOADDRS
-        NOSDL
-        NOTEMPLATE
-        NOLFXI
-        NODUMP
-        NODECK
-        NOSRN
-        NOSREF
-        NOPARSE
-        NOTABDMP
-          MICROCODE
-        NOREGOPT
-        NOLIST
-        NOLISTING2
-        NOTABLST
-        NOHIGHOPT
-          SCAL
-
-
-       *** TYPE 2 OPTIONS ***
- 
-       BLOCKSUM = 400
-       CARDTYPE = 
-       COMPUNIT = 0
-            DSR = 1
-      LABELSIZE = 1200
-         LINECT = 59
-      LITSTRING = 2500
-      MACROSIZE = 500
-           MFID = 0
-          PAGES = 2500
-        SYMBOLS = 200
-          TITLE = 
-       XREFSIZE = 2000
- 
-
- *** NO LANGUAGE SUBSET IN EFFECT ***
-----------------------------------------------------------------------------------------------------------------------
-  HAL/S REL32V0            T H E  V I R T U A L  A G C  P R O J E C T              OCTOBER 30, 2023    17:7:41.93
-STMT                                                                  SOURCE                                                                  REVISION
-
-
-
-   1 M| HELLO:                                                                                              |HELLO
-   1 M| PROGRAM;                                                                                            |HELLO
-   2 M|   DECLARE I INTEGER;                                                                                |HELLO
-   3 M|   DECLARE INTEGER, J;                                                                               |HELLO
-   4 M|   REPLACE PRINTER BY "6";                                                                           |HELLO
-   5 M|   WRITE(PRINTER) 'THE BEGINNING';                                                                   |HELLO
-   6 M|   DO FOR I = 1 TO 5;                                                                                |HELLO
-   7 M| 1   WRITE(PRINTER) I, 'HELLO, WORLD!';                                                              |HELLO
-   8 M| 1   DO FOR J = 2 TO 8 BY 2;                                                                         |HELLO
-   9 M| 2     WRITE(6) J, 'ISN''T THIS FUN?';                                                               |HELLO
-  10 M| 1   END;                                                                                            |ST#8
-  11 M|   END;                                                                                              |ST#6
-  12 M|   WRITE(6) 'THE END';                                                                               |HELLO
-  13 M| CLOSE HELLO;                                                          /***/                         |HELLO
-----------------------------------------------------------------------------------------------------------------------
-  HAL/S REL32V0            T H E  V I R T U A L  A G C  P R O J E C T              OCTOBER 30, 2023    17:7:41.93
-
-
-
-**** C O M P I L A T I O N   L A Y O U T ****
-
- HELLO: PROGRAM;  
-----------------------------------------------------------------------------------------------------------------------
-  HAL/S REL32V0            T H E  V I R T U A L  A G C  P R O J E C T              OCTOBER 30, 2023    17:7:41.93
-
-
-
-S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :
-
-         (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, 2 = REFERENCE, 1 = SUBSCRIPT USE, 0 = DEFINITION)
-
- DCL  NAME            TYPE ATTRIBUTES &amp; CROSS REFERENCE
- 
-   1  HELLO     PROGRAM                              XREF: 0 0001  
-   2  I         INTEGER                            SINGLE, ALIGNED, STATIC   XREF: 0 0002  4 0006  2 0007  
-   3  J         INTEGER                            SINGLE, ALIGNED, STATIC   XREF: 0 0003  4 0008  2 0009  
-   4  PRINTER   REPLACE MACRO                      MACRO TEXT="6"    XREF: 0 0004  2 0005  2 0007  2 0009  
-
-
-----------------------------------------------------------------------------------------------------------------------
-  HAL/S REL32V0            T H E  V I R T U A L  A G C  P R O J E C T              OCTOBER 30, 2023    17:7:41.93
-
-
-       OPTIONAL TABLE SIZES
-
-NAME       REQUESTED    USED
-____       _________    ____
- 
-LITSTRINGS      2500      52
-SYMBOLS          200       4
-MACROSIZE        500       2
-XREFSIZE        2000      11
-BLOCKSUM         400       0
-
-
-CALLS TO SCAN        = 72
-CALLS TO IDENTIFY    = 12
-NUMBER OF REDUCTIONS = 167
-MAX STACK SIZE       = 9
-MAX IND. STACK SIZE  = 5
-END IND. STACK SIZE  = 1
-END ARRAY STACK SIZE = 0
-MAX EXT_ARRAY INDEX  = 1
-STATEMENT COUNT      = 13
-MINOR COMPACTIFIES   = 0
-MAJOR COMPACTIFIES   = 0
-REALLOCATIONS        = 0
-MAX NESTING DEPTH    = 1
-
-
-END OF HAL/S PHASE 1, OCTOBER 30, 2023.  CLOCK TIME = 17:7:41.96.
-
-13 CARDS WERE PROCESSED.
-NO ERRORS WERE DETECTED DURING PHASE 1 .
-
-
-TOTAL CPU TIME FOR PHASE 1      0:0:0.03.
-CPU TIME FOR PHASE 1 SET UP     0:0:0.00.
-CPU TIME FOR PHASE 1 PROCESSING 0:0:0.03.
-CPU TIME FOR PHASE 1 CLEAN UP   0:0:0.00.
-PROCESSING RATE: 26000.0 CARDS PER MINUTE.
-
-
-
-
-                                *****  C O M P I L A T I O N   A B A N D O N E D  *****
-</textarea>
-<p>To do anything more-significant with the compiler, you naturally need
- to study the HAL/S language a bit, using the references I recommended 
-earlier.&nbsp; But there are a few details that the contemporary HAL/S documentation 
-glosses over somewhat, but which you 
-need to understand if you're going to work with anything other than a trivially-simple HAL/S program.&nbsp; <br>
-</p>First, each HAL/S source-code file comprises a single "compilation 
-unit".&nbsp; As far as I can see, there are basically two general 
-categories of compilation units.&nbsp; The first type, which is what are
- HELLO.hal example was, has the following stuff in it:<br>
-<ul>
-<li>Perhaps some comments.</li>
-  <li>Perhaps some compiler directives (more on this presently)<br>
-  </li>
-  <li>A single <tt>PROGRAM</tt> block.<br>
-  </li>
-</ul>
-The second type is some mixture of the following stuff:<br>
-
-
-<ul><li>Perhaps some comments.</li>
-<li>Perhaps some compiler directives.</li>
-<li><tt>PROCEDURE</tt> blocks.</li>
-
-  <li><tt>FUNCTION</tt> blocks.</li>
-  <li><tt>COMPOOL</tt> blocks.</li>
-</ul>
-<p>It seems to have been the custom usually to put a single <tt>PROCEDURE</tt> or a single <tt>FUNCTION</tt> or a single <tt>COMPOOL</tt> in any given compilation unit, but that won't always be the case.<br>
-</p>
-<p>The <tt>COMPOOL</tt> block needs a little explanation.&nbsp; A <tt>COMPOOL</tt> in HAL/S functions something like a <tt>COMMON</tt>
- area in Fortran or an imported module in Python (except that it 
-contains just variables).&nbsp; <tt>COMPOOL</tt>s have names, and there can be many <tt>COMPOOL</tt>s present at once.<br>
-</p>
-
-
-<p>If you played with the "modern" compiler, you'll recall that it was easy to <tt>DECLARE</tt>
- global variables willy-nilly but from the comments I just made above, 
-you'll perceive that there's no such thing as a global variable in 
-HAL/S.&nbsp; Rather, what you might like to think of as a global 
-variable is actually a variable residing in a <tt>COMPOOL</tt>.<br>
-</p>
-<p>Now, since each <tt>PROCEDURE</tt> and <tt>FUNCTION</tt> usually resides in a
- separate (and separately-compiled) compilation unit, and since every 
-variable that's shared between compilation units usually reside in <tt>COMPOOL</tt>s in yet other separate
- compilation units, to compile even a very simple program without errors you have to understand how all of these separate 
-compilation units manage to interface to each other.<br>
-</p>
-<p>The mechanism by which this interface is implemented at the compiler level is based on the 
-notion of the "template library".&nbsp; The template library functions 
-something like the mechanism of a "header file" in C or C++, in which 
-the header file provides prototyping information about functions 
-and variables.&nbsp; But rather than 
-there being innumerable header files, each specialized to a single 
-purpose, HAL/S has a single template library that provides the 
-template information for everything.&nbsp; The compiler will read 
-the template library whenever a HAL/S source-code file needs it to, but<i> </i>it can also optionally write back to the template library (or some 
-separate template library) the information it newly discovers about 
-objects it encounters.&nbsp; In that respect, the template library is a simple kind of database.<br>
-</p>
-<p>The compilation strategy is thus to make sure you compile any 
-particular compilation unit <i>before</i> you compile any other 
-compilation unit that needs it.&nbsp; (And yes, it's possible to 
-have a circular condition in which two different compilation units 
-depend on each other, which defeats this strategy.&nbsp; We'll just ignore that in this discussion.)<br>
-</p>
-<p>So let's take an example.&nbsp; Let's suppose we have a HAL/S <tt>PROGRAM</tt> called <tt>P</tt>, a HAL/S <tt>FUNCTION</tt> called <tt>F</tt> that <tt>P</tt> wants to use, and some "global" variables (<tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt>) used by both.&nbsp; Since there's no such thing as a global variable, these latter will have to go into a <tt>COMPOOL</tt> that we'll call <tt>C</tt>.&nbsp; Nominally that's 3 separate compilation units, comprising 3 separate HAL/S source-code files.&nbsp; Perhaps <tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt> are the coefficients of a quadratic polynomial and <tt>F()</tt> computes the values of the polynomials. Here's what the source code for these three compilation units might look like:<br>
-</p>
-<table width="100%" cellspacing="2" cellpadding="2" border="1">
-  <tbody>
-    <tr>
-      <th valign="top" align="left">C.hal<br>
-      </th>
-      <th valign="top" align="left">F.hal<br>
-      </th>
-      <th valign="top" align="left">P.hal<br>
-      </th>
-    </tr>
-    <tr>
-      <td valign="top">
-        <pre> C: COMPOOL;<br>    DECLARE <br>       A0 SCALAR,<br>       A1 SCALAR,<br>       A2 SCALAR;<br> CLOSE C;<br></pre>
-      </td>
-      <td valign="top">
-        <pre>D INCLUDE TEMPLATE C<br> F: FUNCTION(X) SCALAR;<br>    DECLARE X SCALAR, Y SCALAR;<br>    Y = A0 X**2 + A1 X + A2;<br>    RETURN Y;<br> CLOSE F;<br></pre>
-      </td>
-      <td valign="top">
-        <pre>D INCLUDE TEMPLATE C<br>D INCLUDE TEMPLATE F<br> P: PROGRAM;<br>    A0 = 1.5;<br>    A1 = 5.9;<br>    A2 = -3.3;<br>    DO FOR TEMPORARY I = 1 TO 25;<br>       WRITE(6) I, F(I);<br>    END; <br> CLOSE P;<br></pre>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<p>The <i>first</i> time we process these files, we would have to compile these in left-to-right order, because <tt>COMPOOL C</tt> needs to be in the template library before F.hal is compiled, and <tt>FUNCTION F</tt>
- must be in the template library before P.hal is compiled.&nbsp; (On 
-subsequent processing, as long as the prototyping information for <tt>COMPOOL C</tt> and <tt>FUNCTION F</tt> didn't change, the template library wouldn't change, and it wouldn't matter what order we compiled the 3 files.)&nbsp; The 
-suggested compiler command-line switches I gave earlier aren't quite 
-adequate now that we need to fix up the template library.&nbsp; We need 
-two additional switches:&nbsp; <tt>TEMPLATE</tt>, which causes "templates" to be generated for the compilation units encountered, and <tt>--templib</tt>,
- which causes those new templates to be stored in the main template 
-library, as opposed to being stored by default in a separate, newly-created temporary template library.&nbsp; So here's what 
-the compilation is like:<br>
-</p>
-<blockquote>
-  <blockquote>
-    <pre>HAL_S_FC.py SRN TEMPLATE --templib -hal=C<br>HAL_S_FC.py SRN TEMPLATE --templib -hal=F<br>HAL_S_FC.py SRN TEMPLATE --templib -hal=P</pre>
-  </blockquote>
-</blockquote>
-<p>For whatever it's worth, the template library is a human-readable 
-file (in so-called JSON format), found in the same folder as HAL_S_FC.py
- itself, namely virtualagc/yaShuttle/ported/TEMPLIB.json.&nbsp; (No, in case you're bothered by such things, JSON did 
-not exist when the original HAL/S compiler was written. But I use JSON 
-to implement something the IBM operating system called a Partitioned 
-Data Set, or PDS for short.&nbsp; The fact that it's JSON rather than 
-PDS is at the operating-system level and is transparent to the 
-HAL/S compiler proper.)&nbsp; So can you actually see what the generated templates 
-look
- like just by looking at TEMPLIB.json:<br>
-</p>
-<blockquote>
-  <blockquote>
-    <pre>    ...<br>    "@@C     ": [<br>        " C: EXTERNAL COMPOOL ; DECLARE A0 SCALAR INITIAL ( 1.7 ) , A1 SCALAR INITIAL ( 5",<br>        " .9 ) , A2 SCALAR INITIAL ( - 3.3 ) ;                                           ",<br>        " CLOSE ;                                                                        ",<br>        "D VERSION 01"<br>    ],<br>    "@@F     ": [<br>        " F: EXTERNAL FUNCTION ( X ) SCALAR ; DECLARE X SCALAR ;                         ",<br>        " CLOSE ;                                                                        ",<br>        "D VERSION 01"<br>    ],<br>    "@@P     ": [<br>        " P: EXTERNAL PROGRAM ;                                                          ",<br>        " CLOSE ;                                                                        ",<br>        "D VERSION 01"<br>    ],<br>    ...<br></pre>
-  </blockquote>
-</blockquote>
-Hopefully this emphasizes a point that may not have been entirely 
-obvious before, which is that the template library merely contains 
-meta-information about the compilation units it has processed, but does <i>not</i>
- contain the compiled object code for those units!&nbsp; The object code
- for each unit is separate, and must be combined into a single executable by a
- linker program ... which we do not have at present.<br>
-<br>
-Another thing you may notice that's important to know from time to time is that the 
-identifying names of the templates appearing in the template library are
- <i>not</i> the actual names of the compilation units as they appeared in the original HAL/S source code.&nbsp; So instead of names like <tt>C</tt>, <tt>F</tt>, and <tt>P</tt>, we see identifying names like "<tt>@@C&nbsp;&nbsp;&nbsp;&nbsp; </tt>", "<tt>@@F&nbsp;&nbsp;&nbsp;&nbsp; </tt>", and "<tt>@@P&nbsp;&nbsp;&nbsp;&nbsp; </tt>".&nbsp; The compiler produces these names by:<br>
-<ul>
-  <li>Removing any underline characters.</li>
-  <li>Adding the prefix "<tt>@@</tt>".</li>
-  <li>Truncating to 8 characters if necessary.</li>
-  <li>Padding with blanks if less than 8 characters long.</li>
-</ul>
-<blockquote>
-  <p><font size="-1"><b>Warning:</b> The side effect of this is that if you had, say, a <tt>FUNCTION</tt> called <tt>VELOCITY_OF_EARTH</tt> and another called <tt>VELOCITY_OF_SHIP</tt>, <i>both</i> of them would result in generation of a template called "<tt>@@VELOCI</tt>".&nbsp;
-
- But there can be only one.&nbsp;
- The template for whichever was compiled most-recently would overwrite 
-the other's template in the template library, without any warning you'd 
-be likely to notice, probably eventually 
-causing a compile time error when some hapless compilation unit tried to
- use the now-overwritten function template.&nbsp; (If you recognized the
- "there can be only one" reference a couple of sentences back, you might
- say that this is high-handed behavior on the part of HAL/S-FC, or even 
-than HAL/S-FC was a Highhander.&nbsp; Then again, you might not.)&nbsp; 
-This behavior is related to the limitations of the IBM 360 file-system 
-objects known as Partitioned Data Sets, rather than just being some 
-random idiocy; it is analogous to the 8-character filenames (plus 
-3-character "extensions") that those of us old enough to experience 
-Microsoft DOS (and Digital Research CP/M) had to endure.&nbsp; It didn't
- seem so bad at the time.</font><br>
-  </p>
-</blockquote>
-
-
-<blockquote>
-  <p><font size="-1"><b>Aside:</b>&nbsp; Why was this the port of PASS1 
-abandoned?&nbsp; It turned out that additional data concerning the 
-flight software had become available in the meantime, about which I 
-don't yet care to speak, and it became obvious PASS1 was not 
-enough.&nbsp; To make full use of the additional data would require 
-ports of <i>at least</i> the OPT, AUX, and PASS passes.&nbsp; But the 
-effort and cost in time of porting just PASS1 had been so great that I 
-couldn't really tolerate the thought of proceeding to port at least 
-three additional passes.&nbsp; Almost as significant is the fact that <a moz-do-not-send="true" href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">the documentation for HALMAT had survived only in incomplete form</a>.&nbsp; HALMAT itself is version-dependent to some degree, and the <a moz-do-not-send="true" href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">more-complete but early documentation</a>
- we have of it is seldom relevant to the compiler source-code version 
-available to us.&nbsp; As porting of the compiler's PASS1 progressed, I 
-became increasingly-less optimistic that adequate HALMAT documentation 
-could be recovered to use it as the basis for emulation or code 
-generation.&nbsp; But since the port of PASS1 can (or should be able to)
- produce reports and HALMAT output identical to the original HAL/S-FC, 
-it remains valuable as a cross-checking tool, even if abandoned for 
-primary HAL/S development.</font><br>
-
-
-
-    
-  </p>
-</blockquote>
+Besides these things, there is also HAL/S interpreter, which implements 
+only a subset of full HAL/S functionality.&nbsp; It can be used 
+interactively, accepting HAL/S statements from the keyboard and 
+outputting results to the display.&nbsp; It may be a useful tool for 
+somebody learning to program in HAL/S.&nbsp; <a moz-do-not-send="true" href="hal-s-interpreter.html">It is covered on its own dedicated page</a>.<br>
 <br>
 <hr style="width: 100%; height: 2px;">
     
@@ -4022,7 +3214,7 @@ primary HAL/S development.</font><br>
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-04-28<br>
+          2024-08-21<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

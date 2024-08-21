@@ -45,7 +45,8 @@ document.write(headerTemplate.replace("@TITLE@","XPL/I and XPL Development Toolc
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
 <li><a moz-do-not-send="true" href="#WhyXPLI">XPL/I Versus Standard XPL</a></li>
 <li><a moz-do-not-send="true" href="#XCOMI">XCOM-I</a></li>
-<li><a moz-do-not-send="true" href="#Installation">Installation</a></li>
+<li><a moz-do-not-send="true" href="#Installation">Installation of XCOM-I<br>
+</a></li>
 <ul>
   <li><a moz-do-not-send="true" href="#Linux">Linux or Mac OS<br>
     </a></li>
@@ -69,8 +70,8 @@ document.write(headerTemplate.replace("@TITLE@","XPL/I and XPL Development Toolc
 </ul>
 
 <li><a moz-do-not-send="true" href="#hooks">Patches for Insertion of Inline Code</a></li>
-<li><a moz-do-not-send="true" href="inlines">IBM System/360 Inline Code</a></li>
-<li><a moz-do-not-send="true" href="#appendix">Appendix:&nbsp; Some Problems With C Compilers</a><br>
+<li><a moz-do-not-send="true" href="inlines">More on IBM System/360 Inline Code</a></li>
+<li><a moz-do-not-send="true" href="#appendix">Appendix:&nbsp; Suitable C Compilers</a><br>
 </li>
 
 
@@ -94,8 +95,8 @@ language, and it's mainly about relatively-abstract topics.&nbsp; There
 is no "user's manual" for XPL.&nbsp; No "programmer's guide".&nbsp; No 
 tutorials as to how to get started with it.&nbsp; Indeed, there is not 
 even a "Hello, world!" program.&nbsp; The closest thing to a sample 
-program in XPL is a full-blown language compiler!&nbsp; In short, 
-there's no convenient way for a programmer to get started with it.<br>
+program in XPL is the source code for a full-blown language compiler!&nbsp; In short, 
+there's no convenient way for a programmer to get started with it, except for immediately jumping into the deep end of the pool.<br>
   </li>
   <li>The language was not designed for general-purpose 
 applications.&nbsp; It was tailored for the specific purpose of writing 
@@ -104,7 +105,7 @@ everyday activity of large numbers of people.&nbsp; For example, while
 there is an integer datatype, there's no floating-point datatype; so how
  could you easily write mathematically-intensive programs in it?<br>
   </li>
-  <li>The definition of the language was highly dependent on the 
+  <li>The definition of the language is highly dependent on the 
 characteristics of IBM System/360 mainframe computers, to the extent 
 that even writing an XPL compiler that could run on non-compatible 
 computers is quite a chore.&nbsp; Indeed, the 
@@ -121,7 +122,7 @@ as Windows, Mac OS, or Linux computers, rather than being confined to
 mainframe systems that are no longer common.<br>
 
 <br>
-This web page is devoted to such a modern XPL compiler, which I call <b>XCOM-I</b>.&nbsp; A corresponding web page devoted to the modern HAL/S compiler, which I call <b>HALSFC</b>, can be found <a moz-do-not-send="true" href="HAL.html">here</a>.&nbsp; A corresponding web page devoted to the Space Shuttle flight software, <b>PASS</b> and <b>BFS</b>, can be found <a moz-do-not-send="true" href="Shuttle.html">here</a>.&nbsp; <b>HALSFC</b> will be discussed <i>here</i> only to the extent of instructions for building it using <b>XCOM-I</b>.<br>
+This web page is devoted to such a modern XPL compiler, which I call <b>XCOM-I</b>.&nbsp; A corresponding web page devoted to the modern HAL/S compiler, <b>HAL/S-FC</b> (which I'll often refer to as <b>HALSFC</b> in order to avoid the issue of having the / character in filenames), can be found <a moz-do-not-send="true" href="HAL.html">here</a>.&nbsp; A corresponding web page devoted to the Space Shuttle flight software (<b>PASS</b> and <b>BFS</b>) — and to the Space Shuttle computing systems in general —, can be found <a moz-do-not-send="true" href="Shuttle.html">here</a>.&nbsp; <b>HALSFC</b> will be discussed <i>here</i> only to the extent of instructions for building it using <b>XCOM-I</b>.<br>
 <h1><a name="WhyXPLI"></a>XPL/I Versus Standard XPL<br>
 </h1>
 The Space Shuttle flight software and the HAL/S compiler used to compile
@@ -140,9 +141,12 @@ between standard XPL and this extended XPL didn't matter as long as
 Fortress Intermetrics operated its walled garden separately from the 
 remainder of the computing world.<br>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; For example, the previous attempt best-known to me of a modern XPL compiler is <a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel 
-Weaver's XPL-to-C translator</a>.&nbsp; But alas,it is incapable of compiling Intermetrics's extended form of XPL.</font><br>
+Weaver's XPL-to-C translator</a>.&nbsp; Alas, it is incapable of compiling Intermetrics's extended form of XPL.</font><br>
 </blockquote>
-But times have changed.&nbsp; <i>We</i> sometimes need to distinguish between the standard XPL language of <i>A Compiler Generator</i> and the extended XPL language of Intermetrics.&nbsp; When we do need to distinguish, I'll call that extended language "XPL/I".<br>
+But times have changed.&nbsp; <i>We</i> sometimes will need to distinguish between the standard XPL language of <i>A Compiler Generator</i>
+ and the extended XPL language of Intermetrics in our discussion.&nbsp; 
+When we do need to distinguish, I'll call that extended Intermetrics 
+language "XPL/I".<br>
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; In case you're wondering, there is no known surviving copy of 
 Intermetrics's own XPL/I compiler.&nbsp; In fact, there is reason to 
 believe that it was intentionally destroyed.&nbsp; (Prove me wrong, 
@@ -167,8 +171,8 @@ that somebody else had already done almost exactly what you wanted to
 do, and you just cut-and-paste what they had already done.&nbsp; Whereas
  in scientific research, you observe, you make hypotheses, you explore 
 the consequences of those hypotheses ... and you start all over again if
- your hypotheses were wrong!&nbsp; And in scientific research, even if 
-you think you found the perfect answer, you may still be wrong in the 
+ your hypotheses were found to be wrong!&nbsp; And in scientific research, even if 
+you think you've found the perfect answer, you may still be wrong in the 
 end, in ways you can't detect or understand.&nbsp; In fact, you probably
  will be.<br>
 <br>
@@ -176,7 +180,7 @@ Or to put it differently, computer programming is like a game where you
 can look up all of the rules, whereas scientific research (or writing an
  XPL/I compiler) is like a game where you don't know all of the rules.<br>
 <br>
-Well, that's my XPL/I world, and welcome to it!<br>
+The latter is my XPL/I world, and welcome to it!<br>
 <h1><a name="XCOMI"></a>XCOM-I</h1>
 The modern XPL/I compiler is known as <b>XCOM-I</b>.&nbsp; It is designed to compile both XPL/I programs and standard XPL programs.<br>
 <br>
@@ -186,9 +190,9 @@ XPL or XPL/I program:&nbsp; You first translate your program into C via <b>XCOM-
 <blockquote><font size="-1"><b>Aside:&nbsp; XCOM-I</b> itself is written in the Python 3 language, and getting <b>XCOM-I</b> to run on your computer is dead simple:&nbsp; Just install Python 3, copy <b>XCOM-I</b>
  onto your computer, add it to your PATH, and you're ready to go!&nbsp; 
 Setting up your computer to compile the C code is something else, 
-though.&nbsp; Once again it's dead simple, <i>if</i> you have the C compiler known as <b>gcc</b> (or alternatively, <b>clang</b>).&nbsp;
+though.&nbsp; Once again it's dead simple, <i>if</i> you have the common C compiler known as <b>gcc</b>.&nbsp;
  But it's not so simple on (say) Microsoft Windows where most people use
- the incompatible Visual Studio system.&nbsp; And that's a <i>lot</i> of people.&nbsp; So let's put the installation problem aside for a few minutes and come back to it a little later.</font><br>
+ the far-less-compatible Visual Studio system.&nbsp; And that's a <i>lot</i> of people.&nbsp; So let's put the installation problem aside for a few minutes and come back to it a little later.</font><br>
 </blockquote>
 On a properly-set-up computer, compiling an XPL or XPL/I program is 
 quite simple.&nbsp; Suppose we have an XPL program called HELLO.xpl 
@@ -198,13 +202,12 @@ whose contents are this:<br>
 </blockquote>
 To compile it, we do this:<br>
 <blockquote>
-  <pre><font color="#663300">XCOM-I.py --xpl HELLO.xpl<br>make -C HELLO<br></font></pre>
+  <pre><font color="#663300">XCOM-I.py --xpl HELLO.xpl<br>make -C HELLO.build<br></font></pre>
 </blockquote>
 To run the compiled program, you could do this:<br>
 <blockquote>
-  <pre><font color="#663300">HELLO/HELLO</font><br></pre>
-</blockquote>
-(or in Windows, <font color="#663300"><code>HELLO\HELLO</code></font>), giving output that looks like this:<br>
+  <pre><font color="#663300">./HELLO</font><br></pre>
+</blockquote>giving output that looks like this:<br>
 <blockquote>
   <pre><font color="#663300">PAGE 1<br><br><br>Hello, world!</font><br></pre>
 </blockquote>
@@ -217,7 +220,9 @@ Not quite what you expected, I bet, if you're a coder and have seen lots
 computing environment.&nbsp; Back then, programmers weren't sitting in 
 front of a display screen and a keyboard when they wrote or ran their 
 programs, but were instead punching their programs into 80-column 
-computer cards and outputting the results of running their programs on 
+computer cards, submitting computing jobs that would run at some later 
+but undetermined time, and outputting the results of running their 
+programs on 
 physical printers, probably on fan-fold, tractor-feed paper.&nbsp; 
 Probably that paper has horizontal green-and-white bars on it, or 
 perhaps horizontal black lines between every few lines of print.&nbsp; 
@@ -226,45 +231,49 @@ included page numbers.<br>
 <br>
 If you were to write a computer program today that printed a line of 
 text, you'd probably expect it to move to the next line after each line 
-that was printed.&nbsp; Not in the 1960's on IBM printers!&nbsp; In that
+was "printed" on your display screen.&nbsp; Not in the 1960's on IBM 
+printers!&nbsp; In that
  environment, it was more similar to moving to the next line and <i>then</i> printing the text.&nbsp; That's why there's no line-feed at the end of our printout:&nbsp; It came <i>before</i>
  the line was printed, not after it.&nbsp; Not that this is a big deal, 
-of course, merely that our own engrained expectations no longer 
+of course, merely that our own ingrained expectations no longer 
 completely match those of 1960's-era IBM programmers. <br>
 <br>
-As for what the compilation process did for us, the result of running <b>XCOM-I</b>
- was that a directory called HELLO was created, containing the 
+As for what the compilation process above did for us, the result of running <b>XCOM-I</b>
+ was that a directory called HELLO.build was created, containing the 
 translation into C of our XPL program.&nbsp; That new directory is 
-completely self-contained, and no longer requires <b>XCOM-I</b> nor HELLO.xpl.&nbsp; You could move it to an entirely-different computer before compiling the C code, if you liked.<br>
+completely self-contained, and no longer requires <b>XCOM-I</b> nor 
+HELLO.xpl.&nbsp; You could move it to an entirely-different computer 
+before compiling the C code, if you liked.&nbsp; Its contents look 
+something like this:<br>
 <blockquote>
   <pre>-rw-rw-r-- 1 rburkey rburkey  11207 Aug 12 07:23 COMPACTIFY.c<br>-rw-rw-r-- 1 rburkey rburkey   1730 Aug 12 07:23 configuration.h<br>-rw-rw-r-- 1 rburkey rburkey  16921 Jul  7 10:50 debuggingAid.c<br>-rw-rw-r-- 1 rburkey rburkey   4269 Aug  5 09:01 inline360.c<br>-rw-rw-r-- 1 rburkey rburkey   1195 Aug  5 09:01 inline360.h<br>-rw-rw-r-- 1 rburkey rburkey   1835 Aug 12 07:23 main.c<br>-rw-rw-r-- 1 rburkey rburkey   4545 Aug 10 17:07 Makefile<br>-rw-rw-r-- 1 rburkey rburkey  24759 Aug 12 07:23 memory.c<br>-rw-rw-r-- 1 rburkey rburkey    883 Aug 12 07:23 procedures.h<br>-rw-rw-r-- 1 rburkey rburkey    161 Aug 12 07:23 resetAllReentryGuards.c<br>-rw-rw-r-- 1 rburkey rburkey 125864 Aug  9 13:52 runtimeC.c<br>-rw-rw-r-- 1 rburkey rburkey  18037 Jul 18 10:52 runtimeC.h<br></pre>
 </blockquote>
-The command "<font color="#663300"><code>make -C HELLO</code></font>" 
-simply compiles the C code, and adds the executable (also called 
-"HELLO", or "HELLO.exe" in Windows) to the HELLO/ directory.&nbsp; But 
-the executable doesn't have to be there; you can move it somewhere else 
-before running it, and even delete the HELLO/ directory completely<br>
+The command "<font color="#663300"><code>make -C HELLO.build</code></font>" 
+simply compiles the C code in HELLO.build, and moves the executable (also called 
+"HELLO" or in Windows, "HELLO.exe") up into the current working directory after it builds it.&nbsp; But 
+the executable doesn't <i>have</i> to be there; you can move it somewhere else 
+before running it, and even delete the HELLO.build directory or the current working directory completely.<br>
 <br>
 The <b>XCOM-I</b> command line switch <font color="#663300"><code>--xpl</code></font>, incidentally, wasn't necessary for HELLO.xpl.&nbsp; You can see all of the available command-line switches with<br>
 <blockquote>
   <pre><font color="#663300">XCOM-I.py --help</font><br></pre>
 </blockquote>
 In particular, the switch <font color="#663300"><code>--xpl</code></font> simply informed the 
-compiler that the source code was standard XPL rather than XPL/I.&nbsp; But 
-HELLO.xpl is a perfectly-valid XPL/I program too, so we could just have omitted <font color="#663300"><code>--xpl</code></font> with no problem.&nbsp; That doesn't mean that an identical result is produced, though!&nbsp; For example, if we left off the <font color="#663300"><code>--xpl</code></font> switch, we'd see the following messages when we ran <b>XCOM-I</b>:<br>
+compiler that the source code was standard XPL rather than XPL/I.&nbsp; XPL/I is the default.&nbsp; But 
+HELLO.xpl is a perfectly-valid XPL/I program too, so we could just have omitted <font color="#663300"><code>--xpl</code></font> with no problem.&nbsp; That doesn't mean that an identical result is produced, though!&nbsp; For example, if we left off the <font color="#663300"><code>--xpl</code></font> switch, we might see the following messages when we ran <b>XCOM-I</b>:<br>
 <blockquote>
-  <pre>No code is generated for the following PROCEDURE(s):<br>	Not called:  DESCRIPTOR_MONITOR<br>	Not called:  _RECORD_CONSTANT<br>	Not called:  _NEEDMORE_SPACE<br>	Not called:  _RECORD_SEAL<br>	Not called:  _RECORD_UNSEAL<br>	Not called:  _RECORD_GROUPHEAD<br>	Not called:  _RECORD_COORDINATED<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  _INCREASE_RECORD<br>	Not called:  _ALLOCATE_SPACE<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  _ATTACH_RECORD<br>	Not called:  _GET_SPACE<br>	Not called:  _HOW_MUCH<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  _FIND_FREE<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  _STEAL<br>	Not called:  _MOVE_RECS<br></pre>
+  <pre>No code is generated for the following PROCEDURE(s):<br>	Not called:  DESCRIPTORuMONITOR<br>	Not called:  uRECORDuCONSTANT<br>	Not called:  uNEEDMOREuSPACE<br>	Not called:  uRECORDuSEAL<br>	Not called:  uRECORDuUNSEAL<br>	Not called:  uRECORDuGROUPHEAD<br>	Not called:  uRECORDuCOORDINATED<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  uINCREASEuRECORD<br>	Not called:  uALLOCATEuSPACE<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  uATTACHuRECORD<br>	Not called:  uGETuSPACE<br>	Not called:  uHOWuMUCH<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  uFINDuFREE<br>No code is generated for the following PROCEDURE(s):<br>	Not called:  uSTEAL<br>	Not called:  uMOVEuRECS<br></pre>
 </blockquote>
 Those aren't errors or warnings, but are instead informative messages 
 indicating that certain XPL/I procedures implicitly imported by the 
 compiler hadn't been needed, and thus were being discarded.&nbsp; 
 Whereas the compiler wouldn't have tried to import these procedures in 
 the first place if compiling standard XPL.&nbsp; You'd also find that 
-the contents of the HELLO/ directory were quite different as well:<br>
+the contents of the HELLO.build directory were quite different as well:<br>
 <blockquote>
-  <pre>-rw-rw-r-- 1 rburkey rburkey   2890 Aug 12 07:52 _ACTIVE_DESCRIPTORS.c<br>-rw-rw-r-- 1 rburkey rburkey   2040 Aug 12 07:52 _ATTACH_BLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey   1485 Aug 12 07:52 _ATTACH_BLOCKxJOIN.c<br>-rw-rw-r-- 1 rburkey rburkey   1086 Aug 12 07:52 _CHECK_FOR_THEFT.c<br>-rw-rw-r-- 1 rburkey rburkey  21641 Aug 12 07:52 COMPACTIFY.c<br>-rw-rw-r-- 1 rburkey rburkey   1747 Aug 12 07:52 COMPACTIFYxADD_DESC.c<br>-rw-rw-r-- 1 rburkey rburkey   1711 Aug 12 07:52 configuration.h<br>-rw-rw-r-- 1 rburkey rburkey  16921 Jul  7 10:50 debuggingAid.c<br>-rw-rw-r-- 1 rburkey rburkey   1330 Aug 12 07:52 _DETACH_RECORD.c<br>-rw-rw-r-- 1 rburkey rburkey  10136 Aug 12 07:52 _FREEBLOCK_CHECK.c<br>-rw-rw-r-- 1 rburkey rburkey   1157 Aug 12 07:52 _FREEBLOCK_CHECKxADDRESS_CHECK.c<br>-rw-rw-r-- 1 rburkey rburkey   4322 Aug 12 07:52 _FREEBLOCK_CHECKxBLKPROC.c<br>-rw-rw-r-- 1 rburkey rburkey   4269 Aug  5 09:01 inline360.c<br>-rw-rw-r-- 1 rburkey rburkey   1195 Aug  5 09:01 inline360.h<br>-rw-rw-r-- 1 rburkey rburkey   7047 Aug 12 07:52 main.c<br>-rw-rw-r-- 1 rburkey rburkey   4545 Aug 10 17:07 Makefile<br>-rw-rw-r-- 1 rburkey rburkey  31342 Aug 12 07:52 memory.c<br>-rw-rw-r-- 1 rburkey rburkey   1692 Aug 12 07:52 _MOVE_WORDS.c<br>-rw-rw-r-- 1 rburkey rburkey   1176 Aug 12 07:52 _PREV_FREEBLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey   1142 Aug 12 07:52 _PREV_RECORD.c<br>-rw-rw-r-- 1 rburkey rburkey   5236 Aug 12 07:52 procedures.h<br>-rw-rw-r-- 1 rburkey rburkey   2419 Aug 12 07:52 _RECORD_FREE.c<br>-rw-rw-r-- 1 rburkey rburkey   1597 Aug 12 07:52 RECORD_LINK.c<br>-rw-rw-r-- 1 rburkey rburkey   3990 Aug 12 07:52 _REDUCE_BLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey    652 Aug 12 07:52 resetAllReentryGuards.c<br>-rw-rw-r-- 1 rburkey rburkey   2362 Aug 12 07:52 _RETURN_TO_FREESTRING.c<br>-rw-rw-r-- 1 rburkey rburkey   6157 Aug 12 07:52 _RETURN_UNUSED.c<br>-rw-rw-r-- 1 rburkey rburkey 125864 Aug  9 13:52 runtimeC.c<br>-rw-rw-r-- 1 rburkey rburkey  18037 Jul 18 10:52 runtimeC.h<br>-rw-rw-r-- 1 rburkey rburkey    475 Aug 12 07:52 _SPACE_ROUND.c<br>-rw-rw-r-- 1 rburkey rburkey   2023 Aug 12 07:52 _SPMANERR.c<br>-rw-rw-r-- 1 rburkey rburkey   7067 Aug 12 07:52 _SQUASH_RECORDS.c<br>-rw-rw-r-- 1 rburkey rburkey   4714 Aug 12 07:52 _TAKE_BACK.c<br>-rw-rw-r-- 1 rburkey rburkey   1466 Aug 12 07:52 _UNUSED_BYTES.c<br></pre>
+  <pre>-rw-rw-r-- 1 rburkey rburkey   2890 Aug 12 07:52 uACTIVEuDESCRIPTORS.c<br>-rw-rw-r-- 1 rburkey rburkey   2040 Aug 12 07:52 uATTACHuBLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey   1485 Aug 12 07:52 uATTACHuBLOCKxJOIN.c<br>-rw-rw-r-- 1 rburkey rburkey   1086 Aug 12 07:52 uCHECKuFORuTHEFT.c<br>-rw-rw-r-- 1 rburkey rburkey  21641 Aug 12 07:52 COMPACTIFY.c<br>-rw-rw-r-- 1 rburkey rburkey   1747 Aug 12 07:52 COMPACTIFYxADDuDESC.c<br>-rw-rw-r-- 1 rburkey rburkey   1711 Aug 12 07:52 configuration.h<br>-rw-rw-r-- 1 rburkey rburkey  16921 Jul  7 10:50 debuggingAid.c<br>-rw-rw-r-- 1 rburkey rburkey   1330 Aug 12 07:52 uDETACHuRECORD.c<br>-rw-rw-r-- 1 rburkey rburkey  10136 Aug 12 07:52 uFREEBLOCKuCHECK.c<br>-rw-rw-r-- 1 rburkey rburkey   1157 Aug 12 07:52 uFREEBLOCKuCHECKxADDRESSuCHECK.c<br>-rw-rw-r-- 1 rburkey rburkey   4322 Aug 12 07:52 uFREEBLOCKuCHECKxBLKPROC.c<br>-rw-rw-r-- 1 rburkey rburkey   4269 Aug  5 09:01 inline360.c<br>-rw-rw-r-- 1 rburkey rburkey   1195 Aug  5 09:01 inline360.h<br>-rw-rw-r-- 1 rburkey rburkey   7047 Aug 12 07:52 main.c<br>-rw-rw-r-- 1 rburkey rburkey   4545 Aug 10 17:07 Makefile<br>-rw-rw-r-- 1 rburkey rburkey  31342 Aug 12 07:52 memory.c<br>-rw-rw-r-- 1 rburkey rburkey   1692 Aug 12 07:52 uMOVEuWORDS.c<br>-rw-rw-r-- 1 rburkey rburkey   1176 Aug 12 07:52 uPREVuFREEBLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey   1142 Aug 12 07:52 uPREVuRECORD.c<br>-rw-rw-r-- 1 rburkey rburkey   5236 Aug 12 07:52 procedures.h<br>-rw-rw-r-- 1 rburkey rburkey   2419 Aug 12 07:52 uRECORDuFREE.c<br>-rw-rw-r-- 1 rburkey rburkey   1597 Aug 12 07:52 RECORDuLINK.c<br>-rw-rw-r-- 1 rburkey rburkey   3990 Aug 12 07:52 uREDUCEuBLOCK.c<br>-rw-rw-r-- 1 rburkey rburkey    652 Aug 12 07:52 resetAllReentryGuards.c<br>-rw-rw-r-- 1 rburkey rburkey   2362 Aug 12 07:52 uRETURNuTOuFREESTRING.c<br>-rw-rw-r-- 1 rburkey rburkey   6157 Aug 12 07:52 uRETURNuUNUSED.c<br>-rw-rw-r-- 1 rburkey rburkey 125864 Aug  9 13:52 runtimeC.c<br>-rw-rw-r-- 1 rburkey rburkey  18037 Jul 18 10:52 runtimeC.h<br>-rw-rw-r-- 1 rburkey rburkey    475 Aug 12 07:52 uSPACEuROUND.c<br>-rw-rw-r-- 1 rburkey rburkey   2023 Aug 12 07:52 uSPMANERR.c<br>-rw-rw-r-- 1 rburkey rburkey   7067 Aug 12 07:52 uSQUASHuRECORDS.c<br>-rw-rw-r-- 1 rburkey rburkey   4714 Aug 12 07:52 uTAKEuBACK.c<br>-rw-rw-r-- 1 rburkey rburkey   1466 Aug 12 07:52 uUNUSEDuBYTES.c<br></pre>
 </blockquote>
-The way <b>XCOM-I</b> operates, each XPL <font color="#663300"><code>PROCEDURE</code></font>, even if its definition is embedded in another <font color="#663300"><code>PROCEDURE</code></font>, is given it's own dedicated C file.&nbsp; Our simple HELLO.xpl program didn't have even a single <font color="#663300"><code>PROCEDURE</code></font> in it, though the compiler did implicitly import a number of support procedures such as <font color="#663300"><code>COMPACTIFY</code></font>, so you can see that a COMPACTIFY.c file has been generated.&nbsp; <font color="#663300"><code>COMPACTIFY</code></font>, as it happens, has an embedded <font color="#663300"><code>PROCEDURE</code></font>, <font color="#663300"><code>ADD_DESC</code></font>.&nbsp; That's where the file COMPACTIFYxADD_DESC.c comes from; the little "x" indicates the embedding.<br>
+The way <b>XCOM-I</b> operates, each XPL <font color="#663300"><code>PROCEDURE</code></font>, even if its definition is embedded in another <font color="#663300"><code>PROCEDURE</code></font>, is given its own dedicated C file.&nbsp; Our simple HELLO.xpl program didn't have even a single <font color="#663300"><code>PROCEDURE</code></font> in it, though the compiler did implicitly import a number of support procedures such as <font color="#663300"><code>COMPACTIFY</code></font>, so you can see that a COMPACTIFY.c file has been generated.&nbsp; <font color="#663300"><code>COMPACTIFY</code></font>, as it happens, has an embedded <font color="#663300"><code>PROCEDURE</code></font> called <font color="#663300"><code>ADD_DESC</code></font>.&nbsp; That's where the file COMPACTIFYxADD_DESC.c comes from; the little "x" indicates the embedding.<br>
 <br>
 Just for grins, let's take a look at the generated C code.&nbsp; When compiled with the <font color="#663300"><code>--xpl</code></font> switch, the C file that most-directly relates to HELLO.xpl is main.c, which looks like this:<br>
 <blockquote>
@@ -272,13 +281,14 @@ Just for grins, let's take a look at the generated C code.&nbsp; When compiled w
 </blockquote>
 The part I've highlighted in green is the only part that directly 
 relates to HELLO.xpl.&nbsp; All of the rest is overhead related to 
-modeling the IBM 360 computing environment in C.&nbsp; <br>
-<h1><a name="installation"></a>Installation</h1>
+modeling the IBM 360 computing environment in C.&nbsp; The functions <font color="#009900"><code>cToDescriptor</code></font> and <font color="#009900"><code>OUTPUT</code></font> are part of <b>XCOM-I</b>'s runtime library.<br>
+<h1><a name="installation"></a>Installation of XCOM-I<br>
+</h1>
 <h2><a name="Linux"></a>Linux or Mac OS<br>
 </h2>
 <p>Note that my newest Mac is 17 years old, and hasn't been updatable 
 for a long time now, so my Mac comments may or may not apply to your 
-(probably!) much newer Mac..<br>
+(probably!) much newer Mac.<br>
 </p>
 
 
@@ -295,29 +305,21 @@ for a long time now, so my Mac comments may or may not apply to your
   </blockquote>
 </blockquote>
 <ol start="2">
-  <li>Add the folder <i>virtualagc</i>/XCOM-I to your PATH.&nbsp; 
+  <li>Add the following folders to your PATH:&nbsp; <i>"virtualagc</i>/XCOM-I", <i>"virtualagc</i>/yaShuttle/ported/PASS1.PROCS", and <i>"virtualagc</i>/yaShuttle/Source Code/PASS.REL32V0" to 
+your PATH.&nbsp; 
 (Hint:&nbsp; In Linux, I usually do this by editing ~/.bashrc; in Mac 
-OS, by editing /etc/paths.)&nbsp; Afterward, you may need to close and 
+OS, by editing /etc/paths.&nbsp; But Google it if you're unsure!)&nbsp; Afterward, you may need to close and 
 reopen any terminal windows in order for the change to take effect.</li>
-<li>Install Python 3, if not already installed, and do:</li>
+<li>Install Python 3, if not already installed.</li><li>Optionally, install <b>clang-format</b>.&nbsp; You don't necessarily need to install <b>clang</b> itself, but you certainly can do so.&nbsp; This allows you optionally to "pretty print" the C code that <b>XCOM-I</b> generates.<br>
+</li>
 </ol>
-<blockquote>
-  <blockquote>
-    <pre><font color="#663300">pip3 install virtualenv ebcdic</font><br></pre>
-  </blockquote>
-</blockquote>
-<ol start="4">
-
-  <li>Optionally, install <b>clang-format</b>.&nbsp; You don't necessarily need to install <b>clang</b> itself, but you certainly can do so.</li>
-</ol>
-<p>If you want to build Windows executables using Linux, you need to 
+<p>Less common:&nbsp; If you want to build Windows executables using Linux, you need to 
 additionally install a C cross-compiler.&nbsp; On Linux Mint, which I 
 use, this is called "mingw-64", whereas on your platform it may 
 differ.&nbsp; The instructions below assume that the program used to 
 invoke the cross-compiler is "x86_64-w64-mingw32-gcc" (or alternately 
 "i686-w64-mingw32-gcc"), but again, perhaps it is different on your 
-platform.&nbsp; To actually run the Windows executables on Linux, or to 
-perform any of the tests which will be described requires the 
+platform.&nbsp; To run the Windows executables <i>on</i> Linux requires the 
 installation of WINE.&nbsp; On Linux Mint, both mingw-64 and WINE can be
  installed from the standard package repository.&nbsp; Whether any of 
 that is possible on a Mac, I have no idea whatever; not on <i>my</i> old Mac, for sure!<br>
@@ -330,76 +332,37 @@ that is possible on a Mac, I have no idea whatever; not on <i>my</i> old Mac, fo
 
 
 <h2><a name="Windows"></a>Windows Specific</h2>
-<h3>Full Functionality, in MSYS2</h3>
-<p>The problem in Windows is not <b>XCOM-I</b> <i>per se</i>, which works as-is, but rather to set up some kind of reasonably-compliant environment for compiling the C files produced by <b>XCOM-I</b>.&nbsp; Unfortunately, that's not the work of a mere idle hour.<br>
+<p>The problem in Windows is not <b>XCOM-I</b> <i>per se</i>, which works as-is, but rather to set up some kind of reasonably-compliant environment for compiling the C files produced by <b>XCOM-I</b>.&nbsp; That's more effort in Windows than in Linux or Mac OS (since you generally don't have to do it in Linux or Mac OS).<br>
 </p>
+<blockquote>
 
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; Here are some possibilities I'm <i>not</i> going to pursue here, though I've wasted <i>many</i> hours on them in the background.&nbsp; Some are more-promising than others.<br>
-  </font>
-  <ul>
-    <li><font size="-1">Visual Studio:&nbsp; I have tried to get the Visual Studio command-line C compiler (<b>cl</b>) to work, but ultimately failed.&nbsp; After some effort, I got programs to compile, but they did not run correctly afterward.</font></li>
-    <li><font size="-1">Running a Linux guest in a Windows-hosted 
-virtual machine (such as VirtualBox):&nbsp; This will, of course, work, 
-but you should have used the Linux instructions in the preceding 
-section.</font></li>
-    <li><font size="-1">Using Windows Subsystem for Linux (WSL):&nbsp; I
- have been unable to try this.&nbsp; I purchased Windows 11 to do so, 
+  <font size="-1"><b>Aside:</b>&nbsp; A choice that will likely be obvious to most people is to use the </font><font size="-1">Windows Subsystem for Linux (WSL).&nbsp; I
+ have been unable to try it.&nbsp; I purchased Windows 11 to do so, 
 but I'm running Windows 11 in a virtual machine myself, and it turns out
- that you cannot run WSL on Windows on a virtual machine.&nbsp; Too 
+ that you cannot run WSL on Windows inside of a virtual machine.&nbsp; Too 
 bad!&nbsp; If you try WSL on a physical machine and make it work, let me
- know.</font></li>
-    <li><font size="-1">Cross-compiling from Linux to Windows, using 
-Mingw.&nbsp; I was able to compile programs, but they didn't run 
-correctly afterward.&nbsp; Perhaps I'll debug this some day, but not 
-today!</font></li>
-    <li><font size="-1">Well ... and just modifying makefiles and shell 
-scripts to use Windows utility programs in place of *NIX ones, and 
-batch-file syntax in place of BASH syntax.<br>
-      </font></li>
-  </ul>
-  <p><font size="-1">The C files produced by <b>XCOM-I</b> are quite 
-vanilla, and use no oddball features of C, so the problems I've 
-encountered with compiling but being able to run probably don't relate 
-to the C translations of the XPL source code.&nbsp; I suspect that they 
-relate instead to the runtime library, which I wrote directly in C, and 
-for which I did have to use various target-system-dependent 
-functionality.</font><br>
-  </p>
-</blockquote>
-Here's what to do that <i>will</i> work:<br>
+ know.<br>
+  </font></blockquote>
+At any rate, I'll be offering you two choices of how to install.&nbsp; My 
+recommended choice is to work with something called MSYS2, which is a 
+development environment that's very Linux-like, and includes many of the 
+same development tools that Linux provides.&nbsp; I'll also offer a way 
+to use Visual Studio instead, though you'll still have to end up installing so many
+ Linux-like tools that it's probably more effort, for a result that doesn't seem superior.&nbsp; But it's your 
+choice.<br>
+
+<h3>Option 1: MSYS2</h3>
 
 <ol>
-<li>Install <a moz-do-not-send="true" href="https://www.msys2.org/">Msys2</a>, which gives you a Linux/Mac-like command-line working environment for compiling stuff. <br>
-</li>
-  </ol>
-<blockquote>
-  <blockquote><b><img moz-do-not-send="true" src="Msys2.png" alt="" width="64" height="64" align="right">Note:</b>&nbsp;
- Here's a tricky aspect!&nbsp; Msys2 actually provides several 
-Linux-like environments, depending on the installation of different 
-compiler versions.&nbsp; By default, the installation will likely want 
-to put icons on your desktop and/or toolbar for one of the environments 
-that may or may not work for you, but isn't the particular one I 
-recommend in the next step.&nbsp; My suggestion is to not let it put the
- icon on your desktop or toolbar.<br>
-  </blockquote>
-</blockquote>
-<ol start="2">
-  <li>Run Msys2:&nbsp; If you can find Msys2 in the Windows startup 
-menu, it offers a number of possible ways to run Msys2.&nbsp; The 
-choices it gives you are things like "MSYS2 MSYS", "MSYS2 MINGW32", 
-"MSYS2 MINGW64", and so on. &nbsp; I suggest using "MSYS2 MINGW64", and 
-the instructions below reflect that choice.&nbsp; Some of the other 
-choices have worked well for me, but others have not.&nbsp; <i>Any</i> 
-of the choices open up a Linux-like command-line environment, but the 
-different choices expect different versions of the various development 
-tools (such as the C compiler) to have been installed. <br>
+<li>Install <a moz-do-not-send="true" href="https://www.msys2.org/">MSYS2</a>, which gives you a Linux/Mac-like command-line working environment for compiling stuff.&nbsp; <br>
+</li><li>Run MSYS2.<br>
   </li>
 
   <li>Install various packages with this command:&nbsp;&nbsp;<font color="#663300"><code></code></font></li>
 </ol>
 
 <blockquote>
-  <blockquote><font color="#663300"><code>pacman -S mingw-w64-x86_64-gcc make grep diffutils python3 </code></font><font color="#663300"><code><font color="#663300"><code>python3-pip </code></font>git clang</code></font><br>
+  <blockquote><font color="#663300"><code>pacman -S mingw-w64-ucrt-x86_64-gcc make grep diffutils python3 </code></font><font color="#663300"><code><font color="#663300"><code>python3-pip </code></font>git clang</code></font><br>
   </blockquote>
 </blockquote>
 <ol start="4">
@@ -412,130 +375,91 @@ tools (such as the C compiler) to have been installed. <br>
 </blockquote>
 
 <ol start="5">
-  <li>Add the folders <i>virtualagc</i>/XCOM-I and virtualagc/HALSFC to 
-your PATH.&nbsp; In Msys2, you'd do that by editing the file ~/.bashrc, 
-which you can do with the command "<font color="#663300"><code>nano ~/.bashrc</code></font>".&nbsp; What you have to do is add a line, perhaps at the bottom of the file, reading "<font color="#663300"><code>PATH=$PATH:~/<i>virtualagc</i>/XCOM-I</code></font>:<font color="#663300"><code>~/<i>virtualagc</i>/HALSFC</code></font>".&nbsp; (Afterward, you will need to exit Msys2 and rerun "MSYS2 MINGW64" to see the change take effect.</li>
+  <li>Add the following folders to your PATH:&nbsp; <i>"virtualagc</i>/XCOM-I", <i>"virtualagc</i>/yaShuttle/ported/PASS1.PROCS", and <i>"virtualagc</i>/yaShuttle/Source Code/PASS.REL32V0".&nbsp; In MSYS2, you'd do that by editing the file ~/.bashrc, 
+which you can do with the command "<font color="#663300"><code>nano ~/.bashrc</code></font>".&nbsp; Google how to permanently
+ change the PATH in Linux if you're unsure what to do.&nbsp; Afterward, 
+you will need to exit MSYS2 and rerun it to see the change take effect.</li>
 </ol>
 <p>It's worth noting that if you followed these instructions to the 
-letter, then your "home directory" in Msys2 will probably be something 
-like C:\msys64\home\<i>USERNAME</i>.&nbsp; That's good to know, if you need to transfer any files in or out of there!<br>
+letter, then your "home directory" in MSYS2 will probably be something 
+like C:\msys64\home\<i>USERNAME</i>, whereas your home directory for a normal command-line would be c:\users\<i>USERNAME</i>.&nbsp; That's good to keep in mind if you need to transfer any files in or out of there!<br>
 </p>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; It seems to me that 
-Msys2 implementation operates extremely slowly compared to the Linux and
- Mas OS implementations.&nbsp; Compiling an XPL program and running it 
-takes about 3 times as long as doing the same thing in Linux, on the 
-same physical computer.&nbsp; Perhaps that has something to do with my 
-running Windows inside of a Virtual Machine that only allocates half of 
-the CPU cores to Windows.&nbsp; Perhaps not.<br>
-</font></blockquote>
-<h3>Restricted Functionality, with Visual Studio</h3>
-<blockquote><font size="-1"><b>Warning:</b>&nbsp; I have no knowledge of
- Visual Studio.&nbsp; Period!&nbsp; I've never had any need for it, and 
-have no reason to believe I'll have any need for it on an ongoing 
-basis.&nbsp; So take everything I say with a grain of salt, believe 
-nothing, and don't ask me any questions about it.&nbsp; If something's 
-broken, I'm not going to fix it.&nbsp; I've wasted far too much time on 
-it already.&nbsp; <i>You</i> fix it, and tell me how.&nbsp; With the tools provided by Visual Studio and Python, you <i>may</i> be able to use <b>XCOM-I</b>
- to compile and run XPL or XPL/I programs, and to go beyond that to 
-compile and run HAL/S programs.&nbsp; You will not be able to perform 
-any of the other tests of the <b>XCOM-I</b> system I describe below, 
-unless you do all of the legwork for them yourself.&nbsp; In short, it's
- better to use the MSYS2 environment I describe above, unless you have 
-some specific reason to require Visual Studio.</font><br>
+
+<h3>Option 2: Visual Studio</h3>
+<blockquote><font size="-1"><b>Warning:</b>&nbsp; I have never used 
+Visual Studio prior to this, or if I have then it was so long ago I no longer remember doing so.&nbsp; Besides which, for <b>XCOM-I</b>
+ I'm only using Visual Studio's command-line tools 
+rather than its Integrated Development Environment (IDE).&nbsp; The 
+upshot of this that you shouldn't interpret my giving you Visual Studio 
+instructions as meaning you're going to get the wonderful integration 
+into Visual Studio that you might dream of.&nbsp; You <i>might</i>, but you'll have to work it out yourself!</font><br>
 </blockquote>
-<p>Here are the basic setups and ground rules:<br>
-</p>
-<ul>
-  <li>Command-line work is performed from a "Developer Command Prompt 
-for Visual Studio" (as obtained from the Windows Start menu), and not 
-from a normal command prompt.&nbsp; I think the main reason you have to 
-use it is that the C compiler (<b>cl</b>) is in its PATH, but not in the PATH in a normal command prompt.&nbsp; You'll have to '<code>cd</code>'
+<p>Note that almost everything I'm going to tell you to do, either here 
+in the setup, or elsewhere on the page, is done from what's called the 
+Developer Command Prompt for Visual Studio, which you can run from the 
+Windows Start menu if you have Visual Studio installed.&nbsp; You won't 
+be working from a normal (non-developer) command prompt most of the 
+time.&nbsp; I think the main reason you have to 
+do this is that the C compiler (<b>cl</b>) is in its PATH, but not in the PATH in a normal command prompt.&nbsp; You'll have to '<code>cd</code>'
  to some other directory, though, to get anything done, since you'll 
 have no permissions to actually modify anything in the working directory
  this plunks you into.&nbsp; Isn't that a fun feature?&nbsp; It's your 
-own choice, of course, but perhaps you could go to your home directory:</li>
-</ul>
-<blockquote>
-  <blockquote>
-    <pre>cd \users\<i>YOUR_USERNAME</i><br></pre>
-  </blockquote>
-</blockquote>
+own choice, of course, but perhaps you could go to your normal command-line home directory.</p>
 <ul>
-  <li>As setup, use <b>git</b> to clone the entire <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc">Virtual AGC source-code tree</a> from GitHub; the command is "<font color="#663300"><code>git clone --depth=1 https://github.com/virtualagc/virtualagc.git</code></font>", which creates a directory called "virtualagc".&nbsp; You'll also use <b>git</b> later to get updates; the command, from within the "virtualagc" directory is "<code>git pull</code>".&nbsp;
- [No, I do not know how to find git.exe in Windows, though I believe 
-that Visual Studio does install it.&nbsp; Adding it to your PATH or 
-letting you otherwise know where it is doesn't seem to be VS's 
-style.&nbsp; Once you do discover its location, though, I'd suggest 
-adding it to your PATH.]</li>
-  <li>Add the HALSFC and XCOM-I directories from the downloaded 
-source-code tree to your PATH.&nbsp; If you've already opened a VS 
+
+</ul>
+
+Another thing worth knowing is that if Python programs such as <b>XCOM-I</b>
+ are run from a command line in Windows, 
+they open up in a new window in which all of their messages appear, but 
+the window vanishes as soon as the 
+Python program completes.&nbsp; That means that you have little or no 
+time to ponder or capture the messages it may be showing you, 
+particularly the error messages.&nbsp; You can work around this 
+phenomenon, whenever I explicitly instruct you to run <b>XCOM-I</b>, by invoking <b>XCOM-I</b> as<br>
+<blockquote>
+  <pre>python XCOM-I.py <i>... </i><br></pre>
+</blockquote>
+On the other hand, any invocations of <b>make</b> I instruct you to use will already have take care of this for you.<br>
+<br>
+Here's the setup:<br>
+
+<ul>
+  <li>Get the entire <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc">Virtual AGC source-code tree</a> from GitHub.&nbsp; <br>
+</li>
+  <li>Add the following folders to your PATH:&nbsp; <i>"virtualagc</i>/XCOM-I", <i>"virtualagc</i>/yaShuttle/ported/PASS1.PROCS", and <i>"virtualagc</i>/yaShuttle/Source Code/PASS.REL32V0"..&nbsp; If you've already opened a VS 
 developer command prompt, then close it and start a new one to see the 
 effect of the changed PATH.</li>
   <li>Install Python 3, if it's not already installed.&nbsp; <br>
 </li>
-<li>Unfortunately (for Windows folks), UTF-8 is not at present enabled 
-by default for Python on Windows.&nbsp; While as I've indicated before, 
-the <b>XCOM-I</b> framework <i>prefers</i> that all non-ASCII characters
- have been replaced by their ASCII substitutes, such as '¬' → '~', there
- is certainly legacy XPL code in our source-code tree in which such 
-substitutions haven't been made.&nbsp; <b>XCOM-I</b> will therefore by default not be able to process such files.&nbsp; However, if you set the environment variable <code>PYTHONUTF8=1</code>,
- Python's UTF-8 processing ability is restored, and everything is 
-swell!&nbsp; I'd suggest setting this environment variable permanently; 
-but if that's not counter-productive for you, you may have to set it 
-temporarily before processing some XPL or XPL-I files.
-  </li>
-
-  <li>If Python programs such as XCOM-I.py are run from a command line, 
-they open up in a new command-line window which vanishes as soon as the 
-Python program completes, thus preventing you from seeing any 
-messages.&nbsp; You can always use the command-line switch <code>--winkeep</code>
- with XCOM-I.py to keep the window open whenever there's an error.&nbsp;
- The window can be closed by hitting &lt;Enter&gt; or by just explicitly
- closing it.&nbsp; It'll still close automatically if it doesn't detect 
-an error.&nbsp; For example (try it now!):</li>
-</ul>
-<blockquote>
-  <blockquote>
-    <pre>XCOM-I.py --winkeep --help<br></pre>
-  </blockquote>
-</blockquote>
-At this point, you will be able to compile an XPL or XPL/I program via the prescription<br>
-<blockquote>
-  <pre>XCOM-I.py --winkeep [<i>OPTIONS</i>] <i>SOURCEFILE</i>.xpl<br>cl /Fe: <i>SOURCEFILE</i>.exe <i>SOURCEFILE</i>/*.c</pre>
-</blockquote>
-
-and then run it,<br>
-<blockquote>
-  <pre><i>SOURCEFILE</i> [<i>OPTIONS</i>]<br></pre>
-</blockquote>
-
-  but you won't be able to do any of the other stuff described on this 
-page.&nbsp; Some of which is very useful, and some of which is downright
- cool from a nerdy point of view.&nbsp; In particular, you won't be able
- to run any of the tests needed to verify that any of this works!&nbsp; 
-Most of the reason you can't do that is simply that you don't have at 
-your disposal any of the tools normally found in UNIX-style operating 
-systems like Linux or Mac OS upon which those tests are built.&nbsp; <br>
-<br>
-So while I'm loath to keep advising you to install additional non-Windows stuff on your computer, what you can do is to obtain <a moz-do-not-send="true" href="https://github.com/bmatzelle/gow">a zipfile of numerous UNIX-style utilities from here</a>.&nbsp;
+<li>Set the environment variable <code>PYTHONUTF8=1</code> to enable
+ Python's UTF-8 processing ability.&nbsp;&nbsp;</li>
+<li>Obtain <a moz-do-not-send="true" href="https://github.com/bmatzelle/gow">a zipfile of numerous UNIX-style utilities from here</a>.&nbsp;
  Extract the contents somewhere on your local computer, and add the 
 subdirectory called "bin" to your PATH.&nbsp; (Remember to close and 
-then reeopen an developer command line you may have open, in order to 
-see the effect of the change to the PATH.)&nbsp; <br>
-<br>
-Unfortunately, the version of GNU <b>make</b> provided with this package is too out-of-date (3.81) to be fully satisfactory for use with <b>XCOM-I</b>, so you'll have to install a newer version.&nbsp; You can download <a moz-do-not-send="true" href="https://www.gnu.org/software/make/#download">the latest source code from here</a>
- (4.41 at this writing) and extract the contents.&nbsp; You'll find a 
-file called README.W32, which you can open in Visual Studio and get 
-instructions on how to build it.&nbsp; I lost patience at that point, 
-myself, and so haven't tried it.&nbsp; Good luck!&nbsp; (<i>You</i> were the one that insisted on using Visual Studio, remember, not me?)<br>
+then reopen any developer command line you may have open, in order to 
+see the effect of the change to the PATH.)&nbsp;&nbsp;</li>
+<li>The version of GNU <b>make</b> provided with these UNIX-style utilities is too out-of-date (version 3.81) to be fully satisfactory for use with <b>XCOM-I</b>.&nbsp;
+ So you'll have to install a newer version.&nbsp; Here's a reasonably-easy way to do that:</li>
+<ul>
+  <li>Download <a moz-do-not-send="true" href="https://www.gnu.org/software/make/#download">the latest source code from here</a> (version 4.4.1 as I'm writing this) and extract it.</li>
+  <li>From a Visual Studio developer command line, 'cd' in to the source-code directory just created.</li>
+  <li>Run the batch script called <font color="#663300"><code>build_w32.bat</code></font>.&nbsp; This creates the file gnumake.exe in the subdirectory called WinRel/.</li>
+  <li>Rename gnumake.exe as just make.exe.<br>
+  </li>
+  <li>Get it into your PATH somewhere that precedes the older version of <b>make</b> found in 
+the UNIX-style utilities.&nbsp; What I do is just copy it atop the older version in the UNIX-style utilities' bin/ folder.</li>
+  <li>You can verify the version by running <code>make -v</code>.<br>
+  </li>
+</ul>
 
-<blockquote>
+</ul><blockquote>
 </blockquote>
 
 <h2><a name="testTheInstallation"></a>Testing the Installation</h2>
 <p>We can do a very quick test of your setup and of <b>XCOM-I</b> itself by compiling and running the HELLO.xpl program I <a moz-do-not-send="true" href="#XCOMI">used as an example earlier</a>.</p>
 Do the following:<br>
-<table align="center" cellspacing="2" cellpadding="2">
+<table align="center" cellspacing="2" cellpadding="2" border="1">
   <tbody>
     <tr>
       <th valign="top"><u>Linux</u><u><br>
@@ -548,26 +472,25 @@ Do the following:<br>
     <tr>
       <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:
         <blockquote>
-          <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s -C HELLO<br>HELLO/HELLO</pre>
+          <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s -C HELLO.build<br>./HELLO</pre>
         </blockquote>
 
       </td>
       <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:
         <blockquote>
-  <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s CC=clang EXTRA=-w -C HELLO<br>HELLO/HELLO</pre>
-        </blockquote>
+  <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s CC=clang EXTRA=-w -C HELLO.build<br>./HELLO<br></pre></blockquote>(Omit <code>--pp</code> if <b>clang-format</b> not installed.)<br>
+
+        <br>
+
 
 
       </td>
-      <td valign="top"><img moz-do-not-send="true" src="Msys2.png" alt="" width="64" height="64" align="right">Open an MSYS2 command line.&nbsp; Then:
+      <td valign="top">Open an MSYS2 command line.&nbsp; Then:
         <blockquote>
-          <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s RDYNAMIC= -C HELLO<br>HELLO/HELLO<br></pre></blockquote>Or from a Visual Studio developer command line (if you<br>
-<i>haven't</i> installed the optional utility programs),<br>
-<blockquote>
-  <pre>md temp<br>cd temp<br>XCOM-I.py --winkeep --xpl ..\virtualagc\XCOM-I\Tests\HELLO.xpl<br>cl /Fe: HELLO.exe HELLO/*.c<br>HELLO<br></pre></blockquote>or (if you <i>have</i> installed the optional utility programs),<br>
+          <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s RDYNAMIC= -C HELLO.build<br>HELLO<br></pre></blockquote>Or from a Visual Studio developer command line,<br>
 
 <blockquote>
-  <pre>md temp<br>cd temp<br>XCOM-I.py --winkeep --xpl ..\virtualagc\XCOM-I\Tests\HELLO.xpl<br>make CC=cl -C HELLO<br>HELLO\HELLO</pre>
+  <pre>md temp<br>cd temp<br>set PYTHONUTF8=1<br>python XCOM-I.py --xpl ..\virtualagc\XCOM-I\Tests\HELLO.xpl<br>make CC=cl -C HELLO.build<br>HELLO</pre>
 </blockquote>
 
 <blockquote>
@@ -575,14 +498,14 @@ Do the following:<br>
 
       </td>
     </tr><tr>
-  <th rowspan="1" colspan="1" valign="top"><u>Built in Linux, for use in Windows</u></th>
+  <th rowspan="1" colspan="1" valign="top"><u>Build in Linux, for use in Windows</u></th>
 </tr>
 <tr>
   <td rowspan="1" colspan="1" valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
     <blockquote>
-      <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s CC=x86_64-w64-mingw32-gcc EXT=.exe -C HELLO<br></pre>
+      <pre>mkdir ~/temp<br>cd ~/temp<br>XCOM-I.py --pp --xpl ~/virtualagc/XCOM-I/Tests/HELLO.xpl<br>make -s CC=x86_64-w64-mingw32-gcc EXT=.exe -C HELLO.build<br></pre>
     </blockquote>
-Copy HELLO/HELLO.exe to Windows or run on Linux with WINE.<br>
+Copy HELLO.exe to Windows or run on Linux with WINE.<br>
   </td>
 </tr>
 
@@ -600,19 +523,19 @@ also mess up column alignment in comments.&nbsp; You pays your money and
  takes your chances!</li>
   <li>The <font color="#663300"><code>-s</code></font> in the make command:&nbsp; Optional.&nbsp; It just prevents <b>make</b> from giving you a running commentary on whatever commands it happens to be running.&nbsp; No big deal! <br>
   </li>
-  <li><font color="#663300"><code>CC=clang EXTRA=-w</code></font> in the Mac OS <b>make</b> command:&nbsp; Probably not necessary.&nbsp; The same <b>make</b> command as for Linux could have been used.&nbsp; And <b>clang</b> is the default anyway, so adding <font color="#663300"><code>CC=clang</code></font> just makes it explicit.&nbsp; In fact, to force it to use <b>gcc</b>, I have to use the command <font color="#663300"><code>make -s CC=gcc EXTRA="-w -std=c99" -C HELLO</code></font>.&nbsp; In my experience, <b>clang</b> produces a lot of pointless (and incorrect) warning messages, which is why I disable all of the warnings by adding <font color="#663300"><code>EXTRA=-w</code></font>.&nbsp; <br>
+  <li><font color="#663300"><code>CC=clang EXTRA=-w</code></font> in the Mac OS <b>make</b> command:&nbsp; Probably not necessary.&nbsp; The same <b>make</b> command as for Linux could have been used.&nbsp; And <b>clang</b> is the default anyway in Mac OS anyway, I think, so adding <font color="#663300"><code>CC=clang</code></font> just makes it explicit.&nbsp; In fact, to force it to use <b>gcc</b>, you'd have to use the command <font color="#663300"><code>make -s CC=gcc EXTRA="-w -std=c99" -C HELLO</code><code>.build</code></font>.&nbsp; In my experience, <b>clang</b> produces a lot of pointless (and incorrect) warning messages, which is why I disable all of the warnings by adding <font color="#663300"><code>EXTRA=-w</code></font>.&nbsp; <br>
   </li>
   <li><font color="#663300"><code>RDYNAMIC=</code></font> in the Windows make command:&nbsp; Disables a compiler command-line option that the Windows version of <b>gcc</b> doesn't support.<br>
   </li>
 </ul>
 Various other helpful options will show up in later examples.<br>
 <br>
-By the way, the directory from which we just retrieved HELLO.xpl has 
+By the way, the Test/ directory from which we just retrieved HELLO.xpl has 
 lots of other sample XPL and XPL/I files in it as well, which could be 
 run in the same manner as HELLO.xpl.&nbsp; In fact, I've cobbled 
 together a much-more-extensive test of <b>XCOM-I</b> by using them, and you can run that more-extensive test like so:<br>
 <br>
-<table align="center" cellspacing="2" cellpadding="2">
+<table align="center" cellspacing="2" cellpadding="2" border="1">
 
   <tbody>
     <tr>
@@ -624,15 +547,15 @@ together a much-more-extensive test of <b>XCOM-I</b> by using them, and you can 
         </u></th>
     </tr>
     <tr>
-      <td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
+      <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
         <blockquote>
-          <pre>cd ~/virtualagc/XCOM-I<br>make -f Makefile-regression<br></pre></blockquote>Or:<br>
+          <pre>cd <i>virtualagc</i>/XCOM-I<br>make -f Makefile-regression<br></pre></blockquote>or<br>
 <blockquote>
   <pre>make CC=clang EXTRA=-w -f Makefile-regression</pre>
 </blockquote>
-</td><td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:
+</td><td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:
         <blockquote>
-  <pre>cd ~/virtualagc/XCOM-I<br>make CC=clang EXTRA=-w -f Makefile-regression<br></pre></blockquote>Or:<br>
+  <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=clang EXTRA=-w -f Makefile-regression<br></pre></blockquote>or<br>
 <blockquote>
   <pre>make CC=gcc EXTRA="-w -std=c99" -f Makefile-regression</pre>
 </blockquote>
@@ -642,15 +565,15 @@ together a much-more-extensive test of <b>XCOM-I</b> by using them, and you can 
 
 
       </td>
-      <td valign="top"><img moz-do-not-send="true" src="Msys2.png" alt="" width="64" height="64" align="right"><a name="winRegression"></a>Open an MSYS2 command line.&nbsp; Then:
+      <td valign="top"><a name="winRegression"></a>Open an MSYS2 command line.&nbsp; Then:
         <blockquote>
-          <pre>cd ~/virtualagc/XCOM-I<br>make RDYNAMIC= -f Makefile-regression<br></pre></blockquote>Or from a Visual Studio developer command line,<br>
-if you've installed the optional utilities:<br>
+          <pre>cd <i>virtualagc</i>/XCOM-I<br>make RDYNAMIC= -f Makefile-regression<br></pre></blockquote>Or from a Visual Studio developer command line,<br>
 
 
   
 <blockquote>
-  <pre>set PYTHONUTF8=1<br>make CC=cl -f Makefile-regression<br></pre>
+<pre>make CC=cl -f Makefile-regression</pre>
+
 </blockquote>
 
 <blockquote>
@@ -658,14 +581,14 @@ if you've installed the optional utilities:<br>
 
       </td>
     </tr><tr>
-  <th valign="top"><u>Built in Linux, for use in Windows</u></th>
+  <th valign="top"><u>Build in Linux, for use in Windows</u></th>
 </tr>
 <tr>
   <td valign="top">Build for Windows, but test (requires WINE) on Linux. <br>
     <br>
 Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
     <blockquote>
-      <pre>cd ~/virtualagc/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe -f Makefile-regression</pre>
+      <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe -f Makefile-regression</pre>
     </blockquote>
   </td>
 </tr>
@@ -675,7 +598,7 @@ Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
 <br>
 What you should expect to see in any case is some messages like the following:<br>
 <blockquote>
-  <pre>Files bitsizeDemo/out.txt and Tests/bitsizeDemo.regression are identical<br>Files bitsizeDemo/xxxxA and bitsizeDemoCommon/xxxxA are identical<br>Files bitsizeDemoCommon/xxxxA and bitsizeDemoCommonIn/xxxx are identical<br>Files bitsizeDemoCommon/COMMONa.out and bitsizeDemoCommonIn/COMMONa.out are identical<br>Files out.txt and ../Tests/Example-6.18.3.regression are identical<br>Files out.txt and ../Tests/Example-6.18.4.regression are identical<br>Files Example-6.18.5/out.txt and Tests/Example-6.18.5-and-6.regression are identical<br>Files out.txt and ../Tests/breakCharactersDemo.regression are identical<br>Files ANALYZER/out.txt and ANALYZER/out.regression are identical<br><br>*********** All regression tests passed! ***********<br></pre>
+  <pre>make -s -C Example-6.18.3.build<br>make -s -C Example-6.18.4.build<br>make -s -C Example-6.18.5.build<br>make -s -C Example-6.18.6.build<br>make -s -C breakCharactersDemo.build<br>make -s -C ANALYZER.build<br>make -s -C SKELETON.build<br>make -s -C bitsizeDemo.build<br>make -s -C bitsizeDemoCommon.build<br>make -s -C bitsizeDemoCommonIn.build<br>Files bitsizeDemo.build/out.txt and Tests/bitsizeDemo.regression are identical<br>Files bitsizeDemo.build/xxxxA and bitsizeDemoCommon.build/xxxxA are identical<br>Files bitsizeDemoCommon.build/xxxxA and bitsizeDemoCommonIn.build/xxxx are identical<br>Files bitsizeDemoCommon.build/COMMONa.out and bitsizeDemoCommonIn.build/COMMONa.out are identical<br>Files Example-6.18.3.build/out.txt and Tests/Example-6.18.3.regression are identical<br>Files Example-6.18.4.build/out.txt and Tests/Example-6.18.4.regression are identical<br>Files Example-6.18.5.build/out.txt and Tests/Example-6.18.5-and-6.regression are identical<br>Files breakCharactersDemo.build/out.txt and Tests/breakCharactersDemo.regression are identical<br>Files ANALYZER.build/out.txt and ANALYZER.build/out.regression are identical<br>======================== All regression tests passed! ========================<br></pre>
 </blockquote>
 These were "regression tests", in the sense that the various programs 
 mentioned in the output messages had been performed at some time in the 
@@ -685,7 +608,7 @@ rather than accuracy.&nbsp; By the way, several of the programs,
 including those label Example-xxxx and ANALYZER come straight out of <i>A Compiler Generator</i>.&nbsp;
  The ANALYZER.xpl program is itself quite a significant chunk of code, 
 in that what it does is to accept a BNF grammar for a language and 
-generate a table-driven parser for the language; in the regression test,
+generate a table-driven parser for the language, in essence building a compiler for the language; in the regression test,
  it generates a parser for a simple language called SKELETON.<br>
 <br>
 If you want still more testing to convince yourself that <b>XCOM-I</b> 
@@ -699,11 +622,14 @@ we need to make a brief detour.
 <p>XPL or XPL/I programs compiled by <b>XCOM-I</b> are native to your own local computer system, and if <b>XCOM-I</b> has done its job properly, there should be no lingering dependencies on the IBM System/360 in the compiled programs.<br></p>
 <p>Nevertheless ... XPL was <i>designed</i> to be a program for 
 generating compilers, so a lot of legacy XPL or XPL/I code is actually 
-the source code of a compiler for one or another computer language.  
+the source code of a compiler for one or another computer language, and 
+those compilers invariably spit out IBM System/360 object code.  
 Suppose for example that we had an XPL program called <b>X</b> that was a compiler for a programming language called "X".  It's true that if we compile the source code for <b>X</b> with <b>XCOM-I</b> that we'll get executable code for <b>X</b>
  that runs on our native Linux/Mac/Windows computer (rather than, say, 
-an IBM 360).  But it's also true that if we <i>use</i> that native version of <b>X</b> to compile source-code in the X language, say for a program called <b>Y</b>, then the output of the compiler will still be an object file for the IBM System/360.  So we still wouldn't be able to run <b>Y</b> on our native computer, and would still need an IBM System/360 to run <b>Y</b>.<br></p>
-<p>Which means that even with <b>XCOM-I</b> in hand, it's still very useful to have an IBM System/360 emulator in which to run not the programs <i>produced</i> by <b>XCOM-I</b>, but the programs produced by the compilers produced by <b>XCOM-I</b>.<br></p>
+an IBM 360).  But it's also true that if we <i>use</i> that native-Linux, Mac, or Windows version of <b>X</b> to compile source-code in the X language, say for a program called <b>Y</b>,
+ then the output of the compiler will still be an object file for the 
+IBM System/360.  So we still wouldn't be able to run program <b>Y</b> on our native computer, and would still need an IBM System/360 to run <b>Y</b>.<br></p>
+<p>Which means that even with <b>XCOM-I</b> in hand, it's still very useful to have an IBM System/360 emulator in which to run not the programs <i>produced</i> by <b>XCOM-I</b>, but the programs produced by the compilers compiled by <b>XCOM-I</b>.&nbsp; Yes, I know that makes your head swim a bit.&nbsp; Well, wait until you get to the next section.<br></p>
 <p>If you're already an IBM System/360 expert or even someone who wants 
 to be an IBM System/360 user, then perhaps an IBM System/360 
 emulator such as <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a>
@@ -718,9 +644,9 @@ with Virtual AGC's goal of integrating Space Shuttle computing support
 into spaceflight simulation programs than a full-blown mainframe 
 emulator would be anyway.)<br></p>
 
-<p>As it happens, there is an available lightweight IBM System/360 emulator.  This emulator, called <b>sim360</b>,
+<p>As it happens, there <i>is</i> an available lightweight IBM System/360 emulator.  This emulator, called <b>sim360</b>,
  was written by the same Daniel Weaver who I've also mentioned earlier 
-as the author of an XPL-to-C translator for standard XPL.  You can find 
+as the author of an earlier XPL-to-C translator for standard XPL.  You can find 
 the
  source code for <b>sim360</b> as modified for my purposes here in <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360-source/simulate">the Virtual AGC software repository</a>, but <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">the official place to get the most up-to-date version is Dan's own site</a>.&nbsp;
  If you follow the hyperlink to Dan's site, you'll find that it's 
@@ -768,7 +694,7 @@ the submonitor programs that I'm aware of.</font><br>
 
 <p>Let's build <b>sim360</b>.&nbsp; Do this:<br>
 </p>
-<table align="center" cellspacing="2" cellpadding="2">
+<table align="center" cellspacing="2" cellpadding="2" border="1">
 
 
   <tbody>
@@ -782,14 +708,14 @@ the submonitor programs that I'm aware of.</font><br>
         </u></th>
     </tr>
     <tr>
-      <td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
+      <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
         <blockquote>
-          <pre>cd ~/virtualagc/XCOM-I<br>make sim360<br></pre></blockquote>Or:
+          <pre>cd <i>virtualagc</i>/XCOM-I<br>make sim360<br></pre></blockquote>Or:
 <blockquote>
   <pre>make CC=clang EXTRA=-w sim360</pre>
 </blockquote>
-</td><td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:&nbsp;        <blockquote>
-  <pre>cd ~/virtualagc/XCOM-I<br>make CC=clang EXTRA=-w sim360<br></pre></blockquote>Or:
+</td><td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:&nbsp;        <blockquote>
+  <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=clang EXTRA=-w sim360<br></pre></blockquote>Or:
 <blockquote>
   <pre>make CC=gcc EXTRA="-w -std=c99" sim360</pre>
 </blockquote>
@@ -799,13 +725,11 @@ the submonitor programs that I'm aware of.</font><br>
 
 
       </td>
-      <td valign="top"><img moz-do-not-send="true" src="file:///home/rburkey/git/virtualagc-web/Msys2.png" alt="" width="64" height="64" align="right">Open an MSYS2 command line.&nbsp; Then:&nbsp;<strike>
+      <td valign="top">Open an MSYS2 command line.&nbsp; Then:&nbsp;<strike>
         </strike><blockquote>
-          <pre>cd ~/virtualagc/XCOM-I<br>make sim360<br></pre></blockquote>Or:
+          <pre>cd <i>virtualagc</i>/XCOM-I<br>make sim360<br></pre></blockquote>Or:
 <blockquote>
   <pre>make CC=clang EXTRA=-w sim360<br></pre></blockquote>Or from a Visual Studio developer command line,<br>
-
-if you've installed <b>make</b>:<br>
 <blockquote>
   <pre>make CC=cl sim360.exe<br></pre>
 </blockquote>
@@ -815,7 +739,7 @@ if you've installed <b>make</b>:<br>
 
       </td>
     </tr><tr>
-  <th valign="top"><u>Built in Linux, for use in Windows</u></th>
+  <th valign="top"><u>Build in Linux, for use in Windows</u></th>
 </tr>
 <tr>
   <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
@@ -823,7 +747,7 @@ if you've installed <b>make</b>:<br>
         
           
     <blockquote>
-      <pre>cd ~/virtualagc/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe sim360.exe<br></pre>
+      <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe sim360.exe<br></pre>
     </blockquote>
 Or:<br>
     <blockquote>
@@ -854,14 +778,18 @@ The command-line switches for <b>sim360</b> probably look mysterious, but they'r
 
 
 <ul>
-<li><font color="#663300"><code>-o0ET stdout</code></font>:  Causes any output to "device 0" from the IBM 360 program to be routed to <font color="#663300"><code>stdout</code></font>, and automatically translate it from EBCDIC to ASCII.<br></li><li><code><font color="#663300">-i0AT stdin</font></code>:  Causes input from "device 0" into the IBM 360 program to be routed from <font color="#663300"><code>stdin</code></font>, and automatically to translate it from ASCII to EBCDIC.<br></li>
+<li><font color="#663300"><code>-o0ET stdout</code></font>:  Causes any output to "device 0" from the IBM 360 program to be routed to <font color="#663300"><code>stdout</code></font>, and automatically translate it from EBCDIC to ASCII.<br></li><li><code><font color="#663300">-i0AT stdin</font></code>:  Causes input from "device 0" into the IBM 360 program to be routed from <font color="#663300"><code>stdin</code></font>, and automatically to translate it from ASCII to EBCDIC.</li></ul>The spectre of EBCDIC that looms over this entire enterprise will be discussed later.<br>
+<ul>
+
 </ul>
+
 <h1><a name="compilingXCOM"></a>Insane Bootstrapping!</h1>
 
 And I do mean <i>insane</i>.<br>
 <br>Earlier, I promised (threatened?) to give you some much heftier testing of <b>XCOM-I</b> on your computer, and now that we have <b>sim360</b> in hand, we're going to do that with a vengeance!&nbsp; We're going try <i>bootstrapping</i>
  some legacy standard-XPL compilers.&nbsp; By a "legacy" compiler, I 
-mean an IBM 360 XPL compiler from the good-old 1960's or 1970's.&nbsp; We'll use them to gauge the authenticity of <b>XCOM-I</b>'s behavior, at least in so far as standard XPL is concerned.&nbsp; We happen to have XPL source code <i>and</i> IBM 360 builds of <i>two</i> such legacy compilers.&nbsp; (And by "we", I mean that I copied them from Dan Weaver's website.)<br>
+mean an IBM 360 XPL compiler from the good-old 1960's or 1970's.&nbsp; 
+We'll use our ability to do this to gauge the authenticity of <b>XCOM-I</b>'s behavior, at least in so far as standard XPL is concerned.&nbsp; We happen to have XPL source code <i>and</i> IBM 360 executables for <i>two</i> such legacy compilers.&nbsp; (And by "we", I mean that I copied them from Dan Weaver's website.)<br>
 <br>
 <table cellspacing="2" cellpadding="2" border="1">
   <caption><font size="+1"><b>Available Legacy IBM 360 XPL Compilers</b></font></caption>
@@ -940,7 +868,7 @@ now on, if I'm speaking generically about any of these old compilers,
 I'll simply refer to <b>XCOM<i>x</i></b>.&nbsp; (For the legacy executables, I'll generically call those <b>XCOM</b><b><i>x-YYYYMMDD</i></b>.)&nbsp;
  As for the "patches" in the rightmost column, this refers to the fact 
 that XPL programs may contain inline IBM System/360 machine code 
-inserted directly by the programmer. &nbsp; <a moz-do-not-send="true" href="#hooks">XCOM-I
+inserted directly by the programmer. &nbsp; <a moz-do-not-send="true" href="#hooks"><b>XCOM-I</b>
  has a framework for providing C-language patch files to replace the 
 functionality the original XPL source code implemented by such inline IBM System/360
  machine code</a>.&nbsp; Fortunately, <b>XCOM3</b> has no such inlined IBM 360 code, and <b>XCOM45</b> has merely has a single block of 19 consecutive machine-code instructions.&nbsp; The patch file, of course, was <i>not</i> on the legacy computer tape; I wrote it myself.<br>
@@ -957,18 +885,19 @@ that with <b>XCOM<i>x</i></b>.<br>
 </blockquote>
 
 
-Also to be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that XPL and <b>XCOM-I</b> even exist.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; We don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, it's going to go much more smoothly if <b>XCOM-I</b> is believed to work properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b>
+Also to be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that XPL and <b>XCOM-I</b> even exist.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; We don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, compiling <b>HAL/S-FC</b> is going to go much more smoothly if we can have confidence that <b>XCOM-I</b> works properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b>
  does in fact work as intended. And if in that process <b>XCOM-I</b> can be made useful for 
 somebody who (unlike myself) actually wants to play around with XPL, 
 then why not?<br>
 <br>
-Here's the bootstrapping game-plan as it applies to any or all of the legacy <b>XCOM<i>x</i></b> compilers:<br>
+Here's the bootstrapping game-plan as it applies to either or both of the legacy <b>XCOM<i>x</i></b> compilers:<br>
 <ol>
-  <li>We'll use <b>XCOM-I</b> to compile the XPL source code for <b>XCOM<i>x</i></b>.  That will give us an executable which I'll call <b><b>XCOM<i>x</i></b>-native</b> that runs natively on our Linux, Windows, or Mac computers. <br>
+  <li>We'll use <b>XCOM-I</b> to compile the XPL source code for <b>XCOM<i>x</i></b>.  That will give us an executable which I'll call <b><b>XCOM<i>x</i></b>-native</b> that runs natively on our Linux, Windows, or Mac computer. <br>
 </li>
-  <li>We'll then use <b>XCOM<i>x</i></b><b>-native</b> to compile the XPL source code for <b>XCOM<i>x</i></b> <i>again</i>.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360</b> that's native to the IBM 360. I.e., it only runs on an IBM 360 or a simulation thereof.<br></li>
-  <li>Finally, we'll run&nbsp;<b><b>XCOM<i>x</i></b>-360</b> under <b>sim360</b> to compile the source code for <b>XCOM<i>x</i></b> one last time.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360A</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360A</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.</li>
-<li><i>Finally</i> finally, we'll run the legacy <b>XCOM<i>x</i></b><b>-<i>YYYYMMDD</i></b> executable under <b>sim360</b> to compile source code for <b>XCOM<i>x</i></b> one <i>really-truly</i> last time.&nbsp; That will give us an executable which I'll call <b>XCOM<i>x</i>-360C</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360C</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.
+  <li>We'll then use <b>XCOM<i>x</i></b><b>-native</b> to compile the XPL source code for <b>XCOM<i>x</i></b> <i>again</i>.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360</b> that's native to the IBM 360. I.e., it only runs on an IBM 360 or a simulation thereof, producing IBM 360 object code as well.<br></li>
+  <li>Finally, we'll run&nbsp;<b><b>XCOM<i>x</i></b>-360</b> under <b>sim360</b> to compile the source code for <b>XCOM<i>x</i></b> one last time.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360A</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360A</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.<br>
+</li>
+<li><i>Finally</i> <i>finally</i>, we'll run the legacy <b>XCOM<i>x</i></b><b>-<i>YYYYMMDD</i></b> executable under <b>sim360</b> to compile source code for <b>XCOM<i>x</i></b> one <i>really-truly</i> last time.&nbsp; That will give us an executable which I'll call <b>XCOM<i>x</i>-360C</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360C</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b> and <b><b>XCOM<i>x</i></b>-360A</b>.<br>
 </li>
 
 </ol>
@@ -1018,7 +947,7 @@ Object Files <br>
       </td>
       <td valign="middle" align="center">Yes<br>
       </td>
-      <td valign="middle" align="center">XPL or XPL/I, ASCII coding<br>
+      <td valign="middle" align="center">XPL or XPL/I, ASCII (or UTF-8) coding<br>
       </td>
       <td valign="middle" align="center">C-language files<br>
       </td>
@@ -1139,7 +1068,7 @@ Object Files <br>
 </table>
 <br>
 There are other possible scenarios the table doesn't cover for 
-compiling stuff with other stuff .&nbsp; Those are left as an exercise 
+compiling stuff with other stuff.&nbsp; Those are left as an exercise 
 for the reader, though I don't think they have any relevance <i>vis-à-vis</i> bootstrapping.<br>
 <br>
 Rather than tediously walking you through all of the steps required to 
@@ -1147,7 +1076,7 @@ carry out this complicated bootstrapping scheme, a Makefile has provided
  so that you can carry it out in one easy step.&nbsp; If you want to see
  the gory details, just look into the Makefile itself.<br>
 <br>
-<table align="center" cellspacing="2" cellpadding="2">
+<table align="center" cellspacing="2" cellpadding="2" border="1">
 
 
 
@@ -1161,15 +1090,15 @@ carry out this complicated bootstrapping scheme, a Makefile has provided
         </u></th>
     </tr>
     <tr>
-      <td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
+      <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
         <blockquote>
-          <pre>cd ~/virtualagc/XCOM-I<br>make<br></pre></blockquote>Or:
+          <pre>cd <i>virtualagc</i>/XCOM-I<br>make<br></pre></blockquote>Or:
 <blockquote>
   <pre>make CC=clang EXTRA=-w</pre>
 </blockquote>
-</td><td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:
+</td><td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:
         <blockquote>
-  <pre>cd ~/virtualagc/XCOM-I<br>make CC=clang EXTRA=-w<br></pre></blockquote>Or:
+  <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=clang EXTRA=-w<br></pre></blockquote>Or:
 <blockquote>
   <pre>make CC=gcc EXTRA="-w -std=c99"</pre>
 </blockquote>
@@ -1179,16 +1108,23 @@ carry out this complicated bootstrapping scheme, a Makefile has provided
 
 
       </td>
-      <td valign="top"><img moz-do-not-send="true" src="Msys2.png" alt="" width="64" height="64" align="right"><a name="winInsane"></a>Open an MSYS2 command line.&nbsp; Then: &nbsp;<code>
+      <td valign="top"><a name="winInsane"></a>Open an MSYS2 command line.&nbsp; Then: &nbsp;<code>
         </code><blockquote>
-          <pre><code>cd ~/virtualagc/XCOM-I</code><code><br></code><code>make RDYNAMIC= EXTRA=-w</code><code><br></code></pre></blockquote>Or:<code><br>
+          <pre><code>cd </code><code><i>virtualagc</i>/XCOM-I</code><code><br></code><code>make RDYNAMIC= EXTRA=-w</code><code> EXT=.exe<br></code></pre></blockquote><code>or<br>
 </code>
 <blockquote>
-  <pre><code>make CC=clang EXTRA="-w"</code><br></pre>
+  <pre><code>make CC=clang EXTRA="-w" EXT=.exe<br></code><code></code><br></pre></blockquote>Or from a Visual Studio developer command line,<br>
+<blockquote>
+  <pre>make CC=cl<br></pre>
 </blockquote>
+<blockquote>
+  <pre><code></code></pre>
+
+</blockquote>
+
 </td>
     </tr><tr>
-  <th valign="top"><u>Built in Linux, for use in Windows</u></th>
+  <th valign="top"><u>Build in Linux, for use in Windows</u></th>
 </tr>
 <tr>
   <td valign="top">Build for Windows, but test (requires WINE) on Linux. <br>
@@ -1198,7 +1134,7 @@ carry out this complicated bootstrapping scheme, a Makefile has provided
 Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
 
     <blockquote>
-  <pre>cd ~/virtualagc/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe</pre>
+  <pre>cd <i>virtualagc</i>/XCOM-I<br>make CC=x86_64-w64-mingw32-gcc EXT=.exe</pre>
     </blockquote>
 
   </td>
@@ -1212,37 +1148,34 @@ the table of XPL compilers have now been created, such as XCOM3-360A.obj, and
 if all of the tests comparing them have been passed, you'll see messages
  similar to these:<br>
 <blockquote>
-  <pre>Bootstrapping XCOM3 -----------------------------------------<br>Cross-comparison to legacy compiler's output successful!<br>Bootstrap of XCOM3 successful!<br><br>Bootstrapping XCOM45 -----------------------------------------<br>Cross-comparison to legacy compiler's output successful!<br>Bootstrap of XCOM45 successful!<br></pre>
+  <pre>Bootstrapping XCOM3 -----------------------------------------<br>Files XCOM3-360.obj and XCOM3-360C.obj match within tolerance (2 &lt;= 4 mismatches)<br>Cross-comparison to output of legacy compiler successful<br>Files XCOM3-360.obj and XCOM3-360A.obj match within tolerance (1 &lt;= 4 mismatches)<br>Bootstrap of XCOM3 successful<br>Bootstrapping XCOM45 -----------------------------------------<br>Files XCOM45-360.obj and XCOM45-360C.obj match within tolerance (1 &lt;= 4 mismatches)<br>Cross-comparison to output of legacy compiler successful<br>Files XCOM45-360.obj and XCOM45-360A.obj match within tolerance (1 &lt;= 4 mismatches)<br>Bootstrap of XCOM45 successful<br></pre>
 </blockquote>
-One detail is perhaps worth explaining, because if you were to look into
- the Makefile to understand nitty-gritty of the compilation steps, you 
-might be confused by it.&nbsp; I refer to the nature of the comparisons 
-between the IBM 360 object files of the various compilers.&nbsp; The way
- the comparisons work is this:&nbsp; The object files are, of course, 
-not text files, but rather are non-human-readable binary files.&nbsp; In
- principle, a common tool used for comparing two text files (<b>diff</b>) could be used, but a tool for comparing binary files (<b>cmp</b>) is more-appropriate.&nbsp; The way <b>cmp</b> is used in these comparisons is not to check for exact matches, but rather to <i>count</i>
- the number of bytes that are different, and if that count is less than 
-some cutoff value (typically 6), the comparison is counted as a match.<br>
+You may wonder about the messages that some of the files were "within 
+tolerance" for the IBM 360 object files.&nbsp; The object files are, of 
+course, 
+not text files, but rather are non-human-readable binary files.&nbsp; A 
+perfect match, of course, would be if the files were the same length, 
+and each byte of one file were identical to the corresponding byte of 
+the other file.&nbsp; So why would it be okay if 1 or 2 bytes (as in the
+ printout above) were different?<br>
 <br>
-Six bytes different is a match?&nbsp; Why would I imagine that that makes sense?!!!!<br>
-<br>
-Well, let's look at an abridgement of one of the compilation reports 
-that were created by the compilers during the bootstrapping 
-process.&nbsp; Say, this one for XCOM45-360C.obj:<br>
+Consider the following selection from the report the XPL compiler printed when generating the object file XCOM45-360C.obj:<br>
 <blockquote>
   <pre> XPL COMPILATION---SUNY STONYBROOK---XCOM4.5 VERSION OF  <font color="#ff0000">JULY 19, 1976</font>.  CLOCK TIME = <font color="#ff0000">21:5:40.16</font>.<br><br>TODAY IS AUGUST 12, 2024.  CLOCK TIME = 15:6:40.38.<br><br>   1 I   /*  FIRST WE INITIALIZE THE GLOBAL CONSTANTS THAT DEPEND UPON THE INPUT      I  1286<br>   2 I      GRAMMAR.  THE FOLLOWING CARDS ARE PUNCHED BY THE SYNTAX PRE-PROCESSOR  */ I  1286<br>   3 I                                                                                I  1286<br>   4 I   /*  XPL PARSING TABLES  */                                                   I  1286<br>   5 I                                                                                I  1286<br>   6 I   DECLARE MAXTL LITERALLY '12' ;                                               I  1286<br>   7 I   DECLARE MAXNTL LITERALLY '26' ;                                              I  1286<br>   8 I   DECLARE STARTSTATE LITERALLY '112' ;                                         I  1286<br>   9 I   DECLARE NT LITERALLY '42' ;                                                  I  1286<br>  10 I   DECLARE NSY LITERALLY '92' ;                                                 I  1286<br>  11 I   DECLARE NSTATES LITERALLY '228' ;                                            I  1286<br>  12 I   DECLARE V(92) CHARACTER INITIAL ( '&lt; DUMMY &gt;', '&lt;', '(', '+', '|',           I  1286<br>⋮<br><br>TOTAL TIME IN COMPILER   0:0:1.51.<br>SET UP TIME              0:0:0.03.<br>ACTUAL COMPILATION TIME  0:0:1.33.<br>POST-COMPILATION TIME    0:0:0.15.<br>COMPILATION RATE: 198451 CARDS PER MINUTE.<br></pre>
 </blockquote>
 Notice the part I've highlighted in <font color="#ff0000">red</font>.&nbsp;
- The compilation report includes the date and time on which the compiler
- itself was compiled, which means that the compilation date and time 
-must themselves be embedded in the executable of the compiler ... which 
-means that the same compiler, if compiled at a different time, will have
- a different timestamp embedded in its object file.&nbsp; Since a 
+ The compilation report includes the date and time on which <i>the compiler generating the report</i>
+ was compiled, which means that the compilation date and time 
+must themselves be embedded in the executable of the XPL compiler ... 
+which 
+means that the same XPL compiler, if compiled on two different 
+occasions, would have different timestamps embedded in its two object 
+files.&nbsp; Since a 
 timestamp requires 3 bytes for the time and 3 bytes for the date, that 
-means that up to 6 bytes may differ.<br>
+means that up to 6 bytes may differ simply due to an embedded timestamp.<br>
 <br>
 That's fine theory, all right, but can we see it happening in 
-practice?&nbsp; Here's a spot check to show that we can:&nbsp; I've
+practice?&nbsp; I.e., were the bytes that were different really part of a timestamp?&nbsp; Here's a spot check:&nbsp; I've
  made hexadecimal dumps of 
 the two of the object files that we want to be identical, and then used a
  file-comparison utility to compare
@@ -1256,7 +1189,7 @@ the two of the object files that we want to be identical, and then used a
 
 In this case, only 3 bytes are different.&nbsp; <b>XCOM45-360.obj</b> was 
 built (according to the report it printed out when I made the screenshot above) at time 19:53.37.27, while
-<b> XCOM45-360A.obj</b> was built at 17:5:6.24.&nbsp; <b>XCOM</b> gets the 
+<b> XCOM45-360A.obj</b> was built at 17:5:6.24 on the same date.&nbsp; <b>XCOM</b> gets the 
 compile time using <a moz-do-not-send="true" href="XPL-I.html#builtin">the XPL built-in function <font color="#663300"><code>TIME_OF_GENERATION</code></font></a>,
  which returns the number of centiseconds since midnight.&nbsp; For 
 <b>XCOM45-360.obj</b>, that computes to 
@@ -1264,7 +1197,7 @@ compile time using <a moz-do-not-send="true" href="XPL-I.html#builtin">the XPL b
 <b>XCOM45-360A.obj</b>, 100*(17*3600+5*60+6.24)=6150624=0x5DD9E0.&nbsp; Both perfectly match the screenshot above.&nbsp; (Incidentally, IBM 
 360 programs all store their integer data in <i>big-endian</i> form, so that the most-significant bytes come first in memory.)&nbsp; Q.E.D.<br>
 <blockquote>
-  <font size="-1"><b>Aside:</b>&nbsp; Incidentally, <b>XCOM3</b>
+  <font size="-1"><b>Aside:</b>&nbsp; By the way, <b>XCOM3</b>
  has plenty of quirks specific to it, quite aside from any quirks XPL 
 more-generally may have as a computer language.&nbsp; <b>XCOM3-native</b> and <b>XCOM3-360</b> inherit these quirks.&nbsp; I mention this 
 just in case you become excited about using <b>XCOM3-native</b> and start writing new XPL programs for it!&nbsp; Here are a few quirks I've noticed:</font><br>
@@ -1285,25 +1218,32 @@ just in case you become excited about using <b>XCOM3-native</b> and start writin
 
 </h1>
 
-Hopefully you're now convinced that <b>XCOM-I</b> works reasonably correctly, at least in so far as compiling <i>standard</i> XPL programs is concerned.&nbsp; But our motivation in creating <b>XCOM-I</b>
+Hopefully you're now convinced that <b>XCOM-I</b> works reasonably correctly, at least in so far as compiling <i>standard</i> XPL programs is concerned.&nbsp; But we'll do one last test, and it's a big one! <br>
+<br>
+Recall that our motivation in creating <b>XCOM-I</b>
  was to compile XPL/I programs, and in particular to be able to compile 
 the original HAL/S compiler for Space Shuttle flight software, which was
  known as <b>HAL/S-FC</b> back in the day, or <b>HALSFC</b> in its modern incarnation.&nbsp; While usage of <b>HALSFC</b> is the subject of <a moz-do-not-send="true" href="HAL.html">a different web page</a>, we'll talk about how to compile <b>HALSFC</b> itself here.<br>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; The dedicated <b>HALSFC</b> web page <i>also</i>
  has compilation instructions, but they're different than the ones 
-presented here, because the audience for them is different.&nbsp; <i>Here,</i>
- we assume that you're interested in XPL or XPL/I, so the entire 
-compilation process from beginning XPL/I source code to ending native 
-executable is discussed.&nbsp; Whereas on the <b>HALSFC</b> page, we 
-assume that there is no interest in XPL/I at all, and the discussion 
-covers only the process of converting the C source code of <b>HAL/S-FC</b> to a native executable, as if <b>HAL/S-FC</b> had been written from scratch in C.</font><br>
+presented here, because the audience for them is different.&nbsp; Either
+ set of instructions will work.&nbsp; The ones here provide more 
+flexibility in terms of debugging HAL/S-FC itself.</font><br>
 </blockquote>
 Once again, a Makefile has been provided that performs the entire 
 compilation, as well as compiling a short HAL/S test file, and doing a 
 regression test of the HAL/S compiler's outputs vs an earlier build of 
-the same test file:<br>
+the same test file on my own Linux box.&nbsp; Admittedly, the regression
+ test only compiles a very simple HAL/S test program, which looks like 
+this:<br>
+<blockquote>
+  <pre><font color="#663300"><code>DEBUG ¢0¢3¢4¢5¢6¢8¢9¢C¢D¢E¢F H(202)</code><code><br></code><code> </code><code><br></code><code> HELLO: PROGRAM;</code><code><br></code><code>    DECLARE I INTEGER;</code><code><br></code><code>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');</code><code><br></code><code>    DECLARE INTEGER, J;</code><code><br></code><code>    REPLACE PRINTER BY "6";</code><code><br></code><code>    WRITE(PRINTER) 'THE BEGINNING';</code><code><br></code><code>    DO FOR I = 1 TO 5;</code><code><br></code><code>       WRITE(PRINTER) I, 'HELLO, WORLD!';</code><code><br></code><code>       DO FOR J = 2 TO 8 BY 2;</code><code><br></code><code>          WRITE(PRINTER) J, MY_NAME, 'SAYS ISN''T THIS FUN?';</code><code><br></code><code>       END;</code><code><br></code><code>    END;</code><code><br></code><code>    WRITE(6) 'THE END';</code><code><br></code><code> CLOSE HELLO;</code></font><br></pre>
+</blockquote>
+But a test is a test, right?&nbsp; You may notice that HAL/S bears a 
+creepy similarity to XPL/I.&nbsp; The similarity is superficial, and the
+ two languages are quite different in reality.<br>
 <br>
-<table align="center" cellspacing="2" cellpadding="2">
+<table align="center" cellspacing="2" cellpadding="2" border="1">
 
 
 
@@ -1318,40 +1258,57 @@ the same test file:<br>
         </u></th>
     </tr>
     <tr>
-      <td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
+      <td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
         <blockquote>
           </blockquote>
-<pre>cd ~/virtualagc/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet regression<br></pre>
-Or:<br>
-<pre>make -s XEXTRA=--quiet CC=clang EXTRA=-w regression</pre>
+<blockquote>
+  <pre>cd <i>virtualagc</i>/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet regression<br></pre>
+</blockquote>
 
-</td><td valign="middle">Open a "terminal" (i.e., a command line).&nbsp; Then:
+Or:<br>
+<blockquote>
+  <pre>make -s XEXTRA=--quiet CC=clang EXTRA=-w regression</pre>
+</blockquote>
+
+
+</td><td valign="top">Open a "terminal" (i.e., a command line).&nbsp; Then:
         <blockquote>
   </blockquote>
-<pre>cd ~/virtualagc/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet CC=clang EXTRA=-w regression<br></pre>
+<blockquote>
+  <pre>cd <i>virtualagc</i>/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet CC=clang EXTRA=-w regression<br></pre>
+</blockquote>
+
 Or:
-<pre>make -s XEXTRA=--quiet CC=gcc EXTRA="-w -std=c99" regression
+<blockquote>
+  <pre>make -s XEXTRA=--quiet CC=gcc EXTRA="-w -std=c99" regression
 </pre>
+</blockquote>
+
 <blockquote>
         </blockquote>
 
 
 
       </td>
-      <td valign="top"><img moz-do-not-send="true" src="Msys2.png" alt="" width="64" height="64" align="right">Open an MSYS2 command line.&nbsp; Then:
+      <td valign="top">Open an MSYS2 command line.&nbsp; Then:
         <blockquote>
           </blockquote>
-<pre>cd ~/virtualagc/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet RDYNAMIC= regression<strike><br></strike></pre>
-<strike>Or:</strike>
-<pre><strike>make -s XEXTRA=--quiet CC=clang EXTRA=-w regression</strike><br></pre>
-Note that with <b>clang</b>, this test may fail per <a moz-do-not-send="true" href="#appendix">Appendix A</a>.
+<blockquote>
+  <pre>cd <i>virtualagc</i>/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet RDYNAMIC= regression<strike><br></strike></pre>
+</blockquote>
+
+Or from a Visual Studio developer command line,<br>
+<blockquote>
+  <pre>make -s XEXTRA=--quiet CC=cl regression<strike><br></strike></pre>
+</blockquote>
+
 
       </td>
     </tr><tr>
-  <th valign="top"><u>Built in Linux, for use in Windows</u></th>
+  <th valign="top"><u>Build in Linux, for use in Windows</u></th>
 </tr>
 <tr>
-  <td valign="top">Build for Windows, but test (requires WINE) on Linux. <br>
+  <td valign="top">Builds for Windows, but tests (requires WINE) on Linux. <br>
 
 
     <br>
@@ -1362,7 +1319,11 @@ Open a "terminal" (i.e., a command line).&nbsp; Then:<br>
 
     <blockquote>
   </blockquote>
-    <pre>cd ~/virtualagc/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet CC=x86_64-w64-mingw32-gcc EXT=.exe regression<br></pre>
+    
+<blockquote>
+  <pre>cd <i>virtualagc</i>/yaShuttle/"Source Code"/PASS.REL32V0<br>make -s XEXTRA=--quiet CC=x86_64-w64-mingw32-gcc EXT=.exe regression<br></pre>
+</blockquote>
+
 
   </td>
 </tr>
@@ -1380,12 +1341,12 @@ If everything was found to be successful, you should see messages that terminate
 </blockquote>
 You should also find 5 new executable files:<br>
 <ol>
-  <li><b>PASS1</b></li>
-  <li><b>FLO</b></li>
-  <li><b>OPT</b></li>
-  <li><b>AUXP</b></li>
-  <li><b>PASS2</b></li></ol>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; This isn't actually a full build of <b>HAL/S-FC</b>, but merely the compiler passes needed to run the regression test.&nbsp; You could have gotten the additional passes <b>PASS3</b> and <b>PASS4</b>, along with the BFS versions of the passes,&nbsp; namely <b>PASS1B</b>, <b>OPTB</b>, <b>PASS2B</b>, and <b>PASS3B</b>, by using the <b>make</b> targets "<font color="#663300"><code>all regression</code></font>" rather than just "<font color="#663300"><code>regression</code></font>" in the instructions above.</font><br>
+  <li><b>PASS1[.exe]</b></li>
+  <li><b>FLO</b><b>[.exe]</b></li>
+  <li><b>OPT</b><b>[.exe]</b></li>
+  <li><b>AUXP</b><b>[.exe]</b></li>
+  <li><b>PASS2</b><b>[.exe]</b></li></ol>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; This isn't actually a <i>full</i> build of <b>HAL/S-FC</b>, but merely of the compiler passes needed to run the regression test.&nbsp; You could have gotten the additional passes <b>PASS3</b> and <b>PASS4</b>, along with the BFS versions of the passes (discussed later),&nbsp; namely <b>PASS1B[.exe]</b>, <b>OPTB[.exe]</b>, <b>PASS2B[.exe]</b>, and <b>PASS3B[.exe]</b>, by using the <b>make</b> targets "<font color="#663300"><code>all regression</code></font>" rather than just "<font color="#663300"><code>regression</code></font>" in the instructions above.</font><br>
 </blockquote>
 These passes of <b>HAL/S-FC</b> are chained together to perform a full compilation of a HAL/S program.&nbsp; For those passes having <i>two</i> programs listed, (<b>xxxx</b> and <b>xxxxB</b>), the B version is used when compiling Backup Flight Software, whereas the non-<b>B</b> version is used for compiling the Primary Flight Software; if there's no <b>B</b> version, then the non-<b>B</b>
  version is used for both primary and backup.&nbsp; I'd note that 
@@ -1411,9 +1372,9 @@ to a programmer who wants to come up to speed quickly on how to write or
  <i>am</i> mentioning it! — that some of the most-critical 
 counter-intuitive information is buried in easy-to-miss, 
 easy-to-misunderstand comments made in passing, rather than as big, 
-bold-face warnings. &nbsp; And as a bonus, the book provides an index of
- almost no use at all to a newby XPL programmer.&nbsp; Besides which, 
-most <i>online</i> information about XPL, in my experience, is a simple abridgement or other rehashing of <i>A Compiler Generator</i>,
+bold-face warnings. &nbsp; As a bonus, the book provides an index of
+ almost no use at all to a newby XPL programmer.&nbsp; Beyond the book itself, 
+most <i>online</i> information about XPL, in my experience, is simple condensing or other rehashing of <i>A Compiler Generator</i>,
  and adds little extra of value in a tutorial sense, since it's almost 
 never written by anybody actually working with XPL.&nbsp; With that 
 said, you may find some useful online information in a couple of places:<br></p>
@@ -1423,8 +1384,7 @@ said, you may find some useful online information in a couple of places:<br></p>
   <li>The <a moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/ldindex.html">University of Toronto XPL website has a page</a> with a small but useful transcription of some material from <i>A Compiler Generator</i> — albeit with unfortunate HTML formatting that make some of it almost unreadable.</li>
 </ul>
 <p>And as for Intermetrics XPL/I ... well, from a tutorial perspective, 
-it's orders of magnitude worse.  Perhaps later, non-surviving 
-documentation did a better job.&nbsp; Enough said!
+it's orders of magnitude worse. From the standpoint of <i>surviving</i> documentation, XPL/I may as well never have existed at all.<br>
 </p>
 
 <p>Taking all of that into account, I wish I could provide a 
@@ -1443,10 +1403,17 @@ somehow to make the discussion even worse.
 </h2>
 
 <p>The most basic characteristic of a language is the character set in 
-which the language is expressed.&nbsp; Neither <i>A Compiler Generator</i> nor Intermetrics
+which the language is expressed.&nbsp; Above all else, we need to 
+recognize that IBM 360 computers encoded textual information using 
+so-called EBCDIC coding, which defined somewhat-different characters 
+than the ASCII coding common today, as well as entirely different 
+numerical codes for the characters it did include.<br>
+</p>
+<p>Neither <i>A Compiler Generator</i> nor Intermetrics
  specifies the character set.&nbsp; I've given it a lot of thought, and 
 my conclusion is that the originally-supported character set was:
 </p>
+
 <p align="center">&lt;space&gt;<br>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br>a b c d e f g h i j k l m n o p q r s t u v w x y z<br>0 1 2 3 4 5 6 7 8 9<br>_ % + - * . / | &amp; = &lt; &gt; # @ $ , ; : ( ) ' " ! ?  [ ] { }<br>¢ ¬ &lt;eof&gt;<br>
 </p>
 <p>Here, by &lt;space&gt; I mean a space character, and by &lt;eof&gt; I mean an end-of-file character.<br>
@@ -1456,19 +1423,24 @@ my conclusion is that the originally-supported character set was:
 <p align="center">` ~ ^ \<br>
 </p>
 
-<p>Contrariwise, there are three characters (¢, ¬, and &lt;eof&gt;) that don't exist at 
+<p>Contrariwise, there are three characters (¢, ¬, and &lt;eof&gt;) that
+ don't exist at 
 all in the 7-bit ASCII character set that's the common core for the 
 character sets typically used today when writing software source 
-code.&nbsp; Therefore, when working with <b>XCOM-I</b>, we use the fortunately otherwise-unused ASCII characters in place of the unsupported characters:<br>
+code.&nbsp; The first two are EBCDIC characters, while the third isn't 
+even EBCDIC, but merely something which could be encoded on 
+punchcards.&nbsp; <b>HAL/S-FC</b> somewhat arbitrarily assigned it the non-existent "EBCDIC" code 0xFE.</p>
+<p>Therefore, when working with <b>XCOM-I</b>, we use the fortunately otherwise-unused ASCII characters in place of the unsupported characters:<br>
 </p>
+
 <ul>
   <li>The 
-ASCII characters ~ and ^ are used interchangeably with ¬, but XCOM-I prefers ~.&nbsp; <br>
+ASCII characters ~ and ^ are used interchangeably with ¬, but XCOM-I prefers (and transparently replaces them by) ~.&nbsp; <br>
   </li>
   <li>Similarly, we use the ASCII character ` in preference to ¢.&nbsp; </li>
-  <li>Finally, the ASCII \ character is now used in place of &lt;eof&gt;
- (EBCDIC code 0xFE), which was a character that could be punched on the 
-punch cards, but had no printable representation.</li>
+  <li>Finally, the ASCII \ character is now used in place of &lt;eof&gt;, which was a character that could be punched on the 
+punch cards, but had no printable representation. <br>
+</li>
 </ul>
 <blockquote>
   <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; The &lt;eof&gt; <i>character</i> — not to be confused with the <font color="#663300"><code>EOF</code></font> <i>token</i> that appears at the end of the source code in an XPL or XPL/I program — 
@@ -1481,9 +1453,7 @@ framework, even though it's not a character anyone would ever have
 occasion to use in either an XPL or HAL/S source-code file, unless that 
 file was itself part of a HAL/S compiler!&nbsp; To the best of my 
 knowledge, &lt;eof&gt; appears only within a single string variable, <font color="#663300"><code>INPUT_PAD</code></font>, that occurs in the <b>HAL/S-FC</b>
- source-code file STREAM.xpl.&nbsp; As far as I can tell, it is not even
- a standard EBCDIC character, but rather is something chosen for some 
-reason unknown to me by HAL/S developers. See the comments for </font><font size="-1"><font size="-1"><font color="#663300"><code>INPUT_PAD</code></font></font> in STREAM.xpl.</font><br>
+ source-code file STREAM.xpl.&nbsp; See the comments for </font><font size="-1"><font size="-1"><font color="#663300"><code>INPUT_PAD</code></font></font> in STREAM.xpl.</font><br>
   </p>
 </blockquote>
 <p>These substitutions allow 
@@ -1495,14 +1465,13 @@ other (non-XPL'ing) activities.&nbsp; With that said, I <i>hope</i> that you cou
 
 <blockquote>
   <p><font size="-1"><b>Aside:</b> All previously-existing XPL or XPL/I 
-source code I've found, or HAL/S source code for that matter, has 
+source code files I've found, or HAL/S source code for that matter, has 
 already substituted ~ or ^ for ¬ anyway.  And indeed, some early HAL/S 
 documentation suggests this very substitution.  I suspect that's because
  some IBM printers at the time printed ~ in place of </font><font size="-1"><font size="-1">¬</font>.  But whatever the explanation, the substitutions I'm suggesting are not exactly daring in their originality.  As far as the </font><font size="-1">¢
- symbol is concerned, it's not actually used in active XPL or XPL/I 
-code, as such, but can be used in program comments to toggle various 
-compiler options on and off, or in principle could appear within quoted 
-strings.</font></p>
+ symbol is concerned, it's not actually used in XPL or XPL/I 
+code, as far as I know, but it is used in HAL/S, so we still need to have a reliable way of dealing with it.<br>
+</font></p>
 </blockquote>
 
 <h2>Case Sensitivity</h2>
@@ -1609,7 +1578,7 @@ EBCDIC encoding for anything, because you would actually have programmed
 provide some syntactical sugar for reading the values of these bits or 
 modifying them.&nbsp; For <font color="#663333"><code>BIT(1)</code></font> through <font color="#663333"><code>BIT(32)</code></font>, you'd be somewhat correct, in that XPL largely treats these as being interchangeable with integers (i.e., <font color="#663333"><code>FIXED</code></font>), and automatically converts them back and forth between <font color="#663333"><code>FIXED</code></font>.&nbsp; The runtime library's built-in logical-shift-left and logical-shift-right functions (<font color="#663300"><code>SHL</code></font> and <font color="#663300"><code>SHR</code></font>) work just as easily with them as with the <font color="#663333"><code>FIXED</code></font>, as do the logical operators <font color="#663300"><code>&amp;</code></font>, <font color="#663300"><code>|</code></font>, and <font color="#663300"><code>¬</code></font> (<font color="#663300"><code>~</code></font>), and the relational operators <font color="#663300"><code>&lt;</code></font>, <font color="#663300"><code>&gt;</code></font>, <font color="#663300"><code>=</code></font>, <font color="#663300"><code>!=</code></font>, <font color="#663300"><code>&gt;=</code></font>, and <font color="#663300"><code>&lt;=</code></font>.&nbsp; Swell!<br>
 <br>
-But once you advance to <font color="#663333"><code>BIT(32)</code></font> through <font color="#663333"><code>BIT(2048)</code></font>, you are cruelly disappointed. &nbsp; XPL provides <i>no</i> built-in methods of working with this data, beyond the ability to initialize <font color="#663333"><code>BIT(N)</code></font>
+But once you advance to <font color="#663333"><code>BIT(32)</code></font> through <font color="#663333"><code>BIT(2048)</code></font>, you are cruelly disappointed. &nbsp; XPL provides <i>no</i> built-in methods of working with this data <i>qua</i> bits, beyond the ability to initialize <font color="#663333"><code>BIT(N)</code></font>
  variables with data when they're declared.&nbsp; (More on that 
 later.)&nbsp; As far as actually using this data for anything, there are
  no built-in means to do anything at all with that data.&nbsp; While you
@@ -1641,7 +1610,7 @@ bit-packing is undocumented, what's my justification for claiming that
 what I said just above is true?&nbsp; The short answer is 
 trial-and-error!&nbsp; The longer answer is that one of the intermediate
  milestones in trying to get <b>XCOM-I</b> to the point of being able to compile the original source code for <b>HAL/S-FC</b> was first to be able to compile <b>XCOM3</b>
- and run it with a verifiably correct result.&nbsp; But I couldn't get 
+ and run it with a verifiably correct result.&nbsp; (Recall "insane bootstrapping" from earlier.)&nbsp; But I couldn't get 
 it to work!&nbsp; After messing with it for days on end, I eventually 
 got the answer in a dream, and then experimented with a couple of 
 different bit-packing schemes before finally getting <b>XCOM3</b> to run properly.&nbsp; The packing scheme I describe above is the one that worked.</font><br>
@@ -1705,7 +1674,7 @@ There are additional attributes which can be applied to such declarations, of wh
 </blockquote>
 It's important to understand that the initializer has its affect only at
  compile-time, and is not applied at run-time.&nbsp; That means that if 
-you declare variables within <font color="#663300"><code>PROCEDURE</code></font>s, they're <i>not reinitialized</i> each time the <font color="#663300"><code>PROCEDURE</code></font> is executed.<br>
+you declare variables within a <font color="#663300"><code>PROCEDURE</code></font>, they're <i>not reinitialized</i> each time the <font color="#663300"><code>PROCEDURE</code></font> is executed.<br>
 <br>
 You may have been confused by the initializers shown above for the variables <font color="#663300"><code>F2</code></font>, <font color="#663300"><code>F3</code></font>, and <font color="#663300"><code>B</code></font>,
  since they naively appear to be strings instead of numbers; but the 
@@ -1726,7 +1695,11 @@ distinction without significance, because <b>XCOM-I</b> (or the original <b>XCOM
  automatically tries to perform all computations that are possible at 
 compile time.  Nevertheless, this distinction does cause some 
 arithmetically-satisfactory expressions to be syntactically illegal in 
-XPL.  For example, the expression <font color="#663300"><code>5 + -5</code></font> isn't legal in XPL.</li>
+XPL.  For example, the expression <font color="#663300"><code>5 + -5</code></font> isn't legal in XPL, and would need to be <font color="#663300"><code>5 + (-5)</code></font>
+ instead.&nbsp; The plus sign is also only an operator, but unlike the 
+minus sign (which can be either a binary or a unary operator), the plus 
+sign is only a binary operator.&nbsp; So even an expression like "<font color="#663300"><code>(+5)</code></font>" would be illegal.<br>
+</li>
     <li>A sequence of hexadecimal digits enclosed in double-quote (") 
 characters represents a hexadecimal number.  Spaces are ignored within 
 literals like this, and hence can be added at will for improved human 
@@ -1757,7 +1730,7 @@ XPL/I provides a separate kind of statement which can declare arrays, which synt
 variable and the data for the array was stored elsewhere, much as a 
 string descriptor is used for character values.&nbsp; That was 
 apparently a trick get around limitations on IBM 360 memory-segment 
-sizes, because the pointers were never used for any syntactically.&nbsp;
+sizes.&nbsp;
  At the present time, I don't see this distinction as being 
 operationally significant, so <b>XCOM-I</b>
  treats the two keywords identically.&nbsp; This is subject to change, 
@@ -1807,7 +1780,8 @@ are managed entirely transparently in most cases.<br>
 
   <li><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 0:&nbsp; </font><code>FIXED</code></font> pointer giving the address of the actual data.</font></li>
   <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 4:&nbsp; </font></font></font><code>BIT(16)</code></font> giving the size in bytes of each record.</font></li>
-  <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 6:&nbsp; </font></font></font></font></font><code>BIT(16)</code></font></font><font size="-1"> <font color="#009900">gives the number of <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT(≥32)</code></font> fields in each <font color="#663300"><code>BASED RECORD</code></font>, or 1 if it's a <font color="#663300"><code>BASED CHARACTER</code></font> or <font color="#663300"><code>BASED </code><code>BIT(≥32)</code></font>, or 0 otherwise.  The point is that it's the number of "string descriptors" associated with each element of the <font color="#663300"><code>BASED</code></font> array.  This information is used by </font><font color="#663300"><code>COMPACTIFY</code></font>.  (<a moz-do-not-send="true" href="#compactify">See below</a>.)  While I don't fully understand the calculations being performed, I'd venture the opinion that for <font color="#663300"><code>COMPACTIFY</code></font> to use this information efficiently, it's necessary for the XPL/I compiler to rearrange the fields of <font color="#009900"><font color="#663300"><code>BASED RECORD</code></font></font> from their declared order in such a way that all of string-descriptor fields come first in the record. </font></li>
+  <li><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 6:&nbsp; </font></font></font></font></font><code>BIT(16)</code></font></font><font size="-1"> <font color="#009900">gives the number of <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT(≥32)</code></font> fields in each <font color="#663300"><code>BASED RECORD</code></font>, or 1 if it's a <font color="#663300"><code>BASED CHARACTER</code></font> or <font color="#663300"><code>BASED </code><code>BIT(≥32)</code></font>, or 0 otherwise.  The point is that it's the number of "string descriptors" associated with each element of the <font color="#663300"><code>BASED</code></font> array.  This information is used by </font><font color="#663300"><code>COMPACTIFY</code></font>.  (<a moz-do-not-send="true" href="#compactify">See below</a>.)  While I don't fully understand the calculations being performed, I'd venture the opinion that for <font color="#663300"><code>COMPACTIFY</code></font> to use this information efficiently, it's necessary for the XPL/I compiler to rearrange the fields of <font color="#009900"><font color="#663300"><code>BASED RECORD</code></font></font> from their declared order in such a way that all of string-descriptor fields come first in the record. <b>XCOM-I</b> does indeed perform this rearrangement.<br>
+</font></li>
   <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 8:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font> giving the total number of array entries for which space has been <i>allocated</i>.</font></li>
   <li><font size="-1" color="#009900"><font color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font size="-1" color="#009900"><font color="#663300"><font color="#000000">Offset 12:&nbsp; </font></font></font></font></font><code>FIXED</code></font></font> giving the total number of array entries actually <i>used</i> so far.</font></li>
   
@@ -1936,7 +1910,7 @@ As noted in the preceding section, standard XPL's grammar wouldn't allow an expr
 <br>
 Macro expansions — not macro <i>declarations</i> (I hope!) — can be nested, so you can do things like this if you want:<br>
 <blockquote>
-  <pre><font color="#663300">DECLARE DEVICE LITERALLY '6', DECLARE OUT LITERALLY 'OUTPUT(DEVICE)';<br>OUT = 'My message';</font><br></pre>
+  <pre><font color="#663300">DECLARE DEVICE LITERALLY '6', OUT LITERALLY 'OUTPUT(DEVICE)';<br>OUT = 'My message';</font><br></pre>
 </blockquote>
 This expands to<br>
 <blockquote>
@@ -2008,8 +1982,8 @@ documented, the peculiarities of the IBM 360 object-code generation in
  into a CPU register and reuse it without change throughout both 
 assignments.&nbsp; So seemingly by accident, the net result is that the 
 assignments <i>appear</i> to have been done in a left-to-right 
-order.&nbsp; I would also note that there is an example in A Compiler 
-Generator (Fig. 6.18.1) that shows assembly code generated for the XPL 
+order.&nbsp; I would also note that there is an example in <i>A Compiler 
+Generator</i> (Fig. 6.18.1) that shows assembly code generated for the XPL 
 expression<br>
 </p>
 <blockquote>
@@ -2047,7 +2021,7 @@ doing it, rather than to fix <b>XCOM-I</b>.&nbsp; We'll see.</font><br>
 <h2>Logical Expressions</h2>
 
 
-<p>XPL's logical operators are <font color="#663300"><code>&amp;</code></font>, |, and <font color="#663300"><code>~</code></font> (<font color="#663300"><code>¬</code></font>, <font color="#663300"><code>^</code></font>), for "and", "or", and "not", respectively.  The documentation in <i>A Compiler Generator</i>
+<p>XPL's logical operators are <font color="#663300"><code>&amp;</code></font>, <font color="#663300"><code>|</code></font>, and <font color="#663300"><code>~</code></font> (<font color="#663300"><code>¬</code></font>, <font color="#663300"><code>^</code></font>), for "and", "or", and "not", respectively.  The documentation in <i>A Compiler Generator</i>
  is maddeningly unclear as to what these operators do.  True, table 
 6.8.1 calls them "logical and", "logical or", and "logical complement", 
 but the word "logical" isn't defined ... just as my sloppy usage of the 
@@ -2166,7 +2140,7 @@ Syntactically, <font color="#663300"><code>COMMON</code></font> data is declared
   <li>Using the keyword-pair <font color="#663300"><code>COMMON BASED</code></font> in place of the keyword <font color="#663300"><code>BASED</code></font>.</li>
 </ul>
 <p>Another distinction is that <font color="#663300"><code>CHARACTER</code></font> variables cannot declared in <font color="#663300"><code>COMMON</code></font>, though <font color="#663300"><code>CHARACTER</code></font> variables can appear as fields in <font color="#663300"><code>COMMON BASED RECORD</code></font> variables. <br></p>
-<p>Each cooperating application running in succession needed to declare <font color="#663300"><code>COMMON</code></font>
+<p>Each cooperating application running in succession needs to declare <font color="#663300"><code>COMMON</code></font>
  in exactly the same way, using exactly the same ordering of variables 
 and the same datatypes, at the same addresses.&nbsp; When <a moz-do-not-send="true" href="#basedManagement">"dope vectors" of <b>BASED</b> variables</a> were discussed earlier, it was mentioned that <b>BASED</b>
  variables could be set as "constant" or "unmoveable", and this 
@@ -2174,7 +2148,7 @@ necessity for remaining at the same location when successor programs are
  executed is part of the reason for this feature.<br>
 </p>
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; If <b>BASED</b>
- variables were always manipulated by XPL/I program as intended by the original compiler design — 
+ variables were always manipulated by an XPL/I program as intended by the original compiler design — 
 i.e., allowing SPACELIB to manipulate them via their dope vectors — 
 there would be no reason for these restrictions on moveability.&nbsp; 
 However, the "virtual memory" system employed by <b>HAL/S-FC</b>, as implemented by the files HALINCL/VMEM<i>x</i>.xpl,
@@ -2561,7 +2535,7 @@ code, similar to the C language's <font color="#663300"><code>#if <i>c</i></code
 Interpretations of the possible conditions are entirely at the user's 
 disposal; i.e., they vary by the particular source-code being compiled 
 by <b>XCOM-I</b>.&nbsp; In the particular case of the XPL/I source code for the <b>HAL/S-FC</b> program, there are 4 
-possible conditions <font color="#663300"><i><code>c</code></i></font> that I'm aware of:<br>
+possible conditions <font color="#663300"><i><code>c</code></i></font>, plus 2 additional ones I invented personally:<br>
 <br>
 <table align="center" cellspacing="2" cellpadding="2" border="1">
   <caption><font size="+1"><b>Preprocessor Conditionals</b></font></caption>
@@ -2575,7 +2549,7 @@ possible conditions <font color="#663300"><i><code>c</code></i></font> that I'm 
     <tr>
       <td valign="middle" align="center"><font color="#663300"><code>--cond=P</code></font><br>
       </td>
-      <td valign="top"><b>HAL/S-FC</b> will be specialized for compiling the Space Shuttle's Primary Flight Software (PFS).</td>
+      <td valign="top"><b>HAL/S-FC</b> will be specialized for compiling the Space Shuttle's Primary Flight Software (PASS).</td>
     </tr>
     <tr>
       <td valign="middle" align="center"><font color="#663300"><code>--cond=B</code></font> </td>
@@ -2678,14 +2652,17 @@ abominations are very rare, and only a handful appear in the entire <b>HAL/S-FC<
 A <font color="#663333"><code>PROCEDURE</code></font> may be invoked in two different ways.&nbsp; If it returns a value via a <font color="#663300"><code>RETURN</code></font>
  statement, it can be used in an arithmetical expression or a string 
 expression.&nbsp; If it doesn't return a value, or if it does return a 
-value and you simply want to ignore the value, a <font color="#663333"><code>CALL</code></font> statement can be used to invoke the <font color="#663333"><code>PROCEDURE</code></font> but to discard any returned value.<br>
+value and you simply want to ignore the value, a <font color="#663333"><code>CALL</code></font> statement can be used to invoke the <font color="#663333"><code>PROCEDURE</code></font>
+ but to discard any returned value.&nbsp; But don't be deceived!&nbsp; 
+Cases in which these rules are simply ignored exist in legacy code, and 
+we'll talk a little bit more about that below.<br>
 
 <p><b>Important:</b>&nbsp; All variables local to a <font color="#663333"><code>PROCEDURE</code></font> definition retain their values after the <font color="#663333"><code>PROCEDURE</code></font> returns.&nbsp; If the <font color="#663333"><code>PROCEDURE</code></font> is re-executed, those local variables retain the values they previously had in the prior invocation of the <font color="#663333"><code>PROCEDURE</code></font>.&nbsp; The values of those local variables, though retained, are inaccessible to code outside of the <font color="#663333"><code>PROCEDURE</code></font>,
- because the compiler enforces scopes of variables. (In C code, this 
+ because the namespaces of the local variables prevent it. (In C code, this 
 would be the same thing as saying that every local variable of every 
 function is automatically declared as <font color="#663333"><code>static</code></font>.)
 </p>
-<p><b><i>Very</i> important:</b> Any (or even all) <i>parameter</i>s at the trailing end of the calling list of a <font color="#663333"><code>PROCEDURE</code></font> can be omitted from when calling the <font color="#663333"><code>PROCEDURE</code></font>, and if omitted, they retain the same values as the last time the <font color="#663333"><code>PROCEDURE</code></font> was invoked <i>or</i> the values previously assigned to those parameters from within the <font color="#663333"><code>PROCEDURE</code></font> itself!&nbsp; (In essence, this is like saying that parameters of a <font color="#663333"><code>PROCEDURE</code></font> are not passed to the <font color="#663333"><code>PROCEDURE</code></font>, but rather that they are just aliases for some set of global variables dedicated to the <font color="#663333"><code>PROCEDURE</code></font>.)&nbsp; That's so weird that we need to see an example.&nbsp; Consider the following XPL <font color="#663333"><code>PROCEDURE</code></font> definition, and <font color="#663333"><code>CALL</code></font>s to it:
+<p><b><i>Very</i> important:</b> Any (or even all) <i>parameter</i>s at the trailing end of the calling list of a <font color="#663333"><code>PROCEDURE</code></font> can be omitted from when calling the <font color="#663333"><code>PROCEDURE</code></font>, and if omitted, they too retain the same values as the last time the <font color="#663333"><code>PROCEDURE</code></font> was invoked <i>or</i> the values previously assigned to those parameters from within the <font color="#663333"><code>PROCEDURE</code></font> itself!&nbsp; (In essence, this is like saying that parameters of a <font color="#663333"><code>PROCEDURE</code></font> are not passed to the <font color="#663333"><code>PROCEDURE</code></font>, but rather that they are just aliases for some set of global variables dedicated to the <font color="#663333"><code>PROCEDURE</code></font>.)&nbsp; That's so weird that we need to see an example.&nbsp; Consider the following XPL <font color="#663333"><code>PROCEDURE</code></font> definition, and <font color="#663333"><code>CALL</code></font>s to it:
 </p>
 <blockquote>
   <pre><font color="#663333">weirdo: <br>procedure(x, y, z);<br>    declare (x, y, z) fixed;		/* Declare x,y,z as integers */<br>    output = x || ' ' || y || ' ' || z; /* Print out x,y,z */<br>    x = 29;<br>    y = y + 1;<br>end weirdo;<br><br>call weirdo(1, 2, 3);<br>call weirdo(4, 5);<br>call weirdo(6);<br>call weirdo();<br>call weirdo;</font><br></pre>
@@ -2699,7 +2676,8 @@ function is automatically declared as <font color="#663333"><code>static</code><
 <p>Taking these facts altogether, <b>XCOM-I</b> implements both parameters and local variables of <font color="#663333"><code>PROCEDURE</code></font>s essentially as global variables in they way they are stored:&nbsp; i.e., each parameter and each local variable of each <font color="#663333"><code>PROCEDURE</code></font> has its own <i>static</i>
  address (in the global memory model), assigned at compile time and 
 unchanging thereafter.&nbsp; The compiler enforces the logical scoping 
-of these variables.<br></p>
+of these variables by means of their namespace.&nbsp; There will be more
+ on this when the concept of "mangling" of identifiers is discussed.<br></p>
 <p>Regarding the <font color="#663300"><code>RETURN</code></font> statement, <i>A Compiler Generator</i> explains that it is used to exit from a <font color="#663333"><code>PROCEDURE</code></font>
  and optionally to return a value.  Furthermore, the calling code can 
 either use that return value or else ignore it.  Which makes perfect 
@@ -2725,10 +2703,9 @@ as assignments or if-then-else statements) enclosed within a <font color="#66330
 <blockquote>
   <pre><font color="#663300">DO ...;<br>    ... simple statements ...<br>END;</font><br></pre>
 </blockquote>
-<p>There are five different kinds of <font color="#663300"><code>DO ... END</code></font> blocks.  First, there is a mere grouping:</p>
-<blockquote>
-  <pre><font color="#663300">DO;<br>    ... simple statements ...<br>END;</font></pre>
-</blockquote>
+<p>There are five different kinds of <font color="#663300"><code>DO ... END</code></font> blocks.  First, there is a stand-alone simple grouping as shown above.<br>
+</p>
+
 
 <p>Then there are 3 different kinds of loops:</p>
 <pre><font color="#663300">DO <i>COUNTER</i> = <i>START</i> TO <i>END</i> [BY <i>STEP</i>];<br>    ... simple statements ...<br>END;<br><br></font><font color="#663300">DO WHILE <i>CONDITION</i>;<br>    ... simple statements ...<br>END;</font>
@@ -2910,7 +2887,7 @@ supported are specific to <b>HAL/S-FC</b>, they won't be covered here, but are c
 </p>
 Besides the program options passed to the XPL program at startup, there 
 were position-dependent options ("control toggles") which could be 
-inserted directly into the XPL program within its comments.&nbsp; <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=830">Early documentation</a> indicates that control toggles could appear also appear in the PARM field, but <b>XCOM-I</b> does not support this feature.. <br>
+inserted directly into the XPL program within its comments.&nbsp; <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=830">Early documentation</a> indicates that control toggles could appear also appear in the PARM field.&nbsp; <i><b>XCOM-I</b></i><i> does not support either of these features. </i><br>
 
 <br>
 
@@ -4647,11 +4624,11 @@ However, the C compiler undoubtedly has other debugging options as well, which y
 place, it's very likely you know more about it than I do.&nbsp; You can,
  of course, use graphical-interface front-ends for <b>gdb</b> as well, 
 at least in Linux and Mac OS, though I'm at a loss as to how to do this 
-in Windows because of probably having to work under Msys2.&nbsp; There 
-is a primitive but useful interface that works in Msys2, provided 
+in Windows because of probably having to work under MSYS2.&nbsp; There 
+is a primitive but useful interface that works in MSYS2, provided 
 directly by <b>gdb</b> (namely <font color="#663300"><code>gdb --tui</code></font>),
  that's a step up from its default command-line-style interface.&nbsp; 
-And there are reports of people debugging Msys2-generated programs is 
+And there are reports of people debugging MSYS2-generated programs is 
 Visual Studio, although the descriptions of how to do it are greek to 
 me.<br>
 <br>
@@ -4743,7 +4720,7 @@ the attempt.&nbsp; </font><br>
 <p>Finally, while <code>PROCEDURE</code> definitions and variable declarations can be embedded inside of <code>PROCEDURE</code>
  definitions in XPL, functionally these embedded entities all act as if 
 they were globally declared.&nbsp; It is only their namespaces which are
- restricted.&nbsp; Therefore,<br>
+ restricted.&nbsp; Therefore:<br>
 </p>
 <ul>
   <li>Mangled names are <i>prefixed</i> by the mangled names of every parent <font color="#663300"><code>PROCEDURE</code></font>,
@@ -4985,7 +4962,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
 For floating-point operations, native C formats and arithmetical 
 operators are used.&nbsp; Conversion from/to IBM hexadecimal format 
 occurs only when floating-point values are read from the memory array or
- written into the memory array.&nbsp; This is why the CPU's 
+ written into the <font color="#663300"><code>memory</code></font> array.&nbsp; This is why the CPU's 
 floating-point registers are modeled as the C <font color="#663300"><code>double</code></font> type.&nbsp; The alternative would have been to model them as pairs of <font color="#663300"><code>uint32_t</code></font>
  values, and to provide C functions that directly implemented exact IBM 
 360 arithmetic (like addition, subtraction, and so on) directly upon 
@@ -5060,7 +5037,7 @@ usable by the </font><font size="-1"><font size="-1"><font color="#663300"><code
 In other words, after the </font><font size="-1"><font size="-1"><font size="-1"><font color="#663300"><code>AW</code></font></font></font> occurs, the <font color="#663300"><code>CALL INLINE</code></font> for the </font><font size="-1"><font size="-1"><font color="#663300"><code>STD</code></font></font> instruction that's supposed to store the 2's-complement integer has no 2's-complement integer to store!<br>
     </font></p>
   <p><font size="-1">The workaround for this in the <b>XCOM-I</b> 
-runtime library, is that the floating-point registers are supplemented 
+runtime library is that the floating-point registers are supplemented 
 by an additional array that tracks whether the register should be 
 treated as normalized or unnormalized, and then interprets the value 
 stored in that floating-point register accordingly when an </font><font size="-1"><font size="-1"><font color="#663300"><code>STD</code></font></font>
@@ -5220,54 +5197,54 @@ so, so it's easy to suppose once again that </font></font></font></font></font><
 value.&nbsp; </font></font></font></font></font></font><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><font size="-1"><br>
             </font></font></font></font></font></font></blockquote>
 <h1>
-  <a name="appendix"></a>Appendix:&nbsp; Some Problems With C Compilers</h1>
+  <a name="appendix"></a>Appendix:&nbsp; Suitable C Compilers</h1>
 <p>Since <b>XCOM-I</b> is merely a translator from the XPL or XPL/I 
 languages to C, it's necessary to have a functioning, compatible C 
 compiler to use <b>XCOM-I</b> in its intended way.&nbsp; In theory, any reasonably-modern C compiler should be compatible with the C code <b>XCOM-I</b> produces.&nbsp; However, the nature of the <b>XCOM-I</b>
  runtime library is that it must necessarily provide some services that 
 are system-dependent, and thus it is in the runtime library that there 
-is is a much higher likelihood of finding compatibility problems.<br>
+is is a much higher likelihood of finding C compatibility problems.<br>
 </p>
 <p>While bugs in <b>XCOM-I</b> itself are under my control and can in 
 principle be fixed, within the limits of my skill and time, problems 
 with C compilers themselves (or with their libraries) are outside of my 
 control.&nbsp; Here I'll let you know what some of those problems with C
  compilers are.&nbsp; However, I'm in no position to try every C 
-compiler everywhere, so my coverage is hardly extensive.<br>
+compiler everywhere, so my coverage is hardly extensive.&nbsp; At best, I
+ can let you know my current beliefs about the compilers I've checked 
+out.<br>
 </p>
-<h2>On (and For) Linux</h2>
-<p>No problems have yet been discovered.<br>
-</p>
-<h2>On (and For) Mac OS</h2>
-<p>No problems have yet been discovered.<br>
-</p>
-<h2>On (or For) Windows</h2>
-<p>For <b>gcc</b> in the MSYS2 development environment:&nbsp; Several different variants of <b>gcc</b> are provided by MSYS2.&nbsp; Of those I've tried:<br>
+<h2>Linux and Mac OS<br>
+</h2>
+<p>No current problems with <b>gcc</b> or <b>clang</b>.<br>
+</p><h2>Windows</h2>
+<p>For <b>gcc</b> variants in the MSYS2 development environment: <br>
 </p>
 <ul>
-  <li>Version mingw-w64-ucrt-x86_64-gcc (as recommended in MSYS2 installation instructions):&nbsp; No problems are known.<br>
+  <li><b>mingw-w64-ucrt-x86_64-gcc</b> (recommended for MSYS2):&nbsp; No current problems<br>
   </li>
-  <li>Version mingw-w64-x86_64-gcc:&nbsp; No&nbsp; problems are known<br>
+  <li><b>mingw-w64-x86_64-gcc</b>:&nbsp; No current problems
   </li>
 </ul>
 For <b>clang</b> in the MSYS2 development environment:&nbsp; <br>
 <ul>
-  <li>Either the "variable-argument list" framework (<font color="#663300"><code>va_start</code></font>/<font color="#663300"><code>va_arg</code></font>/<font color="#663300"><code>va_end</code></font>) does not work, or else the <font color="#663300"><code>vsnprintf</code></font> function doesn't work, though I'm unclear which.&nbsp; Specifically, this causes <b>XCOM-I</b> runtime-library failures in the critical <font color="#663300"><code>cToDescriptor</code></font>
- function.&nbsp; Arguments in the variable-argument list which are 
-strings seem to work, whereas arguments which are integers are 
-garbage.&nbsp; <b>Note:</b>&nbsp; It is peculiar that while <a moz-do-not-send="true" href="#winRegression">the least-intensive regression tests</a> fail, the seemingly <a moz-do-not-send="true" href="#winInsane">more-intensive "insane bootstrapping" tests</a> succeed.&nbsp; So perhaps more is going on with this than meets my eye.<br>
+  <li>Not suitable!&nbsp; There is a problem with variadic functions, specifically <code>vsnprintf</code>, that disastrously impacts the <b>XCOM-I</b> runtime library.<br>
   </li>
 </ul>
 For <b>cl</b> (Visual Studio command-line compiler):<br>
 <ul>
-  <li>In <b>cl</b>, identifiers (such as names of functions) beginning with an underscore followed by an upper-case letter (such as "<font color="#663300"><code>_RECORD_ALLOC</code></font>") <a moz-do-not-send="true" href="https://devblogs.microsoft.com/oldnewthing/20230109-00/?p=107685">are reserved</a>, and cannot be used by user code.&nbsp; This conflicts with the fact that <b>XCOM-I</b> tries to use the XPL names of non-embedded procedures as-is in the C translation.&nbsp; Undoubtedly, <b>XCOM-I</b>'s name-mangling algorithm can be modified to account for this unwelcome feature, but that has not yet been done.</li>
+  <li>No current problems<br>
+</li>
 </ul>
-<p>For Mingw-64 (cross-compile C programs from Linux to Windows):<br>
+<h2>Cross-Compile (Linux to Windows)<br>
+</h2>
+<p>For Mingw-64 variants:<br>
 </p>
+
 <ul>
-  <li>In <b>x86_64-w64-mingw32-gcc</b>, no problems have been noted.<br>
+  <li><b>x86_64-w64-mingw32-gcc</b>:&nbsp; No current problems
   </li>
-  <li>In <b>i686-w64-mingw32-gcc</b>, no problems have been noted.<br>
+  <li><b>i686-w64-mingw32-gcc</b>:&nbsp; No current problems
   </li>
 </ul>
 
@@ -5287,7 +5264,7 @@ For <b>cl</b> (Visual Studio command-line compiler):<br>
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-08-16<br>
+          2024-08-18<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

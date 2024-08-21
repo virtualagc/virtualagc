@@ -23,6 +23,53 @@ document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
+  <td valign="top">2024-08-21<br>
+  </td>
+  <td valign="top">For quite some time now I've been working compilers 
+for the HAL/S computer language.&nbsp; Indeed, for the last six months 
+or so I've been working on no less than my <i>third</i> attempt, having 
+abandoned the first two attempts when they were useful but still incomplete 
+in one way or the other.&nbsp; Recall that while HAL/S is basically a 
+dead language now, it is the principal language in which the Space 
+Shuttle flight software was written.&nbsp; And while we have the source 
+code for the original HAL/S compiler used for the Space Shuttle, that 
+source code is written in an extended version of XPL, which itself is a 
+dead computer language.&nbsp; So in order to compile the HAL/S compiler,
+ I first needed to step back and write an XPL compiler.&nbsp; Or more 
+accurately, a compiler for the extended but largely undocumented version
+ of the XPL language in which the HAL/S compiler is written.<br>
+    <br>
+Today, I'm announcing the first release of that XPL compiler (which I call <b>XCOM-I</b>) and the HAL/S compiler (which I call <b>HALSFC</b>),
+ both of which can be run on Linux, Mac OS, or Windows.&nbsp; Their 
+dedicated pages give installation and usage instructions, as well as my 
+usual too-much-of-everthing descriptions of what's going on:<br>
+    <ul>
+      <li><a moz-do-not-send="true" href="HAL.html">HALSFC page<br>
+        </a></li>
+      <li><a moz-do-not-send="true" href="XCOM-I.html">XCOM-I page</a><br>
+      </li>
+    </ul>
+The <a moz-do-not-send="true" href="Shuttle.html">Shuttle page</a> has been reworked somewhat as well, to accommodate this new situation.<br>
+    <br>
+Neither compiler is perfect, there are known bugs, and <b>HALSFC</b> is 
+still missing a couple of compiler passes that deal with simulation 
+data, but I'm quite pleased with both compilers nevertheless.<br>
+    <br>
+Don't get terribly excited about this — as if anyone would! — until you understand the limitations.&nbsp; <b>XCOM-I</b>
+ should be usable as a general XPL compiler, true; it's a Python program
+ that's basically an XPL-to-C translator, so it can be used on any 
+platform having Python and a reasonably-compatible C compiler.&nbsp; 
+However <b>HALSFC</b>, while also running on Linux/Mac/Windows, 
+nevertheless faithfully duplicates the functionality of the original 
+HAL/S compiler.&nbsp; Which means that <b>HALSFC</b> outputs IBM AP-101S
+ object-code files.&nbsp; (Recall that the onboard computers of the 
+Shuttle were model AP-101S.)&nbsp; So unless you simply want to <i>examine</i>
+ the object code created by the HAL/S compiler, you'd also need an 
+AP-101S linker and emulator.&nbsp; A compiler alone isn't enough.&nbsp; 
+But give us time!&nbsp; Rome wasn't built in a day, or even a year.<br>
+  </td>
+</tr>
+<tr>
   <td valign="top">2024-08-18<br>
   </td>
   <td valign="top"><a moz-do-not-send="true" href="links2.html#RecentAdditions">Still more docs for the library</a>, from Mike again.&nbsp; Quite a meaty selection.<br>
