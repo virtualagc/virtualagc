@@ -157,7 +157,7 @@ bootstrap45w3:
 bootstrap: sim360$(EXT)
 	echo Bootstrapping $(BASE) -----------------------------------------
 	-@rm $(BASE)-360*.*
-	@python XCOM-I.py $(XEXTRA) --xpl \
+	@python3 XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
 		--output=$(BASE)-native \
 		$(XPLFILE)
@@ -187,14 +187,14 @@ ifdef LEGACY
 		-f3wb+ $(BASE)-360C.str \
 		$(LEGACY)
 ifdef SELF
-	@python cmp.py 6 $(BASE)-360.obj $(LEGACY) && \
+	@python3 cmp.py 6 $(BASE)-360.obj $(LEGACY) && \
 		( echo Comparison to legacy load file successful ) || \
 		( echo Comparison to legacy load file fails )
 endif # SELF
-	@python cmp.py 4 $(BASE)-360.obj $(BASE)-360C.obj && \
+	@python3 cmp.py 4 $(BASE)-360.obj $(BASE)-360C.obj && \
 		( echo Cross-comparison to output of legacy compiler successful ) || \
 		( echo Cross-comparison to output of legacy compiler fails )
 endif # LEGACY
-	@python cmp.py 4 $(BASE)-360.obj $(BASE)-360A.obj && \
+	@python3 cmp.py 4 $(BASE)-360.obj $(BASE)-360A.obj && \
 		( echo Bootstrap of $(BASE) successful ) || \
 		( echo Bootstrap of $(BASE) failed )

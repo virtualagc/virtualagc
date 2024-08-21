@@ -98,7 +98,7 @@ ifeq ($(CC), cl)
         NULL = NUL
         PERCENT = %%
         export PYTHONUTF8 := 1
-        XCOMI = python $(shell which XCOM-I.py)
+        XCOMI = python3 $(shell which XCOM-I.py)
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
         OUT = -o
@@ -176,7 +176,7 @@ test:
 	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
 	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
-	@python $(shell which cmp.py) 18 cards2.bin regression/cards2.bin && \
+	@python3 $(shell which cmp.py) 18 cards2.bin regression/cards2.bin && \
 		( echo Files cards2.bin and regression/cards2.bin match ) || \
 		( exit 1 )
 	-@grep --invert-match -P "\tCOMM\t1[23]\tFIXED\t" COMMON-PASS2.out >COMMON-PASS2-new.out
@@ -248,7 +248,7 @@ cleanall: clean
 compile: clean
 	@echo Processing $(RTARGET2) ==========================================
 	
-	-python $(shell which HAL_S_FC.py) $(HCOPTION) --ascii \
+	-python3 $(shell which HAL_S_FC.py) $(HCOPTION) --ascii \
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal="$(RTARGET2)" \
 		>py.rpt

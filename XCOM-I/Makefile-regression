@@ -145,11 +145,11 @@ testclean:
 
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
-	@python XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
+	@python3 XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
 	make -s -C $@.build
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
-	@python XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
+	@python3 XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
 	make -s -C $@.build
 
