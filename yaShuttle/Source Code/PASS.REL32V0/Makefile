@@ -80,6 +80,8 @@
 #					PASS1 --help
 
 SHELL := /bin/bash # To use bash rather than sh.
+# Just in case of working with .exe files in WINE.
+export WINEDEBUG=fixme-all
 
 PORTED := $(realpath ../../ported)
 HAL_S_FC_DIR := $(PORTED)/PASS1.PROCS

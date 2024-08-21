@@ -2,6 +2,9 @@
 # This Linux/Mac script compiles a HAL/S program using the HAL/S-FC program,
 # which is assumed to be in the PATH.  
 
+# Just in case of working with .exe files in WINE.
+export WINEDEBUG="fixme-all"
+
 HALS_FILE="$1"
 TEST="$2"
 PARM_STRING="$3"
@@ -93,11 +96,11 @@ then
         for n in $FILES_PORTED ; do cp "$ported/$n" . ; done &>/dev/null
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
         egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
-        diff -q -s pass1A.rpt pass1pA.rpt
+        diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt
         diff -s FILE1.bin halmat.bin
         if [[ "$PARM_LIST" == *LISTING2* ]]
         then
-                diff -q -s LISTING2.txt listing2.txt
+                diff --strip-trailing-cr -q -s LISTING2.txt listing2.txt
         fi
         echo ======================================================
 fi
