@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
 License:    The author (Ronald S. Burkey) declares that this program
             is in the Public Domain (U.S. law) and may be used or 
