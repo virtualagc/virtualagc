@@ -80,8 +80,10 @@
 #					PASS1 --help
 
 SHELL := /bin/bash # To use bash rather than sh.
-# Just in case of working with .exe files in WINE.
-export WINEDEBUG=fixme-all
+# Just in case of working with .exe files in WINE.  Set EXER=wine on the 
+# command line.
+export WINEDEBUG=-all
+EXER=
 
 PORTED := $(realpath ../../ported)
 HAL_S_FC_DIR := $(PORTED)/PASS1.PROCS
@@ -252,7 +254,7 @@ compile: clean
 		$(sPARM_STRING) $(PEXTRA) \
 		--hal="$(RTARGET2)" \
 		>py.rpt
-	-HALSFC-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
+	-$(EXER) HALSFC-PASS1$(HCSUFFIX)$(EXT) $(HEXTRA) \
 		--parm="$(PARM_STRING)" \
 		--ddi=0,"$(RTARGET2).hal" \
 		--ddo=2,listing2.txt \
@@ -275,7 +277,7 @@ compile: clean
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	HALSFC-FLO$(EXT)   \
+	$(EXER) HALSFC-FLO$(EXT)   \
 		--ddo=2,listing2f.txt \
 		--commoni=COMMON-PASS1.out \
 		--commono=COMMON-FLO.out \
@@ -287,7 +289,7 @@ compile: clean
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	HALSFC-OPT$(HCSUFFIX)$(EXT)   \
+	$(EXER) HALSFC-OPT$(HCSUFFIX)$(EXT)   \
 		--ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out \
 		--commono=COMMON-OPT.out \
@@ -301,7 +303,7 @@ compile: clean
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	HALSFC-AUXP$(EXT)   \
+	$(EXER) HALSFC-AUXP$(EXT)   \
 		--ddo=2,listing2a.txt \
 		--commoni=COMMON-OPT.out \
 		--commono=COMMON-AUX.out \
@@ -316,7 +318,7 @@ compile: clean
 	cp litfilea.bin litfile2.bin
 	cp optmata.bin optmat2.bin
 	cp auxmata.bin auxmat2.bin
-	HALSFC-PASS2$(HCSUFFIX)$(EXT) \
+	$(EXER) HALSFC-PASS2$(HCSUFFIX)$(EXT) \
 		--ddo=2,listing22.txt \
 		$(CARDS) \
 		--ddo=4,deck2.bin,E \
@@ -335,7 +337,7 @@ compile: clean
 ignore:
 	cp vmem2.bin vmem3.bin
 	cp litfile2.bin litfile3.bin
-	HALSFC-PASS3$(HCSUFFIX) \
+	$(EXER) HALSFC-PASS3$(HCSUFFIX)$(EXT) \
 		--ddo=2,listing23.txt \
 		--raf=B,1680,5,sdf3.bin \
 		--commoni=COMMON-PASS2.out \

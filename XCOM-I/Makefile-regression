@@ -37,6 +37,12 @@
 # results for them.  (If folders by that name previously existed, they have 
 # been removed.)
 
+# Just in case of working with .exe files in WINE.  If you need to explicitly
+# run exe programs with WINE (on some systems, this seems to be automatic, but
+# on others you can  make it explicit, set EXER=wine on the command line.
+export WINEDEBUG=-all
+export EXER=
+
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
@@ -81,7 +87,7 @@ XPL_APPS += ANALYZER SKELETON
 #	files are valid.
 .PHONY: tests
 all: testclean $(XPL_APPS) $(XPLI_APPS)
-	@bitsizeDemo$(EXT) >bitsizeDemo.build/out.txt
+	@$(EXER) bitsizeDemo$(EXT) >bitsizeDemo.build/out.txt
 	@cd bitsizeDemo.build && \
 	csplit -s out.txt \
 	       "$(PERCENT)^Address Allocations .*$(PERCENT)" \
@@ -92,7 +98,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	       "(^Assignments |^.?PAGE [0-9]|^$$)" xx01 > xxxxA
 	@diff --strip-trailing-cr -s -q bitsizeDemo.build/out.txt Tests/bitsizeDemo.regression
 	
-	@bitsizeDemoCommon$(EXT) --commono=bitsizeDemoCommon.build/COMMON.out >bitsizeDemoCommon.build/out.txt
+	@$(EXER) bitsizeDemoCommon$(EXT) --commono=bitsizeDemoCommon.build/COMMON.out >bitsizeDemoCommon.build/out.txt
 
 	@cd bitsizeDemoCommon.build && \
 	csplit -s out.txt \
@@ -106,7 +112,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	egrep --invert-match "(^Assignments |^.?PAGE [0-9]|^$$)" xx01 > xxxxA
 	@diff --strip-trailing-cr -s -q bitsizeDemo.build/xxxxA bitsizeDemoCommon.build/xxxxA
 	
-	@bitsizeDemoCommonIn$(EXT) --commoni=bitsizeDemoCommon.build/COMMON.out --commono=bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/out.txt
+	@$(EXER) bitsizeDemoCommonIn$(EXT) --commoni=bitsizeDemoCommon.build/COMMON.out --commono=bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/out.txt
 	@cd bitsizeDemoCommonIn.build && \
 	csplit -s out.txt "$(PERCENT)^COMMON .*$(PERCENT)"
 	-@cd bitsizeDemoCommonIn.build && \
@@ -117,21 +123,21 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@sed "s/^;.*//" bitsizeDemoCommonIn.build/COMMON.out >bitsizeDemoCommonIn.build/COMMONa.out
 	@diff --strip-trailing-cr -s -q bitsizeDemoCommon.build/COMMONa.out bitsizeDemoCommonIn.build/COMMONa.out
 
-	@Example-6.18.3$(EXT) <Tests/testdata.txt >Example-6.18.3.build/out.txt
+	@$(EXER) Example-6.18.3$(EXT) <Tests/testdata.txt >Example-6.18.3.build/out.txt
 	@diff --strip-trailing-cr -s -q Example-6.18.3.build/out.txt Tests/Example-6.18.3.regression
 	
-	@Example-6.18.4$(EXT) <Tests/testdata.txt >Example-6.18.4.build/out.txt
+	@$(EXER) Example-6.18.4$(EXT) <Tests/testdata.txt >Example-6.18.4.build/out.txt
 	@diff --strip-trailing-cr -s -q Example-6.18.4.build/out.txt Tests/Example-6.18.4.regression
 	
-	@Example-6.18.6$(EXT) | \
+	@$(EXER) Example-6.18.6$(EXT) | \
 	egrep "^[0-9]+" | \
-	Example-6.18.5$(EXT) >Example-6.18.5.build/out.txt && \
+	$(EXER) Example-6.18.5$(EXT) >Example-6.18.5.build/out.txt && \
 	diff --strip-trailing-cr -s -q Example-6.18.5.build/out.txt Tests/Example-6.18.5-and-6.regression
 	
-	@breakCharactersDemo$(EXT) >breakCharactersDemo.build/out.txt
+	@$(EXER) breakCharactersDemo$(EXT) >breakCharactersDemo.build/out.txt
 	@diff --strip-trailing-cr -s -q breakCharactersDemo.build/out.txt Tests/breakCharactersDemo.regression
 	
-	@ANALYZER$(EXT) <Tests/SKELETON.bnf | \
+	@$(EXER) ANALYZER$(EXT) <Tests/SKELETON.bnf | \
 	egrep --invert-match "ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME" \
 	>ANALYZER.build/out.txt && \
 	egrep --invert-match "ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME" \

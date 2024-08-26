@@ -121,6 +121,7 @@ all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(RDYNAMIC) $(QUIET)
+	chmod +x $(TARGET)
 	$(MV) $@ ..
 
 .PHONY: clean

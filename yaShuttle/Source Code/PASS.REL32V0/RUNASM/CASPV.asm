@@ -1,13 +1,15 @@
 */ Access:      Public Domain, no restrictions believed to exist.
 */ Filename:    CASPV.asm
-*/ Purpose:     This is a part of the HAL/S-FC compiler run-time library.
+*/ Purpose:     This is a part of the HAL/S-FC compiler run-time
+*/              library.
 */ Reference:   TBD.
 */ Language:    IBM AP-101S assembly language.
 */ Contact:     The Virtual AGC Project (www.ibiblio.org/apollo).
 */ History:     2024-06-18 RSB  Suffixed filename with ".asm".
-*/ Note:        Comments beginning */ in column 1 are from the Virtual AGC 
-*/              Project. Comments beginning merely with * are from the original 
-*/              Space Shuttle development.
+*/              2024-08-22 RSB  Corrected header to respect margin.
+*/ Note:        Comments beginning */ in column 1 are from the
+*/              Virtual AGC Project. Comments beginning merely with
+*/              * are from the original Space Shuttle development.
 
          TITLE 'CASPV - CHARACTER ASSIGN,PARTITIONED INPUT'             00000100
 *

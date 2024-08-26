@@ -52,6 +52,10 @@
 # of the compilation time).  This is tested via automated comparison.
 
 SHELL = /bin/bash
+# Just in case of working with .exe files in WINE.  Set EXER=wine on the 
+# command line.
+export WINEDEBUG=-all
+EXER=
 
 ifeq ($(strip $(CC)),)
 	CC = gcc
@@ -162,14 +166,14 @@ bootstrap: sim360$(EXT)
 		--output=$(BASE)-native \
 		$(XPLFILE)
 	@make -s -C $(BASE)-native.build
-	@$(BASE)-native$(EXT) --extra=2,"/* $Y */" $(REXTRA) \
+	@$(EXER) $(BASE)-native$(EXT) --extra=2,"/* $Y */" $(REXTRA) \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
 		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
 		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
 		>$(BASE)-360.rpt
-	@sim360$(EXT) --size=$(RECSIZE) \
+	@$(EXER) sim360$(EXT) --size=$(RECSIZE) \
 		-o0ET $(BASE)-360A.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \
@@ -178,7 +182,7 @@ bootstrap: sim360$(EXT)
 		-f3wb+ $(BASE)-360A.str \
 		$(BASE)-360.obj
 ifdef LEGACY
-	@sim360$(EXT) --size=$(RECSIZE) \
+	@$(EXER) sim360$(EXT) --size=$(RECSIZE) \
 		-o0ET $(BASE)-360C.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \
