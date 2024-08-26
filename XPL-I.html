@@ -345,9 +345,20 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </h1>
     <h2><a name="Linux"></a>Linux or Mac OS<br>
     </h2>
-    <p>Note that my newest Mac is 17 years old, and hasn't been
-      updatable for a long time now, so my Mac comments may or may not
-      apply to your (probably!) much newer Mac.<br>
+    <p>On a Mac, you will need to install <b>Xcode</b> <i>command-line
+        tools</i> before doing anything else.&nbsp; If you instead want
+      to install the entirety of <b>Xcode</b>, I'm sure that's fine
+      too, but the only thing you'll actually need is the much-smaller
+      package of command-line tools.&nbsp; Note that my very old Mac (<b>Xcode</b>
+      4.6) hasn't been updatable for a long time now, but apparently the
+      instructions you'll find throughout this page do work on <b>Xcode</b>
+      14.2 as well; whether they work on the current version, I cannot
+      say.<br>
+    </p>
+    <p>On Linux, you usually don't have to go out of your way to install
+      a C compiler, but <b>gcc</b> or alternately <b>clang</b> will be
+      available from your package repository if you do need to
+      explicitly install either or both of them.<br>
     </p>
     <p>
     </p>
@@ -375,11 +386,26 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         Afterward, you may need to close and reopen any terminal windows
         in order for the change to take effect.</li>
       <li>Install Python 3, if not already installed.</li>
-      <li>Optionally, install <b>clang-format</b>.&nbsp; You don't
-        necessarily need to install <b>clang</b> itself, but you
-        certainly can do so.&nbsp; This allows you optionally to "pretty
-        print" the C code that <b>XCOM-I</b> generates.<br>
+      <li>Optionally, install <b>clang-format</b>.&nbsp; This allows
+        you optionally to "pretty print" the C code that <b>XCOM-I</b>
+        generates.&nbsp; <br>
       </li>
+    </ol>
+    <blockquote>
+      <ul>
+        <li>Installation is easy on Linux (at least on Linux Mint),
+          because <b>clang-format</b> is in the official package
+          repositories.&nbsp; <br>
+        </li>
+        <li>On Mac OS, <b>clang-format</b> is apparently not included
+          in Xcode.&nbsp; You can do this:&nbsp; Install <a
+            moz-do-not-send="true" href="https://brew.sh/">homebrew</a>,
+          if you don't already have it.&nbsp; Then use the command "<font
+            color="#663300"><code>brew install clang-format</code></font>".<br>
+        </li>
+      </ul>
+    </blockquote>
+    <ol start="2">
     </ol>
     <p>Less common:&nbsp; If you want to build Windows executables using
       Linux, you need to additionally install a C cross-compiler.&nbsp;
@@ -390,10 +416,26 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       but again, perhaps it is different on your platform.&nbsp; To run
       the Windows executables <i>on</i> Linux requires the installation
       of WINE.&nbsp; On Linux Mint, both mingw-64 and WINE can be
-      installed from the standard package repository.&nbsp; Whether any
-      of that is possible on a Mac, I have no idea whatever; not on <i>my</i>
-      old Mac, for sure!<br>
+      installed from the standard package repository.&nbsp; However, I
+      found (on Linux Mint), that installing WINE <a
+        moz-do-not-send="true" href="https://www.winehq.org/">directly
+        from the provider</a> produced a better result, and I
+      unequivocally recommend doing that.&nbsp; <br>
     </p>
+    <p>Whether cross-assembly is possible on a Mac, I have no idea
+      whatever; not on <i>my</i> old Mac, for sure!&nbsp; In my
+      experience, it seems like the kind of thing for which Apple
+      enthusiasts would deny the need.&nbsp; I admit that I wouldn't see
+      much need for it myself, if I didn't feel obligated to make my
+      software available to as many folks as possible.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Unlike <i>my</i> old Mac,
+          recent versions of <b>Xcode</b> just run <b>clang</b>
+          anyway, even if you invoke <b>gcc</b>.&nbsp; Well, Daddy
+          knows best, I guess!&nbsp;</font>
+      </p>
+    </blockquote>
     <ol start="4">
     </ol>
     <p>
@@ -601,7 +643,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             </blockquote>
             Or from a Visual Studio developer command line,<br>
             <blockquote>
-              <pre>md temp<br>cd temp<br>set PYTHONUTF8=1<br>python XCOM-I.py --xpl ..\virtualagc\XCOM-I\Tests\HELLO.xpl<br>make CC=cl -C HELLO.build<br>HELLO</pre>
+              <pre>md temp<br>cd temp<br>set PYTHONUTF8=1<br>XCOM-I.py --xpl ..\virtualagc\XCOM-I\Tests\HELLO.xpl<br>make CC=cl -C HELLO.build<br>HELLO</pre>
             </blockquote>
             <blockquote> </blockquote>
           </td>
@@ -700,7 +742,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             </blockquote>
             or<br>
             <blockquote>
-              <pre>make CC=gcc EXTRA="-w -std=c99" -f Makefile-regression</pre>
+              <pre>make CC=gcc EXTRA="-w -std=c99" -f Makefile-regression<br></pre>
+            </blockquote>
+            <blockquote>
             </blockquote>
             <blockquote> </blockquote>
           </td>

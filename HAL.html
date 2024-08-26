@@ -64,6 +64,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
         probe</a>, though in that case the onboard computers were based
       on RCA 1802 COSMAC microprocessors.<br>
     </p>
@@ -88,6 +89,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
           in HAL/S</i></a>.&nbsp; That may sound like an odd advantage
       to mention, but "very fine books about them" are something that
       computer languages with a minimal user base tend to lack.&nbsp;
@@ -135,6 +137,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       optionally be combined into a HAL/S interpreter, into which the
       user could input HAL/S statements and immediately see the result
       of executing that statement.&nbsp; I called this software <b>yaHAL-S-FC</b>.&nbsp;
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -144,6 +147,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
         software remains available in the Virtual AGC software
         repository</a>, and is the subject of two of our pages, one
       about <a moz-do-not-send="true" href="hal-s-compiler.html">the
@@ -167,6 +171,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
+
         source code for the original Intermetrics HAL/S compiler called
         HAL/S-FC</a>.&nbsp; Intermetrics actually had three separate
       HAL/S compilers that I know about:<br>
@@ -328,6 +333,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </table>
     <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
         At present, modern implementations of PASS3/PASS3B/PASS4 have
         not yet been created, though as you can see from the table
         above, they're not needed merely for compilation of object code.<br>
@@ -379,6 +385,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       mentioned further here, except in passing.&nbsp; Prior to that,
       the source code for PASS1/PASS1B of HAL/S-FC had been manually
       translated into the Python 3 language, creating a program I call <b>HAL_S_FC</b>.&nbsp;
+
       This Python port is very useful for cross-checking <b>HALSFC</b>,
       but is (no longer) intended to be run <i>directly</i> by
       developers, and I've created no separate documentation for it
@@ -461,6 +468,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>"SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
 
+
         The list needs to be quoted if it contains any spaces (which
         should only be if the TITLE option is present), but for Windows
         it <i>always</i> needs to be quoted.&nbsp; Also, if the TEST
@@ -481,10 +489,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </li>
     </ul>
     <p>Let's just try compiling HELLO.hal:<font size="+1"><br>
-      </font>
-    </p>
-    <font size="+1">
-    </font>
+      </font> </p>
+    <font size="+1"> </font>
     <blockquote>
       <pre><font color="#663300" size="+1">HALSFC HELLO.hal "" "LIST</font><font size="+1">"<br></font></pre>
     </blockquote>
@@ -553,20 +559,21 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       AP-101S object code.&nbsp; You can read all about it, in all its
       gory detail, in the document "<a moz-do-not-send="true"
         href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+
         Shuttle Model AP-101S Principles of Operation, with Shuttle
         Instruction Set</a>".<br>
     </p>
     As for the object file, it is in the OS/360 Object File Format — or
     at least, very close to it! —, <a moz-do-not-send="true"
       href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">which
+
       you can read about in its wikipedia article</a>.&nbsp; There are
     some slight differences, in that you'd expect text strings in the
     object file to be encoded in EBCDIC, whereas they are instead
     encoded using the Display Electronics Unit (DEU) character set.
     <p>Rather than compiling HELLO.hal using the command given earlier,
       I'd be more likely to compile it using the command</p>
-    <font size="+1">
-    </font>
+    <font size="+1"> </font>
     <blockquote>
       <pre><font color="#663300" size="+1">HALSFC HELLO.hal TEST "LIST</font><font size="+1"><font color="#663300">,NOTABLES,LISTING2"</font><br></font></pre>
     </blockquote>
@@ -597,20 +604,37 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
           <b>XCOM-I</b>, per the instructions on the XPL/I page</a>.</li>
-      <li>(On Windows only!)&nbsp; You can probably just <a
-          moz-do-not-send="true"
-          href="https://www.ibiblio.org/apollo/Downloads/HALSFC-EXE.zip">download
-          the compiler's exe files from here</a>, unzip the zipfile, and
-        put the exe files somewhere in your PATH.&nbsp; If the stuff
-        described in the preceding section works for you after doing so,
-        then you're all done!&nbsp; Otherwise, proceed to the next
-        section.&nbsp; <b>Note:</b>&nbsp; These exe files were compiled
-        on a 64-bit Windows 11 system.&nbsp; They seem to work fine on
-        my Linux system under WINE as well, which is a hopeful sign for
-        compatibility.&nbsp; But I don't know enough about the subject
-        to claim that that means they'll work on your computer.<br>
+      <li>Perhaps you can download pre-built <b>HALSFC</b>
+        executables.&nbsp; I give you no guarantee that they'll work,
+        and you run the risk of not necessarily getting the most
+        up-to-date version of the compiler.&nbsp; If those things bother
+        you (they should!) then go on to step 3 instead.&nbsp; But if
+        you do download them, and if the stuff described in the
+        preceding section works for you after doing so, then you're all
+        done with the installation.<br>
       </li>
+    </ol>
+    <blockquote>
+      <ul>
+        <li>Windows:&nbsp; <a moz-do-not-send="true"
+            href="Downloads/HALSFC-EXE.zip">Download the compiler's exe
+            files from here</a>, unzip the zipfile, and put the exe
+          files somewhere in your PATH.</li>
+        <li>Mac OS:&nbsp; <a moz-do-not-send="true"
+            href="Downloads/HALSFC-MAC.zip">Download the compiler's
+            executable files from here</a>, unzip the zipfile, and put
+          the files somewhere in your PATH.</li>
+        <li>Linux:&nbsp; I have faith that you don't need any
+          shortcuts!&nbsp; Well, that and the fact that it's tough to
+          insure that you have all of the libraries you need to run any
+          executables I give you without putting a lot more work into it
+          than I'm willing to countenance.&nbsp; Move on to step 3.<br>
+        </li>
+      </ul>
+    </blockquote>
+    <ol start="3">
       <li>(Optional but recommended.)&nbsp; Verify that <b>XCOM-I</b>
         works, by following the instructions appropriate to your
         computer type, as given in the following sections of the XPL/I
@@ -624,12 +648,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         <li><a moz-do-not-send="true" href="XPL-I.html#sim360">Emulating
             the IBM System/360 CPU</a></li>
         <li><a moz-do-not-send="true" href="XPL-I.html#compilingXCOM">Insane
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
     <ol start="4">
-      <li>Build HALS/S-FC exe files, using <a moz-do-not-send="true"
-          href="XPL-I.html#halsfc">the instructions on the XPL/I page</a>.</li>
+      <li>Build HALS/S-FC executable files, using <a
+          moz-do-not-send="true" href="XPL-I.html#halsfc">the
+          instructions on the XPL/I page</a>.</li>
     </ol>
     <h1><a name="wildThings"></a>Where the Wild HAL/S Files Are</h1>
     <p>Naturally, the most-important HAL/S source-code files for us will
@@ -646,8 +672,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </p>
     <p><a moz-do-not-send="true"
         href="https://www.ibiblio.org/apollo/Shuttle/19740017615.pdf#page=35">The
+
         HAL-S-360 Users Manual</a> is a much-more feeble source of
       source, though if you look in the directory "<i>virtualagc</i>/yaShuttle/Source
+
 
       Code/HAL-S-360 Users Manual" you'll find a file called DEMO.hal
       that I've taken from the Users Manual.&nbsp; It is interesting
@@ -664,8 +692,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </p>
     <ol start="4">
     </ol>
-    <p>
-    </p>
+    <p> </p>
     <ul>
     </ul>
     <h1><a name="differences"></a>Some Differences Between the Old and
@@ -781,8 +808,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       fact that some single printed lines are replaced by dual printed
       lines does affect the vertical alignment and the pagination.<br>
     </p>
-    <p>
-    </p>
+    <p> </p>
     <h1><a name="options1"></a>Compiler Options, Part One</h1>
     <p>There are a number of options that are specific to the modern
       HAL/S compiler, versus the original HAL/S compiler (which
@@ -824,6 +850,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         in.&nbsp; But by default, the input text is assumed to be 7-bit
         ASCII and will be recoded into EBCDIC as it is read in.&nbsp;
         The compiler thinks of the file as being a numbered <i>device</i>.&nbsp;
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -850,6 +877,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
         Think of these as being <i>binary</i> files of fixed record
         sizes, which are read or written only in integral numbers of
         records.&nbsp; The value of <font color="#663300"><code><i>I</i></code></font>
@@ -906,6 +934,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     without additional blank spaces.&nbsp; For example, <font
       color="#663300"><code>--parm="LIST,SRN,TITLE=MY COMPILER</code><code>"</code></font>.&nbsp;
 
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -929,6 +958,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
       HAL/S-FC User's Manual (section 5)</a>, but I'll give you my own
     take on them here.&nbsp; Overall, the options can be categorized in
     several ways.&nbsp; For one thing, they can be of "type 1" (meaning
@@ -975,6 +1005,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         </tr>
         <tr>
           <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
               1, Printable</i><br>
           </td>
         </tr>
@@ -1077,6 +1108,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
               color="#663300"><code>I</code></font> and <font
               color="#663300"><code>J</code></font>, and the string
             variable <font color="#663300"><code>MY_NAME</code></font>.&nbsp;
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -1091,6 +1123,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
               Wikipedia article about the IBM 360 Object File Format</a>.<br>
           </td>
         </tr>
@@ -1191,6 +1224,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             The HAL/S-FC User's Manual goes on to describe a lot of <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=68">additional
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -1202,9 +1236,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             meant the software would be built for ground-testing
             purposes.&nbsp; Additional reading:&nbsp; "<a
               moz-do-not-send="true" href="Shuttle/20120013307.pdf">Spacecraft
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
               SDL Interface Control Document</a>".<br>
           </td>
         </tr>
@@ -1268,6 +1304,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
               User's Manual</a> describes additional subtleties <i>vis-à-vis</i>
             the SDL option (see above).<br>
           </td>
@@ -1423,6 +1460,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
         </tr>
         <tr>
           <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
               1, Unprintable</i><br>
           </td>
         </tr>
@@ -1557,8 +1595,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             <blockquote>
               <pre><font color="#009900">PAGE 1<br><br><br> HAL/S AUXILIARY HALMAT GENERATOR -- VERSION OF AUGUST 9, 2024.  CLOCK TIME = 12:39:10.00<br><br> HAL/S AUXILIARY HALMAT GENERATOR ENTERED AUGUST 10, 2024.  CLOCK TIME = 18:55:22.04<br><br><br><br>END OF HAL/S AUXILIARY HALMAT GENERATOR AUGUST 10, 2024.  CLOCK TIME = 18:55:22.04<br><br>TOTAL CPU TIME FOR AUXILIARY HALMAT GENERATOR     : 0:0:0.01<br>CPU TIME FOR AUXILIARY HALMAT GENERATOR SETUP     : 0:0:0.01<br>CPU TIME FOR AUXILIARY HALMAT GENERATOR CRUNCHING : 0:0:0.00<br><br>TOTAL NUMBER OF GARBAGE COLLECTIONS    = 2<br>MAXIMUM NUMBER OF USED CELLS           = 499<br>TOTAL TIME SPENT IN GARBAGE COLLECTION = 0:0:0.00<br><br>TOTAL TIME SPENT IN PRETTY PRINTING AUXMAT = 0:0:0.00<br><br>MAXIMUM STACK LEVEL = 1<br><br>NUMBER OF MINOR COMPACTIFIES  = 0<br>NUMBER OF MAJOR COMPACTIFIES  = 0<br>FREE STRING AREA              = 16582621</font><br><br></pre>
             </blockquote>
-            <blockquote>
-            </blockquote>
+            <blockquote> </blockquote>
           </td>
         </tr>
         <tr>
@@ -1708,6 +1745,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
         </tr>
         <tr>
           <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -1757,6 +1795,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
                   lines</a>.<br>
               </li>
               <li>Page headings and subheadings.</li>
@@ -2011,6 +2050,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
     <p>This example turns on debugging-aid options D, E, and F.<br>
     </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
         2.2.7 ("Debugging Aids") of the HAL/S-FC &amp; HAL/S-360
         Compiler System Program Description</a> describes many such
       options, although as you've probably come to expect, by no means
@@ -2220,6 +2260,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             purposes, each such rule is given a unique number, and all
             of <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS1.PROCS/%23%23DRIVER.xpl">the
+
               production numbers are related to the BNF rules in
               comments in the compiler's source code</a>.&nbsp; For
             example, production number 1 is the <code>&lt;COMPILATION&gt;</code>
@@ -2290,6 +2331,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">Print Phase 1 state trace.&nbsp; The compiler
             is a kind of <a moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/Finite-state_machine">state
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -2346,6 +2388,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
               hexadecimal floating-point</a> format.&nbsp; For example,
             the integer literal 20 will be printed as
             4214000000000000.&nbsp; As obtuse as that seems at first
@@ -2580,6 +2623,7 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
                 numeric codes for datatypes can be found beginning at
                 punchcard 00150900 in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS1.PROCS/%23%23DRIVER.xpl">HAL/S-FC
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -2639,8 +2683,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             nothing at all.&nbsp; Let's instead use <a
               moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/106-EXAMPLE_2.hal">the
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
               6-6 of Ryer's "Programming in HAL/S"</a>, which looks like
             so:<br>
             <blockquote>
@@ -2743,6 +2789,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass3.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
           <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass4.rpt
+
                   </i></code></font></b><b>or </b><b><font
                 color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle"><br>
@@ -3198,6 +3245,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     We already know, of course, that the comparision of HALSFC-PASS1's
     results to those of HAL_S_FC can be performed with any/every
     compilation, simply by using the TEST feature of <b>HALSFC</b>.&nbsp;
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -3213,6 +3261,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
           options</a> and the module ordering used to compile that
         flight software.</li>
       <li>A complete binary dump of the compiled flight software of the
@@ -3244,6 +3293,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
 
           I use these terms more-or-less interchangeably to refer to the
           software and/or documentation created for the Space Shuttle
@@ -3350,12 +3400,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <i>A Compiler Generator</i> (1979), by William M. McKeeman,
           James J. Horning, and David B. Wortman.</li>
         <li><i>Ryer</i>:&nbsp; I use this term to refer to the book <i>Programming
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
               section of the Space Shuttle Document Library</a></li>
           <li><a moz-do-not-send="true" href="XPL-I.html">XPL/I
               programming language</a></li>
@@ -3372,8 +3424,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           load-file form.</li>
       </ul>
     </ul>
-    <p>
-    </p>
+    <p> </p>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
