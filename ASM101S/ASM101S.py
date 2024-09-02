@@ -9,47 +9,6 @@ Purpose:    This is an assembler for the assembly language of the IBM AP-101S
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-08-21 RSB  Began.
-
-On the basis of inspection of actual source-code files of AP-101S assembly 
-language, I have decided to use the IBM document S360-21, 
-"IBM System/360 Operating System Assembler Language" as a guide to the
-syntax and coding conventions associated with this language.  The main 
-differences I envisage are these:
-
-    1.  The AP-101S instruction set differs from that of the IBM 360.
-    2.  String data is encoded (in generated object files) using DEU coding 
-        rather than EBCDIC.
-    3.  Source code is assumed to be 7-bit ASCII rather than EBCDIC.
-    4.  In concatenating strings within macros, the System/360 documentation
-        indicates than period ('.', transparently removed) separates them, but
-        that the period is optional if the suffix string begins with '&' or 
-        a special character not allowed in "symbols".  For AP-101S, there are
-        a few instances of the period, but it is far more common for the suffix 
-        string to be enclosed in optional parentheses.  For example, what could 
-        be &A&B in either assembler but is optionally &A.&B for System/360,
-        would more-likely be an optional &A(&B) in AP-101S.
-
-As far as changes to the instruction set, I rely on the IBM document "Space
-Shuttle Model AP-101S Principles of Operation with Shuttle Instruction Set".
-Besides the instructions listed there, various other insructions not listed
-there are used, such as BP, BLE, BNM, and so on.  I assume that those are
-translated to BC and BCR instructions in the manner described in the Figure
-4-1 ("Extended Mnemonic Codes") of the System/360 assembly-language document
-mentioned in the preceding paragraph. Besides those, there the following 
-branches which don't have documentation I can find, but which I could match with
-known instructions by binary comparison of their assembled forms:
-    BLE        = BNP
-    BN         = BM
-
-That document doesn't mention a number of macros which are apparently always
-available.  Refer to section 6.2.7 of the "HAL/S Compiler System Specification".
-The macros include:  AMAIN, AENTRY, AEXIT, I2DEDR, IBMCEDR, INPUT, OUTPUT, WORK,
-ABAL, ACALL, AERROR, ADATA, ACLOSE, ERRPARMS, WORKAREA.  The source code for
-these macros, and a few others, is found in PASS.REL32V0/RUNMAC/.  Since 
-PASS.REL32V0 is always in the PATH (assuming HALSFC installation instructions
-have been followed), we locate the RUNMAC directory by searching the PATH,
-and then automatically always read in all of the source-code files in that
-directory.
 '''
 
 import sys
@@ -69,10 +28,12 @@ macros = { }
 
 # Read a single source-code file.
 source = []
-def readSourceFile(filename):
+libraries = []
+def readSourceFile(filename, copy=False, printable=True):
     global source
     lineNumber = 0
     inMacroProto = False
+    inMacro = False
     try:
         f = open(filename, "rt")
     except:
@@ -95,19 +56,24 @@ def readSourceFile(filename):
             "operand": "",
             "endComment": "",
             "errors": [],
-            "inMacro": False
+            "inMacro": inMacro,
+            "copy": copy,
+            "printable": printable
             })
         line = line[:71]
-        if line.startswith(" ") and not inMacroProto:
-            fields = line.split()
+        fields = line.split()
+        if line.startswith(" ") and not inMacro:
             if len(fields) > 0 and fields[0] == "MACRO":
                 inMacroProto = True
+                inMacro = True
+                source[-1]["inMacro"] = True
         elif inMacroProto:
+            if line.startswith("*") or line.startswith(".*"):
+                continue
             inMacroProto = False
             # This line gives us the "prototype" of the macro.
             # We need to determine the name, the number of mandatory parameters,
             # and the number of optional parameters.
-            fields = line.split()
             fieldNum = 0
             parms = []
             if not line.startswith(" "):
@@ -127,8 +93,26 @@ def readSourceFile(filename):
                     else:
                         mandatory += 1
             macros[name] = [mandatory, mandatory + optional, len(source) - 2]
+        elif inMacro and not line.startswith("*") and not line.startswith(".*"):
+            if len(fields) > 1 and line[0] != " " and fields[1] == "MEND":
+                inMacro = False
+            elif len(fields) > 0 and line[0] == " " and fields[0] == "MEND":
+                inMacro = False
+        elif not inMacro and line.startswith(" ") and len(fields) > 1 and \
+                fields[0] == "COPY":
+            found = False
+            for library in libraries:
+                filename = os.path.join(library, fields[1] + ".asm")
+                if os.path.exists(filename) and os.path.isfile(filename):
+                    found = True
+                    readSourceFile(filename, True)
+                    break
+            if not found:
+                print("File %s.asm for COPY not found" % fields[1], file=sys.stderr)
+                sys.exit(1)
     f.close()
 
+'''
 # Read the entire macro library.
 for dir in os.environ["PATH"].split(":"):
     runmac = os.path.join(dir, "RUNMAC")
@@ -138,6 +122,30 @@ for dir in os.environ["PATH"].split(":"):
             if os.path.isfile(path) and file.endswith(".asm"):
                 readSourceFile(path)
         break
+'''
+
+# Read an entire macro library.
+def readMacroLibrary(dir):
+    global libraries
+    path = os.path.join(dir, "MACROFILES.txt")
+    try:
+        f = open(path, "rt")
+    except:
+        print("Cannot open %s" % path, file=sys.stderr)
+        sys.exit(1)
+    libraries.append(dir)
+    macroFiles = set()
+    for line in f:
+        line = line.strip()
+        if line == "" or line[0] == ";": # Is it a comment or whitespace?
+            continue
+        macroFiles.add(line.strip())
+    f.close()
+    for file in os.listdir(dir):
+        if file not in macroFiles:
+            continue
+        path = os.path.join(dir, file)
+        readSourceFile(path, printable=False)
 
 if False:
     for macro in sorted(macros):
@@ -147,18 +155,46 @@ if False:
 #=============================================================================
 # Parse the command-line options.
 errorCount = 0
+objectFileName = None
+sourceFileCount = 0
 
 for parm in sys.argv[1:]:
-    if not parm.startswith("--"):
+    if parm.startswith("--library="):
+        readMacroLibrary(parm[10:])
+    elif parm.startswith("--object="):
+        if not parm.endswith(".obj"):
+            print("Object-code filenames must end in .obj", file=sys.stderr)
+            sys.exit(1)
+        objectFileName = parm[8:]
+    elif not parm.startswith("--"):
+        if not parm.endswith(".asm"):
+            print("Source-code filenames must end with .asm", file=sys.stderr)
+            sys.exit(1)
+        if objectFileName == None:
+            objectFileName == parm[:-4] + ".obj"
         readSourceFile(parm)
+        sourceFileCount += 1
     elif parm == "--help":
         print("Usage:")
         print("     ASM101S.py [OPTIONS] SOURCE1.asm ...")
-        print("No OPTIONS are presently available")
+        print()
+        print("The defined OPTIONS are:")
+        print()
+        print("--help              Display this message.")
+        print("--object=F.obj      Specify the name of the output object-code")
+        print("                    file.  The default is SOURCEn.obj, where")
+        print("                    SOURCEn.asm is the *last* source-code file")
+        print("                    specified on the command line.")
+        print("--library=L         L specifies a path to a macro library.")
+        print("                    This option can appear multiple times.")
+        print()
         sys.exit(1)
     else:
         print("Unrecognized parameter '%s'" % parm, file=sys.stderr)
         sys.exit(1)
+if sourceFileCount == 0:
+    print("No source-code files were specified", file=sys.stderr)
+    sys.exit(1)
 
 # Mark an error in the array of source code.
 line = {}
@@ -216,12 +252,16 @@ pseudoOps = {
     "SETB": [1,1],
     "SETC": [1,1],
     "SPACE": [0,1],
+    "SPOFF": [0,0],
+    "SPON": [0,0],
     "START": [0,1],
     "TITLE": [1,1],
     "USING": [2,17]
     }
 
 # AP-101S instruction set.
+
+# First, the CPU instructions, categorized by RR, RS, SRS, SI, and RI.
 # 2 operands
 argsRR = { "AR", "CR", "CBL", "DR", "XUL", "LR", "LCR", "LFXI", "MR", "SR", 
            "BALR", "BCR", "BCRE", "BCTR", "BVCR", "NCT", "NR", "XR", "OR",
@@ -230,14 +270,27 @@ argsRR = { "AR", "CR", "CBL", "DR", "XUL", "LR", "LCR", "LFXI", "MR", "SR",
            "STXA", "MVH", "SPM", "SRET", "LXA", "ICR", "PC",
            "BR", "NOPR" }
 # 3 operands
-argsRS = { "A", "AH", "AST", "C", "CH", "D", "IAL", "IHL", "L", "LA", "LH",
-           "LM", "M", "MH", "MIH", "ST", "STH", "STM", "S", "SST", "SH", "TD",
-           "BAL", "BIX", "BC", "BCT", "BCV", "N", "NST", "X", "XST", "O", 
-           "OST", "SHW", "TH", "ZH", "AED", "AE", "CE", "CED", "DED", "DE", "LED", 
-           "LE", "MVS", "MED", "ME", "SED", "SE", "STED", "STE", "STXA", "STDM",
+argsRS = { "A", "AH", "AST", 
+           "C", "CH", "D", 
+           "IAL", "IHL", 
+           "L", "LA", "LH",
+           "LM", "M", "MH", 
+           "MIH", "ST", "STH", 
+           "STM", "S", "SST", 
+           "SH", "TD", "BAL",
+           "BIX", "BC", "BCT", 
+           "BCV", "N", "NST", 
+           "X", "XST", "O",
+           "OST", "SHW", "TH", 
+           "ZH", "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", "MVS", 
+           "MED", "ME", "SED", "SE", "STED", "STE", "DIAG", "STXA", "STDM",
            "ISPB", "LPS", "SSM", "SCAL", "LDM", "LXA", "SVC", "TS",
            "B", "NOP", "BH", "BL", "BE", "BNH", "BNL", "BNE", "BO", "BP",
            "BM", "BZ", "BNP", "BNM", "BNZ", "BNO", "BLE", "BN" }
+for m in sorted(argsRS):
+    argsRS.add(m + "@")
+    argsRS.add(m + "@#")
+    argsRS.add(m + "#")
 # 3 operands
 argsSRS = { "BCB", "BCF", "BCTB", "BVCF", "SLL", "SLDL", "SRA", "SRDA", "SRL",
             "SRDL", "SRR", "SRDR",
@@ -248,7 +301,27 @@ argsSRS = { "BCB", "BCF", "BCTB", "BVCF", "SLL", "SLDL", "SRA", "SRDA", "SRL",
 # 3 operands
 argsSI = { "CIST", "MSTH", "NIST", "XIST", "SB", "TB", "ZB", "TSB" }
 # 2 operands
-argsRI = { "AHI", "CHI", "MHI", "NHI", "XHI", "OHI", "TRB", "ZRB" }
+argsRI = { "AHI", "CHI", "MHI", "NHI", "XHI", "OHI", "TRB", "ZRB", "LHI" }
+
+# Now, the MSC instructions.  All have operands.
+argsMSC = { "@A", "@B", "@BN", "@BNN", "@BNP", "@BNZ", "@BU", "@BU@", "@BXN",
+         "@BXNN", "@BXNP", "@BXNZ", "@BXP",
+         "@BXZ", "@BZ", "@C", "@CI", "@CNOP", "@DLY", "@INT", "@L", "@LAR", 
+         "@LF", "@LH", "@LI", "@LMS", "@LXI", "@N", "@NIX", "@RAI", "@RAW",
+         "@RBI", "@REC", "@RFD", "@RNI", "@RNW", "@SAI", "@SEC", "@SFD", "@SIO",
+         "@ST", "@STF", "@STH", "@STP", "@TAX", "@TI", "@TM", "@TMI", "@TSZ", 
+         "@TXA", "@TXI", "@WAT", "@X", "@XAX",
+         "@BC", "@BXC" "@CALL", "@CALL@", "@LBB", "@LBB@", "@LBP", "@LBP@" }
+
+# And BCE instructions.  None have operands.
+argsBCE = { "#@#DEC", "#@#HEX", "#@#SCN", "#BU", "#BU@", "#CMD", "#CMDI", "#CNOP",
+         "#DLY", "#DLYI", "#LBR", "#LBR@", "#LTO", "#LTOI", "#MIN", "#MIN@",
+         "#MINC", "#MOUT", "#MOUT@", "#MOUTC", "#ORG", "#RDL", "#RDLI", "#RDS",
+         "#RIB", "#SIB", "#SPLIT", "#SSC", "#SST", "#STP", "#TDL", "#TDLI",
+         "#TDS", "#WAT", "#WIX"
+       }
+
+knownInstruction = set.union(argsRR, argsRS, argsSRS, argsSI, argsRI, argsMSC, argsBCE)
 
 #=============================================================================
 # Syntactical analysis of the source code.
@@ -287,7 +360,6 @@ def isSymbolExpression(name, inMacro):
 # have been parsed into 3 fields each:  source, continuation, and identification.
 # The source field must now be additionally broken down into name, operation,
 # operand, and comment, taking into account continuation lines.
-startOfContinued = 0
 inMacro = False
 for lineNumber in range(len(source)):
     line = source[lineNumber]
@@ -320,10 +392,10 @@ for lineNumber in range(len(source)):
                 continue
         fields = text.split(None, 1)
         operation = fields[0]
-        if operation not in pseudoOps and operation not in macros and \
-                operation not in argsRR and \
-                operation not in argsRS and operation not in argsSRS and \
-                operation not in argsSI and operation not in argsRI:
+        if not inMacro and \
+                operation not in pseudoOps and \
+                operation not in macros and \
+                operation not in knownInstruction:
             error("Unknown operation %s" % operation)
             continue
         line["operation"] = operation
@@ -352,7 +424,8 @@ for lineNumber in range(len(source)):
     if not continuation:
         hasOperand = False
         if operation in argsRR or operation in argsRS or operation in argsSRS or \
-                operation in argsSI or operation in argsRI:
+                operation in argsSI or operation in argsRI or \
+                operation in argsMSC:
             hasOperand = True
         elif operation in pseudoOps:
             if pseudoOps[operation][0] > 0:
@@ -435,14 +508,16 @@ if errorCount > 0:
 if True: #***DEBUG***
     for i in range(len(source)):
         line = source[i]
-        if line["fullComment"] or line["dotComment"]:
-            print("%5d:  %s" % (i, line["text"]))
-        else:
-            print("%5d:  %-8s %-5s %-15s%s" % (
-                i,
-                line["name"], 
-                line["operation"],
-                line["operand"],
-                line["endComment"]))
-    for n in sorted(macros):
-        print("%-20s" % n, macros[n])
+        if line["printable"]:
+            if line["fullComment"] or line["dotComment"]:
+                print("%5d:  %s" % (i, line["text"]))
+            else:
+                print("%5d:  %-8s %-5s %-15s%s" % (
+                    i,
+                    line["name"], 
+                    line["operation"],
+                    line["operand"],
+                    line["endComment"]))
+    if False:
+        for n in sorted(macros):
+            print("%-20s" % n, macros[n])
