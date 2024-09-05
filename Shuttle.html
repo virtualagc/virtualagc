@@ -43,9 +43,11 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
 
+
           Interface</a><br>
       </li>
-      <li><a moz-do-not-send="true" href="#Emulation">HAL/S Processing</a></li>
+      <li><a moz-do-not-send="true" href="#Emulation">HAL/S and AP-101S
+          Assembly-Language Processing</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>Insofar as the Space Shuttle is concerned, the Virtual AGC
@@ -146,6 +148,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -193,6 +196,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
 
 
 
@@ -276,12 +280,14 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
 
 
 
@@ -457,6 +463,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -469,6 +476,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
 
 
@@ -529,13 +537,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       Shuttle's flight software still exists is not the same thing as
       saying that I've convinced anybody to give me all of it.&nbsp;
       Without being too specific, I will simply say that I presently
-      have significant quantities of
-      PASS source-code files in hand, along with some BFS files, but
-      that I am not at liberty to show them to you due to issues which I
-      hope can eventually be resolved.&nbsp; Indeed, I can't even
-      necessarily <i>tell</i> you yet everything I have managed to
-      acquire.&nbsp; It's an unpleasant situation that I hope and expect
-      to improve over time.<br>
+      have significant quantities of PASS source-code files in hand,
+      along with some BFS files, but that I am not at liberty to show
+      them to you due to issues which I hope can eventually be
+      resolved.&nbsp; Indeed, I can't even necessarily <i>tell</i> you
+      yet everything I have managed to acquire.&nbsp; It's an unpleasant
+      situation that I hope and expect to improve over time.<br>
     </p>
     <p>On the other hand, here is some software source code we <i>do</i>
       have, and which you can see right now in our source tree:<br>
@@ -544,6 +551,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS
         and BFS.&nbsp; More specifically, <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC
+
           release 32V0</a>, written mostly in an enhanced version of the
         XPL high-level language, with bits in BAL (IBM 360 Basic
         Assembly Language) and in AP-101S assembly language as
@@ -629,12 +637,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         ASCII.&nbsp; So instead, we use the ASCII characters "~" and
         "`", respectively, in place of them.&nbsp;&nbsp; For example,
         every time you might have seen something like "<tt>x </tt><tt>¬=
+
           y</tt>" in the original HAL/S source code or documentation,
         we'd expect "<tt>x ~= y</tt>" instead! </li>
       <li>A compiler directive of the form "<tt>D VERSION <i>v</i></tt>"
         was sometimes used in original HAL/S source code or
         template-library files.&nbsp; Here, "<i><tt>v</tt></i>" is a
         numerical version code in the range of 1 through 255, <i>represented
+
           as a single EBCDIC character</i>.&nbsp; To reiterate, a <i>single</i>
         character position in this compiler-directive string must
         represent up to a 3-digit version number.&nbsp; The way they did
@@ -693,38 +703,22 @@ style="border-collapse:collapse;text-align:center;background:#FFFFFF;font-size:l
         <tr style="background:#F8F8F8;font-size:small">
           <td> <font size="-1"><br>
             </font></td>
-          <td style="width:20pt">0
-          </td>
-          <td style="width:20pt">1
-          </td>
-          <td style="width:20pt">2
-          </td>
-          <td style="width:20pt">3
-          </td>
-          <td style="width:20pt">4
-          </td>
-          <td style="width:20pt">5
-          </td>
-          <td style="width:20pt">6
-          </td>
-          <td style="width:20pt">7
-          </td>
-          <td style="width:20pt">8
-          </td>
-          <td style="width:20pt">9
-          </td>
-          <td style="width:20pt">A
-          </td>
-          <td style="width:20pt">B
-          </td>
-          <td style="width:20pt">C
-          </td>
-          <td style="width:20pt">D
-          </td>
-          <td style="width:20pt">E
-          </td>
-          <td style="width:20pt">F
-          </td>
+          <td style="width:20pt">0 </td>
+          <td style="width:20pt">1 </td>
+          <td style="width:20pt">2 </td>
+          <td style="width:20pt">3 </td>
+          <td style="width:20pt">4 </td>
+          <td style="width:20pt">5 </td>
+          <td style="width:20pt">6 </td>
+          <td style="width:20pt">7 </td>
+          <td style="width:20pt">8 </td>
+          <td style="width:20pt">9 </td>
+          <td style="width:20pt">A </td>
+          <td style="width:20pt">B </td>
+          <td style="width:20pt">C </td>
+          <td style="width:20pt">D </td>
+          <td style="width:20pt">E </td>
+          <td style="width:20pt">F </td>
         </tr>
         <tr>
           <td
@@ -733,8 +727,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="0 U+0000: Control (alias NULL) (alias NUL)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">
-                NUL </span></font>
-          </td>
+                NUL </span></font> </td>
           <td title="1 U+0001: Control (alias START OF HEADING) (alias
             SOH)" style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
@@ -748,18 +741,15 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="3 U+0003: Control (alias END OF TEXT) (alias ETX)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> ETX </span></font>
-          </td>
+                dashed blue;"> ETX </span></font> </td>
           <td title="4 U+0004: Control (alias END OF TRANSMISSION)
             (alias EOT)" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> EOT </span></font>
-          </td>
+                dashed blue;"> EOT </span></font> </td>
           <td title="5 U+0005: Control (alias ENQUIRY) (alias ENQ)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> ENQ </span></font>
-          </td>
+                dashed blue;"> ENQ </span></font> </td>
           <td title="6 U+0006: Control (alias ACKNOWLEDGE) (alias ACK)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
@@ -768,13 +758,11 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="7 U+0007: Control (alias ALERT) (alias BEL)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">
-                BEL </span></font>
-          </td>
+                BEL </span></font> </td>
           <td title="8 U+0008: Control (alias BACKSPACE) (alias BS)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> &nbsp;BS&nbsp; </span></font>
-          </td>
+                dashed blue;"> &nbsp;BS&nbsp; </span></font> </td>
           <td title="9 U+0009: Control (alias CHARACTER TABULATION)
             (alias HORIZONTAL TABULATION) (alias HT) (alias TAB)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
@@ -801,8 +789,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="13 U+000D: Control (alias CARRIAGE RETURN) (alias
             CR)" style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">
-                &nbsp;CR&nbsp; </span></font>
-          </td>
+                &nbsp;CR&nbsp; </span></font> </td>
           <td title="14 U+000E: Control (alias SHIFT OUT) (alias
             LOCKING-SHIFT ONE) (alias SO)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
@@ -854,8 +841,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="22 U+0016: Control (alias SYNCHRONOUS IDLE) (alias
             SYN)" style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"> <span
-                  class="mw-redirect">SYN</span> </span></font>
-          </td>
+                  class="mw-redirect">SYN</span> </span></font> </td>
           <td title="23 U+0017: Control (alias END OF TRANSMISSION
             BLOCK) (alias ETB)"
             style="font-size:75%;padding:1px;background:#FFD"><font
@@ -865,52 +851,44 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="24 U+0018: Control (alias CANCEL) (alias CAN)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> CAN </span></font>
-          </td>
+                dashed blue;"> CAN </span></font> </td>
           <td title="25 U+0019: Control (alias END OF MEDIUM) (alias
             EOM)" style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"> <span class="mw-redirect">&nbsp;EM&nbsp;</span>
-              </span></font>
-          </td>
+              </span></font> </td>
           <td title="26 U+001A: Control (alias SUBSTITUTE) (alias SUB)"
             style="font-size:75%;padding:1px;background:#FEE"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> SUB </span></font>
-          </td>
+                dashed blue;"> SUB </span></font> </td>
           <td title="27 U+001B: Control (alias ESCAPE) (alias ESC)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;"> ESC </span></font>
-          </td>
+                dashed blue;"> ESC </span></font> </td>
           <td title="28 U+001C: Control (alias INFORMATION SEPARATOR
             FOUR) (alias FILE SEPARATOR) (alias FS)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"> <span class="mw-redirect">&nbsp;FS&nbsp;</span>
-              </span></font>
-          </td>
+              </span></font> </td>
           <td title="29 U+001D: Control (alias INFORMATION SEPARATOR
             THREE) (alias GROUP SEPARATOR) (alias GS)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"> <span class="mw-redirect">&nbsp;GS&nbsp;</span>
-              </span></font>
-          </td>
+              </span></font> </td>
           <td title="30 U+001E: Control (alias INFORMATION SEPARATOR
             TWO) (alias RECORD SEPARATOR) (alias RS)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"> <span class="mw-redirect">&nbsp;RS&nbsp;</span>
-              </span></font>
-          </td>
+              </span></font> </td>
           <td title="31 U+001F: Control (alias INFORMATION SEPARATOR
             ONE) (alias UNIT SEPARATOR) (alias US)"
             style="font-size:75%;padding:1px;background:#FFD"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"> <span class="mw-redirect">&nbsp;US&nbsp;</span>
-              </span></font>
-          </td>
+              </span></font> </td>
         </tr>
         <tr>
           <td
@@ -922,103 +900,72 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
                   class="mw-redirect">&nbsp;SP&nbsp;</span> </span></font>
           </td>
           <td title="33 U+0021: EXCLAMATION MARK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">!</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">!</span></font> </td>
           <td title="34 U+0022: QUOTATION MARK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">"</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">"</span></font> </td>
           <td title="35 U+0023: NUMBER SIGN" style="padding:1px;"><font
-              size="-1">#</font>
-          </td>
+              size="-1">#</font> </td>
           <td title="36 U+0024: DOLLAR SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">$</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">$</span></font> </td>
           <td title="37 U+0025: PERCENT SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">%</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">%</span></font> </td>
           <td title="38 U+0026: AMPERSAND" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">&amp;</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">&amp;</span></font> </td>
           <td title="39 U+0027: APOSTROPHE" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">'</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">'</span></font> </td>
           <td title="40 U+0028: LEFT PARENTHESIS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">(</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">(</span></font> </td>
           <td title="41 U+0029: RIGHT PARENTHESIS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">)</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">)</span></font> </td>
           <td title="42 U+002A: ASTERISK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">*</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">*</span></font> </td>
           <td title="43 U+002B: PLUS SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">+</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">+</span></font> </td>
           <td title="44 U+002C: COMMA" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">,</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">,</span></font> </td>
           <td title="45 U+002D: HYPHEN-MINUS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">-</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">-</span></font> </td>
           <td title="46 U+002E: FULL STOP" style="padding:1px;"><font
-              size="-1">.</font>
-          </td>
+              size="-1">.</font> </td>
           <td title="47 U+002F: SOLIDUS" style="padding:1px;"><font
-              size="-1">/</font>
-          </td>
+              size="-1">/</font> </td>
         </tr>
         <tr>
           <td
 style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1"><font
               size="-1">3x </font></td>
           <td title="48 U+0030: DIGIT ZERO" style="padding:1px;"><font
-              size="-1">0</font>
-          </td>
+              size="-1">0</font> </td>
           <td title="49 U+0031: DIGIT ONE" style="padding:1px;"><font
-              size="-1">1</font>
-          </td>
+              size="-1">1</font> </td>
           <td title="50 U+0032: DIGIT TWO" style="padding:1px;"><font
-              size="-1">2</font>
-          </td>
+              size="-1">2</font> </td>
           <td title="51 U+0033: DIGIT THREE" style="padding:1px;"><font
-              size="-1">3</font>
-          </td>
+              size="-1">3</font> </td>
           <td title="52 U+0034: DIGIT FOUR" style="padding:1px;"><font
-              size="-1">4</font>
-          </td>
+              size="-1">4</font> </td>
           <td title="53 U+0035: DIGIT FIVE" style="padding:1px;"><font
-              size="-1">5</font>
-          </td>
+              size="-1">5</font> </td>
           <td title="54 U+0036: DIGIT SIX" style="padding:1px;"><font
-              size="-1">6</font>
-          </td>
+              size="-1">6</font> </td>
           <td title="55 U+0037: DIGIT SEVEN" style="padding:1px;"><font
-              size="-1">7</font>
-          </td>
+              size="-1">7</font> </td>
           <td title="56 U+0038: DIGIT EIGHT" style="padding:1px;"><font
-              size="-1">8</font>
-          </td>
+              size="-1">8</font> </td>
           <td title="57 U+0039: DIGIT NINE" style="padding:1px;"><font
-              size="-1">9</font>
-          </td>
+              size="-1">9</font> </td>
           <td title="58 U+003A: COLON" style="padding:1px;"><font
-              size="-1">:</font>
-          </td>
+              size="-1">:</font> </td>
           <td title="59 U+003B: SEMICOLON" style="padding:1px;"><font
-              size="-1">;</font>
-          </td>
+              size="-1">;</font> </td>
           <td title="60 U+003C: LESS-THAN SIGN" style="padding:1px;"><font
-              size="-1">&lt;</font>
-          </td>
+              size="-1">&lt;</font> </td>
           <td title="61 U+003D: EQUALS SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">=</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">=</span></font> </td>
           <td title="62 U+003E: GREATER-THAN SIGN" style="padding:1px;"><font
-              size="-1">&gt;</font>
-          </td>
+              size="-1">&gt;</font> </td>
           <td title="63 U+003F: QUESTION MARK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">?</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">?</span></font> </td>
         </tr>
         <tr>
           <td
@@ -1026,106 +973,76 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">4x </font></td>
           <td title="64 U+0040: COMMERCIAL AT"
             style="padding:1px;background:#FEE"><font size="-1"><span
-                class="mw-redirect">@</span></font>
-          </td>
+                class="mw-redirect">@</span></font> </td>
           <td title="65 U+0041: LATIN CAPITAL LETTER A"
-            style="padding:1px;"><font size="-1">A</font>
-          </td>
+            style="padding:1px;"><font size="-1">A</font> </td>
           <td title="66 U+0042: LATIN CAPITAL LETTER B"
-            style="padding:1px;"><font size="-1">B</font>
-          </td>
+            style="padding:1px;"><font size="-1">B</font> </td>
           <td title="67 U+0043: LATIN CAPITAL LETTER C"
-            style="padding:1px;"><font size="-1">C</font>
-          </td>
+            style="padding:1px;"><font size="-1">C</font> </td>
           <td title="68 U+0044: LATIN CAPITAL LETTER D"
-            style="padding:1px;"><font size="-1">D</font>
-          </td>
+            style="padding:1px;"><font size="-1">D</font> </td>
           <td title="69 U+0045: LATIN CAPITAL LETTER E"
-            style="padding:1px;"><font size="-1">E</font>
-          </td>
+            style="padding:1px;"><font size="-1">E</font> </td>
           <td title="70 U+0046: LATIN CAPITAL LETTER F"
-            style="padding:1px;"><font size="-1">F</font>
-          </td>
+            style="padding:1px;"><font size="-1">F</font> </td>
           <td title="71 U+0047: LATIN CAPITAL LETTER G"
-            style="padding:1px;"><font size="-1">G</font>
-          </td>
+            style="padding:1px;"><font size="-1">G</font> </td>
           <td title="72 U+0048: LATIN CAPITAL LETTER H"
-            style="padding:1px;"><font size="-1">H</font>
-          </td>
+            style="padding:1px;"><font size="-1">H</font> </td>
           <td title="73 U+0049: LATIN CAPITAL LETTER I"
-            style="padding:1px;"><font size="-1">I</font>
-          </td>
+            style="padding:1px;"><font size="-1">I</font> </td>
           <td title="74 U+004A: LATIN CAPITAL LETTER J"
-            style="padding:1px;"><font size="-1">J</font>
-          </td>
+            style="padding:1px;"><font size="-1">J</font> </td>
           <td title="75 U+004B: LATIN CAPITAL LETTER K"
-            style="padding:1px;"><font size="-1">K</font>
-          </td>
+            style="padding:1px;"><font size="-1">K</font> </td>
           <td title="76 U+004C: LATIN CAPITAL LETTER L"
-            style="padding:1px;"><font size="-1">L</font>
-          </td>
+            style="padding:1px;"><font size="-1">L</font> </td>
           <td title="77 U+004D: LATIN CAPITAL LETTER M"
-            style="padding:1px;"><font size="-1">M</font>
-          </td>
+            style="padding:1px;"><font size="-1">M</font> </td>
           <td title="78 U+004E: LATIN CAPITAL LETTER N"
-            style="padding:1px;"><font size="-1">N</font>
-          </td>
+            style="padding:1px;"><font size="-1">N</font> </td>
           <td title="79 U+004F: LATIN CAPITAL LETTER O"
-            style="padding:1px;"><font size="-1">O</font>
-          </td>
+            style="padding:1px;"><font size="-1">O</font> </td>
         </tr>
         <tr>
           <td
 style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1"><font
               size="-1">5x </font></td>
           <td title="80 U+0050: LATIN CAPITAL LETTER P"
-            style="padding:1px;"><font size="-1">P</font>
-          </td>
+            style="padding:1px;"><font size="-1">P</font> </td>
           <td title="81 U+0051: LATIN CAPITAL LETTER Q"
-            style="padding:1px;"><font size="-1">Q</font>
-          </td>
+            style="padding:1px;"><font size="-1">Q</font> </td>
           <td title="82 U+0052: LATIN CAPITAL LETTER R"
-            style="padding:1px;"><font size="-1">R</font>
-          </td>
+            style="padding:1px;"><font size="-1">R</font> </td>
           <td title="83 U+0053: LATIN CAPITAL LETTER S"
-            style="padding:1px;"><font size="-1">S</font>
-          </td>
+            style="padding:1px;"><font size="-1">S</font> </td>
           <td title="84 U+0054: LATIN CAPITAL LETTER T"
-            style="padding:1px;"><font size="-1">T</font>
-          </td>
+            style="padding:1px;"><font size="-1">T</font> </td>
           <td title="85 U+0055: LATIN CAPITAL LETTER U"
-            style="padding:1px;"><font size="-1">U</font>
-          </td>
+            style="padding:1px;"><font size="-1">U</font> </td>
           <td title="86 U+0056: LATIN CAPITAL LETTER V"
-            style="padding:1px;"><font size="-1">V</font>
-          </td>
+            style="padding:1px;"><font size="-1">V</font> </td>
           <td title="87 U+0057: LATIN CAPITAL LETTER W"
-            style="padding:1px;"><font size="-1">W</font>
-          </td>
+            style="padding:1px;"><font size="-1">W</font> </td>
           <td title="88 U+0058: LATIN CAPITAL LETTER X"
-            style="padding:1px;"><font size="-1">X</font>
-          </td>
+            style="padding:1px;"><font size="-1">X</font> </td>
           <td title="89 U+0059: LATIN CAPITAL LETTER Y"
-            style="padding:1px;"><font size="-1">Y</font>
-          </td>
+            style="padding:1px;"><font size="-1">Y</font> </td>
           <td title="90 U+005A: LATIN CAPITAL LETTER Z"
-            style="padding:1px;"><font size="-1">Z</font>
-          </td>
+            style="padding:1px;"><font size="-1">Z</font> </td>
           <td title="91 U+005B: LEFT SQUARE BRACKET"
             style="padding:1px;"><font size="-1"><span
-                class="mw-redirect">[</span></font>
-          </td>
+                class="mw-redirect">[</span></font> </td>
           <td title="92 U+005C: REVERSE SOLIDUS"
             style="padding:1px;background:#FEE"><font size="-1">\</font>
           </td>
           <td title="93 U+005D: RIGHT SQUARE BRACKET"
             style="padding:1px;"><font size="-1"><span
-                class="mw-redirect">]</span></font>
-          </td>
+                class="mw-redirect">]</span></font> </td>
           <td title="94 U+005E: CIRCUMFLEX ACCENT"
             style="padding:1px;background:#FFD"><font size="-1"><span
-                class="mw-redirect">^</span></font>
-          </td>
+                class="mw-redirect">^</span></font> </td>
           <td title="95 U+005F: LOW LINE"
             style="padding:1px;background:#FFD"><font size="-1">_</font>
           </td>
@@ -1136,8 +1053,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">6x </font></td>
           <td title="96 U+0060: GRAVE ACCENT"
             style="padding:1px;background:#FEE"><font size="-1"><span
-                class="mw-redirect">`</span></font>
-          </td>
+                class="mw-redirect">`</span></font> </td>
           <td title="97 U+0061: LATIN SMALL LETTER A"
             style="padding:1px;background:#FFD"><font size="-1">a</font>
           </td>
@@ -1223,24 +1139,20 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           </td>
           <td title="123 U+007B: LEFT CURLY BRACKET"
             style="padding:1px;background:#FFD"><font size="-1"><span
-                class="mw-redirect">{</span></font>
-          </td>
+                class="mw-redirect">{</span></font> </td>
           <td title="124 U+007C: VERTICAL LINE"
             style="padding:1px;background:#FEE"><font size="-1">|</font>
           </td>
           <td title="125 U+007D: RIGHT CURLY BRACKET"
             style="padding:1px;background:#FFD"><font size="-1"><span
-                class="mw-redirect">}</span></font>
-          </td>
+                class="mw-redirect">}</span></font> </td>
           <td title="126 U+007E: TILDE"
             style="padding:1px;background:#FEE"><font size="-1"><span
-                class="mw-redirect">~</span></font>
-          </td>
+                class="mw-redirect">~</span></font> </td>
           <td title="127 U+007F: Control (alias DELETE) (alias DEL)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">
-                DEL </span></font>
-          </td>
+                DEL </span></font> </td>
         </tr>
       </tbody>
     </table>
@@ -1280,8 +1192,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">0x </font></td>
           <td title="U+0000 NULL" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">NUL</span></font>
-          </td>
+                dashed blue;">NUL</span></font> </td>
           <td title="U+0001 START OF HEADING"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">SOH</span></font>
@@ -1293,8 +1204,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+0003 END OF TEXT"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">ETX</span></span></font>
-          </td>
+                  class="mw-redirect">ETX</span></span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">SEL</span></span></font>
@@ -1302,16 +1212,14 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+0009 CHARACTER TABULATION"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">HT</span>&nbsp;</span></font>
-          </td>
+                  class="mw-redirect">HT</span>&nbsp;</span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">RNL</span></span></font>
           </td>
           <td title="U+007F DELETE" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">DEL</span></font>
-          </td>
+                dashed blue;">DEL</span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;">&nbsp;<span class="mw-selflink-fragment">GE</span>&nbsp;</span></font>
@@ -1327,13 +1235,11 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+000B LINE TABULATION"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">VT</span>&nbsp;</span></font>
-          </td>
+                  class="mw-redirect">VT</span>&nbsp;</span></font> </td>
           <td title="U+000C FORM FEED (FF)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">FF</span>&nbsp;</span></font>
-          </td>
+                  class="mw-redirect">FF</span>&nbsp;</span></font> </td>
           <td title="U+000D CARRIAGE RETURN (CR)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;CR&nbsp;</span></font>
@@ -1341,8 +1247,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+000E SHIFT OUT"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">SO</span>&nbsp;</span></font>
-          </td>
+                  class="mw-redirect">SO</span>&nbsp;</span></font> </td>
           <td title="U+000F SHIFT IN" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;">&nbsp;<span class="mw-redirect">SI</span>&nbsp;&nbsp;</span></font>
@@ -1371,8 +1276,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="" style="font-size:75%;padding:1px;line-height:1"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">RES/<br>
-                  ENP</span></span></font>
-          </td>
+                  ENP</span></span></font> </td>
           <td title="U+0085 NEXT LINE (NEL)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
@@ -1388,8 +1292,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           </td>
           <td title="U+0018 CANCEL" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">CAN</span></font>
-          </td>
+                dashed blue;">CAN</span></font> </td>
           <td title="U+0019 END OF MEDIUM"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;EM&nbsp;</span></font>
@@ -1405,18 +1308,15 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+001C INFORMATION SEPARATOR FOUR"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">IFS</span></span></font>
-          </td>
+                  class="mw-redirect">IFS</span></span></font> </td>
           <td title="U+001D INFORMATION SEPARATOR THREE"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">IGS</span></span></font>
-          </td>
+                  class="mw-redirect">IGS</span></span></font> </td>
           <td title="U+001E INFORMATION SEPARATOR TWO"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">IRS</span></span></font>
-          </td>
+                  class="mw-redirect">IRS</span></span></font> </td>
           <td title="U+001F INFORMATION SEPARATOR ONE"
             style="font-size:75%;padding:1px;line-height:1"><font
               size="-1"><span style="display:inline-block; border:1px
@@ -1447,26 +1347,21 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="" style="font-size:75%;padding:1px;line-height:1"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">BYP/<br>
-                  INP</span></span></font>
-          </td>
+                  INP</span></span></font> </td>
           <td title="U+000A LINE FEED (LF)"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;">&nbsp;<span
-                  class="mw-redirect">LF</span>&nbsp;</span></font>
-          </td>
+                  class="mw-redirect">LF</span>&nbsp;</span></font> </td>
           <td title="U+0017 END OF TRANSMISSION BLOCK"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">ETB</span></span></font>
-          </td>
+                  class="mw-redirect">ETB</span></span></font> </td>
           <td title="U+001B ESCAPE" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">ESC</span></font>
-          </td>
+                dashed blue;">ESC</span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">&nbsp;SA&nbsp;</span></font>
-          </td>
+                dashed blue;">&nbsp;SA&nbsp;</span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">SFE</span></span></font>
@@ -1474,8 +1369,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="" style="font-size:75%;padding:1px;line-height:1"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">&nbsp;SM/<br>
-                  SW</span></span></font>
-          </td>
+                  SW</span></span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">CSP</span></span></font>
@@ -1486,17 +1380,14 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           </td>
           <td title="U+0005 ENQUIRY" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">ENQ</span></font>
-          </td>
+                dashed blue;">ENQ</span></font> </td>
           <td title="U+0006 ACKNOWLEDGE"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">ACK</span></span></font>
-          </td>
+                  class="mw-redirect">ACK</span></span></font> </td>
           <td title="U+0007 BELL" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">BEL</span></font>
-          </td>
+                dashed blue;">BEL</span></font> </td>
         </tr>
         <tr>
           <td
@@ -1511,8 +1402,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+0016 SYNCHRONOUS IDLE"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">SYN</span></span></font>
-          </td>
+                  class="mw-redirect">SYN</span></span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;">&nbsp;&nbsp;<span
@@ -1533,8 +1423,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+0004 END OF TRANSMISSION"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">EOT</span></span></font>
-          </td>
+                  class="mw-redirect">EOT</span></span></font> </td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
                 dashed blue;"><span class="mw-selflink-fragment">SBS</span></span></font>
@@ -1559,8 +1448,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           <td title="U+0015 NEGATIVE ACKNOWLEDGE"
             style="font-size:75%;padding:1px;"><font size="-1"><span
                 style="display:inline-block; border:1px dashed blue;"><span
-                  class="mw-redirect">NAK</span></span></font>
-          </td>
+                  class="mw-redirect">NAK</span></span></font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1606,20 +1494,15 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+00A2 CENT SIGN"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">¢</span></font>
-          </td>
+                class="mw-redirect">¢</span></font> </td>
           <td title="U+002E FULL STOP" style="padding:1px;"><font
-              size="-1">.</font>
-          </td>
+              size="-1">.</font> </td>
           <td title="U+003C LESS-THAN SIGN" style="padding:1px;"><font
-              size="-1">&lt;</font>
-          </td>
+              size="-1">&lt;</font> </td>
           <td title="U+0028 LEFT PARENTHESIS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">(</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">(</span></font> </td>
           <td title="U+002B PLUS SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">+</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">+</span></font> </td>
           <td title="U+007C VERTICAL LINE"
             style="padding:1px;background:#DDD"><font size="-1">|</font>
           </td>
@@ -1629,8 +1512,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1"><font
               size="-1">5x </font></td>
           <td title="U+0026 AMPERSAND" style="padding:1px;"><font
-              size="-1">&amp;</font>
-          </td>
+              size="-1">&amp;</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1660,36 +1542,28 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+0021 EXCLAMATION MARK"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">!</span></font>
-          </td>
+                class="mw-redirect">!</span></font> </td>
           <td title="U+0024 DOLLAR SIGN"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">$</span></font>
-          </td>
+                class="mw-redirect">$</span></font> </td>
           <td title="U+002A ASTERISK" style="padding:1px;"><font
-              size="-1">*</font>
-          </td>
+              size="-1">*</font> </td>
           <td title="U+0029 RIGHT PARENTHESIS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">)</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">)</span></font> </td>
           <td title="U+003B SEMICOLON" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">;</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">;</span></font> </td>
           <td title="U+00AC NOT SIGN"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">¬</span></font>
-          </td>
+                class="mw-redirect">¬</span></font> </td>
         </tr>
         <tr>
           <td
 style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1"><font
               size="-1">6x </font></td>
           <td title="U+002D HYPHEN-MINUS" style="padding:1px;"><font
-              size="-1">-</font>
-          </td>
+              size="-1">-</font> </td>
           <td title="U+002F SOLIDUS" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">/</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">/</span></font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1716,23 +1590,17 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+00A6 BROKEN BAR"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">¦</span></font>
-          </td>
+                class="mw-redirect">¦</span></font> </td>
           <td title="U+002C COMMA" style="padding:1px;"><font size="-1"><span
-                class="mw-redirect">,</span></font>
-          </td>
+                class="mw-redirect">,</span></font> </td>
           <td title="U+0025 PERCENT SIGN" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">%</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">%</span></font> </td>
           <td title="U+005F LOW LINE" style="padding:1px;"><font
-              size="-1">_</font>
-          </td>
+              size="-1">_</font> </td>
           <td title="U+003E GREATER-THAN SIGN" style="padding:1px;"><font
-              size="-1">&gt;</font>
-          </td>
+              size="-1">&gt;</font> </td>
           <td title="U+003F QUESTION MARK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">?</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">?</span></font> </td>
         </tr>
         <tr>
           <td
@@ -1767,8 +1635,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+0060 GRAVE ACCENT"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">`</span></font>
-          </td>
+                class="mw-redirect">`</span></font> </td>
           <td title="U+003A COLON" style="padding:1px;"><font size="-1">:</font>
           </td>
           <td title="U+0023 NUMBER SIGN"
@@ -1776,17 +1643,13 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
           </td>
           <td title="U+0040 COMMERCIAL AT"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">@</span></font>
-          </td>
+                class="mw-redirect">@</span></font> </td>
           <td title="U+0027 APOSTROPHE" style="padding:1px;"><font
-              size="-1">'</font>
-          </td>
+              size="-1">'</font> </td>
           <td title="U+003D EQUALS SIGN" style="padding:1px;"><font
-              size="-1">=</font>
-          </td>
+              size="-1">=</font> </td>
           <td title="U+0022 QUOTATION MARK" style="padding:1px;"><font
-              size="-1"><span class="mw-redirect">"</span></font>
-          </td>
+              size="-1"><span class="mw-redirect">"</span></font> </td>
         </tr>
         <tr>
           <td
@@ -1796,32 +1659,23 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1"><br>
             </font></td>
           <td title="U+0061 LATIN SMALL LETTER A" style="padding:1px;"><font
-              size="-1">a</font>
-          </td>
+              size="-1">a</font> </td>
           <td title="U+0062 LATIN SMALL LETTER B" style="padding:1px;"><font
-              size="-1">b</font>
-          </td>
+              size="-1">b</font> </td>
           <td title="U+0063 LATIN SMALL LETTER C" style="padding:1px;"><font
-              size="-1">c</font>
-          </td>
+              size="-1">c</font> </td>
           <td title="U+0064 LATIN SMALL LETTER D" style="padding:1px;"><font
-              size="-1">d</font>
-          </td>
+              size="-1">d</font> </td>
           <td title="U+0065 LATIN SMALL LETTER E" style="padding:1px;"><font
-              size="-1">e</font>
-          </td>
+              size="-1">e</font> </td>
           <td title="U+0066 LATIN SMALL LETTER F" style="padding:1px;"><font
-              size="-1">f</font>
-          </td>
+              size="-1">f</font> </td>
           <td title="U+0067 LATIN SMALL LETTER G" style="padding:1px;"><font
-              size="-1">g</font>
-          </td>
+              size="-1">g</font> </td>
           <td title="U+0068 LATIN SMALL LETTER H" style="padding:1px;"><font
-              size="-1">h</font>
-          </td>
+              size="-1">h</font> </td>
           <td title="U+0069 LATIN SMALL LETTER I" style="padding:1px;"><font
-              size="-1">i</font>
-          </td>
+              size="-1">i</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1839,8 +1693,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+00B1 PLUS-MINUS SIGN"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">±</span></font>
-          </td>
+                class="mw-redirect">±</span></font> </td>
         </tr>
         <tr>
           <td
@@ -1850,32 +1703,23 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1"><br>
             </font></td>
           <td title="U+006A LATIN SMALL LETTER J" style="padding:1px;"><font
-              size="-1">j</font>
-          </td>
+              size="-1">j</font> </td>
           <td title="U+006B LATIN SMALL LETTER K" style="padding:1px;"><font
-              size="-1">k</font>
-          </td>
+              size="-1">k</font> </td>
           <td title="U+006C LATIN SMALL LETTER L" style="padding:1px;"><font
-              size="-1">l</font>
-          </td>
+              size="-1">l</font> </td>
           <td title="U+006D LATIN SMALL LETTER M" style="padding:1px;"><font
-              size="-1">m</font>
-          </td>
+              size="-1">m</font> </td>
           <td title="U+006E LATIN SMALL LETTER N" style="padding:1px;"><font
-              size="-1">n</font>
-          </td>
+              size="-1">n</font> </td>
           <td title="U+006F LATIN SMALL LETTER O" style="padding:1px;"><font
-              size="-1">o</font>
-          </td>
+              size="-1">o</font> </td>
           <td title="U+0070 LATIN SMALL LETTER P" style="padding:1px;"><font
-              size="-1">p</font>
-          </td>
+              size="-1">p</font> </td>
           <td title="U+0071 LATIN SMALL LETTER Q" style="padding:1px;"><font
-              size="-1">q</font>
-          </td>
+              size="-1">q</font> </td>
           <td title="U+0072 LATIN SMALL LETTER R" style="padding:1px;"><font
-              size="-1">r</font>
-          </td>
+              size="-1">r</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1903,33 +1747,24 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1"><br>
             </font></td>
           <td title="U+007E TILDE" style="padding:1px;background:#DDD"><font
-              size="-1"><span class="mw-redirect"></span></font>
-            <br>
+              size="-1"><span class="mw-redirect"></span></font> <br>
           </td>
           <td title="U+0073 LATIN SMALL LETTER S" style="padding:1px;"><font
-              size="-1">s</font>
-          </td>
+              size="-1">s</font> </td>
           <td title="U+0074 LATIN SMALL LETTER T" style="padding:1px;"><font
-              size="-1">t</font>
-          </td>
+              size="-1">t</font> </td>
           <td title="U+0075 LATIN SMALL LETTER U" style="padding:1px;"><font
-              size="-1">u</font>
-          </td>
+              size="-1">u</font> </td>
           <td title="U+0076 LATIN SMALL LETTER V" style="padding:1px;"><font
-              size="-1">v</font>
-          </td>
+              size="-1">v</font> </td>
           <td title="U+0077 LATIN SMALL LETTER W" style="padding:1px;"><font
-              size="-1">w</font>
-          </td>
+              size="-1">w</font> </td>
           <td title="U+0078 LATIN SMALL LETTER X" style="padding:1px;"><font
-              size="-1">x</font>
-          </td>
+              size="-1">x</font> </td>
           <td title="U+0079 LATIN SMALL LETTER Y" style="padding:1px;"><font
-              size="-1">y</font>
-          </td>
+              size="-1">y</font> </td>
           <td title="U+007A LATIN SMALL LETTER Z" style="padding:1px;"><font
-              size="-1">z</font>
-          </td>
+              size="-1">z</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1955,8 +1790,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">Bx </font></td>
           <td title="U+005E CIRCUMFLEX ACCENT"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">^</span></font>
-          </td>
+                class="mw-redirect">^</span></font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -1986,12 +1820,10 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="U+005B LEFT SQUARE BRACKET"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">[</span></font>
-          </td>
+                class="mw-redirect">[</span></font> </td>
           <td title="U+005D RIGHT SQUARE BRACKET"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">]</span></font>
-          </td>
+                class="mw-redirect">]</span></font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -2011,35 +1843,25 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">Cx </font></td>
           <td title="U+007B LEFT CURLY BRACKET"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">{</span></font>
-          </td>
+                class="mw-redirect">{</span></font> </td>
           <td title="U+0041 LATIN CAPITAL LETTER A" style="padding:1px;"><font
-              size="-1">A</font>
-          </td>
+              size="-1">A</font> </td>
           <td title="U+0042 LATIN CAPITAL LETTER B" style="padding:1px;"><font
-              size="-1">B</font>
-          </td>
+              size="-1">B</font> </td>
           <td title="U+0043 LATIN CAPITAL LETTER C" style="padding:1px;"><font
-              size="-1">C</font>
-          </td>
+              size="-1">C</font> </td>
           <td title="U+0044 LATIN CAPITAL LETTER D" style="padding:1px;"><font
-              size="-1">D</font>
-          </td>
+              size="-1">D</font> </td>
           <td title="U+0045 LATIN CAPITAL LETTER E" style="padding:1px;"><font
-              size="-1">E</font>
-          </td>
+              size="-1">E</font> </td>
           <td title="U+0046 LATIN CAPITAL LETTER F" style="padding:1px;"><font
-              size="-1">F</font>
-          </td>
+              size="-1">F</font> </td>
           <td title="U+0047 LATIN CAPITAL LETTER G" style="padding:1px;"><font
-              size="-1">G</font>
-          </td>
+              size="-1">G</font> </td>
           <td title="U+0048 LATIN CAPITAL LETTER H" style="padding:1px;"><font
-              size="-1">H</font>
-          </td>
+              size="-1">H</font> </td>
           <td title="U+0049 LATIN CAPITAL LETTER I" style="padding:1px;"><font
-              size="-1">I</font>
-          </td>
+              size="-1">I</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -2065,35 +1887,25 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">Dx </font></td>
           <td title="U+007D RIGHT CURLY BRACKET"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">}</span></font>
-          </td>
+                class="mw-redirect">}</span></font> </td>
           <td title="U+004A LATIN CAPITAL LETTER J" style="padding:1px;"><font
-              size="-1">J</font>
-          </td>
+              size="-1">J</font> </td>
           <td title="U+004B LATIN CAPITAL LETTER K" style="padding:1px;"><font
-              size="-1">K</font>
-          </td>
+              size="-1">K</font> </td>
           <td title="U+004C LATIN CAPITAL LETTER L" style="padding:1px;"><font
-              size="-1">L</font>
-          </td>
+              size="-1">L</font> </td>
           <td title="U+004D LATIN CAPITAL LETTER M" style="padding:1px;"><font
-              size="-1">M</font>
-          </td>
+              size="-1">M</font> </td>
           <td title="U+004E LATIN CAPITAL LETTER N" style="padding:1px;"><font
-              size="-1">N</font>
-          </td>
+              size="-1">N</font> </td>
           <td title="U+004F LATIN CAPITAL LETTER O" style="padding:1px;"><font
-              size="-1">O</font>
-          </td>
+              size="-1">O</font> </td>
           <td title="U+0050 LATIN CAPITAL LETTER P" style="padding:1px;"><font
-              size="-1">P</font>
-          </td>
+              size="-1">P</font> </td>
           <td title="U+0051 LATIN CAPITAL LETTER Q" style="padding:1px;"><font
-              size="-1">Q</font>
-          </td>
+              size="-1">Q</font> </td>
           <td title="U+0052 LATIN CAPITAL LETTER R" style="padding:1px;"><font
-              size="-1">R</font>
-          </td>
+              size="-1">R</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -2119,35 +1931,26 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
               size="-1">Ex </font></td>
           <td title="U+005C REVERSE SOLIDUS"
             style="padding:1px;background:#DDD"><font size="-1"><span
-                class="mw-redirect">\</span></font>
-          </td>
+                class="mw-redirect">\</span></font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
           <td title="U+0053 LATIN CAPITAL LETTER S" style="padding:1px;"><font
-              size="-1">S</font>
-          </td>
+              size="-1">S</font> </td>
           <td title="U+0054 LATIN CAPITAL LETTER T" style="padding:1px;"><font
-              size="-1">T</font>
-          </td>
+              size="-1">T</font> </td>
           <td title="U+0055 LATIN CAPITAL LETTER U" style="padding:1px;"><font
-              size="-1">U</font>
-          </td>
+              size="-1">U</font> </td>
           <td title="U+0056 LATIN CAPITAL LETTER V" style="padding:1px;"><font
-              size="-1">V</font>
-          </td>
+              size="-1">V</font> </td>
           <td title="U+0057 LATIN CAPITAL LETTER W" style="padding:1px;"><font
-              size="-1">W</font>
-          </td>
+              size="-1">W</font> </td>
           <td title="U+0058 LATIN CAPITAL LETTER X" style="padding:1px;"><font
-              size="-1">X</font>
-          </td>
+              size="-1">X</font> </td>
           <td title="U+0059 LATIN CAPITAL LETTER Y" style="padding:1px;"><font
-              size="-1">Y</font>
-          </td>
+              size="-1">Y</font> </td>
           <td title="U+005A LATIN CAPITAL LETTER Z" style="padding:1px;"><font
-              size="-1">Z</font>
-          </td>
+              size="-1">Z</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -2172,35 +1975,25 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1"><font
               size="-1">Fx </font></td>
           <td title="U+0030 DIGIT ZERO" style="padding:1px;"><font
-              size="-1">0</font>
-          </td>
+              size="-1">0</font> </td>
           <td title="U+0031 DIGIT ONE" style="padding:1px;"><font
-              size="-1">1</font>
-          </td>
+              size="-1">1</font> </td>
           <td title="U+0032 DIGIT TWO" style="padding:1px;"><font
-              size="-1">2</font>
-          </td>
+              size="-1">2</font> </td>
           <td title="U+0033 DIGIT THREE" style="padding:1px;"><font
-              size="-1">3</font>
-          </td>
+              size="-1">3</font> </td>
           <td title="U+0034 DIGIT FOUR" style="padding:1px;"><font
-              size="-1">4</font>
-          </td>
+              size="-1">4</font> </td>
           <td title="U+0035 DIGIT FIVE" style="padding:1px;"><font
-              size="-1">5</font>
-          </td>
+              size="-1">5</font> </td>
           <td title="U+0036 DIGIT SIX" style="padding:1px;"><font
-              size="-1">6</font>
-          </td>
+              size="-1">6</font> </td>
           <td title="U+0037 DIGIT SEVEN" style="padding:1px;"><font
-              size="-1">7</font>
-          </td>
+              size="-1">7</font> </td>
           <td title="U+0038 DIGIT EIGHT" style="padding:1px;"><font
-              size="-1">8</font>
-          </td>
+              size="-1">8</font> </td>
           <td title="U+0039 DIGIT NINE" style="padding:1px;"><font
-              size="-1">9</font>
-          </td>
+              size="-1">9</font> </td>
           <td title="" style="padding:1px;background:#DDD"> <font
               size="-1"><br>
             </font></td>
@@ -2218,13 +2011,13 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
             </font></td>
           <td title="" style="font-size:75%;padding:1px;"><font
               size="-1"><span style="display:inline-block; border:1px
-                dashed blue;">&nbsp;EO&nbsp;</span></font>
-          </td>
+                dashed blue;">&nbsp;EO&nbsp;</span></font> </td>
         </tr>
       </tbody>
     </table>
     <br>
     In UTF-8, the funky characters "¬" and "¢" are represented by the <i>2-byte
+
     </i>sequences 0xC2 0xAC and 0xC2 0xA2, respectively, and they don't
     appear at all among the 128 characters of ASCII, but do appear among
     the 256 characters of <i>some</i> versions of EBCDIC.<br>
@@ -2256,6 +2049,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
 
 
 
@@ -2327,12 +2121,14 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
           in HAL/S</a>" by Michael Ryer, which was intended as an
         introduction to programming in HAL/S and is organized as a
         tutorial.</li>
       <li>A great supplement to Ryer is the course material for "<a
           moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
           HAL/S Programming</a>" by Craig Schulenberg.&nbsp; Additional
         material associated with that course can be found on our Shuttle
         library page.<br>
@@ -2341,6 +2137,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
         of the language, and recommends proceeding afterward to the <a
           moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
 
 
 
@@ -2392,9 +2189,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
 
 
 
@@ -2459,6 +2258,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
 
 
 
@@ -2546,6 +2346,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -2558,6 +2359,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2592,6 +2394,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -2599,6 +2402,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2664,6 +2468,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -2681,7 +2486,9 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2716,10 +2523,12 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2787,6 +2596,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
     <br>
     <br>
     And '<tt>-</tt>' isn't the only datatype-related character that can
@@ -2811,6 +2621,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2896,6 +2707,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -2907,6 +2719,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
 
 
 
@@ -3261,6 +3074,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -3346,11 +3160,13 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
 
 
 
@@ -3440,6 +3256,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -3451,33 +3268,35 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     </p>
     <p>TBD<br>
     </p>
-    <h1><a name="Emulation"></a>HAL/S Processing<br>
+    <h1><a name="Emulation"></a>HAL/S and AP-101S Assembly-Language
+      Processing<br>
     </h1>
     To resurrect Space Shuttle flight software requires development
     tools for the HAL/S language that can be run on modern (Linux, Mac
     OS, Windows) computers.&nbsp; A minimum subset of tools would seem
     to be:<br>
     <ul>
-      <li>A HAL/S compiler</li>
-      <li>An IBM AP-101S (and AP-101B) assembler</li>
-      <li>An IBM AP-101S linker</li>
-      <li>An IBM AP-101S emulator</li>
+      <li>A HAL/S compiler.&nbsp; Known as <b>HALSFC</b>, this is
+        available and <a moz-do-not-send="true" href="HAL.html">is
+          covered on its own dedicated page</a>.</li>
+      <li>An IBM AP-101S/AP-101B assembler.&nbsp; Known as <b>ASM101S</b>,
+        this is a <a moz-do-not-send="true" href="ASM101S.html">work in
+          progress</a>.<br>
+      </li>
+      <li>An IBM AP-101S linker.&nbsp; TBD<br>
+      </li>
+      <li>An IBM AP-101S emulator.&nbsp; Known as <b>ap101s</b>, this
+        is a work in progress.<br>
+      </li>
     </ul>
-    <p>To date, the HAL/S compiler has been created.&nbsp; <a
-        moz-do-not-send="true" href="HAL.html">It is covered on its own
-        dedicated page</a>.<br>
-    </p>
-    <p>The assembler and linker exist only as ideas so far.<br>
-    </p>
-    <p>Work on the emulator is in progress.<br>
-    </p>
     Besides these things, there is also HAL/S interpreter, which
     implements only a subset of full HAL/S functionality.&nbsp; It can
-    be used interactively, accepting HAL/S statements from the keyboard
-    and outputting results to the display.&nbsp; It may be a useful tool
-    for somebody learning to program in HAL/S.&nbsp; <a
-      moz-do-not-send="true" href="hal-s-interpreter.html">It is covered
-      on its own dedicated page</a>.<br>
+    be used interactively on Linux/Mac/Windows, accepting HAL/S
+    statements from the keyboard and outputting results to the
+    display.&nbsp; It may be a useful tool for somebody learning to
+    program in HAL/S.&nbsp; <a moz-do-not-send="true"
+      href="hal-s-interpreter.html">It is covered on its own dedicated
+      page</a>.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -3493,7 +3312,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-08-25<br>
+          2024-08-27<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

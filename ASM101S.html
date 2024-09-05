@@ -1,0 +1,775 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>AP-101S Macro Assembler</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <div align="center">
+      <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace("@SUBTITLE@","Macro Assembler"))
+</script><br>
+      <font size="+2"><i>(This page and ASM101S itself are under
+          construction.)</i></font><br>
+    </div>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#References">References</a></li>
+      <li><a moz-do-not-send="true" href="#master">The Master Sequence
+          Controller (MSC)</a></li>
+      <li><a moz-do-not-send="true" href="#bce">The Bus Control Elements
+          (BCE)</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#ASM101S">ASM101S</a></li>
+      <li><a moz-do-not-send="true" href="#macros">Macro-Library Files</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#Installation">Installation of
+          ASM101S</a></li>
+      <li><a moz-do-not-send="true" href="#wildThings">Where Are the
+          AP-101 Assembly-Language Files</a></li>
+      <li><a moz-do-not-send="true" href="#Differences">Differences from
+          Expectations</a></li>
+      <ul>
+      </ul>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <b>ASM101S</b> is our "modern" version of the macro assembler for
+    the assembly language of the IBM AP-101S or AP-101B computers used
+    as "General Purpose Computers" (GPC) in the Space Shuttle.&nbsp; To
+    the best of my knowledge, the original assembler actually used for
+    Shuttle software development has not survived, so <b>ASM101S</b> is
+    an entirely-new creation.&nbsp; It is a Python 3 program that should
+    work on any computer having the Python 3 language installed.<br>
+    <br>
+    Regarding AP-101B vs AP-101S, the AP-101B was used in earlier
+    Shuttle flights, while the AP-101S was used in later flights.&nbsp;
+    I have almost no documentation for the AP-101B, but believe that
+    insofar as software is concerned, the sole difference is that a
+    handful of new instruction types were made available in the AP-101S
+    that hadn't existed in the AP-101B.&nbsp; Therefore,
+    <b> ASM101S</b> itself makes no distinctions between the two
+    languages:&nbsp; If you feed in source code using any of the newer
+    instructions, you'll get object code suitable for the AP-101S
+    only.&nbsp; If you feed in source code not having any of the newer
+    instructions, you'll get object code suitable for both the AP-101S
+    and AP-101B.<br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; That's not to say
+        that the differences were insignificant, but merely that the
+        differences are transparent to the assembler.&nbsp; Here's <a
+          moz-do-not-send="true"
+href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20Instruction%20Set%20-%20searchable.pdf#page=40">a
+          summary</a> of some of the differences:<br>
+        <br>
+      </font>
+      <table align="center" cellspacing="10" cellpadding="2">
+        <tbody>
+          <tr>
+            <th align="left" valign="top"><font size="-1"><u>Feature</u><br>
+              </font></th>
+            <th align="left" valign="top"><u><font size="-1">AP-101B<br>
+                </font></u></th>
+            <th align="left" valign="top"><u><font size="-1">AP-101S<br>
+                </font></u></th>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Power:<br>
+              </font></td>
+            <td valign="top"><font size="-1">780W<br>
+              </font></td>
+            <td valign="top"><font size="-1">560W<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Weight:<br>
+              </font></td>
+            <td valign="top"><font size="-1">117 pounds<br>
+              </font></td>
+            <td valign="top"><font size="-1">64 pounds<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Memory:<br>
+              </font></td>
+            <td valign="top"><font size="-1">104K words<br>
+                (416K bytes)<br>
+              </font></td>
+            <td valign="top"><font size="-1">256K words<br>
+                (1024K bytes)<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Memory Protection<br>
+                (per 16-bit half-word):<br>
+              </font></td>
+            <td valign="top"><font size="-1">1 parity bit and <br>
+                1 store-protect bit<br>
+              </font></td>
+            <td valign="top"><font size="-1">6 ECC bits and <br>
+                3 store-protect bits<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Speed:<br>
+              </font></td>
+            <td valign="top"><font size="-1">420K operations/second<br>
+              </font></td>
+            <td valign="top"><font size="-1">&gt;1000K operations/second<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Battery backup:<br>
+              </font></td>
+            <td valign="top"><font size="-1">n/a<br>
+              </font></td>
+            <td valign="top"><font size="-1">Rechargeable NiCAD </font><br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><font size="-1">Built-in test equipment:
+                &nbsp; &nbsp; &nbsp; <br>
+              </font></td>
+            <td valign="top"><font size="-1">n/a<br>
+              </font></td>
+            <td valign="top"><font size="-1">Temperature; charger;
+                battery; soft error counter<br>
+              </font></td>
+          </tr>
+          <tr>
+            <td valign="top">MTBF:<br>
+            </td>
+            <td valign="top"><font size="-1">5250 hours<br>
+              </font></td>
+            <td valign="top"><font size="-1">24,000 hours<br>
+              </font></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    </blockquote>
+    Because of this dearth of software distinction between the different
+    models in a software sense, I'll generally just refer to the
+    "AP-101" rather than specifying "AP-101S" or "AP-101B".&nbsp;
+    Realize, though, that there were also models of the IBM AP-101
+    computer other than the AP-101B or AP-101S, for uses <i>other</i>
+    than the Shuttle, and there's no particular reason to believe that <b>ASM101S</b>
+    could assemble their source code without some updates.<br>
+    <br>
+    Despite the lack of surviving documentation about the original
+    AP-101 assembler, by examining the surviving AP-101
+    assembly-language source code I've concluded that the syntax of the
+    AP-101 assembly language must have closely mimicked that of the
+    standard macro assembler for the IBM System/360 Basic Assembly
+    Language (BAL).&nbsp; This observation has been central to the
+    development of <b>ASM101S</b>.<br>
+    <h1> <a name="References"></a>References</h1>
+    <ul>
+      <li>"<a moz-do-not-send="true"
+          href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+          Shuttle Model AP-101S Principles of Operations with Shuttle
+          Instruction Set</a>".&nbsp; Manual for the CPU instruction
+        set.&nbsp; Also known as the "POO" (Principles of Operation).<br>
+      </li>
+      <li>"<a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231">OS
+
+
+          Assembler Language - OS Release 21</a>".&nbsp; Manual for the
+        System/360 macro assembler upon which <b>ASM101S</b> is
+        modeled.</li>
+      <li><a moz-do-not-send="true"
+href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20Instruction%20Set%20-%20searchable.pdf">A
+          collection of notes about the AP-101S/AP-101B</a>.</li>
+      <li>"<a moz-do-not-send="true"
+href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
+
+          101S Assembly Language Introduction</a>".</li>
+      <li>"Space Shuttle Advanced System/4 Pi Input/Output Processor
+        (IOP)":</li>
+      <ul>
+        <li><a moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf">Parts
+            I and II</a>:&nbsp; :&nbsp; Principles of Operation for
+          PCI/PCO and MSC</li>
+        <li><a moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+            III</a>:&nbsp; Principles of Operation for BCE.</li>
+      </ul>
+      <li>"<a moz-do-not-send="true"
+href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+          Shuttle Advanced System/4 Pi Model AP-101 Central Processor
+          Unit Technical Description</a>".&nbsp; Note that this predates
+        the AP-101S model and doesn't precisely match it.<br>
+      </li>
+    </ul>
+    <h1><a name="master"></a>The Master Sequence Controller (MSC)<br>
+    </h1>
+    AP-101 assembly language includes not only pseudo-ops and AP-101 CPU
+    instructions as such, but also instructions for the Master Sequence
+    Controller (MSC). You might categorize the MSC as being a separate
+    computer within the main computer. The CPU and MSC instructions, for
+    these two essentially separate types of computers, are intermixed
+    indiscriminately in AP-101 assembly-language source code and sharing
+    memory.&nbsp; <a moz-do-not-send="true"
+href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
+      POO</a> explains the MSC thusly:<br>
+    <blockquote><font size="-1">"The Master Sequence Controller (MSC) is
+        a micro programmed computer specifically tailored for I/O
+        Management within the Space Shuttle General Purpose Computer
+        (GPC).&nbsp; As such, it has extensive and programmable
+        capabilities for monitoring and controlling the basic I/O
+        operations performed by upwards to 24 Bus Control Elements
+        (BCE's) which are implemented in the baseline GPC.&nbsp; These
+        capabilities include setting up, scheduling, and initiating BCE
+        programs, monitoring the status of BCD operations, and
+        communicating overall completion of these operations to the
+        CPU."</font><br>
+    </blockquote>
+    MSC instructions can be distinguished from CPU instructions in that
+    they begin with the character "@".<br>
+    <br>
+    See <a moz-do-not-send="true"
+      href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">Appendix
+      II of the AP-101S POO</a> or the seemingly-identical <a
+      moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf#page=68">Part
+      II of the IOP POO</a> for more information.<br>
+    <h1><a name="bce"></a>The Bus Control Elements (BCE)</h1>
+    <p>Similarly, the POO tells us that<br>
+    </p>
+    <blockquote><font size="-1">"The Bus Control Element (BCE) is a
+        microprogrammed controller specifically tailored for management
+        of I/O traffic on one of the Space Shuttle system busses.&nbsp;
+        Within each IOP [Input/Output Processor] there is one BCE for
+        each system bus, for a total of 24 BCE's.&nbsp; Each of these
+        BCE's is capable of independent program execution, data
+        buffering to and from memory, and communication with the MSC."</font><br>
+    </blockquote>
+    Or in other words, besides the MSC discussed in the preceding
+    section, there are 24 <i>additional</i> processors within the
+    AP-101, yet again with their own distinct instruction set, yet again
+    sharing memory and intermixed in the assembly-language source code
+    with CPU instructions and MSC instructions.<br>
+    <p>BCE instructions can be distinguished from CPU and MSC
+      instructions in that they begin with the character "#".<br>
+    </p>
+    <p>See <a moz-do-not-send="true"
+        href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=445">Appendix
+        III of the AP-101S POO</a> or the seemingly-identical <a
+        moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+        III of the IOP POO</a> for more information.<br>
+    </p>
+    <ul>
+    </ul>
+    <h1><a name="ASM101S"></a>ASM101S</h1>
+    <p>(To be clear, <b>ASM101S</b> is <i>not yet functional</i>.&nbsp;
+      I am simply documenting it as I proceed with development!)<br>
+    </p>
+    The modern assembler is typically invoked as<br>
+    <blockquote>
+      <pre><font color="#663300">ASM101S.py [ --library=<i>LIBRARY</i> ] --object=<i>OBJECT</i>.obj <i>SOURCE1</i>.asm <i>SOURCE2</i>.asm ...</font><br></pre>
+    </blockquote>
+    You can see a list of the available command-line options by using
+    the command<br>
+    <blockquote>
+      <pre><font color="#663300">ASM101S.py --help</font>
+</pre>
+    </blockquote>
+    Invoked in this fashion, the action of the assembler is roughly the
+    following:<br>
+    <ol>
+      <li>(Optionally.)&nbsp; Loads the macro definitions found in the
+        assembly-language source-code files (*.asm) found in the <font
+          color="#663300"><code><i>LIBRARY</i></code></font> folder.&nbsp;
+        <br>
+      </li>
+      <li>Load all of the <font color="#663300"><code><i>SOURCEx</i>.asm</code></font>
+        files specified on the command line, in the order that they are
+        specified.&nbsp; Macro definitions should precede any
+        source-code files using those macros, but the ordering of macro
+        files among themselves is not significant.</li>
+      <li>Process the entire set of source code which has been loaded.</li>
+      <li>Output and assembly report (on <font color="#663300"><code>stdout</code></font>)
+        and if there were no fatal errors, an AP-101 object-code file
+        named <font color="#663300"><code><i>OBJECT</i></code><code>.obj</code></font>
+        that contains the results of the assembly process.<br>
+      </li>
+    </ol>
+    TBD<br>
+    <h1><a name="macros"></a>Macro-Library Folders<br>
+    </h1>
+    AP-101 assembly language is a macro language.&nbsp; The Shuttle
+    software developers made constant and frequent use of these macro
+    capabilities, to the point where it's difficult even to find an
+    AP-101 assembly-language file that is not dependent on macros.&nbsp;
+    Thus, we have to understand various things about this macro
+    capability from the very beginning, rather than concentrating merely
+    on translation of AP-101 instructions into object code and leaving
+    the topic of macros for future consideration.&nbsp; You can read
+    about for yourself in the IBM 360 assembler language manual, where <a
+      moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/59/mode/1up?view=theater">macros
+
+      occupy the entire 2nd half of that document</a>.&nbsp; Learning
+    the syntax and other usage details of macros is as important for
+    understanding the flight software, or perhaps even more important,
+    and likely more difficult, than understanding the AP-101 instruction
+    set.<br>
+    <br>
+    But I won't talk here about the technical details of macro
+    definitions or expansions.&nbsp; Rather, here I merely need to talk
+    about the organizational principles of the associated source-code
+    files.<br>
+    <p>When assembling an assembly-language file whose code depends on
+      macros, there are three different ways in which the definitions of
+      those macros may be made available to the code using them:<br>
+    </p>
+    <ol>
+      <li>Macro definitions may explicitly appear within the
+        assembly-language file in which they're used, in which case the
+        scope of those macro definitions is that file alone.<br>
+      </li>
+      <li> Macro definitions may appear in a "macro library", and the
+        macros defined in the library are accessible to any
+        assembly-language file using that library.&nbsp; Speaking
+        generally, the <a moz-do-not-send="true" href="HAL.html">HAL/S
+          compiler</a>'s runtime library (which is written in AP-101
+        assembly language) has a macro library known as RUNMAC, whereas
+        the Shuttle flight software has a macro library known as
+        MLIB80.&nbsp; But each release of the flight software has a
+        version of MLIB80 specific to that release.</li>
+      <li>Macro definitions may appear, along with non-macro code, in
+        AP-101 assembly-language files "included" by other AP-101
+        assembly-language files via an assembly-language pseudo-op
+        called <font color="#663300"><code>COPY</code></font>.&nbsp; (<b>Note</b>:
+        <a moz-do-not-send="true" href="#forbiddenCOPY"><font
+            color="#663300"><code>COPY</code></font>'d files cannot
+          contain macro definitions in System/360, but can do so in
+          AP-101.</a>)<br>
+      </li>
+    </ol>
+    <ul>
+    </ul>
+    In the current implementation of <b>ASM101S</b>, macro libraries
+    are literally just folders of assembly-language files.&nbsp; Recall
+    from the preceding section that <b>ASM101S</b> is invoked with one
+    or more optional command-line arguments of the form <font
+      color="#663300"><code>--library=<i>LIBRARY</i></code></font>.&nbsp;
+    <font color="#663300"><code><i>LIBRARY</i></code></font> is just a
+    path to a macro-library folder.&nbsp; Macro definitions in any
+    libraries specified in this manner are loaded by the assembler along
+    with the specific source-code file(s) being assembled, thus
+    automatically making <i>all</i> of the macro definitions in that
+    library available during the assembly process.<br>
+    <br>
+    Relative to where AP-101 assembly-language source code is stored in
+    the source-code tree, <b>ASM101S</b> would typically be used with
+    either the option <font color="#663300"><code>--library=../RUNMAC</code></font>
+    or <font color="#663300"><code>--library=../MLIB80</code></font>,
+    assuming the current working directory was the one storing the
+    source-code files being assembled.<br>
+    <br>
+    There's a slight problem, though, in that for some reason, all of
+    the assembly-language files includeable via <font color="#663300"><code>COPY</code></font>
+    pseudo-ops are <i>also</i> located within the macro libraries,
+    intermixed with the files intended to contain only macros.&nbsp; But
+    we do not want any of the code from these <font color="#663300"><code>COPY</code></font>'able
+    files (even if there are some macro definitions within them) to be
+    automatically be made available during assembly.&nbsp; Rather, we
+    want their code to be made available <i>only</i> when they're <font
+      color="#663300"><code>COPY</code></font>'d!&nbsp; Or to put it
+    differently, categories #2 and #3 of files containing macro
+    definitions, as discussed above, must be mutually exclusive.<br>
+    <br>
+    It's unclear to my why the Shuttle developers chose to house these
+    mutually-exclusive categories of files together in the same
+    directory — or as they thought of it, the same "Partitioned Data
+    Set" (PDS) —, nor how they handled this ambiguity in their
+    assembler.&nbsp; As for <b>ASM101S</b>, though, it handles the
+    ambiguity as follows:<br>
+    <ul>
+      <li>If a file in the macro library contains <i>only</i> macro
+        definitions (and comments and blank lines), it is automatically
+        loaded by the assembler (category #2).</li>
+      <li>If a file in the macro library contains <i>anything other
+          than</i> macro definitions (and comments), it is not
+        automatically loaded, and can only be loaded via <font
+          color="#663300"><code>COPY</code></font> (category #3).<br>
+      </li>
+    </ul>
+    <p><b>ASM101S</b> does not attempt to determine these distinctions
+      for itself.&nbsp; Rather, the files in the macro library (or
+      libraries) must have been preprocessed in such a manner as to
+      determine which of the two categories each file in the library
+      falls into.&nbsp; Each macro library is assumed to contain a file
+      called MACROFILES.txt containing this information, and <b>ASM101S</b>
+      simply uses the categorization provided by MACROFILES.txt.&nbsp;
+      The format of MACROFILES.txt is that it lists the names all of the
+      macro-definition files, one per line.&nbsp; Full-line comments
+      (having a semicolon in column 1) are also allowed.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; A utility program
+          (makeMACROFILES.py)</font><font size="-1"><font size="-1"> is
+            provided</font> to create MACROFILES.txt.&nbsp; Admittedly,
+          insofar as legacy code related to Shuttle flight software is
+          concerned, this is probably of little interest to you, the end
+          user, since all such preprocessing is likely to have been
+          performed prior to you seeing any of the assembly-language
+          source-code files anyway.&nbsp; But if you do happen to
+          acquire flight software or other AP-101 software from sources
+          other than Virtual AGC — send it to me! — then I suppose you
+          might need to do the preprocessing yourself.<br>
+        </font></p>
+    </blockquote>
+    <h1><a name="Installation"></a>Installation of ASM101S</h1>
+    <p>For Linux, Mac OS, or Windows.&nbsp; If the HAL/S compiler (<b>HALSFC</b>)
+      has been installed <a moz-do-not-send="true"
+        href="HAL.html#Installation">per the instructions</a>, then <b>ASM101S</b>
+      will automatically be available as well.<br>
+    </p>
+    <p>If for some inexplicable reason you want to have <b>ASM101S</b>
+      just for itself, without the HAL/S assembler (or any of the AP-101
+      source-code files) provided by the normal installation, you could
+      instead just download the file <a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tree/master/ASM101S">ASM101S.py</a>.&nbsp;
+
+      You simply need Python 3 to run it.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; If you choose the latter
+          installation method, I can only assume that you already have
+          some AP-101 source-code files that you want to assemble.&nbsp;
+          You might consider sending them to me.</font><br>
+      </p>
+    </blockquote>
+    <h1><a name="wildThings"></a>Where Are the AP-101 Assembly-Language
+      Files?</h1>
+    <p><i>(***FIXME***)</i><br>
+    </p>
+    <ul>
+      <li>HAL/S-FC runtime library:</li>
+      <ul>
+        <li>Source-code files<br>
+        </li>
+        <li>Assembly listings<br>
+        </li>
+        <li>Macro library<a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC"><br>
+          </a></li>
+      </ul>
+      <li>Shuttle FSW OI-30.17:</li>
+      <ul>
+        <li>Source-code files</li>
+        <li>Assembly listings</li>
+        <li>Macro library<br>
+        </li>
+      </ul>
+      <li>Shuttle FSW OI-34.06:</li>
+      <ul>
+        <li>Source-code files</li>
+        <li>Disassemblies<br>
+        </li>
+        <li>Macro library<br>
+        </li>
+      </ul>
+    </ul>
+    <h1><a name="Differences"></a>Differences from Expectations</h1>
+    <p>Given that the connection between the AP-101 assembly language
+      and the System/360 assembly language is undocumented (in <i>surviving</i>
+      documentation) and is based only upon my own inferences, it's not
+      surprising that there are some discrepancies between theory and
+      practice, or between what I've implemented in <b>ASM101S</b> vs
+      what's documented for IBM 360 assembly language.&nbsp; I'll
+      explain those differences in the subsections below.<br>
+    </p>
+    <h2>Instruction Aliases</h2>
+    <p>In IBM 360 Basic Assembly Language (BAL), various aliases exist
+      for the branch instructions <font color="#663300"><code>BCR</code></font>
+      and <font color="#663300"><code>BC</code></font><code></code><font
+        color="#663300"><code></code></font>.&nbsp; These are described
+      in <a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/33/mode/1up?view=theater">Figure
+
+        4-1 of the assembler-language manual</a>, and my assumption is
+      that Figure 4-1 is valid for AP-101 assembly language as
+      well.&nbsp; However, there are additional aliases not covered in
+      that figure, or in any other documentation I can find:<br>
+    </p>
+    <ul>
+      <li><font color="#663300"><code>BLE</code></font> — aliased by <b>ASM101S</b>
+        identically to <font color="#663300"><code>BNP</code></font>.&nbsp;
+
+        I think of them as "Branch Less or Equal" vs "Branch
+        Non-Positive".<br>
+      </li>
+      <li><font color="#663300"><code>BN</code></font> — aliased by <b>ASM101S</b>
+        identically to <font color="#663300"><code>BM</code></font>.&nbsp;
+
+        I think of them as "Branch Negative" vs "Branch Minus".</li>
+    </ul>
+    <p><font color="#663300"><code>LHI</code></font>:&nbsp; Besides the
+      branch-instruction aliases, Shuttle flight-software code uses the
+      operator <font color="#663300"><code>LHI</code></font>, but
+      without any AP-101 instruction or any macro definition
+      corresponding to it.&nbsp; There is such an instruction in IBM 360
+      assembly language.&nbsp; <a moz-do-not-send="true"
+        href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=79">The
+        AP-101S POO notes</a> in its discussion of the <font
+        color="#663300"><code>LA</code></font> instruction that there is
+      a particular configuration of operands for which <font
+        color="#663300"><code>LA</code></font> will be "functionally
+      equivalent to a LOAD HALFWORD IMMEDIATE instruction".&nbsp; My
+      guess is that the original assembler therefore accepted the
+      mnemonic <font color="#663300"><code>LHI</code></font> but
+      silently transformed it in the appropriate <font color="#663300"><code>LA</code></font>
+      instruction.&nbsp; <b>ASM101S</b> treats it in that manner as
+      well.<br>
+    </p>
+    <p><font color="#663300"><code>SHI</code></font>:&nbsp; Similarly,
+      flight software uses the non-existent <font color="#663300"><code>SHI</code></font>
+      instruction.&nbsp; The program comment at those points clearly
+      indicate that this is a kind of subtract-immediate instruction,
+      presumably Subtract Halfword Immediate.&nbsp; Unlike the case of <font
+        color="#663300"><code>LHI</code></font>, there is no
+      corresponding <font color="#663300"><code>SHI</code></font>
+      instruction for System 360.&nbsp; Nevertheless, we might suppose
+      that the case is still similar, in that this could be an alias for
+      (perhaps) a particular configuration of operands for some other
+      AP-101 instruction.&nbsp; Fortunately, we have plenty of examples
+      of assembly listings for code using <font color="#663300"><code>SHI</code></font>.&nbsp;
+      Consider this example:<br>
+    </p>
+    <blockquote>
+      <pre>B0E5  FFFE                   SHI    R5,2<br></pre>
+    </blockquote>
+    <p>The value 0xFFFE is a halfword with the value -2, which leaves us
+      to suspect that this is actually an addition.&nbsp; There is
+      indeed an <a moz-do-not-send="true"
+        href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=66">Add
+        Halfword Immediate</a> instruction (<font color="#663300"><code>AHI</code></font>),
+      and "<font color="#663300"><code>AHI R5,-2</code></font>" would
+      indeed assemble as shown.<br>
+    </p>
+    <p><font color="#663300"><code>LACR</code></font>:&nbsp; There is no
+      corresponding System/360 instruction to guide our thinking.&nbsp;
+      However, there are lots of examples in AP-101 assembly listings,
+      such as those for the CTOI.txt file of the HAL/S-FC runtime
+      library.&nbsp; <font color="#663300"><code>LACR</code></font> is
+      seen to be a register-to-register operation.&nbsp; For (say)
+      general-registers <i>N</i> and <i>M</i>, it assembles to the bit
+      pattern 11101<i>nnn</i> 11101<i>mmm</i>.&nbsp; This is the same
+      pattern that the LOAD ARITHMETIC COMPLEMENT (<font color="#663300"><code>LCR</code></font>)
+      instruction assembles to.&nbsp; Therefore, <font color="#663300"><code>LACR</code></font>
+      is nothing more than a synonym for <font color="#663300"><code>LCR</code></font>.<br>
+    </p>
+    <ul>
+    </ul>
+    <h2>Unused Pseudo-ops</h2>
+    <p>Not all pseudo-ops described in the System/360 assembler manual
+      appear in surviving AP-101 assembly-language source code.&nbsp;
+      I've chosen to believe that rather than the omissions being
+      coincidental, those pseudo-ops are instead specific to System/360
+      and thus had been entirely omitted from AP-101
+      assembly-language.&nbsp; Admittedly, that inference is probably
+      wrong in the case of certain of the pseudo-ops.&nbsp;
+      Nevertheless, they have not been implemented in <b>ASM101S</b>.&nbsp;
+
+      <br>
+    </p>
+    <p>The omitted pseudo-ops are:<br>
+    </p>
+    <ul>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/49/mode/1up?view=theater">CCW</a></li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/27/mode/1up?view=theater">COM</a></li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/26/mode/1up?view=theater">CXD</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/26/mode/1up?view=theater">DXD</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/53/mode/1up?view=theater">ICTL</a></li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/54/mode/1up?view=theater">ISEQ</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/36/mode/1up?view=theater">OPSYN</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/n36/mode/1up?view=theater">WXTRN</a><br>
+      </li>
+    </ul>
+    <ul>
+    </ul>
+    <ol start="4">
+    </ol>
+    <p> </p>
+    <ul>
+    </ul>
+    <p> </p>
+    Obviously, this list is subject to change, if legacy AP-101
+    assembly-language source code using any of these pseudo-ops is
+    discovered.<br>
+    <h2>Mystery Pseudo-ops</h2>
+    <p>The <font color="#663300"><code>SPOFF</code></font> and <font
+        color="#663300"><code>SPON</code></font> pseudo-ops — if they <i>are</i>
+      pseudo-ops — seem typically to be used in pairs:&nbsp; <font
+        color="#663300"><code>SPOFF</code></font> is used to disable
+      something unknown, then an instruction or two later, <font
+        color="#663300"><code>SPON</code></font> is used to re-enable
+      whatever it was.&nbsp; They are not pseudo-ops in the IBM 360
+      assembly language.<br>
+    </p>
+    <p>Fortunately, we have a few contemporary assembly listings in
+      which these pseudo-ops appear in the source code, and thus their
+      effect can be observed somewhat.&nbsp; They do not generate any
+      binary, hence they are definitely not instructions of any
+      kind.&nbsp; Furthermore, they do not affect whether or not the
+      source code they enclose is assembled, nor whether that source
+      code appears in the assembly listing.<br>
+    </p>
+    <p>I would tentatively conclude that at least for the moment they
+      can simply be ignored, and that's what <b>ASM101S</b> does with
+      them for now.<br>
+    </p>
+    <h2><a name="forbiddenCOPY"></a>Forbidden Pseudo-Ops in <font
+        color="#663300"><code>COPY</code></font>'d Files</h2>
+    <p><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/57/mode/1up?view=theater">The
+        System/360 assembler manual tells us</a> that assembly-language
+      files included in other assembly-language files via the <font
+        color="#663300"><code>COPY</code></font> pseudo-op cannot
+      contain various other pseudo-ops, two of which are <font
+        color="#663300"><code>MACRO</code></font> and <font
+        color="#663300"><code>MEND</code></font>.&nbsp; That implies
+      that a <font color="#663300"><code>COPY</code></font>'d file
+      cannot contain any macro definitions.&nbsp; Nevertheless, Space
+      Shuttle flight software has file inclusions that violate this
+      restriction.&nbsp; Specifically, the files MLIB80/MACSMITH.asm and
+      MLIB80/MACROS.asm do contain macro definitions, and yet are
+      themselves <font color="#663300"><code>COPY</code></font>'d into
+      other assembly-language files.&nbsp; Consequently, this
+      restriction (at least insofar as <font color="#663300"><code>MACRO</code></font>
+      and <font color="#663300"><code>MEND</code></font> are concerned)
+      does not apply in AP-101 assembly-language.<br>
+    </p>
+    <h2>Macro-Definition Prototypes</h2>
+    <p><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/65/mode/1up?view=theater">The
+        assembler manual tells us</a> that <br>
+    </p>
+    <blockquote>"The macro instruction prototype statement (hereafter
+      called the prototype statement) specifies the mnemonic operation
+      code and the format of all macro instructions that refer to the
+      macro definition. It must be the second statement of every macro
+      definition."<br>
+    </blockquote>
+    For example, in a macro definition such as<br>
+    <blockquote>
+      <pre><font color="#663300">         MACRO<br>         MYMACRO   ARG1,ARG2<br>         .<br>         .<br>         .<br>         MEND</font><br></pre>
+    </blockquote>
+    no other statements must appear between the first two lines shown
+    here.&nbsp; However, there are cases in flight-software code in
+    which there are comments between these lines, as in<br>
+    <blockquote>
+      <pre><font color="#663300">         MACRO<br>.* THIS IS A COMMENT<br>.* THIS IS ANOTHER COMMENT<br>         .<br>         .<br>         .<br>.* THERE WERE  A WHOLE LOT OF COMMENTS, SEE?<br>         MYMACRO   ARG1,ARG2<br>         .<br>         .<br>         .<br>         MEND</font><br></pre>
+    </blockquote>
+    Perhaps this isn't a contradiction, so much as an implicit judgement
+    that comments aren't "statements" in this language.&nbsp; Well, so
+    be it!&nbsp; Comments, both in dotted form (".*" in columns 1-2) and
+    non-dotted form ("*" in column 1) can appear between the first two
+    lines of a macro definition.<br>
+    <h2>Silly Suffixes</h2>
+    <blockquote>
+      <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+          AP-101 CPU instructions fall into 5 categories, depending on
+          the pattern of operands they accept.&nbsp; These 5 categories
+          are designated RR, RS, SRS, SI, and RI.</font><br>
+      </p>
+    </blockquote>
+    <p>All AP-101 CPU instructions of type RS can optionally have
+      suffixes "@", "#", or "@#" added to their mnemonics.&nbsp; For
+      example, just as there is an <font color="#663300"><code>SCAL</code></font>
+      instruction of type RS, there are also <font color="#663300"><code>SCAL@</code></font>,
+      <font color="#663300"><code>SCAL#</code></font>, and <font
+        color="#663300"><code>SCAL@#</code></font> instructions of type
+      RS.<br>
+    </p>
+    <p>To be picky about it, this usage is indeed documented, but it
+      took me so long to figure out that I thought I should take
+      explicit notice of it here anyway.<br>
+    </p>
+    <p><a moz-do-not-send="true"
+        href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=63">The
+        AP-101S POO tells us</a> that <br>
+    </p>
+    <blockquote>
+      <p>"... [@] [#] indicates that the use of indirect addressing
+        and/or autoindexing is optional.&nbsp; For example, [instruction
+        mnemonic] <font color="#663300"><code>M</code></font> specifies
+        direct addressing without autoindexing, while <font
+          color="#663300"><code>M#</code></font> specifies direct
+        addressing with autoindexing."<br>
+      </p>
+    </blockquote>
+    And in case it's not obvious to you what the POO means by indirect
+    addressing and/or autoindexing, there is much greater detail in <a
+      moz-do-not-send="true"
+      href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=39">the
+      POO's explanation of RS type instructions</a>.&nbsp; <br>
+    <h2>Mystery Instructions or Macros</h2>
+    The following operators appear in flight software source code, and I
+    am so far unable to determine if they are supposed to be
+    instructions, macros, or pseudo-ops:<br>
+    <ul>
+      <li><font color="#663300"><code>LB</code></font> is used in the
+        same manner as the instruction <font color="#663300"><code>LA</code></font>
+        (load address), but it is a mystery what it signifies.&nbsp; I
+        presently have no examples of assembly listings containing it
+        from which I can deduce anything.&nbsp; One possibility is that
+        it's simply an error:&nbsp; Never detected during Shuttle
+        software development because the only known usage is in the
+        definition of a macro (<font color="#663300"><code>LD</code></font>)
+        which in fact is never invoked by any of the other source
+        code.&nbsp; In other words, perhaps <b>ASM101S</b> shouldn't
+        have been getting uppity by trying to parse that macro in the
+        first place!</li>
+      <li>AREAD</li>
+      <li>BC$</li>
+      <li>STH$<br>
+      </li>
+    </ul>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2024-09-01<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" height="100"
+              width="300"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
