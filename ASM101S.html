@@ -34,6 +34,8 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
           AP-101 Assembly-Language Files</a></li>
       <li><a moz-do-not-send="true" href="#Differences">Differences from
           Expectations</a></li>
+      <li><a moz-do-not-send="true" href="#Implementation">Implementation</a><br>
+      </li>
       <ul>
       </ul>
     </ul>
@@ -943,6 +945,60 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       <li>STH$<br>
       </li>
     </ul>
+    <h1><a name="Implementation"></a>Implementation<br>
+    </h1>
+    <i>(This section is currently just notes on my own brainstorming, so
+      it should be ignored by anybody who isn't me.)</i><br>
+    <br>
+    Recall that the four fields potentially present in a line of
+    assembly language (whether instructions, pseudo-ops, macro
+    invocations, etc.) are the <i>name</i> field (beginning in column
+    1), the <i>operation</i> field, the <i>operand</i> field, and the
+    <i>comment</i> field.&nbsp; In a naive implementation, parsing the
+    operand field in particular is quite difficult, firstly because
+    there is no simple way to distinguish between the operand field and
+    the comment field, and secondly because continuation cards further
+    blur the distinction.&nbsp; Other factors, such as arithmetical
+    expressions and expansion of preprocessor variables increase the
+    difficulty level even more.&nbsp; In short, the only way even to
+    determine which portion of a card is the operand (if any) and which
+    is the comment (if any) is to fully parse the operand field.&nbsp;
+    The name and operation fields also partake of some of these
+    difficulties, though admittedly at a much-reduced level of
+    difficulty.<br>
+    <br>
+    Fully parsing the operand field can be quite tricky, because among
+    other things, legal forms of the operand(s) are highly
+    context-sensitive.&nbsp; For example, the allowed forms of the
+    operands of a macro invocation differ from those of a macro
+    definition, which differ from those of instructions, which differ
+    from the several different forms that operands of pseudo-ops can
+    take.<br>
+    <br>
+    To illustrate some of the difficulties, here are some but not all of
+    the forms that the name field (far simpler than the operand field)
+    can take:<br>
+    <ul>
+      <li>An identifier (i.e., a program label) such as <font
+          color="#663300"><code>MYLABEL</code></font>.</li>
+      <li>A symbolic variable (i.e., a formal parameter of a macro, a
+        global preprocessor variable, or a local preprocessor variable)
+        such as <font color="#663300"><code>&amp;MYSYMV</code></font>.</li>
+      <li>An element of symbolic variable that's an array, such as <font
+          color="#663300"><code>&amp;MYSYMA(<i>expression</i>)</code></font>,
+        where by "<font color="#663300"><code><i>expression</i></code></font>"
+        I mean an arbitrary arithmetical expression involving integers
+        or other symbolic variables.</li>
+      <li>A so-called <i>sequence symbol</i>, such as <font
+          color="#663300"><code>.MYSEQ</code></font>.<br>
+      </li>
+    </ul>
+    Given this level of complexity, it seems best to me to define the
+    allowed forms of the operand field (and operation field and name
+    field) as separate Backus-Naur forms (BNF) for each possible
+    context, and to convert those various BNF representations into
+    Python code (since, of course, <b>ASM101S</b> is a Python
+    program).&nbsp; The method for doing this is TBD.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -958,7 +1014,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-09-05<br>
+          2024-09-11<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
