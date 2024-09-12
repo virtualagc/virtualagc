@@ -34,6 +34,8 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
           AP-101 Assembly-Language Files</a></li>
       <li><a moz-do-not-send="true" href="#Differences">Differences from
           Expectations</a></li>
+      <li><a moz-do-not-send="true" href="#Implementation">Implementation</a><br>
+      </li>
       <ul>
       </ul>
     </ul>
@@ -51,13 +53,12 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
     I have almost no documentation for the AP-101B, but believe that
     insofar as software is concerned, the sole difference is that a
     handful of new instruction types were made available in the AP-101S
-    that hadn't existed in the AP-101B.&nbsp; Therefore,
-    <b> ASM101S</b> itself makes no distinctions between the two
-    languages:&nbsp; If you feed in source code using any of the newer
-    instructions, you'll get object code suitable for the AP-101S
-    only.&nbsp; If you feed in source code not having any of the newer
-    instructions, you'll get object code suitable for both the AP-101S
-    and AP-101B.<br>
+    that hadn't existed in the AP-101B.&nbsp; Therefore, <b> ASM101S</b>
+    itself makes no distinctions between the two languages:&nbsp; If you
+    feed in source code using any of the newer instructions, you'll get
+    object code suitable for the AP-101S only.&nbsp; If you feed in
+    source code not having any of the newer instructions, you'll get
+    object code suitable for both the AP-101S and AP-101B.<br>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; That's not to say
         that the differences were insignificant, but merely that the
         differences are transparent to the assembler.&nbsp; Here's <a
@@ -178,6 +179,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231">OS
 
 
+
           Assembler Language - OS Release 21</a>".&nbsp; Manual for the
         System/360 macro assembler upon which <b>ASM101S</b> is
         modeled.</li>
@@ -188,20 +190,24 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
 
 
+
           101S Assembly Language Introduction</a>".</li>
       <li>"Space Shuttle Advanced System/4 Pi Input/Output Processor
         (IOP)":</li>
       <ul>
         <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf">Parts
+
             I and II</a>:&nbsp; :&nbsp; Principles of Operation for
           PCI/PCO and MSC</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
             III</a>:&nbsp; Principles of Operation for BCE.</li>
       </ul>
       <li>"<a moz-do-not-send="true"
 href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+
           Shuttle Advanced System/4 Pi Model AP-101 Central Processor
           Unit Technical Description</a>".&nbsp; Note that this predates
         the AP-101S model and doesn't precisely match it.<br>
@@ -217,6 +223,7 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
     indiscriminately in AP-101 assembly-language source code and sharing
     memory.&nbsp; <a moz-do-not-send="true"
 href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
+
       POO</a> explains the MSC thusly:<br>
     <blockquote><font size="-1">"The Master Sequence Controller (MSC) is
         a micro programmed computer specifically tailored for I/O
@@ -235,9 +242,11 @@ href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
     <br>
     See <a moz-do-not-send="true"
       href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">Appendix
+
       II of the AP-101S POO</a> or the seemingly-identical <a
       moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf#page=68">Part
+
       II of the IOP POO</a> for more information.<br>
     <h1><a name="bce"></a>The Bus Control Elements (BCE)</h1>
     <p>Similarly, the POO tells us that<br>
@@ -260,15 +269,18 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     </p>
     <p>See <a moz-do-not-send="true"
         href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=445">Appendix
+
         III of the AP-101S POO</a> or the seemingly-identical <a
         moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
         III of the IOP POO</a> for more information.<br>
     </p>
     <ul>
     </ul>
     <h1><a name="ASM101S"></a>ASM101S</h1>
     <p>(To be clear, <b>ASM101S</b> is <i>not yet functional</i>.&nbsp;
+
       I am simply documenting it as I proceed with development!)<br>
     </p>
     The modern assembler is typically invoked as<br>
@@ -286,8 +298,8 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     <ol>
       <li>(Optionally.)&nbsp; Loads the macro definitions found in the
         assembly-language source-code files (*.asm) found in the <font
-          color="#663300"><code><i>LIBRARY</i></code></font> folder.&nbsp;
-        <br>
+          color="#663300"><code><i>LIBRARY</i></code></font>
+        folder.&nbsp; <br>
       </li>
       <li>Load all of the <font color="#663300"><code><i>SOURCEx</i>.asm</code></font>
         files specified on the command line, in the order that they are
@@ -315,6 +327,7 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     about for yourself in the IBM 360 assembler language manual, where <a
       moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/59/mode/1up?view=theater">macros
+
 
       occupy the entire 2nd half of that document</a>.&nbsp; Learning
     the syntax and other usage details of macros is as important for
@@ -361,6 +374,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     from the preceding section that <b>ASM101S</b> is invoked with one
     or more optional command-line arguments of the form <font
       color="#663300"><code>--library=<i>LIBRARY</i></code></font>.&nbsp;
+
     <font color="#663300"><code><i>LIBRARY</i></code></font> is just a
     path to a macro-library folder.&nbsp; Macro definitions in any
     libraries specified in this manner are loaded by the assembler along
@@ -380,6 +394,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     pseudo-ops are <i>also</i> located within the macro libraries,
     intermixed with the files intended to contain only macros.&nbsp; But
     we do not want any of the code from these <font color="#663300"><code>COPY</code></font>'able
+
     files (even if there are some macro definitions within them) to be
     automatically be made available during assembly.&nbsp; Rather, we
     want their code to be made available <i>only</i> when they're <font
@@ -440,6 +455,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       instead just download the file <a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/tree/master/ASM101S">ASM101S.py</a>.&nbsp;
 
+
       You simply need Python 3 to run it.<br>
     </p>
     <blockquote>
@@ -497,6 +513,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       in <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/33/mode/1up?view=theater">Figure
 
+
         4-1 of the assembler-language manual</a>, and my assumption is
       that Figure 4-1 is valid for AP-101 assembly language as
       well.&nbsp; However, there are additional aliases not covered in
@@ -506,11 +523,13 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       <li><font color="#663300"><code>BLE</code></font> — aliased by <b>ASM101S</b>
         identically to <font color="#663300"><code>BNP</code></font>.&nbsp;
 
+
         I think of them as "Branch Less or Equal" vs "Branch
         Non-Positive".<br>
       </li>
       <li><font color="#663300"><code>BN</code></font> — aliased by <b>ASM101S</b>
         identically to <font color="#663300"><code>BM</code></font>.&nbsp;
+
 
         I think of them as "Branch Negative" vs "Branch Minus".</li>
     </ul>
@@ -521,6 +540,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       corresponding to it.&nbsp; There is such an instruction in IBM 360
       assembly language.&nbsp; <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=79">The
+
         AP-101S POO notes</a> in its discussion of the <font
         color="#663300"><code>LA</code></font> instruction that there is
       a particular configuration of operands for which <font
@@ -544,6 +564,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       (perhaps) a particular configuration of operands for some other
       AP-101 instruction.&nbsp; Fortunately, we have plenty of examples
       of assembly listings for code using <font color="#663300"><code>SHI</code></font>.&nbsp;
+
       Consider this example:<br>
     </p>
     <blockquote>
@@ -553,7 +574,9 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       to suspect that this is actually an addition.&nbsp; There is
       indeed an <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=66">Add
+
         Halfword Immediate</a> instruction (<font color="#663300"><code>AHI</code></font>),
+
       and "<font color="#663300"><code>AHI R5,-2</code></font>" would
       indeed assemble as shown.<br>
     </p>
@@ -580,6 +603,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       assembly-language.&nbsp; Admittedly, that inference is probably
       wrong in the case of certain of the pseudo-ops.&nbsp;
       Nevertheless, they have not been implemented in <b>ASM101S</b>.&nbsp;
+
 
       <br>
     </p>
@@ -645,6 +669,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         color="#663300"><code>COPY</code></font>'d Files</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/57/mode/1up?view=theater">The
+
         System/360 assembler manual tells us</a> that assembly-language
       files included in other assembly-language files via the <font
         color="#663300"><code>COPY</code></font> pseudo-op cannot
@@ -665,6 +690,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <h2>Macro-Definition Prototypes</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/65/mode/1up?view=theater">The
+
         assembler manual tells us</a> that <br>
     </p>
     <blockquote>"The macro instruction prototype statement (hereafter
@@ -710,6 +736,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </p>
     <p><a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=63">The
+
         AP-101S POO tells us</a> that <br>
     </p>
     <blockquote>
@@ -748,6 +775,60 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       <li>STH$<br>
       </li>
     </ul>
+    <h1><a name="Implementation"></a>Implementation<br>
+    </h1>
+    <i>(This section is currently just notes on my own brainstorming, so
+      it should be ignored by anybody who isn't me.)</i><br>
+    <br>
+    Recall that the four fields potentially present in a line of
+    assembly language (whether instructions, pseudo-ops, macro
+    invocations, etc.) are the <i>name</i> field (beginning in column
+    1), the <i>operation</i> field, the <i>operand</i> field, and the
+    <i>comment</i> field.&nbsp; In a naive implementation, parsing the
+    operand field in particular is quite difficult, firstly because
+    there is no simple way to distinguish between the operand field and
+    the comment field, and secondly because continuation cards further
+    blur the distinction.&nbsp; Other factors, such as arithmetical
+    expressions and expansion of preprocessor variables increase the
+    difficulty level even more.&nbsp; In short, the only way even to
+    determine which portion of a card is the operand (if any) and which
+    is the comment (if any) is to fully parse the operand field.&nbsp;
+    The name and operation fields also partake of some of these
+    difficulties, though admittedly at a much-reduced level of
+    difficulty.<br>
+    <br>
+    Fully parsing the operand field can be quite tricky, because among
+    other things, legal forms of the operand(s) are highly
+    context-sensitive.&nbsp; For example, the allowed forms of the
+    operands of a macro invocation differ from those of a macro
+    definition, which differ from those of instructions, which differ
+    from the several different forms that operands of pseudo-ops can
+    take.<br>
+    <br>
+    To illustrate some of the difficulties, here are some but not all of
+    the forms that the name field (far simpler than the operand field)
+    can take:<br>
+    <ul>
+      <li>An identifier (i.e., a program label) such as <font
+          color="#663300"><code>MYLABEL</code></font>.</li>
+      <li>A symbolic variable (i.e., a formal parameter of a macro, a
+        global preprocessor variable, or a local preprocessor variable)
+        such as <font color="#663300"><code>&amp;MYSYMV</code></font>.</li>
+      <li>An element of symbolic variable that's an array, such as <font
+          color="#663300"><code>&amp;MYSYMA(<i>expression</i>)</code></font>,
+        where by "<font color="#663300"><code><i>expression</i></code></font>"
+        I mean an arbitrary arithmetical expression involving integers
+        or other symbolic variables.</li>
+      <li>A so-called <i>sequence symbol</i>, such as <font
+          color="#663300"><code>.MYSEQ</code></font>.<br>
+      </li>
+    </ul>
+    Given this level of complexity, it seems best to me to define the
+    allowed forms of the operand field (and operation field and name
+    field) as separate Backus-Naur forms (BNF) for each possible
+    context, and to convert those various BNF representations into
+    Python code (since, of course, <b>ASM101S</b> is a Python
+    program).&nbsp; The method for doing this is TBD.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -763,7 +844,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-09-01<br>
+          2024-09-11<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
