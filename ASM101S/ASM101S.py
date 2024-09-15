@@ -13,12 +13,23 @@ History:    2024-08-21 RSB  Began.
 
 import sys
 import os
+import re
 from pathlib import Path
+from fieldParser import *
+
+# Specifics for the type of assembly language.
+if "--390" in sys.argv[1:]:
+    print("System/390 support not presently available.", file=sys.stderr)
+    sys.exit(1)
+    from model360 import *
+else:  # --101
+    from model101 import *
 
 #=============================================================================
 # Some useful data for syntax analysis.
 
-# All pseudo-ops ("assembler instructions"). See Appendix E.  Gives the 
+# All pseudo-ops ("assembler instructions"). See Appendix E of the 
+# "IBM System/360 Operating System Assembler Language" manual.  Gives the 
 # minimum and maximum number of comma-delimited operands in the operand field.
 # -1 for the maximum means "no limit".  I don't guarantee that all of these
 # are necessarily used in AP-101S.
@@ -71,71 +82,6 @@ pseudoOps = {
     "USING": [2,17]
     }
 
-# AP-101S instruction set.
-
-# First, the CPU instructions, categorized by RR, RS, SRS, SI, and RI.
-# 2 operands
-argsRR = { "AR", "CR", "CBL", "DR", "XUL", "LR", "LCR", "LFXI", "MR", "SR", 
-           "BALR", "BCR", "BCRE", "BCTR", "BVCR", "NCT", "NR", "XR", "OR",
-           "SUM", "AEDR", "AER", "CER", "CEDR", "CVFX", "CVFL", "DEDR", "DER",
-           "LER", "LECR", "LFXR", "LFLI", "LFLR", "MEDR", "MER", "SEDR", "SER",
-           "STXA", "MVH", "SPM", "SRET", "LXA", "ICR", "PC",
-           "BR", "NOPR", "LACR" }
-# 3 operands
-argsRS = { "A", "AH", "AST", 
-           "C", "CH", "D", 
-           "IAL", "IHL", 
-           "L", "LA", "LH",
-           "LM", "M", "MH", 
-           "MIH", "ST", "STH", 
-           "STM", "S", "SST", 
-           "SH", "TD", "BAL",
-           "BIX", "BC", "BCT", 
-           "BCV", "N", "NST", 
-           "X", "XST", "O",
-           "OST", "SHW", "TH", 
-           "ZH", "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", "MVS", 
-           "MED", "ME", "SED", "SE", "STED", "STE", "DIAG", "STXA", "STDM",
-           "ISPB", "LPS", "SSM", "SCAL", "LDM", "LXA", "SVC", "TS",
-           "B", "NOP", "BH", "BL", "BE", "BNH", "BNL", "BNE", "BO", "BP",
-           "BM", "BZ", "BNP", "BNM", "BNZ", "BNO", "BLE", "BN" }
-for m in sorted(argsRS):
-    argsRS.add(m + "@")
-    argsRS.add(m + "@#")
-    argsRS.add(m + "#")
-# 3 operands
-argsSRS = { "BCB", "BCF", "BCTB", "BVCF", "SLL", "SLDL", "SRA", "SRDA", "SRL",
-            "SRDL", "SRR", "SRDR",
-            "A", "AH", "C", "CH", "D", "IAL", "L", "LA", "LH",
-            "M", "MH", "ST", "STH", "S", "SH", "TD",
-            "BC", "N", "X", "O", 
-            "SHW", "TH", "ZH", "AE", "DE", "LE", "ME", "SE" }
-# 3 operands
-argsSI = { "CIST", "MSTH", "NIST", "XIST", "SB", "TB", "ZB", "TSB" }
-# 2 operands
-argsRI = { "AHI", "CHI", "MHI", "NHI", "XHI", "OHI", "TRB", "ZRB", "LHI",
-           "SHI" }
-
-# Now, the MSC instructions.  All have operands.
-argsMSC = { "@A", "@B", "@BN", "@BNN", "@BNP", "@BNZ", "@BU", "@BU@", "@BXN",
-         "@BXNN", "@BXNP", "@BXNZ", "@BXP",
-         "@BXZ", "@BZ", "@C", "@CI", "@CNOP", "@DLY", "@INT", "@L", "@LAR", 
-         "@LF", "@LH", "@LI", "@LMS", "@LXI", "@N", "@NIX", "@RAI", "@RAW",
-         "@RBI", "@REC", "@RFD", "@RNI", "@RNW", "@SAI", "@SEC", "@SFD", "@SIO",
-         "@ST", "@STF", "@STH", "@STP", "@TAX", "@TI", "@TM", "@TMI", "@TSZ", 
-         "@TXA", "@TXI", "@WAT", "@X", "@XAX",
-         "@BC", "@BXC" "@CALL", "@CALL@", "@LBB", "@LBB@", "@LBP", "@LBP@" }
-
-# And BCE instructions.  None have operands.
-argsBCE = { "#@#DEC", "#@#HEX", "#@#SCN", "#BU", "#BU@", "#CMD", "#CMDI", "#CNOP",
-         "#DLY", "#DLYI", "#LBR", "#LBR@", "#LTO", "#LTOI", "#MIN", "#MIN@",
-         "#MINC", "#MOUT", "#MOUT@", "#MOUTC", "#ORG", "#RDL", "#RDLI", "#RDS",
-         "#RIB", "#SIB", "#SPLIT", "#SSC", "#SST", "#STP", "#TDL", "#TDLI",
-         "#TDS", "#WAT", "#WIX"
-       }
-
-knownInstruction = set.union(argsRR, argsRS, argsSRS, argsSI, argsRI, argsMSC, argsBCE)
-
 #=============================================================================
 # For reading source files.  The idea is that the entire macro library is 
 # read into the `source` array, and then all of the files listed on the 
@@ -146,6 +92,7 @@ knownInstruction = set.union(argsRR, argsRS, argsSRS, argsSI, argsRI, argsMSC, a
 #    minimum number of parameters
 #    maximum number of parameters
 #    index into `source` at which the macro definition starts.
+#    index of the prototype line.
 #    index into `source` at which the macro definition ends.
 macros = {  }
 
@@ -184,18 +131,298 @@ def isSymbolExpression(name, inMacroDefinition = False):
     if len(fields) != 2:
         errors("Incorrect symbol expression")
         return False
-    return isSymbol(fields[0], inMacroDefinition) and isSymbol(fields[1], inMacroDefinition)
+    return isSymbol(fields[0], inMacroDefinition) and \
+        isSymbol(fields[1], inMacroDefinition)
 
 # `macros` allows quick lookup of macro definitions, which are stored in the 
 # `source` list just like all other lines of code, except not fully parsed.
 # Each entry in `macros` is a list of numbers:
-#    The minimum number of parameters for invocation.
-#    The maximum   "    "      "       "       "
+#    The number of positional parameters for invocation.
+#    The total number of parameters for invocation (positional or not).
 #    The starting index (i.e., of `MACRO`) in `source`.
+#    The index of the macro's prototype line in `source`.
 #    The ending index (i.e., of `MEND`) in `source`.
 macros = { }
 # Global symbolic variables for the macro language.
-macroGlobals = { }
+svGlobals = { }
+
+symVarPatt = re.compile(r'(?<!&)(&A|&B)(?![#@$A-Z0-9])')
+
+# This function replaces all symbolic variables (e.g., &A) given by 
+# `svGlobals` and `svNonGlobals` in a string.
+def replaceMacroVariables(text, svNonGlobals):
+    
+    if "=" not in text:
+        return text
+    
+    # The search pattern is any already-defined symbolic variable not preceded
+    # by an extra & and not followed by an extra "letter" or digit.
+    symbolicVariables = svGlobals | svNonGlobals
+    pattern = "(?<!&)("
+    for sv in symbolicVariables:
+        pattern = pattern + sv + "|"
+    pattern = pattern[:-1] + ")(?![#@_$A-Z0-9])"
+    
+    # We want to do the replacements in reverse order, so as to keep the
+    # indexes to the strings not yet replaced from changing.
+    matches = []
+    for match in re.finditer(pattern, text):
+        matches.append(match)
+    for match in reversed(matches):
+        replacement = symbolicVariables[match.match]
+        start = match.span[0]
+        end = match.span[1]
+        if end < len(text) and text[end] == ".":
+            end += 1
+        text = text[:start] + replacement + text[end:]
+    
+    return text
+
+# The `parseLine` function parses an input card (namely `lines[lineNumber]`) 
+# into `name`, `operation`, an array of operands, and possibly a comment.
+# It does not try to determine validity (except to the extent necessary for 
+# parsing) nor to evaluate any expressions.  It takes into account continuation
+# cards, macro definitions (without expanding them), and the alternate 
+# continuation format sometimes used for macro arguments 
+# and macro formal parameters.  It takes into account parenthesization and 
+# quoted strings (and their attendant spaces) within sub-operands.  The return 
+# is the triple
+#    skipCount, inMacroDefinition, inMacroProto
+# Lines in macro definitions are not parsed beyond their prototypes; that's 
+# done only during expansion.
+# Concerning the `mlocal` argument:  To the extent we know them (but our 
+# knowledge isn't perfect), we replace preprocessor symbolic variables, which
+# are of two types:  global and local, the latter of which are provided by 
+# `mlocal`.
+def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto, svLocals={}):
+    global source
+    alternate = inMacroProto
+    skipped = 0
+    properties = source[-1]
+    subOperands = []
+    properties["operand"] = subOperands
+    if properties["empty"] or properties["fullComment"] or \
+            properties["dotComment"]:
+        return 0, inMacroDefinition, inMacroProto
+    text = properties["text"]
+    # Parse all fields prior to the operand, at least enough to determine the
+    # contents if not the validity.
+    j = 0
+    while j < len(text) and text[j] != " ":  # Scan past the label, if any.
+        j += 1
+    name = text[:j]
+    if not inMacroDefinition:
+        name = replaceMacroVariables(name, svLocals)
+    properties["name"] = name
+    while j < len(text) and text[j] == " ":  # Scan up to operation
+        j += 1
+    k = j
+    while j < len(text) and text[j] != " ":  # Scan past the operation.
+        j += 1
+    operation = text[k:j]
+    if not inMacroDefinition:
+        operation = replaceMacroVariables(operation, svLocals)
+    properties["operation"] = operation
+    if operation in macros:
+        alternate = True
+    if operation == "MACRO":
+        if inMacroDefinition:
+            error(properties, "Nested MACRO definitions")
+        inMacroDefinition = True
+        inMacroProto = True
+        return 0, inMacroDefinition, inMacroProto
+    if operation == "MEND":
+        if not inMacroDefinition:
+            error(properties, "MEND without preceding MACRO")
+        inMacroDefinition = False
+        inMacroProto = False
+        return 0, inMacroDefinition, inMacroProto
+    if inMacroDefinition and not inMacroProto:
+        return 0, inMacroDefinition, inMacroProto
+    while j < len(text) and text[j] == " ":  # Scan up to operand/comment
+        j += 1
+    properties["operandAndComment"] = text[j:]
+    # What we do to parse the operand field depends on whether it's even 
+    # possible for this operation ot have operands.  Otherwise, we would parse
+    # the first word of an end-of-line comment (if any) as the operand field.
+    noOperands = False
+    if not inMacroProto:
+        if operation in macros:
+            # There's a possibility that *all* replacement arguments are 
+            # omitted but that a comment field is present anyway.  That means
+            # there's can be an ambiguity as to whether the first word of the
+            # comment is perhaps a replacement argument.  Sigh!  We have to
+            # maneuver a little bit to work through the special cases.
+            macrostats = macros[operation]
+            positional = macrostats[0]
+            nonpositional = macrostats[1] - positional
+            if positional > 0:
+                # In this case, there is supposedly at least something (namely
+                # a comma) in the operand field, so the comment won't be
+                # considered.   See "Comment Entries" (p. 9) in assembler
+                # manual.
+                pass
+            elif nonpositional == 0:
+                pass
+            else:
+                # This is the tricky case, because if there are no positional
+                # parameters but potentially some nonpositional ones, then 
+                # omitting all of the parameters doesn't require the naked
+                # comma mentioned above.  Instead, we have to check that first
+                # word of the comment to see if it corresponds to any of the
+                # legal nonpositional parameters.
+                fields = properties["operandAndComment"].split(None, 1)
+                if len(fields) == 0:
+                    noOperands = True
+                else:
+                    formal = source[macrostats[3]]["operand"]
+                    found = False
+                    for parm in formal:
+                        if "=" not in parm:
+                            continue
+                        n = parm[1:].split("=", 1)[0]
+                        if fields[0].startswith(n):
+                            found = True
+                            break
+                    if not found:
+                        noOperands = True
+        elif operation in instructionsWithoutOperands:
+            noOperands = True
+        elif operation in pseudoOps:
+            if pseudoOps[operation][0] == 0:
+                noOperands = True
+        elif operation not in instructionsWithOperands:
+            error(properties, \
+                  "Unknown operation (%s), assuming it has no operands" % \
+                  operation)
+            noOperands = True
+        if noOperands:
+            properties["endComment"] = text[j:]
+            return 0, inMacroDefinition, inMacroProto
+    # Now we're ready to start parsing the operand field into subfields.
+    # If the "alternate" format is used and we're actually at the end of the
+    # card, and there's a continuation card, then the operand field begins on
+    # the next card.
+    currentNumber = lineNumber
+    currentProperties = properties
+    currentText = text
+    inQuote = False
+    parenthesisDepth = 0
+    currentSubParm = ""
+    lastWasInternalQuote = False
+    ampStart = -1  # Position in `currentText` to start of a symbolic variable.
+    while True:  # Loop character by character, loading new cards as needed.
+        if j >= len(text) and not currentProperties["continues"]:
+            break
+        if j >= len(text) and currentProperties["continues"]:
+            if currentLineNumber + 1 >= len(lines):
+                error(properties, "Continuation card is missing")
+                return skipped
+            skipped += 1
+            currentNumber += 1
+            currentProperties = lines[currentNumber]
+            currentText = currentProperties["text"]
+            j = 15
+        c = currentText[j]
+        currentSubParm = currentSubParm + c
+        j += 1
+        
+        # Process ampersands and symbolic-variable replacements
+        if ampStart >= 0:
+            if ampStart == j - 2: # First character after &
+                if c == '&':  # &&
+                    ampStart = -1
+                    continue
+                if c in letters:
+                    continue
+            if c in letters or c in digits:
+                continue
+            # If we've gotten here, we've found a non-empty substring starting
+            # at `ampString` that's of an appropriate format to be a symbolic
+            # variable.  If it really is one, we need to replace it and to 
+            # resume processing back where it starts.
+            sv = currentText[ampStart: j]
+            replacement = None
+            if sv in svLocals:
+                replacement = svLocals[sv]
+            elif sv in svGlobals:
+                replacement = svGlobals
+            if replacement == None:
+                ampStart = -1
+                # Fall through to normal processing of c.
+            else:
+                # If we're here, it's because we've found a symbolic variable
+                # (`sv`) in `currentText` and need to replace it (with
+                # `replacement`).  As usual, there are some weird cases we need
+                # to consider.  
+                #   1.   It's possible that `replacement` is of the form 
+                #            ( ... )
+                #        in which case it's a *list* of comma-delimited 
+                #        parameters that have been grouped together, but
+                #        which now need to be ungrouped.
+                #   2.   It could be something of the form
+                #            ( ... )(n)
+                #        where n is a number.  This means to use just the n-th
+                #        item in the list ( ... )
+                pass
+        if c == '&':
+            ampStart = j
+            continue
+        
+        if inQuote:
+            if c != "'":
+                if lastWasInternalQuote:
+                    inQuote = False
+                    lastWasInternalQuote = False
+                    # *no* continue!  Want to fall through.
+                else:
+                    continue
+            else:
+                lastWasInternalQuote = not lastWasInternalQuote
+                continue
+        # To get here, we're definitely not inside of a quote.
+        if c == "'":
+            inQuote = True
+            lastWasInternalQuote = False
+            continue
+        if c == '(':
+            parenthesisDepth += 1
+            continue
+        if c == ')':
+            parenthesisDepth -= 1
+            if parenthesisDepth < 0:
+                error(properties, "Mismatched parentheses")
+                return skipped
+            continue
+        if parenthesisDepth > 0:
+            continue
+        if c == ',':
+            subOperands.append(currentSubParm[:-1])
+            currentSubParm = ""
+            continue
+        if c != " ":
+            continue
+        # If We've gotten here, we've encountered a space.  What to do about
+        # it depends on whether the alternate format is a possibility or not.
+        if currentSubParm == "":
+            # We could only get to here if the last sub-operand added had 
+            # ended in a comma:
+            if alternate and currentProperties["continues"]:
+                # discard the rest of the card and go to the next one
+                j = len(text)
+                continue
+            subOperands.append(currentSubParm[:-1])
+            currentSubParm = ""
+            break
+        break
+    if currentSubParm != "":
+        subOperands.append(currentSubParm[:-1])
+    '''
+    if not inMacroDefinition:
+        for i in range(len(subOperands)):
+            subOperands[i] = replaceMacroVariables(subOperands[i], svLocals)
+    '''
+    return skipped, inMacroDefinition, inMacroProto
 
 # Recursively read a batch of lines of source code, expanding if necessary for 
 # `COPY` pseudo-op or invocation of a macro.  The parameters:
@@ -213,27 +440,32 @@ macroGlobals = { }
 #    printable   Indicates that the file will be listed in the output assembly
 #                listing.  Would be False for anything read from the macro
 #                library.
+#    depth       The depth into the macro expansion(s).  0 is for not an 
+#                expansion.
 source = []
 libraries = []
-def readSourceFile(fromWhere, expansion, copy=False, printable=True):
-    global source, macros, macroGlobals
-    macroLocals = { }
+def readSourceFile(fromWhere, expansion, copy=False, printable=True, depth=0):
+    global source, macros, svGlobals
+    svLocals = { }
     lineNumber = -1
     inMacroProto = False
     inMacroDefinition = False
     continuation = False
     name = ""
     operation = ""
+    prototypeIndex = -1
     
     if fromWhere in macros:
+        # Load the macro definition into the list of source-code lines.
         thisSource = []
-        for i in range(macros[fromWhere][2], macros[fromWhere][3] + 1):
+        prototypeIndex = macros[fromWhere][3] - macros[fromWhere][2]
+        for i in range(macros[fromWhere][2], macros[fromWhere][4] + 1):
             thisSource.append(source[i]["text"])
-            
-        print("***DEBUG*** hello", fromWhere, expansion, copy, printable)
-        for line in thisSource:
-            print(line)
-        sys.exit(1)
+        if False:
+            print("***DEBUG*** A", fromWhere, expansion, copy, printable)
+            for line in thisSource:
+                print("***DEBUG*** B", line)
+            sys.exit(1)
     else:
         try:
             f = open(fromWhere, "rt")
@@ -241,7 +473,8 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
             f.close()
             filename = fromWhere
         except:
-            print("Source file '%s' does not exist" % fromWhere, file=sys.stderr)
+            print("Source file '%s' does not exist" % fromWhere, \
+                  file=sys.stderr)
             sys.exit(1)
     
     skipCount = 0
@@ -254,7 +487,6 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
             "file": filename,
             "lineNumber": lineNumber + 1,
             "text": text,
-            "longText": "",
             "continues": (line[71] != " "),
             "identification": line[72:],
             "empty": (text.strip() == ""),
@@ -262,8 +494,8 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
             "dotComment": line.startswith(".*"),
             "name": "",
             "operation": "",
-            "operandAndComment": "",
-            "operand": "",
+            "operandAndComment": "",  # Really worthless, I think.
+            "operand": [],
             "endComment": "",
             "errors": [],
             "inMacroDefinition": inMacroDefinition,
@@ -275,63 +507,26 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
         if skipCount > 0:
             skipCount -= 1
             continue
-        if properties["empty"] or properties["fullComment"] or properties["dotComment"]:
+        if properties["empty"] or properties["fullComment"] or \
+                properties["dotComment"]:
+            continue
+        if len(source) >1 and source[-2]["continues"]:
             continue
         
-        # Join continuation lines as the longText field.
-        if properties["continues"]:
-            if inMacroProto:
-                # Line continuations in macro prototype lines work differently from
-                # all others.  There's no real way to get the endComment field
-                # right, but that's frankly not used for anything anyway (even
-                # for the assembly listing!), so it doesn't really matter.  We
-                # just strip the end comments away.
-                j = 0
-                while j < 71 and text[j] != " ":  # Scan past the label, if any.
-                    j += 1
-                while j < 71 and text[j] == " ":  # Scan past the space between label and operation
-                    j += 1
-                while j < 71 and text[j] != " ":  # Scan past the operation.
-                    j += 1
-                while j < 71 and text[j] == " ":  # Scan past the space following the operation
-                    j += 1
-                if j < 71:
-                    while j < 71 and text[j] != " ":  # Scan past the operand field
-                        j += 1
-                # There are 3 cases now:
-                #   1. If we've reached the end of the card, then the 
-                #      next line (sans its first 15 characters) is simply
-                #      joined to this one.
-                #   2. If the final character had been ',', then the 
-                #      remainder of this line is discarded and the next
-                #      line (sans first 15 characters) is joined to this
-                #      one.
-                #   3. Otherwise, we're done, and the remaining cards
-                #      have only comments.
-                i = lineNumber
-                completed = False
-                while i + 1 < len(thisSource) and thisSource[i][71] != " ":
-                    skipCount += 1
-                    i += 1
-                    if not completed:
-                        newLine = ("%-80s" % thisSource[i])[:71]
-                        j = 15
-                        while j < 71 and newLine[j] != " ":  # Scan past the operand field
-                            j += 1
-                        completed = ( j < 71 and newLine[j-1] != "," )
-                        text = text + newLine[15:j]
-            else:
-                # This is how "normal" line-continuations work.
-                i = lineNumber
-                while i + 1 < len(thisSource) and thisSource[i][71] != " ":
-                    skipCount += 1
-                    i += 1
-                    text = text + thisSource[i][15:71]
-        properties["longText"] = text
+        # Note that while `parseSubOperations` determines how 
+        # `inMacroDefinition` and `inMacroProto` will change, and returns
+        # new values as dummy1 and dummy1, we ignore those return values here
+        # and make our own determination, because we want to do some things
+        # with macro definitions that `parseLine` doesn't do for us.
+        skipCount, dummy1, dummy2 = parseLine(thisSource, lineNumber, \
+                                              inMacroDefinition, \
+                                              inMacroProto, svLocals)
+        name = properties["name"]
+        operation = properties["operation"]
+        operand = properties["operand"]
         
-        fields = text.split()
-        if text.startswith(" ") and not inMacroDefinition and len(fields) > 0 and \
-                fields[0] == "MACRO":
+        if operation == "MACRO":
+            
             inMacroProto = True
             inMacroDefinition = True
             macroStart = len(source) - 1
@@ -339,36 +534,23 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
         elif inMacroProto:
             inMacroProto = False
             # This line gives us the "prototype" of the macro.
-            # We need to determine the name, the number of mandatory parameters,
-            # and the number of optional parameters.
-            fieldNum = 0
-            parms = []
-            if not text.startswith(" "):
-                if False:
-                    parms.append(fields[0])
-                fieldNum = 1
-            macroName = fields[fieldNum]
-            fieldNum += 1
-            if fieldNum < len(fields):
-                parms = parms + fields[fieldNum].split(",")
-            mandatory = 0
-            optional = 0
-            for parm in parms:
-                if parm.startswith("&"):
-                    if "=" in parm:
-                        optional += 1
-                    else:
-                        mandatory += 1
-            macros[macroName] = [mandatory, mandatory + optional, macroStart]
-            macroName = macroName
-        elif inMacroDefinition and not text.startswith("*") and not text.startswith(".*"):
-            if (len(fields) > 1 and text[0] != " " and fields[1] == "MEND" ) or \
-                    (len(fields) > 0 and text[0] == " " and fields[0] == "MEND"):
+            # We need to determine the name, the number of positional parameters,
+            # and the number of nonpositional parameters.
+            positional = 0
+            nonpositional = 0
+            for sub in operand:
+                if "=" in sub:
+                    nonpositional += 1
+                else:
+                    positional += 1
+            macroName = operation
+            macros[macroName] = [positional, positional + nonpositional, 
+                                 macroStart, len(source)-1]
+        elif operation == "MEND":
                 macros[macroName].append(len(source)-1)
                 inMacroDefinition = False
                 continue
-        elif not inMacroDefinition and text.startswith(" ") and len(fields) > 1 and \
-                fields[0] == "COPY":
+        elif operation == "COPY":
             found = False
             for library in libraries:
                 fcopy = os.path.join(library, fields[1] + ".asm")
@@ -377,129 +559,61 @@ def readSourceFile(fromWhere, expansion, copy=False, printable=True):
                     readSourceFile(fcopy, expansion, True)
                     break
             if not found:
-                print("File %s.asm for COPY not found" % fields[1], file=sys.stderr)
+                print("File %s.asm for COPY not found" % fields[1], \
+                      file=sys.stderr)
                 sys.exit(1)
             continue
         
         if inMacroDefinition:
             continue
         
-        if len(source) > 1 and source[-2]["continues"]:
-            continuation = True
-            if text[:15] != " "*15:
-                error(properties, "Continuation line doesn't begin with enough blanks")
-        else:
-            continuation = False
-        
-        if not continuation:
-            if properties["empty"]:
-                continue
-            if text[0] != " ":
-                fields = text.split(None, 1)
-                name = fields[0]
-                text = fields[1]
-                properties["name"] = name
-                if not isSymbolExpression(name):
-                    error(properties, "Illegal name field %s" % name)
+        # Is this a macro invocation that we must expand?
+        if operation in macros:
+            macrostats = macros[operation]
+            # The replacement parameters are in properties["operand"]
+            # But we need to track down the formal parameters.
+            formal = source[macrostats[3]]["operand"]
+            replacements = properties["operand"]
+            if False:
+                print("***DEBUG*** Expand " + operation)
+                print(operand)
+                print(formal)
+            # Relate the formal parameters to their replacments.  That'll be
+            # the dictionary `newExpansion`.
+            # First take care of the positional parameters.  Put the 
+            # non-positional ones in nonPositonalF,R for later.
+            newExpansion = {}
+            nonPositionalF = {}
+            nonPositionalR = {}
+            iRep = 0 # Next replacement parameter
+            for parm in formal:
+                if "=" in parm:
+                    fields = parm.split("=", 1)
+                    nonPositionalF[fields[0]] = fields[1]
                     continue
-            fields = text.split(None, 1)
-            operation = fields[0]
-            if operation not in pseudoOps and \
-                    operation not in macros and \
-                    operation not in knownInstruction:
-                error(properties, "Unknown operation %s" % operation)
-                continue
-            properties["operation"] = operation
-            if len(fields) > 1:
-                text = fields[1]
-            else:
-                text = ""
-        else:
-            text = text.lstrip()
-        properties["operandAndComment"] = text
-        operandAndComment = text
-        
-        # We cannot distinguish at this point between an operand field and the
-        # first word of a comment, until we analyze the operation field to 
-        # find out if it has an operand or not.
-        if not continuation:
-            hasOperand = False
-            if operation in argsBCE:
-                pass
-            elif operation in knownInstruction:
-                hasOperand = True
-            elif operation in pseudoOps:
-                if pseudoOps[operation][0] > 0:
-                    hasOperand = True
-                elif pseudoOps[operation][1] != 0 and len(operandAndComment.strip()) > 0:
-                    hasOperand = True
-            elif operation in macros:
-                if macros[operation][0] > 0:
-                    hasOperand = True
-                elif macros[operation][1] != 0 and len(operandAndComment.strip()) > 0:
-                    hasOperand = True
-                # We need to expand the macro.  Here are the basic steps:
-                #    1.  Determine the values of all of the pararameters of the
-                #        invocation.
-                #    2.  Determine all of the formal parameters.
-                #    3.  Make a dictionary with keys that are the formal 
-                #        parameters and values which are the replacements.
-                #    4.  Call readSourceFile with the macro name and the 
-                #        parameter-replacement dictionary as its parameters.
-                
-                print("***DEBUG***", operation, macros[operation])
-                for n in range(macros[operation][2], macros[operation][3] + 1):
-                    print(source[n])
-                    if source[n]["operation"] == "MEND":
-                        break
-                    n += 1
-                sys.exit(1)
-                
-                newExpansion = {}  # ***FIXME***
-                readSourceFile(operation, newExpansion, copy, printable)
-            else:
-                print("Implementation error, operation=%s" % operation, file=sys.stderr)
-                sys.exit(1)
-        else:
-            hasOperand = source[lineNumber - 1]["operand"].endswith(",")
-        
-        if hasOperand:
-            # We cannot use the strategy of just using the .split() method here,
-            # because it's possible that the operand does contain blanks, if
-            # inside of a quoted string.  So we have to parse for
-            # that case.  The entire thing could contain spaces if enclosed in
-            # parentheses.
-            assigned = False
-            inQuote = False
-            skip = False
-            for i in range(len(operandAndComment)):
-                if skip:
-                    skip = False
-                    continue
-                skip = False
-                c = operandAndComment[i]
-                if inQuote:
-                    if c == "'":
-                        if i + 1 < len(operandAndComment) and operandAndComment[i+1] == "'":
-                            skip = True
-                            continue
-                        inQuote = False
-                elif c == " ":
-                    assigned = True
-                    properties["operand"] = operandAndComment[:i]
-                    properties["endComment"] = operandAndComment[i+1:].strip()
-                    break
-                elif c == "'":
-                    inQuote = True
-            if inQuote:
-                error(properties, "Unterminated quote")
-                continue
-            if not assigned:
-                properties["operand"] = operandAndComment
-            if len(properties["operand"]) == 0:
-                error(properties, "Missing operand field")
-                continue
-            
+                newExpansion[parm] = "" # Default
+                while iRep < len(replacements) and "=" in replacements[iRep]:
+                    fields = replacements[iRep].split("=", 1)
+                    nonPositionalR["&" + fields[0]] = fields[1]
+                    iRep += 1
+                if iRep < len(replacements):
+                    newExpansion[parm] = replacements[iRep]
+                    iRep += 1
+            while iRep < len(replacements) and "=" in replacements[iRep]:
+                fields = replacements[iRep].split("=", 1)
+                nonPositionalR["&" + fields[0]] = fields[1]
+                iRep += 1
+            # Now the non-positional parameters.
+            for parm in nonPositionalF:
+                if parm in nonPositionalR:
+                    newExpansion[parm] = nonPositionalR[parm]
+                else:
+                    newExpansion[parm] = nonPositionalF[parm]
+            for parm in nonPositionalR:
+                if parm not in nonPositionalF:
+                    error(properties, "Unknown non-positional parameter %s" % parm)
+            readSourceFile(operation, newExpansion, copy, printable, depth+1)
+        continue
 
 # Read an entire macro library.
 def readMacroLibrary(dir):
@@ -537,6 +651,8 @@ sourceFileCount = 0
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
         readMacroLibrary(parm[10:])
+    elif parm in ["--101", "--390"]:
+        pass  # Already processed with the imports.
     elif parm.startswith("--object="):
         if not parm.endswith(".obj"):
             print("Object-code filenames must end in .obj", file=sys.stderr)
@@ -563,6 +679,10 @@ for parm in sys.argv[1:]:
         print("                    specified on the command line.")
         print("--library=L         L specifies a path to a macro library.")
         print("                    This option can appear multiple times.")
+        print("--101               (Default.) Source code is IBM AP-101B or")
+        print("                    AP-101S.")
+        print("--390               Source code is IBM System/390. (This is not")
+        print("                    supported at the present time.)")
         print()
         sys.exit(1)
     else:
@@ -573,18 +693,22 @@ if sourceFileCount == 0:
     sys.exit(1)
 
 #=============================================================================
-# Syntactical analysis of the source code.
+# Code generation.
 
-# At this point, all of the lines of source have been parsed into their
-# appropriate fields, and marked with syntactical errors, with errorCount
-# telling us how many total errors there are.  Im sure the original 
-# assembler would continue with the assembly at this point, but I don't
-# see any reason to.  Let the coder fix the syntactical errors before 
-# forcing me to figure out fallbacks for them!
+# At this point, all of the lines of source code have been read in, and macros
+# expanded.  All of the source-code lines so-obtained have been parsed into 
+# their appropriate fields:  name, operation, and operand, and operand has been 
+# further parsed into a list of sub-operands.  However, none of these things 
+# have been parsed or evaluated beyond whatever was needed for the macro 
+# expansions or splitting the operand field into sub-operands.  For example,
+# while we know what's in the name field, we don't know if it's a valid symbol
+# name or not.
 if len(source) > 0 and source[-1]["inMacroDefinition"]:
     errorCount += 1
 if errorCount > 0:
-    print("Assembly aborted.  Fix the syntax errors marked below and retry.")
+    print("%d error(s) detected.  Assembly aborted.  Fix the syntax errors" % \
+          errorCount)
+    print("marked below and retry.  Search for =========.")
     print()
     lastError = False
     for i in range(len(source)):
@@ -602,11 +726,15 @@ if errorCount > 0:
             lastError = True
     if len(source) > 0 and source[-1]["inMacroDefinition"]:
         print("No closing MEND for MACRO")
+    print("%d error(s) detected.  Assembly aborted.  Fix the syntax errors" % \
+          errorCount)
+    print("marked above and retry.  Search for =========.")
     sys.exit(1)
 
 if True: #***DEBUG***
     inCopy = False
     memberName = ""
+    # I don't really know how to get rvl/concat/nest, so it's just 0/0/0 for now
     rvl = 0
     concat = 0
     nest = 0
@@ -624,7 +752,9 @@ if True: #***DEBUG***
                       % (memberName, rvl, concat, nest))
                 inCopy = False
         if property["printable"]:
-            if property["fullComment"] or property["dotComment"]:
+            if property["dotComment"]:
+                pass
+            elif property["empty"] or property["fullComment"] or property["inMacroDefinition"]:
                 print("%5d:  %s" % (i, property["text"]))
             else:
                 print("%5d:  %-8s %-5s %-14s %s" % (
@@ -636,3 +766,10 @@ if True: #***DEBUG***
     if False:
         for n in sorted(macros):
             print("%-20s" % n, macros[n])
+    
+    if False:
+        a = macros["AMAIN"]
+        print("***DEBUG***", a)
+        print(source[a[2]])
+        print(source[a[3]])
+        print(source[a[4]])
