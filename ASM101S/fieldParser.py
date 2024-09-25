@@ -4,8 +4,8 @@ License:    This program is declared by its author, Ronald Burkey, to be the
             U.S. Public Domain, and may be freely used, modifified, or 
             distributed for any purpose whatever.
 Filename:   fieldParser.py
-Purpose:    This is part of the ASM101S assembler for IBM AP-101 
-            assembly language.
+Purpose:    This is the part of the ASM101S assembler for IBM AP-101 
+            assembly language that's responsible for most parsing.
 Requires:   TatSu (see https://github.com/neogeny/TatSu)
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
@@ -23,7 +23,7 @@ all continuation cards should be merged to provide a single operand string
 without embedded spaces other than those in quoted strings or as required in
 expressions.  This merging process is simple in almost all cases, but in the
 case of macro-prototype lines or macro-invocation lines it's very hard and 
-should be accomplished via the provided `joinOperandMacro` function.
+should be accomplished via the provided `joinOperand` function.
 
 The output is an ordered pair:
     
@@ -36,29 +36,258 @@ As a module, it:
     1.  Imports the modules for all of the defined parsers.  (As a one-time
         setup, the modules should be pre-compiled after any changes to the 
         grammars via `fieldParser.py --generate`.)
-    2.  Exposes the parsers to the importing program as the functions:
-                `parserBceAll`                Operand of a BCE instruction.
-                `parserMscAll`                Operand of an MSC instruction.
-                `parserNameCode`              Any name field outside of a macro.
-                `parserNameMacrodef`          Name field in a macro definition.
-                `parserOperationAll`          Any operation field.
-                `parserOperandInvocation`     Operand of a macro definition.
-                `parserOperandInvocation0`    Called by `joinOperandMacro`
-                `parserOperandPrototype`      Operand of a macro prototype
-                `parserOperandPrototype0`     Called by `joinOperandMacro`
-                `parserRiAll`                 Operand of an RI instruction
-                `parserRrAll`                 Operand of an RR instruction
-                `parserRsAll`                 Operand of an RS instruction
-                `parserSiAll`                 Operand of an SI instruction
-                `parserSrsAll`                Operand of an SRS instruction
-    3.  Exposes the function `joinOperandMacro` to the importing program.
-        
-Due to bugs at the present writing (2024-09-15), though probably fixed soon 
-afterward (see https://github.com/neogeny/TatSu/issues/337), the parsers should
-always be called via `parserXXXXX(fieldToBeParsed, whitespace='')`.
+    2.  Exposes the function`parserASM` method to the importing program.  
+        The parser is used as:
+            AST = parserASM(text, rule)
+        where `rule` is the name (as a string) of a rule in the `grammar`.
+        For example, `parserASM(text, "arithmeticExpression")`.
+    3.  Exposes the function `joinOperand` to the importing program.
 '''
 
 import tatsu
+
+#=============================================================================
+# Consult https://tatsu.readthedocs.io/en/stable/syntax.html for explanations
+# of the syntax used for `grammar`.  Note that `grammar` is *not* the grammar
+# for the assembly-language as such.  Rather, it is a collection of related
+# rules which can be used for parsing specific individual elements of the 
+# assembly language in particular contexts.  Therefore, when parsing a 
+# substring containing such an element, the particular grammar rule that's 
+# desired must be specified when the parser is invoked.
+#
+# (I suspect that a grammar for the language as a whole *could* be written, if
+# the "alternate" form of continuation lines were eliminated and if
+# if preprocessing were done to eliminate all continuation lines.  However, this
+# is not such a grammar.)
+
+grammar = \
+'''
+# Regarding @@whitespace, it may not be adequate and may require the parser to
+# be called with whitespace=''.  See https://github.com/neogeny/TatSu/issues/337.
+@@grammar :: asm
+@@whitespace :: None
+@@parseinfo :: True
+
+#---------------------------------------------------------------------
+# Start with a bunch of high-level rules corresponding to entire 
+# fields (name, operation, operand) of source-code lines.
+
+# Used by `joinOperand` for eliminating continuation lines in 
+# macro prototypes.
+operandPrototype0 = 
+    | end0+: ( parameter { ',' parameter } / / )
+    | end1+: ( parameter { ',' parameter } ',' / / )
+    | end2+: ( parameter { ',' parameter } [ ',' [ '&' ] ] ) $
+    | end3+: ( / */ ) $
+    ;
+
+# Used by `joinOperand` for elimination continuation lines in 
+# macro invocations
+operandInvocation0 = 
+    | end0+: ( replacement { ',' replacement } / / )
+    | end2+: ( replacement { ',' replacement } [ ',' [ "'" /[^']*/ ] ] ) $
+    | end3+: ( / */ ) $
+    | end4+: ( /[^ ]+/ / */ ) $
+    ;
+
+# Operand field of macro prototypes (*after* continuation lines are
+# eliminated).
+operandPrototype = 
+    | pi+: parameter { ',' pi+: parameter } / / 
+    | pi+: parameter { ',' pi+: parameter } $
+    | $
+    ;
+
+# Operand field of macro invocation (*after* continuation lines are
+# eliminated).
+operandInvocation = [ pi+: replacement { ',' pi+: replacement } ] ;
+
+# Name field for all code outside of macro definitions.
+nameCode = 
+    | sv+: variable
+    | id+: identifier
+    ;
+
+nameSet =
+    | sv+: sv $
+    | sv+: sv '(' exp+: arithmeticExpression ')' $
+    ;
+
+# Name field within macro definitions.
+nameMacrodef = 
+    | sequenceSymbol $
+    | subName { '.' subName } $ 
+    ;
+subName = 
+    | variable
+    | identifier
+    ;
+
+# Operation field for all contexts. 
+operationAll = subOperation { '.' subOperation } $ ;
+subOperation = 
+    | variable
+    | identifier
+    ;
+
+# Operand field for an RR instruction.
+rrAll = register ',' register $ ;
+
+# Operand field for an RS instruction.
+rsAll = 
+    | register ',' arithmeticExpression '(' register ')' $ 
+    | register ',' arithmeticExpression '(' register ',' register ')' $
+    ;
+
+# Operand field for an RI instruction.
+riAll = register ',' immediate $ ;
+
+# Operand field for an SRS instruction.
+srsAll = register ',' immediate $ ;
+
+# Operand field for an SI instruction.
+siAll = arithmeticExpression '(' register '),' immediate $ ;
+
+# Operand field for an MSC instruction.
+mscAll = 
+    | constant ',' identifier '(' constant ')' $
+    | constant ',' identifier $
+    | arithmeticExpression '(' constant ')' $ 
+    | arithmeticExpression $
+    ;
+
+# Operand field for an BCE instruction.
+bceAll = 
+    | arithmeticExpression '(' constant ')' $ 
+    | arithmeticExpression ',' arithmeticExpression $
+    | arithmeticExpression $
+    ;
+
+# Opeand field of an AIF.
+aifAll = '(' booleanExpression ')' sequenceSymbol ;
+
+#---------------------------------------------------------------------
+# Now a bunch of rules used by the rules above, but not usually used
+# directly.
+    
+quotedString = "'" /[^']*/ { "''" /[^']*/ } "'" ;
+    
+identifier = /(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*/ ;
+
+variable = 
+    | subvar variable
+    | subvar '.' variable
+    | subvar '(' arithmeticExpression ')'
+    | subvar 
+    ;
+subvar = sv ;
+
+sequenceSymbol = /[.][@#$A-Z][@#$A-Z0-9]*/ ;
+
+constant = 
+    | /[0-9]+/ 
+    | "X'" /[0-9A-F]+/ "'"
+    | "B'" /[0-1]+/ "'" 
+    | "L'" identifier
+    ;
+
+char = 
+    | substringExpression 
+    | quotedString
+    ;
+    
+substringExpression = quotedString '(' arithmeticExpression ',' arithmeticExpression ')' ;
+
+sdTerm = 
+    | /[0-9]+/ 
+    | "X'" /[0-9A-F]+/ "'"
+    | "B'" /[0-1]+/ "'" 
+    | "C" char
+    ;
+
+dcConstant = 
+    | [ number ] [ scale ] [ exp ] /[CXB]/ [ len ] char 
+    | [ number ] [ scale ] [ exp ] /[FHEDLPZ]/ [ len ] data 
+    | [ number ] [ scale ] [ exp ] /[AYSQV]/ [ len ] addresses 
+    ;
+data = "'" element { ',' element } "'" ;
+element = /[^,]+/ ;
+addresses = '(' arithmeticExpression { ',' arithmeticExpression } ')' ;
+len = 'L' [ '.' ] [ '+' | '-' ] number ;
+scale = 'S' [ '+' | '-' ] number;
+exp = 'E' [ '+' | '-' ] number;
+number = ( /[0-9]+/ | '(' arithmeticExpression ')' );
+
+register = 
+    | identifier 
+    | variable 
+    | constant 
+    ;
+
+immediate = 
+    | identifier
+    | variable
+    | constant
+    ;
+
+arithmeticExpression = term  { ( '+' | '-' ) term } ;
+term = factor  { ( '*' | '/' ) factor } ;
+factor = 
+    | constant 
+    | identifier 
+    | variable 
+    | '('  arithmeticExpression  ')' 
+    | '*'
+    ;
+
+booleanExpression = booleanTerm { / */ 'OR' / */ booleanTerm } ;
+booleanTerm = notFactor { / */ 'AND' / */ notFactor } ;
+notFactor = [ / */ 'NOT' / */ ] booleanFactor ;
+booleanFactor = 
+    | booleanLiteral 
+    | variable 
+    | '(' booleanExpression ')' 
+    | relationalExpression
+    ;
+booleanLiteral = '0' | '1' ;
+relationalExpression = 
+    | arithmeticExpression / */ relOp / */ arithmeticExpression
+    | char / */ relOp / */ char
+    ;
+relOp = 'EQ' | 'NE' | 'LT' | 'GT' | 'LE' | 'GE' ;
+
+characterExpression = 
+    | substringExpression 
+    | quotedString
+    | variable
+    | variable '(' arithmeticExpression ',' arithmeticExpression ')'
+    ;
+
+parameter = 
+    | sv '=' /[^, ]*/
+    | sv
+    ;
+    
+sv = /&[@#$A-Z][@#$A-Z0-9]*/ ;
+
+list = listItem { ',' listItem } ;
+listItem = 
+    | '(' list ')'
+    | /[^ ,()]*/
+    ;
+
+replacement = 
+    | identifier "=" "'" /[^']*/ { "''" /[^;]*/ } "'"
+    | identifier '=' '(' list ')'
+    | identifier '=' /[^, ()]*/
+    | char
+    | '(' list ')'
+    | /[^, ()]*/
+    ;
+
+'''
+
+#=============================================================================
 
 standAlone = (__name__ == "__main__")
 generateLocal = False
@@ -93,391 +322,89 @@ if standAlone:
             print("Unknown parameter %s" % parm)
             sys.exit(1)
     
-    # Compile a grammar for local use here or else convert it to Python 
-    # module for (perhaps) quicker startup in ASM101S.  In the former case it
-    # returns the generated parser class, while in the latter case it returns None,
-    # and the calling code is expected to import the module.
-    def compile(grammar):
-        name = None
-        lines = grammar.split('\n')
-        for line in lines:
-            if "@@grammar" in line:
-                fields = line.split("::")
-                name = fields[1].strip().lower()
-                break
-        if generateModules:
-            if name != None:
-                moduleName = "parser_" + name
-                print("Generating %s ..." % moduleName)
-                source = tatsu.to_python_sourcecode(grammar)
-                f = open(moduleName + ".py", "wt")
-                f.write(source)
-                f.close()
-                return None
-        if generateLocal:
-            if name != None:
-                print("Generating %s ..." % name)
-            return tatsu.compile(grammar)
-    
-    #=============================================================================
-    # Consult https://tatsu.readthedocs.io/en/stable/syntax.html for explanations
-    # of the syntax used for describing grammars.
-    # Here are various generic rules I use later in multiple grammars used in 
-    # more-specific contexts.  Note in general that *all* of the grammars defined
-    # within are whitespace-sensitive, i.e. they do not ignore whitespace unless
-    # explicitly made to do so.
-    
-    IDENTIFIER = '''
-        identifier = /[@#$A-Z][@#$A-Z0-9]*/ ;
-    '''
-    
-    VARIABLE = '''
-        variable = /&[@#$A-Z][@#$A-Z0-9]*/ ;
-    '''
-    
-    SEQUENCE_SYMBOL = '''
-        sequenceSymbol = /[.][@#$A-Z][@#$A-Z0-9]*/ ;
-    '''
-    
-    CONSTANT = '''
-        constant = 
-            | /[0-9]+/ 
-            | "X'" /[0-9A-F]+/ "'"
-            | "B'" /[0-1]+/ "'" 
-            | "L'" identifier
-            ;
-    '''
-    
-    SDTERM = '''
-        sdTerm = 
-            | /[0-9]+/ 
-            | "X'" /[0-9A-F]+/ "'"
-            | "B'" /[0-1]+/ "'" 
-            | "C'" /[^']*/ { "''" /[^']*/ } "'"
-            ;
-    '''
-    
-    DC_CONSTANT = '''
-        dcConstant = 
-            | [ number ] [ scale ] [ exp ] /[CXB]/ [ len ] char 
-            | [ number ] [ scale ] [ exp ] /[FHEDLPZ]/ [ len ] data 
-            | [ number ] [ scale ] [ exp ] /[AYSQV]/ [ len ] addresses 
-            ;
-        char = "'" /[^']*/ { "''" /[^']*/ } "'"
-        data = "'" element { ',' element } "'" ;
-        element = /[^,]+/
-        addresses = '(' arithmeticExpression { ',' arithmeticExpression } ')' ;
-        len = 'L' [ '.' ] [ '+' | '-' ] number ;
-        scale = 'S' [ '+' | '-' ] number;
-        exp = 'E' [ '+' | '-' ] number;
-        number = ( /[0-9]+/ | '(' arithmeticExpression ')' );
-    '''
-    
-    REGISTER = '''
-        register = 
-            | identifier 
-            | variable 
-            | constant 
-            ;
-    '''
-    
-    IMMEDIATE = '''
-        immediate = 
-            | identifier
-            | variable
-            | constant
-            ;
-    '''
-    
-    ARITHMETIC_EXPRESSION = '''
-        arithmeticExpression = term  { ( '+' | '-' ) term } ;
-        term = factor  { ( '*' | '/' ) factor } ;
-        factor = 
-            | constant 
-            | identifier 
-            | variable 
-            | '('  arithmeticExpression  ')' 
-            | '*'
-            ;
-    ''' + VARIABLE + IDENTIFIER + CONSTANT
-    
-    #=============================================================================
-    # Definitions of the grammars for the various fields (name, operation, operand)
-    # for the various contexts (macro prototype, macro invocation, etc.)  I've
-    # named them somewhat systematically in the form FIELDTYPE_CONTEXT.  Each
-    # of the grammars are individually compiled for subsequent use in parsing. See
-    # https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/11.
-    
-    # Name field for all code outside of macro definitions.
-    NAME_CODE = '''
-        @@grammar :: nameCode
-        @@whitespace :: None
-        name = subName { '.' subName } $ ;
-        subName = 
-            | variable '(' arithmeticExpression ')'
-            | variable
-            | identifier
-            ;
-    ''' + ARITHMETIC_EXPRESSION
-    
-    # Name field within macro definitions.  It's that same as `NAME_CODE`, except
-    # that it allows so-called "sequence symbols" as well.
-    NAME_MACRODEF = '''
-        @@grammar :: nameMacrodef
-        @@whitespace :: None
-        name = 
-            | sequenceSymbol $
-            | subName { '.' subName } $ 
-            ;
-        subName = 
-            | variable '(' arithmeticExpression ')'
-            | variable
-            | identifier
-            ;
-    ''' + ARITHMETIC_EXPRESSION + SEQUENCE_SYMBOL
-    
-    # Operation field for all contexts.  At the moment, it's actually identical
-    # to `NAME_CODE`, but with the rule names `name` and `subName` changed to 
-    # `operation` and `subOperation.
-    OPERATION_ALL = '''
-        @@grammar :: operationAll
-        @@whitespace :: None
-        operation = subOperation { '.' subOperation } $ ;
-        subOperation = 
-            | variable '(' arithmeticExpression ')'
-            | variable
-            | identifier
-            ;
-    ''' + ARITHMETIC_EXPRESSION
-    
-    # Operand field for an RR instruction.
-    RR_ALL = '''
-        @@grammar :: rrAll
-        @@whitespace :: None
-        operand = register ',' register $ ;
-    ''' + REGISTER + IDENTIFIER + VARIABLE + CONSTANT
-    
-    # Operand field for an RS instruction.
-    RS_ALL = '''
-        @@grammar :: rsAll
-        @@whitespace :: None
-        operand = 
-            | register ',' arithmeticExpression '(' register ')' $ 
-            | register ',' arithmeticExpression '(' register ',' register ')' $
-            ;
-    ''' + ARITHMETIC_EXPRESSION + REGISTER
-    
-    # Operand field for an RI instruction.
-    RI_ALL = '''
-        @@grammar :: riAll
-        @@whitespace :: None
-        operand = register ',' immediate $ ;
-    ''' + IMMEDIATE + REGISTER + IDENTIFIER + VARIABLE + CONSTANT
-    
-    # Operand field for an SRS instruction.
-    SRS_ALL = '''
-        @@grammar :: srsAll
-        @@whitespace :: None
-        operand = register ',' immediate $ ;
-    ''' + IMMEDIATE + REGISTER + IDENTIFIER + VARIABLE + CONSTANT
-    
-    # Operand field for an SI instruction.
-    SI_ALL = '''
-        @@grammar :: siAll
-        @@whitespace :: None
-        operand = arithmeticExpression '(' register '),' immediate $ ;
-    ''' + ARITHMETIC_EXPRESSION + IMMEDIATE + REGISTER
-    
-    # Operand field for an MSC instruction.
-    MSC_ALL = '''
-        @@grammar :: mscAll
-        @@whitespace :: None
-        operand = 
-            | constant ',' identifier '(' constant ')' $
-            | constant ',' identifier $
-            | arithmeticExpression '(' constant ')' $ 
-            | arithmeticExpression $
-            ;
-    ''' + ARITHMETIC_EXPRESSION
-    
-    # Operand field for an BCE instruction.
-    BCE_ALL = '''
-        @@grammar :: bceAll
-        @@whitespace :: None
-        operand = 
-            | arithmeticExpression '(' constant ')' $ 
-            | arithmeticExpression ',' arithmeticExpression $
-            | arithmeticExpression $
-            ;
-    ''' + ARITHMETIC_EXPRESSION
-    
-    # Operand for macro prototypes.
-    PARAMETER = '''
-        parameter = 
-            | variable '=' /[^, ]*/
-            | variable
-            ;
-    ''' + VARIABLE
-    OPERAND_PROTOTYPE = '''
-        @@grammar :: operandPrototype
-        @@whitespace :: None
-        operand = 
-            | parameter { ',' parameter } / / 
-            | parameter { ',' parameter } $
-            | $
-            ;
-    ''' + PARAMETER
-    # Operand for initial parsing of macro prototype cards *before* all continuation
-    # lines have been joined into one long string.  It's used only for the
-    # purpose of determining how to deal with continuation lines in macro 
-    # prototypes.  (After continuation lines have been properly handled to create a 
-    # single merged string, then the final parsing is done using the 
-    # OPERAND_PROTOTYPE rule.)  This is a trickier rule than any of those rules 
-    # above.  It covers 4 possibilities, each of which implies a different manner 
-    # of merging the next continuation lines.  Merging requires knowledge of how 
-    # much of the input string was parsed.  The use of `@@parseinfo` and `endX+:` 
-    # in the rule causes a the output to be a dictionary (instead of an
-    # AST) which gives us 2 important data:  which specific subpattern was matched
-    # and how much of the input string was used up in doing so.
-    OPERAND_PROTOTYPE_0 = '''
-        @@grammar :: operandPrototype0
-        @@whitespace :: None
-        operand = 
-            | end0+: ( parameter { ',' parameter } / / )
-            | end1+: ( parameter { ',' parameter } ',' / / )
-            | end2+: ( parameter { ',' parameter } [ ',' [ '&' ] ] ) $
-            | end3+: ( / */ ) $
-            ;
-    ''' + PARAMETER
-    
-    # Here we have the equivalents to OPERAND_PROTOTYPExx but for macro invocations
-    # rather than macro prototypes.  The allowed formats for items used as 
-    # replacement parameters are unknown, and I've simply taken a wild stab:
-    # any quoted string (with the usual provision for duplicated single-quotes)
-    # or any string at all not containing commas or spaces.
-    # Unfortunately, this stuff has a big problem with grouped arguments like
-    #        ( ... )
-    # in that it's extremely likely for these to be continued across cards,
-    # and there's no way to parse an incomplete item as anything meaningful.
-    # Consequently, detection of that condition is extremely crude.
-    LIST = '''
-        list = listItem { ',' listItem } ;
-        listItem = 
-            | '(' list ')'
-            | /[^ ,()]*/
-            ;
-    '''
-    REPLACEMENT = '''
-        replacement = 
-            | identifier "=" "'" /[^']*/ { "''" /[^;]*/ } "'"
-            | identifier '=' '(' list ')'
-            | identifier '=' /[^, ()]*/
-            | "'" /[^']*/ { "''" /[^;]*/ } "'"
-            | '(' list ')'
-            | /[^, ()]*/
-            ;
-    ''' + IDENTIFIER + LIST
-    OPERAND_INVOCATION = '''
-        @@grammar :: operandInvocation
-        @@whitespace :: None
-        operand = [ replacement { ',' replacement } ] ;
-    ''' + REPLACEMENT
-    OPERAND_INVOCATION_0 = '''
-        @@grammar :: operandInvocation0
-        @@whitespace :: None
-        operand = 
-            | end0+: ( replacement { ',' replacement } / / )
-            | end2+: ( replacement { ',' replacement } [ ',' [ "'" /[^']*/ ] ] ) $
-            | end3+: ( / */ ) $
-            | end4+: ( /[^ ]+/ / */ ) $
-            ;
-    ''' + REPLACEMENT
-
-    # Create parsers from the grammars.
-    
-    parserBceAll = compile(BCE_ALL)
-    parserMscAll = compile(MSC_ALL)
-    parserNameCode = compile(NAME_CODE)
-    parserNameMacrodef = compile(NAME_MACRODEF)
-    parserOperationAll = compile(OPERATION_ALL)
-    parserOperandInvocation = compile(OPERAND_INVOCATION)
-    parserOperandInvocation0 = compile(OPERAND_INVOCATION_0)
-    parserOperandPrototype = compile(OPERAND_PROTOTYPE)
-    parserOperandPrototype0 = compile(OPERAND_PROTOTYPE_0)
-    parserRiAll = compile(RI_ALL)
-    parserRrAll = compile(RR_ALL)
-    parserRsAll = compile(RS_ALL)
-    parserSiAll = compile(SI_ALL)
-    parserSrsAll = compile(SRS_ALL)
+    name = None
+    lines = grammar.split('\n')
+    for line in lines:
+        if "@@grammar" in line:
+            fields = line.split("::")
+            name = fields[1].strip().lower()
+            break
+    if generateModules:
+        if name != None:
+            moduleName = "parser_" + name
+            print("Generating %s ..." % moduleName)
+            source = tatsu.to_python_sourcecode(grammar)
+            f = open(moduleName + ".py", "wt")
+            f.write(source)
+            f.close()
+            parser = None
+    if generateLocal:
+        if name != None:
+            print("Generating %s ..." % name)
+        parser = tatsu.compile(grammar)
 
 if not standAlone or not generateLocal: 
     if standAlone:
-        print("Importing parsers ...")
-    import parser_bceall
-    parserBceAll = parser_bceall.bceAllParser()
-    import parser_mscall
-    parserMscAll = parser_mscall.mscAllParser()
-    import parser_namecode
-    parserNameCode = parser_namecode.nameCodeParser()
-    import parser_namemacrodef
-    parserNameMacrodef = parser_namemacrodef.nameMacrodefParser()
-    import parser_operandinvocation0
-    parserOperandInvocation0 = parser_operandinvocation0.operandInvocation0Parser()
-    import parser_operandinvocation
-    parserOperandInvocation = parser_operandinvocation.operandInvocationParser()
-    import parser_operandprototype0
-    parserOperandPrototype0 = parser_operandprototype0.operandPrototype0Parser()
-    import parser_operandprototype
-    parserOperandPrototype = parser_operandprototype.operandPrototypeParser()
-    import parser_operationall
-    parserOperationAll = parser_operationall.operationAllParser()
-    import parser_riall
-    parserRiAll = parser_riall.riAllParser()
-    import parser_rrall
-    parserRrAll = parser_rrall.rrAllParser()
-    import parser_rsall
-    parserRsAll = parser_rsall.rsAllParser()
-    import parser_siall
-    parserSiAll = parser_siall.siAllParser()
-    import parser_srsall
-    parserSrsAll = parser_srsall.srsAllParser()
+        print("Importing parser ...")
+    import parser_asm
+    parser = parser_asm.asmParser()
+
+def parserASM(text, rule):
+    try:
+        ast = parser.parse(text, start=rule, whitespace='')
+        return ast
+    except:
+        return None
 
 #=============================================================================
 # Auxiliary functions.
 
-# Forms the merged operand field of a macro prototype or macro invocation 
-# lines, taking into account continuation lines.  The arguments are:
+# Forms the merged operand field, taking into account continuation lines.  
+# Comments are discarded.  The arguments are:
 #    `lines`    A list of source-code lines.
 #    `index`    The starting index in `lines` of the macro prototype line.
 #    `column`   The column in `lines[index]` at which the operand field starts.
 #               If the operand field doesn't start on the first card, then
 #               `column` is 71.
-#    `invoke`   False for macro prototype lines, True for macro invocation lines.
-# Returns True,operand on success or False,None on error.  Comments are 
-# discarded.
-def joinOperandMacro(lines, index, column, invoke=False):
+#    `proto`    True for macro-prototype lines
+#    `invoke`   False for macro-argument lines.
+# Returns True,operand,skipCount on success or False,None,skipCount on error.  
+# `skipCount` is the number of continuation lines processed.
+def joinOperand(lines, index, column, proto=False, invoke=False):
     continuation = False
-    while True:
+    skipCount = -1
+    status = True
+    done = False
+    while continuation or skipCount < 0:
         if index >= len(lines):
-            return False,None
+            break
+        skipCount += 1
         line = lines[index]
-        if continuation:
+        if done:
+            pass
+        elif continuation:
             operand = operand + line[15:71]
         else:
             operand = line[column:71]
-        continuation = (line[71] != " ")
+        if len(line) < 72:
+            continuation = False
+        else:
+            continuation = (line[71] != " ")
         index += 1
+        if done or not (invoke or proto):
+            continue
         try:
             if invoke:
-                ret = parserOperandInvocation0.parse(operand, parseinfo=True, whitespace='')
-            else:
-                ret = parserOperandPrototype0.parse(operand, parseinfo=True, whitespace='')
+                ret = parserASM(operand, "operandInvocation0")
+            elif proto:
+                ret = parserASM(operand, "operandPrototype0")
             endpos = ret.parseinfo.endpos
             if "end0" in ret and invoke and endpos > 1 and \
                     operand[endpos-2] == ',':
                 operand = operand[:endpos-1]
             elif "end0" in ret:
-                return True,operand[:endpos-1]
+                done = True
+                operand = operand[:endpos-1]
             elif "end1" in ret:
                 operand = operand[:endpos-1]
             elif "end2" in ret:
@@ -487,11 +414,12 @@ def joinOperandMacro(lines, index, column, invoke=False):
             elif "end4" in ret:
                 operand = operand.rstrip()
             else:
-                return False,None
+                status = False
+                done = True
         except:
-            return False,None
-        if not continuation:
-            return True,operand
+            status = False
+            done = True
+    return status,operand,skipCount
 
 #=============================================================================
 # Some test code.  The test program does two things.
@@ -515,26 +443,26 @@ if __name__ == "__main__":
     
     #-------------------------------------------------------------------------
     # A selection of lines of source code follow, for testing the 
-    # `joinOperandMacro` function.
+    # `joinOperand` function.
     print("Macro prototype lines -------------------------------------------")
     testLines1 = [ 
         "&NAME    FCW2  &Y,&ENDRF=0,&INCRM=0,&POLRX=0,&POLRY=0,&ANCTL1=0,&ANCTL2*000200AA",
         "               =0,&ANCTL3=0,&ANCTL4=0,&ANCTL5=0                         000300AA"
         ]
-    print(joinOperandMacro(testLines1, 0, 15))
+    print(joinOperand(testLines1, 0, 15, proto=True))
     testLines2 = [
         "&NAME    FCW3  &E,&V,&SC=0                      75080                   000200AA"
         ]
-    print(joinOperandMacro(testLines2, 0, 15))
+    print(joinOperand(testLines2, 0, 15, proto=True))
     testLines3 = [
         " FTBEGIN &TID=NO,&STACKX=1,&EQUS=YES,&PDE=YES,&DSTACK=NO,&TYPE=MAIN     000200AA"
         ]
-    print(joinOperandMacro(testLines3, 0, 9))
+    print(joinOperand(testLines3, 0, 9, proto=True))
     testLines4 = [
         "&NAME    GENERATE &TYPE=,&COPY=,&NPCT=,&NTQE=,&NEQE=,&NIOQE=,&STOR=,   X007900AQ",
         "               &NBRQ=                                                   008000AQ"
         ]
-    print(joinOperandMacro(testLines4, 0, 18))
+    print(joinOperand(testLines4, 0, 18, proto=True))
     testLines5 = [
         "         IF    &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,X000200AA",
         "               &P14,&P15,&P16,&P17,&P18,&P19,&P20,&P21,&P22,&P23,&P24,&X000300AA",
@@ -542,18 +470,18 @@ if __name__ == "__main__":
         "               36,&P37,&P38,&P39,&P40,&P41,&P42,&P43,&P44,&P45,&P46,&P4X000500AA",
         "               7,&P48,&P49,&P50,&CC=                                    000600AA"
         ]
-    print(joinOperandMacro(testLines5, 0, 15))
+    print(joinOperand(testLines5, 0, 15, proto=True))
     testLines6 = [
         "         TFRST                                                          000200AA"
         ]
-    print(joinOperandMacro(testLines6, 0, 71))
+    print(joinOperand(testLines6, 0, 71, proto=True))
     testLines7 = [
         "&BUSTYP  TCBUS &LST1,&LST2,&LST3,&LST4,&LST5,&LST6,&LST7,&LST8,&LST9,  X000200AA",
         "               &LST10,&LST11,&LST12,&LST13,&LST14,&LST15,&LST16,&LST17,X000300AA",
         "               &LST18,&LST19,&LST20,&LST21,&LST22,&LST23,&LST24,&LST25,X000400AA",
         "               &LST26,&LST27,&LST28,&LST29,&LST30                       000500AA"
         ]
-    print(joinOperandMacro(testLines7, 0, 15))
+    print(joinOperand(testLines7, 0, 15, proto=True))
     testLines8 = [
         "         TFBCD &FCMLST=,&PLMLST=,                                      X000200AH",
         "               &DEVID01,&DEVID02,&DEVID03,&DEVID04,&DEVID05,           X000300AH",
@@ -581,18 +509,18 @@ if __name__ == "__main__":
         "               &DEVIDB1,&DEVIDB2,&DEVIDB3,&DEVIDB4,&DEVIDB5,           X002500AH",
         "               &DEVIDB6,&DEVIDB7,&DEVIDB8,&DEVIDB9,&DEVIDC0             002600AH"
         ]
-    print(joinOperandMacro(testLines8, 0, 15))
+    print(joinOperand(testLines8, 0, 15, proto=True))
     testLines9 = [
         "         TFPSA &TYPE,&PON=,&POF=,&SR=,&MC=,&PC=,&SVC=,&PC1=,&PC2=,&IM=,X004600AG",
         "               &EI0=,&EI1=,&EI2=,&EI3=,&SI=,&DSR=1,&BSR=1,&PD=YES,     X004700AG",
         "               &TRCPGM=,&TRCBGN=,&TRCEND=                               004800AG"
         ]
-    print(joinOperandMacro(testLines9, 0, 15))
+    print(joinOperand(testLines9, 0, 15, proto=True))
     testLines10 = [
         "         TFRST                                                         ?000200AA",
         "               &A,&B  THIS IS MY COMMENT                                        "
         ]
-    print(joinOperandMacro(testLines10, 0, 71))
+    print(joinOperand(testLines10, 0, 71, proto=True))
     
     print("Macro invocation lines ------------------------------------------")
     testLines1A = [
@@ -601,8 +529,8 @@ if __name__ == "__main__":
     testLines1B = [
         "         FCW2   POLRX=1,POLRY=1,ANCTL5=1,ANCTL4=1,ANCTL1=1              029800AB"
         ]
-    print(joinOperandMacro(testLines1A, 0, 16, True))
-    print(joinOperandMacro(testLines1B, 0, 16, True))
+    print(joinOperand(testLines1A, 0, 16, invoke=True))
+    print(joinOperand(testLines1B, 0, 16, invoke=True))
     testLines4A = [
         "         GENERATE COPY=(TFPCT,TFTQE,TFEQE)                              009300AK"
         ]
@@ -610,12 +538,12 @@ if __name__ == "__main__":
         "         GENERATE TYPE=CSECT,NPCT=35,NTQE=30,NEQE=25,NBRQ=20,          X048100CE",
         "               STOR=(1,1)                                               048200BW"
         ]
-    print(joinOperandMacro(testLines4A, 0, 18, True))
-    print(joinOperandMacro(testLines4B, 0, 18, True))
+    print(joinOperand(testLines4A, 0, 18, invoke=True))
+    print(joinOperand(testLines4B, 0, 18, invoke=True))
     testLines5A = [
         "         IF    (C,R4,EQ,=F'0'),AND,(C,R5,EQ,=F'0') THEN VALUE ZERO      035400AO"
         ]
-    print(joinOperandMacro(testLines5A, 0, 15, True))
+    print(joinOperand(testLines5A, 0, 15, invoke=True))
     
     testLines8A = [
         "         TFBCD FCMLST=(FCMODT,FCPCTAB-FCMODT,FCMODEND-FCPCTAB,         X113700CN",
@@ -702,39 +630,47 @@ if __name__ == "__main__":
         "               (79,(20,21,22),109,27),                                 *120500CN",
         "               (80,(14,15,16,17),,5)                                    120700BJ"
         ]
-    print(joinOperandMacro(testLines8A, 0, 15, True))
+    print(joinOperand(testLines8A, 0, 15, invoke=True))
 
     #-------------------------------------------------------------------------
     # An interactive mode for inputting arbitrary "operand" fields (confined to
     # a single card) and testing them against the defined operand grammars.
     
-    def exercise(rule, parser):
-        try:
-            ast = parser.parse(line, whitespace='')
-            print("%s:" % rule)
-            print(ast)
-            pprint.pprint(ast, indent=2, width=20)
-        except:
+    def exercise(rule):
+        ast = parserASM(line, rule)
+        if ast == None:
             print("%s failed" % rule)
+            return
+        print("%s:" % rule)
+        print(ast)
+        pprint.pprint(ast, indent=2, width=20)
     
     print("Interactive input loop ------------------------------------------")
     while True:
+        print()
         print("Input a string (empty to quit): ", end="")
         line = input().strip('\n\r')
         if len(line) == 0:
             break
         print("Matching: '%s'" % line)
-        exercise("NAME_CODE", parserNameCode)
-        exercise("NAME_MACRODEF", parserNameMacrodef)
-        exercise("OPERATION_ALL", parserOperationAll)
-        exercise("RR_ALL", parserRrAll)
-        exercise("RS_ALL", parserRsAll)
-        exercise("RI_ALL", parserRiAll)
-        exercise("SRS_ALL", parserSrsAll)
-        exercise("SI_ALL", parserSiAll)
-        exercise("MSC_ALL", parserMscAll)
-        exercise("BCE_ALL", parserBceAll)
-        exercise("OPERAND_PROTOTYPE_0", parserOperandPrototype0)
-        exercise("OPERAND_PROTOTYPE", parserOperandPrototype)
-        exercise("OPERAND_INVOCATION_0", parserOperandInvocation0)
-        exercise("OPERAND_INVOCATION", parserOperandInvocation)
+        exercise("nameCode")
+        exercise("nameSet")
+        exercise("nameMacrodef")
+        exercise("operationAll")
+        exercise("rrAll")
+        exercise("rsAll")
+        exercise("riAll")
+        exercise("srsAll")
+        exercise("siAll")
+        exercise("mscAll")
+        exercise("bceAll")
+        exercise("operandPrototype0")
+        exercise("operandPrototype")
+        exercise("operandInvocation0")
+        exercise("operandInvocation")
+        exercise("quotedString")
+        exercise("aifAll")
+        exercise("characterExpression")
+        exercise("arithmeticExpression")
+        exercise("booleanExpression")
+        
