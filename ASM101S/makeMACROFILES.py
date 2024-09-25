@@ -23,7 +23,7 @@ import sys
 import os
 
 for filename in sorted(os.listdir(".")):
-    if not filename.endswith(".asm") and not filename.endswith(".bal"):
+    if not filename.endswith(".asm"):
         print("; " + filename)
         continue
     hasMacros = False
