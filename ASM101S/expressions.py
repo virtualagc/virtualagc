@@ -18,12 +18,38 @@ but mainly this file is a module to be imported into ASM101S.
 Note that in all cases within this module, an "expression" is a so-called AST
 (Abstract Syntax Tree) in the form returned by a TatSu parser.
 '''
+
+import re
 from fieldParser import parserASM
 
-# Global symbolic variables for the macro language.  Note that we don't need
-# to distinguish between `GBLA`, `GBLB`, and `GBLC` in `svGlobals` (nor between
-# `LCLA`, `LCLB`, and `LCLC` in `svLocals` elsewhere), because the datatypes of
-# the variables do it for us in Python.  Thus, 0, False, and "".
+'''
+Global symbolic variables for the macro language.  Note that we don't need
+to distinguish between `GBLA`, `GBLB`, and `GBLC` in `svGlobals` (nor between
+`LCLA`, `LCLB`, and `LCLC` in `svLocals` elsewhere), because the datatypes of
+the values assigned to the variables do it for us in Python.   (The defaults,
+by the way, are 0, False, and '' respectively.)
+
+With that said, the mere datatypes of the variables do not necessarily convey
+all of the metainformation about the variables which we may need to track under
+all possible circumstances.  For that reason, any symbolic variable such as &A
+that appears `svGlobals` (or in the similar `svLocals`) can optionally be
+accompanied by a separate key _&A whose value is a dictionary containing 
+whatever additional metadata that turns out to be relevant.  
+
+I can't specify much of that metadata at the moment.  The example that I know
+of, which has prompted this comment in the first place is that the `svLocals`
+structure used in macro expansions tracks both macro parameters and local 
+"SET symbols`, and that under some circumstances additional data needs to 
+accompany macro parameters in order to implement the so-called "number attribute"
+operator (N'); specifically, omitted parameters are assigned default values,
+but N' needs to know specifically either the parameter has been omitted or not,
+rather than merely knowning that it has been assigned a default value.  I'm
+sure there are a number of other corner cases of that nature.  
+
+In the specific case just mentioned, the following metadata is added to 
+`svLocals` for macro parameters (only):
+    "omitted" : boolean
+'''
 svGlobals = { }  # Use as `global` in every function.
 # There can also be "local" variables in the global context.  By the "global
 # local" context, I refer to items defined at the top-level scope but not 
@@ -32,20 +58,82 @@ svGlobalLocals = { } # Do *not* use as `global` or `nonlocal`.
 
 # Mark an error in the array of source code.
 errorCount = 0
-def error(line, msg):
+def error(properties, msg):
     global errorCount
     errorCount += 1
-    line["errors"].append(msg)
+    properties["errors"].append(msg)
 def getErrorCount():
     return errorCount
+
+'''
+This function replaces all symbolic variables (e.g., &A) given by 
+`svGlobals` and `svLocals` in a string.  `svPattern` is a compiled regular
+expression that matches any symbolic variable, whether previously-defined or
+not.
+
+Aside from the reverse order of replacements of multiple matches just mentioned,
+this sounds trivially straightforward, but it's actually horrible.  Here's the
+problem:  The normal case is that the "string" which is being replaced is 
+normally a bare symbolic variable such as &A that's an element of an AST, so
+what we want to "replace" it with is really itself an AST.
+'''
+svPattern = re.compile("(?<!&)&[A-Z#$@][A-Z#$@0-9]*(?![#@_$A-Z0-9])")
+def svReplace(properties, text, svLocals):
+    global svGlobals
+    
+    if "&" not in text:  # Quick test for absence of symbolic variables.
+        return text
+    
+    # We want to do the replacements in reverse order (i.e., from end of the 
+    # string to the beginning of the string), so as to keep the indexes of 
+    # matches that haven't yet been replaced from changing.
+    matches = []
+    for match in svPattern.finditer(text):
+        matches.append(match)
+    for match in reversed(matches):
+        sv = match.group()
+        if sv in svLocals:
+            replacement = svLocals[sv]
+        elif sv in svGlobals:
+            replacement = svGlobals[sv]
+        else:
+            continue
+        start = match.span()[0]
+        end = match.span()[1]
+        if end < len(text) and text[end] == ".": # Optional "join" character.
+            end += 1
+        if isinstance(replacement, int):
+            replacement = str(replacement)
+        elif replacement == False:
+            replacement = "0"
+        elif replacement == True:
+            replacement = "1"
+        elif isinstance(replacement, (list,tuple)):
+            if text[start-2:start] == "N'":
+                start -= 2
+                replacement = str(len(replacement))
+            else:
+                error(properties, "Cannot use list as a replacement: %s=%s" % \
+                      (sv, str(replacement)))
+                continue
+        try:
+            text = text[:start] + replacement + text[end:]
+        except:
+            pass
+            print("***DEBUG***")
+    
+    return text
 
 # In parsed expressions, remove useless levels of tuple/list embedding, such
 # as [([expression])] -> expression.
 def unroll(expression):
-    while isinstance(expression, (tuple, list)) and \
-            len(expression) == 1 or \
-            (len(expression) == 2 and expression[1] == []):
-        expression = expression [0]
+    while isinstance(expression, (tuple, list)):
+        if len(expression) == 1:
+            expression = expression[0]
+        elif len(expression) > 0 and expression[-1] == []:
+            expression = expression[:-1]
+        else:
+            break
     return expression
 
 # Evaluate an arithmetic expression to an integer and return it, or else `None`
@@ -71,10 +159,74 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
                 return(sv[expression])
             error(properties, "Not an integer value: %s" % expression)
             return None
-    if isinstance(expression, (list,tuple)) and len(expression) == 3 and \
-            expression[0] == '(' and expression[2] == ')':
+    if not isinstance(expression, (list, tuple)):
+        error(properties, "Eval error")
+        return None
+    if len(expression) == 3 and expression[0] == '(' and expression[2] == ')':
         return evalArithmeticExpression(expression[1], svLocals, properties)
-    if isinstance(expression, (list,tuple)) and len(expression) == 2:
+    if len(expression) == 3 and expression[0] == "X'" and expression[2] == "'":
+        try:
+            return int(expression[1], 16)
+        except:
+            error(properties, "Not hexadecimal: %s" % expression[1])
+            return None
+    if len(expression) == 3 and expression[0] == "B'" and expression[2] == "'":
+        try:
+            return int(expression[1], 2)
+        except:
+            error(properties, "Not binary: %s" % expression[1])
+            return None
+    if len(expression) == 2 and isinstance(expression[0], str) and \
+            expression[0] in ["N'", "K'", "L'", "S'", "I'"]:
+        op = expression[0]
+        symvar = expression[1]
+        index = None
+        if isinstance(symvar, (tuple,list)):
+            if len(symvar) == 4 and symvar[1] == '(' and symvar[3] == ')':
+                pass
+            else:
+                error(properties, "Unrecognized operand of %s: %s" % \
+                      (op, symvar[2]))
+                return None
+            index = evalArithmeticExpression(symvar[2], svLocals, properties)
+            if index == None:
+                error(properties, "Cannot compute index of %s: %s" %\
+                      (symvar[0], str(symvar[2])))
+                return None
+            symvar = symvar[0]
+        if symvar in svLocals:
+            sv = svLocals
+        elif symvar in svGlobals:
+            sv = svGlobals
+        else:
+            error(properties, "Symbolic variable %s not found" % symvar)
+            return None
+        var = sv[symvar]
+        if index != None:
+            index -= 1 # Change 1-based to 0-based.
+            if index < 0 or index >= len(var):
+                error(properties, "Index out of range")
+                return None
+            var = var[index]
+        metavar = "_" + symvar
+        if metavar in sv:
+            meta = sv[metavar]
+        else:
+            meta = {}
+        if op == "N'":
+            if symvar != "&SYSLIST" and "omitted" not in meta:
+                error(properties, "Not a macro parameter: %s" % symvar)
+                return None
+            if symvar != "&SYSLIST" and meta["omitted"]:
+                return 0
+            if not isinstance(var, (tuple, list)):
+                return 1
+            return len(var)
+        else:
+            error(properties, "Not yet implemented: %s" % op)
+            return None
+        
+    if len(expression) == 2:
         left = evalArithmeticExpression(expression[0], svLocals, properties)
         if left != None:
             next = expression[1]
@@ -116,28 +268,27 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
     
     expression = unroll(expression)
     
+    while isinstance(expression, (tuple,list)) and len(expression) == 3 and \
+            expression[0] == '(' and expression[2] == ')':
+        expression = unroll(expression[1])
+    
     if isinstance(expression, str):
         if expression == '0':
             return False
         if expression == '1':
             return True
         if expression[:1] == "&":
+            # We shouldn't ever get to here.
             # I'm not sure if this case can arise in the program flow, because
             # I haven't yet worked out when replacements of symbolic variables
             # is performed, but it should be okay here anyway.
             if expression in svLocals:
-                replacement = svLocals[expression]
+                return svLocals[expression]
             elif expression in svGlobals:
-                replacement = svGlobals[expression]
+                return svGlobals[expression]
             else:
                 error(properties, "Not defined: %s" % expression)
                 return None
-            ast = parserASM(svLocals[expression], "booleanExpression")
-            if ast == None:
-                error(properties, "Cannot parse %s (%s) as boolean expression" \
-                      % (expression, svLocals[expression]))
-                return None
-            return evalBooleanExpression(properties, ast, svLocals)
         error(properties, "Implementation error:  %s as boolean expression" \
               % expression)
         return None
@@ -146,59 +297,145 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
             expression[0][:1] == "&" and \
             expression[1] == '(' and expression[3] == ')':
         sv = expression[0]
-        n = evalArithmeticExpression(properties, expression[2], svLocals)
+        n = evalArithmeticExpression(expression[2], svLocals, properties)
         if n == None:
             return None
         if sv in svLocals:
             if not isinstance(svLocals[sv], list):
-                error(properties, "Access to non-subscripted local %s(%d)" % (sv, n))
+                error(properties, \
+                      "Access to non-subscripted local %s(%d)" % (sv, n))
                 return None
             if n < 0 or n >= len(svLocals[sv]):
-                error(properties, "Subscript out of range for local %s(%d)" % (sv, n))
+                error(properties, \
+                      "Subscript out of range for local %s(%d)" % (sv, n))
             return svLocals[sv][n]
         if sv in svGlobals:
             if not isinstance(svGlobals[sv], list):
-                error(properties, "Access to non-subscripted global %s(%d)" % (sv, n))
+                error(properties, \
+                      "Access to non-subscripted global %s(%d)" % (sv, n))
                 return None
             if n < 0 or n >= len(svGlobals[sv]):
-                error(properties, "Subscript out of range for global %s(%d)" % (sv, n))
+                error(properties, \
+                      "Subscript out of range for global %s(%d)" % (sv, n))
             return svGlobals[sv][n]
-        error(properties, "Symbolic variable %s not found in local or global scope" % sv)
+        error(properties, \
+              "Symbolic variable %s not found in local or global scope" % sv)
         return None
     # NOT
     if len(expression) == 4 and expression[1] == "NOT":
-        right = evalBooleanExpression(properties, expression[3], svLocals)
+        right = evalBooleanExpression(expression[3], svLocals, properties)
         if right == None:
+            error(properties, \
+                  "Cannot evaluate boolean expression %s" \
+                  % str(right))
             return None
         return (not right)
     # AND, OR
     if len(expression) == 2:
         left = unroll(expression[0])
-        right = unroll(expressin[1])
+        right = unroll(expression[1])
         if isinstance(right, (tuple,list)) and \
                 len(right) == 4 and \
                 right[1] in ["AND", "OR"]:
             op = right[1]
-            valLeft = evalBooleanExpression(properties, left, svLocals)
+            valLeft = evalBooleanExpression(left, svLocals, properties)
             if valLeft == None:
+                error(properties, \
+                      "Cannot evaluate boolean expression %s" \
+                      % str(left))
                 return None
-            valRight = evalBooleanExpression(properties, right, svLocals)
+            valRight = evalBooleanExpression(right[3], svLocals, properties)
             if valRight == None:
+                error(properties, \
+                      "Cannot evaluate boolean expression %s" \
+                      % str(right[3]))
                 return None
             if op == "OR":
-                return (left or right)
+                return (valLeft or valRight)
             else:
-                return (left and right)
+                return (valLeft and valRight)
     # Relational expressions:
     if len(expression) == 5 and \
             expression[2] in ["EQ", "NE", "LT", "LE", "GT", "GE"]:
+        op = expression[2]
         left = unroll(expression[0])
         right = unroll(expression[4])
-        
-        # ***FIXME***
+        # Should we do a string comparison or an arithmetical one?  We can
+        # recognise string expressions since the first token is always "'".
+        def isString(expression):
+            e = unroll(expression)
+            if isinstance(e, str):
+                return e == "'"
+            if isinstance(e, (tuple,list)) and len(e) > 0:
+                return isString(e[0])
+            return False
+        leftIsString = isString(left)
+        rightIsString = isString(right)
+        if leftIsString != rightIsString:
+            error(properties, "Cannot determine int vs char for comparison")
+            return None
+        # Arithmetical
+        if not leftIsString and not rightIsString:
+            valLeft = evalArithmeticExpression(left, svLocals, properties)
+            if valLeft != None:
+                valRight = evalArithmeticExpression(right, svLocals, properties)
+                if valRight != None:
+                    if op == "EQ":
+                        return valLeft == valRight
+                    if op == "NE":
+                        return valLeft != valRight
+                    if op == "LT":
+                        return valLeft < valRight
+                    if op == "LE":
+                        return valLeft <= valRight
+                    if op == "GT":
+                        return valLeft > valRight
+                    if op == "GE":
+                        return valLeft >= valRight
+                    # Can't get here.
+                error(properties, \
+                      "Cannot evaluate relational expression %s" \
+                      % str(expression))
+                return None
+        # Character
+        if leftIsString and rightIsString:
+            valLeft = evalCharacterExpression(left, svLocals, properties)
+            if valLeft != None:
+                valRight = evalCharacterExpression(right, svLocals, properties)
+                if valRight != None:
+                    # Recall string comparisons prioritize string length, and
+                    # only compare actual character differences when the 
+                    # lengths of the strings are identical.
+                    if len(valLeft) < len(valRight):
+                        cmp = -1
+                    elif len(valLeft) > len(valRight):
+                        cmp = 1
+                    elif valLeft < valRight: # Lengths are the same.
+                        cmp = -1
+                    elif valLeft > valRight:
+                        cmp = 1
+                    else:
+                        cmp = 0
+                    if op == "EQ":
+                        return cmp == 0
+                    if op == "NE":
+                        return cmp != 0
+                    if op == "LT":
+                        return cmp < 0
+                    if op == "LE":
+                        return cmp <= 0
+                    if op == "GT":
+                        return cmp > 0
+                    if op == "GE":
+                        return cmp >= 0
+                    # Can't get here.
+        error(properties, \
+              "Cannot evaluate relational expression %s" \
+              % str(expression))
         return None
-    error(properties, "Cannot evaluate boolean expression %s", \
-          expression, svLocals)
+    error(properties, \
+          "Cannot evaluate boolean expression %s" \
+          % str(expression))
     return None
 
 # Evaluate a character expression to string and return it, or else `None`
@@ -208,11 +445,70 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
 # the globals in case of overlap
 def evalCharacterExpression(expression, svLocals, properties = { "errors": [] }):
     global svGlobals
+    s = None
     
     expression = unroll(expression)
     
-    error(properties, "Evaluation of character expressions not yet implemented")
-    
+    if isinstance(expression, (list,tuple)):
+        if len(expression) == 4 and expression[0] == "'" and \
+                expression[3] == "'":
+            # This case is for 'string1''string2'...'stringN'
+            s = expression[1]
+            for ss in expression[2]:
+                if not isinstance(ss, (list,tuple)) or len(ss) != 2 \
+                        or ss[0] != "''":
+                    error(properties, \
+                          "Cannot evaluate string expression: %s" % \
+                          str(expression))
+                    return None
+                s = s + ss[1]
+        elif len(expression) in [2,3]:
+            s = evalCharacterExpression(expression[0], svLocals, properties)
+            if s == None:
+                error(properties, \
+                      "Cannot evaluate string expression: %s" % \
+                      str(expression[0]))
+                return None
+            for index in range(1, len(expression)):
+                e = unroll(expression[index])
+                if isinstance(e, (list,tuple)) and len(e) == 2 and e[0] == '.':
+                    # This case is for exp1.exp2
+                    ss = evalCharacterExpression(e[1], svLocals, properties)
+                    if ss == None:
+                        error(properties, \
+                              "Cannot evaluate string expression: %s" % \
+                              str(expression[1]))
+                        return None
+                    s = s + ss
+                elif isinstance(e, (list,tuple)) and len(e) == 5 and \
+                        e[0] == '(' and e[2] == ',' and e[4] == ')':
+                    # This is the case for exp(i1,i2)
+                    i = evalArithmeticExpression(e[1], svLocals, properties)
+                    if i == None:
+                        error(properties, \
+                              "Cannot evaluate index %s" % str(e[1]))
+                        return None
+                    i -= 1
+                    n = evalArithmeticExpression(e[3], svLocals, properties)
+                    if n == None:
+                        error(properties, \
+                              "Cannot evaluate length %s" % str(e[3]))
+                        return None
+                    if i < 0 or n < 0 or i + n > len(s):
+                        error(properties, "Index or length out of range")
+                        return None
+                    s = s[i : i + n]
+                else:
+                    ss = evalCharacterExpression(e, svLocals, properties)
+                    if ss == None:
+                        error(properties, \
+                              "Cannot evaluate string expression: %s" % \
+                              str(expression[1]))
+                        return None
+                    s = s + ss
+    if s != None:
+        return svReplace(properties, s, svLocals)
+    error(properties, "Cannot evaluate string expression: %s" % str(expression))
     return None
 
 # Check of two quantities are of the same type.  Only supported:
@@ -261,7 +557,7 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
                       (operation, field))
                 continue
             length = subfields[1][:-1]
-            ast = parserASM(length, "arithmeticExpression")
+            ast = parserASM(length, "arithmeticExpressionOnly")
             if ast == None:
                 error(properties, "Could not parse dimension of %s" % field)
                 continue
@@ -276,7 +572,7 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
             field = subfields[0]
             value = [value] * n
         if field in sv:
-            if isDifferentType(field[sv], value):
+            if isDifferentType(sv[field], value):
                 error(properties, \
                       "Attempt to change type of existing symbolic variable %s" \
                       % field)
@@ -287,7 +583,8 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
 # `name` and `operand` are strings.
 def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     global svGlobals
-
+    
+    operand = operand.strip()
     pname = parserASM(name, "nameSet")
     if pname == None:
         error(properties, \
@@ -304,6 +601,23 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         sv = svLocals
     elif sname in svGlobals:
         sv = svGlobals
+    elif "exp" not in pname:
+        # The (non-arrayed) SET symbol that's the target of the SETx operation
+        # has not been previously declared, which the System/360 assembly-language
+        # manual absolutely requires.  However, I believe that in AP-101S
+        # assembly language there is likely a convenience feature in which the
+        # SET symbol will be automatically declared as local.
+        if operation == "SETA":
+            dv = 0
+        elif operation == "SETB":
+            dv = False
+        elif operation == "SETC":
+            dv = ""
+        else:
+            error(properties, "Instruction is not SETA, SETB, or SETC")
+            return
+        sv = svLocals
+        svLocals[sname] = dv
     else:
         error(properties, "Symbolic variable %s undeclared" % sname)
         return
@@ -317,23 +631,25 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         error(properties, "Is not subscripted: %s" % sname)
         return
     if operation == "SETA" and isinstance(v, int):
-        ast = parserASM(operand, "arithmeticExpression")
+        ast = parserASM(operand, "arithmeticExpressionOnly")
         if ast == None:
             error(properties, "Cannot parse arithmetic expression %s" % operand)
             return
         value = evalArithmeticExpression(ast, svLocals, properties)
     elif operation == "SETB" and isinstance(v, bool):
-        ast = parserASM(operand, "booleanExpression")
+        ast = parserASM(operand, "booleanExpressionOnly")
         if ast == None:
             error(properties, "Cannot parse boolean expression %s" % operand)
             return
         value = evalBooleanExpression(ast, svLocals, properties)
     elif operation == "SETC" and isinstance(v, str):
-        ast = parserASM(operand, "characterExpression")
+        ast = parserASM(operand, "characterExpressionOnly")
         if ast == None:
             error(properties, "Cannot parse character expression %s" % operand)
             return
         value = evalCharacterExpression(ast, svLocals, properties)
+        if value != None:
+            value = value[:8] # Max length of a SETC symbol is 8 characters.
     else:
         error(properties, "Data type doesn't match %s" % sname)
         return
@@ -407,7 +723,7 @@ Various symbolic variables have been predefined.""")
         fields = line.split(None, 1)
         if len(fields) == 2 and \
                 fields[0] in { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB", "LCLC"}:
-            print("Declaration ----------------------------------------------")
+            print("Declaration")
             properties = { "errors": [] }
             svDeclare(fields[0], fields[1], svLocals, properties)
             if len(properties["errors"]) > 0:
@@ -416,16 +732,16 @@ Various symbolic variables have been predefined.""")
             continue
         fields = line.split(None, 2)
         if len(fields) == 3 and fields[1] in { "SETA", "SETB", "SETC"}:
-            print("Assignment -----------------------------------------------")
+            print("Assignment")
             properties = { "errors": [] }
             svSet(fields[1], fields[0], fields[2], svLocals, properties)
             if len(properties["errors"]) > 0:
                 for errorMessage in properties["errors"]:
                     print(errorMessage)
             continue
-        arithmeticExpression = parserASM(line, "arithmeticExpression")
+        arithmeticExpression = parserASM(line, "arithmeticExpressionOnly")
         if arithmeticExpression != None:
-            print("Arithmetic expression ------------------------------------")
+            print("Arithmetic expression")
             properties = { "errors": [] }
             value = evalArithmeticExpression(arithmeticExpression, svLocals, properties)
             if value != None:
@@ -433,9 +749,9 @@ Various symbolic variables have been predefined.""")
             if len(properties["errors"]) > 0:
                 for errorMessage in properties["errors"]:
                     print(errorMessage)
-        booleanExpression = parserASM(line, "booleanExpression")
+        booleanExpression = parserASM(line, "booleanExpressionOnly")
         if booleanExpression != None:
-            print("Boolean expression ---------------------------------------")
+            print("Boolean expression")
             properties = { "errors": [] }
             value = evalBooleanExpression(booleanExpression, svLocals, properties)
             if value != None:
@@ -443,9 +759,9 @@ Various symbolic variables have been predefined.""")
             if len(properties["errors"]) > 0:
                 for errorMessage in properties["errors"]:
                     print(errorMessage)
-        characterExpression = parserASM(line, "characterExpression")
+        characterExpression = parserASM(line, "characterExpressionOnly")
         if characterExpression != None:
-            print("Character expression -------------------------------------")
+            print("Character expression")
             properties = { "errors": [] }
             value = evalCharacterExpression(characterExpression, svLocals, properties)
             if value != None:

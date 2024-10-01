@@ -230,9 +230,11 @@ immediate =
     | constant
     ;
 
+arithmeticExpressionOnly = arithmeticExpression $ ;
 arithmeticExpression = term  { ( '+' | '-' ) term } ;
 term = factor  { ( '*' | '/' ) factor } ;
 factor = 
+    | /[NKLSI]'/ variable
     | constant 
     | identifier 
     | variable 
@@ -240,28 +242,26 @@ factor =
     | '*'
     ;
 
+booleanExpressionOnly = booleanExpression $ ;
 booleanExpression = booleanTerm { / */ 'OR' / */ booleanTerm } ;
 booleanTerm = notFactor { / */ 'AND' / */ notFactor } ;
 notFactor = [ / */ 'NOT' / */ ] booleanFactor ;
 booleanFactor = 
-    | booleanLiteral 
     | variable 
     | '(' booleanExpression ')' 
     | relationalExpression
+    | booleanLiteral 
     ;
 booleanLiteral = '0' | '1' ;
 relationalExpression = 
     | arithmeticExpression / */ relOp / */ arithmeticExpression
-    | char / */ relOp / */ char
+    | characterExpression / */ relOp / */ characterExpression
     ;
 relOp = 'EQ' | 'NE' | 'LT' | 'GT' | 'LE' | 'GE' ;
 
-characterExpression = 
-    | substringExpression 
-    | quotedString
-    | variable
-    | variable '(' arithmeticExpression ',' arithmeticExpression ')'
-    ;
+characterExpressionOnly = characterExpression $ ;
+characterExpression = quotedString [ substringNotation ] { [ '.' ] characterExpression } ;
+substringNotation = '(' arithmeticExpression ',' arithmeticExpression ')' ;
 
 parameter = 
     | sv '=' /[^, ]*/
@@ -670,7 +670,7 @@ if __name__ == "__main__":
         exercise("operandInvocation")
         exercise("quotedString")
         exercise("aifAll")
-        exercise("characterExpression")
-        exercise("arithmeticExpression")
-        exercise("booleanExpression")
+        exercise("characterExpressionOnly")
+        exercise("arithmeticExpressionOnly")
+        exercise("booleanExpressionOnly")
         

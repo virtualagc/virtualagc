@@ -13,7 +13,6 @@ History:    2024-08-21 RSB  Began.
 
 import sys
 import os
-import re
 from pathlib import Path
 from fieldParser import *
 from expressions import *
@@ -132,57 +131,6 @@ def isSymbolExpression(name, inMacroDefinition = False):
 macros = { }
 # Sequence symbols for the global-local scope.
 sequenceGlobalLocals = { }
-
-# This function replaces all symbolic variables (e.g., &A) given by 
-# `svGlobals` and `svLocals` in a string.  `svPattern` is a compiled regular
-# expression that matches any symbolic variable, whether previously-defined or
-# not.
-svPattern = re.compile("(?<!&)&[A-Z#$@][A-Z#$@0-9]*(?![#@_$A-Z0-9])")
-def svReplace(properties, text, svLocals):
-    global svGlobals
-    
-    if "&" not in text:  # Quick test for absence of symbolic variables.
-        return text
-    
-    # We want to do the replacements in reverse order (i.e., from end of the 
-    # string to the beginning of the string), so as to keep the indexes of 
-    # matches that haven't yet been replaced from changing.
-    matches = []
-    for match in svPattern.finditer(text):
-        matches.append(match)
-    for match in reversed(matches):
-        sv = match.group()
-        if sv in svLocals:
-            replacement = svLocals[sv]
-        elif sv in svGlobals:
-            replacement = svGlobals[sv]
-        else:
-            continue
-        start = match.span()[0]
-        end = match.span()[1]
-        if end < len(text) and text[end] == ".": # Optional "join" character.
-            end += 1
-        if isinstance(replacement, int):
-            replacement = str(replacement)
-        elif replacement == False:
-            replacement = "0"
-        elif replacement == True:
-            replacement = "1"
-        elif isinstance(replacement, (list,tuple)):
-            if text[start-2:start] == "N'":
-                start -= 2
-                replacement = str(len(replacement))
-            else:
-                error(properties, "Cannot use list as a replacement: %s=%s" % \
-                      (sv, str(replacement)))
-                continue
-        try:
-            text = text[:start] + replacement + text[end:]
-        except:
-            pass
-            print("***DEBUG***")
-    
-    return text
 
 # The `parseLine` function parses an input card (namely `lines[lineNumber]`) 
 # into `name`, `operation`, and `operation`.
@@ -317,19 +265,14 @@ def evalMacroArgument(properties, suboperand):
                str(suboperand))
         return None,None
 
+# See also the comments about `svGlobals` in the module expressions.py.
 # Recursively read a batch of lines of source code, expanding if necessary for 
 # `COPY` pseudo-op or invocation of a macro.  The parameters:
 #    fromWhere   Either a filename or the name of a macro.  The latter lets 
 #                us read in all of the macro definitions at startup, and then 
 #                reuse the definitionas as many times as we like without 
 #                rereading the file that contained them.
-#    svLocals    If the value is None, then it means that we're *not* in the
-#                process of expanding a macro.  If the value is a dict (even
-#                an empty dict), then we are in the process of expanding a
-#                macro, and the dict gives is the replacement value for each
-#                formal parameter.  Any local variables (`LCLA`, `LCLB`, or
-#                `LCLC`) will also go into here, so the calling code should not
-#                expect to be able to use `svLocals` again.
+#    svLocals    See below.
 #    sequence    A dictionary of sequence symbols encountered, and the 
 #                line number at which they start.
 #    copy        Indicates that the file is being read as the target of a 
@@ -339,12 +282,19 @@ def evalMacroArgument(properties, suboperand):
 #                library.
 #    depth       The depth into the macro expansion(s).  0 is for not an 
 #                expansion.
+# `svLocals` is similar to the global dictionary `svGlobals` in that it gives
+# the symbolic variables that are "local" to a macro invocation rather than the
+# symbolic variables accessible globally.  Initially, the only local variables
+# are the replacement values for the macro's formal parameters, but LCLx and
+# SETx instructions within the macro itself can alter that throughout the 
+# macro expansion.  
 source = []
 libraries = []
 metadata = {} # Metadata for the assembly, such as the TTILE.
+sysndx = -1
 def readSourceFile(fromWhere, svLocals, sequence, \
                    copy=False, printable=True, depth=0):
-    global source, macros, svGlobals, metadata
+    global source, macros, svGlobals, metadata, sysndx
     lineNumber = -1
     inMacroProto = False
     inMacroDefinition = False
@@ -381,11 +331,6 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             else:
                 suffix = " "
             thisSource.append(source[i]["text"] + suffix)
-        if False:
-            print("***DEBUG*** A", fromWhere, svLocals, copy, printable)
-            for line in thisSource:
-                print("***DEBUG*** B", line)
-            sys.exit(1)
     else:
         try:
             f = open(fromWhere, "rt")
@@ -508,20 +453,39 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         if operation in { "SETA", "SETB", "SETC" }:
             svSet(operation, name, operand, svLocals, properties)
             continue
-        if operation == "AIF" or operation == "AGO":
-            # ***FIXME***
-            print("***DEBUG***")
-            print(operation)
-            print(operand)
-            print(sequence)
+        if  operation == "AGO":
+            target = operand
+            if target in sequence:
+                if fromWhere != sequence[target][0]:
+                    error(properties, "Target out of this macro")
+                    continue
+                lineNumber = sequence[target][1] - 1
+            else:
+                skipToSeq = target
+            continue
+        if operation == "AIF":
             ast = parserASM(operand, "aifAll")
             if isinstance(ast, tuple) and len(ast) == 4 and \
                     ast[0] == '(' and ast[2] == ')':
                 target = ast[3]
                 expression = ast[1]
                 passFail = evalBooleanExpression(expression, svLocals, properties)
-                print("***DEBUG***)")
-                # ***FIXME***
+                if passFail == None:
+                    error(properties, "Cannot evaluate %s" % str(expression))
+                    continue
+                if not passFail:
+                    continue
+                # The conditional test has passed.  We must now "go to" the
+                # selected sequence symbol
+                #print("***DEBUG***")
+                if target in sequence:
+                    if fromWhere != sequence[target][0]:
+                        error(properties, "Target out of this macro")
+                        continue
+                    lineNumber = sequence[target][1] - 1
+                else:
+                    skipToSeq = target
+                continue
             else:
                 error(properties, "Unrecognized AIF operand: " + operand)
             continue
@@ -541,32 +505,38 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             properties["operand"] = operand
 
         if operation in macros:
+            sysndx += 1
             macrostats = macros[operation]
             # The replacement parameters are in properties["operand"]
             # But we need to track down the formal parameters.
             formals = source[macrostats[3]]["operand"]
             pformals = parserASM(formals, "operandPrototype")
             poperands = parserASM(operand, "operandInvocation")
-            if True:
-                print(("***DEBUG*** Expand(%d) " % depth) + operation)
-                if isinstance(poperands, dict) and "pi" in poperands:
-                    poperands = poperands["pi"]
-                else:
-                    poperands = []
-                if isinstance(pformals, dict) and "pi" in pformals:
-                    pformals = pformals["pi"]
-                else:
-                    pformals = []
-                print(poperands)
-                print(pformals)
+            if isinstance(poperands, dict) and "pi" in poperands:
+                poperands = poperands["pi"]
+            else:
+                poperands = []
+            if isinstance(pformals, dict) and "pi" in pformals:
+                pformals = pformals["pi"]
+            else:
+                pformals = []
+            #print(("***DEBUG*** Expand(%d) " % depth) + operation)
+            #print(poperands)
+            #print(pformals)
             # Relate the formal parameters to their replacements.  That'll be
             # the dictionary `newLocals`.
-            newLocals = {}
+            newLocals = { }
+            fname = source[macrostats[3]]["name"]
+            if fname != "":
+                newLocals[fname] = name
             # First fill in all default values.
+            syslist = []
             for i in range(len(pformals) - 1, -1, -1):
                 pformal = pformals[i]
                 if isinstance(pformal, str):
                     newLocals[pformal] = ''
+                    newLocals["_" + pformal] = { "omitted": True }
+                    syslist.append('')
                 elif isinstance(pformal, (list,tuple)):
                     if len(pformal) != 3 or pformal[1] != "=" or \
                             pformal[0][:1] != "&" or \
@@ -576,6 +546,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                                str(pformal))
                         continue
                     newLocals[pformal[0]] = pformal[2]
+                    newLocals["_" + pformal[0]] = { "omitted": True }
                     del pformals[i]
                 else:
                     error(properties, \
@@ -595,11 +566,14 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                         # I think.
                         continue
                     newLocals[pformals[i]] = value
+                    newLocals["_" + pformals[i]]["omitted"] = False
+                    syslist[i] = value
                     i += 1
                 else:
-                    newLocals[key] = suboperand
-                
-            print(newLocals) # ***DEBUG***
+                    newLocals[key] = value
+                    newLocals["_" + key]["omitted"] = False
+            newLocals["&SYSLIST"] = syslist
+            newLocals["&SYSNDX"] = sysndx
             readSourceFile(operation, newLocals, sequence, copy=copy, \
                            printable=printable, depth=depth+1)
         continue
@@ -705,15 +679,19 @@ if errorCount > 0:
     lastError = False
     for i in range(len(source)):
         line = source[i]
+        if line["depth"] > 0:
+            depthStar = "+"
+        else:
+            depthStar = ' '
         if len(line["errors"]) == 0:
-            print("%5d:  %s" % (i, line["text"]))
+            print("%5d: %s   %s" % (i, depthStar, line["text"]))
             lastError = False
         else:
             if not lastError:
                 print("=====================================================")
             for msg in line["errors"]:
                 print(msg)
-            print("%5d:  %s" % (i, line["text"]))
+            print("%5d: %s   %s" % (i, depthStar, line["text"]))
             print("=====================================================")
             lastError = True
     if len(source) > 0 and source[-1]["inMacroDefinition"]:

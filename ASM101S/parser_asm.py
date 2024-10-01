@@ -745,6 +745,11 @@ class asmParser(Parser):
             )
 
     @tatsumasu()
+    def _arithmeticExpressionOnly_(self):  # noqa
+        self._arithmeticExpression_()
+        self._check_eof()
+
+    @tatsumasu()
     def _arithmeticExpression_(self):  # noqa
         self._term_()
 
@@ -784,6 +789,9 @@ class asmParser(Parser):
     def _factor_(self):  # noqa
         with self._choice():
             with self._option():
+                self._pattern("[NKLSI]'")
+                self._variable_()
+            with self._option():
                 self._constant_()
             with self._option():
                 self._identifier_()
@@ -800,8 +808,13 @@ class asmParser(Parser):
                 '"B\'" "L\'" "X\'" \'(\' \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<constant> <identifier> <subvar> <sv>'
-                '<variable> [0-9]+'
+                "<variable> [0-9]+ [NKLSI]'"
             )
+
+    @tatsumasu()
+    def _booleanExpressionOnly_(self):  # noqa
+        self._booleanExpression_()
+        self._check_eof()
 
     @tatsumasu()
     def _booleanExpression_(self):  # noqa
@@ -837,8 +850,6 @@ class asmParser(Parser):
     def _booleanFactor_(self):  # noqa
         with self._choice():
             with self._option():
-                self._booleanLiteral_()
-            with self._option():
                 self._variable_()
             with self._option():
                 self._token('(')
@@ -846,12 +857,13 @@ class asmParser(Parser):
                 self._token(')')
             with self._option():
                 self._relationalExpression_()
+            with self._option():
+                self._booleanLiteral_()
             self._error(
                 'expecting one of: '
-                '"\'" \'(\' \'0\' \'1\' <arithmeticExpression>'
-                '<booleanLiteral> <char> <quotedString>'
-                '<relationalExpression>'
-                '<substringExpression> <subvar> <sv>'
+                "'(' '0' '1' <arithmeticExpression>"
+                '<booleanLiteral> <characterExpression>'
+                '<relationalExpression> <subvar> <sv>'
                 '<term> <variable>'
             )
 
@@ -877,16 +889,16 @@ class asmParser(Parser):
                 self._pattern(' *')
                 self._arithmeticExpression_()
             with self._option():
-                self._char_()
+                self._characterExpression_()
                 self._pattern(' *')
                 self._relOp_()
                 self._pattern(' *')
-                self._char_()
+                self._characterExpression_()
             self._error(
                 'expecting one of: '
-                '"\'" <arithmeticExpression> <char>'
-                '<factor> <quotedString>'
-                '<substringExpression> <term>'
+                '"\'" <arithmeticExpression>'
+                '<characterExpression> <factor>'
+                '<quotedString> <term>'
             )
 
     @tatsumasu()
@@ -910,26 +922,29 @@ class asmParser(Parser):
             )
 
     @tatsumasu()
+    def _characterExpressionOnly_(self):  # noqa
+        self._characterExpression_()
+        self._check_eof()
+
+    @tatsumasu()
     def _characterExpression_(self):  # noqa
-        with self._choice():
-            with self._option():
-                self._substringExpression_()
-            with self._option():
-                self._quotedString_()
-            with self._option():
-                self._variable_()
-            with self._option():
-                self._variable_()
-                self._token('(')
-                self._arithmeticExpression_()
-                self._token(',')
-                self._arithmeticExpression_()
-                self._token(')')
-            self._error(
-                'expecting one of: '
-                '"\'" <quotedString> <substringExpression>'
-                '<subvar> <sv> <variable>'
-            )
+        self._quotedString_()
+        with self._optional():
+            self._substringNotation_()
+
+        def block0():
+            with self._optional():
+                self._token('.')
+            self._characterExpression_()
+        self._closure(block0)
+
+    @tatsumasu()
+    def _substringNotation_(self):  # noqa
+        self._token('(')
+        self._arithmeticExpression_()
+        self._token(',')
+        self._arithmeticExpression_()
+        self._token(')')
 
     @tatsumasu()
     def _parameter_(self):  # noqa
@@ -1125,6 +1140,9 @@ class asmSemantics:
     def immediate(self, ast):  # noqa
         return ast
 
+    def arithmeticExpressionOnly(self, ast):  # noqa
+        return ast
+
     def arithmeticExpression(self, ast):  # noqa
         return ast
 
@@ -1132,6 +1150,9 @@ class asmSemantics:
         return ast
 
     def factor(self, ast):  # noqa
+        return ast
+
+    def booleanExpressionOnly(self, ast):  # noqa
         return ast
 
     def booleanExpression(self, ast):  # noqa
@@ -1155,7 +1176,13 @@ class asmSemantics:
     def relOp(self, ast):  # noqa
         return ast
 
+    def characterExpressionOnly(self, ast):  # noqa
+        return ast
+
     def characterExpression(self, ast):  # noqa
+        return ast
+
+    def substringNotation(self, ast):  # noqa
         return ast
 
     def parameter(self, ast):  # noqa
