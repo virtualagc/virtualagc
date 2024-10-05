@@ -12,7 +12,7 @@ This folder contains a modified form of release 32V0 of the original (Shuttle er
     * IBM 360 Basic Assembly Language files:  .bal
     * IBM AP-101S assembly-language files:  .asm
     * Compiler reports:  .txt
-* Finally, headers in the form of comment blocks have been added to the tops of each source-code file.  These are in the form of legal XPL, BAL, or ASM comments, and thus do not affect the compiled or assembled forms *functionally*, though they would have the effect of altering line-numbering in listings or error messages produced by compilers or assemblers.  These "modern comments" are usually distinguishable from the contemporary comments in that they obey the following convention:
+* Finally, headers in the form of comment blocks have been added to the tops of many source-code files.  These are in the form of legal XPL, BAL, or ASM comments, and thus do not affect the compiled or assembled forms *functionally*, though they would have the effect of altering line-numbering in listings or error messages produced by compilers or assemblers.  These "modern comments" are usually distinguishable from the contemporary comments in that they obey the following convention:
     * "/&#42;@" is used as the opening of an inline comment in XPL.  Contemporary comments would simply be "/&#42;" without the trailing "@".
     * "&#42;/" is used as the prefix for a comment in BAL or AP-101S assembly language.  Contemporary comments wouldn't usually have the trailing "/".
 

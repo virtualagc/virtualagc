@@ -64,9 +64,14 @@ grammar = \
 '''
 # Regarding @@whitespace, it may not be adequate and may require the parser to
 # be called with whitespace=''.  See https://github.com/neogeny/TatSu/issues/337.
+# Regarding @@eol_comments, I find that by default, a string beginning with
+# '#' is treated by the parser as being empty.  I deduce that @@eol_comments
+# is somehow causing this.  The only way to override that seems to be to 
+# assign @@eol_comments some pattern which will never be matched.
 @@grammar :: asm
 @@whitespace :: None
 @@parseinfo :: True
+@@eol_comments :: /@g@a@r@b@a@g@e@/
 
 #---------------------------------------------------------------------
 # Start with a bunch of high-level rules corresponding to entire 
@@ -301,6 +306,11 @@ mnote =
     | com+: '*' ',' msg+: quotedString
     | msg+: quotedString
     ;
+
+identifierList = pidentifier { ',' pidentifier } $ ;
+pidentifier = /[#@$A-Z][#@$A-Z0-9]*/ ;
+
+anything = /.*/ $ ;
 
 '''
 
@@ -691,4 +701,6 @@ if __name__ == "__main__":
         exercise("arithmeticExpressionOnly")
         exercise("booleanExpressionOnly")
         exercise("mnote")
-        
+        exercise("identifierList")
+        exercise("pidentifier")
+        exercise("anything")

@@ -32,7 +32,7 @@ class asmBuffer(Buffer):
             whitespace=None,
             nameguard=None,
             comments_re=None,
-            eol_comments_re=None,
+            eol_comments_re='@g@a@r@b@a@g@e@',
             ignorecase=False,
             namechars='',
             parseinfo=True,
@@ -49,7 +49,7 @@ class asmParser(Parser):
             whitespace=None,
             nameguard=None,
             comments_re=None,
-            eol_comments_re=None,
+            eol_comments_re='@g@a@r@b@a@g@e@',
             ignorecase=False,
             namechars='',
             parseinfo=True,
@@ -1101,6 +1101,25 @@ class asmParser(Parser):
                 '"\'" \'*\' <quotedString> [0-9]+'
             )
 
+    @tatsumasu()
+    def _identifierList_(self):  # noqa
+        self._pidentifier_()
+
+        def block0():
+            self._token(',')
+            self._pidentifier_()
+        self._closure(block0)
+        self._check_eof()
+
+    @tatsumasu()
+    def _pidentifier_(self):  # noqa
+        self._pattern('[#@$A-Z][#@$A-Z0-9]*')
+
+    @tatsumasu()
+    def _anything_(self):  # noqa
+        self._pattern('.*')
+        self._check_eof()
+
 
 class asmSemantics:
     def operandPrototype0(self, ast):  # noqa
@@ -1278,6 +1297,15 @@ class asmSemantics:
         return ast
 
     def mnote(self, ast):  # noqa
+        return ast
+
+    def identifierList(self, ast):  # noqa
+        return ast
+
+    def pidentifier(self, ast):  # noqa
+        return ast
+
+    def anything(self, ast):  # noqa
         return ast
 
 

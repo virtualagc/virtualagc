@@ -11,11 +11,17 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-08-21 RSB  Began.
 '''
 
+program = "ASM101S"
+version = "0.00"
+
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 from fieldParser import *
 from expressions import *
+
+currentDate = datetime.today().strftime('%d/%m/%y')
 
 # Specifics for the type of assembly language.
 if "--390" in sys.argv[1:]:
@@ -465,7 +471,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             svSet(operation, name, operand, svLocals, properties)
             continue
         if  operation == "AGO":
-            target = operand
+            target = operand.rstrip()
             if target in sequence:
                 if fromWhere != sequence[target][0]:
                     error(properties, "Target out of this macro")
@@ -509,6 +515,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 error(properties, "Cannot parse MNOTE: " + operand)
             else:
                 msg = unroll(ast["msg"])[1]
+                msg = svReplace(properties, msg, svLocals)
                 if "com" in ast:
                     pass
                 elif "sev" in ast:
@@ -671,12 +678,12 @@ objectFileName = None
 sourceFileCount = 0
 tolerableSeverity = 1
 svGlobals["&SYSPARM"] = "PASS"
+endLibraries = 0 # First line in `source` following macro-library definitions.
 
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
         readMacroLibrary(parm[10:])
-    elif parm in ["--101", "--390"]:
-        pass  # Already processed with the imports.
+        endLibraries = len(source)
     elif parm.startswith("--object="):
         if not parm.endswith(".obj"):
             print("Object-code filenames must end in .obj", file=sys.stderr)
@@ -718,11 +725,6 @@ for parm in sys.argv[1:]:
         print("                    severity determined by the MNOTE instruction")
         print("                    (i.e., by the source code itself), but")
         print("                    level 1 seems to be used for info messages.")
-        print("--101               (Default.) Source code is IBM AP-101B or")
-        print("                    AP-101S.")
-        print("--390               Source code is IBM System/390. (This is not")
-        print("                    supported at the present time, but could be")
-        print("                    some day.)")
         print()
         sys.exit(1)
     else:
@@ -734,6 +736,12 @@ if sourceFileCount == 0:
 
 #=============================================================================
 # Code generation.
+metadata = generateObjectCode(source, macros)
+
+#=============================================================================
+# Print an alternate form of the assembly listing when severe-enough errors have
+# been detected.  this form is more helpful in terms of tracking how macros
+# are expanded and how the values of symbolic variables evolve.
 
 # At this point, all of the lines of source code have been read in, and macros
 # expanded.  All of the source-code lines so-obtained have been parsed into 
@@ -777,41 +785,74 @@ if maxSeverity > tolerableSeverity:
     print("Search for ================ to see the marked errors.")
     sys.exit(1)
 
-if True: #***DEBUG***
-    # "Instructions" in the macro language by default  aren't printed in the 
-    # assembly report.
-    macroLanguageInstructions = { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
-                                  "LCLC", "SETA", "SETB", "SETC", "AIF",
-                                  "AGO", "ANOP", "SPACE", "TITLE", "MEXIT",
-                                  "MNOTE" }
-    inCopy = False
-    memberName = ""
-    # I don't really know how to get rvl/concat/nest, so it's just 0/0/0 for now
-    rvl = 0
-    concat = 0
-    nest = 0
-    for i in range(len(source)):
-        properties = source[i]
-        if properties["depth"] > 0:
-            depthStar = "+"
-        else:
-            depthStar = ' '
-        if properties["operation"] in macroLanguageInstructions:
+#==============================================================================
+# Print the regular form of the assembly listing.
+
+# "Instructions" in the macro language by default  aren't printed in the 
+# assembly report.
+macroLanguageInstructions = { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
+                              "LCLC", "SETA", "SETB", "SETC", "AIF",
+                              "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE" }
+title = ""
+subtitle = ""
+inCopy = False
+memberName = ""
+# I don't really know how to get rvl/concat/nest, so it's just 0/0/0 for now
+rvl = 0
+concat = 0
+nest = 0
+printedLineNumber = 0
+firstLineOnPage = 1
+pageNumber = 0
+linesPerPage = 80
+linesThisPage = 1000
+for i in range(endLibraries, len(source)):
+    properties = source[i]
+    skip = False
+    if properties["operation"] == "SPACE":
+        space = 1 # Actually depends on the operand.
+        printedLineNumber += space
+        linesThisPage += space
+    elif properties["operation"] == "TITLE":
+        title = properties["operand"][1:-1]
+        subtitle = "%-95s" % "  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT" \
+                   + "%16s %s" % (program + " " + version, currentDate)
+        printedLineNumber += 1
+        linesThisPage = 1000
+        skip = True
+    if linesThisPage >= linesPerPage:
+        pageNumber += 1
+        print("\f         %-100s  PAGE %4d" % (title, pageNumber))
+        print(subtitle)
+        linesThisPage = 0
+        if skip:
             continue
-        if properties["copy"]:
-            if not inCopy:
-                memberName = Path(properties["file"]).stem
-                if properties["printable"]:
-                    print("         START OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
-                          % (memberName, rvl, concat, nest))
-                inCopy = True
-        else:
-            if inCopy:
-                if properties["printable"]:
-                    print("           END OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
-                          % (memberName, rvl, concat, nest))
-                inCopy = False
-        if properties["printable"]:
+    if properties["depth"] > 0:
+        depthStar = "+"
+    else:
+        depthStar = ' '
+    if properties["operation"] in macroLanguageInstructions:
+        continue
+    if properties["fullComment"] and properties["text"].startswith("*/"):
+        continue # "Modern" comment
+    if properties["copy"]:
+        if not inCopy:
+            memberName = Path(properties["file"]).stem
+            if properties["printable"]:
+                linesThisPage += 1
+                print("         START OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
+                      % (memberName, rvl, concat, nest))
+            inCopy = True
+    else:
+        if inCopy:
+            if properties["printable"]:
+                linesThisPage += 1
+                print("           END OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
+                      % (memberName, rvl, concat, nest))
+            inCopy = False
+    if properties["printable"]:
+        prefix = ""
+        if False:
             if properties["file"] != None:
                 prefix = "(%d) %s(%d)" % (properties["depth"],
                                           os.path.basename(properties["file"]), 
@@ -820,28 +861,44 @@ if True: #***DEBUG***
                 prefix = "(%d) %s(%d)" % (properties["depth"], 
                                           properties["macro"], 
                                           properties["lineNumber"])
-            if properties["dotComment"]:
-                pass
-            elif properties["empty"] or properties["fullComment"] or properties["inMacroDefinition"]:
-                print("%-24s %5d: %s%s" % (prefix, i, depthStar, properties["text"]))
-            else:
-                name = properties["name"]
-                if name.startswith("."):
-                    name = ""
-                print("%-24s %5d: %s%-8s %-5s %s" % (
-                    prefix,
-                    i,
-                    depthStar,
-                    name, 
-                    properties["operation"],
-                    str(properties["operand"])))
-    if False:
-        for n in sorted(macros):
-            print("%-20s" % n, macros[n])
-    
-    if False:
-        a = macros["AMAIN"]
-        print("***DEBUG***", a)
-        print(source[a[2]])
-        print(source[a[3]])
-        print(source[a[4]])
+        # For whatever reason, a macro-invocation line is printed only under
+        # some circumstances, and is omitted in others.
+        if properties["operation"] in macros and not properties["inMacroDefinition"]:
+            macroWhere = macros[properties["operation"]]
+            if macroWhere[2] > endLibraries:
+                continue
+        if properties["operation"] in macros and properties["depth"] > 0:
+            continue
+        if properties["depth"] == 0:
+            identification = properties["identification"][:8]
+        else:
+            identification = "%02d-" % properties["depth"]
+            suffix = ""
+            if properties["macro"] != None:
+                suffix = properties["macro"]
+            identification = identification + suffix
+        if properties["dotComment"]:
+            pass
+        elif properties["empty"] or properties["fullComment"] or properties["inMacroDefinition"]:
+            printedLineNumber += 1
+            linesThisPage += 1
+            print("%-30s%5d%s%-71s %s" % (prefix, printedLineNumber, 
+                                          depthStar, properties["text"], 
+                                          identification))
+        else:
+            name = properties["name"]
+            if name.startswith("."):
+                name = ""
+            printedLineNumber += 1
+            linesThisPage += 1
+            mid = "%-30s%5d%s%-8s %-5s %s" % (
+                prefix,
+                printedLineNumber,
+                depthStar,
+                name, 
+                properties["operation"],
+                str(properties["operand"]).rstrip())
+            print("%-108s%s" % (mid, identification))
+if True:
+    print(metadata)
+        

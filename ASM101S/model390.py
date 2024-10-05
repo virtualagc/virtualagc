@@ -3,8 +3,9 @@ License:    This program is declared by its author, Ronald Burkey, to be the
             U.S. Public Domain, and may be freely used, modifified, or 
             distributed for any purpose whatever.
 Filename:   model390.py
-Purpose:    This is data for ASM101S, specific to the assembly language of 
-            the IBM System/390 computer.
+Purpose:    This is object-code generation stuff for ASM101S, specific to the 
+            assembly language of the IBM System/390 computer.  I don't expect
+            to every implement this, so it's basically just a stub.
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.

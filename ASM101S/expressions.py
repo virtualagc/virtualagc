@@ -350,6 +350,7 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         n = evalArithmeticExpression(expression[2], svLocals, properties)
         if n == None:
             return None
+        n -= 1  # Convert 1-based to 0-based
         if sv in svLocals:
             if not isinstance(svLocals[sv], list):
                 error(properties, \
@@ -649,8 +650,7 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         error(properties, \
               "Cannot parse name field %s" % name)
         return
-    if isinstance(pname, tuple):
-        pname = pname[0]
+    #print("***DEBUG***", pname)
     if "sv" not in pname:
         error(properties, \
               "No symbolic variable for assignment")
@@ -685,6 +685,9 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         if "exp" not in pname:
             error(properties, "Is subscripted: %s" % sname)
             return
+        # Note that the following is just to get a representative value from 
+        # the list for testing the datatype, *not* to get the specific element
+        # which is indexed.
         v = v[0]
     elif "exp" in pname:
         error(properties, "Is not subscripted: %s" % sname)
@@ -722,6 +725,7 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     if index == None:
         error(properties, "Cannot evaluate subscript in %s" % name)
         return
+    index -= 1 # Change from 1-based to 0-based.
     if index < 0 or index >= len(sv[sname]):
         error(properties, "Index out of range: %s" % name)
         return
