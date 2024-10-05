@@ -112,6 +112,11 @@ nameSet =
     | sv+: sv $
     | sv+: sv '(' exp+: arithmeticExpression ')' $
     ;
+    
+nameSet0 =
+    | sv+: sv '(' exp+: arithmeticExpression ')'
+    | sv+: sv
+    ;
 
 # Name field within macro definitions.
 nameMacrodef = 
@@ -247,9 +252,11 @@ booleanExpression = booleanTerm { / */ 'OR' / */ booleanTerm } ;
 booleanTerm = notFactor { / */ 'AND' / */ notFactor } ;
 notFactor = [ / */ 'NOT' / */ ] booleanFactor ;
 booleanFactor = 
+    | "D'" identifier
+    | "D'" sv
+    | relationalExpression
     | variable 
     | '(' booleanExpression ')' 
-    | relationalExpression
     | booleanLiteral 
     ;
 booleanLiteral = '0' | '1' ;
@@ -260,7 +267,11 @@ relationalExpression =
 relOp = 'EQ' | 'NE' | 'LT' | 'GT' | 'LE' | 'GE' ;
 
 characterExpressionOnly = characterExpression $ ;
-characterExpression = quotedString [ substringNotation ] { [ '.' ] characterExpression } ;
+characterExpression = 
+    | quotedString [ substringNotation ] { [ '.' ] characterExpression } 
+    | "T'" identifier
+    | "T'" sv
+    ;
 substringNotation = '(' arithmeticExpression ',' arithmeticExpression ')' ;
 
 parameter = 
@@ -283,6 +294,12 @@ replacement =
     | char
     | '(' list ')'
     | /[^, ()]*/
+    ;
+
+mnote = 
+    | sev+: /[0-9]+/ ',' msg+: quotedString
+    | com+: '*' ',' msg+: quotedString
+    | msg+: quotedString
     ;
 
 '''
@@ -673,4 +690,5 @@ if __name__ == "__main__":
         exercise("characterExpressionOnly")
         exercise("arithmeticExpressionOnly")
         exercise("booleanExpressionOnly")
+        exercise("mnote")
         

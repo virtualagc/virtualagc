@@ -298,6 +298,29 @@ class asmParser(Parser):
             )
 
     @tatsumasu()
+    def _nameSet0_(self):  # noqa
+        with self._choice():
+            with self._option():
+                self._sv_()
+                self.add_last_node_to_name('sv')
+                self._token('(')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('exp')
+                self._token(')')
+
+                self._define(
+                    [],
+                    ['exp', 'sv']
+                )
+            with self._option():
+                self._sv_()
+                self.add_last_node_to_name('sv')
+            self._error(
+                'expecting one of: '
+                '&[@#$A-Z][@#$A-Z0-9]* <sv>'
+            )
+
+    @tatsumasu()
     def _nameMacrodef_(self):  # noqa
         with self._choice():
             with self._option():
@@ -850,18 +873,24 @@ class asmParser(Parser):
     def _booleanFactor_(self):  # noqa
         with self._choice():
             with self._option():
+                self._token("D'")
+                self._identifier_()
+            with self._option():
+                self._token("D'")
+                self._sv_()
+            with self._option():
+                self._relationalExpression_()
+            with self._option():
                 self._variable_()
             with self._option():
                 self._token('(')
                 self._booleanExpression_()
                 self._token(')')
             with self._option():
-                self._relationalExpression_()
-            with self._option():
                 self._booleanLiteral_()
             self._error(
                 'expecting one of: '
-                "'(' '0' '1' <arithmeticExpression>"
+                '"D\'" \'(\' \'0\' \'1\' <arithmeticExpression>'
                 '<booleanLiteral> <characterExpression>'
                 '<relationalExpression> <subvar> <sv>'
                 '<term> <variable>'
@@ -896,7 +925,7 @@ class asmParser(Parser):
                 self._characterExpression_()
             self._error(
                 'expecting one of: '
-                '"\'" <arithmeticExpression>'
+                '"\'" "T\'" <arithmeticExpression>'
                 '<characterExpression> <factor>'
                 '<quotedString> <term>'
             )
@@ -928,15 +957,27 @@ class asmParser(Parser):
 
     @tatsumasu()
     def _characterExpression_(self):  # noqa
-        self._quotedString_()
-        with self._optional():
-            self._substringNotation_()
+        with self._choice():
+            with self._option():
+                self._quotedString_()
+                with self._optional():
+                    self._substringNotation_()
 
-        def block0():
-            with self._optional():
-                self._token('.')
-            self._characterExpression_()
-        self._closure(block0)
+                def block1():
+                    with self._optional():
+                        self._token('.')
+                    self._characterExpression_()
+                self._closure(block1)
+            with self._option():
+                self._token("T'")
+                self._identifier_()
+            with self._option():
+                self._token("T'")
+                self._sv_()
+            self._error(
+                'expecting one of: '
+                '"\'" "T\'" <quotedString>'
+            )
 
     @tatsumasu()
     def _substringNotation_(self):  # noqa
@@ -1027,6 +1068,39 @@ class asmParser(Parser):
                 '<substringExpression> [^, ()]*'
             )
 
+    @tatsumasu()
+    def _mnote_(self):  # noqa
+        with self._choice():
+            with self._option():
+                self._pattern('[0-9]+')
+                self.add_last_node_to_name('sev')
+                self._token(',')
+                self._quotedString_()
+                self.add_last_node_to_name('msg')
+
+                self._define(
+                    [],
+                    ['msg', 'sev']
+                )
+            with self._option():
+                self._token('*')
+                self.add_last_node_to_name('com')
+                self._token(',')
+                self._quotedString_()
+                self.add_last_node_to_name('msg')
+
+                self._define(
+                    [],
+                    ['com', 'msg']
+                )
+            with self._option():
+                self._quotedString_()
+                self.add_last_node_to_name('msg')
+            self._error(
+                'expecting one of: '
+                '"\'" \'*\' <quotedString> [0-9]+'
+            )
+
 
 class asmSemantics:
     def operandPrototype0(self, ast):  # noqa
@@ -1045,6 +1119,9 @@ class asmSemantics:
         return ast
 
     def nameSet(self, ast):  # noqa
+        return ast
+
+    def nameSet0(self, ast):  # noqa
         return ast
 
     def nameMacrodef(self, ast):  # noqa
@@ -1198,6 +1275,9 @@ class asmSemantics:
         return ast
 
     def replacement(self, ast):  # noqa
+        return ast
+
+    def mnote(self, ast):  # noqa
         return ast
 
 

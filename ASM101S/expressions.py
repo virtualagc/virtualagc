@@ -22,6 +22,12 @@ Note that in all cases within this module, an "expression" is a so-called AST
 import re
 from fieldParser import parserASM
 
+# Already-defined normal program labels (such as `MYSYM`), vs symbolic variables
+# for the macro language or sequence symbols.  At the moment this is just for
+# the purpose of implementing the `D'` operator, but perhaps other info about
+# the labels (such as their addresses) could be collected here later as well.
+definedNormalSymbols = {}
+
 '''
 Global symbolic variables for the macro language.  Note that we don't need
 to distinguish between `GBLA`, `GBLB`, and `GBLC` in `svGlobals` (nor between
@@ -54,16 +60,19 @@ svGlobals = { }  # Use as `global` in every function.
 # There can also be "local" variables in the global context.  By the "global
 # local" context, I refer to items defined at the top-level scope but not 
 # accessible at any lower levels of the scope hierarchy.
-svGlobalLocals = { } # Do *not* use as `global` or `nonlocal`.
+svGlobalLocals = { "parent": [None, 0, 0, None] } # For debugging only
 
 # Mark an error in the array of source code.
 errorCount = 0
-def error(properties, msg):
-    global errorCount
+maxSeverity = 0
+def error(properties, msg, severity=255):
+    global errorCount, maxSeverity
+    if severity > maxSeverity:
+        maxSeverity = severity
     errorCount += 1
     properties["errors"].append(msg)
 def getErrorCount():
-    return errorCount
+    return errorCount, maxSeverity
 
 '''
 This function replaces all symbolic variables (e.g., &A) given by 
@@ -92,14 +101,38 @@ def svReplace(properties, text, svLocals):
         matches.append(match)
     for match in reversed(matches):
         sv = match.group()
+        # We have a certain difficulty now, in that while what we've found is
+        # most-likely something like &A, it could also be something like 
+        # &A(expression).  And the only way we're going to be able to deal with
+        # that is via actual parsing.
+        start = match.span()[0]
+        end = match.span()[1]
+        ast = parserASM(text[start:], "nameSet0")
+        if ast == None:
+            error(properties, "Cannot parse: " + text[start:])
+            continue
+        sv = ast["sv"][0]
         if sv in svLocals:
             replacement = svLocals[sv]
         elif sv in svGlobals:
             replacement = svGlobals[sv]
         else:
             continue
-        start = match.span()[0]
-        end = match.span()[1]
+        if "exp" in ast:
+            if not isinstance(replacement, (list,tuple)):
+                error(properties, "Not a list: " + str(replacement))
+                continue
+            n = evalArithmeticExpression(ast["exp"], svLocals, properties)
+            if n == None:
+                error(properties, "Cannot evaluate index of %s: %s" % \
+                      (sv, str(ast["exp"])))
+                continue
+            n -= 1
+            if n < 0 or n >= len(replacement):
+                error(properties, "Index of %s(%d) out of range" % (sv, n+1))
+                continue
+            replacement = replacement[n]
+            end = start + ast.parseinfo.endpos
         if end < len(text) and text[end] == ".": # Optional "join" character.
             end += 1
         if isinstance(replacement, int):
@@ -109,7 +142,7 @@ def svReplace(properties, text, svLocals):
         elif replacement == True:
             replacement = "1"
         elif isinstance(replacement, (list,tuple)):
-            if text[start-2:start] == "N'":
+            if text[start-2:start] in ["K'", "N'"]:
                 start -= 2
                 replacement = str(len(replacement))
             else:
@@ -155,9 +188,14 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
         elif expression in svGlobals:
             sv = svGlobals
         if sv != None:
-            if isinstance(sv[expression], int):
-                return(sv[expression])
-            error(properties, "Not an integer value: %s" % expression)
+            sv = sv[expression]
+            if isinstance(sv, int):
+                return(sv)
+            if isinstance(sv, str) and sv.isdigit():
+                return(int(sv))
+            error(properties, \
+                  "Cannot be interpreted as an integer value: '%s' (%s)" % \
+                  (sv, expression))
             return None
     if not isinstance(expression, (list, tuple)):
         error(properties, "Eval error")
@@ -203,11 +241,14 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
             return None
         var = sv[symvar]
         if index != None:
-            index -= 1 # Change 1-based to 0-based.
-            if index < 0 or index >= len(var):
-                error(properties, "Index out of range")
-                return None
-            var = var[index]
+            if symvar == "&SYSLIST" and index == 0:
+                var = svLocals["&SYSLIST0"]
+            else:
+                index -= 1 # Change 1-based to 0-based.
+                if index < 0 or index >= len(var):
+                    error(properties, "Index out of range")
+                    return None
+                var = var[index]
         metavar = "_" + symvar
         if metavar in sv:
             meta = sv[metavar]
@@ -222,6 +263,11 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
             if not isinstance(var, (tuple, list)):
                 return 1
             return len(var)
+        elif op == "K'":
+            if isinstance(var, str):
+                return len(var)
+            error(properties, "Not a string: %s" % str(var))
+            return None
         else:
             error(properties, "Not yet implemented: %s" % op)
             return None
@@ -292,6 +338,10 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         error(properties, "Implementation error:  %s as boolean expression" \
               % expression)
         return None
+    if len(expression) == 2 and expression[0] == "D'" and \
+            isinstance(expression[1], str):
+        symbol = svReplace(properties, expression[1], svLocals)
+        return (symbol in definedNormalSymbols)
     # &A(...)
     if len(expression) == 4 and isinstance(expression[0], str) and \
             expression[0][:1] == "&" and \
@@ -365,7 +415,7 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         def isString(expression):
             e = unroll(expression)
             if isinstance(e, str):
-                return e == "'"
+                return e in ["'", "T'"]
             if isinstance(e, (tuple,list)) and len(e) > 0:
                 return isString(e[0])
             return False
@@ -462,6 +512,15 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
                           str(expression))
                     return None
                 s = s + ss[1]
+        elif len(expression) == 2 and expression[0] == "T'" and \
+                isinstance(expression[1], str):
+            symbol = svReplace(properties, expression[1], svLocals)
+            # I only support a tiny percentage of the number of possibilities
+            # presented by the assembly-language manual.  At least for right now.
+            if isinstance(symbol, str):
+                return "C"
+            error(properties, "Implementation error in T'")
+            return None
         elif len(expression) in [2,3]:
             s = evalCharacterExpression(expression[0], svLocals, properties)
             if s == None:
@@ -494,7 +553,7 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
                         error(properties, \
                               "Cannot evaluate length %s" % str(e[3]))
                         return None
-                    if i < 0 or n < 0 or i + n > len(s):
+                    if i < 0 or n < 0: # If i+n past of string, it's okay.
                         error(properties, "Index or length out of range")
                         return None
                     s = s[i : i + n]

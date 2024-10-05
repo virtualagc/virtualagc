@@ -128,6 +128,7 @@ def isSymbolExpression(name, inMacroDefinition = False):
 #    The starting index (i.e., of `MACRO`) in `source`.
 #    The index of the macro's prototype line in `source`.
 #    The ending index (i.e., of `MEND`) in `source`.
+#    The index of the first line of the macro-definition file in `source`.
 macros = { }
 # Sequence symbols for the global-local scope.
 sequenceGlobalLocals = { }
@@ -296,6 +297,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                    copy=False, printable=True, depth=0):
     global source, macros, svGlobals, metadata, sysndx
     lineNumber = -1
+    firstIndexOfFile = len(source)
     inMacroProto = False
     inMacroDefinition = False
     continuation = False
@@ -303,6 +305,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
     operation = ""
     prototypeIndex = -1
     continuePrototype = False
+    lineCorrespondence = [] # How `thisSource` line numbers match to files.
     
     if fromWhere in macros:
         # Load the macro definition into the list of source-code lines.
@@ -331,11 +334,14 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             else:
                 suffix = " "
             thisSource.append(source[i]["text"] + suffix)
+            lineCorrespondence.append(i - macroWhere[5])
     else:
         try:
             f = open(fromWhere, "rt")
             thisSource = f.readlines()
             f.close()
+            for i in range(len(thisSource)):
+                lineCorrespondence.append(i)
             filename = fromWhere
             macroname = None
         except:
@@ -394,6 +400,8 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                               inMacroDefinition, inMacroProto)
         name = properties["name"]
         if name[:1] == ".":
+            # Note that the `fromWhere` stored in the symbol *should* be 
+            # completely irrelevant to anything and shouldn't be used.  I think.
             sequence[name] = (fromWhere, lineNumber)
         operation = properties["operation"]
         operand = properties["operand"]
@@ -421,6 +429,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                                  macroStart, len(source)-1]
         elif operation == "MEND":
                 macros[macroName].append(len(source)-1)
+                macros[macroName].append(firstIndexOfFile)
                 inMacroDefinition = False
                 continue
         elif operation == "COPY":
@@ -446,6 +455,8 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             continue
         
         # Take care of various macro-language related pseudo-ops.
+        if operation == "MEXIT":
+            break
         if operation in { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB", "LCLC"}:
             svDeclare(operation, operand, svLocals, properties)
             continue
@@ -464,6 +475,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 skipToSeq = target
             continue
         if operation == "AIF":
+            operand = operand.rstrip()
             ast = parserASM(operand, "aifAll")
             if isinstance(ast, tuple) and len(ast) == 4 and \
                     ast[0] == '(' and ast[2] == ')':
@@ -491,6 +503,24 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             continue
         if operation == "ANOP":
             continue
+        if operation == "MNOTE":
+            ast = parserASM(operand, "mnote")
+            if ast == None:
+                error(properties, "Cannot parse MNOTE: " + operand)
+            else:
+                msg = unroll(ast["msg"])[1]
+                if "com" in ast:
+                    pass
+                elif "sev" in ast:
+                    error(properties, msg, severity = int(ast["sev"][0]))
+                else: 
+                    error(properties, msg, severity = 1)
+                properties["fullComment"] = True
+                properties["text"] = "*" + msg
+                properties["name"] = ""
+                properties["operation"] = ""
+                properties["operand"] = ""
+            continue
         
         # Symbolic-variable replacement
         if "&" in line:
@@ -503,7 +533,29 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             properties["name"] = name
             properties["operation"] = operation
             properties["operand"] = operand
-
+        
+        if name != "" and name[:1] not in [".", "&"] and \
+                operation not in ["TITLE", "CSECT", "DSECT"] \
+                and operation not in macros:
+            if name not in definedNormalSymbols:
+                definedNormalSymbols[name] = { "label": True,
+                                               "fromWhere": fromWhere,
+                                               "lineNumber": lineNumber,
+                                               "fromLine": lineCorrespondence[lineNumber]
+                                             }
+            else:
+                error(properties, "Already defined: " + name)
+        elif operation == "EXTRN":
+            #print("I am here")
+            symbols = operand.split(",")
+            for symbol in symbols:
+                if symbol not in definedNormalSymbols:
+                    definedNormalSymbols[symbol] = { "label": True,
+                                                   "fromWhere": fromWhere,
+                                                   "lineNumber": lineNumber,
+                                                   "fromLine": lineCorrespondence[lineNumber]
+                                                 }
+        
         if operation in macros:
             sysndx += 1
             macrostats = macros[operation]
@@ -511,7 +563,10 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             # But we need to track down the formal parameters.
             formals = source[macrostats[3]]["operand"]
             pformals = parserASM(formals, "operandPrototype")
-            poperands = parserASM(operand, "operandInvocation")
+            if operand.strip() == "":
+                poperands = []
+            else:
+                poperands = parserASM(operand, "operandInvocation")
             if isinstance(poperands, dict) and "pi" in poperands:
                 poperands = poperands["pi"]
             else:
@@ -525,18 +580,20 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             #print(pformals)
             # Relate the formal parameters to their replacements.  That'll be
             # the dictionary `newLocals`.
-            newLocals = { }
+            newLocals = { 
+                "parent": [fromWhere, lineNumber, lineCorrespondence[lineNumber], svLocals] 
+                }
             fname = source[macrostats[3]]["name"]
             if fname != "":
                 newLocals[fname] = name
             # First fill in all default values.
+            syslist0 = name
             syslist = []
             for i in range(len(pformals) - 1, -1, -1):
                 pformal = pformals[i]
                 if isinstance(pformal, str):
                     newLocals[pformal] = ''
                     newLocals["_" + pformal] = { "omitted": True }
-                    syslist.append('')
                 elif isinstance(pformal, (list,tuple)):
                     if len(pformal) != 3 or pformal[1] != "=" or \
                             pformal[0][:1] != "&" or \
@@ -558,6 +615,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             for suboperand in poperands:
                 key, value = evalMacroArgument(properties, suboperand)
                 if key == None:
+                    syslist.append(value)
                     if i >= len(pformals):
                         # This can happen when there's a comment but no 
                         # positional replacement arguments in a macro invocation
@@ -567,12 +625,12 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                         continue
                     newLocals[pformals[i]] = value
                     newLocals["_" + pformals[i]]["omitted"] = False
-                    syslist[i] = value
                     i += 1
                 else:
                     newLocals[key] = value
                     newLocals["_" + key]["omitted"] = False
             newLocals["&SYSLIST"] = syslist
+            newLocals["&SYSLIST0"] = syslist0
             newLocals["&SYSNDX"] = sysndx
             readSourceFile(operation, newLocals, sequence, copy=copy, \
                            printable=printable, depth=depth+1)
@@ -611,6 +669,8 @@ if False:
 # Parse the command-line options.
 objectFileName = None
 sourceFileCount = 0
+tolerableSeverity = 1
+svGlobals["&SYSPARM"] = "PASS"
 
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
@@ -622,6 +682,10 @@ for parm in sys.argv[1:]:
             print("Object-code filenames must end in .obj", file=sys.stderr)
             sys.exit(1)
         objectFileName = parm[8:]
+    elif parm.startswith("--sysparm="):
+        svGlobals["&SYSPARM"] = parm[10:]
+    elif parm.startswith("--tolerable="):
+        tolerableSeverity = int(parm[12:])
     elif not parm.startswith("--"):
         if not parm.endswith(".asm"):
             print("Source-code filenames must end with .asm", file=sys.stderr)
@@ -644,10 +708,21 @@ for parm in sys.argv[1:]:
         print("                    specified on the command line.")
         print("--library=L         L specifies a path to a macro library.")
         print("                    This option can appear multiple times.")
+        print("--sysparm=T         (Default PASS.) Sets the global SET symbol")
+        print("                    &SYSPARM. For Space Shuttle flight software,")
+        print("                    the allowed choices are BFS and PASS.")
+        print("--tolerable=N       (Default 1.) Sets the maximumn tolerable")
+        print("                    error severity.  All errors detected by")
+        print("                    ASM101S itself are severity 255. Errors")
+        print("                    reported by MNOTE instructions have a")
+        print("                    severity determined by the MNOTE instruction")
+        print("                    (i.e., by the source code itself), but")
+        print("                    level 1 seems to be used for info messages.")
         print("--101               (Default.) Source code is IBM AP-101B or")
         print("                    AP-101S.")
         print("--390               Source code is IBM System/390. (This is not")
-        print("                    supported at the present time.)")
+        print("                    supported at the present time, but could be")
+        print("                    some day.)")
         print()
         sys.exit(1)
     else:
@@ -668,10 +743,11 @@ if sourceFileCount == 0:
 # expansions or splitting the operand field into sub-operands.  For example,
 # while we know what's in the name field, we don't know if it's a valid symbol
 # name or not.
-errorCount = getErrorCount()
+errorCount, maxSeverity = getErrorCount()
 if len(source) > 0 and source[-1]["inMacroDefinition"]:
     errorCount += 1
-if errorCount > 0:
+    maxSeverity = 255
+if maxSeverity > tolerableSeverity:
     print("%d error(s) detected.  Assembly aborted.  Fix the syntax errors" % \
           errorCount)
     print("marked below and retry.  Search for =========.")
@@ -696,12 +772,18 @@ if errorCount > 0:
             lastError = True
     if len(source) > 0 and source[-1]["inMacroDefinition"]:
         print("No closing MEND for MACRO")
-    print("%d error(s) detected.  Assembly aborted.  Fix the syntax errors" % \
-          errorCount)
-    print("marked above and retry.  Search for =========.")
+    print("%d error(s) detected, max severity %d." % (errorCount, maxSeverity))
+    print("Assembly aborted.  Fix the syntax errors or use --tolerable=N.")
+    print("Search for ================ to see the marked errors.")
     sys.exit(1)
 
 if True: #***DEBUG***
+    # "Instructions" in the macro language by default  aren't printed in the 
+    # assembly report.
+    macroLanguageInstructions = { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
+                                  "LCLC", "SETA", "SETB", "SETC", "AIF",
+                                  "AGO", "ANOP", "SPACE", "TITLE", "MEXIT",
+                                  "MNOTE" }
     inCopy = False
     memberName = ""
     # I don't really know how to get rvl/concat/nest, so it's just 0/0/0 for now
@@ -709,40 +791,50 @@ if True: #***DEBUG***
     concat = 0
     nest = 0
     for i in range(len(source)):
-        property = source[i]
-        if property["copy"]:
+        properties = source[i]
+        if properties["depth"] > 0:
+            depthStar = "+"
+        else:
+            depthStar = ' '
+        if properties["operation"] in macroLanguageInstructions:
+            continue
+        if properties["copy"]:
             if not inCopy:
-                memberName = Path(property["file"]).stem
-                if property["printable"]:
+                memberName = Path(properties["file"]).stem
+                if properties["printable"]:
                     print("         START OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
                           % (memberName, rvl, concat, nest))
                 inCopy = True
         else:
             if inCopy:
-                if property["printable"]:
+                if properties["printable"]:
                     print("           END OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
                           % (memberName, rvl, concat, nest))
                 inCopy = False
-        if property["printable"]:
-            if property["file"] != None:
-                prefix = "(%d) %s(%d)" % (property["depth"],
-                                          os.path.basename(property["file"]), 
-                                          property["lineNumber"])
-            elif property["macro"] != None:
-                prefix = "(%d) %s(%d)" % (property["depth"], 
-                                          property["macro"], 
-                                          property["lineNumber"])
-            if property["dotComment"]:
+        if properties["printable"]:
+            if properties["file"] != None:
+                prefix = "(%d) %s(%d)" % (properties["depth"],
+                                          os.path.basename(properties["file"]), 
+                                          properties["lineNumber"])
+            elif properties["macro"] != None:
+                prefix = "(%d) %s(%d)" % (properties["depth"], 
+                                          properties["macro"], 
+                                          properties["lineNumber"])
+            if properties["dotComment"]:
                 pass
-            elif property["empty"] or property["fullComment"] or property["inMacroDefinition"]:
-                print("%-24s %5d:  %s" % (prefix, i, property["text"]))
+            elif properties["empty"] or properties["fullComment"] or properties["inMacroDefinition"]:
+                print("%-24s %5d: %s%s" % (prefix, i, depthStar, properties["text"]))
             else:
-                print("%-24s %5d:  %-8s %-5s %s" % (
+                name = properties["name"]
+                if name.startswith("."):
+                    name = ""
+                print("%-24s %5d: %s%-8s %-5s %s" % (
                     prefix,
                     i,
-                    property["name"], 
-                    property["operation"],
-                    str(property["operand"])))
+                    depthStar,
+                    name, 
+                    properties["operation"],
+                    str(properties["operand"])))
     if False:
         for n in sorted(macros):
             print("%-20s" % n, macros[n])
