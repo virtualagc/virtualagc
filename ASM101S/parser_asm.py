@@ -381,7 +381,15 @@ class asmParser(Parser):
         self._register_()
         self._token(',')
         self._register_()
-        self._check_eof()
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
     def _rsAll_(self):  # noqa
@@ -393,7 +401,15 @@ class asmParser(Parser):
                 self._token('(')
                 self._register_()
                 self._token(')')
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._register_()
                 self._token(',')
@@ -403,7 +419,28 @@ class asmParser(Parser):
                 self._token(',')
                 self._register_()
                 self._token(')')
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
+            with self._option():
+                self._register_()
+                self._token(',')
+                self._arithmeticExpression_()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             self._error(
                 'expecting one of: '
                 '"B\'" "L\'" "X\'"'
@@ -417,14 +454,30 @@ class asmParser(Parser):
         self._register_()
         self._token(',')
         self._immediate_()
-        self._check_eof()
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
     def _srsAll_(self):  # noqa
         self._register_()
         self._token(',')
         self._immediate_()
-        self._check_eof()
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
     def _siAll_(self):  # noqa
@@ -433,7 +486,15 @@ class asmParser(Parser):
         self._register_()
         self._token('),')
         self._immediate_()
-        self._check_eof()
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
     def _mscAll_(self):  # noqa
@@ -445,21 +506,53 @@ class asmParser(Parser):
                 self._token('(')
                 self._constant_()
                 self._token(')')
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._constant_()
                 self._token(',')
                 self._identifier_()
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._arithmeticExpression_()
                 self._token('(')
                 self._constant_()
                 self._token(')')
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._arithmeticExpression_()
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             self._error(
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" <arithmeticExpression>'
@@ -474,15 +567,39 @@ class asmParser(Parser):
                 self._token('(')
                 self._constant_()
                 self._token(')')
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._arithmeticExpression_()
                 self._token(',')
                 self._arithmeticExpression_()
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             with self._option():
                 self._arithmeticExpression_()
-                self._check_eof()
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
             self._error(
                 'expecting one of: '
                 '<arithmeticExpression> <term>'
@@ -604,61 +721,223 @@ class asmParser(Parser):
             )
 
     @tatsumasu()
-    def _dcConstant_(self):  # noqa
+    def _dcOperands_(self):  # noqa
+        self._dcOperand_()
+
+        def block0():
+            self._token(',')
+            self._dcOperand_()
+        self._closure(block0)
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+
+    @tatsumasu()
+    def _dcOperand_(self):  # noqa
         with self._choice():
             with self._option():
                 with self._optional():
                     self._number_()
-                with self._optional():
-                    self._scale_()
-                with self._optional():
-                    self._exp_()
-                self._pattern('[CXB]')
+                    self.add_last_node_to_name('d')
+                self._token('C')
+                self.add_last_node_to_name('t')
                 with self._optional():
                     self._len_()
-                self._char_()
+                    self.add_last_node_to_name('l')
+                self._quotedString_()
+                self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
             with self._option():
                 with self._optional():
                     self._number_()
-                with self._optional():
-                    self._scale_()
-                with self._optional():
-                    self._exp_()
-                self._pattern('[FHEDLPZ]')
+                    self.add_last_node_to_name('d')
+                self._token('X')
+                self.add_last_node_to_name('t')
                 with self._optional():
                     self._len_()
-                self._data_()
+                    self.add_last_node_to_name('l')
+                self._quotedHexString_()
+                self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
             with self._option():
                 with self._optional():
                     self._number_()
-                with self._optional():
-                    self._scale_()
-                with self._optional():
-                    self._exp_()
-                self._pattern('[AYSQV]')
+                    self.add_last_node_to_name('d')
+                self._token('B')
+                self.add_last_node_to_name('t')
                 with self._optional():
                     self._len_()
+                    self.add_last_node_to_name('l')
+                self._quotedBinaryString_()
+                self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._pattern('[FHED]')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                self._quotedFloatList_()
+                self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._pattern('[AY]')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
                 self._addresses_()
+                self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
             self._error(
                 'expecting one of: '
-                "'(' 'E' 'S' <exp> <number> <scale>"
-                '[0-9]+ [AYSQV] [CXB] [FHEDLPZ]'
+                "'(' 'B' 'C' 'X' <number> [0-9]+ [AY]"
+                '[FHED]'
             )
 
     @tatsumasu()
-    def _data_(self):  # noqa
-        self._token("'")
-        self._element_()
+    def _dsOperands_(self):  # noqa
+        self._dsOperand_()
 
         def block0():
             self._token(',')
-            self._element_()
+            self._dsOperand_()
         self._closure(block0)
-        self._token("'")
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
-    def _element_(self):  # noqa
-        self._pattern('[^,]+')
+    def _dsOperand_(self):  # noqa
+        with self._choice():
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('C')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                with self._optional():
+                    self._quotedString_()
+                    self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('X')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                with self._optional():
+                    self._quotedHexString_()
+                    self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('B')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                with self._optional():
+                    self._quotedBinaryString_()
+                    self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._pattern('[FHED]')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                with self._optional():
+                    self._quotedFloatList_()
+                    self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._pattern('[AY]')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                with self._optional():
+                    self._addresses_()
+                    self.add_last_node_to_name('v')
+
+                self._define(
+                    [],
+                    ['d', 'l', 't', 'v']
+                )
+            self._error(
+                'expecting one of: '
+                "'(' 'B' 'C' 'X' <number> [0-9]+ [AY]"
+                '[FHED]'
+            )
 
     @tatsumasu()
     def _addresses_(self):  # noqa
@@ -732,6 +1011,90 @@ class asmParser(Parser):
                     'expecting one of: '
                     "'(' [0-9]+"
                 )
+
+    @tatsumasu()
+    def _quotedHexString_(self):  # noqa
+        self._token("'")
+        self._pattern('[A-F0-9]+')
+        self._token("'")
+
+    @tatsumasu()
+    def _quotedBinaryString_(self):  # noqa
+        self._token("'")
+        self._pattern('[01]+')
+        self._token("'")
+
+    @tatsumasu()
+    def _quotedFloatList_(self):  # noqa
+        self._token("'")
+        self._floatNumber_()
+
+        def block0():
+            self._token(',')
+            self._floatNumber_()
+        self._closure(block0)
+        self._token("'")
+
+    @tatsumasu()
+    def _floatNumber_(self):  # noqa
+        with self._choice():
+            with self._option():
+                with self._optional():
+                    self._pattern('[-+]')
+                self._pattern('[0-9]+')
+                with self._optional():
+                    self._token('.')
+                    self._pattern('[0-9]*')
+                with self._optional():
+                    self._token('E')
+                    with self._optional():
+                        self._pattern('[-+]')
+                    self._pattern('[0-9]+')
+            with self._option():
+                with self._optional():
+                    self._pattern('[-+]')
+                self._token('.')
+                self._pattern('[0-9]+')
+                with self._optional():
+                    self._token('E')
+                    with self._optional():
+                        self._pattern('[-+]')
+                    self._pattern('[0-9]+')
+            self._error(
+                'expecting one of: '
+                "'.' [-+] [0-9]+"
+            )
+
+    @tatsumasu()
+    def _quotedFixedList_(self):  # noqa
+        self._token("'")
+        self._fixedNumber_()
+
+        def block0():
+            self._token(',')
+            self._fixedNumber_()
+        self._closure(block0)
+        self._token("'")
+
+    @tatsumasu()
+    def _fixedNumber_(self):  # noqa
+        with self._choice():
+            with self._option():
+                with self._optional():
+                    self._pattern('[-+]')
+                self._pattern('[0-9]+')
+                with self._optional():
+                    self._token('.')
+                    self._pattern('[0-9]*')
+            with self._option():
+                with self._optional():
+                    self._pattern('[-+]')
+                self._token('.')
+                self._pattern('[0-9]+')
+            self._error(
+                'expecting one of: '
+                "'.' [-+] [0-9]+"
+            )
 
     @tatsumasu()
     def _register_(self):  # noqa
@@ -1206,13 +1569,16 @@ class asmSemantics:
     def sdTerm(self, ast):  # noqa
         return ast
 
-    def dcConstant(self, ast):  # noqa
+    def dcOperands(self, ast):  # noqa
         return ast
 
-    def data(self, ast):  # noqa
+    def dcOperand(self, ast):  # noqa
         return ast
 
-    def element(self, ast):  # noqa
+    def dsOperands(self, ast):  # noqa
+        return ast
+
+    def dsOperand(self, ast):  # noqa
         return ast
 
     def addresses(self, ast):  # noqa
@@ -1228,6 +1594,24 @@ class asmSemantics:
         return ast
 
     def number(self, ast):  # noqa
+        return ast
+
+    def quotedHexString(self, ast):  # noqa
+        return ast
+
+    def quotedBinaryString(self, ast):  # noqa
+        return ast
+
+    def quotedFloatList(self, ast):  # noqa
+        return ast
+
+    def floatNumber(self, ast):  # noqa
+        return ast
+
+    def quotedFixedList(self, ast):  # noqa
+        return ast
+
+    def fixedNumber(self, ast):  # noqa
         return ast
 
     def register(self, ast):  # noqa

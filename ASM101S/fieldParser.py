@@ -141,36 +141,37 @@ subOperation =
     ;
 
 # Operand field for an RR instruction.
-rrAll = register ',' register $ ;
+rrAll = register ',' register ( / / | $ ) ;
 
 # Operand field for an RS instruction.
 rsAll = 
-    | register ',' arithmeticExpression '(' register ')' $ 
-    | register ',' arithmeticExpression '(' register ',' register ')' $
+    | register ',' arithmeticExpression '(' register ')'  ( / / | $ )
+    | register ',' arithmeticExpression '(' register ',' register ')'  ( / / | $ )
+    | register ',' arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for an RI instruction.
-riAll = register ',' immediate $ ;
+riAll = register ',' immediate  ( / / | $ ) ;
 
 # Operand field for an SRS instruction.
-srsAll = register ',' immediate $ ;
+srsAll = register ',' immediate  ( / / | $ ) ;
 
 # Operand field for an SI instruction.
-siAll = arithmeticExpression '(' register '),' immediate $ ;
+siAll = arithmeticExpression '(' register '),' immediate  ( / / | $ ) ;
 
 # Operand field for an MSC instruction.
 mscAll = 
-    | constant ',' identifier '(' constant ')' $
-    | constant ',' identifier $
-    | arithmeticExpression '(' constant ')' $ 
-    | arithmeticExpression $
+    | constant ',' identifier '(' constant ')'  ( / / | $ )
+    | constant ',' identifier  ( / / | $ )
+    | arithmeticExpression '(' constant ')'  ( / / | $ )
+    | arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for an BCE instruction.
 bceAll = 
-    | arithmeticExpression '(' constant ')' $ 
-    | arithmeticExpression ',' arithmeticExpression $
-    | arithmeticExpression $
+    | arithmeticExpression '(' constant ')'  ( / / | $ )
+    | arithmeticExpression ',' arithmeticExpression  ( / / | $ )
+    | arithmeticExpression  ( / / | $ )
     ;
 
 # Opeand field of an AIF.
@@ -215,18 +216,39 @@ sdTerm =
     | "C" char
     ;
 
-dcConstant = 
-    | [ number ] [ scale ] [ exp ] /[CXB]/ [ len ] char 
-    | [ number ] [ scale ] [ exp ] /[FHEDLPZ]/ [ len ] data 
-    | [ number ] [ scale ] [ exp ] /[AYSQV]/ [ len ] addresses 
+dcOperands = dcOperand { ',' dcOperand } ( / / | $ ) ;
+dcOperand = 
+    | [ d+: number ] t+: 'C' [ l+: len ] v+: quotedString 
+    | [ d+: number ] t+: 'X' [ l+: len ] v+: quotedHexString 
+    | [ d+: number ] t+: 'B' [ l+: len ] v+: quotedBinaryString 
+    | [ d+: number ] t+: /[FHED]/ [ l+: len ] v+: quotedFloatList 
+    | [ d+: number ] t+: /[AY]/ [ l+: len ] v+: addresses 
     ;
-data = "'" element { ',' element } "'" ;
-element = /[^,]+/ ;
+dsOperands = dsOperand { ',' dsOperand }  ( / / | $ ) ;
+dsOperand = 
+    | [ d+: number ] t+: 'C' [ l+: len ] [ v+: quotedString ]
+    | [ d+: number ] t+: 'X' [ l+: len ] [ v+: quotedHexString ]
+    | [ d+: number ] t+: 'B' [ l+: len ] [ v+: quotedBinaryString ]
+    | [ d+: number ] t+: /[FHED]/ [ l+: len ] [ v+: quotedFloatList ]
+    | [ d+: number ] t+: /[AY]/ [ l+: len ] [ v+: addresses ]
+    ;
 addresses = '(' arithmeticExpression { ',' arithmeticExpression } ')' ;
 len = 'L' [ '.' ] [ '+' | '-' ] number ;
 scale = 'S' [ '+' | '-' ] number;
 exp = 'E' [ '+' | '-' ] number;
 number = ( /[0-9]+/ | '(' arithmeticExpression ')' );
+quotedHexString = "'" /[A-F0-9]+/ "'" ;
+quotedBinaryString = "'" /[01]+/ "'" ;
+quotedFloatList = "'" floatNumber { ',' floatNumber } "'" ;
+floatNumber = 
+    | [ /[-+]/ ] /[0-9]+/ [ '.' /[0-9]*/ ] [ 'E' [ /[-+]/ ] /[0-9]+/ ] 
+    | [ /[-+]/ ] '.' /[0-9]+/ [ 'E' [ /[-+]/ ] /[0-9]+/ ] 
+    ;
+quotedFixedList = "'" fixedNumber { ',' fixedNumber } "'" ;
+fixedNumber = 
+    | [ /[-+]/ ] /[0-9]+/ [ '.' /[0-9]*/ ] 
+    | [ /[-+]/ ] '.' /[0-9]+/  
+    ;
 
 register = 
     | identifier 
@@ -704,3 +726,7 @@ if __name__ == "__main__":
         exercise("identifierList")
         exercise("pidentifier")
         exercise("anything")
+        exercise("dcOperands")
+        exercise("dsOperands")
+        exercise("rsAll")
+        

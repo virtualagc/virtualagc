@@ -900,5 +900,9 @@ for i in range(endLibraries, len(source)):
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
 if True:
-    print(metadata)
+    import pprint
+    for key in metadata["sects"]:
+        metadata["sects"][key]["memory"] = \
+            metadata["sects"][key]["memory"][:metadata["sects"][key]["used"]]
+    pprint.pp(metadata)
         

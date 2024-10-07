@@ -10,7 +10,7 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.
 '''
 
-from expressions import error, unroll
+from expressions import error, unroll, astFlattenList, evalArithmeticExpression
 from fieldParser import parserASM
 
 #=============================================================================
@@ -117,29 +117,101 @@ I.e., no existing fields other than `errors` are affected.
 
 Additionally, the function returns a dictionary of non-line-by-line info about
 the assembly.
+
+Note that addresses are in units of bytes.
 '''
 ignore = { "TITLE", 
            "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
            "LCLC", "SETA", "SETB", "SETC", "AIF",
            "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE" }
+hexDigits = "0123456789ABCDEF"
 def generateObjectCode(source, macros):
-    csects = {} # Keys are names of c-sections, values the current pointers
-    dsects = {} # Keys are names of d-sections, values the current pointers
+    
+    #-----------------------------------------------------------------------
+    # Setup
+    
+    sects = {} # CSECTS and DSECTS.
     entries = set() # For `ENTRY`.
     extrns = set() # For `EXTRN`.
+    symtab = {}
     metadata = {
-        "csects": csects,
-        "dsects": dsects,
+        "sects": sects,
         "entries": entries,
-        "extrns": extrns
+        "extrns": extrns,
+        "symtab": symtab
         }
-    csect = None # Current c-section.
-    dsect = None # Current d-section.
-    cVsD = True # True for assembling into c-sections, False for d-sections.
+    sect = None # Current section.
     for key in macros:
         ignore.add(key)
+    
+    #-----------------------------------------------------------------------
+    
+    # A function for writing to memory or allocating it without writing to
+    # it, as appropriate, though in this case "not writing to it" means 
+    # zeroing it.  This occurs in the current CSECT or DSECT
+    #    `bytes`        Is either a number (for DS) indicating how much memory
+    #                   to allocate, or else a `bytearray` (for DC) of the
+    #                   actual bytes to store.
+    # Alignment must have been done prior to entry.
+    memoryChunkSize = 4096
+    def toMemory(bytes):
+        if isinstance(bytes, bytearray):
+            pos = sects[sect]["pos"]
+            end = pos + len(bytes)
+            if cVsD:
+                memory = sects[sect]["memory"]
+                if end > len(memory):
+                    chunks = (end - len(memory) + memoryChunkSize - 1) \
+                                // memoryChunkSize
+                    memory.extend([0]*(chunks * memoryChunkSize - len(memory)))
+                for i in range(len(bytes)):
+                    memory[pos + i] = bytes[i]
+                if end > sects[sect]["used"]:
+                    sects[sect]["used"] = end
+            sects[sect]["pos"] = end
+        else:
+            sects[sect]["pos"] += bytes
+
+    # Common processing for all instructions. The `alignment` argument is one
+    # of 1 (byte), 2 (halfword), 4 (word), 8 (doubleword).
+    # The memory added for padding is 0-filled if `zero` is `True`, or left
+    # unchanged if `False`.
+    def commonProcessing(alignment=1, zero=False):
+        nonlocal cVsD, sect
+        
+        # Make sure we're in *some* CSECT or DSECT
+        if sect == None:
+            cVsD = True
+            sect = ""
+            sects[sect] = {
+                "pos": 0,
+                "used": 0,
+                "memory": bytearray(memoryChunkSize)
+                }
+        
+        # Perform alignment.
+        if alignment > 1:
+            rem = sects[sect]["pos"] % alignment
+            if rem != 0:
+                if zero:
+                    toMemory(bytearray(alignment - rem))
+                else:
+                    toMemory(alignment - rem)
+        
+        # Add `name` (if any) to the symbol table.
+        if name != "":
+            if name in symtab:
+                error(properties, "Symbol %s already defined" % name)
+            else:
+                symtab[name] = { "section": sect,  "address": sects[sect]["pos"] }
+    
+    #-----------------------------------------------------------------------
+    # Process `source`, line by line.
+    
     continuation = False
     for properties in source:
+        
+        #******** Should this line be processed or discarded? ********
         if properties["inMacroDefinition"] or properties["fullComment"] or \
                 properties["dotComment"] or properties["empty"]:
             continue
@@ -156,12 +228,15 @@ def generateObjectCode(source, macros):
             continue
         
         name = properties["name"]
+        if name.startswith("."):
+            name = ""
         operand = properties["operand"].rstrip()
         
-        # The big if/elif/else that follows covers all supported operations.
-        # First come the pseudo-ops (in alphabetical order), followed by all
-        # instruction types, categorized in hopefully-useful ways.
-        if operation == "CSECT":
+        #******** Most pseudo-ops ********
+        # Take care of pseudo-ops that don't add anything to AP-101S memory.
+        # Each one of these should either `continue` or `break`, so as not to
+        # fall through to instruction processing.
+        if operation in ["CSECT", "DSECT"]:
             # The current section name starts as `None`, meaning none has been
             # assigned.  `START` or `CSECT` changes that to either "" (the
             # "unnamed" section) or an identifier. Code that must be assembled
@@ -169,18 +244,18 @@ def generateObjectCode(source, macros):
             # the unnamed section.  I *could* check here that the name given
             # to the section is a valid identifier name, but I'm not bothering
             # with that just yet.
-            csect = name
-            if csect not in csects:
-                csects[csect] = 0
-        elif operation == "DC":
-            pass
-        elif operation == "DS":
-            pass
-        elif operation == "DSECT":
-            # Same comments as for `CSECT`.
-            dsect = name
-            if dsect not in dsects:
-                dsects[dsect] = 0
+            cVsD = (operation == "CSECT")
+            if name == "" and not cVsD:
+                error(properties, "Unnamed DSECT not allowed.")
+            sect = name
+            if sect not in sects:
+                sects[sect] = {
+                    "pos": 0,
+                    "used": 0,
+                    "memory": bytearray(memoryChunkSize)
+                    }
+                symtab[sect] = { "section": sect, "address": 0 }
+            continue
         elif operation == "END":
             break
         elif operation in ["ENTRY", "EXTRN"]:
@@ -201,34 +276,183 @@ def generateObjectCode(source, macros):
                         entries.add(symbol)
                     else:
                         extrns.add(symbol)
+            continue
         elif operation == "EQU":
-            pass
+            continue
         elif operation == "EXTRN":
-            pass
+            continue
         elif operation == "LTORG":
-            pass
+            continue
         elif operation == "USING":
-            pass
+            continue
+                
+        #******** Process instruction ********
+        
+        # For our purposes, pseudo-ops like `DS` and `DC` that can have labels,
+        # modify memory, and move the instruction pointer are "instructions".
+        
+        if operation in ["DC", "DS"]:
+            ast = parserASM(operand, operation.lower() + "Operands")
+            if ast == None:
+                error(properties, "Cannot parse %s operand" % operation)
+                continue
+            flattened = astFlattenList(ast)
+            # At this point, `flattened` should be a list with one entry for
+            # each suboperand.  Those suboperands are in the form of 
+            # dicts with the keys:
+            #    'd'    duplication factor
+            #    't'    type
+            #    'l'    length modifier
+            #    'v'    value
+            # Each of these fields will itself be an AST.
+            for suboperand in flattened:
+                if suboperand["d"] == []:
+                    duplicationFactor = 1
+                else:
+                    duplicationFactor = evalArithmeticExpression(suboperand["d"], {}, properties)
+                    if duplicationFactor == None:
+                        error(properties, "Could not evaluate duplication factor")
+                        continue
+                try:
+                    suboperandType = suboperand["t"][0]
+                except:
+                    error(properties, "Suboperand type not specified")
+                    continue
+                if suboperand["l"] == []:
+                    lengthModifier = None
+                else:
+                    lengthModifier = evalArithmeticExpression(suboperand["l"], {}, properties)
+                    if lengthModifier == None:
+                        error(properties, "Count not evaluate length modifier")
+                        continue
+                astValue = suboperand["v"]
+                if suboperandType == "C":
+                    commonProcessing(1)
+                    
+                    pass
+                elif suboperandType == "X":
+                    commonProcessing(1)
+                    # Adjust the string to have an even number of digits,
+                    # 0-padded or truncated to the length modifier, if any.
+                    try:
+                        hexString = flattened[0]["v"][0][1]
+                        if lengthModifier == None:
+                            count = len(hexString)
+                            count += (count % 1)
+                        else:
+                            count = lengthModifier * 2
+                        while len(hexString) < count:
+                            hexString = "0" + hexString
+                        hexString = hexString[-count:]
+                    except:
+                        error(properties, "Cannot parse X value")
+                        continue
+                    # Deal with memory.
+                    if operation == "DC":
+                        bytes = bytearray()
+                        for i in range(0, count, 2):
+                            b = hexString[i:i+2]
+                            bytes.append(int(b, 16))
+                        toMemory(bytes)
+                    else:
+                        toMemory(count // 2)
+                elif suboperandType == "B":
+                    commonProcessing(1)
+                    
+                    pass
+                elif suboperandType == "F":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    toMemory(duplicationFactor * 4)
+                elif suboperandType == "H":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    toMemory(duplicationFactor * 2)
+                elif suboperandType == "E":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    toMemory(duplicationFactor * 4)
+                elif suboperandType == "D":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    toMemory(duplicationFactor * 8)
+                elif suboperandType == "A":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    toMemory(duplicationFactor * 4)
+                elif suboperandType == "Y":
+                    commonProcessing(1)
+                    if lengthModifier != None:
+                        pass
+                    if operation == "DC":
+                        pass
+                    
+                    
+                    toMemory(duplicationFactor * 2)
+                else:
+                    error(properties, "Unsupported DC/DS type %s" % suboperandType)
+                    continue
         elif operation in argsRR:
-            pass
+            commonProcessing(2)
+            ast = parserASM(operand, "rrAll")
+            
+            toMemory(bytearray(2))
         elif operation in argsRS:
-            pass
+            commonProcessing(2)
+            ast = parserASM(operand, "rsAll")
+            
+            toMemory(bytearray(4))
         elif operation in argsSRS:
-            pass
+            commonProcessing(2)
+            ast = parserASM(operand, "srsAll")
+            
+            toMemory(bytearray(2))
         elif operation in argsRI:
-            pass
+            commonProcessing(2)
+            ast = parserASM(operand, "riAll")
+            
+            toMemory(bytearray(4))
         elif operation in argsSI:
-            pass
+            commonProcessing(2)
+            ast = parserASM(operand, "siAll")
+            
+            toMemory(bytearray(4))
         elif operation in argsMSC:
+            commonProcessing(2)
+            ast = parserASM(operand, "mscAll")
             # MSC operations are really standardized enough for there to be
             # any advantage in segregating them this way, but it might provide
             # some clarity in maintenance to do so.
-            pass
+            
+            toMemory(bytearray(4))
         elif operation in argsBCE:
+            commonProcessing(2)
+            ast = parserASM(operand, "bceAll")
             # BCE operations are really standardized enough for there to be
             # any advantage in segregating them this way, but it might provide
             # some clarity in maintenance to do so.
-            pass
+            
+            toMemory(bytearray(4))
         else:
             error(properties, "Untrapped operation " + operation)
             continue

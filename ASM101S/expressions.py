@@ -169,6 +169,32 @@ def unroll(expression):
             break
     return expression
 
+# Rules of the form 
+#    X { ',' X }
+# create AST that looks like the following:
+#    ( AST1, [] }
+# or
+#    ( AST1, [
+#              [ ',', AST2 ],
+#              [ ',', AST3 ],
+#              ...
+#            ] )
+# For our processing, it's much more convenient to have
+#    [ AST1, AST2, AST3, ... ]
+# so that's what the `astFlattenList` function does.
+def astFlattenList(ast):
+    if ast == []:
+        return []
+    try:
+        flattened = [ ast[0] ]
+        for e in ast[1]:
+            flattened.append(e[1])
+        return flattened
+    except:
+        print("Implementation error: AST for X{',',X} not appropriate")
+        import sys
+        sys.exit(1)
+
 # Evaluate an arithmetic expression to an integer and return it, or else `None`
 # on failure.  `properties` is for the line of source code.  `expression` is
 # the parsed expression, as returned by the parser function.  `svLocals` and
