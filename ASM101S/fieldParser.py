@@ -143,18 +143,15 @@ subOperation =
 # Operand field for an RR instruction.
 rrAll = register ',' register ( / / | $ ) ;
 
-# Operand field for an RS instruction.
+# Operand field for an RS or SRS instruction.
 rsAll = 
-    | register ',' arithmeticExpression '(' register ')'  ( / / | $ )
-    | register ',' arithmeticExpression '(' register ',' register ')'  ( / / | $ )
-    | register ',' arithmeticExpression  ( / / | $ )
+    | [ R1+: register ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
+    | [ R1+: register ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
+    | [ R1+: register ',' ] D2+: arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for an RI instruction.
-riAll = register ',' immediate  ( / / | $ ) ;
-
-# Operand field for an SRS instruction.
-srsAll = register ',' immediate  ( / / | $ ) ;
+riAll = R2+: register ',' I1+: immediate  ( / / | $ ) ;
 
 # Operand field for an SI instruction.
 siAll = arithmeticExpression '(' register '),' immediate  ( / / | $ ) ;
@@ -200,6 +197,7 @@ constant =
     | "X'" /[0-9A-F]+/ "'"
     | "B'" /[0-1]+/ "'" 
     | "L'" identifier
+    | '*'
     ;
 
 char = 
@@ -257,9 +255,9 @@ register =
     ;
 
 immediate = 
+    | constant
     | identifier
     | variable
-    | constant
     ;
 
 arithmeticExpressionOnly = arithmeticExpression $ ;
@@ -333,6 +331,10 @@ identifierList = pidentifier { ',' pidentifier } $ ;
 pidentifier = /[#@$A-Z][#@$A-Z0-9]*/ ;
 
 anything = /.*/ $ ;
+
+equOperand = v+: arithmeticExpression ( / / | $ ) ;
+
+expressions = r+: arithmeticExpression { ',' r+: arithmeticExpression }* ( / / | $ ) ;
 
 '''
 
@@ -729,4 +731,9 @@ if __name__ == "__main__":
         exercise("dcOperands")
         exercise("dsOperands")
         exercise("rsAll")
+        exercise("riAll")
+        exercise("immediate")
+        exercise("constant")
+        exercise("equOperand")
+        exercise("expressions")
         

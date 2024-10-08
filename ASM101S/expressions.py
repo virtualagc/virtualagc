@@ -70,7 +70,7 @@ def error(properties, msg, severity=255):
     if severity > maxSeverity:
         maxSeverity = severity
     errorCount += 1
-    properties["errors"].append(msg)
+    properties["errors"].append("(Severity %d) %s" % (severity, msg))
 def getErrorCount():
     return errorCount, maxSeverity
 
@@ -200,7 +200,13 @@ def astFlattenList(ast):
 # the parsed expression, as returned by the parser function.  `svLocals` and
 # `svGlobals` provide the defined symbolic variables, with the locals overriding
 # the globals in case of overlap
-def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }):
+def evalArithmeticExpression(expression, \
+                             svLocals, \
+                             properties = { "errors": [] }, \
+                             symtab = {}, \
+                             star = None, \
+                             severity = 255
+                             ):
     global svGlobals
     
     expression = unroll(expression)
@@ -216,29 +222,38 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
         if sv != None:
             sv = sv[expression]
             if isinstance(sv, int):
-                return(sv)
+                return sv
             if isinstance(sv, str) and sv.isdigit():
-                return(int(sv))
+                return int(sv)
             error(properties, \
                   "Cannot be interpreted as an integer value: '%s' (%s)" % \
-                  (sv, expression))
+                  (sv, expression), severity)
             return None
+        if expression == "*" and star != None:
+            return star
+        if expression in symtab:
+            entry = symtab[expression]
+            if "value" in entry:
+                value = entry["value"]
+                if isinstance(value, int):
+                    return value
     if not isinstance(expression, (list, tuple)):
-        error(properties, "Eval error")
+        error(properties, "Eval error type 1", severity)
         return None
     if len(expression) == 3 and expression[0] == '(' and expression[2] == ')':
-        return evalArithmeticExpression(expression[1], svLocals, properties)
+        return evalArithmeticExpression(expression[1], svLocals, properties, \
+                                        symtab, star, severity)
     if len(expression) == 3 and expression[0] == "X'" and expression[2] == "'":
         try:
             return int(expression[1], 16)
         except:
-            error(properties, "Not hexadecimal: %s" % expression[1])
+            error(properties, "Not hexadecimal: %s" % expression[1], severity)
             return None
     if len(expression) == 3 and expression[0] == "B'" and expression[2] == "'":
         try:
             return int(expression[1], 2)
         except:
-            error(properties, "Not binary: %s" % expression[1])
+            error(properties, "Not binary: %s" % expression[1], severity)
             return None
     if len(expression) == 2 and isinstance(expression[0], str) and \
             expression[0] in ["N'", "K'", "L'", "S'", "I'"]:
@@ -250,12 +265,13 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
                 pass
             else:
                 error(properties, "Unrecognized operand of %s: %s" % \
-                      (op, symvar[2]))
+                      (op, symvar[2]), severity)
                 return None
-            index = evalArithmeticExpression(symvar[2], svLocals, properties)
+            index = evalArithmeticExpression(symvar[2], svLocals, properties, \
+                                             symtab, star, severity)
             if index == None:
                 error(properties, "Cannot compute index of %s: %s" %\
-                      (symvar[0], str(symvar[2])))
+                      (symvar[0], str(symvar[2])), severity)
                 return None
             symvar = symvar[0]
         if symvar in svLocals:
@@ -263,7 +279,7 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
         elif symvar in svGlobals:
             sv = svGlobals
         else:
-            error(properties, "Symbolic variable %s not found" % symvar)
+            error(properties, "Symbolic variable %s not found" % symvar, severity)
             return None
         var = sv[symvar]
         if index != None:
@@ -272,7 +288,7 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
             else:
                 index -= 1 # Change 1-based to 0-based.
                 if index < 0 or index >= len(var):
-                    error(properties, "Index out of range")
+                    error(properties, "Index out of range", severity)
                     return None
                 var = var[index]
         metavar = "_" + symvar
@@ -282,7 +298,7 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
             meta = {}
         if op == "N'":
             if symvar != "&SYSLIST" and "omitted" not in meta:
-                error(properties, "Not a macro parameter: %s" % symvar)
+                error(properties, "Not a macro parameter: %s" % symvar, severity)
                 return None
             if symvar != "&SYSLIST" and meta["omitted"]:
                 return 0
@@ -292,14 +308,15 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
         elif op == "K'":
             if isinstance(var, str):
                 return len(var)
-            error(properties, "Not a string: %s" % str(var))
+            error(properties, "Not a string: %s" % str(var), severity)
             return None
         else:
-            error(properties, "Not yet implemented: %s" % op)
+            error(properties, "Not yet implemented: %s" % op, severity)
             return None
         
     if len(expression) == 2:
-        left = evalArithmeticExpression(expression[0], svLocals, properties)
+        left = evalArithmeticExpression(expression[0], svLocals, properties, \
+                                        symtab, star, severity)
         if left != None:
             next = expression[1]
             chained = False
@@ -314,7 +331,9 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
             if chained:
                 for entry in next:
                     op = entry[0]
-                    right = evalArithmeticExpression(entry[1], svLocals, properties)
+                    right = evalArithmeticExpression(entry[1], svLocals, \
+                                                     properties, symtab, star, \
+                                                     severity)
                     if right != None:
                         if op == "+":
                             left += right
@@ -328,10 +347,10 @@ def evalArithmeticExpression(expression, svLocals, properties = { "errors": [] }
                             else:
                                 left /= right
                     else:
-                        error(properties, "Eval error")
+                        error(properties, "Eval error type 2", severity)
                         return None
                 return left
-    error(properties, "Eval error")
+    error(properties, "Eval error type 3", severity)
     return None
 
 # Evaluate a boolean expression, returning True, False, or None (error).

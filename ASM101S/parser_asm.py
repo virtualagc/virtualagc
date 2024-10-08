@@ -395,11 +395,20 @@ class asmParser(Parser):
     def _rsAll_(self):  # noqa
         with self._choice():
             with self._option():
-                self._register_()
-                self._token(',')
+                with self._optional():
+                    self._register_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+
+                    self._define(
+                        [],
+                        ['R1']
+                    )
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
                 self._token('(')
                 self._register_()
+                self.add_last_node_to_name('B2')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -410,14 +419,29 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+
+                self._define(
+                    [],
+                    ['B2', 'D2', 'R1']
+                )
             with self._option():
-                self._register_()
-                self._token(',')
+                with self._optional():
+                    self._register_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+
+                    self._define(
+                        [],
+                        ['R1']
+                    )
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
                 self._token('(')
                 self._register_()
+                self.add_last_node_to_name('X2')
                 self._token(',')
                 self._register_()
+                self.add_last_node_to_name('B2')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -428,10 +452,23 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+
+                self._define(
+                    [],
+                    ['B2', 'D2', 'R1', 'X2']
+                )
             with self._option():
-                self._register_()
-                self._token(',')
+                with self._optional():
+                    self._register_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+
+                    self._define(
+                        [],
+                        ['R1']
+                    )
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -441,19 +478,27 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+
+                self._define(
+                    [],
+                    ['D2', 'R1']
+                )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'"'
+                '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '<constant> <identifier> <register>'
-                '<subvar> <variable> [0-9]+'
+                '<arithmeticExpression> <constant>'
+                '<identifier> <register> <subvar> <term>'
+                '<variable> [0-9]+'
             )
 
     @tatsumasu()
     def _riAll_(self):  # noqa
         self._register_()
+        self.add_last_node_to_name('R2')
         self._token(',')
         self._immediate_()
+        self.add_last_node_to_name('I1')
         with self._group():
             with self._choice():
                 with self._option():
@@ -464,20 +509,10 @@ class asmParser(Parser):
                     'expecting one of: '
                 )
 
-    @tatsumasu()
-    def _srsAll_(self):  # noqa
-        self._register_()
-        self._token(',')
-        self._immediate_()
-        with self._group():
-            with self._choice():
-                with self._option():
-                    self._pattern(' ')
-                with self._option():
-                    self._check_eof()
-                self._error(
-                    'expecting one of: '
-                )
+        self._define(
+            [],
+            ['I1', 'R2']
+        )
 
     @tatsumasu()
     def _siAll_(self):  # noqa
@@ -555,8 +590,9 @@ class asmParser(Parser):
                         )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" <arithmeticExpression>'
-                '<constant> <term> [0-9]+'
+                '"B\'" "L\'" "X\'" \'*\''
+                '<arithmeticExpression> <constant> <term>'
+                '[0-9]+'
             )
 
     @tatsumasu()
@@ -673,9 +709,11 @@ class asmParser(Parser):
             with self._option():
                 self._token("L'")
                 self._identifier_()
+            with self._option():
+                self._token('*')
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" [0-9]+'
+                '"B\'" "L\'" "X\'" \'*\' [0-9]+'
             )
 
     @tatsumasu()
@@ -1107,7 +1145,7 @@ class asmParser(Parser):
                 self._constant_()
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'"'
+                '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<constant> <identifier> <subvar> <sv>'
                 '<variable> [0-9]+'
@@ -1117,14 +1155,14 @@ class asmParser(Parser):
     def _immediate_(self):  # noqa
         with self._choice():
             with self._option():
+                self._constant_()
+            with self._option():
                 self._identifier_()
             with self._option():
                 self._variable_()
-            with self._option():
-                self._constant_()
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'"'
+                '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<constant> <identifier> <subvar> <sv>'
                 '<variable> [0-9]+'
@@ -1483,6 +1521,55 @@ class asmParser(Parser):
         self._pattern('.*')
         self._check_eof()
 
+    @tatsumasu()
+    def _equOperand_(self):  # noqa
+        self._arithmeticExpression_()
+        self.add_last_node_to_name('v')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+
+        self._define(
+            [],
+            ['v']
+        )
+
+    @tatsumasu()
+    def _expressions_(self):  # noqa
+        self._arithmeticExpression_()
+        self.add_last_node_to_name('r')
+
+        def block1():
+            self._token(',')
+            self._arithmeticExpression_()
+            self.add_last_node_to_name('r')
+
+            self._define(
+                [],
+                ['r']
+            )
+        self._closure(block1)
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+
+        self._define(
+            [],
+            ['r']
+        )
+
 
 class asmSemantics:
     def operandPrototype0(self, ast):  # noqa
@@ -1525,9 +1612,6 @@ class asmSemantics:
         return ast
 
     def riAll(self, ast):  # noqa
-        return ast
-
-    def srsAll(self, ast):  # noqa
         return ast
 
     def siAll(self, ast):  # noqa
@@ -1690,6 +1774,12 @@ class asmSemantics:
         return ast
 
     def anything(self, ast):  # noqa
+        return ast
+
+    def equOperand(self, ast):  # noqa
+        return ast
+
+    def expressions(self, ast):  # noqa
         return ast
 
 

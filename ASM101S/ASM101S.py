@@ -852,15 +852,14 @@ for i in range(endLibraries, len(source)):
             inCopy = False
     if properties["printable"]:
         prefix = ""
-        if False:
-            if properties["file"] != None:
-                prefix = "(%d) %s(%d)" % (properties["depth"],
-                                          os.path.basename(properties["file"]), 
-                                          properties["lineNumber"])
-            elif properties["macro"] != None:
-                prefix = "(%d) %s(%d)" % (properties["depth"], 
-                                          properties["macro"], 
-                                          properties["lineNumber"])
+        if "pos" in properties:
+            prefix = "%05X" % (properties["pos"] // 2)
+        if "assembled" in properties:
+            for i in range(len(properties["assembled"])):
+                b = properties["assembled"][i]
+                if (i & 1) == 0:
+                    prefix += " "
+                prefix += "%02X" % b
         # For whatever reason, a macro-invocation line is printed only under
         # some circumstances, and is omitted in others.
         if properties["operation"] in macros and not properties["inMacroDefinition"]:
@@ -905,4 +904,19 @@ if True:
         metadata["sects"][key]["memory"] = \
             metadata["sects"][key]["memory"][:metadata["sects"][key]["used"]]
     pprint.pp(metadata)
+    
+if False:
+    for symbol in symtab:
+        if "hash" in symtab[symbol]:
+            sect, address = unhash(symtab[symbol]["hash"])
+            if (sect, address) == (None, None):
+                print(symbol, "Cannot unhash")
+            elif sect == None:
+                print(symbol, "Not address")
+            elif symtab[symbol]["type"] == "EXTERNAL":
+                print(symbol, "Address is EXTRN")
+            elif "section" not in symtab[symbol] or "address" not in symtab[symbol]:
+                print(symbol, "Unhashes incorrectly as address")
+            else:
+                print(symbol, "Address", sect,"%05X"%address)
         
