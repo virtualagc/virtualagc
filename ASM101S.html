@@ -182,6 +182,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
           Assembler Language - OS Release 21</a>".&nbsp; Manual for the
         System/360 macro assembler upon which <b>ASM101S</b> is
         modeled.</li>
@@ -190,6 +191,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
           collection of notes about the AP-101S/AP-101B</a>.</li>
       <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
 
 
 
@@ -208,6 +210,7 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
             I and II</a>:&nbsp; :&nbsp; Principles of Operation for
           PCI/PCO and MSC</li>
         <li><a moz-do-not-send="true"
@@ -217,10 +220,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
             III</a>:&nbsp; Principles of Operation for BCE.</li>
       </ul>
       <li>"<a moz-do-not-send="true"
 href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+
 
 
 
@@ -241,6 +246,7 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
     indiscriminately in AP-101 assembly-language source code and sharing
     memory.&nbsp; <a moz-do-not-send="true"
 href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
+
 
 
 
@@ -269,9 +275,11 @@ href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
 
 
 
+
       II of the AP-101S POO</a> or the seemingly-identical <a
       moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf#page=68">Part
+
 
 
 
@@ -304,9 +312,11 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
         III of the AP-101S POO</a> or the seemingly-identical <a
         moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
 
 
 
@@ -323,11 +333,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
       I am simply documenting it as I proceed with development!)<br>
     </p>
     The modern assembler is typically invoked as<br>
     <blockquote>
-      <pre><font color="#663300">ASM101S.py [ --library=<i>LIBRARY</i> ] --object=<i>OBJECT</i>.obj <i>SOURCE1</i>.asm <i>SOURCE2</i>.asm ...</font><br></pre>
+      <pre><font color="#663300">ASM101S.py [ --library=<i>LIBRARY</i> ] [ --sysparm=BFS ] --object=<i>OBJECT</i>.obj <i>SOURCE1</i>.asm <i>SOURCE2</i>.asm ...</font><br></pre>
     </blockquote>
     You can see a list of the available command-line options by using
     the command<br>
@@ -376,6 +387,7 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     about it for yourself in the IBM 360 assembler language manual,
     where <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/59/mode/1up?view=theater">macros
+
 
 
 
@@ -432,6 +444,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     <font color="#663300"><code><i>LIBRARY</i></code></font> is just a
     path to a macro-library folder.&nbsp; Macro definitions in any
     libraries specified in this manner are loaded by the assembler along
@@ -451,6 +464,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     pseudo-ops are <i>also</i> located within the macro libraries,
     intermixed with the files intended to contain only macros.&nbsp; But
     we do not want any of the code from these <font color="#663300"><code>COPY</code></font>'able
+
 
 
 
@@ -521,6 +535,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       You simply need Python 3 to run it.<br>
     </p>
     <blockquote>
@@ -532,27 +547,34 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </blockquote>
     <h1><a name="wildThings"></a>Where Are the AP-101 Assembly-Language
       Files?</h1>
-    <p><i>(***FIXME***)</i><br>
-    </p>
     <ul>
       <li>HAL/S-FC runtime library:</li>
       <ul>
-        <li>Source-code files<br>
+        <li><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">Source-code
+            files</a><br>
         </li>
-        <li>Assembly listings<br>
+        <li><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">"Assembly
+            listings"</a> (see <a moz-do-not-send="true"
+            href="#assemblyListings">here</a>)<br>
         </li>
-        <li>Macro library<a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC"><br>
-          </a></li>
+        <li><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC">Macro
+            library</a></li>
+        <li><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">Interface
+            files</a><br>
+        </li>
       </ul>
-      <li>Shuttle FSW OI-30.17:</li>
+      <li>Shuttle FSW OI-30.17 (presently restricted, sorry!):</li>
       <ul>
         <li>Source-code files</li>
         <li>Assembly listings</li>
         <li>Macro library<br>
         </li>
       </ul>
-      <li>Shuttle FSW OI-34.06:</li>
+      <li>Shuttle FSW OI-34.06 (presently restricted, sorry!):</li>
       <ul>
         <li>Source-code files</li>
         <li>Disassemblies<br>
@@ -571,6 +593,96 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       what's documented for IBM 360 assembly language.&nbsp; I'll
       explain those differences in the subsections below.<br>
     </p>
+    <h2><a name="assemblyListings"></a>Assembly Listings</h2>
+    <p>By an "assembly listing", I mean a printout from the assembler
+      itself, typically showing how each line of source code has been
+      transformed into binary codes, and providing useful extra
+      information such as symbol tables and other cross
+      references.&nbsp; <br>
+    </p>
+    <p>Unfortunately, there are no surviving assembly listings produced
+      by the AP-101S original assembler that I'm aware of, or even
+      substantial fragments of such listings.&nbsp; (If you notice any,
+      be sure to call my attention to them!)&nbsp; Therefore, without
+      any of the original assembly listings to mimic, assembly listings
+      as produced by <b>ASM101S</b> are unlikely to match those of the
+      original assembler with exactitude .... though <i>of course</i> I
+      expect the same binary codes to be produced at the same addresses,
+      since if not, then the entire exercise of creating <b>ASM101S</b>
+      in the first place would be pointless.&nbsp; But even if I had
+      such original assembly listings, one wouldn't expect them to be
+      any guide as to the wording or format of warning or error messages
+      produced by the assembler, since any Space Shuttle flight software
+      source code available for assembly presumably would be error-free,
+      at least to the point that no warning or error messages are likely
+      to appear in any assembly listings.<br>
+    </p>
+    <p>With that said, there is some assembly-listing-like material
+      available.&nbsp; Among the files presently publicly visible, I
+      refer to <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">the
+        folder called RUNLST in our source-code repository</a>, which
+      naively appears to be assembly listings generated by assembling
+      the files in <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+        repository's RUNASM folder</a>.&nbsp; RUNASM contains the
+      AP-101S assembly language source code, in conjunction with <a
+        moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC">the
+        macro library folder RUNMAC</a>, and assisted by <a
+        moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">the
+        interface-file folder ZCONASM</a>, for the runtime library used
+      with AP-101S object code created by the HAL/S compiler, <b>HAL/S-FC</b>.<br>
+    </p>
+    <p>Upon closer inspection, however, the contents of RUNLST cannot
+      actually have been produced directly by the original AP-101S
+      assembler.&nbsp; And similarly for materials not presently
+      publicly visible.&nbsp; I assume, rather, that listings produced
+      by the original assembler were stored somehow, probably in a
+      so-called partitioned data set (PDS), and that the listings in
+      RUNLST were produced by running some kind of report generator on
+      those stored listings.&nbsp; Here's a fragment of the listing
+      RUNLST/ACOS:<br>
+    </p>
+    <pre><font color="#663300">						.<br>						.<br>						.<br>				&nbsp;28 ACOS     AMAIN ACALL=YES                                                00002200<br>                                 29+***********************************************************************<br>                                 30+*<br>                                 31+*        PRIMARY ENTRY POINT<br>                                 32+*<br>                                 33+***********************************************************************<br>00000                            34+ACOS     CSECT                                                          01-AMAIN<br>00000                            35+STACK    DSECT                                                          01-AMAIN<br>                                 36+*        DS    18H            STANDARD STACK AREA DEFINITION<br>00000                            37+         DS    F              PSW (LEFT HALF)                           01-AMAIN<br>00002                            38+         DS    2F             R0,R1                                     01-AMAIN<br>00006                            39+ARG2     DS    F              R2                                        01-AMAIN<br>00008                            40+         DS    F              R3                                        01-AMAIN<br>0000A                            41+ARG4     DS    F              R4                                        01-AMAIN<br>0000C                            42+ARG5     DS    F              R5                                        01-AMAIN<br>0000E                            43+ARG6     DS    F              R6                                        01-AMAIN<br>00010                            44+ARG7     DS    F              R7                                        01-AMAIN<br>                                 45+*        END OF STANDARD STACK AREA<br>00012                            46+SAVE6    DS    D              TO SAVE REGISTERS F6,F7                   02-00025<br>00016                            47+SWITCH   DS    F              TO SAVE R4 ACROSS INTRINSIC CALL          02-00026<br>00018                            48+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN<br>00000                            49+ACOS     CSECT                                                          01-AMAIN<br>0000000                          50+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN<br>00000 E0FB 0018      0018        51+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN<br>00002 B624 0000      0009 0000   52+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN<br>                                 54 *COMPUTES ARC-COSINE(X) OF SINGLE PRECISION SCALAR                      00002300<br>                                 55          INPUT F0             SCALAR SP                                 00002400<br>0000000                          56+F0       EQU   0                                                        01-INPUT<br>                                 58          OUTPUT F0            SCALAR SP RADIANS                         00002500<br>						.<br>						.<br>						.</font><br></pre>
+    <p>To anybody who is familiar with assembly language, this certainly
+      <i>looks</i> like an assembly listing produced by an assembler, so
+      why do I say that it's not?&nbsp; The first clue is the line
+      numbering:&nbsp; There's a line 52 and a line 54, but no line
+      53.&nbsp; And there are lines 56 and 58, but no line 57.&nbsp;
+      Admittedly, it's not 100% certain why that is, but having tried to
+      track it down, it appears to me that both of those gaps correspond
+      to uses of the <font color="#663300"><code>SPACE</code></font>
+      pseudo-op appearing in expansions of the <font color="#663300"><code>AMAIN</code></font>
+      and <font color="#663300"><code>INPUT</code></font> macros
+      respectively.&nbsp; <a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/52/mode/1up?view=theater">According
+        to the assembly-language manual</a>, "The SPACE instruction is
+      used to insert one or more blank lines in the listing."&nbsp;
+      Which is clearly <i>not</i> what has happened, and indeed is the
+      opposite of what has happened.<br>
+    </p>
+    <p>Another clue, not apparent from the fragment above, is in the
+      number of lines per page of the printout.&nbsp; Originally, an
+      assembly listing would have been output to a line printer having
+      (nominally) ~55 lines per page.&nbsp; Whereas the file in RUNLST
+      have about 80 lines per page.&nbsp; Ergo, RUNLST does not provide
+      an unchanged copy of the original listing.&nbsp; Nor are there any
+      embedded form-feed characters or other means to advance to the top
+      of the next page before a page heading is printed.<br>
+    </p>
+    <p>Still, the files of RUNLST are the best guide available as to the
+      format of assembly listings, and hence <b>ASM101S</b> mimics that
+      format to the extent feasible (i.e., to the extent not too
+      pathetically obsessive), plus the addition of form-feed characters
+      to signal page breaks.<br>
+    </p>
+    <p>When I refer later on to "existing assembly listings", keep in
+      mind that I'm referring to these files from RUNLST and not to
+      actual original assembly listings.<br>
+    </p>
+    <p> </p>
     <h2><a name="CharacterSet"></a>Character Set</h2>
     <p><img moz-do-not-send="true" src="encodingDEU.png" alt=""
         width="638" height="468" align="right">The AP-101 character set
@@ -580,12 +692,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       of quoted strings or comments.<br>
     </p>
     <p>As far as I can tell, the AP-101 assembly-language character set
-      is not defined.&nbsp; There is reason to believe that the
-      character set of the Space Shuttle's Display Electronics Unit
-      (DEU) was used for encoding character-string data in object files
-      output by the assembler.&nbsp; (The reason for believing this is
-      that object files output by the HAL/S compiler, <b>HAL/S-FC</b>,
-      were encoded in that manner.)<br>
+      is not defined.&nbsp; There is some confusion regarding how
+      character data is character data is supposed to be encoded in
+      object files.<br>
+    </p>
+    <p>Examining character strings appearing in object files output by
+      the HAL/S compiler <b>HAL/S-FC</b>, which one would suppose
+      should be consistent with AP-101S assembly language, you find that
+      text is encoded per the Space Shuttle's Display Electronics Unit
+      (DEU).<br>
     </p>
     <p>The DEU character set is depicted in the table to the
       right.&nbsp; It is an ASCII-like character set, in the sense that
@@ -620,6 +735,56 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         done to mark a section of code so that it could be easily found
         later.)</font><br>
     </blockquote>
+    <b>But wait!</b>&nbsp; In AP-101S assembly language, constant
+    character data (and constant data of any other type as well) is
+    stored in memory via the pseudo-op called <font color="#663300"><code>DC</code></font>.&nbsp;
+    For example, to store the character data "PC" into memory at the
+    current assembly location, you might employ the assembly language<br>
+    <blockquote>
+      <pre><font color="#663300">DC      C'PC'</font><br></pre>
+    </blockquote>
+    While we have assembly listings for only a limited selection of
+    AP-101S source code, we do have some.&nbsp; Here's how a line such
+    as the one above assembles:<br>
+    <pre><font color="#663300"> 001C9 <font color="#ff0000">D7C3</font>                      964+         DC    C'PC'                                                    01-GENER       FCMCBLKS<br></font></pre>
+    The part shown in red are what is supposedly stored in memory for
+    "PC", those are the EBCDIC codes for the characters "P" and
+    "C".&nbsp; Thus ultimately, it remains unclear as to whether it is
+    the DEU encoding or the EBCDIC encoding which appears in the object
+    files produced.<br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        In case you assume it's impossible that EBCDIC encoding would be
+        shown on the assembly listing but that DEU encoding would occur
+        in the object files, note that the assembly listings produced by
+        IBM Federal Services Division's <a moz-do-not-send="true"
+          href="LVDC.html">LVDC</a> assembler, at least in some
+        versions, had somewhat analogous bugs for constant character
+        data.&nbsp; In that case, constant character data was stored
+        into memory at assembly time by a pseudo-op called <font
+          color="#663300"><code>BCI</code></font> (rather than <font
+          color="#663300"><code>DC</code></font>), and even though the
+        object code created by the assembler must have had the correct
+        character data, the character data as displayed on the assembly
+        listings themselves was garbage, seemingly due to some mismatch
+        between the various character sets involved.&nbsp; In creating <a
+          moz-do-not-send="true"
+          href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">the
+          "modern" LVDC assembler</a>, I found it difficult to decide
+        whether to reproduce the original bug (thus continuing to print
+        garbage in the assembly listings) or else to fix the bug (to
+        make the assembly listings look right but to differ from the
+        surviving printouts of assembly listings).&nbsp; Ultimately, I
+        added a command-line switch (<font color="#663300"><code>--past-bugs</code></font>)
+        to allow the user to make the choice for themselves as to
+        whether to override the original bug.&nbsp; But the LVDC
+        assembler is unrelated to the AP-101S assembler, and there's no
+        reason at all to suppose that a bug in one would somehow carry
+        over into the other.&nbsp; Nevertheless, it's a good
+        illustration of the danger associated with assuming that just
+        because these tools were used regularly, for a long time, that
+        they were necessarily free of bugs, particularly insofar as a
+        non-critical item like the assembly listing is concerned.</font><br>
+    </blockquote>
     Beyond these characters, any Space Shuttle flight-software source
     code available from Virtual AGC will have been "anonymized" by
     replacing personal names or initials with randomized identifiers
@@ -638,7 +803,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     AP-101 assembly-language source code, if such a thing ever
     exists.&nbsp; They is not used in any extant AP-101
     assembly-language source code available to me.<br>
-    <h2>Instruction Aliases</h2>
+    <h2><a name="instructionAliases"></a>Instruction Aliases</h2>
     <p>In IBM 360 Basic Assembly Language (BAL), various aliases exist
       for the branch instructions <font color="#663300"><code>BCR</code></font>
       and <font color="#663300"><code>BC</code></font><code></code><font
@@ -651,32 +816,72 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
-        4-1 of the assembler-language manual</a>, and my assumption is
-      that Figure 4-1 is valid for AP-101 assembly language as
-      well.&nbsp; However, there are additional aliases not covered in
-      that figure, or in any other documentation I can find:<br>
+
+        4-1 of the assembler-language manual</a>.&nbsp; While it is
+      tempting to say that Figure 4-1 should be accepted as-is for
+      AP-101S assembly language, that's unfortunately impossible:&nbsp;
+      Conditional-branch instructions encode a "mask" to be applied to
+      the CPU's condition codes, but the mask is 4 bits wide for
+      System/360 and only 3 bits wide for AP-101S.<br>
     </p>
-    <ul>
-      <li><font color="#663300"><code>BLE</code></font> — aliased by <b>ASM101S</b>
-        identically to <font color="#663300"><code>BNP</code></font>.&nbsp;
-
-
-
-
-
-
-        I think of them as "Branch Less or Equal" vs "Branch
-        Non-Positive".<br>
+    <p>Something has to give!&nbsp; But Figure 4-1 does serve as a
+      starting point for reverse-engineering AP-101 aliases for
+      conditional-branch instructions.&nbsp; Here's my own list of
+      AP-101S mnemonics for aliased branch instructions, grouped by
+      condition-code mask.<br>
+    </p>
+    <ol start="0">
+      <li><font color="#663300"><code>NOP</code></font>,<font
+          color="#663300"><code>NOPR</code></font> — No Operation.<br>
       </li>
-      <li><font color="#663300"><code>BN</code></font> — aliased by <b>ASM101S</b>
-        identically to <font color="#663300"><code>BM</code></font>.&nbsp;
-
-
-
-
-
-
-        I think of them as "Branch Negative" vs "Branch Minus".</li>
+      <li><font color="#663300"><code>BH</code></font>,<font
+          color="#663300"><code>BO</code></font>,<font color="#663300"><code><font
+              color="#663300"><code>BP</code></font> </code></font>—
+        Branch on High, Branch on Overflow, Branch on Plus</li>
+      <li><font color="#663300"><code>BL</code></font>,<font
+          color="#663300"><code>BM</code></font>,<font color="#663300"><code>BN</code></font>
+        — Branch on Low, Branch on Minus, Branch on Negative</li>
+      <li><font color="#663300"><code>BNE</code></font>,<font
+          color="#663300"><code>BNZ</code></font> — Branch on Not Equal,
+        Branch on Not Zero</li>
+      <li><font color="#663300"><code>BE,BZ</code></font> — Branch on
+        Equal, Branch on Zero<br>
+      </li>
+      <li><font color="#663300"><code>BNL,</code></font><font
+          color="#663300"><code></code></font><font color="#663300"><code>BNM</code></font>
+        — Branch on Not Low, Branch on Not Minus</li>
+      <li><font color="#663300"><code>BNH</code></font>,<font
+          color="#663300"><code>BNP</code></font>,<font color="#663300"><code>BLE</code></font>,<font
+          color="#663300"><code>BNO</code></font> — Branch on Not High,
+        Branch on Not Plus, Branch on Less-or-Equal, Branch on Not
+        Overflow<br>
+      </li>
+      <li><font color="#663300"><code>B</code></font>,<font
+          color="#663300"><code>BR</code></font> — Unconditional Branch<br>
+      </li>
+    </ol>
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; While the mnemonics
+        and condition masks in the list above are accurate (I hope!),
+        but textual descriptions are less certain and should be taken
+        with a grain of salt.&nbsp; Corrections are welcome!<br>
+        <br>
+        <b>Aside:</b>&nbsp; The original Figure 4-1 explained how each
+        alias corresponded specifically to <font color="#663300"><code>BCR</code></font>
+        or (much-more commonly) <font color="#663300"><code>BC</code></font><code></code><font
+          color="#663300"><code></code></font> instructions, but I've
+        skipped that explanation here.&nbsp; (Look at the file
+        model101.py of the ASM101S source code if you're
+        interested.)&nbsp; Partly that's because it's unlikely to be of
+        interest, but also because it's far more complicated for AP-101S
+        than for System/360:&nbsp; For example, mnemonic alias like <font
+          color="#663300"><code>BNP</code></font> might be coded as a <font
+          color="#663300"><code>BC</code></font> instruction under some
+        circumstances, as a <font color="#663300"><code>BCB</code></font>
+        instruction in other circumstances, or as a <font
+          color="#663300"><code>BCF</code></font> instruction under
+        still other circumstances.</font><br>
+    </blockquote>
+    <ul>
     </ul>
     <p><font color="#663300"><code>LHI</code></font>:&nbsp; Besides the
       branch-instruction aliases, Shuttle flight-software code uses the
@@ -685,6 +890,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       corresponding to it.&nbsp; There is such an instruction in IBM 360
       assembly language.&nbsp; <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=79">The
+
 
 
 
@@ -718,6 +924,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       Consider this example:<br>
     </p>
     <blockquote>
@@ -732,7 +939,9 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         Halfword Immediate</a> instruction (<font color="#663300"><code>AHI</code></font>),
+
 
 
 
@@ -753,6 +962,12 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       instruction assembles to.&nbsp; Therefore, <font color="#663300"><code>LACR</code></font>
       is nothing more than a synonym for <font color="#663300"><code>LCR</code></font>.<br>
     </p>
+    <p><font color="#663300"><code>PC</code></font>:&nbsp; Similarly,
+      this undocumented instruction is found from available assembly
+      listings to assembly as a synonym for <font color="#663300"><code>MVH</code></font>
+      (move halfword).&nbsp; There's no rationale obvious to me for the
+      specific mnemonic "PC" for this operation.<br>
+    </p>
     <ul>
     </ul>
     <h2>Unused Pseudo-ops</h2>
@@ -764,6 +979,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       assembly-language.&nbsp; Admittedly, that inference is probably
       wrong in the case of certain of the pseudo-ops.&nbsp;
       Nevertheless, they have not been implemented in <b>ASM101S</b>.&nbsp;
+
 
 
 
@@ -817,7 +1033,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         color="#663300"><code>SPON</code></font> is used to re-enable
       whatever it was that <font color="#663300"><code>SPOFF</code></font>
       disabled.&nbsp; They are not pseudo-ops in IBM 360 assembly
-      language.<br>
+      language, and hence must be specific to AP-101S.<br>
     </p>
     <p>Fortunately, we have a few contemporary assembly listings in
       which these pseudo-ops appear in the source code, and thus their
@@ -835,6 +1051,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         color="#663300"><code>COPY</code></font>'d Files</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/57/mode/1up?view=theater">The
+
 
 
 
@@ -860,6 +1077,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <h2>Macro-Definition Prototypes</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/65/mode/1up?view=theater">The
+
 
 
 
@@ -893,12 +1111,14 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         I don't know if anybody will read these words, ever, but my
         sixth sense tells me that some folks who do might be smugly
         saying to themselves right now that "<i>of course</i> full-line
         comments are not 'statements' in any language, so what's this
         fool on about?"&nbsp; As it happens, <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/69/mode/1up?view=theater">on
+
 
 
 
@@ -909,138 +1129,6 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         <math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo></mo></mrow><annotation
               encoding="TeX">&lt;img src="smiley.png"&gt;</annotation></semantics></math></font><br>
     </blockquote>
-    <h2>Non-Positional Macro Parameters and Other Irregularities<br>
-    </h2>
-    <p>AP-101S assembly language uses a concept that (as far as I can
-      tell) does not appear in the System/360 assembly-language manual,
-      namely that of non-positional parameters for macros.&nbsp; (It's
-      hard to be 100% sure, of source, since how do you conduct a search
-      for something whose buzzword you do not know, to insure that it
-      doesn't exist?)&nbsp; <br>
-    </p>
-    <p>The kinds of macro arguments explicitly discussed by the
-      assembly-language manual are similar to this:<br>
-    </p>
-    <blockquote>
-      <pre>        <font color="#663300"> MACRO<br>         MYMACRO    &amp;ARG1,&amp;ARG2,&amp;ARG3<br>         ...<br>         MEND<br>         .<br>         .<br>         .<br>         MYMACRO    X,Y,Z<br>         .<br>         .<br>         .</font><br></pre>
-    </blockquote>
-    <p>Expansions of macros like <font color="#663300"><code>MYMACRO</code></font>
-      essentially involve the replacement of the <i>formal parameters</i>
-      (<font color="#663300"><code>&amp;ARG1</code></font>, <font
-        color="#663300"><code>&amp;ARG2</code></font>, and <font
-        color="#663300"><code>&amp;ARG3</code></font>) by the <i>replacement
-
-
-
-        arguments</i> (<font color="#663300"><code>X</code></font>, <font
-        color="#663300"><code>Y</code></font>, and <font
-        color="#663300"><code>Z</code></font>) everywhere they appear in
-      the body of the macro definition.&nbsp; Furthermore, the
-      associations between the formal parameters and replacement
-      arguments are positional.&nbsp; Thus, the leftmost formal
-      parameter is replaced by the leftmost replacement argument, and so
-      on from left to right.<br>
-    </p>
-    <p>Any replacement arguments which are missing from a macro
-      invocation, the manual tells us, are replaced by empty
-      strings.&nbsp; Thus in the example above, the invocations<br>
-    </p>
-    <blockquote>
-      <pre><font color="#663300"><code>        MYMACRO    ,A,B</code><code><br></code><code>        MYMACRO    C,,D</code><code><br></code><code>        MYMACRO    E,F,<br>        MYMACRO    G,H<br></code></font></pre>
-    </blockquote>
-    <p>would variously replace the formal parameters <font
-        color="#663300"><code>&amp;ARG1,&amp;ARG2,&amp;ARG3</code></font>
-      by "","A","B" or by "C","","D" or by "E","F","" or by "G","H","".<br>
-    </p>
-    <p>As far as I can see, the assembly-language manual does <i>not</i>
-      tell us what's supposed to happen if there are <i>more</i>
-      replacement arguments than formal parameters ... which is
-      something that definitely does happen in AP-101S assembly-language
-      files.&nbsp; I can only assume that the extra replacement
-      parameters are simply discarded, and that's how <b>ASM101S</b>
-      handles it.<br>
-    </p>
-    <p>In AP-101S assembly language, there's also the possibility of
-      providing default values for, thusly:<br>
-    </p>
-    <blockquote>
-      <pre>        <font color="#663300"> MACRO<br>         MYMACRO    &amp;ARG1,&amp;ARG2,&amp;ARG3=12<br>         ...<br>         MEND<br>         .<br>         .<br>         .<br>         MYMACRO    X,Y<br>         .<br>         .<br>         .</font>
-</pre>
-    </blockquote>
-    <p>Here, <font color="#663300"><code>&amp;ARG3</code></font> has
-      been assigned a default value (12), so if omitted from the
-      replacement arguments, the expansion of the macro replaces it by
-      the string "12" rather than by an empty string "".&nbsp; </p>
-    <p>This gimmick also allows some of the parameters to be supplied
-      out of order.&nbsp; The formal parameters <font color="#663300"><code>&amp;ARG1,&amp;ARG2</code></font>
-      and the replacement arguments <font color="#663300"><code>X,Y</code></font>
-      are positional, just as before.&nbsp; However, the formal
-      parameter <font color="#663300"><code>&amp;ARG3</code></font>
-      (and its replacement argument, if we had provided one in the macro
-      invocation) are different.&nbsp; <font color="#663300"><code>&amp;ARG3</code></font>
-      cannot be referenced by its position, but rather is referenced by
-      its name, as in:<br>
-    </p>
-    <blockquote>
-      <pre>        MYMACRO    ARG3=Z<br></pre>
-    </blockquote>
-    <p>Here, <font color="#663300"><code>&amp;ARG1,&amp;ARG2</code></font>
-      are replaced by empty strings, but <font color="#663300"><code>&amp;ARG3</code></font>
-      is replaced by "Z".<br>
-    </p>
-    <p>Unfortunately, while I can sketch out certain obvious
-      characteristics of this behavior pattern, being undocumented it's
-      unclear what the full set of usage rules for these non-positional
-      macro parameters are.&nbsp; The rules can only be inferred by the
-      usage in actual legacy AP-101S assembly-language code.&nbsp;
-      Here's what I've inferred (and failed to infer) so far from
-      inspection:<br>
-    </p>
-    <ul>
-      <li>Non-positional parameters can appear among replacement
-        arguments in a different order than they appear in the formal
-        parameters.&nbsp; Here's an example from OI-34.06 of a macro
-        definition (MLIB80/PROGRAM) versus an invocation of it (module
-        SSSRC/FCMBMAN), in which the parameters are defined in the order
-        TITLE,ENTRY,BR,GPR,FPR,SL but are actually supplied in the order
-        SL,TITLE,ENTRY:<br>
-      </li>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <pre>&amp;CSECT   PROGRAM &amp;TITLE=,&amp;ENTRY=,&amp;BR=,&amp;GPR=,&amp;FPR=,&amp;SL=YES               003900AA<br><br>FCMBMAN  PROGRAM SL=NO,TITLE='BUS REC. PRE-PROCESSOR',ENTRY=FSVC0036    000100AT<br></pre>
-      </blockquote>
-    </blockquote>
-    <ul>
-      <li>Use of both positional and non-positional parameters in same
-        macro appears to be very rare.&nbsp; In almost all cases in
-        which they do appear together, the non-positional parameters
-        follow the positional parameters in both macro definitions and
-        invocations.&nbsp; However, I have found a macro (OI-34.06
-        MLIB80/TFBCD) in which the non-positional parameters precede the
-        positional parameters in both the definition and the invocation
-        (SSSRC/FIOCBLKS).</li>
-      <li>I've found no cases so far in which positional and
-        non-positional parameters are actually intermingled.</li>
-      <li>Macro definitions:&nbsp; Inspection of existing source code
-        suggests that the default values for non-positional parameters
-        in a macro prototype line can be any string (perhaps of 0
-        length) consisting of characters that are neither spaces nor
-        commas, and that enclosing quotes (if provided) form a part of
-        the default value.</li>
-      <li>Macro invocations:&nbsp; It's unclear what kinds of things can
-        be used as arguments in invocations of macros.&nbsp; At present,
-        <b>ASM101S</b> assumes that a replacement argument can be any
-        string that contains no commas or spaces, or else that it is an
-        arbitrary quoted string (delimited with single-quotes).<br>
-      </li>
-    </ul>
-    Nevertheless, in the absence of clearly-documented rules, <b>ASM101S</b>
-    allows the non-positional parameters to appear in any order relative
-    to the positional parameters:&nbsp; after, before, or
-    intermingled.&nbsp; In essence, <b>ASM101S</b> simply moves all of
-    the non-positional parameters to the end of the list, whether in the
-    formal parameters or the replacement arguments.<br>
     <h2>Silly Suffixes</h2>
     <blockquote>
       <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
@@ -1066,6 +1154,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </p>
     <p><a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=63">The
+
 
 
 
@@ -1129,9 +1218,11 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         stands for <a moz-do-not-send="true"
           href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">Backus-Naur
 
+
           form</a>.&nbsp; Technically, the grammars are actually written
         in the modified EBNF (<a moz-do-not-send="true"
           href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended
+
 
           Backus-Naur form</a>) supported by <a moz-do-not-send="true"
           href="https://tatsu.readthedocs.io/en/stable/">the TatSu
@@ -1198,12 +1289,14 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       href="#macros">the macro libraries loaded by the assembler</a>, we
     should should find various <font color="#663300"><code>EQU</code></font>ates
 
+
     similar to the ones above, for the general registers and
     floating-point registers.&nbsp; And indeed, for the macro libraries
     used for the Space Shuttle primary flight software (PASS), and
     backup flight software (BFS), we find exactly such declarations in
     the PASS module MLIB80/MACSMITH or the BFS module MLIB80/EQU, along
     with numerous other <font color="#663300"><code>EQU</code></font>ates
+
 
     of a similar nature:<br>
     <blockquote>
@@ -1234,10 +1327,12 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     default values to the various register symbols, but allows those
     defaults to be overridden by explicit <font color="#663300"><code>EQU</code></font>ates,
 
+
     if such are encountered.<br>
     <h2>Type Attributes, <code>T'</code></h2>
     <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/77/mode/1up">The
+
       System/360 assembly-language manual</a> tells us prefixing a
     symbolic variable (such as <font color="#663300"><code>&amp;A</code></font>)
     with the notation <font color="#663300"><code>T'</code></font>
@@ -1276,6 +1371,24 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         assumed to contain the name of a formal parameter of a macro,
         and the formal parameter is position-dependent.</li>
     </ul>
+    <h2><a name="definedAttribute"></a>The <code>D'</code> Attribute</h2>
+    <p>AP-101S assembly-language source code uses an attribute operator
+      <font color="#663300"><code>D'</code></font>, which is not defined
+      in the assembly-language manual.&nbsp; From the way it is used, I
+      infer when applied to an identifier, it returns "true" (1) if the
+      identifier has been previously defined within the source-code
+      being assembled and "false" (0) if not.&nbsp; A typical usage
+      would be something like <br>
+    </p>
+    <blockquote>
+      <pre>	<font color="#663300">AIF     (D'MYSYM).OKAY<br>	EXTRN	MYSYM<br>OKAY    ...</font><br></pre>
+    </blockquote>
+    <p>Thus if the identifier is not defined, it allows the code to
+      detect that condition and to mark the identifier as being declared
+      externally.<br>
+    </p>
+    <ul>
+    </ul>
     <h2><code>AIF</code> and <code>AGO<br>
       </code><code></code></h2>
     The <font color="#663300"><code>AIF</code></font> and <font
@@ -1284,6 +1397,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     assembly time (rather than at runtime).&nbsp; <a
       moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/88/mode/1up">The
+
       System/360 assembly-language manual</a> makes it clear that these
     "goto" operations can operate only with the same macro depth, and
     further, if within a macro, only within the <i>same</i>
@@ -1337,6 +1451,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         expression.&nbsp; (Nor would <font color="#663300"><code>+5</code></font>
         be legal.)&nbsp; <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/16/mode/1up">The
+
           assembly-language manual</a> seems to advise using workarounds
         such as "<font color="#663300"><code>&amp;A SETA 0-5</code></font>".</li>
       <li>Division by 0 is allowed, and always results in 0.&nbsp; For
@@ -1378,8 +1493,75 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       <li>Expressions can contain any number of terms, rather than being
         limited to a maximum of 16.</li>
       <li>Expressions can have any depth of parentheses, rather than
-        being limited to 5 levels.<br>
-      </li>
+        being limited to 5 levels.</li>
+    </ul>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Regarding peculiarities of
+          my own making, as opposed to those of the language itself or
+          the original assembler, I'm obliged to admit that I don't
+          quite understand how to perfectly handle assembly-time
+          evaluation of arithmetic expressions involving program labels:
+          i.e., involving the addresses of symbols rather than the
+          values of constants.&nbsp; <br>
+        </font></p>
+      <p><font size="-1">To do so, <b>ASM101S</b> instead uses an
+          imperfect trick, making use of the facts that the address
+          space of the AP-101S is limited to 24 bits and that the number
+          of allowed control sections in a program (at least in
+          System/360) is limited to 255.&nbsp; The addresses of program
+          labels (prior to linking) is precisely an ordered pair of the
+          form (control section, offset into control section), but
+          performing arithmetical computations is easiest when these
+          values can somehow be converted to single numbers rather than
+          ordered pairs.&nbsp; The trick is to assign each control
+          section a unique but randomized 64-bit value whose
+          least-significant 24 bits are all 0, and to convert addresses
+          of symbols to a sums of these 64-bit values plus 24-bit
+          offsets into the control sections.&nbsp; (I don't mean that
+          the codes for the symbols are actually random, but rather that
+          they are selected in a way that makes it unlikely to produce
+          their values by common types of calculations.)&nbsp; In this
+          way, calculations like <font color="#663300"><code>SYMBOL+OFFSET</code></font>
+          or <font color="#663300"><code>SYMBOL1-SYMBOL2</code></font>
+          (for symbols in the same section) produce the expected
+          results, and indeed, produces correct results for all <i>correct</i>
+          expressions.&nbsp; Unfortunately it remains possible to
+          combine symbols in an <i>incorrect</i> manner from two
+          different control sections and get a result that appears to be
+          in yet a third control section, which is incorrect.&nbsp; This
+          potential is part of the reason for using 64-bit
+          pseudo-addresses (and distributing the unique numerical codes
+          for the control sections throughout a 40-bit space) rather
+          than 32-bit pseudo-addresses (and distributing the unique
+          numerical codes in an 8-bit space):&nbsp; It reduces</font><font
+          size="-1"><font size="-1"> to a very low level</font> the
+          probability of producing "fake" control sections in
+          calculations.<br>
+        </font></p>
+      <p><font size="-1">According to the System/360 assembly-language
+          manual, although </font><font size="-1"><font size="-1"><font
+              color="#663300"><code>EXTRN</code></font> symbols can
+            appear in expressions, they cannot be paired.&nbsp; This
+            implies, I think, that they can be handled interoperably
+            with the description in the preceding paragraph, by using </font></font><font
+          size="-1"><font size="-1"><font size="-1">unique but
+              randomized 64-bit values with the lower 24 bits all 0 in
+              place of those symbols.<br>
+            </font></font></font></p>
+      <p><font size="-1">I thought at first that the same trick could be
+          used to handle calculations other not-yet-defined
+          symbols.&nbsp; Unfortunately, such an attempt would be
+          guaranteed to produce incorrect results in calculations like <font
+            color="#663300"><code>KNOWN-UNKNOWN</code></font>, even if <font
+            color="#663300"><code>KNOWN</code></font> and <font
+            color="#663300"><code>UNKNOWN</code></font> both turned out
+          to be members of the same control section.&nbsp; Therefore,
+          the addresses of all symbols in the current file must be
+          ascertained in a separate pass before computations of
+          expressions involving such symbols are performed.<br>
+        </font></p>
+    </blockquote>
+    <ul>
     </ul>
     <h2>Relational Expressions Involving Strings</h2>
     <p>Among the types of expressions computed by the assembler at
@@ -1407,6 +1589,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <br>
     <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/138/mode/1up">AP-101S
+
       assembly language</a> shares the obnoxious (in my opinion!)
     property of string comparisons in <a moz-do-not-send="true"
       href="XPL-I.html">the XPL language</a> that a shorter string is
@@ -1448,6 +1631,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </p>
     One flourish which must be mentioned is <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/84/mode/1up">the
+
       so-called substring notation</a>, which can be used to extract a
     substring from a string, as in:<br>
     <blockquote>
@@ -1466,7 +1650,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     time.&nbsp; If you read far enough into the manual, there are
     eventually a couple of examples which indirectly demonstrate that
     indexing of the string is 1-based.<br>
-    <h2>Declaration of "SET Symbols"</h2>
+    <h2><a name="declarationSET"></a>Declaration of "SET Symbols"</h2>
     <p>Before describing the specific AP-101S versus System/360 issue
       associated with the items known as "SET symbols", let me summarize
       some of what the System/360 assembly-language manual has to say
@@ -1559,6 +1743,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <br>
     For example, consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC/INPUT.asm">the
+
       INPUT macro</a>, provided as part of the AP-101S runtime library
     by the original source code of the HAL/S compiler HAL/S-FC.&nbsp; It
     has four SET symbols that are used without declarations, highlighted
@@ -1578,11 +1763,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
               color="#663300"><code></code></font></i></u></font><i>) is
         the target of a <font color="#663300"><code>SETx</code></font>
       </i><u><i><font color="#663300"><code></code></font></i></u><i>instruction,
+
         it is declared automatically by the assembler as if via </i><i><font
           color="#663300"><code></code></font></i><i><font
           color="#663300"><code>LCLx</code></font></i><i>.</i><br>
     </blockquote>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
         If this inference is correct, it might seem naively that there's
         no need for the instructions </font><font size="-1"><font
           color="#663300"><code>LCLA</code></font>, <font
@@ -1607,6 +1794,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             convenience feature would not require it.&nbsp; For example,
             consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC/AERROR.asm">this
+
               macro from the AP-101S runtime-library source code</a>,
             which unlike the problematic macro listed above corresponds
             exactly to the System/360 assembly-language manual's
@@ -1644,8 +1832,238 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         necessity rather than from a desire for mere convenience.&nbsp;
         Not that "mere" convenience is to be sneered at.&nbsp; But
         that's just speculation on my part, with the answer lost in the
-        mists of time past.<br>
-      </font></blockquote>
+        mists of time past.</font><br>
+    </blockquote>
+    <h2><code>DC</code> and <code>DS</code> Pseudo-Op Formats</h2>
+    <p><a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/36/mode/1up?view=theater">The
+        System/360 assembly-language manual</a> describes a
+      quite-complex format for the operands of the <font
+        color="#663300"><code>DS</code></font> and <font
+        color="#663300"><code>DC</code></font> pseudo-ops used for
+      allocating or initializing data memory.&nbsp; (The description
+      takes about 11 pages, which is over 6% of the manual.)&nbsp;
+      However, I see no point in implementing those features of this
+      format which are not actually used in Space Shuttle
+      flight-software source code.&nbsp; At present, I believe that the
+      following features of the <font color="#663300"><code>DC</code></font>/<font
+        color="#663300"><code>DS</code></font> format do <i>not</i>
+      need to be supported in <b>ASM101S</b>:<br>
+    </p>
+    <ul>
+      <li>Type codes L, P, Z, S, V, Q<br>
+      </li>
+      <li>Scale modifier</li>
+      <li>Exponent modifier</li>
+    </ul>
+    <h2>SRS-Type Instructions Versus RS-Type Instructions</h2>
+    <p>AP-101S instructions are of 5 basic types, designated (by IBM) as
+      RR, RS, SRS, RI, and SI, based on the syntax patterns of their
+      operands and on the way they are encoded as machine
+      instructions.&nbsp; Some of these are System/360 patterns, and
+      some are not.&nbsp; I won't bore you with the details, as you can
+      read about them in <a moz-do-not-send="true"
+        href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=34">the
+        AP-101S Principles of Operation</a>.&nbsp; However, there is a
+      certain difficulty with SRS- and RS-type instructions that could <i>in
+        principle</i> cause a mismatch between object code generated by
+      <b>ASM101S</b> vs the original AP-101S assembler, though hopefully
+      not any behavioral difference at runtime other than slight timing
+      discrepancies.&nbsp; This group of instructions includes, among
+      other things, all <a moz-do-not-send="true"
+        href="#instructionAliases">conditional-branch instructions and
+        their aliases</a>.<br>
+    </p>
+    <p>The difficulty relates to the fact that certain instruction
+      mnemonics are used <i>both</i> for SRS-type instructions and
+      RS-type instructions.&nbsp; Moreover, while some of the operand
+      patterns for them are accepted for SRS instructions and not RS
+      instructions, thus allowing the assembler to distinguish between
+      them, <i>some</i> of the operand patterns overlap.&nbsp; In those
+      cases, there is no syntactic way for the assembler to distinguish
+      between the SRS instruction and the RS instruction.&nbsp; Overlap
+      occurs for the following syntactical patterns (where <font
+        color="#663300"><code>R1</code></font>, <font color="#663300"><code>D2</code></font>,
+      and <font color="#663300"><code>B2</code></font> refer to the
+      names of fields in the encoded machine instruction):<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663300">OPCODE	R1,D2<br>OPCODE	R1,D2(B2)</font><br></pre>
+    </blockquote>
+    <p>The vulnerable opcode mnemonics are:<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663300">A AE AH BC C CH D DE IAL L LA LE LH M ME MH N O S SE SH SHW ST STH TD TH X ZH</font><br></pre>
+    </blockquote>
+    While the SRS-type and RS-type instructions are behaviorally
+    identical, they are encoded differently as machine instructions, and
+    in particular require different amounts of memory to do so.&nbsp;
+    SRS-type instructions are encodes as half-words (2 bytes), while
+    RS-type instructions are encoded as full words (4 bytes).&nbsp; For
+    example, there is no syntactical way to know whether to encode the
+    instruction "<font color="#663300"><code>L 4,SWITCH</code></font>"
+    as 2 bytes or as 4 bytes.&nbsp; So if <b>ASM101S</b> were to encode
+    an instruction as SRS while the original assembler were to encode it
+    as RS, or vice-versa, then not only would the binary forms of those
+    particular instructions differ, but all of the code following that
+    instruction in the same control section would be aligned
+    differently.<br>
+    <p>As I said, there is no syntactic way for the assembler to
+      distinguish between these cases, but there is a non-syntactic way
+      based on the size of the <font color="#663300"><code>D2</code></font>
+      sub-operand.&nbsp; If <font color="#663300"><code>D2</code></font>
+      is in the numerical range 0-55, then the SRS instruction can be
+      used, while if <font color="#663300"><code>D2</code></font> is 56
+      or greater, the RS instruction must be used.&nbsp; But as far as I
+      can see — and perhaps this is a limitation of my own imagination!
+      — the size of <font color="#663300"><code>D2</code></font> can be
+      determined only in case it involves only <i>previously-defined</i>
+      symbols whose addresses or values are known.&nbsp; If forward
+      reference is involved, I see no way to determine <font
+        color="#663300"><code>D2</code></font>'s value with
+      certainty.&nbsp; And there is nothing documented, as far as I
+      know, that limits the determination of <font color="#663300"><code>D2</code></font>
+      just to previously-defined symbols.<br>
+    </p>
+    <p>With that said, in <i>some</i> cases <b>ASM101S</b> can know
+      with certainty that the SRS form can be used.&nbsp; For example,
+      in the instruction<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663300">OPCODE	R1,<i>SYMBOL</i></font></pre>
+    </blockquote>
+    <p>where <i><font color="#663300"><code>SYMBOL</code></font></i>
+      happens to be a program label above but within 56 words of a base
+      address specified by <a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/19/mode/1up?view=theater">the
+        <font color="#663300"><code>USING</code></font> pseudo-op</a>,
+      then the SRS encoding is certainly applicable.<br>
+    </p>
+    <p>In short, while <b>ASM101S</b> uses heuristic methods to try to
+      make the same choices of SRS vs RS as the original assembler, but
+      given that the rules used by the original assembler are not known,
+      there is no guarantee that it succeeds in doing so in all possible
+      cases.<br>
+    </p>
+    <h1>Afterthought:&nbsp; HLASM</h1>
+    Belatedly, someone pointed out <a moz-do-not-send="true"
+      href="https://share.confex.com/share/115/webprogram/Session7445.html">a
+      presentation from 2010</a> called "Assembler Language as a Higher
+    Level Language: Conditional Assembly and Macro Techniques" by John
+    R. Ehrman of IBM as a possible resource for deciphering conundrums
+    about gaps in the System/360 assembly-language manual vs
+    AP-101S.&nbsp;&nbsp; Admittedly, John's presentation concerns the
+    so-called "High Level Assembler for z/OS, z/VM, and z/VSE",
+    apparently still being sold for IBM mainframes under the name
+    "HLASM".&nbsp; Not being steeped in IBM lore myself, I can only make
+    assumptions as to how how relevant HLASM may be to the AP-101S
+    assembler.&nbsp; There's a <i>lot</i> of HLASM stuff that's
+    definitely not available (or at least never used if it is available)
+    in AP-101S source code, though it's unclear if there's anything in
+    it that's flatly inconsistent with AP-101S.&nbsp; IBM itself
+    provides <a moz-do-not-send="true"
+      href="https://www.ibm.com/docs/en/SSLTBW_2.2.0/pdf/asmr1022.pdf">a
+      manual for HLASM that's you can find online</a>.<br>
+    <br>
+    Accepting at face value the notion that statements about HLASM are
+    relevant to AP-101S, various inferences I made above might be
+    confirmed as indicated in the following table.&nbsp; (Note that I
+    can't guarantee links into the IBM documentation, since that
+    documentation is not hosted at Virtual AGC, and won't be posted here
+    until at least 2100 AD due to copyright considerations.)<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <th valign="top">My Inference<br>
+          </th>
+          <th valign="top">HLASM Manual<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><a moz-do-not-send="true"
+              href="#definedAttribute">The D' operator</a><br>
+          </td>
+          <td valign="top"><a moz-do-not-send="true"
+href="https://www.ibm.com/docs/en/SSLTBW_2.2.0/pdf/asmr1022.pdf#page=326">Defined
+              Attribute (D')</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><a moz-do-not-send="true"
+              href="#declarationSET">Declaration of SET symbols</a><br>
+          </td>
+          <td valign="top">I've not found this so far in the HLASM
+            manual, but Ehrman's presentation says the following:&nbsp;
+            SET symbols can be implicitly declared "as local variables,
+            if first appearance is as the name-field symbol of a SETx
+            assignment statement − this is the only implicit form whose
+            values may be changed (SET)".&nbsp; (See figure Cond-10.)<br>
+            <br>
+            The HLASM manual, on the other hand, contains <a
+              moz-do-not-send="true"
+href="https://www.ibm.com/docs/en/SSLTBW_2.2.0/pdf/asmr1022.pdf#page=333">the
+              following curious provision</a> that seems to partially
+            contradict Ehrman:&nbsp; "If the variable symbol is the same
+            as the character value, the assembler considers the variable
+            symbol to be an implicitly defined local <font
+              color="#663300"><code>SETC</code></font> symbol which is
+            given a null character string value. For example: <font
+              color="#663300"><code>&amp;C6 SETC '&amp;C6'</code></font>,
+            assigns the value <font color="#663300"><code>''</code></font>
+            to <font color="#663300"><code>&amp;C6</code></font>.&nbsp;
+            <a moz-do-not-send="true"
+href="https://www.ibm.com/docs/en/SSLTBW_2.2.0/pdf/asmr1022.pdf#page=340">Later
+              on</a>, the manual makes a related assertion:&nbsp; "If
+            the variable symbol is the same as the character value, the
+            assembler considers the variable symbol to be an implicitly
+            defined local <font color="#663300"><code>SETA</code></font>
+            symbol, which is given a value of zero. For example:&nbsp; <font
+              color="#663300"><code>&amp;ASYM2 SETA &amp;ASYM2</code></font>.&nbsp;
+            <font color="#663300"><code>&amp;ASYM2 has a value 0</code></font>."<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <ul>
+      <li><a moz-do-not-send="true"
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/ASM101S.html#definedAttribute">The
+          D' ("defined") operator</a>.&nbsp; (See here in the HL.)<br>
+      </li>
+    </ul>
+    <blockquote>
+    </blockquote>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -1661,7 +2079,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-09-28<br>
+          2024-10-05<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
