@@ -101,7 +101,6 @@ system390 = False
 # by opcodes.  When the opcode is given as -1, it's a special case in terms
 # of how the code is generated.  (There are other special cases, though, which
 # are not so-marked, such as almost all conditional branches..)
-argsE = {}
 argsRR = { "AR": 0b00000, "CR": 0b00010, "CBL": 0b00001, "DR": 0b01001, 
            "XUL": 0b00000, "LR": 0b00011, "LCR": 0b11101, "LFXI": 0b10111, 
            "MR": 0b01000, "SR": 0b00001, "BALR": 0b11100, "BCR": 0b11000, 
@@ -115,61 +114,109 @@ argsRR = { "AR": 0b00000, "CR": 0b00010, "CBL": 0b00001, "DR": 0b01001,
            "LXAR": 0b01000, "STXAR": 0b10100, "ICR": 0b11011, 
            "BR": 0b11000, "NOPR": 0b11000, 
            "LACR": 0b11101, "PC": 0b01101 }
-argsI = {}
-argsRRE = {}
-argsRRF = {}
-argsRX = {}
-argsRXE = {}
-argsRXF = {}
-argsRS = { "A": 0b00000, "AH": 0b10000, "AST": 0b00000, "C": 0b00010, 
-           "CH": 0b10010, "D": 0b01001, "IAL": 0b11100, "IHL": 0b100000, 
-           "L": 0b00011, "LA": 0b11101, "LH": 0b10011, "LM": 0b11001, 
-           "M": 0b01000, "MH": 0b10101, "MIH": 0b10011, "ST": 0b00110, 
-           "STH": 0b10111, "STM": 0b11001, "S": 0b00001, "SST": 0b00001, 
-           "SH": 0b10001, "TD": 0b10100, "BAL": 0b11100, "BIX": 0b11011, 
-           "BC": 0b11000, "BCT": 0b11010, "BCV": 0b11001, "N": 0b00100, 
-           "NST": 0b00100, "X": 0b01110, "XST": 0b01110, "O": 0b00101,
-           "OST": 0b00101, "SHW": 0b10100, "TH": 0b10100, "ZH": 0b10100, 
-           "AED": 0b01010, "AE": 0b01010, "CED": 0b00011, "CE": 0b01001, 
-           "DED": 0b00010, "DE": 0b01101, "LED": 0b0111, "LE": 0b01111, 
-           "MVS": 0b01100, "MED": 0b00110, "ME": 0b01100, "SED": 0b01011, 
-           "SE": 0b01011, "STED": 0b00111, "STE": 0b00111, "DIAG": 0b11000, 
-           "ISPB": 0b11101, "LPS": 0b11001, "SSM": 0b10001, "SCAL": 0b11010, 
-           "SVC": 0b11001, "TS": 0b10111, "LXA": 0b01000, "LDM": 0b01101,
-           "STXA": 0b10100, "STDM": 0b10010, 
-           "B": 0b11000, "NOP": 0b11000, "BH": 0b11000, "BL": 0b11000, 
-           "BE": 0b11000, "BNH": 0b11000, "BNL": 0b11000, "BNE": 0b11000, 
-           "BO": 0b11000, "BP": 0b11000, "BM": 0b11000, "BZ": 0b11000, 
-           "BNP": 0b11000, "BNM": 0b11000, "BNZ": 0b11000, "BNO": 0b11000, 
-           "BLE": 0b11000, "BN": 0b11000 }
-for m in sorted(argsRS):
-    argsRS[m + "@"] = argsRS[m]
-    argsRS[m + "@#"] = argsRS[m]
-    argsRS[m + "#"] = argsRS[m]
-argsRSE = {}
-argsRSL = {}
-argsRSI = {}
+
+argsSRSandRS = {
+ "A": 0b00000, "AH": 0b10000, "C": 0b00010, "CH": 0b10010, "D": 0b01001, 
+ "IAL": 0b11100, "L": 0b00011, "LA": 0b11101, "LH": 0b10011, "M": 0b01000, 
+ "MH": 0b10101, "ST": 0b00110, "STH": 0b10111, "S": 0b00001, "SH": 0b10001, 
+ "TD": 0b10100, "BC": 0b11000, "N": 0b00100, "X": 0b01110, "O": 0b00101, 
+ "SHW": 0b10100, "TH": 0b10100, "ZH": 0b10100, "AE": 0b01010, "DE": 0b01101, 
+ "LE": 0b01111, "ME": 0b01100, "SE": 0b01011,
+ }
+
+argsSRSonly = {
+ "BCB": 0b11011, "BCF": 0b11011, "BCTB": 0b11011, "BVCF": 0b11011, 
+ "SLL": 0b11110, "SLDL": 0b11111, "SRA": 0b11110, "SRDA": 0b11111, 
+ "SRDL": 0b11111, "SRL": 0b11110, "SRR": 0b11110, "SRDR": 0b11111,
+ "B": 0b11000, "NOP": 0b11000, 
+ "BH": 0b11000, "BL": 0b11000, "BE": 0b11000, "BNH": 0b11000, 
+ "BNL": 0b11000, "BNE": 0b11000, "BO": 0b11000, "BP": 0b11000, 
+ "BM": 0b11000, "BZ": 0b11000, "BNP": 0b11000, "BNM": 0b11000, 
+ "BNZ": 0b11000, "BNO": 0b11000, "BLE": 0b11000, "BN": 0b11000, 
+ }
+
+argsRSonly = {
+ "AST": 0b00000, "IHL": 0b100000, "LM": 0b11001, "MIH": 0b10011, 
+ "STM": 0b11001, "SST": 0b00001, "BAL": 0b11100, "BIX": 0b11011, 
+ "BCT": 0b11010, "BCV": 0b11001, "NST": 0b00100, "XST": 0b01110, 
+ "OST": 0b00101, "AED": 0b01010, "CED": 0b00011, "CE": 0b01001, 
+ "DED": 0b00010, "LED": 0b00111, "MVS": 0b01100, "MED": 0b00110, 
+ "SED": 0b01011, "STED": 0b00111, "STE": 0b00111, "DIAG": 0b11000, 
+ "ISPB": 0b11101, "LPS": 0b11001, "SSM": 0b10001, "SCAL": 0b11010, 
+ "SVC": 0b11001, "TS": 0b10111, "LXA": 0b01000, "LDM": 0b01101, 
+ "STXA": 0b10100, "STDM": 0b10010, 
+ "A@": 0b00000, "A@#": 0b00000, "A#": 0b00000, "AE@": 0b01010, "AE@#": 0b01010, 
+ "AE#": 0b01010, "AED@": 0b01010, "AED@#": 0b01010, "AED#": 0b01010, 
+ "AH@": 0b10000, "AH@#": 0b10000, "AH#": 0b10000, "AST@": 0b00000, 
+ "AST@#": 0b00000, "AST#": 0b00000, "B@": 0b11000, "B@#": 0b11000, 
+ "B#": 0b11000, "BAL@": 0b11100, "BAL@#": 0b11100, "BAL#": 0b11100, 
+ "BC@": 0b11000, "BC@#": 0b11000, "BC#": 0b11000, "BCT@": 0b11010, 
+ "BCT@#": 0b11010, "BCT#": 0b11010, "BCV@": 0b11001, "BCV@#": 0b11001, 
+ "BCV#": 0b11001, "BE@": 0b11000, "BE@#": 0b11000, "BE#": 0b11000, 
+ "BH@": 0b11000, "BH@#": 0b11000, "BH#": 0b11000, "BIX@": 0b11011, 
+ "BIX@#": 0b11011, "BIX#": 0b11011, "BL@": 0b11000, "BL@#": 0b11000, 
+ "BL#": 0b11000, "BLE@": 0b11000, "BLE@#": 0b11000, "BLE#": 0b11000, 
+ "BM@": 0b11000, "BM@#": 0b11000, "BM#": 0b11000, "BN@": 0b11000, 
+ "BN@#": 0b11000, "BN#": 0b11000, "BNE@": 0b11000, "BNE@#": 0b11000, 
+ "BNE#": 0b11000, "BNH@": 0b11000, "BNH@#": 0b11000, "BNH#": 0b11000, 
+ "BNL@": 0b11000, "BNL@#": 0b11000, "BNL#": 0b11000, "BNM@": 0b11000, 
+ "BNM@#": 0b11000, "BNM#": 0b11000, "BNO@": 0b11000, "BNO@#": 0b11000, 
+ "BNO#": 0b11000, "BNP@": 0b11000, "BNP@#": 0b11000, "BNP#": 0b11000, 
+ "BNZ@": 0b11000, "BNZ@#": 0b11000, "BNZ#": 0b11000, "BO@": 0b11000, 
+ "BO@#": 0b11000, "BO#": 0b11000, "BP@": 0b11000, "BP@#": 0b11000, 
+ "BP#": 0b11000, "BZ@": 0b11000, "BZ@#": 0b11000, "BZ#": 0b11000, 
+ "C@": 0b00010, "C@#": 0b00010, "C#": 0b00010, "CE@": 0b01001, 
+ "CE@#": 0b01001, "CE#": 0b01001, "CED@": 0b00011, "CED@#": 0b00011, 
+ "CED#": 0b00011, "CH@": 0b10010, "CH@#": 0b10010, "CH#": 0b10010, 
+ "D@": 0b01001, "D@#": 0b01001, "D#": 0b01001, "DE@": 0b01101, 
+ "DE@#": 0b01101, "DE#": 0b01101, "DED@": 0b00010, "DED@#": 0b00010, 
+ "DED#": 0b00010, "DIAG@": 0b11000, "DIAG@#": 0b11000, "DIAG#": 0b11000, 
+ "IAL@": 0b11100, "IAL@#": 0b11100, "IAL#": 0b11100, "IHL@": 0b100000, 
+ "IHL@#": 0b100000, "IHL#": 0b100000, "ISPB@": 0b11101, "ISPB@#": 0b11101, 
+ "ISPB#": 0b11101, "L@": 0b00011, "L@#": 0b00011, "L#": 0b00011, "LA@": 0b11101, 
+ "LA@#": 0b11101, "LA#": 0b11101, "LDM@": 0b01101, "LDM@#": 0b01101, 
+ "LDM#": 0b01101, "LE@": 0b01111, "LE@#": 0b01111, "LE#": 0b01111, 
+ "LED@": 0b00111, "LED@#": 0b00111, "LED#": 0b00111, "LH@": 0b10011, 
+ "LH@#": 0b10011, "LH#": 0b10011, "LM@": 0b11001, "LM@#": 0b11001, 
+ "LM#": 0b11001, "LPS@": 0b11001, "LPS@#": 0b11001, "LPS#": 0b11001, 
+ "LXA@": 0b01000, "LXA@#": 0b01000, "LXA#": 0b01000, "M@": 0b01000, 
+ "M@#": 0b01000, "M#": 0b01000, "ME@": 0b01100, "ME@#": 0b01100, 
+ "ME#": 0b01100, "MED@": 0b00110, "MED@#": 0b00110, "MED#": 0b00110, 
+ "MH@": 0b10101, "MH@#": 0b10101, "MH#": 0b10101, "MIH@": 0b10011, 
+ "MIH@#": 0b10011, "MIH#": 0b10011, "MVS@": 0b01100, "MVS@#": 0b01100, 
+ "MVS#": 0b01100, "N@": 0b00100, "N@#": 0b00100, "N#": 0b00100, 
+ "NOP@": 0b11000, "NOP@#": 0b11000, "NOP#": 0b11000, "NST@": 0b00100, 
+ "NST@#": 0b00100, "NST#": 0b00100, "O@": 0b00101, "O@#": 0b00101, 
+ "O#": 0b00101, "OST@": 0b00101, "OST@#": 0b00101, "OST#": 0b00101, 
+ "S@": 0b00001, "S@#": 0b00001, "S#": 0b00001, "SCAL@": 0b11010, 
+ "SCAL@#": 0b11010, "SCAL#": 0b11010, "SE@": 0b01011, "SE@#": 0b01011, 
+ "SE#": 0b01011, "SED@": 0b01011, "SED@#": 0b01011, "SED#": 0b01011, 
+ "SH@": 0b10001, "SH@#": 0b10001, "SH#": 0b10001, "SHW@": 0b10100, 
+ "SHW@#": 0b10100, "SHW#": 0b10100, "SSM@": 0b10001, "SSM@#": 0b10001, 
+ "SSM#": 0b10001, "SST@": 0b00001, "SST@#": 0b00001, "SST#": 0b00001, 
+ "ST@": 0b00110, "ST@#": 0b00110, "ST#": 0b00110, "STDM@": 0b10010, 
+ "STDM@#": 0b10010, "STDM#": 0b10010, "STE@": 0b00111, "STE@#": 0b00111, 
+ "STE#": 0b00111, "STED@": 0b00111, "STED@#": 0b00111, "STED#": 0b00111, 
+ "STH@": 0b10111, "STH@#": 0b10111, "STH#": 0b10111, "STM@": 0b11001, 
+ "STM@#": 0b11001, "STM#": 0b11001, "STXA@": 0b10100, "STXA@#": 0b10100, 
+ "STXA#": 0b10100, "SVC@": 0b11001, "SVC@#": 0b11001, "SVC#": 0b11001, 
+ "TD@": 0b10100, "TD@#": 0b10100, "TD#": 0b10100, "TH@": 0b10100, 
+ "TH@#": 0b10100, "TH#": 0b10100, "TS@": 0b10111, "TS@#": 0b10111, 
+ "TS#": 0b10111, "X@": 0b01110, "X@#": 0b01110, "X#": 0b01110, "XST@": 0b01110, 
+ "XST@#": 0b01110, "XST#": 0b01110, "ZH@": 0b10100, "ZH@#": 0b10100, 
+ "ZH#": 0b10100,
+ }
+
+argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
+
 argsRI = { "AHI": 0b10110000, "CHI": 0b10110101, "MHI": 0b10110111, 
            "NHI": 0b10110110, "XHI": 0b10110100, "OHI": 0b10110010, 
            "TRB": 0b10110011, "ZRB": 0b10110001, 
            "LHI": -1, "SHI": -1 }
-argsRIL = {}
-argsSRS = { "BCB": 0b11011, "BCF": 0b11011, "BCTB": 0b11011, "BVCF": 0b11011, 
-            "SLL": 0b11110, "SLDL": 0b11111, "SRA": 0b11110, "SRDA": 0b11111, 
-            "SRDL": 0b11111, "SRL": 0b11110, "SRR": 0b11110, "SRDR": 0b11111,
-            "A": 0b00000, "AH": 0b10000, "C": 0b00010, "CH": 0b10010, 
-            "D": 0b01001, "IAL": 0b11100, "L": 0b00011, "LA": 0b11101, 
-            "LH": 0b10011, "M": 0b01000, "MH": 0b10101, "ST": 0b00110, 
-            "STH": 0b10111, "S": 0b00001, "SH": 0b10001, "TD": 0b10100,
-            "BC": 0b11000, "N": 0b00100, "X": 0b01110, "O": 0b00101, 
-            "SHW": 0b10100, "TH": 0b10100, "ZH": 0b10100, "AE": 0b01010, 
-            "DE": 0b01101, "LE": 0b01111, "ME": 0b01100, "SE": 0b01011 }
+
 argsSI = { "CIST": 0b10110101, "MSTH": 0b10110000, "NIST": 0b10110110, 
            "XIST": 0b10110100, "SB": 0b10110010, "TB": 0b10110011, 
            "ZB": 0b10110001, "TSB": 0b10110111 }
-argsS = {}
-argsSS = {}
-argsSSE = {}
 
 # Now, the MSC instructions.
 argsMSC = { "@A": -1, "@B": -1, "@BN": -1, "@BNN": -1, "@BNP": -1, "@BNZ": -1, "@BU": -1, "@BU@": -1, "@BXN": -1,
@@ -189,18 +236,16 @@ argsBCE = { "#@#DEC": -1, "#@#HEX": -1, "#@#SCN": -1, "#BU": -1, "#BU@": -1, "#C
            "#TDL": -1, "#TDLI": -1, "#TDS": -1, "#WAT": -1, "#WIX": -1
        }
 
-instructionsWithoutOperands = argsE | argsBCE
-instructionsWithOperands = argsRR | argsI | argsRRE | argsRRF | argsRX | \
-                           argsRXE | argsRXF | argsRS | argsRSE | argsRSL | \
-                           argsRSI | argsRI | argsRIL | argsSRS | \
-                           argsSI | argsS | argsSS | argsSSE | argsMSC
+instructionsWithoutOperands = argsBCE
+instructionsWithOperands = argsRR | argsSRSorRS | argsRSonly | argsSRSonly | \
+                           argsSI | argsMSC
 knownInstructions = instructionsWithoutOperands | instructionsWithOperands
 
 # The field values are the masks.
-branchAliases = {"B": 15, "BR": 15, "NOP": 0, "NOPR": 0, "BH": 2, "BL": 4, 
-                 "BE": 8, "BNH": 13, "BNL": 11, "BNE": 7, "BO": 1, "BP": 2, 
-                 "BM": 4, "BZ": 8, "BNP": 13, "BNM": 11, "BNZ": 7, "BNO": 14,
-                 "BLE": 13, "BN": 4}
+branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2, 
+                 "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
+                 "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNZ": 3, "BNO": 6,
+                 "BLE": 6, "BN": 2}
 
 #=============================================================================
 # Generate object code for AP-101S.
@@ -429,16 +474,22 @@ def generateObjectCode(source, macros):
         return B2, D2
     
     #-----------------------------------------------------------------------
-    # Process source code in a series of passes.  All of the initial passes
-    # are for the purpose of determining the values or addresses of symbols, but
-    # nothing is compiled to the memory of the control sections.  Only on the
-    # final pass is such compilation done.  To track this, the variables
-    # `compile` is used.  On the final pass it is true, but is False prior to
-    # that.  In between passes, `sect` is reset to `None`, and all
-    # control-section position-pointers are returned to 0.
+    # Process source code in a series of passes.
+    #    passCount == 0         Determine the number of bytes needed by each
+    #                           CPU instruction or DC/DS, and the addresses
+    #                           of all symbols.
+    #    passCount == 1         Compile to memory.
+    # Pass 0 isn't actually as straightforward as it sounds, because of the
+    # ambiguity in terms of size of all of the instructions whose mnemonics
+    # are in `argsSRSorRC` and all of the branch instructions aliased to 
+    # instruction `BC` (which itself is in `argsSRSorRC`).  So pass 0 collects
+    # a lot of data regarding such memory alignments into a work structure
+    # that's extensively analyzed in between passes 0 and 1 to resolve the
+    # ambiguity as best ti can.
     
-    while True:
-        metadata["passCount"] += 1
+    for passCount in range(2):
+        metadata["passCount"] = passCount
+        compile = (passCount == 1)
         continuation = False
         for sect in sects:
             sects[sect]["pos"] = 0
@@ -740,15 +791,12 @@ def generateObjectCode(source, macros):
                 toMemory(data)
                 continue
                 
-            if operation in argsRS or operation in argsSRS:
+            if operation in argsSRSorRS:
                 commonProcessing(2)
                 '''
-                We have a conundrum here.  It is often the case that (for the
-                *same* mnemonic) there is both an RS version of the instruction
+                We have a conundrum here.  For the mnemonics in argsSRSandRS
+                there is both an RS version of the instruction
                 (2 halfwords) and an SRS version of the instruction (1 halfword).
-                The duplicates are:
-                    A AE AH BC C CH D DE IAL L LA LE LH M ME MH
-                    N O S SE SH SHW ST STH TD TH X ZH
                 All of the SRS versions could be encoded as the RS version 
                 without functional difficulty, I think, but aren't (presumably
                 to save a little memory).  There's no syntactic difference.
@@ -762,7 +810,7 @@ def generateObjectCode(source, macros):
                 ***FIXME***
                 '''
                 dataSize = 4
-                if operation in branchAliases:
+                if operation in branchAliases or operation in argsSRSonly:
                     dataSize = 2
                 if not compile:
                     toMemory(dataSize)
@@ -787,10 +835,7 @@ def generateObjectCode(source, macros):
                                 if not err:
                                     if b2 == None:
                                         b2,d2 = findB2D2(d2)
-                                    if operation in argsRS:
-                                        opcode = argsRS[operation]
-                                    else:
-                                        opcode = argsSRS[operation]
+                                    opcode = argsSRSorRS[operation]
                                     data[0] = (opcode << 3) | r1
                                     if b2 == None or b2 > 3 or b2 < 0:
                                         error(properties, "No candidate B2 found")
@@ -866,9 +911,5 @@ def generateObjectCode(source, macros):
                 
             error(properties, "Unrecognized line")
             continue
-        
-        if compile: # Compilation completed?
-            break
-        compile = True
         
     return metadata
