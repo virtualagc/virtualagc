@@ -10,6 +10,7 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.
 '''
 
+import copy
 import random
 from expressions import error, unroll, astFlattenList, evalArithmeticExpression
 from fieldParser import parserASM
@@ -101,38 +102,43 @@ system390 = False
 # by opcodes.  When the opcode is given as -1, it's a special case in terms
 # of how the code is generated.  (There are other special cases, though, which
 # are not so-marked, such as almost all conditional branches..)
-argsRR = { "AR": 0b00000, "CR": 0b00010, "CBL": 0b00001, "DR": 0b01001, 
-           "XUL": 0b00000, "LR": 0b00011, "LCR": 0b11101, "LFXI": 0b10111, 
-           "MR": 0b01000, "SR": 0b00001, "BALR": 0b11100, "BCR": 0b11000, 
-           "BCRE": 0b11000, "BCTR": 0b11010, "BVCR": 0b11001, "NCT": 0b11100, 
-           "NR": 0b00100, "XR": 0b01110, "OR": 0b00101, "SUM": 0b10011, 
-           "AEDR": 0b01010, "AER": 0b01010, "CEDR": 0b00011, "CER": 0b01001, 
-           "CVFX": 0b00111, "CVFL": 0b00111, "DEDR": 0b00010, "DER": 0b01101,
-           "LER": 0b01111, "LECR": 0b01111, "LFXR": 0b00100, "LFLI": 0b10001, 
-           "LFLR": 0b00101, "MEDR": 0b00110, "MER": 0b01100, "SEDR": 0b01011, 
-           "SER": 0b01011, "MVH": 0b01101, "SPM": 0b11001, "SRET": 0b10010, 
-           "LXAR": 0b01000, "STXAR": 0b10100, "ICR": 0b11011, 
-           "BR": 0b11000, "NOPR": 0b11000, 
-           "LACR": 0b11101, "PC": 0b01101 }
+
+# The 6-bit numerical codes are the 5-bit OP field, suffixed by the 1-bit OPX
+# field.  Though technically considered RR instructions, the mnemonics
+# LFXI, LFLI, SPM, BR, and NOPR are special, in that they either
+# are encoded slightly differently or else are aliases and accept an altered 
+# syntax from the others.
+argsRR = {   "AR": 0b000000,    "CR": 0b000100,  "CBL": 0b000011,   "DR": 0b010010, 
+            "XUL": 0b000001,    "LR": 0b000110,  "LCR": 0b111011, "LFXI": 0b101110, 
+             "MR": 0b010000,    "SR": 0b000010, "BALR": 0b111000,  "BCR": 0b110000, 
+           "BCRE": 0b110001,  "BCTR": 0b110100, "BVCR": 0b110010,  "NCT": 0b111001, 
+             "NR": 0b001000,    "XR": 0b011100,   "OR": 0b001010,  "SUM": 0b100111, 
+           "AEDR": 0b010101,   "AER": 0b010100, "CEDR": 0b000111,  "CER": 0b010011, 
+           "CVFX": 0b001110,  "CVFL": 0b001111, "DEDR": 0b000101,  "DER": 0b011010,
+            "LER": 0b011110,  "LECR": 0b011111, "LFXR": 0b001001, "LFLI": 0b100010, 
+           "LFLR": 0b001011,  "MEDR": 0b001101,  "MER": 0b011000, "SEDR": 0b010111, 
+            "SER": 0b010110,   "MVH": 0b011011,  "SPM": 0b110011, "SRET": 0b100101, 
+           "LXAR": 0b010001, "STXAR": 0b101001,  "ICR": 0b110110,   "BR": 0b110000, 
+           "NOPR": 0b110000,  "LACR": 0b111011,   "PC": 0b011011 }
 
 argsSRSandRS = {
- "A": 0b00000, "AH": 0b10000, "C": 0b00010, "CH": 0b10010, "D": 0b01001, 
- "IAL": 0b11100, "L": 0b00011, "LA": 0b11101, "LH": 0b10011, "M": 0b01000, 
- "MH": 0b10101, "ST": 0b00110, "STH": 0b10111, "S": 0b00001, "SH": 0b10001, 
- "TD": 0b10100, "BC": 0b11000, "N": 0b00100, "X": 0b01110, "O": 0b00101, 
- "SHW": 0b10100, "TH": 0b10100, "ZH": 0b10100, "AE": 0b01010, "DE": 0b01101, 
- "LE": 0b01111, "ME": 0b01100, "SE": 0b01011,
+   "A": 0b00000, "AH": 0b10000,   "C": 0b00010, "CH": 0b10010,  "D": 0b01001, 
+ "IAL": 0b11100,  "L": 0b00011,  "LA": 0b11101, "LH": 0b10011,  "M": 0b01000, 
+  "MH": 0b10101, "ST": 0b00110, "STH": 0b10111,  "S": 0b00001, "SH": 0b10001, 
+  "TD": 0b10100, "BC": 0b11000,   "N": 0b00100,  "X": 0b01110,  "O": 0b00101, 
+ "SHW": 0b10100, "TH": 0b10100,  "ZH": 0b10100, "AE": 0b01010, "DE": 0b01101, 
+  "LE": 0b01111, "ME": 0b01100,  "SE": 0b01011,
  }
 
 argsSRSonly = {
- "BCB": 0b11011, "BCF": 0b11011, "BCTB": 0b11011, "BVCF": 0b11011, 
- "SLL": 0b11110, "SLDL": 0b11111, "SRA": 0b11110, "SRDA": 0b11111, 
- "SRDL": 0b11111, "SRL": 0b11110, "SRR": 0b11110, "SRDR": 0b11111,
- "B": 0b11000, "NOP": 0b11000, 
- "BH": 0b11000, "BL": 0b11000, "BE": 0b11000, "BNH": 0b11000, 
- "BNL": 0b11000, "BNE": 0b11000, "BO": 0b11000, "BP": 0b11000, 
- "BM": 0b11000, "BZ": 0b11000, "BNP": 0b11000, "BNM": 0b11000, 
- "BNZ": 0b11000, "BNO": 0b11000, "BLE": 0b11000, "BN": 0b11000, 
+  "BCB": 0b11011,  "BCF": 0b11011, "BCTB": 0b11011, "BVCF": 0b11011, 
+  "SLL": 0b11110, "SLDL": 0b11111,  "SRA": 0b11110, "SRDA": 0b11111, 
+ "SRDL": 0b11111,  "SRL": 0b11110,  "SRR": 0b11110, "SRDR": 0b11111,
+    "B": 0b11000,  "NOP": 0b11000, 
+   "BH": 0b11000,   "BL": 0b11000,   "BE": 0b11000,  "BNH": 0b11000, 
+  "BNL": 0b11000,  "BNE": 0b11000,   "BO": 0b11000,   "BP": 0b11000, 
+   "BM": 0b11000,   "BZ": 0b11000,  "BNP": 0b11000,  "BNM": 0b11000, 
+  "BNZ": 0b11000,  "BNO": 0b11000,  "BLE": 0b11000,   "BN": 0b11000, 
  }
 
 argsRSonly = {
@@ -209,14 +215,17 @@ argsRSonly = {
 
 argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
 
-argsRI = { "AHI": 0b10110000, "CHI": 0b10110101, "MHI": 0b10110111, 
-           "NHI": 0b10110110, "XHI": 0b10110100, "OHI": 0b10110010, 
-           "TRB": 0b10110011, "ZRB": 0b10110001, 
-           "LHI": -1, "SHI": -1 }
+# The 9-bit numerical codes are the OP+OPX fields of the encoded instruction.
+# LHI and SHI are special and must be specially handled.
+argsRI = { "AHI": 0b101100000, "CHI": 0b101101010, "MHI": 0b101101110, 
+           "NHI": 0b101101100, "XHI": 0b101101000, "OHI": 0b101100100, 
+           "TRB": 0b101100110, "ZRB": 0b101100010, 
+           "LHI": 0b000000000, "SHI": 0b101100000 }
 
+# The 8-bit numerical codes are the OP+OPX fields of the encoded instruction.
 argsSI = { "CIST": 0b10110101, "MSTH": 0b10110000, "NIST": 0b10110110, 
-           "XIST": 0b10110100, "SB": 0b10110010, "TB": 0b10110011, 
-           "ZB": 0b10110001, "TSB": 0b10110111 }
+           "XIST": 0b10110100,   "SB": 0b10110010,   "TB": 0b10110011, 
+             "ZB": 0b10110001,  "TSB": 0b10110111 }
 
 # Now, the MSC instructions.
 argsMSC = { "@A": -1, "@B": -1, "@BN": -1, "@BNN": -1, "@BNP": -1, "@BNZ": -1, "@BU": -1, "@BU@": -1, "@BXN": -1,
@@ -246,6 +255,82 @@ branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2,
                  "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
                  "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNZ": 3, "BNO": 6,
                  "BLE": 6, "BN": 2}
+
+sects = {} # CSECTS and DSECTS.
+entries = set() # For `ENTRY`.
+extrns = set() # For `EXTRN`.
+symtab = {}
+metadata = {
+    "sects": sects,
+    "entries": entries,
+    "extrns": extrns,
+    "symtab": symtab,
+    "passCount": 0
+    }
+
+#=============================================================================
+# `optimizeScratch` analyzes the "scratch" structures created during the 
+# "collect" pass, to resolve ambiguities in how those mnemonics which could be
+# either SRS instructions or RS instructions are coded.
+
+def optimizeScratch():
+    global symtab, sects
+    
+    for sect in sects:
+        scratch = sects[sect]["scratch"]
+        previouslyDefined = {}
+        for i in range(len(scratch)):
+            entry = scratch[i]
+            entry["properties"]["length"] = entry["length"]
+            if "name" in entry:
+                previouslyDefined[entry["name"]] = i
+            if not entry["ambiguous"]:
+                continue
+            # We've found an ambiguous instruction (i.e., SRS vs RS) that we
+            # must resolve.  First thing is that we have to parse the operand
+            # to determine the target address we want to reach.
+            ast = parserASM(entry["operand"], "rsAll")
+            if ast == None or "X2" in ast or "B2" in ast:
+                entry["ambiguous"] = False
+                continue
+            d2 = evalArithmeticExpression(ast["D2"], {}, entry["properties"], \
+                                          symtab, \
+                                          symtab[sect]["value"] + entry["pos"], \
+                                          severity=0)
+            if d2 == None:
+                entry["ambiguous"] = False
+                continue
+            section, value = unhash(d2)
+            if section == None:
+                entry["ambiguous"] = False
+                continue
+            # Check for the case `OPCODE R1,D2`, where `D2` is a location in
+            # a CSECT currently in `USING`.
+            b = None
+            d = 10000000
+            for u in entry["using"]:
+                if u != None and section == u[1]:
+                    if u[2] < d:
+                        d = u[2]
+                        b = u[1]
+            if b != None and d < 56:
+                entry["length"] = 2
+                entry["properties"]["length"] = entry["length"]
+                entry["ambiguous"] = False
+                for j in range(i+1, len(scratch)):
+                    entry2 = scratch[j]
+                    if sect == entry2["sect"]:
+                        entry2["pos"] -= 2
+                        entry2["hpos"] -= 1
+                        entry2["debug"] = "%05X" % entry2["hpos"]
+                        if "name" in entry2:
+                            sym2 = symtab[entry2["name"]]
+                            if sym2["address"] > entry["hpos"]:
+                                sym2["address"] -= 1
+                                sym2["value"] -= 1
+                                sym2["debug"] = "%05X" % sym2["address"]
+                continue
+    return
 
 #=============================================================================
 # Generate object code for AP-101S.
@@ -315,29 +400,23 @@ The `unhash` function can be used to return any "value"-type integer into
 its constituent "section"/"address", or to determine that it's just an integer
 value rather than an address at all.
 '''
-sects = {} # CSECTS and DSECTS.
-entries = set() # For `ENTRY`.
-extrns = set() # For `EXTRN`.
-symtab = {}
-metadata = {
-    "sects": sects,
-    "entries": entries,
-    "extrns": extrns,
-    "symtab": symtab,
-    "passCount": 0
-    }
 
 def generateObjectCode(source, macros):
     
     #-----------------------------------------------------------------------
     # Setup
     
+    collect = False
     compile = False
     sect = None # Current section.
     for key in macros:
         ignore.add(key)
     properties = {}
     
+    name = ""
+    operation = ""
+    using = [None]*8
+
     #-----------------------------------------------------------------------
     
     # A function for writing to memory or allocating it without writing to
@@ -349,11 +428,32 @@ def generateObjectCode(source, macros):
     # Alignment must have been done prior to entry.
     memoryChunkSize = 4096
     def toMemory(bytes):
-        nonlocal compile, properties
+        nonlocal collect, compile, properties, name, operation
+        pos = sects[sect]["pos"]
+        if collect:
+            pos2 = pos // 2
+            newScratch = {}
+            if name != "":
+                newScratch["name"] = name
+            if isinstance(bytes, int):
+                newScratch["length"] = bytes
+            else:
+                newScratch["length"] = len(bytes)
+            newScratch = newScratch | {
+                "ambiguous": (operation in argsSRSandRS),
+                "debug": "%05X" % pos2,
+                "pos": pos,
+                "hpos": pos2,
+                "sect": sect,
+                "operation": operation,
+                "operand": operand,
+                "properties": properties,
+                "using": copy.copy(using)
+                }
+            sects[sect]["scratch"].append(newScratch)
         properties["section"] = sect
-        properties["pos"] = sects[sect]["pos"]
+        properties["pos"] = pos
         if isinstance(bytes, bytearray):
-            pos = sects[sect]["pos"]
             end = pos + len(bytes)
             if cVsD and compile:
                 memory = sects[sect]["memory"]
@@ -374,8 +474,6 @@ def generateObjectCode(source, macros):
     # of 1 (byte), 2 (halfword), 4 (word), 8 (doubleword).
     # The memory added for padding is 0-filled if `zero` is `True`, or left
     # unchanged if `False`.
-    name = ""
-    operation = ""
     def commonProcessing(alignment=1, zero=False):
         nonlocal cVsD, sect, name, operation
         
@@ -387,7 +485,8 @@ def generateObjectCode(source, macros):
                 sects[sect] = {
                     "pos": 0,
                     "used": 0,
-                    "memory": bytearray(memoryChunkSize)
+                    "memory": bytearray(memoryChunkSize),
+                    "scratch": []
                     }
         
         # Perform alignment.
@@ -400,9 +499,9 @@ def generateObjectCode(source, macros):
                     toMemory(alignment - rem)
         
         # Add `name` (if any) to the symbol table.
-        if name != "":
+        if collect and name != "":
             pos = sects[sect]["pos"] // 2
-            if name in symtab:
+            if name in symtab: # This can't happen.
                 oldSect = symtab[name]["section"]
                 oldPos = symtab[name]["address"]
                 if oldSect != sect or oldPos != pos:
@@ -489,6 +588,7 @@ def generateObjectCode(source, macros):
     
     for passCount in range(2):
         metadata["passCount"] = passCount
+        collect = (passCount == 0)
         compile = (passCount == 1)
         continuation = False
         for sect in sects:
@@ -539,7 +639,8 @@ def generateObjectCode(source, macros):
                     sects[sect] = {
                         "pos": 0,
                         "used": 0,
-                        "memory": bytearray(memoryChunkSize)
+                        "memory": bytearray(memoryChunkSize),
+                        "scratch": []
                         }
                     symtab[sect] = { 
                         "section": sect, 
@@ -725,7 +826,7 @@ def generateObjectCode(source, macros):
                         
                         pass
                     elif suboperandType == "F":
-                        commonProcessing(1)
+                        commonProcessing(4)
                         if lengthModifier != None:
                             pass
                         if operation == "DC":
@@ -787,7 +888,25 @@ def generateObjectCode(source, macros):
                 data = bytearray(2)
                 ast = parserASM(operand, "rrAll")
                 if ast != None:
-                    pass # FIXME
+                    # Make sure we trap some special mnemonics:
+                    if operation in ["SPM", "NOPR"]:
+                        err = "R1" in ast
+                        r1 = 0
+                    elif operation == "BR":
+                        err = "R1" in ast
+                        r1 = 7
+                    else:
+                        err, r1 = evalInstructionSubfield(properties, "R1", \
+                                                          ast, symtab)
+                    if not err and r1 >= 0 and r1 <= 7:
+                        err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
+                        limit = 7
+                        if operation in ["LFXI", "LFLI"]:
+                            limit = 15
+                        if not err and r2 >= 0 and r2 <= limit:
+                            op = argsRR[operation]
+                            data[0] = ((op & 0b111110) << 2) | r1
+                            data[1] = 0b11100000 | ((op & 1) << 3) | r2
                 toMemory(data)
                 continue
                 
@@ -809,7 +928,10 @@ def generateObjectCode(source, macros):
                 instruction without already knowing the size of the instruction.
                 ***FIXME***
                 '''
-                dataSize = 4
+                if collect:
+                    dataSize = 4
+                else:
+                    dataSize = properties["length"]
                 if operation in branchAliases or operation in argsSRSonly:
                     dataSize = 2
                 if not compile:
@@ -839,6 +961,15 @@ def generateObjectCode(source, macros):
                                     data[0] = (opcode << 3) | r1
                                     if b2 == None or b2 > 3 or b2 < 0:
                                         error(properties, "No candidate B2 found")
+                                    elif operation == "B" and d2 >= 0 and d2 < 56:
+                                        opcode = argsSRSonly["BCF"]
+                                        data[0] = (opcode << 3) | r1
+                                        data[1] = ((d2 < 0b111111) << 2)
+                                    elif operation == "B" and d2 < 0 and d2 > -56:
+                                        opcode = argsSRSonly["BCB"]
+                                        data[0] = (opcode << 3) | r1
+                                        d2 = -d2
+                                        data[1] = ((d2 < 0b111111) << 2) | 0b10
                                     elif d2 < 56 or len(data) == 2:
                                         data[1] = 0xFF & ((d2 << 2) | b2)
                                     elif x2 != None:
@@ -847,7 +978,7 @@ def generateObjectCode(source, macros):
                                         else:
                                             data[1] = 0b11111100 | b2
                                             ia = "@" in operation
-                                            i = "#" in operation
+                                            i =  "#" in operation
                                             data[2] = (x2 << 5) | \
                                                       (ia << 4) | \
                                                       (i << 3) | \
@@ -870,10 +1001,28 @@ def generateObjectCode(source, macros):
                 ast = parserASM(operand, "riAll")
                 if ast != None:
                     err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
-                    if not err: 
+                    if not err and r2 >= 0 and r2 <= 7: 
                         err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
                         if not err: 
-                            pass # FIXME
+                            if operation == "SHI":
+                                i1 = -i1
+                                operation = "AHI"
+                            if operation == "LHI":
+                                # LHI is not actually an RI instruction, though
+                                # it is RI syntactically, but
+                                # rather an alias for LA (an RS instruction)
+                                # with special field values.
+                                op = argsSRSorRS["LA"]
+                                data[0] = (op << 3) | r2
+                                data[1] = 0b11110011 # AM=0, B2=11
+                                
+                            else:
+                                op = argsRI[operation]
+                                data[0] = op >> 1
+                                data[1] = 0b11100000 | ((op & 1) << 3) | r2
+                            i1 &= 0xFFFF
+                            data[2] = i1 >> 8
+                            data[3] = i1 & 0xFF
                 toMemory(data)
                 continue
                 
@@ -885,7 +1034,18 @@ def generateObjectCode(source, macros):
                 data = bytearray(4)
                 ast = parserASM(operand, "siAll")
                 if ast != None:
-                    pass # FIXME
+                    err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
+                    if not err:
+                        err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
+                        if not err and b2 >= 0 and b2 <= 3:
+                            err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
+                            i1 &= 0xFFFF
+                            d2 &= 0b111111
+                            op = argsSI[operation]
+                            data[0] = op
+                            data[1] = (d2 << 2) | b2
+                            data[2] = i1 >> 8
+                            data[3] = i1 & 0xFF
                 toMemory(data)
                 continue
                 
@@ -912,4 +1072,8 @@ def generateObjectCode(source, macros):
             error(properties, "Unrecognized line")
             continue
         
+        if collect:
+            for sect in sects:
+                optimizeScratch()
+    
     return metadata

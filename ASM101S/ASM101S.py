@@ -898,7 +898,7 @@ for i in range(endLibraries, len(source)):
                 properties["operation"],
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
-if True:
+if False:
     import pprint
     for key in metadata["sects"]:
         metadata["sects"][key]["memory"] = \

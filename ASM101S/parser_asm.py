@@ -378,9 +378,17 @@ class asmParser(Parser):
 
     @tatsumasu()
     def _rrAll_(self):  # noqa
+        with self._optional():
+            self._register_()
+            self.add_last_node_to_name('R1')
+            self._token(',')
+
+            self._define(
+                [],
+                ['R1']
+            )
         self._register_()
-        self._token(',')
-        self._register_()
+        self.add_last_node_to_name('R2')
         with self._group():
             with self._choice():
                 with self._option():
@@ -390,6 +398,11 @@ class asmParser(Parser):
                 self._error(
                     'expecting one of: '
                 )
+
+        self._define(
+            [],
+            ['R1', 'R2']
+        )
 
     @tatsumasu()
     def _rsAll_(self):  # noqa
@@ -517,10 +530,13 @@ class asmParser(Parser):
     @tatsumasu()
     def _siAll_(self):  # noqa
         self._arithmeticExpression_()
+        self.add_last_node_to_name('D2')
         self._token('(')
         self._register_()
+        self.add_last_node_to_name('B2')
         self._token('),')
         self._immediate_()
+        self.add_last_node_to_name('I1')
         with self._group():
             with self._choice():
                 with self._option():
@@ -530,6 +546,11 @@ class asmParser(Parser):
                 self._error(
                     'expecting one of: '
                 )
+
+        self._define(
+            [],
+            ['B2', 'D2', 'I1']
+        )
 
     @tatsumasu()
     def _mscAll_(self):  # noqa

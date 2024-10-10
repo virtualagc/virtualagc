@@ -141,7 +141,7 @@ subOperation =
     ;
 
 # Operand field for an RR instruction.
-rrAll = register ',' register ( / / | $ ) ;
+rrAll = [ R1+: register ',' ] R2+: register ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
 rsAll = 
@@ -154,7 +154,7 @@ rsAll =
 riAll = R2+: register ',' I1+: immediate  ( / / | $ ) ;
 
 # Operand field for an SI instruction.
-siAll = arithmeticExpression '(' register '),' immediate  ( / / | $ ) ;
+siAll = D2+: arithmeticExpression '(' B2+: register '),' I1+: immediate  ( / / | $ ) ;
 
 # Operand field for an MSC instruction.
 mscAll = 
@@ -730,8 +730,6 @@ if __name__ == "__main__":
         exercise("anything")
         exercise("dcOperands")
         exercise("dsOperands")
-        exercise("rsAll")
-        exercise("riAll")
         exercise("immediate")
         exercise("constant")
         exercise("equOperand")
