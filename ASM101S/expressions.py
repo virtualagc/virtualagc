@@ -165,6 +165,9 @@ def unroll(expression):
             expression = expression[0]
         elif len(expression) > 0 and expression[-1] == []:
             expression = expression[:-1]
+        elif len(expression) == 4 and expression[0] == '(' and \
+                expression[2] == [] and expression[3] == ')':
+            expression = expression[1]
         else:
             break
     return expression

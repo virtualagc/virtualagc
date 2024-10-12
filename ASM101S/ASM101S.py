@@ -852,14 +852,18 @@ for i in range(endLibraries, len(source)):
             inCopy = False
     if properties["printable"]:
         prefix = ""
-        if "pos" in properties:
-            prefix = "%05X" % (properties["pos"] // 2)
+        if "pos1" in properties:
+            prefix = "%05X" % (properties["pos1"] // 2)
         if "assembled" in properties:
             for i in range(len(properties["assembled"])):
                 b = properties["assembled"][i]
-                if (i & 1) == 0:
+                if i == 0 or ((i & 1) == 0 and properties["operation"] != "DC"):
                     prefix += " "
                 prefix += "%02X" % b
+        if "adr1" in properties:
+            prefix = "%-21s%04X" % (prefix, properties["adr1"])
+        if "adr2" in properties:
+            prefix = "%-26s%04X" % (prefix, properties["adr2"])
         # For whatever reason, a macro-invocation line is printed only under
         # some circumstances, and is omitted in others.
         if properties["operation"] in macros and not properties["inMacroDefinition"]:
@@ -878,7 +882,8 @@ for i in range(endLibraries, len(source)):
             identification = identification + suffix
         if properties["dotComment"]:
             pass
-        elif properties["empty"] or properties["fullComment"] or properties["inMacroDefinition"]:
+        elif properties["empty"] or properties["fullComment"] \
+                or properties["inMacroDefinition"]:
             printedLineNumber += 1
             linesThisPage += 1
             print("%-30s%5d%s%-71s %s" % (prefix, printedLineNumber, 

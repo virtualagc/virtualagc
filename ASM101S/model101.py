@@ -108,119 +108,169 @@ system390 = False
 # LFXI, LFLI, SPM, BR, and NOPR are special, in that they either
 # are encoded slightly differently or else are aliases and accept an altered 
 # syntax from the others.
-argsRR = {   "AR": 0b000000,    "CR": 0b000100,  "CBL": 0b000011,   "DR": 0b010010, 
-            "XUL": 0b000001,    "LR": 0b000110,  "LCR": 0b111011, "LFXI": 0b101110, 
-             "MR": 0b010000,    "SR": 0b000010, "BALR": 0b111000,  "BCR": 0b110000, 
-           "BCRE": 0b110001,  "BCTR": 0b110100, "BVCR": 0b110010,  "NCT": 0b111001, 
-             "NR": 0b001000,    "XR": 0b011100,   "OR": 0b001010,  "SUM": 0b100111, 
-           "AEDR": 0b010101,   "AER": 0b010100, "CEDR": 0b000111,  "CER": 0b010011, 
-           "CVFX": 0b001110,  "CVFL": 0b001111, "DEDR": 0b000101,  "DER": 0b011010,
-            "LER": 0b011110,  "LECR": 0b011111, "LFXR": 0b001001, "LFLI": 0b100010, 
-           "LFLR": 0b001011,  "MEDR": 0b001101,  "MER": 0b011000, "SEDR": 0b010111, 
-            "SER": 0b010110,   "MVH": 0b011011,  "SPM": 0b110011, "SRET": 0b100101, 
-           "LXAR": 0b010001, "STXAR": 0b101001,  "ICR": 0b110110,   "BR": 0b110000, 
-           "NOPR": 0b110000,  "LACR": 0b111011,   "PC": 0b011011 }
+argsRR = {   "AR": 0b000000,   "CR": 0b000100,   "CBL": 0b000011,   
+             "DR": 0b010010,  "XUL": 0b000001,    "LR": 0b000110,  
+            "LCR": 0b111011, "LFXI": 0b101110,    "MR": 0b010000,    
+             "SR": 0b000010, "BALR": 0b111000,   "BCR": 0b110000, 
+           "BCRE": 0b110001, "BCTR": 0b110100,  "BVCR": 0b110010, 
+            "NCT": 0b111001,   "NR": 0b001000,    "XR": 0b011100,   
+             "OR": 0b001010,  "SUM": 0b100111,  "AEDR": 0b010101,  
+            "AER": 0b010100, "CEDR": 0b000111,   "CER": 0b010011, 
+           "CVFX": 0b001110, "CVFL": 0b001111,  "DEDR": 0b000101, 
+            "DER": 0b011010,  "LER": 0b011110,  "LECR": 0b011111, 
+           "LFXR": 0b001001, "LFLI": 0b100010,  "LFLR": 0b001011,  
+           "MEDR": 0b001101,  "MER": 0b011000,  "SEDR": 0b010111, 
+            "SER": 0b010110,  "MVH": 0b011011,   "SPM": 0b110011, 
+           "SRET": 0b100101, "LXAR": 0b010001, "STXAR": 0b101001, 
+            "ICR": 0b110110,   "BR": 0b110000,  "NOPR": 0b110000,  
+           "LACR": 0b111011,   "PC": 0b011011 }
 
+# The 10-bit numerical codes are the codes in encoded positions 0-4 (in both
+# the RS and SRS forms of the instructin) suffixed by the bits in positions
+# 8-12 (of the RS form, but are unused in the SRS forms.
 argsSRSandRS = {
-   "A": 0b00000, "AH": 0b10000,   "C": 0b00010, "CH": 0b10010,  "D": 0b01001, 
- "IAL": 0b11100,  "L": 0b00011,  "LA": 0b11101, "LH": 0b10011,  "M": 0b01000, 
-  "MH": 0b10101, "ST": 0b00110, "STH": 0b10111,  "S": 0b00001, "SH": 0b10001, 
-  "TD": 0b10100, "BC": 0b11000,   "N": 0b00100,  "X": 0b01110,  "O": 0b00101, 
- "SHW": 0b10100, "TH": 0b10100,  "ZH": 0b10100, "AE": 0b01010, "DE": 0b01101, 
-  "LE": 0b01111, "ME": 0b01100,  "SE": 0b01011,
+   "A": 0b0000011110, "AH": 0b1000011110,   "C": 0b0001011110, 
+  "CH": 0b1001011110,  "D": 0b0100111110, "IAL": 0b1110011111, 
+   "L": 0b0001111110, "LA": 0b1110111110,  "LH": 0b1001111110, 
+   "M": 0b0100011110, "MH": 0b1010111110,  "ST": 0b0011011110, 
+ "STH": 0b1011111110,  "S": 0b0000111110,  "SH": 0b1000111110, 
+  "TD": 0b1010011110, "BC": 0b1100011110,   "N": 0b0010011110, 
+   "X": 0b0111011110,  "O": 0b0010111110, "SHW": 0b1010011110,
+  "TH": 0b1010011110, "ZH": 0b1010011110,  "AE": 0b0101011110, 
+  "DE": 0b0110111110, "LE": 0b0111111110,  "ME": 0b0110011110,  
+  "SE": 0b0101111110,
  }
 
 argsSRSonly = {
-  "BCB": 0b11011,  "BCF": 0b11011, "BCTB": 0b11011, "BVCF": 0b11011, 
-  "SLL": 0b11110, "SLDL": 0b11111,  "SRA": 0b11110, "SRDA": 0b11111, 
- "SRDL": 0b11111,  "SRL": 0b11110,  "SRR": 0b11110, "SRDR": 0b11111,
-    "B": 0b11000,  "NOP": 0b11000, 
-   "BH": 0b11000,   "BL": 0b11000,   "BE": 0b11000,  "BNH": 0b11000, 
-  "BNL": 0b11000,  "BNE": 0b11000,   "BO": 0b11000,   "BP": 0b11000, 
-   "BM": 0b11000,   "BZ": 0b11000,  "BNP": 0b11000,  "BNM": 0b11000, 
-  "BNZ": 0b11000,  "BNO": 0b11000,  "BLE": 0b11000,   "BN": 0b11000, 
+  "BCB": 0b1101100000,  "BCF": 0b1101100000, "BCTB": 0b1101100000, 
+ "BVCF": 0b1101100000,  "SLL": 0b1111000000, "SLDL": 0b1111100000, 
+  "SRA": 0b1111000000, "SRDA": 0b1111100000, "SRDL": 0b1111100000,  
+  "SRL": 0b1111000000,  "SRR": 0b1111000000, "SRDR": 0b1111100000,
+    "B": 0b1100000000,  "NOP": 0b1100000000,   "BH": 0b1100000000,   
+   "BL": 0b1100000000,   "BE": 0b1100000000,  "BNH": 0b1100000000, 
+  "BNL": 0b1100000000,  "BNE": 0b1100000000,   "BO": 0b1100000000,   
+   "BP": 0b1100000000,   "BM": 0b1100000000,   "BZ": 0b1100000000,  
+  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNZ": 0b1100000000,  
+  "BNO": 0b1100000000,  "BLE": 0b1100000000,   "BN": 0b1100000000, 
  }
 
-argsRSonly = {
- "AST": 0b00000, "IHL": 0b100000, "LM": 0b11001, "MIH": 0b10011, 
- "STM": 0b11001, "SST": 0b00001, "BAL": 0b11100, "BIX": 0b11011, 
- "BCT": 0b11010, "BCV": 0b11001, "NST": 0b00100, "XST": 0b01110, 
- "OST": 0b00101, "AED": 0b01010, "CED": 0b00011, "CE": 0b01001, 
- "DED": 0b00010, "LED": 0b00111, "MVS": 0b01100, "MED": 0b00110, 
- "SED": 0b01011, "STED": 0b00111, "STE": 0b00111, "DIAG": 0b11000, 
- "ISPB": 0b11101, "LPS": 0b11001, "SSM": 0b10001, "SCAL": 0b11010, 
- "SVC": 0b11001, "TS": 0b10111, "LXA": 0b01000, "LDM": 0b01101, 
- "STXA": 0b10100, "STDM": 0b10010, 
- "A@": 0b00000, "A@#": 0b00000, "A#": 0b00000, "AE@": 0b01010, "AE@#": 0b01010, 
- "AE#": 0b01010, "AED@": 0b01010, "AED@#": 0b01010, "AED#": 0b01010, 
- "AH@": 0b10000, "AH@#": 0b10000, "AH#": 0b10000, "AST@": 0b00000, 
- "AST@#": 0b00000, "AST#": 0b00000, "B@": 0b11000, "B@#": 0b11000, 
- "B#": 0b11000, "BAL@": 0b11100, "BAL@#": 0b11100, "BAL#": 0b11100, 
- "BC@": 0b11000, "BC@#": 0b11000, "BC#": 0b11000, "BCT@": 0b11010, 
- "BCT@#": 0b11010, "BCT#": 0b11010, "BCV@": 0b11001, "BCV@#": 0b11001, 
- "BCV#": 0b11001, "BE@": 0b11000, "BE@#": 0b11000, "BE#": 0b11000, 
- "BH@": 0b11000, "BH@#": 0b11000, "BH#": 0b11000, "BIX@": 0b11011, 
- "BIX@#": 0b11011, "BIX#": 0b11011, "BL@": 0b11000, "BL@#": 0b11000, 
- "BL#": 0b11000, "BLE@": 0b11000, "BLE@#": 0b11000, "BLE#": 0b11000, 
- "BM@": 0b11000, "BM@#": 0b11000, "BM#": 0b11000, "BN@": 0b11000, 
- "BN@#": 0b11000, "BN#": 0b11000, "BNE@": 0b11000, "BNE@#": 0b11000, 
- "BNE#": 0b11000, "BNH@": 0b11000, "BNH@#": 0b11000, "BNH#": 0b11000, 
- "BNL@": 0b11000, "BNL@#": 0b11000, "BNL#": 0b11000, "BNM@": 0b11000, 
- "BNM@#": 0b11000, "BNM#": 0b11000, "BNO@": 0b11000, "BNO@#": 0b11000, 
- "BNO#": 0b11000, "BNP@": 0b11000, "BNP@#": 0b11000, "BNP#": 0b11000, 
- "BNZ@": 0b11000, "BNZ@#": 0b11000, "BNZ#": 0b11000, "BO@": 0b11000, 
- "BO@#": 0b11000, "BO#": 0b11000, "BP@": 0b11000, "BP@#": 0b11000, 
- "BP#": 0b11000, "BZ@": 0b11000, "BZ@#": 0b11000, "BZ#": 0b11000, 
- "C@": 0b00010, "C@#": 0b00010, "C#": 0b00010, "CE@": 0b01001, 
- "CE@#": 0b01001, "CE#": 0b01001, "CED@": 0b00011, "CED@#": 0b00011, 
- "CED#": 0b00011, "CH@": 0b10010, "CH@#": 0b10010, "CH#": 0b10010, 
- "D@": 0b01001, "D@#": 0b01001, "D#": 0b01001, "DE@": 0b01101, 
- "DE@#": 0b01101, "DE#": 0b01101, "DED@": 0b00010, "DED@#": 0b00010, 
- "DED#": 0b00010, "DIAG@": 0b11000, "DIAG@#": 0b11000, "DIAG#": 0b11000, 
- "IAL@": 0b11100, "IAL@#": 0b11100, "IAL#": 0b11100, "IHL@": 0b100000, 
- "IHL@#": 0b100000, "IHL#": 0b100000, "ISPB@": 0b11101, "ISPB@#": 0b11101, 
- "ISPB#": 0b11101, "L@": 0b00011, "L@#": 0b00011, "L#": 0b00011, "LA@": 0b11101, 
- "LA@#": 0b11101, "LA#": 0b11101, "LDM@": 0b01101, "LDM@#": 0b01101, 
- "LDM#": 0b01101, "LE@": 0b01111, "LE@#": 0b01111, "LE#": 0b01111, 
- "LED@": 0b00111, "LED@#": 0b00111, "LED#": 0b00111, "LH@": 0b10011, 
- "LH@#": 0b10011, "LH#": 0b10011, "LM@": 0b11001, "LM@#": 0b11001, 
- "LM#": 0b11001, "LPS@": 0b11001, "LPS@#": 0b11001, "LPS#": 0b11001, 
- "LXA@": 0b01000, "LXA@#": 0b01000, "LXA#": 0b01000, "M@": 0b01000, 
- "M@#": 0b01000, "M#": 0b01000, "ME@": 0b01100, "ME@#": 0b01100, 
- "ME#": 0b01100, "MED@": 0b00110, "MED@#": 0b00110, "MED#": 0b00110, 
- "MH@": 0b10101, "MH@#": 0b10101, "MH#": 0b10101, "MIH@": 0b10011, 
- "MIH@#": 0b10011, "MIH#": 0b10011, "MVS@": 0b01100, "MVS@#": 0b01100, 
- "MVS#": 0b01100, "N@": 0b00100, "N@#": 0b00100, "N#": 0b00100, 
- "NOP@": 0b11000, "NOP@#": 0b11000, "NOP#": 0b11000, "NST@": 0b00100, 
- "NST@#": 0b00100, "NST#": 0b00100, "O@": 0b00101, "O@#": 0b00101, 
- "O#": 0b00101, "OST@": 0b00101, "OST@#": 0b00101, "OST#": 0b00101, 
- "S@": 0b00001, "S@#": 0b00001, "S#": 0b00001, "SCAL@": 0b11010, 
- "SCAL@#": 0b11010, "SCAL#": 0b11010, "SE@": 0b01011, "SE@#": 0b01011, 
- "SE#": 0b01011, "SED@": 0b01011, "SED@#": 0b01011, "SED#": 0b01011, 
- "SH@": 0b10001, "SH@#": 0b10001, "SH#": 0b10001, "SHW@": 0b10100, 
- "SHW@#": 0b10100, "SHW#": 0b10100, "SSM@": 0b10001, "SSM@#": 0b10001, 
- "SSM#": 0b10001, "SST@": 0b00001, "SST@#": 0b00001, "SST#": 0b00001, 
- "ST@": 0b00110, "ST@#": 0b00110, "ST#": 0b00110, "STDM@": 0b10010, 
- "STDM@#": 0b10010, "STDM#": 0b10010, "STE@": 0b00111, "STE@#": 0b00111, 
- "STE#": 0b00111, "STED@": 0b00111, "STED@#": 0b00111, "STED#": 0b00111, 
- "STH@": 0b10111, "STH@#": 0b10111, "STH#": 0b10111, "STM@": 0b11001, 
- "STM@#": 0b11001, "STM#": 0b11001, "STXA@": 0b10100, "STXA@#": 0b10100, 
- "STXA#": 0b10100, "SVC@": 0b11001, "SVC@#": 0b11001, "SVC#": 0b11001, 
- "TD@": 0b10100, "TD@#": 0b10100, "TD#": 0b10100, "TH@": 0b10100, 
- "TH@#": 0b10100, "TH#": 0b10100, "TS@": 0b10111, "TS@#": 0b10111, 
- "TS#": 0b10111, "X@": 0b01110, "X@#": 0b01110, "X#": 0b01110, "XST@": 0b01110, 
- "XST@#": 0b01110, "XST#": 0b01110, "ZH@": 0b10100, "ZH@#": 0b10100, 
- "ZH#": 0b10100,
- }
+
+argsRSonly = { 
+   "AST": 0b0000011111,    "IHL": 0b1000011111,     "LM": 0b1100111111, 
+   "MIH": 0b1001111111,    "STM": 0b1100111111,    "SST": 0b0000111111, 
+   "BAL": 0b1110011110,    "BIX": 0b1101111110,    "BCT": 0b1101011110, 
+   "BCV": 0b1100111110,    "NST": 0b0010011111,    "XST": 0b0111011111, 
+   "OST": 0b0010111111,    "AED": 0b0101011111,    "CED": 0b0001111111, 
+    "CE": 0b0100111111,    "DED": 0b0001011111,    "LED": 0b0111111111, 
+   "MVS": 0b0110011111,    "MED": 0b0011011111,    "SED": 0b0101111111, 
+  "STED": 0b0011111111,    "STE": 0b0011111110,   "DIAG": 0b1100011111, 
+  "ISPB": 0b1110111111,    "LPS": 0b1100111111,    "SSM": 0b1000111111, 
+  "SCAL": 0b1101011111,    "SVC": 0b1100111111,     "TS": 0b1011111111, 
+   "LXA": 0b0100011111,    "LDM": 0b0110111111,   "STXA": 0b1010011111, 
+  "STDM": 0b1001011111,     "A@": 0b0000011110,    "A@#": 0b0000011110, 
+    "A#": 0b0000011110,    "AE@": 0b0101011110,   "AE@#": 0b0101011110, 
+   "AE#": 0b0101011110,   "AED@": 0b0101011111,  "AED@#": 0b0101011111, 
+  "AED#": 0b0101011111,    "AH@": 0b1000011110,   "AH@#": 0b1000011110, 
+   "AH#": 0b1000011110,   "AST@": 0b0000011111,  "AST@#": 0b0000011111, 
+  "AST#": 0b0000011111,     "B@": 0b1100000000,    "B@#": 0b1100000000, 
+    "B#": 0b1100000000,   "BAL@": 0b1110011110,  "BAL@#": 0b1110011110, 
+  "BAL#": 0b1110011110,    "BC@": 0b1100011110,   "BC@#": 0b1100011110, 
+   "BC#": 0b1100011110,   "BCT@": 0b1101011110,  "BCT@#": 0b1101011110, 
+  "BCT#": 0b1101011110,   "BCV@": 0b1100111110,  "BCV@#": 0b1100111110, 
+  "BCV#": 0b1100111110,    "BE@": 0b1100000000,   "BE@#": 0b1100000000, 
+   "BE#": 0b1100000000,    "BH@": 0b1100000000,   "BH@#": 0b1100000000, 
+   "BH#": 0b1100000000,   "BIX@": 0b1101111110,  "BIX@#": 0b1101111110, 
+  "BIX#": 0b1101111110,    "BL@": 0b1100000000,   "BL@#": 0b1100000000, 
+   "BL#": 0b1100000000,   "BLE@": 0b1100000000,  "BLE@#": 0b1100000000, 
+  "BLE#": 0b1100000000,    "BM@": 0b1100000000,   "BM@#": 0b1100000000, 
+   "BM#": 0b1100000000,    "BN@": 0b1100000000,   "BN@#": 0b1100000000, 
+   "BN#": 0b1100000000,   "BNE@": 0b1100000000,  "BNE@#": 0b1100000000, 
+  "BNE#": 0b1100000000,   "BNH@": 0b1100000000,  "BNH@#": 0b1100000000, 
+  "BNH#": 0b1100000000,   "BNL@": 0b1100000000,  "BNL@#": 0b1100000000, 
+  "BNL#": 0b1100000000,   "BNM@": 0b1100000000,  "BNM@#": 0b1100000000, 
+  "BNM#": 0b1100000000,   "BNO@": 0b1100000000,  "BNO@#": 0b1100000000, 
+  "BNO#": 0b1100000000,   "BNP@": 0b1100000000,  "BNP@#": 0b1100000000, 
+  "BNP#": 0b1100000000,   "BNZ@": 0b1100000000,  "BNZ@#": 0b1100000000, 
+  "BNZ#": 0b1100000000,    "BO@": 0b1100000000,   "BO@#": 0b1100000000, 
+   "BO#": 0b1100000000,    "BP@": 0b1100000000,   "BP@#": 0b1100000000, 
+   "BP#": 0b1100000000,    "BZ@": 0b1100000000,   "BZ@#": 0b1100000000, 
+   "BZ#": 0b1100000000,     "C@": 0b0001011110,    "C@#": 0b0001011110, 
+    "C#": 0b0001011110,    "CE@": 0b0100111111,   "CE@#": 0b0100111111, 
+   "CE#": 0b0100111111,   "CED@": 0b0001111111,  "CED@#": 0b0001111111, 
+  "CED#": 0b0001111111,    "CH@": 0b1001011110,   "CH@#": 0b1001011110, 
+   "CH#": 0b1001011110,     "D@": 0b0100111110,    "D@#": 0b0100111110, 
+    "D#": 0b0100111110,    "DE@": 0b0110111110,   "DE@#": 0b0110111110, 
+   "DE#": 0b0110111110,   "DED@": 0b0001011111,  "DED@#": 0b0001011111, 
+  "DED#": 0b0001011111,  "DIAG@": 0b1100011111, "DIAG@#": 0b1100011111, 
+ "DIAG#": 0b1100011111,   "IAL@": 0b1110011111,  "IAL@#": 0b1110011111, 
+  "IAL#": 0b1110011111,   "IHL@": 0b1000011111,  "IHL@#": 0b1000011111, 
+  "IHL#": 0b1000011111,  "ISPB@": 0b1110111111, "ISPB@#": 0b1110111111, 
+ "ISPB#": 0b1110111111,     "L@": 0b0001111110,    "L@#": 0b0001111110, 
+    "L#": 0b0001111110,    "LA@": 0b1110111110,   "LA@#": 0b1110111110, 
+   "LA#": 0b1110111110,   "LDM@": 0b0110111111,  "LDM@#": 0b0110111111, 
+  "LDM#": 0b0110111111,    "LE@": 0b0111111110,   "LE@#": 0b0111111110, 
+   "LE#": 0b0111111110,   "LED@": 0b0111111111,  "LED@#": 0b0111111111, 
+  "LED#": 0b0111111111,    "LH@": 0b1001111110,   "LH@#": 0b1001111110, 
+   "LH#": 0b1001111110,    "LM@": 0b1100111111,   "LM@#": 0b1100111111, 
+   "LM#": 0b1100111111,   "LPS@": 0b1100111111,  "LPS@#": 0b1100111111, 
+  "LPS#": 0b1100111111,   "LXA@": 0b0100011111,  "LXA@#": 0b0100011111, 
+  "LXA#": 0b0100011111,     "M@": 0b0100011110,    "M@#": 0b0100011110, 
+    "M#": 0b0100011110,    "ME@": 0b0110011110,   "ME@#": 0b0110011110, 
+   "ME#": 0b0110011110,   "MED@": 0b0011011111,  "MED@#": 0b0011011111, 
+  "MED#": 0b0011011111,    "MH@": 0b1010111110,   "MH@#": 0b1010111110, 
+   "MH#": 0b1010111110,   "MIH@": 0b1001111111,  "MIH@#": 0b1001111111, 
+  "MIH#": 0b1001111111,   "MVS@": 0b0110011111,  "MVS@#": 0b0110011111, 
+  "MVS#": 0b0110011111,     "N@": 0b0010011110,    "N@#": 0b0010011110, 
+    "N#": 0b0010011110,   "NOP@": 0b1100000000,  "NOP@#": 0b1100000000, 
+  "NOP#": 0b1100000000,   "NST@": 0b0010011111,  "NST@#": 0b0010011111, 
+  "NST#": 0b0010011111,     "O@": 0b0010111110,    "O@#": 0b0010111110, 
+    "O#": 0b0010111110,   "OST@": 0b0010111111,  "OST@#": 0b0010111111, 
+  "OST#": 0b0010111111,     "S@": 0b0000111110,    "S@#": 0b0000111110, 
+    "S#": 0b0000111110,  "SCAL@": 0b1101011111, "SCAL@#": 0b1101011111, 
+ "SCAL#": 0b1101011111,    "SE@": 0b0101111110,   "SE@#": 0b0101111110, 
+   "SE#": 0b0101111110,   "SED@": 0b0101111111,  "SED@#": 0b0101111111, 
+  "SED#": 0b0101111111,    "SH@": 0b1000111110,   "SH@#": 0b1000111110, 
+   "SH#": 0b1000111110,   "SHW@": 0b1010011110,  "SHW@#": 0b1010011110, 
+  "SHW#": 0b1010011110,   "SSM@": 0b1000111111,  "SSM@#": 0b1000111111, 
+  "SSM#": 0b1000111111,   "SST@": 0b0000111111,  "SST@#": 0b0000111111, 
+  "SST#": 0b0000111111,    "ST@": 0b0011011110,   "ST@#": 0b0011011110, 
+   "ST#": 0b0011011110,  "STDM@": 0b1001011111, "STDM@#": 0b1001011111, 
+ "STDM#": 0b1001011111,   "STE@": 0b0011111110,  "STE@#": 0b0011111110, 
+  "STE#": 0b0011111110,  "STED@": 0b0011111111, "STED@#": 0b0011111111, 
+ "STED#": 0b0011111111,   "STH@": 0b1011111110,  "STH@#": 0b1011111110, 
+  "STH#": 0b1011111110,   "STM@": 0b1100111111,  "STM@#": 0b1100111111, 
+  "STM#": 0b1100111111,  "STXA@": 0b1010011111, "STXA@#": 0b1010011111, 
+ "STXA#": 0b1010011111,   "SVC@": 0b1100111111,  "SVC@#": 0b1100111111, 
+  "SVC#": 0b1100111111,    "TD@": 0b1010011110,   "TD@#": 0b1010011110, 
+   "TD#": 0b1010011110,    "TH@": 0b1010011110,   "TH@#": 0b1010011110, 
+   "TH#": 0b1010011110,    "TS@": 0b1011111111,   "TS@#": 0b1011111111, 
+   "TS#": 0b1011111111,     "X@": 0b0111011110,    "X@#": 0b0111011110, 
+    "X#": 0b0111011110,   "XST@": 0b0111011111,  "XST@#": 0b0111011111, 
+  "XST#": 0b0111011111,    "ZH@": 0b1010011110,   "ZH@#": 0b1010011110, 
+   "ZH#": 0b1010011110    
+   }
 
 argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
 
-# The 9-bit numerical codes are the OP+OPX fields of the encoded instruction.
+'''
+i = 0
+for key in argsRSonly:
+    i += 1
+    value = format(argsSRSorRS[key.replace("@","").replace("#","")], "#012b")
+    print('%8s: %s, ' % ('"'+key+'"', value), end="")
+    if i % 3 == 0:
+            print()
+print()
+sys.exit(1)
+'''
+
+# The 14-bit numerical codes are what's encoded in bits 0-12
 # LHI and SHI are special and must be specially handled.
-argsRI = { "AHI": 0b101100000, "CHI": 0b101101010, "MHI": 0b101101110, 
-           "NHI": 0b101101100, "XHI": 0b101101000, "OHI": 0b101100100, 
-           "TRB": 0b101100110, "ZRB": 0b101100010, 
-           "LHI": 0b000000000, "SHI": 0b101100000 }
+argsRI = { "AHI": 0b1011000011100, "CHI": 0b1011010111100, 
+           "MHI": 0b1011011111100, "NHI": 0b1011011011100, 
+           "XHI": 0b1011010011100, "OHI": 0b1011001011100, 
+           "TRB": 0b1011001111100, "ZRB": 0b1011000111100, 
+           "LHI": 0b0000000000000, "SHI": 0b1011000011100 }
 
 # The 8-bit numerical codes are the OP+OPX fields of the encoded instruction.
 argsSI = { "CIST": 0b10110101, "MSTH": 0b10110000, "NIST": 0b10110110, 
@@ -255,6 +305,10 @@ branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2,
                  "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
                  "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNZ": 3, "BNO": 6,
                  "BLE": 6, "BN": 2}
+
+# Floating-point RS/SRS mnemonics. 
+fpOperations = { "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", 
+                 "MED", "ME", "SED", "SE", "STED", "STE" }
 
 sects = {} # CSECTS and DSECTS.
 entries = set() # For `ENTRY`.
@@ -295,7 +349,7 @@ def optimizeScratch():
                 continue
             d2 = evalArithmeticExpression(ast["D2"], {}, entry["properties"], \
                                           symtab, \
-                                          symtab[sect]["value"] + entry["pos"], \
+                                          symtab[sect]["value"] + entry["pos1"] // 2, \
                                           severity=0)
             if d2 == None:
                 entry["ambiguous"] = False
@@ -320,12 +374,12 @@ def optimizeScratch():
                 for j in range(i+1, len(scratch)):
                     entry2 = scratch[j]
                     if sect == entry2["sect"]:
-                        entry2["pos"] -= 2
-                        entry2["hpos"] -= 1
-                        entry2["debug"] = "%05X" % entry2["hpos"]
+                        entry2["pos1"] -= 2
+                        entry2["pos2"] -= 1
+                        entry2["debug"] = "%05X" % entry2["pos2"]
                         if "name" in entry2:
                             sym2 = symtab[entry2["name"]]
-                            if sym2["address"] > entry["hpos"]:
+                            if sym2["address"] > entry["pos2"]:
                                 sym2["address"] -= 1
                                 sym2["value"] -= 1
                                 sym2["debug"] = "%05X" % sym2["address"]
@@ -380,7 +434,7 @@ the general category it falls into, chosen from among the following:
    
 Besides the "type" key, there could be one or more of following keys:
    "section"     (string) Name of the control section containg the symbol.
-   "address"     (integer) Address of the symbol within the control section.
+   "address"     (integer) Halfword ddress of the symbol within the control section.
    "value"       Tricky, so see explanatin that follows.
 
 Regarding "value", this is what's used in computing the value of arithmetic 
@@ -401,7 +455,13 @@ its constituent "section"/"address", or to determine that it's just an integer
 value rather than an address at all.
 '''
 
+# `dcBuffer` is used for assembling a single `DC` pseudo-op.  I don't know the
+# maximum amount of data a single `DC` can generate ... but it's a *lot*.
+# I've simply chosen a number here that while far less than the maximum, should
+# be overkill for Shuttle flight software.
+dcBuffer = bytearray(1024)
 def generateObjectCode(source, macros):
+    global dcBuffer
     
     #-----------------------------------------------------------------------
     # Setup
@@ -416,8 +476,20 @@ def generateObjectCode(source, macros):
     name = ""
     operation = ""
     using = [None]*8
+    hashMask = 0xFFFFFFF000000000
 
     #-----------------------------------------------------------------------
+    
+    # If a single `USING` is defined, get it.
+    def onlyOneUsing():
+        found = None
+        for i in range(len(using)):
+            if using[i] != None:
+                if found == None:
+                    found = i
+                else:
+                    return None
+        return found
     
     # A function for writing to memory or allocating it without writing to
     # it, as appropriate, though in this case "not writing to it" means 
@@ -429,9 +501,9 @@ def generateObjectCode(source, macros):
     memoryChunkSize = 4096
     def toMemory(bytes):
         nonlocal collect, compile, properties, name, operation
-        pos = sects[sect]["pos"]
+        pos1 = sects[sect]["pos1"]
         if collect:
-            pos2 = pos // 2
+            pos2 = pos1 // 2
             newScratch = {}
             if name != "":
                 newScratch["name"] = name
@@ -442,8 +514,8 @@ def generateObjectCode(source, macros):
             newScratch = newScratch | {
                 "ambiguous": (operation in argsSRSandRS),
                 "debug": "%05X" % pos2,
-                "pos": pos,
-                "hpos": pos2,
+                "pos1": pos1,
+                "pos2": pos2,
                 "sect": sect,
                 "operation": operation,
                 "operand": operand,
@@ -452,9 +524,9 @@ def generateObjectCode(source, macros):
                 }
             sects[sect]["scratch"].append(newScratch)
         properties["section"] = sect
-        properties["pos"] = pos
+        properties["pos1"] = pos1
         if isinstance(bytes, bytearray):
-            end = pos + len(bytes)
+            end = pos1 + len(bytes)
             if cVsD and compile:
                 memory = sects[sect]["memory"]
                 if end > len(memory):
@@ -462,13 +534,13 @@ def generateObjectCode(source, macros):
                                 // memoryChunkSize
                     memory.extend([0]*(chunks * memoryChunkSize - len(memory)))
                 for i in range(len(bytes)):
-                    memory[pos + i] = bytes[i]
+                    memory[pos1 + i] = bytes[i]
             properties["assembled"] = bytes
-            sects[sect]["pos"] = end
+            sects[sect]["pos1"] = end
         else:
-            sects[sect]["pos"] += bytes
-        if sects[sect]["pos"] > sects[sect]["used"]:
-            sects[sect]["used"] = sects[sect]["pos"]
+            sects[sect]["pos1"] += bytes
+        if sects[sect]["pos1"] > sects[sect]["used"]:
+            sects[sect]["used"] = sects[sect]["pos1"]
 
     # Common processing for all instructions. The `alignment` argument is one
     # of 1 (byte), 2 (halfword), 4 (word), 8 (doubleword).
@@ -483,7 +555,7 @@ def generateObjectCode(source, macros):
             sect = ""
             if sect not in sects:
                 sects[sect] = {
-                    "pos": 0,
+                    "pos1": 0,
                     "used": 0,
                     "memory": bytearray(memoryChunkSize),
                     "scratch": []
@@ -491,7 +563,7 @@ def generateObjectCode(source, macros):
         
         # Perform alignment.
         if alignment > 1:
-            rem = sects[sect]["pos"] % alignment
+            rem = sects[sect]["pos1"] % alignment
             if rem != 0:
                 if zero:
                     toMemory(bytearray(alignment - rem))
@@ -500,18 +572,19 @@ def generateObjectCode(source, macros):
         
         # Add `name` (if any) to the symbol table.
         if collect and name != "":
-            pos = sects[sect]["pos"] // 2
+            pos1 = sects[sect]["pos1"]
             if name in symtab: # This can't happen.
                 oldSect = symtab[name]["section"]
                 oldPos = symtab[name]["address"]
-                if oldSect != sect or oldPos != pos:
+                if oldSect != sect or oldPos != pos1:
                     error(properties, 
                           "Symbol %s address has changed: (%s,%d) -> (%s,%d)" \
-                          % (name, oldSect, oldPos, sect, pos ))
+                          % (name, oldSect, oldPos, sect, pos1 ))
             else:
-                symtab[name] = { "section": sect,  "address": pos,
-                                 "value": symtab[sect]["value"] + pos,
-                                 "debug": "%05X" % pos }
+                pos2 = pos1 // 2
+                symtab[name] = { "section": sect,  "address": pos2,
+                                 "value": symtab[sect]["value"] + pos2,
+                                 "debug": "%05X" % pos2 }
                 if operation in ["DC", "DS"]:
                     symtab[name]["type"] = "DATA"
                 elif name in entries:
@@ -521,7 +594,7 @@ def generateObjectCode(source, macros):
     
     # Gets the hashed address of the current program counter.
     def currentHash():
-        return symtab[sect]["value"] + sects[sect]["pos"]
+        return symtab[sect]["value"] + sects[sect]["pos1"] // 2
     
     # Evaluate a single suboperand of the operand of an instruction like 
     # RR, RS, SRS, SI, RI.  Returns a pair (err,value).  The `err` is 
@@ -550,19 +623,16 @@ def generateObjectCode(source, macros):
     # is concerned, there's no actual upper limit on the returned D2; the 
     # calling code must determine for itself whether or not D2 is small enough.
     def findB2D2(d2):
-        hashMask = 0xFFFFFFF000000000
-        big = (d2 & hashMask) not in [0, hashMask]
+        if (d2 & hashMask) in [0, hashMask]:
+            return None, (d2 & 0xFFFFFF)
         D2 = None
         B2 = None
         for i in range(len(using)):
             e = using[i]
             if e == None:
                 continue
-            if big:
-                d = d2 - e[0]
-            else:
-                d = d2 - e[2]
-            if d >= 0:
+            d = d2 - e[0]
+            if d >= 0 and d < 4096:
                 # Note that "<=" is required in this test, rather than "<",
                 # because the assembler manual states that if two candidate
                 # registers result in the same D2, the higher-number register
@@ -592,7 +662,7 @@ def generateObjectCode(source, macros):
         compile = (passCount == 1)
         continuation = False
         for sect in sects:
-            sects[sect]["pos"] = 0
+            sects[sect]["pos1"] = 0
         sect = None
         using = [None]*8
         # Process shource code, line-by-line
@@ -637,7 +707,7 @@ def generateObjectCode(source, macros):
                 sect = name
                 if sect not in sects:
                     sects[sect] = {
-                        "pos": 0,
+                        "pos1": 0,
                         "used": 0,
                         "memory": bytearray(memoryChunkSize),
                         "scratch": []
@@ -649,7 +719,7 @@ def generateObjectCode(source, macros):
                         "value": getHashcode(sect) 
                         }
                 properties["section"] = sect
-                properties["pos"] = sects[sect]["pos"]
+                properties["pos1"] = sects[sect]["pos1"]
                 continue
             elif operation == "END":
                 break
@@ -705,6 +775,7 @@ def generateObjectCode(source, macros):
                 continue
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
+                commonProcessing(8)
                 continue
             elif operation in ["USING", "DROP"]:
                 ast = parserASM(operand, "expressions")
@@ -745,7 +816,7 @@ def generateObjectCode(source, macros):
             # is really referring to suboperands beyond the first suboperand
             # when a single `DC` or `DS` has multiple suboperands in its 
             # operand.  Regardless, we should align to the halfword now.
-            sects[sect]["pos"] += sects[sect]["pos"] & 1
+            sects[sect]["pos1"] += sects[sect]["pos1"] & 1
             
             #******** Process instruction ********
             
@@ -758,6 +829,7 @@ def generateObjectCode(source, macros):
                     error(properties, "Cannot parse %s operand" % operation)
                     continue
                 flattened = astFlattenList(ast)
+                dcBufferPtr = 0
                 # At this point, `flattened` should be a list with one entry for
                 # each suboperand.  Those suboperands are in the form of 
                 # dicts with the keys:
@@ -765,7 +837,10 @@ def generateObjectCode(source, macros):
                 #    't'    type
                 #    'l'    length modifier
                 #    'v'    value
-                # Each of these fields will itself be an AST.
+                # Each of these fields will itself be an AST.  The descriptions
+                # of how these things are supposed to be interpreted is in the
+                # length section "DC -- DEFINE CONSTANT" (pdf p. 46, numbered
+                # p. 36) of the assembly-language manual (GC28-6514-8).
                 for suboperand in flattened:
                     if suboperand["d"] == []:
                         duplicationFactor = 1
@@ -825,22 +900,35 @@ def generateObjectCode(source, macros):
                         commonProcessing(1)
                         
                         pass
-                    elif suboperandType == "F":
-                        commonProcessing(4)
+                    elif suboperandType in ["F", "H"]:
+                        if suboperandType == "H":
+                            length = 2
+                            mask = 0xFFFF
+                        else:
+                            length = 4
+                            mask = 0xFFFFFFFF
+                        if lengthModifier != None:
+                            commonProcessing(1)
+                        else:
+                            commonProcessing(length)
                         if lengthModifier != None:
                             pass
                         if operation == "DC":
-                            pass
-                        
-                        toMemory(duplicationFactor * 4)
-                    elif suboperandType == "H":
-                        commonProcessing(1)
-                        if lengthModifier != None:
-                            pass
-                        if operation == "DC":
-                            pass
-                        
-                        toMemory(duplicationFactor * 2)
+                            for exp in suboperand["v"]:
+                                v = int(exp[1]) & mask
+                                j = (length - 1) * 8
+                                for i in range(length):
+                                    dcBuffer[dcBufferPtr] = (v >> j) & 0xFF
+                                    dcBufferPtr += 1
+                                    j -= 8
+                            length = dcBufferPtr
+                            while duplicationFactor > 1:
+                                for i in range(length):
+                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
+                                    dcBufferPtr += 1
+                            toMemory(dcBuffer[:dcBufferPtr])
+                            continue
+                        toMemory(duplicationFactor * length)
                     elif suboperandType == "E":
                         commonProcessing(1)
                         if lengthModifier != None:
@@ -866,13 +954,32 @@ def generateObjectCode(source, macros):
                         
                         toMemory(duplicationFactor * 4)
                     elif suboperandType == "Y":
-                        commonProcessing(1)
+                        if lengthModifier != None:
+                            commonProcessing(1)
+                        else:
+                            commonProcessing(2)
                         if lengthModifier != None:
                             pass
                         if operation == "DC":
-                            pass
-                        
-                        
+                            for exp in suboperand["v"]:
+                                v = evalArithmeticExpression(exp, {}, \
+                                                             properties, \
+                                                             symtab, \
+                                                             currentHash())
+                                if v == None:
+                                    error(properties, "Cannot evaluate Y-type constant")
+                                    v = 0
+                                dcBuffer[dcBufferPtr] = (v >> 8) & 0xFF
+                                dcBufferPtr += 1
+                                dcBuffer[dcBufferPtr] = v & 0xFF
+                                dcBufferPtr += 1
+                            length = dcBufferPtr
+                            while duplicationFactor > 1:
+                                for i in range(length):
+                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
+                                    dcBufferPtr += 1
+                            toMemory(dcBuffer[:dcBufferPtr])
+                            continue
                         toMemory(duplicationFactor * 2)
                     else:
                         error(properties, 
@@ -942,8 +1049,13 @@ def generateObjectCode(source, macros):
                 if ast != None:
                     err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
                     if r1 == None:
-                        # This happens for various aliased instructions.
-                        if operation in branchAliases:
+                        # R1 is syntatically omitted for various instructions,
+                        # and an implied R1 is used instead.
+                        if operation == "SVC":
+                            r1 = 1
+                        elif operation in ["SSM", "TS", "LDM", "STDM"]:
+                            r1 = 0
+                        elif operation in branchAliases:
                             r1 = branchAliases[operation]
                         else:
                             # No matches, fall through to other types of instsructions.
@@ -951,44 +1063,112 @@ def generateObjectCode(source, macros):
                     if r1 != None:
                         err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                         if not err: 
+                            if d2 != None:
+                                properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    if b2 == None:
-                                        b2,d2 = findB2D2(d2)
-                                    opcode = argsSRSorRS[operation]
-                                    data[0] = (opcode << 3) | r1
-                                    if b2 == None or b2 > 3 or b2 < 0:
-                                        error(properties, "No candidate B2 found")
-                                    elif operation == "B" and d2 >= 0 and d2 < 56:
-                                        opcode = argsSRSonly["BCF"]
-                                        data[0] = (opcode << 3) | r1
-                                        data[1] = ((d2 < 0b111111) << 2)
-                                    elif operation == "B" and d2 < 0 and d2 > -56:
-                                        opcode = argsSRSonly["BCB"]
-                                        data[0] = (opcode << 3) | r1
-                                        d2 = -d2
-                                        data[1] = ((d2 < 0b111111) << 2) | 0b10
-                                    elif d2 < 56 or len(data) == 2:
-                                        data[1] = 0xFF & ((d2 << 2) | b2)
-                                    elif x2 != None:
-                                        if x2 < 0 or x2 > 7:
-                                            error(properties, "X2 out of range")
+                                    done = False
+                                    forceRS = (operation in argsRSonly)
+                                    if operation == "CE":
+                                        print("***DEBUG***")
+                                    if operation in branchAliases:
+                                        d = d2 - (currentHash() + 1)
+                                        if d >= 0 and d < 0b111000:
+                                            opcode = argsSRSonly["BCF"]
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            d = d & 0b111111
+                                            data[1] = (d << 2) | 0b00
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d:
+                                                properties["adr2"] = d
+                                            done = True
+                                        elif d < 0 and d >= -0b111000:
+                                            opcode = argsSRSonly["BCB"]
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            d = (-d & 0b111111)
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d:
+                                                properties["adr2"] = d
+                                            data[1] = (d << 2) | 0b10
+                                            done = True
                                         else:
-                                            data[1] = 0b11111100 | b2
+                                            operation = "BC"
+                                            forceRS = True
+                                    if not done:
+                                        if b2 == None:
+                                            b2,newd2 = findB2D2(d2)
+                                            if b2 == None:
+                                                if (d2 & hashMask) == symtab[sect]["value"]:
+                                                    b2 = 3
+                                                    forceRS = True
+                                            else:
+                                                d2 = newd2
+                                        opcode = argsSRSorRS[operation]
+                                        hd2 = d2
+                                        if (opcode & 0b1000000000) == 0 and \
+                                                operation not in fpOperations \
+                                                and d2 != None:
+                                            # I believe (undocumented, I think)
+                                            # that the most-significant bit of the
+                                            # opcode determines whether it's a
+                                            # "fullword instruction" (0) or a 
+                                            # "halfword instruction" (1).  In the
+                                            # former case, the displacement is in
+                                            # units of fullwords, whereas we've
+                                            # provided it in terms of halfwords.
+                                            d2 = (d2 & hashMask) | ((d2 & 0xFFFFFFFF) // 2)
+                                        if b2 == None and d2 == None:
+                                            error(properties, "Cannot determine D2(B2)")
+                                        elif not forceRS and b2 != None and \
+                                                b2 >= 0 and b2 <= 3 and \
+                                                (d2 < 56 or len(data) == 2):
+                                            data = data[:2]
+                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
+                                            data[1] = 0xFF & ((d2 << 2) | b2)
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != hd2:
+                                                properties["adr2"] = hd2
+                                        else:
+                                            if b2 == None:
+                                                b2 = 3
+                                            elif b2 == 3:
+                                                d2 -= currentHash() + 2
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            data[1] = ((opcode & 0b11111) << 3) | b2
+                                            # I notice that the original assembler
+                                            # sometimes encoded with AM=1, whereas
+                                            # I would use AM=0 (because no X2 was
+                                            # specified in the source code).  This
+                                            # is okay behaviorally as long as no
+                                            # @ or # is in the mnemonic and D2
+                                            # is small enough to fit in 11 bits.
+                                            # As near as I can see, this happens
+                                            # with floating-point instructions, 
+                                            # though I have no rational for it.
                                             ia = "@" in operation
                                             i =  "#" in operation
-                                            data[2] = (x2 << 5) | \
-                                                      (ia << 4) | \
-                                                      (i << 3) | \
-                                                      (d2 >> 8)
-                                            data[3] = d2
-                                    else:
-                                        data[1] = 0b11111000 | b2
-                                        d2 &= 0xFFFF
-                                        data[2] = d2 >> 8
-                                        data[3] = d2
+                                            if x2 == None and not ia and not i \
+                                                    and d2 <= 0b11111111111 and \
+                                                    operation in fpOperations:
+                                                x2 = 0
+                                            if x2 == None:
+                                                data[2] = (d2 & 0xFF00) >> 8
+                                            else:
+                                                if x2 < 0 or x2 > 7:
+                                                    error(properties, "X2 out of range")
+                                                else:
+                                                    data[1] |= 0b100
+                                                    data[2] = (x2 << 5) | \
+                                                              (ia << 4) | \
+                                                              (i << 3) | \
+                                                              ((d2 & 0x700) >> 8)
+                                            data[3] = d2 & 0xFF
+                                            d2 &= 0xFFFF
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d2:
+                                                properties["adr2"] = d2
                 toMemory(data)
                 continue
                 
@@ -1004,6 +1184,8 @@ def generateObjectCode(source, macros):
                     if not err and r2 >= 0 and r2 <= 7: 
                         err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
                         if not err: 
+                            if i1 != None:
+                                properties["adr2"] = i1 & 0xFFFF
                             if operation == "SHI":
                                 i1 = -i1
                                 operation = "AHI"
@@ -1018,8 +1200,8 @@ def generateObjectCode(source, macros):
                                 
                             else:
                                 op = argsRI[operation]
-                                data[0] = op >> 1
-                                data[1] = 0b11100000 | ((op & 1) << 3) | r2
+                                data[0] = (op & 0b1111111100000) >> 5
+                                data[1] = ((op & 0b11111) << 3) | r2
                             i1 &= 0xFFFF
                             data[2] = i1 >> 8
                             data[3] = i1 & 0xFF
@@ -1036,10 +1218,13 @@ def generateObjectCode(source, macros):
                 if ast != None:
                     err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                     if not err:
+                        if d2 != None:
+                            properties["adr1"] = d2 & 0xFFFF
                         err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
                         if not err and b2 >= 0 and b2 <= 3:
                             err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
                             i1 &= 0xFFFF
+                            properties["adr2"] = i1
                             d2 &= 0b111111
                             op = argsSI[operation]
                             data[0] = op
