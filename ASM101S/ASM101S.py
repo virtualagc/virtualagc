@@ -20,6 +20,7 @@ from pathlib import Path
 from datetime import datetime
 from fieldParser import *
 from expressions import *
+from readListing import *
 
 currentDate = datetime.today().strftime('%d/%m/%y')
 
@@ -679,6 +680,7 @@ sourceFileCount = 0
 tolerableSeverity = 1
 svGlobals["&SYSPARM"] = "PASS"
 endLibraries = 0 # First line in `source` following macro-library definitions.
+comparisonSects = None
 
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
@@ -693,6 +695,11 @@ for parm in sys.argv[1:]:
         svGlobals["&SYSPARM"] = parm[10:]
     elif parm.startswith("--tolerable="):
         tolerableSeverity = int(parm[12:])
+    elif parm.startswith("--compare="):
+        comparisonSects = readListing(parm[10:])
+        if comparisonSects == None:
+            print("Could not load comparison file %s" % parm[10:], file=sys.stderr)
+            sys.exit(1)
     elif not parm.startswith("--"):
         if not parm.endswith(".asm"):
             print("Source-code filenames must end with .asm", file=sys.stderr)
@@ -725,6 +732,9 @@ for parm in sys.argv[1:]:
         print("                    severity determined by the MNOTE instruction")
         print("                    (i.e., by the source code itself), but")
         print("                    level 1 seems to be used for info messages.")
+        print("--compare=F         (Default none.) Specifies the name of an")
+        print("                    assembly-listing file whose generated code")
+        print("                    is compared to the current assembly.")
         print()
         sys.exit(1)
     else:
@@ -806,6 +816,7 @@ firstLineOnPage = 1
 pageNumber = 0
 linesPerPage = 80
 linesThisPage = 1000
+mismatchCount = 0
 for i in range(endLibraries, len(source)):
     properties = source[i]
     skip = False
@@ -851,12 +862,29 @@ for i in range(endLibraries, len(source)):
                       % (memberName, rvl, concat, nest))
             inCopy = False
     if properties["printable"]:
+        address = None
+        section = None
+        comparisonMemory = None
         prefix = ""
         if "pos1" in properties:
-            prefix = "%05X" % (properties["pos1"] // 2)
+            address = properties["pos1"]
+            section = properties["section"]
+            if comparisonSects != None and section in comparisonSects:
+                comparisonMemory = comparisonSects[section]["memory"]
+            prefix = "%05X" % (address // 2)
         if "assembled" in properties:
             for i in range(len(properties["assembled"])):
                 b = properties["assembled"][i]
+                if comparisonMemory != None:
+                    if b != comparisonMemory[address]:
+                        mismatchCount += 1
+                        try:
+                            print("Comparison mismatch: %02X vs %02X" % \
+                                  (b, comparisonMemory[address]))
+                        except:
+                            print("Comparison mismatch: %02X vs unassigned" % b)
+                    comparisonMemory[address] = None
+                    address += 1
                 if i == 0 or ((i & 1) == 0 and properties["operation"] != "DC"):
                     prefix += " "
                 prefix += "%02X" % b
@@ -903,6 +931,21 @@ for i in range(endLibraries, len(source)):
                 properties["operation"],
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
+if comparisonSects != None:
+    for sect in comparisonSects:
+        headerShown = False
+        memory = comparisonSects[sect]["memory"]
+        for address in range(len(memory)):
+            if memory[address] == None:
+                continue
+            if not headerShown:
+                print('Missing object code from section "%s":' % sect)
+                headerShown = True
+            print("\t%05X:  %02X" % (address, memory[address]))
+            mismatchCount += 1
+if mismatchCount > 0:
+    print("Total mismatched object-code bytes in comparison:  %d" % mismatchCount)
+    
 if False:
     import pprint
     for key in metadata["sects"]:

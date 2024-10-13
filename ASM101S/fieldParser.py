@@ -734,4 +734,5 @@ if __name__ == "__main__":
         exercise("constant")
         exercise("equOperand")
         exercise("expressions")
-        
+        exercise("floatNumber")
+        exercise("quotedFloatList")

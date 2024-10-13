@@ -3,7 +3,7 @@ License:    This program is declared by its author, Ronald Burkey, to be the
             U.S. Public Domain, and may be freely used, modifified, or 
             distributed for any purpose whatever.
 Filename:   model101.py
-Purpose:    This object-code generation for ASM101S, specific to the assembly 
+Purpose:    Object-code generation for ASM101S, specific to the assembly 
             language of the IBM AP-101S computer.
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
@@ -14,6 +14,7 @@ import copy
 import random
 from expressions import error, unroll, astFlattenList, evalArithmeticExpression
 from fieldParser import parserASM
+from ibmHex import *
 
 '''
 A unique but "random" 28-bit "random", excluding all 0's and all 1's, 
@@ -139,6 +140,7 @@ argsSRSandRS = {
   "TH": 0b1010011110, "ZH": 0b1010011110,  "AE": 0b0101011110, 
   "DE": 0b0110111110, "LE": 0b0111111110,  "ME": 0b0110011110,  
   "SE": 0b0101111110,
+ "STE": 0b0011111110,   
  }
 
 argsSRSonly = {
@@ -163,7 +165,7 @@ argsRSonly = {
    "OST": 0b0010111111,    "AED": 0b0101011111,    "CED": 0b0001111111, 
     "CE": 0b0100111111,    "DED": 0b0001011111,    "LED": 0b0111111111, 
    "MVS": 0b0110011111,    "MED": 0b0011011111,    "SED": 0b0101111111, 
-  "STED": 0b0011111111,    "STE": 0b0011111110,   "DIAG": 0b1100011111, 
+  "STED": 0b0011111111,                            "DIAG": 0b1100011111, 
   "ISPB": 0b1110111111,    "LPS": 0b1100111111,    "SSM": 0b1000111111, 
   "SCAL": 0b1101011111,    "SVC": 0b1100111111,     "TS": 0b1011111111, 
    "LXA": 0b0100011111,    "LDM": 0b0110111111,   "STXA": 0b1010011111, 
@@ -327,8 +329,10 @@ metadata = {
 # "collect" pass, to resolve ambiguities in how those mnemonics which could be
 # either SRS instructions or RS instructions are coded.
 
+#shortening = 0
 def optimizeScratch():
     global symtab, sects
+    #global shortening
     
     for sect in sects:
         scratch = sects[sect]["scratch"]
@@ -384,6 +388,7 @@ def optimizeScratch():
                                 sym2["value"] -= 1
                                 sym2["debug"] = "%05X" % sym2["address"]
                 continue
+    #print("###DEBUG###", shortening)
     return
 
 #=============================================================================
@@ -507,6 +512,7 @@ def generateObjectCode(source, macros):
             newScratch = {}
             if name != "":
                 newScratch["name"] = name
+                newScratch["alignment"] = symtab[name]["alignment"]
             if isinstance(bytes, int):
                 newScratch["length"] = bytes
             else:
@@ -584,6 +590,7 @@ def generateObjectCode(source, macros):
                 pos2 = pos1 // 2
                 symtab[name] = { "section": sect,  "address": pos2,
                                  "value": symtab[sect]["value"] + pos2,
+                                 "alignment": alignment,
                                  "debug": "%05X" % pos2 }
                 if operation in ["DC", "DS"]:
                     symtab[name]["type"] = "DATA"
@@ -775,7 +782,7 @@ def generateObjectCode(source, macros):
                 continue
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
-                commonProcessing(8)
+                commonProcessing(4)
                 continue
             elif operation in ["USING", "DROP"]:
                 ast = parserASM(operand, "expressions")
@@ -929,22 +936,47 @@ def generateObjectCode(source, macros):
                             toMemory(dcBuffer[:dcBufferPtr])
                             continue
                         toMemory(duplicationFactor * length)
-                    elif suboperandType == "E":
-                        commonProcessing(1)
+                    elif suboperandType in ["E", "D"]:
+                        if suboperandType == "E":
+                            fpLength = 4
+                        else:
+                            fpLength = 8
+                        commonProcessing(fpLength // 2)
                         if lengthModifier != None:
                             pass
+                        length = fpLength
                         if operation == "DC":
-                            pass
-                        
-                        toMemory(duplicationFactor * 4)
-                    elif suboperandType == "D":
-                        commonProcessing(1)
-                        if lengthModifier != None:
-                            pass
-                        if operation == "DC":
-                            pass
-                        
-                        toMemory(duplicationFactor * 8)
+                            length = 0
+                            for value in suboperand["v"]:
+                                # We now have to convert the `value` to an 
+                                # IBM hexadecimal float, of either single
+                                # precision (`fpLength==4`) or double 
+                                # precision (`fpLength==8`).  The lazy man's
+                                # approach I'm taking at first is:
+                                #    `value` -> string
+                                #    string -> Python float
+                                #    Python float -> IBM hex float
+                                v = float(''.join(astFlattenList(value[1:3])))
+                                msw, lsw = toFloatIBM(v)
+                                j = 24
+                                for i in range(4):
+                                    dcBuffer[dcBufferPtr] = (msw >> j) & 0xFF
+                                    dcBufferPtr += 1
+                                    j -= 8
+                                if fpLength == 8:
+                                    j = 24
+                                    for i in range(4):
+                                        dcBuffer[dcBufferPtr] = (lsw >> j) & 0xFF
+                                        dcBufferPtr += 1
+                                        j -= 8
+                            length = dcBufferPtr
+                            while duplicationFactor > 1:
+                                for i in range(length):
+                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
+                                    dcBufferPtr += 1
+                            toMemory(dcBuffer[:dcBufferPtr])
+                            continue
+                        toMemory(duplicationFactor * length)
                     elif suboperandType == "A":
                         commonProcessing(1)
                         if lengthModifier != None:
