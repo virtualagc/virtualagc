@@ -17,6 +17,52 @@ from fieldParser import parserASM
 from ibmHex import *
 
 '''
+Structure of the Code Generator
+-------------------------------
+
+The Assembler as a whole proceeds in a sequence of 5 passes, more or less, 
+of which the first one has already occurred befor the code generator 
+(`generateObjectCode`) has been called.  That initial pass resolves all of the 
+macro language (variables of the form &VAR, sequence symbols of the 
+form .SYMBOL, macro expansion, and inclusion of code via the `COPY` pseudo-op, 
+continuation lines), leaving only lines of "pure" AP-101 assembly-language 
+code for processing.  Besides this, it has also divided the lines in to fields 
+`name`, `operation`, and `operand`, the latter of which may include the 
+end-of-line comment, if any.
+
+Thus `generateObjectCode` itself has 4 passes:
+
+    Pass 0: Uses the operand parser (`parserASM`) to parse each operand and 
+            provide the parsed form as an AST (`ast`) appropriate to the 
+            particular `operation`.  (This is provided as a separate pass, so
+            that the "lookahead" in pass 1, see below, does not have reparse
+            any lines.)
+    Pass 1: Processes `CSECT` pseudo-ops and any other pseudo-ops affecting
+            the control sections and the position pointers within the control
+            sections.  It's purpose is to resolve all symbols, and in particular
+            to determine the addresses of all symbols.  To do so, it must
+            determine the alignments and amount of memory occupied by all
+            CPU/MSC/DCE instructions and DC/DS pseudo-ops.  However, there
+            is ambiguity for some mnemonics as to whether they are RS-type
+            instructions or SRS-type instructions, the two of which occupy
+            different amounts of memory, and this ambiguity cannot be resolved
+            syntactically in most cases.  Therefore, where there is ambiguity,
+            pass 2 must sometimes perform a certain amount of lookahead, 
+            involving the `ast` and other intermediate data created in pass 1, 
+            to determine the sizes of memory displacements that can resolve the 
+            ambiguity.
+    Pass 2: Pass 1 has done a good job (or at least *the* job) of correctly
+            determining the size of SRS vs RS instructions, but a poor job
+            determining the locations of symbols for the symbol table.  Pass 2
+            is essentially a repeat of Pass 1, except that it just directly
+            uses the instruction sizes determined by Pass 1, rather than 
+            attempting to determine them itself.
+    Pass 3: Uses the results of passes 0 and 2 to actually generate the 
+            object code and constant data stored in memory.
+
+Pseudo-Addresses
+----------------
+
 A unique but "random" 28-bit "random", excluding all 0's and all 1's, 
 left-shifted by 36 bits, is assigned as a hashcode to each CSECT (or DSECT) and 
 each EXTRN symbol. These are explicitly seeded, so as to make the sequence 
@@ -347,7 +393,8 @@ def optimizeScratch():
             # We've found an ambiguous instruction (i.e., SRS vs RS) that we
             # must resolve.  First thing is that we have to parse the operand
             # to determine the target address we want to reach.
-            ast = parserASM(entry["operand"], "rsAll")
+            #ast = parserASM(entry["operand"], "rsAll")
+            ast = entry["properties"]["ast"]
             if ast == None or "X2" in ast or "B2" in ast:
                 entry["ambiguous"] = False
                 continue
@@ -472,6 +519,7 @@ def generateObjectCode(source, macros):
     # Setup
     
     collect = False
+    asis = False
     compile = False
     sect = None # Current section.
     for key in macros:
@@ -504,15 +552,15 @@ def generateObjectCode(source, macros):
     #                   actual bytes to store.
     # Alignment must have been done prior to entry.
     memoryChunkSize = 4096
-    def toMemory(bytes):
-        nonlocal collect, compile, properties, name, operation
+    def toMemory(bytes, alignment = 1):
+        nonlocal collect, asis, compile, properties, name, operation
         pos1 = sects[sect]["pos1"]
         if collect:
             pos2 = pos1 // 2
             newScratch = {}
             if name != "":
                 newScratch["name"] = name
-                newScratch["alignment"] = symtab[name]["alignment"]
+                newScratch["alignment"] = alignment
             if isinstance(bytes, int):
                 newScratch["length"] = bytes
             else:
@@ -572,9 +620,9 @@ def generateObjectCode(source, macros):
             rem = sects[sect]["pos1"] % alignment
             if rem != 0:
                 if zero:
-                    toMemory(bytearray(alignment - rem))
+                    toMemory(bytearray(alignment - rem), alignment)
                 else:
-                    toMemory(alignment - rem)
+                    toMemory(alignment - rem, alignment)
         
         # Add `name` (if any) to the symbol table.
         if collect and name != "":
@@ -650,26 +698,74 @@ def generateObjectCode(source, macros):
         return B2, D2
     
     #-----------------------------------------------------------------------
-    # Process source code in a series of passes.
-    #    passCount == 0         Determine the number of bytes needed by each
-    #                           CPU instruction or DC/DS, and the addresses
-    #                           of all symbols.
-    #    passCount == 1         Compile to memory.
-    # Pass 0 isn't actually as straightforward as it sounds, because of the
-    # ambiguity in terms of size of all of the instructions whose mnemonics
-    # are in `argsSRSorRC` and all of the branch instructions aliased to 
-    # instruction `BC` (which itself is in `argsSRSorRC`).  So pass 0 collects
-    # a lot of data regarding such memory alignments into a work structure
-    # that's extensively analyzed in between passes 0 and 1 to resolve the
-    # ambiguity as best ti can.
+    # Pass 0
+    passCount = 0
+    metadata["passCount"] = passCount
+    continuation = False
+    for sect in sects:
+        sects[sect]["pos1"] = 0
+    sect = None
+    using = [None]*8
+    appropriateRules = {
+        "ENTRY": "identifierList", "EXTRN": "identifierList",
+        "EQU": "equOperand", "USING": "expressions", "DROP": "expressions",
+        "DC": "dcOperands", "DS": "dsOperands", 
+        }
+    for operation in argsRR:
+        appropriateRules[operation] = "rrAll"
+    for operation in argsSRSorRS:
+        appropriateRules[operation] = "rsAll"
+    for operation in argsRI:
+        appropriateRules[operation] = "riAll"
+    for operation in argsSI:
+        appropriateRules[operation] = "siAll"
+    for operation in argsMSC:
+        appropriateRules[operation] = "mscAll"
+    for operation in argsBCE:
+        appropriateRules[operation] = "bceAll"
+        
+    # Process shource code, line-by-line
+    for properties in source:
+        #******** Should this line be processed or discarded? ********
+        if properties["inMacroDefinition"] or properties["fullComment"] or \
+                properties["dotComment"] or properties["empty"]:
+            continue
+        # We only need to look at the first line of any sequence of continued
+        # lines.
+        if continuation:
+            continuation = properties["continues"]
+            continue
+        continuation = properties["continues"]
+        # Various types of lines we can immediately discard by looking at 
+        # their `operation` fields
+        operation = properties["operation"]
+        if operation in ignore:
+            continue
+        operand = properties["operand"].rstrip()
+        if operand == "":
+            continue
+        if operation in appropriateRules:
+            ast = parserASM(operand, appropriateRules[operation])
+            if ast == None:
+                error(properties, "Could not parse operands")
+            properties["ast"] = ast
     
-    for passCount in range(2):
+    #-----------------------------------------------------------------------
+    # Remaining passes
+    
+    for passCount in range(1, 4):
         metadata["passCount"] = passCount
-        collect = (passCount == 0)
-        compile = (passCount == 1)
+        collect = (passCount in [1, 2])
+        asis = (passCount == 2)
+        compile = (passCount == 3)
         continuation = False
-        for sect in sects:
-            sects[sect]["pos1"] = 0
+        if asis:
+            #continue
+            sects.clear()
+            symtab.clear()
+        else:
+            for sect in sects:
+                sects[sect]["pos1"] = 0
         sect = None
         using = [None]*8
         # Process shource code, line-by-line
@@ -731,7 +827,7 @@ def generateObjectCode(source, macros):
             elif operation == "END":
                 break
             elif operation in ["ENTRY", "EXTRN"]:
-                ast = parserASM(operand, "identifierList")
+                ast = properties["ast"]
                 if ast == None:
                     error(properties, "Cannot parse operand of %s" % operation)
                 else:
@@ -763,7 +859,7 @@ def generateObjectCode(source, macros):
                         error(properties, "EQU name already in use: %s" % name)
                         continue
                     oldValue = symtab[name]["value"]
-                ast = parserASM(operand, "equOperand")
+                ast = properties["ast"]
                 if ast == None:
                     error(properties, "Cannot parse operand of EQU")
                     continue
@@ -785,7 +881,7 @@ def generateObjectCode(source, macros):
                 commonProcessing(4)
                 continue
             elif operation in ["USING", "DROP"]:
-                ast = parserASM(operand, "expressions")
+                ast = copy.deepcopy(properties["ast"])
                 if ast == None or "r" not in ast or not isinstance(ast["r"], list):
                     error(properties, "Cannot parse operand of " + operation)
                     continue
@@ -831,7 +927,7 @@ def generateObjectCode(source, macros):
             # modify memory, and move the instruction pointer are "instructions".
             
             if operation in ["DC", "DS"]:
-                ast = parserASM(operand, operation.lower() + "Operands")
+                ast = properties["ast"]
                 if ast == None:
                     error(properties, "Cannot parse %s operand" % operation)
                     continue
@@ -941,7 +1037,7 @@ def generateObjectCode(source, macros):
                             fpLength = 4
                         else:
                             fpLength = 8
-                        commonProcessing(fpLength // 2)
+                        commonProcessing(4)  # Even doublewords are aligned to fullword.
                         if lengthModifier != None:
                             pass
                         length = fpLength
@@ -1025,7 +1121,7 @@ def generateObjectCode(source, macros):
                     toMemory(2)
                     continue
                 data = bytearray(2)
-                ast = parserASM(operand, "rrAll")
+                ast = properties["ast"]
                 if ast != None:
                     # Make sure we trap some special mnemonics:
                     if operation in ["SPM", "NOPR"]:
@@ -1067,7 +1163,7 @@ def generateObjectCode(source, macros):
                 instruction without already knowing the size of the instruction.
                 ***FIXME***
                 '''
-                if collect:
+                if collect and not asis:
                     dataSize = 4
                 else:
                     dataSize = properties["length"]
@@ -1077,7 +1173,7 @@ def generateObjectCode(source, macros):
                     toMemory(dataSize)
                     continue
                 data = bytearray(dataSize)
-                ast = parserASM(operand, "rsAll")
+                ast = properties["ast"]
                 if ast != None:
                     err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
                     if r1 == None:
@@ -1210,7 +1306,7 @@ def generateObjectCode(source, macros):
                     toMemory(4)
                     continue
                 data = bytearray(4)
-                ast = parserASM(operand, "riAll")
+                ast = properties["ast"]
                 if ast != None:
                     err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
                     if not err and r2 >= 0 and r2 <= 7: 
@@ -1246,7 +1342,7 @@ def generateObjectCode(source, macros):
                     toMemory(4)
                     continue
                 data = bytearray(4)
-                ast = parserASM(operand, "siAll")
+                ast = properties["ast"]
                 if ast != None:
                     err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                     if not err:
@@ -1271,7 +1367,7 @@ def generateObjectCode(source, macros):
                 # any advantage in segregating them this way, but it might provide
                 # some clarity in maintenance to do so.
                 commonProcessing(2)
-                ast = parserASM(operand, "mscAll")
+                ast = properties["ast"]
                 if ast != None:
                     toMemory(bytearray(4))
                     continue
@@ -1281,7 +1377,7 @@ def generateObjectCode(source, macros):
                 # any advantage in segregating them this way, but it might provide
                 # some clarity in maintenance to do so.
                 commonProcessing(2)
-                ast = parserASM(operand, "bceAll")
+                ast = properties["ast"]
                 if ast != None:
                     toMemory(bytearray(4))
                     continue
@@ -1289,7 +1385,7 @@ def generateObjectCode(source, macros):
             error(properties, "Unrecognized line")
             continue
         
-        if collect:
+        if collect and not asis:
             for sect in sects:
                 optimizeScratch()
     
