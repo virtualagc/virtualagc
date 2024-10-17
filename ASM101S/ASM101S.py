@@ -681,6 +681,7 @@ tolerableSeverity = 1
 svGlobals["&SYSPARM"] = "PASS"
 endLibraries = 0 # First line in `source` following macro-library definitions.
 comparisonSects = None
+comparisonFile = None
 
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
@@ -696,7 +697,8 @@ for parm in sys.argv[1:]:
     elif parm.startswith("--tolerable="):
         tolerableSeverity = int(parm[12:])
     elif parm.startswith("--compare="):
-        comparisonSects = readListing(parm[10:])
+        comparisonFile = parm[10:]
+        comparisonSects = readListing(comparisonFile)
         if comparisonSects == None:
             print("Could not load comparison file %s" % parm[10:], file=sys.stderr)
             sys.exit(1)
@@ -825,7 +827,7 @@ for i in range(endLibraries, len(source)):
         printedLineNumber += space
         linesThisPage += space
     elif properties["operation"] == "TITLE":
-        title = properties["operand"][1:-1]
+        title = properties["operand"].rstrip()[1:-1]
         subtitle = "%-95s" % "  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT" \
                    + "%16s %s" % (program + " " + version, currentDate)
         printedLineNumber += 1
@@ -866,24 +868,32 @@ for i in range(endLibraries, len(source)):
         section = None
         comparisonMemory = None
         prefix = ""
+        if "section" in properties and "offset" in sects[properties["section"]]:
+            offset = sects[properties["section"]]["offset"]
+        else:
+            offset = 0
         if "pos1" in properties:
             address = properties["pos1"]
             section = properties["section"]
             if comparisonSects != None and section in comparisonSects:
                 comparisonMemory = comparisonSects[section]["memory"]
-            prefix = "%05X" % (address // 2)
+            paddress = address // 2
+            if "offset" in sects[section]:
+                paddress += offset
+            prefix = "%05X" % paddress
         if "assembled" in properties:
             for i in range(len(properties["assembled"])):
                 b = properties["assembled"][i]
                 if comparisonMemory != None:
-                    if b != comparisonMemory[address]:
+                    oaddress = address + offset * 2
+                    if b != comparisonMemory[oaddress]:
                         mismatchCount += 1
                         try:
                             print("Comparison mismatch: %02X vs %02X" % \
-                                  (b, comparisonMemory[address]))
+                                  (b, comparisonMemory[oaddress]))
                         except:
                             print("Comparison mismatch: %02X vs unassigned" % b)
-                    comparisonMemory[address] = None
+                    comparisonMemory[oaddress] = None
                     address += 1
                 if i == 0 or ((i & 1) == 0 and properties["operation"] != "DC"):
                     prefix += " "
@@ -932,19 +942,33 @@ for i in range(endLibraries, len(source)):
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
 if comparisonSects != None:
+    print("\f")
+    
+    print("Generated code was compared to file %s" % \
+          os.path.basename(comparisonFile))
+    print("Total mismatched object-code bytes: %d" % mismatchCount)
+    mismatchCount = 0
     for sect in comparisonSects:
         headerShown = False
         memory = comparisonSects[sect]["memory"]
         for address in range(len(memory)):
             if memory[address] == None:
                 continue
+            if 0 == (address & 1):
+                c = "H"
+                if memory[address] == 0xC9:
+                    continue
+            else:
+                c = "L"
+                if memory[address] == 0xFB:
+                    continue
             if not headerShown:
                 print('Missing object code from section "%s":' % sect)
                 headerShown = True
-            print("\t%05X:  %02X" % (address, memory[address]))
+            print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
             mismatchCount += 1
-if mismatchCount > 0:
-    print("Total mismatched object-code bytes in comparison:  %d" % mismatchCount)
+    if mismatchCount > 0:
+        print("Total bytes missing from object code: %d" % mismatchCount)
     
 if False:
     import pprint

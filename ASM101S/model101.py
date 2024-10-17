@@ -116,6 +116,72 @@ and fails lookup.  If there's negative overflow, then in almost all cases
 `hashcode` will be all 1's, but since all 1's is not a legal hashcode, we can
 use it as an indication that the result is purely numerical, without a 
 hashcode.
+
+"Second Operands" of SRS and RS Instructions
+--------------------------------------------
+
+For some instructions, the "second operand" (or more-specifically, D2) is in
+units of halfwords, while in others it is in units of fullwords.  For example,
+if the address of a byte is 40 (decimal), then its halfword address is 20 and
+its fullword address is 10.  I.e., D2 might be 20 or 10 respectively.
+
+So far, my reading of the AP-101S Principles of Operation has not elicited any 
+complete, unambiguous explanation of which instructions or which.  My 
+probably-imperfect inferences are these:
+
+  1.  As a rule of thumb, if the most-significant bit of the opcode is 0, then
+      the instruction uses fullword addresses, while if it is 1, then the
+      instruction uses halfword addresses.
+  2.  However, floating-point instructions are exceptions, and always use 
+      halfword addresses.  (There's some support for that as well, maybe, in that
+      on p. 8-3 the POO says "Second operands for the floating point set are
+      no longer restricted by hardware to even halfword boundary address 
+      locations.")
+  3.  These rules apply only to SRS and RS AM=0 instructions, whereas halfword
+      addressing is always used for RS AM=1 instructions.
+
+One implication of these rules is that in cases an SRS or RS AM=0 instruction
+might require a fullword D2 where the displacement is actually odd number of
+halfwords, then an RS AM=1 instruction would have to be used instead.
+
+Determining Types of SRS/RS Instructions
+----------------------------------------
+
+(in progress)
+
+Regarding those mnemonics which may be SRS or RS type instructions, depending
+on the particular mnemonic there are up to 4 cases to distinguish between:
+
+  1.  Instructions which *must* be type SRS.
+  2.  Instructions which *must* be type RS AM=0.
+  3.  Instructions which *must* be type RS AM=1.
+  4.  Instructions which might be some one of several of the above.
+
+Here are the rules to classify an instruction in this group.
+
+  A.  If the mnemonic is in the SRS-only set, then it is SRS.  (Obviously!)
+  B.  If there is an explicit X2, then the instruction is RS AM=1.
+  C.  If there's no explicit B2 and D2 is a constant (i.e., without an 
+      upper-word hash) then code as RS AM=0 with B2=3.  (Recall:  For AM=0 B2=3, 
+      base register is discarded.)
+  D.  If no explicit B2 but D2's hash matches current control section:
+      1)  Special case of mnemonic BC (possibly aliased from B, BZ, etc.) and
+          displacement from updated IC is >-56 and <0, code as BCB.
+      2)  Special case of mnemonic BC (possibly aliased) and displacement from
+          updated IC is >=0  and <56, code as BCF.
+      3)  If displacement from updated IC is >=0 and <2048, then code as 
+          RS AM=1 (with B2=3, X2=0, IA=0, I=0).
+      4)  If the current control section is in USING, then code as
+          RS AM=0 (with B2=USING reg for current section).
+      5)  Otherwise, fail.
+  E.  If no explicit B2 but D2's hash match one in USING:
+  `   1)  If the unhashed D2 is >=0 and <56, code as SRS
+          (with B2=register from USING).
+      2)  If the unhashed D2 is >=0 and <2048, code as RS AM=1 (with B2 from
+          USING).
+      3)  Code as RS AM=0 (with B2 from USING).
+  F.  If explicit B2 and ...
+  
 '''
 random.seed(16134176201611561415)
 hashcodeLookup = {}
@@ -357,6 +423,13 @@ branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2,
 # Floating-point RS/SRS mnemonics. 
 fpOperations = { "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", 
                  "MED", "ME", "SED", "SE", "STED", "STE" }
+fpOperationsSP = []
+fpOperationsDP = []
+for operation in fpOperations:
+    if operation[-1] == "D":
+        fpOperationsDP.append(operation)
+    else:
+        fpOperationsSP.append(operation)
 
 sects = {} # CSECTS and DSECTS.
 entries = set() # For `ENTRY`.
@@ -512,8 +585,9 @@ value rather than an address at all.
 # I've simply chosen a number here that while far less than the maximum, should
 # be overkill for Shuttle flight software.
 dcBuffer = bytearray(1024)
+firstCSECT = None
 def generateObjectCode(source, macros):
-    global dcBuffer
+    global dcBuffer, firstCSECT
     
     #-----------------------------------------------------------------------
     # Setup
@@ -552,6 +626,9 @@ def generateObjectCode(source, macros):
     #                   actual bytes to store.
     # Alignment must have been done prior to entry.
     memoryChunkSize = 4096
+    defaultChunk = [0xC9]*memoryChunkSize
+    for i in range(1, memoryChunkSize, 2):
+        defaultChunk[i] = 0xFB
     def toMemory(bytes, alignment = 1):
         nonlocal collect, asis, compile, properties, name, operation
         pos1 = sects[sect]["pos1"]
@@ -583,10 +660,8 @@ def generateObjectCode(source, macros):
             end = pos1 + len(bytes)
             if cVsD and compile:
                 memory = sects[sect]["memory"]
-                if end > len(memory):
-                    chunks = (end - len(memory) + memoryChunkSize - 1) \
-                                // memoryChunkSize
-                    memory.extend([0]*(chunks * memoryChunkSize - len(memory)))
+                while end > len(memory):
+                    memory.extend(defaultChunk)
                 for i in range(len(bytes)):
                     memory[pos1 + i] = bytes[i]
             properties["assembled"] = bytes
@@ -601,18 +676,21 @@ def generateObjectCode(source, macros):
     # The memory added for padding is 0-filled if `zero` is `True`, or left
     # unchanged if `False`.
     def commonProcessing(alignment=1, zero=False):
+        global firstCSECT
         nonlocal cVsD, sect, name, operation
         
         # Make sure we're in *some* CSECT or DSECT
         if sect == None:
             cVsD = True
             sect = ""
+            firstCSECT = sect
             if sect not in sects:
                 sects[sect] = {
                     "pos1": 0,
                     "used": 0,
-                    "memory": bytearray(memoryChunkSize),
-                    "scratch": []
+                    "memory": bytearray(defaultChunk),
+                    "scratch": [],
+                    "dsect": False
                     }
         
         # Perform alignment.
@@ -805,6 +883,8 @@ def generateObjectCode(source, macros):
                 # to the section is a valid identifier name, but I'm not bothering
                 # with that just yet.
                 cVsD = (operation == "CSECT")
+                if cVsD and sect == None:
+                    firstCSECT = name
                 if name == "" and not cVsD:
                     error(properties, "Unnamed DSECT not allowed.")
                 sect = name
@@ -812,8 +892,9 @@ def generateObjectCode(source, macros):
                     sects[sect] = {
                         "pos1": 0,
                         "used": 0,
-                        "memory": bytearray(memoryChunkSize),
-                        "scratch": []
+                        "memory": bytearray(defaultChunk),
+                        "scratch": [],
+                        "dsect": not cVsD
                         }
                     symtab[sect] = { 
                         "section": sect, 
@@ -1190,17 +1271,17 @@ def generateObjectCode(source, macros):
                             pass
                     if r1 != None:
                         err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
-                        if not err: 
-                            if d2 != None:
-                                properties["adr1"] = d2 & 0xFFFF
+                        if not err and d2 != None: 
+                            properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
                                     done = False
                                     forceRS = (operation in argsRSonly)
-                                    if operation == "CE":
-                                        print("***DEBUG***")
+                                    if operation == "SVC":
+                                        pass # ***DEBUG***
+                                        pass
                                     if operation in branchAliases:
                                         d = d2 - (currentHash() + 1)
                                         if d >= 0 and d < 0b111000:
@@ -1224,79 +1305,133 @@ def generateObjectCode(source, macros):
                                         else:
                                             operation = "BC"
                                             forceRS = True
-                                    if not done:
+                                    isConstant = False
+                                    if not done and b2 == None:
+                                        # Recall that `findB2D2` returns
+                                        #    None,constantValue        or
+                                        #    B2,unhashedValue          or
+                                        #    None,None                 no match
+                                        b2,newd2 = findB2D2(d2)
                                         if b2 == None:
-                                            b2,newd2 = findB2D2(d2)
-                                            if b2 == None:
-                                                if (d2 & hashMask) == symtab[sect]["value"]:
+                                            if newd2 == None:
+                                                newd2 = d2 - symtab[sect]["value"]
+                                                if newd2 >= 0 and newd2 < 4096:
                                                     b2 = 3
-                                                    forceRS = True
+                                                    d2 = newd2
+                                                else:
+                                                    section,offset = unhash(d2)
+                                                    if section != None:
+                                                        forceAM0 = True
+                                                    else:
+                                                        error(properties, "Cannot determine B2(D2)")
+                                                        done = True
                                             else:
-                                                d2 = newd2
-                                        opcode = argsSRSorRS[operation]
-                                        hd2 = d2
-                                        if (opcode & 0b1000000000) == 0 and \
-                                                operation not in fpOperations \
-                                                and d2 != None:
-                                            # I believe (undocumented, I think)
-                                            # that the most-significant bit of the
-                                            # opcode determines whether it's a
-                                            # "fullword instruction" (0) or a 
-                                            # "halfword instruction" (1).  In the
-                                            # former case, the displacement is in
-                                            # units of fullwords, whereas we've
-                                            # provided it in terms of halfwords.
-                                            d2 = (d2 & hashMask) | ((d2 & 0xFFFFFFFF) // 2)
-                                        if b2 == None and d2 == None:
-                                            error(properties, "Cannot determine D2(B2)")
-                                        elif not forceRS and b2 != None and \
-                                                b2 >= 0 and b2 <= 3 and \
-                                                (d2 < 56 or len(data) == 2):
-                                            data = data[:2]
-                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            data[1] = 0xFF & ((d2 << 2) | b2)
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != hd2:
-                                                properties["adr2"] = hd2
+                                                isConstant = True
+                                                forceRS = True
                                         else:
-                                            if b2 == None:
-                                                b2 = 3
-                                            elif b2 == 3:
-                                                d2 -= currentHash() + 2
+                                            d2 = newd2
+                                    if b2 != None and (b2 < 0 or b2 > 3):
+                                        error(properties, "B2 out of range")
+                                        done = True
+                                    forceAM0 = (operation in fpOperationsDP and \
+                                                b2 not in [3, None])
+                                    forceAM1 = False
+                                    if not done:
+                                        opcode = argsSRSorRS[operation]
+                                        # The logic of determining whether we
+                                        # have to encode as
+                                        #    SRS            vs
+                                        #    RS AM=1        vs
+                                        #    RS AM=0        
+                                        # is quite complex, and we need to 
+                                        # precompute a bunch of the values we
+                                        # need to use in performing that logic.
+                                        unhashedValue = d2 & 0xFFFFFF
+                                        ic = sects[sect]["pos1"] // 2
+                                        if (opcode & 0b1000000000) == 0 and \
+                                                (operation not in fpOperations or \
+                                                 (b2 != 3 and operation in fpOperationsSP)) \
+                                                :
+                                            # The conditional above is entirely
+                                            # empirical.
+                                            dUnitizer = 2
+                                        else:
+                                            dUnitizer = 1
+                                        dSRS = (dUnitizer - 1 + unhashedValue - (ic + 1)) // dUnitizer
+                                        dRSAM1 = (dUnitizer - 1 + unhashedValue - (ic + 2)) // dUnitizer
+                                        uUnhashedValue = (dUnitizer - 1 + unhashedValue) // dUnitizer
+                                        ia = "@" in operation
+                                        i =  "#" in operation
+                                        if b2 == None:
+                                            ib2 = 3
+                                        else:
+                                            ib2 = b2
+                                        if ib2 == 3:
+                                            d = dSRS
+                                            d1 = dRSAM1
+                                        else:
+                                            d = uUnhashedValue
+                                            d1 = uUnhashedValue
+                                            
+                                        if len(data) == 2  or \
+                                               (not (ib2 == 3 and operation in fpOperationsSP) and \
+                                                not forceRS and ib2 == 3 and d >= 0 and d < 56):
+                                            # Is SRS.
+                                            if d >= 56:
+                                                error(properties, "SRS displacement out of range")
+                                            data = data[:2]
+                                            #if ib2 != 3:
+                                            #    d = uUnhashedValue
+                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
+                                            data[1] = 0xFF & ((d << 2) | ib2)
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d:
+                                                properties["adr2"] = d
+                                        elif isConstant:
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            data[1] = ((opcode & 0b11111) << 3) | 0b011
+                                            d0 = d2 & 0xFFFF
+                                            data[2] = (d0 & 0xFF00) >> 8
+                                            data[3] = d0 & 0xFF
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d0:
+                                                properties["adr2"] = d0
+                                        elif not forceAM0 and \
+                                                (x2 != None or ia or \
+                                                i or (d1 >= 0 and d1 < 2048)):
+                                            if x2 == None:
+                                                x2 = 0
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            data[1] = ((opcode & 0b11111) << 3) | 0b100 | ib2
+                                            if x2 < 0 or x2 > 7:
+                                                error(properties, "X2 out of range")
+                                            else:
+                                                data[2] = (x2 << 5) | \
+                                                          (ia << 4) | \
+                                                          (i << 3) | \
+                                                          ((d1 & 0x700) >> 8)
+                                            data[3] = d1 & 0xFF
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d1 & 0xFFFF:
+                                                properties["adr2"] = d1 & 0xFFFF
+                                        elif x2 == None and not ia and not i:
+                                            if b2 != None:
+                                                d0 = d2 & 0xFFFF
+                                            else:
+                                                section, offset = unhash(d2)
+                                                if section in sects and \
+                                                        "offset" in sects[section]:
+                                                    d0 = offset + sects[section]["offset"] - sects[sect]["offset"]
+                                                    b2 = 3
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             data[1] = ((opcode & 0b11111) << 3) | b2
-                                            # I notice that the original assembler
-                                            # sometimes encoded with AM=1, whereas
-                                            # I would use AM=0 (because no X2 was
-                                            # specified in the source code).  This
-                                            # is okay behaviorally as long as no
-                                            # @ or # is in the mnemonic and D2
-                                            # is small enough to fit in 11 bits.
-                                            # As near as I can see, this happens
-                                            # with floating-point instructions, 
-                                            # though I have no rational for it.
-                                            ia = "@" in operation
-                                            i =  "#" in operation
-                                            if x2 == None and not ia and not i \
-                                                    and d2 <= 0b11111111111 and \
-                                                    operation in fpOperations:
-                                                x2 = 0
-                                            if x2 == None:
-                                                data[2] = (d2 & 0xFF00) >> 8
-                                            else:
-                                                if x2 < 0 or x2 > 7:
-                                                    error(properties, "X2 out of range")
-                                                else:
-                                                    data[1] |= 0b100
-                                                    data[2] = (x2 << 5) | \
-                                                              (ia << 4) | \
-                                                              (i << 3) | \
-                                                              ((d2 & 0x700) >> 8)
-                                            data[3] = d2 & 0xFF
-                                            d2 &= 0xFFFF
+                                            data[2] = (d0 & 0xFF00) >> 8
+                                            data[3] = d0 & 0xFF
                                             if "adr1" in properties and \
-                                                    properties["adr1"] != d2:
-                                                properties["adr2"] = d2
+                                                    properties["adr1"] != d0:
+                                                properties["adr2"] = d0
+                                        else:
+                                            error(properties, "Count not interpret line as SRS or RS")
                 toMemory(data)
                 continue
                 
@@ -1388,5 +1523,27 @@ def generateObjectCode(source, macros):
         if collect and not asis:
             for sect in sects:
                 optimizeScratch()
+        if asis:
+            # For reasons I don't grasp, the assembler treats at least some
+            # control sections as contiguous.  I don't grasp the rules for 
+            # which sections those are.  For *now*, all CSECTs are treated
+            # as contiguous (except for fullword realignment in between).
+            # The way this is reflectes is that in `sects`, each CSECT (but not
+            # DSECT) has a field `offset` that gives its offset (in bytes)
+            # with respect to the first CSECT.  It's possible that the only
+            # CSECT which should be treated this way is the one whose `CSECT`
+            # pseudo-op is immediately preceded by an `LTORG` pseudo-op, or 
+            # perhaps one with a special name (like "#L" plus the name of
+            # another section), or who knows?  At any rate, this may perhaps
+            # be revisited if more info becomes available somehow.
+            lastOffset = 0
+            for sect in sects:
+                if sects[sect]["dsect"]:
+                    continue
+                sects[sect]["offset"] = lastOffset
+                lastOffset += sects[sect]["used"] // 2
+                lastOffset = (lastOffset + 1) & 0xFFFFFE
+            pass
+            pass
     
     return metadata
