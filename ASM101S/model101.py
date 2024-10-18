@@ -1253,6 +1253,9 @@ def generateObjectCode(source, macros):
                 
             if operation in argsSRSorRS:
                 commonProcessing(2)
+                if operation == "SHW":
+                    pass # ***DEBUG***
+                    pass
                 '''
                 We have a conundrum here.  For the mnemonics in argsSRSandRS
                 there is both an RS version of the instruction
@@ -1285,7 +1288,9 @@ def generateObjectCode(source, macros):
                     if r1 == None:
                         # R1 is syntatically omitted for various instructions,
                         # and an implied R1 is used instead.
-                        if operation == "SVC":
+                        if operation == "SHW":
+                            r1 = 2
+                        elif operation == "SVC":
                             r1 = 1
                         elif operation in ["SSM", "TS", "LDM", "STDM"]:
                             r1 = 0
@@ -1304,9 +1309,6 @@ def generateObjectCode(source, macros):
                                 if not err:
                                     done = False
                                     forceRS = (operation in argsRSonly)
-                                    if operation == "SLL":
-                                        pass # ***DEBUG***
-                                        pass
                                     if operation == "BCT":
                                         d = d2 - (currentHash() + 1)
                                         if d < 0 and d >= -0b111000:
@@ -1370,8 +1372,10 @@ def generateObjectCode(source, macros):
                                     if b2 != None and (b2 < 0 or b2 > 3):
                                         error(properties, "B2 out of range")
                                         done = True
-                                    forceAM0 = (operation in fpOperationsDP and \
-                                                b2 not in [3, None])
+                                    # `forceAM0` is purely empirical.
+                                    forceAM0 = ((operation in fpOperationsDP \
+                                                 or operation in ["IHL"])
+                                                and b2 not in [3, None])
                                     forceAM1 = False
                                     if not done:
                                         opcode = argsSRSorRS[operation]
@@ -1424,6 +1428,8 @@ def generateObjectCode(source, macros):
                                                 (specifiedB2 or ib2 == 3) and \
                                                 d >= 0 and d < 56):
                                             # Is SRS.
+                                            if operation == "BCTB": # Backward displacement
+                                                d = -d
                                             if d >= 56:
                                                 error(properties, "SRS displacement out of range")
                                             if len(data) == 4: ###DEBUG###

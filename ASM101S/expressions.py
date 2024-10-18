@@ -243,6 +243,30 @@ def evalArithmeticExpression(expression, \
     if not isinstance(expression, (list, tuple)):
         error(properties, "Eval error type 1", severity)
         return None
+    if len(expression) == 4 and expression[1] == "(" and expression[3] == ")" \
+            and isinstance(expression[0], str) and expression[0].startswith("&"):
+        arrayName = expression[0]
+        if arrayName in svLocals:
+            arrayData = svLocals[arrayName]
+        elif arrayName in svGlobals:
+            arrayData = svGlobals[arrayName]
+        else:
+            error(properties, "Cannot find %s" % arrayName)
+            return None
+        if not isinstance(arrayData, list):
+            error(properties, "%s is not an array" % arrayName)
+            return None
+        index = evalArithmeticExpression(expression[2], svLocals, properties, \
+                                         symtab, star, severity)
+        if index == None:
+            error(properties, "Cannot evaluate index")
+            return None
+        index -= 1
+        if index < 0 or index >= len(arrayData):
+            error(properties, "Index is out of range (%d > %d)" % \
+                  (index+1, len(arrayData)))
+            return None
+        return arrayData[index]
     if len(expression) == 3 and expression[0] == '(' and expression[2] == ')':
         return evalArithmeticExpression(expression[1], svLocals, properties, \
                                         symtab, star, severity)
@@ -477,6 +501,9 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         if not leftIsString and not rightIsString:
             valLeft = evalArithmeticExpression(left, svLocals, properties)
             if valLeft != None:
+                if '&ERRNUMS' in right: ###DEBUG###
+                    pass
+                    pass
                 valRight = evalArithmeticExpression(right, svLocals, properties)
                 if valRight != None:
                     if op == "EQ":
