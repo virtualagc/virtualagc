@@ -987,8 +987,7 @@ if comparisonSects != None:
     
     print("Generated code was compared to file %s" % \
           os.path.basename(comparisonFile))
-    print("Total mismatched object-code bytes: %d" % mismatchCount)
-    mismatchCount = 0
+    mismatchCount1 = 0
     for sect in comparisonSects:
         headerShown = False
         memory = comparisonSects[sect]["memory"]
@@ -1007,9 +1006,9 @@ if comparisonSects != None:
                 print('Missing object code from section "%s":' % sect)
                 headerShown = True
             print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
-            mismatchCount += 1
-    if mismatchCount > 0:
-        print("Total bytes missing from object code: %d" % mismatchCount)
+            mismatchCount1 += 1
+    print("%d bytes mismatched and %d bytes missing in generated code" % \
+          (mismatchCount, mismatchCount1))
     
 if False:
     import pprint
