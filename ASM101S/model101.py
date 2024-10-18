@@ -267,7 +267,10 @@ argsSRSonly = {
   "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNZ": 0b1100000000,  
   "BNO": 0b1100000000,  "BLE": 0b1100000000,   "BN": 0b1100000000, 
  }
-
+shiftOperations = { # Special cases of SRS. Values are least-sig bits of code.
+  "SLL": 0b00, "SLDL": 0b00, "SRA": 0b01, "SRDA": 0b01, 
+  "SRDL": 0b10, "SRL": 0b10, "SRR": 0b11, "SRDR": 0b11
+}
 
 argsRSonly = { 
    "AST": 0b0000011111,    "IHL": 0b1000011111,     "LM": 0b1100111111, 
@@ -453,12 +456,34 @@ def optimizeScratch():
     global symtab, sects
     #global shortening
     
+    def adjust(entry, scratch, properties, i):
+        entry["length"] = 2
+        properties["length"] = 2
+        entry["ambiguous"] = False
+        for j in range(i+1, len(scratch)):
+            entry2 = scratch[j]
+            if sect == entry2["sect"]:
+                entry2["pos1"] -= 2
+                entry2["pos2"] -= 1
+                entry2["debug"] = "%05X" % entry2["pos2"]
+                if "name" in entry2:
+                    sym2 = symtab[entry2["name"]]
+                    if sym2["address"] > entry["pos2"]:
+                        sym2["address"] -= 1
+                        sym2["value"] -= 1
+                        sym2["debug"] = "%05X" % sym2["address"]
+    
     for sect in sects:
         scratch = sects[sect]["scratch"]
         previouslyDefined = {}
         for i in range(len(scratch)):
             entry = scratch[i]
-            entry["properties"]["length"] = entry["length"]
+            properties = entry["properties"]
+            operation = properties["operation"]
+            if operation == "BCT":
+                pass
+                pass
+            properties["length"] = entry["length"]
             if "name" in entry:
                 previouslyDefined[entry["name"]] = i
             if not entry["ambiguous"]:
@@ -467,11 +492,11 @@ def optimizeScratch():
             # must resolve.  First thing is that we have to parse the operand
             # to determine the target address we want to reach.
             #ast = parserASM(entry["operand"], "rsAll")
-            ast = entry["properties"]["ast"]
-            if ast == None or "X2" in ast or "B2" in ast:
+            ast = properties["ast"]
+            if ast == None or "X2" in ast:
                 entry["ambiguous"] = False
                 continue
-            d2 = evalArithmeticExpression(ast["D2"], {}, entry["properties"], \
+            d2 = evalArithmeticExpression(ast["D2"], {}, properties, \
                                           symtab, \
                                           symtab[sect]["value"] + entry["pos1"] // 2, \
                                           severity=0)
@@ -480,8 +505,17 @@ def optimizeScratch():
                 continue
             section, value = unhash(d2)
             if section == None:
+                if "B2" in ast and value >= 0 and value < 56:
+                    adjust(entry, scratch, properties, i)
+                    continue
                 entry["ambiguous"] = False
                 continue
+            # A special case:
+            if operation == "BCT" and section == sect:
+                d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
+                if d > 0 and d < 56:
+                    adjust(entry, scratch, properties, i)
+                    continue
             # Check for the case `OPCODE R1,D2`, where `D2` is a location in
             # a CSECT currently in `USING`.
             b = None
@@ -492,21 +526,7 @@ def optimizeScratch():
                         d = u[2]
                         b = u[1]
             if b != None and d < 56:
-                entry["length"] = 2
-                entry["properties"]["length"] = entry["length"]
-                entry["ambiguous"] = False
-                for j in range(i+1, len(scratch)):
-                    entry2 = scratch[j]
-                    if sect == entry2["sect"]:
-                        entry2["pos1"] -= 2
-                        entry2["pos2"] -= 1
-                        entry2["debug"] = "%05X" % entry2["pos2"]
-                        if "name" in entry2:
-                            sym2 = symtab[entry2["name"]]
-                            if sym2["address"] > entry["pos2"]:
-                                sym2["address"] -= 1
-                                sym2["value"] -= 1
-                                sym2["debug"] = "%05X" % sym2["address"]
+                adjust(entry, scratch, properties, i)
                 continue
     #print("###DEBUG###", shortening)
     return
@@ -643,7 +663,7 @@ def generateObjectCode(source, macros):
             else:
                 newScratch["length"] = len(bytes)
             newScratch = newScratch | {
-                "ambiguous": (operation in argsSRSandRS),
+                "ambiguous": (operation in argsSRSandRS or operation == "BCT"),
                 "debug": "%05X" % pos2,
                 "pos1": pos1,
                 "pos2": pos2,
@@ -805,11 +825,13 @@ def generateObjectCode(source, macros):
     # Process shource code, line-by-line
     for properties in source:
         #******** Should this line be processed or discarded? ********
+        if "skip" in properties:
+            continue
         if properties["inMacroDefinition"] or properties["fullComment"] or \
                 properties["dotComment"] or properties["empty"]:
             continue
         # We only need to look at the first line of any sequence of continued
-        # lines.
+        # lines.  (Probably obsoleted by "skip".
         if continuation:
             continuation = properties["continues"]
             continue
@@ -847,11 +869,10 @@ def generateObjectCode(source, macros):
         sect = None
         using = [None]*8
         # Process shource code, line-by-line
-        for properties in source:
+        for propNum in range(len(source)):
+            properties = source[propNum]
             
-            #******** Should this line be processed or discarded? ********
-            if properties["inMacroDefinition"] or properties["fullComment"] or \
-                    properties["dotComment"] or properties["empty"]:
+            if "skip" in properties:
                 continue
             # We only need to look at the first line of any sequence of continued
             # lines.
@@ -859,6 +880,10 @@ def generateObjectCode(source, macros):
                 continuation = properties["continues"]
                 continue
             continuation = properties["continues"]
+            #******** Should this line be processed or discarded? ********
+            if properties["inMacroDefinition"] or properties["fullComment"] or \
+                    properties["dotComment"] or properties["empty"]:
+                continue
             # Various types of lines we can immediately discard by looking at 
             # their `operation` fields
             operation = properties["operation"]
@@ -1279,10 +1304,21 @@ def generateObjectCode(source, macros):
                                 if not err:
                                     done = False
                                     forceRS = (operation in argsRSonly)
-                                    if operation == "SVC":
+                                    if operation == "SLL":
                                         pass # ***DEBUG***
                                         pass
-                                    if operation in branchAliases:
+                                    if operation == "BCT":
+                                        d = d2 - (currentHash() + 1)
+                                        if d < 0 and d >= -0b111000:
+                                            opcode = argsSRSonly["BCTB"]
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            d = (-d & 0b111111)
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d:
+                                                properties["adr2"] = d
+                                            data[1] = (d << 2) | 0b11
+                                            done = True
+                                    elif operation in branchAliases:
                                         d = d2 - (currentHash() + 1)
                                         if d >= 0 and d < 0b111000:
                                             opcode = argsSRSonly["BCF"]
@@ -1306,6 +1342,7 @@ def generateObjectCode(source, macros):
                                             operation = "BC"
                                             forceRS = True
                                     isConstant = False
+                                    specifiedB2 = (b2 != None)
                                     if not done and b2 == None:
                                         # Recall that `findB2D2` returns
                                         #    None,constantValue        or
@@ -1373,12 +1410,25 @@ def generateObjectCode(source, macros):
                                             d = uUnhashedValue
                                             d1 = uUnhashedValue
                                             
-                                        if len(data) == 2  or \
-                                               (not (ib2 == 3 and operation in fpOperationsSP) and \
-                                                not forceRS and ib2 == 3 and d >= 0 and d < 56):
+                                        if operation in shiftOperations:
+                                            data = data[:2]
+                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
+                                            data[1] = 0xFF & ((d2 << 2) | shiftOperations[operation])
+                                            if "adr1" in properties:
+                                                properties.pop("adr1")
+                                            properties["adr2"] = d2 & 0x3F
+                                        elif len(data) == 2  or \
+                                               (not (ib2 == 3 and \
+                                                     operation in fpOperationsSP) and \
+                                                not forceRS and \
+                                                (specifiedB2 or ib2 == 3) and \
+                                                d >= 0 and d < 56):
                                             # Is SRS.
                                             if d >= 56:
                                                 error(properties, "SRS displacement out of range")
+                                            if len(data) == 4: ###DEBUG###
+                                                pass
+                                                pass
                                             data = data[:2]
                                             #if ib2 != 3:
                                             #    d = uUnhashedValue

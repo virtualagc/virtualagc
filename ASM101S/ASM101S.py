@@ -391,6 +391,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         source.append(properties)
         if skipCount > 0:
             skipCount -= 1
+            properties["skip"] = True
             continue
         if properties["empty"] or properties["fullComment"] or \
                 properties["dotComment"]:
@@ -792,9 +793,9 @@ if maxSeverity > tolerableSeverity:
             lastError = True
     if len(source) > 0 and source[-1]["inMacroDefinition"]:
         print("No closing MEND for MACRO")
-    print("%d error(s) detected, max severity %d." % (errorCount, maxSeverity))
     print("Assembly aborted.  Fix the syntax errors or use --tolerable=N.")
     print("Search for ================ to see the marked errors.")
+    print("%d error(s) detected, max severity %d." % (errorCount, maxSeverity))
     sys.exit(1)
 
 #==============================================================================
@@ -941,6 +942,46 @@ for i in range(endLibraries, len(source)):
                 properties["operation"],
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
+
+def toEbcdic(s):
+    converted = ""
+    for c in s:
+        converted += "%02X" % asciiToEbcdic[ord(c)]
+    return converted
+
+# A peculiar collation for sorting the symbol table on the printout.  It's
+# not EBCDIC, nor ASCII.  The alphanumeric ordering seems normal, but the
+# other "letters" (#, @, $) follow the alphanumerics (or at least the alpha).
+# Actually, I have no examples whatever with @, so I just let it remain in the
+# ASCII order.
+def sortOrder(s):
+    converted = ""
+    for c in s:
+        if c == "$":
+            converted += 'a'
+        elif c == "#":
+            converted += 'b'
+        #elif c == "@":
+        #    converted += 'c'
+        else:
+            converted += c
+    return converted
+
+pageNumber += 1
+print("\f%45s%-66sPAGE %4d" % ("", "CROSS REFERENCE", pageNumber))
+print("%-95s%16s %s" % ("SYMBOL    LEN    VALUE   DEFN   REFERENCES", program + " " + version, currentDate))
+for symbol in sorted(symtab, key = sortOrder):
+    symProps = symtab[symbol]
+    length = 1 # FIXME
+    value = symProps["value"]
+    if "section" in symProps and "offset" in sects[symProps["section"]]:
+        value += sects[symProps["section"]]["offset"]
+    if symProps["type"] in ["INSTRUCTION", "DATA"]:
+        line = "%-8s %5d   %06X" % (symbol, length, value & 0xFFFFFF)
+    else:
+        line = "%-8s %5d %08X" % (symbol, length, value & 0xFFFFFFFF)
+    print(line)
+
 if comparisonSects != None:
     print("\f")
     
