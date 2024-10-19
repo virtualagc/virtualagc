@@ -811,6 +811,7 @@ def generateObjectCode(source, macros):
         }
     for operation in argsRR:
         appropriateRules[operation] = "rrAll"
+    appropriateRules["LFXI"] = "lfxiAll"
     for operation in argsSRSorRS:
         appropriateRules[operation] = "rsAll"
     for operation in argsRI:
@@ -1226,6 +1227,9 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(2)
                     continue
+                if operation == "LFXI": ###DEBUG###
+                    pass
+                    pass
                 data = bytearray(2)
                 ast = properties["ast"]
                 if ast != None:
@@ -1241,10 +1245,13 @@ def generateObjectCode(source, macros):
                                                           ast, symtab)
                     if not err and r1 >= 0 and r1 <= 7:
                         err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
-                        limit = 7
+                        lolim = 0
+                        uplim = 7
                         if operation in ["LFXI", "LFLI"]:
-                            limit = 15
-                        if not err and r2 >= 0 and r2 <= limit:
+                            lolim = 0
+                            uplim = 15
+                            r2 += 2
+                        if not err and r2 >= lolim and r2 <= uplim:
                             op = argsRR[operation]
                             data[0] = ((op & 0b111110) << 2) | r1
                             data[1] = 0b11100000 | ((op & 1) << 3) | r2
@@ -1253,9 +1260,6 @@ def generateObjectCode(source, macros):
                 
             if operation in argsSRSorRS:
                 commonProcessing(2)
-                if operation == "SHW":
-                    pass # ***DEBUG***
-                    pass
                 '''
                 We have a conundrum here.  For the mnemonics in argsSRSandRS
                 there is both an RS version of the instruction
@@ -1281,6 +1285,9 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
+                if operation == "LA":
+                    pass # ***DEBUG***
+                    pass
                 data = bytearray(dataSize)
                 ast = properties["ast"]
                 if ast != None:
@@ -1288,7 +1295,7 @@ def generateObjectCode(source, macros):
                     if r1 == None:
                         # R1 is syntatically omitted for various instructions,
                         # and an implied R1 is used instead.
-                        if operation == "SHW":
+                        if operation in ["SHW", "SHW@", "SHW#", "SHW@#"]:
                             r1 = 2
                         elif operation == "SVC":
                             r1 = 1
@@ -1307,6 +1314,9 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
+                                    atStar = ("@" in operation or "#" in operation)
+                                    if atStar and x2 == None:
+                                        b2,x2 = 0,b2
                                     done = False
                                     forceRS = (operation in argsRSonly)
                                     if operation == "BCT":
@@ -1374,7 +1384,7 @@ def generateObjectCode(source, macros):
                                         done = True
                                     # `forceAM0` is purely empirical.
                                     forceAM0 = ((operation in fpOperationsDP \
-                                                 or operation in ["IHL"])
+                                                 or operation in ["IHL", "AST"])
                                                 and b2 not in [3, None])
                                     forceAM1 = False
                                     if not done:
@@ -1390,6 +1400,7 @@ def generateObjectCode(source, macros):
                                         unhashedValue = d2 & 0xFFFFFF
                                         ic = sects[sect]["pos1"] // 2
                                         if (opcode & 0b1000000000) == 0 and \
+                                                operation not in ["AST"] and \
                                                 (operation not in fpOperations or \
                                                  (b2 != 3 and operation in fpOperationsSP)) \
                                                 :
@@ -1421,6 +1432,11 @@ def generateObjectCode(source, macros):
                                             if "adr1" in properties:
                                                 properties.pop("adr1")
                                             properties["adr2"] = d2 & 0x3F
+                                        elif operation == "LA" and \
+                                                x2 == None and b2 != None \
+                                                and d2 >= 0 and d2 < 56:
+                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
+                                            data[1] = 0xFF & ((d2 << 2) | ib2)
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \

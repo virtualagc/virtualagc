@@ -142,6 +142,7 @@ subOperation =
 
 # Operand field for an RR instruction.
 rrAll = [ R1+: register ',' ] R2+: register ( / / | $ ) ;
+lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | register ) ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
 rsAll = 
@@ -249,9 +250,9 @@ fixedNumber =
     ;
 
 register = 
+    | constant 
     | identifier 
     | variable 
-    | constant 
     ;
 
 immediate = 
@@ -736,3 +737,5 @@ if __name__ == "__main__":
         exercise("expressions")
         exercise("floatNumber")
         exercise("quotedFloatList")
+        exercise("lfxiAll")
+        

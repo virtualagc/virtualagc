@@ -215,7 +215,7 @@ def evalArithmeticExpression(expression, \
     expression = unroll(expression)
     
     if isinstance(expression, str):
-        if expression.isdigit():
+        if expression.isdigit() or (expression.startswith("-") and expression[1:].isdigit()):
             return int(expression)
         sv = None
         if expression in svLocals:

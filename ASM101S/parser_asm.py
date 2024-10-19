@@ -405,6 +405,45 @@ class asmParser(Parser):
         )
 
     @tatsumasu()
+    def _lfxiAll_(self):  # noqa
+        with self._optional():
+            self._register_()
+            self.add_last_node_to_name('R1')
+            self._token(',')
+
+            self._define(
+                [],
+                ['R1']
+            )
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._token('-2')
+                with self._option():
+                    self._token('-1')
+                with self._option():
+                    self._register_()
+                self._error(
+                    'expecting one of: '
+                    "'-1' '-2' <register>"
+                )
+        self.add_last_node_to_name('R2')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+
+        self._define(
+            [],
+            ['R1', 'R2']
+        )
+
+    @tatsumasu()
     def _rsAll_(self):  # noqa
         with self._choice():
             with self._option():
@@ -1159,11 +1198,11 @@ class asmParser(Parser):
     def _register_(self):  # noqa
         with self._choice():
             with self._option():
+                self._constant_()
+            with self._option():
                 self._identifier_()
             with self._option():
                 self._variable_()
-            with self._option():
-                self._constant_()
             self._error(
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\''
@@ -1627,6 +1666,9 @@ class asmSemantics:
         return ast
 
     def rrAll(self, ast):  # noqa
+        return ast
+
+    def lfxiAll(self, ast):  # noqa
         return ast
 
     def rsAll(self, ast):  # noqa
