@@ -22,7 +22,7 @@ from fieldParser import *
 from expressions import *
 from readListing import *
 
-currentDate = datetime.today().strftime('%d/%m/%y')
+currentDate = datetime.today().strftime('%m/%d/%y')
 
 # Specifics for the type of assembly language.
 if "--390" in sys.argv[1:]:
@@ -820,6 +820,7 @@ pageNumber = 0
 linesPerPage = 80
 linesThisPage = 1000
 mismatchCount = 0
+pageSeparator = "\f%s" % ('-'*120)
 for i in range(endLibraries, len(source)):
     properties = source[i]
     skip = False
@@ -836,7 +837,9 @@ for i in range(endLibraries, len(source)):
         skip = True
     if linesThisPage >= linesPerPage:
         pageNumber += 1
-        print("\f         %-100s  PAGE %4d" % (title, pageNumber))
+        if pageNumber > 1:
+            print(pageSeparator)
+        print("         %-100s  PAGE %4d" % (title, pageNumber))
         print(subtitle)
         linesThisPage = 0
         if skip:
@@ -967,10 +970,14 @@ def sortOrder(s):
             converted += c
     return converted
 
-pageNumber += 1
-print("\f%45s%-66sPAGE %4d" % ("", "CROSS REFERENCE", pageNumber))
-print("%-95s%16s %s" % ("SYMBOL    LEN    VALUE   DEFN   REFERENCES", program + " " + version, currentDate))
+linesThisPage = 1000
 for symbol in sorted(symtab, key = sortOrder):
+    if linesThisPage >= linesPerPage:
+        pageNumber += 1
+        print(pageSeparator)
+        print("%45s%-66sPAGE %4d" % ("", "CROSS REFERENCE", pageNumber))
+        print("%-95s%16s %s" % ("SYMBOL    LEN    VALUE   DEFN   REFERENCES", program + " " + version, currentDate))
+        linesThisPage = 0
     symProps = symtab[symbol]
     length = 1 # FIXME
     value = symProps["value"]
