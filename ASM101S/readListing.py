@@ -39,7 +39,10 @@ def readListing(filename):
     
     sect = None
     for line in source:
-        front = line[:21]
+        if len(line) > 20 and line[20] == " ":
+            front = line[:21]
+        else:
+            front = line[:30]
         back = line[36:36+71]
         col1 = back[:1]
         if col1 == "*":
@@ -73,6 +76,8 @@ def readListing(filename):
         
         # Is this a line that affects the what control section we're in?
         backFields = back.split()
+        if len(backFields) == 0:
+            continue
         if len(backFields) > 0 and col1 == " ":
             name = None
             operation = backFields[0]
@@ -98,6 +103,9 @@ def readListing(filename):
         
         # Now actually add the stuff to memory.
         for value in values:
+            if sect not in sects: ###DEBUG###
+                pass
+                pass
             while address >= len(sects[sect]["memory"]):
                 sects[sect]["memory"] = sects[sect]["memory"] + ([None]*chunkSize)
             if sects[sect]["memory"][address] not in [None, value]:

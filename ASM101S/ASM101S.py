@@ -386,7 +386,8 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             "inMacroDefinition": inMacroDefinition,
             "copy": copy,
             "printable": printable,
-            "depth": depth
+            "depth": depth,
+            "alignment": 2
             }
         source.append(properties)
         if skipCount > 0:
@@ -821,6 +822,7 @@ linesPerPage = 80
 linesThisPage = 1000
 mismatchCount = 0
 pageSeparator = "\f%s" % ('-'*120)
+literalPoolNumber = 0
 for i in range(endLibraries, len(source)):
     properties = source[i]
     skip = False
@@ -945,6 +947,21 @@ for i in range(endLibraries, len(source)):
                 properties["operation"],
                 str(properties["operand"]).rstrip())
             print("%-108s%s" % (mid, identification))
+        if properties["operation"] == "LTORG":
+            pool = literalPools[literalPoolNumber]
+            reordered = {}
+            for i in range(len(emptyPool), len(pool)):
+                offset = pool[1] + pool[3][i]
+                reordered[offset // 2] = pool[i]
+            for i in sorted(reordered):
+                prefix = "%05X " % i
+                attributes = reordered[i]
+                bytes = attributes["assembled"]
+                for j in range(attributes["L"]):
+                    prefix += "%02X" % bytes[j]
+                prefix = "%-50s" % prefix[:30]
+                print(prefix, attributes["operand"])
+            literalPoolNumber += 1
 
 def toEbcdic(s):
     converted = ""
@@ -997,6 +1014,7 @@ if comparisonSects != None:
     mismatchCount1 = 0
     for sect in comparisonSects:
         headerShown = False
+        amemory = sects[sect]["memory"]
         memory = comparisonSects[sect]["memory"]
         for address in range(len(memory)):
             if memory[address] == None:
@@ -1005,9 +1023,13 @@ if comparisonSects != None:
                 c = "H"
                 if memory[address] == 0xC9:
                     continue
+                if address < len(amemory) and memory[address] == amemory[address]:
+                    continue
             else:
                 c = "L"
                 if memory[address] == 0xFB:
+                    continue
+                if address < len(amemory) and memory[address] == amemory[address]:
                     continue
             if not headerShown:
                 print('Missing object code from section "%s":' % sect)

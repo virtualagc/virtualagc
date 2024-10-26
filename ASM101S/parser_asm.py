@@ -456,6 +456,33 @@ class asmParser(Parser):
                         [],
                         ['R1']
                     )
+                self._token('=')
+                self._lconstant_()
+                self.add_last_node_to_name('L2')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
+
+                self._define(
+                    [],
+                    ['L2', 'R1']
+                )
+            with self._option():
+                with self._optional():
+                    self._register_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+
+                    self._define(
+                        [],
+                        ['R1']
+                    )
                 self._arithmeticExpression_()
                 self.add_last_node_to_name('D2')
                 self._token('(')
@@ -537,7 +564,7 @@ class asmParser(Parser):
                 )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\''
+                '"B\'" "L\'" "X\'" \'*\' \'=\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<arithmeticExpression> <constant>'
                 '<identifier> <register> <subvar> <term>'
@@ -774,6 +801,249 @@ class asmParser(Parser):
             self._error(
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\' [0-9]+'
+            )
+
+    @tatsumasu()
+    def _lconstant_(self):  # noqa
+        with self._choice():
+            with self._option():
+                self._pattern('C')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                self._token("'")
+                with self._group():
+                    self._pattern("[^']*")
+
+                    def block4():
+                        self._token("''")
+                        self._pattern("[^']*")
+                    self._closure(block4)
+                self.add_last_node_to_name('C')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['C', 'L', 'T']
+                )
+            with self._option():
+                self._pattern('X')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                self._token("'")
+                self._pattern('[0-9A-F]+')
+                self.add_last_node_to_name('X')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['L', 'T', 'X']
+                )
+            with self._option():
+                self._pattern('B')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                self._token("'")
+                self._pattern('[0-1]+')
+                self.add_last_node_to_name('B')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['B', 'L', 'T']
+                )
+            with self._option():
+                self._pattern('F')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                with self._optional():
+                    self._token('S')
+                    self._pattern('-?[0-9]+')
+                    self.add_last_node_to_name('S')
+
+                    self._define(
+                        [],
+                        ['S']
+                    )
+                self._token("'")
+                self._floatNumber_()
+                self.add_last_node_to_name('F')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['F', 'L', 'S', 'T']
+                )
+            with self._option():
+                self._pattern('H')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                with self._optional():
+                    self._token('S')
+                    self._pattern('-?[0-9]+')
+                    self.add_last_node_to_name('S')
+
+                    self._define(
+                        [],
+                        ['S']
+                    )
+                self._token("'")
+                self._floatNumber_()
+                self.add_last_node_to_name('H')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['H', 'L', 'S', 'T']
+                )
+            with self._option():
+                self._pattern('E')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                with self._optional():
+                    self._token('S')
+                    self._pattern('-?[0-9]+')
+                    self.add_last_node_to_name('S')
+
+                    self._define(
+                        [],
+                        ['S']
+                    )
+                self._token("'")
+                self._floatNumber_()
+                self.add_last_node_to_name('E')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['E', 'L', 'S', 'T']
+                )
+            with self._option():
+                self._pattern('D')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                with self._optional():
+                    self._token('S')
+                    self._pattern('-?[0-9]+')
+                    self.add_last_node_to_name('S')
+
+                    self._define(
+                        [],
+                        ['S']
+                    )
+                self._token("'")
+                self._floatNumber_()
+                self.add_last_node_to_name('D')
+                self._token("'")
+
+                self._define(
+                    [],
+                    ['D', 'L', 'S', 'T']
+                )
+            with self._option():
+                self._pattern('Y')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                self._token('(')
+                self._identifier_()
+                self.add_last_node_to_name('T')
+                self._token(')')
+
+                self._define(
+                    [],
+                    ['L', 'T']
+                )
+            with self._option():
+                self._pattern('Z')
+                self.add_last_node_to_name('T')
+                with self._optional():
+                    self._token('L')
+                    self._pattern('[0-9]+')
+                    self.add_last_node_to_name('L')
+
+                    self._define(
+                        [],
+                        ['L']
+                    )
+                self._token('(')
+                self._token(',')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
+                self._token(',')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('A2')
+                self._token(')')
+
+                self._define(
+                    [],
+                    ['A1', 'A2', 'L', 'T']
+                )
+            self._error(
+                'expecting one of: '
+                'B C D E F H X Y Z'
             )
 
     @tatsumasu()
@@ -1145,9 +1415,7 @@ class asmParser(Parser):
                     self._pattern('[0-9]*')
                 with self._optional():
                     self._token('E')
-                    with self._optional():
-                        self._pattern('[-+]')
-                    self._pattern('[0-9]+')
+                    self._pattern('[-+]?[0-9]+')
             with self._option():
                 with self._optional():
                     self._pattern('[-+]')
@@ -1155,9 +1423,7 @@ class asmParser(Parser):
                 self._pattern('[0-9]+')
                 with self._optional():
                     self._token('E')
-                    with self._optional():
-                        self._pattern('[-+]')
-                    self._pattern('[0-9]+')
+                    self._pattern('[-+]?[0-9]+')
             self._error(
                 'expecting one of: '
                 "'.' [-+] [0-9]+"
@@ -1705,6 +1971,9 @@ class asmSemantics:
         return ast
 
     def constant(self, ast):  # noqa
+        return ast
+
+    def lconstant(self, ast):  # noqa
         return ast
 
     def char(self, ast):  # noqa

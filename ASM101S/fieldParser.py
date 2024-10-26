@@ -146,6 +146,7 @@ lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | register ) ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
 rsAll = 
+    | [ R1+: register ',' ] "=" L2+: lconstant ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression  ( / / | $ )
@@ -200,6 +201,17 @@ constant =
     | "L'" identifier
     | '*'
     ;
+lconstant = 
+    | T+: /C/ [ "L" L+: /[0-9]+/ ] "'" C+: ( /[^']*/ { "''" /[^']*/ } ) "'"
+    | T+: /X/ [ "L" L+: /[0-9]+/ ] "'" X+: /[0-9A-F]+/ "'"
+    | T+: /B/ [ "L" L+: /[0-9]+/ ] "'" B+: /[0-1]+/ "'" 
+    | T+: /F/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" F+: floatNumber "'"
+    | T+: /H/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" H+: floatNumber "'"
+    | T+: /E/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" E+: floatNumber "'"
+    | T+: /D/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" D+: floatNumber "'"
+    | T+: /Y/ [ "L" L+: /[0-9]+/ ] "(" T+: identifier ")"
+    | T+: /Z/ [ "L" L+: /[0-9]+/ ] "(" "," A1+: arithmeticExpression "," A2+: arithmeticExpression ")"
+    ;
 
 char = 
     | substringExpression 
@@ -240,8 +252,8 @@ quotedHexString = "'" /[A-F0-9]+/ "'" ;
 quotedBinaryString = "'" /[01]+/ "'" ;
 quotedFloatList = "'" floatNumber { ',' floatNumber } "'" ;
 floatNumber = 
-    | [ /[-+]/ ] /[0-9]+/ [ '.' /[0-9]*/ ] [ 'E' [ /[-+]/ ] /[0-9]+/ ] 
-    | [ /[-+]/ ] '.' /[0-9]+/ [ 'E' [ /[-+]/ ] /[0-9]+/ ] 
+    | [ /[-+]/ ] /[0-9]+/ [ '.' /[0-9]*/ ] [ 'E' /[-+]?[0-9]+/ ] 
+    | [ /[-+]/ ] '.' /[0-9]+/ [ 'E' /[-+]?[0-9]+/ ] 
     ;
 quotedFixedList = "'" fixedNumber { ',' fixedNumber } "'" ;
 fixedNumber = 

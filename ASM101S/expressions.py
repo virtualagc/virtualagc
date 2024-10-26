@@ -214,6 +214,35 @@ def evalArithmeticExpression(expression, \
     
     expression = unroll(expression)
     
+    if isinstance(expression, dict) and "T" in expression:
+        datatype = expression["T"][0]
+        expression = unroll(expression[datatype])
+        if datatype == "C":
+            error(properties, \
+                  "Cannot convert string '%s' to arithmetic expression" % expression)
+            return None
+        elif datatype == "B":
+            return int(expression, 2)
+        elif datatype == "X":
+            return int(expression, 16)
+        elif datatype in ["E", "D"]:
+            return float("".join(expression))
+        elif datatype in ["F", "H"]:
+            s = "".join(expression)
+            if s.isdigit():
+                return int(s)
+            return float(s)
+        elif datatype == "Y":
+            if expression not in symtab:
+                error(properties, "Symbol %s not found" % expression)
+                return None
+            return symtab[expression]["pos1"] // 2
+        elif datatype == "Z":
+            error(properties, "Literals =Z(...) not yet implemented")
+            return None
+        error(properties, "Literals =%s not implemented" % datatype)
+        return None
+            
     if isinstance(expression, str):
         if expression.isdigit() or (expression.startswith("-") and expression[1:].isdigit()):
             return int(expression)

@@ -75,7 +75,7 @@ to 24 bits in AP-101S, but prior to linking we don't know the actual addresses
 but only the offsets within control sections.  And for EXTRN symbols, we don't
 even know that much.  The values we use in computing arithmetical expressions
 are 64-bit signed integers like so:
-    hashcode + 32-bit offset For local symbols
+    hashcode + 32-bit offset For local symbols (offset is in halfwords)
     hashcode                 For EXTRN symbols
     32-bit number            For plain number
 For correctly-formed expressions (i.e., those not involving illegal combinations
@@ -434,27 +434,193 @@ for operation in fpOperations:
     else:
         fpOperationsSP.append(operation)
 
+# Alignment of various datatypes of so-called "literals" (=...).
+literalDatatypeAlignments = { "B": 2, "C": 2, "X": 2, "H": 2, "Y": 2, "Z": 2,
+                              "F": 4, "E": 4, "D": 8 }
+
 sects = {} # CSECTS and DSECTS.
 entries = set() # For `ENTRY`.
 extrns = set() # For `EXTRN`.
+rextrns = {} # For `EXTRN`
 symtab = {}
 metadata = {
     "sects": sects,
     "entries": entries,
     "extrns": extrns,
+    "rextrns": rextrns,
     "symtab": symtab,
     "passCount": 0
     }
+'''
+`literalPools` is intended to keep track of what the System/360 assembler 
+manual refers to as "literals" (vs what *I* refer to as literals), namely
+strings like "=1234", "=X'ABCD'", and so on.  In IBM World(TM), these appear
+within operands of instructions, but instead of treating them as immediate data,
+perhaps because the instruction doesn't accept immediate data, the assembler
+stores their values in a "literal pool" and uses their addresses in the code it
+generates for the instructions using them.  The probem with them from my 
+perspective is that the literal pools *always* follow (eventually!) the 
+instructions using the literals, so literals are always end up being forward 
+references.  Thus we need some way to track them until the literal pool is
+eventually formed.  There can be multiple literal pools, each defined by the
+appearance of a `LTORG` pseudo-op (marking the beginning of the pool), as well
+as the default literal pool at the end of the first CSECT.  All literals
+are stored in the literal pool defined by the *following* `LTORG`, or else in
+the default pool if there are any literals after the final `LTORG`.  Duplicate
+literals within any of these LTORG-to-LTORG intervals are stored only once in
+that literal pool.  However, duplicates across literal pools are stored in each
+of the corresponding literal pools.  Literals of the form "=A(...)", such as
+"=A(*+5)" are not present in Shuttle flight software and are not supported.
+If two literals have the same value but different attributes, then they are not
+considered duplicates.  For example, =X'0000001234' and =X'1234' have the same
+numerical values when considered as constants, but have different lenth 
+attributes, because they occupy different amounts of memory.
+
+There is one entry in `literalPools` for each literal pool, with the last one
+being the default pool.  Thus if there are N `LTORG` pseudo-ops, then there are
+N+1 entries.  Each entry is also a list.  The entries of those lists are:
+    0. The name of the CSECT containing the literal pool.
+    1. The byte offset within the CSECT at which the pool starts.
+    2. The alignment (8, 4, 2) of the literal pool itself
+    3. A list of the same length as `literalPools` itself, but only the entries
+       corresponding to the ones below are used, and are the address offsets 
+       into the literal pool of those entries.
+    4. The total size (in bytes) of the pool.
+    5+. Dictionaries, one for each unique literal in the section.
+The dictionaries just mentioned have the keys:
+    "value"        The integer, boolean, or string value of the literal.
+    "L"            The length attribute.
+    "T"            The type attribute.
+    etc.           (Any other attributes it eventually occurs to me are needed.)
+Note that when a new literal pool is started, it's always assigned to 
+CSECT "" (even if there isn't one) and an address within the CSECT of 0.
+These things are adjusted later when an `LTORG` or end of source is encountered
+to close out the literal pool.  The literals do not necessary appear in the
+pool in the same order as encounted in the source code.  Rather, the are sorted
+primarily in reverse order of alignment boundaries (8, 4, 2), and only 
+secondarily on the order encountered.  The offset list (item #3 above)
+is filled in after completion of the pass which discovers all of the literals and 
+assigns them to pools.  Naively, it may appear that it would make more sense 
+to add the address offsets as new key/value pairs in items 4+ themselves, but 
+that would render lookup impossible since you'd have to know the offset before
+performing the lookup. 
+'''
+emptyPool = ["", None, None, [], 0]
+literalPools = [copy.deepcopy(emptyPool)]
+# Call this whenever an `LTORG` is encountered.
+def ltorg(sect):
+    global literalPools, sects
+    literalPool = literalPools[-1]
+    #if len(literalPool) >= len(emptyPool):
+    literalPool[0] = sect
+    literalPool[1] = sects[sect]["pos1"]
+    literalPools.append(copy.deepcopy(emptyPool))
+# Call this at the end of the source code.
+def endOfSource():
+    global literalPools, sects
+    literalPool = literalPools[-1]
+    if len(literalPool) == len(emptyPool):
+        literalPools.pop()
+        return
+    for sect in sects:
+        if not sects[sect]["dsect"]:
+            literalPool[0] = sect
+            literalPool[1] = sects[sect]["pos1"]
+            return
+# Call this whenever a new literal is discovered in an operand.
+def addLiteral(attributeDict):
+    global literalPools
+    literalPool = literalPools[-1]
+    if attributeDict not in literalPool:
+        literalPool.append(copy.deepcopy(attributeDict))
+# Evaluates AST of what System/360 calls a literal, returning either an 
+# attributes dictionary for the literal pool or else None.
+hMax = 1 << 15
+fMax = 1 << 31
+def evalLiteralAttributes(properties, ast, symtab):
+    l2 = evalArithmeticExpression(ast["L2"], {}, properties, symtab, \
+                                  star=None, severity=0)
+    if l2 == None:
+        return None
+    ast = ast["L2"][0]
+    t = ast["T"][0]
+    scale = 1
+    if "S" in ast and len(ast["S"]) > 0:
+        scale = pow(2.0, -int(ast["S"]))
+    numerical = True
+    if t == "C":
+        numerical = False
+        value = value.replace("''", "'").replace("&&", "&")
+        l = len(value)
+        bytes = bytearray(l)
+        for i in range(l):
+            bytes[i] = toEbcdic(ord(value[i]))
+    elif t == "B":
+        l = (len(ast[t][0]) + 7) // 8
+        value = l2
+    elif t == "X":
+        l = (len(ast[t][0]) + 1) // 2
+        value = l2
+    elif t == "H":
+        l = 2
+        value = l2 * scale
+        if value > -1.0 and value < 1.0:
+            value *= hMax
+            if value >= hMax:
+                value = hMax - 1
+            elif value <= -hMax:
+                value = -hMax + 1
+        value = round(value)
+    elif t == "F":
+        l = 4
+        value = l2 * scale
+        if value > -1.0 and value < 1.0:
+            value *= fMax
+            if value >= fMax:
+                value = fMax - 1
+            elif value <= -fMax:
+                value = -fMax + 1
+        value = round(value)
+    elif t == "E":
+        l = 4
+        msw, lsw = toFloatIBM(l2 * scale)
+        value = msw
+    elif t == "D":
+        l = 8
+        msw, lsw = toFloatIBM(l2 * scale)
+        value = (msw << 32) | lsw
+    elif t == "Y":
+        l = 2
+        value = l2
+    elif t == "Z":
+        l = 4
+        value = l2
+    else:
+        error(properties, "Unknown constant-type specifier '%s'" % t)
+        return None
+    if numerical:
+        bytes = bytearray(l)
+        for i in range(l - 1, -1, -1):
+            bytes[i] = value & 0xFF
+            value = value >> 8
+    if "L" in ast and len(ast["L"]) > 0:
+        l = int(ast["L"][0])
+    operand = "=%s" % t
+    if len(ast["L"]) > 0:
+        operand += "L%s" % ast["L"][0]
+    if "S" in ast and len(ast["S"]) > 0:
+        operand += "S%s" % ast["S"][0]
+    operand += "'%s'" % "".join(ast[t][0])
+    attributes = { "value": l2, "T": t, "L": l, "operand": operand, "assembled": bytes }
+    return attributes
 
 #=============================================================================
 # `optimizeScratch` analyzes the "scratch" structures created during the 
 # "collect" pass, to resolve ambiguities in how those mnemonics which could be
 # either SRS instructions or RS instructions are coded.
 
-#shortening = 0
 def optimizeScratch():
-    global symtab, sects
-    #global shortening
+    global symtab, sects, literalPools
     
     def adjust(entry, scratch, properties, i):
         entry["length"] = 2
@@ -473,6 +639,7 @@ def optimizeScratch():
                         sym2["value"] -= 1
                         sym2["debug"] = "%05X" % sym2["address"]
     
+    literalPoolNumber = 0
     for sect in sects:
         scratch = sects[sect]["scratch"]
         previouslyDefined = {}
@@ -480,6 +647,8 @@ def optimizeScratch():
             entry = scratch[i]
             properties = entry["properties"]
             operation = properties["operation"]
+            if operation == "LTORG":
+                literalPoolNumber += 1
             if operation == "BCT":
                 pass
                 pass
@@ -496,10 +665,30 @@ def optimizeScratch():
             if ast == None or "X2" in ast:
                 entry["ambiguous"] = False
                 continue
-            d2 = evalArithmeticExpression(ast["D2"], {}, properties, \
-                                          symtab, \
-                                          symtab[sect]["value"] + entry["pos1"] // 2, \
-                                          severity=0)
+            if "L2" in ast:
+                l2 = evalArithmeticExpression(ast["L2"], {}, properties, \
+                                              symtab, \
+                                              symtab[sect]["value"] + entry["pos1"] // 2, \
+                                              severity=0)
+                attributes = evalLiteralAttributes(properties, ast, symtab)
+                if attributes == None:
+                    entry["ambiguous"] = False
+                    continue
+                literalPool = literalPools[literalPoolNumber]
+                try:
+                    index = literalPool.index(attributes)
+                except:
+                    error(properties, "Literal not in literal pool")
+                    entry["ambiguous"] = False
+                    continue
+                offset = literalPool[3][index] + literalPool[1]
+                d2 = symtab[literalPool[0]]["value"] + offset // 2
+                pass
+            elif "D2" in ast:
+                d2 = evalArithmeticExpression(ast["D2"], {}, properties, \
+                                              symtab, \
+                                              symtab[sect]["value"] + entry["pos1"] // 2, \
+                                              severity=0)
             if d2 == None:
                 entry["ambiguous"] = False
                 continue
@@ -528,7 +717,6 @@ def optimizeScratch():
             if b != None and d < 56:
                 adjust(entry, scratch, properties, i)
                 continue
-    #print("###DEBUG###", shortening)
     return
 
 #=============================================================================
@@ -558,7 +746,7 @@ Note that addresses are in units of bytes.
 ignore = { "TITLE", 
            "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
            "LCLC", "SETA", "SETB", "SETC", "AIF",
-           "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE" }
+           "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE", "SPON", "SPOFF" }
 hexDigits = "0123456789ABCDEF"
 
 '''
@@ -607,7 +795,7 @@ value rather than an address at all.
 dcBuffer = bytearray(1024)
 firstCSECT = None
 def generateObjectCode(source, macros):
-    global dcBuffer, firstCSECT
+    global dcBuffer, firstCSECT, literalPools
     
     #-----------------------------------------------------------------------
     # Setup
@@ -715,6 +903,8 @@ def generateObjectCode(source, macros):
         
         # Perform alignment.
         if alignment > 1:
+            if alignment > properties["alignment"]:
+                properties["alignment"] = alignment
             rem = sects[sect]["pos1"] % alignment
             if rem != 0:
                 if zero:
@@ -869,6 +1059,7 @@ def generateObjectCode(source, macros):
                 sects[sect]["pos1"] = 0
         sect = None
         using = [None]*8
+        literalPoolNumber = 0
         # Process shource code, line-by-line
         for propNum in range(len(source)):
             properties = source[propNum]
@@ -955,6 +1146,7 @@ def generateObjectCode(source, macros):
                                 "type": "EXTERNAL",
                                 "value": getHashcode(symbol)
                                 }
+                            rextrns[symtab[symbol]["value"]] = symbol
                 continue
             elif operation == "EQU":
                 if name == "":
@@ -975,8 +1167,8 @@ def generateObjectCode(source, macros):
                     error(properties, "Cannot evaluate EQU")
                     continue
                 if oldValue not in [None, v]:
-                    error(properties, "EQU value of %s changed: %d -> %d" % \
-                          (name, oldValue, value))
+                    error(properties, "EQU value of %s changed: %08X -> %08X" % \
+                          (name, oldValue, v))
                     continue
                 symtab[name] = {
                     "type": "EQU",
@@ -986,6 +1178,9 @@ def generateObjectCode(source, macros):
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
                 commonProcessing(4)
+                if collect and not asis:
+                    ltorg(sect)
+                literalPoolNumber += 1
                 continue
             elif operation in ["USING", "DROP"]:
                 ast = copy.deepcopy(properties["ast"])
@@ -1003,7 +1198,7 @@ def generateObjectCode(source, macros):
                         continue
                     else:
                         h = rlist.pop(0)
-                section, address = unhash(h)
+                        section, address = unhash(h)
                 for r in rlist:
                     if r == None or r < 0 or r > 7:
                         error(properties, "Bad register number")
@@ -1113,9 +1308,11 @@ def generateObjectCode(source, macros):
                     elif suboperandType in ["F", "H"]:
                         if suboperandType == "H":
                             length = 2
+                            multiplier = 1 << 15
                             mask = 0xFFFF
                         else:
                             length = 4
+                            multiplier = 1 << 31
                             mask = 0xFFFFFFFF
                         if lengthModifier != None:
                             commonProcessing(1)
@@ -1125,7 +1322,19 @@ def generateObjectCode(source, macros):
                             pass
                         if operation == "DC":
                             for exp in suboperand["v"]:
-                                v = int(exp[1]) & mask
+                                exp1 = exp[1]
+                                if isinstance(exp1, str) and exp1.isdigit():
+                                    v = int(exp1) & mask
+                                else:
+                                    # Expression is a tuple of strings  
+                                    # representing a non-integer number.
+                                    exp1 = "".join(exp1)
+                                    v = float(exp1) * multiplier
+                                    if v >= multiplier:
+                                        v = multiplier - 1
+                                    elif v <= -multiplier:
+                                        v = -multiplier + 1
+                                    v = int(v) & mask
                                 j = (length - 1) * 8
                                 for i in range(length):
                                     dcBuffer[dcBufferPtr] = (v >> j) & 0xFF
@@ -1159,7 +1368,14 @@ def generateObjectCode(source, macros):
                                 #    `value` -> string
                                 #    string -> Python float
                                 #    Python float -> IBM hex float
-                                v = float(''.join(astFlattenList(value[1:3])))
+                                try:
+                                    v = float(''.join(astFlattenList(value[1:3])))
+                                except:
+                                    try:
+                                        v = ''.join(value[1])
+                                    except:
+                                        error(properties, "Cannot evaluate constant")
+                                        v = 0.0
                                 msw, lsw = toFloatIBM(v)
                                 j = 24
                                 for i in range(4):
@@ -1227,7 +1443,7 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(2)
                     continue
-                if operation == "LFXI": ###DEBUG###
+                if operation == "BR": ###DEBUG###
                     pass
                     pass
                 data = bytearray(2)
@@ -1235,10 +1451,10 @@ def generateObjectCode(source, macros):
                 if ast != None:
                     # Make sure we trap some special mnemonics:
                     if operation in ["SPM", "NOPR"]:
-                        err = "R1" in ast
+                        err = len(ast["R1"]) > 0
                         r1 = 0
                     elif operation == "BR":
-                        err = "R1" in ast
+                        err = len(ast["R1"]) > 0
                         r1 = 7
                     else:
                         err, r1 = evalInstructionSubfield(properties, "R1", \
@@ -1282,14 +1498,28 @@ def generateObjectCode(source, macros):
                     dataSize = properties["length"]
                 if operation in branchAliases or operation in argsSRSonly:
                     dataSize = 2
+                ast = properties["ast"]
+                literalAttributes = None
+                if "L2" in ast:
+                    literalAttributes = evalLiteralAttributes(properties, ast, symtab)
+                    if literalAttributes == None:
+                        continue
+                    if collect and not asis:
+                        if literalAttributes not in literalPools[-1]:
+                            literalPools[-1].append(literalAttributes)
+                    elif literalAttributes in literalPools[literalPoolNumber]:
+                        pass
+                    else:
+                        error(properties, \
+                              "Literal has changed value: %s" % str(literalAttributes))
+                        continue
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "LA":
+                if operation == "BR":
                     pass # ***DEBUG***
                     pass
                 data = bytearray(dataSize)
-                ast = properties["ast"]
                 if ast != None:
                     err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
                     if r1 == None:
@@ -1307,7 +1537,17 @@ def generateObjectCode(source, macros):
                             # No matches, fall through to other types of instsructions.
                             pass
                     if r1 != None:
-                        err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
+                        if literalAttributes != None:
+                            # This can happen only if we already found that 
+                            # "L2" is in `ast`, and hence the 2nd operand is
+                            # a so-called "literal".
+                            pool = literalPools[literalPoolNumber]
+                            err = False
+                            #d2 = symtab[sect]["value"] + \
+                            #     (pool[1] + pool[3][pool.index(literalAttributes)]) // 2
+                            d2 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2
+                        else:
+                            err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                         if not err and d2 != None: 
                             properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
@@ -1409,8 +1649,10 @@ def generateObjectCode(source, macros):
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
-                                        dSRS = (dUnitizer - 1 + unhashedValue - (ic + 1)) // dUnitizer
-                                        dRSAM1 = (dUnitizer - 1 + unhashedValue - (ic + 2)) // dUnitizer
+                                        dSRSa = unhashedValue - (ic + 1)
+                                        forbiddenSRS = (dSRSa % dUnitizer) != 0
+                                        dSRS = (dSRSa + dUnitizer - 1) // dUnitizer
+                                        dRSAM1 = unhashedValue - (ic + 2)
                                         uUnhashedValue = (dUnitizer - 1 + unhashedValue) // dUnitizer
                                         ia = "@" in operation
                                         i =  "#" in operation
@@ -1423,7 +1665,7 @@ def generateObjectCode(source, macros):
                                             d1 = dRSAM1
                                         else:
                                             d = uUnhashedValue
-                                            d1 = uUnhashedValue
+                                            d1 = unhashedValue
                                             
                                         if operation in shiftOperations:
                                             data = data[:2]
@@ -1442,7 +1684,8 @@ def generateObjectCode(source, macros):
                                                      operation in fpOperationsSP) and \
                                                 not forceRS and \
                                                 (specifiedB2 or ib2 == 3) and \
-                                                d >= 0 and d < 56):
+                                                d >= 0 and d < 56 and \
+                                                not forbiddenSRS):
                                             # Is SRS.
                                             if operation == "BCTB": # Backward displacement
                                                 d = -d
@@ -1456,7 +1699,7 @@ def generateObjectCode(source, macros):
                                             #    d = uUnhashedValue
                                             data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
                                             data[1] = 0xFF & ((d << 2) | ib2)
-                                            if "adr1" in properties and \
+                                            if "adr1" in properties and ib2 == 3 and \
                                                     properties["adr1"] != d:
                                                 properties["adr2"] = d
                                         elif isConstant:
@@ -1489,19 +1732,29 @@ def generateObjectCode(source, macros):
                                         elif x2 == None and not ia and not i:
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
+                                            elif d2 in rextrns:
+                                                b2 = 3
+                                                d0 = 0
                                             else:
                                                 section, offset = unhash(d2)
                                                 if section in sects and \
                                                         "offset" in sects[section]:
                                                     d0 = offset + sects[section]["offset"] - sects[sect]["offset"]
                                                     b2 = 3
+                                                if b2 == None:
+                                                    error(properties, "Could not interpret operand")
+                                                    continue
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             data[1] = ((opcode & 0b11111) << 3) | b2
                                             data[2] = (d0 & 0xFF00) >> 8
                                             data[3] = d0 & 0xFF
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d0:
-                                                properties["adr2"] = d0
+                                            if operation in ["SVC"]:
+                                                # Ad hoc special case.  I think
+                                                properties["adr1"] = d0
+                                            else:
+                                                if "adr1" in properties and \
+                                                        properties["adr1"] != d0:
+                                                    properties["adr2"] = d0
                                         else:
                                             error(properties, "Count not interpret line as SRS or RS")
                 toMemory(data)
@@ -1530,7 +1783,7 @@ def generateObjectCode(source, macros):
                                 # rather an alias for LA (an RS instruction)
                                 # with special field values.
                                 op = argsSRSorRS["LA"]
-                                data[0] = (op << 3) | r2
+                                data[0] = ((op & 0b1111100000) >> 2) | r2
                                 data[1] = 0b11110011 # AM=0, B2=11
                                 
                             else:
@@ -1593,8 +1846,76 @@ def generateObjectCode(source, macros):
             continue
         
         if collect and not asis:
+            # Close out the final literal pool
+            endOfSource()
+            # Rearrange "literals" in the literal pool according to alignment,
+            # and figure out their offsets into the pools.
+            for pool in literalPools:
+                if len(pool) == len(emptyPool):
+                    continue
+                offset = 0
+                pool[2] = 2
+                pool[3] = [None] * len(pool)
+                pool[4] = 0
+                for alignment in [8, 4, 2, 1]:
+                    for i in range(len(emptyPool), len(pool)):
+                        if pool[3][i] != None:
+                            continue
+                        if (pool[i]["L"] % alignment) != 0:
+                            continue
+                        if alignment > pool[2]:
+                            pool[2] = alignment
+                        rem = offset % alignment
+                        if rem != 0:
+                            offset += alignment - rem
+                        pool[3][i] = offset
+                        offset += pool[i]["L"]
+                        if offset > pool[4]:
+                            pool[4] = offset
+                offset = sects[pool[0]]["used"]
+                rem = offset % pool[2]
+                if rem != 0:
+                    offset += pool[2] - rem
+                pool[1] = offset
+            # Eliminate ambiguity between SRS and RS instructions.
             for sect in sects:
                 optimizeScratch()
+            # The previous optimization may have shrunk CSECTs, which
+            # may require moving LTORGs downward in memory.  Unfortunately,
+            # the optimization operation above hasn't resulted in any free
+            # way for us to know the new CSECT sizes.  I just crudely 
+            # recalculate it by examining the entire source ... though it's not
+            # really a trivial calculation.
+            for sect in sects:
+                sects[sect]["used"] = 0
+                sects[sect]["pos1"] = 0
+            for properties in source:
+                try:
+                    # ###FIXME### This doesn't account for the possibility of 
+                    # `ORG` pseudo-ops.
+                    sect = properties["section"]
+                    alignment = properties["alignment"]
+                    pos1 = sects[sect]["pos1"]
+                    rem = pos1 % alignment
+                    if rem != 0:
+                        pos1 += alignment - rem
+                    pos1 += properties["length"]
+                    sects[sect]["pos1"] = pos1
+                    if pos1 > sects[sect]["used"]:
+                        sects[sect]["used"] = pos1
+                except:
+                    pass
+            for i in range(len(literalPools)):
+                pool = literalPools[i]
+                if len(pool) == len(emptyPool):
+                    continue
+                sect = pool[0]
+                usage = sects[sect]["used"]
+                offset = pool[1]
+                alignment = pool[2]
+                while offset - alignment >= usage:
+                    offset -= alignment
+                pool[1] = offset
         if asis:
             # For reasons I don't grasp, the assembler treats at least some
             # control sections as contiguous.  I don't grasp the rules for 
@@ -1613,9 +1934,34 @@ def generateObjectCode(source, macros):
                 if sects[sect]["dsect"]:
                     continue
                 sects[sect]["offset"] = lastOffset
-                lastOffset += sects[sect]["used"] // 2
+                offset = sects[sect]["used"]
+                for pool in literalPools:
+                    if len(pool) == len(emptyPool):
+                        continue
+                    if pool[0] == sect:
+                        offset = pool[1] + pool[4]
+                        break
+                lastOffset += offset // 2
                 lastOffset = (lastOffset + 1) & 0xFFFFFE
             pass
             pass
+    
+    # Let's append the literal pools to their CSECTs.
+    fill = [0xC9, 0xFB]
+    for pool in literalPools:
+        if len(pool) == len(emptyPool):
+            continue
+        assembled = sects[pool[0]]["memory"]
+        desiredLength = pool[1] + pool[4]
+        actualLength = len(assembled)
+        if actualLength < desiredLength:
+            assembled.extend(bytearray(desiredLength - actualLength))
+            for i in range(actualLength, desiredLength):
+                assembled[i] = fill[i & 1]
+        for i in range(len(emptyPool), len(pool)):
+            offset = pool[1] + pool[3][i]
+            lassembled = pool[i]["assembled"]
+            assembled[offset:offset+len(lassembled)] = lassembled
+        sects[pool[0]]["used"] = desiredLength
     
     return metadata
