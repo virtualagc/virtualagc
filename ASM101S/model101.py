@@ -17,6 +17,33 @@ from fieldParser import parserASM
 from ibmHex import *
 
 '''
+******************************************************************************
+                               *** Warning ***
+                               
+    There are several issues with the design of the assembly-language
+    itself, or at least with my understanding of how to deal with its issues,
+    that turn some aspects of the code-generator's algorithm in an ad hoc
+    mess of special cases, with no guarantee that the algorithm is generally
+    correct.
+    
+    A big culprit is the use of the same mnemonic in many cases for:
+    
+            SRS-type instruction (which assemble to halfwords)
+                                    vs
+            RS-type instructions of subtype AM=1 (assembling to fullwords)
+                                    vs
+            RS-type instructions of subtype AM=0 (assembling to fullwords)
+    
+    Another big culprit is the fact that *some* SRS-type instructions and 
+    RS-type subtype AM=0 instructions (but no AM=1 instructions) differ in 
+    their addressing of halfword operands vs fullword operands ... with 
+    *no* documented way to determine which instructions do and which do not.
+    
+    As I say, this makes the code that computes these distinctions a real,
+    huge mess.  It needs to be redesigned, but at present I see no obvious
+    way to do so.
+******************************************************************************
+
 Structure of the Code Generator
 -------------------------------
 
@@ -59,6 +86,9 @@ Thus `generateObjectCode` itself has 4 passes:
             attempting to determine them itself.
     Pass 3: Uses the results of passes 0 and 2 to actually generate the 
             object code and constant data stored in memory.
+
+Some of these passes have what might be thought of as "mini-passes" between
+them and the next pass, in order to resolve minor issues.  
 
 Pseudo-Addresses
 ----------------
