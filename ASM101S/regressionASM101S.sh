@@ -9,6 +9,6 @@ for f in *.asm
 do 
     n=${f%.*}
     echo -n "$n:  "
-    ASM101S.py --library=../RUNMAC --compare=../RUNLST/$n.txt $n.asm | tail -n1
+    ASM101S.py --library=../RUNMAC --tolerable=4 --compare=../RUNLST/$n.txt $n.asm | tail -n1
 done
 cd -

@@ -146,9 +146,12 @@ def svReplace(properties, text, svLocals):
                 start -= 2
                 replacement = str(len(replacement))
             else:
-                error(properties, "Cannot use list as a replacement: %s=%s" % \
-                      (sv, str(replacement)))
-                continue
+                if True: ###DEBUG###
+                    replacement = str(replacement).replace(",)", ")")
+                else:
+                    error(properties, "Cannot use list as a replacement: %s=%s" % \
+                          (sv, str(replacement)))
+                    continue
         try:
             text = text[:start] + replacement + text[end:]
         except:

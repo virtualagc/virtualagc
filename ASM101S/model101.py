@@ -213,6 +213,9 @@ Here are the rules to classify an instruction in this group.
   F.  If explicit B2 and ...
   
 '''
+srsFloor = 0
+srsCeiling = 56
+
 random.seed(16134176201611561415)
 hashcodeLookup = {}
 def getHashcode(symbol):
@@ -294,8 +297,9 @@ argsSRSonly = {
    "BL": 0b1100000000,   "BE": 0b1100000000,  "BNH": 0b1100000000, 
   "BNL": 0b1100000000,  "BNE": 0b1100000000,   "BO": 0b1100000000,   
    "BP": 0b1100000000,   "BM": 0b1100000000,   "BZ": 0b1100000000,  
-  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNZ": 0b1100000000,  
-  "BNO": 0b1100000000,  "BLE": 0b1100000000,   "BN": 0b1100000000, 
+  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNN": 0b1100000000,
+  "BNZ": 0b1100000000,  "BNO": 0b1100000000,  "BLE": 0b1100000000,   
+   "BN": 0b1100000000, 
  }
 shiftOperations = { # Special cases of SRS. Values are least-sig bits of code.
   "SLL": 0b00, "SLDL": 0b00, "SRA": 0b01, "SRDA": 0b01, 
@@ -450,8 +454,8 @@ knownInstructions = instructionsWithoutOperands | instructionsWithOperands
 # The field values are the masks.
 branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2, 
                  "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
-                 "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNZ": 3, "BNO": 6,
-                 "BLE": 6, "BN": 2}
+                 "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNN": 5, "BNZ": 3, 
+                 "BNO": 6, "BLE": 6, "BN": 2}
 
 # Floating-point RS/SRS mnemonics. 
 fpOperations = { "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", 
@@ -724,7 +728,7 @@ def optimizeScratch():
                 continue
             section, value = unhash(d2)
             if section == None:
-                if "B2" in ast and value >= 0 and value < 56:
+                if "B2" in ast and value >= srsFloor and value < srsCeiling:
                     adjust(entry, scratch, properties, i)
                     continue
                 entry["ambiguous"] = False
@@ -732,7 +736,7 @@ def optimizeScratch():
             # A special case:
             if operation == "BCT" and section == sect:
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
-                if d > 0 and d < 56:
+                if d > srsFloor and d < srsCeiling:
                     adjust(entry, scratch, properties, i)
                     continue
             # Check for the case `OPCODE R1,D2`, where `D2` is a location in
@@ -744,7 +748,7 @@ def optimizeScratch():
                     if u[2] < d:
                         d = u[2]
                         b = u[1]
-            if b != None and d < 56:
+            if b != None and d < srsCeiling:
                 adjust(entry, scratch, properties, i)
                 continue
     return
@@ -1217,13 +1221,16 @@ def generateObjectCode(source, macros):
                 if ast == None or "r" not in ast or not isinstance(ast["r"], list):
                     error(properties, "Cannot parse operand of " + operation)
                     continue
-                rlist = ast["r"]
+                rlist = copy.deepcopy(ast["r"])
                 for i in range(len(rlist)):
                     rlist[i] = evalArithmeticExpression(rlist[i], {}, \
                                                         properties, \
                                                         symtab, currentHash())
                 if operation == "USING":
-                    if len(rlist) < 1 or rlist[0] == None:
+                    if len(rlist) < 1:
+                        error(properties, "No value specified")
+                        continue
+                    if rlist[0] == None:
                         error(properties, "Bad location")
                         continue
                     else:
@@ -1496,7 +1503,8 @@ def generateObjectCode(source, macros):
                         if operation in ["LFXI", "LFLI"]:
                             lolim = 0
                             uplim = 15
-                            r2 += 2
+                            if operation == "LFXI":
+                                r2 += 2
                         if not err and r2 >= lolim and r2 <= uplim:
                             op = argsRR[operation]
                             data[0] = ((op & 0b111110) << 2) | r1
@@ -1546,8 +1554,8 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "BR":
-                    pass # ***DEBUG***
+                if operation == "B":
+                    pass # ***DEBUG*** ***TRAP***
                     pass
                 data = bytearray(dataSize)
                 if ast != None:
@@ -1557,7 +1565,7 @@ def generateObjectCode(source, macros):
                         # and an implied R1 is used instead.
                         if operation in ["SHW", "SHW@", "SHW#", "SHW@#"]:
                             r1 = 2
-                        elif operation == "SVC":
+                        elif operation in ["SVC", "ZH"]:
                             r1 = 1
                         elif operation in ["SSM", "TS", "LDM", "STDM"]:
                             r1 = 0
@@ -1649,7 +1657,8 @@ def generateObjectCode(source, macros):
                                                 forceRS = True
                                         else:
                                             d2 = newd2
-                                    if b2 != None and (b2 < 0 or b2 > 3):
+                                    if b2 != None and (b2 < 0 or b2 > 3) and \
+                                            operation not in shiftOperations:
                                         error(properties, "B2 out of range")
                                         done = True
                                     # `forceAM0` is purely empirical.
@@ -1679,10 +1688,18 @@ def generateObjectCode(source, macros):
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
-                                        dSRSa = unhashedValue - (ic + 1)
-                                        forbiddenSRS = (dSRSa % dUnitizer) != 0
+                                        isNumberD2 = False
+                                        rawD2 = unroll(ast["D2"])
+                                        if isinstance(rawD2, str) and rawD2.isdigit():
+                                            isNumberD2 = True
+                                        if isNumberD2:
+                                            dSRSa = unhashedValue
+                                            dRSAM1 = unhashedValue
+                                        else:
+                                            dSRSa = unhashedValue - (ic + 1)
+                                            dRSAM1 = unhashedValue - (ic + 2)
                                         dSRS = (dSRSa + dUnitizer - 1) // dUnitizer
-                                        dRSAM1 = unhashedValue - (ic + 2)
+                                        forbiddenSRS = (dSRSa % dUnitizer) != 0
                                         uUnhashedValue = (dUnitizer - 1 + unhashedValue) // dUnitizer
                                         ia = "@" in operation
                                         i =  "#" in operation
@@ -1699,27 +1716,31 @@ def generateObjectCode(source, macros):
                                             
                                         if operation in shiftOperations:
                                             data = data[:2]
+                                            if b2 == None:
+                                                d = d2
+                                            else:
+                                                d = 56 + b2
                                             data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            data[1] = 0xFF & ((d2 << 2) | shiftOperations[operation])
+                                            data[1] = 0xFF & ((d << 2) | shiftOperations[operation])
                                             if "adr1" in properties:
                                                 properties.pop("adr1")
                                             properties["adr2"] = d2 & 0x3F
                                         elif operation == "LA" and \
                                                 x2 == None and b2 != None \
-                                                and d2 >= 0 and d2 < 56:
+                                                and d2 >= srsFloor and d2 < srsCeiling:
                                             data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
                                             data[1] = 0xFF & ((d2 << 2) | ib2)
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
-                                                not forceRS and \
+                                                not forceRS and x2 == None and \
                                                 (specifiedB2 or ib2 == 3) and \
-                                                d >= 0 and d < 56 and \
+                                                d >= srsFloor and d < srsCeiling and \
                                                 not forbiddenSRS):
                                             # Is SRS.
                                             if operation == "BCTB": # Backward displacement
                                                 d = -d
-                                            if d >= 56:
+                                            if d >= srsCeiling:
                                                 error(properties, "SRS displacement out of range")
                                             if len(data) == 4: ###DEBUG###
                                                 pass

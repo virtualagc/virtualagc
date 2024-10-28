@@ -195,7 +195,7 @@ subvar = sv ;
 sequenceSymbol = /[.][@#$A-Z][@#$A-Z0-9]*/ ;
 
 constant = 
-    | /[0-9]+/ 
+    | /-?[0-9]+/ 
     | "X'" /[0-9A-F]+/ "'"
     | "B'" /[0-1]+/ "'" 
     | "L'" identifier

@@ -243,9 +243,21 @@ def evalMacroArgument(properties, suboperand):
     # This is the case of a non-positional parameter that's just a bare,
     # unquoted string.
     elif isinstance(suboperand, (list,tuple)) and len(suboperand) == 3  \
-                and suboperand[1] == "=" and \
-                isinstance(suboperand[2], str):
+            and suboperand[1] == "=" and \
+            isinstance(suboperand[2], str):
         return ("&" + suboperand[0]),suboperand[2]
+    # Non-positional parameter that's a list.
+    elif isinstance(suboperand, (list, tuple)) and len(suboperand) == 5 and \
+            suboperand[1] == "=" and suboperand[2] == "(" and \
+            isinstance(suboperand[3], tuple) and suboperand[4] == ")":
+        parmName = "&" + suboperand[0]
+        replacementList = []
+        if len(suboperand[3]) > 0:
+            replacementList.append(suboperand[3][0])
+            if len(suboperand[3]) > 1:
+                for e in suboperand[3][1]:
+                    replacementList.append(e[1])
+            return parmName,tuple(replacementList)
     # This is the case of a positional parameter that's a quoted string.
     elif isinstance(suboperand, tuple) and \
             len(suboperand) == 4 and \

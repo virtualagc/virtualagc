@@ -566,9 +566,9 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\' \'=\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '<arithmeticExpression> <constant>'
-                '<identifier> <register> <subvar> <term>'
-                '<variable> [0-9]+'
+                '-?[0-9]+ <arithmeticExpression>'
+                '<constant> <identifier> <register>'
+                '<subvar> <term> <variable>'
             )
 
     @tatsumasu()
@@ -677,9 +677,8 @@ class asmParser(Parser):
                         )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\''
+                '"B\'" "L\'" "X\'" \'*\' -?[0-9]+'
                 '<arithmeticExpression> <constant> <term>'
-                '[0-9]+'
             )
 
     @tatsumasu()
@@ -784,7 +783,7 @@ class asmParser(Parser):
     def _constant_(self):  # noqa
         with self._choice():
             with self._option():
-                self._pattern('[0-9]+')
+                self._pattern('-?[0-9]+')
             with self._option():
                 self._token("X'")
                 self._pattern('[0-9A-F]+')
@@ -800,7 +799,7 @@ class asmParser(Parser):
                 self._token('*')
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\' [0-9]+'
+                '"B\'" "L\'" "X\'" \'*\' -?[0-9]+'
             )
 
     @tatsumasu()
@@ -1473,8 +1472,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '<constant> <identifier> <subvar> <sv>'
-                '<variable> [0-9]+'
+                '-?[0-9]+ <constant> <identifier>'
+                '<subvar> <sv> <variable>'
             )
 
     @tatsumasu()
@@ -1490,8 +1489,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '<constant> <identifier> <subvar> <sv>'
-                '<variable> [0-9]+'
+                '-?[0-9]+ <constant> <identifier>'
+                '<subvar> <sv> <variable>'
             )
 
     @tatsumasu()
@@ -1557,8 +1556,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'(\' \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '<constant> <identifier> <subvar> <sv>'
-                "<variable> [0-9]+ [NKLSI]'"
+                '-?[0-9]+ <constant> <identifier>'
+                "<subvar> <sv> <variable> [NKLSI]'"
             )
 
     @tatsumasu()
