@@ -196,6 +196,9 @@ def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto):
     # macro-invocation lines.  No replacements of symbolice variables, nor
     # expansion of macros, has yet been performed or will be performed here.
     operand = ""
+    if operation == "QCED": ###DEBUG###
+        pass
+        pass
     if inMacroProto:
         inMacroProto = False
         success, field, skipped = joinOperand(lines, lineNumber, j, proto=True)
@@ -277,9 +280,17 @@ def evalMacroArgument(properties, suboperand):
                 for e in suboperand[1][1]:
                     replacementList.append(e[1])
             return None,tuple(replacementList)
-    # Don't know what this is.  Could be a coding error, but probably just
-    # something I haven't implemented yet.
     else:
+        # There are some replacements, like "4(R3)" that will parses as a
+        # tuple of strings, such as (for the example just given)
+        # ( '4', '(', 'R3', ')' ).
+        try:
+            s = "".join(suboperand)
+            return None,s
+        except:
+            pass
+        # Don't know what this is.  Could be a coding error, but probably just
+        # something I haven't implemented yet.
         error(properties, \
                "Implementation error in replacement argument " + \
                str(suboperand))
@@ -381,25 +392,28 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         line = "%-80s" % line.rstrip()[:80]
         text = line[:71]
         properties = {
+            "section": None,
+            "pos1": None,
+            "length": None,
+            "alignment": 2,
+            "text": text,
+            "name": "",
+            "operation": "",
+            "operand": "",
             "file": filename,
             "macro": macroname,
             "lineNumber": lineNumber + 1,
-            "text": text,
             "continues": (line[71] != " "),
             "identification": line[72:],
             "empty": (text.strip() == ""),
             "fullComment": line.startswith("*"),
             "dotComment": line.startswith(".*"),
-            "name": "",
-            "operation": "",
-            "operand": "",
             "endComment": "",
             "errors": [],
             "inMacroDefinition": inMacroDefinition,
             "copy": copy,
             "printable": printable,
             "depth": depth,
-            "alignment": 2
             }
         source.append(properties)
         if skipCount > 0:
@@ -696,6 +710,7 @@ svGlobals["&SYSPARM"] = "PASS"
 endLibraries = 0 # First line in `source` following macro-library definitions.
 comparisonSects = None
 comparisonFile = None
+sourceFileNames = []
 
 for parm in sys.argv[1:]:
     if parm.startswith("--library="):
@@ -720,6 +735,7 @@ for parm in sys.argv[1:]:
         if not parm.endswith(".asm"):
             print("Source-code filenames must end with .asm", file=sys.stderr)
             sys.exit(1)
+        sourceFileNames.append(parm[:-4])
         if objectFileName == None:
             objectFileName == parm[:-4] + ".obj"
         readSourceFile(parm, svGlobalLocals, sequenceGlobalLocals, \
@@ -808,7 +824,8 @@ if maxSeverity > tolerableSeverity:
         print("No closing MEND for MACRO")
     print("Assembly aborted.  Fix the syntax errors or use --tolerable=N.")
     print("Search for ================ to see the marked errors.")
-    print("%d error(s) detected, max severity %d." % (errorCount, maxSeverity))
+    print("%s: %d error(s) detected, max severity %d." % \
+          (",".join(sourceFileNames), errorCount, maxSeverity))
     sys.exit(1)
 
 #==============================================================================
@@ -886,11 +903,12 @@ for i in range(endLibraries, len(source)):
         section = None
         comparisonMemory = None
         prefix = ""
-        if "section" in properties and "offset" in sects[properties["section"]]:
+        if "section" in properties and properties["section"] in sects \
+                and "offset" in sects[properties["section"]]:
             offset = sects[properties["section"]]["offset"]
         else:
             offset = 0
-        if "pos1" in properties:
+        if "pos1" in properties and properties["pos1"] != None:
             address = properties["pos1"]
             section = properties["section"]
             if comparisonSects != None and section in comparisonSects:
@@ -1048,8 +1066,8 @@ if comparisonSects != None:
                 headerShown = True
             print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
             mismatchCount1 += 1
-    print("%d bytes mismatched and %d bytes missing in generated code" % \
-          (mismatchCount, mismatchCount1))
+    print("%s: %d bytes mismatched and %d bytes missing in generated code" % \
+          (",".join(sourceFileNames), mismatchCount, mismatchCount1))
     
 if False:
     import pprint

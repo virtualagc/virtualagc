@@ -176,8 +176,8 @@ class asmParser(Parser):
                 '   * "\'" \'(\' \',\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<char> <identifier> <quotedString>'
-                '<replacement> <substringExpression> [^'
-                ']+ [^, ()]*'
+                '<replacement> <substringExpression>'
+                '[0-9]+ [^ ]+ [^, ()]*'
             )
 
     @tatsumasu()
@@ -379,7 +379,7 @@ class asmParser(Parser):
     @tatsumasu()
     def _rrAll_(self):  # noqa
         with self._optional():
-            self._register_()
+            self._arithmeticExpression_()
             self.add_last_node_to_name('R1')
             self._token(',')
 
@@ -387,7 +387,7 @@ class asmParser(Parser):
                 [],
                 ['R1']
             )
-        self._register_()
+        self._arithmeticExpression_()
         self.add_last_node_to_name('R2')
         with self._group():
             with self._choice():
@@ -576,7 +576,7 @@ class asmParser(Parser):
         self._register_()
         self.add_last_node_to_name('R2')
         self._token(',')
-        self._immediate_()
+        self._arithmeticExpression_()
         self.add_last_node_to_name('I1')
         with self._group():
             with self._choice():
@@ -595,28 +595,54 @@ class asmParser(Parser):
 
     @tatsumasu()
     def _siAll_(self):  # noqa
-        self._arithmeticExpression_()
-        self.add_last_node_to_name('D2')
-        self._token('(')
-        self._register_()
-        self.add_last_node_to_name('B2')
-        self._token('),')
-        self._immediate_()
-        self.add_last_node_to_name('I1')
-        with self._group():
-            with self._choice():
-                with self._option():
-                    self._pattern(' ')
-                with self._option():
-                    self._check_eof()
-                self._error(
-                    'expecting one of: '
-                )
+        with self._choice():
+            with self._option():
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
+                self._token('(')
+                self._register_()
+                self.add_last_node_to_name('B2')
+                self._token('),')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('I1')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
 
-        self._define(
-            [],
-            ['B2', 'D2', 'I1']
-        )
+                self._define(
+                    [],
+                    ['B2', 'D2', 'I1']
+                )
+            with self._option():
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
+                self._token(',')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('I1')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
+
+                self._define(
+                    [],
+                    ['D2', 'I1']
+                )
+            self._error(
+                'expecting one of: '
+                '<arithmeticExpression> <term>'
+            )
 
     @tatsumasu()
     def _mscAll_(self):  # noqa
@@ -1771,6 +1797,31 @@ class asmParser(Parser):
             with self._option():
                 self._identifier_()
                 self._token('=')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern('[0-9]+')
+                        with self._option():
+                            self._identifier_()
+                        self._error(
+                            'expecting one of: '
+                            '<identifier> [0-9]+'
+                        )
+                self._token('(')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern('[0-9]+')
+                        with self._option():
+                            self._identifier_()
+                        self._error(
+                            'expecting one of: '
+                            '<identifier> [0-9]+'
+                        )
+                self._token(')')
+            with self._option():
+                self._identifier_()
+                self._token('=')
                 self._token('(')
                 self._list_()
                 self._token(')')
@@ -1780,6 +1831,29 @@ class asmParser(Parser):
                 self._pattern('[^, ()]*')
             with self._option():
                 self._char_()
+            with self._option():
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern('[0-9]+')
+                        with self._option():
+                            self._identifier_()
+                        self._error(
+                            'expecting one of: '
+                            '<identifier> [0-9]+'
+                        )
+                self._token('(')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern('[0-9]+')
+                        with self._option():
+                            self._identifier_()
+                        self._error(
+                            'expecting one of: '
+                            '<identifier> [0-9]+'
+                        )
+                self._token(')')
             with self._option():
                 self._token('(')
                 self._list_()
@@ -1791,7 +1865,7 @@ class asmParser(Parser):
                 '"\'" \'(\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<char> <identifier> <quotedString>'
-                '<substringExpression> [^, ()]*'
+                '<substringExpression> [0-9]+ [^, ()]*'
             )
 
     @tatsumasu()

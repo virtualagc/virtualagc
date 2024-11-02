@@ -141,7 +141,7 @@ subOperation =
     ;
 
 # Operand field for an RR instruction.
-rrAll = [ R1+: register ',' ] R2+: register ( / / | $ ) ;
+rrAll = [ R1+: arithmeticExpression ',' ] R2+: arithmeticExpression ( / / | $ ) ;
 lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | register ) ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
@@ -153,10 +153,13 @@ rsAll =
     ;
 
 # Operand field for an RI instruction.
-riAll = R2+: register ',' I1+: immediate  ( / / | $ ) ;
+riAll = R2+: register ',' I1+: arithmeticExpression  ( / / | $ ) ;
 
 # Operand field for an SI instruction.
-siAll = D2+: arithmeticExpression '(' B2+: register '),' I1+: immediate  ( / / | $ ) ;
+siAll = 
+    | D2+: arithmeticExpression '(' B2+: register '),' I1+: arithmeticExpression  ( / / | $ ) 
+    | D2+: arithmeticExpression "," I1+: arithmeticExpression  ( / / | $ ) 
+    ;
 
 # Operand field for an MSC instruction.
 mscAll = 
@@ -327,9 +330,11 @@ listItem =
 
 replacement = 
     | identifier "=" "'" /[^']*/ { "''" /[^;]*/ } "'"
+    | identifier "=" ( /[0-9]+/ | identifier ) "(" ( /[0-9]+/ | identifier ) ")"
     | identifier '=' '(' list ')'
     | identifier '=' /[^, ()]*/
     | char
+    | ( /[0-9]+/ | identifier ) "(" ( /[0-9]+/ | identifier ) ")"
     | '(' list ')'
     | /[^, ()]*/
     ;
@@ -444,12 +449,14 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
             break
         skipCount += 1
         line = lines[index]
+        if "F0,F2" in line:
+            pass
         if done:
             pass
         elif continuation:
-            operand = operand + line[15:71]
+            operand = operand.rstrip("\r\n") + line[15:71]
         else:
-            operand = line[column:71]
+            operand = line[column:71].rstrip("\r\n")
         if len(line) < 72:
             continuation = False
         else:

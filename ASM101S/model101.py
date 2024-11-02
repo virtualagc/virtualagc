@@ -215,6 +215,7 @@ Here are the rules to classify an instruction in this group.
 '''
 srsFloor = 0
 srsCeiling = 56
+#srsCeiling = 55
 
 random.seed(16134176201611561415)
 hashcodeLookup = {}
@@ -237,240 +238,27 @@ def unhash(result):
     if buffer == 0 and hashcode in hashcodeLookup:
         return hashcodeLookup[hashcode], offset
     return None, None
-
-#=============================================================================
-# Various tables or the instruction set.
+# Similar to `unhash`, but uses the `USING` list, and returns a pair
+# B2,D2 (or None,None in case of error).
+def unUsing(using, hashed):
+    b2 = None
+    d2 = None
+    for i in range(len(using)):
+        u = using[i]
+        if u == None:
+            continue
+        j = hashed - u[0]
+        if j < 0 or j > 0xFFFFFF:
+            continue
+        if d2 == None or j < d2:
+            b2 = i
+            d2 = j
+    return b2,d2
 
 ap101 = True
 system390 = False
 
-# First, the CPU instructions, categorized by instruction types, accompanied
-# by opcodes.  When the opcode is given as -1, it's a special case in terms
-# of how the code is generated.  (There are other special cases, though, which
-# are not so-marked, such as almost all conditional branches..)
-
-# The 6-bit numerical codes are the 5-bit OP field, suffixed by the 1-bit OPX
-# field.  Though technically considered RR instructions, the mnemonics
-# LFXI, LFLI, SPM, BR, and NOPR are special, in that they either
-# are encoded slightly differently or else are aliases and accept an altered 
-# syntax from the others.
-argsRR = {   "AR": 0b000000,   "CR": 0b000100,   "CBL": 0b000011,   
-             "DR": 0b010010,  "XUL": 0b000001,    "LR": 0b000110,  
-            "LCR": 0b111011, "LFXI": 0b101110,    "MR": 0b010000,    
-             "SR": 0b000010, "BALR": 0b111000,   "BCR": 0b110000, 
-           "BCRE": 0b110001, "BCTR": 0b110100,  "BVCR": 0b110010, 
-            "NCT": 0b111001,   "NR": 0b001000,    "XR": 0b011100,   
-             "OR": 0b001010,  "SUM": 0b100111,  "AEDR": 0b010101,  
-            "AER": 0b010100, "CEDR": 0b000111,   "CER": 0b010011, 
-           "CVFX": 0b001110, "CVFL": 0b001111,  "DEDR": 0b000101, 
-            "DER": 0b011010,  "LER": 0b011110,  "LECR": 0b011111, 
-           "LFXR": 0b001001, "LFLI": 0b100010,  "LFLR": 0b001011,  
-           "MEDR": 0b001101,  "MER": 0b011000,  "SEDR": 0b010111, 
-            "SER": 0b010110,  "MVH": 0b011011,   "SPM": 0b110011, 
-           "SRET": 0b100101, "LXAR": 0b010001, "STXAR": 0b101001, 
-            "ICR": 0b110110,   "BR": 0b110000,  "NOPR": 0b110000,  
-           "LACR": 0b111011,   "PC": 0b011011 }
-
-# The 10-bit numerical codes are the codes in encoded positions 0-4 (in both
-# the RS and SRS forms of the instructin) suffixed by the bits in positions
-# 8-12 (of the RS form, but are unused in the SRS forms.
-argsSRSandRS = {
-   "A": 0b0000011110, "AH": 0b1000011110,   "C": 0b0001011110, 
-  "CH": 0b1001011110,  "D": 0b0100111110, "IAL": 0b1110011111, 
-   "L": 0b0001111110, "LA": 0b1110111110,  "LH": 0b1001111110, 
-   "M": 0b0100011110, "MH": 0b1010111110,  "ST": 0b0011011110, 
- "STH": 0b1011111110,  "S": 0b0000111110,  "SH": 0b1000111110, 
-  "TD": 0b1010011110, "BC": 0b1100011110,   "N": 0b0010011110, 
-   "X": 0b0111011110,  "O": 0b0010111110, "SHW": 0b1010011110,
-  "TH": 0b1010011110, "ZH": 0b1010011110,  "AE": 0b0101011110, 
-  "DE": 0b0110111110, "LE": 0b0111111110,  "ME": 0b0110011110,  
-  "SE": 0b0101111110,
- "STE": 0b0011111110,   
- }
-
-argsSRSonly = {
-  "BCB": 0b1101100000,  "BCF": 0b1101100000, "BCTB": 0b1101100000, 
- "BVCF": 0b1101100000,  "SLL": 0b1111000000, "SLDL": 0b1111100000, 
-  "SRA": 0b1111000000, "SRDA": 0b1111100000, "SRDL": 0b1111100000,  
-  "SRL": 0b1111000000,  "SRR": 0b1111000000, "SRDR": 0b1111100000,
-    "B": 0b1100000000,  "NOP": 0b1100000000,   "BH": 0b1100000000,   
-   "BL": 0b1100000000,   "BE": 0b1100000000,  "BNH": 0b1100000000, 
-  "BNL": 0b1100000000,  "BNE": 0b1100000000,   "BO": 0b1100000000,   
-   "BP": 0b1100000000,   "BM": 0b1100000000,   "BZ": 0b1100000000,  
-  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNN": 0b1100000000,
-  "BNZ": 0b1100000000,  "BNO": 0b1100000000,  "BLE": 0b1100000000,   
-   "BN": 0b1100000000, 
- }
-shiftOperations = { # Special cases of SRS. Values are least-sig bits of code.
-  "SLL": 0b00, "SLDL": 0b00, "SRA": 0b01, "SRDA": 0b01, 
-  "SRDL": 0b10, "SRL": 0b10, "SRR": 0b11, "SRDR": 0b11
-}
-
-argsRSonly = { 
-   "AST": 0b0000011111,    "IHL": 0b1000011111,     "LM": 0b1100111111, 
-   "MIH": 0b1001111111,    "STM": 0b1100111111,    "SST": 0b0000111111, 
-   "BAL": 0b1110011110,    "BIX": 0b1101111110,    "BCT": 0b1101011110, 
-   "BCV": 0b1100111110,    "NST": 0b0010011111,    "XST": 0b0111011111, 
-   "OST": 0b0010111111,    "AED": 0b0101011111,    "CED": 0b0001111111, 
-    "CE": 0b0100111111,    "DED": 0b0001011111,    "LED": 0b0111111111, 
-   "MVS": 0b0110011111,    "MED": 0b0011011111,    "SED": 0b0101111111, 
-  "STED": 0b0011111111,                            "DIAG": 0b1100011111, 
-  "ISPB": 0b1110111111,    "LPS": 0b1100111111,    "SSM": 0b1000111111, 
-  "SCAL": 0b1101011111,    "SVC": 0b1100111111,     "TS": 0b1011111111, 
-   "LXA": 0b0100011111,    "LDM": 0b0110111111,   "STXA": 0b1010011111, 
-  "STDM": 0b1001011111,     "A@": 0b0000011110,    "A@#": 0b0000011110, 
-    "A#": 0b0000011110,    "AE@": 0b0101011110,   "AE@#": 0b0101011110, 
-   "AE#": 0b0101011110,   "AED@": 0b0101011111,  "AED@#": 0b0101011111, 
-  "AED#": 0b0101011111,    "AH@": 0b1000011110,   "AH@#": 0b1000011110, 
-   "AH#": 0b1000011110,   "AST@": 0b0000011111,  "AST@#": 0b0000011111, 
-  "AST#": 0b0000011111,     "B@": 0b1100000000,    "B@#": 0b1100000000, 
-    "B#": 0b1100000000,   "BAL@": 0b1110011110,  "BAL@#": 0b1110011110, 
-  "BAL#": 0b1110011110,    "BC@": 0b1100011110,   "BC@#": 0b1100011110, 
-   "BC#": 0b1100011110,   "BCT@": 0b1101011110,  "BCT@#": 0b1101011110, 
-  "BCT#": 0b1101011110,   "BCV@": 0b1100111110,  "BCV@#": 0b1100111110, 
-  "BCV#": 0b1100111110,    "BE@": 0b1100000000,   "BE@#": 0b1100000000, 
-   "BE#": 0b1100000000,    "BH@": 0b1100000000,   "BH@#": 0b1100000000, 
-   "BH#": 0b1100000000,   "BIX@": 0b1101111110,  "BIX@#": 0b1101111110, 
-  "BIX#": 0b1101111110,    "BL@": 0b1100000000,   "BL@#": 0b1100000000, 
-   "BL#": 0b1100000000,   "BLE@": 0b1100000000,  "BLE@#": 0b1100000000, 
-  "BLE#": 0b1100000000,    "BM@": 0b1100000000,   "BM@#": 0b1100000000, 
-   "BM#": 0b1100000000,    "BN@": 0b1100000000,   "BN@#": 0b1100000000, 
-   "BN#": 0b1100000000,   "BNE@": 0b1100000000,  "BNE@#": 0b1100000000, 
-  "BNE#": 0b1100000000,   "BNH@": 0b1100000000,  "BNH@#": 0b1100000000, 
-  "BNH#": 0b1100000000,   "BNL@": 0b1100000000,  "BNL@#": 0b1100000000, 
-  "BNL#": 0b1100000000,   "BNM@": 0b1100000000,  "BNM@#": 0b1100000000, 
-  "BNM#": 0b1100000000,   "BNO@": 0b1100000000,  "BNO@#": 0b1100000000, 
-  "BNO#": 0b1100000000,   "BNP@": 0b1100000000,  "BNP@#": 0b1100000000, 
-  "BNP#": 0b1100000000,   "BNZ@": 0b1100000000,  "BNZ@#": 0b1100000000, 
-  "BNZ#": 0b1100000000,    "BO@": 0b1100000000,   "BO@#": 0b1100000000, 
-   "BO#": 0b1100000000,    "BP@": 0b1100000000,   "BP@#": 0b1100000000, 
-   "BP#": 0b1100000000,    "BZ@": 0b1100000000,   "BZ@#": 0b1100000000, 
-   "BZ#": 0b1100000000,     "C@": 0b0001011110,    "C@#": 0b0001011110, 
-    "C#": 0b0001011110,    "CE@": 0b0100111111,   "CE@#": 0b0100111111, 
-   "CE#": 0b0100111111,   "CED@": 0b0001111111,  "CED@#": 0b0001111111, 
-  "CED#": 0b0001111111,    "CH@": 0b1001011110,   "CH@#": 0b1001011110, 
-   "CH#": 0b1001011110,     "D@": 0b0100111110,    "D@#": 0b0100111110, 
-    "D#": 0b0100111110,    "DE@": 0b0110111110,   "DE@#": 0b0110111110, 
-   "DE#": 0b0110111110,   "DED@": 0b0001011111,  "DED@#": 0b0001011111, 
-  "DED#": 0b0001011111,  "DIAG@": 0b1100011111, "DIAG@#": 0b1100011111, 
- "DIAG#": 0b1100011111,   "IAL@": 0b1110011111,  "IAL@#": 0b1110011111, 
-  "IAL#": 0b1110011111,   "IHL@": 0b1000011111,  "IHL@#": 0b1000011111, 
-  "IHL#": 0b1000011111,  "ISPB@": 0b1110111111, "ISPB@#": 0b1110111111, 
- "ISPB#": 0b1110111111,     "L@": 0b0001111110,    "L@#": 0b0001111110, 
-    "L#": 0b0001111110,    "LA@": 0b1110111110,   "LA@#": 0b1110111110, 
-   "LA#": 0b1110111110,   "LDM@": 0b0110111111,  "LDM@#": 0b0110111111, 
-  "LDM#": 0b0110111111,    "LE@": 0b0111111110,   "LE@#": 0b0111111110, 
-   "LE#": 0b0111111110,   "LED@": 0b0111111111,  "LED@#": 0b0111111111, 
-  "LED#": 0b0111111111,    "LH@": 0b1001111110,   "LH@#": 0b1001111110, 
-   "LH#": 0b1001111110,    "LM@": 0b1100111111,   "LM@#": 0b1100111111, 
-   "LM#": 0b1100111111,   "LPS@": 0b1100111111,  "LPS@#": 0b1100111111, 
-  "LPS#": 0b1100111111,   "LXA@": 0b0100011111,  "LXA@#": 0b0100011111, 
-  "LXA#": 0b0100011111,     "M@": 0b0100011110,    "M@#": 0b0100011110, 
-    "M#": 0b0100011110,    "ME@": 0b0110011110,   "ME@#": 0b0110011110, 
-   "ME#": 0b0110011110,   "MED@": 0b0011011111,  "MED@#": 0b0011011111, 
-  "MED#": 0b0011011111,    "MH@": 0b1010111110,   "MH@#": 0b1010111110, 
-   "MH#": 0b1010111110,   "MIH@": 0b1001111111,  "MIH@#": 0b1001111111, 
-  "MIH#": 0b1001111111,   "MVS@": 0b0110011111,  "MVS@#": 0b0110011111, 
-  "MVS#": 0b0110011111,     "N@": 0b0010011110,    "N@#": 0b0010011110, 
-    "N#": 0b0010011110,   "NOP@": 0b1100000000,  "NOP@#": 0b1100000000, 
-  "NOP#": 0b1100000000,   "NST@": 0b0010011111,  "NST@#": 0b0010011111, 
-  "NST#": 0b0010011111,     "O@": 0b0010111110,    "O@#": 0b0010111110, 
-    "O#": 0b0010111110,   "OST@": 0b0010111111,  "OST@#": 0b0010111111, 
-  "OST#": 0b0010111111,     "S@": 0b0000111110,    "S@#": 0b0000111110, 
-    "S#": 0b0000111110,  "SCAL@": 0b1101011111, "SCAL@#": 0b1101011111, 
- "SCAL#": 0b1101011111,    "SE@": 0b0101111110,   "SE@#": 0b0101111110, 
-   "SE#": 0b0101111110,   "SED@": 0b0101111111,  "SED@#": 0b0101111111, 
-  "SED#": 0b0101111111,    "SH@": 0b1000111110,   "SH@#": 0b1000111110, 
-   "SH#": 0b1000111110,   "SHW@": 0b1010011110,  "SHW@#": 0b1010011110, 
-  "SHW#": 0b1010011110,   "SSM@": 0b1000111111,  "SSM@#": 0b1000111111, 
-  "SSM#": 0b1000111111,   "SST@": 0b0000111111,  "SST@#": 0b0000111111, 
-  "SST#": 0b0000111111,    "ST@": 0b0011011110,   "ST@#": 0b0011011110, 
-   "ST#": 0b0011011110,  "STDM@": 0b1001011111, "STDM@#": 0b1001011111, 
- "STDM#": 0b1001011111,   "STE@": 0b0011111110,  "STE@#": 0b0011111110, 
-  "STE#": 0b0011111110,  "STED@": 0b0011111111, "STED@#": 0b0011111111, 
- "STED#": 0b0011111111,   "STH@": 0b1011111110,  "STH@#": 0b1011111110, 
-  "STH#": 0b1011111110,   "STM@": 0b1100111111,  "STM@#": 0b1100111111, 
-  "STM#": 0b1100111111,  "STXA@": 0b1010011111, "STXA@#": 0b1010011111, 
- "STXA#": 0b1010011111,   "SVC@": 0b1100111111,  "SVC@#": 0b1100111111, 
-  "SVC#": 0b1100111111,    "TD@": 0b1010011110,   "TD@#": 0b1010011110, 
-   "TD#": 0b1010011110,    "TH@": 0b1010011110,   "TH@#": 0b1010011110, 
-   "TH#": 0b1010011110,    "TS@": 0b1011111111,   "TS@#": 0b1011111111, 
-   "TS#": 0b1011111111,     "X@": 0b0111011110,    "X@#": 0b0111011110, 
-    "X#": 0b0111011110,   "XST@": 0b0111011111,  "XST@#": 0b0111011111, 
-  "XST#": 0b0111011111,    "ZH@": 0b1010011110,   "ZH@#": 0b1010011110, 
-   "ZH#": 0b1010011110    
-   }
-
-argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
-
-'''
-i = 0
-for key in argsRSonly:
-    i += 1
-    value = format(argsSRSorRS[key.replace("@","").replace("#","")], "#012b")
-    print('%8s: %s, ' % ('"'+key+'"', value), end="")
-    if i % 3 == 0:
-            print()
-print()
-sys.exit(1)
-'''
-
-# The 14-bit numerical codes are what's encoded in bits 0-12
-# LHI and SHI are special and must be specially handled.
-argsRI = { "AHI": 0b1011000011100, "CHI": 0b1011010111100, 
-           "MHI": 0b1011011111100, "NHI": 0b1011011011100, 
-           "XHI": 0b1011010011100, "OHI": 0b1011001011100, 
-           "TRB": 0b1011001111100, "ZRB": 0b1011000111100, 
-           "LHI": 0b0000000000000, "SHI": 0b1011000011100 }
-
-# The 8-bit numerical codes are the OP+OPX fields of the encoded instruction.
-argsSI = { "CIST": 0b10110101, "MSTH": 0b10110000, "NIST": 0b10110110, 
-           "XIST": 0b10110100,   "SB": 0b10110010,   "TB": 0b10110011, 
-             "ZB": 0b10110001,  "TSB": 0b10110111 }
-
-# Now, the MSC instructions.
-argsMSC = { "@A": -1, "@B": -1, "@BN": -1, "@BNN": -1, "@BNP": -1, "@BNZ": -1, "@BU": -1, "@BU@": -1, "@BXN": -1,
-         "@BXNN": -1, "@BXNP": -1, "@BXNZ": -1, "@BXP": -1, "@BXZ": -1, "@BZ": -1, "@C": -1, "@CI": -1, 
-         "@CNOP": -1, "@DLY": -1, "@INT": -1, "@L": -1, "@LAR": -1, "@LF": -1, "@LH": -1, "@LI": -1, "@LMS": -1, 
-         "@LXI": -1, "@N": -1, "@NIX": -1, "@RAI": -1, "@RAW": -1, "@RBI": -1, "@REC": -1, "@RFD": -1, "@RNI": -1, 
-         "@RNW": -1, "@SAI": -1, "@SEC": -1, "@SFD": -1, "@SIO": -1, "@ST": -1, "@STF": -1, "@STH": -1, "@STP": -1, 
-         "@TAX": -1, "@TI": -1, "@TM": -1, "@TMI": -1, "@TSZ": -1, "@TXA": -1, "@TXI": -1, "@WAT": -1, "@X": -1, 
-         "@XAX": -1, "@BC": -1, "@BXC" "@CALL": -1, "@CALL@": -1, "@LBB": -1, "@LBB@": -1, "@LBP": -1, 
-         "@LBP@": -1 }
-
-# And BCE instructions.
-argsBCE = { "#@#DEC": -1, "#@#HEX": -1, "#@#SCN": -1, "#BU": -1, "#BU@": -1, "#CMD": -1, "#CMDI": -1, 
-           "#CNOP": -1, "#DLY": -1, "#DLYI": -1, "#LBR": -1, "#LBR@": -1, "#LTO": -1, "#LTOI": -1, "#MIN": -1,
-           "#MIN@": -1, "#MINC": -1, "#MOUT": -1, "#MOUT@": -1, "#MOUTC": -1, "#ORG": -1, "#RDL": -1, 
-           "#RDLI": -1, "#RDS": -1, "#RIB": -1, "#SIB": -1, "#SPLIT": -1, "#SSC": -1, "#SST": -1, "#STP": -1, 
-           "#TDL": -1, "#TDLI": -1, "#TDS": -1, "#WAT": -1, "#WIX": -1
-       }
-
-instructionsWithoutOperands = argsBCE
-instructionsWithOperands = argsRR | argsSRSorRS | argsRSonly | argsSRSonly | \
-                           argsSI | argsMSC
-knownInstructions = instructionsWithoutOperands | instructionsWithOperands
-
-# The field values are the masks.
-branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2, 
-                 "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
-                 "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNN": 5, "BNZ": 3, 
-                 "BNO": 6, "BLE": 6, "BN": 2}
-
-# Floating-point RS/SRS mnemonics. 
-fpOperations = { "AED", "AE", "CE", "CED", "DED", "DE", "LED", "LE", 
-                 "MED", "ME", "SED", "SE", "STED", "STE" }
-fpOperationsSP = []
-fpOperationsDP = []
-for operation in fpOperations:
-    if operation[-1] == "D":
-        fpOperationsDP.append(operation)
-    else:
-        fpOperationsSP.append(operation)
-
-# Alignment of various datatypes of so-called "literals" (=...).
-literalDatatypeAlignments = { "B": 2, "C": 2, "X": 2, "H": 2, "Y": 2, "Z": 2,
-                              "F": 4, "E": 4, "D": 8 }
+from model101tables import *
 
 sects = {} # CSECTS and DSECTS.
 entries = set() # For `ENTRY`.
@@ -656,22 +444,34 @@ def evalLiteralAttributes(properties, ast, symtab):
 def optimizeScratch():
     global symtab, sects, literalPools
     
-    def adjust(entry, scratch, properties, i):
+    def adjust(scratch, properties, i):
+        entry = scratch[i]
         entry["length"] = 2
         properties["length"] = 2
         entry["ambiguous"] = False
+        lastEntry = entry
         for j in range(i+1, len(scratch)):
             entry2 = scratch[j]
             if sect == entry2["sect"]:
-                entry2["pos1"] -= 2
-                entry2["pos2"] -= 1
-                entry2["debug"] = "%05X" % entry2["pos2"]
+                nextPos1 = lastEntry["pos1"] + lastEntry["length"]
+                lastEntry = entry2
+                if "alignment" in entry2["properties"]:
+                    alignment = entry2["properties"]["alignment"]
+                    if alignment > 2:
+                        rem = nextPos1 % alignment
+                        if rem > 0:
+                            nextPos1 += alignment - rem
+                nextPos2 = nextPos1 // 2
+                entry2["pos1"] = nextPos1
+                entry2["properties"]["pos1"] = nextPos1
+                entry2["pos2"] = nextPos2
+                entry2["debug"] = "%05X" % nextPos2
                 if "name" in entry2:
-                    sym2 = symtab[entry2["name"]]
-                    if sym2["address"] > entry["pos2"]:
-                        sym2["address"] -= 1
-                        sym2["value"] -= 1
-                        sym2["debug"] = "%05X" % sym2["address"]
+                    name = entry2["name"]
+                    sym2 = symtab[name]
+                    sym2["address"] = nextPos2
+                    sym2["value"] = (sym2["value"] & 0xFFFFFFF000000000) | nextPos2
+                    sym2["debug"] = "%05X" % sym2["address"]
     
     literalPoolNumber = 0
     for sect in sects:
@@ -683,8 +483,8 @@ def optimizeScratch():
             operation = properties["operation"]
             if operation == "LTORG":
                 literalPoolNumber += 1
-            if operation == "BCT":
-                pass
+                continue
+            if operation == "B": ###DEBUG### ###TRAP optimize###
                 pass
             properties["length"] = entry["length"]
             if "name" in entry:
@@ -728,16 +528,28 @@ def optimizeScratch():
                 continue
             section, value = unhash(d2)
             if section == None:
-                if "B2" in ast and value >= srsFloor and value < srsCeiling:
-                    adjust(entry, scratch, properties, i)
+                if "B2" in ast and value >= srsFloor and value < srsCeiling \
+                        and operation != "BCT":
+                    adjust(scratch, properties, i)
                     continue
                 entry["ambiguous"] = False
                 continue
-            # A special case:
-            if operation == "BCT" and section == sect:
+            # Special cases that branch backward:
+            if section == sect and \
+                    (operation in branchAliases or operation == "BCT"):
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
                 if d > srsFloor and d < srsCeiling:
-                    adjust(entry, scratch, properties, i)
+                    adjust(scratch, properties, i)
+                    continue
+            if operation == "BCT":
+                entry["ambiguous"] = False
+                continue
+            # Check for the case `OPCODE R1,D2`, where `D2` is a location in
+            # the current CSECT.
+            if section == sect and operation in branchAliases: # operation not in fpOperations:
+                d = value - properties["pos1"] // 2 - 1
+                if d >= srsFloor and d < srsCeiling:
+                    adjust(scratch, properties, i)
                     continue
             # Check for the case `OPCODE R1,D2`, where `D2` is a location in
             # a CSECT currently in `USING`.
@@ -748,8 +560,8 @@ def optimizeScratch():
                     if u[2] < d:
                         d = u[2]
                         b = u[1]
-            if b != None and d < srsCeiling:
-                adjust(entry, scratch, properties, i)
+            if b != None and d >= srsFloor and d < srsCeiling:
+                adjust(scratch, properties, i)
                 continue
     return
 
@@ -875,6 +687,8 @@ def generateObjectCode(source, macros):
         nonlocal collect, asis, compile, properties, name, operation
         pos1 = sects[sect]["pos1"]
         if collect:
+            if operation == "DS": ###DEBUG###
+                pass
             pos2 = pos1 // 2
             newScratch = {}
             if name != "":
@@ -939,25 +753,33 @@ def generateObjectCode(source, macros):
         if alignment > 1:
             if alignment > properties["alignment"]:
                 properties["alignment"] = alignment
-            rem = sects[sect]["pos1"] % alignment
+            pos1 = sects[sect]["pos1"]
+            rem = pos1 % alignment
             if rem != 0:
+                # I used to call toMemory() here to do this, but that can 
+                # have unintended side effects such as assigning statements like
+                # "DS 0F" a non-zero length.
                 if zero:
-                    toMemory(bytearray(alignment - rem), alignment)
+                    memory = sects[sect]["memory"]
+                    for pos1 in range(pos1, pos1 + alignment - rem):
+                        memory[pos1] = 0
                 else:
-                    toMemory(alignment - rem, alignment)
+                    pos1 += alignment - rem
+                sects[sect]["pos1"] = pos1
+                if pos1 > sects[sect]["used"]:
+                    sects[sect]["used"] = pos1
         
         # Add `name` (if any) to the symbol table.
         if collect and name != "":
-            pos1 = sects[sect]["pos1"]
+            pos2 = sects[sect]["pos1"] // 2
             if name in symtab: # This can't happen.
                 oldSect = symtab[name]["section"]
                 oldPos = symtab[name]["address"]
-                if oldSect != sect or oldPos != pos1:
+                if oldSect != sect or oldPos != pos2:
                     error(properties, 
                           "Symbol %s address has changed: (%s,%d) -> (%s,%d)" \
-                          % (name, oldSect, oldPos, sect, pos1 ))
+                          % (name, oldSect, oldPos, sect, pos2 ))
             else:
-                pos2 = pos1 // 2
                 symtab[name] = { "section": sect,  "address": pos2,
                                  "value": symtab[sect]["value"] + pos2,
                                  "alignment": alignment,
@@ -1028,24 +850,6 @@ def generateObjectCode(source, macros):
         sects[sect]["pos1"] = 0
     sect = None
     using = [None]*8
-    appropriateRules = {
-        "ENTRY": "identifierList", "EXTRN": "identifierList",
-        "EQU": "equOperand", "USING": "expressions", "DROP": "expressions",
-        "DC": "dcOperands", "DS": "dsOperands", 
-        }
-    for operation in argsRR:
-        appropriateRules[operation] = "rrAll"
-    appropriateRules["LFXI"] = "lfxiAll"
-    for operation in argsSRSorRS:
-        appropriateRules[operation] = "rsAll"
-    for operation in argsRI:
-        appropriateRules[operation] = "riAll"
-    for operation in argsSI:
-        appropriateRules[operation] = "siAll"
-    for operation in argsMSC:
-        appropriateRules[operation] = "mscAll"
-    for operation in argsBCE:
-        appropriateRules[operation] = "bceAll"
         
     # Process shource code, line-by-line
     for properties in source:
@@ -1075,6 +879,15 @@ def generateObjectCode(source, macros):
                 error(properties, "Could not parse operands")
             properties["ast"] = ast
     
+    '''
+    #-----------------------------------------------------------------------
+    # Experimental rework!
+    import sieve
+    sieve.setup(source, macros)
+    while sieve.sieve(source):
+        pass
+    '''
+            
     #-----------------------------------------------------------------------
     # Remaining passes
     
@@ -1087,7 +900,7 @@ def generateObjectCode(source, macros):
         if asis:
             #continue
             sects.clear()
-            symtab.clear()
+            #symtab.clear()
         else:
             for sect in sects:
                 sects[sect]["pos1"] = 0
@@ -1147,12 +960,13 @@ def generateObjectCode(source, macros):
                         "scratch": [],
                         "dsect": not cVsD
                         }
-                    symtab[sect] = { 
-                        "section": sect, 
-                        "address": 0, 
-                        "type": "CSECT",
-                        "value": getHashcode(sect) 
-                        }
+                    if sect not in symtab:
+                        symtab[sect] = { 
+                            "section": sect, 
+                            "address": 0, 
+                            "type": "CSECT",
+                            "value": getHashcode(sect) 
+                            }
                 properties["section"] = sect
                 properties["pos1"] = sects[sect]["pos1"]
                 continue
@@ -1176,10 +990,11 @@ def generateObjectCode(source, macros):
                             entries.add(symbol)
                         else:
                             extrns.add(symbol)
-                            symtab[symbol] = {
-                                "type": "EXTERNAL",
-                                "value": getHashcode(symbol)
-                                }
+                            if symbol not in symtab:
+                                symtab[symbol] = {
+                                    "type": "EXTERNAL",
+                                    "value": getHashcode(symbol)
+                                    }
                             rextrns[symtab[symbol]["value"]] = symbol
                 continue
             elif operation == "EQU":
@@ -1202,12 +1017,13 @@ def generateObjectCode(source, macros):
                     continue
                 if oldValue not in [None, v]:
                     error(properties, "EQU value of %s changed: %08X -> %08X" % \
-                          (name, oldValue, v))
-                    continue
-                symtab[name] = {
-                    "type": "EQU",
-                    "value": v
-                    }
+                          (name, oldValue, v), severity=0)
+                    #continue
+                if name not in symtab:
+                    symtab[name] = {
+                        "type": "EQU",
+                        "value": v
+                        }
                 continue
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
@@ -1514,6 +1330,9 @@ def generateObjectCode(source, macros):
                 
             if operation in argsSRSorRS:
                 commonProcessing(2)
+                if operation in ["LED", "SED"]: ###DEBUG### ***TRAP SRSorRS***
+                    pass
+                    pass
                 '''
                 We have a conundrum here.  For the mnemonics in argsSRSandRS
                 there is both an RS version of the instruction
@@ -1534,10 +1353,13 @@ def generateObjectCode(source, macros):
                     dataSize = 4
                 else:
                     dataSize = properties["length"]
-                if operation in branchAliases or operation in argsSRSonly:
+                if operation in operation in argsSRSonly:
                     dataSize = 2
                 ast = properties["ast"]
                 literalAttributes = None
+                if ast == None: ###DEBUG###
+                    for p in range(propNum -10, propNum+1):
+                        print(p, source[p])
                 if "L2" in ast:
                     literalAttributes = evalLiteralAttributes(properties, ast, symtab)
                     if literalAttributes == None:
@@ -1554,16 +1376,17 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "B":
-                    pass # ***DEBUG*** ***TRAP***
-                    pass
+                if operation == "LA":
+                    pass # ***DEBUG*** ***TRAP compile***
                 data = bytearray(dataSize)
                 if ast != None:
                     err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
                     if r1 == None:
                         # R1 is syntatically omitted for various instructions,
                         # and an implied R1 is used instead.
-                        if operation in ["SHW", "SHW@", "SHW#", "SHW@#"]:
+                        if operation in branchAliases:
+                            r1 = branchAliases[operation]
+                        elif operation in ["SHW", "SHW@", "SHW#", "SHW@#"]:
                             r1 = 2
                         elif operation in ["SVC", "ZH"]:
                             r1 = 1
@@ -1612,6 +1435,7 @@ def generateObjectCode(source, macros):
                                         d = d2 - (currentHash() + 1)
                                         if d >= 0 and d < 0b111000:
                                             opcode = argsSRSonly["BCF"]
+                                            data = data[:2]
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             d = d & 0b111111
                                             data[1] = (d << 2) | 0b00
@@ -1621,6 +1445,7 @@ def generateObjectCode(source, macros):
                                             done = True
                                         elif d < 0 and d >= -0b111000:
                                             opcode = argsSRSonly["BCB"]
+                                            data = data[:2]
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             d = (-d & 0b111111)
                                             if "adr1" in properties and \
@@ -1659,13 +1484,17 @@ def generateObjectCode(source, macros):
                                             d2 = newd2
                                     if b2 != None and (b2 < 0 or b2 > 3) and \
                                             operation not in shiftOperations:
-                                        error(properties, "B2 out of range")
-                                        done = True
+                                        if x2 == None and b2 >= 4 and b2 <= 7:
+                                            x2 = b2
+                                            b2 = None
+                                        else:
+                                            error(properties, "B2 out of range")
+                                            done = True
                                     # `forceAM0` is purely empirical.
-                                    forceAM0 = ((operation in fpOperationsDP \
-                                                 or operation in ["IHL", "AST"])
-                                                and b2 not in [3, None])
-                                    forceAM1 = False
+                                    forceAM0 = (operation in fpOperationsDP \
+                                                or operation in ["IHL", "AST"]) \
+                                                and b2 not in [3, None] and x2 == None
+                                    forceAM1 = (x2 != None)
                                     if not done:
                                         opcode = argsSRSorRS[operation]
                                         # The logic of determining whether we
@@ -1678,16 +1507,25 @@ def generateObjectCode(source, macros):
                                         # need to use in performing that logic.
                                         unhashedValue = d2 & 0xFFFFFF
                                         ic = sects[sect]["pos1"] // 2
-                                        if (opcode & 0b1000000000) == 0 and \
-                                                operation not in ["AST"] and \
-                                                (operation not in fpOperations or \
-                                                 (b2 != 3 and operation in fpOperationsSP)) \
-                                                :
+                                        if (opcode & 0b1000000001) == 0:
                                             # The conditional above is entirely
                                             # empirical.
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
+                                        if operation == "N": ###DEBUG###
+                                            pass
+                                            pass
+                                        if "L2" in ast and dUnitizer == 2 and \
+                                                b2 in [None, 3]:
+                                            # We have to do this, because there's
+                                            # no way for use to know that a 
+                                            # literal is an integral number of
+                                            # fullword addresses away from the
+                                            # current location.
+                                            forceRS = True
+                                            forceAM0 = True
+                                            forceAM1 = False
                                         isNumberD2 = False
                                         rawD2 = unroll(ast["D2"])
                                         if isinstance(rawD2, str) and rawD2.isdigit():
@@ -1727,16 +1565,27 @@ def generateObjectCode(source, macros):
                                             properties["adr2"] = d2 & 0x3F
                                         elif operation == "LA" and \
                                                 x2 == None and b2 != None \
-                                                and d2 >= srsFloor and d2 < srsCeiling:
+                                                and d2 > -srsCeiling and d2 < srsCeiling:
                                             data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            data[1] = 0xFF & ((d2 << 2) | ib2)
+                                            if d2 >= 0:
+                                                data[1] = 0xFF & ((d2 << 2) | ib2)
+                                            else:
+                                                # What's happening here is that we
+                                                # generate an RS AM=1 instruction,
+                                                # but we set the I bit-field to 1
+                                                # to cause d2 to be subtracted from
+                                                # the updateed IC.
+                                                d2 = -d2
+                                                data[1] = 0b11110111
+                                                data[2] = 0b00001000 | ((d2 >> 8) & 0xFF)
+                                                data[3] = d2 & 0xFF
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
                                                 not forceRS and x2 == None and \
                                                 (specifiedB2 or ib2 == 3) and \
                                                 d >= srsFloor and d < srsCeiling and \
-                                                not forbiddenSRS):
+                                                not forbiddenSRS and operation in branchAliases):
                                             # Is SRS.
                                             if operation == "BCTB": # Backward displacement
                                                 d = -d
@@ -1753,7 +1602,7 @@ def generateObjectCode(source, macros):
                                             if "adr1" in properties and ib2 == 3 and \
                                                     properties["adr1"] != d:
                                                 properties["adr2"] = d
-                                        elif isConstant:
+                                        elif isConstant and literalAttributes == None:
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             data[1] = ((opcode & 0b11111) << 3) | 0b011
                                             d0 = d2 & 0xFFFF
@@ -1762,9 +1611,21 @@ def generateObjectCode(source, macros):
                                             if "adr1" in properties and \
                                                     properties["adr1"] != d0:
                                                 properties["adr2"] = d0
+                                        elif literalAttributes != None:
+                                            pool = literalPools[literalPoolNumber]
+                                            d1 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2 \
+                                                 - ic - 2
+                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                            data[1] = ((opcode & 0b11111) << 3) | 0b111
+                                            data[2] = (d1 & 0x700) >> 8
+                                            data[3] = d1 & 0xFF
+                                            if "adr1" in properties and \
+                                                    properties["adr1"] != d1 & 0xFFFF:
+                                                properties["adr2"] = d1 & 0xFFFF
                                         elif not forceAM0 and \
                                                 (x2 != None or ia or \
-                                                i or (d1 >= 0 and d1 < 2048)):
+                                                 i or (d1 >= 0 and d1 < 2048)):
+                                            # RS AM=1 here
                                             if x2 == None:
                                                 x2 = 0
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
@@ -1781,6 +1642,7 @@ def generateObjectCode(source, macros):
                                                     properties["adr1"] != d1 & 0xFFFF:
                                                 properties["adr2"] = d1 & 0xFFFF
                                         elif x2 == None and not ia and not i:
+                                            # RS AM=0 here
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
                                             elif d2 in rextrns:
@@ -1807,7 +1669,7 @@ def generateObjectCode(source, macros):
                                                         properties["adr1"] != d0:
                                                     properties["adr2"] = d0
                                         else:
-                                            error(properties, "Count not interpret line as SRS or RS")
+                                            error(properties, "Could not interpret line as SRS or RS")
                 toMemory(data)
                 continue
                 
@@ -1860,16 +1722,21 @@ def generateObjectCode(source, macros):
                         if d2 != None:
                             properties["adr1"] = d2 & 0xFFFF
                         err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
-                        if not err and b2 >= 0 and b2 <= 3:
-                            err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
-                            i1 &= 0xFFFF
-                            properties["adr2"] = i1
-                            d2 &= 0b111111
-                            op = argsSI[operation]
-                            data[0] = op
-                            data[1] = (d2 << 2) | b2
-                            data[2] = i1 >> 8
-                            data[3] = i1 & 0xFF
+                        if not err:
+                            if b2 == None:
+                                b2, d2 = unUsing(using, d2)
+                            if b2 != None and b2 >= 0 and b2 <= 3:
+                                err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
+                                i1 &= 0xFFFF
+                                properties["adr2"] = i1
+                                d2 &= 0b111111
+                                op = argsSI[operation]
+                                data[0] = op
+                                data[1] = (d2 << 2) | b2
+                                data[2] = i1 >> 8
+                                data[3] = i1 & 0xFF
+                            else:
+                                error(properties, "Cannot identify base register")
                 toMemory(data)
                 continue
                 
@@ -1931,6 +1798,31 @@ def generateObjectCode(source, macros):
             # Eliminate ambiguity between SRS and RS instructions.
             for sect in sects:
                 optimizeScratch()
+            if False: ###DEBUG###
+                # This prints a stylized form of the source code.  We haven't generated
+                # any object code at this point, but we should know all addresses,
+                # and showing those in a form easily comparable to the original source
+                # code is the goal
+                for properties in source:
+                    if "pos1" not in properties or properties["pos1"] == None:
+                        continue
+                    name = ""
+                    symAddr = ""
+                    if "name" in properties and not properties["name"].startswith("."):
+                        name = properties["name"]
+                        if name in symtab:
+                            symAddr = "%05X" % symtab[name]["address"]
+                    msg = "%-10s%5s %05X" % (properties["section"], symAddr, properties["pos1"] // 2)
+                    length = properties["length"]
+                    if length != None and \
+                            properties["operation"] not in ["DS", "CSECT", "DSECT"]:
+                        while length > 0:
+                            msg += " 0000"
+                            length -= 2
+                    msg = "%-36s" % msg
+                    msg += "%-9s%-6s%s" % (name, properties["operation"], properties["operand"])
+                    print(msg)
+                sys.exit(1)
             # The previous optimization may have shrunk CSECTs, which
             # may require moving LTORGs downward in memory.  Unfortunately,
             # the optimization operation above hasn't resulted in any free
@@ -1994,8 +1886,6 @@ def generateObjectCode(source, macros):
                         break
                 lastOffset += offset // 2
                 lastOffset = (lastOffset + 1) & 0xFFFFFE
-            pass
-            pass
     
     # Let's append the literal pools to their CSECTs.
     fill = [0xC9, 0xFB]
