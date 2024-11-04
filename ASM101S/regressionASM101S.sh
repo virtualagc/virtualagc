@@ -8,7 +8,7 @@ cd "../yaShuttle/Source Code/PASS.REL32V0/RUNASM"
 for f in *.asm
 do 
     n=${f%.*}
-    #echo -n "$n:  "
+    #echo "$n:  "
     ASM101S.py --library=../RUNMAC --tolerable=4 --compare=../RUNLST/$n.txt $n.asm \
     | tail -n1 | grep --invert-match "0 bytes mismatched"
 done

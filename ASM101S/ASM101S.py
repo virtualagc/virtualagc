@@ -908,12 +908,16 @@ for i in range(endLibraries, len(source)):
             offset = sects[properties["section"]]["offset"]
         else:
             offset = 0
-        if "pos1" in properties and properties["pos1"] != None:
+        if properties["operation"] == "EQU":
+            prefix = "%07X" % (symtab[properties["name"]]["value"] & 0xFFFFFFF)
+        elif "pos1" in properties and properties["pos1"] != None:
             address = properties["pos1"]
             section = properties["section"]
             if comparisonSects != None and section in comparisonSects:
                 comparisonMemory = comparisonSects[section]["memory"]
             paddress = address // 2
+            if section == None: ###DEBUG###
+                pass
             if "offset" in sects[section]:
                 paddress += offset
             prefix = "%05X" % paddress

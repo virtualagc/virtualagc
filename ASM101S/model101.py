@@ -426,7 +426,20 @@ def evalLiteralAttributes(properties, ast, symtab):
             bytes[i] = value & 0xFF
             value = value >> 8
     if "L" in ast and len(ast["L"]) > 0:
-        l = int(ast["L"][0])
+        # Note that we treat the length modifier as a count of halfwords 
+        # rather than bytes, in contradiction to the System/360 assembly-
+        # language manual.
+        l = 2 * int(ast["L"][0]) 
+        if l < len(bytes):
+            if numerical:
+                bytes = bytes[-l:]
+            else:
+                bytes = bytes[:l]
+        while l > len(bytes):
+            if numerical:
+                bytes.insert(0, 0)
+            else:
+                bytes.append(0x40) # EBCDIC space
     operand = "=%s" % t
     if len(ast["L"]) > 0:
         operand += "L%s" % ast["L"][0]
@@ -481,10 +494,19 @@ def optimizeScratch():
             entry = scratch[i]
             properties = entry["properties"]
             operation = properties["operation"]
-            if operation == "LTORG":
+            if operation == "EQU":
+                if "name" not in entry:
+                    continue
+                v = evalArithmeticExpression(properties["ast"]["v"], {}, \
+                                             properties, symtab, \
+                                             symtab[sect]["value"] + entry["pos1"] // 2, \
+                                             severity=0)
+                symtab[entry["name"]]["value"] = v
+                continue
+            elif operation == "LTORG":
                 literalPoolNumber += 1
                 continue
-            if operation == "B": ###DEBUG### ###TRAP optimize###
+            if operation == "BC": ###DEBUG### ###TRAP optimize###
                 pass
             properties["length"] = entry["length"]
             if "name" in entry:
@@ -536,7 +558,7 @@ def optimizeScratch():
                 continue
             # Special cases that branch backward:
             if section == sect and \
-                    (operation in branchAliases or operation == "BCT"):
+                    (operation in branchAliases or operation in ["BCT", "BC"]):
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
                 if d > srsFloor and d < srsCeiling:
                     adjust(scratch, properties, i)
@@ -546,7 +568,8 @@ def optimizeScratch():
                 continue
             # Check for the case `OPCODE R1,D2`, where `D2` is a location in
             # the current CSECT.
-            if section == sect and operation in branchAliases: # operation not in fpOperations:
+            if section == sect and \
+                    (operation in branchAliases or operation == "BC"): # operation not in fpOperations:
                 d = value - properties["pos1"] // 2 - 1
                 if d >= srsFloor and d < srsCeiling:
                     adjust(scratch, properties, i)
@@ -710,6 +733,12 @@ def generateObjectCode(source, macros):
                 "using": copy.copy(using)
                 }
             sects[sect]["scratch"].append(newScratch)
+        #if isinstance(bytes, int):
+        #    if bytes == 0:
+        #        return
+        #else:
+        #    if len(bytes) == 0:
+        #        return
         properties["section"] = sect
         properties["pos1"] = pos1
         if isinstance(bytes, bytearray):
@@ -933,6 +962,8 @@ def generateObjectCode(source, macros):
             if name.startswith("."):
                 name = ""
             operand = properties["operand"].rstrip()
+            if operand == "R7,=XL2'F'": ###DEBUG###
+                pass
             
             #******** Most pseudo-ops ********
             # Take care of pseudo-ops that don't add anything to AP-101S memory.
@@ -1001,6 +1032,7 @@ def generateObjectCode(source, macros):
                 if name == "":
                     error(properties, "EQU has no name field")
                     continue
+                toMemory(0)
                 oldValue = None
                 if name in symtab:
                     if symtab[name]["type"] != "EQU":
@@ -1178,9 +1210,10 @@ def generateObjectCode(source, macros):
                                 exp1 = exp[1]
                                 if isinstance(exp1, str) and exp1.isdigit():
                                     v = int(exp1) & mask
+                                elif isinstance(exp1, tuple) and len(exp1) == 2 \
+                                        and exp1[0] == '-' and exp1[1].isdigit():
+                                    v = int("".join(exp1)) & mask
                                 else:
-                                    # Expression is a tuple of strings  
-                                    # representing a non-integer number.
                                     exp1 = "".join(exp1)
                                     v = float(exp1) * multiplier
                                     if v >= multiplier:
@@ -1330,8 +1363,7 @@ def generateObjectCode(source, macros):
                 
             if operation in argsSRSorRS:
                 commonProcessing(2)
-                if operation in ["LED", "SED"]: ###DEBUG### ***TRAP SRSorRS***
-                    pass
+                if operation == "BC": ###DEBUG### ***TRAP SRSorRS***
                     pass
                 '''
                 We have a conundrum here.  For the mnemonics in argsSRSandRS
@@ -1376,7 +1408,7 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "LA":
+                if operation == "BC":
                     pass # ***DEBUG*** ***TRAP compile***
                 data = bytearray(dataSize)
                 if ast != None:
@@ -1420,16 +1452,21 @@ def generateObjectCode(source, macros):
                                         b2,x2 = 0,b2
                                     done = False
                                     forceRS = (operation in argsRSonly)
-                                    if operation == "BCT":
+                                    if operation in ["BC", "BCT"]:
                                         d = d2 - (currentHash() + 1)
-                                        if d < 0 and d >= -0b111000:
-                                            opcode = argsSRSonly["BCTB"]
+                                        if d < 0 and d > -0b111000:
+                                            if operation == "BC":
+                                                opcode = argsSRSonly["BCB"]
+                                                ending = 0b10
+                                            else:
+                                                opcode = argsSRSonly["BCTB"]
+                                                ending = 0b11
                                             data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             d = (-d & 0b111111)
                                             if "adr1" in properties and \
                                                     properties["adr1"] != d:
                                                 properties["adr2"] = d
-                                            data[1] = (d << 2) | 0b11
+                                            data[1] = (d << 2) | ending
                                             done = True
                                     elif operation in branchAliases:
                                         d = d2 - (currentHash() + 1)
@@ -1585,14 +1622,17 @@ def generateObjectCode(source, macros):
                                                 not forceRS and x2 == None and \
                                                 (specifiedB2 or ib2 == 3) and \
                                                 d >= srsFloor and d < srsCeiling and \
-                                                not forbiddenSRS and operation in branchAliases):
+                                                not forbiddenSRS and \
+                                                operation in branchAliases):
                                             # Is SRS.
                                             if operation == "BCTB": # Backward displacement
                                                 d = -d
+                                            if operation == "BC":
+                                                operation = "BCF"
+                                                ib2 = 0b00
                                             if d >= srsCeiling:
                                                 error(properties, "SRS displacement out of range")
                                             if len(data) == 4: ###DEBUG###
-                                                pass
                                                 pass
                                             data = data[:2]
                                             #if ib2 != 3:
