@@ -506,7 +506,7 @@ def optimizeScratch():
             elif operation == "LTORG":
                 literalPoolNumber += 1
                 continue
-            if operation == "BC": ###DEBUG### ###TRAP optimize###
+            if operation == "LA": ###DEBUG### ###TRAP optimize###
                 pass
             properties["length"] = entry["length"]
             if "name" in entry:
@@ -1408,7 +1408,7 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "BC":
+                if operation == "LA":
                     pass # ***DEBUG*** ***TRAP compile***
                 data = bytearray(dataSize)
                 if ast != None:
@@ -1441,6 +1441,7 @@ def generateObjectCode(source, macros):
                             d2 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2
                         else:
                             err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
+                        originalD2 = d2
                         if not err and d2 != None: 
                             properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
@@ -1550,8 +1551,7 @@ def generateObjectCode(source, macros):
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
-                                        if operation == "N": ###DEBUG###
-                                            pass
+                                        if operation == "LA": ###DEBUG###
                                             pass
                                         if "L2" in ast and dUnitizer == 2 and \
                                                 b2 in [None, 3]:
@@ -1606,15 +1606,28 @@ def generateObjectCode(source, macros):
                                             data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
                                             if d2 >= 0:
                                                 data[1] = 0xFF & ((d2 << 2) | ib2)
-                                            else:
+                                            elif d2 < ic + 2:
                                                 # What's happening here is that we
                                                 # generate an RS AM=1 instruction,
                                                 # but we set the I bit-field to 1
                                                 # to cause d2 to be subtracted from
                                                 # the updateed IC.
-                                                d2 = -d2
+                                                d2 = ic + 2 - d2
                                                 data[1] = 0b11110111
+                                                if len(data) == 2: ###DEBUG###
+                                                    data.append(0)
+                                                    data.append(0)
+                                                    error(properties, "Instruction length incorrect", 3)
                                                 data[2] = 0b00001000 | ((d2 >> 8) & 0xFF)
+                                                data[3] = d2 & 0xFF
+                                            else: # d2 >= ic + 2
+                                                d2 -= ic + 2
+                                                data[1] = 0b11110111
+                                                if len(data) == 2: ###DEBUG###
+                                                    data.append(0)
+                                                    data.append(0)
+                                                    error(properties, "Instruction length incorrect", 3)
+                                                data[2] = 0b00000000 | ((d2 >> 8) & 0xFF)
                                                 data[3] = d2 & 0xFF
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
