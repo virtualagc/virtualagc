@@ -1495,13 +1495,14 @@ def generateObjectCode(source, macros):
                         else:
                             err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                         originalD2 = d2
+                        extrnD2 = (d2 in rextrns)
                         if not err and d2 != None: 
                             properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    if operation == "SST": ###DEBUG###TRAP###
+                                    if operation == "BNC": ###DEBUG###TRAP###
                                         pass
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3)
@@ -1527,7 +1528,13 @@ def generateObjectCode(source, macros):
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
                                             d = d & 0b111111
-                                            data = generateSRS(properties, "BCF", r1, d, 0b00)
+                                            if operation in ["BNC"]:
+                                                o = "BVCF"
+                                                b = 0b01
+                                            else:
+                                                o = "BCF"
+                                                b = 0b00
+                                            data = generateSRS(properties, o, r1, d, b)
                                             done = True
                                         elif d < 0 and d > -0b111000:
                                             d = (-d & 0b111111)
@@ -1570,15 +1577,16 @@ def generateObjectCode(source, macros):
                                         else:
                                             error(properties, "B2 out of range")
                                             done = True
+                                    opcode = argsSRSorRS[operation]
                                     # `forceAM0` is purely empirical.
-                                    forceAM0 = (operation in fpOperationsDP \
-                                                or operation in ["IHL", "AST", "SST", "MIH"]) \
+                                    forceAM0 = (opcode & 1) != 0 \
                                                 and b2 not in [3, None] and x2 == None
+                                    if extrnD2:
+                                        forceAM0 = True
                                     forceAM1 = (x2 != None)
                                     if not done:
                                         if operation == "SST": ###DEBUG###TRAP###
                                             pass
-                                        opcode = argsSRSorRS[operation]
                                         # The logic of determining whether we
                                         # have to encode as
                                         #    SRS            vs
@@ -1633,8 +1641,6 @@ def generateObjectCode(source, macros):
                                             d = uUnhashedValue
                                             d1 = unhashedValue
                                             
-                                        if "LA    R1,A" in properties["text"]: ###DEBUG###
-                                            pass
                                         #uhSect, uhD2 = unhash(d2)
                                         #uuB2, uuD2 = unUsing(using, d2)
                                         if operation in shiftOperations:
@@ -1697,7 +1703,10 @@ def generateObjectCode(source, macros):
                                             data = generateRS1(properties, operation, 0, 0, r1, d1, 0, 3)
                                         elif operation in ["BC", "BIX", "BAL"] and x2 in [None, 0] and \
                                                 d1 > -2048 and d1 < 0:
-                                            data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
+                                            if extrnD2:
+                                                data = generateRS0(properties, operation, r1, 0, 3)
+                                            else:
+                                                data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
                                         elif not forceAM0 and \
                                                 (x2 != None or ia or \
                                                  i or (d1 >= 0 and d1 < 2048)):
