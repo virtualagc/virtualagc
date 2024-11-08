@@ -256,3 +256,43 @@ for operation in argsMSC:
     appropriateRules[operation] = "mscAll"
 for operation in argsBCE:
     appropriateRules[operation] = "bceAll"
+
+##############################################################################
+# Low-level machine-code generators.  Each returns a `bytearray` of the 
+# appropriate size, filled with the appropriate binary data.  Each accepts
+# the data for each field of the encoded instruction and assumes
+# without checking that that data is correct.  (I.e., mnemonics are assumed to
+# be legitimate SRS or RS mnemonics, and all numeric fields are assumed to be
+# actual number in the correct range.)
+
+def generateSRS(properties, mnemonic, r1, d2, b2):
+    data = bytearray(2)
+    data[0] = ((argsSRSorRS[mnemonic] & 0b1111100000) >> 2) | r1
+    data[1] = 0xFF & ((d2 << 2) | b2)
+    if "adr1" in properties and b2 == 3 and properties["adr1"] != d2:
+        properties["adr2"] = d2
+    return data
+
+def generateRS0(properties, mnemonic, r1, d2, b2):
+    data = bytearray(4)
+    opcode = argsSRSorRS[mnemonic]
+    data[0] = ((opcode & 0b1111100000) >> 2) | r1
+    data[1] = ((opcode & 0b11111) << 3) | b2
+    data[2] = (d2 & 0xFF00) >> 8
+    data[3] = d2 & 0xFF
+    if "adr1" in properties and properties["adr1"] != d2:
+        properties["adr2"] = d2
+    return data
+    
+
+def generateRS1(properties, mnemonic, ia, i, r1, d2, x2, b2):
+    data = bytearray(4)
+    opcode = argsSRSorRS[mnemonic]
+    data[0] = ((opcode & 0b1111100000) >> 2) | r1
+    data[1] = ((opcode & 0b11111) << 3) | 0b100 | b2
+    data[2] = (x2 << 5) | (ia << 4) | (i << 3) | ((d2 & 0x700) >> 8)
+    data[3] = d2 & 0x0FF
+    if "adr1" in properties and properties["adr1"] != d2:
+        properties["adr2"] = d2
+    return data
+    

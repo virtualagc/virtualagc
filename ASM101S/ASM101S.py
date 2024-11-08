@@ -414,6 +414,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             "copy": copy,
             "printable": printable,
             "depth": depth,
+            "n": len(source)
             }
         source.append(properties)
         if skipCount > 0:

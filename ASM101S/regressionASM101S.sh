@@ -12,4 +12,5 @@ do
     ASM101S.py --library=../RUNMAC --tolerable=4 --compare=../RUNLST/$n.txt $n.asm \
     | tail -n1 | grep --invert-match "0 bytes mismatched"
 done
-cd -
+echo ""
+cd - &>/dev/null

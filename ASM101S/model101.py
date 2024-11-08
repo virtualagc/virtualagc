@@ -506,7 +506,7 @@ def optimizeScratch():
             elif operation == "LTORG":
                 literalPoolNumber += 1
                 continue
-            if operation == "LA": ###DEBUG### ###TRAP optimize###
+            if operation == "BZ": ###DEBUG### ###TRAP optimize###
                 pass
             properties["length"] = entry["length"]
             if "name" in entry:
@@ -521,6 +521,15 @@ def optimizeScratch():
             if ast == None or "X2" in ast:
                 entry["ambiguous"] = False
                 continue
+            if "B2" in ast:
+                b2 = evalArithmeticExpression(ast["B2"], {}, properties, \
+                                              symtab, \
+                                              symtab[sect]["value"] + entry["pos1"] // 2, \
+                                              severity=0)
+                if b2 in [4, 5, 6, 7]:
+                    # B2 was really X2.
+                    entry["ambiguous"] = False
+                    continue
             if "L2" in ast:
                 l2 = evalArithmeticExpression(ast["L2"], {}, properties, \
                                               symtab, \
@@ -560,7 +569,7 @@ def optimizeScratch():
             if section == sect and \
                     (operation in branchAliases or operation in ["BCT", "BC"]):
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
-                if d > srsFloor and d < srsCeiling:
+                if d >= srsFloor and d < srsCeiling:
                     adjust(scratch, properties, i)
                     continue
             if operation == "BCT":
@@ -801,24 +810,22 @@ def generateObjectCode(source, macros):
         # Add `name` (if any) to the symbol table.
         if collect and name != "":
             pos2 = sects[sect]["pos1"] // 2
-            if name in symtab: # This can't happen.
+            if name in symtab and "preliminary" not in symtab[name]:
                 oldSect = symtab[name]["section"]
                 oldPos = symtab[name]["address"]
                 if oldSect != sect or oldPos != pos2:
                     error(properties, 
                           "Symbol %s address has changed: (%s,%d) -> (%s,%d)" \
                           % (name, oldSect, oldPos, sect, pos2 ))
+            symtab[name].update( { "section": sect,  "address": pos2,
+                             "value": symtab[sect]["value"] + pos2,
+                             "debug": "%05X" % pos2 } )
+            if operation in ["DC", "DS"]:
+                symtab[name]["type"] = "DATA"
+            elif name in entries:
+                symtab[name]["type"] = "ENTRY"
             else:
-                symtab[name] = { "section": sect,  "address": pos2,
-                                 "value": symtab[sect]["value"] + pos2,
-                                 "alignment": alignment,
-                                 "debug": "%05X" % pos2 }
-                if operation in ["DC", "DS"]:
-                    symtab[name]["type"] = "DATA"
-                elif name in entries:
-                    symtab[name]["type"] = "ENTRY"
-                else:
-                    symtab[name]["type"] = "INSTRUCTION"
+                symtab[name]["type"] = "INSTRUCTION"
     
     # Gets the hashed address of the current program counter.
     def currentHash():
@@ -851,6 +858,8 @@ def generateObjectCode(source, macros):
     # is concerned, there's no actual upper limit on the returned D2; the 
     # calling code must determine for itself whether or not D2 is small enough.
     def findB2D2(d2):
+        if d2 == None: ###DEBUG###
+            pass
         if (d2 & hashMask) in [0, hashMask]:
             return None, (d2 & 0xFFFFFF)
         D2 = None
@@ -875,8 +884,6 @@ def generateObjectCode(source, macros):
     passCount = 0
     metadata["passCount"] = passCount
     continuation = False
-    for sect in sects:
-        sects[sect]["pos1"] = 0
     sect = None
     using = [None]*8
         
@@ -900,13 +907,61 @@ def generateObjectCode(source, macros):
         if operation in ignore:
             continue
         operand = properties["operand"].rstrip()
-        if operand == "":
+        if operand != "":
+            if operation in appropriateRules:
+                ast = parserASM(operand, appropriateRules[operation])
+                if ast == None:
+                    error(properties, "Could not parse operands")
+                properties["ast"] = ast
+        
+        # We need to create "preliminary" entries in the symbol table, for
+        # the sole purpose of providing a temporary way to resolve forward
+        # references in statements like "USING symbol,register" on the next
+        # pass (which will correct these references).
+        if operation in ["EQU"]:
             continue
-        if operation in appropriateRules:
-            ast = parserASM(operand, appropriateRules[operation])
-            if ast == None:
-                error(properties, "Could not parse operands")
-            properties["ast"] = ast
+        if "name" not in properties:
+            continue
+        name = properties["name"]
+        if name in [None, ""]:
+            continue
+        if operation in ["CSECT", "DSECT"]:
+            sect = name
+            if sect not in sects:
+                sects[sect] = {
+                    "pos1": 0,
+                    "used": 0,
+                    "memory": bytearray(defaultChunk),
+                    "scratch": [],
+                    "dsect": False
+                    }
+                if sect not in symtab:
+                    symtab[sect] = { 
+                        "section": sect, 
+                        "address": 0, 
+                        "type": "CSECT",
+                        "value": getHashcode(sect) ,
+                        "preliminary": True,
+                        "n": properties["n"]
+                        }
+            continue
+        try: 
+            pos1 = sects[sect]["pos1"]
+        except: ###DEBUG###
+            pass
+        sects[sect]["pos1"] = pos1 + 4
+        symtab[name] = { "section": sect,  "address": pos1,
+                         "value": symtab[sect]["value"] + pos1,
+                         "alignment": 4,
+                         "debug": "%05X" % pos1,
+                         "preliminary": True,
+                         "n": properties["n"] }
+        if operation in ["DC", "DS"]:
+            symtab[name]["type"] = "DATA"
+        elif False and name in entries:
+            symtab[name]["type"] = "ENTRY"
+        else:
+            symtab[name]["type"] = "INSTRUCTION"
     
     '''
     #-----------------------------------------------------------------------
@@ -1331,7 +1386,6 @@ def generateObjectCode(source, macros):
                     continue
                 if operation == "BR": ###DEBUG###
                     pass
-                    pass
                 data = bytearray(2)
                 ast = properties["ast"]
                 if ast != None:
@@ -1363,7 +1417,7 @@ def generateObjectCode(source, macros):
                 
             if operation in argsSRSorRS:
                 commonProcessing(2)
-                if operation == "BC": ###DEBUG### ***TRAP SRSorRS***
+                if operation == "LH": ###DEBUG### ***TRAP SRSorRS***
                     pass
                 '''
                 We have a conundrum here.  For the mnemonics in argsSRSandRS
@@ -1408,7 +1462,7 @@ def generateObjectCode(source, macros):
                 if not compile:
                     toMemory(dataSize)
                     continue
-                if operation == "LA":
+                if operation == "B":
                     pass # ***DEBUG*** ***TRAP compile***
                 data = bytearray(dataSize)
                 if ast != None:
@@ -1424,8 +1478,6 @@ def generateObjectCode(source, macros):
                             r1 = 1
                         elif operation in ["SSM", "TS", "LDM", "STDM"]:
                             r1 = 0
-                        elif operation in branchAliases:
-                            r1 = branchAliases[operation]
                         else:
                             # No matches, fall through to other types of instsructions.
                             pass
@@ -1448,48 +1500,35 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    atStar = ("@" in operation or "#" in operation)
+                                    atStar = "@" in operation or "#" in operation \
+                                        or (b2 != None and b2 > 3)
                                     if atStar and x2 == None:
-                                        b2,x2 = 0,b2
+                                        x2 = b2
+                                        b, d = unUsing(using, d2)
+                                        if b != None:
+                                            b2 = b
+                                            d2 = d
                                     done = False
                                     forceRS = (operation in argsRSonly)
                                     if operation in ["BC", "BCT"]:
                                         d = d2 - (currentHash() + 1)
                                         if d < 0 and d > -0b111000:
-                                            if operation == "BC":
-                                                opcode = argsSRSonly["BCB"]
-                                                ending = 0b10
-                                            else:
-                                                opcode = argsSRSonly["BCTB"]
-                                                ending = 0b11
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             d = (-d & 0b111111)
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d:
-                                                properties["adr2"] = d
-                                            data[1] = (d << 2) | ending
+                                            data = generateSRS(properties, \
+                                                               operation+"B", \
+                                                               r1, d, \
+                                                               {"BC":0b10, 
+                                                                "BCT":0b11}[operation])
                                             done = True
                                     elif operation in branchAliases:
-                                        d = d2 - (currentHash() + 1)
+                                        d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
-                                            opcode = argsSRSonly["BCF"]
-                                            data = data[:2]
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
                                             d = d & 0b111111
-                                            data[1] = (d << 2) | 0b00
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d:
-                                                properties["adr2"] = d
+                                            data = generateSRS(properties, "BCF", r1, d, 0b00)
                                             done = True
-                                        elif d < 0 and d >= -0b111000:
-                                            opcode = argsSRSonly["BCB"]
-                                            data = data[:2]
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
+                                        elif d < 0 and d > -0b111000:
                                             d = (-d & 0b111111)
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d:
-                                                properties["adr2"] = d
-                                            data[1] = (d << 2) | 0b10
+                                            data = generateSRS(properties, "BCB", r1, d, 0b10)
                                             done = True
                                         else:
                                             operation = "BC"
@@ -1551,7 +1590,7 @@ def generateObjectCode(source, macros):
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
-                                        if operation == "LA": ###DEBUG###
+                                        if operation == "SVC": ###DEBUG###TRAP###
                                             pass
                                         if "L2" in ast and dUnitizer == 2 and \
                                                 b2 in [None, 3]:
@@ -1589,46 +1628,31 @@ def generateObjectCode(source, macros):
                                             d = uUnhashedValue
                                             d1 = unhashedValue
                                             
+                                        if "LA    R1,CPSTLR" in properties["text"]: ###DEBUG###
+                                            pass
                                         if operation in shiftOperations:
-                                            data = data[:2]
                                             if b2 == None:
                                                 d = d2
                                             else:
                                                 d = 56 + b2
-                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            data[1] = 0xFF & ((d << 2) | shiftOperations[operation])
+                                            data = generateSRS(properties, operation, r1, d, shiftOperations[operation])
                                             if "adr1" in properties:
                                                 properties.pop("adr1")
                                             properties["adr2"] = d2 & 0x3F
                                         elif operation == "LA" and \
                                                 x2 == None and b2 != None \
                                                 and d2 > -srsCeiling and d2 < srsCeiling:
-                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            if d2 >= 0:
-                                                data[1] = 0xFF & ((d2 << 2) | ib2)
+                                            if d2 >= 0 and len(data) == 2:
+                                                data = generateSRS(properties, operation, r1, d2, ib2)
                                             elif d2 < ic + 2:
                                                 # What's happening here is that we
                                                 # generate an RS AM=1 instruction,
                                                 # but we set the I bit-field to 1
                                                 # to cause d2 to be subtracted from
                                                 # the updateed IC.
-                                                d2 = ic + 2 - d2
-                                                data[1] = 0b11110111
-                                                if len(data) == 2: ###DEBUG###
-                                                    data.append(0)
-                                                    data.append(0)
-                                                    error(properties, "Instruction length incorrect", 3)
-                                                data[2] = 0b00001000 | ((d2 >> 8) & 0xFF)
-                                                data[3] = d2 & 0xFF
+                                                data = generateRS1(properties, operation, 0, 1, r1, ic + 2 - d2, 0, 3)
                                             else: # d2 >= ic + 2
-                                                d2 -= ic + 2
-                                                data[1] = 0b11110111
-                                                if len(data) == 2: ###DEBUG###
-                                                    data.append(0)
-                                                    data.append(0)
-                                                    error(properties, "Instruction length incorrect", 3)
-                                                data[2] = 0b00000000 | ((d2 >> 8) & 0xFF)
-                                                data[3] = d2 & 0xFF
+                                                data = generateRS1(properties, operation, 0, 0, r1, d2 - ic - 2, 0, 3)
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
@@ -1647,55 +1671,37 @@ def generateObjectCode(source, macros):
                                                 error(properties, "SRS displacement out of range")
                                             if len(data) == 4: ###DEBUG###
                                                 pass
-                                            data = data[:2]
-                                            #if ib2 != 3:
-                                            #    d = uUnhashedValue
-                                            data[0] = ((argsSRSorRS[operation] & 0b1111100000) >> 2) | r1
-                                            data[1] = 0xFF & ((d << 2) | ib2)
-                                            if "adr1" in properties and ib2 == 3 and \
-                                                    properties["adr1"] != d:
-                                                properties["adr2"] = d
+                                            data = generateSRS(properties, operation, r1, d, ib2)
                                         elif isConstant and literalAttributes == None:
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
-                                            data[1] = ((opcode & 0b11111) << 3) | 0b011
-                                            d0 = d2 & 0xFFFF
-                                            data[2] = (d0 & 0xFF00) >> 8
-                                            data[3] = d0 & 0xFF
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d0:
-                                                properties["adr2"] = d0
+                                            data = generateRS0(properties, operation, r1, d2 & 0xFFFF, 3)
                                         elif literalAttributes != None:
                                             pool = literalPools[literalPoolNumber]
                                             d1 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2 \
                                                  - ic - 2
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
-                                            data[1] = ((opcode & 0b11111) << 3) | 0b111
-                                            data[2] = (d1 & 0x700) >> 8
-                                            data[3] = d1 & 0xFF
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d1 & 0xFFFF:
-                                                properties["adr2"] = d1 & 0xFFFF
+                                            data = generateRS1(properties, operation, 0, 0, r1, d1, 0, 3)
+                                        elif operation in ["BC"] and x2 in [None, 0] and \
+                                                d1 > -2048 and d1 < 0:
+                                            data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
                                         elif not forceAM0 and \
                                                 (x2 != None or ia or \
                                                  i or (d1 >= 0 and d1 < 2048)):
+                                            if operation in ["B"]: ###DEBUG###
+                                                pass
                                             # RS AM=1 here
+                                            if ib2 == 3:
+                                                if d1 < 0:
+                                                    d1 = -d1
+                                                    i = 1
                                             if x2 == None:
                                                 x2 = 0
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
-                                            data[1] = ((opcode & 0b11111) << 3) | 0b100 | ib2
                                             if x2 < 0 or x2 > 7:
                                                 error(properties, "X2 out of range")
-                                            else:
-                                                data[2] = (x2 << 5) | \
-                                                          (ia << 4) | \
-                                                          (i << 3) | \
-                                                          ((d1 & 0x700) >> 8)
-                                            data[3] = d1 & 0xFF
-                                            if "adr1" in properties and \
-                                                    properties["adr1"] != d1 & 0xFFFF:
-                                                properties["adr2"] = d1 & 0xFFFF
+                                                x2 = 0
+                                            data = generateRS1(properties, operation, ia, i, r1, d1, x2, ib2)
                                         elif x2 == None and not ia and not i:
                                             # RS AM=0 here
+                                            if operation in ["B", "BZ"]:
+                                                pass
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
                                             elif d2 in rextrns:
@@ -1710,17 +1716,7 @@ def generateObjectCode(source, macros):
                                                 if b2 == None:
                                                     error(properties, "Could not interpret operand")
                                                     continue
-                                            data[0] = ((opcode & 0b1111100000) >> 2) | r1
-                                            data[1] = ((opcode & 0b11111) << 3) | b2
-                                            data[2] = (d0 & 0xFF00) >> 8
-                                            data[3] = d0 & 0xFF
-                                            if operation in ["SVC"]:
-                                                # Ad hoc special case.  I think
-                                                properties["adr1"] = d0
-                                            else:
-                                                if "adr1" in properties and \
-                                                        properties["adr1"] != d0:
-                                                    properties["adr2"] = d0
+                                            data = generateRS0(properties, operation, r1, d0, b2)
                                         else:
                                             error(properties, "Could not interpret line as SRS or RS")
                 toMemory(data)
