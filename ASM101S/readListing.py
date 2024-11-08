@@ -96,9 +96,9 @@ def readListing(filename):
                     "memory": [None]*chunkSize
                     }
             sect = name
-            address *= 2
-            sects[sect]["pos"] = address
-            sects[sect]["memory"] = [None]*chunkSize
+            #address *= 2
+            #sects[sect]["pos"] = address
+            #sects[sect]["memory"] = [None]*chunkSize
             continue
         
         # Now actually add the stuff to memory.

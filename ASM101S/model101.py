@@ -1115,6 +1115,7 @@ def generateObjectCode(source, macros):
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
                 commonProcessing(4)
+                #commonProcessing(2)
                 if collect and not asis:
                     ltorg(sect)
                 literalPoolNumber += 1
@@ -1500,6 +1501,8 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
+                                    if operation == "SST": ###DEBUG###TRAP###
+                                        pass
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3)
                                     if atStar and x2 == None:
@@ -1569,10 +1572,12 @@ def generateObjectCode(source, macros):
                                             done = True
                                     # `forceAM0` is purely empirical.
                                     forceAM0 = (operation in fpOperationsDP \
-                                                or operation in ["IHL", "AST"]) \
+                                                or operation in ["IHL", "AST", "SST", "MIH"]) \
                                                 and b2 not in [3, None] and x2 == None
                                     forceAM1 = (x2 != None)
                                     if not done:
+                                        if operation == "SST": ###DEBUG###TRAP###
+                                            pass
                                         opcode = argsSRSorRS[operation]
                                         # The logic of determining whether we
                                         # have to encode as
@@ -1584,14 +1589,14 @@ def generateObjectCode(source, macros):
                                         # need to use in performing that logic.
                                         unhashedValue = d2 & 0xFFFFFF
                                         ic = sects[sect]["pos1"] // 2
+                                        icSRS = ic + 1
+                                        icRS = ic + 2
                                         if (opcode & 0b1000000001) == 0:
                                             # The conditional above is entirely
                                             # empirical.
                                             dUnitizer = 2
                                         else:
                                             dUnitizer = 1
-                                        if operation == "SVC": ###DEBUG###TRAP###
-                                            pass
                                         if "L2" in ast and dUnitizer == 2 and \
                                                 b2 in [None, 3]:
                                             # We have to do this, because there's
@@ -1610,8 +1615,8 @@ def generateObjectCode(source, macros):
                                             dSRSa = unhashedValue
                                             dRSAM1 = unhashedValue
                                         else:
-                                            dSRSa = unhashedValue - (ic + 1)
-                                            dRSAM1 = unhashedValue - (ic + 2)
+                                            dSRSa = unhashedValue - icSRS
+                                            dRSAM1 = unhashedValue - icRS
                                         dSRS = (dSRSa + dUnitizer - 1) // dUnitizer
                                         forbiddenSRS = (dSRSa % dUnitizer) != 0
                                         uUnhashedValue = (dUnitizer - 1 + unhashedValue) // dUnitizer
@@ -1628,8 +1633,10 @@ def generateObjectCode(source, macros):
                                             d = uUnhashedValue
                                             d1 = unhashedValue
                                             
-                                        if "LA    R1,CPSTLR" in properties["text"]: ###DEBUG###
+                                        if "LA    R1,A" in properties["text"]: ###DEBUG###
                                             pass
+                                        #uhSect, uhD2 = unhash(d2)
+                                        #uuB2, uuD2 = unUsing(using, d2)
                                         if operation in shiftOperations:
                                             if b2 == None:
                                                 d = d2
@@ -1641,18 +1648,18 @@ def generateObjectCode(source, macros):
                                             properties["adr2"] = d2 & 0x3F
                                         elif operation == "LA" and \
                                                 x2 == None and b2 != None \
-                                                and d2 > -srsCeiling and d2 < srsCeiling:
-                                            if d2 >= 0 and len(data) == 2:
+                                                and d2 > -2048 and d2 < 2048:
+                                            if d2 >= 0 and d2 < srsCeiling and len(data) == 2:
                                                 data = generateSRS(properties, operation, r1, d2, ib2)
-                                            elif d2 < ic + 2:
+                                            elif d2 < icRS:
                                                 # What's happening here is that we
                                                 # generate an RS AM=1 instruction,
                                                 # but we set the I bit-field to 1
                                                 # to cause d2 to be subtracted from
                                                 # the updateed IC.
-                                                data = generateRS1(properties, operation, 0, 1, r1, ic + 2 - d2, 0, 3)
+                                                data = generateRS1(properties, operation, 0, 1, r1, icRS - d2, 0, 3)
                                             else: # d2 >= ic + 2
-                                                data = generateRS1(properties, operation, 0, 0, r1, d2 - ic - 2, 0, 3)
+                                                data = generateRS1(properties, operation, 0, 0, r1, d2 - icRS, 0, 3)
                                         elif len(data) == 2  or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
@@ -1662,11 +1669,18 @@ def generateObjectCode(source, macros):
                                                 not forbiddenSRS and \
                                                 operation in branchAliases):
                                             # Is SRS.
-                                            if operation == "BCTB": # Backward displacement
+                                            if operation in ["BCB", "BCTB"]: # Backward displacement
                                                 d = -d
-                                            if operation == "BC":
+                                            if operation in ["BC", "BCF"]:
                                                 operation = "BCF"
                                                 ib2 = 0b00
+                                            elif operation == "BVC":
+                                                operation = "BVCF"
+                                                ib2 = 0b01
+                                            elif operation == "BCB":
+                                                ib2 = 0b10
+                                            elif operation == "BCTB":
+                                                ib2 = 0b11
                                             if d >= srsCeiling:
                                                 error(properties, "SRS displacement out of range")
                                             if len(data) == 4: ###DEBUG###
@@ -1674,12 +1688,14 @@ def generateObjectCode(source, macros):
                                             data = generateSRS(properties, operation, r1, d, ib2)
                                         elif isConstant and literalAttributes == None:
                                             data = generateRS0(properties, operation, r1, d2 & 0xFFFF, 3)
+                                        elif isNumberD2 and b2 != None and x2 == None and not i and not ia:
+                                            data = generateRS0(properties, operation, r1, d2 & 0xFFFF, b2)
                                         elif literalAttributes != None:
                                             pool = literalPools[literalPoolNumber]
                                             d1 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2 \
-                                                 - ic - 2
+                                                 - icRS
                                             data = generateRS1(properties, operation, 0, 0, r1, d1, 0, 3)
-                                        elif operation in ["BC"] and x2 in [None, 0] and \
+                                        elif operation in ["BC", "BIX", "BAL"] and x2 in [None, 0] and \
                                                 d1 > -2048 and d1 < 0:
                                             data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
                                         elif not forceAM0 and \
@@ -1700,7 +1716,7 @@ def generateObjectCode(source, macros):
                                             data = generateRS1(properties, operation, ia, i, r1, d1, x2, ib2)
                                         elif x2 == None and not ia and not i:
                                             # RS AM=0 here
-                                            if operation in ["B", "BZ"]:
+                                            if operation in ["B", "BZ"]: ###DEBUG###
                                                 pass
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
@@ -1905,6 +1921,10 @@ def generateObjectCode(source, macros):
                 usage = sects[sect]["used"]
                 offset = pool[1]
                 alignment = pool[2]
+                if alignment < 2:
+                    alignment = 2
+                elif alignment > 4:
+                    alignment = 4
                 while offset - alignment >= usage:
                     offset -= alignment
                 pool[1] = offset

@@ -448,8 +448,8 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
         if index >= len(lines):
             break
         skipCount += 1
-        line = lines[index]
-        if "F0,F2" in line:
+        line = lines[index].rstrip("\r\n")
+        if "STED  F6,SAVE6" in line: ###DEBUG###TRAP###
             pass
         if done:
             pass
