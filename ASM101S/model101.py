@@ -1168,7 +1168,9 @@ def generateObjectCode(source, macros):
             
             # For our purposes, pseudo-ops like `DS` and `DC` that can have labels,
             # modify memory, and move the instruction pointer are "instructions".
-            
+            if operation == "DC": #name == "TENSTBL": ###DEBUG###TRAP###
+                pass
+            startingPos1 = sects[sect]["pos1"]
             if operation in ["DC", "DS"]:
                 ast = properties["ast"]
                 if ast == None:
@@ -1301,7 +1303,8 @@ def generateObjectCode(source, macros):
                         length = fpLength
                         if operation == "DC":
                             length = 0
-                            for value in suboperand["v"]:
+                            values = astFlattenList(suboperand["v"][0][1:-1])
+                            for value in values:
                                 # We now have to convert the `value` to an 
                                 # IBM hexadecimal float, of either single
                                 # precision (`fpLength==4`) or double 
@@ -1311,13 +1314,10 @@ def generateObjectCode(source, macros):
                                 #    string -> Python float
                                 #    Python float -> IBM hex float
                                 try:
-                                    v = float(''.join(astFlattenList(value[1:3])))
+                                    v = float(''.join(value))
                                 except:
-                                    try:
-                                        v = ''.join(value[1])
-                                    except:
-                                        error(properties, "Cannot evaluate constant")
-                                        v = 0.0
+                                    error(properties, "Cannot evaluate constant")
+                                    v = 0.0
                                 msw, lsw = toFloatIBM(v)
                                 j = 24
                                 for i in range(4):
@@ -1378,6 +1378,7 @@ def generateObjectCode(source, macros):
                         error(properties, 
                               "Unsupported DC/DS type %s" % suboperandType)
                         continue
+                dcLength = sects[sect]["pos1"] - startingPos1
                 continue
             
             if operation in argsRR:

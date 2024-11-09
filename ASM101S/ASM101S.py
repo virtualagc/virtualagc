@@ -923,7 +923,7 @@ for i in range(endLibraries, len(source)):
                 paddress += offset
             prefix = "%05X" % paddress
         if "assembled" in properties:
-            for i in range(len(properties["assembled"])):
+            for i in range(min(8, len(properties["assembled"]))):
                 b = properties["assembled"][i]
                 if comparisonMemory != None:
                     oaddress = address + offset * 2
