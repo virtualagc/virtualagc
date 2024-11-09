@@ -405,11 +405,11 @@ def evalLiteralAttributes(properties, ast, symtab):
         value = round(value)
     elif t == "E":
         l = 4
-        msw, lsw = toFloatIBM(l2 * scale)
+        msw, lsw = toFloatIBM(l2, scale)
         value = msw
     elif t == "D":
         l = 8
-        msw, lsw = toFloatIBM(l2 * scale)
+        msw, lsw = toFloatIBM(l2, scale)
         value = (msw << 32) | lsw
     elif t == "Y":
         l = 2
