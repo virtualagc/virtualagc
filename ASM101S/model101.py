@@ -405,11 +405,11 @@ def evalLiteralAttributes(properties, ast, symtab):
         value = round(value)
     elif t == "E":
         l = 4
-        msw, lsw = toFloatIBM(l2, scale)
+        msw, lsw = toFloatIBM("".join(ast["E"][0]), scale)
         value = msw
     elif t == "D":
         l = 8
-        msw, lsw = toFloatIBM(l2, scale)
+        msw, lsw = toFloatIBM("".join(ast["D"][0]), scale)
         value = (msw << 32) | lsw
     elif t == "Y":
         l = 2
@@ -646,7 +646,7 @@ the general category it falls into, chosen from among the following:
 Besides the "type" key, there could be one or more of following keys:
    "section"     (string) Name of the control section containg the symbol.
    "address"     (integer) Halfword ddress of the symbol within the control section.
-   "value"       Tricky, so see explanatin that follows.
+   "value"       Tricky, so see explanation that follows.
 
 Regarding "value", this is what's used in computing the value of arithmetic 
 expressions involving the symbol.  There are four cases:
@@ -981,12 +981,27 @@ def generateObjectCode(source, macros):
         asis = (passCount == 2)
         compile = (passCount == 3)
         continuation = False
+        
         if asis:
             #continue
             sects.clear()
             #symtab.clear()
         else:
+            ppos1 = 0
             for sect in sects:
+                if sect in symtab:
+                    if not sects[sect]["dsect"]:
+                        ppos1 += ppos1 & 1
+                        symtab[sect]["preliminaryOffset"] = ppos1
+                        ppos1 += sects[sect]["used"] // 2
+                        # The following is because the "used" field doesn't 
+                        # seem to include the litera pool appended to the end
+                        # of it, if any.
+                        for pool in literalPools:
+                            if pool[0] == sect:
+                                ppos1 += ppos1 & 1
+                                ppos1 += pool[4] // 2
+                                break
                 sects[sect]["pos1"] = 0
         sect = None
         using = [None]*8
@@ -1116,8 +1131,11 @@ def generateObjectCode(source, macros):
             elif operation == "LTORG":
                 commonProcessing(4)
                 #commonProcessing(2)
-                if collect and not asis:
-                    ltorg(sect)
+                if collect:
+                    if not asis:
+                        ltorg(sect)
+                    else:
+                        literalPools[literalPoolNumber][1] = sects[sect]["pos1"]
                 literalPoolNumber += 1
                 continue
             elif operation in ["USING", "DROP"]:
@@ -1308,17 +1326,8 @@ def generateObjectCode(source, macros):
                                 # We now have to convert the `value` to an 
                                 # IBM hexadecimal float, of either single
                                 # precision (`fpLength==4`) or double 
-                                # precision (`fpLength==8`).  The lazy man's
-                                # approach I'm taking at first is:
-                                #    `value` -> string
-                                #    string -> Python float
-                                #    Python float -> IBM hex float
-                                try:
-                                    v = float(''.join(value))
-                                except:
-                                    error(properties, "Cannot evaluate constant")
-                                    v = 0.0
-                                msw, lsw = toFloatIBM(v)
+                                # precision (`fpLength==8`). 
+                                msw, lsw = toFloatIBM(''.join(value))
                                 j = 24
                                 for i in range(4):
                                     dcBuffer[dcBufferPtr] = (msw >> j) & 0xFF
@@ -1503,7 +1512,7 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    if operation == "BNC": ###DEBUG###TRAP###
+                                    if operation in ["LA", "SVC"]: ###DEBUG###TRAP###
                                         pass
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3)
@@ -1515,6 +1524,8 @@ def generateObjectCode(source, macros):
                                             d2 = d
                                     done = False
                                     forceRS = (operation in argsRSonly)
+                                    forceAM0 = False
+                                    forceAM1 = False
                                     if operation in ["BC", "BCT"]:
                                         d = d2 - (currentHash() + 1)
                                         if d < 0 and d > -0b111000:
@@ -1580,8 +1591,8 @@ def generateObjectCode(source, macros):
                                             done = True
                                     opcode = argsSRSorRS[operation]
                                     # `forceAM0` is purely empirical.
-                                    forceAM0 = (opcode & 1) != 0 \
-                                                and b2 not in [3, None] and x2 == None
+                                    forceAM0 = forceAM0 or ( (opcode & 1) != 0 \
+                                                and b2 not in [3, None] and x2 == None)
                                     if extrnD2:
                                         forceAM0 = True
                                     forceAM1 = (x2 != None)
@@ -1737,7 +1748,7 @@ def generateObjectCode(source, macros):
                                                 section, offset = unhash(d2)
                                                 if section in sects and \
                                                         "offset" in sects[section]:
-                                                    d0 = offset + sects[section]["offset"] - sects[sect]["offset"]
+                                                    d0 = offset # + sects[section]["offset"] - sects[sect]["offset"]
                                                     b2 = 3
                                                 if b2 == None:
                                                     error(properties, "Could not interpret operand")

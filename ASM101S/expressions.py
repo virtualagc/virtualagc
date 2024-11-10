@@ -270,7 +270,10 @@ def evalArithmeticExpression(expression, \
             entry = symtab[expression]
             if "value" in entry:
                 value = entry["value"]
-                if isinstance(value, int):
+                if isinstance(value, int): ###XPERIMENTAL###
+                    if "section" in entry and entry["type"] == "DATA" and \
+                            "preliminaryOffset" in symtab[entry["section"]]:
+                        value += symtab[entry["section"]]["preliminaryOffset"]
                     return value
     if not isinstance(expression, (list, tuple)):
         error(properties, "Eval error type 1", severity)

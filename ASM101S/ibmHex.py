@@ -55,7 +55,11 @@ sixteen = Decimal(16)
 
 # Convert a Python integer or float to IBM double-precision float.  
 # Returns as a pair (msw,lsw), each of which are 32-bit integers,
-# or (0xff000000,0x00000000) on error.
+# or (0xff000000,0x00000000) on error.  Note that `x` and `scale` can
+# be either numbers or string representations of numbers.  But the 
+# string representation is better, because if the value has already been
+# converted to a Python `float`, it may no longer be able to correctly match 
+# all significant digits.
 def toFloatIBM(x, scale=1):
     d = Decimal(x) * Decimal(scale)
     if d == 0:
@@ -157,7 +161,7 @@ if __name__ == "__main__":
             print("->", f, "->", "%08X,%08X" % toFloatIBM(f))
         else:
             try:
-                f = float(parm)
+                f = parm
             except:
                 print("Not a floating-point numbmer: %s" % parm)
             hex1, hex2 = toFloatIBM(f)
