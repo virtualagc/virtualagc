@@ -23,6 +23,7 @@ from expressions import *
 from readListing import *
 
 currentDate = datetime.today().strftime('%m/%d/%y')
+svGlobals["_passCount"] = -1
 
 # Specifics for the type of assembly language.
 if "--390" in sys.argv[1:]:
@@ -799,11 +800,11 @@ if len(source) > 0 and source[-1]["inMacroDefinition"]:
     errorCount += 1
     maxSeverity = 255
 if maxSeverity > tolerableSeverity:
-    print("%d error(s) detected.  Assembly aborted.  Fix the syntax errors" % \
-          errorCount)
-    print("marked below and retry.  Search for =========.")
+    print("Assembly aborted due to intolerable errors. %d total error(s) detected." % errorCount)
+    print("Fix any intolerable errors marked below and retry.  Search for 'Severity'.")
     print()
     lastError = False
+    intolerables = 0
     for i in range(len(source)):
         line = source[i]
         if line["depth"] > 0:
@@ -816,17 +817,23 @@ if maxSeverity > tolerableSeverity:
         else:
             if not lastError:
                 print("=====================================================")
+            anyIntolerable = False
             for msg in line["errors"]:
+                fields = msg.split(")")[0].split()
+                if int(fields[-1]) > tolerableSeverity:
+                    anyIntolerable = True
                 print(msg)
+            if anyIntolerable:
+                intolerables += 1
             print("%5d: %s   %s" % (i, depthStar, line["text"]))
             print("=====================================================")
             lastError = True
     if len(source) > 0 and source[-1]["inMacroDefinition"]:
         print("No closing MEND for MACRO")
-    print("Assembly aborted.  Fix the syntax errors or use --tolerable=N.")
-    print("Search for ================ to see the marked errors.")
-    print("%s: %d error(s) detected, max severity %d." % \
-          (",".join(sourceFileNames), errorCount, maxSeverity))
+    print("Assembly aborted. Fix the errors or use --tolerable=N to adjust tolerance.")
+    print("Search for 'Severity' to find the marked errors, tolerated or otherwise.")
+    print("%s: %d intolerable line(s) detected, %d < severity < %d." % \
+          (",".join(sourceFileNames), intolerables, tolerableSeverity, 1 + maxSeverity))
     sys.exit(1)
 
 #==============================================================================

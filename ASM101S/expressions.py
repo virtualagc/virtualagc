@@ -70,7 +70,7 @@ def error(properties, msg, severity=255):
     if severity > maxSeverity:
         maxSeverity = severity
     errorCount += 1
-    properties["errors"].append("(Severity %d) %s" % (severity, msg))
+    properties["errors"].append("(Pass %d, Severity %d) %s" % (svGlobals["_passCount"], severity, msg))
 def getErrorCount():
     return errorCount, maxSeverity
 

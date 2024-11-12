@@ -12,7 +12,8 @@ History:    2024-09-05 RSB  Began.
 
 import copy
 import random
-from expressions import error, unroll, astFlattenList, evalArithmeticExpression
+from expressions import error, unroll, astFlattenList, \
+    evalArithmeticExpression, svGlobals
 from fieldParser import parserASM
 from ibmHex import *
 
@@ -882,6 +883,7 @@ def generateObjectCode(source, macros):
     #-----------------------------------------------------------------------
     # Pass 0
     passCount = 0
+    svGlobals["_passCount"] = passCount
     metadata["passCount"] = passCount
     continuation = False
     sect = None
@@ -933,7 +935,7 @@ def generateObjectCode(source, macros):
                     "used": 0,
                     "memory": bytearray(defaultChunk),
                     "scratch": [],
-                    "dsect": False
+                    "dsect": operation in "DSECT"
                     }
                 if sect not in symtab:
                     symtab[sect] = { 
@@ -973,13 +975,21 @@ def generateObjectCode(source, macros):
     '''
             
     #-----------------------------------------------------------------------
-    # Remaining passes
+    # Remaining passes.  In principle these are passes 1 through 3.  However,
+    # it is possible for values of symbols defined by EQU to change during
+    # pass 3, in which case pass 3 is repeated (through pass 4, 5, ...) until
+    # no more changes occur.
     
-    for passCount in range(1, 4):
+    repeatPass = False
+    passCount = 0
+    while passCount < 3 or repeatPass:
+        repeatPass = False
+        passCount += 1
         metadata["passCount"] = passCount
+        svGlobals["_passCount"] = passCount
         collect = (passCount in [1, 2])
         asis = (passCount == 2)
-        compile = (passCount == 3)
+        compile = (passCount >= 3)
         continuation = False
         
         if asis:
@@ -1099,6 +1109,8 @@ def generateObjectCode(source, macros):
                             rextrns[symtab[symbol]["value"]] = symbol
                 continue
             elif operation == "EQU":
+                if operand == "*-2" and compile: ###DEBUG###
+                    pass
                 if name == "":
                     error(properties, "EQU has no name field")
                     continue
@@ -1114,18 +1126,17 @@ def generateObjectCode(source, macros):
                     error(properties, "Cannot parse operand of EQU")
                     continue
                 err, v = evalInstructionSubfield(properties, "v", ast, symtab)
+                if operand.startswith("*") and sect != firstCSECT:
+                    v = (v & 0xFFFFFF) + symtab[firstCSECT]["value"] + symtab[sect]["preliminaryOffset"]
                 if err:
                     error(properties, "Cannot evaluate EQU")
                     continue
-                if oldValue not in [None, v]:
-                    error(properties, "EQU value of %s changed: %08X -> %08X" % \
-                          (name, oldValue, v), severity=0)
-                    #continue
-                if name not in symtab:
-                    symtab[name] = {
-                        "type": "EQU",
-                        "value": v
-                        }
+                if oldValue != v and compile:  ###DEBUG###
+                    repeatPass = True
+                symtab[name] = {
+                    "type": "EQU",
+                    "value": v
+                    }
                 continue
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
