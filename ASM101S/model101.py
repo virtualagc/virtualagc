@@ -502,12 +502,18 @@ def optimizeScratch():
                                              properties, symtab, \
                                              symtab[sect]["value"] + entry["pos1"] // 2, \
                                              severity=0)
-                symtab[entry["name"]]["value"] = v
+                n = entry["name"]
+                symtab[n]["value"] = v
+                s, d = unhash(v)
+                if s != None:
+                    symtab[n]["section"] = s
+                    symtab[n]["address"] = d
+                    symtab[n]["dsect"] = sects[s]["dsect"]
                 continue
             elif operation == "LTORG":
                 literalPoolNumber += 1
                 continue
-            if operation == "BZ": ###DEBUG### ###TRAP optimize###
+            if operation == "BP": ###DEBUG### ###TRAP optimize###
                 pass
             properties["length"] = entry["length"]
             if "name" in entry:
@@ -779,6 +785,7 @@ def generateObjectCode(source, macros):
             cVsD = True
             sect = ""
             firstCSECT = sect
+            symtab["_firstCSECT"] = firstCSECT
             if sect not in sects:
                 sects[sect] = {
                     "pos1": 0,
@@ -820,7 +827,8 @@ def generateObjectCode(source, macros):
                           % (name, oldSect, oldPos, sect, pos2 ))
             symtab[name].update( { "section": sect,  "address": pos2,
                              "value": symtab[sect]["value"] + pos2,
-                             "debug": "%05X" % pos2 } )
+                             "debug": "%05X" % pos2,
+                             "dsect": sects[sect]["dsect"] } )
             if operation in ["DC", "DS"]:
                 symtab[name]["type"] = "DATA"
             elif name in entries:
@@ -944,7 +952,8 @@ def generateObjectCode(source, macros):
                         "type": "CSECT",
                         "value": getHashcode(sect) ,
                         "preliminary": True,
-                        "n": properties["n"]
+                        "n": properties["n"],
+                        "dsect": sects[sect]["dsect"]
                         }
             continue
         try: 
@@ -957,7 +966,8 @@ def generateObjectCode(source, macros):
                          "alignment": 4,
                          "debug": "%05X" % pos1,
                          "preliminary": True,
-                         "n": properties["n"] }
+                         "n": properties["n"],
+                         "dsect": sects[sect]["dsect"] }
         if operation in ["DC", "DS"]:
             symtab[name]["type"] = "DATA"
         elif False and name in entries:
@@ -1060,6 +1070,7 @@ def generateObjectCode(source, macros):
                 cVsD = (operation == "CSECT")
                 if cVsD and sect == None:
                     firstCSECT = name
+                    symtab["_firstCSECT"] = firstCSECT
                 if name == "" and not cVsD:
                     error(properties, "Unnamed DSECT not allowed.")
                 sect = name
@@ -1076,7 +1087,8 @@ def generateObjectCode(source, macros):
                             "section": sect, 
                             "address": 0, 
                             "type": "CSECT",
-                            "value": getHashcode(sect) 
+                            "value": getHashcode(sect),
+                            "dsect": sects[sect]["dsect"]
                             }
                 properties["section"] = sect
                 properties["pos1"] = sects[sect]["pos1"]
@@ -1137,6 +1149,11 @@ def generateObjectCode(source, macros):
                     "type": "EQU",
                     "value": v
                     }
+                vs, vd = unhash(v)
+                if vs != None:
+                    symtab[name]["section"] = vs
+                    symtab[name]["address"] = vd
+                    symtab[name]["dsect"] = sects[vs]["dsect"]
                 continue
             # For EXTRN see ENTRY.
             elif operation == "LTORG":
@@ -1523,7 +1540,7 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    if operation in ["LA", "SVC"]: ###DEBUG###TRAP###
+                                    if operation in ["BP"]: ###DEBUG###TRAP###
                                         pass
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3)
@@ -1577,7 +1594,8 @@ def generateObjectCode(source, macros):
                                         if b2 == None:
                                             if newd2 == None:
                                                 newd2 = d2 - symtab[sect]["value"]
-                                                if newd2 >= 0 and newd2 < 4096:
+                                                if newd2 >= 0 and newd2 < 4096 \
+                                                        and newd2 < sects[sect]["used"] // 2:
                                                     b2 = 3
                                                     d2 = newd2
                                                 else:
@@ -1606,9 +1624,9 @@ def generateObjectCode(source, macros):
                                                 and b2 not in [3, None] and x2 == None)
                                     if extrnD2:
                                         forceAM0 = True
-                                    forceAM1 = (x2 != None)
+                                    forceAM1 = forceAM1 or (x2 != None)
                                     if not done:
-                                        if operation == "SST": ###DEBUG###TRAP###
+                                        if operation == "BP": ###DEBUG###TRAP###
                                             pass
                                         # The logic of determining whether we
                                         # have to encode as
@@ -1987,6 +2005,7 @@ def generateObjectCode(source, macros):
                         break
                 lastOffset += offset // 2
                 lastOffset = (lastOffset + 1) & 0xFFFFFE
+        pass
     
     # Let's append the literal pools to their CSECTs.
     fill = [0xC9, 0xFB]

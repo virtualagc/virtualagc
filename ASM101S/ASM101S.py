@@ -1031,6 +1031,8 @@ def sortOrder(s):
 
 linesThisPage = 1000
 for symbol in sorted(symtab, key = sortOrder):
+    if symbol.startswith("_"):
+        continue
     if linesThisPage >= linesPerPage:
         pageNumber += 1
         print(pageSeparator)

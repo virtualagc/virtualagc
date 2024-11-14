@@ -270,11 +270,17 @@ def evalArithmeticExpression(expression, \
             entry = symtab[expression]
             if "value" in entry:
                 value = entry["value"]
-                if isinstance(value, int): ###XPERIMENTAL###
-                    if "section" in entry and entry["type"] == "DATA" and \
-                            "preliminaryOffset" in symtab[entry["section"]]:
-                        value += symtab[entry["section"]]["preliminaryOffset"]
-                    return value
+                try:
+                    if svGlobals["_passCount"] > 1 and value != 0 and value != -1 and \
+                            (value & 0xFFFFFFF000000000) != 0 and \
+                            not entry["dsect"]: ###XPERIMENTAL###
+                        value = symtab[symtab["_firstCSECT"]]["value"] + \
+                                symtab[entry["section"]]["preliminaryOffset"] + \
+                                entry["address"]
+                except:
+                    pass
+                    pass
+                return value
     if not isinstance(expression, (list, tuple)):
         error(properties, "Eval error type 1", severity)
         return None
