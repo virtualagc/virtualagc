@@ -268,6 +268,10 @@ def evalArithmeticExpression(expression, \
             return star
         if expression in symtab:
             entry = symtab[expression]
+            if svGlobals["_passCount"] == 3:
+                if "references" not in entry:
+                    entry["references"] = []
+                entry["references"].append(properties["n"])
             if "value" in entry:
                 value = entry["value"]
                 try:

@@ -512,6 +512,7 @@ def optimizeScratch():
                     symtab[n]["section"] = s
                     symtab[n]["address"] = d
                     symtab[n]["dsect"] = sects[s]["dsect"]
+                    symtab[n]["properties"] = properties
                 continue
             elif operation == "LTORG":
                 literalPoolNumber += 1
@@ -754,6 +755,7 @@ def generateObjectCode(source, macros):
                 "using": copy.copy(using)
                 }
             sects[sect]["scratch"].append(newScratch)
+            properties["scratch"] = newScratch
         #if isinstance(bytes, int):
         #    if bytes == 0:
         #        return
@@ -836,8 +838,6 @@ def generateObjectCode(source, macros):
                              "dsect": sects[sect]["dsect"] } )
             if operation in ["DC", "DS"]:
                 symtab[name]["type"] = "DATA"
-            elif name in entries:
-                symtab[name]["type"] = "ENTRY"
             else:
                 symtab[name]["type"] = "INSTRUCTION"
     
@@ -949,7 +949,8 @@ def generateObjectCode(source, macros):
                     else:
                         symtab[symbol] = { 
                             "type": "EXTERNAL",
-                            "value": getHashcode(symbol)
+                            "value": getHashcode(symbol),
+                            "properties": properties
                              }
                 for symbol in already:
                     ast.remove(symbol)
@@ -982,8 +983,13 @@ def generateObjectCode(source, macros):
                         "value": getHashcode(sect) ,
                         "preliminary": True,
                         "n": properties["n"],
-                        "dsect": sects[sect]["dsect"]
+                        "dsect": sects[sect]["dsect"],
+                        "properties": properties
                         }
+            elif passCount == 3:
+                if "references" not in symtab[sect]:
+                    symtab[sect]["references"] = []
+                symtab[sect]["references"].append(properties["n"])
             continue
         try: 
             pos1 = sects[sect]["pos1"]
@@ -996,7 +1002,8 @@ def generateObjectCode(source, macros):
                          "debug": "%05X" % pos1,
                          "preliminary": True,
                          "n": properties["n"],
-                         "dsect": sects[sect]["dsect"] }
+                         "dsect": sects[sect]["dsect"], 
+                         "properties": properties }
         if operation in ["DC", "DS"]:
             symtab[name]["type"] = "DATA"
         elif False and name in entries:
@@ -1142,6 +1149,10 @@ def generateObjectCode(source, macros):
                             entries.add(symbol)
                             if symbol in symtab:
                                 symtab[symbol]["entry"] = True
+                                if passCount == 3:
+                                    if "references" not in symtab[symbol]:
+                                        symtab[symbol]["references"] = []
+                                    symtab[symbol]["references"].append(properties["n"])
                         else:
                             extrns.add(symbol)
                             if symbol not in symtab:
@@ -1178,7 +1189,8 @@ def generateObjectCode(source, macros):
                     repeatPass = True
                 symtab[name] = {
                     "type": "EQU",
-                    "value": v
+                    "value": v,
+                    "properties": properties
                     }
                 vs, vd = unhash(v)
                 if vs != None:
@@ -1479,6 +1491,7 @@ def generateObjectCode(source, macros):
                             uplim = 15
                             if operation == "LFXI":
                                 r2 += 2
+                                properties["adr2"] = r2
                         if not err and r2 >= lolim and r2 <= uplim:
                             op = argsRR[operation]
                             data[0] = ((op & 0b111110) << 2) | r1

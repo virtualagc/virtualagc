@@ -908,20 +908,28 @@ for symbol in symtab:
 title = ""
 subtitle = ""
 literalPoolNumber = 0
+continuation = False
 for i in range(endLibraries, len(source)):
     properties = source[i]
     skip = False
     if properties["empty"]:
         continue
+    if continuation:
+        continuation = properties["continues"]
+        linesThisPage += 1
+        continue
+    continuation = properties["continues"]
     if properties["operation"] == "SPACE":
         space = 1 # Actually depends on the operand.
         printedLineNumber += space
+        properties["printedLineNumber"] = printedLineNumber
         linesThisPage += space
     elif properties["operation"] == "TITLE":
         title = properties["operand"].rstrip()[1:-1]
         subtitle = "%-95s" % "  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT" \
                    + "%16s %s" % (program + " " + version, currentDate)
         printedLineNumber += 1
+        properties["printedLineNumber"] = printedLineNumber
         linesThisPage = 1000
         skip = True
     if linesThisPage >= linesPerPage:
@@ -1024,9 +1032,9 @@ for i in range(endLibraries, len(source)):
             identification = identification + suffix[:5]
         if properties["dotComment"]:
             pass
-        elif properties["empty"] or properties["fullComment"] \
-                or properties["inMacroDefinition"]:
+        elif properties["fullComment"] or properties["inMacroDefinition"]:
             printedLineNumber += 1
+            properties["printedLineNumber"] = printedLineNumber
             linesThisPage += 1
             if identification.strip() == "" or \
                     (properties["fullComment"] and depthStar != " " and \
@@ -1037,11 +1045,14 @@ for i in range(endLibraries, len(source)):
                 print("%-30s%5d%s%-71s %s" % (prefix, printedLineNumber, 
                                               depthStar, properties["text"], 
                                               identification))
+        elif properties["operation"] == "":
+            continue
         else:
             name = properties["name"]
             if name.startswith("."):
                 name = ""
             printedLineNumber += 1
+            properties["printedLineNumber"] = printedLineNumber
             linesThisPage += 1
             mid = "%-30s%5d%s%-8s %-5s %s" % (
                 prefix,
@@ -1102,18 +1113,39 @@ for symbol in sorted(symtab, key = sortOrder):
         print("%45s%-66sPAGE %4d" % ("", "CROSS REFERENCE", pageNumber))
         print("%-95s%16s %s" % ("SYMBOL    LEN    VALUE   DEFN   REFERENCES", program + " " + version, currentDate))
         linesThisPage = 0
-    if symProps["type"] in ["EQU", "CSECT", "INSTRUCTION"]: ###FIXME###
+    if symProps["type"] in ["EQU", "CSECT", "EXTERNAL"]: ###FIXME###
         length = 1
+    elif "properties" in symProps and "scratch" in symProps["properties"]:
+        if symProps["properties"]["scratch"]["length"] < 2:
+            length = 1
+        else:
+            length = symProps["properties"]["scratch"]["length"] // 2
     else:
         length = 2
     value = symProps["value"]
+    defn = "     "
+    if "properties" in symProps and "printedLineNumber" in symProps["properties"]:
+        defn = "%5d" % symProps["properties"]["printedLineNumber"]
     if "section" in symProps and "offset" in sects[symProps["section"]]:
         value += sects[symProps["section"]]["offset"]
     if symProps["type"] in ["INSTRUCTION", "DATA"]:
-        line = "%-8s %5d   %06X" % (symbol, length, value & 0xFFFFFF)
+        line = "%-8s %5d   %06X %s" % (symbol, length, value & 0xFFFFFF, defn)
     else:
-        line = "%-8s %5d %08X" % (symbol, length, value & 0xFFFFFFFF)
+        line = "%-8s %5d %08X %s" % (symbol, length, value & 0xFFFFFFFF, defn)
+    numRefs = 0
+    if "references" in symProps and len(symProps["references"]) > 0:
+        line += " "
+        for n in sorted(symProps["references"]):
+            if "printedLineNumber" in source[n]:
+                if numRefs == 15:
+                    print(line)
+                    linesThisPage += 1
+                    line = " "*30
+                    numRefs = 0
+                line += " %5d" % source[n]["printedLineNumber"]
+                numRefs += 1
     print(line)
+    linesThisPage += 1
 
 if comparisonSects != None:
     print("\f")
