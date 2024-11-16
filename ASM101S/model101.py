@@ -221,6 +221,9 @@ srsCeiling = 56
 random.seed(16134176201611561415)
 hashcodeLookup = {}
 def getHashcode(symbol):
+    for h in hashcodeLookup:
+        if hashcodeLookup[h] == symbol:
+            return h
     hashcode = random.randint(1, (1 << 28) - 1) << 36
     hashcodeLookup[hashcode] = symbol
     return hashcode
@@ -643,12 +646,14 @@ the general category it falls into, chosen from among the following:
    "EXTERNAL"    Indicates an `EXTRN` symbol.
    "DATA"        Indicates `DS` or `DC`.
    "INSTRUCTION" Indicates a program label.
-   "ENTRY"       Indicates an `ENTRY` point, but otherwise identical to an
-                 "INSTRUCTION".
    "CSECT"       Indicates `CSECT`, `DSECT`, or `START`.
    "EQU"         Indicates `EQU`.
    "LITERAL"     Indicates an integer, boolean, or string constant value.
    ... presumably, more later ...
+
+Note that there is no "type":"ENTRY".  That's because an `ENTRY` symbol will
+already have some other type, such as "INSTRUCTION" or "DATA".  Instead, an
+`ENTRY` symbol has an extra key, "entry":True.
    
 Besides the "type" key, there could be one or more of following keys:
    "section"     (string) Name of the control section containg the symbol.
@@ -927,7 +932,31 @@ def generateObjectCode(source, macros):
         # We need to create "preliminary" entries in the symbol table, for
         # the sole purpose of providing a temporary way to resolve forward
         # references in statements like "USING symbol,register" on the next
-        # pass (which will correct these references).
+        # pass (which will correct these references).  
+        # Also:  The original assembler transparently discarded `EXTRN` 
+        # statements for already-defined symbols.  When I say "discarded", I
+        # don't just mean "ignored", but that they literally did not appear in
+        # the assembly listing.  Thus we have to go to the bother of detecting
+        # this condition and dealing with it in the same way.
+        if operation == "EXTRN":
+            ast = unroll(ast)
+            if ast != None and isinstance(ast, str):
+                ast = [ast]
+                already = set()
+                for symbol in ast:
+                    if symbol in symtab:
+                        already.add(symbol)
+                    else:
+                        symtab[symbol] = { 
+                            "type": "EXTERNAL",
+                            "value": getHashcode(symbol)
+                             }
+                for symbol in already:
+                    ast.remove(symbol)
+                properties["ast"] = ast
+                if len(ast) == 0:
+                    properties["empty"] = True
+            continue
         if operation in ["EQU"]:
             continue
         if "name" not in properties:
@@ -1111,6 +1140,8 @@ def generateObjectCode(source, macros):
                     for symbol in symbols:
                         if operation == "ENTRY":
                             entries.add(symbol)
+                            if symbol in symtab:
+                                symtab[symbol]["entry"] = True
                         else:
                             extrns.add(symbol)
                             if symbol not in symtab:
@@ -1186,6 +1217,7 @@ def generateObjectCode(source, macros):
                     else:
                         h = rlist.pop(0)
                         section, address = unhash(h)
+                        properties["using"] = address
                 for r in rlist:
                     if r == None or r < 0 or r > 7:
                         error(properties, "Bad register number")
@@ -1540,7 +1572,7 @@ def generateObjectCode(source, macros):
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
                                 if not err:
-                                    if operation in ["BP"]: ###DEBUG###TRAP###
+                                    if operation in ["ST"]: ###DEBUG###TRAP###
                                         pass
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3)

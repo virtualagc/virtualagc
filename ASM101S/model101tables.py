@@ -269,7 +269,8 @@ def generateSRS(properties, mnemonic, r1, d2, b2):
     data = bytearray(2)
     data[0] = ((argsSRSorRS[mnemonic] & 0b1111100000) >> 2) | r1
     data[1] = 0xFF & ((d2 << 2) | b2)
-    if "adr1" in properties and b2 == 3 and properties["adr1"] != d2:
+    if "adr1" in properties and properties["adr1"] != d2 and \
+            (b2 == 3 or properties["operation"] in branchAliases):
         properties["adr2"] = d2
     return data
 

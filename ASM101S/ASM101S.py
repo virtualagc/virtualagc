@@ -554,10 +554,11 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 else: 
                     error(properties, msg, severity = 1)
                 properties["fullComment"] = True
-                properties["text"] = "*" + msg
+                properties["text"] = msg
                 properties["name"] = ""
                 properties["operation"] = ""
                 properties["operand"] = ""
+                properties["mnote"] = True
             continue
         
         # Symbolic-variable replacement
@@ -844,8 +845,6 @@ if maxSeverity > tolerableSeverity:
 macroLanguageInstructions = { "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
                               "LCLC", "SETA", "SETB", "SETC", "AIF",
                               "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE" }
-title = ""
-subtitle = ""
 inCopy = False
 memberName = ""
 # I don't really know how to get rvl/concat/nest, so it's just 0/0/0 for now
@@ -859,10 +858,61 @@ linesPerPage = 80
 linesThisPage = 1000
 mismatchCount = 0
 pageSeparator = "\f%s" % ('-'*120)
+
+title = "EXTERNAL SYMBOL DICTIONARY".center(100)
+subtitle = "%-95s" % "SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID" \
+           + "%16s %s" % (program + " " + version, currentDate)
+id = 0
+ids = {}
+for symbol in symtab:
+    if symbol.startswith("_"):
+        continue
+    entry = symtab[symbol]
+    ldId = "    "
+    if entry["type"] == "CSECT" and not entry["dsect"]:
+        moduleType = "SD"
+        id += 1
+        ids[symbol] = id
+        pid = "%04d" % id
+    elif "entry" in entry:
+        moduleType = "LD"
+        pid = "    "
+        ldId = "%04X" % ids[entry["section"]]
+    elif entry["type"] == "EXTERNAL":
+        moduleType = "ER"
+        id += 1
+        ids[symbol] = id
+        pid = "%04d" % id
+        
+    else:
+        continue
+    address = "      "
+    if "address" in entry:
+        address = entry["address"]
+        if "preliminaryOffset" in entry:
+            address += entry["preliminaryOffset"]
+        address = "%06X" % address
+    length = "      "
+    if symbol in sects:
+        length = "%06X" % ((sects[symbol]["used"] + 1) // 2)
+    if linesThisPage >= linesPerPage:
+        pageNumber += 1
+        if pageNumber > 1:
+            print(pageSeparator)
+        print("         %-100s  PAGE %4d" % (title, pageNumber))
+        print(subtitle)
+        linesThisPage = 0
+    print(("%-10s%-3s%-5s%-7s%-7s%s" % (symbol, moduleType, pid, address, length, ldId)).rstrip())
+    linesThisPage += 1
+
+title = ""
+subtitle = ""
 literalPoolNumber = 0
 for i in range(endLibraries, len(source)):
     properties = source[i]
     skip = False
+    if properties["empty"]:
+        continue
     if properties["operation"] == "SPACE":
         space = 1 # Actually depends on the operand.
         printedLineNumber += space
@@ -918,6 +968,10 @@ for i in range(endLibraries, len(source)):
             offset = 0
         if properties["operation"] == "EQU":
             prefix = "%07X" % (symtab[properties["name"]]["value"] & 0xFFFFFFF)
+        elif properties["operation"] == "USING":
+            prefix = "%07X" % properties["using"]
+        elif properties["operation"] == "LTORG":
+            pass
         elif "pos1" in properties and properties["pos1"] != None:
             address = properties["pos1"]
             section = properties["section"]
@@ -952,6 +1006,8 @@ for i in range(endLibraries, len(source)):
             prefix = "%-26s%04X" % (prefix, properties["adr2"])
         # For whatever reason, a macro-invocation line is printed only under
         # some circumstances, and is omitted in others.
+        if properties["operation"] == "INPUT": ###DEBUG###TRAP###
+            pass
         if properties["operation"] in macros and not properties["inMacroDefinition"]:
             macroWhere = macros[properties["operation"]]
             if macroWhere[2] > endLibraries:
@@ -965,16 +1021,22 @@ for i in range(endLibraries, len(source)):
             suffix = ""
             if properties["macro"] != None:
                 suffix = properties["macro"]
-            identification = identification + suffix
+            identification = identification + suffix[:5]
         if properties["dotComment"]:
             pass
         elif properties["empty"] or properties["fullComment"] \
                 or properties["inMacroDefinition"]:
             printedLineNumber += 1
             linesThisPage += 1
-            print("%-30s%5d%s%-71s %s" % (prefix, printedLineNumber, 
-                                          depthStar, properties["text"], 
-                                          identification))
+            if identification.strip() == "" or \
+                    (properties["fullComment"] and depthStar != " " and \
+                     "mnote" not in properties):
+                print("%-30s%5d%s%s" % (prefix, printedLineNumber, 
+                                              depthStar, properties["text"].rstrip()))
+            else:
+                print("%-30s%5d%s%-71s %s" % (prefix, printedLineNumber, 
+                                              depthStar, properties["text"], 
+                                              identification))
         else:
             name = properties["name"]
             if name.startswith("."):
@@ -1031,7 +1093,8 @@ def sortOrder(s):
 
 linesThisPage = 1000
 for symbol in sorted(symtab, key = sortOrder):
-    if symbol.startswith("_"):
+    symProps = symtab[symbol]
+    if symbol.startswith("_") or symbol.startswith("."):
         continue
     if linesThisPage >= linesPerPage:
         pageNumber += 1
@@ -1039,8 +1102,10 @@ for symbol in sorted(symtab, key = sortOrder):
         print("%45s%-66sPAGE %4d" % ("", "CROSS REFERENCE", pageNumber))
         print("%-95s%16s %s" % ("SYMBOL    LEN    VALUE   DEFN   REFERENCES", program + " " + version, currentDate))
         linesThisPage = 0
-    symProps = symtab[symbol]
-    length = 1 # FIXME
+    if symProps["type"] in ["EQU", "CSECT", "INSTRUCTION"]: ###FIXME###
+        length = 1
+    else:
+        length = 2
     value = symProps["value"]
     if "section" in symProps and "offset" in sects[symProps["section"]]:
         value += sects[symProps["section"]]["offset"]
