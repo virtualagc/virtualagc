@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Formats a table of positive numbers nicely, with 10 entries per row.
 
 table = [0, 135, 0, 126, 141, 0, 19, 0, 126, 141, 0        

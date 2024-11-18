@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 License:    The author, Ron Burkey, declares this program to be in the Public
             Domain, and may be used or modified in any way desired.

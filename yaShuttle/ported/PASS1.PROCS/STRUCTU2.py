@@ -1,4 +1,4 @@
-#!/bin/usr/env python
+#!/bin/usr/env python3
 '''
 Access:     Public Domain, no restrictions believed to exist.
 Filename:   STRUCTU2.py

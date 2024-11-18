@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # CAVEAT UTILITOR
 #
@@ -548,6 +548,34 @@ class asmParser(Parser):
                     )
                 self._arithmeticExpression_()
                 self.add_last_node_to_name('D2')
+                self._token('(')
+                self._token(')')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
+
+                self._define(
+                    [],
+                    ['D2', 'R1']
+                )
+            with self._option():
+                with self._optional():
+                    self._register_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+
+                    self._define(
+                        [],
+                        ['R1']
+                    )
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -578,6 +606,9 @@ class asmParser(Parser):
         self._token(',')
         self._arithmeticExpression_()
         self.add_last_node_to_name('I1')
+        with self._optional():
+            self._token('(')
+            self._token(')')
         with self._group():
             with self._choice():
                 with self._option():
@@ -1214,9 +1245,25 @@ class asmParser(Parser):
                     [],
                     ['d', 'l', 't', 'v']
                 )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('A')
+                self.add_last_node_to_name('t')
+                with self._optional():
+                    self._len_()
+                    self.add_last_node_to_name('l')
+                self._quotedHexString_()
+                self.add_last_node_to_name('h')
+
+                self._define(
+                    [],
+                    ['d', 'h', 'l', 't']
+                )
             self._error(
                 'expecting one of: '
-                "'(' 'B' 'C' 'X' <number> [0-9]+ [AY]"
+                "'(' 'A' 'B' 'C' 'X' <number> [0-9]+ [AY]"
                 '[FHED]'
             )
 

@@ -730,7 +730,10 @@ def generateObjectCode(source, macros):
         defaultChunk[i] = 0xFB
     def toMemory(bytes, alignment = 1):
         nonlocal collect, asis, compile, properties, name, operation
-        pos1 = sects[sect]["pos1"]
+        try:
+            pos1 = sects[sect]["pos1"]
+        except: ###DEBUG###TRAP###
+            pass
         if collect:
             if operation == "DS": ###DEBUG###
                 pass
@@ -1301,7 +1304,7 @@ def generateObjectCode(source, macros):
                             evalArithmeticExpression(suboperand["l"], {}, \
                                                      properties)
                         if lengthModifier == None:
-                            error(properties, "Count not evaluate length modifier")
+                            error(properties, "Could not evaluate length modifier")
                             continue
                     astValue = suboperand["v"]
                     if suboperandType == "C":
@@ -1420,10 +1423,25 @@ def generateObjectCode(source, macros):
                             continue
                         toMemory(duplicationFactor * length)
                     elif suboperandType == "A":
-                        commonProcessing(1)
                         if lengthModifier != None:
+                            commonProcessing(1)
                             pass
                         if operation == "DC":
+                            commonProcessing(4)
+                            if 'h' in suboperand:
+                                lsw = int(suboperand["h"][0][1], 16)
+                                j = 24
+                                for i in range(4):
+                                    dcBuffer[dcBufferPtr] = (lsw >> j) & 0xFF
+                                    dcBufferPtr += 1
+                                    j -= 8
+                                length = dcBufferPtr
+                                while duplicationFactor > 1:
+                                    for i in range(length):
+                                        dcBuffer[dcBufferPtr] = dcBuffer[i]
+                                        dcBufferPtr += 1
+                                toMemory(dcBuffer[:dcBufferPtr])
+                                continue
                             pass
                         
                         toMemory(duplicationFactor * 4)

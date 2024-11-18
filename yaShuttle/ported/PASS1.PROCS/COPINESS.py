@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
    Access:     Public Domain, no restrictions believed to exist.
    Filename:   COPINESS.py

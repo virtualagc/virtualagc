@@ -136,7 +136,7 @@ lineCount = 0
 gotoTargets = []
 
 if fix:
-    print("#!/usr/bin/env python")
+    print("#!/usr/bin/env python3")
 
 def printBuffer():
     global indentationLevel, indentation, pendingIndentation, bufferedLine

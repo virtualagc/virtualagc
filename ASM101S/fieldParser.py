@@ -149,11 +149,12 @@ rsAll =
     | [ R1+: register ',' ] "=" L2+: lconstant ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
+    | [ R1+: register ',' ] D2+: arithmeticExpression '(' ')'  ( / / | $ )
     | [ R1+: register ',' ] D2+: arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for an RI instruction.
-riAll = R2+: register ',' I1+: arithmeticExpression  ( / / | $ ) ;
+riAll = R2+: register ',' I1+: arithmeticExpression [ "(" ")" ]  ( / / | $ ) ;
 
 # Operand field for an SI instruction.
 siAll = 
@@ -237,6 +238,7 @@ dcOperand =
     | [ d+: number ] t+: 'B' [ l+: len ] v+: quotedBinaryString 
     | [ d+: number ] t+: /[FHED]/ [ l+: len ] v+: quotedFloatList 
     | [ d+: number ] t+: /[AY]/ [ l+: len ] v+: addresses 
+    | [ d+: number ] t+: 'A'[ l+: len ] h+: quotedHexString
     ;
 dsOperands = dsOperand { ',' dsOperand }  ( / / | $ ) ;
 dsOperand = 

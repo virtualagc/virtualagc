@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Python program to extract superbank-related info from a yaYUL listing..
 # 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Program to process an AGC wirelist and generate a cross-referenced
 # signal dictionary.

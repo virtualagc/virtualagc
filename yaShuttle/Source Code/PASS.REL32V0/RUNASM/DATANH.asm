@@ -8,7 +8,6 @@
 */ Note:        Comments beginning */ in column 1 are from the Virtual AGC 
 */              Project. Comments beginning merely with * are from the original 
 */              Space Shuttle development.
-
          TITLE 'ARCTANCH,DOUBLE PRECISION'                              00000100
 *
 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED

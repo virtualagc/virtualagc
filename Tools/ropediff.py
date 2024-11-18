@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Copyright 2010 Jim lawton <jim dot lawton at gmail dot com>
 #

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Mike's test code for MPY/MPH, in Python
 
 import sys

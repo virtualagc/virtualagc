@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Python program to generate a matrix of log sections used by different
 # missions.
