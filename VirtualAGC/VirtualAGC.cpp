@@ -2131,6 +2131,8 @@ VirtualAgcApp::OnInit()
            ApoDisKeyInstalled = true;
          }
     }
+  else
+	  printf("Failure: `popen` could not run `mdfind` for ApoDisKey\n");
   pclose(fmdfind);
 #endif
 
