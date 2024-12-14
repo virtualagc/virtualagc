@@ -2120,6 +2120,7 @@ VirtualAgcApp::OnInit()
 #if __APPLE__
   // Is ApoDisKey installed (MacOS only)?
   FILE *fmdfind;
+  printf("MacOS detected");
   fmdfind = popen("mdfind kMDItemCFBundleIdentifier=\"com.ramsaycons.ApoDisKey\"", "rt");
   if (fmdfind != NULL)
     {
