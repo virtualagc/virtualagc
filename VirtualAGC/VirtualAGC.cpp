@@ -200,7 +200,7 @@ int dropdownSquish = 1;
 int maximumSquish = 0;
 int maximizeAtStartup = 0;
 long fontFloor = 8;
-bool ApoDisKeyInstalled = true;
+bool ApoDisKeyInstalled = false;
 
 /*
  * The following array specifies most properties of "missions" (i.e., specific
@@ -2878,9 +2878,9 @@ VirtualAGC::FormCommands(void)
   else
     yaAGC = wxT("");
   if (DskyApoButton->GetValue())
-    yaDSKY = wxT(" "); // We'll come back to this.
+    yaDSKY = wxT(" --ip=localhost"); // We'll come back to this.
   else if (DskyApoHalfButton->GetValue())
-    yaDSKY = wxT(" --half-size"); // We'll come back to this.
+    yaDSKY = wxT(" --ip=localhost --half-size"); // We'll come back to this.
   else if (DeviceDskyCheckbox->GetValue())
     {
       yaDSKY = localExecutableDirectory + PathDelimiter;
