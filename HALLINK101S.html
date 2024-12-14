@@ -1,0 +1,795 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>AP-101S Link Editor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <div align="center">
+      <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace("@SUBTITLE@","Link Editor"))
+</script><br>
+      <font size="+2"><i>(<b>HALLINK101S</b> does not exist at present.<br>
+          This page collects my preliminary thoughts<br>
+          &nbsp;about it, but particularly about object files.)</i></font><br>
+    </div>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#References">References</a></li>
+      <li><a moz-do-not-send="true" href="#installation">Installation of
+          <b>HALLINK101S</b></a></li>
+      <li><a moz-do-not-send="true" href="#usage">Use of <b>HALLINK101S</b></a></li>
+      <li><a moz-do-not-send="true" href="#reverse">Reverse-Engineering
+          Assistance</a></li>
+      <li><a moz-do-not-send="true" href="#unexpected">Unexpected
+          Hurdles</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#partial">Partial Linking By
+            the Assembler Itself</a></li>
+        <li><a moz-do-not-send="true" href="#unknownDatatype">Non-System/360
+            Datatype 0x84</a></li>
+        <li><a moz-do-not-send="true" href="#characterEncoding">Encoding
+            of Character Data in Object Decks</a></li>
+        <li><a moz-do-not-send="true" href="#program"><code>PROGRAM</code>
+            Compilation Unit</a>s<br>
+        </li>
+      </ul>
+      <a moz-do-not-send="true" href="#unexpected"></a>
+      <ul>
+      </ul>
+      <a moz-do-not-send="true" href="#unexpected"> </a>
+    </ul>
+    <a moz-do-not-send="true" href="#unexpected"> </a>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <b>HALLINK101S</b> is our "modern" version of the link editor used
+    to combine IBM AP-101 object files created by the HAL/S language
+    compiler and AP-101S assembler into "load files" which can be
+    directly executed on an IBM AP-101 computer or emulator
+    thereof.&nbsp; To the best of my knowledge, the original linker
+    actually used for Shuttle software development has not survived, so
+    <b>HALLINK101S</b> is an entirely-new creation.&nbsp; It is a Python
+    3 program that should work on any computer having the Python 3
+    language installed. <br>
+    <br>
+    Regarding the IBM AP-101B vs AP-101S computers, the AP-101B was used
+    in earlier Shuttle flights, while the AP-101S was used in later
+    flights.&nbsp; <b>HALLINK101S</b> is completely agnostic on the
+    question of AP-101B vs AP-101S.<br>
+    <p>I am not aware of surviving documentation describing the format
+      of AP-101S object files specifically, nor of any surviving AP-101
+      object-code files from the Shuttle era.&nbsp; In any case, I think
+      that such object code would have been produced not as "files" in a
+      mass-storage system, but rather as decks of computer punch-cards
+      punched directly by the original HAL/S compiler (HAL/S-FC) or
+      AP-101 assembler.&nbsp; So it is possible that the decks of punch
+      cards could still exist, hidden away somewhere, even if not as
+      online files.&nbsp; In any case, I have no access to them, and
+      have heard nary a hint of their existence, and I could be mistaken
+      in my inferences about them anyway.<br>
+    </p>
+    <p>The original linker is referred to in the contemporary
+      documentation simply as "the AP-101 link editor", and the
+      contemporary documentation goes on to say that "until the final
+      version of the linkage editor is available to support all features
+      of the HAL/S-FC compiler, an interim program, known as HALLINK-FC,
+      will be supplied to perform the link edit functions".&nbsp; As
+      usual, satisfactory documentation for neither "the AP-101 link
+      editor" nor for <b>HALLINK-FC</b> (nor for its System/360-target
+      predecessor <b>HALLINK</b>) is available to us.&nbsp; Indeed, I
+      do not even know if the "the AP-101 link editor" was ever
+      completed satisfactorily to supersede <b>HALLINK-FC</b>. My
+      intuition, based on nothing concrete, is that it was not, and that
+      <b>HALLINK-FC</b> was used until the end of the Shuttle
+      project.&nbsp; But since we have access to neither of those
+      linkers, any intuition of mine about them is without value.<br>
+    </p>
+    On the other hand, we <i>do</i> have a modern port (from the XPL
+    programming language into the Python programming language) of the
+    original HAL/S compiler.&nbsp; That being the case, we can use the
+    compiler to convert HAL/S source code into AP-101S object files, and
+    in principle we might be able to do whatever reverse engineering is
+    required on those object files to clarify issues regarding the
+    object-file format.&nbsp; In attempting that kind of reverse
+    engineering, it quickly becomes apparent that the AP-101S
+    object-file format is based upon the format of early object files
+    for the IBM System/360, if not strictly identical to it.&nbsp; In
+    other words, we can use the early System/360 format as our guide,
+    and occasionally depart from it as needed on an <i>ad hoc</i>
+    basis.&nbsp; Some relevant references are listed in the next
+    section.<br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; It appears to me
+        that in IBM parlance, what I call an "object file" would be a
+        referred to as an "object <i>deck</i>", presumably because it
+        was originally directly punched onto a stack of computer
+        punch-cards.&nbsp; I'm not telling you this just to be pedantic
+        — though obviously, that's a thing I do — but rather to let you
+        know that if you google it yourself, you're likely to have much
+        better luck searching for "decks" instead of "files".<br>
+      </font></blockquote>
+    <p> </p>
+    <p>As usual, not all of the System/360 features are needed for
+      actual legacy AP-101S software, so only those features of the
+      object-file format relevant to that surviving software are likely
+      to be implemented in <b>HALLINK101S</b>; contrariwise, some <i>non</i>-System/360
+      AP-101S-specific features may appear in the object files.&nbsp;
+      For example, "records" in an object file are described as being of
+      6 types, known as ESD, TXT, RLD, SYM, XSD, and END, but the XSD
+      type wasn't introduced until the 1990's in order to deal with the
+      needs of C compilers, and hence XSD records don't appear at all in
+      HAL/S or AP-101S object files.&nbsp; But I won't trouble myself or
+      bore you with an exhaustive list of such differences here.&nbsp; <br>
+    </p>
+    To facilitate whatever reverse engineering is needed, I've provided
+    a Python 3 program that can parse the object files produced by the
+    HAL/S compiler (or by <b>ASM101S</b>) and report on all of the data
+    found within them.&nbsp; This will be covered in more detail later.<br>
+    <h1> <a name="References"></a>References</h1>
+    <ul>
+      <li>Documentation for related development-chain tools provided by
+        Virtual AGC:</li>
+      <ul>
+        <li><a moz-do-not-send="true" href="hal.html">HAL/S compiler (<b>HALSFC</b>)</a></li>
+        <li><a moz-do-not-send="true" href="ASM101S.html">AP-101
+            assembler (<b>ASM101S</b>)</a><br>
+        </li>
+      </ul>
+      <li>General AP-101 and System/360 references:<br>
+      </li>
+      <ul>
+        <li>"<a moz-do-not-send="true"
+            href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+            Shuttle Model AP-101S Principles of Operations with Shuttle
+            Instruction Set</a>".&nbsp; Manual for the CPU instruction
+          set.&nbsp; Also known as the "POO" (Principles of Operation).<br>
+        </li>
+        <li>"<a moz-do-not-send="true"
+href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231">OS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Assembler Language - OS Release 21</a>".&nbsp; Manual for
+          the System/360 macro assembler upon which <b>ASM101S</b> is
+          modeled.</li>
+        <li><a moz-do-not-send="true"
+href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20Instruction%20Set%20-%20searchable.pdf">A
+            collection of notes about the AP-101S/AP-101B</a>.</li>
+        <li>"<a moz-do-not-send="true"
+href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            101S Assembly Language Introduction</a>".</li>
+        <li>"Space Shuttle Advanced System/4 Pi Input/Output Processor
+          (IOP)":</li>
+        <ul>
+          <li><a moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf">Parts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              I and II</a>:&nbsp; :&nbsp; Principles of Operation for
+            PCI/PCO and MSC</li>
+          <li><a moz-do-not-send="true"
+href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              III</a>:&nbsp; Principles of Operation for BCE.</li>
+        </ul>
+        <li>"<a moz-do-not-send="true"
+href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Shuttle Advanced System/4 Pi Model AP-101 Central Processor
+            Unit Technical Description</a>".&nbsp; Note that this
+          predates the AP-101S model and doesn't precisely match it.</li>
+        <li><a moz-do-not-send="true"
+href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+            HAL/S Programming Course</a><br>
+        </li>
+      </ul>
+      <li>References related to System/360 object-file formats:</li>
+      <ul>
+        <li><a moz-do-not-send="true"
+            href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">The
+
+
+            Wikipedia article "OS/360 Object File Format"</a></li>
+        <li><a moz-do-not-send="true"
+            href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
+
+            IBM document "MVS Program Management: Advanced Facilities",
+            Appendix A</a></li>
+        <li><a moz-do-not-send="true"
+href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assembler_Programmers_Guide_Sep82.pdf#page=83">The
+
+
+            IBM document "OS/VS-VM/370 Assembler Programmer's Guide",
+            Appendix C</a></li>
+      </ul>
+    </ul>
+    <h1><a name="installation"></a>Installation of HALLINK101S</h1>
+    TBD<br>
+    <br>
+    <h1><a name="usage"></a>Use of HALLINK101S</h1>
+    TBD<br>
+    <h1><a name="reverse"></a>Reverse-Engineering Assistance<br>
+    </h1>
+    To facilitate reverse engineering of the AP-101 object-file format,
+    I've provided a Python 3 module (readObject101S.py), which also can
+    be used as a stand-alone program, to parse the object files produced
+    by the HAL/S compiler (or by <b>ASM101S</b>).&nbsp; For example,
+    consider <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/140-STATISTICS.hal">this
+
+
+      HAL/S program</a> 140-STATISTICS from the book <i>Programming in
+      HAL/S</i>:<br>
+    <blockquote>
+      <pre>  STATISTICS:<br>  PROCEDURE(DATA) ASSIGN(LO_VAL, HI_VAL, MEAN);<br>     DECLARE DATA ARRAY(*) SCALAR;<br>     DECLARE SCALAR,<br>                LO_VAL, HI_VAL, MEAN;<br>     LO_VAL = MIN(DATA);<br>     HI_VAL = MAX(DATA);<br>     MEAN = SUM(DATA) / SIZE(DATA);<br>  CLOSE STATISTICS;<br></pre>
+    </blockquote>
+    <p>Upon compiling this file with the modern HAL/S compiler (<b>HALSFC</b>),<br>
+    </p>
+    <blockquote>
+      <pre>HALSFC 140-STATISTICS.hal "" "LIST,VARSYM,DECK"<br></pre>
+    </blockquote>
+    <p>we get not only a code-generation report (pass2.rpt), which in
+      abridged form looks like the following,<br>
+    </p>
+    <pre>PAGE 2<br>SYMBOL   TYPE  ID  ADDR  LEN(HEX)  LEN(DEC)         BLOCK NAME<br><br><br>#CSTATIS  SD 0001 000000 00001D          29         STATISTICS<br>#ZSTATIS  SD 0002 000000 000002           2<br>#DSTATIS  SD 0003 000000 000002           2<br>#QEMIN    ER 0004                          <br>#QEMAX    ER 0005                          <br>#QESUM    ER 0006                          <br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 3<br>  LOC    CODE        EFFAD           LABEL   INSN   OPERANDS            SYMBOLIC OPERAND<br><br><br>0000000                             ST#1     EQU    *<br>00000                               #ZSTATIS CSECT        ESDID= 0002<br>00000 00000E00                               DC     A'00000E00'         STATISTICS<br>00000                               #CSTATIS CSECT        ESDID= 0001<br>0000000                             STATISTI EQU    *                   STATISTICS<br>00000 E9F3 0000                              LHI    R1,0()              TIME: 0.25; #DSTATIS<br>00002 B914           0005                    STH    R1,5(R0)            TIME: 0.5<br>00003 E0FB 0018                              IAL    R0,24()             TIME: 0.5<br>00005 EB01           0000                    LA     R3,0(R1)            TIME: 0.25<br>00006 BB24           0009                    STH    R3,9(R0)            TIME: 0.5<br>0000007                             ST#2     EQU    *<br>0000007                             ST#3     EQU    *<br>0000007                             ST#4     EQU    *<br>00007 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00008 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00009 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMIN<br>0000B 9B40           0010                    LH     R3,16(R0)           TIME: 0.25; LO_VAL<br>0000C 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000000D                             ST#5     EQU    *<br>0000D 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>0000E 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>0000F E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMAX<br>00011 9B48           0012                    LH     R3,18(R0)           TIME: 0.25; HI_VAL<br>00012 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>0000013                             ST#6     EQU    *<br>00013 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00014 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00015 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QESUM<br>00017 1E1C           000E                    L      R6,14(R0)           TIME: 0.25; DATA+2<br>00018 3AEE                                   CVFL   F2,R6               TIME: 1.75<br>00019 68E2                                   DER    F0,F2               TIME: 7.25<br>0001A 9B50           0014                    LH     R3,20(R0)           TIME: 0.25; MEAN<br>0001B 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000001C                             ST#7     EQU    *<br>000001C                             LBL#2    EQU    *<br>0001C 97E8                                   SRET   7,R0                TIME: 17.5<br>00002                               #DSTATIS CSECT        ESDID= 0003<br>00002 000000                                 ORG    *-2<br>00000 000002                                 ORG    *+2<br>                                             END<br></pre>
+    <p>but also an object file (cards.bin).&nbsp; Parsing that object
+      file using the reverse-engineering program,<br>
+    </p>
+    <blockquote>
+      <pre>readObject101S.py cards.bin<br></pre>
+    </blockquote>
+    <p><a name="exampleReverseEngineering"></a>we obtain something
+      similar to the following report:<br>
+    </p>
+    <pre>0000: 	type=SYM ident="I**20001" size=002E<br>0050: 	type=SYM ident="I**20002" size=002E<br>00A0: 	type=SYM ident="I**20003" size=0022<br>00F0: 	type=ESD ident="I**20004" size=0030 esdid=0001<br>	symbol1: name="#CSTATIS" type=SD address=000000 length=003A AMODE24 RMODE24 RW<br>	symbol2: name="#ZSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>	symbol3: name="#DSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>0140: 	type=ESD ident="I**20005" size=0030 esdid=0004<br>	symbol1: name="#QEMIN  " type=ER<br>	symbol2: name="#QEMAX  " type=ER<br>	symbol3: name="#QESUM  " type=ER<br>0190: 	type=TXT ident="I**20006" offset=000000 size=0004 esdid=0002<br>	data: 00 00 0E 00<br>01E0: 	type=TXT ident="I**20007" offset=000000 size=0004 esdid=0003<br>	data: 00 00 00 16<br>0230: 	type=TXT ident="I**20008" offset=000000 size=0038 esdid=0001<br>	data: E9 F3 00 00 B9 14 E0 FB 00 18 EB 01 BB 24 9A 30<br>	      1D 1C E4 F7 38 00 9B 40 38 03 9A 30 1D 1C E4 F7<br>	      38 00 9B 48 38 03 9A 30 1D 1C E4 F7 38 00 1E 1C<br>	      3A EE 68 E2 9B 50 38 03<br>0280: 	type=TXT ident="I**20009" offset=000038 size=0002 esdid=0001<br>	data: 97 E8<br>02D0: 	type=RLD ident="I**20010" size=0028<br>	relocation=0003 position=0001 flags=(0,0,A,1,0,0) address=000002<br>	relocation=0004 position=0001 flags=(0,0,A,1,0,0) address=000014<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=000020<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=00002C<br>	relocation=0001 position=0002 flags=(0,0,V,1,0,0) address=000000<br>0320: 	type=END ident="I**20011" idrType="2" <br>	translator="HAL/SREL3 V0  24331" <br>	processor="RSB-XCOM-I000924239"<br>--------------------------------------------------------------------------------<br>SYM-Record Summary:<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	DUMMY       offset=000000 name="STACK"<br>	DATA        offset=000030 name="STACKEND" datatype=H<br>	DUMMY       offset=000000 name="HALS/FC"<br>	DUMMY       offset=000000 name="HALS/END"<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	INSTRUCTION offset=000002 name="D24331"<br>	INSTRUCTION offset=000002 name="T2883796"<br>	CONTROL     offset=000000 name="#ZSTATIS"<br>	DATA        offset=000000 datatype=Z<br>	CONTROL     offset=000000 name="#DSTATIS"<br>	DATA        offset=000000 datatype=Z<br></pre>
+    Of course, the documentation needs to be consulted even to
+    understand the parsed information in the report in any detail.&nbsp;
+    Nevertheless, even on a superficial reading, this report tells us
+    that the object file contains 11 "records", of type SYM (3), ESD
+    (2), TXT (4), RLD (1), and END (1), and reveals how various features
+    easily visible in the HAL/S source code are represented in the
+    object file.&nbsp; You may notice that the report doesn't really
+    provide much information about <i>individual</i> SYM (symbol-table)
+    records.&nbsp; That's because all SYM records need to be conjoined
+    end-to-end, and it is only the conjoined record that contains
+    parsable information; whereas the individual SYM records are not
+    separately parsable.&nbsp; Parsing the conjoined record is where the
+    "SYM-Record Summary" at the end of the report comes from.<br>
+    <br>
+    In the reverse-engineering report we see items obviously related in
+    a general way to the HAL/S source code, though the relationship is
+    not immediately clear in detail, such as the symbols <code>#CSTATIS</code>,
+    <code>#ZSTATIS</code>, <code>#DSTATIS</code>, <code>#QEMIN</code>,
+    <code>#QEMAX</code>, and <code>#QESUM</code>.&nbsp; Some of the
+    details are filled in by <a moz-do-not-send="true"
+href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page=481">the
+
+
+      "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
+
+    That course explains that each HAL/S "compilation unit" is
+    automatically assigned a 6-character "generic name" by removing all
+    underscores and truncating to 6 characters.&nbsp; (It's up to the
+    programmer to insure that all of the generic names are
+    unique!)&nbsp; Since in the example we're using the block being
+    compiled is named <code>STATISTICS</code>, the generic name is just
+    "STATIS".&nbsp; The compiler then generates names for the various
+    control sections it likes to create by prefixing various 2-character
+    strings to the generic name.&nbsp; You can see the hopefully-full
+    list of prefixes at the hyperlink just given, but the ones relevant
+    to our particular example are:<br>
+    <ul>
+      <li><code>#C</code> — <code>COMSUB</code> code block, hence <code>#CSTATIS</code><font
+          size="-1">&nbsp; </font></li>
+      <li><code>#D</code> — <code>PROGRAM</code> or <code>COMSUB</code>
+        data, hence <code>#DSTATIS</code></li>
+      <li><code>#Z</code> — <code>ZCON CSECT</code> for <code>COMSUB</code>
+        or <code>REMOTE</code> data, hence <code>#ZSTATIS</code></li>
+      <li><code>#Q</code><code></code> — <code>ZCON</code> for library
+        routines, hence <code>#QEMIN</code>, <code>#QEMAX</code>, and
+        <code>#QESUM</code><code></code></li>
+    </ul>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; A <code>COMSUB</code>
+        is a HAL/S compilation unit containing data or code (such our <code>STATISTICS
+
+
+          PROCEDURE</code>) accessible by other compilation units.&nbsp;
+        <code>ZCON</code> code and <code>REMOTE</code> data are "far
+        away" in the AP-101S address space from the code accessing them,
+        and hence are accessed by different AP-101S instruction types
+        from "nearby" data or code. The functions <code>EMIN</code>, <code>EMAX</code>,
+        and <code>ESUM</code> are AP-101S assembly-language functions
+        from <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
+
+          HAL/S runtime library</a>.</font><br>
+    </blockquote>
+    <p>Alas, the object file is also seen to have a number of items not
+      directly observable in the original HAL/S code but rather
+      presumably transparently generated by the HAL/S compiler itself;
+      examples are the symbols <code>STACK</code>, <code>STACKEND</code>,
+      <code>HALS/FC</code>, <code>HALS/END</code>, <code>D24324</code>,
+      and so on. <br>
+    </p>
+    <p>Some of these items (symbols <code>STACK</code>, <code>STACKEND</code>)
+      appear in the assembly-language source code for HAL/S
+      runtime-library files like <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/ACOS.asm">ACOS</a>,
+      and thus apparently relate to common features HAL/S uses
+      internally.&nbsp; Specifically, I believe the report may be
+      telling us that the <code>DSECT</code> called <code>STACK</code>
+      is 0x30 (<code>STACKEND</code>) halfwords in length.&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b> Recall that because of the nature
+          of the HAL/S language, the HAL/S compiler can determine at
+          compile time the maximum stack required by any compilation
+          unit, although the assembler cannot do so for
+          assembly-language&nbsp; files.</font><br>
+      </p>
+    </blockquote>
+    Some other non-obvious symbols (<code>D24324</code>, <code>T4041882</code>)
+    seem by my reckoning to relate to embedded datestamps and
+    timestamps:<br>
+    <ul>
+      <li><code>D<i>YY</i><i>DDD</i></code> — the leading literal "<code>D</code>"
+        presumably stands for "Date of compilation", while "<i><code>YY</code></i>"
+        is the final 2 digits of the year, and "<i><code>DDD</code></i>"
+        is the day of the year (1 through 365, or 366 for leap years).</li>
+      <li><code>T<i>NNNNNNN</i></code> — the leading literal "<code>T</code>"
+        presumably stands for "Time of compilation", while "<i><code>NNNNNNN</code></i>"
+        is the number of centiseconds since midnight (0 to
+        8640000).&nbsp; It's TBD as to whether this number is
+        left-padded to 7 digits.&nbsp; (It's always 7 digits after 3
+        a.m., but I'm too lazy to get up between midnight and 3 a.m.
+        just to check the padding.)<br>
+      </li>
+    </ul>
+    Still other symbols (such as <code>HALS/FC</code> and <code>HALS/END</code>)
+    remain to be interpreted.&nbsp; Of course, I can <i>invent</i>
+    explanations for anything: <i>Perhaps</i> the presence of symbol
+    HALS/FC is simply the compiler's way of telling us that the
+    compilation was performed by the <b>HAL/S-FC</b> compiler (as
+    opposed to the <b>HAL/S-360</b> compiler).&nbsp; But then, perhaps
+    not.&nbsp; Really, I haven't a clue!&nbsp; If we're lucky, time will
+    tell.&nbsp; I suppose that if reverse engineering obsolete
+    object-file formats were easy, those formats would be included as
+    free bonus items in boxes of breakfast cereal.<br>
+    <br>
+    See the source code for readObject101S.py for further documentation,
+    if any.<br>
+    <ul>
+    </ul>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <h1><a name="unexpected"></a>Unexpected Hurdles</h1>
+    <p>Here are some things I find that differ between AP-101 object
+      files and System/360 object files, or at least which are
+      unexpected from reading the System/360 documentation.<br>
+    </p>
+    <h2><a name="partial"></a>Partial Linking By the Assembler Itself</h2>
+    <p>The expected:&nbsp; In System/360 assembly language, code and
+      data are partitioned into a series of named "control sections",
+      generically referred to as CSECTs.&nbsp; It should be the case
+      that from the assembler's point of view, "addresses" begin at 0
+      and increment upward in each section, and that the linker program
+      subsequently reassigns different starting addresses to the
+      sections generated by the assembler, while adjusting all of the
+      addresses referenced within the various sections accordingly.<br>
+    </p>
+    The unexpected:&nbsp; However, it is clear from the surviving legacy
+    AP-101S assembly listings that there are departures from these
+    principles.&nbsp; Consider the following excerpt of the legacy
+    assembly listing for the SQRT function of the HAL/S-FC runtime
+    library:<br>
+    <pre><font color="#663300">                                 18 SQRT     AMAIN INTSIC=YES                                               00001300<br>                                 19+***********************************************************************<br>                                 20+*<br>                                 21+*        PRIMARY ENTRY POINT<br>                                 22+*<br>                                 23+***********************************************************************<br><font color="#ff0000">00000                            24+SQRT     CSECT                                                          01-AMAIN</font><br>                                 26 * COMPUTES SQUARE ROOT IN SINGLE PRECISION                              00001400<br>                                 27          INPUT F0             SCALAR SP                                 00001500<br>0000000                          28+F0       EQU   0                                                        01-INPUT<br>                                 30          OUTPUT F0            SCALAR SP                                 00001600<br>                                 32          WORK  R1,R5,R6,R7,F1,F2,F3                                     00001700<br>0000001                          33+R1       EQU   1                                                        01-WORK<br>0000005                          34+R5       EQU   5                                                        01-WORK<br>0000006                          35+R6       EQU   6                                                        01-WORK<br>0000007                          36+R7       EQU   7                                                        01-WORK<br>0000001                          37+F1       EQU   1                                                        01-WORK<br>0000002                          38+F2       EQU   2                                                        01-WORK<br>0000003                          39+F3       EQU   3                                                        01-WORK<br><font color="#009900">00000 E9F3 0032      0032        41          LA    R1,A                                                     00001800<br>0000032                          42          USING A,R1                                                     00001900<br></font>00002 7AE0                       43 START    LER   F2,F0                                                    00002000<br>00003 DE88           0026 0022   44          BNP   ERROR          ARGUMENT NEGATIVE OR ZERO                 00002100<br>                                 45 *                                                                       00002200<br>00004 27E8                       46          LFXR  R7,F0          TRANSFER TO GENERAL REGISTER              00002300<br>00005 76E6                       47          XR    R6,R6                                                    00002400<br>00006 FE1C                0007   48          SLDL  R6,7           Q &amp; MANTISSA IN R7                        00002500<br>00007 F660                0018   49          SLL   R6,24          CHAR OF ANSWER - (Q+32) IN R6             00002600<br>00008 1FE7                       50          LR    R7,R7          CHECK FOR Q=1                             00002700<br>00009 DD0C           000D 0003   51          BCF   5,GORP                                                   00002800<br>                                 52 *                                                                       00002900<br>0000A B0E6 0100           0100   53          AHI   R6,X'0100'     ADD 1 TO CHAR FOR Q=1                     00003000<br>0000C E909           0002        54          LA    R1,2(R1)       FULLWORD INDEX                            00003100<br>                                 55 *                                                                       00003200<br>0000D 1DE6                       56 GORP     LR    R5,R6          CHARACTERISTIC OF ANSWER IN R5            00003300<br>0000E F705                0001   57          SRA   R7,1            FIXED M/2 + 'QQ' IN TOP BITS             00003400<br>0000F 0711           003A        58          A     R7,C           ADD C/2, AND ELIMINATE 'QQ'               00003500<br>00010 1E09           0036        59          L     R6,B           -B/2 OR -B/8 AT BIT 7(MANTISSA POS.)      00003600<br>00011 4EE7                       60          DR    R6,R7          (R6) = (4**(-Q))(-B/(C+M)) AT BIT 7       00003700<br>00012 0601           0032        61          A     R6,A           A OR A/4 AT BIT 7 + CHAR=32               00003800<br>00013 06E5                       62          AR    R6,R5          RESTORE CHARACTERISTIC OF ANSWER          00003900<br>00014 29EE                       63          LFLR  F1,R6                                                    00004000<br>                                 64 *                                                                       00004100<br>                                 65          DROP  R1                                                       00004200<br>                                 66 *                                                                       00004300<br>                                 67 *  TWO PASSES OF THE NEWTON-RAPHSON ITERATION                           00004400<br>                                 68 *                                                                       00004500<br>00015 68E1                       69          DER   F0,F1                                                    00004600<br>00016 50E1                       70          AER   F0,F1                                                    00004700<br>00017 7BF7 0013      002C 0013   71          LE    F3,FHALF                                                 00004800<br>00019 60E3                       72          MER   F0,F3                                                    00004900<br>0001A 6AE0                       73          DER   F2,F0                                                    00005000<br>                                 74 *                                                                       00005100<br>0001B B6E6 FF00           FF00   75          NHI   R6,X'FF00'     PUT CHARACTERISTIC OF                     00005200<br>0001D 06F7 000F      002E 000F   76          A     R6,ROUND       ANSWER IN ROUND                           00005300<br>0001F 29EE                       77          LFLR  F1,R6          DIGIT, AND ADD                            00005400<br>00020 50E1                       78          AER   F0,F1          TO INTERMEDIATE RESULT                    00005500<br>                                 79 *                                                                       00005600<br>00021 58E2                       80          SER   F0,F2                                                    00005700<br>00022 60E3                       81          MER   F0,F3                                                    00005800<br>         SQRT -- SINGLE PRECISION SQUARE ROOT FUNCTION                                                         PAGE    3<br>  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05<br>00023 50E2                       82          AER   F0,F2          ANSWER IN F0                              00005900<br>                                 83 *                                                                       00006000<br>                                 84 EXIT     AEXIT                AND RETURN                                00006100<br>                                 85+*********RETURN TO CALLER**********************************************<br>00024                            86+EXIT     DS    0H                                                       01-AEXIT<br>00024 9914           0005        87+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT<br>00025 C7EC                       88+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT<br>                                 89+***********************************************************************<br>                                 91 *                                                                       00006200<br>00026 DC0E           0024 0003   92 ERROR    BCB   4,EXIT         EXIT IF ARG=0                             00006300<br>                                 93          AERROR 5             ARGUMENT&lt;0                                00006400<br>                                 94+*********ISSUE SEND ERROR SVC******************************************<br>00027 C9FB 0030      0030        95+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO<br>                                 96+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************<br>00029 78E8                       97          LECR  F0,F0          FIXUP: GET |ARG|                          00006500<br>0002A DFA6           0002 0029   98          B     START          AND TRY AGAIN                             00006600<br>                                 99 *                                                                       00006700<br>0002B C9FB<br>0002C 40800000                  100 FHALF    DC    E'0.5'                                                   00006800<br>0002E 00000001                  101 ROUND    DC    X'00000001'                                              00006900<br>                                102 *                                                                       00007000<br>                                103          ADATA                                                          00007100<br>                                104+*********DATA CSECT****************************************************<br>00030                           105+         LTORG                                                          02-ERRPA<br>                                106+****************ERROR PARAMETER AREA***********************************<br><font color="#ff0000">00030                           107+#LSQRT   CSECT                                                          02-ERRPA</font><br>                                108+***  SQRT SENDS THE FOLLOWING ERROR                                     02-ERRPA<br>                                110+***  ERROR NUMBER 5 IN GROUP 4                                          02-ERRPA<br>00030 0014                      112+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA<br>00031 0405                      113+         DC    Y(4*256+5)                       8 BIT GROUP AND NUMBER  02-ERRPA<br>                                114+****************END OF ERROR PARAMETER AREA****************************<br><font color="#ff0000">00032                           115+#LSQRT   CSECT                                                          01-ADATA</font><br><font color="#009900">00032 21AE7D00                  116 A        DC    X'21AE7D00'    1.6815948=A + X'20'                       00007200<br></font>00034 206B9F40                  117          DC    X'206B9F40'    0.4203987=A/4 + X'20'                     00007300<br>00036 FF5B02F1                  118 B        DC    X'FF5B02F1'    -1.2889728=B                              00007400<br>00038 FFD6C0BD                  119          DC    X'FFD6C0BD'    -0.3222432=B/4                            00007500<br>0003A 35CFC610                  120 C        DC    X'35CFC610'    0.8408065=C/2                             00007600<br>0003C 75CFC610                  121          DC    X'75CFC610'    0.8408065=C/2 + X'40'                     00007700<br>                                122          ACLOSE                                                         00007800<br>                                123+         END                                                            01-ACLOS</font><br></pre>
+    <p>As I've highlighted in <font color="#ff0000">red</font>, there
+      are two CSECTs in this excerpt, and they are called "<font
+        color="#ff0000"><code>SQRT</code></font>" and "<font
+        color="#ff0000"><code>#LSQRT</code></font>".&nbsp; (The <code><font
+          color="#ff0000">#LSQRT</font></code> section has two separate
+      <code><font color="#663300">CSECT</font></code> statements, but
+      don't be distracted by that, as it's not significant in respect to
+      the points I want to make.&nbsp; Also, don't be distracted by the
+      lines I've highlighted in <font color="#009900">green</font>,
+      which I'll discuss in a moment.)<br>
+    </p>
+    <p><i>Unlike</i> the expectation we (or at least I) would have, The
+      <font color="#ff0000"><code>#LSQRT</code></font> section's
+      addresses do <i>not</i> restart at 0, and instead the assembler
+      continues to assign it addresses which continue incremented from
+      the end of the <code><font color="#ff0000">SQRT</font></code>
+      section.&nbsp; It is as if the assembler has already performed the
+      step of partially linking these two sections of the code.&nbsp;
+      Why is this?<br>
+    </p>
+    <p>One might argue that while whoever coded the original assembler
+      thought (for some unknown reason) that it was a good idea to
+      present the assembly report in this fashion, it really doesn't
+      make any difference:&nbsp; As long as the object file produced by
+      the assembler still represents these as independent sections, the
+      linker can still reassign the addresses however it likes, with the
+      result that after the final linking it may no longer be the case
+      that the <font color="#ff0000"><code>#LSQRT</code></font> section
+      immediately follows the <code><font color="#ff0000">SQRT</font></code>
+      section in memory.<br>
+    </p>
+    <p>Alas, that rationalization is incorrect.&nbsp; Consider now the
+      lines highlighted in <font color="#009900">green</font>, and in
+      particular this instruction:<br>
+    </p>
+    <blockquote>
+      <blockquote>
+        <pre><font color="#009900">LA	R1,A</font><br></pre>
+      </blockquote>
+    </blockquote>
+    <p>For the assembler to assemble an instruction like this, in which
+      a "base register" is not explicitly stated as an operand itself,
+      it needs to somehow determine for itself the appropriate base
+      register.&nbsp; There are only two ways this can happen:<br>
+    </p>
+    <ol>
+      <li>If the operand (<font color="#009900"><code>A</code></font> in
+        this case) is in that same code section as the instruction
+        itself, in which case the appropriate base register is general
+        register 3.</li>
+      <li>Or else the operand is in an address block which has been made
+        known the assembler via a previous <font color="#663300"><code>USING</code></font>
+        pseudo-op.&nbsp; The <font color="#663300"><code>USING</code></font>
+        pseudo-op informs the assembler as to what assumption it can
+        make about the contents of the various general registers.<br>
+      </li>
+    </ol>
+    <p>In this example, though, neither of these conditions
+      obtains.&nbsp; As for condition #1, the instruction appears in the
+      <code><font color="#ff0000">SQRT</font></code> code section, but
+      its operand (<font color="#009900"><code>A</code></font>) appears
+      in a different section, namely <font color="#ff0000"><code>#LSQRT</code></font>.&nbsp;
+
+
+
+      As for condition #2, the only <font color="#663300"><code>USING</code></font>
+      pseudo-op follows the instruction rather than precedes it, so
+      there is no way for the assembler to make any assumptions about
+      register contents.<br>
+    </p>
+    <p>How, then, has the assembler been able to assemble this <font
+        color="#009900"><code>LA</code></font> instruction?&nbsp; Well,
+      perhaps there are possibilities that haven't occurred to me, but
+      it appears to me that there's only one explanation:&nbsp; The
+      assembler really has already linked the <code><font
+          color="#ff0000">SQRT</font></code> and <font color="#ff0000"><code>#LSQRT</code></font>
+      code sections, so that they are in a fixed relationship to each
+      other, and in particular there is really no separate <font
+        color="#ff0000"><code>#LSQRT</code></font> section as such in
+      the object file output by the assembler.&nbsp; I.e., <font
+        color="#ff0000"><code>#LSQRT</code></font> has become just a
+      label for an address within the <code><font color="#ff0000">SQRT</font></code>
+      section, and the actual linker program <i>cannot</i> change this
+      at any later time.<br>
+    </p>
+    <h2><a name="unknownDatatype"></a>Non-System/360 Datatype 0x84<br>
+    </h2>
+    <p>To understand the comments below, it may help to refer back to <a
+        moz-do-not-send="true" href="#exampleReverseEngineering">the
+        earlier example of a reverse-engineering report</a>.<br>
+    </p>
+    <p>In so-called SYM records within an object file, each symbol
+      representing "data" has an associated "datatype", consisting of a
+      single-byte number.&nbsp; For example, the datatype 0x00
+      represents character data (C), 0x04 represents hexadecimal data
+      (X), 0x18 represents single-precision floating-point (E), and so
+      on.&nbsp; However, there's one datatype in AP-101S object files,
+      0x84, that doesn't appear in the available system/360 object-file
+      documentation, leading us to speculate that it represents some
+      AP-101S-only datatype not available on System/360.&nbsp; <br>
+    </p>
+    <p>As it happens, there's <a moz-do-not-send="true"
+        href="ASM101S.html#literals">discussion on our page about the
+        modern AP-101 assembler that concerns the available datatypes</a>.&nbsp;
+      That discussion points out a single AP-101S-specific datatype, Z,
+      that's speculated to be <i>unrelated</i> to the System/360
+      datatype also designated as Z ("zoned decimal", 0x34).&nbsp; For
+      AP-101S, it was speculated that the Z datatype instead was
+      something called a ZCON, which as kind of long-range address
+      constant for items not present in nearby memory and hence
+      addressable by only a restricted class of instructions.&nbsp; <br>
+    </p>
+    <p>We are thus tempted to equate datatype 0x84 in SYM records with
+      AP-101S ZCONs.&nbsp; At the moment this is pure speculation that
+      perhaps doesn't fit perfectly, but the reverse-engineering report
+      nevertheless treats it as factual and reacts to these datatypes as
+      follows:<br>
+    </p>
+    <ul>
+      <li>0x34 (System/360 zoned decimal) would be displayed in the
+        reports as "z", but cannot actually appear.<br>
+      </li>
+      <li>0x84 (<i>possibly</i> AP-101S ZCON) is displayed in the
+        reports as "Z".<br>
+      </li>
+    </ul>
+    <h2><a name="characterEncoding"></a>Encoding of Character Data in
+      Object Decks<br>
+    </h2>
+    <p>In System/360 object files, all character data is encoded in
+      EBCDIC.&nbsp; This is not true for AP-101 object files. <i>Some</i>
+      text is encoded instead in the character set of the Space
+      Shuttle's Display Electronics Unit (DEU).<br>
+    </p>
+    The DEU character set is depicted in the table below.&nbsp; It is an
+    ASCII-like character set, in the sense that almost everywhere the
+    printable characters or control codes overlap with printable ASCII
+    characters or control codes, the numerical encoding matches ASCII as
+    well. <br>
+    <p align="center"><img moz-do-not-send="true" src="encodingDEU.png"
+        alt="" width="638" height="468" align="top"></p>
+    Reverse engineering reveals at least some of the cases in which DEU
+    encoding is used in place of EBCDIC in the object files:<br>
+    <br>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Classification of Textual Data<br>
+          </th>
+          <th valign="top">Encoding<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="middle">Textual data used only at
+            compile/assembly/link time, but not accessible to the
+            executable AP-101 program itself at runtime.&nbsp; Examples
+            of this kind of data include (but are not limited to):
+            <ul>
+              <li>Names of symbols appearing in the source code or
+                transparently generated by the compiler or assembler.<br>
+              </li>
+              <li>Names of object-file record types ("SYM", "ESD",
+                "TXT", "REL", "END").</li>
+              <li>"Ident" fields (columns 72-80) of assembly-language
+                source-code cards.<br>
+              </li>
+            </ul>
+          </td>
+          <td valign="middle" align="center">EBCDIC<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Character constants appearing in HAL/S
+            source code, such as <code>DECLARE CHARACTER CONSTANT</code>
+            statements, <code>DECLARE CHARACTER INITIAL</code>
+            constants, or character literals.</td>
+          <td valign="middle" align="center">DEU<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Character data appearing in AP-101
+            assembly-language source code, such as <code>DC</code>
+            pseudo-ops or so-called "literals" like "<code>=C'...'</code>".<br>
+          </td>
+          <td valign="middle" align="center">TBD (currently, assumed
+            EBCDIC)<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Consider <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/037-ROOTS.hal">this
+
+
+      HAL/S program adapted from the book <i>Programming in HAL/S</i></a>,
+    with a few of its character-string literals highlighted in various
+    colors:<br>
+    <blockquote>
+      <pre>  ROOTS: PROGRAM;<br>    DECLARE SCALAR, A, B, C, D, ROOT1, ROOT2;<br>    DO WHILE TRUE;<br>        WRITE(6) ;<br>        WRITE(6) '<font color="#006600">Enter A, B, C (0,0,0 to quit):</font>';<br>        READ(5) A, B, C;<br>        IF A = 0 AND B = 0 AND C = 0 THEN<br>            DO;<br>                WRITE(6) '<font color="#3366ff">Quitting ...</font>';<br>                EXIT;<br>            END;<br>        D = B**2 - 4 A C;<br>        IF D &gt;= 0 THEN <br>            DO;<br>                D = D**0.5;<br>                ROOT1 = (-B + D) / (2 A);<br>                ROOT2 = (-B - D) / (2 A);<br>                WRITE(6) '<font color="#cc66cc">Real roots of</font>', A, '<font color="#990000">X**2 +</font>', B, '<font color="#ffcc33">X +</font>', C, <br>                         '<font color="#996633">are:</font>', ROOT1, ROOT2;<br>                WRITE(6) '<font color="#ff0000">Check:</font>', <br>                        A ROOT1**2 + B ROOT1 + C,<br>                        A ROOT2**2 + B ROOT2 + C;<br>            END;<br>        ELSE<br>            DO;<br>                TEMPORARY RE, IM, RE2, IM2;<br>                D = (-D)**0.5;<br>                RE = -B / (2 A);<br>                IM = D / (2 A);<br>                WRITE(6) '<font color="#33ff33">Complex roots of</font>', A, '<font color="#990000">X**2 +</font>', B, '<font color="#ffcc33">X +</font>', <br>                         C, '<font color="#996633">are:</font>', RE, '<font color="#999900">+/-</font>', IM, '<font color="#999999">i</font>';<br>                RE2 = RE**2 - IM**2; /* Square of RE2 +/- IM2 i. */<br>                IM2 = 2 RE IM;<br>                WRITE(6) '<font color="#ff0000">Check:</font>', A RE2 + B RE + C, '<font color="#999900">+/-</font>', <br>                         A IM2 + B IM, '<font color="#999999">i</font>';<br>            END;<br>    END;<br>  CLOSE ROOTS;<br></pre>
+    </blockquote>
+    In comparison, here's an excerpt from the reverse-engineering report
+    on the object-code file, with just some of the TXT records, and some
+    portions of the TXT records that seemingly correspond to the literal
+    strings highlighted in colors matching the HAL/S listing above:<br>
+    <pre>	.<br>	.<br>	.<br>05A0: 	type=TXT ident="I**20019" offset=000024 size=0038 esdid=0003<br>	data: 00 01 <font color="#999999">69</font> 00 00 03 <font color="#999900">2B 2F 2D</font> 00 00 10 <font color="#33ff33">43 6F 6D 70<br>	      6C 65 78 20 72 6F 6F 74 73 20 6F 66</font> 00 06 <font color="#ff0000">43 68<br>	      65 63 6B 3A</font> 00 04 <font color="#996633">61 72 65 3A</font> 00 03 <font color="#ffcc33">58 20 2B</font> 00<br>	      00 06 <font color="#990000">58 2A 2A 32 20 2B</font><br>05F0: 	type=TXT ident="I**20020" offset=00005C size=0036 esdid=0003<br>	data: 00 0D <font color="#cc66cc">52 65 61 6C 20 72 6F 6F 74 73 20 6F 66</font> 00<br>	      00 0C <font color="#3366ff">51 75 69 74 74 69 6E 67 20 2E 2E 2E</font> 00 1E<br>	      <font color="#006600">45 6E 74 65 72 20 41 2C 20 42 2C 20 43 20 28 30<br>	      2C 30 2C 30 20 74</font><br>0640: 	type=TXT ident="I**20021" offset=000092 size=0008 esdid=0003<br>	data: <font color="#006600">6F 20 71 75 69 74 29 3A</font><br>	.<br>	.<br>	.<br></pre>
+    You can verify for yourself, if you like, that the colored portions
+    are encoded as DEU/ASCII, and hopefully take my word for it (since I
+    wrote it!) that the reverse-engineering report generator uses
+    EBCDIC-to-ASCII conversion to print out messages such as <code>ident="I**20021"</code>.<br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+        There's no easy way, as far as I know, using just information
+        within the object decks themselves, to easily locate individual
+        unnamed string literals within the TXT records of the object
+        decks.&nbsp; The way I did it above, was to <i>assume</i> that
+        ASCII coding was used, and to look for the ASCII strings ...
+        which I admit was a bit of a cheat, even though it doesn't
+        invalidate the conclusions in any way.&nbsp; In the next
+        section, we'll learn enough to infer that the these strings <i>should</i>
+        have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
+
+        And in portions of the reverse-engineering report that I've
+        omitted above, we would have seen that there is in fact a </font><font
+        size="-1"><font size="-1"><code>CSECT</code></font> called </font><font
+        size="-1"><font size="-1"><code>#DROOTS</code></font> and that
+        it is assigned the ESDID 0003, which is the case in the excerpt
+        above.&nbsp; So indeed, everything is as it should be in this
+        the best of all possible worlds.</font><br>
+    </blockquote>
+    <h2><a name="program"></a>PROGRAM Compilation Units</h2>
+    Object files generated from HAL/S source code containing a <code>PROGRAM</code>
+    (i.e., the top-level compilation unit of a program, rather than a
+    mere component of a program such as the <code>PROCEDURE</code>)
+    have object files differing from the format described in the
+    System/360 documentation and roughly covered in examples of reverse
+    engineering above.<br>
+    <p>Such an object file <i>begins</i> with a block of records in the
+      almost-System/360 format we've already described, but differs
+      after an END record is encountered.&nbsp; After an END record, we
+      enter undocumented <i>terra incognita</i>, in which we can only
+      rely upon whatever reverse engineering we can apply.<br>
+    </p>
+    <p>Consider <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/021-SIMPLE.hal">this
+
+
+        sample HAL/S source code</a> for a <code>PROGRAM</code> based
+      on one found in the book <i>Programming in HAL/S</i>:<br>
+    </p>
+    <blockquote>
+      <pre>  SIMPLE: PROGRAM;<br>          DECLARE PI CONSTANT (3.14159266);<br>          DECLARE R SCALAR;<br>          WRITE(6) 'Input R to compute PI R**2, or -1 to quit.';<br>          DO WHILE TRUE;<br>                  READ(5) R;<br>                  IF R &lt; 0 THEN EXIT;<br>                  WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;<br>          END;<br>  CLOSE SIMPLE;<br></pre>
+    </blockquote>
+    <p>After compiling this file and parsing the object file, we find
+      extraneous material following the END record.&nbsp; If we pretend
+      that this extraneous material consists of EBCDIC characters —
+      which is only partially true —, it could be translated into ASCII
+      essentially as follows:<br>
+    </p>
+    <blockquote>
+      <pre>" STACK $0SIMPLE"<br>"cSYM      a      aaaSTART                                               I**20018"<br>"cESD      a   abSTART   aaaa aa $0SIMPLEcaaa                            I**20019"<br>"cTXT aaa  a   abU3aa                                                    I**20020"<br>"cRLD      a     acabaaac                                                I**20021"<br>"cEND aaa      ab                2HAL/SREL3 V0  24329RSB-XCOM-I000924239 I**20022"<br></pre>
+    </blockquote>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Strictly speaking, this
+          isn't an ASCII translation of the extraneous data, because it
+          has a few flourishes of my own to make it more readable.&nbsp;
+          Specifically, the enclosing quotes are mine, the non-printable
+          control characters encoded numerically as 0x00 (NUL), 0x01
+          (SOH), and 0x02 (STX) are represented by the lower-case
+          characters "a", "b", and "c", respectively, and there aren't
+          actually any newlines.&nbsp; But we can get the gist of it!</font><br>
+      </p>
+    </blockquote>
+    <p>We need to digress for a moment before trying to make some sense
+      of this extraneous nonsense.&nbsp; In the earlier discussion of
+      the object-file format, I glossed over certain simple facts that I
+      assumed you could glean from the System/360 documentation if you
+      were actually interested.&nbsp; But those facts become relevant to
+      the discussion now, so let state them:<br>
+    </p>
+    <ul>
+      <li>An object file is supposed to consist entirely of 80-byte
+        records.</li>
+      <li>The first byte of each record is supposed to be the control
+        character STX, i.e. 0x02 (or "c" in the representation above).</li>
+      <li>Records appear in the order of type SYM, type ESD, type TXT,
+        type RLD, and type END.</li>
+      <li>The final 8 characters of each record have an undefined
+        purpose, but traditionally are an "ident" string that increments
+        with each line.&nbsp; Note that in the example above I haven't
+        shown the records preceding the extraneous material, but those
+        omitted records have ident fields "I**2001" for the leading SYM
+        record through "I**2017" at the END record.</li>
+    </ul>
+    <p>So superficially at least, the extraneous material at the end of
+      the object file starts with an aberrant record that is neither 80
+      bytes in length nor begins with 0x02.&nbsp; But after that
+      aberrant record, the remaining extraneous material seems to follow
+      the rules as if they comprised a completely separate object file.<br>
+    </p>
+    <p>Taking all of that into account, here's the kind of
+      reverse-engineering report we actually see.&nbsp; The extraneous
+      material is highlighted in green, and I've invented a new record
+      type (HDR, for "header") for what I've so far been calling the
+      "aberrant" record:<br>
+    </p>
+    <pre>0000: 	type=SYM ident="I**20001" size=002E<br>0050: 	type=SYM ident="I**20002" size=002E<br>00A0: 	type=SYM ident="I**20003" size=0029<br>00F0: 	type=ESD ident="I**20004" size=0030 esdid=0001<br>	symbol1: name="$0SIMPLE" type=SD address=000000 length=0060 AMODE24 RMODE24 RW<br>	symbol2: name="#ESIMPLE" type=SD address=000000 length=000C AMODE24 RMODE24 RW<br>	symbol3: name="#DSIMPLE" type=SD address=000000 length=0052 AMODE24 RMODE24 RW<br>0140: 	type=ESD ident="I**20005" size=0030 esdid=0004<br>	symbol1: name="@0SIMPLE" type=ER<br>	symbol2: name="#QIOINIT" type=ER<br>	symbol3: name="#QCOUT  " type=ER<br>0190: 	type=ESD ident="I**20006" size=0020 esdid=0007<br>	symbol1: name="#QEIN   " type=ER<br>	symbol2: name="#QEOUT  " type=ER<br>01E0: 	type=TXT ident="I**20007" offset=000000 size=000C esdid=0002<br>	data: 00 00 00 00 00 00 07 00 00 00 00 05<br>0230: 	type=TXT ident="I**20008" offset=000008 size=0004 esdid=0003<br>	data: 00 01 00 12<br>0280: 	type=TXT ident="I**20009" offset=000000 size=0038 esdid=0001<br>	data: E8 F3 00 00 E9 F3 00 00 B9 14 E0 FB 00 14 EB 11<br>	      BB 24 BE E8 BD E5 D0 FF 38 00 EA 4D D0 FF 38 00<br>	      BE E7 75 E5 D0 FF 38 00 EA 0B D0 FF 38 00 78 07<br>	      DD 04 DF 50 BE E8 BD E5<br>02D0: 	type=TXT ident="I**20010" offset=000038 size=0028 esdid=0001<br>	data: D0 FF 38 00 EA 41 D0 FF 38 00 78 07 D0 FF 38 00<br>	      EA 21 D0 FF 38 00 7F 07 67 E7 67 05 78 E7 D0 FF<br>	      38 00 DF 7A C9 F9 00 00<br>0320: 	type=TXT ident="I**20011" offset=000000 size=0002 esdid=0003<br>	data: 00 15<br>0370: 	type=TXT ident="I**20012" offset=000004 size=0004 esdid=0003<br>	data: 41 32 43 F6<br>03C0: 	type=TXT ident="I**20013" offset=000010 size=0036 esdid=0003<br>	data: 00 0D 61 6E 64 20 50 49 20 52 2A 2A 32 20 3D 00<br>	      00 03 52 20 3D 00 00 2A 49 6E 70 75 74 20 52 20<br>	      74 6F 20 63 6F 6D 70 75 74 65 20 50 49 20 52 2A<br>	      2A 32 2C 20 6F 72<br>0410: 	type=TXT ident="I**20014" offset=000046 size=000C esdid=0003<br>	data: 20 2D 31 20 74 6F 20 71 75 69 74 2E<br>0460: 	type=RLD ident="I**20015" size=0038<br>	relocation=0004 position=0001 flags=(0,0,A,1,0,0) address=000002<br>	relocation=0003 position=0001 flags=(0,0,A,1,0,0) address=000006<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=000018<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=00001E<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=000026<br>	relocation=0007 position=0001 flags=(0,0,A,1,0,0) address=00002C<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=00003A<br>04B0: 	type=RLD ident="I**20016" size=0030<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=000040<br>	relocation=0008 position=0001 flags=(0,0,A,1,0,0) address=000046<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=00004C<br>	relocation=0008 position=0001 flags=(0,0,A,1,0,0) address=000058<br>	relocation=0001 position=0002 flags=(0,0,V,1,0,0) address=000004<br>	relocation=0003 position=0002 flags=(0,1,A,1,0,0) address=000004<br>0500: 	type=END ident="I**20017" idrType="2" <br>	translator="HAL/SREL3 V0  24331" <br>	processor="RSB-XCOM-I000924239"<br><font color="#009900">0550: 	type=HDR ident="        " length=15<br>	text=" STACK $0SIMPLE"<br>055F: 	type=SYM ident="I**20018" size=0009<br>05AF: 	type=ESD ident="I**20019" size=0020 esdid=0001<br>	symbol1: name="START   " type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>	symbol2: name="$0SIMPLE" type=ER<br>05FF: 	type=TXT ident="I**20020" offset=000000 size=0004 esdid=0001<br>	data: E4 F3 00 00<br>064F: 	type=RLD ident="I**20021" size=0008<br>	relocation=0002 position=0001 flags=(0,0,A,1,0,0) address=000002<br>069F: 	type=END ident="I**20022" entryAddress=000000 esdid=0001 idrType="2" <br>	translator="HAL/SREL3 V0  24331" <br>	processor="RSB-XCOM-I000924239"</font><br>--------------------------------------------------------------------------------<br>SYM-Record Summary:<br>	CONTROL     offset=000000 name="$0SIMPLE"<br>	DUMMY       offset=000000 name="STACK"<br>	DATA        offset=000028 name="STACKEND" datatype=H<br>	DUMMY       offset=000000 name="HALS/FC"<br>	DUMMY       offset=000000 name="HALS/END"<br>	CONTROL     offset=000000 name="$0SIMPLE"<br>	INSTRUCTION offset=000002 name="D24331"<br>	INSTRUCTION offset=000002 name="T2904859"<br>	CONTROL     offset=000000 name="#ESIMPLE"<br>	DATA        offset=000000 datatype=Z<br>	CONTROL     offset=000000 name="#DSIMPLE"<br>	DATA        offset=000000 datatype=Z<br>	DATA        offset=00000C name="R" datatype=E<br>	CONTROL     offset=000000 name="START"<br></pre>
+    <blockquote> </blockquote>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2024-11-29<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
