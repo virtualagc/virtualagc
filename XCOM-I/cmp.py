@@ -33,7 +33,7 @@ for i in range(len(file1)):
     if file1[i] != file2[i]:
         badcount += 1
         if badcount > threshhold:
-            print("Too many mismatches (> %d)between %s and %s" % \
+            print("Too many mismatches (> %d) between %s and %s" % \
                   (threshhold, filename1, filename2), file=sys.stderr)
             sys.exit(1)
 

@@ -328,6 +328,8 @@ def readObject101S(filename):
             continue
     offset = 0
     while offset < len(packedSymbols):
+        if len(symbols) >= 9: ###DEBUG###
+            pass
         offset, symbol = parsePackedSymbol(packedSymbols, offset)
         if offset != None: # No error
             symbols.append(symbol)

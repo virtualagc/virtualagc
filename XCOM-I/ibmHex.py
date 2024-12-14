@@ -6,7 +6,9 @@
 # point from native floating-point numbers, or vice versa.
 
 import sys
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import *
+
+getcontext().prec = 20
 
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's
@@ -16,7 +18,7 @@ from decimal import Decimal, ROUND_HALF_UP
 # half-integers upward.  Returns None on error.
 def hround(x):
     try:
-        i = int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
+        i = int(x.to_integral_value(rounding=ROUND_HALF_UP))
     except:
         # x wasn't a number.
         return None
@@ -47,15 +49,19 @@ E.g., the 64-bit hexadecimal pair 0x42640000 0x00000000 parses as:
     Fraction = 0.0110 0100 ...
 or in total, 1100100 (binary), or 100 decimal.
 '''
-twoTo56 = 2 ** 56
-twoTo52 = 2 ** 52
-
+twoTo56 = Decimal(2 ** 56)
+twoTo52 = Decimal(2 ** 52)
+sixteen = Decimal(16)
 
 # Convert a Python integer or float to IBM double-precision float.  
 # Returns as a pair (msw,lsw), each of which are 32-bit integers,
-# or (0xff000000,0x00000000) on error.
-def toFloatIBM(x):
-    d = float(x)
+# or (0xff000000,0x00000000) on error.  Note that `x` and `scale` can
+# be either numbers or string representations of numbers.  But the 
+# string representation is better, because if the value has already been
+# converted to a Python `float`, it may no longer be able to correctly match 
+# all significant digits.
+def toFloatIBM(x, scale=1):
+    d = Decimal(x) * Decimal(scale)
     if d == 0:
         return 0x00000000, 0x00000000
     # Make x positive but preserve the sign as a bit flag.
@@ -70,10 +76,10 @@ def toFloatIBM(x):
     e = 64
     while d < twoTo52:
         e -= 1
-        d *= 16
+        d *= sixteen
     while d >= twoTo56:
         e += 1
-        d /= 16
+        d /= sixteen
     if e < 0:
         e = 0
     if e > 127:
@@ -92,7 +98,7 @@ def fromFloatIBM(msw, lsw):
     s = (msw >> 31) & 1
     e = ((msw >> 24) & 0x7f) - 64
     f = ((msw & 0x00ffffff) << 32) | (lsw & 0xffffffff)
-    x = f * (16 ** e) / twoTo56
+    x = f * (16 ** e) / (2 ** 56)
     if s != 0:
         x = -x
     return x
@@ -151,15 +157,16 @@ if __name__ == "__main__":
                 hex2 = int(fields[1], 16)
             except:
                 print("Not hexadecimal: %s" % fields[1])
-            print(fromFloatIBM(hex1, hex2))
+            f = fromFloatIBM(hex1, hex2)
+            print("->", f, "->", "%08X,%08X" % toFloatIBM(f))
         else:
             try:
-                f = float(parm)
+                f = parm
             except:
                 print("Not a floating-point numbmer: %s" % parm)
             hex1, hex2 = toFloatIBM(f)
             if hex1 == 0xFF000000:
                 print("Cannot be converted to IBM hexadecimal floating-point")
             else:
-                print("%08X,%08X" % (hex1, hex2))
+                print("->", "%08X,%08X" % (hex1, hex2), "->", fromFloatIBM(hex1, hex2))
     

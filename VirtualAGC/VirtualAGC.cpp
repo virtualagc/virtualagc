@@ -166,8 +166,15 @@
  *                              core dump (but not yet reconstructed source
  *                              code) is now available.
  *              2024-05-13 RSB  Enabled Comanche 67 for Apollo 12 CM.
- *              2024-05-21 RSB  Added/Enabed Comanche 72 and Manche 72R3 for
+ *              2024-05-21 RSB  Added/Enabled Comanche 72 and Manche 72R3 for
  *                              Apollo 13 CM.
+ *              2024-12-13 RSB  Long-overdue fix for the improperly-cropped
+ *                              heading in the "Simulation Status" window.
+ *                              Added ApoDisKey (Mac) as alternative to yaDSKY2.
+ *                              Speculatively added calls in a lot of widgets to
+ *                              SetForegroundColour`, due to reported problems
+ *                              in MacOS Sequoia that I'm not in a position to
+ *                              try reproducing.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -193,6 +200,7 @@ int dropdownSquish = 1;
 int maximumSquish = 0;
 int maximizeAtStartup = 0;
 long fontFloor = 8;
+bool ApoDisKeyInstalled = true;
 
 /*
  * The following array specifies most properties of "missions" (i.e., specific
@@ -670,6 +678,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   DskyHalfButton = new wxRadioButton(this, ID_DSKYHALFBUTTON, wxT("Half"));
   DskyLiteButton = new wxRadioButton(this, ID_DSKYLITEBUTTON, wxT("\"Lite\""));
   DskyNavButton = new wxRadioButton(this, ID_DSKYNAVBUTTON, wxT("Nav"));
+  DskyApoButton = new wxRadioButton(this, ID_DSKYAPOBUTTON, wxT("Mac"));
+  DskyApoHalfButton = new wxRadioButton(this, ID_DSKYAPOHALFBUTTON, wxT("Mac/2"));
   DownlinkLabel = new wxStaticText(this, wxID_ANY, wxT("Downlink:"));
   TelemetryResizable = new wxRadioButton(this, wxID_ANY, wxT("Normal"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
@@ -753,6 +763,8 @@ EVT_RADIOBUTTON(ID_DSKYFULLBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYHALFBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYLITEBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYNAVBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_DSKYAPOBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_DSKYAPOHALFBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DEDAFULLBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DEDAHALFBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCDEBUGNORMALBUTTON, VirtualAGC::ConsistencyEvent)
@@ -1512,6 +1524,7 @@ VirtualAGC::set_properties()
               missionConstants[mission - ID_FIRSTMISSION].tooltip));
     }
   AgcCustomButton->SetBackgroundColour(wxColour(255, 255, 255));
+  AgcCustomButton->SetForegroundColour(wxColour(0, 0, 0));
   AgcCustomButton->SetToolTip(
       wxT(
           "Click here to run your own personal software creation on the AGC system.  You should first have compiled your assembly-language source code using the yaYUL program to create an executable binary."));
@@ -1525,6 +1538,7 @@ VirtualAGC::set_properties()
   AgcCustomFilename->Enable(false);
   AgcFilenameBrowse->SetMinSize(wxSize(50, 24));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
+  AgcFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
   AgcFilenameBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of the AGC runtime software using a file-selection dialog.  This can be either a pre-compiled binary, or it can be AGC assembly-language source code.  If the latter, then VirtualAGC will actually compile it for you using the yaYUL utility."));
@@ -1532,6 +1546,7 @@ VirtualAGC::set_properties()
   if (!maximumSquish)
     {
       DeviceListLabel->SetBackgroundColour(wxColour(255, 255, 255));
+      DeviceListLabel->SetForegroundColour(wxColour(0, 0, 0));
       DeviceListLabel->SetFont(
           wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       DeviceListLabel->SetToolTip(
@@ -1539,86 +1554,104 @@ VirtualAGC::set_properties()
               "In this area, you can select the particular computers and peripherals devices which will be simulated, along with the controls that will be displayed."));
     }
   DeviceAgcCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceAgcCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceAgcCheckbox->SetToolTip(
       wxT(
           "We assume that you will ALWAYS need to run the simulated guidance computer (AGC), so we don't allow you the option of deselecting it."));
   DeviceAgcCheckbox->Enable(false);
   DeviceAgcCheckbox->SetValue(1);
   DeviceDskyCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceDskyCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceDskyCheckbox->SetToolTip(
       wxT(
           "We assume that you will ALWAYS need to run the simulated display/keypad (DSKY), so we don't allow you the option of deselecting it."));
   DeviceDskyCheckbox->Enable(false);
   DeviceDskyCheckbox->SetValue(1);
   DeviceAcaCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceAcaCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
   JoystickConfigure->SetMinSize(wxSize(70, 24));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
+  JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
       wxT("Click this to run the joystick-configurator program."));
   DeviceTelemetryCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceTelemetryCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceTelemetryCheckbox->SetToolTip(
       wxT(
           "The telemetry downlink monitor displays information which the guidance computer continually transmits to mission control.  Unfortunately, it does not mimic the actual APPEARANCE of the display screens used in mission control, because nobody seems to know exactly how they looked."));
   DeviceAeaCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceAeaCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceAeaCheckbox->SetToolTip(
       wxT(
           "The AEA (or sometimes AGS) is a completely separate computer system in the LM which could be used (but never was used in a real mission) in case of failure of the guidance computer, in order to abort."));
   DeviceDedaCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceDedaCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceDedaCheckbox->SetToolTip(
       wxT(
           "The DEDA was the display/keyboard interface used for the LM abort computer (AEA)."));
   DeviceDedaCheckbox->Enable(false);
   DeviceCpumonCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceCpumonCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceCpumonCheckbox->SetToolTip(
       wxT(
           "This is the main window for the \"LM_simulator\" subsystem.  While designed for the LM and not yet adapted for the CM, it is of some use in CM simulations as well.  This particular window provides a continuous display of the state of the guidance computer's input/output channels.  It does not correspond to anything that actually existed in the spacecraft.  This needs to be selected in order to select any of the peripheral devices appearing below."));
   DeviceImuCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceImuCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceImuCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It is basically an interface to the Inertial Monitoring Unit (IMU).  It gives continuous feedback on the velocity and attitude of the spacecraft.  The FDAI (8-ball) provides a visual status of the pitch/yaw/roll.  "));
   DeviceImuCheckbox->Enable(false);
   DeviceDiscoutCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceDiscoutCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceDiscoutCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a visual indicator of the states of various discrete signals controlled by the guidance computer.  In the actual spacecraft, these signals were not all collected together into a single window like this."));
   DeviceDiscoutCheckbox->Enable(false);
   DeviceCrewinCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceCrewinCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceCrewinCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a way to turn various signals on or off (as the crew would have done with switches or buttons) and to feed those signals to the guidance computer."));
   DeviceCrewinCheckbox->Enable(false);
   DeviceSysinCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DeviceSysinCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DeviceSysinCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a way to set the states of various signals used as inputs to the guidance computer that would normally have been set by systems within the spacecraft that are not present in this simulation."));
   DeviceSysinCheckbox->Enable(false);
   DevicePropulsionCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
+  DevicePropulsionCheckbox->SetForegroundColour(wxColour(0, 0, 0));
   DevicePropulsionCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a continuous monitor of the spacecraft's fuel level, thrust, and so on.  The data is closely tied to the LM at this point, and is limited value in the CM."));
   DevicePropulsionCheckbox->Enable(false);
   NoviceButton->SetBackgroundColour(wxColour(240, 240, 240));
+  NoviceButton->SetForegroundColour(wxColour(0, 0, 0));
   NoviceButton->SetToolTip(
       wxT(
           "Click this button to set the minimum reasonable combination of devices above without having to go through the list and select them or deselect them one-by-one."));
   ExpertButton->SetBackgroundColour(wxColour(240, 240, 240));
+  ExpertButton->SetForegroundColour(wxColour(0, 0, 0));
   ExpertButton->SetToolTip(
       wxT(
           "Click this button to set the maximum reasonable combination of devices above, given the simulation type being run, without having to go through the list and select them or deselect them one-by-one."));
   AgcSourceButton->SetBackgroundColour(wxColour(240, 240, 240));
+  AgcSourceButton->SetForegroundColour(wxColour(0, 0, 0));
   AgcSourceButton->SetToolTip(
       wxT(
           "Click this to view the assembly listing (source code) for the selected AGC simulation type(s)."));
   AeaSourceButton->SetBackgroundColour(wxColour(240, 240, 240));
+  AeaSourceButton->SetForegroundColour(wxColour(0, 0, 0));
   AeaSourceButton->SetToolTip(
       wxT(
           "Click this to view the selected AEA Flight Program assembly listing."));
   if (!maximumSquish)
     {
       OptionList->SetBackgroundColour(wxColour(255, 255, 255));
+      OptionList->SetForegroundColour(wxColour(0, 0, 0));
       OptionList->SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       OptionList->SetToolTip(
           wxT(
@@ -1637,19 +1670,23 @@ VirtualAGC::set_properties()
   CustomResumeButton->SetToolTip(
       wxT("Select a custom memory-core file from which to resume operation."));
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
+  CoreFilename->SetForegroundColour(wxColour(0, 0, 0));
   CoreFilename->Enable(false);
   CoreBrowse->SetMinSize(wxSize(50, 24));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
+  CoreBrowse->SetForegroundColour(wxColour(0, 0, 0));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
   CoreBrowse->Enable(false);
   CoreSaveButton->SetMinSize(wxSize(50, 24));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
+  CoreSaveButton->SetForegroundColour(wxColour(0, 0, 0));
   CoreSaveButton->SetToolTip(
       wxT(
           "Click this button to preserve the most-recent core-dump so that you can resume operation from it later, by name."));
   DskyLabel->SetBackgroundColour(wxColour(255, 255, 255));
+  DskyLabel->SetForegroundColour(wxColour(0, 0, 0));
   DskyFullButton->SetToolTip(
       wxT("This is the default display/keypad simulation."));
   DskyFullButton->SetValue(1);
@@ -1661,7 +1698,12 @@ VirtualAGC::set_properties()
           "The DSKY Lite is an alternate simulation of the display/keypad unit, using software contributed by Stephan Hotto.  There may be some circumstances under which you would find it useful.  However, it can only be used if in the \"Devices\" menu you select \"AGC CPU Bus/Input/Output Monitor\" and DO NOT select \"Telemetry Downlink Monitor\"."));
   DskyNavButton->SetToolTip(
       wxT("Nav-bay DSKY (vs main control-panel DSKY), for Block I only."));
+  DskyApoButton->SetToolTip(
+      wxT("Alternate ApoDisKey in place of yaDSKY2"));
+  DskyApoHalfButton->SetToolTip(
+      wxT("Alternate ApoDisKey in place of yaDSKY2, half size"));
   DownlinkLabel->SetBackgroundColour(wxColour(255, 255, 255));
+  DownlinkLabel->SetForegroundColour(wxColour(0, 0, 0));
   TelemetryResizable->SetToolTip(
       wxT(
           "Uses a format for the telemetry display in which the text size and display size is adjustable."));
@@ -1670,6 +1712,7 @@ VirtualAGC::set_properties()
       wxT(
           "The telemetry-display has a \"retro\" appearance, in which it looks somewhat like it's a CRT such as those from mission control.  However, it is not resizable and consumes quite a lot of space on your computer's actual display."));
   DedaLabel->SetBackgroundColour(wxColour(255, 255, 255));
+  DedaLabel->SetForegroundColour(wxColour(0, 0, 0));
   DedaFullButton->SetToolTip(
       wxT("This is the default AEA display/keypad simulation."));
   DedaFullButton->SetValue(1);
@@ -1677,6 +1720,7 @@ VirtualAGC::set_properties()
       wxT(
           "The half-size DEDA simulation can be useful if you have limited free space on your display screen."));
   AgcDebugLabel->SetBackgroundColour(wxColour(255, 255, 255));
+  AgcDebugLabel->SetForegroundColour(wxColour(0, 0, 0));
   AgcDebugNormalButton->SetToolTip(
       wxT("Click this to run the simulated AGC CPU in the normal manner."));
   AgcDebugNormalButton->SetValue(1);
@@ -1684,6 +1728,7 @@ VirtualAGC::set_properties()
       wxT(
           "Click this to run the simulated AGC CPU with a debug monitor that allows single-stepping, breakpoints, disassembly, dumping/editing of memory, etc."));
   AeaDebugLabel->SetBackgroundColour(wxColour(255, 255, 255));
+  AeaDebugLabel->SetForegroundColour(wxColour(0, 0, 0));
   AeaDebugNormalButton->SetToolTip(
       wxT("This is the normal manner of simulating the AEA/AGS."));
   AeaDebugNormalButton->SetValue(1);
@@ -1691,36 +1736,43 @@ VirtualAGC::set_properties()
       wxT(
           "Click this to run the simulated AEA/AGS CPU with a debug monitor that allows single-stepping, breakpoints, disassembly, dumping/editing of memory, etc."));
   FlightProgram4Button->SetBackgroundColour(wxColour(255, 255, 255));
+  FlightProgram4Button->SetForegroundColour(wxColour(0, 0, 0));
   FlightProgram4Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 9 LM for the first orbital test of the LM.  This will run the AEA/AGS software designated as Flight Program 3 or 4."));
   FlightProgram4Button->Enable(false);
   FlightProgram5Button->SetBackgroundColour(wxColour(255, 255, 255));
+  FlightProgram5Button->SetForegroundColour(wxColour(0, 0, 0));
   FlightProgram5Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 10 LM, which was the first LM test in the lunar neighborhood.  The Apollo 10 mission experienced a mishap associated with the AGC and AEA both trying to control the LM simultaneously.  This will run the AEA/AGS software designated as Flight Program 5."));
   FlightProgram5Button->Enable(false);
   FlightProgram6Button->SetBackgroundColour(wxColour(255, 255, 255));
+  FlightProgram6Button->SetForegroundColour(wxColour(0, 0, 0));
   FlightProgram6Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 11-12 LM for the FIRST moon landing.  This will run the AEA/AGS software designated as Flight Program 6 (June 1969)."));
   FlightProgram6Button->SetValue(1);
   FlightProgram7Button->SetBackgroundColour(wxColour(255, 255, 255));
+  FlightProgram7Button->SetForegroundColour(wxColour(0, 0, 0));
   FlightProgram7Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 13-14 LM.  This will run the AEA/AGS software designated as Flight Program 7."));
   FlightProgram7Button->Enable(false);
   FlightProgram8Button->SetBackgroundColour(wxColour(255, 255, 255));
+  FlightProgram8Button->SetForegroundColour(wxColour(0, 0, 0));
   FlightProgram8Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 15-17 LM.  This will run the AEA/AGS software designated as Flight Program 8 (December 1970)."));
   if (!maximumSquish)
     {
       AeaCustomButton->SetBackgroundColour(wxColour(255, 255, 255));
+      AeaCustomButton->SetForegroundColour(wxColour(0, 0, 0));
       AeaCustomButton->SetToolTip(
           wxT(
               "Click here to run your own personal software creation on the AEA/AGS system.  You should first have compiled your assembly-language source code using the yaLEMAP program to create an executable binary."));
       AeaCustomFilename->SetBackgroundColour(wxColour(255, 255, 255));
+      AeaCustomFilename->SetForegroundColour(wxColour(0, 0, 0));
       AeaCustomFilename->SetForegroundColour(wxColour(16, 16, 16));
       AeaCustomFilename->SetToolTip(
           wxT(
@@ -1728,20 +1780,24 @@ VirtualAGC::set_properties()
       AeaCustomFilename->Enable(false);
       AeaFilenameBrowse->SetMinSize(wxSize(50, 24));
       AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
+      AeaFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
       AeaFilenameBrowse->SetToolTip(
           wxT(
               "Click this button to select the name of the AEA runtime software using a file-selection dialog.  This can be either a pre-compiled binary, or it can be AEA assembly-language source code.  If the latter, then VirtualAGC will actually compile it for you using the yaLEMAP utility."));
       AeaFilenameBrowse->Enable(false);
     }
   RunButton->SetBackgroundColour(wxColour(240, 240, 240));
+  RunButton->SetForegroundColour(wxColour(0, 0, 0));
   RunButton->SetToolTip(
       wxT(
           "Click this button to begin running the simulation using all of the various options and settings selected above!"));
   DefaultsButton->SetBackgroundColour(wxColour(240, 240, 240));
+  DefaultsButton->SetForegroundColour(wxColour(0, 0, 0));
   DefaultsButton->SetToolTip(
       wxT(
           "When you change the various settings above, they are persistent.  In other words, if you run this program again, the settings will be whatever you set them at in the prior run.  If you click this button, it will return the settings to the defaults that existed when this program was first installed."));
   ExitButton->SetBackgroundColour(wxColour(240, 240, 240));
+  ExitButton->SetForegroundColour(wxColour(0, 0, 0));
   ExitButton->SetToolTip(
       wxT(
           "Click this button to exit this program.  Your settings will be saved."));
@@ -1766,7 +1822,7 @@ VirtualAGC::do_layout()
   wxGridSizer* grid_sizer_1 = new wxGridSizer(2, 3, 0, 0);
   wxStaticBoxSizer* sizer_22 = new wxStaticBoxSizer(sizer_22_staticbox,
       wxHORIZONTAL);
-  wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 5, 0, 0);
+  wxGridSizer* grid_sizer_2 = new wxGridSizer(4, 4, 0, 0);
   wxStaticBoxSizer* sizer_18 = new wxStaticBoxSizer(sizer_18_staticbox,
       wxVERTICAL);
   wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
@@ -1970,16 +2026,20 @@ VirtualAGC::do_layout()
   grid_sizer_2->Add(DskyFullButton, 0, 0, 0);
   grid_sizer_2->Add(DskyHalfButton, 0, 0, 0);
   grid_sizer_2->Add(DskyLiteButton, 0, 0, 0);
+
+  grid_sizer_2->Add(20, 20, 0, 0, 0);
   grid_sizer_2->Add(DskyNavButton, 0, 0, 0);
+  grid_sizer_2->Add(DskyApoButton, 0, 0, 0);
+  grid_sizer_2->Add(DskyApoHalfButton, 0, 0, 0);
+
   grid_sizer_2->Add(DownlinkLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(TelemetryResizable, 0, 0, 0);
   grid_sizer_2->Add(TelemetryRetro, 0, 0, 0);
   grid_sizer_2->Add(20, 20, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+
   grid_sizer_2->Add(DedaLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(DedaFullButton, 0, 0, 0);
   grid_sizer_2->Add(DedaHalfButton, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
   grid_sizer_2->Add(20, 20, 0, 0, 0);
   sizer_22->Add(grid_sizer_2, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_22, 0, wxEXPAND, 0);
@@ -2057,6 +2117,22 @@ static VirtualAGC *MainFrame;
 bool
 VirtualAgcApp::OnInit()
 {
+#if __APPLE__
+  // Is ApoDisKey installed (MacOS only)?
+  FILE *fmdfind;
+  fmdfind = popen("mdfind kMDItemCFBundleIdentifier=\"com.ramsaycons.ApoDisKey\"", "rt");
+  if (fmdfind != NULL)
+    {
+       char line[256];
+       while (fgets(line, sizeof(line), fmdfind))
+         {
+           printf("Found: %s", line);
+           ApoDisKeyInstalled = true;
+         }
+    }
+  pclose(fmfind);
+#endif
+
   wxInitAllImageHandlers();
 
   for (int i = 1; i < argc; i++)
@@ -2241,6 +2317,8 @@ VirtualAGC::EnforceConsistency(void)
   DskyHalfButton->Enable(!block1);
   DskyLiteButton->Enable(!block1);
   DskyNavButton->Enable(block1);
+  DskyApoButton->Enable(ApoDisKeyInstalled && !block1);
+  DskyApoHalfButton->Enable(ApoDisKeyInstalled && !block1);
   if (block1 && (DskyHalfButton->GetValue() || DskyLiteButton->GetValue()))
     DskyFullButton->SetValue(true);
   else if (!block1 && DskyNavButton->GetValue())
@@ -2799,7 +2877,11 @@ VirtualAGC::FormCommands(void)
     }
   else
     yaAGC = wxT("");
-  if (DeviceDskyCheckbox->GetValue())
+  if (DskyApoButton->GetValue())
+    yaDSKY = wxT(" "); // We'll come back to this.
+  else if (DskyApoHalfButton->GetValue())
+    yaDSKY = wxT(" --half-size"); // We'll come back to this.
+  else if (DeviceDskyCheckbox->GetValue())
     {
       yaDSKY = localExecutableDirectory + PathDelimiter;
 #ifdef __APPLE__
@@ -3009,8 +3091,22 @@ VirtualAGC::FormCommands(void)
       if (block1)
         yaDSKY += wxT(" --port=") + Port;
       else
-        yaDSKY += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /* CMorLM + wxT(".ini") */
-        + wxT(" --port=") + Port;
+        {
+          yaDSKY += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /* CMorLM + wxT(".ini") */
+          + wxT(" --port=") + Port;
+          if (DskyApoButton->GetValue() || DskyApoHalfButton->GetValue())
+            {
+              wxString yaDSKYa;
+              yaDSKYa = wxT("for n in `mdfind kMDItemCFBundleIdentifier=\"com.ramsaycons.ApoDisKey\"`\n");
+              yaDSKYa += wxT("do\n");
+              yaDSKYa += wxT("    stat -f \"%m '%N'\" -t \"%s\" \"$n\"\n");
+              yaDSKYa += wxT("done | sort -n | tail -1 | grep -o \"'.*'$\" | ");
+              yaDSKYa += wxT("awk '{ print $0\"/Contents/MacOS/ApoDisKey");
+              yaDSKYa += yaDSKY;
+              yaDSKYa += wxT("\" }' | bash");
+              yaDSKY = yaDSKYa;
+            }
+        }
     }
   return (true);
 }
@@ -3346,13 +3442,17 @@ Simulation::set_properties()
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
   UplinkText->SetMinSize(wxSize(480, 480));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
+  UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
+  UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
   ScriptText->SetMinSize(wxSize(480, 480));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
+  ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   DetailPanel->SetBackgroundColour(wxColour(255, 255, 255));
+  DetailPanel->SetForegroundColour(wxColour(0, 0, 0));
 }
 
 void
@@ -3433,7 +3533,7 @@ Simulation::do_layout()
 void
 Simulation::WriteSimulationLabel(wxString Label)
 {
-  SimulationLabel->SetLabel(Label + wxT("\nAGC simulation running!"));
+  SimulationLabel->SetLabel(Label + wxT("\nAGC simulation running!\n    "));
   SimulationLabel->Fit();
   Layout();
 }
