@@ -2130,7 +2130,7 @@ VirtualAgcApp::OnInit()
            ApoDisKeyInstalled = true;
          }
     }
-  pclose(fmfind);
+  pclose(fmdfind);
 #endif
 
   wxInitAllImageHandlers();
