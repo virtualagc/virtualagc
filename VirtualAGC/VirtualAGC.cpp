@@ -3323,7 +3323,7 @@ Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
         wxCAPTION | wxMINIMIZE_BOX /*| wxSTAY_ON_TOP*/ | wxSYSTEM_MENU)
 {
 #ifdef __APPLE__
-#define defaultPosition wxPoint(0, 0)
+#define defaultPosition wxPoint(0, 100)
 #else
 #define defaultPosition wxDefaultPosition
 #endif
