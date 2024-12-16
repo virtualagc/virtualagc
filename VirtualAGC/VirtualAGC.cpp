@@ -175,6 +175,8 @@
  *                              SetForegroundColour`, due to reported problems
  *                              in MacOS Sequoia that I'm not in a position to
  *                              try reproducing.
+ *              2024-12-16 RSB  Removed "stay on top" behavior of simulation-
+ *                              status window".
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -3318,13 +3320,18 @@ VirtualAGC::FormScript(void)
 Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
     const wxPoint& pos, const wxSize& size, long style) :
     wxFrame(parent, id, title, pos, size,
-        wxCAPTION | wxMINIMIZE_BOX | wxSTAY_ON_TOP | wxSYSTEM_MENU)
+        wxCAPTION | wxMINIMIZE_BOX /*| wxSTAY_ON_TOP*/ | wxSYSTEM_MENU)
 {
-  DetailPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+#ifdef __APPLE__
+#define defaultPosition wxPoint(0, 0)
+#else
+#define defaultPosition wxDefaultPosition
+#endif
+  DetailPanel = new wxPanel(this, wxID_ANY, defaultPosition, wxDefaultSize,
       wxNO_BORDER | wxTAB_TRAVERSAL);
-  ScriptPanel = new wxPanel(DetailPanel, wxID_ANY, wxDefaultPosition,
+  ScriptPanel = new wxPanel(DetailPanel, wxID_ANY, defaultPosition,
       wxDefaultSize, wxSUNKEN_BORDER | wxTAB_TRAVERSAL);
-  UplinkPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+  UplinkPanel = new wxPanel(this, wxID_ANY, defaultPosition, wxDefaultSize,
       wxNO_BORDER | wxTAB_TRAVERSAL);
   sizer_32_staticbox = new wxStaticBox(ScriptPanel, -1,
       wxT("To do the same thing from a command line ..."));
