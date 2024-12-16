@@ -1302,7 +1302,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
     return;
   RunButton->Enable(false);
   Hide();
-  SimulationWindow = new Simulation(this, wxID_ANY, wxEmptyString);
+  SimulationWindow = new Simulation(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
   SimulationWindow->Enable(true);
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
@@ -3322,16 +3322,11 @@ Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
     wxFrame(parent, id, title, pos, size,
         wxCAPTION | wxMINIMIZE_BOX /*| wxSTAY_ON_TOP*/ | wxSYSTEM_MENU)
 {
-#ifdef __APPLE__
-#define defaultPosition wxPoint(0, 100)
-#else
-#define defaultPosition wxDefaultPosition
-#endif
-  DetailPanel = new wxPanel(this, wxID_ANY, defaultPosition, wxDefaultSize,
+  DetailPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
       wxNO_BORDER | wxTAB_TRAVERSAL);
-  ScriptPanel = new wxPanel(DetailPanel, wxID_ANY, defaultPosition,
+  ScriptPanel = new wxPanel(DetailPanel, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxSUNKEN_BORDER | wxTAB_TRAVERSAL);
-  UplinkPanel = new wxPanel(this, wxID_ANY, defaultPosition, wxDefaultSize,
+  UplinkPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
       wxNO_BORDER | wxTAB_TRAVERSAL);
   sizer_32_staticbox = new wxStaticBox(ScriptPanel, -1,
       wxT("To do the same thing from a command line ..."));
