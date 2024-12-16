@@ -202,6 +202,13 @@ int maximizeAtStartup = 0;
 long fontFloor = 8;
 bool ApoDisKeyInstalled = false;
 
+// Not used (yet?).
+void
+setWidgetColours(wxControl* w, int b=255, int f=0) {
+   w->SetBackgroundColour(wxColour(b, b, b));
+   w->SetForegroundColour(wxColour(f, f, f));
+}
+
 /*
  * The following array specifies most properties of "missions" (i.e., specific
  * AGC program/versions). The array entries must be in the identical order of
