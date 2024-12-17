@@ -193,6 +193,12 @@
 #include "wx/filefn.h"
 #include "wx/utils.h"
 
+// Note: Do *not* use persistence for the main window.  It interacts badly with
+// resizable windows, at least on my Linux Mint 21.3 system; the window
+// in size every time it's invoked.  But it can be used for the Simulation-
+// Status window.
+#include <wx/persist/toplevel.h>
+
 #include "VirtualAGC.h"
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
@@ -483,6 +489,8 @@ VirtualAGC::SetSize(void)
   SET_FONT(ExitButton, 0);
 }
 
+// Regarding wxRESIZE_BORDER:  Undesirable in principle, but was added as a
+// workaround due to Issue #1174.
 VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
     const wxPoint& pos, const wxSize& size, long style) :
     wxFrame(parent, id, title, pos, size,
@@ -1367,6 +1375,8 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->DetailPanel->Hide();
   SimulationWindow->Fit();
   SimulationWindow->Show();
+  SimulationWindow->SetName("SimulationStatus");
+  wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
@@ -2220,9 +2230,7 @@ VirtualAgcApp::OnInit()
           printf("\twith --squish there is no title bar and hence no way\n");
           printf("\tto unmaximize the program after it is started up.\n");
           printf("\tNote that the program does not generally have a\n");
-          printf("\tmaximization button, nor is it generally resizable.\n");
-          printf("\tso --maximize is actually the only method provided of\n");
-          printf("\tmaximizing the program anyway.\n");
+          printf("\tmaximization button.\n");
           printf("--font-floor=N\n");
           printf("\tSets the minimum allowed font size, in integers.  The\n");
           printf("\tdefault is 8.\n");
@@ -2234,6 +2242,8 @@ VirtualAgcApp::OnInit()
   MainFrame->SetForegroundColour(wxColor (0, 0, 0));
   SetTopWindow(MainFrame);
   MainFrame->Show();
+  // MainFrame->SetName("VirtualAGC");
+  // wxPersistentRegisterAndRestore(MainFrame, "VirtualAGC");
   return true;
 }
 
