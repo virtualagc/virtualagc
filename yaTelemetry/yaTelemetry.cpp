@@ -565,9 +565,9 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       SimpleFrame->Fit ();
       SimpleFrame->Refresh ();
       SimpleFrame->Update ();
-      wxSize size = SimpleFrame->GetSize();
-      SimpleFrame->SetPosition(wxPoint(1130-size.GetWidth(), 800-size.GetHeight()));
       SimpleFrame->Show ();
+      wxSize size = SimpleFrame->GetSize();
+      SimpleFrame->SetPosition(wxPoint(1066-size.GetWidth(), 10));
     }
   firstTimeIO = false;
   // Check to see if the message has a yaAGC signature.  If not,
@@ -846,7 +846,7 @@ bool yaTelemetryApp::OnInit()
 
         SimpleFrame->Show();
         wxSize size = SimpleFrame->GetSize();
-        SimpleFrame->SetPosition(wxPoint(1130-size.GetWidth(), 800-size.GetHeight()));
+        SimpleFrame->SetPosition(wxPoint(1066-size.GetWidth(), 10));
       }
       
     else
@@ -866,7 +866,7 @@ bool yaTelemetryApp::OnInit()
         MainFrame->Timer->Start (PULSE_INTERVAL);
     
         MainFrame->Show();
-        MainFrame->SetPosition(wxPoint(1130-MainFrame->GetSize().GetWidth(), 800-MainFrame->GetSize().GetHeight()));
+        MainFrame->SetPosition(wxPoint(1066-MainFrame->GetSize().GetWidth(), 10));
       }
     return true;
 }

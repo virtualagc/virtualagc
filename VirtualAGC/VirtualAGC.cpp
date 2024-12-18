@@ -1379,7 +1379,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->Show();
   //SimulationWindow->SetName("SimulationStatus");
   //wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
-  SimulationWindow->SetPosition(wxPoint(50, 50));
+  SimulationWindow->SetPosition(wxPoint(10, 10));
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
@@ -3246,6 +3246,13 @@ VirtualAGC::FormScript(void)
           Fout.Write(sleepTime);
         }
 
+      // Run yaTelemetry
+      if (DeviceTelemetryCheckbox->GetValue())
+        {
+          Fout.Write(yaTelemetry + wxT(" &\n"));
+          Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
+        }
+
       // Run AEA
       if (DeviceAeaCheckbox->GetValue())
         {
@@ -3302,13 +3309,6 @@ VirtualAGC::FormScript(void)
           // running (perhaps because of the time it takes to load symbol
           // tables or something).
           Fout.Write(LM_Simulator + wxT(" &\n"));
-          Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
-        }
-
-      // Run yaTelemetry
-      if (DeviceTelemetryCheckbox->GetValue())
-        {
-          Fout.Write(yaTelemetry + wxT(" &\n"));
           Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
         }
 

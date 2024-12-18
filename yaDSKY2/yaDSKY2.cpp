@@ -1471,7 +1471,7 @@ yaDskyApp::OnInit ()
       MainWindow->SetMinSize (wxSize(330, 392));
     }
   MainWindow->Show ();
-  MainWindow->SetPosition(wxPoint(50, 800-MainWindow->GetSize().GetHeight()));
+  MainWindow->SetPosition(wxPoint(10, 768-MainWindow->GetSize().GetHeight()));
   return true;
 }
 
