@@ -565,6 +565,8 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       SimpleFrame->Fit ();
       SimpleFrame->Refresh ();
       SimpleFrame->Update ();
+      wxSize size = SimpleFrame->GetSize();
+      SimpleFrame->SetPosition(wxPoint(1130-size.GetWidth(), 800-size.GetHeight()));
       SimpleFrame->Show ();
     }
   firstTimeIO = false;
@@ -691,8 +693,8 @@ bool yaTelemetryApp::OnInit()
 {
     App = this;
     wxInitAllImageHandlers();
-    MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString);
-    SimpleFrame = new SimpleFrameClass (NULL, wxID_ANY, wxEmptyString);
+    MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString, wxDefaultPosition);
+    SimpleFrame = new SimpleFrameClass (NULL, wxID_ANY, wxEmptyString, wxDefaultPosition);
     int i, FontSizeSwitch = 0;
     
     printf ("\n");
@@ -841,9 +843,10 @@ bool yaTelemetryApp::OnInit()
         //SimpleFrame->ClearScreen ();
         SimpleFrame->Timer = new TimerClass ();
         SimpleFrame->Timer->Start (PULSE_INTERVAL);
-    
-        SimpleFrame->Show();
 
+        SimpleFrame->Show();
+        wxSize size = SimpleFrame->GetSize();
+        SimpleFrame->SetPosition(wxPoint(1130-size.GetWidth(), 800-size.GetHeight()));
       }
       
     else
@@ -863,7 +866,7 @@ bool yaTelemetryApp::OnInit()
         MainFrame->Timer->Start (PULSE_INTERVAL);
     
         MainFrame->Show();
-    
+        MainFrame->SetPosition(wxPoint(1130-MainFrame->GetSize().GetWidth(), 800-MainFrame->GetSize().GetHeight()));
       }
     return true;
 }
@@ -1288,27 +1291,3 @@ PrintMsk1137 (const DownlinkListSpec_t *Spec)
       //PrintField (&Spec->FieldSpecs[i]);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

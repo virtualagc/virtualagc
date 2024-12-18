@@ -197,7 +197,7 @@
 // resizable windows, at least on my Linux Mint 21.3 system; the window
 // in size every time it's invoked.  But it can be used for the Simulation-
 // Status window.
-#include <wx/persist/toplevel.h>
+//#include <wx/persist/toplevel.h>
 
 #include "VirtualAGC.h"
 #include "../yaAGC/yaAGC.h"
@@ -470,6 +470,8 @@ VirtualAGC::SetSize(void)
   SET_FONT(DskyHalfButton, 0);
   SET_FONT(DskyLiteButton, 0);
   SET_FONT(DskyNavButton, 0);
+  SET_FONT(DskyApoButton, 0);
+  SET_FONT(DskyApoHalfButton, 0);
   SET_FONT(DownlinkLabel, 0);
   SET_FONT(TelemetryResizable, 0);
   SET_FONT(TelemetryRetro, 0);
@@ -1375,8 +1377,9 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->DetailPanel->Hide();
   SimulationWindow->Fit();
   SimulationWindow->Show();
-  SimulationWindow->SetName("SimulationStatus");
-  wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
+  //SimulationWindow->SetName("SimulationStatus");
+  //wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
+  SimulationWindow->SetPosition(wxPoint(50, 50));
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
@@ -2631,6 +2634,8 @@ VirtualAGC::ReadConfigurationFile(void)
               CHECK_TRUE_FALSE_SETTING(AeaDebugMonitorButton);
               CHECK_TRUE_FALSE_SETTING(TelemetryResizable);
               CHECK_TRUE_FALSE_SETTING(TelemetryRetro);
+              CHECK_TRUE_FALSE_SETTING(DskyApoButton);
+              CHECK_TRUE_FALSE_SETTING(DskyApoHalfButton);
             }
           Fin.Close();
           if (DropDown)
@@ -2721,6 +2726,8 @@ VirtualAGC::WriteConfigurationFile(void)
       WRITE_TRUE_FALSE_SETTING(AeaDebugMonitorButton);
       WRITE_TRUE_FALSE_SETTING(TelemetryResizable);
       WRITE_TRUE_FALSE_SETTING(TelemetryRetro);
+      WRITE_TRUE_FALSE_SETTING(DskyApoButton);
+      WRITE_TRUE_FALSE_SETTING(DskyApoHalfButton);
       Fout.Close();
     }
   else
@@ -3204,6 +3211,7 @@ VirtualAGC::FormScript(void)
   wxString localExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
 #endif
   wxFile Fout;
+  wxString sleepTime = wxT("sleep 0.1\n"); // To help with tiling the windows.
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
     {
       Fout.Write(wxT("#!/bin/sh\n"));
@@ -3226,6 +3234,7 @@ VirtualAGC::FormScript(void)
               // Fout.Write (wxT ("xterm -geometry 80x43 -e "));
               Fout.Write(yaDSKY + wxT(" &\n"));
               Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
+              Fout.Write(sleepTime);
             }
         }
 
@@ -3234,6 +3243,7 @@ VirtualAGC::FormScript(void)
         {
           Fout.Write(yaDEDA + wxT(" &\n"));
           Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
+          Fout.Write(sleepTime);
         }
 
       // Run AEA
