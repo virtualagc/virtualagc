@@ -1379,7 +1379,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->Show();
   //SimulationWindow->SetName("SimulationStatus");
   //wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
-  SimulationWindow->SetPosition(wxPoint(50, 50));
+  SimulationWindow->SetPosition(wxPoint(50, 25));
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
@@ -3211,7 +3211,7 @@ VirtualAGC::FormScript(void)
   wxString localExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
 #endif
   wxFile Fout;
-  wxString sleepTime = wxT("sleep 0.1\n"); // To help with tiling the windows.
+  wxString sleepTime = wxT("sleep 0.2\n"); // To help with tiling the windows.
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
     {
       Fout.Write(wxT("#!/bin/sh\n"));
@@ -3224,6 +3224,9 @@ VirtualAGC::FormScript(void)
           Fout.Write(wxT("rm LM.core\n"));
           Fout.Write(wxT("rm CM.core\n"));
         }
+
+      Fout.Write(sleepTime);
+
 
       // Run DSKY
       if (DeviceDskyCheckbox->GetValue())
