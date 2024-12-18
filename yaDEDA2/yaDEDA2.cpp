@@ -672,7 +672,7 @@ yaDedaAppClass::OnInit ()
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
   MainWindow->Show ();
-  MainWindow->SetPosition(wxPoint(1066-MainWindow->GetSize().GetWidth(), 768-MainWindow->GetSize().GetHeight()));
+  MainWindow->SetPosition(wxPoint(1106-MainWindow->GetSize().GetWidth(), 768-MainWindow->GetSize().GetHeight()));
   return true;
 }
 

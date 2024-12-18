@@ -1379,7 +1379,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->Show();
   //SimulationWindow->SetName("SimulationStatus");
   //wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
-  SimulationWindow->SetPosition(wxPoint(10, 10));
+  SimulationWindow->SetPosition(wxPoint(50, 50));
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
