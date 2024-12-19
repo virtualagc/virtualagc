@@ -89,6 +89,7 @@ static int StartupDelay = 0;
 #endif
 extern int Portnum;
 static int ServerSocket = -1;
+wxPoint ulCorner = wxPoint(-1, -1);
 
 // Names of various graphics files.
 
@@ -550,7 +551,7 @@ yaDedaAppClass::OnInit ()
 {
   int i;
   wxInitAllImageHandlers ();
-  MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString);
+  MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString, ulCorner);
 
   cout
       << string (
@@ -592,6 +593,18 @@ yaDedaAppClass::OnInit ()
 	      printf ("The --port switch is out of range.  Must be 1-64K.\n");
 	      goto Help;
 	    }
+	}
+      else if (ArgStart.IsSameAs (wxT ("--x")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.x = dummy;
+	}
+      else if (ArgStart.IsSameAs (wxT ("--y")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.y = dummy;
 	}
       else if (Arg.IsSameAs (wxT ("--half-size")))
 	{
@@ -636,6 +649,13 @@ yaDedaAppClass::OnInit ()
 	      "\tdifferent port settings for yaDEDA2 are needed.  Note that by default,\n");
 	  printf ("\tyaAGS listens for new connections on ports %d-%d.\n",
 		  Portnum, Portnum + 10 - 1);
+	  printf ("--x=X --y=Y\n");
+	  printf (
+	      "\tBy default, the window position is some system default.  This option\n");
+	  printf (
+	      "\tinstead allows explicit selection.  The units are pixel coordinates\n");
+	  printf (
+	      "\tof the upper-left corner, relative to the upper left of the screen.\n");
 	  printf ("--half-size\n");
 	  printf (
 	      "\tUses a half-size version of yaDEDA2, suitable for smaller graphical\n");
@@ -672,7 +692,7 @@ yaDedaAppClass::OnInit ()
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
   MainWindow->Show ();
-  MainWindow->SetPosition(wxPoint(1106-MainWindow->GetSize().GetWidth(), 768-MainWindow->GetSize().GetHeight()));
+  MainWindow->SetPosition(ulCorner);
   return true;
 }
 

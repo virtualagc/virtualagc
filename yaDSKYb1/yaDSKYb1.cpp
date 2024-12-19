@@ -77,6 +77,8 @@ static int StartupDelay = 0;
 #endif
 static int VerbNounFlashing = 0;
 static int ServerSocket = -1;
+wxPoint ulCorner = wxPoint(-1, -1);
+
 void
 OutputKeycode(int Keycode);
 

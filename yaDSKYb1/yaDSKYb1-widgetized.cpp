@@ -709,6 +709,18 @@ MyApp::OnInit()
               goto Help;
             }
         }
+      else if (ArgStart.IsSameAs (wxT ("--x")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.x = dummy;
+	}
+      else if (ArgStart.IsSameAs (wxT ("--y")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.y = dummy;
+	}
       else if (ArgStart.IsSameAs(wxT("--images")))
         {
           imageDirectory = ArgEnd;
@@ -735,12 +747,19 @@ MyApp::OnInit()
           printf("--nav-bay\n");
           printf(
               "\tBy default, the main control-panel DSKY is shown.  This selects the nav-bay DSKY.\n");
+    	  printf ("--x=X --y=Y\n");
+    	  printf (
+    	      "\tBy default, the window position is some system default.  This option\n");
+    	  printf (
+    	      "\tinstead allows explicit selection.  The units are pixel coordinates\n");
+    	  printf (
+    	      "\tof the upper-left corner, relative to the upper left of the screen.\n");
           exit(1);
         }
     }
 
   wxInitAllImageHandlers();
-  frame = new MyFrame(NULL, wxID_ANY, wxEmptyString, imageDirectory, navBay);
+  frame = new MyFrame(NULL, wxID_ANY, wxEmptyString, imageDirectory, navBay, ulCorner);
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);

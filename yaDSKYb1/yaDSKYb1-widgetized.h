@@ -202,5 +202,6 @@ enum {
 
 
 extern MyFrame* frame;
+extern wxPoint ulCorner;
 
 #endif // YADSKYB1MAIN-WIDGETIZED_H

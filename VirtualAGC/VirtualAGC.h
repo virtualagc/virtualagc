@@ -343,6 +343,8 @@ private:
   bool
   FormLmsIni(void);
   bool
+  FormTiling(void);
+  bool
   FormCommands(void);
   bool
   FormScript(void);

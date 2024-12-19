@@ -104,6 +104,7 @@ static int StartupDelay = 0;
 static int Points = DEFAULT_FONTSIZE_RETRO;
 static bool Simple = false;
 static bool Undecorated = true;
+wxPoint ulCorner = wxPoint(-1, -1);
 
 // Here are some templates for various MSK screens.
 
@@ -567,7 +568,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       SimpleFrame->Update ();
       SimpleFrame->Show ();
       wxSize size = SimpleFrame->GetSize();
-      SimpleFrame->SetPosition(wxPoint(1106-size.GetWidth(), 25));
+      SimpleFrame->SetPosition(ulCorner);
     }
   firstTimeIO = false;
   // Check to see if the message has a yaAGC signature.  If not,
@@ -693,8 +694,8 @@ bool yaTelemetryApp::OnInit()
 {
     App = this;
     wxInitAllImageHandlers();
-    MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString, wxDefaultPosition);
-    SimpleFrame = new SimpleFrameClass (NULL, wxID_ANY, wxEmptyString, wxDefaultPosition);
+    MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString, ulCorner);
+    SimpleFrame = new SimpleFrameClass (NULL, wxID_ANY, wxEmptyString, ulCorner);
     int i, FontSizeSwitch = 0;
     
     printf ("\n");
@@ -743,6 +744,11 @@ bool yaTelemetryApp::OnInit()
             printf ("     --ip=H          The hostname or IP address of the yaAGC server\n");
             printf ("                     to which yaTelemetry should connect.  The\n");
             printf ("                     default is \"localhost\".\n");
+            printf ("     --x=X --y=Y     By default, the window position is some system\n");
+            printf ("                     default.  This option instead allows explicit\n");
+            printf ("                     selection.  The units are pixel coordinates\n");
+            printf ("                     of the upper-left corner, relative to the upper\n");
+            printf ("                     left of the screen.\n");
             printf ("     --spacecraft=S  The type of spacecraft, either LM or CM.  This\n");
             printf ("                     defaults to LM.\n");
             printf ("     --font-size=P   Font size, in points.  Defaults to %d on this\n", DEFAULT_FONTSIZE_RETRO);
@@ -771,6 +777,14 @@ bool yaTelemetryApp::OnInit()
             strcpy (NonDefaultHostname, Value.char_str ());
             Hostname = NonDefaultHostname;
           }
+        else if (Command.IsSameAs (wxT ("--x")))
+  	{
+      	  ulCorner.x = IntValue;
+  	}
+        else if (Command.IsSameAs (wxT ("--y")))
+  	{
+      	  ulCorner.y = IntValue;
+  	}
         else if (Command.IsSameAs (wxT ("--spacecraft")))
           {
             Value = Value.Lower ();
@@ -846,7 +860,7 @@ bool yaTelemetryApp::OnInit()
 
         SimpleFrame->Show();
         wxSize size = SimpleFrame->GetSize();
-        SimpleFrame->SetPosition(wxPoint(1106-size.GetWidth(), 25));
+        SimpleFrame->SetPosition(ulCorner);
       }
       
     else
@@ -866,7 +880,7 @@ bool yaTelemetryApp::OnInit()
         MainFrame->Timer->Start (PULSE_INTERVAL);
     
         MainFrame->Show();
-        MainFrame->SetPosition(wxPoint(1106-MainFrame->GetSize().GetWidth(), 25));
+        MainFrame->SetPosition(ulCorner);
       }
     return true;
 }

@@ -209,6 +209,10 @@ int maximumSquish = 0;
 int maximizeAtStartup = 0;
 long fontFloor = 8;
 bool ApoDisKeyInstalled = false;
+int showSimulate, xSimulate, ySimulate, wSimulate, hSimulate;
+int showDSKY, xDSKY, yDSKY, wDSKY, hDSKY;
+int showDEDA, xDEDA, yDEDA, wDEDA, hDEDA;
+int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
 
 // Not used (yet?).
 void
@@ -725,7 +729,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   FlightProgram6Button = new wxRadioButton(this, ID_FLIGHTPROGRAM6BUTTON,
       wxT("Apollo 11-12 (Flight Program 6)"));
   FlightProgram7Button = new wxRadioButton(this, ID_FLIGHTPROGRAM7BUTTON,
-      wxT("Apollo 13-14? (Flight Program 7)"));
+      wxT("Apollo 13-14 (Flight Program 7)"));
   FlightProgram8Button = new wxRadioButton(this, ID_FLIGHTPROGRAM8BUTTON,
       wxT("Apollo 15-17 (Flight Program 8)"));
   if (!maximumSquish)
@@ -1306,6 +1310,8 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
       if (!FormLmsIni())
         return;
     }
+  if (!FormTiling())
+    return;
   if (!FormCommands())
     return;
   if (!FormScript())
@@ -1377,9 +1383,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->DetailPanel->Hide();
   SimulationWindow->Fit();
   SimulationWindow->Show();
-  //SimulationWindow->SetName("SimulationStatus");
-  //wxPersistentRegisterAndRestore(SimulationWindow, "SimulationStatus");
-  SimulationWindow->SetPosition(wxPoint(50, 25));
+  SimulationWindow->SetPosition(wxPoint(xSimulate, ySimulate));
 #ifdef WIN32
   wxString Command = wxT ("simulate2.bat");
 #else
@@ -2862,6 +2866,209 @@ VirtualAGC::FormLmsIni(void)
   return (true);
 }
 
+// Forms the tiling for the constellation of user-interface windows in a
+// simulation.
+bool
+VirtualAGC::FormTiling(void)
+{
+    int xScreen, yScreen, wScreen, hScreen;
+    wxClientDisplayRect(&xScreen, &yScreen, &wScreen, &hScreen);
+    xScreen += 5;
+    yScreen -= 5;
+    wScreen -= 10;
+    showSimulate = 0, xSimulate = 0, ySimulate = 0, wSimulate = 0, hSimulate = 0;
+    showDSKY = 0, xDSKY = 0, yDSKY = 0, wDSKY = 0, hDSKY = 0;
+    showDEDA = 0, xDEDA = 0, yDEDA = 0, wDEDA = 0, hDEDA = 0;
+    showTelemetry = 0, xTelemetry = 0, yTelemetry = 0, wTelemetry = 0, hTelemetry = 0;
+
+    // First, figure out which windows are going to be displayed during the
+    // simulation, and get their heights and widths.  We can't *really* know
+    // the geometry of any given window on all of the possible platforms, so we
+    // try to give a conservative upper limit.
+    showSimulate = 1;
+    wSimulate = 510;
+    hSimulate = 690;
+    if (DeviceDskyCheckbox->GetValue())
+    {
+        showDSKY = 1;
+        if (block1) {
+            if (DskyFullButton->GetValue()) {
+              wDSKY = 590;
+              hDSKY = 600;
+            }
+            else if (DskyNavButton->GetValue()) {
+              wDSKY = 350;
+              hDSKY = 1030;
+            }
+            else
+                return false;
+        } else {
+            if (DskyFullButton->GetValue()) {
+              wDSKY = 575;
+              hDSKY = 670;
+            }
+            else if (DskyHalfButton->GetValue()) {
+              wDSKY = 340;
+              hDSKY = 420;
+            }
+            else if (DskyLiteButton->GetValue()) {
+              // I don't think I have a way of influencing this one.
+              showDSKY = 0;
+            }
+            else if (DskyApoButton->GetValue()) {
+              wDSKY = 570;
+              hDSKY = 680;
+            }
+            else if (DskyApoHalfButton->GetValue()) {
+              wDSKY = 290;
+              hDSKY = 360;
+            }
+            else
+                return false;
+        }
+    }
+    if (DeviceTelemetryCheckbox->GetValue()) {
+        showTelemetry = 1;
+        if (TelemetryResizable->GetValue()) {
+            wTelemetry = 510;
+            hTelemetry = 720;
+        }
+        else if (TelemetryRetro->GetValue()) {
+            wTelemetry = 770;
+            hTelemetry = 980;
+        }
+        else
+            return false;
+    }
+    if (DeviceDedaCheckbox->GetValue()) {
+        showDEDA = 1;
+        if (DedaFullButton->GetValue()) {
+            wDEDA = 450;
+            hDEDA = 520;
+        }
+        else if (DedaHalfButton->GetValue()) {
+            wDEDA = 255;
+            hDEDA = 325;
+        }
+        else
+            return false;
+    }
+
+    // Debug:
+    //fprintf(stderr, "Screen: %d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
+    //fprintf(stderr, "Simulate: %d %d %d %d %d\n", showSimulate, xSimulate, ySimulate, wSimulate, hSimulate);
+    //fprintf(stderr, "DSKY: %d %d %d %d %d\n", showDSKY, xDSKY, yDSKY, wDSKY, hDSKY);
+    //fprintf(stderr, "DEDA: %d %d %d %d %d\n", showDEDA, xDEDA, yDEDA, wDEDA, hDEDA);
+    //fprintf(stderr, "Telemetry: %d %d %d %d %d\n", showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry);
+
+    // My approach to packing this is going to be trivial stupid, though there
+    // are better algorithms that could be used if it were worthwhile (see
+    // https://en.wikipedia.org/wiki/Rectangle_packing, section
+    // "Packing different rectangles in a minimum-area rectangle").
+    // Basically, all of the windows are simply put side-by-size if they all
+    // fit that way.  If they don't fit, then they're just overlapped horizontally
+    // by whatever amount that allows them to fit.  There's an exception if
+    // both half-size DSKY and half-size DEDA are used at the same time, since
+    // placing one of those above the other results in something about the
+    // height of a normal-size window.  Also, the Simulation-Status window
+    // is preferentially overlapped compared to all others.
+    // First, try the fully side-by-side option.
+    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < 800);
+    int columns = 1;
+    xSimulate = 0;
+    ySimulate = 0;
+    int used = wSimulate;
+    if (stacked) {
+        columns++;
+        xDSKY = used;
+        yDSKY = 0;
+        xDEDA = used;
+        yDEDA = hDSKY;
+        used += wDSKY;
+    } else {
+        if (showDSKY) {
+            columns++;
+            xDSKY = used;
+            yDSKY = 0;
+            used += wDSKY;
+        }
+        if (showDEDA) {
+            columns++;
+            xDEDA = used;
+            yDEDA = 0;
+            used += wDEDA;
+        }
+    }
+    if (showTelemetry) {
+        columns++;
+        xTelemetry = used;
+        yTelemetry = 0;
+        used += wTelemetry;
+    }
+
+    // debug
+    //fprintf(stderr, "used=%d columns=%d\n", used, columns);
+
+    if (used <= wScreen)
+        ; // Okay!
+    else if ((used - wSimulate) <= wScreen) {
+        int recover = used - wScreen;
+        xDSKY -= recover;
+        xDEDA -= recover;
+        xTelemetry -= recover;
+        used -= recover;
+    } else {
+        xDSKY -= wSimulate;
+        xDEDA -= wSimulate;
+        xTelemetry -= wSimulate;
+        used -= wSimulate;
+        int recover, delta  = (used - wScreen + columns - 2) / (columns - 1);
+        recover = delta;
+        if (stacked) {
+            xDSKY -= recover;
+            xDEDA -= recover;
+            recover += delta;
+        } else {
+            if (showDSKY) {
+                xDSKY -= recover;
+                recover += delta;
+            }
+            if (showDEDA) {
+                xDEDA -= recover;
+                recover += delta;
+            }
+        }
+        if (showTelemetry) {
+            xTelemetry -= recover;
+            recover += delta;
+        }
+        used -= recover;
+    }
+    xSimulate += xScreen;
+    ySimulate += yScreen;
+    xDSKY += xScreen;
+    yDSKY += yScreen;
+    xDEDA += xScreen;
+    yDEDA += yScreen;
+    xTelemetry += xScreen;
+    yTelemetry += yScreen;
+
+    // Debug:
+    fprintf(stderr, "Screen: %d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
+    fprintf(stderr, "Simulate: %d %d %d %d %d\n", showSimulate, xSimulate, ySimulate, wSimulate, hSimulate);
+    fprintf(stderr, "DSKY: %d %d %d %d %d\n", showDSKY, xDSKY, yDSKY, wDSKY, hDSKY);
+    fprintf(stderr, "DEDA: %d %d %d %d %d\n", showDEDA, xDEDA, yDEDA, wDEDA, hDEDA);
+    fprintf(stderr, "Telemetry: %d %d %d %d %d\n", showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry);
+
+    return (true);
+}
+
+// Form an options string like " --x=X --y=Y".
+wxString
+xyOptions(int x, int y) {
+  return wxString::Format(" --x=%d --y=%d", x, y);
+}
+
 // Forms command lines for other programs we want to execute for the
 // simulation.  Returns true on success, false on failure.
 bool
@@ -2940,6 +3147,8 @@ VirtualAGC::FormCommands(void)
     }
   else
     yaDSKY = wxT("");
+  if (yaDSKY != "")
+    yaDSKY += xyOptions(xDSKY, yDSKY);
   if (DeviceAcaCheckbox->GetValue())
     {
       // By default we want to use yaACA3 here.  However, if someone
@@ -2972,6 +3181,8 @@ VirtualAGC::FormCommands(void)
     }
   else
     yaTelemetry = wxT("");
+  if (yaTelemetry != "")
+	  yaTelemetry += xyOptions(xTelemetry, yTelemetry);
   if (DeviceAeaCheckbox->GetValue())
     {
       AeaSim = true;
@@ -3022,6 +3233,8 @@ VirtualAGC::FormCommands(void)
     }
   else
     yaDEDA = wxT("");
+  if (yaDEDA != "")
+	  yaDEDA += xyOptions(xDEDA, yDEDA);
   if (DeviceCpumonCheckbox->GetValue())
     LM_Simulator = wxT("wish VirtualAGC.tcl --cfg=lm_simulator.ini");
   else

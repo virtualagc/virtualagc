@@ -145,6 +145,8 @@ static int TestUplink = 0;
 static int ServerSocket = -1;
 static bool ProceedPressed = false;
 
+wxPoint ulCorner = wxPoint(-1, -1);
+
 static const char SevenSeg0[] = "7Seg-0.jpg";
 
 // Here are the defaults used for indicator lamps in the absence of a configuration file.
@@ -1193,7 +1195,7 @@ yaDskyApp::OnInit ()
   int i, j, UsedCfg = 0;
 
   wxInitAllImageHandlers ();
-  MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString);
+  MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString, ulCorner);
   MainWindow->iLastButton = MainWindow->ProButton;
   MainWindow->CurrentBlank = wxString::FromAscii (SevenSeg0);
   MainWindow->CurrentVD1 = wxString::FromAscii (SevenSeg0);
@@ -1283,6 +1285,18 @@ yaDskyApp::OnInit ()
 	    }
 	  UsedCfg = 1;
 	}
+      else if (ArgStart.IsSameAs (wxT ("--x")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.x = dummy;
+	}
+      else if (ArgStart.IsSameAs (wxT ("--y")))
+	{
+    	  long dummy;
+    	  ArgEnd.ToLong (&dummy);
+    	  ulCorner.y = dummy;
+	}
       else if (Arg.IsSameAs (wxT ("--half-size")))
 	{
 	  if (UsedCfg)
@@ -1330,6 +1344,13 @@ yaDskyApp::OnInit ()
 	      "\tdifferent port settings for yaDSKY2 are needed.  Note that by default,\n");
 	  printf ("\tyaAGC listens for new connections on ports %d-%d.\n",
 		  Portnum, Portnum + 10 - 1);
+	  printf ("--x=X --y=Y\n");
+	  printf (
+	      "\tBy default, the window position is some system default.  This option\n");
+	  printf (
+	      "\tinstead allows explicit selection.  The units are pixel coordinates\n");
+	  printf (
+	      "\tof the upper-left corner, relative to the upper left of the screen.\n");
 	  printf ("--cfg=ConfigFilename\n");
 	  printf (
 	      "\tSelects a configuration file to be used, to allow different yaDSKY\n");
@@ -1471,7 +1492,7 @@ yaDskyApp::OnInit ()
       MainWindow->SetMinSize (wxSize(330, 392));
     }
   MainWindow->Show ();
-  MainWindow->SetPosition(wxPoint(50, 768-MainWindow->GetSize().GetHeight()));
+  MainWindow->SetPosition(ulCorner);
   return true;
 }
 
