@@ -2874,8 +2874,9 @@ VirtualAGC::FormTiling(void)
     int xScreen, yScreen, wScreen, hScreen;
     wxClientDisplayRect(&xScreen, &yScreen, &wScreen, &hScreen);
     xScreen += 5;
-    yScreen -= 5;
+    yScreen += 5;
     wScreen -= 10;
+    hScreen -= 10;
     showSimulate = 0, xSimulate = 0, ySimulate = 0, wSimulate = 0, hSimulate = 0;
     showDSKY = 0, xDSKY = 0, yDSKY = 0, wDSKY = 0, hDSKY = 0;
     showDEDA = 0, xDEDA = 0, yDEDA = 0, wDEDA = 0, hDEDA = 0;
@@ -2982,7 +2983,7 @@ VirtualAGC::FormTiling(void)
         columns++;
         xDSKY = used;
         yDSKY = 0;
-        xDEDA = used;
+        xDEDA = used + (hDSKY - hDEDA) / 2;
         yDEDA = hDSKY;
         used += wDSKY;
     } else {
@@ -3022,25 +3023,25 @@ VirtualAGC::FormTiling(void)
         xDEDA -= wSimulate;
         xTelemetry -= wSimulate;
         used -= wSimulate;
-        int recover, delta  = (used - wScreen + columns - 2) / (columns - 1);
-        recover = delta;
-        if (stacked) {
-            xDSKY -= recover;
-            xDEDA -= recover;
-            recover += delta;
-        } else {
-            if (showDSKY) {
-                xDSKY -= recover;
+        columns--;
+        int recover = 0, delta  = (used - wScreen + columns - 2) / (columns - 1);
+        if (columns > 1) {
+            recover = delta;
+            if (stacked) {
+                ;
+            } else {
+                if (showDSKY) {
+                    ;
+                }
+                if (showDEDA) {
+                    xDEDA -= recover;
+                    recover += delta;
+                }
+            }
+            if (showTelemetry) {
+                xTelemetry -= recover;
                 recover += delta;
             }
-            if (showDEDA) {
-                xDEDA -= recover;
-                recover += delta;
-            }
-        }
-        if (showTelemetry) {
-            xTelemetry -= recover;
-            recover += delta;
         }
         used -= recover;
     }
