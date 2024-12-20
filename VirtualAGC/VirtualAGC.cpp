@@ -202,6 +202,11 @@
 #include "VirtualAGC.h"
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
+#ifdef __APPLE__
+#include <time.h>
+#include <sys/stat.h>
+char whereApoDisKey[256] = "";
+#endif
 
 int noSquish = 0;
 int dropdownSquish = 1;
@@ -2151,11 +2156,23 @@ VirtualAgcApp::OnInit()
   if (fmdfind != NULL)
     {
        char line[256];
+       struct stat fileStats;
+       time_t t = 0;
        while (fgets(line, sizeof(line), fmdfind) != NULL)
          {
-           printf("Found: %s", line);
+           char *s = strstr(line, ".app");
+           if (s == NULL)
+               continue;
+           s[4] = 0;
+           printf("Found: %s\n", line);
            ApoDisKeyInstalled = true;
+           stat(line, &fileStats);
+           if (fileStats.tv_sec > t) {
+               t = fileStats.tv_sec;
+               strcpy(whereApoDisKey, line);
+           }
          }
+       printf("Chosen = %s\n", whereApoDisKey);
     }
   else
 	  printf("Failure: `popen` could not run `mdfind` for ApoDisKey\n");
