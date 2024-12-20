@@ -427,7 +427,9 @@ LIBS+=-L/usr/lib
 LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
+ifndef NOLREGEX
 CURSES+=-lregex
+endif
 else
 CURSES=-lcurses
 endif
