@@ -424,12 +424,11 @@ CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
 LIBS+=-L/usr/lib
+LIBS+=-L/mingw64/lib
 LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
-ifndef NOLREGEX
 CURSES+=-lregex
-endif
 else
 CURSES=-lcurses
 endif
