@@ -177,6 +177,13 @@
  *                              try reproducing.
  *              2024-12-16 RSB  Removed "stay on top" behavior of simulation-
  *                              status window".
+ *              2024-12-19 RSB  For the sake of ApoDisKey, I've had to move
+ *                              yaAGC startup to *before* DSKY startup.  I
+ *                              hope this doesn't break stuff.  Now includes
+ *                              automatic tiling of the simulation.  Choice
+ *                              of the ApoDisKey version (if several versions
+ *                              are installed) is now in VirtualAGC itself
+ *                              rather than in the simulation script.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
