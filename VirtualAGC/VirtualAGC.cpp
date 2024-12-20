@@ -2164,15 +2164,15 @@ VirtualAgcApp::OnInit()
            if (s == NULL)
                continue;
            s[4] = 0;
-           printf("Found: %s\n", line);
+           printf("Found:  %s\n", line);
            ApoDisKeyInstalled = true;
            stat(line, &fileStats);
-           if (fileStats.tv_sec > t) {
-               t = fileStats.tv_sec;
+           if (fileStats.st_birthtimespec.tv_sec > t) {
+               t = fileStats.st_birthtimespec.tv_sec;
                strcpy(whereApoDisKey, line);
            }
          }
-       printf("Chosen = %s\n", whereApoDisKey);
+       printf("Chosen: %s\n", whereApoDisKey);
     }
   else
 	  printf("Failure: `popen` could not run `mdfind` for ApoDisKey\n");
