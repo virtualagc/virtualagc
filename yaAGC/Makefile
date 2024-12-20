@@ -216,7 +216,7 @@ endif
 
 yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
 	${cc} -pthread ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
-	libyaAGC.a -L. ${STATIC} ${LIBS} -lyaAGC -lm ${CURSES} -lpthread
+	libyaAGC.a -L. ${STATIC} ${LIBS} -lyaAGC -lm ${CURSES}
 
 yaAGC.wasm: wasm.o agc_engine.o agc_engine_init.o agc_utilities.o ringbuffer_api.o ringbuffer.o
 	${WASI_SDK_PATH}/bin/wasm-ld ${LDFLAGS2} -o $@ $^
