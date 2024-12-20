@@ -3357,13 +3357,14 @@ VirtualAGC::FormCommands(void)
           if (DskyApoButton->GetValue() || DskyApoHalfButton->GetValue())
             {
               wxString yaDSKYa;
-              yaDSKYa = wxT("for n in `mdfind kMDItemCFBundleIdentifier=\"com.ramsaycons.ApoDisKey\"`\n");
-              yaDSKYa += wxT("do\n");
-              yaDSKYa += wxT("    stat -f \"%m '%N'\" -t \"%s\" \"$n\"\n");
-              yaDSKYa += wxT("done | sort -n | tail -1 | grep -o \"'.*'$\" | ");
-              yaDSKYa += wxT("awk '{ print $0\"/Contents/MacOS/ApoDisKey");
+              //yaDSKYa = wxT("for n in `mdfind kMDItemCFBundleIdentifier=\"com.ramsaycons.ApoDisKey\"`\n");
+              //yaDSKYa += wxT("do\n");
+              //yaDSKYa += wxT("    stat -f \"%m '%N'\" -t \"%s\" \"$n\"\n");
+              //yaDSKYa += wxT("done | sort -n | tail -1 | grep -o \"'.*'$\" | ");
+              //yaDSKYa += wxT("awk '{ print $0\"/Contents/MacOS/ApoDisKey");
+              yaDSKYa = wxString::Format("%s/Contents/MacOS/ApoDisKey", whereApoDisKey);
               yaDSKYa += yaDSKY;
-              yaDSKYa += wxT("\" }' | bash");
+              //yaDSKYa += wxT("\" }' | bash");
               yaDSKY = yaDSKYa;
             }
         }
