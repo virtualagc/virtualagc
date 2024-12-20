@@ -73,6 +73,7 @@
   both down when either one of them terminated.  
 */
 
+#include <winsock2.h>
 #include <windows.h>
 #include <stdio.h>
 #include <ctype.h>

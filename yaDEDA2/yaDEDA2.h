@@ -43,6 +43,7 @@
 #define YADEDA2_H
 
 #ifdef WIN32
+#include <winsock2.h>
 #include <windows.h>
 #include <sys/time.h>
 struct tms {

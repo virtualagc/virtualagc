@@ -65,6 +65,7 @@
 #include <string.h>
 #include <unistd.h>
 #ifdef WIN32
+#include <winsock2.h>
 #include <windows.h>
 #include <sys/time.h>
 #include "regex.h"

@@ -123,6 +123,7 @@
 #include <unistd.h>
 #ifdef WIN32
 #include <pthread.h>
+#include <winsock2.h>
 #include <windows.h>
 #include <sys/time.h>
 #define LB "\r\n"

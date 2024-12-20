@@ -65,8 +65,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #else
-#include <windows.h>
 #include <winsock2.h>
+#include <windows.h>
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__)) || WIN32

@@ -50,6 +50,7 @@
 #include <pthread.h>
 #include "enet/enet.h"
 #ifdef WIN32
+#include <winsock2.h>
 #include <windows.h>
 struct tms
   {

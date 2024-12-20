@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
 #include <windows.h>
 
 #ifdef _WIN32_WCE

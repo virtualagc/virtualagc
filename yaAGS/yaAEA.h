@@ -59,8 +59,8 @@
 
 #elif defined(WIN32)
 
-#include <windows.h>
 #include <winsock2.h>
+#include <windows.h>
 #define FORMAT_64U "%llu"
 #define FORMAT_64O "%llo"
 
