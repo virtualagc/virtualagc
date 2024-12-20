@@ -205,8 +205,8 @@
 #ifdef __APPLE__
 #include <time.h>
 #include <sys/stat.h>
-char whereApoDisKey[256] = "";
 #endif
+char whereApoDisKey[256] = "";
 
 int noSquish = 0;
 int dropdownSquish = 1;
