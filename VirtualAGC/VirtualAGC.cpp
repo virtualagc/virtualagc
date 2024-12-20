@@ -3459,6 +3459,25 @@ VirtualAGC::FormScript(void)
 
       Fout.Write(sleepTime);
 
+      // Run AGC
+      if (DeviceAgcCheckbox->GetValue())
+        {
+          if (AgcDebugMonitorButton->GetValue())
+            {
+#ifdef __APPLE__
+              Fout.Write (wxT ("../MacOS/Terminator.app/Contents/MacOS/Terminator --working-directory \""));
+              Fout.Write (ResourceDirectory);
+              Fout.Write (wxT ("\" \'"));
+              Fout.Write (yaAGC + wxT ("\' &\n"));
+#else
+              Fout.Write(wxT("xterm -sb -geometry 112x40 -e "));
+              Fout.Write(yaAGC + wxT(" &\n"));
+#endif
+            }
+          else
+            Fout.Write(yaAGC + wxT(" &\n"));
+          Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
+        }
 
       // Run DSKY
       if (DeviceDskyCheckbox->GetValue())
@@ -3512,26 +3531,6 @@ VirtualAGC::FormScript(void)
       if (DeviceAcaCheckbox->GetValue())
         {
           Fout.Write(yaACA + wxT(" &\n"));
-          Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
-        }
-
-      // Run AGC
-      if (DeviceAgcCheckbox->GetValue())
-        {
-          if (AgcDebugMonitorButton->GetValue())
-            {
-#ifdef __APPLE__
-              Fout.Write (wxT ("../MacOS/Terminator.app/Contents/MacOS/Terminator --working-directory \""));
-              Fout.Write (ResourceDirectory);
-              Fout.Write (wxT ("\" \'"));
-              Fout.Write (yaAGC + wxT ("\' &\n"));
-#else
-              Fout.Write(wxT("xterm -sb -geometry 112x40 -e "));
-              Fout.Write(yaAGC + wxT(" &\n"));
-#endif
-            }
-          else
-            Fout.Write(yaAGC + wxT(" &\n"));
           Fout.Write(wxT("PIDS=\"$! ${PIDS}\"\n"));
         }
 
