@@ -492,7 +492,7 @@ cbMISSIONS += LUM69R2 Luminary097 Luminary098 Luminary178
 cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 
 # The base set of targets to be built always.
-SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
+SUBDIRS = yaAGC Tools yaLEMAP yaAGS yaYUL ControlPulseSim yaUniverse
 SUBDIRS += yaAGC-Block1-Pultorak yaAGCb1 yaUplinkBlock1 Validation-Block1
 SUBDIRS += yaASM yaOBC
 SUBDIRS += yaLVDC
