@@ -240,7 +240,7 @@ install:	yaAGC
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
 checkdec.o: ../Tools/checkdec.c
-	${cc} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${cc} -pthread ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
 ifdef WASI
