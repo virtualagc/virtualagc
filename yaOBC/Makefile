@@ -36,6 +36,10 @@ else	# MSYSTEM
 PREFIX=/usr/local
 endif	# MSYSTEM
 
+ifdef WIN32
+WLIBS=-lwsock32 -lws2_32 -lwinmm
+endif
+
 ifeq "${USER}" "rburkey"
 CFLAGS+=-Wall -Werror -O3
 WEB=${HOME}/Projects/sandroid.org/public_html/apollo/Downloads
@@ -54,8 +58,8 @@ all-archs: \
 	${SAVE}
 
 ${TARGET} ${TARGET2}: % : %.c ../yaASM/yaASM.h Makefile
-	${cc} ${CFLAGS} -o $@ -I../enet/include \
-		$< ../enet/*.c -lpthread -lm
+	${cc} -pthread ${CFLAGS} -o $@ -I../enet/include \
+		$< ../enet/*.c -lpthread -lm $(WLIBS)
 
 ${TARGET}.exe ${TARGET2}.exe: %.exe : %.c ../yaASM/yaASM.h Makefile
 	i386-mingw32-${cc} -DPTW32_STATIC_LIB -O3 -o $@ \
