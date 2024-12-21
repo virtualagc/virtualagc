@@ -46,8 +46,12 @@
 #include <sys/socket.h>
 #endif
 #include <errno.h>
-#if defined(SOLARIS) || defined(WIN32)
+#if defined(SOLARIS)
 #include <ncurses/ncurses.h>
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#elif defined(WIN32)
+#include <ncursesw/ncurses.h>
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
