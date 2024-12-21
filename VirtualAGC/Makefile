@@ -271,7 +271,7 @@ endif
 	-rm -rf $@/LM_Simulator/doc/CVS
 	-rm -rf $@/LM_Simulator/Documentation/CVS
 	${CP} template.app/Contents/Resources/VirtualAGC.icns $@
-ifeq IGNORE_THIS
+ifdef IGNORE_THIS
 ifeq "${EXT}" ".exe"
 	${CP} /usr/local/bin/SDL.dll $@
 	# Very old usage.
