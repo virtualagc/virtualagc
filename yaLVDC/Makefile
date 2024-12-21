@@ -19,14 +19,15 @@ ifndef cc
 cc=gcc
 endif
 
+OURFLAGS=${CFLAGS}
 ifdef WIN32
-CFLAGS+=-DHAVE_TIME_H
+OURFLAGS+=-DHAVE_TIME_H
 LIBS=-lwsock32 -lws2_32 -lwinmm
 endif
 
 ifeq "${USER}" "rburkey"
-#CFLAGS+=-Wall -Werror -O3
-CFLAGS+=-Wall -Werror -O0 -g
+#OURFLAGS+=-Wall -Werror -O3
+OURFLAGS+=-Wall -Werror -O0 -g
 endif
 
 SOURCE:=$(wildcard *.c)
@@ -38,7 +39,7 @@ default: ${TARGET}
 all-archs: ${TARGET}
 
 ${TARGET}: ${SOURCE} yaLVDC.h Makefile
-	${cc} ${CFLAGS} -o $@ *.c -lm ${LIBS}
+	${cc} ${OURFLAGS} -o $@ *.c -lm ${LIBS}
 
 .PHONY:	clean
 clean:
