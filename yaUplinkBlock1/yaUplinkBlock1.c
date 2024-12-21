@@ -50,6 +50,7 @@
 #include <ncurses/ncurses.h>
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
+#endif
 #elif defined(WIN32)
 #include <ncursesw/ncurses.h>
 #ifndef MSG_NOSIGNAL
