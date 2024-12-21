@@ -19,7 +19,7 @@ LIBS =
 ifdef WIN32
 LIBS = "-L/usr/lib"
 endif
-LIBS += -lncurses -lpthread
+LIBS += -lncurses
 
 
 all default: yaAGC-Block1
@@ -28,7 +28,7 @@ all default: yaAGC-Block1
 # needed, depending on whether or not the constant USE_NCURSES
 # is #defined.
 yaAGC-Block1: $(SOURCE) $(HEADERS) Makefile
-	${CC} -O0 -g -o $@ $(SOURCE) $(LIBS) -lstdc++
+	${CC} -pthread -O0 -g -o $@ $(SOURCE) $(LIBS) -lstdc++
 
 clean:
 	-rm $(TARGETS)
