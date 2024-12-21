@@ -19,6 +19,11 @@ ifndef cc
 cc=gcc
 endif
 
+ifdef WIN32
+CFLAGS+=-DHAVE_TIME_H
+LIBS=-lwsock32 -lws2_32 -lwinmm
+endif
+
 ifeq "${USER}" "rburkey"
 #CFLAGS+=-Wall -Werror -O3
 CFLAGS+=-Wall -Werror -O0 -g
@@ -33,7 +38,7 @@ default: ${TARGET}
 all-archs: ${TARGET}
 
 ${TARGET}: ${SOURCE} yaLVDC.h Makefile
-	${cc} ${CFLAGS} -o $@ *.c -lm
+	${cc} ${CFLAGS} -o $@ *.c -lm ${LIBS}
 
 .PHONY:	clean
 clean:
