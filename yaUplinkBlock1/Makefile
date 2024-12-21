@@ -7,7 +7,7 @@ EXTRAS=-DSOLARIS=yes
 LIBS=-lxnet
 endif
 ifdef WIN32
-EXTRAS=-I/usr/include -Wno-deprecated-declarations
+EXTRAS=-I$(MINGW_PREFIX)/include -Wno-deprecated-declarations
 LIBS=-L$(MINGW_PREFIX)/lib -lwsock32
 endif
 
