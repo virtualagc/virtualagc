@@ -17,7 +17,7 @@ HEADERS:=$(wildcard *.h)
 
 LIBS = 
 ifdef WIN32
-LIBS = -L$MINGW_PREFIX/lib
+LIBS = -L$(MINGW_PREFIX)/lib
 endif
 LIBS += -lncurses
 
