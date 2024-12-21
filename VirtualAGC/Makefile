@@ -271,6 +271,7 @@ endif
 	-rm -rf $@/LM_Simulator/doc/CVS
 	-rm -rf $@/LM_Simulator/Documentation/CVS
 	${CP} template.app/Contents/Resources/VirtualAGC.icns $@
+ifeq IGNORE_THIS
 ifeq "${EXT}" ".exe"
 	${CP} /usr/local/bin/SDL.dll $@
 	# Very old usage.
@@ -291,6 +292,7 @@ ifeq "${EXT}" ".exe"
 	do \
 		${CP} c:/mingw/bin/$$n.dll $@ ; \
 	done
+endif
 endif
 	${CP} ../Contributed/SyntaxHighlight $@
 	rm -rf `find $@/SyntaxHighlight -name ".svn"`
