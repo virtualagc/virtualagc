@@ -769,8 +769,8 @@ ifdef WIN32
 	@echo "================================================================"
 	@echo "Run Virtual AGC from its desktop launcher, or if creation of"
 	@echo "the launcher failed, run from a command-line as follows:"
-	@echo "  cd VirtualAGC.installed\\bin"
-	@echo "  virtualagc.bat"
+	@echo "  cd VirtualAGC.installed\\Resources"
+	@echo "  VirtualAGC.bat"
 	@echo "================================================================"
 else
 	# Create installation directory.
