@@ -763,15 +763,12 @@ ifdef MACOSX
 	@echo "Run Virtual AGC from its desktop icon."
 else
 ifdef WIN32
-	-mkdir "$(WINHOME)/VirtualAGC"
-	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINHOME)/VirtualAGC"
-	@echo "cd %HOMEPATH%\\VirtualAGC\\Resources" >$(iTMP)
-	@echo "..\\bin\\VirtualAGC" >>$(iTMP)
-	mv $(iTMP) $(WINHOME)/Desktop/VirtualAGC.bat
+	-mkdir "$(WINHOME)/VirtualAGC.installed"
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINHOME)/VirtualAGC.installed"
 	@echo ""
 	@echo "================================================================"
-	@echo "Run Virtual AGC from its desktop launcher."
-	@echo "Or else, run Virtual AGC from a Windows command-line as follows:"
+	@echo "Run Virtual AGC from its desktop launcher, or if creation of"
+	@echo "the launcher failed, run from a command-line as follows:"
 	@echo "  cd VirtualAGC\\Resources"
 	@echo "  ..\\bin\\VirtualAGC"
 	@echo "================================================================"
