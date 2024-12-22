@@ -3424,8 +3424,10 @@ VirtualAGC::FormScript (void)
       {
         if (StartupWipeButton->GetValue ())
           {
-            Fout.Write (wxT ("del LM.core" EOL));
-            Fout.Write (wxT ("del CM.core" EOL));
+            Fout.Write (wxT ("if not DEFINED IS_MINIMIZED set IS_MINIMIZED=1 && start \"\" /min \"%~dpnx0\" %* && exit" EOL));
+            Fout.Write (wxT ("\tdel LM.core" EOL));
+            Fout.Write (wxT ("\tdel CM.core" EOL));
+            Fout.Write (wxt ("exit" EOL));
           }
         //if (FunkyYaACA)
         //  Fout.Write (wxT ("start cmd /C ") + yaACA + wxT (EOL));
