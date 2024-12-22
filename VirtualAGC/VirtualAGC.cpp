@@ -1401,7 +1401,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
 #else
   wxString Command = wxT("./simulate");
 #endif
-  wxExecute(Command, wxEXEC_SYNC | wxEXEC_NODISABLE);
+  wxExecute(Command, wxEXEC_SYNC | wxEXEC_NODISABLE | wxEXEC_HIDE_CONSOLE);
   SimulationWindow->Close();
   delete SimulationWindow;
   Show();
@@ -3422,16 +3422,16 @@ VirtualAGC::FormScript (void)
       }
     if (Fout.Create (wxT ("simulate2.bat"), true))
       {
-        Fout.Write (wxT ("if not DEFINED IS_MINIMIZED set IS_MINIMIZED=1 && start \"\" /min \"%~dpnx0\" %* && exit" EOL));
+        //Fout.Write (wxT ("if not DEFINED IS_MINIMIZED set IS_MINIMIZED=1 && start \"\" /min \"%~dpnx0\" %* && exit" EOL));
         if (StartupWipeButton->GetValue ())
           {
-            Fout.Write (wxT ("\tdel LM.core" EOL));
-            Fout.Write (wxT ("\tdel CM.core" EOL));
+            Fout.Write (wxT ("del LM.core" EOL));
+            Fout.Write (wxT ("del CM.core" EOL));
           }
         //if (FunkyYaACA)
         //  Fout.Write (wxT ("start cmd /C ") + yaACA + wxT (EOL));
-        Fout.Write (wxT ("\t..\\bin\\WinAGC.exe <simulate.bat" EOL));
-        Fout.Write (wxT ("exit" EOL));
+        Fout.Write (wxT ("..\\bin\\WinAGC.exe <simulate.bat" EOL));
+        //Fout.Write (wxT ("exit" EOL));
         Fout.Close ();
       }
     else
