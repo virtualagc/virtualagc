@@ -294,10 +294,10 @@ ifdef IGNORE_THIS
 	do \
 		${CP} c:/mingw/bin/$$n.dll $@ ; \
 	done
-else // of IGNORE_THIS. Do this instead:
-	for n in ../bin/*.exe ; do ldd $$n ; done | egrep 'ucrt64|home' | awk '{print $3}' | sort -u | xargs -i cp {} $@
-endif // of IGNORE_THIS
-endif // of EXT == .exe
+else # of IGNORE_THIS. Do this instead:
+	for n in ../bin/*.exe ; do ldd $$n ; done | egrep 'ucrt64|home' | awk '{print $$3}' | sort -u | xargs -i cp {} $@
+endif # of IGNORE_THIS
+endif # of EXT == .exe
 	${CP} ../Contributed/SyntaxHighlight $@
 	rm -rf `find $@/SyntaxHighlight -name ".svn"`
 
