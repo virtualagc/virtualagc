@@ -271,8 +271,8 @@ endif
 	-rm -rf $@/LM_Simulator/doc/CVS
 	-rm -rf $@/LM_Simulator/Documentation/CVS
 	${CP} template.app/Contents/Resources/VirtualAGC.icns $@
-ifdef IGNORE_THIS
 ifeq "${EXT}" ".exe"
+ifdef IGNORE_THIS
 	${CP} /usr/local/bin/SDL.dll $@
 	# Very old usage.
 	#for n in history pthread readline libgnurx ; \
@@ -292,8 +292,10 @@ ifeq "${EXT}" ".exe"
 	do \
 		${CP} c:/mingw/bin/$$n.dll $@ ; \
 	done
-endif
-endif
+else // of IGNORE_THIS
+	ldd ../bin/VirtualAGC.exe | egrep 'ucrt64|home' | awk '{print $3}' | xargs -i cp {} $@
+endif // of IGNORE_THIS
+endif // of EXT == .exe
 	${CP} ../Contributed/SyntaxHighlight $@
 	rm -rf `find $@/SyntaxHighlight -name ".svn"`
 
