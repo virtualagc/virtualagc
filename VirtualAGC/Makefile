@@ -237,7 +237,8 @@ temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
 
 # This target creates a Resources directory for any of the installation
 # packages.  Except for gtk+ related stuff, none of the contents of the
-# Resources directory vary by target.
+# Resources directory vary by target.  This target assumes that the associated
+# bin directory has already been populated.
 .PHONY: temp/lVirtualAGC/Resources
 temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Contents/Resources:
 	mkdir -p $@/pixmaps $@/source
@@ -272,6 +273,7 @@ endif
 	-rm -rf $@/LM_Simulator/Documentation/CVS
 	${CP} template.app/Contents/Resources/VirtualAGC.icns $@
 ifeq "${EXT}" ".exe"
+# Copy DLLs.
 ifdef IGNORE_THIS
 	${CP} /usr/local/bin/SDL.dll $@
 	# Very old usage.
@@ -292,8 +294,8 @@ ifdef IGNORE_THIS
 	do \
 		${CP} c:/mingw/bin/$$n.dll $@ ; \
 	done
-else // of IGNORE_THIS
-	ldd ../bin/VirtualAGC.exe | egrep 'ucrt64|home' | awk '{print $3}' | xargs -i cp {} $@
+else // of IGNORE_THIS. Do this instead:
+	for n in ../bin/*.exe ; do ldd $$n ; done | egrep 'ucrt64|home' | awk '{print $3}' | sort -u | xargs -i cp {} $@
 endif // of IGNORE_THIS
 endif // of EXT == .exe
 	${CP} ../Contributed/SyntaxHighlight $@
