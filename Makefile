@@ -796,7 +796,7 @@ ifdef SOLARIS
 else
 	@echo "[Desktop Entry]" >$(iTMP)
 	@echo "Encoding=UTF-8" >>$(iTMP)
-	@echo "Name=VirtualAGC" >>$(iTMP)
+	@echo "Name=VirtualAGC Application" >>$(iTMP)
 	@echo "Comment=Virtual AGC GUI Application" >>$(iTMP)
 	@echo "Terminal=false" >>$(iTMP)
 	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(iTMP)
