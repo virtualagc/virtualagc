@@ -1331,6 +1331,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   RunButton->Enable(false);
   Hide();
   SimulationWindow = new Simulation(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+  SimulationWindow->EnableCloseButton(false);
   SimulationWindow->Enable(true);
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
@@ -3703,7 +3704,7 @@ Simulation::UploadEvent(wxCommandEvent &event)
 void
 Simulation::set_properties()
 {
-  SetTitle(wxT("Simulation status"));
+  SetTitle(wxT("Simulation Status"));
   wxIcon _icon;
   _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SetIcon(_icon);
