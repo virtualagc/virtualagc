@@ -635,7 +635,7 @@ END_EVENT_TABLE();
 void MainFrameClass::set_properties()
 {
     // begin wxGlade: MainFrameClass::set_properties
-    SetTitle(wxT("yaTelemetry by Ron Burkey"));
+    SetTitle(wxT("yaTelemetry"));
     wxIcon _icon;
     _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
     SetIcon(_icon);
@@ -1012,7 +1012,7 @@ void SimpleFrameClass::TimerStop(wxCloseEvent &event)
 void SimpleFrameClass::set_properties()
 {
     // begin wxGlade: SimpleFrameClass::set_properties
-    SetTitle(wxT("yaTelemetry by Ron Burkey"));
+    SetTitle(wxT("yaTelemetry"));
     wxIcon _icon;
     _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
     SetIcon(_icon);

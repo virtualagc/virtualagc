@@ -974,7 +974,7 @@ void
 MainFrame::set_properties ()
 {
   // begin wxGlade: MainFrame::set_properties
-  SetTitle (wxT ("yaDSKY2 by Ron Burkey"));
+  SetTitle (wxT ("yaDSKY2"));
   wxIcon _icon;
   _icon.CopyFromBitmap (wxBitmap (wxT ("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SetIcon (_icon);
@@ -1478,7 +1478,7 @@ yaDskyApp::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
-  // With wxWidgets 3.0, the --half-size option inevitably creates a main
+  // With wxWidgets 3.0, the --half-size option generally creates a main
   // window thats too short (vertically), and I haven't been able to figure
   // out how to coax it into calculating the window size properly.
   // (Works fine with wxWidgets 2.8 or with the full-size DSKY.)  At any
@@ -1489,10 +1489,10 @@ yaDskyApp::OnInit ()
   // windows that are a little too small.
   if (HalfSize)
     {
-      MainWindow->SetMinSize (wxSize(330, 392));
+      MainWindow->SetMinSize (wxSize(335, 430));
     }
-  MainWindow->Show ();
   MainWindow->SetPosition(ulCorner);
+  MainWindow->Show ();
   return true;
 }
 
@@ -2328,6 +2328,7 @@ void
 MainFrame::HalveTheWindow (void)
 {
   int ButtonSize;
+  SetTitle (wxT("DSKY"));
   if (HalfSize)
     ButtonSize = 40;
   else

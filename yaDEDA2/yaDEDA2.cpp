@@ -396,7 +396,7 @@ void
 MainFrame::set_properties ()
 {
   // begin wxGlade: MainFrame::set_properties
-  SetTitle (wxT ("yaDEDA2 by Ron Burkey"));
+  SetTitle (wxT ("yaDEDA2"));
   wxIcon _icon;
   _icon.CopyFromBitmap (wxBitmap (wxT ("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SetIcon (_icon);
@@ -691,8 +691,21 @@ yaDedaAppClass::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
-  MainWindow->Show ();
+  // With wxWidgets 3.0, the --half-size option generally creates a main
+  // window thats too short (vertically), and I haven't been able to figure
+  // out how to coax it into calculating the window size properly.
+  // (Works fine with wxWidgets 2.8 or with the full-size DEDA.)  At any
+  // rate, the following is a lame attempt to prevent that from happening,
+  // though in theory it could force windows that are too big on some
+  // platforms, alas!  With wxWidgets 3.2, the problem extends to
+  // half-size windows that are a lot too big in general or regular-size
+  // windows that are a little too small.
+  if (MainWindow->HalfSize)
+    {
+      MainWindow->SetMinSize (wxSize(250, 335));
+    }
   MainWindow->SetPosition(ulCorner);
+  MainWindow->Show ();
   return true;
 }
 
@@ -1055,6 +1068,7 @@ void
 MainFrame::HalveTheWindow (void)
 {
   int ButtonSize, Thickness;
+  SetTitle(wxT("DEDA"));
   if (HalfSize)
     {
       ButtonSize = 40;

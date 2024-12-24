@@ -430,7 +430,7 @@ static int NumShellouts = 0, OnShellout = 0;
   Object->SetBitmap (Bitmap)
 
 void
-VirtualAGC::SetSize(void)
+VirtualAGC::SetFontSizes(void)
 {
   wxFont Font;
   wxBitmap Bitmap;
@@ -764,7 +764,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   ReadConfigurationFile();
   EnforceConsistency();
 
-  SetSize();
+  SetFontSizes();
   Layout();
   Fit();
 }
@@ -1574,7 +1574,7 @@ VirtualAGC::set_properties()
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
   AgcCustomFilename->Enable(false);
-  AgcFilenameBrowse->SetMinSize(wxSize(50, 24));
+  AgcFilenameBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AgcFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
   AgcFilenameBrowse->SetToolTip(
@@ -1610,7 +1610,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(wxSize(70, 24));
+  JoystickConfigure->SetMinSize(FromDIP(wxSize(70, 24)));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -1710,14 +1710,14 @@ VirtualAGC::set_properties()
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
   CoreFilename->SetForegroundColour(wxColour(0, 0, 0));
   CoreFilename->Enable(false);
-  CoreBrowse->SetMinSize(wxSize(50, 24));
+  CoreBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   CoreBrowse->SetForegroundColour(wxColour(0, 0, 0));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
   CoreBrowse->Enable(false);
-  CoreSaveButton->SetMinSize(wxSize(50, 24));
+  CoreSaveButton->SetMinSize(FromDIP(wxSize(50, 24)));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
   CoreSaveButton->SetForegroundColour(wxColour(0, 0, 0));
   CoreSaveButton->SetToolTip(
@@ -1816,7 +1816,7 @@ VirtualAGC::set_properties()
           wxT(
               "If you wish to run abort-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
       AeaCustomFilename->Enable(false);
-      AeaFilenameBrowse->SetMinSize(wxSize(50, 24));
+      AeaFilenameBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
       AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
       AeaFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
       AeaFilenameBrowse->SetToolTip(
@@ -2270,6 +2270,8 @@ VirtualAgcApp::OnInit()
     }
 
   MainFrame = new VirtualAGC(NULL, wxID_ANY, wxEmptyString);
+  MainFrame->SetMinSize(MainFrame->FromDIP(wxSize(730, 435)));
+  printf("%d, %d\n", MainFrame->FromDIP(wxSize(730, 435)).x, MainFrame->FromDIP(wxSize(730, 435)).y);
   MainFrame->SetForegroundColour(wxColor (0, 0, 0));
   SetTopWindow(MainFrame);
   MainFrame->Show();
@@ -2911,7 +2913,7 @@ VirtualAGC::FormTiling(void)
     // the geometry of any given window on all of the possible platforms, so we
     // try to give a conservative upper limit.
     showSimulate = 1;
-    wSimulate = 510;
+    wSimulate = 565;
     hSimulate = 690;
     if (DeviceDskyCheckbox->GetValue())
     {
@@ -2933,8 +2935,8 @@ VirtualAGC::FormTiling(void)
               hDSKY = 670;
             }
             else if (DskyHalfButton->GetValue()) {
-              wDSKY = 340;
-              hDSKY = 420;
+              wDSKY = 360;
+              hDSKY = 460;
             }
             else if (DskyLiteButton->GetValue()) {
               // I don't think I have a way of influencing this one.
@@ -2973,7 +2975,7 @@ VirtualAGC::FormTiling(void)
         }
         else if (DedaHalfButton->GetValue()) {
             wDEDA = 255;
-            hDEDA = 325;
+            hDEDA = 365;
         }
         else
             return false;
@@ -2998,7 +3000,7 @@ VirtualAGC::FormTiling(void)
     // height of a normal-size window.  Also, the Simulation-Status window
     // is preferentially overlapped compared to all others.
     // First, try the fully side-by-side option.
-    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < 800);
+    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < 820);
     int columns = 1;
     xSimulate = 0;
     ySimulate = 0;
@@ -3715,14 +3717,14 @@ Simulation::set_properties()
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
-  UplinkText->SetMinSize(wxSize(480, 480));
+  UplinkText->SetMinSize(FromDIP(wxSize(480, 480)));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
   UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetMinSize(wxSize(480, 480));
+  ScriptText->SetMinSize(FromDIP(wxSize(480, 480)));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));

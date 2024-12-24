@@ -323,7 +323,7 @@ public:
   EnableRunButton(void);
   long SimulationProcessID;
   void
-  SetSize(void);
+  SetFontSizes(void);
   int Points, StartingPoints;
   bool ReallySmall;
   bool DropDown;
