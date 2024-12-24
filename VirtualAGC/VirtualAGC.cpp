@@ -2270,11 +2270,14 @@ VirtualAgcApp::OnInit()
     }
 
   MainFrame = new VirtualAGC(NULL, wxID_ANY, wxEmptyString);
-  MainFrame->SetMinSize(MainFrame->FromDIP(wxSize(730, 435)));
-  printf("%d, %d\n", MainFrame->FromDIP(wxSize(730, 435)).x, MainFrame->FromDIP(wxSize(730, 435)).y);
   MainFrame->SetForegroundColour(wxColor (0, 0, 0));
   SetTopWindow(MainFrame);
   MainFrame->Show();
+  MainFrame->Refresh();
+  MainFrame->Update();
+  wxSize sz = MainFrame->FromDIP(wxSize(730, 435));
+  MainFrame->SetMinSize(sz);
+  printf("%d, %d\n", sz.x, sz.y);
   // MainFrame->SetName("VirtualAGC");
   // wxPersistentRegisterAndRestore(MainFrame, "VirtualAGC");
   return true;
