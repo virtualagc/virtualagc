@@ -225,6 +225,7 @@ int showSimulate, xSimulate, ySimulate, wSimulate, hSimulate;
 int showDSKY, xDSKY, yDSKY, wDSKY, hDSKY;
 int showDEDA, xDEDA, yDEDA, wDEDA, hDEDA;
 int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
+double scaleDPI = 1.0;
 
 // Min width for the RHS of the main window.
 wxSize minWidthRHS;
@@ -520,7 +521,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
             (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX // | wxCLIP_CHILDREN
                 | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
-  minWidthRHS = wxSize(340, -1);
+  minWidthRHS = wxSize(340 * scaleDPI, -1);
   // We auto-adjust fonts and image sizes if the screen size is too small.
   wxFont Font = GetFont();
   StartingPoints = Font.GetPointSize();
@@ -1581,7 +1582,7 @@ VirtualAGC::set_properties()
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
   AgcCustomFilename->Enable(false);
-  AgcFilenameBrowse->SetMinSize(wxSize(50,24));
+  AgcFilenameBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AgcFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
   AgcFilenameBrowse->SetToolTip(
@@ -1617,7 +1618,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(wxSize(70,24));
+  JoystickConfigure->SetMinSize(wxSize(70 * scaleDPI, 24 * scaleDPI));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -1717,14 +1718,14 @@ VirtualAGC::set_properties()
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
   CoreFilename->SetForegroundColour(wxColour(0, 0, 0));
   CoreFilename->Enable(false);
-  CoreBrowse->SetMinSize(wxSize(50,24));
+  CoreBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   CoreBrowse->SetForegroundColour(wxColour(0, 0, 0));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
   CoreBrowse->Enable(false);
-  CoreSaveButton->SetMinSize(wxSize(50,24));
+  CoreSaveButton->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
   CoreSaveButton->SetForegroundColour(wxColour(0, 0, 0));
   CoreSaveButton->SetToolTip(
@@ -1823,7 +1824,7 @@ VirtualAGC::set_properties()
           wxT(
               "If you wish to run abort-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
       AeaCustomFilename->Enable(false);
-      AeaFilenameBrowse->SetMinSize(wxSize(50,24));
+      AeaFilenameBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
       AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
       AeaFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
       AeaFilenameBrowse->SetToolTip(
@@ -2227,6 +2228,10 @@ VirtualAgcApp::OnInit()
         {
           ArgEnd.ToLong(&fontFloor);
         }
+      else if (ArgStart.IsSameAs(wxT("--dpi-scale")))
+      {
+        ArgEnd.ToDouble(&scaleDPI);
+      }
       else
         {
           Help: printf("USAGE:\n");
@@ -2272,6 +2277,9 @@ VirtualAgcApp::OnInit()
           printf("--font-floor=N\n");
           printf("\tSets the minimum allowed font size, in integers.  The\n");
           printf("\tdefault is 8.\n");
+          printf("--dpi-scale=F\n");
+          printf("\tA floating-point number (default 1.0) which can work\n");
+          printf("\taround a failure to correctly detect the DPI.\n");
           exit(1);
         }
     }
@@ -2282,7 +2290,7 @@ VirtualAgcApp::OnInit()
   MainFrame->Show();
   MainFrame->Refresh();
   MainFrame->Update();
-  wxSize sz = wxSize(-1, 440);
+  wxSize sz = wxSize(-1, 440 * scaleDPI);
   MainFrame->SetMinSize(sz);
   sz = MainFrame->GetSize();
   printf("Size: %d, %d\n", sz.x, sz.y);
@@ -2914,7 +2922,8 @@ VirtualAGC::FormTiling(void)
 {
     int xScreen, yScreen, wScreen, hScreen;
     wxClientDisplayRect(&xScreen, &yScreen, &wScreen, &hScreen);
-    printf("%d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
+    printf("Display rect: %d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
+    printf("DPI scale factor: %g\n", this->GetDPIScaleFactor());
 
     xScreen += 5;
     yScreen += 5;
@@ -3734,14 +3743,14 @@ Simulation::set_properties()
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
-  UplinkText->SetMinSize(wxSize(480,480));
+  UplinkText->SetMinSize(wxSize(480 * scaleDPI, 480 * scaleDPI));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
   UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetMinSize(wxSize(480,480));
+  ScriptText->SetMinSize(wxSize(480 * scaleDPI, 480 * scaleDPI));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
