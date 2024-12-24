@@ -1509,7 +1509,7 @@ TimerClass::Notify ()
   unsigned char c;
   static unsigned long pulseCount = 0;
 
-  if (pulseCount == 4) {
+  if (pulseCount == 2) {
     MainWindow->SetPosition(ulCorner);
   }
 

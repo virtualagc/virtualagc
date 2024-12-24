@@ -56,6 +56,8 @@ control over the state of the random number generator.
 // Added a default value for EINVAL for similar reasons.
 // 11/20/17 Ron Burkey: Got rid of a compiler warning by explicitly casting some
 // constants as signed.
+// 12/24/24 Ron Burkey: Removed the `register` specifier to avoid compiler
+// warnings.
 
 #include <errno.h>
 #ifndef EINVAL
@@ -240,7 +242,7 @@ srandom (unsigned int x)
   state[0] = x;
   if (rand_type != TYPE_0)
     {
-      register long int i;
+      long int i;
       for (i = 1; i < rand_deg; ++i)
 	state[i] = (1103515145 * state[i - 1]) + 12345;
       fptr = &state[rand_sep];
@@ -330,9 +332,9 @@ initstate (unsigned int seed, PTR arg_state, unsigned long n)
 PTR
 setstate (PTR arg_state)
 {
-  register long int *new_state = (long int *) arg_state;
-  register int type = new_state[0] % MAX_TYPES;
-  register int rear = new_state[0] / MAX_TYPES;
+  long int *new_state = (long int *) arg_state;
+  int type = new_state[0] % MAX_TYPES;
+  int rear = new_state[0] / MAX_TYPES;
   PTR ostate = (PTR) &state[-1];
 
   if (rand_type == TYPE_0)

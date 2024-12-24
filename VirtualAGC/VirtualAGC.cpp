@@ -226,6 +226,9 @@ int showDSKY, xDSKY, yDSKY, wDSKY, hDSKY;
 int showDEDA, xDEDA, yDEDA, wDEDA, hDEDA;
 int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
 
+// Min width for the RHS of the main window.
+wxSize minWidthRHS;
+
 // Not used (yet?).
 void
 setWidgetColours(wxControl* w, int b=255, int f=0) {
@@ -517,7 +520,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
             (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX // | wxCLIP_CHILDREN
                 | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
-
+  minWidthRHS = this->FromDIP(wxSize(680, -1));
   // We auto-adjust fonts and image sizes if the screen size is too small.
   wxFont Font = GetFont();
   StartingPoints = Font.GetPointSize();
@@ -587,10 +590,14 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
 
   sizer_1_copy_staticbox = new wxStaticBox(this, -1, wxT("Browse Source Code"));
   sizer_18_staticbox = new wxStaticBox(this, -1, wxT("AGC Startup"));
+  sizer_18_staticbox->SetMinSize(minWidthRHS);
   sizer_22_staticbox = new wxStaticBox(this, -1, wxT("Interface styles"));
+  sizer_22_staticbox->SetMinSize(minWidthRHS);
   sizer_38_staticbox = new wxStaticBox(this, -1, wxT("Use AGC/AEA debugger?"));
+  sizer_38_staticbox->SetMinSize(minWidthRHS);
   sizer_20_staticbox = new wxStaticBox(this, -1,
       wxT("LM Abort Computer (AEA) software"));
+  sizer_20_staticbox->SetMinSize(minWidthRHS);
   sizer_19_staticbox = new wxStaticBox(this, -1,
       wxT("Guidance Computer (AGC) software"));
   if (!maximumSquish)
@@ -1574,7 +1581,7 @@ VirtualAGC::set_properties()
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
   AgcCustomFilename->Enable(false);
-  AgcFilenameBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
+  AgcFilenameBrowse->SetMinSize(FromDIP(wxSize(100, 48)));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AgcFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
   AgcFilenameBrowse->SetToolTip(
@@ -1610,7 +1617,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(FromDIP(wxSize(70, 24)));
+  JoystickConfigure->SetMinSize(FromDIP(wxSize(140, 48)));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -1710,14 +1717,14 @@ VirtualAGC::set_properties()
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
   CoreFilename->SetForegroundColour(wxColour(0, 0, 0));
   CoreFilename->Enable(false);
-  CoreBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
+  CoreBrowse->SetMinSize(FromDIP(wxSize(100, 48)));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   CoreBrowse->SetForegroundColour(wxColour(0, 0, 0));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
   CoreBrowse->Enable(false);
-  CoreSaveButton->SetMinSize(FromDIP(wxSize(50, 24)));
+  CoreSaveButton->SetMinSize(FromDIP(wxSize(100, 48)));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
   CoreSaveButton->SetForegroundColour(wxColour(0, 0, 0));
   CoreSaveButton->SetToolTip(
@@ -1816,7 +1823,7 @@ VirtualAGC::set_properties()
           wxT(
               "If you wish to run abort-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
       AeaCustomFilename->Enable(false);
-      AeaFilenameBrowse->SetMinSize(FromDIP(wxSize(50, 24)));
+      AeaFilenameBrowse->SetMinSize(FromDIP(wxSize(100, 48)));
       AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
       AeaFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
       AeaFilenameBrowse->SetToolTip(
@@ -2275,7 +2282,7 @@ VirtualAgcApp::OnInit()
   MainFrame->Show();
   MainFrame->Refresh();
   MainFrame->Update();
-  wxSize sz = MainFrame->FromDIP(wxSize(730, 435));
+  wxSize sz = MainFrame->FromDIP(wxSize(-1, 870));
   MainFrame->SetMinSize(sz);
   printf("%d, %d\n", sz.x, sz.y);
   // MainFrame->SetName("VirtualAGC");
@@ -3722,14 +3729,14 @@ Simulation::set_properties()
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
-  UplinkText->SetMinSize(FromDIP(wxSize(480, 480)));
+  UplinkText->SetMinSize(FromDIP(wxSize(960, 960)));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
   UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetMinSize(FromDIP(wxSize(480, 480)));
+  ScriptText->SetMinSize(FromDIP(wxSize(960, 960)));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
