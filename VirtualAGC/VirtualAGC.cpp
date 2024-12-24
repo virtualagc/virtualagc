@@ -2902,6 +2902,8 @@ VirtualAGC::FormTiling(void)
 {
     int xScreen, yScreen, wScreen, hScreen;
     wxClientDisplayRect(&xScreen, &yScreen, &wScreen, &hScreen);
+    printf("%d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
+
     xScreen += 5;
     yScreen += 5;
     wScreen -= 10;

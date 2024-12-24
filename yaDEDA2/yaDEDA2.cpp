@@ -705,9 +705,6 @@ yaDedaAppClass::OnInit ()
       MainWindow->SetMinSize (wxSize(250, 335));
     }
   MainWindow->Show ();
-  MainWindow->Refresh();
-  MainWindow->Update();
-  MainWindow->SetPosition(ulCorner);
   return true;
 }
 
@@ -748,7 +745,14 @@ TimerClass::Notify ()
 
   static unsigned char Packet[4];
   static int PacketSize = 0;
+  static int pulseCount;
   int i;
+
+  if (pulseCount == 4) {
+    MainWindow->SetPosition(ulCorner);
+  }
+  pulseCount++;
+
   unsigned char c;
   if (StartupDelay > 0)
     {

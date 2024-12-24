@@ -1492,9 +1492,6 @@ yaDskyApp::OnInit ()
       MainWindow->SetMinSize (wxSize(335, 430));
     }
   MainWindow->Show ();
-  MainWindow->Refresh();
-  MainWindow->Update();
-  MainWindow->SetPosition(ulCorner);
   return true;
 }
 
@@ -1511,6 +1508,10 @@ TimerClass::Notify ()
   int i;
   unsigned char c;
   static unsigned long pulseCount = 0;
+
+  if (pulseCount == 4) {
+    MainWindow->SetPosition(ulCorner);
+  }
 
   pulseCount++;
 
