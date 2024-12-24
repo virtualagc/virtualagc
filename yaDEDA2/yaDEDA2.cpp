@@ -704,8 +704,10 @@ yaDedaAppClass::OnInit ()
     {
       MainWindow->SetMinSize (wxSize(250, 335));
     }
-  MainWindow->SetPosition(ulCorner);
   MainWindow->Show ();
+  MainWindow->Refresh();
+  MainWindow->Update();
+  MainWindow->SetPosition(ulCorner);
   return true;
 }
 

@@ -1491,8 +1491,10 @@ yaDskyApp::OnInit ()
     {
       MainWindow->SetMinSize (wxSize(335, 430));
     }
-  MainWindow->SetPosition(ulCorner);
   MainWindow->Show ();
+  MainWindow->Refresh();
+  MainWindow->Update();
+  MainWindow->SetPosition(ulCorner);
   return true;
 }
 

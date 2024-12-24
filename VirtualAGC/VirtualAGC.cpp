@@ -1331,7 +1331,6 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   RunButton->Enable(false);
   Hide();
   SimulationWindow = new Simulation(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-  SimulationWindow->EnableCloseButton(false);
   SimulationWindow->Enable(true);
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
