@@ -225,7 +225,22 @@ int showSimulate, xSimulate, ySimulate, wSimulate, hSimulate;
 int showDSKY, xDSKY, yDSKY, wDSKY, hDSKY;
 int showDEDA, xDEDA, yDEDA, wDEDA, hDEDA;
 int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
+
+// The user interface was designed, many years ago, for displays that were
+// nominally DPI=75.  While I envisaged displays becoming physically much
+// larger and DPI different in the future, I didn't envision *dramatic* increases
+// to the DPI while often becoming physically smaller.  wxWidgets tries to
+// compensate for this, but fails on some platforms, resulting in unreadably
+// small interfaces or badly-layed-out ones.  wxWidgets in principal also has a
+// separate framework that can be explicitly used to deal with this problem by
+// means of a concept called the "device independent pixel" (DIP).  However, the
+// mechanism does not work, in my experience, because it fails to properly
+// detect the DPI it needs for the scaling between the physical pixels and the
+// DIPs.  What we do instead is to allow the user to specify (via an environment
+// variable called AGC_SCALE) an optional scale factor for the user's display
+// versus the nominal designed-in display.
 double scaleDPI = 1.0;
+#define SCALED(x) ((x) * scaleDPI)
 
 // Min width for the RHS of the main window.
 wxSize minWidthRHS;
@@ -521,7 +536,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
             (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX // | wxCLIP_CHILDREN
                 | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
-  minWidthRHS = wxSize(340 * scaleDPI, -1);
+  minWidthRHS = wxSize(SCALED(340), -1);
   // We auto-adjust fonts and image sizes if the screen size is too small.
   wxFont Font = GetFont();
   StartingPoints = Font.GetPointSize();
@@ -1582,7 +1597,7 @@ VirtualAGC::set_properties()
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
   AgcCustomFilename->Enable(false);
-  AgcFilenameBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
+  AgcFilenameBrowse->SetMinSize(wxSize(SCALED(50), SCALED(24)));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AgcFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
   AgcFilenameBrowse->SetToolTip(
@@ -1618,7 +1633,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(wxSize(70 * scaleDPI, 24 * scaleDPI));
+  JoystickConfigure->SetMinSize(wxSize(SCALED(70), SCALED(24)));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -1718,14 +1733,14 @@ VirtualAGC::set_properties()
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
   CoreFilename->SetForegroundColour(wxColour(0, 0, 0));
   CoreFilename->Enable(false);
-  CoreBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
+  CoreBrowse->SetMinSize(wxSize(SCALED(50), SCALED(24)));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   CoreBrowse->SetForegroundColour(wxColour(0, 0, 0));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
   CoreBrowse->Enable(false);
-  CoreSaveButton->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
+  CoreSaveButton->SetMinSize(wxSize(SCALED(50), SCALED(24)));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
   CoreSaveButton->SetForegroundColour(wxColour(0, 0, 0));
   CoreSaveButton->SetToolTip(
@@ -1824,7 +1839,7 @@ VirtualAGC::set_properties()
           wxT(
               "If you wish to run abort-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
       AeaCustomFilename->Enable(false);
-      AeaFilenameBrowse->SetMinSize(wxSize(50 * scaleDPI, 24 * scaleDPI));
+      AeaFilenameBrowse->SetMinSize(wxSize(SCALED(50), SCALED(24)));
       AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
       AeaFilenameBrowse->SetForegroundColour(wxColour(0, 0, 0));
       AeaFilenameBrowse->SetToolTip(
@@ -2194,6 +2209,10 @@ VirtualAgcApp::OnInit()
   pclose(fmdfind);
 #endif
 
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+	  envString.ToDouble(&scaleDPI);
+
   wxInitAllImageHandlers();
 
   for (int i = 1; i < argc; i++)
@@ -2228,10 +2247,10 @@ VirtualAgcApp::OnInit()
         {
           ArgEnd.ToLong(&fontFloor);
         }
-      else if (ArgStart.IsSameAs(wxT("--dpi-scale")))
-      {
-        ArgEnd.ToDouble(&scaleDPI);
-      }
+      //else if (ArgStart.IsSameAs(wxT("--dpi-scale")))
+      //{
+      //  ArgEnd.ToDouble(&scaleDPI);
+      //}
       else
         {
           Help: printf("USAGE:\n");
@@ -2277,9 +2296,9 @@ VirtualAgcApp::OnInit()
           printf("--font-floor=N\n");
           printf("\tSets the minimum allowed font size, in integers.  The\n");
           printf("\tdefault is 8.\n");
-          printf("--dpi-scale=F\n");
-          printf("\tA floating-point number (default 1.0) which can work\n");
-          printf("\taround a failure to correctly detect the DPI.\n");
+          //printf("--dpi-scale=F\n");
+          //printf("\tA floating-point number (default 1.0) which can work\n");
+          //printf("\taround a failure to correctly detect the DPI.\n");
           exit(1);
         }
     }
@@ -2290,7 +2309,7 @@ VirtualAgcApp::OnInit()
   MainFrame->Show();
   MainFrame->Refresh();
   MainFrame->Update();
-  wxSize sz = wxSize(-1, 440 * scaleDPI);
+  wxSize sz = wxSize(-1, SCALED(440));
   MainFrame->SetMinSize(sz);
   sz = MainFrame->GetSize();
   printf("Size: %d, %d\n", sz.x, sz.y);
@@ -3006,6 +3025,14 @@ VirtualAGC::FormTiling(void)
         else
             return false;
     }
+    wSimulate = SCALED(wSimulate);
+    hSimulate = SCALED(hSimulate);
+    wDSKY = SCALED(wDSKY);
+    hDSKY = SCALED(hDSKY);
+    wDEDA = SCALED(wDEDA);
+    hDEDA = SCALED(hDEDA);
+    wTelemetry = SCALED(wTelemetry);
+    hTelemetry = SCALED(hTelemetry);
 
     // Debug:
     //fprintf(stderr, "Screen: %d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
@@ -3026,7 +3053,7 @@ VirtualAGC::FormTiling(void)
     // height of a normal-size window.  Also, the Simulation-Status window
     // is preferentially overlapped compared to all others.
     // First, try the fully side-by-side option.
-    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < 820);
+    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < SCALED(820));
     int columns = 1;
     xSimulate = 0;
     ySimulate = 0;
@@ -3743,14 +3770,14 @@ Simulation::set_properties()
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
-  UplinkText->SetMinSize(wxSize(480 * scaleDPI, 480 * scaleDPI));
+  UplinkText->SetMinSize(wxSize(SCALED(480), SCALED(480)));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
   UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetMinSize(wxSize(480 * scaleDPI, 480 * scaleDPI));
+  ScriptText->SetMinSize(wxSize(SCALED(480), SCALED(480)));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));

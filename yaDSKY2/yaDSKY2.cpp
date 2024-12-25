@@ -91,6 +91,9 @@
  *		                tries to write to garbage file pointers.
  *		                Now it's explicitly initialized.  But
  *		                who knows what else may be lurking?
+ *		2024-12-25 RSB  Corrections to --half-size format.  Introduction of
+ *		                AGC_SCALE environment variable to handle DPI too
+ *		                grossly different from 100.
  *
  * The yaDSKY2 program is intended to be a completely identical drop-in
  * replacement for the yaDSKY program as it exists at 2009-03-06.
@@ -116,6 +119,7 @@ using namespace std;
 
 #include "wx/filefn.h"
 #include <wx/stdpaths.h>
+#include "wx/utils.h"
 
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
@@ -144,6 +148,11 @@ static int DebugCounterReg = 032, DebugCounterInc = 1, DebugCounterWhich = 1;
 static int TestUplink = 0;
 static int ServerSocket = -1;
 static bool ProceedPressed = false;
+
+// See the comments in VirtualAGC.cpp.
+double scaleDPI = 1.0;
+#define SCALED(x) ((x) * scaleDPI)
+#define SCALED2(x) ((x) * scaleDPI * (HalfSize ? 0.5 : 1.0))
 
 wxPoint ulCorner = wxPoint(-1, -1);
 
@@ -229,6 +238,18 @@ static int NumMatches = 0;
 // begin wxGlade: ::extracode
 // end wxGlade
 
+// This is a function that stands in place of the function
+// wxBitmap(filename, imagetype) to load an a jpg but to scale it according
+// to scaleDPI.
+wxBitmap
+scaledBitmap(const wxString &name, wxBitmapType type) {
+  if (scaleDPI == 1.0)
+    return wxBitmap(name, type);
+  wxImage *image = new wxImage(name, type);
+  image->Rescale(SCALED(image->GetWidth()), SCALED(image->GetHeight()));
+  return wxBitmap(*image);
+}
+
 MainFrame::MainFrame (wxWindow* parent, int id, const wxString& title,
 		      const wxPoint& pos, const wxSize& size, long style) :
     wxFrame (parent, id, title, pos, size,
@@ -237,137 +258,137 @@ MainFrame::MainFrame (wxWindow* parent, int id, const wxString& title,
   // begin wxGlade: MainFrame::MainFrame
   panel_1 = new wxPanel (this, wxID_ANY);
   bitmap_5 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_6_copy = new wxStaticBitmap (
       this, wxID_ANY,
-      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator11 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator21 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator12 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator22 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator13 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator23 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator14 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator24 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator15 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator25 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator16 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator26 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator17 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   Annunciator27 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_6 = new wxStaticBitmap (
       this, wxID_ANY,
-      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_5_copy = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_5_copy_1 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+      this, wxID_ANY, scaledBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_6_copy_copy = new wxStaticBitmap (
       this, wxID_ANY,
-      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
   CompActyAnnunciator = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("CompActyOff.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("CompActyOff.jpg"), wxBITMAP_TYPE_ANY));
   ModeAnnunciator = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("rProgOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("rProgOn.jpg"), wxBITMAP_TYPE_ANY));
   MD1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   MD2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   VerbAnnunciator = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("VerbOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("VerbOn.jpg"), wxBITMAP_TYPE_ANY));
   VD1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   VD2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   NounAnnunciator = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("NounOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("NounOn.jpg"), wxBITMAP_TYPE_ANY));
   ND1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   ND2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_2_copy_1 = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
   R1PlusMinus = new wxStaticBitmap (
       panel_1, wxID_ANY,
-      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
   R1D1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R1D2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R1D3Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R1D4Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R1D5Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_2_copy = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
   R2PlusMinus = new wxStaticBitmap (
       panel_1, wxID_ANY,
-      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
   R2D1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R2D2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R2D3Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R2D4Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R2D5Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_2 = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
   R3PlusMinus = new wxStaticBitmap (
       panel_1, wxID_ANY,
-      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
   R3D1Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R3D2Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R3D3Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R3D4Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   R3D5Digit = new wxStaticBitmap (
-      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+      panel_1, wxID_ANY, scaledBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_6_copy_copy_copy = new wxStaticBitmap (
       this, wxID_ANY,
-      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+      scaledBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_5_copy_2 = new wxStaticBitmap (
-      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-  VerbBitmap = wxBitmap (wxT ("VerbUp.jpg"), wxBITMAP_TYPE_ANY);
-  NounBitmap = wxBitmap (wxT ("NounUp.jpg"), wxBITMAP_TYPE_ANY);
-  PlusBitmap = wxBitmap (wxT ("PlusUp.jpg"), wxBITMAP_TYPE_ANY);
-  MinusBitmap = wxBitmap (wxT ("MinusUp.jpg"), wxBITMAP_TYPE_ANY);
-  ZeroBitmap = wxBitmap (wxT ("0Up.jpg"), wxBITMAP_TYPE_ANY);
-  SevenBitmap = wxBitmap (wxT ("7Up.jpg"), wxBITMAP_TYPE_ANY);
-  FourBitmap = wxBitmap (wxT ("4Up.jpg"), wxBITMAP_TYPE_ANY);
-  OneBitmap = wxBitmap (wxT ("1Up.jpg"), wxBITMAP_TYPE_ANY);
-  EightBitmap = wxBitmap (wxT ("8Up.jpg"), wxBITMAP_TYPE_ANY);
-  FiveBitmap = wxBitmap (wxT ("5Up.jpg"), wxBITMAP_TYPE_ANY);
-  TwoBitmap = wxBitmap (wxT ("2Up.jpg"), wxBITMAP_TYPE_ANY);
-  NineBitmap = wxBitmap (wxT ("9Up.jpg"), wxBITMAP_TYPE_ANY);
-  SixBitmap = wxBitmap (wxT ("6Up.jpg"), wxBITMAP_TYPE_ANY);
-  ThreeBitmap = wxBitmap (wxT ("3Up.jpg"), wxBITMAP_TYPE_ANY);
-  ClrBitmap = wxBitmap (wxT ("ClrUp.jpg"), wxBITMAP_TYPE_ANY);
-  ProBitmap = wxBitmap (wxT ("ProUp.jpg"), wxBITMAP_TYPE_ANY);
-  KeyRelBitmap = wxBitmap (wxT ("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY);
-  EntrBitmap = wxBitmap (wxT ("EntrUp.jpg"), wxBITMAP_TYPE_ANY);
-  RsetBitmap = wxBitmap (wxT ("RsetUp.jpg"), wxBITMAP_TYPE_ANY);
+      this, wxID_ANY, scaledBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+  VerbBitmap = scaledBitmap (wxT ("VerbUp.jpg"), wxBITMAP_TYPE_ANY);
+  NounBitmap = scaledBitmap (wxT ("NounUp.jpg"), wxBITMAP_TYPE_ANY);
+  PlusBitmap = scaledBitmap (wxT ("PlusUp.jpg"), wxBITMAP_TYPE_ANY);
+  MinusBitmap = scaledBitmap (wxT ("MinusUp.jpg"), wxBITMAP_TYPE_ANY);
+  ZeroBitmap = scaledBitmap (wxT ("0Up.jpg"), wxBITMAP_TYPE_ANY);
+  SevenBitmap = scaledBitmap (wxT ("7Up.jpg"), wxBITMAP_TYPE_ANY);
+  FourBitmap = scaledBitmap (wxT ("4Up.jpg"), wxBITMAP_TYPE_ANY);
+  OneBitmap = scaledBitmap (wxT ("1Up.jpg"), wxBITMAP_TYPE_ANY);
+  EightBitmap = scaledBitmap (wxT ("8Up.jpg"), wxBITMAP_TYPE_ANY);
+  FiveBitmap = scaledBitmap (wxT ("5Up.jpg"), wxBITMAP_TYPE_ANY);
+  TwoBitmap = scaledBitmap (wxT ("2Up.jpg"), wxBITMAP_TYPE_ANY);
+  NineBitmap = scaledBitmap (wxT ("9Up.jpg"), wxBITMAP_TYPE_ANY);
+  SixBitmap = scaledBitmap (wxT ("6Up.jpg"), wxBITMAP_TYPE_ANY);
+  ThreeBitmap = scaledBitmap (wxT ("3Up.jpg"), wxBITMAP_TYPE_ANY);
+  ClrBitmap = scaledBitmap (wxT ("ClrUp.jpg"), wxBITMAP_TYPE_ANY);
+  ProBitmap = scaledBitmap (wxT ("ProUp.jpg"), wxBITMAP_TYPE_ANY);
+  KeyRelBitmap = scaledBitmap (wxT ("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY);
+  EntrBitmap = scaledBitmap (wxT ("EntrUp.jpg"), wxBITMAP_TYPE_ANY);
+  RsetBitmap = scaledBitmap (wxT ("RsetUp.jpg"), wxBITMAP_TYPE_ANY);
   VerbButton = new wxBitmapButton (this, ID_VERBBUTTON, VerbBitmap);
   NounButton = new wxBitmapButton (this, ID_NOUNBUTTON, NounBitmap);
   PlusButton = new wxBitmapButton (this, ID_PLUSBUTTON, PlusBitmap);
@@ -973,31 +994,33 @@ MainFrame::on_ProButton_released (wxCommandEvent &event)
 void
 MainFrame::set_properties ()
 {
+  wxSize size75 = wxSize(SCALED(75), SCALED(75));
+
   // begin wxGlade: MainFrame::set_properties
   SetTitle (wxT ("yaDSKY2"));
   wxIcon _icon;
-  _icon.CopyFromBitmap (wxBitmap (wxT ("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+  _icon.CopyFromBitmap (scaledBitmap (wxT ("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SetIcon (_icon);
   panel_1->SetBackgroundColour (wxColour (160, 160, 160));
-  VerbButton->SetMinSize (wxSize (75, 75));
-  NounButton->SetMinSize (wxSize (75, 75));
-  PlusButton->SetMinSize (wxSize (75, 75));
-  MinusButton->SetMinSize (wxSize (75, 75));
-  ZeroButton->SetMinSize (wxSize (75, 75));
-  SevenButton->SetMinSize (wxSize (75, 75));
-  FourButton->SetMinSize (wxSize (75, 75));
-  OneButton->SetMinSize (wxSize (75, 75));
-  EightButton->SetMinSize (wxSize (75, 75));
-  FiveButton->SetMinSize (wxSize (75, 75));
-  TwoButton->SetMinSize (wxSize (75, 75));
-  NineButton->SetMinSize (wxSize (75, 75));
-  SixButton->SetMinSize (wxSize (75, 75));
-  ThreeButton->SetMinSize (wxSize (75, 75));
-  ClrButton->SetMinSize (wxSize (75, 75));
-  ProButton->SetMinSize (wxSize (75, 75));
-  KeyRelButton->SetMinSize (wxSize (75, 75));
-  EntrButton->SetMinSize (wxSize (75, 75));
-  RsetButton->SetMinSize (wxSize (75, 75));
+  VerbButton->SetMinSize (size75);
+  NounButton->SetMinSize (size75);
+  PlusButton->SetMinSize (size75);
+  MinusButton->SetMinSize (size75);
+  ZeroButton->SetMinSize (size75);
+  SevenButton->SetMinSize (size75);
+  FourButton->SetMinSize (size75);
+  OneButton->SetMinSize (size75);
+  EightButton->SetMinSize (size75);
+  FiveButton->SetMinSize (size75);
+  TwoButton->SetMinSize (size75);
+  NineButton->SetMinSize (size75);
+  SixButton->SetMinSize (size75);
+  ThreeButton->SetMinSize (size75);
+  ClrButton->SetMinSize (size75);
+  ProButton->SetMinSize (size75);
+  KeyRelButton->SetMinSize (size75);
+  EntrButton->SetMinSize (size75);
+  RsetButton->SetMinSize (size75);
   // end wxGlade
 }
 
@@ -1006,14 +1029,14 @@ MainFrame::do_layout ()
 {
   // begin wxGlade: MainFrame::do_layout
   wxBoxSizer* sizer_1 = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_3 = new wxBoxSizer (wxHORIZONTAL);
-  wxBoxSizer* sizer_4_copy = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_5_copy_3 = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_5_copy_2 = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_5_copy_1 = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_5_copy = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_5 = new wxBoxSizer (wxVERTICAL);
-  wxBoxSizer* sizer_4 = new wxBoxSizer (wxVERTICAL);
+  Keypad = new wxBoxSizer (wxHORIZONTAL);
+  KeypadRight = new wxBoxSizer (wxVERTICAL);
+  KeypadMiddle4 = new wxBoxSizer (wxVERTICAL);
+  KeypadMiddle3 = new wxBoxSizer (wxVERTICAL);
+  KeypadMiddle2 = new wxBoxSizer (wxVERTICAL);
+  KeypadMiddle1 = new wxBoxSizer (wxVERTICAL);
+  KeypadMiddle0 = new wxBoxSizer (wxVERTICAL);
+  KeypadLeft = new wxBoxSizer (wxVERTICAL);
   wxBoxSizer* sizer_2 = new wxBoxSizer (wxHORIZONTAL);
   wxBoxSizer* sizer_14 = new wxBoxSizer (wxHORIZONTAL);
   wxBoxSizer* sizer_15 = new wxBoxSizer (wxVERTICAL);
@@ -1031,57 +1054,59 @@ MainFrame::do_layout ()
   wxBoxSizer* sizer_11 = new wxBoxSizer (wxHORIZONTAL);
   wxBoxSizer* sizer_12 = new wxBoxSizer (wxHORIZONTAL);
   wxBoxSizer* sizer_13 = new wxBoxSizer (wxVERTICAL);
-  wxGridSizer* grid_sizer_1_copy = new wxGridSizer (7, 2, 9, 10);
-  sizer_1->Add (20, 15, 0, 0, 0);
-  sizer_2->Add (20, 20, 2, wxEXPAND, 0);
+  // HGap and VGap will be changed later, since HalfSize isn't known yet.
+  AnnunciatorGrid = new wxGridSizer (7, 2, SCALED2(9), SCALED2(10));
+  printf("Annunciator Grid: HalfSize=%d scaleDPI=%g\n", HalfSize, scaleDPI);
+  sizer_1->Add (SCALED2(20), SCALED2(15), 0, 0, 0);
+  sizer_2->Add (SCALED2(20), SCALED2(20), 2, wxEXPAND, 0);
   sizer_12->Add (bitmap_5, 0, 0, 0);
   sizer_13->Add (bitmap_6_copy, 0, 0, 0);
-  sizer_13->Add (20, 5, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator11, 0,
+  sizer_13->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator11, 0,
 			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 			  0);
-  grid_sizer_1_copy->Add (Annunciator21, 0,
+  AnnunciatorGrid->Add (Annunciator21, 0,
 			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 			  0);
-  grid_sizer_1_copy->Add (Annunciator12, 0,
+  AnnunciatorGrid->Add (Annunciator12, 0,
 			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 			  0);
-  grid_sizer_1_copy->Add (Annunciator22, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator13, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator23, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator14, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator24, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator15, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator25, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator16, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator26, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator17, 0, 0, 0);
-  grid_sizer_1_copy->Add (Annunciator27, 0, 0, 0);
-  sizer_13->Add (grid_sizer_1_copy, 0,
+  AnnunciatorGrid->Add (Annunciator22, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator13, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator23, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator14, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator24, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator15, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator25, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator16, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator26, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator17, 0, 0, 0);
+  AnnunciatorGrid->Add (Annunciator27, 0, 0, 0);
+  sizer_13->Add (AnnunciatorGrid, 0,
 		 wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_13->Add (20, 5, 0, 0, 0);
+  sizer_13->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
   sizer_13->Add (bitmap_6, 0, 0, 0);
   sizer_12->Add (sizer_13, 0, 0, 0);
   sizer_12->Add (bitmap_5_copy, 0, 0, 0);
   sizer_2->Add (sizer_12, 0, 0, 0);
-  sizer_2->Add (20, 20, 3, wxEXPAND, 0);
+  sizer_2->Add (SCALED2(20), SCALED2(20), 3, wxEXPAND, 0);
   sizer_14->Add (bitmap_5_copy_1, 0, 0, 0);
   sizer_15->Add (bitmap_6_copy_copy, 0, 0, 0);
   sizer_9->Add (CompActyAnnunciator, 0, wxALIGN_CENTER_VERTICAL, 0);
-  sizer_9->Add (20, 20, 1, 0, 0);
+  sizer_9->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
   sizer_10->Add (ModeAnnunciator, 0, 0, 0);
   sizer_11->Add (MD1Digit, 0, 0, 0);
   sizer_11->Add (MD2Digit, 0, 0, 0);
   sizer_10->Add (sizer_11, 1, wxEXPAND, 0);
   sizer_9->Add (sizer_10, 1, wxEXPAND, 0);
   sizer_6->Add (sizer_9, 0, wxEXPAND, 0);
-  sizer_6->Add (20, 14, 0, 0, 0);
+  sizer_6->Add (SCALED2(20), SCALED2(14), 0, 0, 0);
   sizer_10_copy->Add (VerbAnnunciator, 0, 0, 0);
   sizer_11_copy->Add (VD1Digit, 0, 0, 0);
   sizer_11_copy->Add (VD2Digit, 0, 0, 0);
   sizer_10_copy->Add (sizer_11_copy, 0, wxEXPAND, 0);
   sizer_8->Add (sizer_10_copy, 1, wxEXPAND, 0);
-  sizer_8->Add (20, 20, 1, 0, 0);
+  sizer_8->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
   sizer_10_copy_1->Add (NounAnnunciator, 0, 0, 0);
   sizer_11_copy_1->Add (ND1Digit, 0, 0, 0);
   sizer_11_copy_1->Add (ND2Digit, 0, 0, 0);
@@ -1118,61 +1143,61 @@ MainFrame::do_layout ()
   sizer_14->Add (sizer_15, 0, 0, 0);
   sizer_14->Add (bitmap_5_copy_2, 0, 0, 0);
   sizer_2->Add (sizer_14, 0, 0, 0);
-  sizer_2->Add (20, 20, 2, wxEXPAND, 0);
+  sizer_2->Add (SCALED2(20), SCALED2(20), 2, wxEXPAND, 0);
   sizer_1->Add (sizer_2, 0, wxEXPAND, 0);
-  sizer_1->Add (20, 15, 0, 0, 0);
-  sizer_3->Add (8, 20, 0, 0, 0);
-  sizer_4->Add (20, 20, 1, 0, 0);
-  sizer_4->Add (VerbButton, 0, 0, 0);
-  sizer_4->Add (20, 5, 0, 0, 0);
-  sizer_4->Add (NounButton, 0, 0, 0);
-  sizer_4->Add (20, 20, 1, 0, 0);
-  sizer_3->Add (sizer_4, 0, wxEXPAND, 0);
-  sizer_3->Add (8, 20, 0, 0, 0);
-  sizer_5->Add (PlusButton, 0, 0, 0);
-  sizer_5->Add (20, 5, 0, 0, 0);
-  sizer_5->Add (MinusButton, 0, 0, 0);
-  sizer_5->Add (20, 5, 0, 0, 0);
-  sizer_5->Add (ZeroButton, 0, 0, 0);
-  sizer_3->Add (sizer_5, 0, 0, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_5_copy->Add (SevenButton, 0, 0, 0);
-  sizer_5_copy->Add (20, 5, 0, 0, 0);
-  sizer_5_copy->Add (FourButton, 0, 0, 0);
-  sizer_5_copy->Add (20, 5, 0, 0, 0);
-  sizer_5_copy->Add (OneButton, 0, 0, 0);
-  sizer_3->Add (sizer_5_copy, 0, 0, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_5_copy_1->Add (EightButton, 0, 0, 0);
-  sizer_5_copy_1->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_1->Add (FiveButton, 0, 0, 0);
-  sizer_5_copy_1->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_1->Add (TwoButton, 0, 0, 0);
-  sizer_3->Add (sizer_5_copy_1, 0, 0, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_5_copy_2->Add (NineButton, 0, 0, 0);
-  sizer_5_copy_2->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_2->Add (SixButton, 0, 0, 0);
-  sizer_5_copy_2->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_2->Add (ThreeButton, 0, 0, 0);
-  sizer_3->Add (sizer_5_copy_2, 0, 0, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_5_copy_3->Add (ClrButton, 0, 0, 0);
-  sizer_5_copy_3->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_3->Add (ProButton, 0, 0, 0);
-  sizer_5_copy_3->Add (20, 5, 0, 0, 0);
-  sizer_5_copy_3->Add (KeyRelButton, 0, 0, 0);
-  sizer_3->Add (sizer_5_copy_3, 0, 0, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_4_copy->Add (20, 20, 1, 0, 0);
-  sizer_4_copy->Add (EntrButton, 0, 0, 0);
-  sizer_4_copy->Add (20, 5, 0, 0, 0);
-  sizer_4_copy->Add (RsetButton, 0, 0, 0);
-  sizer_4_copy->Add (20, 20, 1, 0, 0);
-  sizer_3->Add (sizer_4_copy, 0, wxEXPAND, 0);
-  sizer_3->Add (5, 20, 0, 0, 0);
-  sizer_1->Add (sizer_3, 1, 0, 0);
-  sizer_1->Add (20, 15, 0, 0, 0);
+  sizer_1->Add (SCALED2(20), SCALED2(15), 0, 0, 0);
+  Keypad->Add (SCALED2(8), SCALED2(20), 0, 0, 0);
+  KeypadLeft->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
+  KeypadLeft->Add (VerbButton, 0, 0, 0);
+  KeypadLeft->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadLeft->Add (NounButton, 0, 0, 0);
+  KeypadLeft->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
+  Keypad->Add (KeypadLeft, 0, wxEXPAND, 0);
+  Keypad->Add (SCALED2(8), SCALED2(20), 0, 0, 0);
+  KeypadMiddle0->Add (PlusButton, 0, 0, 0);
+  KeypadMiddle0->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle0->Add (MinusButton, 0, 0, 0);
+  KeypadMiddle0->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle0->Add (ZeroButton, 0, 0, 0);
+  Keypad->Add (KeypadMiddle0, 0, 0, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  KeypadMiddle1->Add (SevenButton, 0, 0, 0);
+  KeypadMiddle1->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle1->Add (FourButton, 0, 0, 0);
+  KeypadMiddle1->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle1->Add (OneButton, 0, 0, 0);
+  Keypad->Add (KeypadMiddle1, 0, 0, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  KeypadMiddle2->Add (EightButton, 0, 0, 0);
+  KeypadMiddle2->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle2->Add (FiveButton, 0, 0, 0);
+  KeypadMiddle2->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle2->Add (TwoButton, 0, 0, 0);
+  Keypad->Add (KeypadMiddle2, 0, 0, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  KeypadMiddle3->Add (NineButton, 0, 0, 0);
+  KeypadMiddle3->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle3->Add (SixButton, 0, 0, 0);
+  KeypadMiddle3->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle3->Add (ThreeButton, 0, 0, 0);
+  Keypad->Add (KeypadMiddle3, 0, 0, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  KeypadMiddle4->Add (ClrButton, 0, 0, 0);
+  KeypadMiddle4->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle4->Add (ProButton, 0, 0, 0);
+  KeypadMiddle4->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadMiddle4->Add (KeyRelButton, 0, 0, 0);
+  Keypad->Add (KeypadMiddle4, 0, 0, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  KeypadRight->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
+  KeypadRight->Add (EntrButton, 0, 0, 0);
+  KeypadRight->Add (SCALED2(20), SCALED2(5), 0, 0, 0);
+  KeypadRight->Add (RsetButton, 0, 0, 0);
+  KeypadRight->Add (SCALED2(20), SCALED2(20), 1, 0, 0);
+  Keypad->Add (KeypadRight, 0, wxEXPAND, 0);
+  Keypad->Add (SCALED2(5), SCALED2(20), 0, 0, 0);
+  sizer_1->Add (Keypad, 0, 0, 0);
+  sizer_1->Add (SCALED2(20), SCALED2(15), 0, 0, 0);
   SetSizer (sizer_1);
   sizer_1->Fit (this);
   Layout ();
@@ -1193,6 +1218,10 @@ yaDskyApp::OnInit ()
 {
 
   int i, j, UsedCfg = 0;
+
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+	  envString.ToDouble(&scaleDPI);
 
   wxInitAllImageHandlers ();
   MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString, ulCorner);
@@ -1306,7 +1335,13 @@ yaDskyApp::OnInit ()
 	      goto Help;
 	    }
 	  HalfSize = 1;
+	  //printf("Found DSKY2 --half-size %p\n", MainWindow->AnnunciatorGrid);
+	  MainWindow->AnnunciatorGrid->SetHGap(SCALED2(9));
+	  //printf("A\n");
+	  MainWindow->AnnunciatorGrid->SetVGap(SCALED2(10));
+	  //printf("B\n");
 	  MainWindow->HalveTheWindow ();
+	  //printf("C\n");
 	}
       else if (ArgStart.IsSameAs (wxT ("--delay")))
 	{
@@ -1478,18 +1513,11 @@ yaDskyApp::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
-  // With wxWidgets 3.0, the --half-size option generally creates a main
-  // window thats too short (vertically), and I haven't been able to figure
-  // out how to coax it into calculating the window size properly.
-  // (Works fine with wxWidgets 2.8 or with the full-size DSKY.)  At any
-  // rate, the following is a lame attempt to prevent that from happening,
-  // though in theory it could force windows that are too big on some
-  // platforms, alas!  With wxWidgets 3.2, the problem extends to
-  // half-size windows that are a lot too big in general or regular-size
-  // windows that are a little too small.
+  // For whatever reason, --half-size DSKYs tend to be too short and have to
+  // be manually enlarged.  This is a workaround for that.
   if (HalfSize)
     {
-      MainWindow->SetMinSize (wxSize(335, 430));
+      MainWindow->SetMinSize (wxSize(SCALED(335), SCALED(380)));
     }
   MainWindow->Show ();
   return true;
@@ -1753,6 +1781,11 @@ MainFrame::ImageSet (wxStaticBitmap *StaticBitmap, wxString &Filename)
     Dummy = Filename;
   Bitmap = StaticBitmap->GetBitmap ();
   Bitmap.LoadFile (Dummy, wxBITMAP_TYPE_JPEG);
+  if (scaleDPI != 1.0) {
+    wxImage image = Bitmap.ConvertToImage();
+    image.Rescale(SCALED(image.GetWidth()), SCALED(image.GetHeight()));
+    Bitmap = wxBitmap(image);
+  }
   StaticBitmap->SetBitmap (Bitmap);
 }
 void
@@ -1778,6 +1811,11 @@ MainFrame::ImageSet (wxBitmapButton *BitmapButton, wxString &Filename)
     Dummy = Filename;
   Bitmap = BitmapButton->GetBitmapLabel ();
   Bitmap.LoadFile (Dummy, wxBITMAP_TYPE_JPEG);
+  if (scaleDPI != 1.0) {
+    wxImage image = Bitmap.ConvertToImage();
+    image.Rescale(SCALED(image.GetWidth()), SCALED(image.GetHeight()));
+    Bitmap = wxBitmap(image);
+  }
   BitmapButton->SetBitmapLabel (Bitmap);
 }
 void
@@ -2353,8 +2391,8 @@ MainFrame::HalveTheWindow (void)
   ImageSet (Annunciator17, "UplinkActyOff.jpg");
   ImageSet (Annunciator27, "UplinkActyOff.jpg");
   ImageSet (bitmap_6, "FrameHorizontal.jpg");
-  ImageSet (bitmap_5_copy, "FrameVerticalL.jpg");
-  ImageSet (bitmap_5_copy_1, "FrameVerticalR.jpg");
+  ImageSet (bitmap_5_copy, "FrameVerticalR.jpg");
+  ImageSet (bitmap_5_copy_1, "FrameVerticalL2.jpg");
   ImageSet (bitmap_6_copy_copy, "FrameHorizontal.jpg");
   ImageSet (CompActyAnnunciator, "CompActyOff.jpg");
   ImageSet (ModeAnnunciator, "rProgOn.jpg");
@@ -2388,7 +2426,7 @@ MainFrame::HalveTheWindow (void)
   ImageSet (R3D4Digit, "7Seg-0.jpg");
   ImageSet (R3D5Digit, "7Seg-0.jpg");
   ImageSet (bitmap_6_copy_copy_copy, "FrameHorizontal.jpg");
-  ImageSet (bitmap_5_copy_2, "FrameVerticalR.jpg");
+  ImageSet (bitmap_5_copy_2, "FrameVerticalR2.jpg");
   ImageSet (VerbButton, "VerbUp.jpg");
   ImageSet (NounButton, "NounUp.jpg");
   ImageSet (PlusButton, "PlusUp.jpg");
@@ -2408,25 +2446,26 @@ MainFrame::HalveTheWindow (void)
   ImageSet (KeyRelButton, "KeyRelUp.jpg");
   ImageSet (EntrButton, "EntrUp.jpg");
   ImageSet (RsetButton, "RsetUp.jpg");
-  VerbButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  NounButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  PlusButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  MinusButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  ZeroButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  SevenButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  FourButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  OneButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  EightButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  FiveButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  TwoButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  NineButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  SixButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  ThreeButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  ClrButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  ProButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  KeyRelButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  EntrButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
-  RsetButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  wxSize sizeButton = wxSize(SCALED(ButtonSize), SCALED(ButtonSize));
+  VerbButton->SetMinSize (sizeButton);
+  NounButton->SetMinSize (sizeButton);
+  PlusButton->SetMinSize (sizeButton);
+  MinusButton->SetMinSize (sizeButton);
+  ZeroButton->SetMinSize (sizeButton);
+  SevenButton->SetMinSize (sizeButton);
+  FourButton->SetMinSize (sizeButton);
+  OneButton->SetMinSize (sizeButton);
+  EightButton->SetMinSize (sizeButton);
+  FiveButton->SetMinSize (sizeButton);
+  TwoButton->SetMinSize (sizeButton);
+  NineButton->SetMinSize (sizeButton);
+  SixButton->SetMinSize (sizeButton);
+  ThreeButton->SetMinSize (sizeButton);
+  ClrButton->SetMinSize (sizeButton);
+  ProButton->SetMinSize (sizeButton);
+  KeyRelButton->SetMinSize (sizeButton);
+  EntrButton->SetMinSize (sizeButton);
+  RsetButton->SetMinSize (sizeButton);
   Fit ();
 }
 

@@ -61,6 +61,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <iostream>
+#include "wx/utils.h"
 
 using namespace std;
 
@@ -74,6 +75,10 @@ times (struct tms *p)
     return (GetTickCount ());
   }
 #endif
+
+// See the comments in VirtualAGC.cpp.
+double scaleDPI = 1.0;
+#define SCALED(x) ((x) * scaleDPI)
 
 // Interval (ms.) at which the timer fires for servicing the socket.
 #define PULSE_INTERVAL 100
@@ -550,6 +555,11 @@ bool
 yaDedaAppClass::OnInit ()
 {
   int i;
+
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+	  envString.ToDouble(&scaleDPI);
+
   wxInitAllImageHandlers ();
   MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString, ulCorner);
 

@@ -245,6 +245,9 @@ public:
     wxBitmapButton* EntrButton;
     wxBitmapButton* RsetButton;
     // end wxGlade
+    wxGridSizer *AnnunciatorGrid;
+    wxBoxSizer *KeypadLeft, *KeypadMiddle0, *KeypadMiddle1, *KeypadMiddle2,
+      *KeypadMiddle3, *KeypadMiddle4, *KeypadRight, *Keypad;
 
     DECLARE_EVENT_TABLE()
 
