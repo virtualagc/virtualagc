@@ -133,11 +133,11 @@ public:
     wxStaticBitmap* DigitTop3;
     wxStaticBitmap* bitmap_5_copy;
     wxStaticBitmap* bitmap_11;
-    wxStaticBitmap* bitmap_12;
-    wxStaticBitmap* bitmap_5_copy_1;
+    wxStaticBitmap* OprErrBarTop;
+    wxStaticBitmap* OprErrBarLeft;
     wxStaticBitmap* IndicatorOprErr;
-    wxStaticBitmap* bitmap_20;
-    wxStaticBitmap* bitmap_12_copy;
+    wxStaticBitmap* OprErrBarRight;
+    wxStaticBitmap* OprErrBarBottom;
     wxStaticBitmap* bitmap_13;
     wxStaticBitmap* bitmap_7;
     wxStaticBitmap* Sign;

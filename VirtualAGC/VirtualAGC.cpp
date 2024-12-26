@@ -3015,7 +3015,7 @@ VirtualAGC::FormTiling(void)
     if (DeviceDedaCheckbox->GetValue()) {
         showDEDA = 1;
         if (DedaFullButton->GetValue()) {
-            wDEDA = 450;
+            wDEDA = 455;
             hDEDA = 520;
         }
         else if (DedaHalfButton->GetValue()) {
