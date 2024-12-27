@@ -21,6 +21,18 @@
 #define APP_CATALOG "app"  // replace with the appropriate catalog name
 #endif
 
+#ifdef TOP_YADSKYB1
+wxPoint ulCorner = wxPoint(-1, -1);
+int HalfSize = 0;
+double scaleDPI = 1.0;
+#else
+extern wxPoint ulCorner;
+extern int HalfSize;
+extern double scaleDPI;
+#endif
+//#define SCALED(x) ((x) * scaleDPI)
+#define SCALED2(x) ((x) * scaleDPI * (HalfSize ? 0.5 : 1.0))
+
 // begin wxGlade: ::dependencies
 // end wxGlade
 
@@ -40,7 +52,6 @@ private:
 // color.  I simply copied it from https://wiki.wxwidgets.org/An_image_panel.
 class wxImagePanel : public wxPanel
   {
-    wxBitmap image;
 
   public:
     wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format);
@@ -48,6 +59,8 @@ class wxImagePanel : public wxPanel
     void paintEvent(wxPaintEvent & evt);
     void paintNow();
     void render(wxDC& dc);
+
+    wxBitmap image;
 
     DECLARE_EVENT_TABLE()
   };
@@ -102,8 +115,8 @@ class MyFrame: public wxFrame
     wxStaticBitmap* indicatorBottomRight;
     wxStaticBitmap* indicatorUpTl;
     wxStaticBitmap* indicatorComp;
-    wxStaticBitmap* labelVerb;
-    wxStaticBitmap* labelNoun;
+    //wxStaticBitmap* labelVerb;
+    //wxStaticBitmap* labelNoun;
     wxStaticBitmap* digitProgramLeft;
     wxStaticBitmap* digitProgramRight;
     wxStaticBitmap* digitVerbLeft;

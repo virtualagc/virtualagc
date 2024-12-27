@@ -201,6 +201,7 @@ enum
   ID_DSKYHALFBUTTON,
   ID_DSKYLITEBUTTON,
   ID_DSKYNAVBUTTON,
+  ID_DSKYNAVHALFBUTTON,
   ID_DSKYAPOBUTTON,
   ID_DSKYAPOHALFBUTTON,
   ID_AGCDEBUGBOX = 500,
@@ -445,6 +446,7 @@ protected:
   wxRadioButton* DskyHalfButton;
   wxRadioButton* DskyLiteButton;
   wxRadioButton* DskyNavButton;
+  wxRadioButton* DskyNavHalfButton;
   wxRadioButton* DskyApoButton;
   wxRadioButton* DskyApoHalfButton;
   wxStaticText* DownlinkLabel;

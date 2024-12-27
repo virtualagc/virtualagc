@@ -68,6 +68,16 @@ wxImagePanel::render(wxDC& dc)
   dc.DrawBitmap(image, 0, 0, false);
 }
 
+// This is a function that stands in place of the function
+// wxBitmap(filename, imagetype) to load an a jpg but to scale it according
+// to scaleDPI.
+wxBitmap
+scaledBitmap(const wxString &name, wxBitmapType type) {
+  wxImage *image = new wxImage(name, type);
+  image->Rescale(SCALED2(image->GetWidth()), SCALED2(image->GetHeight()));
+  return wxBitmap(*image);
+}
+
 MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
     const wxString& images, bool inNavBay, const wxPoint& pos,
     const wxSize& size, long style) :
@@ -83,118 +93,121 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
           + (navBay ?
               wxT("Block1DSKYnav-face-bare.png") :
               wxT("Block1DSKYmain-face-bare.png")), wxBITMAP_TYPE_PNG);
+  wxImage image = panel->image.ConvertToImage();
+  image.Rescale(SCALED2(image.GetWidth()), SCALED2(image.GetHeight()));
+  panel->image = wxBitmap(image);
 
   UpTelAccept = false;
   flashing = false;
   flashStateLit = true;
   flashCounter = 0;
 
-  imageUpTelBlock = wxBitmap(imageDirectory + wxT("UpTel-block-20x40.png"),
+  imageUpTelBlock = scaledBitmap(imageDirectory + wxT("UpTel-block-20x40.png"),
       wxBITMAP_TYPE_ANY);
-  imageUpTelAccept = wxBitmap(imageDirectory + wxT("UpTel-accept-20x40.png"),
+  imageUpTelAccept = scaledBitmap(imageDirectory + wxT("UpTel-accept-20x40.png"),
       wxBITMAP_TYPE_ANY);
 
-  image7Seg0 = wxBitmap(imageDirectory + wxT("7Seg-0-33x38.jpg"),
+  image7Seg0 = scaledBitmap(imageDirectory + wxT("7Seg-0-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg15 = wxBitmap(imageDirectory + wxT("7Seg-15-33x38.jpg"),
+  image7Seg15 = scaledBitmap(imageDirectory + wxT("7Seg-15-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg19 = wxBitmap(imageDirectory + wxT("7Seg-19-33x38.jpg"),
+  image7Seg19 = scaledBitmap(imageDirectory + wxT("7Seg-19-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg21 = wxBitmap(imageDirectory + wxT("7Seg-21-33x38.jpg"),
+  image7Seg21 = scaledBitmap(imageDirectory + wxT("7Seg-21-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg25 = wxBitmap(imageDirectory + wxT("7Seg-25-33x38.jpg"),
+  image7Seg25 = scaledBitmap(imageDirectory + wxT("7Seg-25-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg27 = wxBitmap(imageDirectory + wxT("7Seg-27-33x38.jpg"),
+  image7Seg27 = scaledBitmap(imageDirectory + wxT("7Seg-27-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg28 = wxBitmap(imageDirectory + wxT("7Seg-28-33x38.jpg"),
+  image7Seg28 = scaledBitmap(imageDirectory + wxT("7Seg-28-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg29 = wxBitmap(imageDirectory + wxT("7Seg-29-33x38.jpg"),
+  image7Seg29 = scaledBitmap(imageDirectory + wxT("7Seg-29-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg30 = wxBitmap(imageDirectory + wxT("7Seg-30-33x38.jpg"),
+  image7Seg30 = scaledBitmap(imageDirectory + wxT("7Seg-30-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg31 = wxBitmap(imageDirectory + wxT("7Seg-31-33x38.jpg"),
+  image7Seg31 = scaledBitmap(imageDirectory + wxT("7Seg-31-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  image7Seg3 = wxBitmap(imageDirectory + wxT("7Seg-3-33x38.jpg"),
+  image7Seg3 = scaledBitmap(imageDirectory + wxT("7Seg-3-33x38.jpg"),
       wxBITMAP_TYPE_ANY);
-  imagePlusMinusPlus = wxBitmap(
+  imagePlusMinusPlus = scaledBitmap(
       imageDirectory + wxT("PlusMinus-plus-28x38.jpg"), wxBITMAP_TYPE_ANY);
-  imagePlusMinusMinus = wxBitmap(
+  imagePlusMinusMinus = scaledBitmap(
       imageDirectory + wxT("PlusMinus-minus-28x38.jpg"), wxBITMAP_TYPE_ANY);
-  imagePlusMinusOff = wxBitmap(imageDirectory + wxT("PlusMinus-off-28x38.jpg"),
+  imagePlusMinusOff = scaledBitmap(imageDirectory + wxT("PlusMinus-off-28x38.jpg"),
       wxBITMAP_TYPE_ANY);
 
-  imageUptlOn = wxBitmap(imageDirectory + wxT("Uptl-on-43x37.png"),
+  imageUptlOn = scaledBitmap(imageDirectory + wxT("Uptl-on-43x37.png"),
       wxBITMAP_TYPE_ANY);
-  imageUptlOff = wxBitmap(imageDirectory + wxT("Uptl-off-43x37.png"),
+  imageUptlOff = scaledBitmap(imageDirectory + wxT("Uptl-off-43x37.png"),
       wxBITMAP_TYPE_ANY);
 
-  imageCompOn = wxBitmap(imageDirectory + wxT("Comp-on-43x37.png"),
+  imageCompOn = scaledBitmap(imageDirectory + wxT("Comp-on-43x37.png"),
       wxBITMAP_TYPE_ANY);
-  imageCompOff = wxBitmap(imageDirectory + wxT("Comp-off-43x37.png"),
+  imageCompOff = scaledBitmap(imageDirectory + wxT("Comp-off-43x37.png"),
       wxBITMAP_TYPE_ANY);
-  imageVerbLabelOn = wxBitmap(imageDirectory + (navBay ?
+  imageVerbLabelOn = scaledBitmap(imageDirectory + (navBay ?
       wxT("VerbLabel-nav-on-85x21.png") :
       wxT("VerbLabel-on-85x21.png")),
       wxBITMAP_TYPE_ANY);
-  imageVerbLabelOff = wxBitmap(
+  imageVerbLabelOff = scaledBitmap(
       imageDirectory
           + (navBay ?
               wxT("VerbLabel-nav-off-85x21.png") :
               wxT("VerbLabel-off-85x21.png")), wxBITMAP_TYPE_ANY);
   imageNounLabelOn =
-      wxBitmap(
+      scaledBitmap(
           imageDirectory
               + (navBay ?
                   wxT("NounLabel-nav-on-93x21.png") :
                   wxT("NounLabel-on-93x21.png")), wxBITMAP_TYPE_ANY);
-  imageNounLabelOff = wxBitmap(imageDirectory + (navBay ?
+  imageNounLabelOff = scaledBitmap(imageDirectory + (navBay ?
       wxT("NounLabel-nav-off-93x21.png") :
       wxT("NounLabel-off-93x21.png")),
       wxBITMAP_TYPE_ANY);
 
-  imageCompFailOn = wxBitmap(imageDirectory + wxT("CompFail-on-63x44.png"),
+  imageCompFailOn = scaledBitmap(imageDirectory + wxT("CompFail-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageCompFailOff = wxBitmap(imageDirectory + wxT("CompFail-off-63x44.png"),
+  imageCompFailOff = scaledBitmap(imageDirectory + wxT("CompFail-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageCheckFailOn = wxBitmap(imageDirectory + wxT("CheckFail-on-63x44.png"),
+  imageCheckFailOn = scaledBitmap(imageDirectory + wxT("CheckFail-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageCheckFailOff = wxBitmap(imageDirectory + wxT("CheckFail-off-63x44.png"),
+  imageCheckFailOff = scaledBitmap(imageDirectory + wxT("CheckFail-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageProgAlmOn = wxBitmap(imageDirectory + wxT("ProgAlm-on-63x44.png"),
+  imageProgAlmOn = scaledBitmap(imageDirectory + wxT("ProgAlm-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageProgAlmOff = wxBitmap(imageDirectory + wxT("ProgAlm-off-63x44.png"),
+  imageProgAlmOff = scaledBitmap(imageDirectory + wxT("ProgAlm-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageCounterFailOn = wxBitmap(
+  imageCounterFailOn = scaledBitmap(
       imageDirectory + wxT("CounterFail-on-63x44.png"), wxBITMAP_TYPE_ANY);
-  imageCounterFailOff = wxBitmap(
+  imageCounterFailOff = scaledBitmap(
       imageDirectory + wxT("CounterFail-off-63x44.png"), wxBITMAP_TYPE_ANY);
-  imageRuptLockOn = wxBitmap(imageDirectory + wxT("RuptLock-on-63x44.png"),
+  imageRuptLockOn = scaledBitmap(imageDirectory + wxT("RuptLock-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageRuptLockOff = wxBitmap(imageDirectory + wxT("RuptLock-off-63x44.png"),
+  imageRuptLockOff = scaledBitmap(imageDirectory + wxT("RuptLock-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageTcTrapOn = wxBitmap(imageDirectory + wxT("TcTrap-on-63x44.png"),
+  imageTcTrapOn = scaledBitmap(imageDirectory + wxT("TcTrap-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageTcTrapOff = wxBitmap(imageDirectory + wxT("TcTrap-off-63x44.png"),
+  imageTcTrapOff = scaledBitmap(imageDirectory + wxT("TcTrap-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageScalerFailOn = wxBitmap(imageDirectory + wxT("ScalerFail-on-63x44.png"),
+  imageScalerFailOn = scaledBitmap(imageDirectory + wxT("ScalerFail-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageScalerFailOff = wxBitmap(
+  imageScalerFailOff = scaledBitmap(
       imageDirectory + wxT("ScalerFail-off-63x44.png"), wxBITMAP_TYPE_ANY);
-  imageTmFailOn = wxBitmap(imageDirectory + wxT("TmFail-on-63x44.png"),
+  imageTmFailOn = scaledBitmap(imageDirectory + wxT("TmFail-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageTmFailOff = wxBitmap(imageDirectory + wxT("TmFail-off-63x44.png"),
+  imageTmFailOff = scaledBitmap(imageDirectory + wxT("TmFail-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageKeyRlseOn = wxBitmap(imageDirectory + wxT("KeyRlse-on-63x44.png"),
+  imageKeyRlseOn = scaledBitmap(imageDirectory + wxT("KeyRlse-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageKeyRlseOff = wxBitmap(imageDirectory + wxT("KeyRlse-off-63x44.png"),
+  imageKeyRlseOff = scaledBitmap(imageDirectory + wxT("KeyRlse-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageBlankOn = wxBitmap(imageDirectory + wxT("Blank-on-63x44.png"),
+  imageBlankOn = scaledBitmap(imageDirectory + wxT("Blank-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageBlankOff = wxBitmap(imageDirectory + wxT("Blank-off-63x44.png"),
+  imageBlankOff = scaledBitmap(imageDirectory + wxT("Blank-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageParityFailOn = wxBitmap(imageDirectory + wxT("ParityFail-on-63x44.png"),
+  imageParityFailOn = scaledBitmap(imageDirectory + wxT("ParityFail-on-63x44.png"),
       wxBITMAP_TYPE_ANY);
-  imageParityFailOff = wxBitmap(
+  imageParityFailOff = scaledBitmap(
       imageDirectory + wxT("ParityFail-off-63x44.png"), wxBITMAP_TYPE_ANY);
 
   indicatorCompFail = new wxStaticBitmap(panel, wxID_ANY, imageCompFailOff);
@@ -214,8 +227,8 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
 
   indicatorUpTl = new wxStaticBitmap(panel, wxID_ANY, imageUptlOff);
   indicatorComp = new wxStaticBitmap(panel, wxID_ANY, imageCompOff);
-  labelNoun = new wxStaticBitmap(panel, wxID_ANY, imageNounLabelOn);
-  labelVerb = new wxStaticBitmap(panel, wxID_ANY, imageVerbLabelOn);
+  //labelNoun = new wxStaticBitmap(panel, wxID_ANY, imageNounLabelOn);
+  //labelVerb = new wxStaticBitmap(panel, wxID_ANY, imageVerbLabelOn);
   digitProgramLeft = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   digitProgramRight = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   digitVerbLeft = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
@@ -242,44 +255,44 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
   Digit5Reg3 = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   SwitchUpTel = new wxBitmapButton(panel, ID_UPTELSWITCH, imageUpTelBlock);
   ButtonKeyRlse = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
-      wxBitmap(imageDirectory + wxT("KeyRlse-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("KeyRlse-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonErrorReset = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
-      wxBitmap(imageDirectory + wxT("ErrorReset-60x60.png"),
+      scaledBitmap(imageDirectory + wxT("ErrorReset-60x60.png"),
           wxBITMAP_TYPE_ANY));
   ButtonTestAlarm = new wxBitmapButton(panel, ID_TESTALARMBUTTON,
-      wxBitmap(imageDirectory + wxT("TestAlarm-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("TestAlarm-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonClear = new wxBitmapButton(panel, ID_CLEARBUTTON,
-      wxBitmap(imageDirectory + wxT("Clear-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Clear-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonVerb = new wxBitmapButton(panel, ID_VERBBUTTON,
-      wxBitmap(imageDirectory + wxT("Verb-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Verb-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonNoun = new wxBitmapButton(panel, ID_NOUNBUTTON,
-      wxBitmap(imageDirectory + wxT("Noun-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Noun-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonEnter = new wxBitmapButton(panel, ID_ENTERBUTTON,
-      wxBitmap(imageDirectory + wxT("Enter-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Enter-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonPlus = new wxBitmapButton(panel, ID_PLUSBUTTON,
-      wxBitmap(imageDirectory + wxT("Plus-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Plus-60x60.png"), wxBITMAP_TYPE_ANY));
   Button7 = new wxBitmapButton(panel, ID_SEVENBUTTON,
-      wxBitmap(imageDirectory + wxT("7-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("7-60x60.png"), wxBITMAP_TYPE_ANY));
   Button8 = new wxBitmapButton(panel, ID_EIGHTBUTTON,
-      wxBitmap(imageDirectory + wxT("8-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("8-60x60.png"), wxBITMAP_TYPE_ANY));
   Button9 = new wxBitmapButton(panel, ID_NINEBUTTON,
-      wxBitmap(imageDirectory + wxT("9-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("9-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonMinus = new wxBitmapButton(panel, ID_MINUSBUTTON,
-      wxBitmap(imageDirectory + wxT("Minus-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Minus-60x60.png"), wxBITMAP_TYPE_ANY));
   Button4 = new wxBitmapButton(panel, ID_FOURBUTTON,
-      wxBitmap(imageDirectory + wxT("4-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("4-60x60.png"), wxBITMAP_TYPE_ANY));
   Button5 = new wxBitmapButton(panel, ID_FIVEBUTTON,
-      wxBitmap(imageDirectory + wxT("5-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("5-60x60.png"), wxBITMAP_TYPE_ANY));
   Button6 = new wxBitmapButton(panel, ID_SIXBUTTON,
-      wxBitmap(imageDirectory + wxT("6-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("6-60x60.png"), wxBITMAP_TYPE_ANY));
   Button0 = new wxBitmapButton(panel, ID_ZEROBUTTON,
-      wxBitmap(imageDirectory + wxT("0-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("0-60x60.png"), wxBITMAP_TYPE_ANY));
   Button1 = new wxBitmapButton(panel, ID_ONEBUTTON,
-      wxBitmap(imageDirectory + wxT("1-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("1-60x60.png"), wxBITMAP_TYPE_ANY));
   Button2 = new wxBitmapButton(panel, ID_TWOBUTTON,
-      wxBitmap(imageDirectory + wxT("2-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("2-60x60.png"), wxBITMAP_TYPE_ANY));
   Button3 = new wxBitmapButton(panel, ID_THREEBUTTON,
-      wxBitmap(imageDirectory + wxT("3-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("3-60x60.png"), wxBITMAP_TYPE_ANY));
 
   set_properties();
   do_layout();
@@ -295,44 +308,45 @@ MyFrame::set_properties()
       navBay ? _("yaDSKY Block 1 Nav Bay") : _("yaDSKY Block 1 Control Panel"));
   SetBackgroundColour(wxColour(214, 214, 214));
   SwitchUpTel->SetSize(SwitchUpTel->GetBestSize());
-  ButtonKeyRlse->SetSize(wxSize(60, 60));
-  ButtonTestAlarm->SetSize(wxSize(60, 60));
-  ButtonErrorReset->SetSize(wxSize(60, 60));
-  ButtonClear->SetSize(wxSize(60, 60));
-  ButtonVerb->SetSize(wxSize(60, 60));
-  ButtonNoun->SetSize(wxSize(60, 60));
-  ButtonEnter->SetSize(wxSize(60, 60));
-  ButtonPlus->SetSize(wxSize(60, 60));
-  Button7->SetSize(wxSize(60, 60));
-  Button8->SetSize(wxSize(60, 60));
-  Button9->SetSize(wxSize(60, 60));
-  ButtonMinus->SetSize(wxSize(60, 60));
-  Button4->SetSize(wxSize(60, 60));
-  Button5->SetSize(wxSize(60, 60));
-  Button6->SetSize(wxSize(60, 60));
-  Button0->SetSize(wxSize(60, 60));
-  Button1->SetSize(wxSize(60, 60));
-  Button2->SetSize(wxSize(60, 60));
-  Button3->SetSize(wxSize(60, 60));
-  ButtonKeyRlse->SetMinSize(wxSize(60, 60));
-  ButtonTestAlarm->SetMinSize(wxSize(60, 60));
-  ButtonErrorReset->SetMinSize(wxSize(60, 60));
-  ButtonClear->SetMinSize(wxSize(60, 60));
-  ButtonVerb->SetMinSize(wxSize(60, 60));
-  ButtonNoun->SetMinSize(wxSize(60, 60));
-  ButtonEnter->SetMinSize(wxSize(60, 60));
-  ButtonPlus->SetMinSize(wxSize(60, 60));
-  Button7->SetMinSize(wxSize(60, 60));
-  Button8->SetMinSize(wxSize(60, 60));
-  Button9->SetMinSize(wxSize(60, 60));
-  ButtonMinus->SetMinSize(wxSize(60, 60));
-  Button4->SetMinSize(wxSize(60, 60));
-  Button5->SetMinSize(wxSize(60, 60));
-  Button6->SetMinSize(wxSize(60, 60));
-  Button0->SetMinSize(wxSize(60, 60));
-  Button1->SetMinSize(wxSize(60, 60));
-  Button2->SetMinSize(wxSize(60, 60));
-  Button3->SetMinSize(wxSize(60, 60));
+  wxSize buttonSize = wxSize(SCALED2(60), SCALED2(60));
+  ButtonKeyRlse->SetSize(buttonSize);
+  ButtonTestAlarm->SetSize(buttonSize);
+  ButtonErrorReset->SetSize(buttonSize);
+  ButtonClear->SetSize(buttonSize);
+  ButtonVerb->SetSize(buttonSize);
+  ButtonNoun->SetSize(buttonSize);
+  ButtonEnter->SetSize(buttonSize);
+  ButtonPlus->SetSize(buttonSize);
+  Button7->SetSize(buttonSize);
+  Button8->SetSize(buttonSize);
+  Button9->SetSize(buttonSize);
+  ButtonMinus->SetSize(buttonSize);
+  Button4->SetSize(buttonSize);
+  Button5->SetSize(buttonSize);
+  Button6->SetSize(buttonSize);
+  Button0->SetSize(buttonSize);
+  Button1->SetSize(buttonSize);
+  Button2->SetSize(buttonSize);
+  Button3->SetSize(buttonSize);
+  ButtonKeyRlse->SetMinSize(buttonSize);
+  ButtonTestAlarm->SetMinSize(buttonSize);
+  ButtonErrorReset->SetMinSize(buttonSize);
+  ButtonClear->SetMinSize(buttonSize);
+  ButtonVerb->SetMinSize(buttonSize);
+  ButtonNoun->SetMinSize(buttonSize);
+  ButtonEnter->SetMinSize(buttonSize);
+  ButtonPlus->SetMinSize(buttonSize);
+  Button7->SetMinSize(buttonSize);
+  Button8->SetMinSize(buttonSize);
+  Button9->SetMinSize(buttonSize);
+  ButtonMinus->SetMinSize(buttonSize);
+  Button4->SetMinSize(buttonSize);
+  Button5->SetMinSize(buttonSize);
+  Button6->SetMinSize(buttonSize);
+  Button0->SetMinSize(buttonSize);
+  Button1->SetMinSize(buttonSize);
+  Button2->SetMinSize(buttonSize);
+  Button3->SetMinSize(buttonSize);
   panel->SetBackgroundColour(wxColour(0, 0, 0));
 
 // end wxGlade
@@ -355,12 +369,12 @@ MyFrame::do_layout()
 
       indicatorCompFail->Show(false);
       SwitchUpTel->Show(false);
-      SetSize(wxSize(346, 1151));
+      SetSize(wxSize(SCALED2(346), SCALED2(1151)));
 
-      xDelta = 73;
-      yDelta = 48;
-      xStart = 69;
-      yStart = 81;
+      xDelta = SCALED2(73);
+      yDelta = SCALED2(48);
+      xStart = SCALED2(69);
+      yStart = SCALED2(81);
       y = yStart;
       x = xStart;
       indicatorProgAlm->SetPosition(wxPoint(x, y));
@@ -389,49 +403,49 @@ MyFrame::do_layout()
       indicatorKeyRlse->SetPosition(wxPoint(x, y));
       x += xDelta;
       indicatorBottomRight->SetPosition(wxPoint(x, y));
-      xDelta = 44;
-      yDelta = 0;
-      xStart = 72;
-      yStart = 346;
+      xDelta = SCALED2(44);
+      yDelta = SCALED2(0);
+      xStart = SCALED2(72);
+      yStart = SCALED2(346);
       y = yStart;
       x = xStart;
       indicatorUpTl->SetPosition(wxPoint(x, y));
       x += xDelta;
       indicatorComp->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 38;
-      yDelta = 0;
-      xStart = 197;
+      xDelta = SCALED2(38);
+      yDelta = SCALED2(0);
+      xStart = SCALED2(197);
       y = yStart;
       x = xStart;
       digitProgramLeft->SetPosition(wxPoint(x, y));
       x += xDelta;
       digitProgramRight->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 38;
-      yDelta = 0;
-      xStart = 78;
-      yStart = 406;
+      xDelta = SCALED2(38);
+      yDelta = SCALED2(0);
+      xStart = SCALED2(78);
+      yStart = SCALED2(406);
       y = yStart;
       x = xStart;
       digitVerbLeft->SetPosition(wxPoint(x, y));
       x += xDelta;
       digitVerbRight->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 38;
-      yDelta = 0;
-      xStart = 197;
-      yStart = 406;
+      xDelta = SCALED2(38);
+      yDelta = SCALED2(0);
+      xStart = SCALED2(197);
+      yStart = SCALED2(406);
       y = yStart;
       x = xStart;
       digitNounLeft->SetPosition(wxPoint(x, y));
       x += xDelta;
       digitNounRight->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 33;
-      yDelta = 60;
-      xStart = 74;
-      yStart = 466;
+      xDelta = SCALED2(33);
+      yDelta = SCALED2(60);
+      xStart = SCALED2(74);
+      yStart = SCALED2(466);
       y = yStart;
       x = xStart;
       PlusMinusReg1->SetPosition(wxPoint(x, y));
@@ -474,10 +488,10 @@ MyFrame::do_layout()
       x += xDelta;
       Digit5Reg3->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 92;
-      yDelta = 0;
-      xStart = 51;
-      yStart = 823;
+      xDelta = SCALED2(92);
+      yDelta = SCALED2(0);
+      xStart = SCALED2(51);
+      yStart = SCALED2(823);
       y = yStart;
       x = xStart;
       ButtonKeyRlse->SetPosition(wxPoint(x, y));
@@ -486,10 +500,10 @@ MyFrame::do_layout()
       x += xDelta;
       ButtonErrorReset->SetPosition(wxPoint(x, y));
       x += xDelta;
-      xDelta = 61;
-      yDelta = 61;
-      xStart = 51;
-      yStart = 890;
+      xDelta = SCALED2(61);
+      yDelta = SCALED2(61);
+      xStart = SCALED2(51);
+      yStart = SCALED2(890);
       y = yStart;
       x = xStart;
       ButtonClear->SetPosition(wxPoint(x, y));
@@ -531,8 +545,8 @@ MyFrame::do_layout()
       Button3->SetPosition(wxPoint(x, y));
       x += xDelta;
 
-      labelVerb->SetPosition(wxPoint(71, 385));
-      labelNoun->SetPosition(wxPoint(188, 385));
+      //labelVerb->SetPosition(wxPoint(71, 385));
+      //labelNoun->SetPosition(wxPoint(188, 385));
     }
   else
     {
@@ -554,58 +568,58 @@ MyFrame::do_layout()
       wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
       wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_4 = new wxBoxSizer(wxVERTICAL);
-      wxGridSizer* grid_sizer_1 = new wxGridSizer(4, 4, 2, 2); // Keypad
+      wxGridSizer* grid_sizer_1 = new wxGridSizer(4, 4, SCALED2(2), SCALED2(2)); // Keypad
       wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_3 = new wxBoxSizer(wxVERTICAL);
       wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-      wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 6, 22, 1); // Registers.
-      wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, 0 /*21*/,
-          22); // Activity/Program/Verb/Noun
+      wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 6, SCALED2(22), SCALED2(1)); // Registers.
+      wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, SCALED2(0) /*21*/,
+    		  SCALED2(22)); // Activity/Program/Verb/Noun
       wxBoxSizer* sizer_12_copy_1 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_12_copy = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-      sizer_2->Add(77, 20, 0, 0, 0); // Left margin
-      sizer_3->Add(20, 55, 0, 0, 0);
-      sizer_8->Add(39, 20, 0, 0, 0); // Left of CompFail.
+      sizer_2->Add(SCALED2(77), SCALED2(20), 0, 0, 0); // Left margin
+      sizer_3->Add(SCALED2(20), SCALED2(55), 0, 0, 0);
+      sizer_8->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Left of CompFail.
       sizer_8->Add(indicatorCompFail, 0, 0, 0);
-      sizer_8->Add(5, 20, 0, 0, 0); // Between CompFail and CheckFail
+      sizer_8->Add(SCALED2(5), SCALED2(20), 0, 0, 0); // Between CompFail and CheckFail
       sizer_8->Add(indicatorCheckFail, 0, 0, 0);
-      sizer_8->Add(39, 20, 0, 0, 0); // Right of CheckFail
+      sizer_8->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Right of CheckFail
       sizer_3->Add(sizer_8, 0, 0, 0);
-      sizer_3->Add(20, 113, 0, 0, 0);
-      sizer_11->Add(0, 20, 0, 0, 0);
+      sizer_3->Add(SCALED2(20), SCALED2(113), 0, 0, 0);
+      sizer_11->Add(SCALED2(0), SCALED2(20), 0, 0, 0);
       sizer_11->Add(indicatorUpTl, 0, 0, 0);
-      sizer_11->Add(1, 20, 0, 0, 0);
+      sizer_11->Add(SCALED2(1), SCALED2(20), 0, 0, 0);
       sizer_11->Add(indicatorComp, 0, 0, 0);
-      sizer_11->Add(5, 20, 0, 0, 0);
+      sizer_11->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
       grid_sizer_3->Add(sizer_11, 0, 0, 0);
-      sizer_12->Add(11, 20, 0, 0, 0);
+      sizer_12->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
       sizer_12->Add(digitProgramLeft, 0, 0, 0);
-      sizer_12->Add(5, 20, 0, 0, 0);
+      sizer_12->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
       sizer_12->Add(digitProgramRight, 0, 0, 0);
-      sizer_12->Add(12, 20, 0, 0, 0);
+      sizer_12->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
       grid_sizer_3->Add(sizer_12, 0, 0, 0);
       //grid_sizer_3->Add(20, 21, 0);
       //grid_sizer_3->Add(20, 21, 0);
-      grid_sizer_3->Add(labelVerb, 0, 0, 0);
-      grid_sizer_3->Add(labelNoun, 0, 0, 0);
-      sizer_12_copy->Add(7, 20, 0, 0, 0);
+      grid_sizer_3->Add(SCALED2(85), SCALED2(21), 0, 0, 0);
+      grid_sizer_3->Add(SCALED2(93), SCALED2(21), 0, 0, 0);
+      sizer_12_copy->Add(SCALED2(7), SCALED2(20), 0, 0, 0);
       sizer_12_copy->Add(digitVerbLeft, 0, 0, 0);
-      sizer_12_copy->Add(5, 20, 0, 0, 0);
+      sizer_12_copy->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
       sizer_12_copy->Add(digitVerbRight, 0, 0, 0);
-      sizer_12_copy->Add(12, 20, 0, 0, 0);
+      sizer_12_copy->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
       grid_sizer_3->Add(sizer_12_copy, 0, 0, 0);
-      sizer_12_copy_1->Add(11, 20, 0, 0, 0);
+      sizer_12_copy_1->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
       sizer_12_copy_1->Add(digitNounLeft, 0, 0, 0);
-      sizer_12_copy_1->Add(5, 20, 0, 0, 0);
+      sizer_12_copy_1->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
       sizer_12_copy_1->Add(digitNounRight, 0, 0, 0);
-      sizer_12_copy_1->Add(12, 20, 0, 0, 0);
+      sizer_12_copy_1->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
       grid_sizer_3->Add(sizer_12_copy_1, 0, 0, 0);
       sizer_3->Add(grid_sizer_3, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-      sizer_3->Add(20, 22, 0, 0, 0); // Between Reg1 and Verb/Noun
+      sizer_3->Add(SCALED2(20), SCALED2(22), 0, 0, 0); // Between Reg1 and Verb/Noun
       grid_sizer_2->Add(PlusMinusReg1, 0, 0, 0);
       grid_sizer_2->Add(Digit1Reg1, 0, 0, 0);
       grid_sizer_2->Add(Digit2Reg1, 0, 0, 0);
@@ -626,20 +640,20 @@ MyFrame::do_layout()
       grid_sizer_2->Add(Digit5Reg3, 0, 0, 0);
       sizer_7->Add(grid_sizer_2, 0, 0, 0);
       sizer_3->Add(sizer_7, 0, 0, 0);
-      sizer_3->Add(20, 74, 0, 0, 0); // Below Reg3.
+      sizer_3->Add(SCALED2(20), SCALED2(74), 0, 0, 0); // Below Reg3.
       sizer_2->Add(sizer_3, 0, 0, 0);
-      sizer_2->Add(31, 20, 0, 0, 0); // Middle horizontal spacer.
-      sizer_4->Add(20, 46, 0, 0, 0); // Above SwitchUptel
-      sizer_6->Add(15, 20, 0, 0, 0); // Left of SwitchUptel
+      sizer_2->Add(SCALED2(31), SCALED2(20), 0, 0, 0); // Middle horizontal spacer.
+      sizer_4->Add(SCALED2(20), SCALED2(46), 0, 0, 0); // Above SwitchUptel
+      sizer_6->Add(SCALED2(15), SCALED2(20), 0, 0, 0); // Left of SwitchUptel
       sizer_6->Add(SwitchUpTel, 0, 0, 0);
-      sizer_6->Add(184, 20, 0, 0, 0); // Right of SwitchUpTel
+      sizer_6->Add(SCALED2(184), SCALED2(20), 0, 0, 0); // Right of SwitchUpTel
       sizer_4->Add(sizer_6, 0, 0, 0);
-      sizer_4->Add(20, 101, 0, 0, 0); // Between KeyRlse and SwitchUpTel
+      sizer_4->Add(SCALED2(20), SCALED2(106), 0, 0, 0); // Between KeyRlse and SwitchUpTel
       sizer_5->Add(ButtonKeyRlse, 0, 0, 0);
-      sizer_5->Add(126, 20, 0, 0, 0); // Between KeyRlse and ErrorReset
+      sizer_5->Add(SCALED2(126), SCALED2(20), 0, 0, 0); // Between KeyRlse and ErrorReset
       sizer_5->Add(ButtonErrorReset, 0, 0, 0);
       sizer_4->Add(sizer_5, 0, 0, 0);
-      sizer_4->Add(20, 6, 0, 0, 0); // Between KeyRlse and Keypad
+      sizer_4->Add(SCALED2(20), SCALED2(6), 0, 0, 0); // Between KeyRlse and Keypad
       grid_sizer_1->Add(ButtonClear, 0, 0, 0);
       grid_sizer_1->Add(ButtonVerb, 0, 0, 0);
       grid_sizer_1->Add(ButtonNoun, 0, 0, 0);
@@ -657,9 +671,9 @@ MyFrame::do_layout()
       grid_sizer_1->Add(Button2, 0, 0, 0);
       grid_sizer_1->Add(Button3, 0, 0, 0);
       sizer_4->Add(grid_sizer_1, 0, 0, 0);
-      sizer_4->Add(20, 63, 0, 0, 0); // Below keypad
+      sizer_4->Add(SCALED2(20), SCALED2(63), 0, 0, 0); // Below keypad
       sizer_2->Add(sizer_4, 0, 0, 0);
-      sizer_2->Add(26, 20, 0, 0, 0);
+      sizer_2->Add(SCALED2(26), SCALED2(20), 0, 0, 0);
       panel->SetSizer(sizer_2);
       sizer_1->Add(panel, 1, 0, 0);
       SetSizer(sizer_1);
@@ -729,6 +743,10 @@ MyApp::OnInit()
         {
           navBay = true;
         }
+      else if (Arg.IsSameAs (wxT ("--half-size")))
+        {
+          HalfSize = 1;
+        }
       else
         {
           Help: printf("USAGE:\n");
@@ -754,15 +772,31 @@ MyApp::OnInit()
     	      "\tinstead allows explicit selection.  The units are pixel coordinates\n");
     	  printf (
     	      "\tof the upper-left corner, relative to the upper left of the screen.\n");
+    	  printf ("--half-size\n");
+    	  printf (
+    	      "\tUses a half-size version, suitable for smaller graphical displays.\n");
           exit(1);
         }
     }
+
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+    envString.ToDouble(&scaleDPI);
 
   wxInitAllImageHandlers();
   frame = new MyFrame(NULL, wxID_ANY, wxEmptyString, imageDirectory, navBay, ulCorner);
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);
+  // For whatever reason, --half-size DSKYs tend to be too short and have to
+  // be manually enlarged.  This is a workaround for that.
+  if (HalfSize)
+    {
+      if (navBay)
+        frame->SetMinSize (wxSize(SCALED2(346), SCALED2(1160)));
+      else
+        frame->SetMinSize (wxSize(SCALED2(587), SCALED2(572)));
+    }
   frame->Show();
   return true;
 }

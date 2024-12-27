@@ -1259,7 +1259,7 @@ yaDskyApp::OnInit ()
   cout
       << string (
 	  "yaDSKY2 Apollo DSKY simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
-  cout << string ("Copyright 2009,2017,2022 by Ronald S. Burkey\n");
+  cout << string ("Copyright 2009,2017,20222024 by Ronald S. Burkey\n");
   cout
       << string (
 	  "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");

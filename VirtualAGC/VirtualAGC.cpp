@@ -505,6 +505,7 @@ VirtualAGC::SetFontSizes(void)
   SET_FONT(DskyHalfButton, 0);
   SET_FONT(DskyLiteButton, 0);
   SET_FONT(DskyNavButton, 0);
+  SET_FONT(DskyNavHalfButton, 0);
   SET_FONT(DskyApoButton, 0);
   SET_FONT(DskyApoHalfButton, 0);
   SET_FONT(DownlinkLabel, 0);
@@ -731,11 +732,12 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   CoreBrowse = new wxButton(this, ID_COREBROWSE, wxT("..."));
   CoreSaveButton = new wxButton(this, ID_CORESAVEBUTTON, wxT("Save"));
   DskyLabel = new wxStaticText(this, wxID_ANY, wxT("DSKY:"));
-  DskyFullButton = new wxRadioButton(this, ID_DSKYFULLBUTTON, wxT("Full"),
+  DskyFullButton = new wxRadioButton(this, ID_DSKYFULLBUTTON, wxT("COM"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-  DskyHalfButton = new wxRadioButton(this, ID_DSKYHALFBUTTON, wxT("Half"));
+  DskyHalfButton = new wxRadioButton(this, ID_DSKYHALFBUTTON, wxT("COM/2"));
   DskyLiteButton = new wxRadioButton(this, ID_DSKYLITEBUTTON, wxT("\"Lite\""));
-  DskyNavButton = new wxRadioButton(this, ID_DSKYNAVBUTTON, wxT("Nav"));
+  DskyNavButton = new wxRadioButton(this, ID_DSKYNAVBUTTON, wxT("NAV"));
+  DskyNavHalfButton = new wxRadioButton(this, ID_DSKYNAVHALFBUTTON, wxT("NAV/2"));
   DskyApoButton = new wxRadioButton(this, ID_DSKYAPOBUTTON, wxT("Mac"));
   DskyApoHalfButton = new wxRadioButton(this, ID_DSKYAPOHALFBUTTON, wxT("Mac/2"));
   DownlinkLabel = new wxStaticText(this, wxID_ANY, wxT("Downlink:"));
@@ -820,6 +822,7 @@ EVT_CHECKBOX(ID_DEVICEACACHECKBOX, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYFULLBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYHALFBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYLITEBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_DSKYNAVHALFBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYNAVBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYAPOBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_DSKYAPOHALFBUTTON, VirtualAGC::ConsistencyEvent)
@@ -1759,6 +1762,8 @@ VirtualAGC::set_properties()
           "The DSKY Lite is an alternate simulation of the display/keypad unit, using software contributed by Stephan Hotto.  There may be some circumstances under which you would find it useful.  However, it can only be used if in the \"Devices\" menu you select \"AGC CPU Bus/Input/Output Monitor\" and DO NOT select \"Telemetry Downlink Monitor\"."));
   DskyNavButton->SetToolTip(
       wxT("Nav-bay DSKY (vs main control-panel DSKY), for Block I only."));
+  DskyNavHalfButton->SetToolTip(
+      wxT("Nav-bay DSKY, half-size, for Block I only."));
   DskyApoButton->SetToolTip(
       wxT("Alternate ApoDisKey in place of yaDSKY2"));
   DskyApoHalfButton->SetToolTip(
@@ -1883,7 +1888,7 @@ VirtualAGC::do_layout()
   wxGridSizer* grid_sizer_1 = new wxGridSizer(2, 3, 0, 0);
   wxStaticBoxSizer* sizer_22 = new wxStaticBoxSizer(sizer_22_staticbox,
       wxHORIZONTAL);
-  wxGridSizer* grid_sizer_2 = new wxGridSizer(4, 4, 0, 0);
+  wxGridSizer* grid_sizer_2 = new wxGridSizer(5,4, 0, 0);
   wxStaticBoxSizer* sizer_18 = new wxStaticBoxSizer(sizer_18_staticbox,
       wxVERTICAL);
   wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
@@ -2090,8 +2095,13 @@ VirtualAGC::do_layout()
 
   grid_sizer_2->Add(20, 20, 0, 0, 0);
   grid_sizer_2->Add(DskyNavButton, 0, 0, 0);
+  grid_sizer_2->Add(DskyNavHalfButton, 0, 0, 0);
+  grid_sizer_2->Add(20, 20, 0, 0, 0);
+
+  grid_sizer_2->Add(20, 20, 0, 0, 0);
   grid_sizer_2->Add(DskyApoButton, 0, 0, 0);
   grid_sizer_2->Add(DskyApoHalfButton, 0, 0, 0);
+  grid_sizer_2->Add(20, 20, 0, 0, 0);
 
   grid_sizer_2->Add(DownlinkLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(TelemetryResizable, 0, 0, 0);
@@ -2411,14 +2421,17 @@ VirtualAGC::EnforceConsistency(void)
   CoreSaveButton->Enable(!block1);
   DskyLabel->Enable(true);
   DskyFullButton->Enable(true);
-  DskyHalfButton->Enable(!block1);
+  DskyHalfButton->Enable(true);
   DskyLiteButton->Enable(!block1);
   DskyNavButton->Enable(block1);
+  DskyNavHalfButton->Enable(block1);
   DskyApoButton->Enable(ApoDisKeyInstalled && !block1);
   DskyApoHalfButton->Enable(ApoDisKeyInstalled && !block1);
-  if (block1 && (DskyHalfButton->GetValue() || DskyLiteButton->GetValue()))
+  if (block1 && (DskyApoButton->GetValue() || DskyApoHalfButton->GetValue() || DskyLiteButton->GetValue()))
     DskyFullButton->SetValue(true);
-  else if (!block1 && DskyNavButton->GetValue())
+  else if (!block1 && (DskyNavButton->GetValue() || DskyNavHalfButton->GetValue()))
+    DskyFullButton->SetValue(true);
+  else if (DeviceCpumonCheckbox->GetValue() && DskyLiteButton->GetValue())
     DskyFullButton->SetValue(true);
   DownlinkLabel->Enable(!block1);
   TelemetryResizable->Enable(!block1);
@@ -2708,6 +2721,7 @@ VirtualAGC::ReadConfigurationFile(void)
               CHECK_TRUE_FALSE_SETTING(TelemetryRetro);
               CHECK_TRUE_FALSE_SETTING(DskyApoButton);
               CHECK_TRUE_FALSE_SETTING(DskyApoHalfButton);
+              CHECK_TRUE_FALSE_SETTING(DskyNavHalfButton);
             }
           Fin.Close();
           if (DropDown)
@@ -2800,6 +2814,7 @@ VirtualAGC::WriteConfigurationFile(void)
       WRITE_TRUE_FALSE_SETTING(TelemetryRetro);
       WRITE_TRUE_FALSE_SETTING(DskyApoButton);
       WRITE_TRUE_FALSE_SETTING(DskyApoHalfButton);
+      WRITE_TRUE_FALSE_SETTING(DskyNavHalfButton);
       Fout.Close();
     }
   else
@@ -2968,9 +2983,17 @@ VirtualAGC::FormTiling(void)
               wDSKY = 590;
               hDSKY = 600;
             }
+            else if (DskyHalfButton->GetValue()) {
+              wDSKY = 300;  // TBD
+              hDSKY = 325;  // TBD
+            }
             else if (DskyNavButton->GetValue()) {
               wDSKY = 350;
               hDSKY = 1030;
+            }
+            else if (DskyNavHalfButton->GetValue()) {
+              wDSKY = 175;  // TBD
+              hDSKY = 610;  // TBD
             }
             else
                 return false;
@@ -3211,6 +3234,10 @@ VirtualAGC::FormCommands(void)
           yaDSKY += wxT("yaDSKYb1 --images=images-yaDSKYb1" + PathDelimiter);
           if (DskyNavButton->GetValue())
             yaDSKY += wxT(" --nav-bay");
+          else if (DskyNavHalfButton->GetValue())
+            yaDSKY += wxT(" --half-size --nav-bay");
+          else if (DskyHalfButton->GetValue())
+            yaDSKY += wxT(" --half-size");
         }
       else
         {

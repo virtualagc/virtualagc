@@ -51,6 +51,8 @@
  *                              200 ms wait from the packet output code, and fixed
  *                              a warning about an incorrect grid sizer
  *                              alignment object on program startup.
+ *              2024-12-27 RSB  Implemented --x, --y,  --half-size and
+ *                              AGC_SCALE.  Fixed fuzzy digit images.
  */
 
 #include <sys/types.h>
@@ -62,6 +64,7 @@
 #endif
 #include <errno.h>
 #include <wx/utils.h>
+#define TOP_YADSKYB1
 #include "yaDSKYb1.h"
 extern int
 CallSocket(char *hostname, unsigned short portnum);
@@ -77,7 +80,6 @@ static int StartupDelay = 0;
 #endif
 static int VerbNounFlashing = 0;
 static int ServerSocket = -1;
-wxPoint ulCorner = wxPoint(-1, -1);
 
 void
 OutputKeycode(int Keycode);
