@@ -931,13 +931,13 @@ MyApp::OnInit()
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);
+  frame->Show();
   // For whatever reason, these things don't size themselves correctly, and all
   // other things being equal, would have to be manually resized. This is a
   // workaround for that.
   if (navBay)
-	frame->SetMinSize (wxSize(SCALED2(350), SCALED2(1212)));
+	frame->SetMinClientSize (wxSize(SCALED2(346 /*350*/), SCALED2(1151 /*1212*/)));
   else
-	frame->SetMinSize (wxSize(SCALED2(590), SCALED2(604)));
-  frame->Show();
+	frame->SetMinClientSize (wxSize(SCALED2(587 /*590*/), SCALED2(572 /*604*/)));
   return true;
 }
