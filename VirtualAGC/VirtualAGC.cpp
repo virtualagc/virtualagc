@@ -541,7 +541,7 @@ VirtualAGC::SetFontSizes(void)
 
 // I use this for keeping Mac OS from squishing checkboxes and radio buttons
 // together too close.
-wxSize LineSize = wxSize(-1, SCALED(30));
+wxSize LineSize = wxSize(-1, SCALED(24));
 
 // Regarding wxRESIZE_BORDER:  Undesirable in principle, but was added as a
 // workaround due to Issue #1174.
