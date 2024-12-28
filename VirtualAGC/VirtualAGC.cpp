@@ -2320,7 +2320,7 @@ VirtualAgcApp::OnInit()
   MainFrame->Refresh();
   MainFrame->Update();
   wxSize sz = wxSize(-1, SCALED(440));
-  MainFrame->SetMinSize(sz);
+  MainFrame->SetClientSize(sz);
   sz = MainFrame->GetSize();
   printf("Size: %d, %d\n", sz.x, sz.y);
   sz = MainFrame->FromDIP(MainFrame->GetSize());
@@ -3797,14 +3797,14 @@ Simulation::set_properties()
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
-  UplinkText->SetMinSize(wxSize(SCALED(480), SCALED(480)));
+  UplinkText->SetClientSize(wxSize(SCALED(480), SCALED(480)));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
   UplinkText->SetForegroundColour(wxColour(0, 0, 0));
   UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetMinSize(wxSize(SCALED(480), SCALED(480)));
+  ScriptText->SetClientSize(wxSize(SCALED(480), SCALED(480)));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));

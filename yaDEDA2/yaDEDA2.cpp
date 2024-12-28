@@ -715,19 +715,12 @@ yaDedaAppClass::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
-  // With wxWidgets 3.0, the --half-size option generally creates a main
-  // window thats too short (vertically), and I haven't been able to figure
-  // out how to coax it into calculating the window size properly.
-  // (Works fine with wxWidgets 2.8 or with the full-size DEDA.)  At any
-  // rate, the following is a lame attempt to prevent that from happening,
-  // though in theory it could force windows that are too big on some
-  // platforms, alas!  With wxWidgets 3.2, the problem extends to
-  // half-size windows that are a lot too big in general or regular-size
-  // windows that are a little too small.
+  // The top windows don't seem to be sized correctly.  This is a workaround.
+  // Note that --half-size is not exactly half-scale for yaDEDA2.
   if (MainWindow->HalfSize)
-    {
-      MainWindow->SetMinSize (wxSize(SCALED(250), SCALED(300)));
-    }
+    MainWindow->SetClientSize (wxSize(SCALED(240), SCALED(292)));
+  else
+    MainWindow->SetClientSize (wxSize(SCALED(415), SCALED(485)));
   MainWindow->Show ();
   return true;
 }

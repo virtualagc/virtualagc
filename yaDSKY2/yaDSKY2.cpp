@@ -1513,12 +1513,12 @@ yaDskyApp::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
-  // For whatever reason, --half-size DSKYs tend to be too short and have to
-  // be manually enlarged.  This is a workaround for that.
+  // The top windows don't seem to be sized correctly.  This is a workaround.
+  // Note that --half-size is not exactly half-scale for yaDSKY2.
   if (HalfSize)
-    {
-      MainWindow->SetMinSize (wxSize(SCALED(335), SCALED(380)));
-    }
+    MainWindow->SetClientSize (wxSize(SCALED(329), SCALED(357)));
+  else
+    MainWindow->SetClientSize (wxSize(SCALED(573), SCALED(633)));
   MainWindow->Show ();
   return true;
 }

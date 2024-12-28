@@ -254,7 +254,8 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
   Digit3Reg3 = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   Digit4Reg3 = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   Digit5Reg3 = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
-  SwitchUpTel = new wxBitmapButton(panel, ID_UPTELSWITCH, imageUpTelBlock);
+  SwitchUpTel = new wxBitmapButton(panel, ID_UPTELSWITCH, imageUpTelBlock,
+                    wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonKeyRlse = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
       scaledBitmap(imageDirectory + wxT("KeyRlse-60x60.png"), wxBITMAP_TYPE_ANY));
   ButtonErrorReset = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
@@ -306,9 +307,9 @@ MyFrame::set_properties()
 
   // begin wxGlade: MyFrame::set_properties
   SetTitle(
-      navBay ? _("yaDSKYb1 NAV") : _("yaDSKYb1 COM"));
+      navBay ? _("DSKY") : _("DSKY"));
   SetBackgroundColour(wxColour(214, 214, 214));
-  SwitchUpTel->SetSize(SwitchUpTel->GetBestSize());
+  SwitchUpTel->SetSize(wxSize(SCALED2(20), SCALED2(40)));
   wxSize buttonSize = wxSize(SCALED2(60), SCALED2(60));
   ButtonKeyRlse->SetSize(buttonSize);
   ButtonTestAlarm->SetSize(buttonSize);
@@ -931,13 +932,16 @@ MyApp::OnInit()
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);
-  frame->Show();
   // For whatever reason, these things don't size themselves correctly, and all
   // other things being equal, would have to be manually resized. This is a
   // workaround for that.
+  /*
   if (navBay)
-	frame->SetMinClientSize (wxSize(SCALED2(346 /*350*/), SCALED2(1151 /*1212*/)));
+    frame->SetClientSize (wxSize(SCALED2(346), SCALED2(1151)));
   else
-	frame->SetMinClientSize (wxSize(SCALED2(587 /*590*/), SCALED2(572 /*604*/)));
+    frame->SetClientSize (wxSize(SCALED2(587), SCALED2(572)));
+  */
+  frame->SetClientSize( frame->panel->image.GetWidth(), frame->panel->image.GetHeight());
+  frame->Show();
   return true;
 }
