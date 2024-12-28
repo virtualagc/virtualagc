@@ -242,6 +242,18 @@ int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
 double scaleDPI = 1.0;
 #define SCALED(x) ((x) * scaleDPI)
 
+// This is a function that stands in place of the function
+// wxBitmap(filename, imagetype) to load an a jpg but to scale it according
+// to scaleDPI.
+wxBitmap
+scaledBitmap(const wxString &name, wxBitmapType type) {
+  if (scaleDPI == 1.0)
+    return wxBitmap(name, type);
+  wxImage *image = new wxImage(name, type);
+  image->Rescale(SCALED(image->GetWidth()), SCALED(image->GetHeight()));
+  return wxBitmap(*image);
+}
+
 // Min width for the RHS of the main window.
 wxSize minWidthRHS;
 
@@ -527,6 +539,10 @@ VirtualAGC::SetFontSizes(void)
   SET_FONT(ExitButton, 0);
 }
 
+// I use this for keeping Mac OS from squishing checkboxes and radio buttons
+// together too close.
+wxSize LineSize = wxSize(-1, SCALED(30));
+
 // Regarding wxRESIZE_BORDER:  Undesirable in principle, but was added as a
 // workaround due to Issue #1174.
 VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
@@ -620,31 +636,31 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   if (!maximumSquish)
     {
       Patch1Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo1.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo1.png"), wxBITMAP_TYPE_ANY));
       Patch7Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo7.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo7.png"), wxBITMAP_TYPE_ANY));
       Patch8Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo8.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo8.png"), wxBITMAP_TYPE_ANY));
       Patch9Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo9.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo9.png"), wxBITMAP_TYPE_ANY));
       Patch10Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo10.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo10.png"), wxBITMAP_TYPE_ANY));
       Patch11Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo11.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo11.png"), wxBITMAP_TYPE_ANY));
       PatchBitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
       Patch12Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo12.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo12.png"), wxBITMAP_TYPE_ANY));
       Patch13Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo13.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo13.png"), wxBITMAP_TYPE_ANY));
       Patch14Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo14.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo14.png"), wxBITMAP_TYPE_ANY));
       Patch15Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo15.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo15.png"), wxBITMAP_TYPE_ANY));
       Patch16Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo16.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo16.png"), wxBITMAP_TYPE_ANY));
       Patch17Bitmap = new wxStaticBitmap(this, wxID_ANY,
-          wxBitmap(wxT("apo17.png"), wxBITMAP_TYPE_ANY));
+          scaledBitmap(wxT("apo17.png"), wxBITMAP_TYPE_ANY));
     }
   TopLine = new wxStaticLine(this, wxID_ANY);
   if (!maximumSquish)
@@ -682,31 +698,44 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
         wxDefaultPosition, wxDefaultSize);
   DeviceAgcCheckbox = new wxCheckBox(this, ID_DEVICEAGCCHECKBOX,
       wxT("Guidance Computer"));
+  DeviceAgcCheckbox->SetMinSize(LineSize);
   DeviceDskyCheckbox = new wxCheckBox(this, ID_DEVICEDSKYCHECKBOX,
       wxT("DSKY (AGC display and keypad)"));
+  DeviceDskyCheckbox->SetMinSize(LineSize);
   DeviceAcaCheckbox = new wxCheckBox(this, ID_DEVICEACACHECKBOX,
       wxT("Attitude Controller Assembly"));
+  DeviceAcaCheckbox->SetMinSize(LineSize);
   JoystickConfigure = new wxButton(this, ID_JOYSTICKCONFIGURE, wxT("Handler"));
+  JoystickConfigure->SetClientSize(LineSize);
   DeviceTelemetryCheckbox = new wxCheckBox(this, ID_DEVICETELEMETRYCHECKBOX,
       wxT("Telemetry Downlink Monitor"));
+  DeviceTelemetryCheckbox->SetMinSize(LineSize);
   DeviceAeaCheckbox = new wxCheckBox(this, ID_DEVICEAEACHECKBOX,
       wxT("LM Abort Computer (AEA)"));
+  DeviceAeaCheckbox->SetMinSize(LineSize);
   DeviceDedaCheckbox = new wxCheckBox(this, ID_DEVICEDEDACHECKBOX,
       wxT("DEDA (AEA display and keypad)"));
+  DeviceDedaCheckbox->SetMinSize(LineSize);
   DeviceCpumonCheckbox = new wxCheckBox(this, ID_DEVICECPUMONCHECKBOX,
       wxT("AGC CPU Bus/Input/Output Monitor"));
+  DeviceCpumonCheckbox->SetMinSize(LineSize);
   static_line_4 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxLI_VERTICAL);
   DeviceImuCheckbox = new wxCheckBox(this, ID_DEVICEIMUCHECKBOX,
       wxT("Inertial Monitor Unit / FDAI (8-ball)"));
+  DeviceImuCheckbox->SetMinSize(LineSize);
   DeviceDiscoutCheckbox = new wxCheckBox(this, ID_DEVICEDISCOUTCHECKBOX,
       wxT("Discrete Outputs"));
+  DeviceDiscoutCheckbox->SetMinSize(LineSize);
   DeviceCrewinCheckbox = new wxCheckBox(this, ID_DEVICECREWINCHECKBOX,
       wxT("Discrete Inputs (crew)"));
+  DeviceCrewinCheckbox->SetMinSize(LineSize);
   DeviceSysinCheckbox = new wxCheckBox(this, ID_DEVICESYSINCHECKBOX,
       wxT("Discrete Inputs (LM system)"));
+  DeviceSysinCheckbox->SetMinSize(LineSize);
   DevicePropulsionCheckbox = new wxCheckBox(this, ID_DEVICEPROPULSIONCHECKBOX,
       wxT("Propulsion/Thrust/Fuel Monitor"));
+  DevicePropulsionCheckbox->SetMinSize(LineSize);
   NoviceButton = new wxButton(this, ID_NOVICEBUTTON, wxT("Novice"));
   ExpertButton = new wxButton(this, ID_EXPERTBUTTON, wxT("Expert"));
   static_line_3 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition,
@@ -722,53 +751,82 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   StartupWipeButton = new wxRadioButton(this, ID_STARTUPWIPEBUTTON,
       wxT("Restart program, wiping memory"), wxDefaultPosition, wxDefaultSize,
       wxRB_GROUP);
+  StartupWipeButton->SetMinSize(LineSize);
   StartupPreserveButton = new wxRadioButton(this, ID_STARTUPPRESERVEBUTTON,
       wxT("Restart program, preserving memory"));
+  StartupPreserveButton->SetMinSize(LineSize);
   StartupResumeButton = new wxRadioButton(this, ID_STARTUPRESUMEBUTTON,
       wxT("Resume from ending point of prior run"));
+  StartupResumeButton->SetMinSize(LineSize);
   CustomResumeButton = new wxRadioButton(this, ID_CUSTOMRESUMEBUTTON,
       wxT("Custom:"));
+  CustomResumeButton->SetMinSize(LineSize);
   CoreFilename = new wxTextCtrl(this, wxID_ANY, wxEmptyString);
   CoreBrowse = new wxButton(this, ID_COREBROWSE, wxT("..."));
   CoreSaveButton = new wxButton(this, ID_CORESAVEBUTTON, wxT("Save"));
   DskyLabel = new wxStaticText(this, wxID_ANY, wxT("DSKY:"));
+  DskyLabel->SetMinSize(LineSize);
   DskyFullButton = new wxRadioButton(this, ID_DSKYFULLBUTTON, wxT("COM"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  DskyFullButton->SetMinSize(LineSize);
   DskyHalfButton = new wxRadioButton(this, ID_DSKYHALFBUTTON, wxT("COM/2"));
+  DskyHalfButton->SetMinSize(LineSize);
   DskyLiteButton = new wxRadioButton(this, ID_DSKYLITEBUTTON, wxT("\"Lite\""));
+  DskyLiteButton->SetMinSize(LineSize);
   DskyNavButton = new wxRadioButton(this, ID_DSKYNAVBUTTON, wxT("NAV"));
+  DskyNavButton->SetMinSize(LineSize);
   DskyNavHalfButton = new wxRadioButton(this, ID_DSKYNAVHALFBUTTON, wxT("NAV/2"));
+  DskyNavHalfButton->SetMinSize(LineSize);
   DskyApoButton = new wxRadioButton(this, ID_DSKYAPOBUTTON, wxT("Mac"));
+  DskyApoButton->SetMinSize(LineSize);
   DskyApoHalfButton = new wxRadioButton(this, ID_DSKYAPOHALFBUTTON, wxT("Mac/2"));
+  DskyApoHalfButton->SetMinSize(LineSize);
   DownlinkLabel = new wxStaticText(this, wxID_ANY, wxT("Downlink:"));
+  DownlinkLabel->SetMinSize(LineSize);
   TelemetryResizable = new wxRadioButton(this, wxID_ANY, wxT("Normal"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  TelemetryResizable->SetMinSize(LineSize);
   TelemetryRetro = new wxRadioButton(this, wxID_ANY, wxT("\"Retro\""));
+  TelemetryRetro->SetMinSize(LineSize);
   DedaLabel = new wxStaticText(this, wxID_ANY, wxT("DEDA:"));
+  DedaLabel->SetMinSize(LineSize);
   DedaFullButton = new wxRadioButton(this, ID_DEDAFULLBUTTON, wxT("Full"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  DedaFullButton->SetMinSize(LineSize);
   DedaHalfButton = new wxRadioButton(this, ID_DEDAHALFBUTTON, wxT("Half"));
+  DedaHalfButton->SetMinSize(LineSize);
   AgcDebugLabel = new wxStaticText(this, wxID_ANY, wxT("AGC code:"));
+  AgcDebugLabel->SetMinSize(LineSize);
   AgcDebugNormalButton = new wxRadioButton(this, ID_AGCDEBUGNORMALBUTTON,
       wxT("Normal"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  AgcDebugNormalButton->SetMinSize(LineSize);
   AgcDebugMonitorButton = new wxRadioButton(this, ID_AGCDEBUGMONITORBUTTON,
       wxT("Debugger"));
+  AgcDebugMonitorButton->SetMinSize(LineSize);
   AeaDebugLabel = new wxStaticText(this, wxID_ANY, wxT("AEA code:"));
+  AeaDebugLabel->SetMinSize(LineSize);
   AeaDebugNormalButton = new wxRadioButton(this, ID_AEADEBUGNORMALBUTTON,
       wxT("Normal"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  AeaDebugNormalButton->SetMinSize(LineSize);
   AeaDebugMonitorButton = new wxRadioButton(this, ID_AEADEBUGMONITORBUTTON,
       wxT("Debugger"));
+  AeaDebugMonitorButton->SetMinSize(LineSize);
   FlightProgram4Button = new wxRadioButton(this, ID_FLIGHTPROGRAM4BUTTON,
       wxT("Apollo 9 (Flight Programs 3, 4)"), wxDefaultPosition, wxDefaultSize,
       wxRB_GROUP);
+  FlightProgram4Button->SetMinSize(LineSize);
   FlightProgram5Button = new wxRadioButton(this, ID_FLIGHTPROGRAM5BUTTON,
       wxT("Apollo 10 (Flight Program 5)"));
+  FlightProgram5Button->SetMinSize(LineSize);
   FlightProgram6Button = new wxRadioButton(this, ID_FLIGHTPROGRAM6BUTTON,
       wxT("Apollo 11-12 (Flight Program 6)"));
+  FlightProgram6Button->SetMinSize(LineSize);
   FlightProgram7Button = new wxRadioButton(this, ID_FLIGHTPROGRAM7BUTTON,
       wxT("Apollo 13-14 (Flight Program 7)"));
+  FlightProgram7Button->SetMinSize(LineSize);
   FlightProgram8Button = new wxRadioButton(this, ID_FLIGHTPROGRAM8BUTTON,
       wxT("Apollo 15-17 (Flight Program 8)"));
+  FlightProgram8Button->SetMinSize(LineSize);
   if (!maximumSquish)
     {
       AeaCustomButton = new wxRadioButton(this, ID_AEACUSTOMBUTTON,
@@ -1636,7 +1694,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(wxSize(SCALED(70), SCALED(24)));
+  JoystickConfigure->SetMinSize(wxSize(SCALED(70), SCALED(20)));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -3681,7 +3739,7 @@ Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
       wxT("Digital uplink status"));
   if (!maximumSquish)
     PatchBitmap = new wxStaticBitmap(this, wxID_ANY,
-        wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+        scaledBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SimulationLabel = new wxStaticText(this, ID_SIMULATIONLABEL,
       wxT("Apollo 13 Lunar Module\nsimulation in progress!"), wxDefaultPosition,
       wxDefaultSize);
