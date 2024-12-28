@@ -541,8 +541,8 @@ VirtualAGC::SetFontSizes(void)
 
 // I use this for keeping Mac OS from squishing checkboxes and radio buttons
 // together too close.
-#define LINE_SIZE 16
-wxSize LineSize = wxSize(-1, SCALED(LINE_SIZE));
+#define LINE_SIZE 18
+wxSize LineSize;;
 
 // Regarding wxRESIZE_BORDER:  Undesirable in principle, but was added as a
 // workaround due to Issue #1174.
@@ -554,6 +554,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
             (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX // | wxCLIP_CHILDREN
                 | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+  envString.ToDouble(&scaleDPI);
+  LineSize = wxSize(-1, SCALED(LINE_SIZE));
+
   minWidthRHS = wxSize(SCALED(340), -1);
   // We auto-adjust fonts and image sizes if the screen size is too small.
   wxFont Font = GetFont();
