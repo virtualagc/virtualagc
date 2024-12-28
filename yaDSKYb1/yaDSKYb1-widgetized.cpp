@@ -306,7 +306,7 @@ MyFrame::set_properties()
 
   // begin wxGlade: MyFrame::set_properties
   SetTitle(
-      navBay ? _("yaDSKY Block 1 Nav Bay") : _("yaDSKY Block 1 Control Panel"));
+      navBay ? _("yaDSKYb1 NAV") : _("yaDSKYb1 COM"));
   SetBackgroundColour(wxColour(214, 214, 214));
   SwitchUpTel->SetSize(SwitchUpTel->GetBestSize());
   wxSize buttonSize = wxSize(SCALED2(60), SCALED2(60));
@@ -931,24 +931,13 @@ MyApp::OnInit()
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);
-  // For whatever reason, --half-size DSKYs tend to be too short and all other
-  // things being equal, would have to be manually resized. This is a
+  // For whatever reason, these things don't size themselves correctly, and all
+  // other things being equal, would have to be manually resized. This is a
   // workaround for that.
-  if (HalfSize)
-    {
-      if (navBay)
-        frame->SetMinSize (wxSize(SCALED2(346), SCALED2(1160)));
-      else
-        frame->SetMinSize (wxSize(SCALED2(587), SCALED2(572+32)));
-    }
-  else {
-    // I don't know why, but the following -- which seems to me to be an
-    // improvement on the above -- not only does *not* resize the frame, but
-    // actually defeats the --x and --y switches somehow.
-    // ... Except it doesn't defeat them any more.  What's the deal?  And why
-    // do I need to arbitrarily add some extra to the height?  The ribbon?
-    frame->SetMinSize (wxSize(frame->panel->image.GetWidth(), frame->panel->image.GetHeight()+SCALED2(16)));
-  }
+  if (navBay)
+	frame->SetMinSize (wxSize(SCALED2(350), SCALED2(1212)));
+  else
+	frame->SetMinSize (wxSize(SCALED2(590), SCALED2(604)));
   frame->Show();
   return true;
 }
