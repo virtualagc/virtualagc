@@ -257,44 +257,63 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
   SwitchUpTel = new wxBitmapButton(panel, ID_UPTELSWITCH, imageUpTelBlock,
                     wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonKeyRlse = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
-      scaledBitmap(imageDirectory + wxT("KeyRlse-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("KeyRlse-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonErrorReset = new wxBitmapButton(panel, ID_KEYRLSEBUTTON,
       scaledBitmap(imageDirectory + wxT("ErrorReset-60x60.png"),
-          wxBITMAP_TYPE_ANY));
+          wxBITMAP_TYPE_ANY),
+	      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonTestAlarm = new wxBitmapButton(panel, ID_TESTALARMBUTTON,
-      scaledBitmap(imageDirectory + wxT("TestAlarm-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("TestAlarm-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonClear = new wxBitmapButton(panel, ID_CLEARBUTTON,
-      scaledBitmap(imageDirectory + wxT("Clear-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Clear-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonVerb = new wxBitmapButton(panel, ID_VERBBUTTON,
-      scaledBitmap(imageDirectory + wxT("Verb-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Verb-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonNoun = new wxBitmapButton(panel, ID_NOUNBUTTON,
-      scaledBitmap(imageDirectory + wxT("Noun-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Noun-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonEnter = new wxBitmapButton(panel, ID_ENTERBUTTON,
-      scaledBitmap(imageDirectory + wxT("Enter-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Enter-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonPlus = new wxBitmapButton(panel, ID_PLUSBUTTON,
-      scaledBitmap(imageDirectory + wxT("Plus-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Plus-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button7 = new wxBitmapButton(panel, ID_SEVENBUTTON,
-      scaledBitmap(imageDirectory + wxT("7-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("7-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button8 = new wxBitmapButton(panel, ID_EIGHTBUTTON,
-      scaledBitmap(imageDirectory + wxT("8-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("8-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button9 = new wxBitmapButton(panel, ID_NINEBUTTON,
-      scaledBitmap(imageDirectory + wxT("9-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("9-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   ButtonMinus = new wxBitmapButton(panel, ID_MINUSBUTTON,
-      scaledBitmap(imageDirectory + wxT("Minus-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("Minus-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button4 = new wxBitmapButton(panel, ID_FOURBUTTON,
-      scaledBitmap(imageDirectory + wxT("4-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("4-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button5 = new wxBitmapButton(panel, ID_FIVEBUTTON,
-      scaledBitmap(imageDirectory + wxT("5-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("5-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button6 = new wxBitmapButton(panel, ID_SIXBUTTON,
-      scaledBitmap(imageDirectory + wxT("6-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("6-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button0 = new wxBitmapButton(panel, ID_ZEROBUTTON,
-      scaledBitmap(imageDirectory + wxT("0-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("0-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button1 = new wxBitmapButton(panel, ID_ONEBUTTON,
-      scaledBitmap(imageDirectory + wxT("1-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("1-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button2 = new wxBitmapButton(panel, ID_TWOBUTTON,
-      scaledBitmap(imageDirectory + wxT("2-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("2-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
   Button3 = new wxBitmapButton(panel, ID_THREEBUTTON,
-      scaledBitmap(imageDirectory + wxT("3-60x60.png"), wxBITMAP_TYPE_ANY));
+      scaledBitmap(imageDirectory + wxT("3-60x60.png"), wxBITMAP_TYPE_ANY),
+      wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxBU_EXACTFIT);
 
   set_properties();
   do_layout();
