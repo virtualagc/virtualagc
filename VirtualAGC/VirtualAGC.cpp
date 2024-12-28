@@ -541,7 +541,8 @@ VirtualAGC::SetFontSizes(void)
 
 // I use this for keeping Mac OS from squishing checkboxes and radio buttons
 // together too close.
-wxSize LineSize = wxSize(-1, SCALED(24));
+#define LINE_SIZE 16
+wxSize LineSize = wxSize(-1, SCALED(LINE_SIZE));
 
 // Regarding wxRESIZE_BORDER:  Undesirable in principle, but was added as a
 // workaround due to Issue #1174.
@@ -1694,7 +1695,7 @@ VirtualAGC::set_properties()
   DeviceAcaCheckbox->SetToolTip(
       wxT(
           "The ACA is the rotational hand-controller (stick) used by the astronauts to control thrusters.  To use it, you must have a supported 3D joystick."));
-  JoystickConfigure->SetMinSize(wxSize(SCALED(70), SCALED(20)));
+  JoystickConfigure->SetMinSize(wxSize(SCALED(70), SCALED(LINE_SIZE)));
   JoystickConfigure->SetBackgroundColour(wxColour(240, 240, 240));
   JoystickConfigure->SetForegroundColour(wxColour(0, 0, 0));
   JoystickConfigure->SetToolTip(
@@ -2070,10 +2071,6 @@ VirtualAGC::do_layout()
     }
   sizer_7->Add(DeviceAgcCheckbox, 0, 0, 0);
   sizer_7->Add(DeviceDskyCheckbox, 0, 0, 0);
-  sizer_37->Add(DeviceAcaCheckbox, 0, wxALIGN_CENTER_VERTICAL, 0);
-  sizer_37->Add(2, 20, 1, 0, 0);
-  sizer_37->Add(JoystickConfigure, 0, 0, 0);
-  sizer_7->Add(sizer_37, 0, wxEXPAND, 0);
   sizer_7->Add(DeviceTelemetryCheckbox, 0, 0, 0);
   sizer_7->Add(DeviceAeaCheckbox, 0, 0, 0);
   sizer_7->Add(DeviceDedaCheckbox, 0, 0, 0);
@@ -2086,6 +2083,10 @@ VirtualAGC::do_layout()
   sizer_36->Add(DevicePropulsionCheckbox, 0, 0, 0);
   sizer_35->Add(sizer_36, 15, wxEXPAND, 0);
   sizer_7->Add(sizer_35, 1, wxEXPAND, 0);
+  sizer_37->Add(DeviceAcaCheckbox, 0, wxALIGN_CENTER_VERTICAL, 0);
+  sizer_37->Add(2, 20, 1, 0, 0);
+  sizer_37->Add(JoystickConfigure, 0, 0, 0);
+  sizer_7->Add(sizer_37, 0, wxEXPAND, 0);
   if (!maximumSquish)
     sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
         0);
