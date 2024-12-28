@@ -521,8 +521,8 @@ VirtualAGC::SetFontSizes(void)
   SET_FONT(DskyApoButton, 0);
   SET_FONT(DskyApoHalfButton, 0);
   SET_FONT(DownlinkLabel, 0);
-  SET_FONT(TelemetryResizable, 0);
-  SET_FONT(TelemetryRetro, 0);
+  //SET_FONT(TelemetryResizable, 0);
+  //SET_FONT(TelemetryRetro, 0);
   SET_FONT(AgcDebugLabel, 0);
   SET_FONT(AgcDebugNormalButton, 0);
   SET_FONT(AgcDebugMonitorButton, 0);
@@ -791,9 +791,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   DownlinkLabel->SetMinSize(LineSize);
   TelemetryResizable = new wxRadioButton(this, wxID_ANY, wxT("Normal"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-  TelemetryResizable->SetMinSize(LineSize);
+  TelemetryResizable->Show(false);
+  //TelemetryResizable->SetMinSize(LineSize);
   TelemetryRetro = new wxRadioButton(this, wxID_ANY, wxT("\"Retro\""));
-  TelemetryRetro->SetMinSize(LineSize);
+  TelemetryRetro->Show(false);
+  //TelemetryRetro->SetMinSize(LineSize);
   DedaLabel = new wxStaticText(this, wxID_ANY, wxT("DEDA:"));
   DedaLabel->SetMinSize(LineSize);
   DedaFullButton = new wxRadioButton(this, ID_DEDAFULLBUTTON, wxT("Full"),
@@ -1834,13 +1836,13 @@ VirtualAGC::set_properties()
       wxT("Alternate ApoDisKey in place of yaDSKY2, half size"));
   DownlinkLabel->SetBackgroundColour(wxColour(255, 255, 255));
   DownlinkLabel->SetForegroundColour(wxColour(0, 0, 0));
-  TelemetryResizable->SetToolTip(
-      wxT(
-          "Uses a format for the telemetry display in which the text size and display size is adjustable."));
-  TelemetryResizable->SetValue(1);
-  TelemetryRetro->SetToolTip(
-      wxT(
-          "The telemetry-display has a \"retro\" appearance, in which it looks somewhat like it's a CRT such as those from mission control.  However, it is not resizable and consumes quite a lot of space on your computer's actual display."));
+  //TelemetryResizable->SetToolTip(
+  //    wxT(
+  //        "Uses a format for the telemetry display in which the text size and display size is adjustable."));
+  //TelemetryResizable->SetValue(1);
+  //TelemetryRetro->SetToolTip(
+  //    wxT(
+  //        "The telemetry-display has a \"retro\" appearance, in which it looks somewhat like it's a CRT such as those from mission control.  However, it is not resizable and consumes quite a lot of space on your computer's actual display."));
   DedaLabel->SetBackgroundColour(wxColour(255, 255, 255));
   DedaLabel->SetForegroundColour(wxColour(0, 0, 0));
   DedaFullButton->SetToolTip(
@@ -1952,7 +1954,7 @@ VirtualAGC::do_layout()
   wxGridSizer* grid_sizer_1 = new wxGridSizer(2, 3, 0, 0);
   wxStaticBoxSizer* sizer_22 = new wxStaticBoxSizer(sizer_22_staticbox,
       wxHORIZONTAL);
-  wxGridSizer* grid_sizer_2 = new wxGridSizer(5,4, 0, 0);
+  wxGridSizer* grid_sizer_2 = new wxGridSizer(4 /*rows*/,4 /*cols*/, 0, 0);
   wxStaticBoxSizer* sizer_18 = new wxStaticBoxSizer(sizer_18_staticbox,
       wxVERTICAL);
   wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
@@ -2167,10 +2169,10 @@ VirtualAGC::do_layout()
   grid_sizer_2->Add(DskyApoHalfButton, 0, 0, 0);
   grid_sizer_2->Add(20, 20, 0, 0, 0);
 
-  grid_sizer_2->Add(DownlinkLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
-  grid_sizer_2->Add(TelemetryResizable, 0, 0, 0);
-  grid_sizer_2->Add(TelemetryRetro, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  //grid_sizer_2->Add(DownlinkLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
+  //grid_sizer_2->Add(TelemetryResizable, 0, 0, 0);
+  //grid_sizer_2->Add(TelemetryRetro, 0, 0, 0);
+  //grid_sizer_2->Add(20, 20, 0, 0, 0);
 
   grid_sizer_2->Add(DedaLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(DedaFullButton, 0, 0, 0);
@@ -2282,10 +2284,6 @@ VirtualAgcApp::OnInit()
 	  printf("Failure: `popen` could not run `mdfind` for ApoDisKey\n");
   pclose(fmdfind);
 #endif
-
-  wxString envString;
-  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
-	  envString.ToDouble(&scaleDPI);
 
   wxInitAllImageHandlers();
 
@@ -2500,8 +2498,8 @@ VirtualAGC::EnforceConsistency(void)
   else if (DeviceCpumonCheckbox->GetValue() && DskyLiteButton->GetValue())
     DskyFullButton->SetValue(true);
   DownlinkLabel->Enable(!block1);
-  TelemetryResizable->Enable(!block1);
-  TelemetryRetro->Enable(!block1);
+  //TelemetryResizable->Enable(!block1);
+  //TelemetryRetro->Enable(!block1);
   DedaLabel->Enable(!block1);
   DedaFullButton->Enable(!block1);
   DedaHalfButton->Enable(!block1);
@@ -2562,8 +2560,8 @@ VirtualAGC::EnforceConsistency(void)
   DskyLiteButton->Enable(
       DeviceCpumonCheckbox->GetValue() /* && !DeviceTelemetryCheckbox->GetValue () */);
   DskyNavButton->Enable(block1);
-  TelemetryResizable->Enable(DeviceTelemetryCheckbox->GetValue());
-  TelemetryRetro->Enable(DeviceTelemetryCheckbox->GetValue());
+  //TelemetryResizable->Enable(DeviceTelemetryCheckbox->GetValue());
+  //TelemetryRetro->Enable(DeviceTelemetryCheckbox->GetValue());
   DownlinkLabel->Enable(DeviceTelemetryCheckbox->GetValue());
   AgcSourceButton->Enable(
       hasSource
@@ -2697,7 +2695,7 @@ VirtualAGC::SetDefaultConfiguration(void)
       DskyHalfButton->SetValue(true);
     }
   AeaDebugNormalButton->SetValue(true);
-  TelemetryResizable->SetValue(true);
+  //TelemetryResizable->SetValue(true);
 }
 
 // Reads a configuration file to get all of the settings.
@@ -3090,11 +3088,11 @@ VirtualAGC::FormTiling(void)
     }
     if (DeviceTelemetryCheckbox->GetValue()) {
         showTelemetry = 1;
-        if (TelemetryResizable->GetValue()) {
+        if (true /*TelemetryResizable->GetValue()*/) {
             wTelemetry = 510;
             hTelemetry = 720;
         }
-        else if (TelemetryRetro->GetValue()) {
+        else if (false /*TelemetryRetro->GetValue()*/) {
             wTelemetry = 770;
             hTelemetry = 980;
         }
@@ -3349,7 +3347,7 @@ VirtualAGC::FormCommands(void)
       yaTelemetry += wxT ("yaTelemetry.app/Contents/MacOS/");
 #endif
       yaTelemetry += wxT("yaTelemetry");
-      if (TelemetryResizable->GetValue())
+      if (true /*TelemetryResizable->GetValue()*/)
         yaTelemetry += wxT(" --simple");
     }
   else
