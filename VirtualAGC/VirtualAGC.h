@@ -472,7 +472,6 @@ protected:
   wxStaticLine* static_line_1;
   wxButton* RunButton;
   wxButton* DefaultsButton;
-  wxButton* ExitButton;
   wxBoxSizer* optionsBox;
   wxStaticBoxSizer* agcStartupBox;
   wxGridSizer* interfaceStylesBox;
@@ -481,6 +480,8 @@ protected:
   DECLARE_EVENT_TABLE()
 
 public:
+  wxButton* ExitButton;
+
   virtual void
   ConsistencyEvent(wxCommandEvent &event);
   virtual void
