@@ -2319,11 +2319,16 @@ VirtualAgcApp::OnInit()
   MainFrame->Show();
   MainFrame->Refresh();
   MainFrame->Update();
+  // The main window inexplicably seems invariably to be sized too short.
+  // The various contortions below represent the detritus of my successive
+  // attempts to work around that.  It doesn't help that each target system
+  // has its own quirks that seem to work actively against my attempts.
   //wxSize sz = wxSize(-1, SCALED(440));
   //MainFrame->SetClientSize(sz);
   //MainFrame->SetClientSize(MainFrame->GetBestSize());
+  wxSize s = MainFrame->GetClientSize();
   wxPoint p = MainFrame->ExitButton->GetPosition();
-  MainFrame->SetClientSize(wxSize(-1, p.y + SCALED(60)));
+  MainFrame->SetClientSize(wxSize(s.x, p.y + SCALED(60)));
   // MainFrame->SetName("VirtualAGC");
   // wxPersistentRegisterAndRestore(MainFrame, "VirtualAGC");
   return true;
