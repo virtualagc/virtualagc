@@ -96,6 +96,7 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
   wxImage image = panel->image.ConvertToImage();
   image.Rescale(SCALED2(image.GetWidth()), SCALED2(image.GetHeight()));
   panel->image = wxBitmap(image);
+  //panel->SetMinSize(wxSize(image.GetWidth(), image.GetHeight()));
 
   UpTelAccept = false;
   flashing = false;
@@ -352,6 +353,11 @@ MyFrame::set_properties()
 // end wxGlade
 }
 
+wxPoint
+scaledPoint(double x, double y) {
+  return wxPoint(SCALED2(x), SCALED2(y));
+}
+
 void
 MyFrame::do_layout()
 {
@@ -365,7 +371,7 @@ MyFrame::do_layout()
   // the background image at positions I just read off from the GIMP.
   if (navBay)
     {
-      int x, y, xStart, yStart, xDelta, yDelta;
+      double x, y, xStart, yStart, xDelta, yDelta;
 
       indicatorCompFail->Show(false);
       SwitchUpTel->Show(false);
@@ -564,122 +570,259 @@ MyFrame::do_layout()
       indicatorBottomLeft->Show(false);
       indicatorBottomRight->Show(false);
 
+#ifdef USE_SIZERS
       // begin wxGlade: MyFrame::do_layout
       wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
-      wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_4 = new wxBoxSizer(wxVERTICAL);
-      wxGridSizer* grid_sizer_1 = new wxGridSizer(4, 4, SCALED2(2), SCALED2(2)); // Keypad
-      wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_3 = new wxBoxSizer(wxVERTICAL);
-      wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-      wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 6, SCALED2(22), SCALED2(1)); // Registers.
-      wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, SCALED2(0) /*21*/,
+      wxBoxSizer* BothSides = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* RightSide = new wxBoxSizer(wxVERTICAL);
+      wxGridSizer* LowerKeypad = new wxGridSizer(4, 4, SCALED2(2), SCALED2(2)); // Keypad
+      wxBoxSizer* UpperKeypad = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* ExternalControls = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* LeftSide = new wxBoxSizer(wxVERTICAL);
+      //wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
+      wxGridSizer* Registers = new wxGridSizer(3, 6, SCALED2(22), SCALED2(1)); // Registers.
+      wxFlexGridSizer* AboveRegisters = new wxFlexGridSizer(3 /*2*/, 2, SCALED2(0) /*21*/,
     		  SCALED2(22)); // Activity/Program/Verb/Noun
-      wxBoxSizer* sizer_12_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_12_copy = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
-      wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-      sizer_2->Add(SCALED2(77), SCALED2(20), 0, 0, 0); // Left margin
-      sizer_3->Add(SCALED2(20), SCALED2(55), 0, 0, 0);
-      sizer_8->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Left of CompFail.
-      sizer_8->Add(indicatorCompFail, 0, 0, 0);
-      sizer_8->Add(SCALED2(5), SCALED2(20), 0, 0, 0); // Between CompFail and CheckFail
-      sizer_8->Add(indicatorCheckFail, 0, 0, 0);
-      sizer_8->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Right of CheckFail
-      sizer_3->Add(sizer_8, 0, 0, 0);
-      sizer_3->Add(SCALED2(20), SCALED2(113), 0, 0, 0);
-      sizer_11->Add(SCALED2(0), SCALED2(20), 0, 0, 0);
-      sizer_11->Add(indicatorUpTl, 0, 0, 0);
-      sizer_11->Add(SCALED2(1), SCALED2(20), 0, 0, 0);
-      sizer_11->Add(indicatorComp, 0, 0, 0);
-      sizer_11->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
-      grid_sizer_3->Add(sizer_11, 0, 0, 0);
-      sizer_12->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
-      sizer_12->Add(digitProgramLeft, 0, 0, 0);
-      sizer_12->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
-      sizer_12->Add(digitProgramRight, 0, 0, 0);
-      sizer_12->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
-      grid_sizer_3->Add(sizer_12, 0, 0, 0);
-      //grid_sizer_3->Add(20, 21, 0);
-      //grid_sizer_3->Add(20, 21, 0);
-      grid_sizer_3->Add(SCALED2(85), SCALED2(21), 0, 0, 0);
-      grid_sizer_3->Add(SCALED2(93), SCALED2(21), 0, 0, 0);
-      sizer_12_copy->Add(SCALED2(7), SCALED2(20), 0, 0, 0);
-      sizer_12_copy->Add(digitVerbLeft, 0, 0, 0);
-      sizer_12_copy->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
-      sizer_12_copy->Add(digitVerbRight, 0, 0, 0);
-      sizer_12_copy->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
-      grid_sizer_3->Add(sizer_12_copy, 0, 0, 0);
-      sizer_12_copy_1->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
-      sizer_12_copy_1->Add(digitNounLeft, 0, 0, 0);
-      sizer_12_copy_1->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
-      sizer_12_copy_1->Add(digitNounRight, 0, 0, 0);
-      sizer_12_copy_1->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
-      grid_sizer_3->Add(sizer_12_copy_1, 0, 0, 0);
-      sizer_3->Add(grid_sizer_3, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-      sizer_3->Add(SCALED2(20), SCALED2(22), 0, 0, 0); // Between Reg1 and Verb/Noun
-      grid_sizer_2->Add(PlusMinusReg1, 0, 0, 0);
-      grid_sizer_2->Add(Digit1Reg1, 0, 0, 0);
-      grid_sizer_2->Add(Digit2Reg1, 0, 0, 0);
-      grid_sizer_2->Add(Digit3Reg1, 0, 0, 0);
-      grid_sizer_2->Add(Digit4Reg1, 0, 0, 0);
-      grid_sizer_2->Add(Digit5Reg1, 0, 0, 0);
-      grid_sizer_2->Add(PlusMinusReg2, 0, 0, 0);
-      grid_sizer_2->Add(Digit1Reg2, 0, 0, 0);
-      grid_sizer_2->Add(Digit2Reg2, 0, 0, 0);
-      grid_sizer_2->Add(Digit3Reg2, 0, 0, 0);
-      grid_sizer_2->Add(Digit4Reg2, 0, 0, 0);
-      grid_sizer_2->Add(Digit5Reg2, 0, 0, 0);
-      grid_sizer_2->Add(PlusMinusReg3, 0, 0, 0);
-      grid_sizer_2->Add(Digit1Reg3, 0, 0, 0);
-      grid_sizer_2->Add(Digit2Reg3, 0, 0, 0);
-      grid_sizer_2->Add(Digit3Reg3, 0, 0, 0);
-      grid_sizer_2->Add(Digit4Reg3, 0, 0, 0);
-      grid_sizer_2->Add(Digit5Reg3, 0, 0, 0);
-      sizer_7->Add(grid_sizer_2, 0, 0, 0);
-      sizer_3->Add(sizer_7, 0, 0, 0);
-      sizer_3->Add(SCALED2(20), SCALED2(74), 0, 0, 0); // Below Reg3.
-      sizer_2->Add(sizer_3, 0, 0, 0);
-      sizer_2->Add(SCALED2(31), SCALED2(20), 0, 0, 0); // Middle horizontal spacer.
-      sizer_4->Add(SCALED2(20), SCALED2(46), 0, 0, 0); // Above SwitchUptel
-      sizer_6->Add(SCALED2(15), SCALED2(20), 0, 0, 0); // Left of SwitchUptel
-      sizer_6->Add(SwitchUpTel, 0, 0, 0);
-      sizer_6->Add(SCALED2(184), SCALED2(20), 0, 0, 0); // Right of SwitchUpTel
-      sizer_4->Add(sizer_6, 0, 0, 0);
-      sizer_4->Add(SCALED2(20), SCALED2(106), 0, 0, 0); // Between KeyRlse and SwitchUpTel
-      sizer_5->Add(ButtonKeyRlse, 0, 0, 0);
-      sizer_5->Add(SCALED2(126), SCALED2(20), 0, 0, 0); // Between KeyRlse and ErrorReset
-      sizer_5->Add(ButtonErrorReset, 0, 0, 0);
-      sizer_4->Add(sizer_5, 0, 0, 0);
-      sizer_4->Add(SCALED2(20), SCALED2(6), 0, 0, 0); // Between KeyRlse and Keypad
-      grid_sizer_1->Add(ButtonClear, 0, 0, 0);
-      grid_sizer_1->Add(ButtonVerb, 0, 0, 0);
-      grid_sizer_1->Add(ButtonNoun, 0, 0, 0);
-      grid_sizer_1->Add(ButtonEnter, 0, 0, 0);
-      grid_sizer_1->Add(ButtonPlus, 0, 0, 0);
-      grid_sizer_1->Add(Button7, 0, 0, 0);
-      grid_sizer_1->Add(Button8, 0, 0, 0);
-      grid_sizer_1->Add(Button9, 0, 0, 0);
-      grid_sizer_1->Add(ButtonMinus, 0, 0, 0);
-      grid_sizer_1->Add(Button4, 0, 0, 0);
-      grid_sizer_1->Add(Button5, 0, 0, 0);
-      grid_sizer_1->Add(Button6, 0, 0, 0);
-      grid_sizer_1->Add(Button0, 0, 0, 0);
-      grid_sizer_1->Add(Button1, 0, 0, 0);
-      grid_sizer_1->Add(Button2, 0, 0, 0);
-      grid_sizer_1->Add(Button3, 0, 0, 0);
-      sizer_4->Add(grid_sizer_1, 0, 0, 0);
-      sizer_4->Add(SCALED2(20), SCALED2(63), 0, 0, 0); // Below keypad
-      sizer_2->Add(sizer_4, 0, 0, 0);
-      sizer_2->Add(SCALED2(26), SCALED2(20), 0, 0, 0);
-      panel->SetSizer(sizer_2);
+      wxBoxSizer* NounDigits = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* VerbDigits = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* ProgramDigits = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* UpTlIndicator = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* CompAndCheckIndicators = new wxBoxSizer(wxHORIZONTAL);
+      BothSides->Add(SCALED2(77), SCALED2(20), 0, 0, 0); // Left margin
+      LeftSide->Add(SCALED2(20), SCALED2(55), 0, 0, 0);
+      CompAndCheckIndicators->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Left of CompFail.
+      CompAndCheckIndicators->Add(indicatorCompFail, 0, 0, 0);
+      CompAndCheckIndicators->Add(SCALED2(5), SCALED2(20), 0, 0, 0); // Between CompFail and CheckFail
+      CompAndCheckIndicators->Add(indicatorCheckFail, 0, 0, 0);
+      CompAndCheckIndicators->Add(SCALED2(39), SCALED2(20), 0, 0, 0); // Right of CheckFail
+      LeftSide->Add(CompAndCheckIndicators, 0, 0, 0);
+      LeftSide->Add(SCALED2(20), SCALED2(113), 0, 0, 0);
+      UpTlIndicator->Add(SCALED2(0), SCALED2(20), 0, 0, 0);
+      UpTlIndicator->Add(indicatorUpTl, 0, 0, 0);
+      UpTlIndicator->Add(SCALED2(1), SCALED2(20), 0, 0, 0);
+      UpTlIndicator->Add(indicatorComp, 0, 0, 0);
+      UpTlIndicator->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
+      AboveRegisters->Add(UpTlIndicator, 0, 0, 0);
+      ProgramDigits->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
+      ProgramDigits->Add(digitProgramLeft, 0, 0, 0);
+      ProgramDigits->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
+      ProgramDigits->Add(digitProgramRight, 0, 0, 0);
+      ProgramDigits->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
+      AboveRegisters->Add(ProgramDigits, 0, 0, 0);
+      //AboveRegisters->Add(20, 21, 0);
+      //AboveRegisters->Add(20, 21, 0);
+      AboveRegisters->Add(SCALED2(85), SCALED2(21), 0, 0, 0);
+      AboveRegisters->Add(SCALED2(93), SCALED2(21), 0, 0, 0);
+      VerbDigits->Add(SCALED2(7), SCALED2(20), 0, 0, 0);
+      VerbDigits->Add(digitVerbLeft, 0, 0, 0);
+      VerbDigits->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
+      VerbDigits->Add(digitVerbRight, 0, 0, 0);
+      VerbDigits->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
+      AboveRegisters->Add(VerbDigits, 0, 0, 0);
+      NounDigits->Add(SCALED2(11), SCALED2(20), 0, 0, 0);
+      NounDigits->Add(digitNounLeft, 0, 0, 0);
+      NounDigits->Add(SCALED2(5), SCALED2(20), 0, 0, 0);
+      NounDigits->Add(digitNounRight, 0, 0, 0);
+      NounDigits->Add(SCALED2(12), SCALED2(20), 0, 0, 0);
+      AboveRegisters->Add(NounDigits, 0, 0, 0);
+      LeftSide->Add(AboveRegisters, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+      LeftSide->Add(SCALED2(20), SCALED2(22), 0, 0, 0); // Between Reg1 and Verb/Noun
+      Registers->Add(PlusMinusReg1, 0, 0, 0);
+      Registers->Add(Digit1Reg1, 0, 0, 0);
+      Registers->Add(Digit2Reg1, 0, 0, 0);
+      Registers->Add(Digit3Reg1, 0, 0, 0);
+      Registers->Add(Digit4Reg1, 0, 0, 0);
+      Registers->Add(Digit5Reg1, 0, 0, 0);
+      Registers->Add(PlusMinusReg2, 0, 0, 0);
+      Registers->Add(Digit1Reg2, 0, 0, 0);
+      Registers->Add(Digit2Reg2, 0, 0, 0);
+      Registers->Add(Digit3Reg2, 0, 0, 0);
+      Registers->Add(Digit4Reg2, 0, 0, 0);
+      Registers->Add(Digit5Reg2, 0, 0, 0);
+      Registers->Add(PlusMinusReg3, 0, 0, 0);
+      Registers->Add(Digit1Reg3, 0, 0, 0);
+      Registers->Add(Digit2Reg3, 0, 0, 0);
+      Registers->Add(Digit3Reg3, 0, 0, 0);
+      Registers->Add(Digit4Reg3, 0, 0, 0);
+      Registers->Add(Digit5Reg3, 0, 0, 0);
+      //sizer_7->Add(Registers, 0, 0, 0);
+      //LeftSide->Add(sizer_7, 0, 0, 0);
+      LeftSide->Add(Registers);
+      LeftSide->Add(SCALED2(20), SCALED2(74), 0, 0, 0); // Below Reg3.
+      BothSides->Add(LeftSide, 0, 0, 0);
+      BothSides->Add(SCALED2(31), SCALED2(20), 0, 0, 0); // Middle horizontal spacer.
+      RightSide->Add(SCALED2(20), SCALED2(46), 0, 0, 0); // Above SwitchUptel
+      ExternalControls->Add(SCALED2(15), SCALED2(20), 0, 0, 0); // Left of SwitchUptel
+      ExternalControls->Add(SwitchUpTel, 0, 0, 0);
+      ExternalControls->Add(SCALED2(184), SCALED2(20), 0, 0, 0); // Right of SwitchUpTel
+      RightSide->Add(ExternalControls, 0, 0, 0);
+      RightSide->Add(SCALED2(20), SCALED2(106), 0, 0, 0); // Between KeyRlse and SwitchUpTel
+      UpperKeypad->Add(ButtonKeyRlse, 0, 0, 0);
+      UpperKeypad->Add(SCALED2(126), SCALED2(20), 0, 0, 0); // Between KeyRlse and ErrorReset
+      UpperKeypad->Add(ButtonErrorReset, 0, 0, 0);
+      RightSide->Add(UpperKeypad, 0, 0, 0);
+      RightSide->Add(SCALED2(20), SCALED2(6), 0, 0, 0); // Between KeyRlse and Keypad
+      LowerKeypad->Add(ButtonClear, 0, 0, 0);
+      LowerKeypad->Add(ButtonVerb, 0, 0, 0);
+      LowerKeypad->Add(ButtonNoun, 0, 0, 0);
+      LowerKeypad->Add(ButtonEnter, 0, 0, 0);
+      LowerKeypad->Add(ButtonPlus, 0, 0, 0);
+      LowerKeypad->Add(Button7, 0, 0, 0);
+      LowerKeypad->Add(Button8, 0, 0, 0);
+      LowerKeypad->Add(Button9, 0, 0, 0);
+      LowerKeypad->Add(ButtonMinus, 0, 0, 0);
+      LowerKeypad->Add(Button4, 0, 0, 0);
+      LowerKeypad->Add(Button5, 0, 0, 0);
+      LowerKeypad->Add(Button6, 0, 0, 0);
+      LowerKeypad->Add(Button0, 0, 0, 0);
+      LowerKeypad->Add(Button1, 0, 0, 0);
+      LowerKeypad->Add(Button2, 0, 0, 0);
+      LowerKeypad->Add(Button3, 0, 0, 0);
+      RightSide->Add(LowerKeypad, 0, 0, 0);
+      RightSide->Add(SCALED2(20), SCALED2(63), 0, 0, 0); // Below keypad
+      BothSides->Add(RightSide, 0, 0, 0);
+      BothSides->Add(SCALED2(26), SCALED2(20), 0, 0, 0);
+      panel->SetSizer(BothSides);
       sizer_1->Add(panel, 1, 0, 0);
       SetSizer(sizer_1);
       sizer_1->Fit(this);
       Layout();
       // end wxGlade
+#else // ifndef USE_SIZERS
+      // For reasons inexplicable to me, the normal wxWidgets method of using
+      // sizers introduces small positioning discrepancies (in --half-size only)
+      // and those discrepancies are different on different target platforms.
+      // Those discrepancies, while small, are serious and seem to be far
+      // larger than the rounding errors introduced by stacking SCALED2()
+      // errors.  I'm tired of wrestling with that nonsensical problem. However,
+      // the positioning method (without sizers) used for NAV seems to
+      // work perfectly.  Here, I mimic what NAV does.
+
+      // A word about technique.  I made it a little easier than described above
+      // partial automation:
+      // A. In GIMP, make an image consisting of layers:  the background
+      //    (full face), and each widget.  For those widgets that are
+      //    indistinguishable digits, rename their layers more descriptively.
+      // B. Make it RGB and use a DPI of 100.
+      // C. Export as a TIFF file.
+      // D. Use the utility `tiffinfo` to read the TIFF file and thus print
+      //    info about each layer.  `egrep` it with "Position:|PageName:" to
+      //    show just the relevant layers.  Since the DPI is 100, a position
+      //    of something like 1.16,.55 is seen at a glance to be 116,55 pixels.
+      // For future reference (even though I'll undoubtedly never read this
+      // again!), the process could have been fully automated:  Simply name
+      // each tiff layer identically to the associated widget name
+      // Then have a script process the info provided by
+      // `tiffinfo` to produce a sequence of lines of the form
+      //      widget->SetPosition(scaledPoint(x, y));
+      // which could be directly pasted into a ::do_layout() function like this
+      // one.
+
+      double x, y, xStart, yStart, xDelta, yDelta, xDelta1;
+
+      // Left-hand side.
+      indicatorCompFail->SetPosition(scaledPoint(115, 55));
+      indicatorCheckFail->SetPosition(scaledPoint(182, 55));
+      indicatorUpTl->SetPosition(scaledPoint(77, 212));
+      indicatorComp->SetPosition(scaledPoint(121, 212));
+      digitProgramLeft->SetPosition(scaledPoint(202, 212));
+      digitProgramRight->SetPosition(scaledPoint(242, 212));
+      digitVerbLeft->SetPosition(scaledPoint(83, 271));
+      digitVerbRight->SetPosition(scaledPoint(122, 271));
+      digitNounLeft->SetPosition(scaledPoint(202, 271));
+      digitNounRight->SetPosition(scaledPoint(242, 271));
+      yStart = SCALED2(331);
+      yDelta = SCALED2(60);
+      xStart = SCALED2(76);
+      xDelta1 = SCALED2(36);
+      xDelta = SCALED2(34);
+      x = xStart;
+      y = yStart;
+      PlusMinusReg1->SetPosition(wxPoint(x, y));
+      x += xDelta1;
+      Digit1Reg1->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit2Reg1->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit3Reg1->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit4Reg1->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit5Reg1->SetPosition(wxPoint(x, y));
+      y += yDelta;
+      x = xStart;
+      PlusMinusReg2->SetPosition(wxPoint(x, y));
+      x += xDelta1;
+      Digit1Reg2->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit2Reg2->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit3Reg2->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit4Reg2->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit5Reg2->SetPosition(wxPoint(x, y));
+      y += yDelta;
+      x = xStart;
+      PlusMinusReg3->SetPosition(wxPoint(x, y));
+      x += xDelta1;
+      Digit1Reg3->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit2Reg3->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit3Reg3->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit4Reg3->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Digit5Reg3->SetPosition(wxPoint(x, y));
+      // Right-hand side.
+      SwitchUpTel->SetPosition(scaledPoint(337, 53));
+      ButtonKeyRlse->SetPosition(scaledPoint(317, 199));
+      ButtonErrorReset->SetPosition(scaledPoint(503, 199));
+      xDelta = SCALED2(62);
+      yDelta = SCALED2(62);
+      xStart = SCALED2(317);
+      yStart = SCALED2(265);
+      y = yStart;
+      x = xStart;
+      ButtonClear->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      ButtonVerb->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      ButtonNoun->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      ButtonEnter->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      y += yDelta;
+      x = xStart;
+      ButtonPlus->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button7->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button8->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button9->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      y += yDelta;
+      x = xStart;
+      ButtonMinus->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button4->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button5->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button6->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      y += yDelta;
+      x = xStart;
+      Button0->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button1->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button2->SetPosition(wxPoint(x, y));
+      x += xDelta;
+      Button3->SetPosition(wxPoint(x, y));
+#endif
     }
 }
 
@@ -788,15 +931,24 @@ MyApp::OnInit()
   frame->Timer = new TimerClass();
   frame->Timer->Start(PULSE_INTERVAL);
   SetTopWindow(frame);
-  // For whatever reason, --half-size DSKYs tend to be too short and have to
-  // be manually enlarged.  This is a workaround for that.
+  // For whatever reason, --half-size DSKYs tend to be too short and all other
+  // things being equal, would have to be manually resized. This is a
+  // workaround for that.
   if (HalfSize)
     {
       if (navBay)
         frame->SetMinSize (wxSize(SCALED2(346), SCALED2(1160)));
       else
-        frame->SetMinSize (wxSize(SCALED2(587), SCALED2(572)));
+        frame->SetMinSize (wxSize(SCALED2(587), SCALED2(572+32)));
     }
+  else {
+    // I don't know why, but the following -- which seems to me to be an
+    // improvement on the above -- not only does *not* resize the frame, but
+    // actually defeats the --x and --y switches somehow.
+    // ... Except it doesn't defeat them any more.  What's the deal?  And why
+    // do I need to arbitrarily add some extra to the height?  The ribbon?
+    frame->SetMinSize (wxSize(frame->panel->image.GetWidth(), frame->panel->image.GetHeight()+SCALED2(16)));
+  }
   frame->Show();
   return true;
 }
