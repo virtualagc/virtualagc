@@ -148,7 +148,9 @@ endif
 
 # This is used only for Mac OS, and can be overridden from the command line
 # of the Makefile:
+ifndef AGC_SCALE
 AGC_SCALE=1.0
+endif
 
 # This is just so that when I build it, I can insure that it will be statically or
 # dynamically linked in the binary installers, according to my current whims.
