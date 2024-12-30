@@ -382,7 +382,7 @@ endif
 create-bundle:
 	-rm -rf temp/VirtualAGC.app
 	mkdir -p temp/VirtualAGC.app/Contents
-	sed "s@<key>1.0</key>@<key>$(AGC_SCALE)</key>@" \
+	sed "s@<string>1.0</string>@<string>$(AGC_SCALE)</string>@" \
 	    template.app/Contents/Info.plist \
 	    >temp/VirtualAGC.app/Contents/Info.plist
 
