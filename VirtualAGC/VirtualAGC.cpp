@@ -789,6 +789,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   DskyApoHalfButton->SetMinSize(LineSize);
   DownlinkLabel = new wxStaticText(this, wxID_ANY, wxT("Downlink:"));
   DownlinkLabel->SetMinSize(LineSize);
+  DownlinkLabel->Show(false);
   TelemetryResizable = new wxRadioButton(this, wxID_ANY, wxT("Normal"),
       wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
   TelemetryResizable->Show(false);
