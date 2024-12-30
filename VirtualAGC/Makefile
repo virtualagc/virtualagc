@@ -384,7 +384,7 @@ create-bundle:
 	mkdir -p temp/VirtualAGC.app/Contents
 	sed "s@<key>1.0</key>@<key>$(AGC_SCALE)</key>@" \
 	    template.app/Contents/Info.plist \
-	    >temp/VirtualAGC.app/Contents
+	    >temp/VirtualAGC.app/Contents/Info.plist
 
 # The Mac application tarball requires a file called Terminator.app.tar.bz2 in the 
 # parent directory of yaAGC.  This file is obtained by downloading terminator.dmg
