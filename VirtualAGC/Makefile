@@ -146,6 +146,10 @@ else
 YADEDA2=-DYADEDA2
 endif
 
+# This is used only for Mac OS, and can be overridden from the command line
+# of the Makefile:
+AGC_SCALE=1.0
+
 # This is just so that when I build it, I can insure that it will be statically or
 # dynamically linked in the binary installers, according to my current whims.
 # For anybody else, it will just accept whatever your wxWidgets default library is.
@@ -378,7 +382,9 @@ endif
 create-bundle:
 	-rm -rf temp/VirtualAGC.app
 	mkdir -p temp/VirtualAGC.app/Contents
-	${CP} template.app/Contents/Info.plist temp/VirtualAGC.app/Contents
+	sed "s@<key>1.0</key>@<key>$(AGC_SCALE)</key>@" \
+	    template.app/Contents/Info.plist \
+	    >temp/VirtualAGC.app/Contents
 
 # The Mac application tarball requires a file called Terminator.app.tar.bz2 in the 
 # parent directory of yaAGC.  This file is obtained by downloading terminator.dmg
