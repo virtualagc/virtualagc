@@ -103,6 +103,7 @@ elif args.ags:
 else:
 	TCP_PORT = 19799
 
+lastTime = 0
 if args.time:
 	import datetime
 	lastTime = datetime.datetime.now()
