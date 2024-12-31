@@ -209,7 +209,7 @@ class printer:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PRINTER")
-		self.root.geometry("1200x480")
+		self.root.geometry("1200x480+100+100")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, \
 					    bordermode='ignore')
@@ -226,7 +226,7 @@ class typewriter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC TYPEWRITER")
-		self.root.geometry("1200x480")
+		self.root.geometry("1200x480+200+200")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, \
 					    bordermode='ignore')
@@ -244,7 +244,7 @@ class plotter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PLOTTER")
-		self.root.geometry("%dx%d" % (1024 + 2 * plotMargin, \
+		self.root.geometry("%dx%d+300+300" % (1024 + 2 * plotMargin, \
 									  1024 + 2 * plotMargin))
 		self.canvas = ScrolledWindow(self.root)
 		self.canvas.place(relx=0.0, rely=0.0, relheight=1.0,
@@ -2261,6 +2261,14 @@ try:
 except:
 	pass
 
+if False:
+	root.update()
+	width = root.winfo_width()*2.5
+	height = root.winfo_height()*2.5
+	print("Geometry:", width, height)
+	root.geometry("%dx%d+0+0" % (width, height))
+else:
+	root.geometry("+0+0")
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
 root.mainloop()
