@@ -86,13 +86,23 @@ static int CheckEnds[10];
 static int CheckLocs[10];
 
 int
-main (void)
+main (int argc, char *argv[])
 {
   int i, j, i1, i2, i3, RetVal = 0, Lines = 0;
   int Location = 0, Checksum = 0, NumChecksums = 0;
   long long l1 = 0, TotalChecksum = 0, TotalSum = 0;
   char *ss;
   FILE *fp;
+
+  if (argc > 1)
+    {
+      printf("Usage:\n");
+      printf("\bbinLEMAP <OCTALS\n");
+      printf("The input, OCTALS, should be 16384 lines of text, each line\n");
+      printf("of which is a 32-bit unsigned octal number.  The output is\n");
+      printf("a file called binLEMAP.bin.\n");
+      exit(1);
+    }
 
   // Process the input file.
   while (NULL != fgets (s, sizeof (s) - 1, stdin))
