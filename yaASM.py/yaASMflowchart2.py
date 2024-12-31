@@ -130,6 +130,17 @@ import copy
 # Read CLI switches.  Define the shapes used for various flowchart boxes.
 # Refer to https://graphviz.org/doc/info/shapes.html, in particular to the
 # section describing SDL shapes for PostScript.
+if "--help" in sys.argv[1:]:
+    print("Flowchart creator for properly marked-up LVDC source code.")
+    print("Usage:")
+    print("\tyaASMflowchart [OPTIONS] <SOURCE.lvdc")
+    print("The output is a set of DOT (graphviz) source files, which can")
+    print("be converted into images of flowcharts using graphviz's `dot`")
+    print("program.  The available options are:")
+    print("--no-sdl       Indicates that so-called SDL shapes should not be used.")
+    print("--simplified   Selects simplified visuals for the flowchart.")
+    print("--print-nodes  Enables a debugging mode in which graph nodes are printed.")
+    sys.exit(1)
 if "--no-sdl" not in sys.argv[1:]:
     startShape = "shape=sdl_start peripheries=0"
     callShape = "shape=sdl_call peripheries=0"
