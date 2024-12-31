@@ -50,6 +50,8 @@
 # as piDSKY2.py already interacting with the GPIO using the pigpio method.  However, it may conflict with
 # other GPIO-interfacing programs that expect to have an exclusive lock on the hardware.
 
+import datetime
+
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
