@@ -1982,7 +1982,7 @@ VirtualAGC::do_layout()
   wxGridSizer* LeftSizer = new wxGridSizer(1, 6, 0, 0);
   if (!maximumSquish)
     {
-      TopSizer->Add(20, 5, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+      TopSizer->Add(SCALED(20), SCALED(5), 0, wxALIGN_CENTER_HORIZONTAL, 0);
       LeftSizer->Add(Patch1Bitmap, 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       LeftSizer->Add(Patch7Bitmap, 0,
@@ -1996,11 +1996,11 @@ VirtualAGC::do_layout()
       LeftSizer->Add(Patch11Bitmap, 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       HeaderSizer->Add(LeftSizer, 1, wxEXPAND, 0);
-      MiddleSizer->Add(20, 20, 1,
+      MiddleSizer->Add(SCALED(20), SCALED(20), 1,
           wxALIGN_CENTER_VERTICAL, 0);
       MiddleSizer->Add(PatchBitmap, 0,
           wxALIGN_CENTER_VERTICAL, 0);
-      MiddleSizer->Add(20, 20, 1,
+      MiddleSizer->Add(SCALED(20), SCALED(20), 1,
           wxALIGN_CENTER_VERTICAL, 0);
       HeaderSizer->Add(MiddleSizer, 1, wxEXPAND, 0);
       RightSizer->Add(Patch12Bitmap, 0,
@@ -2017,14 +2017,14 @@ VirtualAGC::do_layout()
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       HeaderSizer->Add(RightSizer, 1, wxEXPAND, 0);
       TopSizer->Add(HeaderSizer, 0, wxEXPAND, 0);
-      TopSizer->Add(20, 5, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+      TopSizer->Add(SCALED(20), SCALED(5), 0, wxALIGN_CENTER_HORIZONTAL, 0);
       TopSizer->Add(TopLine, 0, wxEXPAND, 0);
-      sizer_4->Add(20, 10, 0,
+      sizer_4->Add(SCALED(20), SCALED(10), 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       sizer_4->Add(SimTypeLabel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-      sizer_11->Add(20, 20, 0,
+      sizer_11->Add(SCALED(20), SCALED(20), 0,
           wxALIGN_CENTER_VERTICAL, 0);
-      sizer_14->Add(20, 10, 0, wxEXPAND, 0);
+      sizer_14->Add(SCALED(20), SCALED(10), 0, wxEXPAND, 0);
     }
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
@@ -2033,23 +2033,24 @@ VirtualAGC::do_layout()
   sizer_15->Add(AgcCustomFilename, 1, wxEXPAND, 0);
   sizer_15->Add(AgcFilenameBrowse, 0, 0, 0);
   sizer_19->Add(sizer_15, 0, wxEXPAND, 0);
+  sizer_19->Add(SCALED(5), SCALED(5), 0, 0, 0);
   sizer_14->Add(sizer_19, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_14->Add(20, 10, 0, wxEXPAND, 0);
+    sizer_14->Add(SCALED(20), SCALED(10), 0, wxEXPAND, 0);
   sizer_13->Add(sizer_14, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_11->Add(20, 20, 0,
+    sizer_11->Add(SCALED(20), SCALED(20), 0,
        wxALIGN_CENTER_VERTICAL, 0);
   sizer_4->Add(sizer_11, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_4, 1, wxEXPAND, 0);
 
   sizer_6->Add(static_line_2, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
+    sizer_6->Add(SCALED(20), SCALED(20), 0, wxALIGN_CENTER_VERTICAL,
         0);
   if (!maximumSquish)
-    sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+    sizer_7->Add(SCALED(20), SCALED(10), 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
         0);
   if (DropDown)
     {
@@ -2057,12 +2058,12 @@ VirtualAGC::do_layout()
       if (!maximumSquish)
         {
           sizer_7->Add(SimTypeLabel2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-          sizer_7->Add(20, 10, 0,
+          sizer_7->Add(SCALED(20), SCALED(10), 0,
               wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
         }
       sizer_7->Add(DeviceAGCversionDropDownList, 0, 0, 0);
       if (!maximumSquish)
-        sizer_7->Add(20, 10, 0,
+        sizer_7->Add(SCALED(20), SCALED(10), 0,
             wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
     }
   else
@@ -2074,7 +2075,7 @@ VirtualAGC::do_layout()
   if (!maximumSquish)
     {
       sizer_7->Add(DeviceListLabel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-      sizer_7->Add(20, 10, 0,
+      sizer_7->Add(SCALED(20), SCALED(10), 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
     }
   sizer_7->Add(DeviceAgcCheckbox, 0, 0, 0);
@@ -2092,54 +2093,54 @@ VirtualAGC::do_layout()
   sizer_35->Add(sizer_36, 15, wxEXPAND, 0);
   sizer_7->Add(sizer_35, 1, wxEXPAND, 0);
   sizer_37->Add(DeviceAcaCheckbox, 0, wxALIGN_CENTER_VERTICAL, 0);
-  sizer_37->Add(2, 20, 1, 0, 0);
+  sizer_37->Add(SCALED(2), SCALED(20), 1, 0, 0);
   sizer_37->Add(JoystickConfigure, 0, 0, 0);
   sizer_7->Add(sizer_37, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+    sizer_7->Add(SCALED(20), SCALED(10), 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
         0);
   sizer_12->Add(NoviceButton, 0, 0, 2);
   if (!maximumSquish)
-    sizer_12->Add(20, 20, 0,
+    sizer_12->Add(SCALED(20), SCALED(20), 0,
         wxALIGN_CENTER_VERTICAL, 0);
   sizer_12->Add(ExpertButton, 0, 0, 0);
   sizer_7->Add(sizer_12, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   if (!maximumSquish)
-    sizer_7->Add(20, 10, 0, 0, 0);
+    sizer_7->Add(SCALED(20), SCALED(10), 0, 0, 0);
   sizer_6->Add(sizer_7, 1, 0, 0);
   if (!maximumSquish)
-    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
+    sizer_6->Add(SCALED(20), SCALED(20), 0, wxALIGN_CENTER_VERTICAL,
         0);
   sizer_6->Add(static_line_3, 0, wxEXPAND, 0);
   sizer_5->Add(sizer_6, 0, wxEXPAND, 0);
   sizer_5->Add(static_line_5, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_5->Add(20, 10, 10, wxEXPAND, 0);
+    sizer_5->Add(SCALED(20), SCALED(10), 10, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_1_copy->Add(SCALED(20), SCALED(30), 1, 0, 0);
   sizer_1_copy->Add(AgcSourceButton, 0, 0, 0);
   if (!maximumSquish)
-    sizer_1_copy->Add(20, 20, 0, 0, 0);
+    sizer_1_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
   sizer_1_copy->Add(AeaSourceButton, 0, 0, 0);
   if (!maximumSquish)
-    sizer_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
   if (DropDown)
-    sizer_1->Add(20, 20, 0, 0, 0);
+    sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
   sizer_1->Add(sizer_1_copy, 1, wxEXPAND, 0);
   sizer_5->Add(sizer_1, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_5->Add(20, 10, 0, wxEXPAND, 0);
+    sizer_5->Add(SCALED(20), SCALED(10), 0, wxEXPAND, 0);
   sizer_2->Add(sizer_5, 1, wxEXPAND, 0);
   optionsBox = sizer_8;
   if (!maximumSquish)
     {
-      sizer_8->Add(20, 10, 0,
+      sizer_8->Add(SCALED(20), SCALED(10), 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       sizer_8->Add(OptionList, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-      sizer_8->Add(20, 10, 0,
+      sizer_8->Add(SCALED(20), SCALED(10), 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-      sizer_9->Add(20, 20, 0,
+      sizer_9->Add(SCALED(20), SCALED(20), 0,
           wxALIGN_CENTER_VERTICAL, 0);
     }
   agcStartupBox = sizer_18;
@@ -2150,39 +2151,39 @@ VirtualAGC::do_layout()
   sizer_34->Add(CoreFilename, 1, wxEXPAND, 0);
   sizer_34->Add(CoreBrowse, 0, 0, 0);
   sizer_34->Add(CoreSaveButton, 0, 0, 0);
+  sizer_34->Add(SCALED(5), SCALED(5), 0, 0, 0);
   sizer_18->Add(sizer_34, 1, wxEXPAND, 0);
+  sizer_18->Add(SCALED(5), SCALED(5), 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_10->Add(sizer_18, 0, wxEXPAND, 0);
-  if (!maximumSquish)
-    sizer_10->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL, 0);
   interfaceStylesBox = grid_sizer_2;
   grid_sizer_2->Add(DskyLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(DskyFullButton, 0, 0, 0);
   grid_sizer_2->Add(DskyHalfButton, 0, 0, 0);
   grid_sizer_2->Add(DskyLiteButton, 0, 0, 0);
 
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
   grid_sizer_2->Add(DskyNavButton, 0, 0, 0);
   grid_sizer_2->Add(DskyNavHalfButton, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
 
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
   grid_sizer_2->Add(DskyApoButton, 0, 0, 0);
   grid_sizer_2->Add(DskyApoHalfButton, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
 
   //grid_sizer_2->Add(DownlinkLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   //grid_sizer_2->Add(TelemetryResizable, 0, 0, 0);
   //grid_sizer_2->Add(TelemetryRetro, 0, 0, 0);
-  //grid_sizer_2->Add(20, 20, 0, 0, 0);
+  //grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
 
   grid_sizer_2->Add(DedaLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_2->Add(DedaFullButton, 0, 0, 0);
   grid_sizer_2->Add(DedaHalfButton, 0, 0, 0);
-  grid_sizer_2->Add(20, 20, 0, 0, 0);
+  grid_sizer_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
   sizer_22->Add(grid_sizer_2, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_22, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_10->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+    sizer_10->Add(SCALED(20), SCALED(10), 0, wxALIGN_CENTER_HORIZONTAL, 0);
   debuggerBox = grid_sizer_1;
   grid_sizer_1->Add(AgcDebugLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_1->Add(AgcDebugNormalButton, 0, wxALIGN_CENTER_VERTICAL, 0);
@@ -2204,38 +2205,40 @@ VirtualAGC::do_layout()
       sizer_15_copy->Add(AeaCustomButton, 0, 0, 0);
       sizer_15_copy->Add(AeaCustomFilename, 1, wxEXPAND, 0);
       sizer_15_copy->Add(AeaFilenameBrowse, 0, 0, 0);
+      sizer_15_copy->Add(SCALED(5), SCALED(5), 0, 0, 0);
       sizer_20->Add(sizer_15_copy, 0, wxEXPAND, 0);
+      sizer_20->Add(SCALED(5), SCALED(5), 0, 0, 0);
     }
   sizer_30->Add(sizer_20, 0, wxEXPAND, 0);
   sizer_29->Add(sizer_30, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_29, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_10->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+    sizer_10->Add(SCALED(20), SCALED(10), 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_9->Add(sizer_10, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_9->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
+    sizer_9->Add(SCALED(20), SCALED(20), 0, wxALIGN_CENTER_VERTICAL,
         0);
   sizer_8->Add(sizer_9, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_8, 1, wxEXPAND, 0);
   TopSizer->Add(sizer_2, 0, wxEXPAND, 0);
   TopSizer->Add(static_line_1, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    TopSizer->Add(20, 15, 0,
+    TopSizer->Add(SCALED(20), SCALED(15), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   sizer_3->Add(RunButton, 0,
       wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(SCALED(40), SCALED(40), 0, wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(DefaultsButton, 0,
       wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(SCALED(40), SCALED(40), 0, wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(ExitButton, 0,
       wxALIGN_CENTER_VERTICAL, 0);
   TopSizer->Add(sizer_3, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   if (!maximumSquish)
-    TopSizer->Add(20, 15, 0,
+    TopSizer->Add(SCALED(20), SCALED(15), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   SetSizer(TopSizer);
   TopSizer->Fit(this);
@@ -3038,8 +3041,8 @@ VirtualAGC::FormTiling(void)
     // the geometry of any given window on all of the possible platforms, so we
     // try to give a conservative upper limit.
     showSimulate = 1;
-    wSimulate = 565;
-    hSimulate = 690;
+    wSimulate = 320 /*565*/;
+    hSimulate = 225 /*690*/;
     if (DeviceDskyCheckbox->GetValue())
     {
         showDSKY = 1;
@@ -3064,7 +3067,7 @@ VirtualAGC::FormTiling(void)
                 return false;
         } else {
             if (DskyFullButton->GetValue()) {
-              wDSKY = 575;
+              wDSKY = 580;
               hDSKY = 670;
             }
             else if (DskyHalfButton->GetValue()) {
@@ -3141,7 +3144,7 @@ VirtualAGC::FormTiling(void)
     // height of a normal-size window.  Also, the Simulation-Status window
     // is preferentially overlapped compared to all others.
     // First, try the fully side-by-side option.
-    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < SCALED(820));
+    bool stacked = (showDSKY && showDEDA && (hDSKY + hDEDA) < SCALED(900));
     int columns = 1;
     xSimulate = 0;
     ySimulate = 0;
@@ -3730,7 +3733,8 @@ VirtualAGC::FormScript(void)
 Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
     const wxPoint& pos, const wxSize& size, long style) :
     wxFrame(parent, id, title, pos, size,
-        wxCAPTION | wxMINIMIZE_BOX /*| wxSTAY_ON_TOP*/ | wxSYSTEM_MENU)
+        /*wxCAPTION | wxMINIMIZE_BOX | wxSYSTEM_MENU | wxRESIZE_BORDER */
+        wxDEFAULT_FRAME_STYLE & ~(wxCLOSE_BOX | wxMAXIMIZE_BOX))
 {
   DetailPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
       wxNO_BORDER | wxTAB_TRAVERSAL);
@@ -3755,7 +3759,7 @@ Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
       wxDefaultPosition, wxDefaultSize,
       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
   ScriptText = new wxTextCtrl(ScriptPanel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize,
+      wxDefaultPosition, wxSize(SCALED(500), SCALED(500)),
       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
 
   set_properties();
@@ -3869,7 +3873,7 @@ Simulation::set_properties()
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->SetForegroundColour(wxColour(0, 0, 0));
   UplinkPanel->Hide();
-  ScriptText->SetClientSize(wxSize(SCALED(480), SCALED(480)));
+  //ScriptText->SetClientSize(wxSize(SCALED(480), SCALED(480)));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
   ScriptText->SetForegroundColour(wxColour(0, 0, 0));
   ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
@@ -3880,75 +3884,73 @@ Simulation::set_properties()
 void
 Simulation::do_layout()
 {
-  wxBoxSizer* sizer_25 = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_17 = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer* sizer_31 = new wxBoxSizer(wxVERTICAL);
-  wxStaticBoxSizer* sizer_32 = new wxStaticBoxSizer(sizer_32_staticbox,
+  wxBoxSizer* SimulationEntire = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer* DetailPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* ScriptPanelSizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticBoxSizer* SimulationScriptTextSizer = new wxStaticBoxSizer(sizer_32_staticbox,
       wxHORIZONTAL);
   wxStaticBoxSizer* sizer_33 = new wxStaticBoxSizer(sizer_33_staticbox,
       wxHORIZONTAL);
-  wxBoxSizer* sizer_16 = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer* sizer_27 = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer* sizer_26 = new wxBoxSizer(wxHORIZONTAL);
-  if (!maximumSquish)
-    sizer_25->Add(20, 10, 0,
+  wxBoxSizer* SimulationButtons = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* SimulationDescription = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* SimulationPatch = new wxBoxSizer(wxHORIZONTAL);
+  if (!maximumSquish) {
+    SimulationEntire->Add(SCALED(20), SCALED(10), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  if (!maximumSquish)
-    {
-      sizer_26->Add(20, 20, 1,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-      sizer_26->Add(PatchBitmap, 0,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-      sizer_26->Add(20, 20, 1,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+    SimulationPatch->Add(SCALED(20), SCALED(20), 1,
+        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+    SimulationPatch->Add(PatchBitmap, 0,
+        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+    SimulationPatch->Add(SCALED(20), SCALED(20), 1,
+        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
     }
-  sizer_25->Add(sizer_26, 0, wxEXPAND, 0);
-  if (!maximumSquish)
-    sizer_25->Add(20, 20, 0,
+  SimulationEntire->Add(SimulationPatch, 0, wxEXPAND, 0);
+  if (!maximumSquish) {
+    SimulationEntire->Add(SCALED(20), SCALED(20), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  if (!maximumSquish)
-    sizer_27->Add(20, 20, 0,
+    SimulationDescription->Add(SCALED(20), SCALED(20), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_27->Add(SimulationLabel, 1, wxEXPAND, 0);
+  }
+  SimulationDescription->Add(SimulationLabel, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_27->Add(20, 20, 0,
+    SimulationDescription->Add(SCALED(20), SCALED(20), 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_25->Add(sizer_27, 0, wxEXPAND, 0);
+  SimulationEntire->Add(SimulationDescription, 0, wxEXPAND, 0);
+  //if (!maximumSquish)
+  //  SimulationEntire->Add(SCALED(20), SCALED(20), 0,
+  //      wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   if (!maximumSquish)
-    sizer_25->Add(20, 20, 0,
-        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  if (!maximumSquish)
-    sizer_16->Add(20, 20, 1, 0, 0);
-  sizer_16->Add(MoreButton, 0,
+    SimulationButtons->Add(SCALED(20), SCALED(20), 1, 0, 0);
+  SimulationButtons->Add(MoreButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_16->Add(50, 20, 0, 0, 0);
-  sizer_16->Add(LessButton, 0,
+  SimulationButtons->Add(SCALED(50), SCALED(20), 0, 0, 0);
+  SimulationButtons->Add(LessButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   if (!maximumSquish)
-    sizer_16->Add(50, 20, 0, 0, 0);
-  sizer_16->Add(UploadButton, 0, 0, 0);
+    SimulationButtons->Add(SCALED(50), SCALED(20), 0, 0, 0);
+  SimulationButtons->Add(UploadButton, 0, 0, 0);
   if (!maximumSquish)
-    sizer_16->Add(20, 20, 1, 0, 0);
-  sizer_25->Add(sizer_16, 0, wxEXPAND, 0);
+    SimulationButtons->Add(SCALED(20), SCALED(20), 1, 0, 0);
+  SimulationEntire->Add(SimulationButtons, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_25->Add(20, 10, 0, 0, 0);
+    SimulationEntire->Add(SCALED(20), SCALED(10), 0, 0, 0);
   sizer_33->Add(UplinkText, 1, wxEXPAND, 0);
   UplinkPanel->SetSizer(sizer_33);
-  sizer_25->Add(UplinkPanel, 1, wxEXPAND, 0);
+  SimulationEntire->Add(UplinkPanel, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_17->Add(10, 20, 0, 0, 0);
-  sizer_32->Add(ScriptText, 1, wxEXPAND, 0);
-  ScriptPanel->SetSizer(sizer_32);
-  sizer_31->Add(ScriptPanel, 0, wxEXPAND, 0);
+    DetailPanelSizer->Add(SCALED(10), SCALED(20), 0, 0, 0);
+  SimulationScriptTextSizer->Add(ScriptText, 1, wxEXPAND, 0);
+  ScriptPanel->SetSizer(SimulationScriptTextSizer);
+  ScriptPanelSizer->Add(ScriptPanel, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_31->Add(20, 10, 0, 0, 0);
-  sizer_17->Add(sizer_31, 1, wxEXPAND, 0);
+    ScriptPanelSizer->Add(SCALED(20), SCALED(10), 0, 0, 0);
+  DetailPanelSizer->Add(ScriptPanelSizer, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_17->Add(10, 20, 0, 0, 0);
-  DetailPanel->SetSizer(sizer_17);
-  sizer_25->Add(DetailPanel, 1, wxEXPAND, 0);
-  SetSizer(sizer_25);
-  sizer_25->Fit(this);
+    DetailPanelSizer->Add(SCALED(10), SCALED(20), 0, 0, 0);
+  DetailPanel->SetSizer(DetailPanelSizer);
+  SimulationEntire->Add(DetailPanel, 1, wxEXPAND, 0);
+  SetSizer(SimulationEntire);
+  SimulationEntire->Fit(this);
   Layout();
 }
 
