@@ -103,7 +103,7 @@ elif args.ags:
 else:
 	TCP_PORT = 19799
 
-lastTime = 0
+lastTime = None
 if args.time:
 	import datetime
 	lastTime = datetime.datetime.now()
@@ -227,13 +227,14 @@ def toOnesComplement(value):
 # while the "masks" tell which bits of the "values" are valid.  (The AGC will ignore
 # the invalid bits.  We don't need such masks for AGS.)
 def inputsForAGx():
+	global lastTime
 	returnValue = []
 	
-	global lastTime
-	now = datetime.datetime.now()
-	if now.second == lastTime.second:
-		return []
-	lastTime = now
+	if args.time:
+		now = datetime.datetime.now()
+		if now.second == lastTime.second:
+			return []
+		lastTime = now
 	
 	# Just a demo ... supplies current BerryGPS-IMU IMU data to AGC on input channels
 	# 051-063.  The values (all 1's-complement) supplied are:
