@@ -2268,7 +2268,7 @@ if False:
 	print("Geometry:", width, height)
 	root.geometry("%dx%d+0+0" % (width, height))
 else:
-	root.geometry("+0+0")
+	root.geometry("+400+400")
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
 root.mainloop()
