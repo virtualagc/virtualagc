@@ -1,4 +1,13 @@
 #!/bin/bash
+# This script runs the PTC program PAST using yaLVDC and yaPTC.py.
+
+# First, find the absolute path to this script, remembering that it may be
+# following links.
+apparent="`which runSimPTC.sh`"
+actual="`readlink -f '$apparent' | sed 's@/runSimPTC.sh'`"
+echo $apparent
+echo $actual
+exit 1
 
 xterm -rightbar -hold -e ./yaPTC.py --resize=1 &
 

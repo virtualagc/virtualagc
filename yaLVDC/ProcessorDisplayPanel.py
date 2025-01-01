@@ -6,6 +6,11 @@
 #    Jun 04, 2020 09:18:23 AM CDT  platform: Linux
 
 import sys
+import os
+
+agcScale = 1.0
+if "AGC_SCALE" in os.environ:
+    agcScale = float(os.environ["AGC_SCALE"])
 
 try:
   import Tkinter as tk
@@ -68,7 +73,7 @@ class topProcessorDisplayPanel:
     self.style.map('.',background=
       [('selected', _compcolor), ('active',_ana2color)])
 
-    top.geometry("1311x729+3241+107")
+    top.geometry("%dx%d+0+0" % (1311*agcScale, 731*agcScale))
     top.minsize(1, 1)
     #top.maxsize(5105, 1170)
     top.resizable(1, 0)
@@ -80,7 +85,7 @@ class topProcessorDisplayPanel:
         , relwidth=0.333)
     self.paneProcessorDisplayPanel.configure(takefocus="0")
     self.paneProcessorDisplayPanel_p5 = ttk.Labelframe(height=74.19999999999999
-        , text='{}')
+        , text='')
     self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p5, weight=0)
     self.paneProcessorDisplayPanel_p1 = ttk.Labelframe(height=100.0, text='DATA')
 
@@ -1861,7 +1866,7 @@ class topProcessorDisplayPanel:
         , relheight=1.0, relwidth=0.333)
     self.paneMemoryLoadAndDataDisplayPanel.configure(takefocus="0")
     self.paneMemoryLoadAndDataDisplayPanel_p1 = ttk.Labelframe(height=350
-        , text='{}')
+        , text='')
     self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p1, weight=0)
     self.paneMemoryLoadAndDataDisplayPanel_p2 = ttk.Labelframe(height=118.5
         , text='INSTRUCTION ADDRESS')
@@ -1873,7 +1878,7 @@ class topProcessorDisplayPanel:
         , text='DATA')
     self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p4, weight=4)
     self.paneMemoryLoadAndDataDisplayPanel_p5 = ttk.Labelframe(height=33.900000000000006
-        , text='{}')
+        , text='')
     self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p5, weight=1)
     self.paneMemoryLoadAndDataDisplayPanel_p7 = ttk.Labelframe(text='DISPLAY MODE')
 
@@ -3719,7 +3724,7 @@ class topProcessorDisplayPanel:
     self.paneCEPanel = ttk.Panedwindow(top, orient="vertical")
     self.paneCEPanel.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=0.328)
     self.paneCEPanel.configure(takefocus="0")
-    self.paneCEPanel_p1 = ttk.Labelframe(height=240, text='{}')
+    self.paneCEPanel_p1 = ttk.Labelframe(height=240, text="" )
     self.paneCEPanel.add(self.paneCEPanel_p1, weight=0)
     self.paneCEPanel_p2 = ttk.Labelframe(height=194.70000000000005
         , text='ACCUMULATOR')

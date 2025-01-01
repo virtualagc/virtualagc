@@ -61,12 +61,7 @@
 # you can simply run yaLVDC and yaPTC.py from different consoles on that same 
 # computer. 
 
-import os
 from ProcessorDisplayPanel import *
-
-agcScale = 1.0
-if "AGC_SCALE" in os.environ:
-	agcScale = float(os.environ["AGC_SCALE"])
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 prsModeBCD = True
@@ -160,6 +155,9 @@ cli.add_argument("--tstop", \
 cli.add_argument("--terminal", \
 				 help="Just print all incoming virtual-wire data from CPU.", \
 				 type=int)
+cli.add_argument("--noconnect", \
+				help="Don't try to connect to the LVDC (for GUI debugging).", \
+				type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -1627,7 +1625,8 @@ def connectToLVDC():
 				sys.exit(1)
 			time.sleep(1)
 
-connectToLVDC()
+if not args.noconnect:
+	connectToLVDC()
 
 ###############################################################################
 # Event loop.  Just check periodically for output from yaLVDC (in which case 
@@ -2272,7 +2271,7 @@ if False:
 	height = root.winfo_height()*2.5
 	print("Geometry:", width, height)
 	root.geometry("%dx%d+0+0" % (width, height))
-else:
+elif False:
 	root.geometry("+0+0")
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
