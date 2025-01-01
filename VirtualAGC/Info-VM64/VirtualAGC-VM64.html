@@ -5,39 +5,77 @@
     <title>VirtualAGC-VM64 Virtual Machine</title>
   </head>
   <body>
-    <h1>What's this Virtual Machine?</h1>
+    <h1>Contents</h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#WhatsThis">What's this
+          Virtual Machine?</a></li>
+      <li><a moz-do-not-send="true" href="#WhatsNot">What's Not In this
+          Virtual Machine?</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#Desktop">Virtual AGC
+          Facilities Available On the VM's Desktop</a></li>
+      <li><a moz-do-not-send="true" href="#CommandLine">Virtual AGC
+          Facilities Available From the Command Line</a></li>
+      <li><a moz-do-not-send="true" href="#Lubuntu">Working With Lubuntu</a><br>
+      </li>
+    </ul>
+    <h1><a name="WhatsThis"></a>What's this Virtual Machine?</h1>
     <p>This Virtual Machine (VM), called VirtualAGC-VM64, is intended to
       provide an easy and portable way to work with the materials from
       the Virtual AGC Project, and to update it, without the
-      inconvenience of having to deal with the quirks of the various
-      computer platforms (Windows, Mac OS, Linux, <i>et al.</i>, in
-      multiple operating-system versions).&nbsp; I won't describe the
-      Virtual AGC Project here, since if you don't have a pretty good
-      idea already what it is, then you can be assured that you don't
-      need this VM at all and can stop reading right here.<br>
+      inconvenience of having to deal with complex installation
+      instructions or the quirks of the various computer platforms
+      (Windows, Mac OS, Linux, <i>et al.</i>, in multiple
+      operating-system versions).&nbsp; I won't describe the Virtual AGC
+      Project here, since if you don't have a pretty good idea already
+      what it is, then you can be assured that you don't need this VM at
+      all and can stop reading right here.&nbsp; It suffices to say that
+      the project provides information and software related to the
+      flight computers used in the Apollo and Space Shuttle spacecraft
+      and launch vehicles.<br>
     </p>
     <p>The VM itself is running <a moz-do-not-send="true"
         href="https://lubuntu.me/">a light-weight version of the 64-bit
         Ubuntu Linux operating system that's known as Lubuntu</a>.&nbsp;
       The VM can be run on any computer for which there's a version of <a
         moz-do-not-send="true" href="https://virtualbox.org">the
-        VirtualBox virtualization environment</a>, but you likely know
-      that already since you're viewing this message.<br>
+        VirtualBox virtualization environment</a>, or some common
+      alternatives, but you likely know that already since you're
+      viewing this message.<br>
     </p>
-    <h1>Virtual AGC Facilities Available on the VM</h1>
-    <p>By default, there are just seven icons on the VM's desktop (aside
-      from the Info icon, <img moz-do-not-send="true"
-        src="Icon-round-Question_mark.svg.png" alt=""
-        height="24">, that you used to open this explanation you're
-      reading right now):<br>
+    <h1><a name="WhatsNot"></a>What's Not In this Virtual Machine?</h1>
+    <p>Apollo and Space Shuttle documentation is not directly provided
+      within the VM due to size constraints.&nbsp; (I assume you
+      wouldn't want to deal with multi-terabyte downloads.)&nbsp; Links
+      to online documents at Virtual AGC related websites are provided
+      instead.<br>
+    </p>
+    <p>Flight software for the Apollo Launch Vehicle Digital Computer
+      (LVDC) and the Space Shuttle General Purpose Computers (GPC) are
+      not provided due to <i>presumed</i> "export" restrictions under
+      the International Trade in Arms Regulations (ITAR).&nbsp; It is
+      hoped that at some point we can acquire either export licenses or
+      else a ruling that no export licenses are needed, at which point
+      the flight software will be included.<br>
+    </p>
+    <p> </p>
+    <h1><a name="Desktop"></a>Virtual AGC Facilities Available On the
+      VM's Desktop<br>
+    </h1>
+    <p>Icons available on the VM's desktop:<br>
     </p>
     <p><img moz-do-not-send="true"
-        src="ApolloPatch2-transparent.png"
-        alt="" height="24"> opens the VirtualAGC GUI application.&nbsp;
-      That application is a portal that allows you to run an AGC/AGS
-      simulation in a multitude of configurations, using any available
-      version of the original AGC or AGS software, or to view any of
-      that original software.<br>
+        src="Icon-round-Question_mark.svg.png" alt="" height="24"> is
+      the "info" icon which opens up the explanation you're reading
+      right now ... but I can only assume you already figured that out!<br>
+    </p>
+    <p><img moz-do-not-send="true" src="ApolloPatch2-transparent.png"
+        alt="" height="24"> opens <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updating">the
+        VirtualAGC GUI application</a>.&nbsp; That application is a
+      portal that allows you to run an AGC/AGS simulation in a multitude
+      of configurations, using any available version of the original AGC
+      or AGS software, or to view any of that original software.<br>
     </p>
     <p><img moz-do-not-send="true" src="Firefox_logo.svg" alt=""
         height="24"> takes you to the Virtual AGC Project's main
@@ -75,16 +113,138 @@
       because Orbiter is compatible with Microsoft Windows only, and
       cannot be run on a Linux system. Nor can I freely provide a
       Windows-based VM on which to run Orbiter, because unlike Linux,
-      Microsoft Windows cannot legally be freely distributed.</p>
-    <h1>Working with Lubuntu</h1>
+      Microsoft Windows cannot legally be freely distributed.<br>
+    </p>
+    <img moz-do-not-send="true"
+src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/PTC-64x64.png"
+      alt="" width="29" height="24"> opens the Programmable Test
+    Controller (PTC) simulation, running what's called the PTC ADAPT
+    Self-Test (PAST) program.&nbsp; The PTC was a test panel used for
+    debugging Apollo Launch Vehicle Digital Computer (LVDC)
+    software.&nbsp; The particular LVDC software it is running here is
+    for the Aerospace Data Adapter/Processor Tester (ADAPT), which was a
+    fixture for evaluating the Launch Vehicle Data Adapter (LVDA), a
+    peripheral of the LVDC.&nbsp; Running LVDC software other than PAST
+    must be done from the command line (see the next section).<br>
+    <br>
+    <img moz-do-not-send="true"
+src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/utilities-terminal.png"
+      alt="" width="24" height="24"> opens a Lubuntu command line.&nbsp;
+    See the very next section below for reasons why you might wish to do
+    that.<br>
+    <br>
+    <img moz-do-not-send="true"
+src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/preferences-system.svg"
+      alt="" width="24" height="24"> opens the Lubuntu "control panel"
+    or "control center", or whatever term you'd like to apply to a
+    facility for modifying the settings for the Lubuntu system itself.<br>
+    <h1><a name="CommandLine"></a>Virtual AGC Facilities Available From
+      the Command Line</h1>
+    <p>Some facilities made available to you via the Virtual AGC
+      software repository can be easily accessed via a simple graphical
+      interface as in the preceding section, whereas others are
+      available only via a command line.&nbsp; In this section, we have
+      a brief summary of some of the more-useful utilities available via
+      the command line, but this is not a comprehensive list.&nbsp; In
+      addition to the hyperlinked documentation, each program generally
+      accepts a command-line option <code>--help</code> for additional
+      information.<br>
+    </p>
+    <ul>
+      <li>Apollo Lunar Module Abort Guidance System (AGS):</li>
+      <ul>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler"><b>yaLEMAP</b></a>,
+          the assembler for AGS software source code, creating an AGS
+          executable program.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaAGS.html#Utility_Programs"><b>binLEMAP</b></a>,
+          for creating an AGS executable file from a list of octal
+          values.</li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>yaAGS</b></a>,
+          the AGS CPU emulator.&nbsp; Note that the emulator has an <a
+            moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaAGS.html#Debug">internal
+            debugging facility</a>.<br>
+        </li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaDEDA_the_AGS_User-Interface"><b>yaDEDA</b></a>,
+          the AGS Data Entry and Display Assembly (DEDA) simulator.<br>
+        </li>
+      </ul>
+      <li>Apollo Launch Vehicle Digital Computer (LVDC):&nbsp; <br>
+      </li>
+      <ul>
+        <li><b><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a></b>,
+          the assembler for software source code for the LVDC and
+          Programmable Test Controller (PTC), creating an LVDC/PTC
+          executable program.</li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDC_the_LVDC_CPU_Emulation"><b>yaLVDC</b></a>,
+          the CPU emulator for the LVDC and PTC.&nbsp; There are
+          presently no LVDC peripherals.&nbsp; But the emulator has an <a
+            moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/LVDC.html#EmulatorDebugger">internal
+            debugger facility</a>, or can work with the telemetry or
+          Programmable Test Controller systems (see next items), so LVDC
+          code execution need not be entirely black-box.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/LVDC.html#ViewingTelemetry"><b>yaMccLvdc.py</b></a>,
+          the LVDC telemetry monitor and Digital Command System (DCS).</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/PTCTestProcedures.html"><b>yaPTC</b><b>.py</b></a>,
+          the Programmable Test Controller (PTC) simulator.&nbsp; <a
+            moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
+            here also</a>.<br>
+        </li>
+        <li><b>analyzeBoost.py</b>:&nbsp; <a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/LVDC.html#DoingSomething">See
+            the LVDC's "repeatable flight mode"</a>.</li>
+        <li><b>yaASMflowchart2.py</b>, a software flowchart creator
+          based on mysterious markings found in certain LVDC flight
+          software source code.</li>
+        <li><b>unHOP.py</b> is a programmer aid that parses an LVDC "HOP
+          constant" into its constituent fields.</li>
+        <li><b>unOP.py</b> is a programmer aid that parses an LVDC
+          opcode into its constituent fields.<br>
+        </li>
+      </ul>
+      <li>Space Shuttle:&nbsp; Similarly, TBD<br>
+      </li>
+      <li>If you are engaged in creating your own peripheral devices
+        that can attach to the AGC or AGS CPU emulators (<b>yaAGC</b>
+        and <b>yaAGS</b> respectively), you might like to supplement <a
+          moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/developer.html">the
+          description of the communication protocol</a> with running
+        some simple, model software that's easy to understand and to
+        port.&nbsp; The Python script <b>piPeripheral.py</b> <a
+          moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
+          as such a model</a>, as do the more-fully worked-out <b>piDSKY.py</b>
+        and <b>piDEDA.py</b> programs.&nbsp; For example, in the
+        screenshot below, I am running <b>piDSKY.py</b> in parallel
+        with the more-usual DSKY emulation (<b>yaDSKY2</b>), but <b>piDSKY.py</b>
+        provides very different insight into the communication protocol
+        that may be more useful for an implementer.</li>
+    </ul>
+    <div align="center"><img moz-do-not-send="true"
+src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/piDSKY.jpg"
+        alt="" width="1224" height="628"></div>
+    <p><br>
+    </p>
+    <h1><a name="Lubuntu"></a>Working With Lubuntu</h1>
     <p>You're unlikely to be familiar with Lubuntu, but be confident
       that unfamiliarity won't matter very much to you.&nbsp; Since this
       VM is not intended to be a full-fledged system for you to do your
-      daily work or have your entertainment, it doesn't have much
-      software installed on it that isn't directly relevant to the
-      Virtual AGC Project.&nbsp; But it doesn't need much, and hopefully
-      this short section will familiarize you almost everything you do
-      need to know.<br>
+      daily work or obtain your non-AGC-related entertainment, it
+      doesn't have much software installed on it that isn't directly
+      relevant to the Virtual AGC Project.&nbsp; But it doesn't need
+      much, and hopefully this short section will familiarize you almost
+      everything you do need to know.<br>
     </p>
     <ul>
       <li>As delivered, the desktop is configured so that a <i>single
@@ -101,38 +261,31 @@
           src="Lubuntu_logo_only.svg" alt="" height="24"> in the
         lower-left corner of the screen.<br>
       </li>
-      <li>Command-line window: There are several different command-line
-        terminals you can use (QTerminal, UXterm, Xterm).&nbsp; They are
-        all found on the Lubuntu main menu under the heading "System
-        Tools".&nbsp; I would recommend using QTerminal.</li>
-      <li>Web browser: Firefox is found on the main menu under the
-        heading "Internet".</li>
+      <li>Web browser: Firefox is found on the Lubuntu main menu under
+        the heading "Internet".</li>
       <li>Text editor: Several are installed (FeatherPad, Vim), on the
         Lubuntu main menu under the heading "Accessories", or obtained
         by right-clicking on a text file.&nbsp; I would recommend
         FeatherPad for ease of use, but some people may prefer Vim its
         more-advanced capabilities.</li>
-      <li>Lubuntu updater: To update Lubuntu itself, you can use the
-        Lubuntu Update under the "Preferences" heading of the Lubuntu
-        main menu. However, any updates to the C/C++ compilers, to
-        wxWidgets, or to any other package required by Virtual AGC's
-        build system could have the unintended consequence of future
-        failures when trying to update Virtual AGC. Therefore, it is
-        better not to update Lubuntu until/unless you see a notification
-        on the Virtual AGC website that it's desirable to do so.</li>
-      <li>Screenshots and recordings: I'd recommend using the VirtualBox
-        View menu to do that rather than using Lubuntu's facilities,
-        which may not have been installed.</li>
+      <li>Screenshots: I'd recommend using the VirtualBox View menu to
+        make screenshots, rather than using Lubuntu's facilities or the
+        facilities of the host computer.</li>
+      <li>Recordings: The VirtualBox View menu has a Recording option
+        you can use, and it is functional, but it's tricky and I
+        wouldn't recommend it if you already have decent
+        screen-recording software on the host computer.<br>
+      </li>
       <li>System snapshots: If you have configured the VM how you like
         it and are considering doing anything which might adversely
         affect it (such as performing a Lubuntu update), you might want
         to make a snapshot of your current VM configuration before doing
         so. I would recommend using VirtualBox's snapshotting capability
-        than attempting to install or use any native Lubuntu facilities
-        for that purpose.</li>
+        rather than attempting to install or use any native Lubuntu
+        backup facilities for that purpose.</li>
     </ul>
     <p><br>
-      <i>(Last updated 2024-12-24 by Ron Burkey)</i><br>
+      <i>(Last updated 2025-01-01 by Ron Burkey)</i><br>
       <br>
     </p>
   </body>

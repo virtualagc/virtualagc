@@ -5,24 +5,50 @@
 #  in conjunction with Tcl version 8.6
 #    Jun 04, 2020 09:18:23 AM CDT  platform: Linux
 
+# *************************** IMPORTANT NOTE! *****************************
+# There are similar facilities in module `tkinter` and `tkinter.ttk`, such as 
+# PanedWindow in the former and Panedwindow in the latter, or LabelFrame in
+# the former and Labelframe in the latter.  And they work almost exactly the
+# same way!  *Except* when it comes down to subtleties in layout and dealing 
+# with 4K resolution.  Which means that when you're googling the answers, if
+# you're not careful you'll be trying to apply ttk solutions to tkinter widgets
+# or vice-versa.  I was blissfully unaware of this distinction, and had 
+# mix-and-matched the two types, importing both of the modules.  But for the
+# 4K scaling problem, we definitely need `tkinter` and need to expunge `ttk`.
+# *************************************************************************
+
 import sys
 import os
 
 agcScale = 1.0
 if "AGC_SCALE" in os.environ:
     agcScale = float(os.environ["AGC_SCALE"])
+winWidth = 1311*agcScale
+winHeight = 731*agcScale
+_bgcolor = '#d9d9d9'  # X11 color: 'gray85'
+bgcolor = _bgcolor
+_fgcolor = '#000000'  # X11 color: 'black'
+fgcolor = _fgcolor
+_compcolor = '#d9d9d9' # X11 color: 'gray85'
+_ana1color = '#d9d9d9' # X11 color: 'gray85'
+_ana2color = '#ececec' # Closest X11 color: 'gray92'
+font12 = "-family {DejaVu Sans} -size 12"
+font9 = "-family {DejaVu Sans} -size 9"
 
 try:
   import Tkinter as tk
 except ImportError:
   import tkinter as tk
 
-try:
-  import ttk
-  py3 = False
-except ImportError:
-  import tkinter.ttk as ttk
-  py3 = True
+if False:
+    try:
+      import ttk
+      py3 = False
+    except ImportError:
+      import tkinter.ttk as ttk
+      py3 = True
+else:
+    py3 = True
 
 import ProcessorDisplayPanel_support
 
@@ -57,54 +83,40 @@ class topProcessorDisplayPanel:
   def __init__(self, top=None):
     '''This class configures and populates the toplevel window.
        top is the toplevel containing window.'''
-    _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
-    _fgcolor = '#000000'  # X11 color: 'black'
-    _compcolor = '#d9d9d9' # X11 color: 'gray85'
-    _ana1color = '#d9d9d9' # X11 color: 'gray85'
-    _ana2color = '#ececec' # Closest X11 color: 'gray92'
-    font12 = "-family {DejaVu Sans} -size 12"
-    font9 = "-family {DejaVu Sans} -size 12"
-    self.style = ttk.Style()
+    self.style = tk.ttk.Style()
     if sys.platform == "win32":
       self.style.theme_use('winnative')
     self.style.configure('.',background=_bgcolor)
     self.style.configure('.',foreground=_fgcolor)
-    self.style.configure('.',font=font9)
+    self.style.configure('.',font=font12)
     self.style.map('.',background=
       [('selected', _compcolor), ('active',_ana2color)])
 
-    top.geometry("%dx%d+0+0" % (1311*agcScale, 731*agcScale))
-    top.minsize(1, 1)
-    #top.maxsize(5105, 1170)
-    top.resizable(1, 0)
-    top.title("PROGRAMMABLE TEST CONTROLLER")
-    top.configure(highlightcolor="black")
-
-    self.paneProcessorDisplayPanel = ttk.Panedwindow(top, orient="vertical")
+    self.paneProcessorDisplayPanel = tk.PanedWindow(top, orient="vertical")
     self.paneProcessorDisplayPanel.place(relx=0.667, rely=0.0, relheight=1.0
         , relwidth=0.333)
-    self.paneProcessorDisplayPanel.configure(takefocus="0")
-    self.paneProcessorDisplayPanel_p5 = ttk.Labelframe(height=74.19999999999999
+    ##self.paneProcessorDisplayPanel.configure(takefocus="0")
+    self.paneProcessorDisplayPanel_p5 = tk.LabelFrame(height=agcScale*35
         , text='')
-    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p5, weight=0)
-    self.paneProcessorDisplayPanel_p1 = ttk.Labelframe(height=100.0, text='DATA')
+    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p5)
+    self.paneProcessorDisplayPanel_p1 = tk.LabelFrame(height=agcScale*247, text='DATA')
 
-    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p1, weight=1)
-    self.paneProcessorDisplayPanel_p2 = ttk.Labelframe(height=100.0
+    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p1)
+    self.paneProcessorDisplayPanel_p2 = tk.LabelFrame(height=agcScale*116
         , text='INTERRUPTS')
-    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p2, weight=4)
-    self.paneProcessorDisplayPanel_p3 = ttk.Labelframe(height=190.8
+    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p2)
+    self.paneProcessorDisplayPanel_p3 = tk.LabelFrame(height=agcScale*222
         , text='PROGRAM CONTROL')
-    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p3, weight=3)
-    self.paneProcessorDisplayPanel_p4 = ttk.Labelframe(text='MISCELLANEOUS')
-    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p4, weight=2)
+    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p3)
+    self.paneProcessorDisplayPanel_p4 = tk.LabelFrame(text='MISCELLANEOUS')
+    self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p4)
     self.__funcid0 = self.paneProcessorDisplayPanel.bind('<Map>', self.__adjust_sash0)
 
     self.Label9 = tk.Label(self.paneProcessorDisplayPanel_p5)
-    self.Label9.place(relx=0.0, rely=0.143, height=25, width=437
+    self.Label9.place(relx=0.0, rely=0.143, height=agcScale*25, width=agcScale*437
         , bordermode='ignore')
     self.Label9.configure(activebackground="#f9f9f9")
-    self.Label9.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label9.configure(font=font12)
     self.Label9.configure(text='''PROCESSOR DISPLAY PANEL''')
 
     self.pdpDM1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
@@ -114,7 +126,7 @@ class topProcessorDisplayPanel:
     self.pdpDM1.configure(borderwidth="2")
     self.pdpDM1.configure(relief="ridge")
     self.pdpDM1.configure(selectbackground="#c4c4c4")
-    self.pdpDM1.configure(takefocus="0")
+    ##self.pdpDM1.configure(takefocus="0")
 
     self.pdpDM0 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpDM0.place(relx=0.709, rely=0.809, relheight=0.087, relwidth=0.094
@@ -123,7 +135,7 @@ class topProcessorDisplayPanel:
     self.pdpDM0.configure(borderwidth="2")
     self.pdpDM0.configure(relief="ridge")
     self.pdpDM0.configure(selectbackground="#c4c4c4")
-    self.pdpDM0.configure(takefocus="0")
+    ##self.pdpDM0.configure(takefocus="0")
 
     self.pdpIM1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIM1.place(relx=0.709, rely=0.726, relheight=0.087, relwidth=0.094
@@ -132,7 +144,7 @@ class topProcessorDisplayPanel:
     self.pdpIM1.configure(borderwidth="2")
     self.pdpIM1.configure(relief="ridge")
     self.pdpIM1.configure(selectbackground="#c4c4c4")
-    self.pdpIM1.configure(takefocus="0")
+    ##self.pdpIM1.configure(takefocus="0")
 
     self.pdpIM0 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIM0.place(relx=0.709, rely=0.643, relheight=0.087, relwidth=0.094
@@ -141,7 +153,7 @@ class topProcessorDisplayPanel:
     self.pdpIM0.configure(borderwidth="2")
     self.pdpIM0.configure(relief="ridge")
     self.pdpIM0.configure(selectbackground="#c4c4c4")
-    self.pdpIM0.configure(takefocus="0")
+    ##self.pdpIM0.configure(takefocus="0")
 
     self.pdpA2 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA2.place(relx=0.526, rely=0.581, relheight=0.129, relwidth=0.069
@@ -150,7 +162,7 @@ class topProcessorDisplayPanel:
     self.pdpA2.configure(borderwidth="2")
     self.pdpA2.configure(relief="ridge")
     self.pdpA2.configure(selectbackground="#c4c4c4")
-    self.pdpA2.configure(takefocus="0")
+    ##self.pdpA2.configure(takefocus="0")
 
     self.pdpA9 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA9.place(relx=0.046, rely=0.581, relheight=0.129, relwidth=0.069
@@ -159,7 +171,7 @@ class topProcessorDisplayPanel:
     self.pdpA9.configure(borderwidth="2")
     self.pdpA9.configure(relief="ridge")
     self.pdpA9.configure(selectbackground="#c4c4c4")
-    self.pdpA9.configure(takefocus="0")
+    ##self.pdpA9.configure(takefocus="0")
 
     self.pdpA8 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA8.place(relx=0.114, rely=0.581, relheight=0.129, relwidth=0.069
@@ -168,7 +180,7 @@ class topProcessorDisplayPanel:
     self.pdpA8.configure(borderwidth="2")
     self.pdpA8.configure(relief="ridge")
     self.pdpA8.configure(selectbackground="#c4c4c4")
-    self.pdpA8.configure(takefocus="0")
+    ##self.pdpA8.configure(takefocus="0")
 
     self.pdpA7 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA7.place(relx=0.183, rely=0.581, relheight=0.129, relwidth=0.069
@@ -177,7 +189,7 @@ class topProcessorDisplayPanel:
     self.pdpA7.configure(borderwidth="2")
     self.pdpA7.configure(relief="ridge")
     self.pdpA7.configure(selectbackground="#c4c4c4")
-    self.pdpA7.configure(takefocus="0")
+    ##self.pdpA7.configure(takefocus="0")
 
     self.pdpA6 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA6.place(relx=0.252, rely=0.581, relheight=0.129, relwidth=0.069
@@ -186,7 +198,7 @@ class topProcessorDisplayPanel:
     self.pdpA6.configure(borderwidth="2")
     self.pdpA6.configure(relief="ridge")
     self.pdpA6.configure(selectbackground="#c4c4c4")
-    self.pdpA6.configure(takefocus="0")
+    ##self.pdpA6.configure(takefocus="0")
 
     self.pdpA5 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA5.place(relx=0.32, rely=0.581, relheight=0.129, relwidth=0.069
@@ -195,7 +207,7 @@ class topProcessorDisplayPanel:
     self.pdpA5.configure(borderwidth="2")
     self.pdpA5.configure(relief="ridge")
     self.pdpA5.configure(selectbackground="#c4c4c4")
-    self.pdpA5.configure(takefocus="0")
+    ##self.pdpA5.configure(takefocus="0")
 
     self.pdpA4 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA4.place(relx=0.389, rely=0.581, relheight=0.129, relwidth=0.069
@@ -204,7 +216,7 @@ class topProcessorDisplayPanel:
     self.pdpA4.configure(borderwidth="2")
     self.pdpA4.configure(relief="ridge")
     self.pdpA4.configure(selectbackground="#c4c4c4")
-    self.pdpA4.configure(takefocus="0")
+    ##self.pdpA4.configure(takefocus="0")
 
     self.pdpA3 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA3.place(relx=0.458, rely=0.581, relheight=0.129, relwidth=0.069
@@ -213,7 +225,7 @@ class topProcessorDisplayPanel:
     self.pdpA3.configure(borderwidth="2")
     self.pdpA3.configure(relief="ridge")
     self.pdpA3.configure(selectbackground="#c4c4c4")
-    self.pdpA3.configure(takefocus="0")
+    ##self.pdpA3.configure(takefocus="0")
 
     self.pdpA1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpA1.place(relx=0.595, rely=0.581, relheight=0.129, relwidth=0.069
@@ -222,7 +234,7 @@ class topProcessorDisplayPanel:
     self.pdpA1.configure(borderwidth="2")
     self.pdpA1.configure(relief="ridge")
     self.pdpA1.configure(selectbackground="#c4c4c4")
-    self.pdpA1.configure(takefocus="0")
+    ##self.pdpA1.configure(takefocus="0")
 
     self.pdp13 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp13.place(relx=0.87, rely=0.062, relheight=0.129, relwidth=0.069
@@ -231,7 +243,7 @@ class topProcessorDisplayPanel:
     self.pdp13.configure(borderwidth="2")
     self.pdp13.configure(relief="ridge")
     self.pdp13.configure(selectbackground="#c4c4c4")
-    self.pdp13.configure(takefocus="0")
+    ##self.pdp13.configure(takefocus="0")
 
     self.pdpOP1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpOP1.place(relx=0.87, rely=0.29, relheight=0.129, relwidth=0.069
@@ -240,7 +252,7 @@ class topProcessorDisplayPanel:
     self.pdpOP1.configure(borderwidth="2")
     self.pdpOP1.configure(relief="ridge")
     self.pdpOP1.configure(selectbackground="#c4c4c4")
-    self.pdpOP1.configure(takefocus="0")
+    ##self.pdpOP1.configure(takefocus="0")
 
     self.pdp12 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp12.place(relx=0.801, rely=0.062, relheight=0.129, relwidth=0.069
@@ -249,7 +261,7 @@ class topProcessorDisplayPanel:
     self.pdp12.configure(borderwidth="2")
     self.pdp12.configure(relief="ridge")
     self.pdp12.configure(selectbackground="#c4c4c4")
-    self.pdp12.configure(takefocus="0")
+    ##self.pdp12.configure(takefocus="0")
 
     self.pdp11 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp11.place(relx=0.732, rely=0.062, relheight=0.129, relwidth=0.069
@@ -258,7 +270,7 @@ class topProcessorDisplayPanel:
     self.pdp11.configure(borderwidth="2")
     self.pdp11.configure(relief="ridge")
     self.pdp11.configure(selectbackground="#c4c4c4")
-    self.pdp11.configure(takefocus="0")
+    ##self.pdp11.configure(takefocus="0")
 
     self.pdp10 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp10.place(relx=0.664, rely=0.062, relheight=0.129, relwidth=0.069
@@ -267,7 +279,7 @@ class topProcessorDisplayPanel:
     self.pdp10.configure(borderwidth="2")
     self.pdp10.configure(relief="ridge")
     self.pdp10.configure(selectbackground="#c4c4c4")
-    self.pdp10.configure(takefocus="0")
+    ##self.pdp10.configure(takefocus="0")
 
     self.pdp9 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp9.place(relx=0.595, rely=0.062, relheight=0.129, relwidth=0.069
@@ -276,7 +288,7 @@ class topProcessorDisplayPanel:
     self.pdp9.configure(borderwidth="2")
     self.pdp9.configure(relief="ridge")
     self.pdp9.configure(selectbackground="#c4c4c4")
-    self.pdp9.configure(takefocus="0")
+    ##self.pdp9.configure(takefocus="0")
 
     self.pdp8 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp8.place(relx=0.526, rely=0.062, relheight=0.129, relwidth=0.069
@@ -285,7 +297,7 @@ class topProcessorDisplayPanel:
     self.pdp8.configure(borderwidth="2")
     self.pdp8.configure(relief="ridge")
     self.pdp8.configure(selectbackground="#c4c4c4")
-    self.pdp8.configure(takefocus="0")
+    ##self.pdp8.configure(takefocus="0")
 
     self.pdp7 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp7.place(relx=0.458, rely=0.062, relheight=0.129, relwidth=0.069
@@ -294,7 +306,7 @@ class topProcessorDisplayPanel:
     self.pdp7.configure(borderwidth="2")
     self.pdp7.configure(relief="ridge")
     self.pdp7.configure(selectbackground="#c4c4c4")
-    self.pdp7.configure(takefocus="0")
+    ##self.pdp7.configure(takefocus="0")
 
     self.pdp6 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp6.place(relx=0.389, rely=0.062, relheight=0.129, relwidth=0.069
@@ -303,7 +315,7 @@ class topProcessorDisplayPanel:
     self.pdp6.configure(borderwidth="2")
     self.pdp6.configure(relief="ridge")
     self.pdp6.configure(selectbackground="#c4c4c4")
-    self.pdp6.configure(takefocus="0")
+    ##self.pdp6.configure(takefocus="0")
 
     self.pdp5 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp5.place(relx=0.32, rely=0.062, relheight=0.129, relwidth=0.069
@@ -312,7 +324,7 @@ class topProcessorDisplayPanel:
     self.pdp5.configure(borderwidth="2")
     self.pdp5.configure(relief="ridge")
     self.pdp5.configure(selectbackground="#c4c4c4")
-    self.pdp5.configure(takefocus="0")
+    ##self.pdp5.configure(takefocus="0")
 
     self.pdp4 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp4.place(relx=0.252, rely=0.062, relheight=0.129, relwidth=0.069
@@ -321,7 +333,7 @@ class topProcessorDisplayPanel:
     self.pdp4.configure(borderwidth="2")
     self.pdp4.configure(relief="ridge")
     self.pdp4.configure(selectbackground="#c4c4c4")
-    self.pdp4.configure(takefocus="0")
+    ##self.pdp4.configure(takefocus="0")
 
     self.pdp3 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp3.place(relx=0.183, rely=0.062, relheight=0.129, relwidth=0.069
@@ -330,7 +342,7 @@ class topProcessorDisplayPanel:
     self.pdp3.configure(borderwidth="2")
     self.pdp3.configure(relief="ridge")
     self.pdp3.configure(selectbackground="#c4c4c4")
-    self.pdp3.configure(takefocus="0")
+    ##self.pdp3.configure(takefocus="0")
 
     self.pdp2 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp2.place(relx=0.114, rely=0.062, relheight=0.129, relwidth=0.069
@@ -339,7 +351,7 @@ class topProcessorDisplayPanel:
     self.pdp2.configure(borderwidth="2")
     self.pdp2.configure(relief="ridge")
     self.pdp2.configure(selectbackground="#c4c4c4")
-    self.pdp2.configure(takefocus="0")
+    ##self.pdp2.configure(takefocus="0")
 
     self.pdp1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdp1.place(relx=0.046, rely=0.062, relheight=0.129, relwidth=0.069
@@ -348,7 +360,7 @@ class topProcessorDisplayPanel:
     self.pdp1.configure(borderwidth="2")
     self.pdp1.configure(relief="ridge")
     self.pdp1.configure(selectbackground="#c4c4c4")
-    self.pdp1.configure(takefocus="0")
+    ##self.pdp1.configure(takefocus="0")
 
     self.pdpHOPSAVE_REG = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpHOPSAVE_REG.place(relx=0.847, rely=0.602, relheight=0.17
@@ -357,7 +369,7 @@ class topProcessorDisplayPanel:
     self.pdpHOPSAVE_REG.configure(borderwidth="2")
     self.pdpHOPSAVE_REG.configure(relief="ridge")
     self.pdpHOPSAVE_REG.configure(selectbackground="#c4c4c4")
-    self.pdpHOPSAVE_REG.configure(takefocus="0")
+    ##self.pdpHOPSAVE_REG.configure(takefocus="0")
 
     self.pdpMEM_ADD_REG = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpMEM_ADD_REG.place(relx=0.847, rely=0.436, relheight=0.17
@@ -366,7 +378,7 @@ class topProcessorDisplayPanel:
     self.pdpMEM_ADD_REG.configure(borderwidth="2")
     self.pdpMEM_ADD_REG.configure(relief="ridge")
     self.pdpMEM_ADD_REG.configure(selectbackground="#c4c4c4")
-    self.pdpMEM_ADD_REG.configure(takefocus="0")
+    ##self.pdpMEM_ADD_REG.configure(takefocus="0")
 
     self.pdpSYL0 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpSYL0.place(relx=0.046, rely=0.747, relheight=0.17, relwidth=0.092
@@ -375,7 +387,7 @@ class topProcessorDisplayPanel:
     self.pdpSYL0.configure(borderwidth="2")
     self.pdpSYL0.configure(relief="ridge")
     self.pdpSYL0.configure(selectbackground="#c4c4c4")
-    self.pdpSYL0.configure(takefocus="0")
+    ##self.pdpSYL0.configure(takefocus="0")
 
     self.pdpSYL1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpSYL1.place(relx=0.137, rely=0.747, relheight=0.17, relwidth=0.092
@@ -384,7 +396,7 @@ class topProcessorDisplayPanel:
     self.pdpSYL1.configure(borderwidth="2")
     self.pdpSYL1.configure(relief="ridge")
     self.pdpSYL1.configure(selectbackground="#c4c4c4")
-    self.pdpSYL1.configure(takefocus="0")
+    ##self.pdpSYL1.configure(takefocus="0")
 
     self.pdpDS4 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpDS4.place(relx=0.263, rely=0.83, relheight=0.087, relwidth=0.094
@@ -393,7 +405,7 @@ class topProcessorDisplayPanel:
     self.pdpDS4.configure(borderwidth="2")
     self.pdpDS4.configure(relief="ridge")
     self.pdpDS4.configure(selectbackground="#c4c4c4")
-    self.pdpDS4.configure(takefocus="0")
+    #self.pdpDS4.configure(takefocus="0")
 
     self.pdpIS4 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIS4.place(relx=0.263, rely=0.747, relheight=0.087, relwidth=0.094
@@ -402,7 +414,7 @@ class topProcessorDisplayPanel:
     self.pdpIS4.configure(borderwidth="2")
     self.pdpIS4.configure(relief="ridge")
     self.pdpIS4.configure(selectbackground="#c4c4c4")
-    self.pdpIS4.configure(takefocus="0")
+    #self.pdpIS4.configure(takefocus="0")
 
     self.pdpDS1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpDS1.place(relx=0.572, rely=0.83, relheight=0.087, relwidth=0.094
@@ -411,7 +423,7 @@ class topProcessorDisplayPanel:
     self.pdpDS1.configure(borderwidth="2")
     self.pdpDS1.configure(relief="ridge")
     self.pdpDS1.configure(selectbackground="#c4c4c4")
-    self.pdpDS1.configure(takefocus="0")
+    #self.pdpDS1.configure(takefocus="0")
 
     self.pdpDS2 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpDS2.place(relx=0.481, rely=0.83, relheight=0.087, relwidth=0.094
@@ -420,7 +432,7 @@ class topProcessorDisplayPanel:
     self.pdpDS2.configure(borderwidth="2")
     self.pdpDS2.configure(relief="ridge")
     self.pdpDS2.configure(selectbackground="#c4c4c4")
-    self.pdpDS2.configure(takefocus="0")
+    #self.pdpDS2.configure(takefocus="0")
 
     self.pdpDS3 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpDS3.place(relx=0.389, rely=0.83, relheight=0.087, relwidth=0.094
@@ -429,7 +441,7 @@ class topProcessorDisplayPanel:
     self.pdpDS3.configure(borderwidth="2")
     self.pdpDS3.configure(relief="ridge")
     self.pdpDS3.configure(selectbackground="#c4c4c4")
-    self.pdpDS3.configure(takefocus="0")
+    #self.pdpDS3.configure(takefocus="0")
 
     self.pdpIS3 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIS3.place(relx=0.389, rely=0.747, relheight=0.087, relwidth=0.094
@@ -438,7 +450,7 @@ class topProcessorDisplayPanel:
     self.pdpIS3.configure(borderwidth="2")
     self.pdpIS3.configure(relief="ridge")
     self.pdpIS3.configure(selectbackground="#c4c4c4")
-    self.pdpIS3.configure(takefocus="0")
+    #self.pdpIS3.configure(takefocus="0")
 
     self.pdpIS2 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIS2.place(relx=0.481, rely=0.747, relheight=0.087, relwidth=0.094
@@ -447,7 +459,7 @@ class topProcessorDisplayPanel:
     self.pdpIS2.configure(borderwidth="2")
     self.pdpIS2.configure(relief="ridge")
     self.pdpIS2.configure(selectbackground="#c4c4c4")
-    self.pdpIS2.configure(takefocus="0")
+    #self.pdpIS2.configure(takefocus="0")
 
     self.pdpIS1 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpIS1.place(relx=0.572, rely=0.747, relheight=0.087, relwidth=0.094
@@ -456,7 +468,7 @@ class topProcessorDisplayPanel:
     self.pdpIS1.configure(borderwidth="2")
     self.pdpIS1.configure(relief="ridge")
     self.pdpIS1.configure(selectbackground="#c4c4c4")
-    self.pdpIS1.configure(takefocus="0")
+    #self.pdpIS1.configure(takefocus="0")
 
     self.pdpOP2 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpOP2.place(relx=0.801, rely=0.29, relheight=0.129, relwidth=0.069
@@ -465,7 +477,7 @@ class topProcessorDisplayPanel:
     self.pdpOP2.configure(borderwidth="2")
     self.pdpOP2.configure(relief="ridge")
     self.pdpOP2.configure(selectbackground="#c4c4c4")
-    self.pdpOP2.configure(takefocus="0")
+    #self.pdpOP2.configure(takefocus="0")
 
     self.pdpOP3 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpOP3.place(relx=0.732, rely=0.29, relheight=0.129, relwidth=0.069
@@ -474,7 +486,7 @@ class topProcessorDisplayPanel:
     self.pdpOP3.configure(borderwidth="2")
     self.pdpOP3.configure(relief="ridge")
     self.pdpOP3.configure(selectbackground="#c4c4c4")
-    self.pdpOP3.configure(takefocus="0")
+    #self.pdpOP3.configure(takefocus="0")
 
     self.pdpOP4 = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpOP4.place(relx=0.664, rely=0.29, relheight=0.129, relwidth=0.069
@@ -483,7 +495,7 @@ class topProcessorDisplayPanel:
     self.pdpOP4.configure(borderwidth="2")
     self.pdpOP4.configure(relief="ridge")
     self.pdpOP4.configure(selectbackground="#c4c4c4")
-    self.pdpOP4.configure(takefocus="0")
+    #self.pdpOP4.configure(takefocus="0")
 
     self.pdpTRANS_REG = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpTRANS_REG.place(relx=0.538, rely=0.29, relheight=0.17, relwidth=0.092
@@ -492,7 +504,7 @@ class topProcessorDisplayPanel:
     self.pdpTRANS_REG.configure(borderwidth="2")
     self.pdpTRANS_REG.configure(relief="ridge")
     self.pdpTRANS_REG.configure(selectbackground="#c4c4c4")
-    self.pdpTRANS_REG.configure(takefocus="0")
+    #self.pdpTRANS_REG.configure(takefocus="0")
 
     self.pdpMEM_BUFFER_REG = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpMEM_BUFFER_REG.place(relx=0.412, rely=0.29, relheight=0.17
@@ -501,7 +513,7 @@ class topProcessorDisplayPanel:
     self.pdpMEM_BUFFER_REG.configure(borderwidth="2")
     self.pdpMEM_BUFFER_REG.configure(relief="ridge")
     self.pdpMEM_BUFFER_REG.configure(selectbackground="#c4c4c4")
-    self.pdpMEM_BUFFER_REG.configure(takefocus="0")
+    #self.pdpMEM_BUFFER_REG.configure(takefocus="0")
 
     self.pdpMEM_BUFFER_PARITY = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpMEM_BUFFER_PARITY.place(relx=0.286, rely=0.29, relheight=0.17
@@ -510,7 +522,7 @@ class topProcessorDisplayPanel:
     self.pdpMEM_BUFFER_PARITY.configure(borderwidth="2")
     self.pdpMEM_BUFFER_PARITY.configure(relief="ridge")
     self.pdpMEM_BUFFER_PARITY.configure(selectbackground="#c4c4c4")
-    self.pdpMEM_BUFFER_PARITY.configure(takefocus="0")
+    #self.pdpMEM_BUFFER_PARITY.configure(takefocus="0")
 
     self.pdpERROR_RESET = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpERROR_RESET.place(relx=0.034, rely=0.29, relheight=0.17
@@ -519,7 +531,7 @@ class topProcessorDisplayPanel:
     self.pdpERROR_RESET.configure(borderwidth="2")
     self.pdpERROR_RESET.configure(relief="ridge")
     self.pdpERROR_RESET.configure(selectbackground="#c4c4c4")
-    self.pdpERROR_RESET.configure(takefocus="0")
+    #self.pdpERROR_RESET.configure(takefocus="0")
 
     self.pdpPARITY_ERROR = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpPARITY_ERROR.place(relx=0.16, rely=0.29, relheight=0.087
@@ -528,7 +540,7 @@ class topProcessorDisplayPanel:
     self.pdpPARITY_ERROR.configure(borderwidth="2")
     self.pdpPARITY_ERROR.configure(relief="ridge")
     self.pdpPARITY_ERROR.configure(selectbackground="#c4c4c4")
-    self.pdpPARITY_ERROR.configure(takefocus="0")
+    #self.pdpPARITY_ERROR.configure(takefocus="0")
 
     self.pdpERROR_HOLD = tk.Canvas(self.paneProcessorDisplayPanel_p1)
     self.pdpERROR_HOLD.place(relx=0.16, rely=0.373, relheight=0.087
@@ -537,239 +549,239 @@ class topProcessorDisplayPanel:
     self.pdpERROR_HOLD.configure(borderwidth="2")
     self.pdpERROR_HOLD.configure(relief="ridge")
     self.pdpERROR_HOLD.configure(selectbackground="#c4c4c4")
-    self.pdpERROR_HOLD.configure(takefocus="0")
+    #self.pdpERROR_HOLD.configure(takefocus="0")
 
     self.Label13 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label13.place(relx=0.675, rely=0.249, height=8, width=109
+    self.Label13.place(relx=0.675, rely=0.249, height=agcScale*8, width=agcScale*109
         , bordermode='ignore')
     self.Label13.configure(activebackground="#f9f9f9")
     self.Label13.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13.configure(text='''----------OP CODE----------''')
 
     self.Label13_38 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label13_38.place(relx=0.057, rely=0.539, height=8, width=259
+    self.Label13_38.place(relx=0.057, rely=0.539, height=agcScale*8, width=agcScale*259
         , bordermode='ignore')
     self.Label13_38.configure(activebackground="#f9f9f9")
     self.Label13_38.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_38.configure(text='''--------------------MEMORY ADDRESS--------------------''')
 
     self.Label13_39 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label13_39.place(relx=0.057, rely=0.934, height=8, width=74
+    self.Label13_39.place(relx=0.057, rely=0.934, height=agcScale*8, width=agcScale*74
         , bordermode='ignore')
     self.Label13_39.configure(activebackground="#f9f9f9")
     self.Label13_39.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_39.configure(text='''----SYLLABLE----''')
 
     self.Label13_40 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label13_40.place(relx=0.275, rely=0.934, height=8, width=169
+    self.Label13_40.place(relx=0.275, rely=0.934, height=agcScale*8, width=agcScale*169
         , bordermode='ignore')
     self.Label13_40.configure(activebackground="#f9f9f9")
     self.Label13_40.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_40.configure(text='''---------------SECTOR---------------''')
 
     self.Label14 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14.place(relx=0.229, rely=0.788, height=18, width=12
+    self.Label14.place(relx=0.229, rely=0.788, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14.configure(activebackground="#f9f9f9")
-    self.Label14.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14.configure(font=font12)
     self.Label14.configure(text='''←''')
 
     self.Label14_41 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_41.place(relx=0.378, rely=0.332, height=18, width=12
+    self.Label14_41.place(relx=0.378, rely=0.332, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_41.configure(activebackground="#f9f9f9")
-    self.Label14_41.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_41.configure(font=font12)
     self.Label14_41.configure(text='''←''')
 
     self.Label14_15 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_15.place(relx=0.801, rely=0.768, height=23, width=67
+    self.Label14_15.place(relx=0.801, rely=0.768, height=agcScale*23, width=agcScale*67
         , bordermode='ignore')
     self.Label14_15.configure(activebackground="#f9f9f9")
     self.Label14_15.configure(anchor='w')
-    self.Label14_15.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_15.configure(font=font12)
     self.Label14_15.configure(text='''⟵⟵⟵⟵''')
 
     self.Label15 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label15.place(relx=0.675, rely=0.581, height=13, width=72
+    self.Label15.place(relx=0.675, rely=0.581, height=agcScale*13, width=agcScale*72
         , bordermode='ignore')
     self.Label15.configure(activebackground="#f9f9f9")
     self.Label15.configure(anchor='w')
-    self.Label15.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label15.configure(font=font12)
     self.Label15.configure(text='''⟵⟵⟵⟵⟵''')
 
     self.Label14_8 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_8.place(relx=0.938, rely=0.622, height=18, width=12
+    self.Label14_8.place(relx=0.938, rely=0.622, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_8.configure(activebackground="#f9f9f9")
-    self.Label14_8.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_8.configure(font=font12)
     self.Label14_8.configure(text='''←''')
 
     self.Label14_43 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_43.place(relx=0.938, rely=0.477, height=18, width=12
+    self.Label14_43.place(relx=0.938, rely=0.477, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_43.configure(activebackground="#f9f9f9")
-    self.Label14_43.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_43.configure(font=font12)
     self.Label14_43.configure(text='''←''')
 
     self.Label14_42 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_42.place(relx=0.938, rely=0.29, height=18, width=12
+    self.Label14_42.place(relx=0.938, rely=0.29, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_42.configure(activebackground="#f9f9f9")
-    self.Label14_42.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_42.configure(font=font12)
     self.Label14_42.configure(text='''←''')
 
     self.Label17 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17.place(relx=0.95, rely=0.245, height=15, width=17
+    self.Label17.place(relx=0.95, rely=0.245, height=agcScale*15, width=agcScale*17
         , bordermode='ignore')
     self.Label17.configure(activebackground="#f9f9f9")
-    self.Label17.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17.configure(font=font12)
     self.Label17.configure(text='''↓''')
 
     self.Label17_20 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_20.place(relx=0.95, rely=0.581, height=18, width=17
+    self.Label17_20.place(relx=0.95, rely=0.581, height=agcScale*18, width=agcScale*17
         , bordermode='ignore')
     self.Label17_20.configure(activebackground="#f9f9f9")
-    self.Label17_20.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_20.configure(font=font12)
     self.Label17_20.configure(text='''↓''')
 
     self.Label17_45 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_45.place(relx=0.95, rely=0.747, height=23, width=17
+    self.Label17_45.place(relx=0.95, rely=0.747, height=agcScale*23, width=agcScale*17
         , bordermode='ignore')
     self.Label17_45.configure(activebackground="#f9f9f9")
-    self.Label17_45.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_45.configure(font=font12)
     self.Label17_45.configure(text='''↓''')
 
     self.Label17_47 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_47.place(relx=0.801, rely=0.726, height=13, width=17
+    self.Label17_47.place(relx=0.801, rely=0.726, height=agcScale*13, width=agcScale*17
         , bordermode='ignore')
     self.Label17_47.configure(activebackground="#f9f9f9")
-    self.Label17_47.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_47.configure(font=font12)
     self.Label17_47.configure(text='''↓''')
 
     self.Label19 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label19.place(relx=0.812, rely=0.643, height=18, width=12
+    self.Label19.place(relx=0.812, rely=0.643, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label19.configure(activebackground="#f9f9f9")
-    self.Label19.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label19.configure(font=font12)
     self.Label19.configure(text='''↙''')
 
     self.Label17_44 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_44.place(relx=0.95, rely=0.519, height=18, width=17
+    self.Label17_44.place(relx=0.95, rely=0.519, height=agcScale*18, width=agcScale*17
         , bordermode='ignore')
     self.Label17_44.configure(activebackground="#f9f9f9")
-    self.Label17_44.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_44.configure(font=font12)
     self.Label17_44.configure(text='''↓''')
 
     self.Label17_21 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_21.place(relx=0.95, rely=0.685, height=18, width=17
+    self.Label17_21.place(relx=0.95, rely=0.685, height=agcScale*18, width=agcScale*17
         , bordermode='ignore')
     self.Label17_21.configure(activebackground="#f9f9f9")
-    self.Label17_21.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_21.configure(font=font12)
     self.Label17_21.configure(text='''↓''')
 
     self.Label17_22 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_22.place(relx=0.95, rely=0.415, height=23, width=17
+    self.Label17_22.place(relx=0.95, rely=0.415, height=agcScale*23, width=agcScale*17
         , bordermode='ignore')
     self.Label17_22.configure(activebackground="#f9f9f9")
-    self.Label17_22.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_22.configure(font=font12)
     self.Label17_22.configure(text='''↓''')
 
     self.Label17_46 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label17_46.place(relx=0.95, rely=0.332, height=23, width=17
+    self.Label17_46.place(relx=0.95, rely=0.332, height=agcScale*23, width=agcScale*17
         , bordermode='ignore')
     self.Label17_46.configure(activebackground="#f9f9f9")
-    self.Label17_46.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label17_46.configure(font=font12)
     self.Label17_46.configure(text='''↓''')
 
     self.Label19_13 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label19_13.place(relx=0.675, rely=0.788, height=18, width=12
+    self.Label19_13.place(relx=0.675, rely=0.788, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label19_13.configure(activebackground="#f9f9f9")
-    self.Label19_13.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label19_13.configure(font=font12)
     self.Label19_13.configure(text='''↙''')
 
     self.Label14_1 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_1.place(relx=0.252, rely=0.332, height=18, width=12
+    self.Label14_1.place(relx=0.252, rely=0.332, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_1.configure(activebackground="#f9f9f9")
-    self.Label14_1.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_1.configure(font=font12)
     self.Label14_1.configure(text='''←''')
 
     self.Label21 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label21.place(relx=0.057, rely=0.187, height=8, width=382
+    self.Label21.place(relx=0.057, rely=0.187, height=agcScale*8, width=agcScale*382
         , bordermode='ignore')
     self.Label21.configure(activebackground="#f9f9f9")
-    self.Label21.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label21.configure(font=font12)
     self.Label21.configure(text='''————————————————————————————————''')
 
     self.Label14_16 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_16.place(relx=0.32, rely=0.216, height=18, width=12
+    self.Label14_16.place(relx=0.32, rely=0.216, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_16.configure(activebackground="#f9f9f9")
-    self.Label14_16.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_16.configure(font=font12)
     self.Label14_16.configure(text='''↑''')
 
     self.Label14_17 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_17.place(relx=0.572, rely=0.22, height=18, width=12
+    self.Label14_17.place(relx=0.572, rely=0.22, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_17.configure(activebackground="#f9f9f9")
-    self.Label14_17.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_17.configure(font=font12)
     self.Label14_17.configure(text='''↑''')
 
     self.Label14_9 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_9.place(relx=0.126, rely=0.332, height=18, width=12
+    self.Label14_9.place(relx=0.126, rely=0.332, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_9.configure(activebackground="#f9f9f9")
-    self.Label14_9.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_9.configure(font=font12)
     self.Label14_9.configure(text='''→''')
 
     self.Label14_10 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_10.place(relx=0.018, rely=0.56, height=18, width=12
+    self.Label14_10.place(relx=0.018, rely=0.56, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_10.configure(activebackground="#f9f9f9")
-    self.Label14_10.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_10.configure(font=font12)
     self.Label14_10.configure(text='''↖''')
 
     self.Label14_18 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_18.place(relx=0.023, rely=0.498, height=18, width=12
+    self.Label14_18.place(relx=0.023, rely=0.498, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_18.configure(activebackground="#f9f9f9")
-    self.Label14_18.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_18.configure(font=font12)
     self.Label14_18.configure(text='''↗''')
 
     self.Label14_11 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_11.place(relx=0.565, rely=0.465, height=12, width=12
+    self.Label14_11.place(relx=0.565, rely=0.465, height=agcScale*12, width=agcScale*12
         , bordermode='ignore')
     self.Label14_11.configure(activebackground="#f9f9f9")
-    self.Label14_11.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_11.configure(font=font12)
     self.Label14_11.configure(text='''↗''')
 
     self.Label14_12 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_12.place(relx=0.428, rely=0.456, height=18, width=12
+    self.Label14_12.place(relx=0.428, rely=0.456, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_12.configure(activebackground="#f9f9f9")
-    self.Label14_12.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_12.configure(font=font12)
     self.Label14_12.configure(text='''↗''')
 
     self.Label14_13 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_13.place(relx=0.057, rely=0.485, height=12, width=160
+    self.Label14_13.place(relx=0.057, rely=0.485, height=agcScale*12, width=agcScale*160
         , bordermode='ignore')
     self.Label14_13.configure(activebackground="#f9f9f9")
-    self.Label14_13.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_13.configure(font=font12)
     self.Label14_13.configure(text='''⟶⟶⟶⟶⟶⟶⟶⟶⟶''')
 
     self.Label14_14 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_14.place(relx=0.458, rely=0.485, height=12, width=47
+    self.Label14_14.place(relx=0.458, rely=0.485, height=agcScale*12, width=agcScale*47
         , bordermode='ignore')
     self.Label14_14.configure(activebackground="#d9d9d9")
-    self.Label14_14.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_14.configure(font=font12)
     self.Label14_14.configure(text='''⟶⟶''')
 
     self.Label14_19 = tk.Label(self.paneProcessorDisplayPanel_p1)
-    self.Label14_19.place(relx=0.938, rely=0.17, height=18, width=12
+    self.Label14_19.place(relx=0.938, rely=0.17, height=agcScale*18, width=agcScale*12
         , bordermode='ignore')
     self.Label14_19.configure(activebackground="#f9f9f9")
-    self.Label14_19.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label14_19.configure(font=font12)
     self.Label14_19.configure(text='''→''')
 
     self.PROG_ERR = tk.Canvas(self.paneProcessorDisplayPanel_p2)
@@ -779,7 +791,7 @@ class topProcessorDisplayPanel:
     self.PROG_ERR.configure(borderwidth="2")
     self.PROG_ERR.configure(relief="ridge")
     self.PROG_ERR.configure(selectbackground="#c4c4c4")
-    self.PROG_ERR.configure(takefocus="0")
+    #self.PROG_ERR.configure(takefocus="0")
 
     self.SYNC_ERR = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.SYNC_ERR.place(relx=0.847, rely=0.773, relheight=0.191, relwidth=0.117
@@ -788,7 +800,7 @@ class topProcessorDisplayPanel:
     self.SYNC_ERR.configure(borderwidth="2")
     self.SYNC_ERR.configure(relief="ridge")
     self.SYNC_ERR.configure(selectbackground="#c4c4c4")
-    self.SYNC_ERR.configure(takefocus="0")
+    #self.SYNC_ERR.configure(takefocus="0")
 
     self.INHIBIT_CTRL = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.INHIBIT_CTRL.place(relx=0.847, rely=0.136, relheight=0.373
@@ -797,7 +809,7 @@ class topProcessorDisplayPanel:
     self.INHIBIT_CTRL.configure(borderwidth="2")
     self.INHIBIT_CTRL.configure(relief="ridge")
     self.INHIBIT_CTRL.configure(selectbackground="#c4c4c4")
-    self.INHIBIT_CTRL.configure(takefocus="0")
+    #self.INHIBIT_CTRL.configure(takefocus="0")
 
     self.iI6 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI6.place(relx=0.503, rely=0.136, relheight=0.191, relwidth=0.094
@@ -806,7 +818,7 @@ class topProcessorDisplayPanel:
     self.iI6.configure(borderwidth="2")
     self.iI6.configure(relief="ridge")
     self.iI6.configure(selectbackground="#c4c4c4")
-    self.iI6.configure(takefocus="0")
+    #self.iI6.configure(takefocus="0")
 
     self.iI7 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI7.place(relx=0.595, rely=0.136, relheight=0.191, relwidth=0.094
@@ -815,7 +827,7 @@ class topProcessorDisplayPanel:
     self.iI7.configure(borderwidth="2")
     self.iI7.configure(relief="ridge")
     self.iI7.configure(selectbackground="#c4c4c4")
-    self.iI7.configure(takefocus="0")
+    #self.iI7.configure(takefocus="0")
 
     self.iI8 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI8.place(relx=0.686, rely=0.136, relheight=0.191, relwidth=0.094
@@ -824,7 +836,7 @@ class topProcessorDisplayPanel:
     self.iI8.configure(borderwidth="2")
     self.iI8.configure(relief="ridge")
     self.iI8.configure(selectbackground="#c4c4c4")
-    self.iI8.configure(takefocus="0")
+    #self.iI8.configure(takefocus="0")
 
     self.iI5 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI5.place(relx=0.412, rely=0.136, relheight=0.191, relwidth=0.094
@@ -833,7 +845,7 @@ class topProcessorDisplayPanel:
     self.iI5.configure(borderwidth="2")
     self.iI5.configure(relief="ridge")
     self.iI5.configure(selectbackground="#c4c4c4")
-    self.iI5.configure(takefocus="0")
+    #self.iI5.configure(takefocus="0")
 
     self.iI4 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI4.place(relx=0.32, rely=0.136, relheight=0.191, relwidth=0.094
@@ -842,7 +854,7 @@ class topProcessorDisplayPanel:
     self.iI4.configure(borderwidth="2")
     self.iI4.configure(relief="ridge")
     self.iI4.configure(selectbackground="#c4c4c4")
-    self.iI4.configure(takefocus="0")
+    #self.iI4.configure(takefocus="0")
 
     self.iI3 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI3.place(relx=0.229, rely=0.136, relheight=0.191, relwidth=0.094
@@ -851,7 +863,7 @@ class topProcessorDisplayPanel:
     self.iI3.configure(borderwidth="2")
     self.iI3.configure(relief="ridge")
     self.iI3.configure(selectbackground="#c4c4c4")
-    self.iI3.configure(takefocus="0")
+    #self.iI3.configure(takefocus="0")
 
     self.iI2 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI2.place(relx=0.137, rely=0.136, relheight=0.191, relwidth=0.094
@@ -860,7 +872,7 @@ class topProcessorDisplayPanel:
     self.iI2.configure(borderwidth="2")
     self.iI2.configure(relief="ridge")
     self.iI2.configure(selectbackground="#c4c4c4")
-    self.iI2.configure(takefocus="0")
+    #self.iI2.configure(takefocus="0")
 
     self.iI1 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI1.place(relx=0.046, rely=0.136, relheight=0.191, relwidth=0.094
@@ -869,7 +881,7 @@ class topProcessorDisplayPanel:
     self.iI1.configure(borderwidth="2")
     self.iI1.configure(relief="ridge")
     self.iI1.configure(selectbackground="#c4c4c4")
-    self.iI1.configure(takefocus="0")
+    #self.iI1.configure(takefocus="0")
 
     self.iB8 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB8.place(relx=0.686, rely=0.318, relheight=0.191, relwidth=0.094
@@ -878,7 +890,7 @@ class topProcessorDisplayPanel:
     self.iB8.configure(borderwidth="2")
     self.iB8.configure(relief="ridge")
     self.iB8.configure(selectbackground="#c4c4c4")
-    self.iB8.configure(takefocus="0")
+    #self.iB8.configure(takefocus="0")
 
     self.iB7 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB7.place(relx=0.595, rely=0.318, relheight=0.191, relwidth=0.094
@@ -887,7 +899,7 @@ class topProcessorDisplayPanel:
     self.iB7.configure(borderwidth="2")
     self.iB7.configure(relief="ridge")
     self.iB7.configure(selectbackground="#c4c4c4")
-    self.iB7.configure(takefocus="0")
+    #self.iB7.configure(takefocus="0")
 
     self.iB6 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB6.place(relx=0.503, rely=0.318, relheight=0.191, relwidth=0.094
@@ -896,7 +908,7 @@ class topProcessorDisplayPanel:
     self.iB6.configure(borderwidth="2")
     self.iB6.configure(relief="ridge")
     self.iB6.configure(selectbackground="#c4c4c4")
-    self.iB6.configure(takefocus="0")
+    #self.iB6.configure(takefocus="0")
 
     self.iB5 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB5.place(relx=0.412, rely=0.318, relheight=0.191, relwidth=0.094
@@ -905,7 +917,7 @@ class topProcessorDisplayPanel:
     self.iB5.configure(borderwidth="2")
     self.iB5.configure(relief="ridge")
     self.iB5.configure(selectbackground="#c4c4c4")
-    self.iB5.configure(takefocus="0")
+    #self.iB5.configure(takefocus="0")
 
     self.iB4 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB4.place(relx=0.32, rely=0.318, relheight=0.191, relwidth=0.094
@@ -914,7 +926,7 @@ class topProcessorDisplayPanel:
     self.iB4.configure(borderwidth="2")
     self.iB4.configure(relief="ridge")
     self.iB4.configure(selectbackground="#c4c4c4")
-    self.iB4.configure(takefocus="0")
+    #self.iB4.configure(takefocus="0")
 
     self.iB3 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB3.place(relx=0.229, rely=0.318, relheight=0.191, relwidth=0.094
@@ -923,7 +935,7 @@ class topProcessorDisplayPanel:
     self.iB3.configure(borderwidth="2")
     self.iB3.configure(relief="ridge")
     self.iB3.configure(selectbackground="#c4c4c4")
-    self.iB3.configure(takefocus="0")
+    #self.iB3.configure(takefocus="0")
 
     self.iB2 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB2.place(relx=0.137, rely=0.318, relheight=0.191, relwidth=0.094
@@ -932,7 +944,7 @@ class topProcessorDisplayPanel:
     self.iB2.configure(borderwidth="2")
     self.iB2.configure(relief="ridge")
     self.iB2.configure(selectbackground="#c4c4c4")
-    self.iB2.configure(takefocus="0")
+    #self.iB2.configure(takefocus="0")
 
     self.iB1 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB1.place(relx=0.046, rely=0.318, relheight=0.191, relwidth=0.094
@@ -941,7 +953,7 @@ class topProcessorDisplayPanel:
     self.iB1.configure(borderwidth="2")
     self.iB1.configure(relief="ridge")
     self.iB1.configure(selectbackground="#c4c4c4")
-    self.iB1.configure(takefocus="0")
+    #self.iB1.configure(takefocus="0")
 
     self.iI16 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI16.place(relx=0.686, rely=0.591, relheight=0.191, relwidth=0.094
@@ -950,7 +962,7 @@ class topProcessorDisplayPanel:
     self.iI16.configure(borderwidth="2")
     self.iI16.configure(relief="ridge")
     self.iI16.configure(selectbackground="#c4c4c4")
-    self.iI16.configure(takefocus="0")
+    #self.iI16.configure(takefocus="0")
 
     self.iB16 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB16.place(relx=0.686, rely=0.773, relheight=0.191, relwidth=0.094
@@ -959,7 +971,7 @@ class topProcessorDisplayPanel:
     self.iB16.configure(borderwidth="2")
     self.iB16.configure(relief="ridge")
     self.iB16.configure(selectbackground="#c4c4c4")
-    self.iB16.configure(takefocus="0")
+    #self.iB16.configure(takefocus="0")
 
     self.iI15 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI15.place(relx=0.595, rely=0.591, relheight=0.191, relwidth=0.094
@@ -968,7 +980,7 @@ class topProcessorDisplayPanel:
     self.iI15.configure(borderwidth="2")
     self.iI15.configure(relief="ridge")
     self.iI15.configure(selectbackground="#c4c4c4")
-    self.iI15.configure(takefocus="0")
+    #self.iI15.configure(takefocus="0")
 
     self.iB15 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB15.place(relx=0.595, rely=0.773, relheight=0.191, relwidth=0.094
@@ -977,7 +989,7 @@ class topProcessorDisplayPanel:
     self.iB15.configure(borderwidth="2")
     self.iB15.configure(relief="ridge")
     self.iB15.configure(selectbackground="#c4c4c4")
-    self.iB15.configure(takefocus="0")
+    #self.iB15.configure(takefocus="0")
 
     self.iI14 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI14.place(relx=0.503, rely=0.591, relheight=0.191, relwidth=0.094
@@ -986,7 +998,7 @@ class topProcessorDisplayPanel:
     self.iI14.configure(borderwidth="2")
     self.iI14.configure(relief="ridge")
     self.iI14.configure(selectbackground="#c4c4c4")
-    self.iI14.configure(takefocus="0")
+    #self.iI14.configure(takefocus="0")
 
     self.iB14 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB14.place(relx=0.503, rely=0.773, relheight=0.191, relwidth=0.094
@@ -995,7 +1007,7 @@ class topProcessorDisplayPanel:
     self.iB14.configure(borderwidth="2")
     self.iB14.configure(relief="ridge")
     self.iB14.configure(selectbackground="#c4c4c4")
-    self.iB14.configure(takefocus="0")
+    #self.iB14.configure(takefocus="0")
 
     self.iI13 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI13.place(relx=0.412, rely=0.591, relheight=0.191, relwidth=0.094
@@ -1004,7 +1016,7 @@ class topProcessorDisplayPanel:
     self.iI13.configure(borderwidth="2")
     self.iI13.configure(relief="ridge")
     self.iI13.configure(selectbackground="#c4c4c4")
-    self.iI13.configure(takefocus="0")
+    #self.iI13.configure(takefocus="0")
 
     self.iB13 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB13.place(relx=0.412, rely=0.773, relheight=0.191, relwidth=0.094
@@ -1013,7 +1025,7 @@ class topProcessorDisplayPanel:
     self.iB13.configure(borderwidth="2")
     self.iB13.configure(relief="ridge")
     self.iB13.configure(selectbackground="#c4c4c4")
-    self.iB13.configure(takefocus="0")
+    #self.iB13.configure(takefocus="0")
 
     self.iI12 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI12.place(relx=0.32, rely=0.591, relheight=0.191, relwidth=0.094
@@ -1022,7 +1034,7 @@ class topProcessorDisplayPanel:
     self.iI12.configure(borderwidth="2")
     self.iI12.configure(relief="ridge")
     self.iI12.configure(selectbackground="#c4c4c4")
-    self.iI12.configure(takefocus="0")
+    #self.iI12.configure(takefocus="0")
 
     self.iB12 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB12.place(relx=0.32, rely=0.773, relheight=0.191, relwidth=0.094
@@ -1031,7 +1043,7 @@ class topProcessorDisplayPanel:
     self.iB12.configure(borderwidth="2")
     self.iB12.configure(relief="ridge")
     self.iB12.configure(selectbackground="#c4c4c4")
-    self.iB12.configure(takefocus="0")
+    #self.iB12.configure(takefocus="0")
 
     self.iI11 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI11.place(relx=0.229, rely=0.591, relheight=0.191, relwidth=0.094
@@ -1040,7 +1052,7 @@ class topProcessorDisplayPanel:
     self.iI11.configure(borderwidth="2")
     self.iI11.configure(relief="ridge")
     self.iI11.configure(selectbackground="#c4c4c4")
-    self.iI11.configure(takefocus="0")
+    #self.iI11.configure(takefocus="0")
 
     self.iB11 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB11.place(relx=0.229, rely=0.773, relheight=0.191, relwidth=0.094
@@ -1049,7 +1061,7 @@ class topProcessorDisplayPanel:
     self.iB11.configure(borderwidth="2")
     self.iB11.configure(relief="ridge")
     self.iB11.configure(selectbackground="#c4c4c4")
-    self.iB11.configure(takefocus="0")
+    #self.iB11.configure(takefocus="0")
 
     self.iI10 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI10.place(relx=0.137, rely=0.591, relheight=0.191, relwidth=0.094
@@ -1058,7 +1070,7 @@ class topProcessorDisplayPanel:
     self.iI10.configure(borderwidth="2")
     self.iI10.configure(relief="ridge")
     self.iI10.configure(selectbackground="#c4c4c4")
-    self.iI10.configure(takefocus="0")
+    #self.iI10.configure(takefocus="0")
 
     self.iB10 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB10.place(relx=0.137, rely=0.773, relheight=0.191, relwidth=0.094
@@ -1067,7 +1079,7 @@ class topProcessorDisplayPanel:
     self.iB10.configure(borderwidth="2")
     self.iB10.configure(relief="ridge")
     self.iB10.configure(selectbackground="#c4c4c4")
-    self.iB10.configure(takefocus="0")
+    #self.iB10.configure(takefocus="0")
 
     self.iI9 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iI9.place(relx=0.046, rely=0.591, relheight=0.191, relwidth=0.094
@@ -1076,7 +1088,7 @@ class topProcessorDisplayPanel:
     self.iI9.configure(borderwidth="2")
     self.iI9.configure(relief="ridge")
     self.iI9.configure(selectbackground="#c4c4c4")
-    self.iI9.configure(takefocus="0")
+    #self.iI9.configure(takefocus="0")
 
     self.iB9 = tk.Canvas(self.paneProcessorDisplayPanel_p2)
     self.iB9.place(relx=0.046, rely=0.773, relheight=0.191, relwidth=0.094
@@ -1085,19 +1097,19 @@ class topProcessorDisplayPanel:
     self.iB9.configure(borderwidth="2")
     self.iB9.configure(relief="ridge")
     self.iB9.configure(selectbackground="#c4c4c4")
-    self.iB9.configure(takefocus="0")
+    #self.iB9.configure(takefocus="0")
 
-    self.TPanedwindow1 = ttk.Panedwindow(self.paneProcessorDisplayPanel_p3
+    self.TPanedwindow1 = tk.PanedWindow(self.paneProcessorDisplayPanel_p3
         , orient="vertical")
     self.TPanedwindow1.place(relx=0.023, rely=0.092, relheight=0.862
         , relwidth=0.954, bordermode='ignore')
-    self.TPanedwindow1.configure(takefocus="0")
-    self.TPanedwindow1_p1 = ttk.Labelframe(height=128.0, text='')
-    self.TPanedwindow1.add(self.TPanedwindow1_p1, weight=0)
-    self.paneProgRegA = ttk.Labelframe(height=37.5, text='PROG REG A')
-    self.TPanedwindow1.add(self.paneProgRegA, weight=0)
-    self.paneProgRegB = ttk.Labelframe(text='PROG REG B')
-    self.TPanedwindow1.add(self.paneProgRegB, weight=0)
+    ##self.TPanedwindow1.configure(takefocus="0")
+    self.TPanedwindow1_p1 = tk.LabelFrame(height=agcScale*69, text='')
+    self.TPanedwindow1.add(self.TPanedwindow1_p1)
+    self.paneProgRegA = tk.LabelFrame(height=agcScale*62, text='PROG REG A')
+    self.TPanedwindow1.add(self.paneProgRegA)
+    self.paneProgRegB = tk.LabelFrame(text='PROG REG B')
+    self.TPanedwindow1.add(self.paneProgRegB)
     self.__funcid1 = self.TPanedwindow1.bind('<Map>', self.__adjust_sash1)
 
     self.P10 = tk.Canvas(self.TPanedwindow1_p1)
@@ -1107,7 +1119,7 @@ class topProcessorDisplayPanel:
     self.P10.configure(borderwidth="2")
     self.P10.configure(relief="ridge")
     self.P10.configure(selectbackground="#c4c4c4")
-    self.P10.configure(takefocus="0")
+    #self.P10.configure(takefocus="0")
 
     self.P4 = tk.Canvas(self.TPanedwindow1_p1)
     self.P4.place(relx=0.492, rely=0.25, relheight=0.35, relwidth=0.072
@@ -1116,7 +1128,7 @@ class topProcessorDisplayPanel:
     self.P4.configure(borderwidth="2")
     self.P4.configure(relief="ridge")
     self.P4.configure(selectbackground="#c4c4c4")
-    self.P4.configure(takefocus="0")
+    #self.P4.configure(takefocus="0")
 
     self.D4 = tk.Canvas(self.TPanedwindow1_p1)
     self.D4.place(relx=0.42, rely=0.583, relheight=0.35, relwidth=0.072
@@ -1125,7 +1137,7 @@ class topProcessorDisplayPanel:
     self.D4.configure(borderwidth="2")
     self.D4.configure(relief="ridge")
     self.D4.configure(selectbackground="#c4c4c4")
-    self.D4.configure(takefocus="0")
+    #self.D4.configure(takefocus="0")
 
     self.D3 = tk.Canvas(self.TPanedwindow1_p1)
     self.D3.place(relx=0.492, rely=0.583, relheight=0.35, relwidth=0.072
@@ -1134,7 +1146,7 @@ class topProcessorDisplayPanel:
     self.D3.configure(borderwidth="2")
     self.D3.configure(relief="ridge")
     self.D3.configure(selectbackground="#c4c4c4")
-    self.D3.configure(takefocus="0")
+    #self.D3.configure(takefocus="0")
 
     self.P2 = tk.Canvas(self.TPanedwindow1_p1)
     self.P2.place(relx=0.564, rely=0.25, relheight=0.35, relwidth=0.072
@@ -1143,7 +1155,7 @@ class topProcessorDisplayPanel:
     self.P2.configure(borderwidth="2")
     self.P2.configure(relief="ridge")
     self.P2.configure(selectbackground="#c4c4c4")
-    self.P2.configure(takefocus="0")
+    #self.P2.configure(takefocus="0")
 
     self.P1 = tk.Canvas(self.TPanedwindow1_p1)
     self.P1.place(relx=0.635, rely=0.25, relheight=0.35, relwidth=0.072
@@ -1152,7 +1164,7 @@ class topProcessorDisplayPanel:
     self.P1.configure(borderwidth="2")
     self.P1.configure(relief="ridge")
     self.P1.configure(selectbackground="#c4c4c4")
-    self.P1.configure(takefocus="0")
+    #self.P1.configure(takefocus="0")
 
     self.D2 = tk.Canvas(self.TPanedwindow1_p1)
     self.D2.place(relx=0.564, rely=0.583, relheight=0.35, relwidth=0.074
@@ -1161,7 +1173,7 @@ class topProcessorDisplayPanel:
     self.D2.configure(borderwidth="2")
     self.D2.configure(relief="ridge")
     self.D2.configure(selectbackground="#c4c4c4")
-    self.D2.configure(takefocus="0")
+    #self.D2.configure(takefocus="0")
 
     self.D1 = tk.Canvas(self.TPanedwindow1_p1)
     self.D1.place(relx=0.635, rely=0.583, relheight=0.35, relwidth=0.072
@@ -1170,7 +1182,7 @@ class topProcessorDisplayPanel:
     self.D1.configure(borderwidth="2")
     self.D1.configure(relief="ridge")
     self.D1.configure(selectbackground="#c4c4c4")
-    self.D1.configure(takefocus="0")
+    #self.D1.configure(takefocus="0")
 
     self.P20 = tk.Canvas(self.TPanedwindow1_p1)
     self.P20.place(relx=0.348, rely=0.25, relheight=0.35, relwidth=0.072
@@ -1179,7 +1191,7 @@ class topProcessorDisplayPanel:
     self.P20.configure(borderwidth="2")
     self.P20.configure(relief="ridge")
     self.P20.configure(selectbackground="#c4c4c4")
-    self.P20.configure(takefocus="0")
+    #self.P20.configure(takefocus="0")
 
     self.D5 = tk.Canvas(self.TPanedwindow1_p1)
     self.D5.place(relx=0.348, rely=0.583, relheight=0.35, relwidth=0.072
@@ -1188,7 +1200,7 @@ class topProcessorDisplayPanel:
     self.D5.configure(borderwidth="2")
     self.D5.configure(relief="ridge")
     self.D5.configure(selectbackground="#c4c4c4")
-    self.D5.configure(takefocus="0")
+    #self.D5.configure(takefocus="0")
 
     self.P40 = tk.Canvas(self.TPanedwindow1_p1)
     self.P40.place(relx=0.276, rely=0.25, relheight=0.35, relwidth=0.074
@@ -1197,7 +1209,7 @@ class topProcessorDisplayPanel:
     self.P40.configure(borderwidth="2")
     self.P40.configure(relief="ridge")
     self.P40.configure(selectbackground="#c4c4c4")
-    self.P40.configure(takefocus="0")
+    #self.P40.configure(takefocus="0")
 
     self.D6 = tk.Canvas(self.TPanedwindow1_p1)
     self.D6.place(relx=0.276, rely=0.583, relheight=0.35, relwidth=0.072
@@ -1206,7 +1218,7 @@ class topProcessorDisplayPanel:
     self.D6.configure(borderwidth="2")
     self.D6.configure(relief="ridge")
     self.D6.configure(selectbackground="#c4c4c4")
-    self.D6.configure(takefocus="0")
+    #self.D6.configure(takefocus="0")
 
     self.HALT = tk.Canvas(self.TPanedwindow1_p1)
     self.HALT.place(relx=0.863, rely=0.25, relheight=0.683, relwidth=0.122
@@ -1215,7 +1227,7 @@ class topProcessorDisplayPanel:
     self.HALT.configure(borderwidth="2")
     self.HALT.configure(relief="ridge")
     self.HALT.configure(selectbackground="#c4c4c4")
-    self.HALT.configure(takefocus="0")
+    #self.HALT.configure(takefocus="0")
 
     self.RESET_MACHINE = tk.Canvas(self.TPanedwindow1_p1)
     self.RESET_MACHINE.place(relx=0.755, rely=0.25, relheight=0.683
@@ -1224,7 +1236,7 @@ class topProcessorDisplayPanel:
     self.RESET_MACHINE.configure(borderwidth="2")
     self.RESET_MACHINE.configure(relief="ridge")
     self.RESET_MACHINE.configure(selectbackground="#c4c4c4")
-    self.RESET_MACHINE.configure(takefocus="0")
+    #self.RESET_MACHINE.configure(takefocus="0")
 
     self.MAN_CST = tk.Canvas(self.TPanedwindow1_p1)
     self.MAN_CST.place(relx=0.012, rely=0.583, relheight=0.35, relwidth=0.122
@@ -1233,7 +1245,7 @@ class topProcessorDisplayPanel:
     self.MAN_CST.configure(borderwidth="2")
     self.MAN_CST.configure(relief="ridge")
     self.MAN_CST.configure(selectbackground="#c4c4c4")
-    self.MAN_CST.configure(takefocus="0")
+    #self.MAN_CST.configure(takefocus="0")
 
     self.CST = tk.Canvas(self.TPanedwindow1_p1)
     self.CST.place(relx=0.012, rely=0.25, relheight=0.35, relwidth=0.122
@@ -1242,7 +1254,7 @@ class topProcessorDisplayPanel:
     self.CST.configure(borderwidth="2")
     self.CST.configure(relief="ridge")
     self.CST.configure(selectbackground="#c4c4c4")
-    self.CST.configure(takefocus="0")
+    #self.CST.configure(takefocus="0")
 
     self.ADVANCE = tk.Canvas(self.TPanedwindow1_p1)
     self.ADVANCE.place(relx=0.132, rely=0.25, relheight=0.683, relwidth=0.11
@@ -1251,7 +1263,7 @@ class topProcessorDisplayPanel:
     self.ADVANCE.configure(borderwidth="2")
     self.ADVANCE.configure(relief="ridge")
     self.ADVANCE.configure(selectbackground="#c4c4c4")
-    self.ADVANCE.configure(takefocus="0")
+    #self.ADVANCE.configure(takefocus="0")
 
     self.PRA1 = tk.Checkbutton(self.paneProgRegA)
     self.PRA1.place(relx=0.096, rely=0.293, relheight=0.31, relwidth=0.084
@@ -1259,7 +1271,7 @@ class topProcessorDisplayPanel:
     self.PRA1.configure(activebackground="#d9d9d9")
     self.PRA1.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA1.configure(justify='left')
-    self.PRA1.configure(takefocus="0")
+    #self.PRA1.configure(takefocus="0")
     self.PRA1.configure(variable=ProcessorDisplayPanel_support.bPRA1)
 
     self.PRA2 = tk.Checkbutton(self.paneProgRegA)
@@ -1268,7 +1280,7 @@ class topProcessorDisplayPanel:
     self.PRA2.configure(activebackground="#d9d9d9")
     self.PRA2.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA2.configure(justify='left')
-    self.PRA2.configure(takefocus="0")
+    #self.PRA2.configure(takefocus="0")
     self.PRA2.configure(variable=ProcessorDisplayPanel_support.bPRA2)
 
     self.PRA3 = tk.Checkbutton(self.paneProgRegA)
@@ -1277,7 +1289,7 @@ class topProcessorDisplayPanel:
     self.PRA3.configure(activebackground="#d9d9d9")
     self.PRA3.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA3.configure(justify='left')
-    self.PRA3.configure(takefocus="0")
+    #self.PRA3.configure(takefocus="0")
     self.PRA3.configure(variable=ProcessorDisplayPanel_support.bPRA3)
 
     self.PRA12 = tk.Checkbutton(self.paneProgRegA)
@@ -1286,7 +1298,7 @@ class topProcessorDisplayPanel:
     self.PRA12.configure(activebackground="#d9d9d9")
     self.PRA12.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA12.configure(justify='left')
-    self.PRA12.configure(takefocus="0")
+    #self.PRA12.configure(takefocus="0")
     self.PRA12.configure(variable=ProcessorDisplayPanel_support.bPRA12)
 
     self.PRA4 = tk.Checkbutton(self.paneProgRegA)
@@ -1295,7 +1307,7 @@ class topProcessorDisplayPanel:
     self.PRA4.configure(activebackground="#d9d9d9")
     self.PRA4.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA4.configure(justify='left')
-    self.PRA4.configure(takefocus="0")
+    #self.PRA4.configure(takefocus="0")
     self.PRA4.configure(variable=ProcessorDisplayPanel_support.bPRA4)
 
     self.PRA5 = tk.Checkbutton(self.paneProgRegA)
@@ -1304,7 +1316,7 @@ class topProcessorDisplayPanel:
     self.PRA5.configure(activebackground="#d9d9d9")
     self.PRA5.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA5.configure(justify='left')
-    self.PRA5.configure(takefocus="0")
+    #self.PRA5.configure(takefocus="0")
     self.PRA5.configure(variable=ProcessorDisplayPanel_support.bPRA5)
 
     self.PRA6 = tk.Checkbutton(self.paneProgRegA)
@@ -1313,7 +1325,7 @@ class topProcessorDisplayPanel:
     self.PRA6.configure(activebackground="#d9d9d9")
     self.PRA6.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA6.configure(justify='left')
-    self.PRA6.configure(takefocus="0")
+    #self.PRA6.configure(takefocus="0")
     self.PRA6.configure(variable=ProcessorDisplayPanel_support.bPRA6)
 
     self.PRA11 = tk.Checkbutton(self.paneProgRegA)
@@ -1322,7 +1334,7 @@ class topProcessorDisplayPanel:
     self.PRA11.configure(activebackground="#d9d9d9")
     self.PRA11.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA11.configure(justify='left')
-    self.PRA11.configure(takefocus="0")
+    #self.PRA11.configure(takefocus="0")
     self.PRA11.configure(variable=ProcessorDisplayPanel_support.bPRA11)
 
     self.PRA7 = tk.Checkbutton(self.paneProgRegA)
@@ -1331,7 +1343,7 @@ class topProcessorDisplayPanel:
     self.PRA7.configure(activebackground="#d9d9d9")
     self.PRA7.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA7.configure(justify='left')
-    self.PRA7.configure(takefocus="0")
+    #self.PRA7.configure(takefocus="0")
     self.PRA7.configure(variable=ProcessorDisplayPanel_support.bPRA7)
 
     self.PRA8 = tk.Checkbutton(self.paneProgRegA)
@@ -1340,7 +1352,7 @@ class topProcessorDisplayPanel:
     self.PRA8.configure(activebackground="#d9d9d9")
     self.PRA8.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA8.configure(justify='left')
-    self.PRA8.configure(takefocus="0")
+    #self.PRA8.configure(takefocus="0")
     self.PRA8.configure(variable=ProcessorDisplayPanel_support.bPRA8)
 
     self.PRA9 = tk.Checkbutton(self.paneProgRegA)
@@ -1349,7 +1361,7 @@ class topProcessorDisplayPanel:
     self.PRA9.configure(activebackground="#d9d9d9")
     self.PRA9.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA9.configure(justify='left')
-    self.PRA9.configure(takefocus="0")
+    #self.PRA9.configure(takefocus="0")
     self.PRA9.configure(variable=ProcessorDisplayPanel_support.bPRA9)
 
     self.PRA10 = tk.Checkbutton(self.paneProgRegA)
@@ -1358,7 +1370,7 @@ class topProcessorDisplayPanel:
     self.PRA10.configure(activebackground="#d9d9d9")
     self.PRA10.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA10.configure(justify='left')
-    self.PRA10.configure(takefocus="0")
+    #self.PRA10.configure(takefocus="0")
     self.PRA10.configure(variable=ProcessorDisplayPanel_support.bPRA10)
 
     self.PRA14 = tk.Checkbutton(self.paneProgRegA)
@@ -1367,7 +1379,7 @@ class topProcessorDisplayPanel:
     self.PRA14.configure(activebackground="#d9d9d9")
     self.PRA14.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA14.configure(justify='left')
-    self.PRA14.configure(takefocus="0")
+    #self.PRA14.configure(takefocus="0")
     self.PRA14.configure(variable=ProcessorDisplayPanel_support.bPRA14)
 
     self.PRA15 = tk.Checkbutton(self.paneProgRegA)
@@ -1376,7 +1388,7 @@ class topProcessorDisplayPanel:
     self.PRA15.configure(activebackground="#d9d9d9")
     self.PRA15.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA15.configure(justify='left')
-    self.PRA15.configure(takefocus="0")
+    #self.PRA15.configure(takefocus="0")
     self.PRA15.configure(variable=ProcessorDisplayPanel_support.bPRA15)
 
     self.PRA16 = tk.Checkbutton(self.paneProgRegA)
@@ -1385,7 +1397,7 @@ class topProcessorDisplayPanel:
     self.PRA16.configure(activebackground="#d9d9d9")
     self.PRA16.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA16.configure(justify='left')
-    self.PRA16.configure(takefocus="0")
+    #self.PRA16.configure(takefocus="0")
     self.PRA16.configure(variable=ProcessorDisplayPanel_support.bPRA16)
 
     self.PRA17 = tk.Checkbutton(self.paneProgRegA)
@@ -1394,7 +1406,7 @@ class topProcessorDisplayPanel:
     self.PRA17.configure(activebackground="#d9d9d9")
     self.PRA17.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA17.configure(justify='left')
-    self.PRA17.configure(takefocus="0")
+    #self.PRA17.configure(takefocus="0")
     self.PRA17.configure(variable=ProcessorDisplayPanel_support.bPRA17)
 
     self.PRA18 = tk.Checkbutton(self.paneProgRegA)
@@ -1403,7 +1415,7 @@ class topProcessorDisplayPanel:
     self.PRA18.configure(activebackground="#d9d9d9")
     self.PRA18.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA18.configure(justify='left')
-    self.PRA18.configure(takefocus="0")
+    #self.PRA18.configure(takefocus="0")
     self.PRA18.configure(variable=ProcessorDisplayPanel_support.bPRA18)
 
     self.PRA19 = tk.Checkbutton(self.paneProgRegA)
@@ -1412,7 +1424,7 @@ class topProcessorDisplayPanel:
     self.PRA19.configure(activebackground="#d9d9d9")
     self.PRA19.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA19.configure(justify='left')
-    self.PRA19.configure(takefocus="0")
+    #self.PRA19.configure(takefocus="0")
     self.PRA19.configure(variable=ProcessorDisplayPanel_support.bPRA19)
 
     self.PRA20 = tk.Checkbutton(self.paneProgRegA)
@@ -1421,7 +1433,7 @@ class topProcessorDisplayPanel:
     self.PRA20.configure(activebackground="#d9d9d9")
     self.PRA20.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA20.configure(justify='left')
-    self.PRA20.configure(takefocus="0")
+    #self.PRA20.configure(takefocus="0")
     self.PRA20.configure(variable=ProcessorDisplayPanel_support.bPRA20)
 
     self.PRA21 = tk.Checkbutton(self.paneProgRegA)
@@ -1430,7 +1442,7 @@ class topProcessorDisplayPanel:
     self.PRA21.configure(activebackground="#d9d9d9")
     self.PRA21.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA21.configure(justify='left')
-    self.PRA21.configure(takefocus="0")
+    #self.PRA21.configure(takefocus="0")
     self.PRA21.configure(variable=ProcessorDisplayPanel_support.bPRA21)
 
     self.PRA22 = tk.Checkbutton(self.paneProgRegA)
@@ -1439,7 +1451,7 @@ class topProcessorDisplayPanel:
     self.PRA22.configure(activebackground="#d9d9d9")
     self.PRA22.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA22.configure(justify='left')
-    self.PRA22.configure(takefocus="0")
+    #self.PRA22.configure(takefocus="0")
     self.PRA22.configure(variable=ProcessorDisplayPanel_support.bPRA22)
 
     self.PRA23 = tk.Checkbutton(self.paneProgRegA)
@@ -1448,7 +1460,7 @@ class topProcessorDisplayPanel:
     self.PRA23.configure(activebackground="#d9d9d9")
     self.PRA23.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA23.configure(justify='left')
-    self.PRA23.configure(takefocus="0")
+    #self.PRA23.configure(takefocus="0")
     self.PRA23.configure(variable=ProcessorDisplayPanel_support.bPRA23)
 
     self.PRA24 = tk.Checkbutton(self.paneProgRegA)
@@ -1457,7 +1469,7 @@ class topProcessorDisplayPanel:
     self.PRA24.configure(activebackground="#d9d9d9")
     self.PRA24.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA24.configure(justify='left')
-    self.PRA24.configure(takefocus="0")
+    #self.PRA24.configure(takefocus="0")
     self.PRA24.configure(variable=ProcessorDisplayPanel_support.bPRA24)
 
     self.PRA25 = tk.Checkbutton(self.paneProgRegA)
@@ -1466,7 +1478,7 @@ class topProcessorDisplayPanel:
     self.PRA25.configure(activebackground="#d9d9d9")
     self.PRA25.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA25.configure(justify='left')
-    self.PRA25.configure(takefocus="0")
+    #self.PRA25.configure(takefocus="0")
     self.PRA25.configure(variable=ProcessorDisplayPanel_support.bPRA25)
 
     self.PRAS = tk.Checkbutton(self.paneProgRegA)
@@ -1475,7 +1487,7 @@ class topProcessorDisplayPanel:
     self.PRAS.configure(activebackground="#d9d9d9")
     self.PRAS.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRAS.configure(justify='left')
-    self.PRAS.configure(takefocus="0")
+    #self.PRAS.configure(takefocus="0")
     self.PRAS.configure(variable=ProcessorDisplayPanel_support.bPRAS)
 
     self.PRA13 = tk.Checkbutton(self.paneProgRegA)
@@ -1484,32 +1496,32 @@ class topProcessorDisplayPanel:
     self.PRA13.configure(activebackground="#d9d9d9")
     self.PRA13.configure(command=ProcessorDisplayPanel_support.cPRA)
     self.PRA13.configure(justify='left')
-    self.PRA13.configure(takefocus="0")
+    #self.PRA13.configure(takefocus="0")
     self.PRA13.configure(variable=ProcessorDisplayPanel_support.bPRA13)
 
     self.Label1 = tk.Label(self.paneProgRegA)
-    self.Label1.place(relx=0.022, rely=0.259, height=16, width=12
+    self.Label1.place(relx=0.022, rely=0.259, height=agcScale*16, width=agcScale*12
         , bordermode='ignore')
     self.Label1.configure(activebackground="#f9f9f9")
     self.Label1.configure(font="-family {DejaVu Sans} -size 7")
     self.Label1.configure(text='''S''')
 
     self.Label2 = tk.Label(self.paneProgRegA)
-    self.Label2.place(relx=0.94, rely=0.259, height=16, width=20
+    self.Label2.place(relx=0.94, rely=0.259, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label2.configure(activebackground="#f9f9f9")
     self.Label2.configure(font="-family {DejaVu Sans} -size 6")
     self.Label2.configure(text='''12''')
 
     self.Label3 = tk.Label(self.paneProgRegA)
-    self.Label3.place(relx=0.94, rely=0.69, height=16, width=20
+    self.Label3.place(relx=0.94, rely=0.69, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label3.configure(activebackground="#f9f9f9")
     self.Label3.configure(font="-family {DejaVu Sans} -size 6")
     self.Label3.configure(text='''25''')
 
     self.Label4 = tk.Label(self.paneProgRegA)
-    self.Label4.place(relx=0.007, rely=0.69, height=16, width=20
+    self.Label4.place(relx=0.007, rely=0.69, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label4.configure(activebackground="#f9f9f9")
     self.Label4.configure(font="-family {DejaVu Sans} -size 6")
@@ -1521,7 +1533,7 @@ class topProcessorDisplayPanel:
     self.PRBS.configure(activebackground="#d9d9d9")
     self.PRBS.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRBS.configure(justify='left')
-    self.PRBS.configure(takefocus="0")
+    #self.PRBS.configure(takefocus="0")
     self.PRBS.configure(variable=ProcessorDisplayPanel_support.bPRBS)
 
     self.PRB13 = tk.Checkbutton(self.paneProgRegB)
@@ -1530,7 +1542,7 @@ class topProcessorDisplayPanel:
     self.PRB13.configure(activebackground="#d9d9d9")
     self.PRB13.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB13.configure(justify='left')
-    self.PRB13.configure(takefocus="0")
+    #self.PRB13.configure(takefocus="0")
     self.PRB13.configure(variable=ProcessorDisplayPanel_support.bPRB13)
 
     self.PRB1 = tk.Checkbutton(self.paneProgRegB)
@@ -1539,7 +1551,7 @@ class topProcessorDisplayPanel:
     self.PRB1.configure(activebackground="#d9d9d9")
     self.PRB1.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB1.configure(justify='left')
-    self.PRB1.configure(takefocus="0")
+    #self.PRB1.configure(takefocus="0")
     self.PRB1.configure(variable=ProcessorDisplayPanel_support.bPRB1)
 
     self.PRB2 = tk.Checkbutton(self.paneProgRegB)
@@ -1548,7 +1560,7 @@ class topProcessorDisplayPanel:
     self.PRB2.configure(activebackground="#d9d9d9")
     self.PRB2.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB2.configure(justify='left')
-    self.PRB2.configure(takefocus="0")
+    #self.PRB2.configure(takefocus="0")
     self.PRB2.configure(variable=ProcessorDisplayPanel_support.bPRB2)
 
     self.PRB3 = tk.Checkbutton(self.paneProgRegB)
@@ -1557,7 +1569,7 @@ class topProcessorDisplayPanel:
     self.PRB3.configure(activebackground="#d9d9d9")
     self.PRB3.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB3.configure(justify='left')
-    self.PRB3.configure(takefocus="0")
+    #self.PRB3.configure(takefocus="0")
     self.PRB3.configure(variable=ProcessorDisplayPanel_support.bPRB3)
 
     self.PRB4 = tk.Checkbutton(self.paneProgRegB)
@@ -1566,7 +1578,7 @@ class topProcessorDisplayPanel:
     self.PRB4.configure(activebackground="#d9d9d9")
     self.PRB4.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB4.configure(justify='left')
-    self.PRB4.configure(takefocus="0")
+    #self.PRB4.configure(takefocus="0")
     self.PRB4.configure(variable=ProcessorDisplayPanel_support.bPRB4)
 
     self.PRB5 = tk.Checkbutton(self.paneProgRegB)
@@ -1575,7 +1587,7 @@ class topProcessorDisplayPanel:
     self.PRB5.configure(activebackground="#d9d9d9")
     self.PRB5.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB5.configure(justify='left')
-    self.PRB5.configure(takefocus="0")
+    #self.PRB5.configure(takefocus="0")
     self.PRB5.configure(variable=ProcessorDisplayPanel_support.bPRB5)
 
     self.PRB6 = tk.Checkbutton(self.paneProgRegB)
@@ -1584,7 +1596,7 @@ class topProcessorDisplayPanel:
     self.PRB6.configure(activebackground="#d9d9d9")
     self.PRB6.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB6.configure(justify='left')
-    self.PRB6.configure(takefocus="0")
+    #self.PRB6.configure(takefocus="0")
     self.PRB6.configure(variable=ProcessorDisplayPanel_support.bPRB6)
 
     self.PRB7 = tk.Checkbutton(self.paneProgRegB)
@@ -1593,7 +1605,7 @@ class topProcessorDisplayPanel:
     self.PRB7.configure(activebackground="#d9d9d9")
     self.PRB7.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB7.configure(justify='left')
-    self.PRB7.configure(takefocus="0")
+    #self.PRB7.configure(takefocus="0")
     self.PRB7.configure(variable=ProcessorDisplayPanel_support.bPRB7)
 
     self.PRB8 = tk.Checkbutton(self.paneProgRegB)
@@ -1602,7 +1614,7 @@ class topProcessorDisplayPanel:
     self.PRB8.configure(activebackground="#d9d9d9")
     self.PRB8.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB8.configure(justify='left')
-    self.PRB8.configure(takefocus="0")
+    #self.PRB8.configure(takefocus="0")
     self.PRB8.configure(variable=ProcessorDisplayPanel_support.bPRB8)
 
     self.PRB9 = tk.Checkbutton(self.paneProgRegB)
@@ -1611,7 +1623,7 @@ class topProcessorDisplayPanel:
     self.PRB9.configure(activebackground="#d9d9d9")
     self.PRB9.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB9.configure(justify='left')
-    self.PRB9.configure(takefocus="0")
+    #self.PRB9.configure(takefocus="0")
     self.PRB9.configure(variable=ProcessorDisplayPanel_support.bPRB9)
 
     self.PRB10 = tk.Checkbutton(self.paneProgRegB)
@@ -1620,7 +1632,7 @@ class topProcessorDisplayPanel:
     self.PRB10.configure(activebackground="#d9d9d9")
     self.PRB10.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB10.configure(justify='left')
-    self.PRB10.configure(takefocus="0")
+    #self.PRB10.configure(takefocus="0")
     self.PRB10.configure(variable=ProcessorDisplayPanel_support.bPRB10)
 
     self.PRB11 = tk.Checkbutton(self.paneProgRegB)
@@ -1629,7 +1641,7 @@ class topProcessorDisplayPanel:
     self.PRB11.configure(activebackground="#d9d9d9")
     self.PRB11.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB11.configure(justify='left')
-    self.PRB11.configure(takefocus="0")
+    #self.PRB11.configure(takefocus="0")
     self.PRB11.configure(variable=ProcessorDisplayPanel_support.bPRB11)
 
     self.PRB12 = tk.Checkbutton(self.paneProgRegB)
@@ -1638,7 +1650,7 @@ class topProcessorDisplayPanel:
     self.PRB12.configure(activebackground="#d9d9d9")
     self.PRB12.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB12.configure(justify='left')
-    self.PRB12.configure(takefocus="0")
+    #self.PRB12.configure(takefocus="0")
     self.PRB12.configure(variable=ProcessorDisplayPanel_support.bPRB12)
 
     self.PRB14 = tk.Checkbutton(self.paneProgRegB)
@@ -1647,7 +1659,7 @@ class topProcessorDisplayPanel:
     self.PRB14.configure(activebackground="#d9d9d9")
     self.PRB14.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB14.configure(justify='left')
-    self.PRB14.configure(takefocus="0")
+    #self.PRB14.configure(takefocus="0")
     self.PRB14.configure(variable=ProcessorDisplayPanel_support.bPRB14)
 
     self.PRB15 = tk.Checkbutton(self.paneProgRegB)
@@ -1656,7 +1668,7 @@ class topProcessorDisplayPanel:
     self.PRB15.configure(activebackground="#d9d9d9")
     self.PRB15.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB15.configure(justify='left')
-    self.PRB15.configure(takefocus="0")
+    #self.PRB15.configure(takefocus="0")
     self.PRB15.configure(variable=ProcessorDisplayPanel_support.bPRB15)
 
     self.PRB16 = tk.Checkbutton(self.paneProgRegB)
@@ -1665,7 +1677,7 @@ class topProcessorDisplayPanel:
     self.PRB16.configure(activebackground="#d9d9d9")
     self.PRB16.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB16.configure(justify='left')
-    self.PRB16.configure(takefocus="0")
+    #self.PRB16.configure(takefocus="0")
     self.PRB16.configure(variable=ProcessorDisplayPanel_support.bPRB16)
 
     self.PRB17 = tk.Checkbutton(self.paneProgRegB)
@@ -1674,7 +1686,7 @@ class topProcessorDisplayPanel:
     self.PRB17.configure(activebackground="#d9d9d9")
     self.PRB17.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB17.configure(justify='left')
-    self.PRB17.configure(takefocus="0")
+    #self.PRB17.configure(takefocus="0")
     self.PRB17.configure(variable=ProcessorDisplayPanel_support.bPRB17)
 
     self.PRB18 = tk.Checkbutton(self.paneProgRegB)
@@ -1683,7 +1695,7 @@ class topProcessorDisplayPanel:
     self.PRB18.configure(activebackground="#d9d9d9")
     self.PRB18.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB18.configure(justify='left')
-    self.PRB18.configure(takefocus="0")
+    #self.PRB18.configure(takefocus="0")
     self.PRB18.configure(variable=ProcessorDisplayPanel_support.bPRB18)
 
     self.PRB19 = tk.Checkbutton(self.paneProgRegB)
@@ -1692,7 +1704,7 @@ class topProcessorDisplayPanel:
     self.PRB19.configure(activebackground="#d9d9d9")
     self.PRB19.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB19.configure(justify='left')
-    self.PRB19.configure(takefocus="0")
+    #self.PRB19.configure(takefocus="0")
     self.PRB19.configure(variable=ProcessorDisplayPanel_support.bPRB19)
 
     self.PRB20 = tk.Checkbutton(self.paneProgRegB)
@@ -1701,7 +1713,7 @@ class topProcessorDisplayPanel:
     self.PRB20.configure(activebackground="#d9d9d9")
     self.PRB20.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB20.configure(justify='left')
-    self.PRB20.configure(takefocus="0")
+    #self.PRB20.configure(takefocus="0")
     self.PRB20.configure(variable=ProcessorDisplayPanel_support.bPRB20)
 
     self.PRB21 = tk.Checkbutton(self.paneProgRegB)
@@ -1710,7 +1722,7 @@ class topProcessorDisplayPanel:
     self.PRB21.configure(activebackground="#d9d9d9")
     self.PRB21.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB21.configure(justify='left')
-    self.PRB21.configure(takefocus="0")
+    #self.PRB21.configure(takefocus="0")
     self.PRB21.configure(variable=ProcessorDisplayPanel_support.bPRB21)
 
     self.PRB22 = tk.Checkbutton(self.paneProgRegB)
@@ -1719,7 +1731,7 @@ class topProcessorDisplayPanel:
     self.PRB22.configure(activebackground="#d9d9d9")
     self.PRB22.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB22.configure(justify='left')
-    self.PRB22.configure(takefocus="0")
+    #self.PRB22.configure(takefocus="0")
     self.PRB22.configure(variable=ProcessorDisplayPanel_support.bPRB22)
 
     self.PRB23 = tk.Checkbutton(self.paneProgRegB)
@@ -1728,7 +1740,7 @@ class topProcessorDisplayPanel:
     self.PRB23.configure(activebackground="#d9d9d9")
     self.PRB23.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB23.configure(justify='left')
-    self.PRB23.configure(takefocus="0")
+    #self.PRB23.configure(takefocus="0")
     self.PRB23.configure(variable=ProcessorDisplayPanel_support.bPRB23)
 
     self.PRB24 = tk.Checkbutton(self.paneProgRegB)
@@ -1737,7 +1749,7 @@ class topProcessorDisplayPanel:
     self.PRB24.configure(activebackground="#d9d9d9")
     self.PRB24.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB24.configure(justify='left')
-    self.PRB24.configure(takefocus="0")
+    #self.PRB24.configure(takefocus="0")
     self.PRB24.configure(variable=ProcessorDisplayPanel_support.bPRB24)
 
     self.PRB25 = tk.Checkbutton(self.paneProgRegB)
@@ -1746,32 +1758,32 @@ class topProcessorDisplayPanel:
     self.PRB25.configure(activebackground="#d9d9d9")
     self.PRB25.configure(command=ProcessorDisplayPanel_support.cPRB)
     self.PRB25.configure(justify='left')
-    self.PRB25.configure(takefocus="0")
+    #self.PRB25.configure(takefocus="0")
     self.PRB25.configure(variable=ProcessorDisplayPanel_support.bPRB25)
 
     self.Label5 = tk.Label(self.paneProgRegB)
-    self.Label5.place(relx=0.024, rely=0.22, height=17, width=12
+    self.Label5.place(relx=0.024, rely=0.22, height=agcScale*17, width=agcScale*12
         , bordermode='ignore')
     self.Label5.configure(activebackground="#f9f9f9")
     self.Label5.configure(font="-family {DejaVu Sans} -size 6")
     self.Label5.configure(text='''S''')
 
     self.Label6 = tk.Label(self.paneProgRegB)
-    self.Label6.place(relx=0.94, rely=0.254, height=16, width=20
+    self.Label6.place(relx=0.94, rely=0.254, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label6.configure(activebackground="#f9f9f9")
     self.Label6.configure(font="-family {DejaVu Sans} -size 6")
     self.Label6.configure(text='''12''')
 
     self.Label7 = tk.Label(self.paneProgRegB)
-    self.Label7.place(relx=0.007, rely=0.695, height=16, width=20
+    self.Label7.place(relx=0.007, rely=0.695, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label7.configure(activebackground="#f9f9f9")
     self.Label7.configure(font="-family {DejaVu Sans} -size 6")
     self.Label7.configure(text='''13''')
 
     self.Label8 = tk.Label(self.paneProgRegB)
-    self.Label8.place(relx=0.94, rely=0.695, height=16, width=20
+    self.Label8.place(relx=0.94, rely=0.695, height=agcScale*16, width=agcScale*20
         , bordermode='ignore')
     self.Label8.configure(activebackground="#f9f9f9")
     self.Label8.configure(font="-family {DejaVu Sans} -size 6")
@@ -1784,7 +1796,7 @@ class topProcessorDisplayPanel:
     self.pdpLAMP_TEST.configure(borderwidth="2")
     self.pdpLAMP_TEST.configure(relief="ridge")
     self.pdpLAMP_TEST.configure(selectbackground="#c4c4c4")
-    self.pdpLAMP_TEST.configure(takefocus="0")
+    #self.pdpLAMP_TEST.configure(takefocus="0")
 
     self.trmcERROR_DEVICES_TEST = tk.Canvas(self.paneProcessorDisplayPanel_p4)
     self.trmcERROR_DEVICES_TEST.place(relx=0.767, rely=0.472, relheight=0.387
@@ -1793,7 +1805,7 @@ class topProcessorDisplayPanel:
     self.trmcERROR_DEVICES_TEST.configure(borderwidth="2")
     self.trmcERROR_DEVICES_TEST.configure(relief="ridge")
     self.trmcERROR_DEVICES_TEST.configure(selectbackground="#c4c4c4")
-    self.trmcERROR_DEVICES_TEST.configure(takefocus="0")
+    #self.trmcERROR_DEVICES_TEST.configure(takefocus="0")
 
     self.trmcDD = tk.Canvas(self.paneProcessorDisplayPanel_p4)
     self.trmcDD.place(relx=0.652, rely=0.66, relheight=0.198, relwidth=0.117
@@ -1802,7 +1814,7 @@ class topProcessorDisplayPanel:
     self.trmcDD.configure(borderwidth="2")
     self.trmcDD.configure(relief="ridge")
     self.trmcDD.configure(selectbackground="#c4c4c4")
-    self.trmcDD.configure(takefocus="0")
+    #self.trmcDD.configure(takefocus="0")
 
     self.trmcML = tk.Canvas(self.paneProcessorDisplayPanel_p4)
     self.trmcML.place(relx=0.652, rely=0.472, relheight=0.198, relwidth=0.117
@@ -1811,7 +1823,7 @@ class topProcessorDisplayPanel:
     self.trmcML.configure(borderwidth="2")
     self.trmcML.configure(relief="ridge")
     self.trmcML.configure(selectbackground="#c4c4c4")
-    self.trmcML.configure(takefocus="0")
+    #self.trmcML.configure(takefocus="0")
 
     self.trmcMANUAL = tk.Canvas(self.paneProcessorDisplayPanel_p4)
     self.trmcMANUAL.place(relx=0.538, rely=0.66, relheight=0.198, relwidth=0.117
@@ -1820,30 +1832,30 @@ class topProcessorDisplayPanel:
     self.trmcMANUAL.configure(borderwidth="2")
     self.trmcMANUAL.configure(relief="ridge")
     self.trmcMANUAL.configure(selectbackground="#c4c4c4")
-    self.trmcMANUAL.configure(takefocus="0")
+    #self.trmcMANUAL.configure(takefocus="0")
 
     self.Label12_4 = tk.Label(self.paneProcessorDisplayPanel_p4)
-    self.Label12_4.place(relx=0.549, rely=0.33, height=12, width=142
+    self.Label12_4.place(relx=0.549, rely=0.33, height=agcScale*12, width=agcScale*142
         , bordermode='ignore')
     self.Label12_4.configure(activebackground="#f9f9f9")
-    self.Label12_4.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label12_4.configure(font=font9)
     self.Label12_4.configure(text='''--------------------MODE--------------------''')
 
     self.Label12_7 = tk.Label(self.paneProcessorDisplayPanel_p4)
-    self.Label12_7.place(relx=0.011, rely=0.189, height=12, width=142
+    self.Label12_7.place(relx=0.011, rely=0.189, height=agcScale*12, width=agcScale*142
         , bordermode='ignore')
     self.Label12_7.configure(activebackground="#f9f9f9")
-    self.Label12_7.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label12_7.configure(font=font9)
     self.Label12_7.configure(text='''POWER CONTROL''')
 
     self.Label12_6 = tk.Label(self.paneProcessorDisplayPanel_p4)
-    self.Label12_6.place(relx=0.458, rely=0.189, height=12, width=217
+    self.Label12_6.place(relx=0.458, rely=0.189, height=agcScale*12, width=agcScale*217
         , bordermode='ignore')
     self.Label12_6.configure(activebackground="#f9f9f9")
-    self.Label12_6.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label12_6.configure(font=font9)
     self.Label12_6.configure(text='''TAPE READER AND MODE CONTROL''')
 
-    self.TSeparator1 = ttk.Separator(self.paneProcessorDisplayPanel_p4)
+    self.TSeparator1 = tk.ttk.Separator(self.paneProcessorDisplayPanel_p4)
     self.TSeparator1.place(relx=0.375, rely=0.255, relheight=0.604
         , bordermode='ignore')
     self.TSeparator1.configure(orient="vertical")
@@ -1855,41 +1867,41 @@ class topProcessorDisplayPanel:
     self.trmcAUTO.configure(borderwidth="2")
     self.trmcAUTO.configure(relief="ridge")
     self.trmcAUTO.configure(selectbackground="#c4c4c4")
-    self.trmcAUTO.configure(takefocus="0")
+    #self.trmcAUTO.configure(takefocus="0")
 
     self.menubar = tk.Menu(top,font=font12,bg=_bgcolor,fg=_fgcolor)
     top.configure(menu = self.menubar)
 
-    self.paneMemoryLoadAndDataDisplayPanel = ttk.Panedwindow(top
+    self.paneMemoryLoadAndDataDisplayPanel = tk.PanedWindow(top
         , orient="vertical")
     self.paneMemoryLoadAndDataDisplayPanel.place(relx=0.331, rely=0.0
         , relheight=1.0, relwidth=0.333)
-    self.paneMemoryLoadAndDataDisplayPanel.configure(takefocus="0")
-    self.paneMemoryLoadAndDataDisplayPanel_p1 = ttk.Labelframe(height=350
+    ##self.paneMemoryLoadAndDataDisplayPanel.configure(takefocus="0")
+    self.paneMemoryLoadAndDataDisplayPanel_p1 = tk.LabelFrame(height=agcScale*35
         , text='')
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p1, weight=0)
-    self.paneMemoryLoadAndDataDisplayPanel_p2 = ttk.Labelframe(height=118.5
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p1)
+    self.paneMemoryLoadAndDataDisplayPanel_p2 = tk.LabelFrame(height=agcScale*142
         , text='INSTRUCTION ADDRESS')
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p2, weight=2)
-    self.paneMemoryLoadAndDataDisplayPanel_p3 = ttk.Labelframe(height=0
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p2)
+    self.paneMemoryLoadAndDataDisplayPanel_p3 = tk.LabelFrame(height=agcScale*137
         , text='DATA ADDRESS')
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p3, weight=2)
-    self.paneMemoryLoadAndDataDisplayPanel_p4 = ttk.Labelframe(height=57.900000000000006
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p3)
+    self.paneMemoryLoadAndDataDisplayPanel_p4 = tk.LabelFrame(height=agcScale*159
         , text='DATA')
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p4, weight=4)
-    self.paneMemoryLoadAndDataDisplayPanel_p5 = ttk.Labelframe(height=33.900000000000006
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p4)
+    self.paneMemoryLoadAndDataDisplayPanel_p5 = tk.LabelFrame(height=agcScale*81
         , text='')
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p5, weight=1)
-    self.paneMemoryLoadAndDataDisplayPanel_p7 = ttk.Labelframe(text='DISPLAY MODE')
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p5)
+    self.paneMemoryLoadAndDataDisplayPanel_p7 = tk.LabelFrame(text='DISPLAY MODE')
 
-    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p7, weight=3)
+    self.paneMemoryLoadAndDataDisplayPanel.add(self.paneMemoryLoadAndDataDisplayPanel_p7)
     self.__funcid2 = self.paneMemoryLoadAndDataDisplayPanel.bind('<Map>', self.__adjust_sash2)
 
     self.Label10 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p1)
-    self.Label10.place(relx=0.0, rely=0.0, height=25, width=444
+    self.Label10.place(relx=0.0, rely=0.0, height=agcScale*25, width=agcScale*444
         , bordermode='ignore')
     self.Label10.configure(activebackground="#f9f9f9")
-    self.Label10.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label10.configure(font=font12)
     self.Label10.configure(text='''MEMORY LOAD AND DATA DISPLAY''')
 
     self.iaComputerIS4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
@@ -1899,10 +1911,10 @@ class topProcessorDisplayPanel:
     self.iaComputerIS4.configure(borderwidth="2")
     self.iaComputerIS4.configure(relief="ridge")
     self.iaComputerIS4.configure(selectbackground="#c4c4c4")
-    self.iaComputerIS4.configure(takefocus="0")
+    #self.iaComputerIS4.configure(takefocus="0")
 
     self.Label13_12 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label13_12.place(relx=0.572, rely=0.111, height=16, width=150
+    self.Label13_12.place(relx=0.572, rely=0.111, height=agcScale*16, width=agcScale*150
         , bordermode='ignore')
     self.Label13_12.configure(activebackground="#f9f9f9")
     self.Label13_12.configure(font="-family {DejaVu Sans} -size 8")
@@ -1915,10 +1927,10 @@ class topProcessorDisplayPanel:
     self.iaCommandIS4.configure(borderwidth="2")
     self.iaCommandIS4.configure(relief="ridge")
     self.iaCommandIS4.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS4.configure(takefocus="0")
+    #self.iaCommandIS4.configure(takefocus="0")
 
     self.Label13_7 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label13_7.place(relx=0.206, rely=0.556, height=16, width=310
+    self.Label13_7.place(relx=0.206, rely=0.556, height=agcScale*16, width=agcScale*310
         , bordermode='ignore')
     self.Label13_7.configure(activebackground="#f9f9f9")
     self.Label13_7.configure(font="-family {DejaVu Sans} -size 8")
@@ -1931,7 +1943,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA8.configure(borderwidth="2")
     self.iaComputerA8.configure(relief="ridge")
     self.iaComputerA8.configure(selectbackground="#c4c4c4")
-    self.iaComputerA8.configure(takefocus="0")
+    #self.iaComputerA8.configure(takefocus="0")
 
     self.iaCommandA6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA6.place(relx=0.378, rely=0.815, relheight=0.156
@@ -1940,7 +1952,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA6.configure(borderwidth="2")
     self.iaCommandA6.configure(relief="ridge")
     self.iaCommandA6.configure(selectbackground="#c4c4c4")
-    self.iaCommandA6.configure(takefocus="0")
+    #self.iaCommandA6.configure(takefocus="0")
 
     self.iaCommandA7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA7.place(relx=0.286, rely=0.815, relheight=0.156
@@ -1949,7 +1961,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA7.configure(borderwidth="2")
     self.iaCommandA7.configure(relief="ridge")
     self.iaCommandA7.configure(selectbackground="#c4c4c4")
-    self.iaCommandA7.configure(takefocus="0")
+    #self.iaCommandA7.configure(takefocus="0")
 
     self.iaComputerIS3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerIS3.place(relx=0.652, rely=0.222, relheight=0.156
@@ -1958,7 +1970,7 @@ class topProcessorDisplayPanel:
     self.iaComputerIS3.configure(borderwidth="2")
     self.iaComputerIS3.configure(relief="ridge")
     self.iaComputerIS3.configure(selectbackground="#c4c4c4")
-    self.iaComputerIS3.configure(takefocus="0")
+    #self.iaComputerIS3.configure(takefocus="0")
 
     self.iaCommandA8 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA8.place(relx=0.195, rely=0.815, relheight=0.156
@@ -1967,7 +1979,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA8.configure(borderwidth="2")
     self.iaCommandA8.configure(relief="ridge")
     self.iaCommandA8.configure(selectbackground="#c4c4c4")
-    self.iaCommandA8.configure(takefocus="0")
+    #self.iaCommandA8.configure(takefocus="0")
 
     self.iaCommandA5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA5.place(relx=0.469, rely=0.815, relheight=0.156
@@ -1976,7 +1988,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA5.configure(borderwidth="2")
     self.iaCommandA5.configure(relief="ridge")
     self.iaCommandA5.configure(selectbackground="#c4c4c4")
-    self.iaCommandA5.configure(takefocus="0")
+    #self.iaCommandA5.configure(takefocus="0")
 
     self.iaCommandA4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA4.place(relx=0.561, rely=0.815, relheight=0.156
@@ -1985,7 +1997,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA4.configure(borderwidth="2")
     self.iaCommandA4.configure(relief="ridge")
     self.iaCommandA4.configure(selectbackground="#c4c4c4")
-    self.iaCommandA4.configure(takefocus="0")
+    #self.iaCommandA4.configure(takefocus="0")
 
     self.iaCommandA3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA3.place(relx=0.652, rely=0.815, relheight=0.156
@@ -1994,7 +2006,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA3.configure(borderwidth="2")
     self.iaCommandA3.configure(relief="ridge")
     self.iaCommandA3.configure(selectbackground="#c4c4c4")
-    self.iaCommandA3.configure(takefocus="0")
+    #self.iaCommandA3.configure(takefocus="0")
 
     self.iaCommandA2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA2.place(relx=0.744, rely=0.815, relheight=0.156
@@ -2003,7 +2015,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA2.configure(borderwidth="2")
     self.iaCommandA2.configure(relief="ridge")
     self.iaCommandA2.configure(selectbackground="#c4c4c4")
-    self.iaCommandA2.configure(takefocus="0")
+    #self.iaCommandA2.configure(takefocus="0")
 
     self.iaCommandA1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandA1.place(relx=0.835, rely=0.815, relheight=0.156
@@ -2012,7 +2024,7 @@ class topProcessorDisplayPanel:
     self.iaCommandA1.configure(borderwidth="2")
     self.iaCommandA1.configure(relief="ridge")
     self.iaCommandA1.configure(selectbackground="#c4c4c4")
-    self.iaCommandA1.configure(takefocus="0")
+    #self.iaCommandA1.configure(takefocus="0")
 
     self.iaComputerA7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA7.place(relx=0.286, rely=0.667, relheight=0.156
@@ -2021,7 +2033,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA7.configure(borderwidth="2")
     self.iaComputerA7.configure(relief="ridge")
     self.iaComputerA7.configure(selectbackground="#c4c4c4")
-    self.iaComputerA7.configure(takefocus="0")
+    #self.iaComputerA7.configure(takefocus="0")
 
     self.iaComputerA6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA6.place(relx=0.378, rely=0.667, relheight=0.156
@@ -2030,7 +2042,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA6.configure(borderwidth="2")
     self.iaComputerA6.configure(relief="ridge")
     self.iaComputerA6.configure(selectbackground="#c4c4c4")
-    self.iaComputerA6.configure(takefocus="0")
+    #self.iaComputerA6.configure(takefocus="0")
 
     self.iaComputerA5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA5.place(relx=0.469, rely=0.667, relheight=0.156
@@ -2039,7 +2051,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA5.configure(borderwidth="2")
     self.iaComputerA5.configure(relief="ridge")
     self.iaComputerA5.configure(selectbackground="#c4c4c4")
-    self.iaComputerA5.configure(takefocus="0")
+    #self.iaComputerA5.configure(takefocus="0")
 
     self.iaComputerA4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA4.place(relx=0.561, rely=0.667, relheight=0.156
@@ -2048,7 +2060,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA4.configure(borderwidth="2")
     self.iaComputerA4.configure(relief="ridge")
     self.iaComputerA4.configure(selectbackground="#c4c4c4")
-    self.iaComputerA4.configure(takefocus="0")
+    #self.iaComputerA4.configure(takefocus="0")
 
     self.iaComputerA3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA3.place(relx=0.652, rely=0.667, relheight=0.156
@@ -2057,7 +2069,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA3.configure(borderwidth="2")
     self.iaComputerA3.configure(relief="ridge")
     self.iaComputerA3.configure(selectbackground="#c4c4c4")
-    self.iaComputerA3.configure(takefocus="0")
+    #self.iaComputerA3.configure(takefocus="0")
 
     self.iaComputerA2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA2.place(relx=0.744, rely=0.667, relheight=0.156
@@ -2066,7 +2078,7 @@ class topProcessorDisplayPanel:
     self.iaComputerA2.configure(borderwidth="2")
     self.iaComputerA2.configure(relief="ridge")
     self.iaComputerA2.configure(selectbackground="#c4c4c4")
-    self.iaComputerA2.configure(takefocus="0")
+    #self.iaComputerA2.configure(takefocus="0")
 
     self.iaComputerA1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerA1.place(relx=0.835, rely=0.667, relheight=0.156
@@ -2075,10 +2087,10 @@ class topProcessorDisplayPanel:
     self.iaComputerA1.configure(borderwidth="2")
     self.iaComputerA1.configure(relief="ridge")
     self.iaComputerA1.configure(selectbackground="#c4c4c4")
-    self.iaComputerA1.configure(takefocus="0")
+    #self.iaComputerA1.configure(takefocus="0")
 
     self.Label12_5 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label12_5.place(relx=0.011, rely=0.667, height=23, width=77
+    self.Label12_5.place(relx=0.011, rely=0.667, height=agcScale*23, width=agcScale*77
         , bordermode='ignore')
     self.Label12_5.configure(activebackground="#f9f9f9")
     self.Label12_5.configure(anchor='ne')
@@ -2086,7 +2098,7 @@ class topProcessorDisplayPanel:
     self.Label12_5.configure(text='''COMPUTER''')
 
     self.Label12_2 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label12_2.place(relx=0.011, rely=0.815, height=23, width=77
+    self.Label12_2.place(relx=0.011, rely=0.815, height=agcScale*23, width=agcScale*77
         , bordermode='ignore')
     self.Label12_2.configure(activebackground="#f9f9f9")
     self.Label12_2.configure(anchor='ne')
@@ -2100,7 +2112,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS3.configure(borderwidth="2")
     self.iaCommandIS3.configure(relief="ridge")
     self.iaCommandIS3.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS3.configure(takefocus="0")
+    #self.iaCommandIS3.configure(takefocus="0")
 
     self.iaComputerIS2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerIS2.place(relx=0.744, rely=0.222, relheight=0.156
@@ -2109,7 +2121,7 @@ class topProcessorDisplayPanel:
     self.iaComputerIS2.configure(borderwidth="2")
     self.iaComputerIS2.configure(relief="ridge")
     self.iaComputerIS2.configure(selectbackground="#c4c4c4")
-    self.iaComputerIS2.configure(takefocus="0")
+    #self.iaComputerIS2.configure(takefocus="0")
 
     self.iaCommandIS2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandIS2.place(relx=0.744, rely=0.37, relheight=0.156
@@ -2118,7 +2130,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS2.configure(borderwidth="2")
     self.iaCommandIS2.configure(relief="ridge")
     self.iaCommandIS2.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS2.configure(takefocus="0")
+    #self.iaCommandIS2.configure(takefocus="0")
 
     self.iaComputerIS1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerIS1.place(relx=0.835, rely=0.222, relheight=0.156
@@ -2127,7 +2139,7 @@ class topProcessorDisplayPanel:
     self.iaComputerIS1.configure(borderwidth="2")
     self.iaComputerIS1.configure(relief="ridge")
     self.iaComputerIS1.configure(selectbackground="#c4c4c4")
-    self.iaComputerIS1.configure(takefocus="0")
+    #self.iaComputerIS1.configure(takefocus="0")
 
     self.iaCommandIS1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandIS1.place(relx=0.835, rely=0.37, relheight=0.156
@@ -2136,7 +2148,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS1.configure(borderwidth="2")
     self.iaCommandIS1.configure(relief="ridge")
     self.iaCommandIS1.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS1.configure(takefocus="0")
+    #self.iaCommandIS1.configure(takefocus="0")
 
     self.iaComputerSYL1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerSYL1.place(relx=0.481, rely=0.222, relheight=0.156
@@ -2145,7 +2157,7 @@ class topProcessorDisplayPanel:
     self.iaComputerSYL1.configure(borderwidth="2")
     self.iaComputerSYL1.configure(relief="ridge")
     self.iaComputerSYL1.configure(selectbackground="#c4c4c4")
-    self.iaComputerSYL1.configure(takefocus="0")
+    #self.iaComputerSYL1.configure(takefocus="0")
 
     self.iaCommandSYL1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandSYL1.place(relx=0.481, rely=0.37, relheight=0.156
@@ -2154,7 +2166,7 @@ class topProcessorDisplayPanel:
     self.iaCommandSYL1.configure(borderwidth="2")
     self.iaCommandSYL1.configure(relief="ridge")
     self.iaCommandSYL1.configure(selectbackground="#c4c4c4")
-    self.iaCommandSYL1.configure(takefocus="0")
+    #self.iaCommandSYL1.configure(takefocus="0")
 
     self.iaComputerSYL0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerSYL0.place(relx=0.4, rely=0.222, relheight=0.156
@@ -2163,7 +2175,7 @@ class topProcessorDisplayPanel:
     self.iaComputerSYL0.configure(borderwidth="2")
     self.iaComputerSYL0.configure(relief="ridge")
     self.iaComputerSYL0.configure(selectbackground="#c4c4c4")
-    self.iaComputerSYL0.configure(takefocus="0")
+    #self.iaComputerSYL0.configure(takefocus="0")
 
     self.iaCommandSYL0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandSYL0.place(relx=0.4, rely=0.37, relheight=0.156, relwidth=0.08
@@ -2172,7 +2184,7 @@ class topProcessorDisplayPanel:
     self.iaCommandSYL0.configure(borderwidth="2")
     self.iaCommandSYL0.configure(relief="ridge")
     self.iaCommandSYL0.configure(selectbackground="#c4c4c4")
-    self.iaCommandSYL0.configure(takefocus="0")
+    #self.iaCommandSYL0.configure(takefocus="0")
 
     self.mlREPEAT_13 = tk.Canvas(self.iaCommandSYL0)
     self.mlREPEAT_13.place(relx=7.8, rely=2.143, relheight=1.0, relwidth=1.0)
@@ -2180,17 +2192,17 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_13.configure(borderwidth="2")
     self.mlREPEAT_13.configure(relief="ridge")
     self.mlREPEAT_13.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_13.configure(takefocus="0")
+    #self.mlREPEAT_13.configure(takefocus="0")
 
     self.Label12_8 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label12_8.place(relx=0.217, rely=0.222, height=23, width=77
+    self.Label12_8.place(relx=0.217, rely=0.222, height=agcScale*23, width=agcScale*77
         , bordermode='ignore')
     self.Label12_8.configure(activebackground="#f9f9f9")
     self.Label12_8.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_8.configure(text='''—COMPUTER—''')
 
     self.Label12_9 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label12_9.place(relx=0.206, rely=0.37, height=23, width=82
+    self.Label12_9.place(relx=0.206, rely=0.37, height=agcScale*23, width=agcScale*82
         , bordermode='ignore')
     self.Label12_9.configure(activebackground="#f9f9f9")
     self.Label12_9.configure(font="-family {DejaVu Sans} -size 8")
@@ -2203,7 +2215,7 @@ class topProcessorDisplayPanel:
     self.iaCommandM0.configure(borderwidth="2")
     self.iaCommandM0.configure(relief="ridge")
     self.iaCommandM0.configure(selectbackground="#c4c4c4")
-    self.iaCommandM0.configure(takefocus="0")
+    #self.iaCommandM0.configure(takefocus="0")
 
     self.mlREPEAT_8 = tk.Canvas(self.iaCommandM0)
     self.mlREPEAT_8.place(relx=7.8, rely=2.143, relheight=1.0, relwidth=1.0)
@@ -2211,7 +2223,7 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_8.configure(borderwidth="2")
     self.mlREPEAT_8.configure(relief="ridge")
     self.mlREPEAT_8.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_8.configure(takefocus="0")
+    #self.mlREPEAT_8.configure(takefocus="0")
 
     self.iaComputerM0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerM0.place(relx=0.046, rely=0.222, relheight=0.156
@@ -2220,7 +2232,7 @@ class topProcessorDisplayPanel:
     self.iaComputerM0.configure(borderwidth="2")
     self.iaComputerM0.configure(relief="ridge")
     self.iaComputerM0.configure(selectbackground="#c4c4c4")
-    self.iaComputerM0.configure(takefocus="0")
+    #self.iaComputerM0.configure(takefocus="0")
 
     self.mlREPEAT_10 = tk.Canvas(self.iaComputerM0)
     self.mlREPEAT_10.place(relx=7.8, rely=2.143, relheight=1.0, relwidth=1.0)
@@ -2228,7 +2240,7 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_10.configure(borderwidth="2")
     self.mlREPEAT_10.configure(relief="ridge")
     self.mlREPEAT_10.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_10.configure(takefocus="0")
+    #self.mlREPEAT_10.configure(takefocus="0")
 
     self.iaCommandM1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaCommandM1.place(relx=0.126, rely=0.37, relheight=0.156, relwidth=0.08
@@ -2237,7 +2249,7 @@ class topProcessorDisplayPanel:
     self.iaCommandM1.configure(borderwidth="2")
     self.iaCommandM1.configure(relief="ridge")
     self.iaCommandM1.configure(selectbackground="#c4c4c4")
-    self.iaCommandM1.configure(takefocus="0")
+    #self.iaCommandM1.configure(takefocus="0")
 
     self.mlREPEAT_12 = tk.Canvas(self.iaCommandM1)
     self.mlREPEAT_12.place(relx=7.8, rely=2.143, relheight=1.0, relwidth=1.0)
@@ -2245,7 +2257,7 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_12.configure(borderwidth="2")
     self.mlREPEAT_12.configure(relief="ridge")
     self.mlREPEAT_12.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_12.configure(takefocus="0")
+    #self.mlREPEAT_12.configure(takefocus="0")
 
     self.iaComputerM1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p2)
     self.iaComputerM1.place(relx=0.126, rely=0.222, relheight=0.156
@@ -2254,7 +2266,7 @@ class topProcessorDisplayPanel:
     self.iaComputerM1.configure(borderwidth="2")
     self.iaComputerM1.configure(relief="ridge")
     self.iaComputerM1.configure(selectbackground="#c4c4c4")
-    self.iaComputerM1.configure(takefocus="0")
+    #self.iaComputerM1.configure(takefocus="0")
 
     self.mlREPEAT_14 = tk.Canvas(self.iaComputerM1)
     self.mlREPEAT_14.place(relx=7.8, rely=2.143, relheight=1.0, relwidth=1.0)
@@ -2262,31 +2274,31 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_14.configure(borderwidth="2")
     self.mlREPEAT_14.configure(relief="ridge")
     self.mlREPEAT_14.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_14.configure(takefocus="0")
+    #self.mlREPEAT_14.configure(takefocus="0")
 
     self.Label13_9 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label13_9.place(relx=0.4, rely=0.111, height=16, width=70
+    self.Label13_9.place(relx=0.4, rely=0.111, height=agcScale*16, width=agcScale*70
         , bordermode='ignore')
     self.Label13_9.configure(activebackground="#f9f9f9")
     self.Label13_9.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_9.configure(text='''----------SYL----------''')
 
     self.Label13_11 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p2)
-    self.Label13_11.place(relx=0.046, rely=0.111, height=16, width=70
+    self.Label13_11.place(relx=0.046, rely=0.111, height=agcScale*16, width=agcScale*70
         , bordermode='ignore')
     self.Label13_11.configure(activebackground="#f9f9f9")
     self.Label13_11.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_11.configure(text='''----MODULE----''')
 
     self.Label13_10 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label13_10.place(relx=0.252, rely=0.113, height=19, width=150
+    self.Label13_10.place(relx=0.252, rely=0.113, height=agcScale*19, width=agcScale*150
         , bordermode='ignore')
     self.Label13_10.configure(activebackground="#f9f9f9")
     self.Label13_10.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_10.configure(text='''---------------SECTOR---------------''')
 
     self.Label13_1 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label13_1.place(relx=0.789, rely=0.113, height=19, width=70
+    self.Label13_1.place(relx=0.789, rely=0.113, height=agcScale*19, width=agcScale*70
         , bordermode='ignore')
     self.Label13_1.configure(activebackground="#f9f9f9")
     self.Label13_1.configure(font="-family {DejaVu Sans} -size 8")
@@ -2299,7 +2311,7 @@ class topProcessorDisplayPanel:
     self.daComputerDS4.configure(borderwidth="2")
     self.daComputerDS4.configure(relief="ridge")
     self.daComputerDS4.configure(selectbackground="#c4c4c4")
-    self.daComputerDS4.configure(takefocus="0")
+    #self.daComputerDS4.configure(takefocus="0")
 
     self.daPARITY_BIT = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daPARITY_BIT.place(relx=0.057, rely=0.226, relheight=0.308
@@ -2308,7 +2320,7 @@ class topProcessorDisplayPanel:
     self.daPARITY_BIT.configure(borderwidth="2")
     self.daPARITY_BIT.configure(relief="ridge")
     self.daPARITY_BIT.configure(selectbackground="#c4c4c4")
-    self.daPARITY_BIT.configure(takefocus="0")
+    #self.daPARITY_BIT.configure(takefocus="0")
 
     self.daCommandDS4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandDS4.place(relx=0.24, rely=0.376, relheight=0.158
@@ -2317,7 +2329,7 @@ class topProcessorDisplayPanel:
     self.daCommandDS4.configure(borderwidth="2")
     self.daCommandDS4.configure(relief="ridge")
     self.daCommandDS4.configure(selectbackground="#c4c4c4")
-    self.daCommandDS4.configure(takefocus="0")
+    #self.daCommandDS4.configure(takefocus="0")
 
     self.daComputerDS3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerDS3.place(relx=0.332, rely=0.226, relheight=0.158
@@ -2326,7 +2338,7 @@ class topProcessorDisplayPanel:
     self.daComputerDS3.configure(borderwidth="2")
     self.daComputerDS3.configure(relief="ridge")
     self.daComputerDS3.configure(selectbackground="#c4c4c4")
-    self.daComputerDS3.configure(takefocus="0")
+    #self.daComputerDS3.configure(takefocus="0")
 
     self.iaCommandIS4_11 = tk.Canvas(self.daComputerDS3)
     self.iaCommandIS4_11.place(relx=4.75, rely=0.81, relheight=1.0, relwidth=1.0)
@@ -2335,7 +2347,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS4_11.configure(borderwidth="2")
     self.iaCommandIS4_11.configure(relief="ridge")
     self.iaCommandIS4_11.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS4_11.configure(takefocus="0")
+    #self.iaCommandIS4_11.configure(takefocus="0")
 
     self.daCommandDS3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandDS3.place(relx=0.332, rely=0.376, relheight=0.158
@@ -2344,7 +2356,7 @@ class topProcessorDisplayPanel:
     self.daCommandDS3.configure(borderwidth="2")
     self.daCommandDS3.configure(relief="ridge")
     self.daCommandDS3.configure(selectbackground="#c4c4c4")
-    self.daCommandDS3.configure(takefocus="0")
+    #self.daCommandDS3.configure(takefocus="0")
 
     self.daComputerDS2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerDS2.place(relx=0.423, rely=0.226, relheight=0.158
@@ -2353,7 +2365,7 @@ class topProcessorDisplayPanel:
     self.daComputerDS2.configure(borderwidth="2")
     self.daComputerDS2.configure(relief="ridge")
     self.daComputerDS2.configure(selectbackground="#c4c4c4")
-    self.daComputerDS2.configure(takefocus="0")
+    #self.daComputerDS2.configure(takefocus="0")
 
     self.daCommandDS2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandDS2.place(relx=0.423, rely=0.376, relheight=0.158
@@ -2362,7 +2374,7 @@ class topProcessorDisplayPanel:
     self.daCommandDS2.configure(borderwidth="2")
     self.daCommandDS2.configure(relief="ridge")
     self.daCommandDS2.configure(selectbackground="#c4c4c4")
-    self.daCommandDS2.configure(takefocus="0")
+    #self.daCommandDS2.configure(takefocus="0")
 
     self.iaCommandIS4_2 = tk.Canvas(self.daCommandDS2)
     self.iaCommandIS4_2.place(relx=5.65, rely=3.714, relheight=1.0, relwidth=1.0)
@@ -2371,7 +2383,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS4_2.configure(borderwidth="2")
     self.iaCommandIS4_2.configure(relief="ridge")
     self.iaCommandIS4_2.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS4_2.configure(takefocus="0")
+    #self.iaCommandIS4_2.configure(takefocus="0")
 
     self.daComputerDS1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerDS1.place(relx=0.515, rely=0.226, relheight=0.158
@@ -2380,7 +2392,7 @@ class topProcessorDisplayPanel:
     self.daComputerDS1.configure(borderwidth="2")
     self.daComputerDS1.configure(relief="ridge")
     self.daComputerDS1.configure(selectbackground="#c4c4c4")
-    self.daComputerDS1.configure(takefocus="0")
+    #self.daComputerDS1.configure(takefocus="0")
 
     self.iaCommandIS4_3 = tk.Canvas(self.daComputerDS1)
     self.iaCommandIS4_3.place(relx=6.0, rely=1.667, relheight=1.0, relwidth=1.0)
@@ -2388,7 +2400,7 @@ class topProcessorDisplayPanel:
     self.iaCommandIS4_3.configure(borderwidth="2")
     self.iaCommandIS4_3.configure(relief="ridge")
     self.iaCommandIS4_3.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS4_3.configure(takefocus="0")
+    #self.iaCommandIS4_3.configure(takefocus="0")
 
     self.daCommandDS1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandDS1.place(relx=0.515, rely=0.376, relheight=0.158
@@ -2397,7 +2409,7 @@ class topProcessorDisplayPanel:
     self.daCommandDS1.configure(borderwidth="2")
     self.daCommandDS1.configure(relief="ridge")
     self.daCommandDS1.configure(selectbackground="#c4c4c4")
-    self.daCommandDS1.configure(takefocus="0")
+    #self.daCommandDS1.configure(takefocus="0")
 
     self.iaCommandIS4_4 = tk.Canvas(self.daCommandDS1)
     self.iaCommandIS4_4.place(relx=6.0, rely=3.333, relheight=1.0, relwidth=1.0)
@@ -2405,17 +2417,17 @@ class topProcessorDisplayPanel:
     self.iaCommandIS4_4.configure(borderwidth="2")
     self.iaCommandIS4_4.configure(relief="ridge")
     self.iaCommandIS4_4.configure(selectbackground="#c4c4c4")
-    self.iaCommandIS4_4.configure(takefocus="0")
+    #self.iaCommandIS4_4.configure(takefocus="0")
 
     self.Label12_3 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label12_3.place(relx=0.611, rely=0.226, height=23, width=77
+    self.Label12_3.place(relx=0.611, rely=0.226, height=agcScale*23, width=agcScale*77
         , bordermode='ignore')
     self.Label12_3.configure(activebackground="#f9f9f9")
     self.Label12_3.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_3.configure(text='''—COMPUTER—''')
 
     self.Label12_4 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label12_4.place(relx=0.611, rely=0.376, height=23, width=77
+    self.Label12_4.place(relx=0.611, rely=0.376, height=agcScale*23, width=agcScale*77
         , bordermode='ignore')
     self.Label12_4.configure(activebackground="#f9f9f9")
     self.Label12_4.configure(font="-family {DejaVu Sans} -size 8")
@@ -2428,7 +2440,7 @@ class topProcessorDisplayPanel:
     self.daComputerM0.configure(borderwidth="2")
     self.daComputerM0.configure(relief="ridge")
     self.daComputerM0.configure(selectbackground="#c4c4c4")
-    self.daComputerM0.configure(takefocus="0")
+    #self.daComputerM0.configure(takefocus="0")
 
     self.daComputerM1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerM1.place(relx=0.87, rely=0.226, relheight=0.158, relwidth=0.08
@@ -2437,7 +2449,7 @@ class topProcessorDisplayPanel:
     self.daComputerM1.configure(borderwidth="2")
     self.daComputerM1.configure(relief="ridge")
     self.daComputerM1.configure(selectbackground="#c4c4c4")
-    self.daComputerM1.configure(takefocus="0")
+    #self.daComputerM1.configure(takefocus="0")
 
     self.daCommandM0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandM0.place(relx=0.789, rely=0.376, relheight=0.158, relwidth=0.08
@@ -2446,7 +2458,7 @@ class topProcessorDisplayPanel:
     self.daCommandM0.configure(borderwidth="2")
     self.daCommandM0.configure(relief="ridge")
     self.daCommandM0.configure(selectbackground="#c4c4c4")
-    self.daCommandM0.configure(takefocus="0")
+    #self.daCommandM0.configure(takefocus="0")
 
     self.daCommandM1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandM1.place(relx=0.87, rely=0.376, relheight=0.158, relwidth=0.08
@@ -2455,10 +2467,10 @@ class topProcessorDisplayPanel:
     self.daCommandM1.configure(borderwidth="2")
     self.daCommandM1.configure(relief="ridge")
     self.daCommandM1.configure(selectbackground="#c4c4c4")
-    self.daCommandM1.configure(takefocus="0")
+    #self.daCommandM1.configure(takefocus="0")
 
     self.Label13_5 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label13_5.place(relx=0.023, rely=0.15, height=9, width=70
+    self.Label13_5.place(relx=0.023, rely=0.15, height=agcScale*9, width=agcScale*70
         , bordermode='ignore')
     self.Label13_5.configure(activebackground="#f9f9f9")
     self.Label13_5.configure(font="-family {DejaVu Sans} -size 8")
@@ -2471,7 +2483,7 @@ class topProcessorDisplayPanel:
     self.daCommandOP3.configure(borderwidth="2")
     self.daCommandOP3.configure(relief="ridge")
     self.daCommandOP3.configure(selectbackground="#c4c4c4")
-    self.daCommandOP3.configure(takefocus="0")
+    #self.daCommandOP3.configure(takefocus="0")
 
     self.daCommandOP2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOP2.place(relx=0.229, rely=0.789, relheight=0.158
@@ -2480,7 +2492,7 @@ class topProcessorDisplayPanel:
     self.daCommandOP2.configure(borderwidth="2")
     self.daCommandOP2.configure(relief="ridge")
     self.daCommandOP2.configure(selectbackground="#c4c4c4")
-    self.daCommandOP2.configure(takefocus="0")
+    #self.daCommandOP2.configure(takefocus="0")
 
     self.daCommandOP1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOP1.place(relx=0.297, rely=0.789, relheight=0.158
@@ -2489,7 +2501,7 @@ class topProcessorDisplayPanel:
     self.daCommandOP1.configure(borderwidth="2")
     self.daCommandOP1.configure(relief="ridge")
     self.daCommandOP1.configure(selectbackground="#c4c4c4")
-    self.daCommandOP1.configure(takefocus="0")
+    #self.daCommandOP1.configure(takefocus="0")
 
     self.daCommandOA9 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA9.place(relx=0.366, rely=0.789, relheight=0.158
@@ -2498,7 +2510,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA9.configure(borderwidth="2")
     self.daCommandOA9.configure(relief="ridge")
     self.daCommandOA9.configure(selectbackground="#c4c4c4")
-    self.daCommandOA9.configure(takefocus="0")
+    #self.daCommandOA9.configure(takefocus="0")
 
     self.daCommandOA8 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA8.place(relx=0.435, rely=0.789, relheight=0.158
@@ -2507,7 +2519,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA8.configure(borderwidth="2")
     self.daCommandOA8.configure(relief="ridge")
     self.daCommandOA8.configure(selectbackground="#c4c4c4")
-    self.daCommandOA8.configure(takefocus="0")
+    #self.daCommandOA8.configure(takefocus="0")
 
     self.daCommandOA7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA7.place(relx=0.503, rely=0.789, relheight=0.158
@@ -2516,7 +2528,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA7.configure(borderwidth="2")
     self.daCommandOA7.configure(relief="ridge")
     self.daCommandOA7.configure(selectbackground="#c4c4c4")
-    self.daCommandOA7.configure(takefocus="0")
+    #self.daCommandOA7.configure(takefocus="0")
 
     self.daCommandOA6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA6.place(relx=0.572, rely=0.789, relheight=0.158
@@ -2525,7 +2537,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA6.configure(borderwidth="2")
     self.daCommandOA6.configure(relief="ridge")
     self.daCommandOA6.configure(selectbackground="#c4c4c4")
-    self.daCommandOA6.configure(takefocus="0")
+    #self.daCommandOA6.configure(takefocus="0")
 
     self.daCommandOA5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA5.place(relx=0.641, rely=0.789, relheight=0.158
@@ -2534,7 +2546,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA5.configure(borderwidth="2")
     self.daCommandOA5.configure(relief="ridge")
     self.daCommandOA5.configure(selectbackground="#c4c4c4")
-    self.daCommandOA5.configure(takefocus="0")
+    #self.daCommandOA5.configure(takefocus="0")
 
     self.daCommandOA4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA4.place(relx=0.709, rely=0.789, relheight=0.158
@@ -2543,7 +2555,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA4.configure(borderwidth="2")
     self.daCommandOA4.configure(relief="ridge")
     self.daCommandOA4.configure(selectbackground="#c4c4c4")
-    self.daCommandOA4.configure(takefocus="0")
+    #self.daCommandOA4.configure(takefocus="0")
 
     self.daCommandOP4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOP4.place(relx=0.092, rely=0.789, relheight=0.158
@@ -2552,7 +2564,7 @@ class topProcessorDisplayPanel:
     self.daCommandOP4.configure(borderwidth="2")
     self.daCommandOP4.configure(relief="ridge")
     self.daCommandOP4.configure(selectbackground="#c4c4c4")
-    self.daCommandOP4.configure(takefocus="0")
+    #self.daCommandOP4.configure(takefocus="0")
 
     self.daCommandOA3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA3.place(relx=0.778, rely=0.789, relheight=0.158
@@ -2561,7 +2573,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA3.configure(borderwidth="2")
     self.daCommandOA3.configure(relief="ridge")
     self.daCommandOA3.configure(selectbackground="#c4c4c4")
-    self.daCommandOA3.configure(takefocus="0")
+    #self.daCommandOA3.configure(takefocus="0")
 
     self.daCommandOA2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA2.place(relx=0.847, rely=0.789, relheight=0.158
@@ -2570,7 +2582,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA2.configure(borderwidth="2")
     self.daCommandOA2.configure(relief="ridge")
     self.daCommandOA2.configure(selectbackground="#c4c4c4")
-    self.daCommandOA2.configure(takefocus="0")
+    #self.daCommandOA2.configure(takefocus="0")
 
     self.daCommandOA1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daCommandOA1.place(relx=0.915, rely=0.789, relheight=0.158
@@ -2579,7 +2591,7 @@ class topProcessorDisplayPanel:
     self.daCommandOA1.configure(borderwidth="2")
     self.daCommandOA1.configure(relief="ridge")
     self.daCommandOA1.configure(selectbackground="#c4c4c4")
-    self.daCommandOA1.configure(takefocus="0")
+    #self.daCommandOA1.configure(takefocus="0")
 
     self.daComputerOP4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOP4.place(relx=0.092, rely=0.639, relheight=0.158
@@ -2588,7 +2600,7 @@ class topProcessorDisplayPanel:
     self.daComputerOP4.configure(borderwidth="2")
     self.daComputerOP4.configure(relief="ridge")
     self.daComputerOP4.configure(selectbackground="#c4c4c4")
-    self.daComputerOP4.configure(takefocus="0")
+    #self.daComputerOP4.configure(takefocus="0")
 
     self.daComputerOP3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOP3.place(relx=0.16, rely=0.639, relheight=0.158
@@ -2597,7 +2609,7 @@ class topProcessorDisplayPanel:
     self.daComputerOP3.configure(borderwidth="2")
     self.daComputerOP3.configure(relief="ridge")
     self.daComputerOP3.configure(selectbackground="#c4c4c4")
-    self.daComputerOP3.configure(takefocus="0")
+    #self.daComputerOP3.configure(takefocus="0")
 
     self.daComputerOP2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOP2.place(relx=0.229, rely=0.639, relheight=0.158
@@ -2606,7 +2618,7 @@ class topProcessorDisplayPanel:
     self.daComputerOP2.configure(borderwidth="2")
     self.daComputerOP2.configure(relief="ridge")
     self.daComputerOP2.configure(selectbackground="#c4c4c4")
-    self.daComputerOP2.configure(takefocus="0")
+    #self.daComputerOP2.configure(takefocus="0")
 
     self.daComputerOP1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOP1.place(relx=0.297, rely=0.639, relheight=0.158
@@ -2615,7 +2627,7 @@ class topProcessorDisplayPanel:
     self.daComputerOP1.configure(borderwidth="2")
     self.daComputerOP1.configure(relief="ridge")
     self.daComputerOP1.configure(selectbackground="#c4c4c4")
-    self.daComputerOP1.configure(takefocus="0")
+    #self.daComputerOP1.configure(takefocus="0")
 
     self.daComputerOA9 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA9.place(relx=0.366, rely=0.639, relheight=0.158
@@ -2624,7 +2636,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA9.configure(borderwidth="2")
     self.daComputerOA9.configure(relief="ridge")
     self.daComputerOA9.configure(selectbackground="#c4c4c4")
-    self.daComputerOA9.configure(takefocus="0")
+    #self.daComputerOA9.configure(takefocus="0")
 
     self.daComputerOA8 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA8.place(relx=0.435, rely=0.639, relheight=0.158
@@ -2633,7 +2645,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA8.configure(borderwidth="2")
     self.daComputerOA8.configure(relief="ridge")
     self.daComputerOA8.configure(selectbackground="#c4c4c4")
-    self.daComputerOA8.configure(takefocus="0")
+    #self.daComputerOA8.configure(takefocus="0")
 
     self.daComputerOA7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA7.place(relx=0.503, rely=0.639, relheight=0.158
@@ -2642,7 +2654,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA7.configure(borderwidth="2")
     self.daComputerOA7.configure(relief="ridge")
     self.daComputerOA7.configure(selectbackground="#c4c4c4")
-    self.daComputerOA7.configure(takefocus="0")
+    #self.daComputerOA7.configure(takefocus="0")
 
     self.daComputerOA6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA6.place(relx=0.572, rely=0.639, relheight=0.158
@@ -2651,7 +2663,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA6.configure(borderwidth="2")
     self.daComputerOA6.configure(relief="ridge")
     self.daComputerOA6.configure(selectbackground="#c4c4c4")
-    self.daComputerOA6.configure(takefocus="0")
+    #self.daComputerOA6.configure(takefocus="0")
 
     self.daComputerOA5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA5.place(relx=0.641, rely=0.639, relheight=0.158
@@ -2660,7 +2672,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA5.configure(borderwidth="2")
     self.daComputerOA5.configure(relief="ridge")
     self.daComputerOA5.configure(selectbackground="#c4c4c4")
-    self.daComputerOA5.configure(takefocus="0")
+    #self.daComputerOA5.configure(takefocus="0")
 
     self.daComputerOA4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA4.place(relx=0.709, rely=0.639, relheight=0.158
@@ -2669,7 +2681,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA4.configure(borderwidth="2")
     self.daComputerOA4.configure(relief="ridge")
     self.daComputerOA4.configure(selectbackground="#c4c4c4")
-    self.daComputerOA4.configure(takefocus="0")
+    #self.daComputerOA4.configure(takefocus="0")
 
     self.daComputerOA3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA3.place(relx=0.778, rely=0.639, relheight=0.158
@@ -2678,7 +2690,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA3.configure(borderwidth="2")
     self.daComputerOA3.configure(relief="ridge")
     self.daComputerOA3.configure(selectbackground="#c4c4c4")
-    self.daComputerOA3.configure(takefocus="0")
+    #self.daComputerOA3.configure(takefocus="0")
 
     self.daComputerOA2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA2.place(relx=0.847, rely=0.639, relheight=0.158
@@ -2687,7 +2699,7 @@ class topProcessorDisplayPanel:
     self.daComputerOA2.configure(borderwidth="2")
     self.daComputerOA2.configure(relief="ridge")
     self.daComputerOA2.configure(selectbackground="#c4c4c4")
-    self.daComputerOA2.configure(takefocus="0")
+    #self.daComputerOA2.configure(takefocus="0")
 
     self.daComputerOA1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p3)
     self.daComputerOA1.place(relx=0.915, rely=0.639, relheight=0.158
@@ -2696,24 +2708,24 @@ class topProcessorDisplayPanel:
     self.daComputerOA1.configure(borderwidth="2")
     self.daComputerOA1.configure(relief="ridge")
     self.daComputerOA1.configure(selectbackground="#c4c4c4")
-    self.daComputerOA1.configure(takefocus="0")
+    #self.daComputerOA1.configure(takefocus="0")
 
     self.Label13_6 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label13_6.place(relx=0.103, rely=0.564, height=9, width=110
+    self.Label13_6.place(relx=0.103, rely=0.564, height=agcScale*9, width=agcScale*110
         , bordermode='ignore')
     self.Label13_6.configure(activebackground="#f9f9f9")
     self.Label13_6.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_6.configure(text='''----------OP CODE----------''')
 
     self.Label13_8 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label13_8.place(relx=0.378, rely=0.564, height=9, width=260
+    self.Label13_8.place(relx=0.378, rely=0.564, height=agcScale*9, width=agcScale*260
         , bordermode='ignore')
     self.Label13_8.configure(activebackground="#f9f9f9")
     self.Label13_8.configure(font="-family {DejaVu Sans} -size 8")
     self.Label13_8.configure(text='''------------------------------OPERAND------------------------------''')
 
     self.Label12_6 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label12_6.place(relx=0.011, rely=0.639, height=23, width=32
+    self.Label12_6.place(relx=0.011, rely=0.639, height=agcScale*23, width=agcScale*32
         , bordermode='ignore')
     self.Label12_6.configure(activebackground="#f9f9f9")
     self.Label12_6.configure(anchor='ne')
@@ -2721,7 +2733,7 @@ class topProcessorDisplayPanel:
     self.Label12_6.configure(text='''CPTR''')
 
     self.Label12_10 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p3)
-    self.Label12_10.place(relx=0.011, rely=0.789, height=23, width=32
+    self.Label12_10.place(relx=0.011, rely=0.789, height=agcScale*23, width=agcScale*32
         , bordermode='ignore')
     self.Label12_10.configure(activebackground="#f9f9f9")
     self.Label12_10.configure(anchor='ne')
@@ -2735,7 +2747,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand14.configure(borderwidth="2")
     self.mlddCommand14.configure(relief="ridge")
     self.mlddCommand14.configure(selectbackground="#c4c4c4")
-    self.mlddCommand14.configure(takefocus="0")
+    #self.mlddCommand14.configure(takefocus="0")
 
     self.mlddComputer17 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer17.place(relx=0.561, rely=0.844, relheight=0.136
@@ -2744,7 +2756,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer17.configure(borderwidth="2")
     self.mlddComputer17.configure(relief="ridge")
     self.mlddComputer17.configure(selectbackground="#c4c4c4")
-    self.mlddComputer17.configure(takefocus="0")
+    #self.mlddComputer17.configure(takefocus="0")
 
     self.mlddCommand17 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand17.place(relx=0.606, rely=0.844, relheight=0.136
@@ -2753,7 +2765,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand17.configure(borderwidth="2")
     self.mlddCommand17.configure(relief="ridge")
     self.mlddCommand17.configure(selectbackground="#c4c4c4")
-    self.mlddCommand17.configure(takefocus="0")
+    #self.mlddCommand17.configure(takefocus="0")
 
     self.mlddComputer20 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer20.place(relx=0.664, rely=0.844, relheight=0.136
@@ -2762,7 +2774,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer20.configure(borderwidth="2")
     self.mlddComputer20.configure(relief="ridge")
     self.mlddComputer20.configure(selectbackground="#c4c4c4")
-    self.mlddComputer20.configure(takefocus="0")
+    #self.mlddComputer20.configure(takefocus="0")
 
     self.mlddCommand20 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand20.place(relx=0.709, rely=0.844, relheight=0.136
@@ -2771,7 +2783,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand20.configure(borderwidth="2")
     self.mlddCommand20.configure(relief="ridge")
     self.mlddCommand20.configure(selectbackground="#c4c4c4")
-    self.mlddCommand20.configure(takefocus="0")
+    #self.mlddCommand20.configure(takefocus="0")
 
     self.mlddComputer23 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer23.place(relx=0.767, rely=0.844, relheight=0.136
@@ -2780,7 +2792,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer23.configure(borderwidth="2")
     self.mlddComputer23.configure(relief="ridge")
     self.mlddComputer23.configure(selectbackground="#c4c4c4")
-    self.mlddComputer23.configure(takefocus="0")
+    #self.mlddComputer23.configure(takefocus="0")
 
     self.mlddCommand23 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand23.place(relx=0.812, rely=0.844, relheight=0.136
@@ -2789,7 +2801,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand23.configure(borderwidth="2")
     self.mlddCommand23.configure(relief="ridge")
     self.mlddCommand23.configure(selectbackground="#c4c4c4")
-    self.mlddCommand23.configure(takefocus="0")
+    #self.mlddCommand23.configure(takefocus="0")
 
     self.mlddComputer14 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer14.place(relx=0.458, rely=0.844, relheight=0.136
@@ -2798,7 +2810,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer14.configure(borderwidth="2")
     self.mlddComputer14.configure(relief="ridge")
     self.mlddComputer14.configure(selectbackground="#c4c4c4")
-    self.mlddComputer14.configure(takefocus="0")
+    #self.mlddComputer14.configure(takefocus="0")
 
     self.mlddCommand11 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand11.place(relx=0.4, rely=0.844, relheight=0.136
@@ -2807,7 +2819,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand11.configure(borderwidth="2")
     self.mlddCommand11.configure(relief="ridge")
     self.mlddCommand11.configure(selectbackground="#c4c4c4")
-    self.mlddCommand11.configure(takefocus="0")
+    #self.mlddCommand11.configure(takefocus="0")
 
     self.mlddComputer11 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer11.place(relx=0.355, rely=0.844, relheight=0.136
@@ -2816,7 +2828,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer11.configure(borderwidth="2")
     self.mlddComputer11.configure(relief="ridge")
     self.mlddComputer11.configure(selectbackground="#c4c4c4")
-    self.mlddComputer11.configure(takefocus="0")
+    #self.mlddComputer11.configure(takefocus="0")
 
     self.mlddCommand8 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand8.place(relx=0.297, rely=0.844, relheight=0.136
@@ -2825,7 +2837,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand8.configure(borderwidth="2")
     self.mlddCommand8.configure(relief="ridge")
     self.mlddCommand8.configure(selectbackground="#c4c4c4")
-    self.mlddCommand8.configure(takefocus="0")
+    #self.mlddCommand8.configure(takefocus="0")
 
     self.mlddComputer8 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer8.place(relx=0.252, rely=0.844, relheight=0.136
@@ -2834,7 +2846,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer8.configure(borderwidth="2")
     self.mlddComputer8.configure(relief="ridge")
     self.mlddComputer8.configure(selectbackground="#c4c4c4")
-    self.mlddComputer8.configure(takefocus="0")
+    #self.mlddComputer8.configure(takefocus="0")
 
     self.mlddCommand5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand5.place(relx=0.195, rely=0.844, relheight=0.136
@@ -2843,7 +2855,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand5.configure(borderwidth="2")
     self.mlddCommand5.configure(relief="ridge")
     self.mlddCommand5.configure(selectbackground="#c4c4c4")
-    self.mlddCommand5.configure(takefocus="0")
+    #self.mlddCommand5.configure(takefocus="0")
 
     self.mlddComputer5 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer5.place(relx=0.149, rely=0.844, relheight=0.136
@@ -2852,7 +2864,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer5.configure(borderwidth="2")
     self.mlddComputer5.configure(relief="ridge")
     self.mlddComputer5.configure(selectbackground="#c4c4c4")
-    self.mlddComputer5.configure(takefocus="0")
+    #self.mlddComputer5.configure(takefocus="0")
 
     self.mlddCommand2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand2.place(relx=0.092, rely=0.844, relheight=0.136
@@ -2861,7 +2873,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand2.configure(borderwidth="2")
     self.mlddCommand2.configure(relief="ridge")
     self.mlddCommand2.configure(selectbackground="#c4c4c4")
-    self.mlddCommand2.configure(takefocus="0")
+    #self.mlddCommand2.configure(takefocus="0")
 
     self.mlddComputer2 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer2.place(relx=0.046, rely=0.844, relheight=0.136
@@ -2870,7 +2882,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer2.configure(borderwidth="2")
     self.mlddComputer2.configure(relief="ridge")
     self.mlddComputer2.configure(selectbackground="#c4c4c4")
-    self.mlddComputer2.configure(takefocus="0")
+    #self.mlddComputer2.configure(takefocus="0")
 
     self.mlddComputer13 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer13.place(relx=0.458, rely=0.714, relheight=0.136
@@ -2879,7 +2891,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer13.configure(borderwidth="2")
     self.mlddComputer13.configure(relief="ridge")
     self.mlddComputer13.configure(selectbackground="#c4c4c4")
-    self.mlddComputer13.configure(takefocus="0")
+    #self.mlddComputer13.configure(takefocus="0")
 
     self.mlddComputer12 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer12.place(relx=0.458, rely=0.584, relheight=0.136
@@ -2888,7 +2900,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer12.configure(borderwidth="2")
     self.mlddComputer12.configure(relief="ridge")
     self.mlddComputer12.configure(selectbackground="#c4c4c4")
-    self.mlddComputer12.configure(takefocus="0")
+    #self.mlddComputer12.configure(takefocus="0")
 
     self.mlddCommandSYL0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommandSYL0.place(relx=0.458, rely=0.227, relheight=0.26
@@ -2897,10 +2909,10 @@ class topProcessorDisplayPanel:
     self.mlddCommandSYL0.configure(borderwidth="2")
     self.mlddCommandSYL0.configure(relief="ridge")
     self.mlddCommandSYL0.configure(selectbackground="#c4c4c4")
-    self.mlddCommandSYL0.configure(takefocus="0")
+    #self.mlddCommandSYL0.configure(takefocus="0")
 
     self.Label13_7 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label13_7.place(relx=0.412, rely=0.097, height=9, width=80
+    self.Label13_7.place(relx=0.412, rely=0.097, height=agcScale*9, width=agcScale*80
         , bordermode='ignore')
     self.Label13_7.configure(activebackground="#f9f9f9")
     self.Label13_7.configure(font="-family {DejaVu Sans} -size 8")
@@ -2913,7 +2925,7 @@ class topProcessorDisplayPanel:
     self.mlddComputerBR1.configure(borderwidth="2")
     self.mlddComputerBR1.configure(relief="ridge")
     self.mlddComputerBR1.configure(selectbackground="#c4c4c4")
-    self.mlddComputerBR1.configure(takefocus="0")
+    #self.mlddComputerBR1.configure(takefocus="0")
 
     self.mlddCommandSYL1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommandSYL1.place(relx=0.549, rely=0.227, relheight=0.26
@@ -2922,7 +2934,7 @@ class topProcessorDisplayPanel:
     self.mlddCommandSYL1.configure(borderwidth="2")
     self.mlddCommandSYL1.configure(relief="ridge")
     self.mlddCommandSYL1.configure(selectbackground="#c4c4c4")
-    self.mlddCommandSYL1.configure(takefocus="0")
+    #self.mlddCommandSYL1.configure(takefocus="0")
 
     self.mlddComputerBR0 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputerBR0.place(relx=0.412, rely=0.227, relheight=0.26
@@ -2931,7 +2943,7 @@ class topProcessorDisplayPanel:
     self.mlddComputerBR0.configure(borderwidth="2")
     self.mlddComputerBR0.configure(relief="ridge")
     self.mlddComputerBR0.configure(selectbackground="#c4c4c4")
-    self.mlddComputerBR0.configure(takefocus="0")
+    #self.mlddComputerBR0.configure(takefocus="0")
 
     self.mlddLAMP_TEST = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddLAMP_TEST.place(relx=0.149, rely=0.227, relheight=0.266
@@ -2940,7 +2952,7 @@ class topProcessorDisplayPanel:
     self.mlddLAMP_TEST.configure(borderwidth="2")
     self.mlddLAMP_TEST.configure(relief="ridge")
     self.mlddLAMP_TEST.configure(selectbackground="#c4c4c4")
-    self.mlddLAMP_TEST.configure(takefocus="0")
+    #self.mlddLAMP_TEST.configure(takefocus="0")
 
     self.mlddPARITY_BIT = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddPARITY_BIT.place(relx=0.767, rely=0.227, relheight=0.266
@@ -2949,10 +2961,10 @@ class topProcessorDisplayPanel:
     self.mlddPARITY_BIT.configure(borderwidth="2")
     self.mlddPARITY_BIT.configure(relief="ridge")
     self.mlddPARITY_BIT.configure(selectbackground="#c4c4c4")
-    self.mlddPARITY_BIT.configure(takefocus="0")
+    #self.mlddPARITY_BIT.configure(takefocus="0")
 
     self.Label13_13 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label13_13.place(relx=0.732, rely=0.162, height=9, width=70
+    self.Label13_13.place(relx=0.732, rely=0.162, height=agcScale*9, width=agcScale*70
         , bordermode='ignore')
     self.Label13_13.configure(activebackground="#f9f9f9")
     self.Label13_13.configure(font="-family {DejaVu Sans} -size 8")
@@ -2965,7 +2977,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand25.configure(borderwidth="2")
     self.mlddCommand25.configure(relief="ridge")
     self.mlddCommand25.configure(selectbackground="#c4c4c4")
-    self.mlddCommand25.configure(takefocus="0")
+    #self.mlddCommand25.configure(takefocus="0")
 
     self.mlddCommand24 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand24.place(relx=0.915, rely=0.584, relheight=0.136
@@ -2974,7 +2986,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand24.configure(borderwidth="2")
     self.mlddCommand24.configure(relief="ridge")
     self.mlddCommand24.configure(selectbackground="#c4c4c4")
-    self.mlddCommand24.configure(takefocus="0")
+    #self.mlddCommand24.configure(takefocus="0")
 
     self.mlddComputer25 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer25.place(relx=0.87, rely=0.714, relheight=0.136
@@ -2983,7 +2995,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer25.configure(borderwidth="2")
     self.mlddComputer25.configure(relief="ridge")
     self.mlddComputer25.configure(selectbackground="#c4c4c4")
-    self.mlddComputer25.configure(takefocus="0")
+    #self.mlddComputer25.configure(takefocus="0")
 
     self.mlddComputer24 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer24.place(relx=0.87, rely=0.584, relheight=0.136
@@ -2992,7 +3004,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer24.configure(borderwidth="2")
     self.mlddComputer24.configure(relief="ridge")
     self.mlddComputer24.configure(selectbackground="#c4c4c4")
-    self.mlddComputer24.configure(takefocus="0")
+    #self.mlddComputer24.configure(takefocus="0")
 
     self.mlddComputer1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer1.place(relx=0.046, rely=0.714, relheight=0.136
@@ -3001,7 +3013,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer1.configure(borderwidth="2")
     self.mlddComputer1.configure(relief="ridge")
     self.mlddComputer1.configure(selectbackground="#c4c4c4")
-    self.mlddComputer1.configure(takefocus="0")
+    #self.mlddComputer1.configure(takefocus="0")
 
     self.mlddComputerSIGN = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputerSIGN.place(relx=0.046, rely=0.584, relheight=0.136
@@ -3010,7 +3022,7 @@ class topProcessorDisplayPanel:
     self.mlddComputerSIGN.configure(borderwidth="2")
     self.mlddComputerSIGN.configure(relief="ridge")
     self.mlddComputerSIGN.configure(selectbackground="#c4c4c4")
-    self.mlddComputerSIGN.configure(takefocus="0")
+    #self.mlddComputerSIGN.configure(takefocus="0")
 
     self.mlddCommand1 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand1.place(relx=0.092, rely=0.714, relheight=0.136
@@ -3019,7 +3031,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand1.configure(borderwidth="2")
     self.mlddCommand1.configure(relief="ridge")
     self.mlddCommand1.configure(selectbackground="#c4c4c4")
-    self.mlddCommand1.configure(takefocus="0")
+    #self.mlddCommand1.configure(takefocus="0")
 
     self.mlddCommandSIGN = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommandSIGN.place(relx=0.092, rely=0.584, relheight=0.136
@@ -3028,7 +3040,7 @@ class topProcessorDisplayPanel:
     self.mlddCommandSIGN.configure(borderwidth="2")
     self.mlddCommandSIGN.configure(relief="ridge")
     self.mlddCommandSIGN.configure(selectbackground="#c4c4c4")
-    self.mlddCommandSIGN.configure(takefocus="0")
+    #self.mlddCommandSIGN.configure(takefocus="0")
 
     self.mlddComputer4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer4.place(relx=0.149, rely=0.714, relheight=0.136
@@ -3037,7 +3049,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer4.configure(borderwidth="2")
     self.mlddComputer4.configure(relief="ridge")
     self.mlddComputer4.configure(selectbackground="#c4c4c4")
-    self.mlddComputer4.configure(takefocus="0")
+    #self.mlddComputer4.configure(takefocus="0")
 
     self.mlddComputer3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer3.place(relx=0.149, rely=0.584, relheight=0.136
@@ -3046,7 +3058,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer3.configure(borderwidth="2")
     self.mlddComputer3.configure(relief="ridge")
     self.mlddComputer3.configure(selectbackground="#c4c4c4")
-    self.mlddComputer3.configure(takefocus="0")
+    #self.mlddComputer3.configure(takefocus="0")
 
     self.mlddCommand4 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand4.place(relx=0.195, rely=0.714, relheight=0.136
@@ -3055,7 +3067,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand4.configure(borderwidth="2")
     self.mlddCommand4.configure(relief="ridge")
     self.mlddCommand4.configure(selectbackground="#c4c4c4")
-    self.mlddCommand4.configure(takefocus="0")
+    #self.mlddCommand4.configure(takefocus="0")
 
     self.mlddCommand3 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand3.place(relx=0.195, rely=0.584, relheight=0.136
@@ -3064,7 +3076,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand3.configure(borderwidth="2")
     self.mlddCommand3.configure(relief="ridge")
     self.mlddCommand3.configure(selectbackground="#c4c4c4")
-    self.mlddCommand3.configure(takefocus="0")
+    #self.mlddCommand3.configure(takefocus="0")
 
     self.mlddComputer7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer7.place(relx=0.252, rely=0.714, relheight=0.136
@@ -3073,7 +3085,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer7.configure(borderwidth="2")
     self.mlddComputer7.configure(relief="ridge")
     self.mlddComputer7.configure(selectbackground="#c4c4c4")
-    self.mlddComputer7.configure(takefocus="0")
+    #self.mlddComputer7.configure(takefocus="0")
 
     self.mlddComputer6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer6.place(relx=0.252, rely=0.584, relheight=0.136
@@ -3082,7 +3094,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer6.configure(borderwidth="2")
     self.mlddComputer6.configure(relief="ridge")
     self.mlddComputer6.configure(selectbackground="#c4c4c4")
-    self.mlddComputer6.configure(takefocus="0")
+    #self.mlddComputer6.configure(takefocus="0")
 
     self.mlddCommand7 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand7.place(relx=0.297, rely=0.714, relheight=0.136
@@ -3091,7 +3103,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand7.configure(borderwidth="2")
     self.mlddCommand7.configure(relief="ridge")
     self.mlddCommand7.configure(selectbackground="#c4c4c4")
-    self.mlddCommand7.configure(takefocus="0")
+    #self.mlddCommand7.configure(takefocus="0")
 
     self.mlddCommand6 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand6.place(relx=0.297, rely=0.584, relheight=0.136
@@ -3100,7 +3112,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand6.configure(borderwidth="2")
     self.mlddCommand6.configure(relief="ridge")
     self.mlddCommand6.configure(selectbackground="#c4c4c4")
-    self.mlddCommand6.configure(takefocus="0")
+    #self.mlddCommand6.configure(takefocus="0")
 
     self.mlddComputer10 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer10.place(relx=0.355, rely=0.714, relheight=0.136
@@ -3109,7 +3121,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer10.configure(borderwidth="2")
     self.mlddComputer10.configure(relief="ridge")
     self.mlddComputer10.configure(selectbackground="#c4c4c4")
-    self.mlddComputer10.configure(takefocus="0")
+    #self.mlddComputer10.configure(takefocus="0")
 
     self.mlddComputer9 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer9.place(relx=0.355, rely=0.584, relheight=0.136
@@ -3118,7 +3130,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer9.configure(borderwidth="2")
     self.mlddComputer9.configure(relief="ridge")
     self.mlddComputer9.configure(selectbackground="#c4c4c4")
-    self.mlddComputer9.configure(takefocus="0")
+    #self.mlddComputer9.configure(takefocus="0")
 
     self.mlddCommand10 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand10.place(relx=0.4, rely=0.714, relheight=0.136
@@ -3127,7 +3139,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand10.configure(borderwidth="2")
     self.mlddCommand10.configure(relief="ridge")
     self.mlddCommand10.configure(selectbackground="#c4c4c4")
-    self.mlddCommand10.configure(takefocus="0")
+    #self.mlddCommand10.configure(takefocus="0")
 
     self.mlddCommand9 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand9.place(relx=0.4, rely=0.584, relheight=0.136, relwidth=0.048
@@ -3136,7 +3148,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand9.configure(borderwidth="2")
     self.mlddCommand9.configure(relief="ridge")
     self.mlddCommand9.configure(selectbackground="#c4c4c4")
-    self.mlddCommand9.configure(takefocus="0")
+    #self.mlddCommand9.configure(takefocus="0")
 
     self.mlddCommand13 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand13.place(relx=0.503, rely=0.714, relheight=0.136
@@ -3145,7 +3157,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand13.configure(borderwidth="2")
     self.mlddCommand13.configure(relief="ridge")
     self.mlddCommand13.configure(selectbackground="#c4c4c4")
-    self.mlddCommand13.configure(takefocus="0")
+    #self.mlddCommand13.configure(takefocus="0")
 
     self.mlddCommand12 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand12.place(relx=0.503, rely=0.584, relheight=0.136
@@ -3154,7 +3166,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand12.configure(borderwidth="2")
     self.mlddCommand12.configure(relief="ridge")
     self.mlddCommand12.configure(selectbackground="#c4c4c4")
-    self.mlddCommand12.configure(takefocus="0")
+    #self.mlddCommand12.configure(takefocus="0")
 
     self.mlddComputer16 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer16.place(relx=0.561, rely=0.714, relheight=0.136
@@ -3163,7 +3175,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer16.configure(borderwidth="2")
     self.mlddComputer16.configure(relief="ridge")
     self.mlddComputer16.configure(selectbackground="#c4c4c4")
-    self.mlddComputer16.configure(takefocus="0")
+    #self.mlddComputer16.configure(takefocus="0")
 
     self.mlddComputer15 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer15.place(relx=0.561, rely=0.584, relheight=0.136
@@ -3172,7 +3184,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer15.configure(borderwidth="2")
     self.mlddComputer15.configure(relief="ridge")
     self.mlddComputer15.configure(selectbackground="#c4c4c4")
-    self.mlddComputer15.configure(takefocus="0")
+    #self.mlddComputer15.configure(takefocus="0")
 
     self.mlddCommand16 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand16.place(relx=0.606, rely=0.714, relheight=0.136
@@ -3181,7 +3193,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand16.configure(borderwidth="2")
     self.mlddCommand16.configure(relief="ridge")
     self.mlddCommand16.configure(selectbackground="#c4c4c4")
-    self.mlddCommand16.configure(takefocus="0")
+    #self.mlddCommand16.configure(takefocus="0")
 
     self.mlddCommand15 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand15.place(relx=0.606, rely=0.584, relheight=0.136
@@ -3190,7 +3202,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand15.configure(borderwidth="2")
     self.mlddCommand15.configure(relief="ridge")
     self.mlddCommand15.configure(selectbackground="#c4c4c4")
-    self.mlddCommand15.configure(takefocus="0")
+    #self.mlddCommand15.configure(takefocus="0")
 
     self.mlddComputer19 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer19.place(relx=0.664, rely=0.714, relheight=0.136
@@ -3199,7 +3211,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer19.configure(borderwidth="2")
     self.mlddComputer19.configure(relief="ridge")
     self.mlddComputer19.configure(selectbackground="#c4c4c4")
-    self.mlddComputer19.configure(takefocus="0")
+    #self.mlddComputer19.configure(takefocus="0")
 
     self.mlddComputer18 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer18.place(relx=0.664, rely=0.584, relheight=0.136
@@ -3208,7 +3220,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer18.configure(borderwidth="2")
     self.mlddComputer18.configure(relief="ridge")
     self.mlddComputer18.configure(selectbackground="#c4c4c4")
-    self.mlddComputer18.configure(takefocus="0")
+    #self.mlddComputer18.configure(takefocus="0")
 
     self.mlddCommand19 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand19.place(relx=0.709, rely=0.714, relheight=0.136
@@ -3217,7 +3229,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand19.configure(borderwidth="2")
     self.mlddCommand19.configure(relief="ridge")
     self.mlddCommand19.configure(selectbackground="#c4c4c4")
-    self.mlddCommand19.configure(takefocus="0")
+    #self.mlddCommand19.configure(takefocus="0")
 
     self.mlddCommand18 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand18.place(relx=0.709, rely=0.584, relheight=0.136
@@ -3226,7 +3238,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand18.configure(borderwidth="2")
     self.mlddCommand18.configure(relief="ridge")
     self.mlddCommand18.configure(selectbackground="#c4c4c4")
-    self.mlddCommand18.configure(takefocus="0")
+    #self.mlddCommand18.configure(takefocus="0")
 
     self.mlddComputer22 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer22.place(relx=0.767, rely=0.714, relheight=0.136
@@ -3235,7 +3247,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer22.configure(borderwidth="2")
     self.mlddComputer22.configure(relief="ridge")
     self.mlddComputer22.configure(selectbackground="#c4c4c4")
-    self.mlddComputer22.configure(takefocus="0")
+    #self.mlddComputer22.configure(takefocus="0")
 
     self.mlddComputer21 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddComputer21.place(relx=0.767, rely=0.584, relheight=0.136
@@ -3244,7 +3256,7 @@ class topProcessorDisplayPanel:
     self.mlddComputer21.configure(borderwidth="2")
     self.mlddComputer21.configure(relief="ridge")
     self.mlddComputer21.configure(selectbackground="#c4c4c4")
-    self.mlddComputer21.configure(takefocus="0")
+    #self.mlddComputer21.configure(takefocus="0")
 
     self.mlddCommand22 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand22.place(relx=0.812, rely=0.714, relheight=0.136
@@ -3253,7 +3265,7 @@ class topProcessorDisplayPanel:
     self.mlddCommand22.configure(borderwidth="2")
     self.mlddCommand22.configure(relief="ridge")
     self.mlddCommand22.configure(selectbackground="#c4c4c4")
-    self.mlddCommand22.configure(takefocus="0")
+    #self.mlddCommand22.configure(takefocus="0")
 
     self.mlddCommand21 = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p4)
     self.mlddCommand21.place(relx=0.812, rely=0.584, relheight=0.136
@@ -3262,101 +3274,100 @@ class topProcessorDisplayPanel:
     self.mlddCommand21.configure(borderwidth="2")
     self.mlddCommand21.configure(relief="ridge")
     self.mlddCommand21.configure(selectbackground="#c4c4c4")
-    self.mlddCommand21.configure(takefocus="0")
+    #self.mlddCommand21.configure(takefocus="0")
 
     self.Label12_8 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_8.place(relx=0.023, rely=0.519, height=11, width=32
+    self.Label12_8.place(relx=0.023, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_8.configure(activebackground="#f9f9f9")
     self.Label12_8.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_8.configure(text='''CPTR''')
 
     self.Label12_9 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_9.place(relx=0.847, rely=0.519, height=11, width=32
+    self.Label12_9.place(relx=0.847, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_9.configure(activebackground="#f9f9f9")
     self.Label12_9.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_9.configure(text='''CPTR''')
 
     self.Label12_11 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_11.place(relx=0.092, rely=0.519, height=11, width=32
+    self.Label12_11.place(relx=0.092, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_11.configure(activebackground="#f9f9f9")
     self.Label12_11.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_11.configure(text='''CMD''')
 
     self.Label12_12 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_12.place(relx=0.915, rely=0.519, height=11, width=32
+    self.Label12_12.place(relx=0.915, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_12.configure(activebackground="#f9f9f9")
     self.Label12_12.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_12.configure(text='''CMD''')
 
     self.Label12_13 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_13.place(relx=0.446, rely=0.487, height=11, width=32
+    self.Label12_13.place(relx=0.446, rely=0.487, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_13.configure(activebackground="#f9f9f9")
     self.Label12_13.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_13.configure(text='''CMD''')
 
     self.Label12_15 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_15.place(relx=0.538, rely=0.487, height=11, width=32
+    self.Label12_15.place(relx=0.538, rely=0.487, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_15.configure(activebackground="#f9f9f9")
     self.Label12_15.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_15.configure(text='''CMD''')
 
     self.Label12_14 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_14.place(relx=0.4, rely=0.162, height=11, width=32
+    self.Label12_14.place(relx=0.4, rely=0.162, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_14.configure(activebackground="#f9f9f9")
     self.Label12_14.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_14.configure(text='''CPTR''')
 
     self.Label12_10 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_10.place(relx=0.492, rely=0.162, height=11, width=32
+    self.Label12_10.place(relx=0.492, rely=0.162, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_10.configure(activebackground="#f9f9f9")
     self.Label12_10.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_10.configure(text='''CPTR''')
 
     self.Label12_11 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_11.place(relx=0.641, rely=0.519, height=11, width=32
+    self.Label12_11.place(relx=0.641, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_11.configure(activebackground="#f9f9f9")
     self.Label12_11.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_11.configure(text='''CPTR''')
 
     self.Label12_12 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_12.place(relx=0.229, rely=0.519, height=11, width=32
+    self.Label12_12.place(relx=0.229, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_12.configure(activebackground="#f9f9f9")
     self.Label12_12.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_12.configure(text='''CPTR''')
 
     self.Label12_16 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_16.place(relx=0.709, rely=0.519, height=11, width=32
+    self.Label12_16.place(relx=0.709, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_16.configure(activebackground="#f9f9f9")
     self.Label12_16.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_16.configure(text='''CMD''')
 
     self.Label12_13 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p4)
-    self.Label12_13.place(relx=0.297, rely=0.519, height=11, width=32
+    self.Label12_13.place(relx=0.297, rely=0.519, height=agcScale*11, width=agcScale*32
         , bordermode='ignore')
     self.Label12_13.configure(activebackground="#f9f9f9")
     self.Label12_13.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_13.configure(text='''CMD''')
 
-    self.TPanedwindow2 = ttk.Panedwindow(self.paneMemoryLoadAndDataDisplayPanel_p5
+    self.TPanedwindow2 = tk.PanedWindow(self.paneMemoryLoadAndDataDisplayPanel_p5
         , orient="horizontal")
     self.TPanedwindow2.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0
         , bordermode='ignore')
-    self.TPanedwindow2.configure(takefocus="0")
-    self.TPanedwindow2_p1 = ttk.Labelframe(width=75, text='ERRORS')
-    self.TPanedwindow2.add(self.TPanedwindow2_p1, weight=4)
-    self.TPanedwindow2_p2 = ttk.Labelframe(text='MEMORY LOADER')
-    self.TPanedwindow2.add(self.TPanedwindow2_p2, weight=2)
+    self.TPanedwindow2_p1 = tk.LabelFrame(width=agcScale*234, text='ERRORS')
+    self.TPanedwindow2.add(self.TPanedwindow2_p1)
+    self.TPanedwindow2_p2 = tk.LabelFrame(text='MEMORY LOADER')
+    self.TPanedwindow2.add(self.TPanedwindow2_p2)
     self.__funcid3 = self.TPanedwindow2.bind('<Map>', self.__adjust_sash3)
 
     self.ERROR_RESET = tk.Canvas(self.TPanedwindow2_p1)
@@ -3366,7 +3377,7 @@ class topProcessorDisplayPanel:
     self.ERROR_RESET.configure(borderwidth="2")
     self.ERROR_RESET.configure(relief="ridge")
     self.ERROR_RESET.configure(selectbackground="#c4c4c4")
-    self.ERROR_RESET.configure(takefocus="0")
+    #self.ERROR_RESET.configure(takefocus="0")
 
     self.INVERT_ERROR = tk.Canvas(self.TPanedwindow2_p1)
     self.INVERT_ERROR.place(relx=0.823, rely=0.39, relheight=0.532
@@ -3375,7 +3386,7 @@ class topProcessorDisplayPanel:
     self.INVERT_ERROR.configure(borderwidth="2")
     self.INVERT_ERROR.configure(relief="ridge")
     self.INVERT_ERROR.configure(selectbackground="#c4c4c4")
-    self.INVERT_ERROR.configure(takefocus="0")
+    #self.INVERT_ERROR.configure(takefocus="0")
 
     self.BR14 = tk.Canvas(self.TPanedwindow2_p1)
     self.BR14.place(relx=0.541, rely=0.649, relheight=0.273, relwidth=0.13
@@ -3384,7 +3395,7 @@ class topProcessorDisplayPanel:
     self.BR14.configure(borderwidth="2")
     self.BR14.configure(relief="ridge")
     self.BR14.configure(selectbackground="#c4c4c4")
-    self.BR14.configure(takefocus="0")
+    #self.BR14.configure(takefocus="0")
 
     self.SSMBR = tk.Canvas(self.TPanedwindow2_p1)
     self.SSMBR.place(relx=0.411, rely=0.649, relheight=0.273, relwidth=0.13
@@ -3393,7 +3404,7 @@ class topProcessorDisplayPanel:
     self.SSMBR.configure(borderwidth="2")
     self.SSMBR.configure(relief="ridge")
     self.SSMBR.configure(selectbackground="#c4c4c4")
-    self.SSMBR.configure(takefocus="0")
+    #self.SSMBR.configure(takefocus="0")
 
     self.HOPC1 = tk.Canvas(self.TPanedwindow2_p1)
     self.HOPC1.place(relx=0.281, rely=0.649, relheight=0.273, relwidth=0.13
@@ -3402,7 +3413,7 @@ class topProcessorDisplayPanel:
     self.HOPC1.configure(borderwidth="2")
     self.HOPC1.configure(relief="ridge")
     self.HOPC1.configure(selectbackground="#c4c4c4")
-    self.HOPC1.configure(takefocus="0")
+    #self.HOPC1.configure(takefocus="0")
 
     self.PARITY_SERIAL = tk.Canvas(self.TPanedwindow2_p1)
     self.PARITY_SERIAL.place(relx=0.022, rely=0.649, relheight=0.273
@@ -3411,7 +3422,7 @@ class topProcessorDisplayPanel:
     self.PARITY_SERIAL.configure(borderwidth="2")
     self.PARITY_SERIAL.configure(relief="ridge")
     self.PARITY_SERIAL.configure(selectbackground="#c4c4c4")
-    self.PARITY_SERIAL.configure(takefocus="0")
+    #self.PARITY_SERIAL.configure(takefocus="0")
 
     self.OAC = tk.Canvas(self.TPanedwindow2_p1)
     self.OAC.place(relx=0.541, rely=0.39, relheight=0.273, relwidth=0.13
@@ -3420,7 +3431,7 @@ class topProcessorDisplayPanel:
     self.OAC.configure(borderwidth="2")
     self.OAC.configure(relief="ridge")
     self.OAC.configure(selectbackground="#c4c4c4")
-    self.OAC.configure(takefocus="0")
+    #self.OAC.configure(takefocus="0")
 
     self.SSMSC = tk.Canvas(self.TPanedwindow2_p1)
     self.SSMSC.place(relx=0.411, rely=0.39, relheight=0.273, relwidth=0.13
@@ -3429,7 +3440,7 @@ class topProcessorDisplayPanel:
     self.SSMSC.configure(borderwidth="2")
     self.SSMSC.configure(relief="ridge")
     self.SSMSC.configure(selectbackground="#c4c4c4")
-    self.SSMSC.configure(takefocus="0")
+    #self.SSMSC.configure(takefocus="0")
 
     self.SERIAL = tk.Canvas(self.TPanedwindow2_p1)
     self.SERIAL.place(relx=0.281, rely=0.39, relheight=0.273, relwidth=0.13
@@ -3438,7 +3449,7 @@ class topProcessorDisplayPanel:
     self.SERIAL.configure(borderwidth="2")
     self.SERIAL.configure(relief="ridge")
     self.SERIAL.configure(selectbackground="#c4c4c4")
-    self.SERIAL.configure(takefocus="0")
+    #self.SERIAL.configure(takefocus="0")
 
     self.TRS = tk.Canvas(self.TPanedwindow2_p1)
     self.TRS.place(relx=0.152, rely=0.39, relheight=0.273, relwidth=0.13
@@ -3447,17 +3458,17 @@ class topProcessorDisplayPanel:
     self.TRS.configure(borderwidth="2")
     self.TRS.configure(relief="ridge")
     self.TRS.configure(selectbackground="#c4c4c4")
-    self.TRS.configure(takefocus="0")
+    #self.TRS.configure(takefocus="0")
 
     self.Label12_14 = tk.Label(self.TPanedwindow2_p1)
-    self.Label12_14.place(relx=0.009, rely=0.26, height=11, width=37
+    self.Label12_14.place(relx=0.009, rely=0.26, height=agcScale*11, width=agcScale*37
         , bordermode='ignore')
     self.Label12_14.configure(activebackground="#f9f9f9")
     self.Label12_14.configure(font="-family {DejaVu Sans} -size 8")
     self.Label12_14.configure(text='''PAR''')
 
     self.Label12_15 = tk.Label(self.TPanedwindow2_p1)
-    self.Label12_15.place(relx=0.173, rely=0.26, height=11, width=112
+    self.Label12_15.place(relx=0.173, rely=0.26, height=agcScale*11, width=agcScale*112
         , bordermode='ignore')
     self.Label12_15.configure(activebackground="#f9f9f9")
     self.Label12_15.configure(font="-family {DejaVu Sans} -size 8")
@@ -3470,7 +3481,7 @@ class topProcessorDisplayPanel:
     self.A13.configure(borderwidth="2")
     self.A13.configure(relief="ridge")
     self.A13.configure(selectbackground="#c4c4c4")
-    self.A13.configure(takefocus="0")
+    #self.A13.configure(takefocus="0")
 
     self.PARITY_TAPE = tk.Canvas(self.TPanedwindow2_p1)
     self.PARITY_TAPE.place(relx=0.022, rely=0.39, relheight=0.273, relwidth=0.13
@@ -3479,7 +3490,7 @@ class topProcessorDisplayPanel:
     self.PARITY_TAPE.configure(borderwidth="2")
     self.PARITY_TAPE.configure(relief="ridge")
     self.PARITY_TAPE.configure(selectbackground="#c4c4c4")
-    self.PARITY_TAPE.configure(takefocus="0")
+    #self.PARITY_TAPE.configure(takefocus="0")
 
     self.mlREPEAT = tk.Canvas(self.TPanedwindow2_p2)
     self.mlREPEAT.place(relx=0.025, rely=0.39, relheight=0.273, relwidth=0.199
@@ -3488,7 +3499,7 @@ class topProcessorDisplayPanel:
     self.mlREPEAT.configure(borderwidth="2")
     self.mlREPEAT.configure(relief="ridge")
     self.mlREPEAT.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT.configure(takefocus="0")
+    #self.mlREPEAT.configure(takefocus="0")
 
     self.mlREPEAT_INVERSE = tk.Canvas(self.TPanedwindow2_p2)
     self.mlREPEAT_INVERSE.place(relx=0.025, rely=0.649, relheight=0.273
@@ -3497,7 +3508,7 @@ class topProcessorDisplayPanel:
     self.mlREPEAT_INVERSE.configure(borderwidth="2")
     self.mlREPEAT_INVERSE.configure(relief="ridge")
     self.mlREPEAT_INVERSE.configure(selectbackground="#c4c4c4")
-    self.mlREPEAT_INVERSE.configure(takefocus="0")
+    #self.mlREPEAT_INVERSE.configure(takefocus="0")
 
     self.mlADDRESS_CMPTR = tk.Canvas(self.TPanedwindow2_p2)
     self.mlADDRESS_CMPTR.place(relx=0.224, rely=0.39, relheight=0.532
@@ -3506,7 +3517,7 @@ class topProcessorDisplayPanel:
     self.mlADDRESS_CMPTR.configure(borderwidth="2")
     self.mlADDRESS_CMPTR.configure(relief="ridge")
     self.mlADDRESS_CMPTR.configure(selectbackground="#c4c4c4")
-    self.mlADDRESS_CMPTR.configure(takefocus="0")
+    #self.mlADDRESS_CMPTR.configure(takefocus="0")
 
     self.mlCOMPTR_DISPLAY_RESET = tk.Canvas(self.TPanedwindow2_p2)
     self.mlCOMPTR_DISPLAY_RESET.place(relx=0.473, rely=0.39, relheight=0.532
@@ -3515,7 +3526,7 @@ class topProcessorDisplayPanel:
     self.mlCOMPTR_DISPLAY_RESET.configure(borderwidth="2")
     self.mlCOMPTR_DISPLAY_RESET.configure(relief="ridge")
     self.mlCOMPTR_DISPLAY_RESET.configure(selectbackground="#c4c4c4")
-    self.mlCOMPTR_DISPLAY_RESET.configure(takefocus="0")
+    #self.mlCOMPTR_DISPLAY_RESET.configure(takefocus="0")
 
     self.mlCOMMAND_DISPLAY_RESET = tk.Canvas(self.TPanedwindow2_p2)
     self.mlCOMMAND_DISPLAY_RESET.place(relx=0.721, rely=0.39, relheight=0.532
@@ -3524,13 +3535,13 @@ class topProcessorDisplayPanel:
     self.mlCOMMAND_DISPLAY_RESET.configure(borderwidth="2")
     self.mlCOMMAND_DISPLAY_RESET.configure(relief="ridge")
     self.mlCOMMAND_DISPLAY_RESET.configure(selectbackground="#c4c4c4")
-    self.mlCOMMAND_DISPLAY_RESET.configure(takefocus="0")
+    #self.mlCOMMAND_DISPLAY_RESET.configure(takefocus="0")
 
     self.frameDisplaySelect = tk.LabelFrame(self.paneMemoryLoadAndDataDisplayPanel_p7)
     self.frameDisplaySelect.place(relx=0.023, rely=0.112, relheight=0.859
         , relwidth=0.343, bordermode='ignore')
     self.frameDisplaySelect.configure(relief='groove')
-    self.frameDisplaySelect.configure(font="-family {DejaVu Sans} -size -12")
+    self.frameDisplaySelect.configure(font=font9)
     self.frameDisplaySelect.configure(text='''DISPLAY SELECT''')
 
     self.dsTRS = tk.Radiobutton(self.frameDisplaySelect)
@@ -3539,9 +3550,9 @@ class topProcessorDisplayPanel:
     self.dsTRS.configure(activebackground="#d9d9d9")
     self.dsTRS.configure(anchor='nw')
     self.dsTRS.configure(command=ProcessorDisplayPanel_support.eventDisplaySelect)
-    self.dsTRS.configure(font="-family {DejaVu Sans} -size -12")
+    self.dsTRS.configure(font=font9)
     self.dsTRS.configure(justify='left')
-    self.dsTRS.configure(takefocus="0")
+    #self.dsTRS.configure(takefocus="0")
     self.dsTRS.configure(text='''TRS''')
     self.dsTRS.configure(value="3")
     self.dsTRS.configure(variable=ProcessorDisplayPanel_support.displaySelect)
@@ -3552,9 +3563,9 @@ class topProcessorDisplayPanel:
     self.dsDATA.configure(activebackground="#d9d9d9")
     self.dsDATA.configure(anchor='nw')
     self.dsDATA.configure(command=ProcessorDisplayPanel_support.eventDisplaySelect)
-    self.dsDATA.configure(font="-family {DejaVu Sans} -size -12")
+    self.dsDATA.configure(font=font9)
     self.dsDATA.configure(justify='left')
-    self.dsDATA.configure(takefocus="0")
+    #self.dsDATA.configure(takefocus="0")
     self.dsDATA.configure(text='''DATA''')
     self.dsDATA.configure(value="2")
     self.dsDATA.configure(variable=ProcessorDisplayPanel_support.displaySelect)
@@ -3565,9 +3576,9 @@ class topProcessorDisplayPanel:
     self.dsIA.configure(activebackground="#d9d9d9")
     self.dsIA.configure(anchor='nw')
     self.dsIA.configure(command=ProcessorDisplayPanel_support.eventDisplaySelect)
-    self.dsIA.configure(font="-family {DejaVu Sans} -size -12")
+    self.dsIA.configure(font=font9)
     self.dsIA.configure(justify='left')
-    self.dsIA.configure(takefocus="0")
+    #self.dsIA.configure(takefocus="0")
     self.dsIA.configure(text='''IA''')
     self.dsIA.configure(value="1")
     self.dsIA.configure(variable=ProcessorDisplayPanel_support.displaySelect)
@@ -3578,26 +3589,26 @@ class topProcessorDisplayPanel:
     self.dsNONE.configure(activebackground="#d9d9d9")
     self.dsNONE.configure(anchor='nw')
     self.dsNONE.configure(command=ProcessorDisplayPanel_support.eventDisplaySelect)
-    self.dsNONE.configure(font="-family {DejaVu Sans} -size -12")
+    self.dsNONE.configure(font=font9)
     self.dsNONE.configure(justify='left')
-    self.dsNONE.configure(takefocus="0")
+    #self.dsNONE.configure(takefocus="0")
     self.dsNONE.configure(text='''NONE''')
     self.dsNONE.configure(value="0")
     self.dsNONE.configure(variable=ProcessorDisplayPanel_support.displaySelect)
 
     self.Label18 = tk.Label(self.frameDisplaySelect)
-    self.Label18.place(relx=0.133, rely=0.479, height=22, width=28
+    self.Label18.place(relx=0.133, rely=0.479, height=agcScale*22, width=agcScale*28
         , bordermode='ignore')
     self.Label18.configure(activebackground="#f9f9f9")
     self.Label18.configure(anchor='ne')
-    self.Label18.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label18.configure(font=font9)
     self.Label18.configure(text='''A13''')
 
     self.frameModeControl = tk.LabelFrame(self.paneMemoryLoadAndDataDisplayPanel_p7)
     self.frameModeControl.place(relx=0.549, rely=0.112, relheight=0.859
         , relwidth=0.435, bordermode='ignore')
     self.frameModeControl.configure(relief='groove')
-    self.frameModeControl.configure(font="-family {DejaVu Sans} -size -12")
+    self.frameModeControl.configure(font=font9)
     self.frameModeControl.configure(text='''MODE CONTROL''')
 
     self.mcdREPEAT = tk.Radiobutton(self.frameModeControl)
@@ -3606,9 +3617,9 @@ class topProcessorDisplayPanel:
     self.mcdREPEAT.configure(activebackground="#d9d9d9")
     self.mcdREPEAT.configure(anchor='nw')
     self.mcdREPEAT.configure(command=ProcessorDisplayPanel_support.eventModeControl)
-    self.mcdREPEAT.configure(font="-family {DejaVu Sans} -size -12")
+    self.mcdREPEAT.configure(font=font9)
     self.mcdREPEAT.configure(justify='left')
-    self.mcdREPEAT.configure(takefocus="0")
+    #self.mcdREPEAT.configure(takefocus="0")
     self.mcdREPEAT.configure(text='''REPEAT''')
     self.mcdREPEAT.configure(value="4")
     self.mcdREPEAT.configure(variable=ProcessorDisplayPanel_support.modeControl)
@@ -3619,9 +3630,9 @@ class topProcessorDisplayPanel:
     self.mcdSINGLE.configure(activebackground="#d9d9d9")
     self.mcdSINGLE.configure(anchor='nw')
     self.mcdSINGLE.configure(command=ProcessorDisplayPanel_support.eventModeControl)
-    self.mcdSINGLE.configure(font="-family {DejaVu Sans} -size -12")
+    self.mcdSINGLE.configure(font=font9)
     self.mcdSINGLE.configure(justify='left')
-    self.mcdSINGLE.configure(takefocus="0")
+    #self.mcdSINGLE.configure(takefocus="0")
     self.mcdSINGLE.configure(text='''SINGLE''')
     self.mcdSINGLE.configure(value="3")
     self.mcdSINGLE.configure(variable=ProcessorDisplayPanel_support.modeControl)
@@ -3632,9 +3643,9 @@ class topProcessorDisplayPanel:
     self.mcpcADR_HOLD.configure(activebackground="#d9d9d9")
     self.mcpcADR_HOLD.configure(anchor='nw')
     self.mcpcADR_HOLD.configure(command=ProcessorDisplayPanel_support.eventModeControl)
-    self.mcpcADR_HOLD.configure(font="-family {DejaVu Sans} -size -12")
+    self.mcpcADR_HOLD.configure(font=font9)
     self.mcpcADR_HOLD.configure(justify='left')
-    self.mcpcADR_HOLD.configure(takefocus="0")
+    #self.mcpcADR_HOLD.configure(takefocus="0")
     self.mcpcADR_HOLD.configure(text='''ADR HOLD''')
     self.mcpcADR_HOLD.configure(value="2")
     self.mcpcADR_HOLD.configure(variable=ProcessorDisplayPanel_support.modeControl)
@@ -3645,9 +3656,9 @@ class topProcessorDisplayPanel:
     self.mcpcSINGLE_STEP.configure(activebackground="#d9d9d9")
     self.mcpcSINGLE_STEP.configure(anchor='nw')
     self.mcpcSINGLE_STEP.configure(command=ProcessorDisplayPanel_support.eventModeControl)
-    self.mcpcSINGLE_STEP.configure(font="-family {DejaVu Sans} -size -12")
+    self.mcpcSINGLE_STEP.configure(font=font9)
     self.mcpcSINGLE_STEP.configure(justify='left')
-    self.mcpcSINGLE_STEP.configure(takefocus="0")
+    #self.mcpcSINGLE_STEP.configure(takefocus="0")
     self.mcpcSINGLE_STEP.configure(text='''SINGLE STEP''')
     self.mcpcSINGLE_STEP.configure(value="1")
     self.mcpcSINGLE_STEP.configure(variable=ProcessorDisplayPanel_support.modeControl)
@@ -3658,35 +3669,35 @@ class topProcessorDisplayPanel:
     self.mcpcREPEAT.configure(activebackground="#d9d9d9")
     self.mcpcREPEAT.configure(anchor='nw')
     self.mcpcREPEAT.configure(command=ProcessorDisplayPanel_support.eventModeControl)
-    self.mcpcREPEAT.configure(font="-family {DejaVu Sans} -size -12")
+    self.mcpcREPEAT.configure(font=font9)
     self.mcpcREPEAT.configure(justify='left')
-    self.mcpcREPEAT.configure(takefocus="0")
+    #self.mcpcREPEAT.configure(takefocus="0")
     self.mcpcREPEAT.configure(text='''REPEAT''')
     self.mcpcREPEAT.configure(value="0")
     self.mcpcREPEAT.configure(variable=ProcessorDisplayPanel_support.modeControl)
 
     self.Label18_26 = tk.Label(self.frameModeControl)
-    self.Label18_26.place(relx=0.053, rely=0.24, height=22, width=58
+    self.Label18_26.place(relx=0.053, rely=0.24, height=agcScale*22, width=agcScale*58
         , bordermode='ignore')
     self.Label18_26.configure(activebackground="#f9f9f9")
     self.Label18_26.configure(anchor='ne')
-    self.Label18_26.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label18_26.configure(font=font9)
     self.Label18_26.configure(text='''DISPLAY''')
 
     self.Label18_27 = tk.Label(self.frameModeControl)
-    self.Label18_27.place(relx=0.158, rely=0.548, height=22, width=38
+    self.Label18_27.place(relx=0.158, rely=0.548, height=agcScale*22, width=agcScale*38
         , bordermode='ignore')
     self.Label18_27.configure(activebackground="#f9f9f9")
     self.Label18_27.configure(anchor='ne')
-    self.Label18_27.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label18_27.configure(font=font9)
     self.Label18_27.configure(text='''PROG''')
 
     self.Label18_28 = tk.Label(self.frameModeControl)
-    self.Label18_28.place(relx=0.105, rely=0.685, height=22, width=48
+    self.Label18_28.place(relx=0.105, rely=0.685, height=agcScale*22, width=agcScale*48
         , bordermode='ignore')
     self.Label18_28.configure(activebackground="#f9f9f9")
     self.Label18_28.configure(anchor='ne')
-    self.Label18_28.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label18_28.configure(font=font9)
     self.Label18_28.configure(text='''CYCLE''')
 
     self.acDATA = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p7)
@@ -3696,7 +3707,7 @@ class topProcessorDisplayPanel:
     self.acDATA.configure(borderwidth="2")
     self.acDATA.configure(relief="ridge")
     self.acDATA.configure(selectbackground="#c4c4c4")
-    self.acDATA.configure(takefocus="0")
+    #self.acDATA.configure(takefocus="0")
 
     self.acINS = tk.Canvas(self.paneMemoryLoadAndDataDisplayPanel_p7)
     self.acINS.place(relx=0.423, rely=0.706, relheight=0.124, relwidth=0.069
@@ -3705,44 +3716,48 @@ class topProcessorDisplayPanel:
     self.acINS.configure(borderwidth="2")
     self.acINS.configure(relief="ridge")
     self.acINS.configure(selectbackground="#c4c4c4")
-    self.acINS.configure(takefocus="0")
+    #self.acINS.configure(takefocus="0")
 
     self.Label12 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p7)
-    self.Label12.place(relx=0.389, rely=0.5, height=12, width=62
+    self.Label12.place(relx=0.389, rely=0.5, height=agcScale*12, width=agcScale*62
         , bordermode='ignore')
     self.Label12.configure(activebackground="#f9f9f9")
-    self.Label12.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label12.configure(font=font9)
     self.Label12.configure(text='''COMPARE''')
 
     self.Label12_4 = tk.Label(self.paneMemoryLoadAndDataDisplayPanel_p7)
-    self.Label12_4.place(relx=0.389, rely=0.412, height=12, width=62
+    self.Label12_4.place(relx=0.389, rely=0.412, height=agcScale*12, width=agcScale*62
         , bordermode='ignore')
     self.Label12_4.configure(activebackground="#f9f9f9")
-    self.Label12_4.configure(font="-family {DejaVu Sans} -size -12")
+    self.Label12_4.configure(font=font9)
     self.Label12_4.configure(text='''ADDRESS''')
 
-    self.paneCEPanel = ttk.Panedwindow(top, orient="vertical")
+    self.paneCEPanel = tk.PanedWindow(top, orient="vertical")
     self.paneCEPanel.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=0.328)
-    self.paneCEPanel.configure(takefocus="0")
-    self.paneCEPanel_p1 = ttk.Labelframe(height=240, text="" )
-    self.paneCEPanel.add(self.paneCEPanel_p1, weight=0)
-    self.paneCEPanel_p2 = ttk.Labelframe(height=194.70000000000005
+    ##self.paneCEPanel.configure(takefocus="0")
+    #self.paneCEPanel_p1 = ttk.Labelframe(height=agcScale*240, text="" )
+    self.paneCEPanel_p1 = tk.LabelFrame(height=round(agcScale*35), text="" )
+    self.paneCEPanel.add(self.paneCEPanel_p1)
+    #self.paneCEPanel_p2 = ttk.Labelframe(height=agcScale*194.7
+    self.paneCEPanel_p2 = tk.LabelFrame(height=agcScale*155
         , text='ACCUMULATOR')
-    self.paneCEPanel.add(self.paneCEPanel_p2, weight=3)
-    self.paneCEPanel_p3 = ttk.Labelframe(height=136.20000000000005
+    self.paneCEPanel.add(self.paneCEPanel_p2)
+    #self.paneCEPanel_p3 = ttk.Labelframe(height=agcScale*136.2
+    self.paneCEPanel_p3 = tk.LabelFrame(height=agcScale*130
         , text='MEMORY BUFFER REGISTER')
-    self.paneCEPanel.add(self.paneCEPanel_p3, weight=2)
-    self.paneCEPanel_p4 = ttk.Labelframe(height=95.4, text='PROCESSOR TIMING')
-    self.paneCEPanel.add(self.paneCEPanel_p4, weight=4)
-    self.paneCEPanel_p5 = ttk.Labelframe(text='TAPE READER')
-    self.paneCEPanel.add(self.paneCEPanel_p5, weight=2)
+    self.paneCEPanel.add(self.paneCEPanel_p3)
+    #self.paneCEPanel_p4 = ttk.Labelframe(height=agcScale*95.4, text='PROCESSOR TIMING')
+    self.paneCEPanel_p4 = tk.LabelFrame(height=agcScale*292, text='PROCESSOR TIMING')
+    self.paneCEPanel.add(self.paneCEPanel_p4)
+    self.paneCEPanel_p5 = tk.LabelFrame(text='TAPE READER')
+    self.paneCEPanel.add(self.paneCEPanel_p5)
     self.__funcid4 = self.paneCEPanel.bind('<Map>', self.__adjust_sash4)
 
     self.Label11 = tk.Label(self.paneCEPanel_p1)
-    self.Label11.place(relx=0.0, rely=0.143, height=25, width=437
+    self.Label11.place(relx=0.0, rely=0.143, height=agcScale*25, width=agcScale*437
         , bordermode='ignore')
     self.Label11.configure(activebackground="#f9f9f9")
-    self.Label11.configure(font="-family {DejaVu Sans} -size 12")
+    self.Label11.configure(font=font12)
     self.Label11.configure(text='''C. E. PANEL''')
 
     self.A_S = tk.Canvas(self.paneCEPanel_p2)
@@ -3752,7 +3767,7 @@ class topProcessorDisplayPanel:
     self.A_S.configure(borderwidth="2")
     self.A_S.configure(relief="ridge")
     self.A_S.configure(selectbackground="#c4c4c4")
-    self.A_S.configure(takefocus="0")
+    #self.A_S.configure(takefocus="0")
 
     self.DLA14 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA14.place(relx=0.047, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3761,7 +3776,7 @@ class topProcessorDisplayPanel:
     self.DLA14.configure(borderwidth="2")
     self.DLA14.configure(relief="ridge")
     self.DLA14.configure(selectbackground="#c4c4c4")
-    self.DLA14.configure(takefocus="0")
+    #self.DLA14.configure(takefocus="0")
 
     self.DLA27 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA27.place(relx=0.047, rely=0.4, relheight=0.14, relwidth=0.07
@@ -3770,7 +3785,7 @@ class topProcessorDisplayPanel:
     self.DLA27.configure(borderwidth="2")
     self.DLA27.configure(relief="ridge")
     self.DLA27.configure(selectbackground="#c4c4c4")
-    self.DLA27.configure(takefocus="0")
+    #self.DLA27.configure(takefocus="0")
 
     self.DLB8 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB8.place(relx=0.047, rely=0.533, relheight=0.14, relwidth=0.07
@@ -3779,7 +3794,7 @@ class topProcessorDisplayPanel:
     self.DLB8.configure(borderwidth="2")
     self.DLB8.configure(relief="ridge")
     self.DLB8.configure(selectbackground="#c4c4c4")
-    self.DLB8.configure(takefocus="0")
+    #self.DLB8.configure(takefocus="0")
 
     self.DLB21 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB21.place(relx=0.047, rely=0.7, relheight=0.14, relwidth=0.07
@@ -3788,7 +3803,7 @@ class topProcessorDisplayPanel:
     self.DLB21.configure(borderwidth="2")
     self.DLB21.configure(relief="ridge")
     self.DLB21.configure(selectbackground="#c4c4c4")
-    self.DLB21.configure(takefocus="0")
+    #self.DLB21.configure(takefocus="0")
 
     self.DLA2 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA2.place(relx=0.116, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3797,7 +3812,7 @@ class topProcessorDisplayPanel:
     self.DLA2.configure(borderwidth="2")
     self.DLA2.configure(relief="ridge")
     self.DLA2.configure(selectbackground="#c4c4c4")
-    self.DLA2.configure(takefocus="0")
+    #self.DLA2.configure(takefocus="0")
 
     self.DLA3 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA3.place(relx=0.186, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3806,7 +3821,7 @@ class topProcessorDisplayPanel:
     self.DLA3.configure(borderwidth="2")
     self.DLA3.configure(relief="ridge")
     self.DLA3.configure(selectbackground="#c4c4c4")
-    self.DLA3.configure(takefocus="0")
+    #self.DLA3.configure(takefocus="0")
 
     self.DLA4 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA4.place(relx=0.256, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3815,7 +3830,7 @@ class topProcessorDisplayPanel:
     self.DLA4.configure(borderwidth="2")
     self.DLA4.configure(relief="ridge")
     self.DLA4.configure(selectbackground="#c4c4c4")
-    self.DLA4.configure(takefocus="0")
+    #self.DLA4.configure(takefocus="0")
 
     self.DLA5 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA5.place(relx=0.326, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3824,7 +3839,7 @@ class topProcessorDisplayPanel:
     self.DLA5.configure(borderwidth="2")
     self.DLA5.configure(relief="ridge")
     self.DLA5.configure(selectbackground="#c4c4c4")
-    self.DLA5.configure(takefocus="0")
+    #self.DLA5.configure(takefocus="0")
 
     self.DLA6 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA6.place(relx=0.395, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3833,7 +3848,7 @@ class topProcessorDisplayPanel:
     self.DLA6.configure(borderwidth="2")
     self.DLA6.configure(relief="ridge")
     self.DLA6.configure(selectbackground="#c4c4c4")
-    self.DLA6.configure(takefocus="0")
+    #self.DLA6.configure(takefocus="0")
 
     self.DLA7 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA7.place(relx=0.465, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3842,7 +3857,7 @@ class topProcessorDisplayPanel:
     self.DLA7.configure(borderwidth="2")
     self.DLA7.configure(relief="ridge")
     self.DLA7.configure(selectbackground="#c4c4c4")
-    self.DLA7.configure(takefocus="0")
+    #self.DLA7.configure(takefocus="0")
 
     self.DLA8 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA8.place(relx=0.535, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3851,7 +3866,7 @@ class topProcessorDisplayPanel:
     self.DLA8.configure(borderwidth="2")
     self.DLA8.configure(relief="ridge")
     self.DLA8.configure(selectbackground="#c4c4c4")
-    self.DLA8.configure(takefocus="0")
+    #self.DLA8.configure(takefocus="0")
 
     self.DLA9 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA9.place(relx=0.605, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3860,7 +3875,7 @@ class topProcessorDisplayPanel:
     self.DLA9.configure(borderwidth="2")
     self.DLA9.configure(relief="ridge")
     self.DLA9.configure(selectbackground="#c4c4c4")
-    self.DLA9.configure(takefocus="0")
+    #self.DLA9.configure(takefocus="0")
 
     self.DLA10 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA10.place(relx=0.674, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3869,7 +3884,7 @@ class topProcessorDisplayPanel:
     self.DLA10.configure(borderwidth="2")
     self.DLA10.configure(relief="ridge")
     self.DLA10.configure(selectbackground="#c4c4c4")
-    self.DLA10.configure(takefocus="0")
+    #self.DLA10.configure(takefocus="0")
 
     self.DLA11 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA11.place(relx=0.744, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3878,7 +3893,7 @@ class topProcessorDisplayPanel:
     self.DLA11.configure(borderwidth="2")
     self.DLA11.configure(relief="ridge")
     self.DLA11.configure(selectbackground="#c4c4c4")
-    self.DLA11.configure(takefocus="0")
+    #self.DLA11.configure(takefocus="0")
 
     self.DLA12 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA12.place(relx=0.814, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3887,7 +3902,7 @@ class topProcessorDisplayPanel:
     self.DLA12.configure(borderwidth="2")
     self.DLA12.configure(relief="ridge")
     self.DLA12.configure(selectbackground="#c4c4c4")
-    self.DLA12.configure(takefocus="0")
+    #self.DLA12.configure(takefocus="0")
 
     self.DLA13 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA13.place(relx=0.884, rely=0.1, relheight=0.14, relwidth=0.07
@@ -3896,7 +3911,7 @@ class topProcessorDisplayPanel:
     self.DLA13.configure(borderwidth="2")
     self.DLA13.configure(relief="ridge")
     self.DLA13.configure(selectbackground="#c4c4c4")
-    self.DLA13.configure(takefocus="0")
+    #self.DLA13.configure(takefocus="0")
 
     self.DLA15 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA15.place(relx=0.116, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3905,7 +3920,7 @@ class topProcessorDisplayPanel:
     self.DLA15.configure(borderwidth="2")
     self.DLA15.configure(relief="ridge")
     self.DLA15.configure(selectbackground="#c4c4c4")
-    self.DLA15.configure(takefocus="0")
+    #self.DLA15.configure(takefocus="0")
 
     self.DLA16 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA16.place(relx=0.186, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3914,7 +3929,7 @@ class topProcessorDisplayPanel:
     self.DLA16.configure(borderwidth="2")
     self.DLA16.configure(relief="ridge")
     self.DLA16.configure(selectbackground="#c4c4c4")
-    self.DLA16.configure(takefocus="0")
+    #self.DLA16.configure(takefocus="0")
 
     self.DLA17 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA17.place(relx=0.256, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3923,7 +3938,7 @@ class topProcessorDisplayPanel:
     self.DLA17.configure(borderwidth="2")
     self.DLA17.configure(relief="ridge")
     self.DLA17.configure(selectbackground="#c4c4c4")
-    self.DLA17.configure(takefocus="0")
+    #self.DLA17.configure(takefocus="0")
 
     self.DLA18 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA18.place(relx=0.326, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3932,7 +3947,7 @@ class topProcessorDisplayPanel:
     self.DLA18.configure(borderwidth="2")
     self.DLA18.configure(relief="ridge")
     self.DLA18.configure(selectbackground="#c4c4c4")
-    self.DLA18.configure(takefocus="0")
+    #self.DLA18.configure(takefocus="0")
 
     self.DLA19 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA19.place(relx=0.395, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3941,7 +3956,7 @@ class topProcessorDisplayPanel:
     self.DLA19.configure(borderwidth="2")
     self.DLA19.configure(relief="ridge")
     self.DLA19.configure(selectbackground="#c4c4c4")
-    self.DLA19.configure(takefocus="0")
+    #self.DLA19.configure(takefocus="0")
 
     self.DLA20 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA20.place(relx=0.465, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3950,7 +3965,7 @@ class topProcessorDisplayPanel:
     self.DLA20.configure(borderwidth="2")
     self.DLA20.configure(relief="ridge")
     self.DLA20.configure(selectbackground="#c4c4c4")
-    self.DLA20.configure(takefocus="0")
+    #self.DLA20.configure(takefocus="0")
 
     self.DLA21 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA21.place(relx=0.535, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3959,7 +3974,7 @@ class topProcessorDisplayPanel:
     self.DLA21.configure(borderwidth="2")
     self.DLA21.configure(relief="ridge")
     self.DLA21.configure(selectbackground="#c4c4c4")
-    self.DLA21.configure(takefocus="0")
+    #self.DLA21.configure(takefocus="0")
 
     self.DLA22 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA22.place(relx=0.605, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3968,7 +3983,7 @@ class topProcessorDisplayPanel:
     self.DLA22.configure(borderwidth="2")
     self.DLA22.configure(relief="ridge")
     self.DLA22.configure(selectbackground="#c4c4c4")
-    self.DLA22.configure(takefocus="0")
+    #self.DLA22.configure(takefocus="0")
 
     self.DLA23 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA23.place(relx=0.674, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3977,7 +3992,7 @@ class topProcessorDisplayPanel:
     self.DLA23.configure(borderwidth="2")
     self.DLA23.configure(relief="ridge")
     self.DLA23.configure(selectbackground="#c4c4c4")
-    self.DLA23.configure(takefocus="0")
+    #self.DLA23.configure(takefocus="0")
 
     self.DLA24 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA24.place(relx=0.744, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3986,7 +4001,7 @@ class topProcessorDisplayPanel:
     self.DLA24.configure(borderwidth="2")
     self.DLA24.configure(relief="ridge")
     self.DLA24.configure(selectbackground="#c4c4c4")
-    self.DLA24.configure(takefocus="0")
+    #self.DLA24.configure(takefocus="0")
 
     self.DLA25 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA25.place(relx=0.814, rely=0.233, relheight=0.14, relwidth=0.07
@@ -3995,7 +4010,7 @@ class topProcessorDisplayPanel:
     self.DLA25.configure(borderwidth="2")
     self.DLA25.configure(relief="ridge")
     self.DLA25.configure(selectbackground="#c4c4c4")
-    self.DLA25.configure(takefocus="0")
+    #self.DLA25.configure(takefocus="0")
 
     self.DLA26 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA26.place(relx=0.884, rely=0.233, relheight=0.14, relwidth=0.07
@@ -4004,7 +4019,7 @@ class topProcessorDisplayPanel:
     self.DLA26.configure(borderwidth="2")
     self.DLA26.configure(relief="ridge")
     self.DLA26.configure(selectbackground="#c4c4c4")
-    self.DLA26.configure(takefocus="0")
+    #self.DLA26.configure(takefocus="0")
 
     self.DLA28 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA28.place(relx=0.116, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4013,7 +4028,7 @@ class topProcessorDisplayPanel:
     self.DLA28.configure(borderwidth="2")
     self.DLA28.configure(relief="ridge")
     self.DLA28.configure(selectbackground="#c4c4c4")
-    self.DLA28.configure(takefocus="0")
+    #self.DLA28.configure(takefocus="0")
 
     self.DLA29 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA29.place(relx=0.186, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4022,7 +4037,7 @@ class topProcessorDisplayPanel:
     self.DLA29.configure(borderwidth="2")
     self.DLA29.configure(relief="ridge")
     self.DLA29.configure(selectbackground="#c4c4c4")
-    self.DLA29.configure(takefocus="0")
+    #self.DLA29.configure(takefocus="0")
 
     self.DLA30 = tk.Canvas(self.paneCEPanel_p2)
     self.DLA30.place(relx=0.256, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4031,7 +4046,7 @@ class topProcessorDisplayPanel:
     self.DLA30.configure(borderwidth="2")
     self.DLA30.configure(relief="ridge")
     self.DLA30.configure(selectbackground="#c4c4c4")
-    self.DLA30.configure(takefocus="0")
+    #self.DLA30.configure(takefocus="0")
 
     self.ACC0 = tk.Canvas(self.paneCEPanel_p2)
     self.ACC0.place(relx=0.326, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4040,7 +4055,7 @@ class topProcessorDisplayPanel:
     self.ACC0.configure(borderwidth="2")
     self.ACC0.configure(relief="ridge")
     self.ACC0.configure(selectbackground="#c4c4c4")
-    self.ACC0.configure(takefocus="0")
+    #self.ACC0.configure(takefocus="0")
 
     self.ACC1 = tk.Canvas(self.paneCEPanel_p2)
     self.ACC1.place(relx=0.395, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4049,7 +4064,7 @@ class topProcessorDisplayPanel:
     self.ACC1.configure(borderwidth="2")
     self.ACC1.configure(relief="ridge")
     self.ACC1.configure(selectbackground="#c4c4c4")
-    self.ACC1.configure(takefocus="0")
+    #self.ACC1.configure(takefocus="0")
 
     self.DLB1 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB1.place(relx=0.465, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4058,7 +4073,7 @@ class topProcessorDisplayPanel:
     self.DLB1.configure(borderwidth="2")
     self.DLB1.configure(relief="ridge")
     self.DLB1.configure(selectbackground="#c4c4c4")
-    self.DLB1.configure(takefocus="0")
+    #self.DLB1.configure(takefocus="0")
 
     self.DLB2 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB2.place(relx=0.535, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4067,7 +4082,7 @@ class topProcessorDisplayPanel:
     self.DLB2.configure(borderwidth="2")
     self.DLB2.configure(relief="ridge")
     self.DLB2.configure(selectbackground="#c4c4c4")
-    self.DLB2.configure(takefocus="0")
+    #self.DLB2.configure(takefocus="0")
 
     self.DLB3 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB3.place(relx=0.605, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4076,7 +4091,7 @@ class topProcessorDisplayPanel:
     self.DLB3.configure(borderwidth="2")
     self.DLB3.configure(relief="ridge")
     self.DLB3.configure(selectbackground="#c4c4c4")
-    self.DLB3.configure(takefocus="0")
+    #self.DLB3.configure(takefocus="0")
 
     self.DLB4 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB4.place(relx=0.674, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4085,7 +4100,7 @@ class topProcessorDisplayPanel:
     self.DLB4.configure(borderwidth="2")
     self.DLB4.configure(relief="ridge")
     self.DLB4.configure(selectbackground="#c4c4c4")
-    self.DLB4.configure(takefocus="0")
+    #self.DLB4.configure(takefocus="0")
 
     self.DLB5 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB5.place(relx=0.744, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4094,7 +4109,7 @@ class topProcessorDisplayPanel:
     self.DLB5.configure(borderwidth="2")
     self.DLB5.configure(relief="ridge")
     self.DLB5.configure(selectbackground="#c4c4c4")
-    self.DLB5.configure(takefocus="0")
+    #self.DLB5.configure(takefocus="0")
 
     self.DLB7 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB7.place(relx=0.884, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4103,7 +4118,7 @@ class topProcessorDisplayPanel:
     self.DLB7.configure(borderwidth="2")
     self.DLB7.configure(relief="ridge")
     self.DLB7.configure(selectbackground="#c4c4c4")
-    self.DLB7.configure(takefocus="0")
+    #self.DLB7.configure(takefocus="0")
 
     self.DLB6 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB6.place(relx=0.814, rely=0.4, relheight=0.14, relwidth=0.07
@@ -4112,7 +4127,7 @@ class topProcessorDisplayPanel:
     self.DLB6.configure(borderwidth="2")
     self.DLB6.configure(relief="ridge")
     self.DLB6.configure(selectbackground="#c4c4c4")
-    self.DLB6.configure(takefocus="0")
+    #self.DLB6.configure(takefocus="0")
 
     self.DLB9 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB9.place(relx=0.116, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4121,7 +4136,7 @@ class topProcessorDisplayPanel:
     self.DLB9.configure(borderwidth="2")
     self.DLB9.configure(relief="ridge")
     self.DLB9.configure(selectbackground="#c4c4c4")
-    self.DLB9.configure(takefocus="0")
+    #self.DLB9.configure(takefocus="0")
 
     self.DLB10 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB10.place(relx=0.186, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4130,7 +4145,7 @@ class topProcessorDisplayPanel:
     self.DLB10.configure(borderwidth="2")
     self.DLB10.configure(relief="ridge")
     self.DLB10.configure(selectbackground="#c4c4c4")
-    self.DLB10.configure(takefocus="0")
+    #self.DLB10.configure(takefocus="0")
 
     self.DLB11 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB11.place(relx=0.256, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4139,7 +4154,7 @@ class topProcessorDisplayPanel:
     self.DLB11.configure(borderwidth="2")
     self.DLB11.configure(relief="ridge")
     self.DLB11.configure(selectbackground="#c4c4c4")
-    self.DLB11.configure(takefocus="0")
+    #self.DLB11.configure(takefocus="0")
 
     self.DLB12 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB12.place(relx=0.326, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4148,7 +4163,7 @@ class topProcessorDisplayPanel:
     self.DLB12.configure(borderwidth="2")
     self.DLB12.configure(relief="ridge")
     self.DLB12.configure(selectbackground="#c4c4c4")
-    self.DLB12.configure(takefocus="0")
+    #self.DLB12.configure(takefocus="0")
 
     self.DLB13 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB13.place(relx=0.395, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4157,7 +4172,7 @@ class topProcessorDisplayPanel:
     self.DLB13.configure(borderwidth="2")
     self.DLB13.configure(relief="ridge")
     self.DLB13.configure(selectbackground="#c4c4c4")
-    self.DLB13.configure(takefocus="0")
+    #self.DLB13.configure(takefocus="0")
 
     self.DLB14 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB14.place(relx=0.465, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4166,7 +4181,7 @@ class topProcessorDisplayPanel:
     self.DLB14.configure(borderwidth="2")
     self.DLB14.configure(relief="ridge")
     self.DLB14.configure(selectbackground="#c4c4c4")
-    self.DLB14.configure(takefocus="0")
+    #self.DLB14.configure(takefocus="0")
 
     self.DLB15 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB15.place(relx=0.535, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4175,7 +4190,7 @@ class topProcessorDisplayPanel:
     self.DLB15.configure(borderwidth="2")
     self.DLB15.configure(relief="ridge")
     self.DLB15.configure(selectbackground="#c4c4c4")
-    self.DLB15.configure(takefocus="0")
+    #self.DLB15.configure(takefocus="0")
 
     self.DLB16 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB16.place(relx=0.605, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4184,7 +4199,7 @@ class topProcessorDisplayPanel:
     self.DLB16.configure(borderwidth="2")
     self.DLB16.configure(relief="ridge")
     self.DLB16.configure(selectbackground="#c4c4c4")
-    self.DLB16.configure(takefocus="0")
+    #self.DLB16.configure(takefocus="0")
 
     self.DLB17 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB17.place(relx=0.674, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4193,7 +4208,7 @@ class topProcessorDisplayPanel:
     self.DLB17.configure(borderwidth="2")
     self.DLB17.configure(relief="ridge")
     self.DLB17.configure(selectbackground="#c4c4c4")
-    self.DLB17.configure(takefocus="0")
+    #self.DLB17.configure(takefocus="0")
 
     self.DLB18 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB18.place(relx=0.744, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4202,7 +4217,7 @@ class topProcessorDisplayPanel:
     self.DLB18.configure(borderwidth="2")
     self.DLB18.configure(relief="ridge")
     self.DLB18.configure(selectbackground="#c4c4c4")
-    self.DLB18.configure(takefocus="0")
+    #self.DLB18.configure(takefocus="0")
 
     self.DLB19 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB19.place(relx=0.814, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4211,7 +4226,7 @@ class topProcessorDisplayPanel:
     self.DLB19.configure(borderwidth="2")
     self.DLB19.configure(relief="ridge")
     self.DLB19.configure(selectbackground="#c4c4c4")
-    self.DLB19.configure(takefocus="0")
+    #self.DLB19.configure(takefocus="0")
 
     self.DLB20 = tk.Canvas(self.paneCEPanel_p2)
     self.DLB20.place(relx=0.884, rely=0.533, relheight=0.14, relwidth=0.07
@@ -4220,7 +4235,7 @@ class topProcessorDisplayPanel:
     self.DLB20.configure(borderwidth="2")
     self.DLB20.configure(relief="ridge")
     self.DLB20.configure(selectbackground="#c4c4c4")
-    self.DLB20.configure(takefocus="0")
+    #self.DLB20.configure(takefocus="0")
 
     self.AI0 = tk.Canvas(self.paneCEPanel_p2)
     self.AI0.place(relx=0.116, rely=0.7, relheight=0.14, relwidth=0.07
@@ -4229,7 +4244,7 @@ class topProcessorDisplayPanel:
     self.AI0.configure(borderwidth="2")
     self.AI0.configure(relief="ridge")
     self.AI0.configure(selectbackground="#c4c4c4")
-    self.AI0.configure(takefocus="0")
+    #self.AI0.configure(takefocus="0")
 
     self.AI1 = tk.Canvas(self.paneCEPanel_p2)
     self.AI1.place(relx=0.186, rely=0.7, relheight=0.14, relwidth=0.07
@@ -4238,7 +4253,7 @@ class topProcessorDisplayPanel:
     self.AI1.configure(borderwidth="2")
     self.AI1.configure(relief="ridge")
     self.AI1.configure(selectbackground="#c4c4c4")
-    self.AI1.configure(takefocus="0")
+    #self.AI1.configure(takefocus="0")
 
     self.AI2 = tk.Canvas(self.paneCEPanel_p2)
     self.AI2.place(relx=0.256, rely=0.7, relheight=0.14, relwidth=0.07
@@ -4247,7 +4262,7 @@ class topProcessorDisplayPanel:
     self.AI2.configure(borderwidth="2")
     self.AI2.configure(relief="ridge")
     self.AI2.configure(selectbackground="#c4c4c4")
-    self.AI2.configure(takefocus="0")
+    #self.AI2.configure(takefocus="0")
 
     self.AI3 = tk.Canvas(self.paneCEPanel_p2)
     self.AI3.place(relx=0.326, rely=0.7, relheight=0.14, relwidth=0.07
@@ -4256,7 +4271,7 @@ class topProcessorDisplayPanel:
     self.AI3.configure(borderwidth="2")
     self.AI3.configure(relief="ridge")
     self.AI3.configure(selectbackground="#c4c4c4")
-    self.AI3.configure(takefocus="0")
+    #self.AI3.configure(takefocus="0")
 
     self.AI4 = tk.Canvas(self.paneCEPanel_p2)
     self.AI4.place(relx=0.395, rely=0.7, relheight=0.14, relwidth=0.07
@@ -4265,7 +4280,7 @@ class topProcessorDisplayPanel:
     self.AI4.configure(borderwidth="2")
     self.AI4.configure(relief="ridge")
     self.AI4.configure(selectbackground="#c4c4c4")
-    self.AI4.configure(takefocus="0")
+    #self.AI4.configure(takefocus="0")
 
     self.ACC_DISPLAY_ENABLE = tk.Canvas(self.paneCEPanel_p2)
     self.ACC_DISPLAY_ENABLE.place(relx=0.791, rely=0.7, relheight=0.273
@@ -4274,7 +4289,7 @@ class topProcessorDisplayPanel:
     self.ACC_DISPLAY_ENABLE.configure(borderwidth="2")
     self.ACC_DISPLAY_ENABLE.configure(relief="ridge")
     self.ACC_DISPLAY_ENABLE.configure(selectbackground="#c4c4c4")
-    self.ACC_DISPLAY_ENABLE.configure(takefocus="0")
+    #self.ACC_DISPLAY_ENABLE.configure(takefocus="0")
 
     self.mbrBIT1 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT1.place(relx=0.047, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4283,7 +4298,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT1.configure(borderwidth="2")
     self.mbrBIT1.configure(relief="ridge")
     self.mbrBIT1.configure(selectbackground="#c4c4c4")
-    self.mbrBIT1.configure(takefocus="0")
+    #self.mbrBIT1.configure(takefocus="0")
 
     self.mbrBIT2 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT2.place(relx=0.116, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4292,7 +4307,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT2.configure(borderwidth="2")
     self.mbrBIT2.configure(relief="ridge")
     self.mbrBIT2.configure(selectbackground="#c4c4c4")
-    self.mbrBIT2.configure(takefocus="0")
+    #self.mbrBIT2.configure(takefocus="0")
 
     self.mbrBIT3 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT3.place(relx=0.186, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4301,7 +4316,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT3.configure(borderwidth="2")
     self.mbrBIT3.configure(relief="ridge")
     self.mbrBIT3.configure(selectbackground="#c4c4c4")
-    self.mbrBIT3.configure(takefocus="0")
+    #self.mbrBIT3.configure(takefocus="0")
 
     self.mbrBIT4 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT4.place(relx=0.256, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4310,7 +4325,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT4.configure(borderwidth="2")
     self.mbrBIT4.configure(relief="ridge")
     self.mbrBIT4.configure(selectbackground="#c4c4c4")
-    self.mbrBIT4.configure(takefocus="0")
+    #self.mbrBIT4.configure(takefocus="0")
 
     self.mbrBIT5 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT5.place(relx=0.326, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4319,7 +4334,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT5.configure(borderwidth="2")
     self.mbrBIT5.configure(relief="ridge")
     self.mbrBIT5.configure(selectbackground="#c4c4c4")
-    self.mbrBIT5.configure(takefocus="0")
+    #self.mbrBIT5.configure(takefocus="0")
 
     self.mbrBIT6 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT6.place(relx=0.395, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4328,7 +4343,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT6.configure(borderwidth="2")
     self.mbrBIT6.configure(relief="ridge")
     self.mbrBIT6.configure(selectbackground="#c4c4c4")
-    self.mbrBIT6.configure(takefocus="0")
+    #self.mbrBIT6.configure(takefocus="0")
 
     self.mbrBIT7 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT7.place(relx=0.465, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4337,7 +4352,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT7.configure(borderwidth="2")
     self.mbrBIT7.configure(relief="ridge")
     self.mbrBIT7.configure(selectbackground="#c4c4c4")
-    self.mbrBIT7.configure(takefocus="0")
+    #self.mbrBIT7.configure(takefocus="0")
 
     self.mbrBIT8 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT8.place(relx=0.535, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4346,7 +4361,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT8.configure(borderwidth="2")
     self.mbrBIT8.configure(relief="ridge")
     self.mbrBIT8.configure(selectbackground="#c4c4c4")
-    self.mbrBIT8.configure(takefocus="0")
+    #self.mbrBIT8.configure(takefocus="0")
 
     self.mbrBIT9 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT9.place(relx=0.605, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4355,7 +4370,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT9.configure(borderwidth="2")
     self.mbrBIT9.configure(relief="ridge")
     self.mbrBIT9.configure(selectbackground="#c4c4c4")
-    self.mbrBIT9.configure(takefocus="0")
+    #self.mbrBIT9.configure(takefocus="0")
 
     self.mbrBIT10 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT10.place(relx=0.674, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4364,7 +4379,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT10.configure(borderwidth="2")
     self.mbrBIT10.configure(relief="ridge")
     self.mbrBIT10.configure(selectbackground="#c4c4c4")
-    self.mbrBIT10.configure(takefocus="0")
+    #self.mbrBIT10.configure(takefocus="0")
 
     self.mbrBIT11 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT11.place(relx=0.744, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4373,7 +4388,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT11.configure(borderwidth="2")
     self.mbrBIT11.configure(relief="ridge")
     self.mbrBIT11.configure(selectbackground="#c4c4c4")
-    self.mbrBIT11.configure(takefocus="0")
+    #self.mbrBIT11.configure(takefocus="0")
 
     self.mbrBIT12 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT12.place(relx=0.814, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4382,7 +4397,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT12.configure(borderwidth="2")
     self.mbrBIT12.configure(relief="ridge")
     self.mbrBIT12.configure(selectbackground="#c4c4c4")
-    self.mbrBIT12.configure(takefocus="0")
+    #self.mbrBIT12.configure(takefocus="0")
 
     self.mbrBIT13 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT13.place(relx=0.884, rely=0.238, relheight=0.167, relwidth=0.07
@@ -4391,7 +4406,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT13.configure(borderwidth="2")
     self.mbrBIT13.configure(relief="ridge")
     self.mbrBIT13.configure(selectbackground="#c4c4c4")
-    self.mbrBIT13.configure(takefocus="0")
+    #self.mbrBIT13.configure(takefocus="0")
 
     self.mbrMBR1 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR1.place(relx=0.047, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4400,7 +4415,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR1.configure(borderwidth="2")
     self.mbrMBR1.configure(relief="ridge")
     self.mbrMBR1.configure(selectbackground="#c4c4c4")
-    self.mbrMBR1.configure(takefocus="0")
+    #self.mbrMBR1.configure(takefocus="0")
 
     self.mbrMBR2 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR2.place(relx=0.116, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4409,7 +4424,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR2.configure(borderwidth="2")
     self.mbrMBR2.configure(relief="ridge")
     self.mbrMBR2.configure(selectbackground="#c4c4c4")
-    self.mbrMBR2.configure(takefocus="0")
+    #self.mbrMBR2.configure(takefocus="0")
 
     self.mbrMBR3 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR3.place(relx=0.186, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4418,7 +4433,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR3.configure(borderwidth="2")
     self.mbrMBR3.configure(relief="ridge")
     self.mbrMBR3.configure(selectbackground="#c4c4c4")
-    self.mbrMBR3.configure(takefocus="0")
+    #self.mbrMBR3.configure(takefocus="0")
 
     self.mbrMBR4 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR4.place(relx=0.256, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4427,7 +4442,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR4.configure(borderwidth="2")
     self.mbrMBR4.configure(relief="ridge")
     self.mbrMBR4.configure(selectbackground="#c4c4c4")
-    self.mbrMBR4.configure(takefocus="0")
+    #self.mbrMBR4.configure(takefocus="0")
 
     self.mbrMBR5 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR5.place(relx=0.326, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4436,7 +4451,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR5.configure(borderwidth="2")
     self.mbrMBR5.configure(relief="ridge")
     self.mbrMBR5.configure(selectbackground="#c4c4c4")
-    self.mbrMBR5.configure(takefocus="0")
+    #self.mbrMBR5.configure(takefocus="0")
 
     self.mbrMBR6 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR6.place(relx=0.395, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4445,7 +4460,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR6.configure(borderwidth="2")
     self.mbrMBR6.configure(relief="ridge")
     self.mbrMBR6.configure(selectbackground="#c4c4c4")
-    self.mbrMBR6.configure(takefocus="0")
+    #self.mbrMBR6.configure(takefocus="0")
 
     self.mbrMBR7 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR7.place(relx=0.465, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4454,7 +4469,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR7.configure(borderwidth="2")
     self.mbrMBR7.configure(relief="ridge")
     self.mbrMBR7.configure(selectbackground="#c4c4c4")
-    self.mbrMBR7.configure(takefocus="0")
+    #self.mbrMBR7.configure(takefocus="0")
 
     self.mbrMBR8 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR8.place(relx=0.535, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4463,7 +4478,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR8.configure(borderwidth="2")
     self.mbrMBR8.configure(relief="ridge")
     self.mbrMBR8.configure(selectbackground="#c4c4c4")
-    self.mbrMBR8.configure(takefocus="0")
+    #self.mbrMBR8.configure(takefocus="0")
 
     self.mbrMBR9 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR9.place(relx=0.605, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4472,7 +4487,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR9.configure(borderwidth="2")
     self.mbrMBR9.configure(relief="ridge")
     self.mbrMBR9.configure(selectbackground="#c4c4c4")
-    self.mbrMBR9.configure(takefocus="0")
+    #self.mbrMBR9.configure(takefocus="0")
 
     self.mbrMBR10 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR10.place(relx=0.674, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4481,7 +4496,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR10.configure(borderwidth="2")
     self.mbrMBR10.configure(relief="ridge")
     self.mbrMBR10.configure(selectbackground="#c4c4c4")
-    self.mbrMBR10.configure(takefocus="0")
+    #self.mbrMBR10.configure(takefocus="0")
 
     self.mbrMBR11 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR11.place(relx=0.744, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4490,7 +4505,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR11.configure(borderwidth="2")
     self.mbrMBR11.configure(relief="ridge")
     self.mbrMBR11.configure(selectbackground="#c4c4c4")
-    self.mbrMBR11.configure(takefocus="0")
+    #self.mbrMBR11.configure(takefocus="0")
 
     self.mbrMBR12 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR12.place(relx=0.814, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4499,7 +4514,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR12.configure(borderwidth="2")
     self.mbrMBR12.configure(relief="ridge")
     self.mbrMBR12.configure(selectbackground="#c4c4c4")
-    self.mbrMBR12.configure(takefocus="0")
+    #self.mbrMBR12.configure(takefocus="0")
 
     self.mbrMBR13 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrMBR13.place(relx=0.884, rely=0.397, relheight=0.167, relwidth=0.07
@@ -4508,7 +4523,7 @@ class topProcessorDisplayPanel:
     self.mbrMBR13.configure(borderwidth="2")
     self.mbrMBR13.configure(relief="ridge")
     self.mbrMBR13.configure(selectbackground="#c4c4c4")
-    self.mbrMBR13.configure(takefocus="0")
+    #self.mbrMBR13.configure(takefocus="0")
 
     self.mbrODD_PARITY = tk.Canvas(self.paneCEPanel_p3)
     self.mbrODD_PARITY.place(relx=0.372, rely=0.794, relheight=0.167
@@ -4517,7 +4532,7 @@ class topProcessorDisplayPanel:
     self.mbrODD_PARITY.configure(borderwidth="2")
     self.mbrODD_PARITY.configure(relief="ridge")
     self.mbrODD_PARITY.configure(selectbackground="#c4c4c4")
-    self.mbrODD_PARITY.configure(takefocus="0")
+    #self.mbrODD_PARITY.configure(takefocus="0")
 
     self.mbrBIT14 = tk.Canvas(self.paneCEPanel_p3)
     self.mbrBIT14.place(relx=0.372, rely=0.635, relheight=0.167, relwidth=0.119
@@ -4526,7 +4541,7 @@ class topProcessorDisplayPanel:
     self.mbrBIT14.configure(borderwidth="2")
     self.mbrBIT14.configure(relief="ridge")
     self.mbrBIT14.configure(selectbackground="#c4c4c4")
-    self.mbrBIT14.configure(takefocus="0")
+    #self.mbrBIT14.configure(takefocus="0")
 
     self.mbrLOAD = tk.Canvas(self.paneCEPanel_p3)
     self.mbrLOAD.place(relx=0.547, rely=0.635, relheight=0.325, relwidth=0.093
@@ -4535,7 +4550,7 @@ class topProcessorDisplayPanel:
     self.mbrLOAD.configure(borderwidth="2")
     self.mbrLOAD.configure(relief="ridge")
     self.mbrLOAD.configure(selectbackground="#c4c4c4")
-    self.mbrLOAD.configure(takefocus="0")
+    #self.mbrLOAD.configure(takefocus="0")
 
     self.ceLAMP_TEST = tk.Canvas(self.paneCEPanel_p3)
     self.ceLAMP_TEST.place(relx=0.802, rely=0.635, relheight=0.325
@@ -4544,55 +4559,61 @@ class topProcessorDisplayPanel:
     self.ceLAMP_TEST.configure(borderwidth="2")
     self.ceLAMP_TEST.configure(relief="ridge")
     self.ceLAMP_TEST.configure(selectbackground="#c4c4c4")
-    self.ceLAMP_TEST.configure(takefocus="0")
+    #self.ceLAMP_TEST.configure(takefocus="0")
 
   def __adjust_sash0(self, event):
     paned = event.widget
-    pos = [35, 281, 396, 618, ]
-    i = 0
-    for sash in pos:
-      paned.sashpos(i, sash)
-      i += 1
+    if False:
+        pos = [35, 281, 396, 618, ]
+        i = 0
+        for sash in pos:
+          paned.sash_place(i, 0, round(agcScale*sash))
+          i += 1
     paned.unbind('<map>', self.__funcid0)
     del self.__funcid0
 
   def __adjust_sash1(self, event):
+      
     paned = event.widget
-    pos = [60, 123, ]
-    i = 0
-    for sash in pos:
-      paned.sashpos(i, sash)
-      i += 1
+    if False:
+        pos = [60, 123, ]
+        i = 0
+        for sash in pos:
+          paned.sash_place(i, 0, round(agcScale*sash))
+          i += 1
     paned.unbind('<map>', self.__funcid1)
     del self.__funcid1
 
   def __adjust_sash2(self, event):
     paned = event.widget
-    pos = [35, 175, 313, 472, 554, ]
-    i = 0
-    for sash in pos:
-      paned.sashpos(i, sash)
-      i += 1
+    if False:
+        pos = [35, 175, 313, 472, 554, ]
+        i = 0
+        for sash in pos:
+          paned.sash_place(i, 0, round(agcScale*sash))
+          i += 1
     paned.unbind('<map>', self.__funcid2)
     del self.__funcid2
 
   def __adjust_sash3(self, event):
     paned = event.widget
-    pos = [231, ]
-    i = 0
-    for sash in pos:
-      paned.sashpos(i, sash)
-      i += 1
+    if False:
+        pos = [231, ]
+        i = 0
+        for sash in pos:
+          paned.sash_place(i, round(agcScale*sash), 0)
+          i += 1
     paned.unbind('<map>', self.__funcid3)
     del self.__funcid3
 
   def __adjust_sash4(self, event):
     paned = event.widget
-    pos = [35, 190, 321, 614, ]
-    i = 0
-    for sash in pos:
-      paned.sashpos(i, sash)
-      i += 1
+    if False:
+        pos = [35, 190, 321, 614, ]
+        i = 0
+        for sash in pos:
+          paned.sash_place(i, 0, round(agcScale*sash))
+          i += 1
     paned.unbind('<map>', self.__funcid4)
     del self.__funcid4
 
@@ -4604,10 +4625,10 @@ class AutoScroll(object):
     #  could be used for scrolled entry widget for which vertical
     #  scrolling is not supported. 5/7/14.
     try:
-      vsb = ttk.Scrollbar(master, orient='vertical', command=self.yview)
+      vsb = tk.Scrollbar(master, orient='vertical', command=self.yview)
     except:
       pass
-    hsb = ttk.Scrollbar(master, orient='horizontal', command=self.xview)
+    hsb = tk.Scrollbar(master, orient='horizontal', command=self.xview)
     try:
       self.configure(yscrollcommand=self._autoscroll(vsb))
     except:
@@ -4619,8 +4640,8 @@ class AutoScroll(object):
     except:
       pass
     hsb.grid(column=0, row=1, sticky='ew')
-    master.grid_columnconfigure(0, weight=1)
-    master.grid_rowconfigure(0, weight=1)
+    master.grid_columnconfigure(0)
+    master.grid_rowconfigure(0)
     # Copy geometry methods of master  (taken from ScrolledText.py)
     if py3:
       methods = tk.Pack.__dict__.keys() | tk.Grid.__dict__.keys() \
@@ -4651,7 +4672,7 @@ def _create_container(func):
   '''Creates a ttk Frame with a given master, and use this new frame to
   place the scrollbars and the widget.'''
   def wrapped(cls, master, **kw):
-    container = ttk.Frame(master)
+    container = tk.Frame(master)
     container.bind('<Enter>', lambda e: _bound_to_mousewheel(e, container))
     container.bind('<Leave>', lambda e: _unbound_to_mousewheel(e, container))
     return func(cls, container, **kw)

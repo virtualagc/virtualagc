@@ -62,6 +62,7 @@
 # computer. 
 
 from ProcessorDisplayPanel import *
+#import tkinter.font as tkFont
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 prsModeBCD = True
@@ -1667,8 +1668,17 @@ leftToRead = packetSize
 view = memoryview(inputBuffer)
 
 didSomething = False
+firstIteration = True
 def mainLoopIteration():
 	global didSomething, inputBuffer, leftToRead, view, terminalHeaderPrinted
+	global firstIteration
+
+	if firstIteration:
+		#top.paneCEPanel.sash_place(0, 0, round(agcScale*35))
+		#top.paneCEPanel_p2.paneconfig(height=agcScale*155)
+		#print(top.paneCEPanel.config())
+		pass
+	firstIteration = False
 
 	# Check for packet data received from yaLVDC and process it.
 	# While these packets are always the same length in bytes,
@@ -1752,6 +1762,18 @@ while False:
 	mainLoopIteration()
 
 root = tk.Tk()
+#default_font = tkFont.nametofont("TkDefaultFont")
+#default_font.configure(size=12)
+default_scaling = root.tk.call('tk', 'scaling')
+print("Default scaling =", default_scaling)
+root.tk.call('tk', 'scaling', agcScale * default_scaling)
+root.tk_setPalette(background=bgcolor, foreground=fgcolor)
+root.geometry("%dx%d+0+0" % (winWidth, winHeight))
+root.minsize(1, 1)
+#top.maxsize(5105, 1170)
+root.resizable(1, 1)
+root.title("PROGRAMMABLE TEST CONTROLLER")
+root.configure(highlightcolor="black")
 
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
@@ -2267,7 +2289,4 @@ except:
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
-default_scaling = root.tk.call('tk', 'scaling')
-print("Default scaling =", default_scaling)
-root.tk.call('tk', 'scaling', agcScale * default_scaling)
 root.mainloop()
