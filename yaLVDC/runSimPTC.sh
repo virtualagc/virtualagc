@@ -5,9 +5,7 @@
 # following links.
 apparent="`which runSimPTC.sh`"
 actual="`readlink -f '$apparent' | sed 's@/runSimPTC.sh'`"
-echo $apparent
-echo $actual
-exit 1
+cd "$actual"
 
 xterm -rightbar -hold -e ./yaPTC.py --resize=1 &
 
