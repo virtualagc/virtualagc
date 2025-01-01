@@ -4,7 +4,7 @@
 # First, find the absolute path to this script, remembering that it may be
 # following links.
 apparent="`which runSimPTC.sh`"
-actual="`readlink -f '$apparent' | sed 's@/runSimPTC.sh'`"
+actual="`readlink -f '$apparent' | sed 's@/runSimPTC.sh$@@'`"
 cd "$actual"
 
 xterm -rightbar -hold -e ./yaPTC.py --resize=1 &
