@@ -95,7 +95,7 @@ class topProcessorDisplayPanel:
     self.paneProcessorDisplayPanel = tk.PanedWindow(top, orient="vertical")
     self.paneProcessorDisplayPanel.place(relx=0.667, rely=0.0, relheight=1.0
         , relwidth=0.333)
-    ##self.paneProcessorDisplayPanel.configure(takefocus="0")
+    #self.paneProcessorDisplayPanel.configure(takefocus="0")
     self.paneProcessorDisplayPanel_p5 = tk.LabelFrame(height=agcScale*35
         , text='')
     self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p5)
@@ -105,8 +105,8 @@ class topProcessorDisplayPanel:
     self.paneProcessorDisplayPanel_p2 = tk.LabelFrame(height=agcScale*116
         , text='INTERRUPTS')
     self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p2)
-    self.paneProcessorDisplayPanel_p3 = tk.LabelFrame(height=agcScale*222
-        , text='PROGRAM CONTROL')
+    self.paneProcessorDisplayPanel_p3 = tk.LabelFrame(height=agcScale*222,
+        text='PROGRAM CONTROL')
     self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p3)
     self.paneProcessorDisplayPanel_p4 = tk.LabelFrame(text='MISCELLANEOUS')
     self.paneProcessorDisplayPanel.add(self.paneProcessorDisplayPanel_p4)
@@ -555,28 +555,28 @@ class topProcessorDisplayPanel:
     self.Label13.place(relx=0.675, rely=0.249, height=agcScale*8, width=agcScale*109
         , bordermode='ignore')
     self.Label13.configure(activebackground="#f9f9f9")
-    self.Label13.configure(font="-family {DejaVu Sans} -size 8")
+    self.Label13.configure(font="-family {DejaVu Sans} -size 7")
     self.Label13.configure(text='''----------OP CODE----------''')
 
     self.Label13_38 = tk.Label(self.paneProcessorDisplayPanel_p1)
     self.Label13_38.place(relx=0.057, rely=0.539, height=agcScale*8, width=agcScale*259
         , bordermode='ignore')
     self.Label13_38.configure(activebackground="#f9f9f9")
-    self.Label13_38.configure(font="-family {DejaVu Sans} -size 8")
+    self.Label13_38.configure(font="-family {DejaVu Sans} -size 7")
     self.Label13_38.configure(text='''--------------------MEMORY ADDRESS--------------------''')
 
     self.Label13_39 = tk.Label(self.paneProcessorDisplayPanel_p1)
     self.Label13_39.place(relx=0.057, rely=0.934, height=agcScale*8, width=agcScale*74
         , bordermode='ignore')
     self.Label13_39.configure(activebackground="#f9f9f9")
-    self.Label13_39.configure(font="-family {DejaVu Sans} -size 8")
+    self.Label13_39.configure(font="-family {DejaVu Sans} -size 7")
     self.Label13_39.configure(text='''----SYLLABLE----''')
 
     self.Label13_40 = tk.Label(self.paneProcessorDisplayPanel_p1)
     self.Label13_40.place(relx=0.275, rely=0.934, height=agcScale*8, width=agcScale*169
         , bordermode='ignore')
     self.Label13_40.configure(activebackground="#f9f9f9")
-    self.Label13_40.configure(font="-family {DejaVu Sans} -size 8")
+    self.Label13_40.configure(font="-family {DejaVu Sans} -size 7")
     self.Label13_40.configure(text='''---------------SECTOR---------------''')
 
     self.Label14 = tk.Label(self.paneProcessorDisplayPanel_p1)
@@ -1104,11 +1104,11 @@ class topProcessorDisplayPanel:
     self.TPanedwindow1.place(relx=0.023, rely=0.092, relheight=0.862
         , relwidth=0.954, bordermode='ignore')
     ##self.TPanedwindow1.configure(takefocus="0")
-    self.TPanedwindow1_p1 = tk.LabelFrame(height=agcScale*69, text='')
+    self.TPanedwindow1_p1 = tk.LabelFrame(height=agcScale*62, text='')
     self.TPanedwindow1.add(self.TPanedwindow1_p1)
     self.paneProgRegA = tk.LabelFrame(height=agcScale*62, text='PROG REG A')
     self.TPanedwindow1.add(self.paneProgRegA)
-    self.paneProgRegB = tk.LabelFrame(text='PROG REG B')
+    self.paneProgRegB = tk.LabelFrame(height=agcScale*62, text='PROG REG B')
     self.TPanedwindow1.add(self.paneProgRegB)
     self.__funcid1 = self.TPanedwindow1.bind('<Map>', self.__adjust_sash1)
 
@@ -1503,7 +1503,7 @@ class topProcessorDisplayPanel:
     self.Label1.place(relx=0.022, rely=0.259, height=agcScale*16, width=agcScale*12
         , bordermode='ignore')
     self.Label1.configure(activebackground="#f9f9f9")
-    self.Label1.configure(font="-family {DejaVu Sans} -size 7")
+    self.Label1.configure(font="-family {DejaVu Sans} -size 6")
     self.Label1.configure(text='''S''')
 
     self.Label2 = tk.Label(self.paneProgRegA)
