@@ -1,6 +1,6 @@
 #!/bin/bash
 
-xterm -rightbar -e ./yaPTC.py &
+xterm -rightbar -hold -e ./yaPTC.py --resize=1 &
 
 # Assemble the PAST program (as slightly altered by me) source code.
 ../yaASM.py/yaASM.py --ptc --past-bugs <PAST.lvdc >PAST.listing && \

@@ -70,7 +70,7 @@ class topProcessorDisplayPanel:
 
     top.geometry("1311x729+3241+107")
     top.minsize(1, 1)
-    top.maxsize(5105, 1170)
+    #top.maxsize(5105, 1170)
     top.resizable(1, 0)
     top.title("PROGRAMMABLE TEST CONTROLLER")
     top.configure(highlightcolor="black")

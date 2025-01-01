@@ -61,7 +61,12 @@
 # you can simply run yaLVDC and yaPTC.py from different consoles on that same 
 # computer. 
 
+import os
 from ProcessorDisplayPanel import *
+
+agcScale = 1.0
+if "AGC_SCALE" in os.environ:
+	agcScale = float(os.environ["AGC_SCALE"])
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 prsModeBCD = True
@@ -2271,4 +2276,7 @@ else:
 	root.geometry("+0+0")
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
+default_scaling = root.tk.call('tk', 'scaling')
+print("Default scaling =", default_scaling)
+root.tk.call('tk', 'scaling', agcScale * default_scaling)
 root.mainloop()
