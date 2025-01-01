@@ -4,6 +4,7 @@
 # it can potentially perform other tasks as well.
 
 cd ~/git/virtualagc
+git stash drop
 git pull
 time make clean install clean
 echo "Terminated.  Hit ENTER key or close this window."
