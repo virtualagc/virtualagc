@@ -2265,19 +2265,6 @@ try:
 except:
 	pass
 
-if False:
-	root.update()
-	width = root.winfo_width()*2.5
-	height = root.winfo_height()*2.5
-	print("Geometry:", width, height)
-	root.geometry("%dx%d+0+0" % (width, height))
-<<<<<<< HEAD
-elif False:
-	root.geometry("+0+0")
-=======
-else:
-	root.geometry("+400+400")
->>>>>>> branch 'master' of https://github.com/virtualagc/virtualagc.git
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
 default_scaling = root.tk.call('tk', 'scaling')
