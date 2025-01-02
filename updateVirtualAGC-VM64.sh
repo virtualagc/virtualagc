@@ -20,8 +20,12 @@ then
         # First, make all of the "normal" stuff that's usually automatic.
         time make clean install clean
         # Now some extra, non-standard stuff that is usually built manually.
-        rm sim630 &>/dev/null
-        make -C XCOM-I sim360
+        cd ../XCOM-I
+        make sim360
+        make
+        cd ../yaShuttle/"Source Code"/PASS.REL32V0
+        make -s XEXTRA=--quiet all regression
+        
         echo "Terminated.  Hit ENTER key or close this window."
         read
 fi
