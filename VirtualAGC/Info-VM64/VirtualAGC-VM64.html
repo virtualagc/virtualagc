@@ -234,6 +234,10 @@ src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/preferences-system
       accept a command-line option <code>--help</code> for additional
       information.<br>
     </p>
+    <p>The programs whose names and descriptions are struck out <strike>like
+        so</strike> are not yet available and therefore are not
+      included.<br>
+    </p>
     <ul>
       <li>Gemini Onboard Computer (OBC):</li>
       <ul>
@@ -253,7 +257,7 @@ href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">b
             debugging facility</a>.</li>
         <li><strike><b>yaPanel</b></strike><strike>, the Manual Data
             Insertion Unit (MDIU) simulator for astronaut interactions
-            with the OBC.&nbsp; This is not yet available.</strike><br>
+            with the OBC.</strike><br>
         </li>
       </ul>
       <li>Apollo Lunar Module and Command Module AGC (LGC and CMC
@@ -408,14 +412,56 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
       <li>Space Shuttle:&nbsp; <br>
       </li>
       <ul>
-        <li>HALSFC</li>
-        <li>ASM101S</li>
-        <li>HALLINK101S</li>
-        <li>ap101s<br>
+        <li><b>HALSFC</b>, the original Intermetrics/United Space
+          Alliance compiler for the HAL/S computer language in which
+          Space Shuttle flight software was written, as ported for
+          "modern" computer systems via the XCOM-I.py XPL/I language
+          compiler (see below).&nbsp; This is actually a shell script
+          that integrates the various compiler passes, which are each
+          implemented as stand-alone programs:</li>
+        <ul>
+          <li><b>HALSFC-PASS1</b>, "phase 1" (parsing), specialized for
+            primary flight software.</li>
+          <li><b>HALSFC-PASS1B</b>, same except specialized for backup
+            flight software.</li>
+          <li><b>HALSFC-FLO</b>, "flow generator" for "phase 1.5"
+            (optimization).</li>
+          <li><b>HALSFC-OPT</b>, "optimization" for "phase 1.5",
+            specialized for primary flight software.</li>
+          <li><b>HALSFC-OPTB</b>, same except specialized for backup
+            flight software.</li>
+          <li><b>HALSFC-AUXP</b>, "auxiliary optimization" for "phase
+            1.5".</li>
+          <li><b>HALSFC-PASS2</b>, "phase 2" (code generation),
+            specialized for primary flight software.</li>
+          <li><b>HALSFC-PASS2B</b>, same except specialized for backup
+            flight software.</li>
+          <li><strike><b>HALSFC-PASS3</b></strike><strike>, "phase 3"
+              (simulation data file generation), specialized for primary
+              flight software.</strike><strike><br>
+            </strike></li>
+          <li><strike><b>HALSFC-PASS3B</b></strike><strike>, same except
+              specialized for backup flight software.</strike></li>
+          <li><strike><b>HALSFC-PASS4</b></strike><strike>, "phase 4".</strike><strike>&nbsp;
+              This is not yet available.</strike></li>
+        </ul>
+        <li><b>ASM101S.py</b>, a macro assembler for the IBM AP-101S
+          assembly language.<br>
         </li>
-        <li>HAL_S_FC<br>
+        <li><strike><b>HALLINK101S</b></strike><strike>, an AP-101S
+            linker for object files produced by </strike><strike>HALSFC</strike><strike>
+            and </strike><strike>ASM101S.py</strike><strike> (see
+            above).</strike><strike><br>
+          </strike></li>
+        <li><strike><b>ap101s</b></strike><strike>, a light-weight IBM
+            AP-101S CPU emulator.</strike><br>
         </li>
-        <li>yaHAL-S-FC</li>
+        <li><b>HAL_S_FC.py</b>, a port of PASS1 of the original
+          Intermetrics HAL/S compiler to the Python 3 language.<br>
+        </li>
+        <li><b>yaHAL-S-FC.py</b>, a partially-functional HAL/S compiler
+          and interpreter.<br>
+        </li>
         <li><a moz-do-not-send="true"
             href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>XCOM-I.py</b></a>,
           a compiler for the XPL/I language, which is the standard ~1970
