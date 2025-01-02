@@ -3,10 +3,10 @@
 # Virtual AGC sourcd tree, including items not normally automatically built.
 
 # First, make all of the "normal" stuff that's usually automatic.
-time make clean install clean
+make clean install clean
 
 # Now build some extra, non-standard stuff that is usually built manually.
-cd ../XCOM-I
+cd XCOM-I
 rm sim360 &>/dev/null
 make sim360
 make

@@ -21,7 +21,7 @@ then
         # The build stuff is separated out into an independent script, so
         # as to make sure that changes to the build procedure are captured
         # without a 2nd git pull.
-        ./rebuildVirtualAGC.sh
+        time ./rebuildVirtualAGC.sh
         
         echo "Terminated.  Hit ENTER key or close this window."
         read
