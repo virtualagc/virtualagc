@@ -4,7 +4,7 @@
 # it can potentially perform other tasks as well.
 
 echo The process of updating Virtual AGC should be harmless and easy,
-echo although it will probably take several minutes. But if you have have 
+echo although it will probably take several minutes. But if you have  
 echo made changes yourself to the source-code tree, the update process 
 echo will discard your changes.  If this is your situation, you might want 
 echo to copy your changed files out of the source tree before proceeding.
@@ -18,6 +18,7 @@ then
         git stash drop
         git pull
         time make clean install clean
+        make -C XCOM-I sim360
         echo "Terminated.  Hit ENTER key or close this window."
         read
 fi
