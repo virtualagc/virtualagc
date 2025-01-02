@@ -17,7 +17,10 @@ then
         git stash
         git stash drop
         git pull
+        # First, make all of the "normal" stuff that's usually automatic.
         time make clean install clean
+        # Now some extra, non-standard stuff that is usually built manually.
+        rm sim630 &>/dev/null
         make -C XCOM-I sim360
         echo "Terminated.  Hit ENTER key or close this window."
         read
