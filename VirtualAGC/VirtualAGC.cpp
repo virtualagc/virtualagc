@@ -4409,6 +4409,9 @@ TimerClass::Notify()
               MainFrame->SimulationWindow->DetailShown);
           MainFrame->SimulationWindow->Hide();
           MainFrame->SimulationWindow->InvalidateBestSize();
+          wxSize s = MainFrame->SimulationWindow->GetClientSize();
+          wxPoint p = MainFrame->SimulationWindow->UploadButton->GetPosition();
+          MainFrame->SimulationWindow->SetClientSize(wxSize(s.x, p.y + SCALED(60)));
           MainFrame->SimulationWindow->Layout();
           MainFrame->SimulationWindow->Fit();
           MainFrame->SimulationWindow->Refresh();

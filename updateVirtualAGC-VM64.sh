@@ -3,10 +3,18 @@
 # by getting the latest version of the source tree and building it.  However,
 # it can potentially perform other tasks as well.
 
-read -p "Are you sure (y/N)? " -n 1 -r
+echo The process of updating Virtual AGC should be harmless and easy,
+echo although it will probably take several minutes. But if you have have 
+echo made changes yourself to the source-code tree, the update process 
+echo will discard your changes.  If this is your situation, you might want 
+echo to copy your changed files out of the folder ~/git/virtualagc/.
+echo ""
+read -p "Are you sure you're ready to proceed at this time (y/N)? " -n 1 -r
 if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
+        echo ""
         cd ~/git/virtualagc
+        git stash
         git stash drop
         git pull
         time make clean install clean
