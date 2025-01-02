@@ -112,6 +112,7 @@ private:
     // end wxGlade
 
 public:
+    wxString exePath;
     // begin wxGlade: yaAcaFrameClass::attributes
     wxStaticBox* YawBox_staticbox;
     wxStaticBox* PitchBox_staticbox;

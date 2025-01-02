@@ -22,6 +22,7 @@
   Purpose:	Helps users to configure joystick parameters.
   Reference:	http://www.ibiblio.org/apollo/index.html
   Mode:		2009-04-08 RSB	Began.
+		2025-01-02 RSB	Added exePath.
 */
 
 
@@ -79,8 +80,8 @@ protected:
     wxStaticBox* sizer_7_copy_1_copy_staticbox;
     wxStaticBox* sizer_7_copy_copy_staticbox;
     wxStaticBox* sizer_7_copy_3_staticbox;
-    wxStaticText* Label1a_copy;
-    wxPanel* panel_1_copy_copy_copy_2;
+    wxStaticText* LabelStep1;
+    wxPanel* PanelStep1;
     wxStaticText* Label1b_copy;
     wxStaticBitmap* Checkmark3;
     wxStaticText* label_1_copy_2;
@@ -95,9 +96,9 @@ protected:
     wxButton* Default3Button;
     wxButton* Test3Button;
     wxButton* Set3Button;
-    wxPanel* Panel1;
-    wxStaticText* Label2a;
-    wxPanel* panel_1_copy_copy_copy_copy;
+    wxPanel* PanelUL;
+    wxStaticText* LabelStep3;
+    wxPanel* PanelStep3;
     wxStaticText* Label2b;
     wxStaticBitmap* Checkmark1;
     wxStaticText* RollStickLabel_copy;
@@ -126,23 +127,24 @@ protected:
     wxSpinCtrl* YawOffset;
     wxButton* DefaultButton;
     wxButton* TestButton;
-    wxPanel* Panel3;
-    wxStaticText* Label3a_copy_copy_copy;
-    wxPanel* panel_1_copy_copy_copy_1_copy_copy_copy;
+    wxPanel* PanelUR;
+    wxStaticText* LabelStep2;
+    wxPanel* PanelStep2;
     wxStaticText* Label3b_copy_copy_copy;
     wxStaticBitmap* Checkmark2;
     wxButton* Test2Button;
-    wxPanel* Panel2;
-    wxStaticText* Label3a_copy;
-    wxPanel* panel_1_copy_copy_copy_1_copy;
+    wxPanel* PanelLL;
+    wxStaticText* LabelStep4;
+    wxPanel* PanelStep4;
     wxStaticText* Label3b_copy;
     wxButton* FinishButton;
-    wxPanel* panel_3;
+    wxPanel* PanelLR;
     // end wxGlade
 
     DECLARE_EVENT_TABLE()
 
 public:
+    wxString exePath;
     virtual void Test3Clicked(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Set3Clicked(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void TestClicked(wxCommandEvent &event); // wxGlade: <event_handler>

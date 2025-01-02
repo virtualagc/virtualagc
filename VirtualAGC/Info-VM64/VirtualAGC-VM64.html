@@ -9,6 +9,8 @@
     <ul>
       <li><a moz-do-not-send="true" href="#WhatsThis">What's this
           Virtual Machine?</a></li>
+      <li><a moz-do-not-send="true" href="#setup">Setup of VirtualBox</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#WhatsNot">What's Not In this
           Virtual Machine?</a><br>
       </li>
@@ -48,24 +50,58 @@
         <br>
       </font>
       <ul>
-        <font size="-1"></font>
-        <li><font size="-1">Your username and password are both
-            "virtualagc".&nbsp; Your home directory is /home/virtualagc,
-            usually abbreviated as ~.</font></li>
+        <li><font size="-1">Login is automatic, but your username and
+            password are both "virtualagc".&nbsp; Your home directory is
+            /home/virtualagc, usually abbreviated as ~.</font></li>
         <li><font size="-1">The Virtual AGC source-code tree is
             maintained in the <a moz-do-not-send="true"
               href="file:///home/virtualagc/git/virtualagc/">subfolder
               git/virtualagc/</a> under your home directory.<br>
           </font></li>
-        <li><font size="-1">Your installed version of the built Virtual
-            AGC is in the <a moz-do-not-send="true"
+        <li><font size="-1">Your "installed" version of the built
+            Virtual AGC is in the <a moz-do-not-send="true"
               href="file:///home/rburkey/VirtualAGC/">subfolder
               VirtualAGC/</a> under your home directory.</font></li>
         <li><font size="-1">In Linux, filenames and folder names are <i>case
-              sensitive</i>.<br>
+              sensitive</i> and "/" is the separator between the
+            components of a filesystem path.<br>
           </font></li>
       </ul>
     </blockquote>
+    <h1><a name="JoystickSetup"></a>Setup of VirtualBox<br>
+    </h1>
+    <p>I doubt if most people using modern computers will need any setup
+      to use the Virtual AGC VM, beyond whatever you've already done to
+      be reading this pleasant little note.&nbsp; However, there are
+      some optional things you might want to do.&nbsp; If so, shut down
+      the VM, if it's running, and look at VirtualBox's settings for the
+      VirtualAGC-VM64 VM:<br>
+    </p>
+    <ul>
+      <li>As delivered, the VM is set up to use 4 CPU cores.&nbsp; This
+        can be changed in the VirtualBox Settings/System/Processor
+        window.&nbsp; I have run it with 1 CPU core without any apparent
+        difficulty.<br>
+      </li>
+      <li>Also as delivered, the VM is set to use 4GB of memory.&nbsp;
+        This can be changed in the VirtualBox
+        Settings/System/Motherboard window.&nbsp; I have run it with 1GB
+        without any apparent problem.</li>
+      <li>If you want to use a USB joystick to simulate the Apollo LM
+        Attitude Controller Assembly (ACA, also referred to as the
+        rotational hand controller, or RHC), attach it to your computer
+        and look at the VirtualBox Settings/USB window.&nbsp; Use the
+        hot-buttons there to add a new "USB Device Filter", choosing
+        your joystick from the list you're presented with.&nbsp; (You
+        may see that the filter for "Logitech Extreme 3D Pro[3500]" is
+        present.&nbsp; That's my own joystick.&nbsp; If by unlikely
+        chance you're using that exact same model, then you may not have
+        to configure anything!)&nbsp; Note that while the VM is running,
+        it will take control of any of the devices listed in "USB Device
+        Filters" away from your host computer, and only return control
+        after shutting down the VM.<br>
+      </li>
+    </ul>
     <h1><a name="WhatsNot"></a>What's Not In this Virtual Machine?</h1>
     <p>The original documentation for Gemini, Apollo, and the Space
       Shuttle is not directly provided within the VM due to size
@@ -77,8 +113,10 @@
         href="https://www.ibiblio.org/apollo/links-shuttle.html">Space
         Shuttle document library</a>.<br>
     </p>
-    <p>Flight software for Gemini is not provided, because none has ever
-      been discovered.<br>
+    <p>Flight software for Gemini is not provided, because no surviving
+      copy has ever been discovered.&nbsp; Some short programs created
+      for us by a couple of the original Gemini software developers are
+      present.<br>
     </p>
     <p>Flight software for the Apollo Launch Vehicle Digital Computer
       (LVDC) and the Space Shuttle General Purpose Computers (GPC) are
@@ -88,6 +126,21 @@
       export licenses or else a ruling that no export licenses are
       needed, at which point the flight software will be included.<br>
     </p>
+    <p>Virtual AGC related software created by developers external to
+      the Virtual AGC Project that's specific to the Windows or Mac OS
+      platforms is not provided since it cannot be run on a Linux
+      platform.<br>
+    </p>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; It is possible to
+        run <i>some</i> Windows software on Linux, via an emulation
+        system called WINE (for the canard "WINE Is <i>Not</i> an
+        Emulator").&nbsp; However, I'm not aware that any of the
+        software mentioned in the paragraph above falls into that
+        category.&nbsp; There is an article in the Orbiter Wiki (see the
+        next section) that explains how to run an out-of-date version of
+        Orbiter on Linux using WINE, so perhaps some day Orbiter w/NASSP
+        will be included here.&nbsp; However, that day is not today.</font><br>
+    </blockquote>
     <p> </p>
     <h1><a name="Desktop"></a>Virtual AGC Facilities Available On the
       VM's Desktop<br>
@@ -172,13 +225,14 @@ src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/preferences-system
       the Command Line</h1>
     <p>Some facilities made available to you via the Virtual AGC
       software repository can be easily accessed via an integrated
-      graphical interface as in the preceding section, whereas others
-      are available only via a command line.&nbsp; In this section, we
-      have a brief summary of some of the more-useful Virtual AGC
-      utilities available via the command line, but this is not a
-      comprehensive list.&nbsp; In addition to the hyperlinked
-      documentation, each program generally accepts a command-line
-      option <code>--help</code> for additional information.<br>
+      graphical interface as in the preceding section, whereas many
+      others are available only via a command line.&nbsp; In this
+      section, we have a brief summary of some of the more-useful
+      Virtual AGC utilities available via the command line, but this is
+      not a comprehensive list.&nbsp; In addition to the hyperlinked
+      documentation, with a few exceptions, these programs generally
+      accept a command-line option <code>--help</code> for additional
+      information.<br>
     </p>
     <ul>
       <li>Gemini Onboard Computer (OBC):</li>
@@ -222,8 +276,46 @@ href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">b
         <li><a moz-do-not-send="true"
             href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry"><b>yaTelemetry</b></a>,
           the telemetry downlink monitor and uplink manager for the AGC.</li>
-        <li><br>
+        <li><b><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaTelemetry.html#LM_Simulator_by_Stephan_Hotto">lm_simulator</a></b>
+          is a peripheral for the AGC CPU simulator providing various
+          instruments such as an IMU, an FDAI, and a selection of
+          control-panel switches, plus its own version of the
+          DSKY.&nbsp; Note that it has some probably-uncorrectable
+          peculiarities with respect to the various other
+          graphical-interface programs mentioned here:</li>
+        <ul>
+          <li>It has no --help option.<br>
+          </li>
+          <li>It is not scalable for high-resolution displays.</li>
+          <li>The AGC emulator (yaAGC) must be running prior to starting
+            it.</li>
+        </ul>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaACA"><b>yaACA,
+              yaACA2, yaACA3, jWiz</b></a>:&nbsp; The <b>yaACA<i>x</i></b>
+          programs are simulators that allow a physical USB 3D joystick
+          to simulate the Attitude Controller Assembly (ACA), also known
+          as the Rotational Hand Controller (RHC), while <b>jWiz</b> is
+          a "wizard" that helps you to decide which of the different ACA
+          simulators to use.&nbsp; <br>
         </li>
+      </ul>
+    </ul>
+    <blockquote>
+      <blockquote>
+        <blockquote><font size="-1"><b>Note:</b> </font><font size="-1">All
+            three <b>yaACA<i>x</i></b> programs work on the VM.&nbsp; <b>yaACA<i>x</i></b>
+            and <b>jWiz</b> expect to be run from
+            ~/VirtualAGC/Resources/, since that's where their
+            configuration files are, and may not behave properly
+            otherwise.&nbsp; Note also that <b>jWiz</b> has no <code>--help</code>
+            option.</font><br>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+    <ul>
+      <ul>
         <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1"><b>yaAGCb1</b></a>,
           the Block I AGC CPU emulator.</li>
@@ -246,7 +338,9 @@ href="https://www.ibiblio.org/apollo/Block1.html#John_Pultoraks_Assembler_and_Si
             moz-do-not-send="true"
             href="https://github.com/donnaware/AGC">a visual-debugging
             environment for it</a>, but that is Windows-only and
-          therefore unavailable in this VM.<br>
+          therefore unavailable in this VM.</li>
+        <li>See also the <a moz-do-not-send="true" href="#templates">Python
+            templates</a> below.<br>
         </li>
       </ul>
       <li>Apollo Lunar Module Abort Guidance System (AGS):</li>
@@ -268,7 +362,9 @@ href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>
         </li>
         <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/yaAGS.html#yaDEDA_the_AGS_User-Interface"><b>yaDEDA</b></a>,
-          the AGS Data Entry and Display Assembly (DEDA) simulator.<br>
+          the AGS Data Entry and Display Assembly (DEDA) simulator.</li>
+        <li>See also the <a moz-do-not-send="true" href="#templates">Python
+            templates</a> below.<br>
         </li>
       </ul>
       <li>Apollo Launch Vehicle Digital Computer (LVDC):&nbsp; <br>
@@ -310,13 +406,25 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
           opcode into its constituent fields.<br>
         </li>
       </ul>
-      <li>Space Shuttle:&nbsp; Similarly, TBD<br>
+      <li>Space Shuttle:&nbsp; <br>
       </li>
-      <li>Python templates for peripheral devices:&nbsp; If you are
-        engaged in creating your own peripheral devices that can attach
-        to the AGC or AGS CPU emulators (<b>yaAGC</b> and <b>yaAGS</b>
-        respectively), you might like to supplement <a
-          moz-do-not-send="true"
+      <ul>
+        <li>HALSFC</li>
+        <li>ASM101S</li>
+        <li>HALLINK101S</li>
+        <li>ap101s<br>
+        </li>
+        <li>HAL_S_FC<br>
+        </li>
+        <li>yaHAL-S-FC</li>
+        <li>XCOM-I.py</li>
+        <li>sim360<br>
+        </li>
+      </ul>
+      <li><a name="templates"></a>Python templates for peripheral
+        devices:&nbsp; If you are engaged in creating your own
+        peripheral devices suitable for the Virtual AGC framework, you
+        might like to supplement <a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/developer.html">the
           description of the communication protocol</a> with running
         some simple, model software that's easy to understand and to

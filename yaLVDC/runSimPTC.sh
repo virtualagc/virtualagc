@@ -8,7 +8,7 @@ actual="`readlink -f \"$apparent\" | sed 's@/runSimPTC.sh$@@'`"
 cd "$actual"
 
 # Start the PTC simulator.
-xterm -rightbar -hold -e ./yaPTC.py &
+xterm -fa monospace -rightbar -hold -e ./yaPTC.py &
 #./yaPTC.py --resize=1 &
 
 # Assemble the PAST program (as slightly altered by me) source code, and then

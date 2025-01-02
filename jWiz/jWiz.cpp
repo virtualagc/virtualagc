@@ -35,11 +35,16 @@
 		                invocations; it seems never to have been
 		                supported, and is now causing assertion
 		                failures with wxWidgets 3.1.x.
+		2025-01-02 RSB  Allow Check.jpg to be in either the the current
+		                folder or the folder containing the executable.
 */
 
 #include "jWiz.h"
 
 #include <wx/textfile.h>
+#include <wx/wx.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 #include <math.h>
 
 // This program is designed to be run from the Resources subdirectory of the
@@ -57,6 +62,25 @@
 #define EXE_DIR2 "../bin/"
 #endif
 
+// See the comments in VirtualAGC.cpp.
+double scaleDPI = 1.0;
+#define SCALED(x) ((x) * scaleDPI)
+wxSize
+scaledSize(float x, float y) {
+  return wxSize(SCALED(x), SCALED(y));
+}
+// This is a function that stands in place of the function
+// wxBitmap(filename, imagetype) to load an a jpg but to scale it according
+// to scaleDPI.
+wxBitmap
+scaledBitmap(const wxString &name, wxBitmapType type) {
+  if (scaleDPI == 1.0)
+    return wxBitmap(name, type);
+  wxImage *image = new wxImage(name, type);
+  image->Rescale(SCALED(image->GetWidth()), SCALED(image->GetHeight()));
+  return wxBitmap(*image);
+}
+#define BACKGROUND_COLOR wxColour(255, 255, 255)
 
 // begin wxGlade: ::extracode
 // end wxGlade
@@ -64,89 +88,110 @@
 
 
 MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE)
+    wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)
 {
+    wxString envString;
+    if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+        envString.ToDouble(&scaleDPI);
+    if (wxFileExists(wxT("Check.jpg")))
+        exePath = wxT("");
+    else {
+        wxFileName f(wxStandardPaths::Get().GetExecutablePath());
+        exePath = f.GetPath() + wxFileName::GetPathSeparator();
+    }
+
     // begin wxGlade: MainFrameClass::MainFrameClass
-    panel_3 = new wxPanel(this, wxID_ANY);
-    panel_1_copy_copy_copy_1_copy = new wxPanel(panel_3, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
-    Panel2 = new wxPanel(this, wxID_ANY);
-    panel_1_copy_copy_copy_1_copy_copy_copy = new wxPanel(Panel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
-    Panel3 = new wxPanel(this, wxID_ANY);
-    panel_1_copy_copy_copy_copy = new wxPanel(Panel3, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
-    Panel1 = new wxPanel(this, wxID_ANY);
-    sizer_7_copy_3_staticbox = new wxStaticBox(Panel1, -1, wxT("Roll Settings"));
-    sizer_7_copy_copy_staticbox = new wxStaticBox(Panel1, -1, wxT("Pitch Settings"));
-    sizer_7_copy_1_copy_staticbox = new wxStaticBox(Panel1, -1, wxT("Yaw Settings"));
-    sizer_3_copy_copy_staticbox = new wxStaticBox(Panel1, -1, wxT("Configure Default Joystick Handler (yaACA3)"));
-    sizer_7_copy_2_copy_2_staticbox = new wxStaticBox(Panel3, -1, wxT("Roll Settings"));
-    sizer_7_copy_2_copy_copy_staticbox = new wxStaticBox(Panel3, -1, wxT("Pitch Settings"));
-    sizer_7_copy_2_copy_1_copy_staticbox = new wxStaticBox(Panel3, -1, wxT("Yaw Settings"));
-    sizer_4_copy_copy_staticbox = new wxStaticBox(Panel3, -1, wxT("Configure Last-Resort Joystick Handler (yaACA)"));
-    sizer_9_copy_staticbox = new wxStaticBox(Panel2, -1, wxT("Configure Alternative Joystick Handler (yaACA2)"));
-    panel_1_copy_copy_copy_2 = new wxPanel(Panel1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
-    Label1a_copy = new wxStaticText(panel_1_copy_copy_copy_2, wxID_ANY, wxT("Step\n#1"), wxDefaultPosition, wxDefaultSize);
-    Label1b_copy = new wxStaticText(Panel1, wxID_ANY, wxT("Always try this first!\nRepeat as necessary."));
-    Checkmark3 = new wxStaticBitmap(Panel1, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
-    label_1_copy_2 = new wxStaticText(Panel1, wxID_ANY, wxT("Axis:"));
-    Roll3Axis = new wxSpinCtrl(Panel1, ID_ROLL3AXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    PanelLR = new wxPanel(this, wxID_ANY);
+    PanelLR->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelStep4 = new wxPanel(PanelLR, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
+    PanelStep4->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelLL = new wxPanel(this, wxID_ANY);
+    PanelLL->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelStep2 = new wxPanel(PanelLL, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
+    PanelStep2->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelUR = new wxPanel(this, wxID_ANY);
+    PanelUR->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelStep3 = new wxPanel(PanelUR, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
+    PanelStep3->SetBackgroundColour(BACKGROUND_COLOR);
+    PanelUL = new wxPanel(this, wxID_ANY);
+    PanelUL->SetBackgroundColour(BACKGROUND_COLOR);
+    sizer_7_copy_3_staticbox = new wxStaticBox(PanelUL, -1, wxT("Roll Settings"));
+    sizer_7_copy_copy_staticbox = new wxStaticBox(PanelUL, -1, wxT("Pitch Settings"));
+    sizer_7_copy_1_copy_staticbox = new wxStaticBox(PanelUL, -1, wxT("Yaw Settings"));
+    sizer_3_copy_copy_staticbox = new wxStaticBox(PanelUL, -1, wxT("Configure Default Joystick Handler (yaACA3)"));
+    sizer_7_copy_2_copy_2_staticbox = new wxStaticBox(PanelUR, -1, wxT("Roll Settings"));
+    sizer_7_copy_2_copy_copy_staticbox = new wxStaticBox(PanelUR, -1, wxT("Pitch Settings"));
+    sizer_7_copy_2_copy_1_copy_staticbox = new wxStaticBox(PanelUR, -1, wxT("Yaw Settings"));
+    sizer_4_copy_copy_staticbox = new wxStaticBox(PanelUR, -1, wxT("Configure Last-Resort Joystick Handler (yaACA)"));
+    sizer_9_copy_staticbox = new wxStaticBox(PanelLL, -1, wxT("Configure Alternative Joystick Handler (yaACA2)"));
+    PanelStep1 = new wxPanel(PanelUL, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
+    PanelStep1->SetBackgroundColour(BACKGROUND_COLOR);
+    LabelStep1 = new wxStaticText(PanelStep1, wxID_ANY, wxT("Step\n#1"), wxDefaultPosition, wxDefaultSize);
+    Label1b_copy = new wxStaticText(PanelUL, wxID_ANY, wxT("Always try this first!\nRepeat as necessary."));
+    Checkmark3 = new wxStaticBitmap(PanelUL, wxID_ANY, scaledBitmap(exePath + wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
+    label_1_copy_2 = new wxStaticText(PanelUL, wxID_ANY, wxT("Axis:"));
+    Roll3Axis = new wxSpinCtrl(PanelUL, ID_ROLL3AXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
     const wxString Roll3Sense_choices[] = {
         wxT("Positive"),
         wxT("Negative")
     };
-    Roll3Sense = new wxRadioBox(Panel1, ID_ROLL3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Roll3Sense_choices, 0, wxRA_SPECIFY_ROWS);
-    label_1_copy_copy = new wxStaticText(Panel1, wxID_ANY, wxT("Axis:"));
-    Pitch3Axis = new wxSpinCtrl(Panel1, ID_PITCH3AXIS, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    Roll3Sense = new wxRadioBox(PanelUL, ID_ROLL3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Roll3Sense_choices, 0, wxRA_SPECIFY_ROWS);
+    label_1_copy_copy = new wxStaticText(PanelUL, wxID_ANY, wxT("Axis:"));
+    Pitch3Axis = new wxSpinCtrl(PanelUL, ID_PITCH3AXIS, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
     const wxString Pitch3Sense_choices[] = {
         wxT("Positive"),
         wxT("Negative")
     };
-    Pitch3Sense = new wxRadioBox(Panel1, ID_PITCH3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Pitch3Sense_choices, 0, wxRA_SPECIFY_ROWS);
-    label_1_copy_1_copy = new wxStaticText(Panel1, wxID_ANY, wxT("Axis:"));
-    Yaw3Axis = new wxSpinCtrl(Panel1, ID_YAW3AXIS, wxT("2"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    Pitch3Sense = new wxRadioBox(PanelUL, ID_PITCH3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Pitch3Sense_choices, 0, wxRA_SPECIFY_ROWS);
+    label_1_copy_1_copy = new wxStaticText(PanelUL, wxID_ANY, wxT("Axis:"));
+    Yaw3Axis = new wxSpinCtrl(PanelUL, ID_YAW3AXIS, wxT("2"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
     const wxString Yaw3Sense_choices[] = {
         wxT("Positive"),
         wxT("Negative")
     };
-    Yaw3Sense = new wxRadioBox(Panel1, ID_YAW3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Yaw3Sense_choices, 0, wxRA_SPECIFY_ROWS);
-    Default3Button = new wxButton(Panel1, ID_DEFAULT3BUTTON, wxT("Default"));
-    Test3Button = new wxButton(Panel1, ID_TEST3BUTTON, wxT("Test"));
-    Set3Button = new wxButton(Panel1, ID_SET3BUTTON, wxT("Set"));
-    Label2a = new wxStaticText(panel_1_copy_copy_copy_copy, wxID_ANY, wxT("Step\n#3"), wxDefaultPosition, wxDefaultSize);
-    Label2b = new wxStaticText(Panel3, wxID_ANY, wxT("Try this only when steps #1-2 fail!\nRepeat as necessary."));
-    Checkmark1 = new wxStaticBitmap(Panel3, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
-    RollStickLabel_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Stick:"));
-    RollStick = new wxSpinCtrl(Panel3, ID_ROLLSTICK, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
-    RollAxisLabel_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Axis: "));
-    RollAxis = new wxSpinCtrl(Panel3, ID_ROLLAXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
-    label_1_copy_2_copy_copy_copy_2 = new wxStaticText(Panel3, wxID_ANY, wxT("Scale:"));
-    RollFactor = new wxSpinCtrl(Panel3, ID_ROLLFACTOR, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
-    label_1_copy_2_copy_copy_1_copy_2 = new wxStaticText(Panel3, wxID_ANY, wxT("Offset:"));
-    RollOffset = new wxSpinCtrl(Panel3, ID_ROLLOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
-    label_1_copy_2_copy_1_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Stick:"));
-    PitchStick = new wxSpinCtrl(Panel3, ID_PITCHSTICK, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
-    label_1_copy_2_copy_copy_2_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Axis: "));
-    PitchAxis = new wxSpinCtrl(Panel3, ID_PITCHAXIS, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
-    label_1_copy_2_copy_copy_copy_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Scale:"));
-    PitchFactor = new wxSpinCtrl(Panel3, ID_PITCHFACTOR, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
-    label_1_copy_2_copy_copy_1_copy_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Offset:"));
-    PitchOffset = new wxSpinCtrl(Panel3, ID_PITCHOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
-    label_1_copy_2_copy_2_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Stick:"));
-    YawStick = new wxSpinCtrl(Panel3, ID_YAWSTICK, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
-    label_1_copy_2_copy_copy_3_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Axis: "));
-    YawAxis = new wxSpinCtrl(Panel3, ID_YAWAXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
-    label_1_copy_2_copy_copy_copy_1_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Scale:"));
-    YawFactor = new wxSpinCtrl(Panel3, ID_YAWFACTOR, wxT("-100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
-    label_1_copy_2_copy_copy_1_copy_1_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Offset:"));
-    YawOffset = new wxSpinCtrl(Panel3, ID_YAWOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
-    DefaultButton = new wxButton(Panel3, ID_DEFAULTBUTTON, wxT("Default"));
-    TestButton = new wxButton(Panel3, ID_TESTBUTTON, wxT("Test/Set"));
-    Label3a_copy_copy_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy_copy_copy, wxID_ANY, wxT("Step\n#2"), wxDefaultPosition, wxDefaultSize);
-    Label3b_copy_copy_copy = new wxStaticText(Panel2, wxID_ANY, wxT("Try this only when step #1 fails!"));
-    Checkmark2 = new wxStaticBitmap(Panel2, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
-    Test2Button = new wxButton(Panel2, ID_TEST2BUTTON, wxT("Test/Set"));
-    Label3a_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy, wxID_ANY, wxT("Step\n#4"), wxDefaultPosition, wxDefaultSize);
-    Label3b_copy = new wxStaticText(panel_3, wxID_ANY, wxT("Finish up!"));
-    FinishButton = new wxButton(panel_3, ID_FINISHBUTTON, wxT("Finish"));
+    Yaw3Sense = new wxRadioBox(PanelUL, ID_YAW3SENSE, wxT("Sense"), wxDefaultPosition, wxDefaultSize, 2, Yaw3Sense_choices, 0, wxRA_SPECIFY_ROWS);
+    Default3Button = new wxButton(PanelUL, ID_DEFAULT3BUTTON, wxT("Default"));
+    Test3Button = new wxButton(PanelUL, ID_TEST3BUTTON, wxT("Test"));
+    Set3Button = new wxButton(PanelUL, ID_SET3BUTTON, wxT("Set"));
+    LabelStep3 = new wxStaticText(PanelStep3, wxID_ANY, wxT("Step\n#3"), wxDefaultPosition, wxDefaultSize);
+    LabelStep3->SetBackgroundColour(BACKGROUND_COLOR);
+    Label2b = new wxStaticText(PanelUR, wxID_ANY, wxT("Try this only when steps #1-2 fail!\nRepeat as necessary."));
+    Checkmark1 = new wxStaticBitmap(PanelUR, wxID_ANY, scaledBitmap(exePath + wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
+    RollStickLabel_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Stick:"));
+    RollStick = new wxSpinCtrl(PanelUR, ID_ROLLSTICK, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    RollAxisLabel_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Axis: "));
+    RollAxis = new wxSpinCtrl(PanelUR, ID_ROLLAXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
+    label_1_copy_2_copy_copy_copy_2 = new wxStaticText(PanelUR, wxID_ANY, wxT("Scale:"));
+    RollFactor = new wxSpinCtrl(PanelUR, ID_ROLLFACTOR, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
+    label_1_copy_2_copy_copy_1_copy_2 = new wxStaticText(PanelUR, wxID_ANY, wxT("Offset:"));
+    RollOffset = new wxSpinCtrl(PanelUR, ID_ROLLOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
+    label_1_copy_2_copy_1_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Stick:"));
+    PitchStick = new wxSpinCtrl(PanelUR, ID_PITCHSTICK, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    label_1_copy_2_copy_copy_2_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Axis: "));
+    PitchAxis = new wxSpinCtrl(PanelUR, ID_PITCHAXIS, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
+    label_1_copy_2_copy_copy_copy_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Scale:"));
+    PitchFactor = new wxSpinCtrl(PanelUR, ID_PITCHFACTOR, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
+    label_1_copy_2_copy_copy_1_copy_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Offset:"));
+    PitchOffset = new wxSpinCtrl(PanelUR, ID_PITCHOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
+    label_1_copy_2_copy_2_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Stick:"));
+    YawStick = new wxSpinCtrl(PanelUR, ID_YAWSTICK, wxT("1"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9);
+    label_1_copy_2_copy_copy_3_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Axis: "));
+    YawAxis = new wxSpinCtrl(PanelUR, ID_YAWAXIS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1);
+    label_1_copy_2_copy_copy_copy_1_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Scale:"));
+    YawFactor = new wxSpinCtrl(PanelUR, ID_YAWFACTOR, wxT("-100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -300, 300);
+    label_1_copy_2_copy_copy_1_copy_1_copy = new wxStaticText(PanelUR, wxID_ANY, wxT("Offset:"));
+    YawOffset = new wxSpinCtrl(PanelUR, ID_YAWOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
+    DefaultButton = new wxButton(PanelUR, ID_DEFAULTBUTTON, wxT("Default"));
+    TestButton = new wxButton(PanelUR, ID_TESTBUTTON, wxT("Test/Set"));
+    LabelStep2 = new wxStaticText(PanelStep2, wxID_ANY, wxT("Step\n#2"), wxDefaultPosition, wxDefaultSize);
+    LabelStep2->SetBackgroundColour(BACKGROUND_COLOR);
+    Label3b_copy_copy_copy = new wxStaticText(PanelLL, wxID_ANY, wxT("Try this only when step #1 fails!"));
+    Checkmark2 = new wxStaticBitmap(PanelLL, wxID_ANY, scaledBitmap(exePath + wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
+    Test2Button = new wxButton(PanelLL, ID_TEST2BUTTON, wxT("Test/Set"));
+    LabelStep4 = new wxStaticText(PanelStep4, wxID_ANY, wxT("Step\n#4"), wxDefaultPosition, wxDefaultSize);
+    LabelStep4->SetBackgroundColour(BACKGROUND_COLOR);
+    Label3b_copy = new wxStaticText(PanelLR, wxID_ANY, wxT("Finish up!"));
+    FinishButton = new wxButton(PanelLR, ID_FINISHBUTTON, wxT("Finish"));
 
     set_properties();
     do_layout();
@@ -166,18 +211,18 @@ MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, 
       Checkmark3->Show ();
 
 // Note that ISMACOSX is a flag that's defined if doing a native biuild in Mac OS X.
-// Note also that Panel1 is the upper-left panel (for yaACA3), Panel2 is for yaACA2,
-// and Panel3 is for yaACA.
+// Note also that PanelUL is the upper-left panel (for yaACA3), PanelLL is for yaACA2,
+// and PanelUR is for yaACA.
 #if defined (WIN32) || defined (__FreeBSD__) || defined (ISMACOSX)
     // I can't get yaACA to work right in Windows.
-    Panel3->Disable ();
+    PanelUR->Disable ();
 #endif    
 #if defined (__APPLE__) || defined (__FreeBSD__) || defined (ISMACOSX) || defined (sun)
     // I can't get yaACA2 to work right cross-compiled in Mac OS X 10.5.  (Haven't tried it in 10.4.)
-    Panel2->Disable ();
+    PanelLL->Disable ();
 #endif  
 #if 0
-    Panel1->Disable ();
+    PanelUL->Disable ();
 #endif
 }
 
@@ -230,7 +275,8 @@ void MainFrameClass::Test2Clicked(wxCommandEvent &event)
   Update ();
   Show ();
   Raise ();
-  wxRemoveFile (wxT ("yaACA-0.cfg"));
+  if (wxFileExists (wxT ("yaACA-0.cfg")))
+    wxRemoveFile (wxT ("yaACA-0.cfg"));
 }
 
 
@@ -268,7 +314,7 @@ void MainFrameClass::Test3Clicked(wxCommandEvent &event)
   Prefix += wxT (" ");
   Dummy = Prefix + Dummy;
 #else
-  Dummy = wxT ("xterm -e ") + Dummy;
+  Dummy = wxT ("xterm -fa monoface -e ") + Dummy;
 #endif
   //wxMessageBox (Dummy);
   Hide ();
@@ -281,8 +327,10 @@ void MainFrameClass::Test3Clicked(wxCommandEvent &event)
 
 void MainFrameClass::Set3Clicked(wxCommandEvent &event)
 {
-  wxRemoveFile (wxT ("yaACA-0.cfg"));
-  wxRemoveFile (wxT ("yaACA2-0.cfg"));
+  if (wxFileExists (wxT ("yaACA-0.cfg")))
+    wxRemoveFile (wxT ("yaACA-0.cfg"));
+  if (wxFileExists (wxT ("yaACA2-0.cfg")))
+    wxRemoveFile (wxT ("yaACA2-0.cfg"));
   //Hide ();
   Checkmark1->Hide ();
   Checkmark2->Hide ();
@@ -330,7 +378,7 @@ void MainFrameClass::TestClicked(wxCommandEvent &event)
   Prefix += wxT (" ");
   Dummy = Prefix + Dummy;
 #else
-  Dummy = wxT ("xterm -e ") + Dummy;
+  Dummy = wxT ("xterm -fa monoface -e ") + Dummy;
 #endif
   //wxMessageBox (Dummy);
   Hide ();
@@ -346,7 +394,8 @@ void MainFrameClass::TestClicked(wxCommandEvent &event)
   Show ();
   Raise ();
   //wxMessageBox (Dummy);
-  wxRemoveFile (wxT ("yaACA2-0.cfg"));
+  if (wxFileExists (wxT ("yaACA-0.cfg")))
+    wxRemoveFile (wxT ("yaACA-0.cfg"));
 }
 
 
@@ -471,59 +520,59 @@ void MainFrameClass::set_properties()
 {
     // begin wxGlade: MainFrameClass::set_properties
     SetTitle(wxT("Virtual AGC Joystick Configurator Helper"));
-    SetBackgroundColour(wxColour(255, 255, 255));
-    Label1a_copy->SetMinSize(wxSize(60, 60));
-    Label1a_copy->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
+    SetBackgroundColour(BACKGROUND_COLOR);
+    LabelStep1->SetMinSize(scaledSize(60, 60));
+    LabelStep1->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     Label1b_copy->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
-    Roll3Axis->SetMinSize(wxSize(50, 25));
+    Roll3Axis->SetMinSize(scaledSize(50, 25));
     Roll3Axis->SetToolTip(wxT("Select which joystick physical axis corresponds to \"Roll\"."));
     Roll3Sense->SetToolTip(wxT("Determine +/- sense of the joystick."));
     Roll3Sense->SetSelection(0);
-    Pitch3Axis->SetMinSize(wxSize(50, 25));
+    Pitch3Axis->SetMinSize(scaledSize(50, 25));
     Pitch3Axis->SetToolTip(wxT("Select which joystick physical axis corresponds to \"Pitch\"."));
     Pitch3Sense->SetToolTip(wxT("Determine +/- sense of the joystick."));
     Pitch3Sense->SetSelection(0);
-    Yaw3Axis->SetMinSize(wxSize(50, 25));
+    Yaw3Axis->SetMinSize(scaledSize(50, 25));
     Yaw3Axis->SetToolTip(wxT("Select which joystick physical axis corresponds to \"Yaw\"."));
     Yaw3Sense->SetToolTip(wxT("Determine +/- sense of the joystick."));
     Yaw3Sense->SetSelection(1);
     Default3Button->SetToolTip(wxT("Return to default settings.  Must click \"Set\" to actually use these settings."));
     Test3Button->SetToolTip(wxT("Test the yaACA3 configuration.  Must click \"Set\" to actually use these settings."));
     Set3Button->SetToolTip(wxT("Set yaACA3, with the settings shown, as the joystick handler for Virtual AGC."));
-    Label2a->SetMinSize(wxSize(60, 60));
-    Label2a->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
+    LabelStep3->SetMinSize(scaledSize(60, 60));
+    LabelStep3->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     Label2b->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
-    RollStick->SetMinSize(wxSize(75, 25));
+    RollStick->SetMinSize(scaledSize(75, 25));
     RollStick->SetToolTip(wxT("Select which joystick \"stick\" corresponds to \"Roll\"."));
-    RollAxis->SetMinSize(wxSize(75, 25));
+    RollAxis->SetMinSize(scaledSize(75, 25));
     RollAxis->SetToolTip(wxT("Select which joystick \"axis\" corresponds to \"Roll\"."));
-    RollFactor->SetMinSize(wxSize(75, 25));
+    RollFactor->SetMinSize(scaledSize(75, 25));
     RollFactor->SetToolTip(wxT("Select a numerical multiplier (in hundredths) which should be applied to the \"Roll\" reading."));
-    RollOffset->SetMinSize(wxSize(75, 25));
+    RollOffset->SetMinSize(scaledSize(75, 25));
     RollOffset->SetToolTip(wxT("Select an offset value which should be added to the \"Roll\" reading."));
-    PitchStick->SetMinSize(wxSize(75, 25));
+    PitchStick->SetMinSize(scaledSize(75, 25));
     PitchStick->SetToolTip(wxT("Select which joystick \"stick\" corresponds to \"Pitch\"."));
-    PitchAxis->SetMinSize(wxSize(75, 25));
+    PitchAxis->SetMinSize(scaledSize(75, 25));
     PitchAxis->SetToolTip(wxT("Select which joystick \"axis\" corresponds to \"Pitch\"."));
-    PitchFactor->SetMinSize(wxSize(75, 25));
+    PitchFactor->SetMinSize(scaledSize(75, 25));
     PitchFactor->SetToolTip(wxT("Select a numerical multiplier (in hundredths) which should be applied to the \"Pitch\" reading."));
-    PitchOffset->SetMinSize(wxSize(75, 25));
+    PitchOffset->SetMinSize(scaledSize(75, 25));
     PitchOffset->SetToolTip(wxT("Select an offset value which should be added to the \"Pitch\" reading."));
-    YawStick->SetMinSize(wxSize(75, 25));
+    YawStick->SetMinSize(scaledSize(75, 25));
     YawStick->SetToolTip(wxT("Select which joystick \"stick\" corresponds to \"Yaw\"."));
-    YawAxis->SetMinSize(wxSize(75, 25));
+    YawAxis->SetMinSize(scaledSize(75, 25));
     YawAxis->SetToolTip(wxT("Select which joystick \"axis\" corresponds to \"Yaw\"."));
-    YawFactor->SetMinSize(wxSize(75, 25));
+    YawFactor->SetMinSize(scaledSize(75, 25));
     YawFactor->SetToolTip(wxT("Select a numerical multiplier (in hundredths) which should be applied to the \"Yaw\" reading."));
-    YawOffset->SetMinSize(wxSize(75, 25));
+    YawOffset->SetMinSize(scaledSize(75, 25));
     YawOffset->SetToolTip(wxT("Select an offset value which should be added to the \"Yaw\" reading."));
     DefaultButton->SetToolTip(wxT("Return to default settings.  Must click \"Test/Set\" to actually use these settings."));
     TestButton->SetToolTip(wxT("Test AND set the yaACA configuration parameters shown."));
-    Label3a_copy_copy_copy->SetMinSize(wxSize(60, 60));
-    Label3a_copy_copy_copy->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
+    LabelStep2->SetMinSize(scaledSize(60, 60));
+    LabelStep2->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     Label3b_copy_copy_copy->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
-    Label3a_copy->SetMinSize(wxSize(60, 60));
-    Label3a_copy->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
+    LabelStep4->SetMinSize(scaledSize(60, 60));
+    LabelStep4->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     Label3b_copy->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     // end wxGlade
 }
@@ -540,7 +589,7 @@ void MainFrameClass::do_layout()
     wxBoxSizer* sizer_14_copy = new wxBoxSizer(wxVERTICAL);
     wxStaticBoxSizer* sizer_9_copy = new wxStaticBoxSizer(sizer_9_copy_staticbox, wxVERTICAL);
     wxBoxSizer* sizer_12_copy_1_copy_copy_copy = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_10_copy_copy_copy_1_copy_copy_copy = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* SizerStep2 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_14_copy_2 = new wxBoxSizer(wxVERTICAL);
     wxStaticBoxSizer* sizer_4_copy_copy = new wxStaticBoxSizer(sizer_4_copy_copy_staticbox, wxVERTICAL);
     wxBoxSizer* sizer_5_copy_copy = new wxBoxSizer(wxHORIZONTAL);
@@ -574,218 +623,220 @@ void MainFrameClass::do_layout()
     wxBoxSizer* sizer_8_copy_3 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_12_copy_2 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_10_copy_copy_copy_2 = new wxBoxSizer(wxHORIZONTAL);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    sizer_10_copy_copy_copy_2->Add(Label1a_copy, 0, 0, 0);
-    panel_1_copy_copy_copy_2->SetSizer(sizer_10_copy_copy_copy_2);
-    sizer_12_copy_2->Add(panel_1_copy_copy_copy_2, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_2->Add(20, 20, 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_10_copy_copy_copy_2->Add(LabelStep1, 0, 0, 0);
+    PanelStep1->SetSizer(sizer_10_copy_copy_copy_2);
+    sizer_12_copy_2->Add(PanelStep1, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    sizer_12_copy_2->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_12_copy_2->Add(Label1b_copy, 0, wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_2->Add(2, 20, 1, wxEXPAND, 0);
+    sizer_12_copy_2->Add(SCALED(2), SCALED(20), 1, wxEXPAND, 0);
     sizer_12_copy_2->Add(Checkmark3, 0, 0, 0);
     sizer_14_copy_1->Add(sizer_12_copy_2, 0, wxEXPAND, 0);
-    sizer_14_copy_1->Add(20, 10, 0, 0, 0);
-    sizer_3_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_6_copy_1->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_3->Add(20, 20, 0, 0, 0);
-    sizer_8_copy_3->Add(20, 20, 1, 0, 0);
+    sizer_14_copy_1->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_3_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_6_copy_1->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_3->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_8_copy_3->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_3->Add(label_1_copy_2, 0, 0, 0);
     sizer_8_copy_3->Add(Roll3Axis, 0, 0, 0);
-    sizer_8_copy_3->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_3->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_3->Add(sizer_8_copy_3, 0, wxEXPAND, 0);
-    sizer_7_copy_3->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_3->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_7_copy_3->Add(Roll3Sense, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7_copy_3->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_3->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_6_copy_1->Add(sizer_7_copy_3, 1, wxEXPAND, 0);
-    sizer_6_copy_1->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_copy->Add(20, 20, 0, 0, 0);
-    sizer_8_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_6_copy_1->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_8_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_copy->Add(label_1_copy_copy, 0, 0, 0);
     sizer_8_copy_copy->Add(Pitch3Axis, 0, 0, 0);
-    sizer_8_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_copy->Add(sizer_8_copy_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_copy->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_7_copy_copy->Add(Pitch3Sense, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7_copy_copy->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_6_copy_1->Add(sizer_7_copy_copy, 1, wxEXPAND, 0);
-    sizer_6_copy_1->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_1_copy->Add(20, 20, 0, 0, 0);
-    sizer_8_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_6_copy_1->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_1_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_8_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_1_copy->Add(label_1_copy_1_copy, 0, 0, 0);
     sizer_8_copy_1_copy->Add(Yaw3Axis, 0, 0, 0);
-    sizer_8_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_1_copy->Add(sizer_8_copy_1_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_1_copy->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_1_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_7_copy_1_copy->Add(Yaw3Sense, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7_copy_1_copy->Add(20, 20, 0, 0, 0);
+    sizer_7_copy_1_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_6_copy_1->Add(sizer_7_copy_1_copy, 1, wxEXPAND, 0);
-    sizer_6_copy_1->Add(5, 20, 0, 0, 0);
+    sizer_6_copy_1->Add(SCALED(5), SCALED(20), 0, 0, 0);
     sizer_3_copy_copy->Add(sizer_6_copy_1, 1, wxEXPAND, 0);
-    sizer_3_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 20, 1, 0, 0);
+    sizer_3_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_5_copy_1->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_5_copy_1->Add(Default3Button, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 20, 0, 0, 0);
+    sizer_5_copy_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_5_copy_1->Add(Test3Button, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 20, 0, 0, 0);
+    sizer_5_copy_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_5_copy_1->Add(Set3Button, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 20, 1, 0, 0);
+    sizer_5_copy_1->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_3_copy_copy->Add(sizer_5_copy_1, 0, wxEXPAND, 0);
-    sizer_3_copy_copy->Add(20, 10, 0, 0, 0);
+    sizer_3_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_14_copy_1->Add(sizer_3_copy_copy, 1, wxEXPAND, 0);
-    Panel1->SetSizer(sizer_14_copy_1);
-    grid_sizer_1->Add(Panel1, 1, wxEXPAND, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    sizer_10_copy_copy_copy_copy->Add(Label2a, 0, 0, 0);
-    panel_1_copy_copy_copy_copy->SetSizer(sizer_10_copy_copy_copy_copy);
-    sizer_12_copy_copy->Add(panel_1_copy_copy_copy_copy, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_copy->Add(20, 20, 0, 0, 0);
+    PanelUL->SetSizer(sizer_14_copy_1);
+    grid_sizer_1->Add(PanelUL, 1, wxEXPAND, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_10_copy_copy_copy_copy->Add(LabelStep3, 0, 0, 0);
+    PanelStep3->SetSizer(sizer_10_copy_copy_copy_copy);
+    sizer_12_copy_copy->Add(PanelStep3, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    sizer_12_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_12_copy_copy->Add(Label2b, 0, wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_copy->Add(2, 20, 1, wxEXPAND, 0);
+    sizer_12_copy_copy->Add(SCALED(2), SCALED(20), 1, wxEXPAND, 0);
     sizer_12_copy_copy->Add(Checkmark1, 0, 0, 0);
     sizer_14_copy_2->Add(sizer_12_copy_copy, 0, wxEXPAND, 0);
-    sizer_14_copy_2->Add(20, 10, 0, 0, 0);
-    sizer_4_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_6_copy_copy->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_2_copy_2->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_3->Add(20, 20, 1, 0, 0);
+    sizer_14_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_4_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_6_copy_copy->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_2_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_3->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_3->Add(RollStickLabel_copy, 0, 0, 0);
     sizer_8_copy_2_copy_3->Add(RollStick, 0, 0, 0);
-    sizer_8_copy_2_copy_3->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_3->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_2->Add(sizer_8_copy_2_copy_3, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_2->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_4->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_4->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_4->Add(RollAxisLabel_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_4->Add(RollAxis, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_4->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_4->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_2->Add(sizer_8_copy_2_copy_copy_4, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_2->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_2->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_2->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_copy_2->Add(label_1_copy_2_copy_copy_copy_2, 0, 0, 0);
     sizer_8_copy_2_copy_copy_copy_2->Add(RollFactor, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_2->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_2->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_2->Add(sizer_8_copy_2_copy_copy_copy_2, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_2->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_2->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_2->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_2->Add(label_1_copy_2_copy_copy_1_copy_2, 0, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_2->Add(RollOffset, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_2->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_2->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_2->Add(sizer_8_copy_2_copy_copy_1_copy_2, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_2->Add(20, 10, 0, 0, 0);
+    sizer_7_copy_2_copy_2->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_6_copy_copy->Add(sizer_7_copy_2_copy_2, 1, wxEXPAND, 0);
-    sizer_6_copy_copy->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_2_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_6_copy_copy->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_2_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_1_copy->Add(label_1_copy_2_copy_1_copy, 0, 0, 0);
     sizer_8_copy_2_copy_1_copy->Add(PitchStick, 0, 0, 0);
-    sizer_8_copy_2_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_copy->Add(sizer_8_copy_2_copy_1_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_2_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_2_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_2_copy->Add(label_1_copy_2_copy_copy_2_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_2_copy->Add(PitchAxis, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_2_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_2_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_copy->Add(sizer_8_copy_2_copy_copy_2_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_copy_copy->Add(label_1_copy_2_copy_copy_copy_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_copy_copy->Add(PitchFactor, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_copy->Add(sizer_8_copy_2_copy_copy_copy_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_copy->Add(label_1_copy_2_copy_copy_1_copy_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_copy->Add(PitchOffset, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_copy->Add(sizer_8_copy_2_copy_copy_1_copy_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_copy->Add(20, 10, 0, 0, 0);
+    sizer_7_copy_2_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_6_copy_copy->Add(sizer_7_copy_2_copy_copy, 1, wxEXPAND, 0);
-    sizer_6_copy_copy->Add(5, 20, 0, 0, 0);
-    sizer_7_copy_2_copy_1_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_2_copy->Add(20, 20, 1, 0, 0);
+    sizer_6_copy_copy->Add(SCALED(5), SCALED(20), 0, 0, 0);
+    sizer_7_copy_2_copy_1_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_2_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_2_copy->Add(label_1_copy_2_copy_2_copy, 0, 0, 0);
     sizer_8_copy_2_copy_2_copy->Add(YawStick, 0, 0, 0);
-    sizer_8_copy_2_copy_2_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_2_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_1_copy->Add(sizer_8_copy_2_copy_2_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_1_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_3_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_1_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_3_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_3_copy->Add(label_1_copy_2_copy_copy_3_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_3_copy->Add(YawAxis, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_3_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_3_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_1_copy->Add(sizer_8_copy_2_copy_copy_3_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_1_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_1_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_copy_1_copy->Add(label_1_copy_2_copy_copy_copy_1_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_copy_1_copy->Add(YawFactor, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_1_copy->Add(sizer_8_copy_2_copy_copy_copy_1_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_1_copy->Add(20, 10, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_7_copy_2_copy_1_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(label_1_copy_2_copy_copy_1_copy_1_copy, 0, 0, 0);
     sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(YawOffset, 0, 0, 0);
-    sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(20, 20, 1, 0, 0);
+    sizer_8_copy_2_copy_copy_1_copy_1_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_7_copy_2_copy_1_copy->Add(sizer_8_copy_2_copy_copy_1_copy_1_copy, 0, wxEXPAND, 0);
-    sizer_7_copy_2_copy_1_copy->Add(20, 10, 0, 0, 0);
+    sizer_7_copy_2_copy_1_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_6_copy_copy->Add(sizer_7_copy_2_copy_1_copy, 1, wxEXPAND, 0);
-    sizer_6_copy_copy->Add(5, 20, 0, 0, 0);
+    sizer_6_copy_copy->Add(SCALED(5), SCALED(20), 0, 0, 0);
     sizer_4_copy_copy->Add(sizer_6_copy_copy, 1, wxEXPAND, 0);
-    sizer_4_copy_copy->Add(20, 10, 0, 0, 0);
-    sizer_5_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_4_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_5_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_5_copy_copy->Add(DefaultButton, 0, 0, 0);
-    sizer_5_copy_copy->Add(20, 20, 0, 0, 0);
+    sizer_5_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_5_copy_copy->Add(TestButton, 0, 0, 0);
-    sizer_5_copy_copy->Add(20, 20, 1, 0, 0);
+    sizer_5_copy_copy->Add(SCALED(20), SCALED(20), 1, 0, 0);
     sizer_4_copy_copy->Add(sizer_5_copy_copy, 0, wxEXPAND, 0);
-    sizer_4_copy_copy->Add(20, 10, 0, 0, 0);
+    sizer_4_copy_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_14_copy_2->Add(sizer_4_copy_copy, 1, wxEXPAND, 0);
-    Panel3->SetSizer(sizer_14_copy_2);
-    grid_sizer_1->Add(Panel3, 1, wxEXPAND, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    sizer_10_copy_copy_copy_1_copy_copy_copy->Add(Label3a_copy_copy_copy, 0, 0, 0);
-    panel_1_copy_copy_copy_1_copy_copy_copy->SetSizer(sizer_10_copy_copy_copy_1_copy_copy_copy);
-    sizer_12_copy_1_copy_copy_copy->Add(panel_1_copy_copy_copy_1_copy_copy_copy, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_1_copy_copy_copy->Add(20, 20, 0, 0, 0);
+    PanelUR->SetSizer(sizer_14_copy_2);
+    grid_sizer_1->Add(PanelUR, 1, wxEXPAND, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    SizerStep2->Add(LabelStep2, 0, 0, 0);
+    PanelStep2->SetSizer(SizerStep2);
+    sizer_12_copy_1_copy_copy_copy->Add(PanelStep2, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    sizer_12_copy_1_copy_copy_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_12_copy_1_copy_copy_copy->Add(Label3b_copy_copy_copy, 0, wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_1_copy_copy_copy->Add(2, 20, 1, wxEXPAND, 0);
+    sizer_12_copy_1_copy_copy_copy->Add(SCALED(2), SCALED(20), 1, wxEXPAND, 0);
     sizer_12_copy_1_copy_copy_copy->Add(Checkmark2, 0, 0, 0);
     sizer_14_copy->Add(sizer_12_copy_1_copy_copy_copy, 0, wxEXPAND, 0);
-    sizer_14_copy->Add(20, 10, 0, 0, 0);
-    sizer_9_copy->Add(20, 10, 0, 0, 0);
+    sizer_14_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
+    sizer_9_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_9_copy->Add(Test2Button, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_9_copy->Add(20, 10, 0, 0, 0);
+    sizer_9_copy->Add(SCALED(20), SCALED(10), 0, 0, 0);
     sizer_14_copy->Add(sizer_9_copy, 0, wxEXPAND, 0);
-    Panel2->SetSizer(sizer_14_copy);
-    grid_sizer_1->Add(Panel2, 1, wxEXPAND, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    sizer_10_copy_copy_copy_1_copy->Add(Label3a_copy, 0, 0, 0);
-    panel_1_copy_copy_copy_1_copy->SetSizer(sizer_10_copy_copy_copy_1_copy);
-    sizer_12_copy_1_copy->Add(panel_1_copy_copy_copy_1_copy, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    sizer_12_copy_1_copy->Add(20, 20, 0, 0, 0);
+    PanelLL->SetSizer(sizer_14_copy);
+    grid_sizer_1->Add(PanelLL, 1, wxEXPAND, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    sizer_10_copy_copy_copy_1_copy->Add(LabelStep4, 0, 0, 0);
+    PanelStep4->SetSizer(sizer_10_copy_copy_copy_1_copy);
+    sizer_12_copy_1_copy->Add(PanelStep4, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    sizer_12_copy_1_copy->Add(SCALED(20), SCALED(20), 0, 0, 0);
     sizer_12_copy_1_copy->Add(Label3b_copy, 0, wxALIGN_CENTER_VERTICAL, 0);
     sizer_14->Add(sizer_12_copy_1_copy, 0, 0, 0);
-    sizer_14->Add(20, 10, 1, 0, 0);
+    sizer_14->Add(SCALED(20), SCALED(10), 1, 0, 0);
     sizer_14->Add(FinishButton, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_14->Add(20, 20, 0, 0, 0);
-    panel_3->SetSizer(sizer_14);
-    grid_sizer_1->Add(panel_3, 1, wxEXPAND, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    grid_sizer_1->Add(20, 20, 0, 0, 0);
-    sizer_1->Add(grid_sizer_1, 1, wxEXPAND, 0);
-    SetSizer(sizer_1);
-    sizer_1->Fit(this);
+    sizer_14->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    PanelLR->SetSizer(sizer_14);
+    grid_sizer_1->Add(PanelLR, 1, wxEXPAND, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    grid_sizer_1->Add(SCALED(20), SCALED(20), 0, 0, 0);
+    //sizer_1->Add(grid_sizer_1, 1, wxEXPAND, 0);
+    //SetSizer(sizer_1);
+    //sizer_1->Fit(this);
+    SetSizer(grid_sizer_1);
+    grid_sizer_1->Fit(this);
     Layout();
     Centre();
     // end wxGlade
@@ -802,8 +853,14 @@ IMPLEMENT_APP(jWizClass)
 
 bool jWizClass::OnInit()
 {
+  wxString envString;
+  if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+	  envString.ToDouble(&scaleDPI);
+
     wxInitAllImageHandlers();
-    MainFrameClass* MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString);
+    MainFrameClass* MainFrame = new MainFrameClass(NULL, wxID_ANY, wxEmptyString,
+						   wxDefaultPosition,
+						   wxDefaultSize);
     SetTopWindow(MainFrame);
     MainFrame->Show();
     return true;

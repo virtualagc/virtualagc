@@ -3629,7 +3629,7 @@ VirtualAGC::FormScript(void)
               Fout.Write (wxT ("\" \'"));
               Fout.Write (yaAGC + wxT ("\' &\n"));
 #else
-              Fout.Write(wxT("xterm -sb -geometry 112x40 -e "));
+              Fout.Write(wxT("xterm -fa monospace -sb -geometry 112x40 -e "));
               Fout.Write(yaAGC + wxT(" &\n"));
 #endif
             }
@@ -3677,7 +3677,7 @@ VirtualAGC::FormScript(void)
               Fout.Write (wxT ("\" \'"));
               Fout.Write (yaAGS + wxT ("\' &\n"));
 #else
-              Fout.Write(wxT("xterm -sb -geometry 112x40 -e "));
+              Fout.Write(wxT("xterm -fa monospace -sb -geometry 112x40 -e "));
               Fout.Write(yaAGS + wxT(" &\n"));
 #endif
             }

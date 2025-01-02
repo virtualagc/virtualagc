@@ -34,6 +34,8 @@
 				yaACA and yaACA3 are perfectly fine 
 				Allegro and SDL programs, and I don't need
 				this stuff cluttering up yaACA2.
+		2025-01-02 RSB	Various bugs and user-interface issues
+				corrected.
 */
 
 #define VER(x) #x
@@ -49,6 +51,9 @@
 
 #include <wx/file.h>
 #include <wx/textfile.h>
+#include <wx/wx.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 // Interval (ms.) at which the timer fires for servicing the socket.
 #define PULSE_INTERVAL 100
@@ -67,6 +72,25 @@ static int ServerSocket = -1, LastServerSocket = -1;
 static int ControllerNumber = 0;
 static int JoystickConnectionTimeout = 0;
 
+// See the comments in VirtualAGC.cpp.
+double scaleDPI = 1.0;
+#define SCALED(x) ((x) * scaleDPI)
+wxSize
+scaledSize(float x, float y) {
+  return wxSize(SCALED(x), SCALED(y));
+}
+
+// This is a function that stands in place of the function
+// wxBitmap(filename, imagetype) to load an a jpg but to scale it according
+// to scaleDPI.
+wxBitmap
+scaledBitmap(const wxString &name, wxBitmapType type) {
+  if (scaleDPI == 1.0)
+    return wxBitmap(name, type);
+  wxImage *image = new wxImage(name, type);
+  image->Rescale(SCALED(image->GetWidth()), SCALED(image->GetHeight()));
+  return wxBitmap(*image);
+}
 
 // begin wxGlade: ::extracode
 // end wxGlade
@@ -171,6 +195,16 @@ yaAcaFrameClass:: WriteParameters (int ControllerNumber)
 yaAcaFrameClass::yaAcaFrameClass(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE|wxCLOSE_BOX)
 {
+    wxString envString;
+    if (wxGetEnv(wxT("AGC_SCALE"), &envString))
+        envString.ToDouble(&scaleDPI);
+    if (wxFileExists(wxT("ApolloPatch2.png")))
+        exePath = wxT("");
+    else {
+        wxFileName f(wxStandardPaths::Get().GetExecutablePath());
+        exePath = f.GetPath() + wxFileName::GetPathSeparator();
+    }
+
     GetParameters (ControllerNumber);
     Roll.CurrentAdjustedReading = 0;
     Roll.LastRawReading = 0;
@@ -306,7 +340,7 @@ void yaAcaFrameClass::set_properties()
     // begin wxGlade: yaAcaFrameClass::set_properties
     SetTitle(wxT("yaACA2 by Ron Burkey"));
     wxIcon _icon;
-    _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+    _icon.CopyFromBitmap(scaledBitmap(exePath + wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
     SetIcon(_icon);
     SetBackgroundColour(wxColour(255, 255, 255));
     BoxAxis0->Enable(false);
@@ -347,7 +381,7 @@ void yaAcaFrameClass::do_layout()
     wxStaticBoxSizer* RollBox = new wxStaticBoxSizer(RollBox_staticbox, wxVERTICAL);
     wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
     wxStaticBoxSizer* ControllerSizer = new wxStaticBoxSizer(ControllerSizer_staticbox, wxVERTICAL);
-    wxFlexGridSizer* grid_sizer_1 = new wxFlexGridSizer(6, 2, 0, 0);
+    wxFlexGridSizer* grid_sizer_1 = new wxFlexGridSizer(7, 2, 0, 0);
     wxBoxSizer* ControllerPositionSizer_copy_1 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* ControllerPositionSizer_copy = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* ControllerPositionSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -365,11 +399,11 @@ void yaAcaFrameClass::do_layout()
     panel_2->SetSizer(sizer_3);
     grid_sizer_1->Add(panel_2, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_1, 0, wxALIGN_RIGHT, 0);
-    ModelSizer_copy->Add(ControllerNumberLabel, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    ModelSizer_copy->Add(ControllerNumberLabel, 1, wxEXPAND /*|wxALIGN_CENTER_VERTICAL*/, 0);
     ControllerNumberPanel->SetSizer(ModelSizer_copy);
     grid_sizer_1->Add(ControllerNumberPanel, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_1_copy_3, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    ModelSizer->Add(ControllerModelLabel, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    ModelSizer->Add(ControllerModelLabel, 1, wxEXPAND /*|wxALIGN_CENTER_VERTICAL*/, 0);
     ModelPanel->SetSizer(ModelSizer);
     grid_sizer_1->Add(ModelPanel, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_3, 0, wxALIGN_RIGHT, 0);
@@ -384,18 +418,18 @@ void yaAcaFrameClass::do_layout()
     panel_1->SetSizer(sizer_2);
     grid_sizer_1->Add(panel_1, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_1_copy_1, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    ControllerPositionSizer->Add(ControllerPitchLabel, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    ControllerPositionSizer->Add(ControllerPitchLabel, 1, wxEXPAND /*|wxALIGN_CENTER_VERTICAL*/, 0);
     ControllerPitchPanel->SetSizer(ControllerPositionSizer);
     grid_sizer_1->Add(ControllerPitchPanel, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_1_copy_4, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    ControllerPositionSizer_copy->Add(ControllerRollLabel, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    ControllerPositionSizer_copy->Add(ControllerRollLabel, 1, wxEXPAND /*|wxALIGN_CENTER_VERTICAL*/, 0);
     ControllerPositionPanel_copy->SetSizer(ControllerPositionSizer_copy);
     grid_sizer_1->Add(ControllerPositionPanel_copy, 1, wxEXPAND, 0);
     grid_sizer_1->Add(label_1_copy, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    ControllerPositionSizer_copy_1->Add(ControllerYawLabel, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    ControllerPositionSizer_copy_1->Add(ControllerYawLabel, 1, wxEXPAND /*|wxALIGN_CENTER_VERTICAL*/, 0);
     ControllerPositionPanel_copy_1->SetSizer(ControllerPositionSizer_copy_1);
     grid_sizer_1->Add(ControllerPositionPanel_copy_1, 1, wxEXPAND, 0);
-    ControllerSizer->Add(grid_sizer_1, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    ControllerSizer->Add(grid_sizer_1, 1, wxEXPAND /*|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL*/, 0);
     ControllerBox->Add(ControllerSizer, 1, wxEXPAND, 0);
     ControllerBox->Add(20, 20, 0, 0, 0);
     sizer_1->Add(label_2, 0, wxALIGN_CENTER_VERTICAL, 0);
