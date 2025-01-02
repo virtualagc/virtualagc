@@ -124,6 +124,7 @@ protected:
     DECLARE_EVENT_TABLE()
 
 public:
+    wxString exePath;
     void TimerStop(wxCloseEvent &event);
 }; // wxGlade: end class
 

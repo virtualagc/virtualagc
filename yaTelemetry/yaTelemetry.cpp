@@ -46,6 +46,9 @@
                                 at some point if there's a demand for it,
                                 but the non-simple "decorated" display doesn't
                                 seem worth the effort to maintain.
+                2025-01-01 RSB  Had been required to keep the executable in the
+                                same folder as the image files it loads; fixed
+                                that.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -77,6 +80,9 @@ SimpleFrameClass *SimpleFrame = NULL;
 #include <stdio.h>
 #include <errno.h>
 #include <iostream>
+#include <wx/wx.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 using namespace std;
 
@@ -347,10 +353,10 @@ MainFrameClass::Undecorate (void)
     delete bitmap_5;
     delete bitmap_3;
     delete bitmap_2;
-    bitmap_1 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("tTelemetryLeft.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_5 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("tTelemetryTop.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_3 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("tTelemetryBottom.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_2 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("tTelemetryRight.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_1 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + wxT("tTelemetryLeft.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_5 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + wxT("tTelemetryTop.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_3 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + wxT("tTelemetryBottom.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_2 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + wxT("tTelemetryRight.jpg"), wxBITMAP_TYPE_ANY));
     do_layout();
 }
 
@@ -612,15 +618,22 @@ Error:
 MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     wxFrame(parent, id, title, pos, size, wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxSYSTEM_MENU)
 {
+    if (wxFileExists(wxT("ttTelemetryVertical.jpg")))
+        exePath = wxT("");
+    else {
+        wxFileName f(wxStandardPaths::Get().GetExecutablePath());
+        exePath = f.GetPath() + wxFileName::GetPathSeparator();
+    }
+
     // begin wxGlade: MainFrameClass::MainFrameClass
     wxString undeco = wxT("");
     if (Undecorated)
       undeco = wxT("t");
-    bitmap_1 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(undeco + wxT("TelemetryLeft.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_5 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(undeco + wxT("TelemetryTop.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_1 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + undeco + wxT("TelemetryLeft.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_5 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + undeco + wxT("TelemetryTop.jpg"), wxBITMAP_TYPE_ANY));
     TextCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxNO_BORDER);
-    bitmap_3 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(undeco + wxT("TelemetryBottom.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_2 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(undeco + wxT("TelemetryRight.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_3 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + undeco + wxT("TelemetryBottom.jpg"), wxBITMAP_TYPE_ANY));
+    bitmap_2 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(exePath + undeco + wxT("TelemetryRight.jpg"), wxBITMAP_TYPE_ANY));
 
     set_properties();
     do_layout();
@@ -637,7 +650,7 @@ void MainFrameClass::set_properties()
     // begin wxGlade: MainFrameClass::set_properties
     SetTitle(wxT("yaTelemetry"));
     wxIcon _icon;
-    _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+    _icon.CopyFromBitmap(wxBitmap(exePath + wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
     SetIcon(_icon);
     SetBackgroundColour(wxColour(0, 0, 0));
     SetForegroundColour(wxColour(192, 192, 192));
@@ -764,6 +777,11 @@ bool yaTelemetryApp::OnInit()
             printf ("     --simple        Produces a simple text display, allowing dynamic\n");
             printf ("                     resizing of the text.  This is by far the best choice\n");
             printf ("                     when there is limited display-screen real estate.\n");
+            printf ("Note: yaTelemetry loads a variety of image files, which it expects to\n");
+            printf ("      find in the folder containing its own executable.  However, they\n");
+            printf ("      could instead be in the current working directory; yaTelemetry\n");
+            printf ("      uses the existence or non-existence of the file ttTelemetryVertical.jpg\n");
+            printf ("      to make the decision as to which folder to use.\n");
             printf ("\n");
             fflush (stdout);
             return (false);
@@ -1014,7 +1032,7 @@ void SimpleFrameClass::set_properties()
     // begin wxGlade: SimpleFrameClass::set_properties
     SetTitle(wxT("yaTelemetry"));
     wxIcon _icon;
-    _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+    _icon.CopyFromBitmap(wxBitmap(MainFrame->exePath + wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
     SetIcon(_icon);
     Bigger->SetToolTip(wxT("Make text bigger by clicking this button."));
     Smaller->SetToolTip(wxT("Make text smaller by clicking this button."));

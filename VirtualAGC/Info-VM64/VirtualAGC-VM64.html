@@ -26,13 +26,14 @@
       inconvenience of having to deal with complex installation
       instructions or the quirks of the various computer platforms
       (Windows, Mac OS, Linux, <i>et al.</i>, in multiple
-      operating-system versions).&nbsp; I won't describe the Virtual AGC
-      Project here, since if you don't have a pretty good idea already
-      what it is, then you can be assured that you don't need this VM at
-      all and can stop reading right here.&nbsp; It suffices to say that
-      the project provides information and software related to the
-      flight computers used in the Apollo and Space Shuttle spacecraft
-      and launch vehicles.<br>
+      operating-system versions) that Virtual AGC targets.&nbsp; I won't
+      describe the Virtual AGC Project in any detail here, since if you
+      don't have a pretty good idea already what it is, then you can be
+      assured that you don't need this VM at all and can stop reading
+      right here.&nbsp; It suffices to say that the project provides
+      information and software related to the flight computers used in
+      the Gemini, Apollo, and Space Shuttle spacecraft and launch
+      vehicles.<br>
     </p>
     <p>The VM itself is running <a moz-do-not-send="true"
         href="https://lubuntu.me/">a light-weight version of the 64-bit
@@ -40,29 +41,58 @@
       The VM can be run on any computer for which there's a version of <a
         moz-do-not-send="true" href="https://virtualbox.org">the
         VirtualBox virtualization environment</a>, or some common
-      alternatives, but you likely know that already since you're
+      alternatives to it, but you likely know that already since you're
       viewing this message.<br>
     </p>
+    <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+        <br>
+      </font>
+      <ul>
+        <font size="-1"></font>
+        <li><font size="-1">Your username and password are both
+            "virtualagc".&nbsp; Your home directory is /home/virtualagc,
+            usually abbreviated as ~.</font></li>
+        <li><font size="-1">The Virtual AGC source-code tree is
+            maintained in the <a moz-do-not-send="true"
+              href="file:///home/virtualagc/git/virtualagc/">subfolder
+              git/virtualagc/</a> under your home directory.<br>
+          </font></li>
+        <li><font size="-1">Your installed version of the built Virtual
+            AGC is in the <a moz-do-not-send="true"
+              href="file:///home/rburkey/VirtualAGC/">subfolder
+              VirtualAGC/</a> under your home directory.</font></li>
+        <li><font size="-1">In Linux, filenames and folder names are <i>case
+              sensitive</i>.<br>
+          </font></li>
+      </ul>
+    </blockquote>
     <h1><a name="WhatsNot"></a>What's Not In this Virtual Machine?</h1>
-    <p>Apollo and Space Shuttle documentation is not directly provided
-      within the VM due to size constraints.&nbsp; (I assume you
-      wouldn't want to deal with multi-terabyte downloads.)&nbsp; Links
-      to online documents at Virtual AGC related websites are provided
-      instead.<br>
+    <p>The original documentation for Gemini, Apollo, and the Space
+      Shuttle is not directly provided within the VM due to size
+      constraints.&nbsp; (I assume you wouldn't want to deal with
+      multi-terabyte downloads.)&nbsp; Refer instead to Virtual AGC's
+      online <a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/links2.html">Apollo &amp;
+        Gemini document library</a> or the <a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/links-shuttle.html">Space
+        Shuttle document library</a>.<br>
+    </p>
+    <p>Flight software for Gemini is not provided, because none has ever
+      been discovered.<br>
     </p>
     <p>Flight software for the Apollo Launch Vehicle Digital Computer
       (LVDC) and the Space Shuttle General Purpose Computers (GPC) are
-      not provided due to <i>presumed</i> "export" restrictions under
-      the International Trade in Arms Regulations (ITAR).&nbsp; It is
-      hoped that at some point we can acquire either export licenses or
-      else a ruling that no export licenses are needed, at which point
-      the flight software will be included.<br>
+      not publicly provided due to <i>presumed</i> "export"
+      restrictions under the International Trade in Arms Regulations
+      (ITAR).&nbsp; It is hoped that at some point we can acquire either
+      export licenses or else a ruling that no export licenses are
+      needed, at which point the flight software will be included.<br>
     </p>
     <p> </p>
     <h1><a name="Desktop"></a>Virtual AGC Facilities Available On the
       VM's Desktop<br>
     </h1>
-    <p>Icons available on the VM's desktop:<br>
+    <p>Icons on the VM's desktop:<br>
     </p>
     <p><img moz-do-not-send="true"
         src="Icon-round-Question_mark.svg.png" alt="" height="24"> is
@@ -141,16 +171,84 @@ src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/preferences-system
     <h1><a name="CommandLine"></a>Virtual AGC Facilities Available From
       the Command Line</h1>
     <p>Some facilities made available to you via the Virtual AGC
-      software repository can be easily accessed via a simple graphical
-      interface as in the preceding section, whereas others are
-      available only via a command line.&nbsp; In this section, we have
-      a brief summary of some of the more-useful utilities available via
-      the command line, but this is not a comprehensive list.&nbsp; In
-      addition to the hyperlinked documentation, each program generally
-      accepts a command-line option <code>--help</code> for additional
-      information.<br>
+      software repository can be easily accessed via an integrated
+      graphical interface as in the preceding section, whereas others
+      are available only via a command line.&nbsp; In this section, we
+      have a brief summary of some of the more-useful Virtual AGC
+      utilities available via the command line, but this is not a
+      comprehensive list.&nbsp; In addition to the hyperlinked
+      documentation, each program generally accepts a command-line
+      option <code>--help</code> for additional information.<br>
     </p>
     <ul>
+      <li>Gemini Onboard Computer (OBC):</li>
+      <ul>
+        <li><b><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Gemini.html#yaOBCASM_the_OBC_Cross-Assembler">yaASM</a></b>,
+          the assembler for OBC software source code, creating an OBS
+          executable program.&nbsp; Note that no documentation for the
+          original assembler or the assembly language itself, nor any
+          original OBC source code, is presently known to have survived.
+          Therefore, it is unlikely that the syntax required matches the
+          original source code.</li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Gemini.html#yaOBC_the_OBC_CPU_Emulation"><b>yaOBC</b></a>,
+          the OBS CPU emulator.&nbsp; Note that the emulator has a <a
+            moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">built-in
+            debugging facility</a>.</li>
+        <li><strike><b>yaPanel</b></strike><strike>, the Manual Data
+            Insertion Unit (MDIU) simulator for astronaut interactions
+            with the OBC.&nbsp; This is not yet available.</strike><br>
+        </li>
+      </ul>
+      <li>Apollo Lunar Module and Command Module AGC (LGC and CMC
+        respectively):</li>
+      <ul>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaYUL.html"><b>yaYUL</b></a>,
+          the assembler for AGC software source code, both for Block I
+          and Block II spacecraft.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaAGC.html"><b>yaAGC</b></a>,
+          the Block II AGC CPU emulator.&nbsp; &nbsp; Note that the
+          emulator has a <a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaAGC.html#Debugging">built-in
+            debugging facility</a>, but can also be visually debugged
+          using Code::Blocks.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaDSKY.html#Running_yaDSKY"><b>yaDSKY2</b></a>,
+          the AGC's Display-Keyboard (DSKY) simulator.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry"><b>yaTelemetry</b></a>,
+          the telemetry downlink monitor and uplink manager for the AGC.</li>
+        <li><br>
+        </li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1"><b>yaAGCb1</b></a>,
+          the Block I AGC CPU emulator.</li>
+        <li><b><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Block1.html#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">yaDSKYb1</a></b>,
+          the Block I DSKY simulator.</li>
+        <li><a moz-do-not-send="true"
+            href="https://www.ibiblio.org/apollo/Block1.html#yaUplinkBlock1"><b>yaUplinkBlock1</b></a>,
+          a digital-uplink program for sending commands to the Block I
+          AGC CPU emulator.<br>
+        </li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Block1.html#John_Pultoraks_Assembler_and_Simulator"><b>yaAGC-Block1</b></a>,
+          John Pultorak's Block I AGC assembler and emulator.&nbsp; Note
+          that assembler accepts only a custom syntax unique to it,
+          rather than the original Block I source-code syntax.&nbsp;
+          However, <b>yaYUL</b> (see above) can create executable
+          object files accepted by this program, so that it continues to
+          be useful as a debugger.&nbsp; There apparently is also <a
+            moz-do-not-send="true"
+            href="https://github.com/donnaware/AGC">a visual-debugging
+            environment for it</a>, but that is Windows-only and
+          therefore unavailable in this VM.<br>
+        </li>
+      </ul>
       <li>Apollo Lunar Module Abort Guidance System (AGS):</li>
       <ul>
         <li><a moz-do-not-send="true"
@@ -163,9 +261,9 @@ href="https://www.ibiblio.org/apollo/yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler"
           values.</li>
         <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>yaAGS</b></a>,
-          the AGS CPU emulator.&nbsp; Note that the emulator has an <a
+          the AGS CPU emulator.&nbsp; Note that the emulator has a <a
             moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaAGS.html#Debug">internal
+            href="https://www.ibiblio.org/apollo/yaAGS.html#Debug">built-in
             debugging facility</a>.<br>
         </li>
         <li><a moz-do-not-send="true"
@@ -184,10 +282,10 @@ href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDCASM_the_LVDC_Cross-Assemble
         <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDC_the_LVDC_CPU_Emulation"><b>yaLVDC</b></a>,
           the CPU emulator for the LVDC and PTC.&nbsp; There are
-          presently no LVDC peripherals.&nbsp; But the emulator has an <a
+          presently no LVDC peripherals.&nbsp; But the emulator has a <a
             moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/LVDC.html#EmulatorDebugger">internal
-            debugger facility</a>, or can work with the telemetry or
+            href="https://www.ibiblio.org/apollo/LVDC.html#EmulatorDebugger">built-in
+            debugging facility</a>, or can work with the telemetry or
           Programmable Test Controller systems (see next items), so LVDC
           code execution need not be entirely black-box.</li>
         <li><a moz-do-not-send="true"
@@ -214,9 +312,10 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
       </ul>
       <li>Space Shuttle:&nbsp; Similarly, TBD<br>
       </li>
-      <li>If you are engaged in creating your own peripheral devices
-        that can attach to the AGC or AGS CPU emulators (<b>yaAGC</b>
-        and <b>yaAGS</b> respectively), you might like to supplement <a
+      <li>Python templates for peripheral devices:&nbsp; If you are
+        engaged in creating your own peripheral devices that can attach
+        to the AGC or AGS CPU emulators (<b>yaAGC</b> and <b>yaAGS</b>
+        respectively), you might like to supplement <a
           moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/developer.html">the
           description of the communication protocol</a> with running

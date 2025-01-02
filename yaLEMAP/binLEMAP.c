@@ -74,6 +74,7 @@
   The output file is always called binLEMAP.bin.
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
