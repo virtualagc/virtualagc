@@ -11,5 +11,5 @@ rm sim360 &>/dev/null
 make sim360
 make
 cd ../yaShuttle/"Source Code"/PASS.REL32V0
-make -s XEXTRA=--quiet all regression
+make -s XEXTRA=--quiet clean all regression
 

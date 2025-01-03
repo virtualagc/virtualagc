@@ -154,14 +154,25 @@ IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME
 .PHONY: regression
 regression: PASS1 FLO OPT AUXP PASS2 compile test
 
-# Regarding AP-101S object-code file matches, HAL/S-FC embeds its build own
-# build-timestamp in the object code, so there can be up to a 8-byte mismatch 
-# due to that.  The IBM 360 "card" format separately
-# embeds 2 copies (for some reason) of a 5-byte run-timestamp in the END record.  
-# Therefore, we tolerate as many as 18 bytes of mismatch.  Ideally we could 
-# could check that the latter 10 mismatches are in the correct positions, 
-# relative to the END record, but this is not that ideal of a world.  But 18
-# bytes is a lot, in a small test file!
+# Regarding AP-101S object-code file matches, here's what I originally wrote:
+# 	HAL/S-FC embeds its own build-timestamp in the object code, so 
+#	there can be up to a 8-byte mismatch due to that.  The IBM 360 
+#	"card" format separately # embeds 2 copies (for some reason) of a 
+#	5-byte run-timestamp in the END record.  Therefore, we tolerate as 
+#	many as 18 bytes of mismatch.  Ideally we could could check that 
+#	the latter 10 mismatches are in the correct positions, relative to 
+#	the END record, but this is not that ideal of a world.  But 18
+# 	bytes is a lot, in a small test file!
+# I don't know where I got this information, but it doesn't fully jibe with what
+# I see when I analyze object files created by HAL/S-FC PASS2 using the program
+# readObject101S.py.  When I do that, what I see is that the compiler has 
+# put into the symbol table a symbol named "Dnnnnn" (5 digits) for a datestamp
+# and a symbol named "Tnnnnnnn" (7 digits) for a timestamp.  Additionally, 
+# there are *two* END records, and in *each* of those two END records there's
+# a field called "translator" and one called "processor", each of which is a
+# string, and in each of those strings seems to have included something that
+# corresponds to the nnnnn of the symbol Dnnnnn.  Combining all of those, we
+# may have up to 7+5*5=32 bytes that differ due to datestamp and timestamp.
 .PHONY: test
 test: 
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >pass1-new.rpt
@@ -178,7 +189,7 @@ test:
 	-@egrep --invert-match "$(IGNORE_LINES)" c2.rpt >pass2-new.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" regression/c2.rpt >pass2-old.rpt
 	@diff $(DEXTRA) -q -s --strip-trailing-cr pass2-new.rpt pass2-old.rpt
-	@python3 $(shell which cmp.py) 18 cards2.bin regression/cards2.bin && \
+	@python3 $(shell which cmp.py) 32 cards2.bin regression/cards2.bin && \
 		( echo Files cards2.bin and regression/cards2.bin match ) || \
 		( exit 1 )
 	-@grep --invert-match "	COMM	1[23]	FIXED	" COMMON-PASS2.out >COMMON-PASS2-new.out

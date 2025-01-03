@@ -112,7 +112,7 @@ def parsePackedSymbol(packedSymbols, offset):
     
     def getOutaHere():
         if offset >= len(packedSymbols):
-            symbol["error"] = "Error: Bad offset into SYM record"
+            symbol["error"] = "Error: Bad offset %05X into SYM record" % offset
             return True
         return False
     
@@ -148,7 +148,7 @@ def parsePackedSymbol(packedSymbols, offset):
         elif typ == 0b110:
             symbol["symbolType"] = "RELOCATABLE"
         else:
-            symbol["error"] = "Error: Unknown symbol type"
+            symbol["error"] = "Error: Unknown symbol type %02X" % type
             return None,symbol
     if cluster:
         symbol["cluster"] = True
@@ -337,6 +337,8 @@ def readObject101S(filename):
             oi["errors"].append("Error: Undetermined error in symbol table")
         if "error" in symbol:
             oi["errors"].append(symbol["error"])
+        if offset == None:
+            break
     return object, symbols
 
 if __name__ == "__main__":
