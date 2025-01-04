@@ -808,7 +808,7 @@ else
 	@echo ""
 	@echo "================================================================"
 	@echo "Run Virtual AGC from its desktop icon.  If the icon doesn't"
-	@echo "exist or doesen't work, run Virtual AGC from a command-line"
+	@echo "exist or doesn't work, run Virtual AGC from a command-line"
 	@echo "as follows:"
 	@echo "  cd ~/VirtualAGC/Resources"
 	@echo "  ../bin/VirtualAGC"
