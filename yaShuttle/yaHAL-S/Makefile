@@ -47,7 +47,7 @@ clean :
 
 distclean : clean
 	-rm DemoHAL_S
-	-make -C temp distclean
+	-rm temp -rf
 
 DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
 	if [ ! -d temp] ; then mkdir temp ; fi

@@ -171,7 +171,10 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     <p><img moz-do-not-send="true" src="update.png" alt="" height="24">
       updates the Virtual AGC software in this VM by downloading all of
       the latest source code from the GitHub repository, and rebuilding
-      it.<br>
+      it.&nbsp; After performing an update, an additional icon
+      (Update.log) will appear on the desktop.&nbsp; This won't be of
+      any interest to you, I expect, but is available to be sent to us
+      in case you encounter some difficulty updating.<br>
     </p>
     <p><img moz-do-not-send="true" src="codeblocks.png" alt=""
         height="24"> lets you perform visual debugging on AGC
@@ -416,9 +419,9 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
           Alliance compiler for the HAL/S computer language in which
           Space Shuttle flight software was written, as ported for
           "modern" computer systems via the XCOM-I.py XPL/I language
-          compiler (see below).&nbsp; This is actually a shell script
+          compiler (see below).&nbsp; HALSFC is actually a shell script
           that integrates the various compiler passes, which are each
-          implemented as stand-alone programs:</li>
+          implemented as stand-alone programs, as follows:</li>
         <ul>
           <li><b>HALSFC-PASS1</b>, "phase 1" (parsing), specialized for
             primary flight software.</li>
@@ -442,11 +445,17 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
             </strike></li>
           <li><strike><b>HALSFC-PASS3B</b></strike><strike>, same except
               specialized for backup flight software.</strike></li>
-          <li><strike><b>HALSFC-PASS4</b></strike><strike>, "phase 4".</strike><strike>&nbsp;
-              This is not yet available.</strike></li>
+          <li><strike><b>HALSFC-PASS4</b></strike><strike>, "phase 4".</strike></li>
         </ul>
-        <li><b>ASM101S.py</b>, a macro assembler for the IBM AP-101S
-          assembly language.<br>
+        <li><a moz-do-not-send="true" href="ASM101S.html"><b>ASM101S.py</b></a>,
+          a macro assembler for the IBM AP-101S assembly language.</li>
+        <li><a moz-do-not-send="true" href="ASM101S.html#wildThings"><b>extractAP101S.py</b></a>,
+          a program which extracts AP-101S assembly language from a
+          report made by PASS2 of the HAL/S compiler (HALSFC).&nbsp;
+          (Has no <code>--help</code> option.)<br>
+        </li>
+        <li><b>readObject101S.py</b>, a program for reading and parsing
+          AP-101S object files.<br>
         </li>
         <li><strike><b>HALLINK101S</b></strike><strike>, an AP-101S
             linker for object files produced by </strike><strike>HALSFC</strike><strike>
@@ -460,7 +469,11 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
           Intermetrics HAL/S compiler to the Python 3 language.<br>
         </li>
         <li><b>yaHAL-S-FC.py</b>, a partially-functional HAL/S compiler
-          and interpreter.<br>
+          and interpreter.</li>
+        <li><a moz-do-not-send="true" href="XPL-I.html#monitor"><b>ibmHex.py</b></a>,
+          a utility (and Python module) to convert back and forth
+          between IBM Hexadecimal Floating-Point format and
+          human-readable (or Python-readable) numbers.<br>
         </li>
         <li><a moz-do-not-send="true"
             href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>XCOM-I.py</b></a>,
@@ -545,9 +558,27 @@ src="file:///home/rburkey/git/virtualagc/VirtualAGC/Info-VM64/piDSKY.jpg"
         so. I would recommend using VirtualBox's snapshotting capability
         rather than attempting to install or use any native Lubuntu
         backup facilities for that purpose.</li>
+      <li>As distributed, I've disabled several convenience features
+        VirtualBox provides, such as "Shared Folders" (in which a folder
+        on the host machine appears also in the VM), "Shared Clipboard"
+        (in which you can cut-and-paste text between the hold machine
+        and the VM, or vice-versa), and "Drag and Drop" (in which you
+        can drag-and-drop files or folders between the host machine and
+        VM, or vice-versa).&nbsp; Nor does the VM have access to optical
+        drives or webcams.&nbsp; I've done these things to insure that
+        the VM has minimal impact on your host system.&nbsp; But also
+        because the "Drag and Drop" feature has sometimes frozen up my
+        own VMs.&nbsp; The drawback is that these setting leave you few
+        ways to transfer information between the VM and your host
+        computer, if you should want to do so.&nbsp; Feel free to
+        reenable any features that you like in the VirtualBox settings
+        for the VirtualAGC VM.&nbsp; I would suggest that "Shared
+        Folders" and "Shared Clipboard" are the most useful and the most
+        harmless.<br>
+      </li>
     </ul>
     <p><br>
-      <i>(Last updated 2025-01-01 by Ron Burkey)</i><br>
+      <i>(Last updated 2025-01-03 by Ron Burkey)</i><br>
       <br>
     </p>
   </body>
