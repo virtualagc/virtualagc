@@ -50,7 +50,7 @@ distclean : clean
 	-rm temp -rf
 
 DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
-	if [ ! -d temp] ; then mkdir temp ; fi
+	if [ ! -d temp ] ; then mkdir temp ; fi
 	cd temp && bnfc --c -l -m ../HAL_S.cf
 	make -C temp CCFLAGS="${CCFLAGS}" BISON_OPTS="${BISON_OPTS}"
 	mv temp/TestHAL_S DemoHAL_S
