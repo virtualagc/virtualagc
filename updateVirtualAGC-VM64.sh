@@ -16,10 +16,13 @@ if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
         echo ""
         date > $LOG_FILE
-        cd ~/git/virtualagc 2>&1 >> $LOG_FILE
-        git stash 2>&1 >> $LOG_FILE
-        git stash drop 2>&1 >> $LOG_FILE
-        git pull 2>&1 >> $LOG_FILE
+        for dir in virtualagc virtualagc-schematics
+        do
+                cd ~/git/$dir 2>&1 >> $LOG_FILE
+                git stash 2>&1 >> $LOG_FILE
+                git stash drop 2>&1 >> $LOG_FILE
+                git pull 2>&1 >> $LOG_FILE
+        done
         
         # The build stuff is separated out into an independent script, so
         # as to make sure that changes to the build procedure are captured

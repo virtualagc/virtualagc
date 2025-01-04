@@ -27,6 +27,7 @@ History:        2022-11-07 RSB  Created.
                 2022-12-10 RSB  Added --no-compile.
                 2022-12-11 RSB  The next evolution of yaHAL-preprocessor.py.
                 2022-12-16 RSB  Began implementing interpreter.
+                2025-01-04 RSB  Some corrections to --help.
                                 
 Here are some features of HAL/S I don't think the compiler (if based on a
 context-free grammar with free formatting) could handle without preprocessing:
@@ -91,9 +92,9 @@ for param in sys.argv[1:]:
                         is made for different tab sizes in different source 
                         files, so let's just hope that never happens!  Probably 
                         the Shuttle source has no tabs anyway since it was 
-                        supplied on
-                        punchcards, but it's certainly possible to accidentally
-                        end up with tabs if source is edited in modern editors.
+                        supplied on punchcards, but it's certainly possible to 
+                        accidentally end up with tabs if source is edited in 
+                        modern editors.
         --no-compile    Merely output preprocessed source, and do not attempt
                         to invoke the compiler.
         --library=F     Specifies the filename of the library of structure
@@ -102,9 +103,8 @@ for param in sys.argv[1:]:
                         structure templates encountered during preprocessing
                         will only be added to the final library file specified.
                         This option must precede the HAL/S source filenames.
-        --no-compile    Merely output preprocessed source, and do not attempt
-                        to invoke the compiler.
-        --compiler=F    Name of compiler's phase 1 (default %s).
+        --compiler=F    Name of compiler's phase 1.  The default is
+                        %s.
         --lbnf, --bnf   Display the abstract syntax trees (AST) in LBNF or
                         in BNF.  Default is not to display the ASTs.
         --trace         Enable tracing for compiler front-end parser.

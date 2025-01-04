@@ -9,6 +9,7 @@ Requirements:   READLINE module
 History:        2022-12-16 RSB  Split off the nascent form from 
                                 yaHAL-S-FC.py.
                 2023-02-18 RSB  Added the optimizePALMAT() pass.
+                2025-01-04 RSB  Correction to `help.
 """
 
 #-------------------------------------------------------------------------
@@ -127,7 +128,7 @@ helpMenu = \
 \t                 Note that all interpreter commands are
 \t                 acted upon immediately rather than being
 \t                 added to the spool.
-\t`UNSPOOL          process all spooled lines.
+\t`UNSPOOL         process all spooled lines.
 \t`REVIEW          Redisplay spooled HAL/S source lines.
 \t`COLORIZE C      Enable colorizing (ANSI terminals only).
 \t                 C is one of the following words: black,
