@@ -15,7 +15,7 @@ read -p "Are you sure you're ready to proceed at this time (y/N)? " -n 1 -r
 if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
         echo ""
-        time > $LOG_FILE
+        date > $LOG_FILE
         cd ~/git/virtualagc 2>&1 >> $LOG_FILE
         git stash 2>&1 >> $LOG_FILE
         git stash drop 2>&1 >> $LOG_FILE
@@ -27,7 +27,7 @@ then
         time ./rebuildVirtualAGC.sh 2>&1 | tee -a $LOG_FILE
         
         echo "Terminated.  Hit ENTER key or close this window."
-        time >> $LOG_FILE
+        date >> $LOG_FILE
         read
 fi
 
