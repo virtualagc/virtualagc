@@ -16,7 +16,7 @@ APP = modernHAL-S-FC
 CC2 = x86_64-w64-mingw32-gcc
 STRIP2 = x86_64-w64-mingw32-strip
 ifeq "" "$(shell which $(CC2))"
-  APP2 = ""
+  APP2 = 
 else
   APP2 = ${APP}.exe
 endif
