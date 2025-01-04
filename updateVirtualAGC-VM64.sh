@@ -18,6 +18,7 @@ then
         date > $LOG_FILE
         for dir in virtualagc virtualagc-schematics
         do
+                echo Pulling from $dir >> $LOG_FILE
                 cd ~/git/$dir 2>&1 >> $LOG_FILE
                 git stash 2>&1 >> $LOG_FILE
                 git stash drop 2>&1 >> $LOG_FILE
