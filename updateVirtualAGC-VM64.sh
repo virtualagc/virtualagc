@@ -24,7 +24,7 @@ then
                 git stash drop 2>&1 >> $LOG_FILE
                 git pull 2>&1 >> $LOG_FILE
         done
-        /home/virtualagc/virtualagc-schematics/Schematics/vmDesktopIcons.sh
+        /home/virtualagc/git/virtualagc-schematics/Schematics/vmDesktopIcons.sh
         
         # The build stuff is separated out into an independent script, so
         # as to make sure that changes to the build procedure are captured
