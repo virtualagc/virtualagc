@@ -4,7 +4,7 @@
 # associated drawing's top-level page into the KiCad schematic editor.
 
 home=/home/virtualagc
-desktop=$home/Desktop
+desktop=$home/Desktop/Schematics
 schematics=$home/git/virtualagc-schematics/Schematics
 cd $schematics
 if [[ ! -d $desktop ]]
@@ -24,5 +24,6 @@ do
                 echo "Icon=eeschema" >> temp.desktop
                 echo "Terminal=false" >> temp.desktop
                 mv temp.desktop $desktop/$f.desktop
+                gio set $desktop/$f.desktop "metadata::trusted" yes
         fi
 done
