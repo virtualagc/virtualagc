@@ -4,12 +4,12 @@
 # associated drawing's top-level page into the KiCad schematic editor.
 
 home=/home/virtualagc
-desktop=$home/Desktop/Schematics
+desktop="$home/Desktop/Electrical Schematics"
 schematics=$home/git/virtualagc-schematics/Schematics
 cd $schematics
-if [[ ! -d $desktop ]]
+if [[ ! -d "$desktop" ]]
 then
-        mkdir $desktop
+        mkdir "$desktop"
 fi
 for f in [0-9]*
 do
@@ -23,7 +23,8 @@ do
                 echo "Type=Application" >> temp.desktop
                 echo "Icon=eeschema" >> temp.desktop
                 echo "Terminal=false" >> temp.desktop
-                mv temp.desktop $desktop/$f.desktop
-                gio set $desktop/$f.desktop "metadata::trusted" yes
+                chmod +x temp.desktop
+                mv temp.desktop "$desktop"/$f.desktop
+                gio set "$desktop"/$f.desktop "metadata::trusted" yes
         fi
 done
