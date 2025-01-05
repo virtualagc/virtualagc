@@ -23,8 +23,8 @@ do
                 echo "Type=Application" >> temp.desktop
                 echo "Icon=eeschema" >> temp.desktop
                 echo "Terminal=false" >> temp.desktop
-                chmod +x temp.desktop
+                chmod a+x temp.desktop
                 mv temp.desktop "$desktop"/$f.desktop
-                gio set "$desktop"/$f.desktop "metadata::trusted" yes
+                gio set "$desktop"/$f.desktop "metadata::trusted" true
         fi
 done
