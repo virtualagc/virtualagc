@@ -60,6 +60,7 @@
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
 
 
+
         <br>
       </font>
       <ul>
@@ -76,6 +77,7 @@
               href="file:///home/rburkey/VirtualAGC/">subfolder
               VirtualAGC/</a> under your home directory.</font></li>
         <li><font size="-1">In Linux, filenames and folder names are <i>case
+
 
 
               sensitive</i> and "/" is the separator between the
@@ -107,14 +109,11 @@
         rotational hand controller, or RHC), attach it to your computer
         and look at the VirtualBox Settings/USB window.&nbsp; Use the
         hot-buttons there to add a new "USB Device Filter", choosing
-        your joystick from the list you're presented with.&nbsp; (You
-        may see that the filter for "Logitech Extreme 3D Pro[3500]" is
-        present.&nbsp; That's my own joystick.&nbsp; If by unlikely
-        chance you're using that exact same model, then you may not have
-        to configure anything!)&nbsp; Note that while the VM is running,
-        it will take control of any of the devices listed in "USB Device
-        Filters" away from your host computer, and only return control
-        after shutting down the VM.</li>
+        your joystick from the list you're presented with.&nbsp; Note
+        that while the VM is running, it will by default take control of
+        any of the devices listed in "USB Device Filters" away from your
+        host computer, and only return control after shutting down the
+        VM.</li>
     </ul>
     <blockquote><font size="-1"><b>Warning:</b>&nbsp; My 3D joystick
         seems to be misidentified by some software within the VM as a
@@ -130,8 +129,8 @@
     <p>The original documentation for Gemini, Apollo, and the Space
       Shuttle is not directly provided within the VM due to size
       constraints.&nbsp; (I assume you wouldn't want to deal with
-      multi-terabyte downloads.)&nbsp; Refer instead to Virtual AGC's
-      online <a moz-do-not-send="true"
+      multi-terabyte downloads of the VM!)&nbsp; Refer instead to
+      Virtual AGC's online <a moz-do-not-send="true"
         href="https://www.ibiblio.org/apollo/links2.html">Apollo &amp;
         Gemini document library</a> or the <a moz-do-not-send="true"
         href="https://www.ibiblio.org/apollo/links-shuttle.html">Space
@@ -163,7 +162,9 @@
         category.&nbsp; There is an article in the Orbiter Wiki (see the
         next section) that explains how to run an out-of-date version of
         Orbiter on Linux using WINE, so perhaps some day Orbiter w/NASSP
-        will be included here.&nbsp; However, that day is not today.</font><br>
+        will be included here.&nbsp; However, that day is not
+        today.&nbsp; WINE is not installed by default on the VM, because
+        it's a rather large package.</font><br>
     </blockquote>
     <p> </p>
     <h1><a name="Desktop"></a>Virtual AGC Facilities Available On the
@@ -179,6 +180,7 @@
     <p><img moz-do-not-send="true" src="ApolloPatch2-transparent.png"
         alt="" height="24"> opens <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updating">the
+
 
 
         VirtualAGC GUI application</a>.&nbsp; That application is a
@@ -210,6 +212,10 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
       are the Apollo 11 Command Module software (Comanche 055) and Lunar
       Module software (Luminary 099).<br>
     </p>
+    <img moz-do-not-send="true" src="eeschema.svg" alt="" width="24"
+      height="24"> lets you view the original AGC Guidance, Navigation
+    &amp; Control electrical schematics, as transcribed for a modern
+    computer-aided design (CAD) system.
     <p><img moz-do-not-send="true" src="archive.org.png" alt=""
         height="24"> takes you the Virtual AGC Project section of The
       Internet Archive, which contains the highest-available resolution
@@ -227,8 +233,8 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
       Windows-based VM on which to run Orbiter, because unlike Linux,
       Microsoft Windows cannot legally be freely distributed.<br>
     </p>
-    <img moz-do-not-send="true" src="PTC-64x64.png" alt="" height="24"
-      width="29"> opens the Programmable Test Controller (PTC)
+    <img moz-do-not-send="true" src="PTC-64x64.png" alt="" width="29"
+      height="24"> opens the Programmable Test Controller (PTC)
     simulation, running what's called the PTC ADAPT Self-Test (PAST)
     program.&nbsp; The PTC was a test panel used for debugging Apollo
     Launch Vehicle Digital Computer (LVDC) software.&nbsp; The
@@ -238,22 +244,22 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     the LVDC.&nbsp; Running LVDC software other than PAST must be done
     from the command line (see the next section).<br>
     <br>
-    <img moz-do-not-send="true" src="kicad.svg" alt="" height="24"
-      width="24"> opens the electrical circuitry editor (KiCad EDA), for
-    viewing electrical schematics for the Apollo guidance system, and
-    particularly for the AGC and DSKY.&nbsp; Since KiCad (and EDA
+    <img moz-do-not-send="true" src="kicad.svg" alt="" width="24"
+      height="24"> opens the electrical circuitry editor (KiCad EDA),
+    for viewing electrical schematics for the Apollo guidance system,
+    and particularly for the AGC and DSKY.&nbsp; Since KiCad (and EDA
     software in general) may not be a topic about which there is common
     knowledge, <a moz-do-not-send="true" href="#kicad">there's a
       section below that covers some elementary facts</a> about use of
     this software.<br>
     <br>
     <img moz-do-not-send="true" src="utilities-terminal.png" alt=""
-      height="24" width="24"> opens a Lubuntu command line.&nbsp; See
+      width="24" height="24"> opens a Lubuntu command line.&nbsp; See
     the very next section below for reasons why you might wish to do
     that.<br>
     <br>
     <img moz-do-not-send="true" src="preferences-system.svg" alt=""
-      height="24" width="24"> opens the Lubuntu "control panel" or
+      width="24" height="24"> opens the Lubuntu "control panel" or
     "control center", or whatever term you'd like to apply to a facility
     for modifying the settings for the Lubuntu system itself.<br>
     <h1><a name="CommandLine"></a>Virtual AGC Facilities Available From
@@ -272,296 +278,369 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     <p>The programs whose names and descriptions are struck out <strike>like
 
 
+
         so</strike> are not yet available and therefore are not
       included.<br>
     </p>
     <ul>
-      <li>Gemini Onboard Computer (OBC):</li>
+    </ul>
+    <h2>Gemini Onboard Computer (OBC)</h2>
+    <ul>
       <ul>
-        <li><b><a moz-do-not-send="true"
+      </ul>
+      <li><b><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Gemini.html#yaOBCASM_the_OBC_Cross-Assembler">yaASM</a></b>,
-          the assembler for OBC software source code, creating an OBS
-          executable program.&nbsp; Note that no documentation for the
-          original assembler or the assembly language itself, nor any
-          original OBC source code, is presently known to have survived.
-          Therefore, it is unlikely that the syntax required matches the
-          original source code.</li>
-        <li><a moz-do-not-send="true"
+        the assembler for OBC software source code, creating an OBS
+        executable program.&nbsp; Note that no documentation for the
+        original assembler or the assembly language itself, nor any
+        original OBC source code, is presently known to have survived.
+        Therefore, it is unlikely that the syntax required matches the
+        original source code.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Gemini.html#yaOBC_the_OBC_CPU_Emulation"><b>yaOBC</b></a>,
-          the OBS CPU emulator.&nbsp; Note that the emulator has a <a
-            moz-do-not-send="true"
+        the OBS CPU emulator.&nbsp; Note that the emulator has a <a
+          moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">built-in
 
 
-            debugging facility</a>.</li>
-        <li><strike><b>yaPanel</b></strike><strike>, the Manual Data
-            Insertion Unit (MDIU) simulator for astronaut interactions
-            with the OBC.</strike><br>
-        </li>
-      </ul>
-      <li>Apollo Lunar Module and Command Module AGC (LGC and CMC
-        respectively):</li>
+
+          debugging facility</a>.</li>
       <ul>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaYUL.html"><b>yaYUL</b></a>,
-          the assembler for AGC software source code, both for Block I
-          and Block II spacecraft.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaAGC.html"><b>yaAGC</b></a>,
-          the Block II AGC CPU emulator.&nbsp; &nbsp; Note that the
-          emulator has a <a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaAGC.html#Debugging">built-in
+      </ul>
+      <li><strike><b>yaPanel</b></strike><strike>, the Manual Data
+          Insertion Unit (MDIU) simulator for astronaut interactions
+          with the OBC.</strike></li>
+    </ul>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <h2>Apollo Lunar Module and Command Module AGC</h2>
+    <ul>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaYUL.html"><b>yaYUL</b></a>,
+        the assembler for AGC software source code, both for Block I and
+        Block II spacecraft.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaAGC.html"><b>yaAGC</b></a>,
+        the Block II AGC CPU emulator.&nbsp; &nbsp; Note that the
+        emulator has a <a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaAGC.html#Debugging">built-in
 
 
-            debugging facility</a>, but can also be visually debugged
-          using Code::Blocks.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaDSKY.html#Running_yaDSKY"><b>yaDSKY2</b></a>,
-          the AGC's Display-Keyboard (DSKY) simulator.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry"><b>yaTelemetry</b></a>,
-          the telemetry downlink monitor and uplink manager for the AGC.</li>
-        <li><b><a moz-do-not-send="true"
+
+          debugging facility</a>, but can also be visually debugged
+        using Code::Blocks.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaDSKY.html#Running_yaDSKY"><b>yaDSKY2</b></a>,
+        the AGC's Display-Keyboard (DSKY) simulator.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry"><b>yaTelemetry</b></a>,
+        the telemetry downlink monitor and uplink manager for the AGC.</li>
+      <ul>
+      </ul>
+      <li><b><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/yaTelemetry.html#LM_Simulator_by_Stephan_Hotto">lm_simulator</a></b>
-          is a peripheral for the AGC CPU simulator providing various
-          instruments such as an IMU, an FDAI, and a selection of
-          control-panel switches, plus its own version of the
-          DSKY.&nbsp; Note that it has some probably-uncorrectable
-          peculiarities with respect to the various other
-          graphical-interface programs mentioned here:</li>
-        <ul>
-          <li>It has no --help option.<br>
-          </li>
-          <li>It is not scalable for high-resolution displays.</li>
-          <li>The AGC emulator (yaAGC) must be running prior to starting
-            it.</li>
-        </ul>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaACA"><b>yaACA,
-
-
-              yaACA2, yaACA3, jWiz</b></a>:&nbsp; The <b>yaACA<i>x</i></b>
-          programs are simulators that allow a physical USB 3D joystick
-          to simulate the Attitude Controller Assembly (ACA), also known
-          as the Rotational Hand Controller (RHC), while <b>jWiz</b> is
-          a "wizard" that helps you to decide which of the different ACA
-          simulators to use.&nbsp; <br>
+        is a peripheral for the AGC CPU simulator providing various
+        instruments such as an IMU, an FDAI, and a selection of
+        control-panel switches, plus its own version of the DSKY.&nbsp;
+        Note that it has some probably-uncorrectable peculiarities with
+        respect to the various other graphical-interface programs
+        mentioned here:</li>
+      <ul>
+        <br>
+        <li>It has no --help option.<br>
         </li>
+        <li>It is not scalable for high-resolution displays.</li>
+        <li>The AGC emulator (yaAGC) must be running prior to starting
+          it.</li>
+        <br>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaACA"><b>yaACA,
+
+
+
+            yaACA2, yaACA3, jWiz</b></a>:&nbsp; The <b>yaACA<i>x</i></b>
+        programs are simulators that allow a physical USB 3D joystick to
+        simulate the Attitude Controller Assembly (ACA), also known as
+        the Rotational Hand Controller (RHC), while <b>jWiz</b> is a
+        "wizard" that helps you to decide which of the different ACA
+        simulators to use.&nbsp; <br>
+      </li>
+      <ul>
       </ul>
     </ul>
     <blockquote>
-      <blockquote>
-        <blockquote><font size="-1"><b>Note:</b>&nbsp; </font><font
-            size="-1"><b></b><b>yaACA<i>x</i></b> and <b>jWiz</b>
-            expect to be run from ~/VirtualAGC/Resources/, since that's
-            where their configuration files are, and may not behave
-            properly otherwise.&nbsp; Note also that <b>jWiz</b> has no
-            <code>--help</code> option.</font><br>
-        </blockquote>
+      <blockquote><font size="-1"><b>Note:</b>&nbsp; </font><font
+          size="-1"><b>yaACA<i>x</i></b> and <b>jWiz</b> expect to be
+          run from ~/VirtualAGC/Resources/, since that's where their
+          configuration files are, and may not behave properly
+          otherwise.&nbsp; Note also that <b>jWiz</b> has no <code>--help</code>
+          option.</font><br>
       </blockquote>
     </blockquote>
     <ul>
-      <ul>
-        <li><a moz-do-not-send="true"
+      <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1"><b>yaAGCb1</b></a>,
-          the Block I AGC CPU emulator.</li>
-        <li><b><a moz-do-not-send="true"
+        the Block I AGC CPU emulator.</li>
+      <li><b><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Block1.html#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">yaDSKYb1</a></b>,
-          the Block I DSKY simulator.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/Block1.html#yaUplinkBlock1"><b>yaUplinkBlock1</b></a>,
-          a digital-uplink program for sending commands to the Block I
-          AGC CPU emulator.<br>
-        </li>
-        <li><a moz-do-not-send="true"
+        the Block I DSKY simulator.</li>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/Block1.html#yaUplinkBlock1"><b>yaUplinkBlock1</b></a>,
+        a digital-uplink program for sending commands to the Block I AGC
+        CPU emulator.<br>
+      </li>
+      <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Block1.html#John_Pultoraks_Assembler_and_Simulator"><b>yaAGC-Block1</b></a>,
-          John Pultorak's Block I AGC assembler and emulator.&nbsp; Note
-          that assembler accepts only a custom syntax unique to it,
-          rather than the original Block I source-code syntax.&nbsp;
-          However, <b>yaYUL</b> (see above) can create executable
-          object files accepted by this program, so that it continues to
-          be useful as a debugger.&nbsp; There apparently is also <a
-            moz-do-not-send="true"
-            href="https://github.com/donnaware/AGC">a visual-debugging
-            environment for it</a>, but that is Windows-only and
-          therefore unavailable in this VM.</li>
-        <li>See also the <a moz-do-not-send="true" href="#templates">Python
-
-
-            templates</a> below.<br>
-        </li>
-      </ul>
-      <li>Apollo Lunar Module Abort Guidance System (AGS):</li>
+        John Pultorak's Block I AGC assembler and emulator.&nbsp; Note
+        that assembler accepts only a custom syntax unique to it, rather
+        than the original Block I source-code syntax.&nbsp; However, <b>yaYUL</b>
+        (see above) can create executable object files accepted by this
+        program, so that it continues to be useful as a debugger.&nbsp;
+        There apparently is also <a moz-do-not-send="true"
+          href="https://github.com/donnaware/AGC">a visual-debugging
+          environment for it</a>, but that is Windows-only and therefore
+        unavailable in this VM.</li>
+    </ul>
+    <ul>
       <ul>
-        <li><a moz-do-not-send="true"
-href="https://www.ibiblio.org/apollo/yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler"><b>yaLEMAP</b></a>,
-          the assembler for AGS software source code, creating an AGS
-          executable program.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaAGS.html#Utility_Programs"><b>binLEMAP</b></a>,
-          for creating an AGS executable file from a list of octal
-          values.</li>
-        <li><a moz-do-not-send="true"
-href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>yaAGS</b></a>,
-          the AGS CPU emulator.&nbsp; Note that the emulator has a <a
-            moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/yaAGS.html#Debug">built-in
-
-
-            debugging facility</a>.<br>
-        </li>
-        <li><a moz-do-not-send="true"
-href="https://www.ibiblio.org/apollo/yaAGS.html#yaDEDA_the_AGS_User-Interface"><b>yaDEDA</b></a>,
-          the AGS Data Entry and Display Assembly (DEDA) simulator.</li>
-        <li>See also the <a moz-do-not-send="true" href="#templates">Python
-
-
-            templates</a> below.<br>
-        </li>
       </ul>
-      <li>Apollo Launch Vehicle Digital Computer (LVDC):&nbsp; <br>
+    </ul>
+    <h2>Apollo Lunar Module Abort Guidance System (AGS)</h2>
+    <ul>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler"><b>yaLEMAP</b></a>,
+        the assembler for AGS software source code, creating an AGS
+        executable program.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaAGS.html#Utility_Programs"><b>binLEMAP</b></a>,
+        for creating an AGS executable file from a list of octal values.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>yaAGS</b></a>,
+        the AGS CPU emulator.&nbsp; Note that the emulator has a <a
+          moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/yaAGS.html#Debug">built-in
+
+
+
+          debugging facility</a>.<br>
       </li>
       <ul>
-        <li><b><a moz-do-not-send="true"
+      </ul>
+      <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/yaAGS.html#yaDEDA_the_AGS_User-Interface"><b>yaDEDA</b></a>,
+        the AGS Data Entry and Display Assembly (DEDA) simulator.</li>
+      <ul>
+      </ul>
+    </ul>
+    <ul>
+    </ul>
+    <h2>Apollo Launch Vehicle Digital Computer (LVDC):&nbsp; </h2>
+    <ul>
+      <ul>
+      </ul>
+      <li><b><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a></b>,
-          the assembler for software source code for the LVDC and
-          Programmable Test Controller (PTC), creating an LVDC/PTC
-          executable program.</li>
-        <li><a moz-do-not-send="true"
+        the assembler for software source code for the LVDC and
+        Programmable Test Controller (PTC), creating an LVDC/PTC
+        executable program.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDC_the_LVDC_CPU_Emulation"><b>yaLVDC</b></a>,
-          the CPU emulator for the LVDC and PTC.&nbsp; There are
-          presently no LVDC peripherals.&nbsp; But the emulator has a <a
-            moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/LVDC.html#EmulatorDebugger">built-in
+        the CPU emulator for the LVDC and PTC.&nbsp; There are presently
+        no LVDC peripherals.&nbsp; But the emulator has a <a
+          moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/LVDC.html#EmulatorDebugger">built-in
 
 
-            debugging facility</a>, or can work with the telemetry or
-          Programmable Test Controller systems (see next items), so LVDC
-          code execution need not be entirely black-box.</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/LVDC.html#ViewingTelemetry"><b>yaMccLvdc.py</b></a>,
-          the LVDC telemetry monitor and Digital Command System (DCS).</li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/PTCTestProcedures.html"><b>yaPTC</b><b>.py</b></a>,
-          the Programmable Test Controller (PTC) simulator.&nbsp; <a
-            moz-do-not-send="true"
+
+          debugging facility</a>, or can work with the telemetry or
+        Programmable Test Controller systems (see next items), so LVDC
+        code execution need not be entirely black-box.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/LVDC.html#ViewingTelemetry"><b>yaMccLvdc.py</b></a>,
+        the LVDC telemetry monitor and Digital Command System (DCS).</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/PTCTestProcedures.html"><b>yaPTC</b><b>.py</b></a>,
+        the Programmable Test Controller (PTC) simulator.&nbsp; <a
+          moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
 
 
-            here also</a>.<br>
-        </li>
-        <li><b>analyzeBoost.py</b>:&nbsp; <a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/LVDC.html#DoingSomething">See
 
-
-            the LVDC's "repeatable flight mode"</a>.</li>
-        <li><b>yaASMflowchart2.py</b>, a software flowchart creator
-          based on mysterious markings found in certain LVDC flight
-          software source code.</li>
-        <li><b>unHOP.py</b> is a programmer aid that parses an LVDC "HOP
-          constant" into its constituent fields.</li>
-        <li><b>unOP.py</b> is a programmer aid that parses an LVDC
-          opcode into its constituent fields.<br>
-        </li>
-      </ul>
-      <li>Space Shuttle:&nbsp; <br>
+          here also</a>.<br>
       </li>
       <ul>
-        <li><b>HALSFC</b>, the original Intermetrics/United Space
-          Alliance compiler for the HAL/S computer language in which
-          Space Shuttle flight software was written, as ported for
-          "modern" computer systems via the XCOM-I.py XPL/I language
-          compiler (see below).&nbsp; HALSFC is actually a shell script
-          that integrates the various compiler passes, which are each
-          implemented as stand-alone programs, as follows:</li>
-        <ul>
-          <li><b>HALSFC-PASS1</b>, "phase 1" (parsing), specialized for
-            primary flight software.</li>
-          <li><b>HALSFC-PASS1B</b>, same except specialized for backup
-            flight software.</li>
-          <li><b>HALSFC-FLO</b>, "flow generator" for "phase 1.5"
-            (optimization).</li>
-          <li><b>HALSFC-OPT</b>, "optimization" for "phase 1.5",
-            specialized for primary flight software.</li>
-          <li><b>HALSFC-OPTB</b>, same except specialized for backup
-            flight software.</li>
-          <li><b>HALSFC-AUXP</b>, "auxiliary optimization" for "phase
-            1.5".</li>
-          <li><b>HALSFC-PASS2</b>, "phase 2" (code generation),
-            specialized for primary flight software.</li>
-          <li><b>HALSFC-PASS2B</b>, same except specialized for backup
-            flight software.</li>
-          <li><strike><b>HALSFC-PASS3</b></strike><strike>, "phase 3"
-              (simulation data file generation), specialized for primary
-              flight software.</strike><strike><br>
-            </strike></li>
-          <li><strike><b>HALSFC-PASS3B</b></strike><strike>, same except
-              specialized for backup flight software.</strike></li>
-          <li><strike><b>HALSFC-PASS4</b></strike><strike>, "phase 4".</strike></li>
-        </ul>
-        <li><a moz-do-not-send="true" href="ASM101S.html"><b>ASM101S.py</b></a>,
-          a macro assembler for the IBM AP-101S assembly language.</li>
-        <li><a moz-do-not-send="true" href="ASM101S.html#wildThings"><b>extractAP101S.py</b></a>,
-          a program which extracts AP-101S assembly language from a
-          report made by PASS2 of the HAL/S compiler (HALSFC).&nbsp;
-          (Has no <code>--help</code> option.)<br>
-        </li>
-        <li><b>readObject101S.py</b>, a program for reading and parsing
-          AP-101S object files.<br>
-        </li>
-        <li><strike><b>HALLINK101S</b></strike><strike>, an AP-101S
-            linker for object files produced by </strike><strike>HALSFC</strike><strike>
-            and </strike><strike>ASM101S.py</strike><strike> (see
-            above).</strike><strike><br>
-          </strike></li>
-        <li><strike><b>ap101s</b></strike><strike>, a light-weight IBM
-            AP-101S CPU emulator.</strike><br>
-        </li>
-        <li><b>HAL_S_FC.py</b>, a port of PASS1 of the original
-          Intermetrics HAL/S compiler to the Python 3 language.<br>
-        </li>
-        <li><a moz-do-not-send="true" href="hal-s-interpreter.html"><b>yaHAL-S-FC.py</b></a>,
-          a partially-functional HAL/S compiler and interpreter.</li>
-        <li><a moz-do-not-send="true" href="XPL-I.html#monitor"><b>ibmHex.py</b></a>,
-          a utility (and Python module) to convert back and forth
-          between IBM Hexadecimal Floating-Point format and
-          human-readable (or Python-readable) numbers.<br>
-        </li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>XCOM-I.py</b></a>,
-          a compiler for the XPL/I language, which is the standard ~1970
-          XPL language as extended by Intermetrics, Inc., for writing
-          their compiler for the HAL/S language.<br>
-        </li>
-        <li><a moz-do-not-send="true"
-            href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>sim360</b></a>,
-          a light-weight IBM System/360 CPU emulator.&nbsp; It is used
-          primarily in the validation process for XCOM-I.py (see above),
-          the XPL/I language compiler, but can be used for other
-          purposes as well.<br>
-        </li>
       </ul>
-      <li><a name="templates"></a>Python templates for peripheral
-        devices:&nbsp; If you are engaged in creating your own
-        peripheral devices suitable for the Virtual AGC framework, you
-        might like to supplement <a moz-do-not-send="true"
-          href="https://www.ibiblio.org/apollo/developer.html">the
-          description of the communication protocol</a> with running
-        some simple, model software that's easy to understand and to
-        port.&nbsp; The Python script <b>piPeripheral.py</b> <a
-          moz-do-not-send="true"
+      <li><b>analyzeBoost.py</b>:&nbsp; <a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/LVDC.html#DoingSomething">See
+
+
+
+          the LVDC's "repeatable flight mode"</a>.</li>
+      <ul>
+      </ul>
+      <li><b>yaASMflowchart2.py</b>, a software flowchart creator based
+        on mysterious markings found in certain LVDC flight software
+        source code.</li>
+      <ul>
+      </ul>
+      <li><b>unHOP.py</b> is a programmer aid that parses an LVDC "HOP
+        constant" into its constituent fields.</li>
+      <ul>
+      </ul>
+      <li><b>unOP.py</b> is a programmer aid that parses an LVDC opcode
+        into its constituent fields.</li>
+    </ul>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <h2>Space Shuttle</h2>
+    <ul>
+      <ul>
+      </ul>
+      <li><b>HALSFC</b>, the original Intermetrics/United Space Alliance
+        compiler for the HAL/S computer language in which Space Shuttle
+        flight software was written, as ported for "modern" computer
+        systems via the XCOM-I.py XPL/I language compiler (see
+        below).&nbsp; HALSFC is actually a shell script that integrates
+        the various compiler passes, which are each implemented as
+        stand-alone programs, as follows:</li>
+      <ul>
+        <br>
+        <li><b>HALSFC-PASS1</b>, "phase 1" (parsing), specialized for
+          primary flight software.</li>
+        <li><b>HALSFC-PASS1B</b>, same except specialized for backup
+          flight software.</li>
+        <li><b>HALSFC-FLO</b>, "flow generator" for "phase 1.5"
+          (optimization).</li>
+        <li><b>HALSFC-OPT</b>, "optimization" for "phase 1.5",
+          specialized for primary flight software.</li>
+        <li><b>HALSFC-OPTB</b>, same except specialized for backup
+          flight software.</li>
+        <li><b>HALSFC-AUXP</b>, "auxiliary optimization" for "phase
+          1.5".</li>
+        <li><b>HALSFC-PASS2</b>, "phase 2" (code generation),
+          specialized for primary flight software.</li>
+        <li><b>HALSFC-PASS2B</b>, same except specialized for backup
+          flight software.</li>
+        <li><strike><b>HALSFC-PASS3</b></strike><strike>, "phase 3"
+            (simulation data file generation), specialized for primary
+            flight software.</strike><strike><br>
+          </strike></li>
+        <li><strike><b>HALSFC-PASS3B</b></strike><strike>, same except
+            specialized for backup flight software.</strike></li>
+        <li><strike><b>HALSFC-PASS4</b></strike><strike>, "phase 4".</strike></li>
+        <br>
+      </ul>
+      <li><a moz-do-not-send="true" href="ASM101S.html"><b>ASM101S.py</b></a>,
+        a macro assembler for the IBM AP-101S assembly language.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="ASM101S.html#wildThings"><b>extractAP101S.py</b></a>,
+        a program which extracts AP-101S assembly language from a report
+        made by PASS2 of the HAL/S compiler (HALSFC).&nbsp; (Has no <code>--help</code>
+        option.)<br>
+      </li>
+      <ul>
+      </ul>
+      <li><b>readObject101S.py</b>, a program for reading and parsing
+        AP-101S object files.<br>
+      </li>
+      <ul>
+      </ul>
+      <li><strike><b>HALLINK101S</b></strike><strike>, an AP-101S linker
+          for object files produced by </strike><strike>HALSFC</strike><strike>
+          and </strike><strike>ASM101S.py</strike><strike> (see above).</strike><strike><br>
+        </strike></li>
+      <ul>
+      </ul>
+      <li><strike><b>ap101s</b></strike><strike>, a light-weight IBM
+          AP-101S CPU emulator.</strike><br>
+      </li>
+      <ul>
+      </ul>
+      <li><b>HAL_S_FC.py</b>, a port of PASS1 of the original
+        Intermetrics HAL/S compiler to the Python 3 language.<br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="hal-s-interpreter.html"><b>yaHAL-S-FC.py</b></a>,
+        a partially-functional HAL/S compiler and interpreter.</li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="XPL-I.html#monitor"><b>ibmHex.py</b></a>,
+        a utility (and Python module) to convert back and forth between
+        IBM Hexadecimal Floating-Point format and human-readable (or
+        Python-readable) numbers.<br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>XCOM-I.py</b></a>,
+        a compiler for the XPL/I language, which is the standard ~1970
+        XPL language as extended by Intermetrics, Inc., for writing
+        their compiler for the HAL/S language.<br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/XPL-I.html#sim360"><b>sim360</b></a>,
+        a light-weight IBM System/360 CPU emulator.&nbsp; It is used
+        primarily in the validation process for XCOM-I.py (see above),
+        the XPL/I language compiler, but can be used for other purposes
+        as well.</li>
+    </ul>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <h2><a name="templates"></a>Python Templates for Peripheral Devices</h2>
+    If you are engaged in creating your own peripheral devices suitable
+    for the Virtual AGC framework, you might like to supplement <a
+      moz-do-not-send="true"
+      href="https://www.ibiblio.org/apollo/developer.html">the
+      description of the communication protocol</a> with running some
+    simple, model software that's easy to understand and to port.&nbsp;
+    The Python script <b>piPeripheral.py</b> <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
 
 
-          as such a model</a>, as do the more-fully worked-out <b>piDSKY.py</b>
-        and <b>piDEDA.py</b> programs.&nbsp; For example, in the
-        screenshot below, I am running <b>piDSKY.py</b> in parallel
-        with the more-usual DSKY emulation (<b>yaDSKY2</b>), but <b>piDSKY.py</b>
-        provides very different insight into the communication protocol
-        that may be more useful for an implementer.</li>
+
+      as such a model</a>, as do the more-fully worked-out <b>piDSKY.py</b>
+    and <b>piDEDA.py</b> programs.&nbsp; For example, in the screenshot
+    below, I am running <b>piDSKY.py</b> in parallel with the
+    more-usual DSKY emulation (<b>yaDSKY2</b>), but <b>piDSKY.py</b>
+    provides very different insight into the communication protocol that
+    may be more useful for an implementer.
+    <ul>
     </ul>
-    <div align="center"><img moz-do-not-send="true"
-        src="Info-VM64/piDSKY.jpg" alt="" height="628" width="1224"></div>
+    <div align="center"><img moz-do-not-send="true" src="piDSKY.jpg"
+        alt="" width="1224" height="628"></div>
     <p><br>
     </p>
     <h1><a name="Lubuntu"></a>Working With Lubuntu</h1>
@@ -586,7 +665,7 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
         box labeled "Open files with single click".</li>
       <li>Lubuntu's main menu is opened by using the icon that looks
         like&nbsp;<img moz-do-not-send="true"
-          src="Lubuntu_logo_only.svg" alt="" height="24" width="600"> in
+          src="Lubuntu_logo_only.svg" alt="" width="24" height="24"> in
         the lower-left corner of the screen.<br>
       </li>
       <li>Web browser: Firefox is found on the Lubuntu main menu under
@@ -667,15 +746,15 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
       the interconnections work.<br>
     </p>
     <div align="center"><img moz-do-not-send="true"
-        src="exampleKiCad.png" alt="" height="268" width="676"></div>
+        src="exampleKiCad.png" alt="" width="676" height="268"></div>
     <ul>
-      <li><img moz-do-not-send="true" src="Info-VM64/exampleToolbar.png"
-          alt="" height="154" align="right" width="79">These CAD
-        drawings are in the format of the KiCad EDA software, version
-        6.&nbsp; They can be directly used in later versions of KiCad,
-        but you'll see a harmless warning banner reading "This file was
-        created by an older versions of KiCad. It will be converted to
-        the new format when saved".</li>
+      <li><img moz-do-not-send="true" src="exampleToolbar.png" alt=""
+          width="79" height="154" align="right">These CAD drawings are
+        in the format of the KiCad EDA software, version 6.&nbsp; They
+        can be directly used in later versions of KiCad, but you'll see
+        a harmless warning banner reading "This file was created by an
+        older versions of KiCad. It will be converted to the new format
+        when saved".</li>
       <li>The schematics for any given drawing tend to consist of
         multiple pages, consisting of a top-level CAD file (always
         called module.kicad_sch) and supplemental pages that represent
@@ -697,10 +776,12 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
       <li>The electrical schematics directly related to the original
         paper drawings are stored in <a moz-do-not-send="true"
           href="file:///home/virtualagc/git/virtualagc-schematics/Schematics/">this
+
           folder</a>, while alternate schematics intended to convey the
         correct functionality without corresponding to any specific
         original drawing are instead in <a moz-do-not-send="true"
           href="file:///home/virtualagc/git/virtualagc-schematics/msSchematics/">this
+
           folder</a>.&nbsp; Note that the alternate drawings haven't
         been endowed with any convenient links from the desktop, so you
         have to navigate to them in a file browser and explicitly run
