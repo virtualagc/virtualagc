@@ -11,7 +11,7 @@ if [[ ! -d "$desktop" ]]
 then
         mkdir "$desktop"
 fi
-for f in [0-9]*
+for f in [0-9]* fixed_erasable_memory
 do
         if [[ -d "$f" ]]
         then
@@ -19,7 +19,7 @@ do
                 echo "Name=$f Schematics Viewer" >> temp.desktop
                 echo "GenericName=" >> temp.desktop
                 echo "Comment=" >> temp.desktop
-                echo "Exec=eeschema $schematics/$f/module.sch" >> temp.desktop
+                echo "Exec=eeschema $schematics/$f/module.kicad_sch" >> temp.desktop
                 echo "Type=Application" >> temp.desktop
                 echo "Icon=eeschema" >> temp.desktop
                 echo "Terminal=false" >> temp.desktop
