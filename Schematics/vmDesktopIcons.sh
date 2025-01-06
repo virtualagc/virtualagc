@@ -11,7 +11,7 @@ if [[ ! -d "$desktop" ]]
 then
         mkdir "$desktop"
 fi
-for f in [0-9]* fixed_erasable_memory
+for f in [0-9]* fixed_erasable_memory testVerilog
 do
         if [[ -d "$f" ]]
         then
