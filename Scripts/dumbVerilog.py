@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 # Copyright 2018 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
@@ -59,6 +59,8 @@
 #				with "pullup".
 #		2018-10-18 RSB	Added A52.
 #		2018-10-27 RSB	Changed simulation time units from 100ns/1ns to 1ns/1ps.
+#		2025-01-06 RSB	Converted from Python 2 to Python 3 using the 2to3 
+#				utility.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -185,7 +187,7 @@ def readSchematicFile(filename):
 	f = open(filename, "r")
 	newLines = f.readlines();
 	f.close();
-	print >> sys.stderr, "Read file " + filename + ", " + str(len(newLines)) + " lines"
+	print("Read file " + filename + ", " + str(len(newLines)) + " lines", file=sys.stderr)
 	inSheet = False
 	inComp = False
 	inNOR = False
@@ -299,7 +301,7 @@ if len(sys.argv) >= 3:
 					thisInit["k"]["delay"] = float(fields[4])
 				inits[fields[0]] = thisInit
 		except:
-			print >> sys.stderr, "Could not read inits file " + initsFile
+			print("Could not read inits file " + initsFile, file=sys.stderr)
 			error = True
 				
 	# Test validity of the moduleName
@@ -337,7 +339,7 @@ if len(sys.argv) >= 3:
 					pinsDB.append(fields[2:])
 			f.close()
 		except:
-			print >> sys.stderr, "Could not read pin DB " + pathToPinsTxt
+			print("Could not read pin DB " + pathToPinsTxt, file=sys.stderr)
 			error = True
 	
 	# Load the gate numbers of the NOR gates from the .sch file, if one has been specified.
@@ -363,7 +365,7 @@ if len(sys.argv) >= 3:
 					if schPadsJ1[i] != "?":
 						pinsDB[400 + i] = [ "?", schPadsJ4[i] ]
 		except:
-			print >> sys.stderr, "Could not read schematic file " + schFile
+			print("Could not read schematic file " + schFile, file=sys.stderr)
 			error = True
 	
 	wireType = "wire"
@@ -376,34 +378,34 @@ if len(sys.argv) >= 3:
 		lines = f.readlines()
 		f.close()
 	except:
-		print >> sys.stderr, "Could not read netlist " + netlistFilename
+		print("Could not read netlist " + netlistFilename, file=sys.stderr)
 		error = True
 	
 else:
-	print >> sys.stderr, "Wrong number of command-line arguments."
+	print("Wrong number of command-line arguments.", file=sys.stderr)
 	error = True
 
 if error:
-	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [WIRETYPE]]]]] >OUTPUT.v"
-	print >> sys.stderr, "MODULE is the name of the AGC module, A1 - A24 or A52."
-	print >> sys.stderr, "For \"modules\" that weren't part of the original AGC, but"
-	print >> sys.stderr, "are instead introduced for simulation purposes, any unique"
-	print >> sys.stderr, "alphanumeric (or '_', not leading with a digit) can be used."
-	print >> sys.stderr, "INPUT.net is a netlist output by KiCad in OrcadPCB2 format."
-	print >> sys.stderr, "If the optional path to pins.txt is omitted, it is assumed"
-	print >> sys.stderr, "that pins.txt is in the current directory.  If the optional"
-	print >> sys.stderr, "gate DELAY is omitted, then it is omitted from the Verilog."
-	print >> sys.stderr, "The optional (but not really, in practice!) INPUT.init file"
-	print >> sys.stderr, "provides initial conditions for any NOR gates that need it;"
-	print >> sys.stderr, "i.e., for feedback within flip-flop circuits.  The optional"
-	print >> sys.stderr, "SCHEMATIC.sch file is used to find the gate numbers associated"
-	print >> sys.stderr, "with the NOR gates, and to rename otherwise inconveniently-"
-	print >> sys.stderr, "named nets according to the gates driving them.  The WIRETYPE"
-	print >> sys.stderr, "argument, if present, chooses between the Verilog constructs"
-	print >> sys.stderr, "used for wire-AND'ing.  The default is 'wire' (uses pullups +"
-	print >> sys.stderr, "1'bz + wires), while the other choice is 'wand' (uses wands)."
-	print >> sys.stderr, "the default is 'wire'."
+	print("USAGE:", file=sys.stderr)
+	print("\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [WIRETYPE]]]]] >OUTPUT.v", file=sys.stderr)
+	print("MODULE is the name of the AGC module, A1 - A24 or A52.", file=sys.stderr)
+	print("For \"modules\" that weren't part of the original AGC, but", file=sys.stderr)
+	print("are instead introduced for simulation purposes, any unique", file=sys.stderr)
+	print("alphanumeric (or '_', not leading with a digit) can be used.", file=sys.stderr)
+	print("INPUT.net is a netlist output by KiCad in OrcadPCB2 format.", file=sys.stderr)
+	print("If the optional path to pins.txt is omitted, it is assumed", file=sys.stderr)
+	print("that pins.txt is in the current directory.  If the optional", file=sys.stderr)
+	print("gate DELAY is omitted, then it is omitted from the Verilog.", file=sys.stderr)
+	print("The optional (but not really, in practice!) INPUT.init file", file=sys.stderr)
+	print("provides initial conditions for any NOR gates that need it;", file=sys.stderr)
+	print("i.e., for feedback within flip-flop circuits.  The optional", file=sys.stderr)
+	print("SCHEMATIC.sch file is used to find the gate numbers associated", file=sys.stderr)
+	print("with the NOR gates, and to rename otherwise inconveniently-", file=sys.stderr)
+	print("named nets according to the gates driving them.  The WIRETYPE", file=sys.stderr)
+	print("argument, if present, chooses between the Verilog constructs", file=sys.stderr)
+	print("used for wire-AND'ing.  The default is 'wire' (uses pullups +", file=sys.stderr)
+	print("1'bz + wires), while the other choice is 'wand' (uses wands).", file=sys.stderr)
+	print("the default is 'wire'.", file=sys.stderr)
 	sys.exit(1)
 
 # If we're not using the pins DB, then we need to try and regenerate the data that would 
@@ -550,13 +552,13 @@ for line in lines:
 			# An output net.
 			outputs[fields[2]] = netName
 			continue
-		print >> sys.stderr, "Netlist entry \"" + line.strip() + "\" is neither an input nor an output."
+		print("Netlist entry \"" + line.strip() + "\" is neither an input nor an output.", file=sys.stderr)
 		sys.exit(1)
 
 # Can now write out the beginning of the Verilog module.
-print "// Verilog module auto-generated for AGC module " + moduleName + " by dumbVerilog.py"
-print ""
-print "module " + moduleName + " ( "
+print("// Verilog module auto-generated for AGC module " + moduleName + " by dumbVerilog.py")
+print("")
+print("module " + moduleName + " ( ")
 
 # The dictionaries inputs, outputs, and inouts may have items in common, and may have
 # duplicates.  We want to remove duplicate, add items that are in both inputs and inouts,
@@ -599,11 +601,11 @@ for name in newInputs + newInouts + newOutputs:
 	if len(line) > desiredLineLength:
 		if count > 0:
 			line += ","
-		print line
+		print(line)
 		line = ""
 if len(line) > 0:
-	print line
-print ");"
+	print(line)
+print(");")
 
 # Force the following signals to be wires (as opposed to wands), regardless of which 
 # wire-type has been chosen.  For example, SAx needs to do this because they come from
@@ -625,7 +627,7 @@ for item in newInputs:
 
 count = len(newNewInputs)
 if count > 0:
-	print ""
+	print("")
 	line = "input " + wireType + " rst"
 	for name in newNewInputs:
 		count -= 1
@@ -638,14 +640,14 @@ if count > 0:
 				line += ","
 			else:
 				line += ";"
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line + ";"
+		print(line + ";")
 
 count = len(forces)
 if count > 0:
-	print ""
+	print("")
 	line = "input wire"
 	for name in forces:
 		if count == len(forces):
@@ -660,10 +662,10 @@ if count > 0:
 				line += ","
 			else:
 				line += ";"
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line + ";"
+		print(line + ";")
 
 forces = []
 newNewInouts = []
@@ -675,7 +677,7 @@ for item in newInouts:
 
 count = len(newNewInouts)
 if count > 0:
-	print ""
+	print("")
 	line = "inout " + wireType
 	for name in newNewInouts:
 		count -= 1
@@ -690,14 +692,14 @@ if count > 0:
 				line += ","
 			else:
 				line += ";"
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line + ";"
+		print(line + ";")
 
 count = len(forces)
 if count > 0:
-	print ""
+	print("")
 	line = "inout wire"
 	for name in forces:
 		if count == len(forces):
@@ -712,14 +714,14 @@ if count > 0:
 				line += ","
 			else:
 				line += ";"
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line + ";"
+		print(line + ";")
 
 count = len(newOutputs)
 if count > 0:
-	print ""
+	print("")
 	line = "output " + wireType
 	for name in newOutputs:
 		count -= 1
@@ -734,15 +736,15 @@ if count > 0:
 				line += ","
 			else:
 				line += ";"
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line + ";"
+		print(line + ";")
 
-print ""
-print "parameter GATE_DELAY = " + rawDelay + "; // This default may be overridden at compile time."
-print "initial $display(\"Gate delay (" + moduleName + ") will be %f ns.\", GATE_DELAY);"
-print ""
+print("")
+print("parameter GATE_DELAY = " + rawDelay + "; // This default may be overridden at compile time.")
+print("initial $display(\"Gate delay (" + moduleName + ") will be %f ns.\", GATE_DELAY);")
+print("")
 
 # Now do another pass on the netlist to determine how the internal logic of the
 # module works.  We only need to look at the NOR gate components, because we already
@@ -891,8 +893,8 @@ if len(nors) > 0:
 				initLevel = nors[i][2]["output"] or nets[netName][2]["output"]
 				gateDelay = max(nors[i][2]["delay"], nets[netName][2]["delay"])
 			except:
-				print >> sys.stderr, nors[i][2]
-				print >> sys.stderr, nets[netName][2]
+				print(nors[i][2], file=sys.stderr)
+				print(nets[netName][2], file=sys.stderr)
 				sys.exit(1)
 			inputList = nets[netName][3:] + nors[i][3:]
 		finalArray = [gateName, netName, { "output":initLevel, "delay":gateDelay }]
@@ -917,11 +919,11 @@ if len(nors) > 0:
 		thisDelay = delay
 		if gate[2]["delay"] != 0:
 			thisDelay = " #" + str(gate[2]["delay"])
-		print "// Gate " + gate[0].replace("_", " ")
+		print("// Gate " + gate[0].replace("_", " "))
 		if translateToGates and netName in netToGate:
 			netName = netToGate[netName]
 		if wireType == "wire":
-			print "pullup(" + netName + ");"		
+			print("pullup(" + netName + ");")		
 			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ((0";
 		else:
 			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : !(0";
@@ -934,8 +936,8 @@ if len(nors) > 0:
 		if wireType == "wire":
 			outLine += ") ? 1'b0 : 1'bz"
 		outLine += ")" + ";"
-		print outLine
-print "// End of NOR gates"
+		print(outLine)
+print("// End of NOR gates")
 
 # And similarly, write out any Verilog for BUFFERs, RAMs, and ROMs:
 for device in buffers:
@@ -948,13 +950,13 @@ for device in buffers:
 			pins[n] = "1'b0"
 		elif pins[n] == "1":
 			pins[n] = "1'b1"
-	print "BUFFER " + refd.replace("-","_") + "("
-	print "  " + pins[1] + ", " + pins[19] + ", " + pins[2] + ", " + pins[4] + ", "	
-	print "  " + pins[6] + ", " + pins[8] + ", " + pins[11] + ", " + pins[13] + ", "	
-	print "  " + pins[15] + ", " + pins[17] + ", " + pins[18] + ", " + pins[16] + ", "	
-	print "  " + pins[14] + ", " + pins[12] + ", " + pins[9] + ", " + pins[7] + ", "	
-	print "  " + pins[5] + ", " + pins[3]
-	print ");"	
+	print("BUFFER " + refd.replace("-","_") + "(")
+	print("  " + pins[1] + ", " + pins[19] + ", " + pins[2] + ", " + pins[4] + ", ")	
+	print("  " + pins[6] + ", " + pins[8] + ", " + pins[11] + ", " + pins[13] + ", ")	
+	print("  " + pins[15] + ", " + pins[17] + ", " + pins[18] + ", " + pins[16] + ", ")	
+	print("  " + pins[14] + ", " + pins[12] + ", " + pins[9] + ", " + pins[7] + ", ")	
+	print("  " + pins[5] + ", " + pins[3])
+	print(");")	
 for device in rams:
 	refd = device["refd"]
 	pins = device["pins"]
@@ -965,18 +967,18 @@ for device in rams:
 			pins[n] = "1'b0"
 		elif pins[n] == "1":
 			pins[n] = "1'b1"
-	print "RAM " + refd.replace("-","_") + "("
-	print "  " + pins[6] + ", " + pins[17] + ", " + pins[41] + ", " + pins[40] + ", "	
-	print "  " + pins[39] + ", " + pins[1] + ", " + pins[2] + ", " + pins[3] + ", "	
-	print "  " + pins[4] + ", " + pins[5] + ", " + pins[18] + ", " + pins[19] + ", "
-	print "  " + pins[20] + ", " + pins[21] + ", " + pins[22] + ", " + pins[23] + ", "
-	print "  " + pins[24] + ", " + pins[25] + ", " + pins[42] + ", " + pins[43] + ", "	
-	print "  " + pins[44] + ", " + pins[7] + ", " + pins[8] + ", " + pins[9] + ", "
-	print "  " + pins[10] + ", " + pins[13] + ", " + pins[14] + ", " + pins[15] + ", "
-	print "  " + pins[16] + ", " + pins[29] + ", " + pins[30] + ", " + pins[31] + ", "
-	print "  " + pins[32] + ", " + pins[35] + ", " + pins[36] + ", " + pins[37] + ", "
-	print "  " + pins[38]
-	print ");"	
+	print("RAM " + refd.replace("-","_") + "(")
+	print("  " + pins[6] + ", " + pins[17] + ", " + pins[41] + ", " + pins[40] + ", ")	
+	print("  " + pins[39] + ", " + pins[1] + ", " + pins[2] + ", " + pins[3] + ", ")	
+	print("  " + pins[4] + ", " + pins[5] + ", " + pins[18] + ", " + pins[19] + ", ")
+	print("  " + pins[20] + ", " + pins[21] + ", " + pins[22] + ", " + pins[23] + ", ")
+	print("  " + pins[24] + ", " + pins[25] + ", " + pins[42] + ", " + pins[43] + ", ")	
+	print("  " + pins[44] + ", " + pins[7] + ", " + pins[8] + ", " + pins[9] + ", ")
+	print("  " + pins[10] + ", " + pins[13] + ", " + pins[14] + ", " + pins[15] + ", ")
+	print("  " + pins[16] + ", " + pins[29] + ", " + pins[30] + ", " + pins[31] + ", ")
+	print("  " + pins[32] + ", " + pins[35] + ", " + pins[36] + ", " + pins[37] + ", ")
+	print("  " + pins[38])
+	print(");")	
 for device in roms:
 	refd = device["refd"]
 	pins = device["pins"]
@@ -987,25 +989,25 @@ for device in roms:
 			pins[n] = "1'b0"
 		elif pins[n] == "1":
 			pins[n] = "1'b1"
-	print "ROM " + refd.replace("-","_") + "("
-	print "  " + pins[26] + ", " + pins[28] + ", " + pins[11] + ", " + pins[25] + ", "	
-	print "  " + pins[24] + ", " + pins[23] + ", " + pins[22] + ", " + pins[21] + ", "	
-	print "  " + pins[20] + ", " + pins[19] + ", " + pins[18] + ", " + pins[8] + ", "
-	print "  " + pins[7] + ", " + pins[6] + ", " + pins[5] + ", " + pins[4] + ", "
-	print "  " + pins[3] + ", " + pins[2] + ", " + pins[1] + ", " + pins[48] + ", "	
-	print "  " + pins[29] + ", " + pins[31] + ", " + pins[33] + ", " + pins[35] + ", "
-	print "  " + pins[38] + ", " + pins[40] + ", " + pins[42] + ", " + pins[44] + ", "
-	print "  " + pins[30] + ", " + pins[32] + ", " + pins[34] + ", " + pins[36] + ", "
-	print "  " + pins[39] + ", " + pins[41] + ", " + pins[43] + ", " + pins[45]
-	print ");"	
+	print("ROM " + refd.replace("-","_") + "(")
+	print("  " + pins[26] + ", " + pins[28] + ", " + pins[11] + ", " + pins[25] + ", ")	
+	print("  " + pins[24] + ", " + pins[23] + ", " + pins[22] + ", " + pins[21] + ", ")	
+	print("  " + pins[20] + ", " + pins[19] + ", " + pins[18] + ", " + pins[8] + ", ")
+	print("  " + pins[7] + ", " + pins[6] + ", " + pins[5] + ", " + pins[4] + ", ")
+	print("  " + pins[3] + ", " + pins[2] + ", " + pins[1] + ", " + pins[48] + ", ")	
+	print("  " + pins[29] + ", " + pins[31] + ", " + pins[33] + ", " + pins[35] + ", ")
+	print("  " + pins[38] + ", " + pins[40] + ", " + pins[42] + ", " + pins[44] + ", ")
+	print("  " + pins[30] + ", " + pins[32] + ", " + pins[34] + ", " + pins[36] + ", ")
+	print("  " + pins[39] + ", " + pins[41] + ", " + pins[43] + ", " + pins[45])
+	print(");")	
 
-print ""
+print("")
 # If there are output signals which aren't really being driven by anything, we need to 
 # fix them up.
 for n in newOutputs:
 	if n not in assigned:
 		#print "pulldown(" + n + ");"
-		print "assign " + n + " = 1'b0;"
-print ""
-print "endmodule"
+		print("assign " + n + " = 1'b0;")
+print("")
+print("endmodule")
 
