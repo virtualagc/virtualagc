@@ -22,7 +22,9 @@
       <li><a moz-do-not-send="true" href="#LubuntuUpdates">Lubuntu
           Updates</a></li>
       <li><a moz-do-not-send="true" href="#kicad">Working With Apollo
-          GNC Electrical Schematics</a><br>
+          GNC Electrical Schematics</a></li>
+      <li><a moz-do-not-send="true" href="#verilog">Working With Verilog
+          Electrical Simulation of the AGC</a><br>
       </li>
     </ul>
     <h1><a name="WhatsThis"></a>What's this Virtual Machine?</h1>
@@ -33,13 +35,13 @@
       instructions or the quirks of the various computer platforms
       (Windows, Mac OS, Linux, <i>et al.</i>, in multiple
       operating-system versions) that Virtual AGC targets.&nbsp; I won't
-      describe the Virtual AGC Project in any detail here, since if you
-      don't have a pretty good idea already what it is, then you can be
-      assured that you don't need this VM at all and can stop reading
-      right here.&nbsp; It suffices to say that the project provides
-      information, software, and engineering drawings related to the
-      flight computers used in the Gemini, Apollo, and Space Shuttle
-      spacecraft and launch vehicles.<br>
+      describe the Virtual AGC Project itself in any detail here, since
+      if you don't have a pretty good idea already what it is, then you
+      can be assured that you don't need this VM at all and can stop
+      reading right here.&nbsp; It suffices to say that the project
+      provides information, software (both original and modern), and
+      engineering drawings related to the flight computers used in the
+      Gemini, Apollo, and Space Shuttle spacecraft and launch vehicles.<br>
     </p>
     <p>With this VM you'll be able to run all of the software provided
       by the Virtual AGC project, as well as to view Apollo guidance
@@ -64,13 +66,22 @@
         <br>
       </font>
       <ul>
-        <li><font size="-1">Login is automatic, but your username and
-            password are both "virtualagc".&nbsp; Your home directory is
-            /home/virtualagc, usually abbreviated as ~.</font></li>
+        <li><font size="-1">Login is automatic to the Lubuntu
+            desktop.&nbsp; <br>
+          </font></li>
+        <li><font size="-1">If at some point you need to know it, your
+            username and password are both "virtualagc".&nbsp; <br>
+          </font></li>
+        <li><font size="-1">Your home directory is /home/virtualagc,
+            usually abbreviated as ~.</font></li>
         <li><font size="-1">The Virtual AGC source-code tree is
             maintained in the <a moz-do-not-send="true"
               href="file:///home/virtualagc/git/virtualagc/">subfolder
-              git/virtualagc/</a> under your home directory.<br>
+              git/virtualagc/</a> under your home directory.</font></li>
+        <li><font size="-1">The electrical-schematics tree is maintained
+            in the <a moz-do-not-send="true"
+              href="file:///home/virtualagc/git/virtualagc-schematics/">subfolder
+              git/virtualagc-schematics/</a> under your home directory.<br>
           </font></li>
         <li><font size="-1">Your "installed" version of the built
             Virtual AGC is in the <a moz-do-not-send="true"
@@ -88,17 +99,18 @@
     <h1><a name="JoystickSetup"></a>Setup of VirtualBox<br>
     </h1>
     <p>I doubt if most people using modern computers will need any setup
-      to use the Virtual AGC VM, beyond whatever you've already done to
-      be reading this pleasant little note.&nbsp; However, there are
-      some optional things you might want to do.&nbsp; If so, shut down
-      the VM, if it's running, and look at VirtualBox's settings for the
-      VirtualAGC-VM64 VM:<br>
+      to use the Virtual AGC VM, beyond whatever you've <i>already</i>
+      done to be reading this pleasant little note.&nbsp; However, there
+      are some optional things you might want to do.&nbsp; If so, shut
+      down the VM, if it's running, and look at VirtualBox's settings
+      for the VirtualAGC-VM64 VM:<br>
     </p>
     <ul>
       <li>As delivered, the VM is set up to use 4 CPU cores.&nbsp; This
         can be changed in the VirtualBox Settings/System/Processor
         window.&nbsp; I have run it with 1 CPU core without any apparent
-        difficulty.<br>
+        difficulty, but this is nevertheless the case of "more is
+        better".<br>
       </li>
       <li>Also as delivered, the VM is set to use 4GB of memory.&nbsp;
         This can be changed in the VirtualBox
@@ -115,13 +127,13 @@
         host computer, and only return control after shutting down the
         VM.</li>
     </ul>
-    <blockquote><font size="-1"><b>Warning:</b>&nbsp; My 3D joystick
-        seems to be misidentified by some software within the VM as a
-        tablet (i.e., a touchpad).&nbsp; So while it can be used as a
-        ACA/RHC, it may also just cause random stuff to occur on the
-        desktop as long as it's enabled.&nbsp; Which makes using it less
-        appealing for me.&nbsp; Whether that's the case on your computer
-        with your 3D joystick, who knows?</font><br>
+    <blockquote><font size="-1"><b>Warning:</b>&nbsp; My own personal 3D
+        joystick seems to be misidentified by some software within the
+        VM as a tablet (i.e., a touchpad).&nbsp; So while it can be used
+        as a ACA/RHC, it may also just cause random stuff to occur on
+        the desktop as long as it's enabled.&nbsp; Which makes using it
+        less appealing for me.&nbsp; Whether that's the case on your
+        computer with your 3D joystick, who knows?</font><br>
     </blockquote>
     <ul>
     </ul>
@@ -163,8 +175,8 @@
         next section) that explains how to run an out-of-date version of
         Orbiter on Linux using WINE, so perhaps some day Orbiter w/NASSP
         will be included here.&nbsp; However, that day is not
-        today.&nbsp; WINE is not installed by default on the VM, because
-        it's a rather large package.</font><br>
+        today.&nbsp; Due to its large size WINE is not installed by
+        default on the VM.</font><br>
     </blockquote>
     <p> </p>
     <h1><a name="Desktop"></a>Virtual AGC Facilities Available On the
@@ -194,13 +206,17 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     </p>
     <p><img moz-do-not-send="true" src="github.com.png" alt=""
         height="24"> takes you to the Virtual AGC Project's software
-      repository at GitHub.<br>
+      repository at GitHub.&nbsp; The corresponding <i>local</i>
+      repository within this VM is <a moz-do-not-send="true"
+        href="file:///home/virtualagc/git/virtualagc/">here</a>.&nbsp;
+      Immediately after an update (see next item), the local repository
+      is an identical copy of the master at GitHub.<br>
     </p>
     <p><img moz-do-not-send="true" src="update.png" alt="" height="24">
       updates the Virtual AGC software in this VM by downloading all of
       the latest source code from the GitHub repository, and rebuilding
       it.&nbsp; After performing an update, an additional icon
-      (Update.log) will appear on the desktop.&nbsp; This won't be of
+      (Update.log) will appear on the desktop.&nbsp; The log won't be of
       any interest to you, I expect, but is available to be sent to us
       in case you encounter some difficulty updating.<br>
     </p>
@@ -214,8 +230,10 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     </p>
     <img moz-do-not-send="true" src="eeschema.svg" alt="" width="24"
       height="24"> lets you view the original AGC Guidance, Navigation
-    &amp; Control electrical schematics, as transcribed for a modern
-    computer-aided design (CAD) system.
+    &amp; Control electrical schematics — e.g., electrical schematics
+    for the AGC and DSKY —, as transcribed for a modern computer-aided
+    design (CAD) system. There's further explanation in <a
+      moz-do-not-send="true" href="#kicad">a later section</a>.<br>
     <p><img moz-do-not-send="true" src="archive.org.png" alt=""
         height="24"> takes you the Virtual AGC Project section of The
       Internet Archive, which contains the highest-available resolution
@@ -225,7 +243,7 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     </p>
     <p><img moz-do-not-send="true" src="LM.png" alt="" height="24">
       takes you to the website of the NASSP (i.e., Apollo) add-on for
-      the Orbiter spaceflight simulator, into which Virtual AGC is
+      the Orbiter spaceflight simulator, into which Virtual AGC has been
       integrated. Unfortunately, in <i>this</i> VM you cannot actually
       fly simulated Apollo missions using the Orbiter/NASSP. That's
       because Orbiter is compatible with Microsoft Windows only, and
@@ -244,15 +262,6 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
     the LVDC.&nbsp; Running LVDC software other than PAST must be done
     from the command line (see the next section).<br>
     <br>
-    <img moz-do-not-send="true" src="kicad.svg" alt="" width="24"
-      height="24"> opens the electrical circuitry editor (KiCad EDA),
-    for viewing electrical schematics for the Apollo guidance system,
-    and particularly for the AGC and DSKY.&nbsp; Since KiCad (and EDA
-    software in general) may not be a topic about which there is common
-    knowledge, <a moz-do-not-send="true" href="#kicad">there's a
-      section below that covers some elementary facts</a> about use of
-    this software.<br>
-    <br>
     <img moz-do-not-send="true" src="utilities-terminal.png" alt=""
       width="24" height="24"> opens a Lubuntu command line.&nbsp; See
     the very next section below for reasons why you might wish to do
@@ -269,18 +278,18 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
       graphical interface as in the preceding section, whereas many
       others are available only via a command line.&nbsp; In this
       section, we have a brief summary of some of the more-useful
-      Virtual AGC utilities available via the command line, but this is
-      not a comprehensive list.&nbsp; In addition to the hyperlinked
-      documentation, with a few exceptions, these programs generally
-      accept a command-line option <code>--help</code> for additional
-      information.<br>
+      Virtual AGC utilities available via the command line, but <i>this
+        is not a comprehensive list</i> and may be updated in the
+      future.&nbsp; In addition to the hyperlinked documentation, with a
+      few exceptions, these programs generally accept a command-line
+      option <code>--help</code> for additional information.<br>
     </p>
     <p>The programs whose names and descriptions are struck out <strike>like
 
 
 
-        so</strike> are not yet available and therefore are not
-      included.<br>
+        so</strike> are not (yet?) available and therefore are not
+      included the VM.<br>
     </p>
     <ul>
     </ul>
@@ -408,11 +417,7 @@ href="https://www.ibiblio.org/apollo/Block1.html#John_Pultoraks_Assembler_and_Si
         that assembler accepts only a custom syntax unique to it, rather
         than the original Block I source-code syntax.&nbsp; However, <b>yaYUL</b>
         (see above) can create executable object files accepted by this
-        program, so that it continues to be useful as a debugger.&nbsp;
-        There apparently is also <a moz-do-not-send="true"
-          href="https://github.com/donnaware/AGC">a visual-debugging
-          environment for it</a>, but that is Windows-only and therefore
-        unavailable in this VM.</li>
+        program, so that it continues to be useful as a debugger.</li>
     </ul>
     <ul>
       <ul>
@@ -523,13 +528,15 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
     <ul>
       <ul>
       </ul>
-      <li><b>HALSFC</b>, the original Intermetrics/United Space Alliance
-        compiler for the HAL/S computer language in which Space Shuttle
-        flight software was written, as ported for "modern" computer
-        systems via the XCOM-I.py XPL/I language compiler (see
-        below).&nbsp; HALSFC is actually a shell script that integrates
-        the various compiler passes, which are each implemented as
-        stand-alone programs, as follows:</li>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/HAL.html"><b>HALSFC</b></a>,
+        the original Intermetrics/United Space Alliance compiler for the
+        HAL/S computer language in which Space Shuttle flight software
+        was written, as ported for "modern" computer systems via the
+        XCOM-I.py XPL/I language compiler (see below).&nbsp; HALSFC is
+        actually a shell script that integrates the various compiler
+        passes, which are each implemented as stand-alone programs, as
+        follows:</li>
       <ul>
         <br>
         <li><b>HALSFC-PASS1</b>, "phase 1" (parsing), specialized for
@@ -568,8 +575,9 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
       </li>
       <ul>
       </ul>
-      <li><b>readObject101S.py</b>, a program for reading and parsing
-        AP-101S object files.<br>
+      <li><a moz-do-not-send="true"
+          href="https://www.ibiblio.org/apollo/HALLINK101S.html#reverse"><b>readObject101S.py</b></a>,
+        a program for reading and parsing AP-101S object files.<br>
       </li>
       <ul>
       </ul>
@@ -584,8 +592,8 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
       </li>
       <ul>
       </ul>
-      <li><b>HAL_S_FC.py</b>, a port of PASS1 of the original
-        Intermetrics HAL/S compiler to the Python 3 language.<br>
+      <li><b>HAL_S_FC.py</b>, a fully-functional port of PASS1 of the
+        original Intermetrics HAL/S compiler to the Python 3 language.<br>
       </li>
       <ul>
       </ul>
@@ -614,6 +622,19 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
         primarily in the validation process for XCOM-I.py (see above),
         the XPL/I language compiler, but can be used for other purposes
         as well.</li>
+    </ul>
+    <h2>Electrical Schematics and Their Verilog Simulation</h2>
+    <p><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_Software">See
+        the online descriptions here</a>.&nbsp; Few of them are likely
+      to be of interest to you, the users of the VM.&nbsp; Those which I
+      think are potentially of interest are:<br>
+    </p>
+    <ul>
+      <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Verilog.html#Converting_Netlist_to_Verilog">dumbVerilog.py</a>,
+        which converts the netlist of an AGC "logic module" to Verilog
+        source code.</li>
     </ul>
     <ul>
       <ul>
@@ -734,32 +755,61 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
       the CAD files for the Apollo Guidance, Navigation &amp; Control
       (GNC) System electrical schematics in the Virtual AGC VM.<br>
     </p>
-    <p>You may perhaps wonder <i>why</i> you would want to view those
-      files, using EDA software you're not familiar with, as opposed to
-      simply looking at the scans of the original drawings which we
-      provide only.&nbsp; Well, aside from the fact that the CAD
-      drawings will be a lot prettier and easier to read than ancient
-      scans of paper drawings, you'll have useful capabilities you
-      wouldn't otherwise have.&nbsp; For example, you can highlight a
-      given net, with the the highlighting extending even across
-      multiple pages of the drawing, making it much easier to see how
-      the interconnections work.<br>
+    <p>At present, there are about 140 CAD files available, referenced
+      by their original drawing numbers.&nbsp; Unfortunately — for
+      example —, while you can easily see that we present you with
+      drawing 2005260A, there's not yet any way within the VM that you
+      can tell at a glance that drawing 2005260A represents "logic
+      module A2" in the AGC of Apollo 11's Lunar Module.&nbsp; In other
+      words, there's nothing here in the VM that says to you "Drawing
+      2005260A is relevant to me and I want to look at it!"&nbsp; That's
+      a deficiency I hope to correct in the future.&nbsp; In the
+      meantime, what you have is the ability to work in the opposite
+      direction:&nbsp; You can use our online <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Number_or_Title_">drawing-tree
+        lookup facility</a> to choose "Apollo 11 Lunar Module" to reach
+      drawing 2014999-101 of the GN&amp;C system, then choose "COMPUTER
+      ASSEMBLY" to reach drawing 2003993-031, at which point you can
+      select "LOGIC MODULE A2" to reach drawing 2003888-021, and finally
+      you'll see that it has the electrical schematic 2005260A, which
+      you can view either in its scanned form or as an image exported
+      from the CAD file ... or know to view the actual CAD file here in
+      the VM.<br>
+    </p>
+    <p>You may perhaps wonder <i>why</i> you would want to view these
+      CAD files here in the VM, using EDA software you're not familiar
+      with, as opposed to simply looking at the images I just now told
+      you we provide online anyway!&nbsp; Well, aside from the fun
+      factor, you have useful capabilities within the CAD system that
+      you wouldn't otherwise have just from viewing the images of the
+      drawings.&nbsp; For example, you perform searches on component
+      reference designators or net names, or even on resistor values or
+      component types.&nbsp; Or you can generate netlist files in a
+      variety of formats.&nbsp; Or you can highlight a given electrical
+      net, with the highlighting extending even across multiple pages of
+      the drawing, making it much easier to see how the interconnections
+      work.&nbsp; In the screenshot below, you see a net that's
+      highlighted <font color="#cc33cc">like so</font>.<br>
     </p>
     <div align="center"><img moz-do-not-send="true"
         src="exampleKiCad.png" alt="" width="676" height="268"></div>
     <ul>
       <li><img moz-do-not-send="true" src="exampleToolbar.png" alt=""
           width="79" height="154" align="right">These CAD drawings are
-        in the format of the KiCad EDA software, version 6.&nbsp; They
-        can be directly used in later versions of KiCad, but you'll see
-        a harmless warning banner reading "This file was created by an
-        older versions of KiCad. It will be converted to the new format
-        when saved".</li>
+        in the format of the <a moz-do-not-send="true"
+          href="https://www.kicad.org/">KiCad EDA software</a>, version
+        6, and in particular for KiCad's schematic editor, <b>eeschema</b>.&nbsp;
+        The CAD files can be directly used in later versions of KiCad,
+        as is the case for this VM, but you'll see a harmless warning
+        banner reading "This file was created by an older versions of
+        KiCad. It will be converted to the new format when saved".</li>
       <li>The schematics for any given drawing tend to consist of
         multiple pages, consisting of a top-level CAD file (always
         called module.kicad_sch) and supplemental pages that represent
         either separate "sheets" of the original drawing or else
-        reusable "blocks".&nbsp; You can descend into these extra sheets
+        reusable "blocks".&nbsp; So when you open a drawing, you
+        sometimes just see some rectangular objects with markings like
+        Page 1 or Page 2.&nbsp; You can descend into these extra sheets
         or blocks by double-clicking them.</li>
       <li>You can zoom in or zoom out using a mouse scroll-wheel.</li>
       <li>To pan, you hold in the <i>rightmost</i> mouse button while
@@ -769,12 +819,12 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
         "Select" mode, which means that the cursor looks like an
         arrowhead.&nbsp; You activate this mode using the up-arrow
         hotbutton on the toolbar to the right of the drawing (as in the
-        image to the right).&nbsp; The hotbutton immediately below that,
-        which is the one active in the image to the right, is the
-        "Highlight" mode that I used in the screenshot above having a
-        highlighted net.</li>
-      <li>The electrical schematics directly related to the original
-        paper drawings are stored in <a moz-do-not-send="true"
+        image to the right).&nbsp; The hotbutton immediately below that
+        instead enables the "Highlight" mode that I used in the
+        screenshot above having a highlighted net.</li>
+      <li>The electrical schematics for which desktop icons are provided
+        are directly related to the original paper drawings are stored
+        in <a moz-do-not-send="true"
           href="file:///home/virtualagc/git/virtualagc-schematics/Schematics/">this
 
           folder</a>, while alternate schematics intended to convey the
@@ -784,10 +834,65 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
 
           folder</a>.&nbsp; Note that the alternate drawings haven't
         been endowed with any convenient links from the desktop, so you
-        have to navigate to them in a file browser and explicitly run
-        the KiCad schematic viewer yourself if you're interested in
-        them.<br>
+        have to navigate to them in a file browser and explicitly run <b>eeschema</b>
+        yourself if you're interested in them.&nbsp; The top-level
+        schematic file for any given drawing is called
+        "module.kicad_sch".</li>
+    </ul>
+    <h1><a name="verilog"></a>Working With Verilog Electrical Simulation
+      of the AGC</h1>
+    <p><i>(This is presently inoperative due to change in KiCad file
+        formats.&nbsp; The description will be updated when that change
+        has been accounted for.)</i><br>
+    </p>
+    <p>The Verilog-based simulation process for Virtual AGC is <a
+        moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/Verilog.html">described
+        online here</a>. That description is unfortunately a bit light
+      on details such as what you are actually supposed to type into the
+      command line to use the programs it discusses.<br>
+    </p>
+    <p>In so far as the VM specifically is concerned, some details it
+      may be helpful to know include:</p>
+    <ul>
+      <li>Location, location, location!&nbsp; The CAD files for the
+        electrical schematics, as mentioned in the preceding section,
+        are in the folder ~/git/virtualagc-schematics/Schematics/.&nbsp;
+        So for example, where the online description mentions the
+        testVerilog/ folder, it's really talking about
+        ~/git/virtualagc-schematics/Schematics//testVerilog/.</li>
+      <li>Netlist generation:&nbsp; Each of the electrical-schematic CAD
+        folders contains an already-generated netlist file for that
+        schematic, and that schematic, and it's always named
+        "module.net".&nbsp; It's ready to be used, as-is!&nbsp; However,
+        if you choose to generate your own netlist file for a schematic,
+        you can do it from within <b>eeschema</b> by using
+        File/Export/Netlist from the main menu; among the output
+        formats, choose the OrcadePCB2 format.&nbsp; Alternately, it can
+        be done directly from a command line with a command something
+        like</li>
+    </ul>
+    <blockquote>
+      <blockquote>
+        <pre>kicad-cli sch export netlist --output <i>FILENAME</i>.net --format orcadpcb2 module.kicad_sch<br></pre>
+      </blockquote>
+    </blockquote>
+    <ul>
+      <li>The only electrical circuits which are simulated are purely
+        digital ones; i.e., those consisting of interconnected logic
+        gates rather than analog circuits that have resistors,
+        capacitors, inductors, and such.&nbsp; In the AGC, the only
+        logic gates used were triple-input NOR gates.&nbsp; There were
+        no inverters, AND gates, flip-flops, etc.&nbsp; Any place those
+        were needed, they were synthesized by means of triple-input NOR
+        gates.</li>
+      <li>TBD<br>
       </li>
+    </ul>
+    <blockquote>
+      <pre><br></pre>
+    </blockquote>
+    <ul>
     </ul>
     <ul>
     </ul>

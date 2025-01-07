@@ -29,17 +29,18 @@ then
         echo ""
         echo This script compiles a HAL/S file to an AP-101S object-code file.
         echo ""
-        echo "     HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]"
+        echo "     HALSFC SOURCE.hal [ TEST [ PARMFIELD [ TARGET [ EXT ]]]]"
         echo ""
         echo Parameters appear in the indicated order.  Missing parameters
-        echo in the middle of the list can use \"\" as place markers for the.
+        echo in the middle of the list can use \"\" as place markers for the
         echo defaults.  The parameters are interpreted as follows:
         echo ""
         echo "     SOURCE.hal The HAL/S source-code file."
-        echo "     TEST       Perform all available validity tests."
-        echo "     PARMS      Comma-separated list of compiler options."
+        echo "     TEST       If not blank (default), perform all available validity tests."
+        echo "                (Requires NOTABLES in the PARMFIELD.)"
+        echo "     PARMFIELD  Comma-separated list of HAL/S options.  Default, blank."
         echo "     TARGET     Either PFS (default) or BFS."
-        echo "     EXT        Either blank (default) or .exe (cross compilation)"
+        echo "     EXTENSION  Either blank (native) or .exe (cross compiling for Windows)"
         echo ""
         exit 1
 fi
