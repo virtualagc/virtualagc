@@ -20,676 +20,275 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
       <tbody>
         <tr>
           <td colspan="4" rowspan="1" valign="top">
-            <div align="center"> <big><b>Current Versions of Virtual
-                  AGC Downloads</b></big><br>
+            <div align="center"> <big><b>Available Downloads</b></big><br>
             </div>
           </td>
         </tr>
         <tr>
-          <th valign="bottom" align="left">Target Platform<small><br>
+          <th align="left" valign="bottom">Target Platform<small><br>
             </small></th>
-          <th valign="bottom" align="left"> Description<small><br>
+          <th align="left" valign="bottom"> Description<small><br>
             </small></th>
-          <th valign="bottom" align="left">Download Version<small><br>
+          <th align="left" valign="bottom">Download<small><br>
             </small></th>
-          <th valign="bottom" align="left"> Instructions<small><br>
+          <th align="left" valign="bottom"> Instructions<small><br>
             </small></th>
         </tr>
         <tr>
-          <td valign="middle">All platforms<br>
+          <td valign="middle">Any<br>
           </td>
-          <td valign="middle">Complete source code (Apps, AGC, and AEA)<br>
+          <td valign="middle">Complete source code.<br>
           </td>
           <td valign="middle"><a
               href="https://github.com/virtualagc/virtualagc">Current at
               GitHub</a></td>
           <td valign="middle"><a
-              href="#Downloading_and_Building_Virtual_AGC">Building from
-              source</a><br>
+              href="#Downloading_and_Building_Virtual_AGC">Building
+              Virtual AGC from source</a><br>
           </td>
         </tr>
         <tr>
-          <td valign="middle">Windows, Mac OS X, Linux, Solaris, or
-            FreeBSD (32- or 64-bit 'x86)<br>
-          </td>
-          <td valign="middle">VirtualBox virtual machine (Apps, AGC
-            source code, and visual AGC debugging). <br>
+          <td valign="middle">Windows, Mac OS, Linux, Solaris, FreeBSD </td>
+          <td valign="middle">64-bit 'x86 Virtual Machine (VM) guest
+            prepared for use with VirtualBox, but with a little effort
+            in some other popular hypervisors as well:<br>
             <br>
-            <font size="-1">Since the VM is a rather substantial
-              download (~1GB), you normally wouldn't want to download it
-              very often, and instead would just update it with new
-              VirtualAGC software, as needed, after the initial
-              download.&nbsp; But sometimes the improvements to the VM
-              itself are substantial enough to justify re-downloading it
-              in its entirety, so here is a brief change history to let
-              you decide.&nbsp; Note that older versions of the VM are <i>not</i>
-              retained on this site, so only the latest one listed in
-              the change history is still available.&nbsp; </font><font
-              size="-1">Note also that a complete re-download of the VM
-              requires erasing the old VM, putting the downloaded one in
-              the same location as the old VM on your host machine.</font>
+            <table cellspacing="2" cellpadding="2" border="1"
+              align="center" width="80%">
+              <tbody>
+                <tr>
+                  <th rowspan="2" colspan="1" valign="bottom">Hypervisor<br>
+                  </th>
+                  <th rowspan="1" colspan="5" valign="bottom">Host
+                    Systems Supported<br>
+                  </th>
+                  <th rowspan="1" colspan="2" valign="bottom">Virtual
+                    Disk<br>
+                  </th>
+                  <th rowspan="2" colspan="1" valign="bottom">Hypervisor
+                    Cost<br>
+                  </th>
+                  <th rowspan="2" colspan="1" valign="bottom"><sup>†</sup>Tested?</th>
+                </tr>
+                <tr>
+                  <th valign="bottom">Windows<br>
+                  </th>
+                  <th valign="bottom">Mac<br>
+                  </th>
+                  <th valign="bottom">Linux<br>
+                  </th>
+                  <th valign="bottom">FreeBSD<br>
+                  </th>
+                  <th valign="bottom">Solaris<br>
+                  </th>
+                  <th valign="bottom">Native Format<br>
+                  </th>
+                  <th valign="bottom"><sup>*</sup>Conversion<br>
+                    Needed?<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+                      href="https://www.virtualbox.org/">VirtualBox</a></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle">VDI<br>
+                  </td>
+                  <td valign="middle">No<br>
+                  </td>
+                  <td valign="middle">Free<br>
+                  </td>
+                  <td valign="middle"><font color="#009900">Yes (v. 7.1)<br>
+                    </font></td>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+                      href="https://www.qemu.org/">QEMU</a></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle">QCOW<br>
+                  </td>
+                  <td valign="middle">Preferred but not required<br>
+                  </td>
+                  <td valign="middle">Free<br>
+                  </td>
+                  <td valign="middle"><font color="#009900">Yes (v. 9.2)<br>
+                    </font></td>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+                      href="https://www.vmware.com/">VMware Workstation
+                      Pro</a></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No</font><br>
+                  </td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle">VMDK<br>
+                  </td>
+                  <td valign="middle">Yes</td>
+                  <td valign="middle">$$$, but free for personal use</td>
+                  <td valign="middle"><font color="#009900">Yes (v.
+                      17.6)<br>
+                    </font></td>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+                      href="https://access.broadcom.com/default/ui/v1/signin/">VMware
+
+                      Fusion Pro</a></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle">VMDK<br>
+                  </td>
+                  <td valign="middle">Yes</td>
+                  <td valign="middle">$$$, but free for personal use</td>
+                  <td valign="middle"><font color="#cc9933">No<br>
+                    </font></td>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v">Hyper-V</a><br>
+                  </td>
+                  <td valign="middle"><font color="#009900">Yes</font></td>
+                  <td valign="middle"><font color="#ff0000">No</font><br>
+                  </td>
+                  <td valign="middle"><font color="#ff0000">No</font><br>
+                  </td>
+                  <td valign="middle"><font color="#ff0000">No</font><br>
+                  </td>
+                  <td valign="middle"><font color="#ff0000">No</font><br>
+                  </td>
+                  <td valign="middle">VHD<br>
+                  </td>
+                  <td valign="middle">Yes</td>
+                  <td valign="middle">Free<br>
+                  </td>
+                  <td valign="middle"><font color="#cc9933">No</font></td>
+                </tr>
+                <tr>
+                  <td valign="middle"><a moz-do-not-send="true"
+                      href="https://www.parallels.com/">Parallels</a></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#009900">Yes<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle"><font color="#ff0000">No<br>
+                    </font></td>
+                  <td valign="middle">HDD<br>
+                  </td>
+                  <td valign="middle">Preferred but not required<br>
+                  </td>
+                  <td valign="middle">$$$, but cheaper for
+                    non-commercial use, with a free 14-day trial</td>
+                  <td valign="middle"><font color="#cc9933">No<br>
+                    </font></td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="10" valign="top"><font
+                      size="-1"><b>Notes:</b></font><br>
+                    <sup>*</sup><font size="-1">Conversion of the
+                      downloaded virtual disk from VirtualBox format
+                      (VDI) to the native format of other hypervisors
+                      mentioned above can be performed by both
+                      VirtualBox or by QEMU.<br>
+                    </font><sup>†</sup><font size="-1">All testing was
+                      done on a Linux host machine, and the VM worked
+                      fine for all hypervisors I was able to test.</font><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            The VM provides the ability to run or build <i>all</i>
+            software provided by the Virtual AGC Project that's related
+            to Gemini, Apollo, or the Space Shuttle, including software
+            not covered by the build-instructions found later on this
+            page.&nbsp; This avoids the necessity of manually performing
+            tricky builds and installations, as well as the risk that
+            these builds or installations will fail on your particular
+            computer platform.&nbsp; However, it does not (yet?) include
+            original flight software source-code for the LVDC or Space
+            Shuttle that we've been holding back under fear of ITAR
+            backlash. <br>
+            <br>
+            Since the VM is a rather substantial download, you would
+            typically download it just once and then upgrade it in-place
+            to newer versions of Virtual AGC as desired.&nbsp; This is a
+            very-simple and convenient procedure, though time-consuming,
+            and is considerably improved from the prior, now-obsoleted
+            32-bit VM, and can be performed at any time.<br>
+            <br>
+            Updates to the VM's Linux operating system are a different
+            matter, and should only be performed an as-advised basis.<br>
+            <br>
+            <a name="LubuntuUpdates"></a>Advisable VirtualAGC VM
+            operating-system updates:<br>
             <ul>
-              <li><font size="-1">2017-04-20:</font></li>
-              <ul>
-                <li><font size="-1">[<b>Note:</b>&nbsp; I recommend
-                    installing a later version of the Midori browser, by
-                    executing the following command from a command-line
-                    in the VM:&nbsp; </font><font size="-1">"</font><font
-                    size="-1"><tt>sudo apt-add-repository ppa:midori/ppa
-                      &amp;&amp; sudo apt-get update -qq &amp;&amp; sudo
-                      apt-get install midori</tt></font><font size="-1">".&nbsp;
-You
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    will be prompted for a password, which is
-                    "virtualagc".]</font></li>
-              </ul>
-              <ul>
-                <li><font size="-1">Virtual disk size increased from 5GB
-                    to 9GB, therefore, more actual disk space on the
-                    host-system is required as well.</font></li>
-                <li><font size="-1">Space reserved for a swap-partition,
-                    though not enabled.<br>
-                  </font></li>
-                <li><font size="-1">Cut-and-paste between VM and host
-                    machine is now enabled by default.<br>
-                  </font></li>
-                <li><font size="-1">Language support and keyboard-layout
-                    for the VM added (beyond just U.S. English), with
-                    desktop launcher icon for selecting among them.<br>
-                  </font></li>
-                <li><font size="-1">"Update VirtualAGC" launcher icon
-                    added to desktop, for easy updates to the VirtualAGC
-                    software.</font></li>
-                <li><font size="-1">2017-04-17 version of VirtualAGC
-                    software.<br>
-                  </font></li>
-              </ul>
-              <li><font size="-1">2017-03-29: </font><br>
-              </li>
-              <ul>
-                <li><font size="-1">Added Code::Blocks visual-debugging
-                    launchers for many more AGC versions.</font></li>
-                <li><font size="-1">Eliminated the password entry
-                    associated with the screen-saver.</font></li>
-                <li><font size="-1">Default browser changed, for much
-                    faster viewing of AGC program listings.&nbsp; [<b>N</b><b>ote:</b>
-                    It turns out that there are oddities about the way
-                    this browser, Midori, has been working, so I would
-                    advise installing a newer version of it.&nbsp; From
-                    within a command-line in the VM, execute the
-                    following command: "</font><font size="-1"><tt>sudo
-                      apt-add-repository ppa:midori/ppa &amp;&amp; sudo
-                      apt-get update -qq &amp;&amp; sudo apt-get install
-                      midori</tt></font><font size="-1">".&nbsp; You
-                    will be prompted for a password, which is
-                    "virtualagc".]<br>
-                  </font></li>
-                <li><font size="-1">2017-03-29 version of VirtualAGC
-                    software.<br>
-                  </font></li>
-              </ul>
-              <li><font size="-1">2016-11-19:&nbsp; <br>
-                </font></li>
-              <ul>
-                <li><font size="-1">Initial version of VM.</font></li>
-                <li><font size="-1">2016-11-19 version of VirtualAGC
-                    software.</font></li>
-              </ul>
+              <li>None recommended so far.</li>
             </ul>
           </td>
-          <td valign="middle"><a
-              href="Downloads/VirtualAGC-runtime.tar.xz"> 2017-03-29,
-              1.2GB</a><br>
-            (10GB uncompressed)<br>
+          <td valign="middle"><a moz-do-not-send="true"
+              href="Downloads/VirtualAGC-VM64.7z">Compressed VM</a><br>
+            <br>
+            Last updated, 2025-01-01<br>
+            <br>
+            Download: 3.5GB<br>
+            <br>
+            Uncompressed: 13.6GB<br>
+            <br>
+            In use:&nbsp; Up to 40GB<br>
           </td>
           <td valign="middle"><a href="#Downloading_Running_or_Updating">Using
 the
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               VM</a><br>
-            <br>
-            or <br>
-            <br>
-            <a href="#Updating_the_Virtual_AGC_VM">Updating the VM to
-              latest version of VirtualAGC (see next item)</a><br>
           </td>
         </tr>
         <tr>
-          <td valign="middle">Ubuntu 14.04 (32-bit 'x86)<br>
+          <td>Any</td>
+          <td>Pre-built versions of Virtual AGC are no longer provided,
+            other than via the VM.&nbsp; Obsolete downloads and
+            instructions can still be found at on <a
+              moz-do-not-send="true" href="download-still-less-old.html">our
+
+              superseded download page</a>(s).<br>
           </td>
-          <td valign="middle">App-installation tarball<br>
-          </td>
-          <td valign="middle"><a
-              href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-08-31.tar.xz">2017-08-31,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              26MB</a><br>
-            (418MB uncompressed)<br>
-          </td>
-          <td valign="middle"><font color="#999999"><a
-                href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using
-                Ubuntu installer</a></font></td>
-        </tr>
-        <tr>
-        </tr>
-        <tr>
-          <td valign="middle">Raspberry Pi (Raspbian-Jessie)<br>
-          </td>
-          <td valign="middle">App-installation tarball<br>
-          </td>
-          <td valign="middle"><a
-              href="Downloads/VirtualAGC-Raspbian-2017-08-31.tar.xz">
-              2017-08-31, 26MB</a><br>
-            (418MB uncompressed)<br>
-            <a href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz"> </a></td>
-          <td valign="middle"><a href="#Raspberry_Pi_Raspbian_">Using
-              Raspbian tarball</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle">Windows<br>
-          </td>
-          <td valign="middle">App-installation tarball<br>
-          </td>
-          <td valign="middle"><a
-              href="Downloads/VirtualAGC-Windows-2017-08-31.tar.xz">2017-08-31,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              27MB</a><br>
-            (418MB uncompressed)<br>
-          </td>
-          <td valign="middle"><a href="#Installer_for_Windows">Using
-              Windows tarball</a><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    <br>
-    <table summary="" cellspacing="2" cellpadding="2" border="1"
-      align="center">
-      <tbody>
-        <tr>
-          <td colspan="4" rowspan="1" valign="top">
-            <div align="center"> <big><b>Older Versions</b></big><br>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th valign="top" align="left">Target Platform<small><br>
-            </small></th>
-          <th valign="top" align="left"> Description<small><br>
-            </small></th>
-          <th valign="top" align="left">Download Version<small><br>
-            </small></th>
-          <th valign="top" align="left"> Instructions<small><br>
-            </small></th>
-        </tr>
-        <tr>
-          <td valign="top">Ubuntu 14.04 (32-bit 'x86)<br>
-          </td>
-          <td valign="top">App-installation tarball<br>
-          </td>
-          <td valign="top"><a
-              href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-04-17.tar.xz">2017-04-17,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              21MB</a></td>
-          <td valign="top"><a
-              href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
-              installer</a></td>
-        </tr>
-        <tr>
-          <td valign="top">Ubuntu 14.04 (32-bit 'x86)<br>
-          </td>
-          <td valign="top">App-installation tarball<br>
-          </td>
-          <td valign="top"><a
-              href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-03-29.tar.xz">2017-03-29,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              23MB</a><br>
-          </td>
-          <td valign="top"><a
-              href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
-Ubuntu
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              installer</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">Ubuntu 14.04 (32-bit 'x86)<br>
-          </td>
-          <td valign="top">App-installer program<br>
-          </td>
-          <td valign="top"><a
-              href="Downloads/VirtualAGC-installer-2017-03-27">2017-03-27,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              42MB</a><br>
-          </td>
-          <td valign="top"><a
-              href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
-Ubuntu
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              installer</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle">Ubuntu 14.04 (32-bit 'x86)<br>
-          </td>
-          <td valign="top">App-installer program<br>
-          </td>
-          <td valign="middle"><font color="#999999"><a
-                href="Downloads/VirtualAGC-installer-2016-11-16">
-                2016-11-16, 27MB</a></font></td>
-          <td valign="middle"><font color="#999999"><a
-                href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
-Ubuntu
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                installer</a><br>
-            </font> </td>
-        </tr>
-        <tr>
-          <td valign="top">Raspberry Pi (Raspbian-Jessie)<br>
-          </td>
-          <td valign="top">App-installation tarball<br>
-          </td>
-          <td valign="top"><a
-              href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz">2017-03-29,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              21MB</a></td>
-          <td valign="top"><a href="#Raspberry_Pi_Raspbian_">Using
-              Raspbian tarball</a></td>
-        </tr>
-        <tr>
-          <td valign="middle">Raspberry Pi (Raspbian-Jessie)<br>
-          </td>
-          <td valign="top">App-installation tarball<br>
-          </td>
-          <td valign="middle"><a
-              href="Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2">
-              2016-08-13, 12MB<br>
-            </a></td>
-          <td valign="middle"><a
-              href="download.html#Raspberry_Pi_Raspbian_">Using Raspbian
-              tarball</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">Windows<br>
-          </td>
-          <td valign="top">App-installation tarball<br>
-          </td>
-          <td valign="top"><a
-              href="Downloads/VirtualAGC-Windows-2017-03-29.tar.xz">2017-03-29,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              23MB</a></td>
-          <td valign="top"><a href="#Installer_for_Windows">Using
-              Windows tarball</a></td>
-        </tr>
-        <tr>
-          <td colspan="4" rowspan="1" valign="top"><a
-              href="download-less-old.html">Very old versions</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4" valign="top"><a href="download-old.html">Very,
-              very old versions</a><br>
+          <td>n/a</td>
+          <td valign="top">n/a<br>
           </td>
         </tr>
       </tbody>
@@ -697,58 +296,25 @@ Ubuntu
     <br>
     <h2>Contents</h2>
     <ul>
-      <li><a href="#Introduction">Introduction</a></li>
-      <li><a href="#Downloading_Running_or_Updating">Downloading,
-          Running, or Updating Virtual AGC in VirtualBox</a></li>
+      <li><a moz-do-not-send="true"
+          href="#Downloading_Running_or_Updating">The Virtual AGC VM</a><a
+          moz-do-not-send="true" href="#Downloading_Running_or_Updating"><br>
+        </a></li>
       <ul>
-        <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
-of
+        <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Use and
+            Updating of the VM</a></li>
+        <li><a moz-do-not-send="true" href="#Customization">Customization
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            the Virtual AGC VM</a></li>
+            of the VM</a><br>
+        </li>
         <li><a href="#Installation_of_the_Virtual_AGC_VM_">Installation
-            of the Virtual AGC VM</a></li>
-        <li><a href="#Updating_the_Virtual_AGC_VM">Updating the Virtual
-            AGC VM</a></li>
-      </ul>
-      <li><a href="#Platforms_Directly_Supported_by">Platforms Directly
-          Supported by Virtual AGC Installers</a></li>
-      <ul>
-        <li><a href="#Virtual_AGC_Installer_for_Raspberry_Pi">Virtual
-            AGC Installer for Raspberry Pi (Raspbian)</a></li>
-        <li><a href="#Installer_for_Ubuntu_14.04_32-bit_x86">Installer
-            for Ubuntu 14.04 32-bit 'x86 Linux<br>
-          </a></li>
-        <li><a href="#Installer_for_Windows">Installer for Windows</a><br>
+            of the VM</a></li>
+        <li><a moz-do-not-send="true" href="#OtherVirt">Using Alternate
+            Hypervisors In Place of VirtualBox</a><br>
         </li>
       </ul>
       <li><a href="#Downloading_and_Building_Virtual_AGC">Downloading
@@ -756,6 +322,12 @@ of
       <ul>
         <li><a href="#Limitation">Limitation</a></li>
         <li><a href="#Getting_the_Source_Code_">Getting the Source Code</a></li>
+        <li><a moz-do-not-send="true" href="#4K">High-Resolution
+            Displays Such As 4K</a><br>
+        </li>
+        <li><a moz-do-not-send="true" href="#wxWidgets">Regarding
+            wxWidgets</a><br>
+        </li>
         <li><a href="#CMake-Based_Builds">CMake-Based Builds</a><br>
         </li>
         <li><a href="#Linux_">Linux</a></li>
@@ -764,15 +336,11 @@ of
         <li><a href="#Solaris">Solaris</a></li>
         <li><a href="#Mac_OS_X">Mac OS X</a></li>
         <ul>
-          <li><a href="#Older_Macs:_Xcode_with_gcc">Older Macs: Xcode
-              with gcc</a></li>
-          <li><a href="#Newer_Macs:_Xcode_with_clang">Newer Macs: Xcode
-              with clang</a><br>
+          <li><a href="#Older_Macs:_Xcode_with_gcc">Older Macs</a></li>
+          <li><a href="#Newer_Macs:_Xcode_with_clang">Mac OS Monterey</a></li>
+          <li><a moz-do-not-send="true" href="#Sequoia">Newer Macs</a><br>
           </li>
         </ul>
-        <li><a moz-do-not-send="true" href="#WindowsObsolete">Windows
-            (Obsolete)</a><br>
-        </li>
         <li><a href="#Windows">Windows</a></li>
         <li><a href="#WebAssembly">WebAssembly</a><br>
         </li>
@@ -784,320 +352,239 @@ of
           on Slower Computers, Such as Raspberry Pi</a><br>
       </li>
     </ul>
-    <h2><a name="Introduction" id="Introduction"></a>Introduction</h2>
-    <p>This page covers various ways to download and/or install Virtual
-      AGC project software.&nbsp; Three methods are currently
-      recommended, and a fourth is possible if not really recommended:<br>
-    </p>
-    <ol>
-      <li>If you simply wish to <i>run</i> one of the provided AGC or
-        AEA simulations, examine the AGC or AEA program code, and/or do
-        visual debugging of (Block II) AGC code, then the easiest thing
-        to do is to <a href="#Downloading_Running_or_Updating">download
-          and run the provided VirtualBox virtual machine</a>.&nbsp; The
-        VM is guaranteed to work properly on any 32-bit or 64-bit 'x86
-        platform for which VirtualBox is available, namely Windows, Mac,
-        Linux, and Solaris, and (<a
-href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">according
-to
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          this page</a>) FreeBSD as well even though the latter is not
-        obvious from the VirtualBox website.<br>
-      </li>
-      <li>If you just happen to have a computer system which is
-        currently supported by an installation package, then you can <a
-          href="#Platforms_Directly_Supported_by">simply download and
-          install the proper installation package</a>.&nbsp; At present,
-        however, these platforms are only the following:</li>
-      <ol>
-        <li>Raspberry Pi</li>
-        <li>Ubuntu 14.04 32-bit 'x86.</li>
-        <li>Windows.<br>
-        </li>
-      </ol>
-      <li>If you wish to do not only the above, but also wish to delve
-        more deeply into the Virtual AGC project code (as opposed to
-        just the AGC/AEA code), then you should instead <a
-          href="#Downloading_and_Building_Virtual_AGC">download the
-          Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
-This
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        works on many more platforms, though is more-involved to set up,
-        and visual AGC debugging may not be possible easily on platforms
-        other than 'x86 Windows, Mac, or Linux.<br>
-      </li>
-      <li>If you are satisfied with <i>older</i> versions of Virtual
-        AGC, many additional computer platforms were once directly
-        supported with installer programs, which you can still find <a
-          href="download-less-old.html">here</a> or <a
-          href="download-old.html">here</a>.&nbsp; Ideally, we would
-        like to directly support all major platforms with Virtual AGC
-        installer programs, but in practice it is far too hard to do so
-        with the resources available at present, so this is no longer
-        being done currently.</li>
-    </ol>
-    <p>Note that a lot of detail about known quirks on different
-      platforms, and about trouble-shooting, can be found at the older
-      links listed in approach #4 above, but isn't found on the present
-      page.&nbsp; That's because the information hasn't been updated in
-      so long that its reliability is dubious, and because many of the
-      platforms mentioned there are long-obsolete.&nbsp; It should also
-      be noted that the build-instructions for some platforms presented
-      here are similarly out-of-date and may need corrections.<br>
-    </p>
     <h2><a name="Downloading_Running_or_Updating"
-        id="Downloading_Running_or_Updating"></a>Downloading, Running,
-      or Updating Virtual AGC in VirtualBox</h2>
+        id="Downloading_Running_or_Updating"></a>The Virtual AGC VM<br>
+    </h2>
     <h3><a name="Characteristics_of_the_Virtual_AGC_VM"
-        id="Characteristics_of_the_Virtual_AGC_VM"></a>Characteristics
-      of the Virtual AGC VM<br>
+        id="Characteristics_of_the_Virtual_AGC_VM"></a>Use and Updating
+      of the VM<br>
     </h3>
-    <p>My descriptions in this section relate to the 2017-04-20 version
-      of both the VM and the VirtualAGC software, so other versions may
-      be slightly different ... but this still gives the general idea.<br>
-    </p>
-    <p>The virtual-machine approach should work with any host system
-      supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
-namely,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      any 32-bit or 64-bit 'x86 version of Windows, Mac, Linux, Solaris,
-      or FreeBSD.&nbsp; The VM is nice because it lets you work with the
-      most-commonly-desired elements of Virtual AGC, while skipping past
-      the most-annoying and tricky setup steps, such as compiling
-      Virtual AGC's source code.&nbsp; It provides you with a "virtual
-      machine", with Virtual AGC and other things you need in order to
-      be able to work with Virtual AGC already pre-installed and
-      pre-configured.&nbsp; Though like anything else done to make our
-      lives "simpler", it brings its own (hopefully smaller!) set of
-      problems with it.<br>
-    </p>
-    <p>When the VM is run, the first thing you see is the VirtualAGC
-      GUI, from which you can run an AGC simulation using various
-      selectable options.&nbsp; There are actually two different
-      versions, and which you'll see depends on how large your (virtual)
-      display screen is:&nbsp; For screens smaller than 1200×1024 you'll
-      get the interface below left, whereas for larger screens you'll
-      get the one below right.&nbsp; Unfortunately, they don't resize if
-      you resize your virtual display screen, in which case you may
-      simply need to exit from the program and restart it.&nbsp; The two
-      interfaces have exactly the same capabilities, except the smaller,
-      left-hand one doesn't allow you to run "custom" AGC-software
-      versions:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="0">
-      <tbody>
-        <tr>
-          <td valign="top" align="center"><a
-              href="VirtualAGC-runtime-gui.jpg"><img alt="" title="Click
-                to enlarge" src="small-VirtualAGC-runtime-gui.jpg"
-                width="360" border="2" height="265"></a></td>
-          <td valign="top" align="center"><a
-              href="VirtualAGC-runtime-gui-B.jpg"><img alt=""
-                title="Click to enlarge"
-                src="small-VirtualAGC-runtime-gui-B.jpg" width="360"
-                border="2" height="265"></a></td>
-        </tr>
-      </tbody>
-    </table>
-    <p>You can do a number of things from this VirtualAGC GUI, such as
-      run the simulation (below left) or browse nicely
-      syntax-highlighted AGC source code (below right):<br>
-    </p>
-    <table summary="" width="100%" cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center"><a
-              href="VirtualAGC-runtime-sim.jpg"><img alt="" title="Click
-                to enlarge" src="small-VirtualAGC-runtime-sim.jpg"
-                width="360" border="2" height="265"></a><br>
-          </td>
-          <td valign="top" align="center"><a
-              href="VirtualAGC-runtime-browse.jpg"><img alt=""
-                title="Click to enlarge"
-                src="small-VirtualAGC-runtime-browse.jpg" width="360"
-                border="2" height="265"></a><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p>If you exit from the VirtualAGC GUI, you'll see the VM's bare
-      desktop, on which a number of other useful options appear: <br>
-    </p>
-    <p align="center"><a href="VirtualAGC-runtime-kbd-select.jpg"><img
-          alt="" title="Click to enlarge"
-          src="VirtualAGC-runtime-kbd-select.jpg" width="360" border="2"
-          height="265"></a><br>
-      <br>
-    </p>
-    The VM actually runs Ubuntu Linux, and if you're not an American,
-    you might want to configure language options or keyboard-layout
-    options.&nbsp; (Or you might not care about those things, since the
-    language options only affect the VM and not VirtualAGC, and you have
-    very little need to use the keyboard ... but still.)&nbsp; For VM
-    versions 2017-04-20 or later, the overall language selection is in
-    the desktop icon called "Language Support"; all languages supported
-    by Ubuntu are already loaded, so you don't need to download any new
-    ones, but you do need to select the one you want (if it's not U.S.
-    English).&nbsp; By the way, that's <i>not</i> what's depicted
-    above; what you see in the screenshot above is the keyboard-layout
-    selection list, which you can get by clicking the icon that looks
-    like a keyboard near the desktop's bottom right.&nbsp; There are
-    actually a lot more layouts available than what's shown, but to get
-    more of them, such as Arabic or Chinese or whatever, you need to use
-    the "Keyboard Input Methods" icon first, to add the layout you need
-    to this pop-up menu.<br>
+    Virtual AGC can be used in a couple of ways, one of which
+    (installing it directly on your own computer) is covered later one,
+    and the other of which is running it in a so-called "virtual
+    machine" (or VM for short).<br>
     <br>
-    Some other very-useful icons you can see on this desktop are:<br>
+    The VM approach should work with most host systems supported by the
+    hypervisor known as <a href="http://www.virtualbox.org">VirtualBox</a>,
+    including any 64-bit 'x86 version of Windows, Mac, Linux, Solaris,
+    or FreeBSD.&nbsp; Basically, you just install VirtualBox, download
+    the Virtual AGC VM, and then run it!&nbsp; All of which side-steps
+    any potential inconvenience in building Virtual AGC from source code
+    on your own physical computer.&nbsp; <br>
+    <br>
+    But before talking about how to install the Virtual AGC VM, let's
+    talk first about how you can use it once it's installed.&nbsp; In
+    other words, let's have an advertisement for it!&nbsp; One nice
+    thing about the VM approach is that the virtual machine's "display
+    screen" can be made as big or small as you like, within the limits
+    of the size of your physical display.&nbsp; For the sake of my
+    explanations below, I'll make the VM screen smaller than I normally
+    would for my own purposes — which would be just to expand it to fill
+    an entire monitor —, but perhaps appropriately for our modern times
+    in which people are often more prone to use tiny laptop computers
+    rather than huge desktop systems.<br>
+    <br>
+    When the VM is run, the desktop you'll be presented with is
+    something like this:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/InitialDesktop.jpg" alt="" height="347"
+        width="461"><br>
+    </div>
+    <br>
+    (This desktop will actually be surrounded by a border with
+    VirtualBox's own menu, status bar, and so on, not to mention your
+    operating-system-provided title bar, but I don't want to complicate
+    matters so I've omitted such extras.) <br>
+    <br>
+    What is all of this stuff?&nbsp; Well, it's pretty self-explanatory,
+    I suspect, but here's a brief rundown starting at the upper left:<br>
     <ul>
-      <li>"AGC Simulator" lets you rerun the VirtualAGC GUI if you've
-        exited from it.</li>
-      <li>"GitHub Repo" lets you browse our GitHub source-code
-        repository.</li>
-      <li>"Internet Archive" lets you browse our Internet Archive
-        document collection.</li>
-      <li>"Website" lets you browse our main website.</li>
-      <li>(2017-04-20 or later.)&nbsp; "Update VirtualAGC" lets you
-        download and install the latest version of the VirtualAGC GUI
-        program, and all of the associated simulation software, AGC
-        code, AGS code, and so on.&nbsp; Just double-click it, and then
-        answer the prompt with either YES or NO.<br>
-      </li>
-      <li>"AGC Visual Debugging" allows you to work with the AGC source
-        code, and or run the AGC simulation, within a program called <a
-          href="http://codeblocks.org/">Code::Blocks</a>.&nbsp; The
-        desktop icon is actually a folder containing separate launcher
-        icons for most of the AGC software versions available to us.<br>
+      <li>An icon for running Virtual AGC itself via a graphical user
+        interface (GUI) that we'll talk more about below.</li>
+      <li>An icon that loads a web browser and takes you to our software
+        repository on GitHub.</li>
+      <li>An icon that downloads the latest version of the Virtual AGC
+        software (including any new or updated AGC or AGS source code
+        that may be in it), and rebuilds it all from source.&nbsp; All
+        you have to do is click it and then sit back and wait for it to
+        finish.&nbsp; I'd recommend exiting from the VirtualAGC
+        application (if it happens to be running) before doing that.</li>
+      <li>An icon that loads a web browser and takes you to our main
+        website at Ibiblio.</li>
+      <li>An icon that opens a folder of visual-debugging projects for
+        various AGC software versions.&nbsp; We'll talk more about that
+        below.</li>
+      <li>An icon that may give you more (and possibly more-up-to-date)
+        information about the VM than I'm providing here.</li>
+      <li>An icon that loads a web browser and takes you to the website
+        of the NASSP (Apollo) add-on for the Orbiter
+        spaceflight-simulation system.&nbsp; Alas, Orbiter/NASSP is a
+        Windows-only system that you cannot run within the Virtual AGC
+        VM, but the website can still be useful.&nbsp; NASSP integrates
+        Virtual AGC's emulations of the AGC and AGS computers into their
+        simulations.&nbsp; NASSP is not, however, affiliated with the
+        Virtual AGC Project in any official way.</li>
+      <li>An icon that loads a web browser and takes you to our
+        highest-resolution documentation images at The Internet Archive.<br>
       </li>
     </ul>
-    Code::Blocks is a popular Integrated Development Environment
-    (IDE).&nbsp; Within it, you can edit the AGC source code and
-    reassemble it ... but more importantly, you can <i>visually debug</i>
-    it: i.e., single-step through the AGC code, examine AGC variables,
-    and so forth, so that you can get a very intimate understanding of
-    how the AGC code works, if that's something that interests
-    you.&nbsp; For example, in the VM screenshot below, the Luminary 131
-    (Apollo 13 LM) code is being debugged, and the program is at line
-    379 (the <tt>EXTEND</tt> instruction) of the Fresh Start and
-    Restart section of the code.<br>
-    <p align="center"><br>
-      <a href="VirtualAGC-runtime-dbg.jpg"><img alt="" title="Click to
-          enlarge" src="small-VirtualAGC-runtime-dbg.jpg" width="720"
-          border="2" height="530"></a><br>
-    </p>
-    <p>Okay, enough of the sales pitch already!&nbsp; What's do you
-      actually have to do to install the thing?<br>
-    </p>
+    If you were to run the Virtual AGC application from its icon, you'd
+    see something like the following:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/GUI.jpg" alt="" height="474" width="631"><br>
+    </div>
+    <br>
+    You can do a number of things from this VirtualAGC GUI, such as run
+    the simulation by clicking the "Run!" button at the bottom of the
+    application's window.&nbsp; With the options shown above, this means
+    running the AGC software originally written for Apollo 11's Lunar
+    Module, which happens to be called LUMINARY 99, with a DSKY
+    (display/keyboard) peripheral device, and with a telemetry
+    monitor.&nbsp; The screenshot below shows that happening.&nbsp; The
+    main window of the application disappears when you do that, and what
+    appears in its place are the various windows for the DSKY and other
+    peripheral(s), arranged in a way intended to facilitate making
+    everything viewable at once.&nbsp; The extent to which this
+    arranging succeeds at making everything visible depends on the
+    options used and the amount of real estate available on the virtual
+    desktop.&nbsp; In the example below, the arranger has slightly
+    overlapped some windows, but has mostly succeeded. To exit the
+    simulation, you'd just close any one of the open windows; the other
+    windows would then close automatically, albeit probably with a short
+    delay, and the main screen of the application would return.<br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Actually, if you
+        close the window labeled "Simulation Status", it won't close the
+        simulation at all, but rather it closes the simulation
+        manager.&nbsp; That's a bug, not a feature, but one which I'm at
+        a loss to fix at present.</font><br>
+    </blockquote>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/running.jpg" alt="" height="383" width="680"><br>
+    </div>
+    <br>
+    &nbsp; Another thing you can do is view the AGC source code (in this
+    case, for LUMINARY 99), by clicking the button marked "AGC" near the
+    lower left of the application's window.&nbsp; I did that and clicked
+    around a few times before creating the screenshot below:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/source.jpg" alt="" height="427" width="759"><br>
+    </div>
+    <br>
+    <br>
+    I promised above to talk a little bit about the desktop icon labeled
+    "AGC Visual Debugging.&nbsp; If you click it, a new window will pop
+    up that lists a number of the Apollo Guidance Computer software
+    versions available, though by no means all (or even most) of
+    them.&nbsp; These are the AGC software versions for which we've
+    created visual-debugging projects.&nbsp; Hopefully, many more such
+    AGC versions will be debuggable in the future, but for now these are
+    the only ones provided.&nbsp; Click on one of them to begin visual
+    debugging of the associated AGC software version.&nbsp;
+    (Unfortunately, visual debugging for Abort Guidance System software
+    is not available.)<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/codeblocksFolder.jpg" alt="" height="405"
+        width="720"><br>
+    </div>
+    <br>
+    Visual debugging AGC software works pretty much as you'd expect, if
+    you've ever done visual debugging in the past.&nbsp; But like any
+    tool, the Code::Blocks integrated development environment (IDE) in
+    which the debugging is performed takes some getting used to.&nbsp;
+    Clicking on the LUMINARY 99 entry, the Code::Blocks window that
+    appears looks something like the screenshot below.&nbsp; (Before
+    making the screenshot, I've actually double-clicked on one the AGC
+    source-code files in the left-hand pane, and then clicked on "Tools"
+    in the main menu.)<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/codeblocks.jpg" alt="" height="716" width="896"><br>
+    </div>
+    <br>
+    The reason I've clicked on "Tools" in the image above is that since
+    I'm illustrating how to debug LUMINARY 99 from the Apollo 11 Lunar
+    Module, I'll want to start a half-size Lunar Module DSKY (why not?)
+    and (also why not?) a telemetry monitor as well, both of which are
+    done from the Tools menu.&nbsp; The various debugging options are
+    found in the tool bar with the little red right-pointing
+    arrow.&nbsp; We can start the emulation in a variety of ways.&nbsp;
+    For example, we might click (twice, for some reason) the "next line"
+    button that's two to the right of the red arrow; this would start
+    single-stepping through the software.&nbsp; But in the screenshot
+    below I've started the program free-running by clicking on the red
+    arrow (twice), and then have clicked the pause button (once).&nbsp;
+    You can see that pause has occurred at line 66 in the source-code
+    file INTER-BANK_COMMUNICATIONS.agc.&nbsp; And from this point we can
+    do things like set breakpoints, single-step through the program,
+    view/edit memory locations, and so forth.&nbsp; But the details are
+    really out of our scope, and you'll want to consult <a
+      moz-do-not-send="true"
+      href="https://www.codeblocks.org/user-manual/">Code::Blocks
+      documentation online</a> for more info, I suppose.&nbsp; More
+    information can also be found in our Wiki at GitHub, <a
+      moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">here</a>
+    or <a moz-do-not-send="true"
+      href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">here</a>.<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/paused.jpg" alt="" height="860" width="1215"><br>
+    </div>
+    <br>
+    <h3><a name="Customization"></a>Customization of the VM</h3>
+    Beyond Virtual AGC itself, you might like to personalize the VM'd
+    desktop for your own convenience and taste.&nbsp; For example, <i>I</i>
+    personally think that single-clicking desktop items to activate them
+    is better than double-clicking them.&nbsp; <i>You</i> might want to
+    change that.&nbsp; (To see instructions on how to do that,
+    single-click on the Info desktop icon.)&nbsp; Other examples that
+    occur to me are adjusting the language, the display size, the time
+    zone, and so forth, but of course you can make any changes you
+    like.&nbsp; The VM runs a variety of Ubuntu Linux called Lubuntu,
+    and you can google how to work with that, or you can use the Info
+    icon on the VM's desktop to also get a variety of helpful
+    customization hints.&nbsp; I'll just confine myself here to pointing
+    out that the Lubuntu menu is called up from the little blue icon at
+    the lower left of the desktop, and that the Lubuntu configuration
+    settings can be gotten to from that Lubuntu menu by using
+    Preferences/LXQt-Settings/LXQt-Configuration-Center as shown in the
+    screenshot:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/options.jpg" alt="" height="417" width="511"><br>
+    </div>
+    <br>
+    Notice, by the way, that unlike all of the other screenshots so far,
+    the one above includes VirtualBox menu at the top and a VirtualBox
+    status bar at the bottom.&nbsp; I've included those because I want
+    to explain that using the Lubuntu configuration center to change the
+    monitor settings may not give you complete control over the display
+    resolution: In addition, you may need to make adjustments in the <i>VirtualBox</i>
+    menu's View/Virtual-Screen-1 settings as in the screenshot below; of
+    course, I'm not saying you'll use those <i>specific</i> settings,
+    but just that adjustment both of Lubuntu and of VirtualBox may be
+    needed.&nbsp; If you have a 4K monitor, setting "Scale to 150%" or
+    "Scale to 200%" might be useful in making the items on the VM'd
+    desktop large enough to be easily legible.<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/virtualscreen.jpg" alt="" height="432"
+        width="499"><br>
+    </div>
+    <br>
     <h3><a name="Installation_of_the_Virtual_AGC_VM_"
         id="Installation_of_the_Virtual_AGC_VM_"></a>Installation of the
-      Virtual AGC VM<br>
+      VM<br>
     </h3>
-    <p>It's hard to pin down exactly what computer resources you'll need
-      to run the VM.&nbsp; The minimum is probably around 2 GB of RAM
-      and 30GB of free disk space, but the more of everything you have,
-      the better.&nbsp; In particular, you will have a far more
-      satisfactory experience if your CPU has <a
-        href="https://en.wikipedia.org/wiki/X86_virtualization">VT-x
-        (Intel) or AMD-V (AMD) extensions</a>.&nbsp; The VM itself
-      requires only about 10GB of disk space, but in the process of
-      decompressing the downloaded VM, you'll temporarily need a lot
-      more (hence the 30GB mentioned).<br>
-    </p>
-    <p>Before doing anything with Virtual AGC as such, you should take
-      care of the following:<br>
-    </p>
+    The basic steps are these:<br>
     <ul>
+    </ul>
+    <ol>
       <li>If VirtualBox is not already installed, <a
           href="https://www.virtualbox.org">download and install
           VirtualBox</a>, using whatever version is suitable for your
@@ -1135,281 +622,184 @@ namely,
 
 
 
-          4.3.40</a>, but it should work with later versions as
-        well.&nbsp; If you have a different version, you may find
-        yourself wanting to reinstall VirtualBox's "guest additions"; if
-        you do, remember that the username and password are both
+
+
+
+
+
+
+
+          7.1.4</a>, but I hope it will work with other versions as
+        well.&nbsp; Be sure to install not only VirtualBox as such, but
+        also its so-called "Extension Pack".</li>
+      <li>If your version of VirtualBox differs from the one in which
+        the VM was created, when you run the VM you may be prompted to
+        reinstall VirtualBox's "guest additions".&nbsp; Do so.&nbsp; If
+        you do, note that the username and password of the VM are both
         "virtualagc".<br>
       </li>
-      <li>The VM is compressed in tar.xz form for downloading, so if
-        your operating system doesn't already have software support for
-        tar.xz archives, you need to install extra software that
-        provides it.&nbsp; In Linux, you're probably okay without doing
-        anything, or at worst just using your distribution's software
+      <li>The VM is compressed in 7z format for downloading, so if your
+        operating system doesn't already have software support for 7z
+        archives, you need to install extra software that provides
+        it.&nbsp; In Linux, you're probably okay without doing anything,
+        or at worst just using your distribution's software
         repository.&nbsp; For other platforms, a little googling reveals
         that the program <a href="http://www.7-zip.org/download.html">7zip</a>
         provides these formats for Windows, and there are "unofficial"
         installers for 7zip for Mac, Solaris, and FreeBSD.&nbsp;
         However, various other programs work as well, I think, such as <a
           href="http://www.winzip.com/win/en/index.htm">WinZip</a>.</li>
-    </ul>
-    <p>Then to actually install the VirtualAGC VM, you do the following.<br>
-    </p>
-    <ol>
-      <li>Download the current compressed VM, as listed at the top of
-        this page.<br>
+      <li>Download <a moz-do-not-send="true"
+          href="Downloads/VirtualAGC-VM64.7z">the current compressed
+          Virtual AGC VM</a>.<br>
       </li>
-      <li>Uncompress it, resulting in a folder called
-        "VirtualAGC-runtime".&nbsp; (This may or may not be a 2-step
-        process, in which a tar file is first created, which in turn
-        would need to be expanded to get the mentioned folder.)&nbsp;
-        The tar.xz/tar file(s) are no longer used after that and may be
-        deleted ... though obviously <i>we'd</i> prefer you retained it
-        for a while to make sure you don't need to download it again if
-        some mishap occurs.&nbsp; VirtualBox tends to store all of its
-        virtual machines in the same folder (on Linux, for example, that
-        folder is "~/VirtualBox VMs"), so although it's not necessary to
-        do so, you might want to move the VirtualAGC-runtime folder into
-        the corresponding "VirtualBox VMs" folder on your computer.</li>
-      <li>In whatever file-system browser your computer has, descend
-        into the VirtualAGC-runtime folder, and double-click the mouse
-        on the file VirtualAGC-runtime.vbox.&nbsp; This makes VirtualBox
-        aware of your VM, and may or may not actually immediately run
-        it.&nbsp; At any rate, the VM will be visible in VirtualBox's
-        manager program, and you can run it from there.</li>
+      <li>Extract the contents, resulting in a folder called
+        "VirtualAGC-VM64".&nbsp; The 7z file is no longer used after
+        extraction and may be deleted ... though obviously <i>we'd</i>
+        prefer you retained it for a while to make sure you don't need
+        to download it again if some mishap occurs.&nbsp; VirtualBox
+        tends to store all of its virtual machines in the same folder
+        (on Linux, for example, that folder is "~/VirtualBox
+        VMs").&nbsp; It's not necessary to conform to this practice,
+        though can do so for consistency if you like.</li>
+      <li>Run VirtualBox, and from its main menu select
+        Machine/Add.&nbsp; In the dialog you're presented with, find the
+        folder just now created for the Virtual AGC VM, and select the
+        file VirtualAGC-VM64.vbox.</li>
+      <li>The Virtual AGC VM will be visible in VirtualBox's manager
+        program, and you can run it from there.</li>
     </ol>
-    <p>In its as-downloaded form, the VM is typically configured to use
-      1GB of RAM and 2 CPU cores.&nbsp; You may be able dial these
-      settings down in VirtualBox, but you may need to scale your
-      expectations at the same time.<br>
-    </p>
-    <p>As I mentioned above, the username and password for the VM are
-      both "virtualagc".&nbsp; Since you are automatically logged in
-      whenever you run the VM, you don't normally need this information,
-      but it's good to know just in case (for example) you ever need to
-      install some new, non-Virtual-AGC software on it, or perform some
-      other administrative action.<br>
-    </p>
-    <p>Finally, technically, for any Linux pros, the VM does not have
-      any swap space.&nbsp; If that makes you uncomfortable, versions
-      the VM from 2017-04-20 or later actually have an uncommitted 1GB
-      partition on the virtual disk which you can assign as swap space
-      if you want.&nbsp; I normally don't to this because I don't think
-      it's necessary, but mainly because filling that partition with a
-      lot of random garbage just causes more hassle in trying to create
-      a "small" downloadable image.<br>
-    </p>
-    <h3><a name="Updating_the_Virtual_AGC_VM"
-        id="Updating_the_Virtual_AGC_VM"></a>Updating the Virtual AGC VM</h3>
-    <p>Because the VM is such a large download, you don't want to have
-      to download it every time there's updated Virtual AGC software,
-      and usually just want to update the VirtualAGC software within the
-      VM.<br>
-    </p>
-    <p>For VM versions 2017-04-20 or later, this update process is
-      really easy:&nbsp; There's simply a desktop icon called "Update
-      VirtualAGC" that you can double-click.&nbsp; It will tell you what
-      the latest VirtualAGC version is, and you can tell it either YES
-      or NO.<br>
-    </p>
-    <p>For earlier VM versions, you can <a href="UpdateVirtualAGC">download
-a
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        script</a> that does the same thing.&nbsp; Just put it somewhere
-      (say in the "home" directory, /home/virtualagc/), and then from a
-      command-line run the following command:<br>
-    </p>
-    <blockquote>
-      <p><tt>bash ./UpdateVirtualAGC</tt><br>
-      </p>
-    </blockquote>
-    <h2><a name="Platforms_Directly_Supported_by"
-        id="Platforms_Directly_Supported_by"></a>Platforms Directly
-      Supported by Virtual AGC Installers</h2>
-    <h3><a name="Virtual_AGC_Installer_for_Raspberry_Pi"
-        id="Virtual_AGC_Installer_for_Raspberry_Pi"></a>Virtual AGC
-      Installer for Raspberry Pi (Raspbian)</h3>
-    Installation is trivial:<br>
     <ol>
-      <li>Download the current Raspberry Pi installation tarball, as
-        listed at the top of this page.<a
-          href="Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2"></a></li>
-      <li>Unpack the installation tarball somewhere:&nbsp; either "tar
-        -xJvf VirtualAGC-Raspbian-<i>VERSION</i>.tar.xz" or "tar -xjvf
-        VirtualAGC-Raspbian-<i>VERSION</i>.tar.bz2", depending on which
-        type of installer is downloaded.&nbsp; (Notice that these two
-        commands are <i>not</i> the same, in that one has a 'j' where
-        the other has a 'J'.)<br>
-      </li>
     </ol>
-    This gives you a directory called VirtualAGC/ (or lVirtualAGC/ if
-    the older .bz2 form of the installer was used).&nbsp; Before running
-    the program for the first time, there's a one-time setup you may
-    have to do:<br>
-    <blockquote><tt>sudo apt-get install libwxgtk2.8-0 libsdl
-        libncurses5 liballegro4 tk</tt><br>
-    </blockquote>
-    To run the program, simply do the following from the command line,
-    or set up a desktop icon that does the equivalent:<br>
-    <blockquote> <tt>cd VirtualAGC/Resources</tt><tt><br>
-      </tt><tt> ../bin/VirtualAGC</tt><br>
-    </blockquote>
-    <h3><a name="Installer_for_Ubuntu_14.04_32-bit_x86"
-        id="Installer_for_Ubuntu_14.04_32-bit_x86"></a>Installer for
-      Ubuntu 14.04 32-bit 'x86 Linux<br>
+    It's hard to pin down exactly what physical computer resources
+    you'll need to run the VM.&nbsp; As downloaded, the VM is set to use
+    4GB of RAM and 4 CPUs, but those settings are adjustable easily by
+    you within the VirtualBox project settings.&nbsp; I've just now
+    tried it with 1GB and 1 CPU on my 10+ year old computer, and there
+    was nothing obviously wrong with how it ran; your experience may
+    vary.&nbsp; <br>
+    <p>Perhaps of more concern to you, I've endowed the VM with a
+      virtual disk that's nominally 40GB.&nbsp; The way VirtualBox
+      virtual disks work, they are actually usually smaller than the
+      nominal size, but physically expand as they fill up.&nbsp; So as
+      delivered, the virtual disk appears to you to be only about 14GB,
+      but you may later find it using 40GB of your disk!&nbsp; I made it
+      this large because with the previous generation VM, now
+      superseded, I had trimmed the virtual disk to a bare minimum and
+      found it impossible to grow it when I realized it had filled
+      up.&nbsp; You may think that 40GB is excessive and prefer to shave
+      off a few (or a lot) of gigabytes.&nbsp; The procedure to do so is
+      trickier than I'd like, so I won't explain it unless somebody
+      actually asks me about it; or you can google it.<br>
+    </p>
+    <p>Finally, technically, for any Linux pros, the VM does not have a
+      swap partition.&nbsp; You can adjust the VM itself to give
+      yourself one, but if you're pro enough to desire this, you're too
+      much of a pro for me to instruct you on the details of how to do
+      it.&nbsp; <br>
+    </p>
+    <h3><a name="OtherVirt"></a>Using Alternate Hypervisors In Place of
+      VirtualBox<br>
     </h3>
-    <ol>
-      <li> For a first-time installation only, you may have to install
-        the following system libraries from the Ubuntu repository:&nbsp;
-        tk, libsdl1.2, libncurses5, liballegro4.4, libgtk2.0,
-        libwxgtk2.8.</li>
-      <li>Another one-time step is downloading the <a
-          href="UpdateVirtualAGC">update script, UpdateVirtualAGC</a>.</li>
-      <li>Run the command "bash UpdateVirtualAGC".</li>
-      <li>If you try to use the ACA simulation (joystick) and it doesn't
-        work, <a
-          href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
-about
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          configuring it</a>.<br>
-      </li>
-    </ol>
-    <h3><a name="Installer_for_Windows"></a>Installer for Windows</h3>
-    <p>Installation is as follows:<br>
+    <p>Here's a brief survey of some popular hypervisors:<br>
     </p>
-    <ol>
-      <li>Download the current Windows installation tarball, as listed
-        at the top of this page.</li>
-      <li>Unpack the installation tarball somewhere:&nbsp; I did this by
-        using <a href="http://www.7zip.org">7zip</a>, but I believe
-        there are a lot of other possibilities as well.&nbsp; With 7zip,
-        the unpacking was a two-step process, first to turn
-        VirtualAGC-Windows-<i>VERSION</i>.tar.xz into
-        VirtualAGC-Windows-<i>VERSION</i>.tar, and then to turn the
-        latter file into the uncompressed folder VirtualAGC.&nbsp; (At
-        which point the tar.xz and tar files are no longer needed and
-        can be deleted.)</li>
-    </ol>
-    This gives you a folder called VirtualAGC.&nbsp; This folder can be
-    stored any place you like, though I usually copy it into the same
-    folder I find myself in when opening up a DOS command line.&nbsp;
-    Just for the sake of discussion, let's suppose you've done this too,
-    and so you now have a file called C:\Users\<i>YourNameHere</i>\VirtualAGC.<br>
-    <br>
-    To run the program, my suggestion would be to create a desktop
-    shortcut for it.&nbsp; I'm no Windows aficionado, but I think the
-    basic steps to do that are these:<br>
-    <ol>
-      <li> <i>Right</i>-click on the desktop, and choose New/Shortcut
-        in the pop-up menu that appears.</li>
-      <li> The popup window that appears will ask you for the location
-        of the program you want to run.&nbsp; It is C:\Users\<i>YourNameHere</i>\VirtualAGC\bin\VirtualAGC.exe.</li>
-      <li> After the shortcut has been created on the desktop, <i>right</i>-click
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        it and select Properties.&nbsp; Change the "Start in" or
-        "Working directory" to be C:\Users\<i>YourNameHere</i>\VirtualAGC\Resources.</li>
-      <li>If you're really very keen on getting everything just so, that
-        same Properties window from step 3 above also lets you change
-        the icon displayed on the desktop.&nbsp; It's entirely optional,
-        but I'd suggest using C:\Users\<i>YourNameHere</i>\VirtualAGC\Resources\ApolloPatch2-transparent.ico.</li>
-    </ol>
-    You should now be able to run VirtualAGC simply by double-clicking
-    the desktop shortcut you've created.<br>
-    <br>
-    Another way to use the program is from a command line.&nbsp; In the
-    command line, do this:<br>
-    <ol>
-      <li>C: &nbsp;&nbsp; </li>
-      <li>cd C:\Users\<i>YourNameHere</i>\VirtualAGC\Resources</li>
-      <li>..\bin\VirtualAGC</li>
-    </ol>
+    <ul>
+      <li><a moz-do-not-send="true"
+          href="https://www.oracle.com/virtualization/virtualbox/">VirtualBox</a>
+        (Windows/Linux/Mac, free).</li>
+      <li><a moz-do-not-send="true" href="https://www.qemu.org/">QEMU</a>
+        (Windows/Linux/Mac, free).</li>
+      <li><a moz-do-not-send="true" href="https://www.vmware.com/">VMware</a>
+        (Windows/Linux/Mac, commercial, but with a restricted-feature
+        free version).</li>
+      <li><a moz-do-not-send="true"
+href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v">Hyper-V</a>
+        (Windows only, free).</li>
+      <li><a moz-do-not-send="true" href="https://www.parallels.com/">Parallels</a>
+        (Mac only, commercial).</li>
+    </ul>
+    <p>The Virtual AGC VM is only provided in a form specific to
+      VirtualBox.&nbsp; The VirtualBox native virtual-disk format (VDI)
+      that we provide in the VirtualAGC VM can be converted to any of
+      the following virtual-disk formats native to other hypervisors:<br>
+    </p>
+    <ul>
+      <li>VMDK (for VMware)</li>
+      <li>HDD (for Parallels)</li>
+      <li>QCOW (for QEMU)</li>
+      <li>VHD (for Hyper-V)<br>
+      </li>
+    </ul>
+    <p>As for <i>how</i> to perform such a conversion, either
+      VirtualBox or QEMU can convert VDI-format disks to any of the
+      formats listed above.&nbsp; <br>
+    </p>
+    <blockquote><font size="-1"><b>Details:</b>&nbsp; At least in v7.1
+        of VirtualBox, conversion of a VDI file can be performed from
+        the VirtualBox Manager application, from it's main menu:&nbsp;
+        Select File/Tools/Virtual-Media-Manager.&nbsp; Then right-click
+        on any VDI file, choose the Copy operation, and select the
+        desired format to create.&nbsp; Alternately, conversion can be
+        performed from a command line with a command of the form
+        "vboxmanage clonemedium ...".<br>
+        <br>
+        QEMU is more convenient in some ways, since to perform a
+        conversion you don't even need a full installation of QEMU, but
+        merely the <b>qemu-img</b> command-line program, which at least
+        in Linux Mint is a separate installation ("apt install
+        qemu-utils").&nbsp; The command to convert to VMDK, for example,
+        is "qemu-img -f VDI -F VMDK VirtualAGC-VM64.vdi
+        VirtualAGC-VM64.vmdk".&nbsp; I've not actually tried it myself,
+        though.<b>&nbsp; </b>It's good that a full QEMU installation
+        isn't needed for conversion, since the technique for performing
+        a full install of QEMU can be a tad unobvious.&nbsp; At least in
+        Linux Mint, the technique is to use "sudo apt intall
+        bridge-utils virt-manager" and then reboot; QEMU itself can then
+        be run as the "Virtual Machine Manager".&nbsp; Who would have
+        guessed?<br>
+      </font></blockquote>
+    <p>Additionally, for hypervisors <i>other</i> than VirtualBox,
+      you'll have to manually create a VM using the native tools
+      provided by the particular hypervisor, and then attach the
+      VirtualAGC virtual disk to that VM.&nbsp; In my experience,
+      creating a VM that uses a pre-existing virtual disk may prove to
+      be a tricky feat in some hypervisors — which like to create the
+      virtual disk <i>for</i> you at the time the VM itself is created,
+      instead of admitting you might already have one —, but I have
+      faith in you!<br>
+    </p>
+    <p>Of course, just being able to create a VM with a virtual disk in
+      the appropriate format for a given hypervisor does not necessarily
+      imply the ability of that hypervisor to run that virtual
+      machine!&nbsp; One would hope so, but believe me, it ain't
+      necessarily so.&nbsp; (I've made some conversions that <i>won't</i>
+      boot up afterward.)&nbsp; But in the case of the VirtualAGC VM, it
+      does seem okay.&nbsp; Here's some testing I performed:<br>
+    </p>
+    <ul>
+      <li>VMware Workstation Pro:&nbsp; I used VirtualBox to create a
+        VMware virtual disk, and using that converted disk ran the
+        Virtual AGC VM in VMware Workstation Pro.&nbsp; Once the VM was
+        booted up, then from a command line within it, I installed
+        "VMware Tools" in order to get better control over the virtual
+        screen, using the command "sudo apt install
+        open-vm-tools".&nbsp; (Recall that the VM's password is
+        "virtualagc".)&nbsp;&nbsp; The VM seemed to work fine.</li>
+      <li>QEMU:&nbsp; QEMU is actually able to use the VDI file
+        directly, without conversion, so I didn't attempt to convert
+        it.&nbsp; The VM seemed to work fine.&nbsp; <b>But!&nbsp;</b> I
+        wasn't able to use that VDI file in Virtualbox after running it
+        in QEMU.&nbsp; So it might be a good idea to convert the Virtual
+        AGC VM's virtual-disk file into a QEMU native format, or at
+        least clone it into a separate VDI file, before using it with
+        QEMU.</li>
+    </ul>
+    <p>In all of the cases I was able to try, some of the features I
+      like that are provided by VirtualBox were absent, though nothing
+      that would seriously prevent running the Virtual AGC VM in one of
+      these alternate virtualization systems. <br>
+    </p>
+    <p> </p>
     <h2> </h2>
     <h2><a name="Downloading_and_Building_Virtual_AGC"
         id="Downloading_and_Building_Virtual_AGC"></a>Downloading and
@@ -1421,11 +811,18 @@ about
       Code::Blocks, this capability is not a part of Virtual AGC
       proper.&nbsp; That is, Code::Blocks based AGC debugging has its
       own set of installations, requirements, and setups, distinct from
-      those of building Virtual AGC proper ... which is what's discussed
-      below.&nbsp; If (once Virtual AGC is built and working
+      those of building Virtual AGC proper ... which is all that's
+      discussed below.&nbsp; If (once Virtual AGC is built and working
       satisfactorily) you want to do visual debugging, you need to
       install Code::Blocks and should consult <a
 href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">the
+
+
+
+
+
+
+
 
 
 
@@ -1461,6 +858,13 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
+
+
+
+
+
+
 
 
 
@@ -1535,11 +939,25 @@ the
 
 
 
+
+
+
+
+
+
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
+
+
+
+
+
+
 
 
 
@@ -1580,12 +998,24 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
       <p>git clone --depth 1 https://github.com/virtualagc/virtualagc<br>
       </p>
     </blockquote>
-    In either case, you end up with a folder called virtualagc.&nbsp;<br>
+    The "git clone" method has the great advantage that the download can
+    be updated later with a simply command ("git pull"), whereas the
+    zipfile methods basically requires starting over again from
+    scratch.&nbsp; In either case, you end up with a folder called
+    virtualagc.&nbsp;<br>
     <br>
     What you do with it after that depends on which platform you intend
     to run Virtual AGC on, and that's the topic of the next few
-    sections.&nbsp; It's also possible that <a
+    sections.&nbsp; It's also possible though increasingly unlikely that
+    <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
+
+
+
+
+
+
 
 
 
@@ -1619,6 +1049,113 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
       instructions at the GitHub repository</a> may (or may not) be more
     up-to-date than those here.<br>
+    <h3><a name="4K"></a>High-Resolution Displays Such as 4K</h3>
+    <p>The advent of high-resolution displays such 4K, in which the
+      number of pixels per inch has increased drastically but the
+      physical dimensions of the display have barely changed, has a
+      dramatic effect on graphical programs such as our <b>yaDSKY2</b>,
+      <b>yaDEDA2</b>, <b>VirtualAGC</b>, and so on, whose
+      user-interfaces were developed with pixel-based positioning in
+      mind rather than distance-based positioning.&nbsp; In other words,
+      if you run (say) <b>yaDSKY2</b>, designed for a 1920×1080
+      display, on a 3840×2160 display that's roughly the same size
+      physical dimensions, it's going to look very tiny.&nbsp; Possibly
+      it will be unreadable.&nbsp; Alas, this effect cannot always be
+      detected in an automated way by the software itself.<br>
+    </p>
+    <p>In Windows and Linux you can work around this in Virtual AGC by
+      defining an environment variable called <code>AGC_SCALE</code>
+      which controls the "scaling" of the graphical user interfaces in
+      Virtual AGC programs.&nbsp; In Mac OS there is a subtle
+      difference, in that this environment variable must be set before <i>building</i>
+      Virtual AGC, whereas in Windows and Linux it merely needs to be
+      set prior to <i>running</i> Virtual AGC.&nbsp;&nbsp; In the 4K vs
+      1080p example just given, you might use<br>
+    </p>
+    <blockquote>
+      <pre>AGC_SCALE=2.0<br></pre>
+    </blockquote>
+    <p>If the <code>AGC_SCALE</code> variable isn't defined at all, the
+      scaling defaults to 1.0, so you needn't bother with it unless the
+      Virtual AGC programs don't look right.&nbsp; And it doesn't matter
+      exactly what the scale factor is, as long as it's something
+      comfortable to you.&nbsp; In the example above, it didn't need to
+      be 2.0; perhaps you found 1.5 to be good enough, or 2.25 to be
+      better.&nbsp; However, not all Virtual AGC programs treat scaling
+      with equal grace, so 2.0 is ultimately likely to prove to be the
+      best choice anyway.&nbsp; Note too that the scaling is going to be
+      more "exact" if it's an exact integer.&nbsp; For fractional values
+      like 2.25, various controls in the user interface might be
+      positioned incorrectly by fractions of a pixel.&nbsp; And if large
+      scaling factors are used, imperfections in the graphics designed
+      into the user interface will become exaggerated, causing them to
+      appear blocky.<br>
+    </p>
+    <p>The method for making such environment variables permanently
+      available to all Virtual AGC programs — i.e., <i>both</i> to
+      programs run from desktop icons <i>and</i> to those run from a
+      command line — varies by operating-system type:<br>
+    </p>
+    <ul>
+      <li>Linux:&nbsp; Use a text editor (as an administrator) to edit
+        the file /etc/profile, and add the line "export AGC_SCALE=<i>X.X</i>"
+        to it, where <i>X.X</i> is whatever scale factor you
+        choose.&nbsp; Note that this won't have any effect until after
+        the next reboot.</li>
+      <li>Windows:&nbsp; From the Windows menu, open the <i>Control
+          Panel</i>, then choose <i>System and Security</i>, then <i>System</i>,
+        then (in the right-hand pane) <i>Advanced System Settings</i>,
+        then <i>Environment Variables</i>.&nbsp; Create a new <i>User
+          Variable</i> called AGC_SCALE, and assign it whatever scale
+        factor <i>X.X</i> you like.&nbsp; This won't take effect until
+        you close the <i>Environment Variables</i> window by hitting
+        OK, and will only affect new command lines or Virtual AGC
+        programs.</li>
+      <li>Mac OS:&nbsp;&nbsp; There is no <i>good</i> solution that I
+        can ascertain.&nbsp; You might be best advised to google this
+        yourself, for your own specific Mac OS version.&nbsp; But here's
+        a not-very-satisfactory answer that will probably work for
+        you:&nbsp;&nbsp; <i>Before</i> <a moz-do-not-send="true"
+          href="#Sequoia">building Virtual AGC</a>, close the Terminal
+        application if it's running, then use a text editor to edit the
+        files ~/.zprofile and ~/.bashrc, and add the line "export
+        AGC_SCALE=<i>X.X</i>" to both of them, where <i>X.X</i> is
+        whatever scale factor you choose.&nbsp; Only then should you
+        build Virtual AGC.&nbsp; In <i>rebuilding</i> Virtual AGC after
+        a change to AGC_SCALE, be sure to use the "clean" build-target.
+        <br>
+      </li>
+    </ul>
+    <h3><a name="wxWidgets"></a>Regarding wxWidgets</h3>
+    <p><b>wxWidgets</b> is a cross-platform toolkit, suitable for
+      writing software have a graphical user interface (GUI) that can be
+      used with a simple recompilation on any platform supported by <b>wxWidgets</b>.&nbsp;
+
+
+
+
+
+      In other words, using a single base of source code, Virtual AGC
+      can be recompiled to run on Windows or Mac OS or Linux or
+      wherever.&nbsp; <br>
+    </p>
+    <p>In building Virtual AGC from source, version 2.8 of <b>wxWidgets</b>
+      has been recommended for a long time, and the instructions given
+      below often rely on this fact.&nbsp; However, I have observed that
+      it is becoming increasingly difficult to even put together a setup
+      having a working version of <b>wxWidgets</b> 2.8 in Linux,
+      because its prerequisites often conflict seemingly irreconcilably
+      with components of default installations of Linux.&nbsp; Indeed,
+      it's not even clear to me if the current Virtual AGC code base
+      compiles with <b>wxWidgets</b> 2.8, or it it works once compiled,
+      because I seem to have to working installation upon which to test
+      it.&nbsp; Moreover, I have no working installations of 2.8 on Mac
+      OS or Windows to work with.<br>
+    </p>
+    <p>Virtual AGC is thus currently being developed using <b>wxWidgets</b>
+      version 3.2.&nbsp; Given a choice between <b>wxWidgets</b> 2.8,
+      3.0, or 3.2, choose 3.2.<br>
+    </p>
     <h3><a name="CMake-Based_Builds"></a>CMake-Based Builds</h3>
     <p>Because I am lazy, I prefer to develop software only with the
       tools I already know and understand.&nbsp; Usually, roughly
@@ -1656,12 +1193,20 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
+
+
+
+
+
+
         for the CMake-based build process can be found in our GitHub
-        repository's wiki</a>.<br>
+        repository's wiki</a>.&nbsp; Whether those instructions are
+      up-to-date or not is a question I'd prefer not to address.<br>
     </p>
     <p>Since Michael maintains both that wiki page and the CMake process
       itself, please don't attempt to get any sensible response from me
-      (RSB) if you encounter problems them or have questions.&nbsp;
+      (RSB) if you encounter problems with them or have questions.&nbsp;
       You'll want to use our GitHub repository's issue system to report
       problems, or direct inquiries via the GitHub communication system
       to Michael's tag (@scivision).<br>
@@ -1671,129 +1216,48 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>This works!<br>
-                </b> <small><small><small><i>Last verified (Mint 21
-                        Mate 64-bit): 2022-08-07</i></small></small></small></big></big><br>
-            <font size="-1"><i><i><font size="-1"><i><i>Last verified
-                        (Mint 20.1 Mate 64-bit): 2022-08-07</i></i></font></i></i></font><br>
-            <font size="-1"><i><i><font size="-1"><i><i><font size="-1"><i><i><font
-                                size="-1"><i><i>Last verified (Mint 19
-                                    Mate 64-bit): 2022-08-07<br>
-                                  </i></i></font></i></i></font></i></i></font>Last
-
-
-
-
-
-
-                  verified (Mint 17.3 Mate 64-bit): 2022-08-07</i></i></font><br>
-            <font size="-1"><i><i>Last verified (Mint 17.3 Mate 64-bit,
-                  clang 3.9): 2022-08-07</i></i></font><big><big><small><small><small><i><big><big><small><small><small><i><br>
-                                  </i></small></small></small></big></big>Last
-
-
-
-
-
-
-                        verified (Mint 32-bit): 2019-09-22<br>
-                        Last verified (Fedora 26 64-bit): 2017-08-31<br>
-                        Last verified (Slackware 14.2): 2021-03-21<br>
-                        Last verified (Chromebook): 2021-03-21<br>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
+                </b> <small><small><small><i>Last verified (Ubuntu
+                        24.04 64-bit):&nbsp; 2024-12-29<br>
+                        Last verified (Linux Mint 21.3): 2024-12-29</i></small></small></small></big></big><big><big><small><small><small><i><br>
                       </i></small></small></small></big></big></td>
         </tr>
       </tbody>
     </table>
     <br>
-    These instructions apply to building Virtual AGC on <i>Ubuntu-like
-      systems</i>, but are probably pretty applicable to most Ubuntu,
-    Debian, or Mint desktop systems.&nbsp; Please realize that while
-    Linux is my own working environment of choice, I don't have time to
-    support every possible Linux variant, and don't intend to even
-    pretend to do so any longer.&nbsp; <br>
-    <br>
-    I primarily use Linux Mint.&nbsp; Since Linux Mint is based on
-    Ubuntu Linux according to the following table, it's probably a
-    reasonable supposition that if I can build Virtual AGC for the Mint
-    versions shown above, then you can build it for the Ubuntu versions
-    shown below.&nbsp; Not that I guarantee it!<br>
-    <ul>
-      <li>Linux Mint 17 ⟺ Ubuntu 14.04</li>
-      <li><font color="#c0c0c0">Linux Mint 18 ⟺ Ubuntu 16.04</font></li>
-      <li>Linux Mint 19 ⟺ Ubuntu 18.04</li>
-      <li>Linux Mint 20 ⟺ Ubuntu 20.04</li>
-      <li>Linux Mint 21 ⟺ Ubuntu 22.04</li>
-    </ul>
+    I personally develop on Linux Mint, which is Ubuntu based, and these
+    instructions are targeted for those platforms.&nbsp; Presumably
+    builds can be performed on other Linux platforms, but the detailed
+    instructions will differ.<br>
     <h4>One-Time Setup</h4>
-    <p>Unfortunately, I cannot give you an exact list of package names
-      even for my own distribution of choice.&nbsp; They change over
-      time!&nbsp; So you'll have to take the following information only
-      as suggestions.&nbsp; If you find things you need to do
-      differently, let me know and perhaps I can incorporate that info
-      here.<br>
-    </p>
     <h4> </h4>
     <ul>
-      <li>Ubuntu/Debian/Mint:&nbsp; "sudo apt-get install libsdl1.2-dev
-        libncurses5-dev liballegro4.4-dev g++ libgtk2.0-dev
-        libwxgtk2.8-dev tcl tk".&nbsp; But sometimes the package names
-        needed are a little different:</li>
+      <li>Install the following packages, using either command-line
+        commands like "sudo apt-get install <i>PackageName</i>" or else
+        using whatever graphical package manager is provide.&nbsp; (On
+        Linux Mint, that would be Synaptic.)</li>
       <ul>
-        <li>Could be liballegro4-dev</li>
-        <li>Could be libwxgtk3.0-dev or libwxgtk3.0-gtk3-dev<br>
-        </li>
-        <li>Note that using wxWidgets 3.2 should also be possible.&nbsp;
-          At the present writing, that would entail building wxWidgets
-          from source.&nbsp; You will definitely need the latest Virtual
-          AGC source code.<br>
-        </li>
+        <li>libsdl1.2-dev</li>
+        <li>libncurses5-dev</li>
+        <li>liballegro4-dev</li>
+        <li>g++</li>
+        <li>libgtk2.0-dev</li>
+        <li>tcl</li>
+        <li>tk</li>
       </ul>
-      <li>Versions of Linux I don't personally support, but about which
-        I have learned possibly-helpful info:</li>
-      <ul>
-        <li>Chromebook:&nbsp; <tt>mkdir ~/Desktop</tt>, and use the
-          instructions above.&nbsp; I'm not actually sure what range of
-          Chromebooks can support a VirtualAGC installation, but <i>some</i>
-          have Linux terminals built in and can do so.&nbsp; Thanks to
-          Nick Warne for pointing this out.</li>
-      </ul>
-      <ul>
-        <li>Slackware 14.2:&nbsp; Do library builds for wxGTK and
-          allegro4; I am told that the default allegro (allegro5) does
-          not set up directory links as expected by VirtualAGC, which is
-          why allegro4 has to be chosen specifically.&nbsp; (Thanks to
-          Nick Warne for all Slackware info.)<br>
-        </li>
-      </ul>
-      <ul>
-        <li>Fedora 26 64-bit Intel/AMD: "sudo yum install SDL-devel
-          ncurses-devel allegro-devel gcc-c++ wxGTK3-devel
-          redhat-rpm-config".&nbsp; (Note that this uses wxGTK 3 rather
-          than wxGTK 2.8 as I normally advise.&nbsp; To instead use
-          wxGTK 2.8, the makefiles for all of the graphical programs,
-          such as yaDSKY2, yaDEDA2, VirtualAGC, and so on, have to be
-          modified manually to add -fPIC to the compiler command lines.)</li>
-      </ul>
+      <li>If wxWidgets 3.2 is available in the package repository (with
+        a package name something like libwxgtk3.2-gtk3-dev), install it
+        in the same manner described above.&nbsp; Otherwise, <a
+          moz-do-not-send="true"
+          href="https://www.wxwidgets.org/downloads/">download its
+          source code directly from the web</a>, and build/install it
+        from source according to the instructions found there.</li>
+      <li>Install both Python 3 and Python 2 if not already installed.<br>
+      </li>
     </ul>
-    I have lately started encountering systems (Linux Mint and Ubuntu,
-    I'm looking at <i>you</i>!) for which the Virtual AGC build
-    procedure described below fails, due the operating system being
-    configured in such a way that the Python interpreter cannot be found
-    even though we (Virtual AGC) are referencing it as described in
-    Python documentation.&nbsp; If you try the following from a command
-    line,<br>
-    <br>
-    &nbsp;&nbsp;&nbsp; <tt>/usr/bin/env python</tt><br>
-    <br>
-    and it fails to actually run Python, then you have this issue and
-    must fix it before proceeding.&nbsp; On some versions of Linux Mint
-    and Ubuntu, there are packages called "python-is-python2" and
-    "python-is-python3" which can fix the problem.&nbsp; On some
-    versions, just reinstalling Python 3 or Python 2 will fix the
-    problem.<br>
     <h4>Building Virtual AGC Once the One-Time Setup Is Complete</h4>
     <h4> </h4>
     <ul>
@@ -1817,37 +1281,21 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       stuff may cause you problems.&nbsp; Hopefully that won't happen to
       most people, but I suspect that a higher percentage of folks
       interested in Virtual AGC would have this kind of problem than
-      those picked at random from the general population.&nbsp; For
-      example, I have this problem myself on one system of the several I
-      use.&nbsp; This particular offending development system is a
-      64-bit Linux Mint 17.3 system, but with <i>multiple</i> versions
-      of gcc, libstdc++, and wxGTK installed.&nbsp; The resulting
-      (unclean) system can build the Virtual AGC software fine, but not
-      run it once built, because of a mismatch between the default
-      versions of the compiler and the share libraries installed.&nbsp;
-      This isn't a problem with Virtual AGC as such, but is simply the
-      result of not having a clean Linux installation in which
-      everything is guaranteed to work with everything else. <br>
+      those picked at random from the general population.&nbsp; <br>
     </p>
-    <p>One potential fix is to have a virtual machine with a clean Linux
-      installation on which you can build Virtual AGC; i.e., simply
-      bypass your "dirty" build setup completely.&nbsp; This is usually
-      quite a hassle.&nbsp; <br>
-    </p>
-    <p>A better solution, when feasible, would be to use extra
-      command-line switches for 'make', to eliminate conflicts by
-      overriding the default compiler choices.&nbsp; There are two such
-      switches, FORCE_cc and FORCE_CC, which respectively override the C
-      compiler and the C++ compiler.&nbsp; For example, on my offending
-      Linux Mint 17.3 system, I can get around the goofed-up system
-      libraries with the following dodge, which forces the use of an
-      older compiler (gcc 4.8) vs the latest version I've installed (gcc
-      8.3):<br>
-    </p>
-    <p><tt>&nbsp;&nbsp;&nbsp; make FORCE_cc=/usr/bin/gcc
-        FORCE_CC=/usr/bin/g++ clean install</tt></p>
-    <p>See the comments in <a
+    <p>Sometimes, extra command-line switches for 'make' can be used to
+      eliminate conflicts by overriding the default compiler
+      choices.&nbsp; There are two such switches, FORCE_cc and FORCE_CC,
+      which respectively override the C compiler and the C++
+      compiler.&nbsp; See the comments in <a
         href="https://github.com/virtualagc/virtualagc/blob/master/Makefile">the
+
+
+
+
+
+
+
 
 
 
@@ -1913,10 +1361,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>This works!<br>
+          <td align="center" valign="middle"><big><big><b>This worked<br>
                 </b> <small><small><small><i>Last verified (Raspbian
                         Jessie): 2017-11-20<br>
                         Last verified (Raspbian Stretch): 2018-05-11<br>
@@ -1926,72 +1374,17 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       </tbody>
     </table>
     <br>
-    These instructions relate to building Virtual AGC on a Raspberry Pi
-    3 running Raspbian-Jessie, though they're not really specific to any
-    particular Pi model.&nbsp; For example, the instructions also work,
-    unchanged, on a Pi B+ and a Pi Zero (though I would not recommend
-    running VirtualAGC on them, unless you like to snooze).&nbsp; This
-    really isn't any different from building it on <a
-      href="#BuildLinux">any other Linux system</a>, but I'll go through
-    the steps separately anyway, using a completely clean Raspbian
-    installation.&nbsp; Laszlo Morocz provided the original idea.&nbsp;<br>
-    <p>One-time setup:<br>
-    </p>
-    <blockquote>
-      <p>sudo apt-get install wx2.8-headers libwxgtk2.8-0
-        libwxgtk2.8-dev libsdl-dev libncurses5-dev liballegro4-dev git<br>
-        git clone --depth 1 https://github.com/virtualagc/virtualagc</p>
-    </blockquote>
-    The "sudo apt-get install ..." step given above is inadequate in
-    some versions of Raspbian, and may need modifications:<br>
-    <ul>
-      <li>If libsdl1.2debian is pre-installed on your system, it may
-        conflict with the installation of libsdl-dev described
-        above.&nbsp; Simply omit libsdl-dev.&nbsp; If there is a
-        libsdl1.2debian-dev package, you may need to install it. </li>
-      <li>Raspbian Buster (as opposed to Jessie and Stretch).&nbsp; I've
-        not yet tried Raspbian Buster myself, but I'm told the following
-        mods are necessary:<br>
-      </li>
-      <ul>
-        <li>Compilation:&nbsp; There may be a problem with the wxWidgets
-          2.8 library that allows applications apparently to be built
-          properly, but not to be runnable afterward, with a complaint
-          about mismatched "ABI" versions.&nbsp; The workaround is to
-          install wxWidgets 3.0 instead of 2.8, in which case use the
-          following command rather than the one given above:&nbsp; "sudo
-          apt-get install wx3.0-headers libwxgtk3.0-dev libsdl-dev
-          libncurses5-dev liballegro4-dev git".</li>
-        <li>Running:&nbsp; It may be that Tcl/Tk isn't installed, and
-          while that those aren't needed for the most common
-          configuration of VirtualAGC (AGC+DSKY+Telemetry), it is needed
-          for certain advanced features.&nbsp; Install with "sudo
-          apt-get install tcl tk".<br>
-        </li>
-      </ul>
-    </ul>
-    <p>Building Virtual AGC:<br>
-    </p>
-    <blockquote>
-      <p>cd virtualagc<br>
-        make install<br>
-      </p>
-    </blockquote>
-    or perhaps "make clean install" instead.&nbsp; (No 'sudo' should be
-    used with the 'make', nor is it a good idea to build from the root
-    account, since I gather there's no desktop for the root user.)&nbsp;
-    This process creates a desktop icon from which you can run Virtual
-    AGC.&nbsp; You can "uninstall" by removing the icon, the
-    ~/VirtualAGC folder, and the source-code directory you downloaded
-    from GitHub.
+    Just refer to the generic Linux instructions in the preceding
+    section.&nbsp; <br>
+    <br>
     <h3><a name="FreeBSD" id="FreeBSD"></a>FreeBSD</h3>
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>This works!<br>
+          <td align="center" valign="middle"><big><big><b>This worked<br>
                 </b> <i><small><small><small>Last verified: 2017-08-31</small></small></small></i><br>
               </big></big></td>
         </tr>
@@ -2001,6 +1394,13 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
+
+
+
+
+
+
 
 
 
@@ -2089,10 +1489,10 @@ That
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>This works!<br>
+          <td align="center" valign="middle"><big><big><b>This worked<br>
                 </b> <small><small><small><i>Last verified: 2017-08-31</i></small></small></small><br>
               </big></big></td>
         </tr>
@@ -2109,6 +1509,13 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
+
+
+
+
+
+
 
 
 
@@ -2179,9 +1586,9 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"> </td>
-          <td valign="middle" align="center"><big><big><b>This works!<br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"> </td>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
                 </b> <small><small><small><i>Last verified (older
                         Macs): 2021-11-12</i></small></small></small><br>
                 <font size="-1"><i>Last verified (Monterey): 2024-12-22<br>
@@ -2210,8 +1617,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <br>
     Now that I've warned you, the subsections below cover what I know
     and what I theorize about building Virtual AGC on Macs.<br>
-    <h4><a name="Older_Macs:_Xcode_with_gcc"></a>Older Macs: Xcode with
-      gcc<br>
+    <h4><a name="Older_Macs:_Xcode_with_gcc"></a>Older Macs<br>
     </h4>
     The executive summary is that this works (on <i>my</i> Mac, with
     Mac OS X Lion 10.7.5 and Xcode 4.6.3) and the simulated AGC, DSKY,
@@ -2223,6 +1629,13 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <ol>
       <li>Install <a href="https://developer.apple.com/download/more">most-current
 version
+
+
+
+
+
+
+
 
 
 
@@ -2332,6 +1745,13 @@ You
 
 
 
+
+
+
+
+
+
+
         have to add that to your PATH, so that the 'wx-config' program
         can be found during the build.&nbsp; The command is "export
         PATH=$PATH:/opt/local/.../bin".&nbsp; You can test that it
@@ -2377,8 +1797,17 @@ You
       the various individual GUI applications there, where you can
       simply run them by double-clicking on them.<br>
     </p>
-    <h4><a name="Newer_Macs:_Xcode_with_clang"></a>Newer Macs: Xcode
-      with clang</h4>
+    <h4><a name="Newer_Macs:_Xcode_with_clang"></a>Mac OS Monterey</h4>
+    <p><i>(The instructions in </i><i><a moz-do-not-send="true"
+          href="#Sequoia">the next section</a></i><i> are recommended
+        for Monterey rather than the ones in this section.&nbsp; This
+        section uses Macports to speed up the installation process, but
+        there are drawbacks to doing so, because the side effects can be
+        hard to undo later.&nbsp; You have been warned!&nbsp; These
+        instructions do seem to work if you don't mind inviting later
+        difficulties.&nbsp; On the other hand, if you happen to be using
+        Macports already anyway then you may as well proceed!)</i><br>
+    </p>
     <p>Ludo Visser has sent me instructions for building Virtual AGC on
       a clean installation of MacOS 12.0.1 (Monterey).&nbsp; Virtual AGC
       itself required no changes.&nbsp; He does mention that he didn't
@@ -2386,7 +1815,13 @@ You
       Virtual AGC does work "out of the box" after he builds it.
       &nbsp;&nbsp; <br>
     </p>
-    <p>So here are his instructions, verbatim:</p>
+    <p> <a moz-do-not-send="true" href="#4K">Recall the comments
+        already made about high-resolution displays.</a>&nbsp; If your
+      Mac has such a display and you will use the environment variable <code>AGC_SCALE</code>
+      to correct for it, make sure that <code>AGC_SCALE</code> is
+      properly set (and exported) before proceeding.<br>
+    </p>
+    <p>Here are Ludo's instructions, verbatim:</p>
     <ol>
       <li>Install Xcode command line tools</li>
     </ol>
@@ -2438,6 +1873,13 @@ You
     Xcode.&nbsp; Admittedly, that's probably not a point that's of much
     concern to Apple aficionados.<br>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
+
+
+
+
+
         The first time you run <b>VirtualAGC</b> from its desktop icon
         after installation, it may take a considerable amount of time to
         start up.&nbsp; There will be no such delays on subsequent
@@ -2462,218 +1904,131 @@ You
         or later as the machine on which you built it, though I have not
         tried it and do not guarantee it.<br>
       </font></blockquote>
-    <h4>Mac OS Sequoia</h4>
-    <p>I'm told that the instructions above do not work as-is for Mac OS
-      Sequoia, but that a build can be performed with modified
-      instructions, the details of which I'm not yet privy to.&nbsp;
-      Hopefully I'll have new instructions for you in January 2025.<br>
+    <h4><a name="Sequoia"></a>Newer Macs<br>
+    </h4>
+    <p>I'm told that the instructions given above for Mac OS Monterey do
+      not work as-is for some later versions of Mac OS, such as
+      Sequoia.&nbsp; Gavin Eadie (thanks, Gavin!) has sent me modified
+      instructions.&nbsp; The executive summary is that these
+      instructions are the same as for Monterey, except that wxWidgets
+      is built from source rather than installed via Macports.&nbsp;
+      That being the case, it would be my supposition that these
+      instructions should work just as well on Mac OS Monterey, Ventura,
+      or Sonoma as in Sequoia, but only time will tell.<br>
     </p>
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; A full installation
+        of Xcode is not needed, though it's fine if present.&nbsp; It's
+        only necessary to have the so-called Xcode command-line tools,
+        which can either be installed stand-alone or else as part of a
+        full Xcode installation.<br>
+      </font></blockquote>
+    <a moz-do-not-send="true" href="#4K">Recall the comments already
+      made about high-resolution displays.</a>&nbsp; If your Mac has
+    such a display and you will use the environment variable <code>AGC_SCALE</code>
+    to correct for it, make sure that <code>AGC_SCALE</code> is
+    properly set (and exported) before proceeding. This causes <code>AGC_SCALE</code>
+    to be hard-coded into the Virtual AGC application.&nbsp; (But it can
+    be changed anytime afterward by modifying the file
+    VirtualAGC.app/Contents/Info.plist with a text editor.)<br>
+    <br>
+    Here are the steps for building Virtual AGC:<br>
+    <blockquote> </blockquote>
+    <ol start="1">
+      <li> (One-time setup.)&nbsp; Install wxWidgets 3.2.<i>x</i>
+        (currently 3.2.6) by <a moz-do-not-send="true"
+href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2">downloading
+
+
+
+
+          its source code</a>, and building it from source according to
+        <a moz-do-not-send="true"
+href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
+
+
+
+          online instructions</a>.&nbsp; It might be worth rebooting
+        after the build is complete.&nbsp; Building wxWidgets is simple
+        when it works, but takes an extremely long time!&nbsp; And there
+        are some traps to avoid:</li>
+      <ul>
+        <li>Apparently the build does not proceed correctly if any of
+          the folder names in its path contain any spaces.&nbsp; <br>
+        </li>
+        <li>Do <i>not</i> create an environment variable <code>cc</code>
+          (as described in the next step) before building
+          wxWidgets.&nbsp; If you do have such an environment variable,
+          get rid of it until after building of wxWidgets is complete.</li>
+        <li>It appears to me that building wxWidgets will <i>fail</i>
+          if Macports has previously been used to install wxWidgets as
+          described in <a moz-do-not-send="true"
+            href="Newer_Macs:_Xcode_with_clang">the preceding section</a>.&nbsp;
+
+
+
+          Or more specifically, if Macports has installed some of the
+          libraries (such as libjpeg) that wxWidgets requires, because
+          those libraries will be of incompatible versions.&nbsp; On
+          solutions is to uninstall Macports and all of the packages
+          Macports had installed.&nbsp; <a moz-do-not-send="true"
+href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">The
+
+
+
+            instructions for doing so are in the Macports manual</a>,
+          and it may be worth rebooting afterward.&nbsp; But if you
+          can't remove Macports, and if wxWidgets doesn't build for you
+          with Macports present, I'm not in a position to advise you how
+          to proceed.<br>
+        </li>
+      </ul>
+      <li>(Building Virtual AGC.)&nbsp; In a shell session:</li>
+    </ol>
+    <pre>          export cc=clang
+          export CC=clang++
+          git clone --depth=1 https://github.com/virtualagc/virtualagc.git
+          cd virtualagc
+          make MACOSX=yes FORCE_clang=yes clean install<br></pre>
+    The various <code>export</code> commands listed above make changes
+    to the associated environment variables that are only
+    temporary.&nbsp; The associated environment variables will thus
+    disappear after the command-line shell is closed.&nbsp; In other
+    words, you'll have to use these very same commands every time you
+    open a command-line window to rebuild Virtual AGC.&nbsp; So you may
+    want to make the changes permanent instead.&nbsp; Unfortunately, the
+    method for making permanent changes to environment variables varies
+    by Mac OS version, as well as according to which command-shell
+    program is being used.&nbsp; If the <code>zsh</code> command shell
+    is being used, as is the case by default in Monterey, then the <code>export</code>
+    commands can be added to a file called ~/.zprofile to make them
+    permanent.&nbsp; If the <code>bash</code> command shell is used,
+    then the file you need to edit is ~/.bashrc. &nbsp; If these don't
+    work for you, I'm afraid you'll have to research it yourself.<br>
+    <br>
+    Note that while any Python scripts used above are in Python 3, which
+    is now installed by default (as far as I know) in Mac OS, some
+    Python 2 scripts are also present in Virtual AGC even though not
+    used in the installation process.&nbsp; Python 2 is no longer
+    installed by default, so in the relatively-rare case in which you
+    want to use one of those scripts you will need to explicitly install
+    Python 2.&nbsp; As of this writing, <a
+      href="https://www.python.org/downloads/release/python-2718/">the
+      MacOS installer for the so-called "final" release of Python 2,
+      namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
+    <br>
+    <p> </p>
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
-    <h3><a name="WindowsObsolete" id="WindowsObsolete"></a>Windows (Obsolete)</h3>
-    <blockquote>
-      <p><i><b>Note:</b>&nbsp; The instructions in this section relate
-          to an earlier version of Virtual AGC, tailored to a developer
-          environment known as "Msys".&nbsp; However, Msys, which is <u>not</u>
-          the same thing as the currently-available "Msys2", and has
-          been discontinued.&nbsp; These instructions therefore do not
-          work.&nbsp; They will be removed eventually.&nbsp; See the
-          next section instead.</i><br>
-      </p>
-    </blockquote>
-    <table summary="" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
-          </td>
-          <td valign="middle" align="center"><big><big><strike><b>This
-                    works!<br>
-                  </b></strike><strike> </strike><strike><small><small><small><i>Last
-                          verified (Andy Smith): 2021-05-24<br>
-                          Last verified (RSB): 2017-08-31</i></small></small></small></strike><br>
-              </big></big></td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    <strike><i>Concerning the build verifications listed above:&nbsp;
-        After my last personal (RSB) verification I had gotten various
-        hints from correspondents that Windows 64-bit builds no longer
-        worked properly.&nbsp; Also, I was told that in all MinGW builds
-        the AGC program SUNBURST 37 no longer assembled correctly.&nbsp;
-        Subsequent fixes have hopefully corrected those issues, but I
-        have not personally verified the builds.&nbsp; Thanks to Andy
-        Smith for that.&nbsp; Also, I'm told that Cygwin builds work as
-        well, though I have not tried it within recent memory, nor can I
-        provide any specific set of instructions for doing so.</i></strike><strike><br>
-    </strike><strike> </strike><strike><br>
-    </strike><strike> This section relates to building Virtual AGC on
-      64-bit Windows 7, though the procedure doesn't seem to have
-      anything in it that's specific to that version of Windows.&nbsp;
-      (It's merely that I've only </strike><strike><i>tried</i></strike><strike>
-      it on Windows 7.&nbsp; On occasion, I've copied the results into
-      Windows XP and run VirtualAGC there as well, but I don't always do
-      that.)&nbsp; The building process uses MinGW/Msys (as opposed to
-      Visual Studio), and I don't know whether or not there is a valid
-      Visual Studio build process.</strike><strike><br>
-    </strike><strike> </strike><strike><br>
-    </strike><strike> First-time setup of the Windows box is somewhat
-      time-consuming (but building Virtual AGC is pretty easy after
-      that):</strike><strike><br>
-    </strike><strike> </strike>
-    <ol>
-      <li><strike>Install </strike><strike><a
-            href="http://www.mingw.org">the <b>MinGW</b> compiler and
-            the <b>Msys</b> Linux-like command-line development
-            environment</a></strike><strike>, using the downloadable
-          "MinGW Installation Manager".&nbsp; This installation program
-          changes over time, so I cannot tell you precisely how to use
-          it, and can only give you a general idea.&nbsp; Use the
-          default choices for installation directory (c:\mingw) and
-          other settings, if any are offered.&nbsp; Note that by
-          default, the batch file c:\mingw\msys\1.0\msys.bat is what's
-          used to start the </strike><strike><b>Msys</b></strike><strike>
-          command shell as in the next step below, and you might want to
-          manually create a desktop icon or a Windows start-menu entry
-          for running that batch file.&nbsp; If you are unlucky enough
-          to have a Windows user name containing spaces, you will
-          encounter difficulties.&nbsp; The instructions at the
-          www.mingw.org website explain what to do in that
-          situation.&nbsp; Specific packages which you need to install
-          using the MinGW Installation Manager, at least at this
-          writing, which may not be among the defaults are:</strike></li>
-      <ul>
-        <li><strike>All of the packages in the "Basic Setup", except
-            Ada, FORTRAN, and Objective-C compilers.</strike></li>
-        <li><strike>Among the packages in "All Packages":</strike><strike><br>
-          </strike> </li>
-        <ul>
-          <li><strike>"msys-libregex" (dev+dll)</strike></li>
-          <li><strike>"msys-libncurses" (dev+dll)</strike></li>
-          <li><strike>"msys-wget"</strike></li>
-          <li><strike>"msys-unzip"</strike></li>
-        </ul>
-      </ul>
-      <li><strike>Run </strike><strike><span style="font-weight: bold;">Msys</span></strike><strike>,
-          to bring up an </strike><strike><b>Msys</b></strike><strike>
-          command-line shell, which is different from the native Windows
-        </strike><strike>command-line shell.&nbsp; Some of the "DOS"
-          commands you probably are familiar with (such as "dir") don't
-          work in this shell, while Linux-type replacements ("ls -l")
-          are used instead.&nbsp; Some commands, like "cd", work almost
-          the same way, though there are subtle differences. Also, '/'
-          is the separator for folders in path-names, rather than
-          '\'.&nbsp; Google for "bash" if you're interested in these
-          kinds of differences.&nbsp;</strike><strike><br>
-        </strike> </li>
-      <li><strike>Install the </strike><strike><a
-            href="http://www.libsdl.org">SDL library, version 1.2</a></strike><strike>.&nbsp;
-          You should find that there is a download file specifically
-          labeled as a Win32 development library for </strike><strike><span
-            style="font-weight: bold;">MinGW</span></strike><strike>.&nbsp;
-Within
-
-
-
-
-
-
-
-          your </strike><strike><span style="font-weight: bold;">Msys</span></strike><strike>
-          home directory, unpack the download file, 'cd' into the
-          directory it creates.&nbsp; Do "mkdir /usr/local", and run the
-          command "make install-sdl prefix=/usr/local".&nbsp; (The /usr
-          directory within </strike><strike><span style="font-weight:
-            bold;">Msys</span></strike><strike> will probably correspond
-          to something like c:\mingw\msys\1.0\ in your Windows
-          filesystem.) &nbsp; </strike><strike><span
-            style="font-weight: bold;">Note:</span></strike><strike>&nbsp;
-
-
-
-
-
-
-
-        </strike><strike><span style="font-style: italic;">All</span></strike><strike>
-          software needed to build Virtual AGC will be installed under
-          /usr/local, so eventually it will be populated with
-          sub-directories such as /usr/local/bin, /usr/local/include,
-          /usr/local/lib, and so on.&nbsp; The Virtual AGC makefiles are
-          hard-coded to assume these installation locations.&nbsp; Note,
-          however, that the Virtual AGC binaries you are going to create
-          are </strike><strike><span style="font-style: italic;">not</span></strike><strike>
-          installed under /usr/local, because while the Virtual AGC apps
-          are being created using </strike><strike><b>Msys</b></strike><strike>,
-        </strike><strike><b>Msys</b></strike><strike> is not needed to
-          run them ... they are simply Windows programs like any other.</strike><strike><br>
-        </strike> </li>
-      <li><strike>Obtain a source zipfile of </strike><strike><a
-            href="http://www.wxwidgets.org/">wxWidgets, version 2.8.12</a></strike><strike>,
-          or as close to this 2.8.x version as is available.&nbsp; Of
-          the several varieties offered for download (wxAll, wxMSW,
-          wxGTK, ...) chose wxMSW, and make sure you get the source code
-          rather than an installer program.&nbsp; Unzip the downloaded
-          file in your home directory, 'cd' into the directory this
-          creates, and then do "./configure --enable-unicode", "make",
-          and "make install".</strike></li>
-      <li><strike>Though it has nothing to do with </strike><strike><i>building</i></strike><strike>
-          Virtual AGC, if you want to have access to Stephen Hotto's
-          contributed Lunar Module accessories when you </strike><strike><i>run</i></strike><strike>
-          Virtual AGC, you'll also have to </strike><strike><a
-            href="https://www.tcl.tk/software/tcltk/">install Tcl/Tk</a></strike><strike>.&nbsp;</strike><strike><br>
-        </strike> </li>
-    </ol>
-    <strike> Once this one-time setup is complete, you should now be
-      able to build Virtual AGC as follows.&nbsp; As above, all of the
-      following steps take place in the </strike><strike><b>Msys</b></strike><strike>
-      command shell, and </strike><strike><u>not</u></strike><strike>
-      from a "DOS" command line:</strike><strike><br>
-    </strike><strike> </strike>
-    <ol style="list-style-type: lower-alpha;">
-      <li><strike>Get the Virtual AGC source code from GitHub (from the
-          link at the top of this page), either by using 'git', if
-          installed on your computer, or by downloading a zipfile and
-          unzipping it.&nbsp; For the sake of discussion, I'm going to
-          suppose that the folder you get from doing this is called
-          "virtualagc" and is in your home directory.</strike><strike><br>
-        </strike> </li>
-      <li><strike>Do "cd virtualagc".</strike><strike><br>
-        </strike> </li>
-      <li><strike>Build it: "make WIN32=yes install" or "make WIN32=yes
-          clean install".&nbsp;</strike><strike><br>
-        </strike> </li>
-    </ol>
-    <strike> This process may or may not create a desktop launcher for
-      VirtualAGC.&nbsp; (If not, you can create your own launcher on the
-      desktop.&nbsp; Just have it run the program C:\Users\</strike><strike><i>YourUserName</i></strike><strike>\VirtualAGC\bin\VirtualAGC.exe,
-and
-
-
-
-
-
-
-
-      have it use C:\Users\</strike><strike><i>YourUserName</i></strike><strike>\VirtualAGC\Resources
-      as the starting directory.)</strike><strike><br>
-    </strike><strike> </strike><strike><br>
-    </strike><strike> You can "uninstall" simply by removing the desktop
-      icon and %HOMEPATH%\VirtualAGC, and whatever source-folder you
-      downloaded from GitHub.</strike><br>
     <h3><a name="Windows"></a>Windows</h3>
-    <p><i>(This section is under construction.&nbsp; The contents, I
-        think, are correct.)</i><br>
-    </p>
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" moz-do-not-send="true" width="72"
-              height="75"> </td>
-          <td valign="middle" align="center"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" moz-do-not-send="true"
+              height="75" width="72"> </td>
+          <td align="center" valign="middle"><br>
             <font size="+2"><b>This works!</b></font><big><big><big><big><font
                       size="-1"><b><br>
                       </b></font><font size="-1"><i>Last verified (RSB,
@@ -2695,6 +2050,13 @@ and
       Linux/Mac-like process which created them.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
+
+
+
+
+
         At this writing, <b>MSYS2</b> supports only Windows 10 or
         later.</font><br>
     </blockquote>
@@ -2707,6 +2069,13 @@ and
         expectation that I can personally try them or debug them. I'd
         guess that there would be a much better chance for WSL than for
         Visual Studio, and that <a moz-do-not-send="true" href="#Linux">the
+
+
+
+
+
+
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -2715,6 +2084,13 @@ and
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
+
+
+
+
+
+
           <b>MSYS2</b></a>.&nbsp; You may be given several choices of
         environment, the differences between which are inexplicable;
         choose the UCRT64 environment.&nbsp;&nbsp;</li>
@@ -2791,6 +2167,13 @@ and
     involved.&nbsp; Go figure!&nbsp; Here are the instructions for doing
     so, based on the idea that the build process described above has
     created an installation folder C:\Users\<i>username</i>\VirtualAGC.installed,
+
+
+
+
+
+
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -2800,6 +2183,13 @@ and
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
+
+
+
+
+
+
         <br>
       </li>
       <li>At the next prompt, enter some convenient name for the
@@ -2832,10 +2222,10 @@ and
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>This works!</b><small><small><small><i><br>
+          <td align="center" valign="middle"><big><big><b>This worked</b><small><small><small><i><br>
                         Last verified (RSB, Linux Mint 21): 2022-09-25</i></small></small></small><br>
               </big></big></td>
         </tr>
@@ -2857,6 +2247,13 @@ and
     </p>
     WebAssembly builds of Virtual AGC don't provide the entire Virtual
     AGC suite of programs, but merely the AGC CPU emulation (<b>yaAGC</b>).&nbsp;
+
+
+
+
+
+
+
 
 
 
@@ -2914,6 +2311,13 @@ and
 
 
 
+
+
+
+
+
+
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -2932,6 +2336,13 @@ and
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
+
+
+
+
+
+
 
 
 
@@ -3013,6 +2424,13 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
 
 
 
+
+
+
+
+
+
+
     rather than to "http://localhost:8000/demo/" and seemingly avoid
     HTTP entirely?&nbsp; In other words, why can't this demo, or
     presumably similar web apps, simply run entirely within the
@@ -3041,10 +2459,10 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="yellowQuestion.png" width="70" height="75"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="yellowQuestion.png" height="75" width="70"><br>
           </td>
-          <td valign="middle" align="center"><big><big><b>Still okay?</b></big></big><br>
+          <td align="center" valign="middle"><big><big><b>Still okay?</b></big></big><br>
           </td>
         </tr>
       </tbody>
@@ -3161,14 +2579,21 @@ Commons
 
 
 
+
+
+
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-09-25.<br>
+          2025-01-03<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
         </font></i> </center>
     <br>
   </body>

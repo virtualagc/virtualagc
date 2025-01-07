@@ -1,5 +1,6 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head>
+<html>
+  <head>
     <title>Virtual AGC Document Library Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="Author" content="Ronald Burkey">
@@ -11,12 +12,10 @@
     <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace("@SUBTITLE@","Roadmap and Theory of Operation"))
 </script><br>
-<h1>
-    Important Note
-    </h1>
-<p>This page was written prior to the effort to port the original Intermetrics HAL/S compiler, <b>HAL/S-FC</b>, for modern usage.  (See <a moz-do-not-send="true" href="HAL.html">here</a>.)  The use of the term "modern compiler" in this page refers merely to that portion of the HAL/S interpreter (see <a moz-do-not-send="true" href="hal-s-interpreter.html">here</a>) that functions as a stand-alone compiler, and not to <b>HAL/S-FC</b>.  Please forgive the confusion of terminology, but I have no obvious way of reducing the confusion beyond warning you about it. <br></p>
-<p>This page is of interest primarily because it serves as the specification for the PALMAT intermediate language. </p>
-<h1>Table of Contents </h1>
+    <h1> Important Note </h1>
+    <p>This page was written prior to the effort to port the original Intermetrics HAL/S compiler, <b>HAL/S-FC</b>, for modern usage.  (See <a moz-do-not-send="true" href="HAL.html">here</a>.)  The use of the term "modern compiler" in this page refers merely to that portion of the HAL/S interpreter (see <a moz-do-not-send="true" href="hal-s-interpreter.html">here</a>) that functions as a stand-alone compiler, and not to <b>HAL/S-FC</b>.  Please forgive the confusion of terminology, but I have no obvious way of reducing the confusion beyond warning you about it. <br></p>
+    <p>This page is of interest primarily because it serves as the specification for the PALMAT intermediate language. </p>
+    <h1>Table of Contents </h1>
     <ul>
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
       <li><a moz-do-not-send="true" href="#Roadmap">Roadmap</a></li>
@@ -121,16 +120,35 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>However, the tokenizer+parser is a program in the C language, and must be compiled for the target platform.  There are two approaches to this, depending on whether or not the LBNF description of HAL/S (i.e., the HAL_S.cf file mentioned above) has changed or not.  For the sake of discussion, let's call these <i>deep builds</i> (HAL_S.cf changed) vs <i>shallow builds</i> (HAL_S.cf unchanged).  I've not as of yet given much thought or put much effort into the most-convenient way to build this program on a target-platform by target-platform basis, so I'll just explain the way I currently do it.<br></p>
     <h3>Shallow Build</h3>
     <p>As mentioned above, a "shallow build" is one in which the file HAL_S.cf has not changed.<br></p>
-    <p>The current Makefile is written for my own setup, namely Linux Mint 21 with the usual C compiler (<tt>gcc</tt>) and a Windows cross-compiler (<tt>x86_64-w64-mingw32-gcc</tt>) installed, though I expect it would work on may versions of Linux as-is.  Simply running the command <tt>make</tt> from the folder yaShuttle/ builds both the native Linux version of the tokenizer+compiler (namely <tt>modernHAL-S-FC</tt>) and a 64-bit Windows version of it (<tt>x86_64-w64-mingw32-gcc.exe</tt>).  I've not tried to build the Windows version of the program directly on Windows, but the one included in the yaShuttle/ folder already in the repository should work fine, so there's not much need to rebuild it directly on Windows.  It even works in Linux, under WINE, though I don't recommend doing so.<br></p>
-    <p>The yaShuttle/ folder in the repository also has a pre-compiled Mac OS version of the tokenizer+Parser (<tt>modernHAL-S-FC-macosx</tt>), but since Mac OS programs cannot really be built from Linux, and since it's a great hassle for me to build it directly on Mac OS, the Mac version is unlikely to be fully up-to-date except when I make an effort to release it.  Thus if you have Mac OS, you're very likely to have to build it from source yourself.  Fortunately, it's easy.  Just clone the Virtual AGC GitHub repository onto your Mac; in a console, descend into the yaShuttle/ folder, and do <tt>make modernHAL-S-FC-macosx</tt>.<br></p>
-    <p>If you have some platform other than Linux, Windows 64, or Mac OS, or are using some other C compiler than what I've anticipated, you should still be able to do a shallow build of the tokenizer+parser quite easily.  Just compile all of the files yaShuttle/*.c together.  The default name the modern HAL/S compiler expects this program to have is <tt>modernHAL-S-FC.exe</tt> on Windows, <tt>modernHAL-S-FC-macosx</tt> on Mac, or <tt>modernHAL-S-FC</tt> everywhere else, but you can override this command-line switch at when you invoke the modern HAL/S compiler.  The command-line switch needed is <tt>--compiler=</tt><tt><i>NameOfCompiler</i></tt>. <br></p>
+    <p>The current Makefile is written for my own setup, namely Linux Mint 21 with the usual C compiler (<tt>gcc</tt>) and a Windows cross-compiler (<tt>x86_64-w64-mingw32-gcc</tt>) installed, though I expect it would work on many versions of Linux as-is.  Simply running the command <tt>make</tt> from the folder yaShuttle/yaHAL-S/ builds both the native Linux version of the tokenizer+compiler (namely <tt>modernHAL-S-FC</tt>) and a 64-bit Windows version of it (<tt>x86_64-w64-mingw32-gcc.exe</tt>).  I've not tried to build the Windows version of the program directly on Windows, but the one included in the yaShuttle/yaHAL-S/ folder already in the repository should work fine, so there's not much need to rebuild it directly on Windows.  It even works in Linux, under WINE, though I don't recommend doing so.<br></p>
+    <p>The yaShuttle/yaHAL-S/ folder in the repository also has a pre-compiled Mac OS version of the tokenizer+Parser (<tt>modernHAL-S-FC-macosx</tt>), but since Mac OS programs cannot really be built from Linux, and since it's a great hassle for me to build it directly on Mac OS, the Mac version is unlikely to be fully up-to-date except when I make an effort to release it.  Thus if you have Mac OS, you're very likely to have to build it from source yourself.  Fortunately, it's easy.  Just clone the Virtual AGC GitHub repository onto your Mac; in a console, descend into the yaShuttle/yaHAL-S/ folder, and do <tt>make modernHAL-S-FC-macosx</tt>.<br></p>
+    <p>If you have some platform other than Linux, Windows 64, or Mac OS, or are using some other C compiler than what I've anticipated, you should still be able to do a shallow build of the tokenizer+parser quite easily.  Just compile all of the files yaShuttle/yaHAL-S/*.c together.  The default name the modern HAL/S compiler expects this program to have is <tt>modernHAL-S-FC.exe</tt> on Windows, <tt>modernHAL-S-FC-macosx</tt> on Mac, or <tt>modernHAL-S-FC</tt> everywhere else, but you can override this command-line switch at when you invoke the modern HAL/S compiler.  The command-line switch needed is <tt>--compiler=</tt><tt><i>NameOfCompiler</i></tt>. <br></p>
     <h3>Deep Build</h3>
     <p>A "deep build" is one in which the file HAL_S.cf has been modified in some way <i>other</i> than what's available in our GitHub repository.  (In other words, if you don't like <i>my</i> LBNF description of HAL/S, and want to make your own tweaks to it.)  In this case, an extra processing step is needed to create the *.c and *.h files for a shallow build of the tokenizer+parser as described above.<br></p>
     <p>This extra processing step requires installation of the so-called <a moz-do-not-send="true" href="https://bnfc.digitalgrammars.com/">BNF Converter (BNFC) framework</a>, which builds tokenizers and parsers from an LBNF description of a context-free language, such as our LBNF file HAL_S.cf, so ...<br></p>
     <blockquote>
       <p><b>One-time setup</b>:  Install BNF Converter.<br></p>
     </blockquote>
-    <p>But I must warn you, while BNF Converter purports to be platform-independent, it achieves that independence by using whatever standardized tokenizer builders and parser builders are popular on the platform on which it is running.  On Linux, for example, it uses the <i>flex</i> tokenizer library and the <i>bison</i> parser library.  On other platforms it uses other libraries.  Hence, I have no way in the world to guarantee the results when running BNFC on some platform other than Linux.  Maybe it'll work, maybe it won't.<br></p>
+    <p>But I must warn you, while BNF Converter purports to be platform-independent, it achieves that independence by using whatever standardized tokenizer builders and parser builders are popular on the platform on which it is running.  On Linux, for example, it uses the <i>flex</i> tokenizer library and the <i>bison</i> parser library, and these must be installed if not present.  On other platforms it uses other libraries.  Hence, I have no way in the world to guarantee the results when running BNFC on some platform other than Linux.  Maybe it'll work, maybe it won't.<br></p>
+    <blockquote><font size="-1"><b>Big warning!</b>&nbsp; I've found an
+        unfortunate sensitivity to BNFC version.&nbsp; For example, at
+        the present time, BNFC 2.8.3 works for our purposes, while
+        versions 2.9.<i>x</i> (through the currently most recent 2.9.5)
+        do not.&nbsp; I found this out accidentally and unpleasantly
+        after an operating-system upgrade.&nbsp; The symptom is that
+        building modernHAL-S-FC simply fails, and different minor
+        versions of 2.9.<i>x</i> fail in different ways.&nbsp; The
+        problem with debugging such stuff is that the error shows up
+        when processing the files created by flex or bison&nbsp; — the
+        flex and bison versions not having changed at all — rather than
+        anything directly relatable to my original LBNF, so ultimately
+        there's nothing I can do about it on my own.&nbsp; For my own
+        purposes, I managed by pulling version 2.8.3 out of an Ubuntu
+        package archive, and fortunately it installed without a problem,
+        even though for a different operating-system version than
+        mine.&nbsp; But I consider that I was very lucky to find that
+        obsoleted package.&nbsp; </font><br>
+    </blockquote>
     <p>You should be able to perform a deep build using the following command:<br></p>
     <blockquote>
       <p><tt>make distclean all</tt><br></p>
@@ -423,6 +441,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -441,6 +461,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
+
 
 
 
@@ -741,6 +763,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 E VECTOR;</tt><br>
     </blockquote>
     which is identical in layout to <tt>T2-STRUCTURE</tt> and <tt>T4-STRUCTURE</tt>.&nbsp;
+
+
     It is represented in the identifier dictionary as<br>
     <blockquote><tt>"^s_T5^": {"template": [<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -798,12 +822,12 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>Note also that several <a moz-do-not-send="true" href="#ControlTransfer">control-transfer instructions</a> and <a moz-do-not-send="true" href="#Miscellaneous">miscellaneous instructions</a> also affect the computation stack in a generally-trivial way without that being their principal function, but are included in later sections rather than in the  table below.<br></p>
     <h4><a name="Pushing"></a>Pushing onto the Computation Stack<br>
     </h4>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Mnemonic<br>
           </th>
-          <th valign="top" nowrap="nowrap">Python Form of the
+          <th nowrap="nowrap" valign="top">Python Form of the
             Instruction<br>
           </th>
           <th valign="top">Description<br>
@@ -812,7 +836,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>number</tt><tt><br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'number': string}</tt><tt><br>
+          <td nowrap="nowrap" valign="top"><tt>{'number': string}</tt><tt><br>
             </tt></td>
           <td valign="top">Pushes a literal number (HAL/S <tt>INTEGER</tt>
             or <tt>SCALAR</tt> onto the computation stack.&nbsp; In
@@ -838,7 +862,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         </tr>
         <tr>
           <td valign="top"><tt>string</tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'string': string}</tt></td>
+          <td nowrap="nowrap" valign="top"><tt>{'string': string}</tt></td>
           <td valign="top">Pushes a literal <tt>CHARACTER</tt> string
             onto the computation stack as a single entry.</td>
         </tr>
@@ -878,7 +902,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>array<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'array': [[..., 'a'],
+          <td nowrap="nowrap" valign="top"><tt>{'array': [[..., 'a'],
               ..., [..., 'a'], 'a']}<br>
             </tt></td>
           <td valign="top">Pushes a literal <tt>ARRAY</tt> onto the
@@ -888,10 +912,12 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>boolean<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'boolean': [value,
+          <td nowrap="nowrap" valign="top"><tt>{'boolean': [value,
               length, 'b']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
+
 
 
 
@@ -1088,12 +1114,12 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       </tbody>
     </table>
     <h4><a name="Computations"></a>Standard Computations on the Stack</h4>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Mnemonic<br>
           </th>
-          <th valign="top" nowrap="nowrap">Python Form of the
+          <th nowrap="nowrap" valign="top">Python Form of the
             Instruction<br>
           </th>
           <th valign="top">Description<br>
@@ -1102,7 +1128,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>+<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': '+'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': '+'}<br>
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the stack and
             pushes operand1+operand2 back onto the stack.&nbsp; Note
@@ -1119,7 +1145,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>-<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': '-'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': '-'}<br>
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the stack and
             pushes operand1-operand2 back onto the stack.&nbsp;
@@ -1135,7 +1161,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>U-<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': 'U-'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': 'U-'}<br>
             </tt></td>
           <td valign="top">Pops the operand from the stack and pushes
             -operand back onto the stack.<br>
@@ -1144,7 +1170,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>times<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': ''}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': ''}<br>
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the stack and
             pushes operand1 times operand2 back onto the stack.&nbsp;
@@ -1163,7 +1189,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>/<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': '/'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': '/'}<br>
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the stack and
             pushes operand1/operand2 back onto the stack.&nbsp; I.e.,
@@ -1178,7 +1204,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>**<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': '**'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': '**'}<br>
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the stack and
             pushes operand1**operand2 back onto the stack.&nbsp; I.e.,
@@ -1196,7 +1222,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>C||<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': 'C||'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': 'C||'}<br>
             </tt></td>
           <td valign="top">The string-concatenation operator.&nbsp; It
             pops operand1 and operand2 from the stack.&nbsp; Operand2 is
@@ -1210,7 +1236,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>not<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': 'NOT'}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': 'NOT'}<br>
             </tt></td>
           <td valign="top">Pops the operand from the stack, performs a
             bitwise inversion on it, and pushes the result back onto the
@@ -1235,6 +1261,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -1242,7 +1270,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>and<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'operator': 'AND'}</tt><br>
+          <td nowrap="nowrap" valign="top"><tt>{'operator': 'AND'}</tt><br>
           </td>
           <td valign="top">Pops operand1 and operand2 from the stack,
             performs a bitwise <tt>AND</tt>, and pushes the result back
@@ -1255,6 +1283,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+
 
 
 
@@ -1288,6 +1318,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+
 
 
 
@@ -1338,6 +1370,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1374,6 +1408,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1385,6 +1421,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1435,6 +1473,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1456,6 +1496,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1509,6 +1551,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1547,6 +1591,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1571,6 +1617,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1669,10 +1717,13 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <meta http-equiv="Content-Type" content="text/html;
+              charset=UTF-8">
             <style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></td>
@@ -1751,8 +1802,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             The HAL/S run-time library functions are documented in the
-            HAL/S documentation, particularly the <a moz-do-not-send="true" href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+            HAL/S documentation, particularly the <a
+              moz-do-not-send="true"
+              href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
+
 
 
 
@@ -1909,10 +1966,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
+
 
 
 
@@ -1971,10 +2032,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+
+
 
 
 
@@ -1999,6 +2064,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
             on the computation stack, and that's not quite the same as
@@ -2009,6 +2076,8 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
+
 
 
 
@@ -2112,6 +2181,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             The <tt>sliceAT</tt> instruction then pushes the Python
             list <tt>[round(operand1), round(operand2)]</tt> in their
             place, while the <tt>sliceTO</tt> instruction instead
@@ -2130,12 +2201,12 @@ p, li { white-space: pre-wrap; }
     <h4><a name="MiscellaneousStack"></a>Storing and Popping from the
       Stack<br>
     </h4>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Mnemonic<br>
           </th>
-          <th valign="top" nowrap="nowrap">Python Form of the
+          <th nowrap="nowrap" valign="top">Python Form of the
             Instruction<br>
           </th>
           <th valign="top">Description<br>
@@ -2152,7 +2223,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>store<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'store': (index,
+          <td nowrap="nowrap" valign="top"><tt>{'store': (index,
               identifier)}</tt><br>
           </td>
           <td valign="top">The <tt>store</tt> instruction mostly has
@@ -2189,7 +2260,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>storepop<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'storepop': (index,
+          <td nowrap="nowrap" valign="top"><tt>{'storepop': (index,
               identifier)}<br>
             </tt></td>
           <td valign="top">Mostly equivalent to the two-instruction
@@ -2244,12 +2315,12 @@ p, li { white-space: pre-wrap; }
       </tbody>
     </table>
     <h3><a name="ControlTransfer"></a>Transfer of Control</h3>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Mnemonic<br>
           </th>
-          <th valign="top" nowrap="nowrap">Python Form of the
+          <th nowrap="nowrap" valign="top">Python Form of the
             Instruction<br>
           </th>
           <th valign="top">Description<br>
@@ -2258,7 +2329,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>goto<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'goto': (indexD,
+          <td nowrap="nowrap" valign="top"><tt>{'goto': (indexD,
               identifier)}<br>
               {'goto': (indexT, offset)} <br>
               {'goto': (indexT, offset), 'symbolicLabel': (indexD,
@@ -2292,8 +2363,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
+
 
 
 
@@ -2336,7 +2411,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>iffalse<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt><tt>{'iffalse': (indexD,
+          <td nowrap="nowrap" valign="top"><tt><tt>{'iffalse': (indexD,
                 identifier)}<br>
                 {'iffalse': (indexT, offset)} <br>
                 {'iffalse': (indexT, offset), 'symbolicLabel': (indexD,
@@ -2354,7 +2429,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>iftrue<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt><tt><tt>{'iftrue':
+          <td nowrap="nowrap" valign="top"><tt><tt><tt>{'iftrue':
                   (indexD, identifier)}<br>
                   {'iftrue': (indexT, offset)} <br>
                   {'iftrue': (indexT, offset), 'symbolicLabel': (indexD,
@@ -2371,7 +2446,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>call<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'call': (index,
+          <td nowrap="nowrap" valign="top"><tt>{'call': (index,
               identifier)}<br>
               {'call': (index, identifier), 'assignments': {...}}<br>
             </tt> </td>
@@ -2488,6 +2563,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2495,10 +2572,12 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>return<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'return': 1}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'return': 1}<br>
               {'return': 2}<br>
             </tt> </td>
           <td valign="top">This instruction returns from a <tt>CALL</tt>'d
+
+
 
 
 
@@ -2531,6 +2610,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             The distinction is that while either type of subroutine will
             have popped all of its input parameters from the computation
             stack, the <tt>FUNCTION</tt> will have additionally pushed
@@ -2549,13 +2630,15 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>run<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'run': (index,
+          <td nowrap="nowrap" valign="top"><tt>{'run': (index,
               identifier)}<br>
             </tt> </td>
           <td valign="top">Runs the <tt>PROGRAM</tt> whose name is
             given by the identifier defined in the specified
             scope.&nbsp; In principle, I don't think there's any way to
             define a <tt>PROGRAM</tt> other than in the scope with <tt>index=0</tt>.&nbsp;
+
+
 
 
 
@@ -2594,6 +2677,8 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
+
 
 
 
@@ -2649,6 +2734,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             given that the compiler's code generator can figure out
             which scope that is.)<br>
           </td>
@@ -2681,12 +2768,12 @@ p, li { white-space: pre-wrap; }
     </table>
     <br>
     <h3><a name="Miscellaneous"></a>Miscellaneous Instructions</h3>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Mnemonic<br>
           </th>
-          <th valign="top" nowrap="nowrap">Python Form of the
+          <th nowrap="nowrap" valign="top">Python Form of the
             Instruction<br>
           </th>
           <th valign="top">Description<br>
@@ -2695,7 +2782,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>noop<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'noop': True}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'noop': True}<br>
               {'noop': True, 'label': identifier}<br>
             </tt></td>
           <td valign="top">This is the "no-operation" instruction, and
@@ -2718,7 +2805,7 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>debug<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'debug': string}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'debug': string}<br>
             </tt> </td>
           <td valign="top">This instruction is ignored during execution,
             similar to a <tt>noop</tt>, though it would not be
@@ -2731,10 +2818,12 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>write<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt><tt>{'write': lun}<br>
+          <td nowrap="nowrap" valign="top"><tt><tt>{'write': lun}<br>
               </tt></tt> </td>
           <td valign="top">Prints out the entire contents of the
             computation stack to the specified "logical unit number" (<tt>lun</tt>).&nbsp;
+
+
 
 
 
@@ -2770,9 +2859,11 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>read<br>
             </tt> </td>
-          <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
+          <td nowrap="nowrap" valign="top"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
+
 
 
 
@@ -2828,7 +2919,8 @@ p, li { white-space: pre-wrap; }
             <p>For the other subscripting conventions of HAL/S, namely "<tt>#</tt>" and "<tt>#</tt><tt>±<i>N</i></tt>" to mean the last element in the affected direction and elements relative to it, the code generator performs the trick of replacing <tt>#</tt> by a very large integer (2,000,000,000 at this writing).  The emulator performs the reverse trick of subtracting this constant from very large superscripts, and instead adding the width of the corresponding dimension to the subscript.  This allows the emulator to compute subscript expressions involving <tt>#</tt> without having to provide special software separate from the normal expression software to do so.  However, this limits the maximum width of any dimension of a composite object to half of the large constant.<br></p>
             <p>Note that although in an <tt>ARRAY</tt> of <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>BIT</tt> or <tt>CHARACTER</tt> HAL/S visually distinguishes between the <tt>ARRAY</tt> indices and the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> indices by having a colon (:) between the two groups indices rather than a comma (,), PALMAT makes no such distinction.  Rather, if subscripts are present, it expects the number of subscripts to correspond <i>either</i> to the dimensionality of the <tt>ARRAY</tt> or else to the dimensionality of the <tt>ARRAY</tt> <i>plus</i> the dimensionality of the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> objects comprising the <tt>ARRAY</tt>.</p>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <meta http-equiv="Content-Type" content="text/html;
+              charset=UTF-8">
             <style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></td>
@@ -2940,16 +3032,18 @@ p, li { white-space: pre-wrap; }
         center; text-indent: 0px; text-transform: none; white-space:
         normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width:
         0px; display: inline !important; float: none; background-color:
-        rgb(255, 255, 255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
+        rgb(255, 255, 255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
-      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
           2024-08-13<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
-              hosted by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+              hosted by ibiblio.org" src="hosted.png" height="100"
+              width="300"></a><br>
         </font></i></center>
     <br>
-  
-
-</body></html>
+  </body>
+</html>
