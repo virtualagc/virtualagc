@@ -64,13 +64,16 @@ done
 echo Bye! Shutting down the simulation.
 for n in ${PIDS}
 do
-  kill ${n} >/dev/null
+  kill ${n} &>/dev/null
 done
 # If at first you don't succeed ....  I've found that an ordinary shutdown
-# signal doesn't seem to affect yaACA3, so it has to be sent a KILL signal.
+# signal may not affect yaACA3, so it has to be sent a KILL signal.
 sleep 0.25
 for n in ${PIDS}
 do
-  kill -KILL ${n} >/dev/null
+  if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
+  then
+    kill -KILL ${n} &>/dev/null
+  fi
 done
 

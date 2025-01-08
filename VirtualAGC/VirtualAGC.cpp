@@ -184,6 +184,7 @@
  *                              of the ApoDisKey version (if several versions
  *                              are installed) is now in VirtualAGC itself
  *                              rather than in the simulation script.
+ *              2025-01-08 RSB  Adjustment to simulation-status window sizing.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1487,6 +1488,9 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   SimulationWindow->MoreButton->Enable();
   SimulationWindow->DetailPanel->Hide();
   SimulationWindow->Fit();
+  wxSize s = SimulationWindow->GetClientSize();
+  wxPoint p = SimulationWindow->UploadButton->GetPosition();
+  SimulationWindow->SetClientSize(wxSize(s.x, p.y + SCALED(80)));
   SimulationWindow->Show();
   SimulationWindow->SetPosition(wxPoint(xSimulate, ySimulate));
 #ifdef WIN32
@@ -3041,7 +3045,7 @@ VirtualAGC::FormTiling(void)
     // the geometry of any given window on all of the possible platforms, so we
     // try to give a conservative upper limit.
     showSimulate = 1;
-    wSimulate = 320 /*565*/;
+    wSimulate = 395 /*565*/;
     hSimulate = 225 /*690*/;
     if (DeviceDskyCheckbox->GetValue())
     {
@@ -4409,13 +4413,15 @@ TimerClass::Notify()
               MainFrame->SimulationWindow->DetailShown);
           MainFrame->SimulationWindow->Hide();
           MainFrame->SimulationWindow->InvalidateBestSize();
-          wxSize s = MainFrame->SimulationWindow->GetClientSize();
-          wxPoint p = MainFrame->SimulationWindow->UploadButton->GetPosition();
-          MainFrame->SimulationWindow->SetClientSize(wxSize(s.x, p.y + SCALED(60)));
           MainFrame->SimulationWindow->Layout();
           MainFrame->SimulationWindow->Fit();
           MainFrame->SimulationWindow->Refresh();
           MainFrame->SimulationWindow->Update();
+          if (MainFrame->Simulationwindow->MoreEnabled) {
+            wxSize s = MainFrame->SimulationWindow->GetClientSize();
+            wxPoint p = MainFrame->SimulationWindow->UploadButton->GetPosition();
+            MainFrame->SimulationWindow->SetClientSize(wxSize(s.x, p.y + SCALED(60)));
+          }
           MainFrame->SimulationWindow->Show();
           Stop();
         }
