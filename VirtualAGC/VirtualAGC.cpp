@@ -3045,7 +3045,7 @@ VirtualAGC::FormTiling(void)
     // the geometry of any given window on all of the possible platforms, so we
     // try to give a conservative upper limit.
     showSimulate = 1;
-    wSimulate = 395 /*565*/;
+    wSimulate = 400 /*565*/;
     hSimulate = 225 /*690*/;
     if (DeviceDskyCheckbox->GetValue())
     {
