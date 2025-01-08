@@ -66,5 +66,11 @@ for n in ${PIDS}
 do
   kill ${n} >/dev/null
 done
-
+# If at first you don't succeed ....  I've found that an ordinary shutdown
+# signal doesn't seem to affect yaACA3, so it has to be sent a KILL signal.
+sleep 0.25
+for n in ${PIDS}
+do
+  kill -KILL ${n} >/dev/null
+done
 
