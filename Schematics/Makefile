@@ -87,7 +87,7 @@
 #
 # If module.init and/or module_tb.v don't exist, an empty one will be created.
 #
-# Note that in any given DRAWING directory, of module_tb.v isn't empty, 
+# Note that in any given DRAWING directory, if module_tb.v isn't empty, 
 # the declarations of the Verilog module and its parameters must be consistent
 # between module_tb.v (which is supplied as an input) and module.v (which is 
 # an output of the build process), but makes no attempt to enforce 

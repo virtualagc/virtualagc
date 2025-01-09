@@ -97,6 +97,7 @@
 #			circuit will simply oscillate uncontrollably.  The file can also
 #			contain delays to be applied to specific NOR gate outputs, overriding
 #			the global DELAY setting for those particular gates.
+#	[SCHEMATIC]		Optional name of the schematic file.
 #
 # The Verilog is output to stdout.
 #
@@ -115,9 +116,9 @@
 
 import sys
 import os
+from readSchematicFile import *
 
 error = False
-gateLocations = {}
 
 # Hard-coded info about components from our custom symbol libraries.  It would probably be
 # niftier to read the symbol libraries to deduce this info.  Entry 0 in these arrays is
@@ -177,87 +178,6 @@ pinTypesBUFFER = [ "",
 	"T",    "P",    "I",    "T",    "I",    "T",    "I",    "T",    
 	"I",    "T",    "I",    "P"
 ]
-schPadsJ1 = [ "?" ] * 144
-schPadsJ2 = [ "?" ] * 72
-schPadsJ3 = [ "?" ] * 72
-schPadsJ4 = [ "?" ] * 72
-
-def readSchematicFile(filename):
-	global gateLocations
-	f = open(filename, "r")
-	newLines = f.readlines();
-	f.close();
-	print("Read file " + filename + ", " + str(len(newLines)) + " lines", file=sys.stderr)
-	inSheet = False
-	inComp = False
-	inNOR = False
-	inConnector = False
-	pathName = os.path.dirname(filename)
-	for rawLine in newLines:
-		line = rawLine.strip()
-		if line == "$Sheet":
-			inSheet = True
-			continue
-		if line == "$EndSheet":
-			inSheet = False
-			continue
-		if line == "$Comp":
-			inComp = True
-			refd = ""
-			unit = 0
-			continue
-		if line == "$EndComp":
-			inComp = False
-			inNOR = False
-			inConnector = False
-			continue
-		if inSheet:
-			fields = line.split()
-			if len(fields) >= 2 and fields[0] == "F1":
-				newFilename = pathName + "/" + fields[1].strip("\"")
-				readSchematicFile(newFilename)
-			continue
-		if inComp:
-			fields = line.split()
-			if len(fields) >= 3 and fields[0] == "L":
-				refd = fields[2]
-				if fields[1][:5] == "D3NOR":
-					inNOR = True
-				if fields[1][:18] == "AGC_DSKY:Connector":
-					inConnector = True
-				if refd == "J1":
-					schPads = schPadsJ1
-				elif refd == "J2":
-					schPads = schPadsJ2
-				elif refd == "J3":
-					schPads = schPadsJ3
-				elif refd == "J4":
-					schPads = schPadsJ4
-				else:
-					schPads = ""
-				continue
-			if len(fields) >= 2 and fields[0] == "U":
-				unitNumber = int(fields[1])
-				if inNOR:
-					if unitNumber == 1:
-						unit = "A"
-					else:
-						unit = "B"
-				continue
-			if inNOR and len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Location\"":
-				gate = fields[2].strip("\"")
-				gateLocations[refd + unit] = gate
-				continue
-			if inConnector and len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Caption\"":
-				caption = fields[2].strip("\"")
-				if caption[:3] in ["0VD", "+4V", "+4S", "FAP"]:
-					continue
-				if caption[:1].isdigit():
-					caption = "d" + caption
-				caption = caption.replace("+", "p").replace("-", "m")
-				schPads[unitNumber] = caption
-	#print schPadsJ1
-	#print gateLocations
 
 rawDelay = "20"
 delay = " #GATE_DELAY"
