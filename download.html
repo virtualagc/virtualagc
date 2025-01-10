@@ -59,22 +59,56 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
             as the risk that those builds or installations could fail on
             your particular computer platform.&nbsp; <br>
             <br>
-            Since the VM is a rather substantial download, you would
-            typically download the VM just once and then update it
-            in-place to newer versions of Virtual AGC as desired.&nbsp;
-            Updating is a very simple and convenient procedure that can
-            be performed unattended in under 20 minutes (estimated) at
-            any time you care to do so.&nbsp; <br>
+            <a name="LubuntuUpdates"></a>Since the VM is a rather
+            substantial download, you would typically download the VM
+            just once and then update it in-place to newer versions of
+            Virtual AGC as desired.&nbsp; Updating Virtual AGC is a very
+            simple and convenient procedure that can be performed
+            unattended in under 20 minutes (estimated) at any time you
+            care to do so.&nbsp; On the other hand, updates to the VM's
+            Linux operating system are a different matter, and should
+            only be performed on an as-advised basis to avoid breaking
+            the VM's Virtual AGC installation.<br>
             <br>
-            <a name="LubuntuUpdates"></a>On the other hand, updates to
-            the VM's Linux operating system are a different matter, and
-            should only be performed on an as-advised basis to avoid
-            breaking the VM's Virtual AGC installation.&nbsp; Currently
-            advisable VirtualAGC VM operating-system updates are as
-            follows:<br>
-            <ul>
-              <li>None recommended so far.</li>
-            </ul>
+            <div align="center"><i><b>Currently-Recommended Updates</b></i><br>
+            </div>
+            <table cellspacing="2" cellpadding="2" border="1"
+              align="center">
+              <tbody>
+                <tr>
+                  <th valign="bottom">Type of Update<br>
+                  </th>
+                  <th valign="bottom">How To Do It<br>
+                  </th>
+                  <th valign="bottom">Recommendation<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="middle">Virtual AGC<br>
+                  </td>
+                  <td valign="middle"><img moz-do-not-send="true"
+                      src="VM64-images/update.png" alt="" height="24"
+                      align="left" width="24">on VM desktop<br>
+                  </td>
+                  <td valign="middle">Minor update: 2025-01-08 or later<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle">Lubuntu Operating System<br>
+                  </td>
+                  <td valign="middle"><img moz-do-not-send="true"
+                      src="VM64-images/preferences-system.svg" alt=""
+                      height="24" width="24">on VM desktop, then <img
+                      moz-do-not-send="true"
+                      src="VM64-images/system-software-update.svg"
+                      alt="" height="24" align="right" width="24"><br>
+                  </td>
+                  <td valign="middle">None recommended<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
             Though designed with VirtualBox in mind, the VM can instead
             be used with a little effort in some other types of
             hypervisors if you so desire.&nbsp; (I've read, but have no
@@ -189,6 +223,7 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
                 <tr>
                   <td valign="middle"><a moz-do-not-send="true"
                       href="https://access.broadcom.com/default/ui/v1/signin/">VMware
+
 
 
 
@@ -318,6 +353,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Use and
             Updating of the VM</a></li>
         <li><a moz-do-not-send="true" href="#Customization">Customization
+
 
 
 
@@ -703,6 +739,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
 
 
 
+
           7.1.4</a>, but I hope it will work with other versions as
         well.&nbsp; Be sure to install not only VirtualBox as such, but
         also its so-called "Extension Pack".</li>
@@ -758,6 +795,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
       </ul>
     </blockquote>
     <ol start="8">
+      <li>Apply any recommended updates.<br>
+      </li>
       <li>You can run the VM by double-clicking the
         VirtualAGC-VM64-Release entry in VirtualBox's left-hand pane.<br>
       </li>
@@ -959,10 +998,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1065,11 +1106,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1135,6 +1178,7 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     sections.&nbsp; It's also possible though increasingly unlikely that
     <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -1275,6 +1319,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       In other words, using a single base of source code, Virtual AGC
       can be recompiled to run on Windows or Mac OS or Linux or
       wherever.&nbsp; <br>
@@ -1318,6 +1363,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       Michael!), and if the "official" instructions below don't appeal
       to you, or if you simply like the idea of using CMake, Michael's <a
 href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-CMake">documentation
+
 
 
 
@@ -1489,6 +1535,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
         Makefile</a> itself for more explanation.&nbsp; The switches can
       override not merely the filesystem paths for locating the compiler
       (when you have multiple versions of gcc or g++ installed), but can
@@ -1562,6 +1609,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
 
 
 
@@ -1684,6 +1732,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1856,6 +1905,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -1903,6 +1953,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -2083,6 +2134,7 @@ You
 
 
 
+
         The first time you run <b>VirtualAGC</b> from its desktop icon
         after installation, it may take a considerable amount of time to
         start up.&nbsp; There will be no such delays on subsequent
@@ -2151,9 +2203,11 @@ href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-
 
 
 
+
           its source code</a>, and building it from source according to
         <a moz-do-not-send="true"
 href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
 
 
 
@@ -2191,12 +2245,14 @@ href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">th
 
 
 
+
           Or more specifically, if Macports has installed some of the
           libraries (such as libjpeg) that wxWidgets requires, because
           those libraries will be of incompatible versions.&nbsp; On
           solutions is to uninstall Macports and all of the packages
           Macports had installed.&nbsp; <a moz-do-not-send="true"
 href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">The
+
 
 
 
@@ -2295,6 +2351,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
         At this writing, <b>MSYS2</b> supports only Windows 10 or
         later.</font><br>
     </blockquote>
@@ -2321,6 +2378,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -2329,6 +2387,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
 
 
 
@@ -2433,6 +2492,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -2442,6 +2502,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
 
 
 
@@ -2534,6 +2595,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
     So the idea is that you can load the WebAssembly build of <b>yaAGC</b>
     into an HTML web-page you create, along with a core-rope images of
     an AGC program, and then run the whole thing in a supporting browser
@@ -2598,6 +2660,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -2616,6 +2679,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
 
 
 
@@ -2704,6 +2768,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     </ul>
     Now, you may wonder why there's a need to run an HTTP server at all,
     when one could simply browse to "file:///<i>PathToWebAGC</i>/demo/index.html"
+
 
 
 
@@ -2850,6 +2915,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
 

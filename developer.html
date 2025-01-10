@@ -16,6 +16,7 @@ document.write(headerTemplate.replace("@TITLE@","Developer Info").replace("@SUBT
     <ul>
       <li><a href="#Contributing_Changes_Back_to_the_Virtual">Contributing
 Changes
+
           Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -66,6 +67,7 @@ Changes
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
 Interconnections
+
             API</a></li>
         <li><a href="#AGC_CPU-Engine_API">AGC CPU-Engine API</a></li>
         <li><strike><a href="#AGC_Backtrace_API">AGC Backtrace API</a></strike></li>
@@ -124,6 +126,7 @@ Interconnections
     different computers. This promotes the possibility of changing or
     even completely replacing <span style="font-weight: bold;">yaDSKY</span>—or
 of
+
     introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -136,6 +139,7 @@ of
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
 As
+
     far as interoperability requirements are concerned, these
     alternatives are drop-in replacements for each other.<br>
     <br>
@@ -282,10 +286,9 @@ As
     usually run a version of Linux anyway, this is frankly the preferred
     embedded solution for most people.&nbsp; Including me!<br>
     <br>
-    If not — if,
-    for example, you have no operating system and want to run a "bare
-    metal" version of <b>yaAGC</b> — here's what you need to
-    do:<br>
+    If not — if, for example, you have no operating system and want to
+    run a "bare metal" version of <b>yaAGC</b> — here's what you need
+    to do:<br>
     <br>
     Provide replacements for the <span style="font-family: monospace;">send</span>
     and <span style="font-family: monospace;">recv</span> functions, so
@@ -336,6 +339,7 @@ As
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
 vs.
+
       yaAGS Packets</h3>
     The <span style="font-weight: bold;">yaAGC</span> and <span
       style="font-weight: bold;">yaAGS</span> programs each use a system
@@ -1261,6 +1265,7 @@ vs.
     regardless of how many bits of precision the register has.<br>
     <h3><a name="Working_with_the_DEDA" id="Working_with_the_DEDA"></a>Working
 with
+
       the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
     standpoint than working with the DSKY.&nbsp; The DSKY is simply a
@@ -1423,8 +1428,9 @@ with
     sequences", refer to the <a
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
 Architecture
-      section of the assembly-language manual</a>.&nbsp;
-    Numerically, unprogrammed sequences are represented as follows:<br>
+
+      section of the assembly-language manual</a>.&nbsp; Numerically,
+    unprogrammed sequences are represented as follows:<br>
     <br>
     <div style="text-align: center;">
       <table summary="" style="text-align: left; margin-left: auto;
@@ -1672,6 +1678,7 @@ Architecture
     discarded.<br>
     <h3><a name="Input-Channel_Bitmasks" id="Input-Channel_Bitmasks"></a>yaAGC
 Input-Channel
+
       Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1743,6 +1750,7 @@ Input-Channel
     which bits of the output channels are applicable.<br>
     <h3><a name="Fictitious_IO_Channels" id="Fictitious_IO_Channels"></a>Fictitious
 I/O
+
       Channels</h3>
     For the purpose of communicating various types of information
     to/from <span style="font-weight: bold;">yaAGC</span> which do not
@@ -1997,7 +2005,7 @@ I/O
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">0163<br>
+          <td align="center" valign="middle">0163<br>
           </td>
           <td valign="middle">Output from CPU to DSKY<br>
           </td>
@@ -2034,6 +2042,7 @@ I/O
     <br>
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
 I/O
+
       Channel Specifics</h2>
     The real AGC CPU interfaced with peripheral hardware by means of
     instructions that access "i/o channels" rather than main memory.<br>
@@ -2067,6 +2076,7 @@ I/O
     </div>
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
 of
+
       I/O Channels</h3>
     Output Channel 10 (octal)<br>
     <div style="margin-left: 40px;"> Used for driving the DSKY's
@@ -2078,8 +2088,8 @@ of
       <br>
       <div style="text-align: center;"> <img
           src="yaAGC-7segpositions.jpg" title="" alt="Output-code
-          positions." style="width: 202px; height: 339px;" width="202"
-          height="339"><br>
+          positions." style="width: 202px; height: 339px;" height="339"
+          width="202"><br>
       </div>
     </div>
     <br>
@@ -2395,14 +2405,15 @@ of
       five 7-segment displays per grouping, you might think it would be
       possible to spell out the wordlet <br>
       <br>
-      <div align="center"><img alt="" src="APOLO.png" width="322"
-          height="90"><br>
+      <div align="center"><img alt="" src="APOLO.png" height="90"
+          width="322"><br>
       </div>
       <br>
       Hugh Blair-Smith actually made this amusing suggestion.&nbsp; But,
       alas, it is not possible. The page of the DSKY's electrical
       schematics that defines what patterns can be displayed is <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">found
+
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
       schematic have been traced out, and are shown in the leftmost
@@ -2415,9 +2426,9 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       agreement.<br>
       <br>
       <div align="center"><a href="traceDSKY.png"><img title="Click to
-            enlarge" alt="" src="traceDSKY-small.png" width="383"
-            height="269" border="2"></a> &nbsp; &nbsp; <img alt=""
-          src="traceDSKYA.jpg" width="646" height="269"><br>
+            enlarge" alt="" src="traceDSKY-small.png" border="2"
+            height="269" width="383"></a> &nbsp; &nbsp; <img alt=""
+          src="traceDSKYA.jpg" height="269" width="646"><br>
       </div>
       <br>
     </div>
@@ -3111,6 +3122,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
       the data for whatever input channels you want to change:<br>
     </p>
     <p align="center"><tt>[ (<i>CHANNEL0</i>,<i>VALUE0</i>,<i>MASK0</i>),
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3143,6 +3155,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     in altering or replacing the <span style="font-weight: bold;">yaDSKY</span>
     program, will probably be interested in the architecture and other
     internal details of <span style="font-weight: bold;">yaDSKY</span>.&nbsp;
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
@@ -3150,6 +3163,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
 to
+
       yaAGC</h3>
     As mentioned earlier, the AGC interacted with hardware such as the
     DSKY through the AGC's "i/o channel" mechanism. The i/o-channel
@@ -3173,6 +3187,7 @@ to
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
       Architecture</h3>
     The <span style="font-weight: bold;">yaDSKY</span> program is
     event-driven. What this means, in essence, is that when a keyboard
@@ -3256,7 +3271,7 @@ to
     </h3>
     <div style="text-align: center;"> <img src="yaAGC-indpositions.jpg"
         title="" alt="Indicator positions." style="width: 195px; height:
-        329px;" width="195" height="329"><br>
+        329px;" height="329" width="195"><br>
       <br>
     </div>
     The indicator legends in the upper-left quadrant of the <span
@@ -3359,21 +3374,20 @@ to
         style="font-weight: bold;">yaAGS</span> internal data.)&nbsp;
       Therefore, when operations are performed on</span> <span
       style="font-family: monospace; color: rgb(0, 0, 0);">int16_t</span><span
-      style="color: rgb(0, 0, 0);">data, you must take special care
-      to insure that the operations are appropriate to AGC
-      integers.&nbsp; For example, if you had two integers <span
-        style="font-family: monospace;">i1</span> and <span
-        style="font-family: monospace;">i2</span> in AGC format, the
-      C-language operation <span style="font-family: monospace;">i1+i2</span>
-      will often not produce the correct sum in AGC format; the
-      appropriate operation would instead be <span style="font-family:
-        monospace;">AddSP16(i1,i2)</span> (see below).&nbsp; Another
-      very important point to understand is the concept of
-      "overflow".&nbsp; Integers in AGC format are 1's complement
-      integers occupying the least significant 15 bits of an <span
-        style="font-family: monospace;">int16_t</span> value.&nbsp; The
-      16th bit is usually an exact copy of the 15th bit.&nbsp; However,
-      if there is <span style="font-style: italic;">overflow</span>
+      style="color: rgb(0, 0, 0);">data, you must take special care to
+      insure that the operations are appropriate to AGC integers.&nbsp;
+      For example, if you had two integers <span style="font-family:
+        monospace;">i1</span> and <span style="font-family: monospace;">i2</span>
+      in AGC format, the C-language operation <span style="font-family:
+        monospace;">i1+i2</span> will often not produce the correct sum
+      in AGC format; the appropriate operation would instead be <span
+        style="font-family: monospace;">AddSP16(i1,i2)</span> (see
+      below).&nbsp; Another very important point to understand is the
+      concept of "overflow".&nbsp; Integers in AGC format are 1's
+      complement integers occupying the least significant 15 bits of an
+      <span style="font-family: monospace;">int16_t</span> value.&nbsp;
+      The 16th bit is usually an exact copy of the 15th bit.&nbsp;
+      However, if there is <span style="font-style: italic;">overflow</span>
       from an operation, then the 15th and 16th bits are opposites, <span
         style="font-style: italic;">and it is the 16th bit which is
         considered to be the correct sign</span>.&nbsp; With
@@ -3385,9 +3399,10 @@ to
       the following simple example:&nbsp; The largest possible positive
       value of an AGC single-precision integer is 2<sup>14</sup>-1=16383.&nbsp;
 Therefore,
-      the operation of 16383+1 will overflow.&nbsp; In terms
-      of bits, this operation results in 01 000000 000000.&nbsp; The
-      mismatch between the most significant bits is an indication of
+
+      the operation of 16383+1 will overflow.&nbsp; In terms of bits,
+      this operation results in 01 000000 000000.&nbsp; The mismatch
+      between the most significant bits is an indication of
       overflow.&nbsp; The actual value is given by the 16th bit and the
       lowest 14 bits, or +0.&nbsp; To "overflow correct" this value
       would be to eliminate the overflow mismatch by copying bit 16 into
@@ -3399,6 +3414,7 @@ Therefore,
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
 Interconnections
+
       API</h3>
     This is perhaps the most important part of the AGC API, because it
     is disatisfaction with (or lack of understanding of) Virtual AGC's
@@ -3425,6 +3441,7 @@ Interconnections
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
 New
+
     <span style="font-weight: bold;">yaAGC</span>-to-<span
       style="font-weight: bold;">yaDSKY</span> interface with no code
     changes directly in <span style="font-weight: bold;">yaAGC</span>
@@ -3717,22 +3734,42 @@ New
       State);</span> (<span style="font-weight: bold;">yaAGC</span>
     only)<br>
     <br>
-    Call this function to execute one machine-cycle of the
-    simulation.&nbsp; Use <span style="font-family: monospace;">agc_engine_init()</span>
+    Call this function to execute one AGC instruction of the simulation
+    and at the same time to perform housekeeping operations needed by
+    the AGC.&nbsp; AGC instructions require 1, 2, 3, or 6 "machine cycle
+    times" (MCT) of 11.719 μsec each to execute.&nbsp; However, the
+    "housekeeping operations", which include things such as timer
+    incrementation that occur asynchronously as far as the AGC software
+    is concerned, also consume MCT due to the hardware design of the
+    AGC.&nbsp; The point is that each call to <code>agc_engine()</code>,
+    will consume <i>some</i> amount ≥1 of MCT.&nbsp; The total MCT used
+    by <code>agc_engine()</code> is tracked by the integer variable <code>State-&gt;CycleCounter</code>.<br>
+    <br>
+    Use <span style="font-family: monospace;">agc_engine_init()</span>
     prior to the first call of <span style="font-family: monospace;">agc_engine()</span>
     to initialize <span style="font-family: monospace;">State</span>,
     and then call <span style="font-family: monospace;">agc_engine()</span>
-    thereafter every (simulated) 11.7 microseconds if you want to
-    preserve accurate system timing.&nbsp; If you don't care about
-    accurate timing, call <span style="font-family: monospace;">agc_engine()</span>
-    as often or as seldom as you like.&nbsp; <span style="font-family:
-      monospace;">agc_engine()</span> will modify <span
-      style="font-family: monospace;">State</span> and will call <span
-      style="font-family: monospace;">ChannelInput()</span> and <span
-      style="font-family: monospace;">ChannelOutput()</span> (see above)
-    as needed to perform i/o.&nbsp; Counters will be incremented or
-    decremented automatically, if <span style="font-family: monospace;">ChannelInput()</span>
-    is implemented properly.<br>
+    often enough to keep <code>State-&gt;CycleCounter*MCT</code>
+    closely in sync with the passage of real time.&nbsp; In an embedded
+    system, you'd do this perhaps by an interrupt-service routine that
+    triggered every 11.719 microseconds and decided whether it needed to
+    call <code>agc_engine()</code> or not.&nbsp; In an operating-system
+    environment such as Windows, Mac OS, or Linux, that would be every
+    inefficient, so it would be more usual to perform this check every <code>N*MCT</code>
+    (where, say, <code>N=1000</code>) and then to call <code>agc_engine()</code>
+    enough times to let <code>State-&gt;CycleCounter*MCT</code> catch
+    up to real time.<br>
+    <br>
+    If you don't care about accurate timing, just call <span
+      style="font-family: monospace;">agc_engine()</span> as often or as
+    seldom as you like.&nbsp; <span style="font-family: monospace;">agc_engine()</span>
+    will modify <span style="font-family: monospace;">State</span> and
+    will call <span style="font-family: monospace;">ChannelInput()</span>
+    and <span style="font-family: monospace;">ChannelOutput()</span>
+    (see above) as needed to perform i/o.&nbsp; Counters will be
+    incremented or decremented automatically, if <span
+      style="font-family: monospace;">ChannelInput()</span> is
+    implemented properly.<br>
     <br>
     Returns 0 on success and non-zero on failure, but I'm not sure if
     there are any circumstances under which this function can fail.<br>
@@ -3824,14 +3861,16 @@ New
       style="font-family: monospace;">ChannelOutput</span> that
     physically outputs the data.&nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
 It's
-    important to use this function rather than reading the mirror
-    array directly, since the function accounts for the fact that the L
-    and Q registers appear in both i/o space and erasable-memory
-    space.&nbsp; It also provides the bookkeeping needed for output
-    channel 010, which really corresponds to 16 output ports implemented
-    with latches external to the CPU.<br>
+
+    important to use this function rather than reading the mirror array
+    directly, since the function accounts for the fact that the L and Q
+    registers appear in both i/o space and erasable-memory space.&nbsp;
+    It also provides the bookkeeping needed for output channel 010,
+    which really corresponds to 16 output ports implemented with latches
+    external to the CPU.<br>
     <h3><a name="AGC_Backtrace_API" id="AGC_Backtrace_API"></a><strike>AGC
 Backtrace
+
         API</strike></h3>
     <strike> To understand what "backtraces" are and why you might want
       to use them, refer to the explanation of debugging on the </strike><strike><a
@@ -3933,8 +3972,7 @@ Backtrace
     use what I've provided than to take care of it all yourself.<br>
     <br>
     If you want more information on downlink-lists in general, refer to
-    our <a
-      href="links2.html#GSOPs">Document Library page</a>.<br>
+    our <a href="links2.html#GSOPs">Document Library page</a>.<br>
     <br>
     <span style="font-family: monospace;"><span style="font-family:
         monospace;">#include "agc_engine.h"</span><br>
@@ -4165,13 +4203,12 @@ Backtrace
     This is just like the regular C-library <span style="font-family:
       monospace;">fopen</span> function, except that accounts for the
     directory preferences of <span style="font-weight: bold;">yaAGC</span><span
-      style="font-style: italic;">et al</span>.&nbsp; It first
-    attempts to open the file with the name as given.&nbsp; If that
-    fails, it prepends the name of the directory where the Virtual AGC
-    executables were installed and tries again.&nbsp; This allows you
-    (for example) to do things like <span style="font-family:
-      monospace;">rfopen("Luminary131.bin","rb")</span> without worrying
-    where Luminary131.bin has been installed.<br>
+      style="font-style: italic;">et al</span>.&nbsp; It first attempts
+    to open the file with the name as given.&nbsp; If that fails, it
+    prepends the name of the directory where the Virtual AGC executables
+    were installed and tries again.&nbsp; This allows you (for example)
+    to do things like <span style="font-family: monospace;">rfopen("Luminary131.bin","rb")</span>
+    without worrying where Luminary131.bin has been installed.<br>
     <h3><a name="An_Example:_The_Simplest_Possible_AGC"
         id="An_Example:_The_Simplest_Possible_AGC"></a>An Example:&nbsp;
       The Simplest Possible AGC Emulation Made from Library Functions</h3>
@@ -4201,6 +4238,7 @@ Backtrace
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; return
         (1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 //
+
         No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4425,14 +4463,15 @@ Backtrace
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-09-21.<br>
+          2025-01-10.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
         </font></i> </center>
     <br>
     <br>
