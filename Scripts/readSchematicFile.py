@@ -85,7 +85,7 @@ def normalizeCaption(caption):
 	return caption
 
 # Read KiCad v5 (or earlier, I suppose) files.
-def readSchematicFile5(filename, newLines, fast = False):
+def readSchematicFile5(filename, newLines, fast = True):
 	inSheet = False
 	inComp = False
 	inNOR = False
@@ -323,7 +323,7 @@ def readSchematicFile6(newLines, fast = True):
 							readSchematicFile(subsheetFilename, fast)
 							break;
 
-def readSchematicFile(filename, fast = False):
+def readSchematicFile(filename, fast = True):
 	print("Reading file " + filename, file=sys.stderr)
 	f = open(filename, "r")
 	newLines = f.readlines();
