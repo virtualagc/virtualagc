@@ -20,10 +20,13 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
       <li><a href="#Introduction">Introduction</a><br>
       </li>
       <li><a href="#References">References</a></li>
+      <li><a moz-do-not-send="true" href="#WorkstationSetup">Workstation
+          Setup</a><br>
+      </li>
       <li><a href="#An_Example:_testVerilog">First Example: Simulating a
           Small Digital Circuit</a></li>
-      <li><a moz-do-not-send="true" href="#EntireAGC">Simulating an
-          Entire AGC</a></li>
+      <li><a moz-do-not-send="true" href="#EntireAGC">Big Example:&nbsp;
+          Simulating an Entire AGC</a></li>
       <ul>
         <li><a moz-do-not-send="true" href="#SomeBackground">Some
             Background Information</a><br>
@@ -57,10 +60,18 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
             Results</a></li>
       </ul>
       <li><a href="#Appendix:_Translation_from_KiCad_into">Appendix:
-          Translation from KiCad into Verilog</a></li>
+          Technical Details</a></li>
       <ul>
-        <li><a href="#Converting_Netlist_to_Verilog">Converting Netlist
-            to Verilog</a></li>
+        <li><a moz-do-not-send="true" href="#CreatingSchematic">Creating/Editing
+            a Schematic Diagram</a><br>
+        </li>
+        <li><a moz-do-not-send="true" href="#CreatingNetlists">Creating
+            a Netlist</a><br>
+        </li>
+        <li><a href="#Converting_Netlist_to_Verilog">Converting Netlists
+            to Verilog Source code</a></li>
+        <li><a moz-do-not-send="true" href="#PinsTxt">The pins.txt File</a><br>
+        </li>
         <li><a href="#Generating_Flip-flop_Initialization">Generating
             Flip-Flop Initialization Files (module.init)</a><br>
         </li>
@@ -84,24 +95,24 @@ I
         AGC hardware simulator</a>, and want to have some way of
       verifying that your creation works properly.<br>
     </p>
-    <p>Realize, though, that the purpose of such simulations can <i>only</i>
-      be accurate examination or verification of AGC behavior.&nbsp;
-      While you can use them to run AGC software, these simulations are
-      very much slower than real
-      time, so you cannot expect to use them as replacements for the
-      software simulations of the AGC CPU if you expect a comfortable
-      experience when you're using them.&nbsp; One day, as computer
-      speeds continue to advance,
-      perhaps!&nbsp; But not now.&nbsp; Recognize too that while
+    <p>Realize, though, that the purpose of such simulations can only
+      be accurate examination or verification of AGC behavior, and they
+      are not practical substitutes for software (such as our <a
+        moz-do-not-send="true" href="yaAGC.html"><b>yaAGC</b></a>
+      program) designed and dedicated solely to running AGC
+      software.&nbsp; While you <i>can</i> use digital electrical
+      simulations to run AGC software, these simulations are very much
+      slower than real
+      time.&nbsp; One day, as computer speeds continue to advance, I
+      expect that digital electrical simulations will be much faster
+      than now!&nbsp; But not now.&nbsp; Recognize too that while
       simulation of the AGC or DSKY's <i>analog</i> circuitry is also
       possible, that's not what I'm talking about here.&nbsp; It is
       simulation of the digital circuitry — i.e., the collection of
       logic gates in the AGC — that will be of interest.<br>
     </p>
     <p>Here's an executive summary of the workflow of the
-      digital-simulation process as I envisage it.&nbsp; Note that as
-      scary and complex as the workflow may seem, most of the steps have
-      already been performed for you.<br>
+      digital-simulation process as I envisage it:&nbsp; <br>
     </p>
     <table cellspacing="2" cellpadding="2" border="1" height="739"
       align="center">
@@ -109,7 +120,7 @@ I
         <tr>
           <th valign="bottom">#<br>
           </th>
-          <th valign="bottom">Step<br>
+          <th valign="bottom">Workflow Step<br>
           </th>
           <th valign="bottom">Comment<br>
           </th>
@@ -123,7 +134,7 @@ I
           <td valign="middle">The schematic-capture software in question
             is called <a moz-do-not-send="true"
               href="https://www.kicad.org/"><b>KiCad</b> EDA</a>.&nbsp;
-            The transcribed schematic files&nbsp; are <a
+            The transcribed schematic files are <a
               moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here</a>.<br>
           </td>
@@ -158,9 +169,9 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
             provide.&nbsp; <br>
             <br>
             <b>Note:</b>&nbsp; The script <b>dumbVerilog.py</b> is
-            specialized for AGC digital circuits as conceived ~1970, and
-            will not produce anything useful when applied to non-AGC
-            circuitry or to analog circuitry.<br>
+            specialized for AGC digital circuits ~1970, and will not
+            produce anything useful when applied to non-AGC circuitry or
+            to analog circuitry.<br>
           </td>
         </tr>
         <tr>
@@ -169,7 +180,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
           <td valign="middle">A "test bench" — i.e., a description in
             Verilog source code of the external
             inputs into the emulated circuitry vs time — is written.</td>
-          <td valign="middle"><br>
+          <td valign="middle">There's a helpful Python 3 script, <a
+              moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbTestbench.py">dumbTestbench.py</a>,
+            which can automate a little of this for you, but the script
+            can't read your mind (yet!), so you still have to make some
+            choices for yourself.<br>
           </td>
         </tr>
         <tr>
@@ -179,7 +195,10 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
             i.e., the executable form of the AGC software that the
             emulated AGC circuitry is going to run — is converted into
             Verilog source code.</td>
-          <td valign="middle"><br>
+          <td valign="middle"><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">This
+              has already been done</a>, at least for an incomplete
+            selection of the AGC software versions available to us.<br>
           </td>
         </tr>
         <tr>
@@ -227,17 +246,18 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; Regarding the choice
         of software used in the workflow&nbsp;</font><font size="-1"><font
           size="-1">— i.e., the holy trinity <b>KiCad</b>, <b>iVerilog</b>,
-          and <b>GTKWave</b> </font>—, disagreement is always
-        possible, and indeed likely if you happen to be a person with
-        expertise in this particular area.&nbsp; The programs were
-        chosen because they are free of charge (and indeed are open
-        source, like the Virtual AGC Project itself) and available for
-        Linux, Windows, and Mac OS.&nbsp; If you can make it work with
-        the fancier tools a professional may have at their disposal,
-        then by all means do so and let me know.&nbsp; I won't change an
-        open-source workflow into a non-open-source workflow no matter
-        how terrific an alternate tool may be, but at least I'll be
-        interested to hear the news!<br>
+          and <b>GTKWave</b> </font>—, disagreement as to whether
+        these are the optimal choices is always possible, and indeed
+        likely if you happen to be a person with expertise in this
+        particular area.&nbsp; The programs were chosen because they are
+        free of charge (and indeed are open source, like the Virtual AGC
+        Project itself) and available for Linux, Windows, and Mac
+        OS.&nbsp; If you can make it work with the fancier tools a
+        professional may have at their disposal, then by all means do so
+        and let me know.&nbsp; I won't change an open-source workflow
+        into a non-open-source workflow no matter how terrific an
+        alternate tool may be, but at least I'll be interested to hear
+        the news and can parrot it back to the general public!<br>
       </font></blockquote>
     <p>Multiple types of simulation are possible, including:<br>
     </p>
@@ -249,7 +269,8 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
       </li>
     </ul>
     <p>Indeed, if you are capable of writing your own Verilog
-      descriptions of peripheral hardware in the LM or CM, you can
+      descriptions of <i>Other</i> peripheral hardware in the LM or CM,
+      you can
       probably even simulate AGC+DSKY+<i>Other</i>.&nbsp; What we'll
       concentrate on discussing, however, is the full AGC.&nbsp;
       Hopefully, with that background, you'll be able to see for
@@ -342,34 +363,93 @@ translator
           that would not have been easily discoverable otherwise.&nbsp;
           And I can honestly tell you that it would never even have
           occurred to me to try this if Mike hadn't already done what he
-          did!&nbsp; The difference is that my schematics closely match
-          the original AGC schematics, so closely that you can overlay
-          them, while Mike's schematics are intended to be — and I
-          believe, are! — <i>functionally</i> identical to the original
+          did!&nbsp; It's very much a case of "me too!" on my part.
+          &nbsp; With that said, there are some pros and cons that work
+          in both directions.&nbsp; My schematics closely match the
+          original AGC schematics, so closely that you can overlay them,
+          while Mike's schematics are intended to be — and I believe,
+          are! — <i>functionally</i> identical to the original
           schematics, but impossible to verify vs the original
           schematics without considerable intellectual effort.&nbsp;
           Mike's version is more efficient in the sense that his
           simulation runs significantly faster than mine ... but you
           can't compare his side-by-side with the original schematics to
-          verify correctness as you can with mine.&nbsp; Which one you
-          prefer is a matter of taste.</font><br>
+          verify correctness as you can with mine.&nbsp; Which approach
+          you prefer is a matter of taste.&nbsp; What I'll be discussing
+          <i>here</i> is my own approach rather than Mike's.</font><br>
       </p>
     </blockquote>
     <ul>
     </ul>
+    <h1><a name="WorkstationSetup"></a>Workstation Setup</h1>
+    <p>Install the following software on your computer:<br>
+    </p>
+    <ul>
+      <li><a moz-do-not-send="true" href="https://www.kicad.org/">KiCad
+          EDA</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+          href="https://steveicarus.github.io/iverilog/">Icarus Verilog</a><br>
+      </li>
+      <li><a moz-do-not-send="true"
+          href="https://gtkwave.github.io/gtkwave/">GTKWave</a></li>
+    </ul>
+    <p>On Ubuntu or Linux Mint, this is as simple as using the command<br>
+    </p>
+    <blockquote>
+      <pre>sudo apt install kicad iverilog gtkwave<br></pre>
+    </blockquote>
+    <p>On other platforms, installation may or may not be something as
+      simple, but you should follow the hyperlinks given above to find
+      out.<br>
+    </p>
+    <p>Download <a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tree/schematics">the
+        "schematics" branch of the Virtual AGC repository</a> from
+      GitHub.&nbsp; There are many different ways you might do this,
+      depending on your computer platform and personal tastes, and I
+      wouldn't presume to dictate to you.&nbsp; For the sake of
+      discussion, however, I'll assume that you've done this by creating
+      a folder called "virtualagc-schematics" in your "home
+      directory".&nbsp; For example, if you have the git program
+      installed on your computer, you could do it with a command like:<br>
+    </p>
+    <blockquote>
+      <pre>git clone --depth=1 -b schematics https://github.com/virtualagc/virtualagc.git virtualagc-schematics<br></pre>
+    </blockquote>
+    <p>Within the folder you've just created you'll find a folder called
+      "Scripts".&nbsp; Add the path to this Scripts folder into your
+      PATH environment variable.&nbsp; Depending on your particular
+      computer platform, the way of doing that varies.&nbsp; But the
+      following should usually work:<br>
+    </p>
+    <ul>
+      <li>Linux: Add the line "<code>export PATH=$PATH:</code><code><i>PathToYourNewFolder</i></code>"
+        to the file ~/.bashrc using a text editor.</li>
+      <li>Mac OS: Add the line "<code>export PATH=$PATH:</code><code><i>PathToYourNewFolder</i></code>"
+        to <i>both</i> of the files ~/.bashrc and ~/.zprofile using a
+        text editor.</li>
+      <li>Windows:&nbsp; I'd suggest opening up the desktop menu and
+        searching for "edit environment variables".&nbsp; Edit the
+        "Path" variable for your account and add <code><i>PathToYourNewFolder</i></code>
+        to it.</li>
+    </ul>
+    <p>It's likely the changes the PATH won't affect any existing
+      command lines which are open, so you'll probably have to open a
+      new command-line terminal to get the benefit of the change.<br>
+    </p>
     <h1><a name="An_Example:_testVerilog"></a>First Example: Simulating
       a Small Digital Circuit<br>
     </h1>
     <p>The Virtual AGC software repository already contains some
       fully-worked out examples of digital simulations. The simplest
       example is
-      something called "testVerilog", which is actually a small circuit
-      block from the AGC's circuit module A1, the "scaler" module.&nbsp;
-      Let's consider the testVerilog simulation workflow in terms of the
-      results you can expect to see, without getting into the
-      nitty-gritty of how you accomplish these steps.&nbsp; (Those
-      details, when you want them, appear in <a moz-do-not-send="true"
-        href="#Appendix:_Translation_from_KiCad_into">the Appendix</a>.)<br>
+      something called "<a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVerilog">testVerilog</a>",
+      which is actually a small circuit
+      block extracted from the AGC's circuit module A1, the "scaler"
+      module.&nbsp; In this section we'll cover the testVerilog
+      simulation workflow.<br>
     </p>
     <p>Workflow Step #1:&nbsp; Start with the original Apollo Program
       schematic-diagram drawing for module A1, which is drawing
@@ -384,18 +464,56 @@ translator
           width="300"></a><br>
     </div>
     <p>Don't be confused by the fact that the inputs of NOR gates in the
-      circuit are decorated with little triangles that make the gate
-      look like a rocket ship.&nbsp; They're just regular NOR gates in
+      circuit are decorated with little triangles that make the gates
+      look like rocket ships.&nbsp; (Was it intentional, I
+      wonder?)&nbsp; They're just regular NOR gates in
       spite of that.&nbsp; The numbered oval pads are the inputs from or
       outputs to the AGC backplane into which the various AGC circuitry
       modules plug.&nbsp; Perhaps I should also point out that the NOR
-      gates used in the AGC were like open-collector gates, in which you
-      can directly tie together outputs from different gates
-      (effectively AND'ing them without any literal AND
-      gate).&nbsp;&nbsp; <br>
+      gates used in the AGC were open-drain gates, in which you can
+      directly tie together outputs from different gates (effectively
+      AND'ing them without any literal AND gate).&nbsp;&nbsp; <br>
     </p>
-    <p>After transcription, the KiCad files for this circuit module look
-      essentially identical to the original paper drawings; <br>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; I won't cover here how to
+          actually transcribe paper drawings of electrical schematics
+          into KiCad schematic files.&nbsp; It's a complicated
+          affair.&nbsp; Just any old transcription won't do.&nbsp; And
+          honestly, you may not have to understand how to make
+          transcriptions anyway, since I've already transcribed all of
+          the pre-existing AGC schematics for you.&nbsp; Nevertheless,
+          in the Appendix there's <a moz-do-not-send="true"
+            href="#Converting_Netlist_to_Verilog">a list of some of the
+            rules</a> you'd have to follow to get schematic files that
+          are usable for our simulation workflow.&nbsp; There are also
+          common-sense rules that aren't covered in the Appendix, such
+          as "you have to use wires for electrical interconnections
+          rather than just lines".&nbsp; One rule not in the Appendix
+          that I've personally followed in order to make verification of
+          correctness of the transcriptions much simpler is that the
+          transcribed schematics should appear to be so visually
+          identical to the originals that you can overlay them with
+          nothing perceptibly out of place.&nbsp; There's no technical
+          necessity for that particular rule.&nbsp; Mike Stewart's
+          transcriptions, for example, are designed entirely for
+          functional correctness and have no visual resemblance whatever
+          to the originals.&nbsp; On the other hand, Mike's
+          transcriptions don't follow the rules laid out in the Appendix
+          either, so certain steps in our simulation workflow (which
+          post-date Mike's transcriptions) will fail.&nbsp; In case
+          you're wondering how to transcribe a circuit so as to make it
+          visually identical to the original, KiCad's schematic capture
+          program, <b>eeschema</b>, allows you to use a JPG image as
+          the backdrop of your schematic.&nbsp; Thus if you use the
+          scanned images (as seen above) for your backdrops in <b>eeschema</b>,
+          you can almost-trivially insure that all of your components
+          and wires are in exactly the right places, which also helps to
+          insure that the nets in the transcription are as they should
+          be. </font><br>
+      </p>
+    </blockquote>
+    <p>Transcriptions which follow the rules in the Appendix (and my
+      additional criteria) look like this: <br>
     </p>
     <div align="center"><a href="KiCad/2005259A-p1of2.png"><img
           src="2005259A-p1of2-small.png" alt="" border="2" height="232"
@@ -403,7 +521,8 @@ translator
           src="2005259A-p2of2-small.png" alt="" border="2" height="232"
           width="300"></a><br>
     </div>
-    <p>Now, AGC module A1 is the "scaler" circuit.&nbsp; If you want to
+    <p>Now as I mentioned, AGC module A1 is the "scaler" circuit.&nbsp;
+      If you want to
       read about it in some detail, you can look at <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">section
 4-5.3.4
@@ -412,7 +531,8 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
       clock signal called FS01/ (a 102.4 KHz square wave), which you can
       see coming into the module from the AGC's backplane near the upper
       left on the first sheet of the schematic, and to run it through a
-      sequence of circuit blocks that successively cut the frequency of
+      sequence of identical circuit blocks that successively cut the
+      frequency of
       that signal in half, as follows, and outputting those slower
       clocks back to the AGC's backplane:<br>
     </p>
@@ -423,17 +543,21 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
       <li>Output signal FS33 is 0.000023842 Hz</li>
     </ul>
     <p>To simplify things, the testVerilog example cuts this all down so
-      that just the first divide-by-two circuit block, which produces
-      the output signal FS02 from input signal FS01/, is retained in the
-      design.&nbsp; Here is a simple
+      that just the <i>first</i> of the many divide-by-two circuit
+      blocks.&nbsp; The abridged circuit produces
+      the output signal FS02 from input signal FS01/ and implements
+      what's known to electrical engineers as a "flip-flop". &nbsp; Here
+      is an
       image of that circuit:<br>
     </p>
     <div align="center"><img src="testVerilogCircuit.png" alt=""
         height="549" width="643"><br>
     </div>
-    <p>Workflow Step 2: Creation of a netlist from the CAD files.&nbsp;
-      While it isn't
-      terribly instructive, the netlist file for this circuit is
+    <p>Workflow Step 2:&nbsp; <a moz-do-not-send="true"
+        href="#CreatingNetlists">Consult the Appendix</a> for an
+      explanation of how to create the netlist.&nbsp; While it isn't
+      terribly instructive in itself, the netlist file for this circuit
+      is
       relatively short and relatively readable without any explanation,
       so here it is in full:<br>
     </p>
@@ -502,29 +626,47 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
 *</font><br></pre>
     </blockquote>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
-        I mentioned earlier that some of the tools in the workflow could
-        have evolved since this section was written.&nbsp; The principal
+        I hinted earlier that some of the tools in the workflow have
+        evolved since this section was written.&nbsp; The principal
         offender in this regard is the KiCad EDA program, which has
         moved from v.5 when the netlist file above was created, to v.8
         now, with major changes having occurred in the transition from
-        v.5 to v.6.&nbsp; The moral is that if you created the same
-        netlist <i>today</i>, it would look very different than what
-        you see above, though it would be functionally identical.</font><br>
+        v.5 to v.6.&nbsp; The moral is that if you creat the same
+        netlist <i>today</i>, it will look very different than what you
+        see above, though it will be functionally identical.</font><br>
     </blockquote>
     Workflow Step #3: Conversion to Verilog.&nbsp; <br>
     <br>
+    The Verilog source code is created by the command:<br>
+    <blockquote><font face="Courier 10 Pitch">dumbVerilog.py A1 <font
+          face="Courier 10 Pitch">module</font>.net pins.txt 0.2 <font
+          face="Courier 10 Pitch">module.init</font> module.kicad_sch
+        &gt;<font face="Courier 10 Pitch">module</font>.v</font><br>
+    </blockquote>
+    The command-line parameters are the AGC logic module designation
+    (A1, since testVerilog was snipped out of module A1), the name of
+    the netlist file (module.net), <a moz-do-not-send="true"
+      href="#PinsTxt">a file describing backplane connections</a>
+    (pins.txt), the propagation delay of NOR gates ("0.2" meaning "20
+    ns"), <a moz-do-not-send="true"
+      href="#Generating_Flip-flop_Initialization">the initial states of
+      flip-flops</a> (module.init), and the name of the top-level
+    schematic file (module.kicad_sch for KiCad v.6 or later, module.sch
+    for KiCad v.5 or earlier).<br>
+    <br>
     The Verilog source code you get looks somewhat similar to the
     following.&nbsp; (It's only "somewhat similar" because this is
-    another case of tools that have evolved.)&nbsp; Even if you don't
-    know Verilog, I think you can get a good sense of what's what.&nbsp;
-    The <font color="#663300"><code>rst</code></font> signal is not
-    present in the schematic, and is simply always added by the program
-    we use to create the Verilog source code; it's what allows the
-    initial conditions of memory to be set up, but is normally active
-    only at the very beginning of the simulation.&nbsp; Verilog doesn't
-    allow signal names like "FS01/", because the character "/" isn't
-    legal for signal names, so the translator has automatically changed
-    "FS01/" to "FS01_".<br>
+    another case of tools that have evolved since I first wrote this
+    section.)&nbsp; Even if you don't know Verilog, I think you can get
+    a good sense of what's what.&nbsp; The <font color="#663300"><code>rst</code></font>
+    signal is not present in the schematic, and is simply always added
+    by the program we use to synthesize the Verilog source code; it's
+    what allows the initial conditions of memory — in this case, the
+    flip-flop — to be set up, but is normally active only at the very
+    beginning of the simulation.&nbsp; Verilog doesn't allow signal
+    names like "FS01/", because the character "/" isn't legal for signal
+    names, so the translator has automatically changed "FS01/" to
+    "FS01_".<br>
     <blockquote>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <pre style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; word-spacing: 0px; -webkit-text-stroke-width: 0px; overflow-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">// Verilog module auto-generated for AGC module A1 by dumbVerilog.py
@@ -546,12 +688,12 @@ endmodule</font></pre>
     in a simulation workflow where you would have to decide how you want
     the input signals supplied to the circuit to vary over time, as well
     as which output signals from the circuit you want to log for later
-    viewing or analysis.&nbsp; Those those things together comprise
-    what's called the "test bench".&nbsp; The test bench is yet another
-    Verilog source-code file.&nbsp; But you have to write it or tweak it
-    yourself, rather than expecting it to be created automatically for
-    you.&nbsp; The test-bench file I've created for testVerilog looks
-    like this:<br>
+    viewing or analysis.&nbsp; Those decisions together comprise what's
+    called the "test bench".&nbsp; The test bench is yet another Verilog
+    source-code file.&nbsp; But you have to write it or tweak it
+    yourself, at least partially, rather than expecting it to be created
+    automatically for you.&nbsp; The test-bench file I've created for
+    testVerilog looks like this:<br>
     <blockquote>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <pre style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; word-spacing: 0px; -webkit-text-stroke-width: 0px; overflow-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">// Test bench for testVerilog.v
@@ -576,11 +718,11 @@ initial
 $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);
 endmodule</font></pre>
     </blockquote>
-    Let's take a look at this file and see what it's trying to
-    say.&nbsp; First, the "timescale" directive explains how to
-    understand the timings (the things marked with "#") that appear
-    within the test-bench file.&nbsp; It says that the time scale will
-    be 1 μs, so that the numbers for the "#" timings are in
+    Let's take a look at this test-bench source-code file and see what
+    it's trying to say.&nbsp; First, the "timescale" directive explains
+    how to understand the timings (the things marked with "#") that
+    appear within the test-bench file.&nbsp; It says that the time scale
+    will be 1 μs, so that the numbers for the "#" timings are in
     microseconds.&nbsp; <br>
     <br>
     The "reg rst =1" means that the <font color="#663300"><code>rst</code></font>
@@ -589,16 +731,15 @@ endmodule</font></pre>
     "register" that remembers it's own settings, as opposed to a "wire"
     (which cannot remember anything).&nbsp; Thus, we set <font
       color="#663300"><code>rst</code></font> to 1 and it will stay that
-    way until we say otherwise.&nbsp; Thus, a few lines later we see "#
-    2 rst = 0", which means that 2 us after startup, the test bench is
-    going to reset the <font color="#663300"><code>rst</code></font>
-    signal to 0, and leave it there.&nbsp; The "# 500 $finish" that you
-    also see there says that the simulation itself will actually end
-    after 500 μs.&nbsp; The "$dumpfile" and "$dumpvars" statements say
-    that an output logfile called testVerilog.vcd is going to be opened,
-    and that the values of all of the input and output variables are
-    going to be dumped into it on a cycle-by-cycle basis, for later
-    analysis.<br>
+    way until we say otherwise.&nbsp; A few lines later we see "# 2 rst
+    = 0", which means that 2 us after startup, the test bench is going
+    to reset the <font color="#663300"><code>rst</code></font> signal
+    to 0, and leave it there.&nbsp; The "# 500 $finish" that you also
+    see there says that the simulation itself will actually end after
+    500 μs.&nbsp; The "$dumpfile" and "$dumpvars" statements say that an
+    output logfile called testVerilog.vcd is going to be opened, and
+    that the values of all of the input and output variables are going
+    to be dumped into it on a cycle-by-cycle basis, for later analysis.<br>
     <br>
     The "reg FS01_ = 0" means that <font color="#663300"><code>FS01_</code></font>
     (FS01/) is also an input to the circuit being tested, and that it
@@ -623,12 +764,15 @@ endmodule</font></pre>
     <br>
     Workflow Step #5:&nbsp; Modeling memory.&nbsp; Since we're just
     simulating a single logic module of the AGC, rather than the AGC as
-    a whole, we don't need any memory, so&nbsp; we don't need this step.<br>
+    a whole, we don't need any memory other than the flip-flop that the
+    circuit implements, so&nbsp; we don't need this step.<br>
     <br>
-    Workflow Steps #6 and #7:&nbsp; Compiling and running the
-    simulation.&nbsp; There's really nothing to show you in terms of
-    compiling; it's dead simple.&nbsp; After compilation, when you run
-    the simulation, you see something like this:<br>
+    Workflow Step #6:&nbsp; Compiling the Verilog source-code
+    files.&nbsp; There's really nothing to show you; it's dead simple.<br>
+    <br>
+    Workflow Step #7:&nbsp; Running the simulation.&nbsp; After
+    compilation, when you run the simulation, you see something like
+    this:<br>
     <blockquote><font size="-1" face="Courier"><font color="#663300">VCD
           info: dumpfile testVerilog.vcd opened for output.<br>
           At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1,
@@ -698,152 +842,37 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the
     <div align="center"><img src="testVerilog.Wave.png" alt=""
         height="499" width="1030"><br>
     </div>
-    <h1><a name="Files"></a>Files</h1>
-    <p>For our discussion (and in <a
-href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">our
-        repository for electrical schematics and Verilog descriptions of
-        them</a>), we expect a certain directory hierarchy and
-      file-naming convention within that hierarchy.&nbsp; It looks like
-      this:<br>
-    </p>
-    <blockquote>Top level directory of the repository/<br>
-      <blockquote><font color="#33cc00">Scripts/</font><br>
-        <blockquote><font color="#33cc00">dumbVerilog.py<br>
-            dumbTestbench.py</font><br>
-        </blockquote>
-        <font color="#33cc00">Schematics/<br>
-        </font>
-        <blockquote><font color="#33cc00">roms/<br>
-          </font>
-          <blockquote><font color="#33cc00">Artemis072.v<br>
-              Aurora12.v<br>
-              ...<br>
-              Validation.v<br>
-              Validation-hardware-simulation.v<br>
-            </font></blockquote>
-        </blockquote>
-        <blockquote><font color="#33cc00"><i>DRAWING1</i>/</font><br>
-          <blockquote><font color="#33cc00">... <i>schematics</i> ...</font><br>
-            <font color="#33cc00">module.net<br>
-              <font color="#990000"><font color="#33cc00">module.init</font><br>
-              </font></font><font color="#990000">tb.v</font><br>
-            <font color="#33cc00">module.v<br>
-              module_tb.v<br>
-              module.vvp</font><br>
-          </blockquote>
-          <font color="#33cc00"><i>DRAWING2</i>/</font><br>
-          <blockquote><font color="#33cc00"><i>... schematics ...</i><br>
-              module.net<br>
-              <font color="#990000"><font color="#33cc00">module.init</font><br>
-              </font></font><font color="#990000">tb.v<br>
-            </font><font color="#33cc00">module.v<br>
-              module_tb.v<br>
-              module.vvp</font><br>
-          </blockquote>
-          .<br>
-          .<br>
-          .<br>
-          <font color="#33cc00">Makefile<br>
-            2003200.v<br>
-          </font><font color="#990000">tb-2003200.v<br>
-          </font><font color="#33cc00">2003200.vvp<br>
-            2003993.v<br>
-          </font><font color="#990000">tb-2003993.v<br>
-          </font><font color="#33cc00">2003993.vvp<br>
-          </font>.<br>
-          .<br>
-          .<br>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    <font color="#33cc00">The items in green above</font> are the ones
-    that are either provided for you in our repository or are created
-    more-or-less automatically for you by the process that will be
-    described later on.&nbsp; <font color="#990000">The items in
-      reddish-brown above</font> may be partially created for you to
-    give you a head start, but nevertheless require some active
-    involvement on your part to get them just right, in those cases
-    where you actually need the files.&nbsp; But in brief, the
-    electrical design for any given part number of the AGC (such as
-    2003200 or 2003993) consists of a set of drawings of the individual
-    circuit modules, plus the "backplane", i.e. the set of electrical
-    interconnections between the modules.&nbsp; For AGC p/n 2003200, for
-    example, those items are implemented by the Verilog files:<br>
-    <ul>
-      <li>2003200.v (the backplane)</li>
-      <li>2005259A/module.v (module A1)</li>
-      <li>2005260A/module.v (module A2)</li>
-      <li>...</li>
-      <li>2005273A/module.v (module A24).</li>
-    </ul>
-    Files<br>
-    <ul>
-      <li>1003700.v<br>
-      </li>
-      <li>2003100.v<br>
-      </li>
-      <li>2003200.v</li>
-      <li>2003993.v<br>
-      </li>
-    </ul>
-    are the top-level "test benches" for the AGC simulation as a whole,
-    for the AGC p/n's 1003700 (Block I) or (Block II) 2003100, 2003200,
-    or 2003993.&nbsp; They're actually created for you, and there's only
-    a tiny bit that's separated off into separate files that you need to
-    edit yourself:<br>
-    <ul>
-      <li>tb_1003700.v</li>
-      <li>tb_2003100.v</li>
-      <li>tb_2003200.v</li>
-      <li>tb_2003993.v<br>
-      </li>
-    </ul>
-    At present, only 2003200 actually exists in a usable form.&nbsp;
-    Remember, this is a work in progress!&nbsp; At any rate, test
-    benches are described further in the next section, as are the
-    initialization files <i>DRAWINGn</i>/module.init.&nbsp; The various
-    *.vvp files are the compiled form of the Verilog, and are what's
-    used to actually run simulations.<br>
-    <blockquote><font size="-1"><b>Aside:</b>&nbsp; You may look at this
-        heap of drawing numbers, and shake your heads, bewildered.&nbsp;
-        2003100?&nbsp; 2003200?&nbsp; 2003993?&nbsp; What?!!!&nbsp;
-        These are all AGC model numbers, of which 2003993 is by far the
-        most common, and was used in almost all manned missions.&nbsp;
-        Whereas in contrast, model 2003200, though installed in a couple
-        of the Apollo guidance systems (including that for LM-2), was
-        never flown in <i>any</i> Apollo mission.&nbsp; So why have I
-        chosen to make that unflown model the single worked-out
-        example?&nbsp; I cannot give you a definitive answer from
-        memory, but after perusing the documentation I believe it simply
-        has to do with the accidental ordering in which the electrical
-        schematics for various missions became available to us.&nbsp;
-        The first set of drawings that became available appears to have
-        been that for AGC model 2003200, and then the schematics for
-        other missions became available years later.&nbsp; Hence the
-        most work in terms of digital simulation has been done on model
-        2003200.<br>
-      </font></blockquote>
-    <h1><br>
-    </h1>
-    <h1><a name="EntireAGC"></a>Simulating an Entire AGC</h1>
+    <br>
+    <h1><a name="EntireAGC"></a>Big Example: Simulating an Entire AGC</h1>
     <h2><a name="SomeBackground"></a>Some Background Information</h2>
+    <p>As with the discussion of the simulation of the simple
+      "testVerilog" circuit in the preceding section, we'll be
+      concentrating on what the various steps of the simulation workflow
+      produce rather than on the detailed commands needed to accomplish
+      those steps.&nbsp; Coverage of those detail commands is again
+      relegated to <a moz-do-not-send="true"
+        href="#Appendix:_Translation_from_KiCad_into">the Appendix</a>.<br>
+    </p>
     <p>Simulating an entire AGC is similar to simulating just a small
       portion of an AGC as in the example of "testVerilog" that we saw
       above.&nbsp; There are some differences, though.&nbsp; For one
       thing, we can't work with just one huge electrical schematic that
       covers the entire AGC, as we could with testVerilog.&nbsp; Well,
       we <i>could</i>, except that we don't have such a monstrous
-      drawing to work with.&nbsp; Rather, we have to cobble the
-      simulation together using the various bits and pieces we can get
-      from schematics, netlists, and Verilog source-code files created
-      individually for the separate "logic modules" of the AGC.&nbsp;
-      But doing that would only get us the AGC's CPU, and a CPU needs a
-      program to run.&nbsp; So we also need Verilog source-code files
-      that model whatever particular AGC program — such as LUMINARY,
-      COLOSSUS, or whatever — that we want to run.<br>
+      drawing to work with.&nbsp; Rather, we have lots of drawings of
+      electrical schematics for the individual logic modules comprising
+      the AGC.&nbsp; We have to cobble the simulation together using the
+      various bits and pieces we can get from schematics, netlists, and
+      Verilog source-code files created individually for the separate
+      "logic modules" of the AGC.&nbsp; But doing that would only get us
+      the AGC's CPU, and a CPU needs a program to run.&nbsp; So we also
+      need Verilog source-code files that model whatever particular AGC
+      program — such as LUMINARY, COLOSSUS, or whatever — that we want
+      to run.&nbsp; So on choice we have to make is which AGC software
+      are we going to use?<br>
     </p>
-    <p>One choice we have to make in principle is <i>which model</i> of
-      AGC do we want to simulate?&nbsp; Some of the choices are:<br>
+    <p>Another choice we have to make in principle is <i>which model</i>
+      of AGC do we want to simulate?&nbsp; Some of the choices are:<br>
     </p>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
@@ -971,10 +1000,9 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">our
     </p>
     <p>The good news is that in so far as the digital logic is
       concerned, there is very little difference between the different
-      Block II AGC models, and it's only the digital logic which
-      concerns us in the Verilog simulation of the AGC.&nbsp; Mike
-      Stewart, who is far more knowledgeable about this topic than I am,
-      explains it thusly (as slightly edited by me):<br>
+      Block II AGC models.&nbsp; Mike Stewart, who is far more
+      knowledgeable about this topic than I am, explains it thusly (as
+      slightly edited by me):<br>
     </p>
     <blockquote>
       <div>
@@ -990,78 +1018,22 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">our
         [isn't being simulated] with the Verilog sim."</div>
     </blockquote>
     <p>With that said, the full-AGC example we'll be working through
-      below is in fact for the model 2003200, which never flew in any
-      mission though it was in fact installed in LM-2.&nbsp; Why I chose
-      this particular model for the example, rather than the
-      far-more-common 2003993, is a mystery.<br>
-      <br>
+      below is for the model 2003200, which never flew in any mission
+      though it was in fact installed in LM-2.&nbsp; Why I made the
+      oddball choise of this particular model for the example, rather
+      than the far-more-common 2003993, is a mystery.<br>
     </p>
     <h2><a name="Steps_1_2_and_3:_Creating_Verilog"></a>Workflow Steps
       1, 2, and 3: Creating Verilog Source-Code Files Corresponding To
       the AGC Schematics</h2>
-    <p>Since this is something that has already been done for you, and
-      the repository has these files in it, there's not much you need to
-      know about it.&nbsp; So (lucky you!) I'm not actually going to
-      describe how to perform these steps.<br>
-    </p>
-    <p>However, here are some basic factoids that may or may not be of
-      interest:<br>
-    </p>
-    <ul>
-      <li>The KiCad schematic files for the AGC "logic flow diagrams"
-        that are being modeled are expected to contain only a handful of
-        different electrical components that contribute to the
-        electrical design of the Verilog files (as opposed to the
-        appearance of the CAD drawings).&nbsp; Those primitives are:</li>
-      <ul>
-        <li>Dual triple-input NOR gates.&nbsp; These will have reference
-          designators U<i>nnn</i>.&nbsp; Each instance of aNOR gate has
-          a 5-digit "location" field that's unique throughout the entire
-          AGC. <br>
-        </li>
-        <li>72-pin connectors.&nbsp; These consist entirely of numbered
-          oval-shaped pads, providing a single connector pin each.&nbsp;
-          These will have reference designators J<i>n</i>, of which only
-          J1 through J4 are relevant to the digital simulation.&nbsp;
-          These pads are shown with labels that represent the backplane
-          signals to which they are connected.&nbsp; In other words,
-          these connect different AGC modules/drawing together.<br>
-        </li>
-        <li>KiCad "net labels", for assigning net names to wires, and
-          thus connecting apparently disconnected objects within a sheet
-          of the drawing.</li>
-        <li>KiCad "hierarchical" pins or labels, for interconnecting
-          signals on different drawing sheets.</li>
-      </ul>
-      <li>The KiCad Inspect/ElectricalRulesChecker (ERC) feature is used
-        to check the correctness of the schematics.&nbsp; It can't
-        actually do that, of course, but it does tell us a lot of stuff
-        about wires that aren't connected.</li>
-      <li>The KiCad Tools/GenerateNetlistFile feature is used to create
-        a netlist for the drawing.&nbsp; It provides several possible
-        netlist formats, but the one that must be chosen is "OrcadPCB2".</li>
-      <li>A Python 3 script we provide in the repository
-        (Scripts/dumbVerilog.py) can translate the netlist file (plus
-        schematic file) into a Verilog source-code file, in an entirely
-        automated way if the rules listed above are obeyed.</li>
-      <li>A Python 3 script we provide in the repository
-        (Scripts/dumbTestbench.py) can create a testbench Verilog file
-        (see the next section!) for the Verilog file of a drawing of an
-        AGC module or for a <i>collection</i> of Verilog files of AGC
-        modules.&nbsp; Think of it as creating a "backplane" into which
-        the individual AGC modules are plugged.&nbsp; Taking it to the
-        logical extreme, if you fed it a collection of netlists for all
-        24 AGC modules, A1 through A24, it would produce Verilog an
-        entire backplane for the AGC.<br>
-      </li>
-    </ul>
+    There's really nothing to see here, so let's move on.<br>
     <h2><a name="Step_4:_The_Test_BenchTBD"></a>Workflow Step 4: The
       Test Bench, and Initial States and Gate Delays<br>
     </h2>
     <h3><a name="module.init"></a>module.init</h3>
     <p><img src="testVerilogCircuit.png" alt="" height="372"
         align="left" width="438">The AGC's logic module circuits,
-      modules A1-A24 mostly consist of so-called "combinational" logic,
+      modules A1-A24, mostly consist of so-called "combinational" logic,
       in which a unique set of inputs determines a unique set of outputs
       at any specific moment of time.&nbsp; However, some of the NOR
       gates, such as those in the figure to the left (which is from <a
@@ -1237,18 +1209,17 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/fixed_
       module ROM.v), not that the choice of this specific part has too
       much significance, as long as it has sufficient capacity.&nbsp; As
       far as the <i>contents</i> of the memory are concerned, it can be
-      any of the AGC programs available to us in the Virtual AGC
-      project:&nbsp; Artemis 072, Aurora 12, Colossus 237, etc.&nbsp;
+      any of the AGC programs available to us in the Virtual AGC project
+      — though not all of them have been pre-converted to Verilog as of
+      yet —, such as Artemis 072, Aurora 12, Colossus 237, etc.&nbsp;
       It's only necessary to make sure that the particular Verilog file
-      implementing the desired AGC program is present in the
-      Schematics/roms/ folder at compile time, and is named
-      "rom.v".&nbsp; For convenience, <a
-href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">each
-        of the available AGC programs has been converted into the form
-        needed for the Verilog to use them</a>, and can be selected at
-      the time the Verilog is compiled (see the next section).<br>
+      implementing the desired AGC program is present in <a
+        moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">the
+        Schematics/roms/ folder</a> at Verilog compile time, and is
+      named "rom.v".<br>
     </p>
-    <p>It is worth noting, though, that the simulation of the
+    <p>It is worth reiterating, though, that the simulation of the
       electronics runs <i>very slowly</i> relative to real time, and
       that there isn't presently any way to model an interactive DSKY in
       the simulation, so the choice of which AGC programs to use is
@@ -1402,9 +1373,164 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
     <ul>
     </ul>
     <h1><a name="Appendix:_Translation_from_KiCad_into"></a>Appendix:
-      Translation from KiCad into Verilog</h1>
-    <h2><a name="Converting_Netlist_to_Verilog"></a>Converting Netlist
-      to Verilog</h2>
+      Technical Details<br>
+    </h1>
+    <p>This Appendix discusses the details of how to perform the
+      operations that have only been described in general terms
+      above.&nbsp; Those operations are presented in roughly the order
+      they are used.<br>
+    </p>
+    <h2><a name="CreatingSchematic"></a>Creating/Editing a Schematic
+      Diagram</h2>
+    <p>This is too detailed a topic for me to give much helpful advice
+      about in a limited space.&nbsp; I will simply point out the
+      following:<br>
+    </p>
+    <ul>
+      <li>The schematic-capture editor supplied with KiCad EDA is called
+        <b>eeschema</b>.<br>
+      </li>
+      <li>Schematic diagrams transcribed from the original Apollo
+        Guidance, Navigation &amp; Control (GNC) system are found in <a
+          moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
+          "schematics" branch of our Virtual AGC repository, in the
+          folder called "Schematics"</a>.</li>
+      <li>There is a separate folder for each original drawing number,
+        such as 1005700A or 2005259-.&nbsp; All operations specific to a
+        given drawing are expected to be performed within its folder
+        unless otherwise stated.&nbsp; The top-level page of the
+        schematic has the filename "module.sch" (for KiCad v.5 or prior)
+        or "module.kicad_sch" (for KiCad v.6 or later).&nbsp; The
+        descriptions below assume the latter.<br>
+      </li>
+      <li>All operations described on this web-page were originally
+        performed with KiCad v.5 but are today tested with KiCad v.6 and
+        v.7.&nbsp; If you have installed KiCad v.8 or v.9, I have every
+        expectation that they will operate as described, but have not
+        tested them.<br>
+      </li>
+    </ul>
+    <h2><a name="CreatingNetlists"></a>Creating a Netlist</h2>
+    <p>There are two methods.&nbsp; <br>
+    </p>
+    <p>Method 1:&nbsp; While viewing the top-level page of a schematic
+      diagram in <b>eeschema</b>, select File/Export/Netlist from the
+      main menu.&nbsp; In the "Export Netlist" window which pops up,
+      select the tab labeled "OrcadPCB2" and click the button labeled
+      "Export Netlist".&nbsp; In the "Save Netlist File" dialog which
+      appears, which should have pre-chosen the folder containing the
+      top-level schematic file itself, save the netlist as "module.net".<br>
+    </p>
+    <p>Method 2:&nbsp; For KiCad v.7 or later, the netlist can be
+      created from a command line without even running <b>eeschema</b>.&nbsp;
+      The command would be<br>
+    </p>
+    <blockquote>
+      <pre>kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch<br></pre>
+    </blockquote>
+    <h2><a name="Converting_Netlist_to_Verilog"></a>Converting Netlists
+      to Verilog Source Code<br>
+    </h2>
+    The supplied tools for converting a netlist (or more accurately, a
+    netlist plus the associated schematic) to Verilog source code are
+    specific to AGC logic modules as originally designed, and to our
+    specific manner of transcribing those those drawings for use with <b>eeschema</b>.&nbsp;
+    Departing from any of those conditions could render the supplied
+    tools useless, thus forcing you to <i>manually</i> create whatever
+    Verilog source code you think represents your digital circuit.&nbsp;
+    The conditions are:<br>
+    <ul>
+      <li>Only the AGC modules (i.e., drawing numbers) designated as
+        "logic modules" are relevant to the digital simulation.&nbsp;
+        For example, for AGC model 2003993, the logic modules are A1
+        (schematic drawing 2005259), A2 (schematic drawing 2005260), and
+        so on.<br>
+      </li>
+      <li>The only digital-logic components used in logic modules are
+        dual triple-input open-drain NOR gates.<br>
+      </li>
+      <li>Each digital-logic component has a reference designator of the
+        form U<i>snn</i>, where <i>snn</i> is a three-digit decimal
+        number.&nbsp; The two NOR gates of a single dual-NOR component
+        share the same reference designator.&nbsp; In other respects,
+        these reference designators are unique throughout a given logic
+        module (i.e., top-level schematic).&nbsp; Each logic module is a
+        2-sided circuit board, with all reference designators on the
+        "top" side having <i>s</i>=1 and all on the "bottom" having <i>s</i>=2.</li>
+      <li>Each NOR gate has a 5-digit "location", <i>mmnnn</i> that's
+        unique throughout the entire AGC.&nbsp; Any given dual-gate
+        component thus has two separate locations, one for each of the
+        two gates.&nbsp; The digits <i>mm</i> are specific to the logic
+        module and the digits <i>nnn</i> vary across module.</li>
+      <li>When the logic circuit being simulated spans more than a
+        single logic module, as is the case when simulating the entirety
+        of an AGC, the logic modules interconnect by being plugged into
+        a common backplane.&nbsp; In the electrical schematics, this
+        backplane is represented as 4 separate 72-pin connectors, with
+        reference designators J1, J2, J3, and J4.&nbsp; For example, pin
+        J2-5 represents the same signal within every logic module.</li>
+      <li>In summary, digital circuits which can be simulated using the
+        supplied tools consist entirely of triple-input open-drainNOR
+        gates, backplane connectors, and the wires interconnecting them.<br>
+      </li>
+    </ul>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        To be completely honest, I'm no longer entirely sure how many of
+        these rules the supplied tools actually depend upon, as opposed
+        to these rules just being the ones obeyed by the original
+        developers.&nbsp; <i>Most</i> of them are relied upon.</font><br>
+    </blockquote>
+    To convert a <i>single</i> schematic to Verilog source code, the
+    Python 3 script <b>dumbVerilog.py</b> is used:<br>
+    <blockquote><font face="Courier 10 Pitch">dumbVerilog.py <i>MODULE</i>
+        <font face="Courier 10 Pitch">module</font>.net pins.txt <i>DELAY</i>
+        <font face="Courier 10 Pitch">module.init</font>
+        module.kicad_sch [<i>WIRETYPE</i>] &gt;<font face="Courier 10
+          Pitch">module</font>.v</font><br>
+    </blockquote>
+    The files called pins.txt and module.init are described in <a
+      moz-do-not-send="true" href="#Generating_Flip-flop_Initialization">the
+      next section</a>.&nbsp; The file pins.txt will be searched for if
+    not found; it may be either in the current directory, the directory
+    containing <b>dumbVerilog.py</b> itself (the usual case), or else
+    specified with an explicit path.&nbsp; The parameters "module.net",
+    "module.kicad_sch" (or just "module.sch" for KiCad v.5), and
+    "module.v" are literal.&nbsp; As for the remaining command-line
+    parameters:<br>
+    <ul>
+      <li><code><i>MODULE</i></code> would be something like "A1", "A2",
+        etc.&nbsp; It's the designation of the specific logic module to
+        which the schematic belongs.&nbsp; The tool doesn't actually use
+        this for anything except as a unique identifier when multiple
+        logic modules are interconnected, so if you're working with a
+        circuit other than the official AGC modules, it doesn't really
+        matter what you use here, though I would recommend that it still
+        be of the form A<i>nn</i>.</li>
+      <li><code><i>DELAY</i></code>, roughly speaking, is the
+        propagation delay of signals from the input of a NOR gate to its
+        output.&nbsp; The unit in which <code><i>DELAY</i></code> is
+        expressed ultimately depends upon the time-scale that will be
+        set in the test bench, but that's conventionally 100 ns.&nbsp;
+        The nominal gate delay of AGC NOR gates was 20 ns, so that means
+        a reasonable <code><i>DELAY</i></code> might be 0.2.</li>
+      <li><code><i>WIRETYPE</i></code> is an optional parameter having
+        the value either "<code>wire</code>" or "<code>wand</code>".&nbsp;
+        It shouldn't matter which is chosen, so this parameter should
+        probably be omitted.<br>
+      </li>
+    </ul>
+    There is also a way to semi-automate creation of the netlist(s) and
+    other portions of the simulation workflow if you want to simulate an
+    <i>entire AGC</i>.&nbsp; Or at least there is such a shortcut in
+    Linux and possibly Mac OS, though not presently in Windows.&nbsp;
+    Specifically, there's a Makefile which can be used with the GNU <b>make</b>
+    utility to batch produce Verilog source for all of the available
+    schematics, as well as creating a rough draft of a "test bench" (<a
+      moz-do-not-send="true"
+      href="#Converting_Verilog_Module_to_Verilog">see below</a>) for a
+    given AGC module.<br>
+    <br>
     As mentioned earlier, we don't really translate from KiCad into
     Verilog,
     but rather from a KiCad netlist (in "OrcadPCB2" format) into
@@ -1417,29 +1543,86 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
     <blockquote><font face="Courier 10 Pitch">cd Schematics<br>
         make clean all</font><br>
     </blockquote>
-    If you're a bit less lucky, you'd probably have to run our
-    netlist-to-Verilog translation script manually.&nbsp; This is the
-    Python 2 script Scripts/dumbVerilog.py, and taking into account <a
-      href="#Files">our directory and file-naming conventions</a>, you'd
-    do this:<br>
-    <blockquote><font face="Courier 10 Pitch">cd Sche<font face="Courier
-          10 Pitch">matics/<i>DR</i><i><font face="Courier 10 Pitch">AWING_NUMBER</font></i></font><br>
-        ../../Scripts/dumbVerilog.py <i>MODULE</i> <font face="Courier
-          10 Pitch">module</font>.net <font face="Courier 10 Pitch">../..Scripts</font>/pins.txt
-        <i>DELAY</i> <font face="Courier 10 Pitch">module.init</font>
-        &gt;<font face="Courier 10 Pitch">module</font>.v</font><br>
+    <h2><a name="PinsTxt"></a>The pins.txt File</h2>
+    <p>Abstractly, the AGC circuitry consists of a number of "modules"
+      (each represented by an electrical schematic), plugged into a
+      "backplane".&nbsp; The backplane, again abstractly, consists of a
+      set of connectors whose pins are interconnected by wires.&nbsp;
+      However, there is no schematic diagram as such for the backplane,
+      so to incorporate the backplane into our simulation the
+      interconnections in the backplane must be specified in some other
+      form.&nbsp; That alternate form of description is the pins.txt
+      file, which is just a text file having a separate line in it for
+      each pin of each connector on the backplane.&nbsp; <br>
+    </p>
+    <p>Each line of the file has four fields, delimited by space
+      characters.&nbsp; Those fields are:<br>
+    </p>
+    <ol>
+      <li>A module number (A<i>nn</i> or B<i>nn</i>).</li>
+      <li>A pin number on the backplane connector for the module.<br>
+      </li>
+      <li>A signal type:&nbsp; IN, OUT, INOUT, BP, FIX, FOX, NC, SPARE</li>
+      <li>A signal name (blank if signal type is NC or SPARE)<br>
+      </li>
+    </ol>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Technically, there
+        are actually two separate backplanes, designated "A" and "B",
+        into which the AGC modules A<i>nn</i> and B<i>n</i>n
+        respectively plug, with some interconnections between the two
+        backplanes.&nbsp; The pins.txt file describes both, so we may as
+        well think of it simply as one big backplane.</font><br>
     </blockquote>
-    The only things that really need to be filled in here are the AGC <i>MODULE</i>
-    number (A1, A2, ..., A24) and the default gate <i>DELAY</i>.&nbsp;
-    The unit in which <i>DELAY</i> is expressed ultimately depend upon
-    the time-scale that will eventually be set in the test bench.&nbsp;
-    Now, the basic AGC clock speed is 1.024 MHz, but the simulation
-    cycle time must then be 2.048 MHz, since that's the rate at which
-    the clock toggles.&nbsp; For this reason, all test bench Verilog
-    automatically produced (see the next section) uses a basic
-    time-scale of 100 ns.&nbsp; The nominal gate delay of AGC NOR gates
-    was 20 ns., so that means a reasonable <i>DELAY</i> might be 0.2,
-    and therefore that's what we typically use.<br>
+    <p>Regarding the module-to-backplane connectors, for the logic
+      modules that interest us for simulation purposes, each module had
+      a physical 284-pin connector consisting of 4 rows of 71 pins
+      each.&nbsp; (The 21st pin from either end of a row was missing, so
+      you could equally-well consider it physically to be a 276-pin
+      connector consisting of 4 rows of 69 pins each.&nbsp; But the pin
+      numbering pretends that the missing pins were present.)&nbsp; <i>On
+        the other hand</i>, on the electrical schematics for the logic
+      modules, each of the 71-pin rows was considered a separate
+      connector, and thus the schematics show 4 separate connectors
+      each, designated as J1, J2, J3, and J4.<br>
+    </p>
+    <p>Just to emphasize this point, in case the message was lost in the
+      details:&nbsp; In pins.txt each backplane connector for a logic
+      module has 284 pins, while on the logic module's electrical
+      schematics there are instead 4 connectors of 71 pins each.<br>
+    </p>
+    <p>In principle, a separate pins.txt file should be used for each
+      different AGC model.&nbsp; In practice, there's little difference
+      between the models and there is presently a single pins.txt file
+      used for all Block II AGC's.&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; The existing pins.txt was
+          derived from Mike Stewart's digital simulation of the
+          AGC.&nbsp; Mike's backplane pin data was derived in turn <a
+            moz-do-not-send="true"
+href="https://github.com/virtualagc/agc_simulation/blob/master/scripts/generate_agc_backplane.py">by
+            a script</a> that analyzed his Verilog files.&nbsp; Thus if
+          we indeed wanted to generate a separate pins.txt file for each
+          Block II AGC model we'd have an awkward chicken-and-egg
+          problem, since <b>dumbVerilog.py</b> needs pins.txt <i>before</i>
+          generating our Verilog files, whereas the only automated way
+          of generating pins.txt does so <i>after</i> creating the
+          Verilog files.&nbsp; On the other hand, for Block I AGC's I've
+          created a similar file, <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsBlockI.txt">pinsBlockI.txt</a>,
+          by processing Block I schematics (rather than Verilog files)
+          using <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlockI.awk">an
+            AWK script</a>, so perhaps the same technique could be used
+          for Block II as well.&nbsp; However, the pinsBlockI.txt file
+          is in a somewhat different format than pins.txt, and <b>dumbVerilog.py</b>
+          isn't presently able to support that particular format.&nbsp;
+          Although I don't recall for certain, I suppose this means that
+          I had only done preliminary work on Block I AGC simulation,
+          without having taken it to the point of the simulation
+          actually functioning.&nbsp; <br>
+        </font></p>
+    </blockquote>
     <h2><a name="Generating_Flip-flop_Initialization"></a>Generating
       Flip-flop Initialization files (module.init)</h2>
     <p>A consistent set of flip-flop initializations can conveniently be
