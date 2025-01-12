@@ -205,7 +205,8 @@
 #		2023-05-02 RSB  Added Corona 261.
 #		2024-01-25 RSB  Added Skylark 48
 #		2024-05-13 RSB	Added Comanche 67
-#		2024-05-21 RSB  Added Comanche 72 and Manche72R3.
+#		2024-05-21 RSB	Added Comanche 72 and Manche72R3.
+#		2025-01-11 RSB	Added TicTacToe.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -478,6 +479,7 @@ MISSIONS += SundanceXXX Sundance306ish Comanche044 Comanche045 Manche45R2
 # MISSIONS += LUM99R2
 MISSIONS += Luminary096 LM131R1 Sunrise45 Sunrise69 Aurora88
 MISSIONS += Corona261 Skylark048 Comanche067 Comanche072 Manche72R3
+MISSIONS += TicTacToe
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

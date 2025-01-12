@@ -185,6 +185,7 @@
  *                              are installed) is now in VirtualAGC itself
  *                              rather than in the simulation script.
  *              2025-01-08 RSB  Adjustment to simulation-status window sizing.
+ *              2025-01-11 RSB  Added a Tic-tac-toe "mission".
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -430,7 +431,10 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Zerlina56", "LM.ini" },
             { "SUPER JOB", "SuperJob/MAIN.agc.html",
                 "Click this to select SUPER JOB (Raytheon Auxiliary Memory test) software.  Note that to run meaningfully, a simulated Auxiliary Memory unit (not yet available!) needs to be run also.",
-                ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" } };
+                ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" },
+            { "TIC-TAC-TOE", "TicTacToe/MAIN.agc.html",
+                "Click this to select the Tic-Tac-Toe game by Neil Fraser and Lena Ku",
+                ENABLED, CM, BLOCK2, NO_PERIPHERALS, "TicTacToe", "CM.ini" } };
 
 // This is the array where shell commands for the Digital Uplink
 // are stored.
@@ -958,6 +962,7 @@ EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINA56BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_TICTACTOEBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_BOREALISBUTTON, VirtualAGC::ConsistencyEvent)
 END_EVENT_TABLE();

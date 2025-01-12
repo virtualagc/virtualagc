@@ -63,6 +63,7 @@
  *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
  *              2022-11-17 RSB  Added Aurora 88.
  *              2024-05-21 RSB  Added Comanche 72.
+ *              2025-01-11 RSB  Added a Tic-tac-toe "mission".
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -181,6 +182,7 @@ enum
   ID_SUNBURST37BUTTON,
   ID_ZERLINA56BUTTON,
   ID_SUPERJOBBUTTON,
+  ID_TICTACTOEBUTTON,
   ID_AGCCUSTOMBUTTON,
   ID_AEASIMTYPEBOX = 200,
   ID_FLIGHTPROGRAM4BUTTON,

@@ -108,6 +108,7 @@
  *             	2018-10-12 RSB  Added stuff associated with --simulation.
  *             	2021-01-24 RSB  Added --reconstruction.
  *             	2021-04-20 RSB  Added stuff associated with --ebcdic.
+ *             	2025-01-11 RSB	Corrected some spacing in the --help menu.
  */
 
 #include "yaYUL.h"
@@ -618,7 +619,7 @@ main(int argc, char *argv[])
           "                 there were fatal errors during assembly.\n");
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
-      printf("--ascii         Sort symbol table using native (presumably\n"
+      printf("--ascii          Sort symbol table using native (presumably\n"
           "                 ASCII) collation.  See --ebcdic, --honeywell.\n");
       printf("--ebcdic         (Default) Sort symbol table using EBCDIC\n"
           "                 rather than native (presumably ASCII)\n"
