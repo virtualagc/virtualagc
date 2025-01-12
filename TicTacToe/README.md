@@ -3,10 +3,10 @@ and Lena Ku's repository](https://github.com/NeilFraser/AGC-code),
 for incorporation into the VirtualAGC GUI.  The remainder of the 
 files in this folder were added by me in support of that end.
 
-There is no automatic mechnism for sync'ing updates in the official
-repository linked here, and I'm lazy, so you may find newer versions
-TicTacToe.agc at the linked site than the version here.
+There is no automatic mechanism for sync'ing the version here with
+updates to the official repository, and I'm lazy, so you may find 
+newer versions of TicTacToe.agc in the linked repository.
 
-The linked repository may also have other AGC apps than Tic-Tac-Toe
-which I've not (yet?) imported into VirtualAGC.
+The linked repository also has at least one AGC app other than 
+Tic-Tac-Toe which I've not (yet?) imported into VirtualAGC.
 
