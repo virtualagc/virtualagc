@@ -652,7 +652,13 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
       href="#Generating_Flip-flop_Initialization">the initial states of
       flip-flops</a> (module.init), and the name of the top-level
     schematic file (module.kicad_sch for KiCad v.6 or later, module.sch
-    for KiCad v.5 or earlier).<br>
+    for KiCad v.5 or earlier).&nbsp; For the purpose of this particular
+    simulation, the module.init file looks like,<br>
+    <blockquote>
+      <pre>U127 1 0<br>U129 1 0<br></pre>
+    </blockquote>
+    <br>
+    <br>
     <br>
     The Verilog source code you get looks somewhat similar to the
     following.&nbsp; (It's only "somewhat similar" because this is
@@ -1625,83 +1631,190 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     </blockquote>
     <h2><a name="Generating_Flip-flop_Initialization"></a>Generating
       Flip-flop Initialization files (module.init)</h2>
-    <p>A consistent set of flip-flop initializations can conveniently be
-      generated using the Python 2 script
-      Scripts/dumbInitialization.py.&nbsp; If you are running Linux then
-      the simplest thing to do (for, say, AGC model 2003200) is just<br>
+    <p><img src="testVerilogCircuitInit.png" alt=""
+        moz-do-not-send="true" height="485" align="right" width="348">The
+      only digital components present in AGC logic-module schematics are
+      dual triple-input open-drain NOR gates, which in themselves are
+      stateless; i.e., the output signal of a NOR gate is directly
+      determined by the <i>current</i> state of its input
+      signals.&nbsp; Or at least, the state of the input signals after
+      however long it takes the signals to propagate through the gate,
+      which is nominally 20 nanoseconds.&nbsp; Nevertheless, it is
+      possible to interconnect NOR gates in such a way that the
+      constellation of NOR gates has an output signal that does not
+      necessarily depend on the current state of the inputs.&nbsp; In
+      other words, the constellation of NOR gates has "memory".&nbsp;
+      The most-common such circuit block in the AGC uses several NOR
+      gates to form what's known as a "flip-flop"; i.e., a memory
+      element capable of indefinitely storing a single bit
+      indefinitely.&nbsp; Or rather, of storing a bit until the power is
+      cycled, at which point the value of the bit is lost.&nbsp; The
+      testVerilog circuit used in examples above, and shown yet again in
+      the image at the right, is such a flip-flop.<br>
+    </p>
+    <p>For simulation of a circuit containing flip-flops like this, the
+      question becomes "What are the states of the flip-flops at
+      power-up?"&nbsp; <i>After</i> power-up is no issue, since if we
+      know the states of the flip-flops at power up, the simulation
+      itself takes care of computing their states at later times.&nbsp;
+      But we first have to have some way of knowing what the states were
+      at power-up in order to do that.<br>
+    </p>
+    <p>In the design of the physical AGC, almost no effort is given to
+      putting these implicit flip-flops into any given state.&nbsp; (And
+      in those cases where an effort had been made, the mechanisms used
+      would put the simulated flip-flops into a known state too.)&nbsp;
+      Rather, the developers just seemed to feel that the flip-flops
+      would generally settle down into <i>some</i> stable state, and
+      that assurance proved to be enough for their purposes.&nbsp; For <i>our</i>
+      purposes, namely digital simulation, it's <i>not</i>
+      enough!&nbsp; In simulation, it's perfectly possible for a such a
+      flip-flop to oscillate indefinitely without ever settling down
+      into some stable state, which means that the Verilog emulator
+      could get stuck in an infinite loop or timeout while trying to
+      compute the initial state of the circuit.&nbsp; No good!<br>
+    </p>
+    <p>To specify the initial states of flip-flops, module.init allows
+      you to state the initial output signal of any or all of the NOR
+      gates.&nbsp; A dual NOR gate component used in the AGC has two
+      outputs, which are designated as pin J for one of the NOR gates
+      and K for the other of the NOR gates.&nbsp; The way these are
+      specified in module.init is that there is a line in the file for
+      each dual NOR component that you want to specify, and that line
+      has the format<br>
+    </p>
+    <blockquote><i>Unnn OutputJ OutputK</i><br>
+    </blockquote>
+    where <i>Unnn</i> is the reference designator of the dual-NOR
+    component and <i>OutputJ</i> and <i>OutputK</i> are the output
+    signal levels (0 or 1).&nbsp; For testVerilog, for example,
+    module.init looks like:<br>
+    <blockquote>
+      <pre>U127 1 0<br>U129 1 0<br></pre>
+    </blockquote>
+    <p>In other words, U127's J output is 1 ("on") and K output is 0
+      ("off"); and the same for U129.&nbsp; I've illustrated that in the
+      image to the right by coloring NOR-gate outputs specified
+      initially as 1 in <font color="#33cc00">green</font>, and those
+      specified initially as 0 in <font color="#ff0000">red</font>.&nbsp;
+      You don't need to specify the output for every NOR gate, and thus
+      the outputs of U126 and U128 are left unspecified.&nbsp; But if
+      you manually create the module.init file, it's entirely up to you
+      to determine which ones you want to specify; and worse, not all
+      possible combinations of signals are consistent, and <i>you</i>
+      must insure the consistency.&nbsp; Because of the way NOR gates
+      work, specifying that U129's OutputJ is 1 <i>forces</i> U127
+      OutputK, U128 OutputJ, and U129 OutputK all to be 0.&nbsp; So if
+      you specified any of those latter outputs to be 1, you'd be
+      creating an inconsistent set of inital conditions.<br>
+    </p>
+    <p>Fortunately, a consistent set of flip-flop initializations can
+      conveniently be generated using the Python 3 script <b>dumbInitialization.py</b>.&nbsp;
+      The syntax is simply<br>
     </p>
     <blockquote>
-      <p><font face="Courier 10 Pitch">cd <font face="Courier 10 Pitch">S</font>chematics<br>
-          <font face="Courier 10 Pitch">make clean all <br>
-            <font face="Courier 10 Pitch">make </font>2003200.init<br>
-            <font face="Courier 10 Pitch"><font face="Courier 10 Pitch">make
-                clea<font face="Courier 10 Pitch">n all</font></font></font><br>
-          </font></font></p>
+      <p><font face="Courier 10 Pitch">dumbInitialization.py
+          &lt;module.v</font></p>
     </blockquote>
-    <p>Of course, if you don't have Linux then this doesn't help you too
-      much, so let's consider how to go about generating the flip-flop
-      initialization files (<i>DRAWING</i>/module.init) as a manual
-      operation rather than using the handy-dandy Makefile.&nbsp; The
-      basic syntax is simply<br>
+    <p>where<code> module.v</code><code></code> is the Verilog
+      source-code file associated with the module.&nbsp; As it happens,
+      <b>dumbInitialization.py</b> does not output any file specially
+      called module.init.&nbsp; Rather, it expects to be operating on an
+      entire AGC circuit, so it outputs separate initialization files
+      for each of the AGC's logic modules:&nbsp; A1.init, A2.init, and
+      so on.&nbsp; As you may recall, the testVerilog circuit is a
+      snippet from the circuit for logic module A1, so we'd have to
+      rename A1.init as module.init after running <b>dumbInitializion.py</b>.&nbsp;
+      Still, the operation seems pretty simple.<br>
     </p>
-    <blockquote>
-      <p><font face="Courier 10 Pitch">dumbInitialization.py &lt;<i>INPUT</i>.v</font><br>
-      </p>
-    </blockquote>
-    <p>However, this simple statement hides some inconvenient
-      complexity.&nbsp; Using
-      dumbInitialization.py to create an initialization file requires
-      having the Verilog for the circuit at hand, whereas generating the
-      Verilog for the circuit requires having the initialization file at
-      hand!&nbsp; Fortunately, this circle is not
-      as vicious as it appears, since all you really have to do is this:<br>
+    <p>This apparent simplicity hides a nasty chicken-and-egg truth,
+      namely that we need to have module.init for <b>dumbVerilog.py</b>
+      to produce module.v, and we need module.v for <b>dumbInitialization.py</b>
+      to produce module.v.&nbsp; Catch 22!<br>
+    </p>
+    <p>Fortunately, this circle is not
+      as vicious as it appears, since all you really have to do is
+      follow this 3-step procedure:<br>
     </p>
     <ol>
-      <li>Use dumbVerilog.py to generate the Verilog for the circuit <i>without</i>
-        using module.init files, or
-        using empty ones, or using ones of your own devising.</li>
-      <li>Use dumbInitialization.py to generate module.init files for
-        the circuit.<br>
+      <li>Use <b>dumbVerilog.py</b> with an empty module.init, or else
+        one of your own devising, to create module.v.<br>
       </li>
-      <li>Use dumbVerilog.py <i>again</i>, this time to regenerate the
-        Verilog for the circuit, <i>using</i> the new module.init
-        files.</li>
+      <li>Use <b>dumbInitialization.py</b> to generate A1.init, and
+        rename A1.init as module.init.<br>
+      </li>
+      <li>Use <b>dumbVerilog.py</b> again, to regenerate module.v.</li>
     </ol>
-    <p>That's why in the Makefile example we started with, there are two
-      "make clean all" steps.<br>
+    <p>And indeed, this process works for us, giving us<br>
     </p>
-    <p>There are two basic scenarios for which you'd want to generate
-      initialization files, I think:&nbsp; You might want an
-      initialization file for an AGC module considered as a stand-alone
-      unit.&nbsp; Or, you might want an initialization file for the
-      complete set of AGC modules of a given AGC part number.&nbsp; The
-      latter has an advantage over the former, in that the
-      initialization is internally consistent throughout the entire
-      AGC.&nbsp; Besides, an initialization file of the full-AGC type
-      works perfectly well for an individual module, but not
-      vice-versa.&nbsp; So let's assume you really want initialization
-      files for the AGC as a whole.<br>
-    </p>
-    <p>The first step, of course, is to take all of the Verilog files
-      for the individual AGC modules, and concatenate them to form one
-      large file.&nbsp; For AGC model 2003200, for example, those files
-      are 2005259A/module.v, 2005260A/module.v, ...,
-      2005273A/module.v.&nbsp; (The drawing numbers for the AGC modules,
-      which is essentially what these are, are listed both on <a
-        href="ElectroMechanical.html">the Electro-Mechanical page</a> of
-      the website, and in Schematics/Makefile.)&nbsp; You can combine
-      these files, for example, using a text-editor program.&nbsp; The
-      second step is to actually run dumbInitialization.py:<br>
-    </p>
-    <blockquote><font face="Courier 10 Pitch">Scripts/dumbInitialization.py
-        &lt; </font><font face="Courier 10 Pitch"><font face="Courier
-          10 Pitch">Bi<font face="Courier 10 Pitch">gCombined<font
-              face="Courier 10 Pitch">VerilogFile</font></font></font>.v</font></blockquote>
-    The result is the creation of files files A1.init, A2.init, ...,
-    A24.init.&nbsp; These need to be copied into the appropriate
-    drawing directories and be renamed to module.init.&nbsp; For
-    example, A1.init
-    might become 2005259A/module.init.
+    <blockquote>
+      <pre># Auto-generated for module A1 by dumbInitialization.py.<br>U127 1 0<br>U129 1 0<br></pre>
+    </blockquote>
+    <p><strike>(</strike><strike><i>Come back to the following later and
+          fix it up.)</i></strike></p>
+    <p><strike>If you are running Linux then the simplest thing to do
+        (for, say, AGC model 2003200) is just</strike><strike><br>
+      </strike></p>
+    <blockquote>
+      <p><strike><font face="Courier 10 Pitch">cd <font face="Courier
+              10 Pitch">S</font>chematics<br>
+            <font face="Courier 10 Pitch">make clean all <br>
+              <font face="Courier 10 Pitch">make </font>2003200.init<br>
+              <font face="Courier 10 Pitch"><font face="Courier 10
+                  Pitch">make clea<font face="Courier 10 Pitch">n all</font></font></font><br>
+            </font></font></strike></p>
+    </blockquote>
+    <p><strike>Of course, if you don't have Linux then this doesn't help
+        you too much, so let's consider how to go about generating the
+        flip-flop initialization files (</strike><strike><i>DRAWING</i></strike><strike>/module.init)
+        as a manual operation rather than using the handy-dandy
+        Makefile.&nbsp; The basic syntax is simply</strike><strike><br>
+      </strike></p>
+    <blockquote>
+      <p><strike><font face="Courier 10 Pitch">dumbInitialization.py
+            &lt;module.v</font></strike><strike><br>
+        </strike></p>
+    </blockquote>
+    <strike><br>
+    </strike>
+    <p><strike>That's why in the Makefile example we started with, there
+        are two "make clean all" steps.</strike><strike><br>
+      </strike></p>
+    <p><strike>There are two basic scenarios for which you'd want to
+        generate initialization files, I think:&nbsp; You might want an
+        initialization file for an AGC module considered as a
+        stand-alone unit.&nbsp; Or, you might want an initialization
+        file for the complete set of AGC modules of a given AGC part
+        number.&nbsp; The latter has an advantage over the former, in
+        that the initialization is internally consistent throughout the
+        entire AGC.&nbsp; Besides, an initialization file of the
+        full-AGC type works perfectly well for an individual module, but
+        not vice-versa.&nbsp; So let's assume you really want
+        initialization files for the AGC as a whole.</strike><strike><br>
+      </strike></p>
+    <p><strike>The first step, of course, is to take all of the Verilog
+        files for the individual AGC modules, and concatenate them to
+        form one large file.&nbsp; For AGC model 2003200, for example,
+        those files are 2005259A/module.v, 2005260A/module.v, ...,
+        2005273A/module.v.&nbsp; (The drawing numbers for the AGC
+        modules, which is essentially what these are, are listed both on
+      </strike><strike><a href="ElectroMechanical.html">the
+          Electro-Mechanical page</a></strike><strike> of the website,
+        and in Schematics/Makefile.)&nbsp; You can combine these files,
+        for example, using a text-editor program.&nbsp; The second step
+        is to actually run dumbInitialization.py:</strike><strike><br>
+      </strike></p>
+    <blockquote><strike><font face="Courier 10 Pitch">Scripts/dumbInitialization.py
+          &lt; </font></strike><strike><font face="Courier 10 Pitch"><font
+            face="Courier 10 Pitch">Bi<font face="Courier 10 Pitch">gCombined<font
+                face="Courier 10 Pitch">VerilogFile</font></font></font>.v</font></strike></blockquote>
+    <strike>
+      The result is the creation of files files A1.init, A2.init, ...,
+      A24.init.&nbsp; These need to be copied into the appropriate
+      drawing directories and be renamed to module.init.&nbsp; For
+      example, A1.init
+      might become 2005259A/module.init.
+    </strike>
     <h2><a name="Converting_Verilog_Module_to_Verilog"></a>Converting
       Verilog Module to Verilog Test Bench</h2>
     After you've waded through the stuff above, you've managed to create
@@ -1749,7 +1862,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-10-26.<br>
+          2025-01-11<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
