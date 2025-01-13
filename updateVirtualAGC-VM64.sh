@@ -30,7 +30,7 @@ then
         echo =================================================================
         get fetch origin 2>&1 >> $LOG_FILE
         echo Updates to be retrieved from Virtual AGC repository:
-        git log HEAD..origin/master | grep '^ '
+        git log --reverse HEAD..origin/master | grep '^ '
         echo =================================================================
         read -p "Proceed with update and rebuild (y/N)? " -n 1 -r
         if [[ "$REPLY" =~ ^[Yy]$ ]]
