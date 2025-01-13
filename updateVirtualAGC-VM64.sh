@@ -45,6 +45,7 @@ then
                 time ./rebuildVirtualAGC.sh 2>&1 | tee -a $LOG_FILE
         fi
         
+        echo ""
         echo "Terminated.  Hit ENTER key or close this window."
         date >> $LOG_FILE
         read
