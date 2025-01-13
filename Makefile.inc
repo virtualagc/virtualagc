@@ -29,6 +29,14 @@
 #
 #  1. `BASENAME` must be set to the flight name in the calling Makefile.
 #
+#  1A.By default, we expect the top-level AGC source-code file to be named
+#     MAIN.agc.  If the AGC source code fits into a single source-code file
+#     that you don't want to be named MAIN.agc, and more-likely want to be
+#     the same as the `BASENAME`, the calling Makefile should define the
+#     variable `TOPLEVEL`, such as
+#                TOPLEVEL=$(BASENAME)
+#     or whatever's appropriate.
+#
 #  2. Define `NO_BINSOURCE for those missions that do not have a binsource file.
 #
 #  3. For normal missions, a binsource is used to generate a known-good bin 
