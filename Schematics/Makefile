@@ -5,7 +5,8 @@
 # Purpose:	Makefile for building a Verilog simulation of the AGC from
 #		the KiCad schematics. It doesn't attempt to actually run
 #		the simulated hardware, but simply builds it.
-# Host system:	This expects expects to be running under 'bash', and expects
+# Host system:	This expects expects to be running under 'bash' (or a very 
+#		similar shell program), and expects
 #		'touch', 'mv', 'rm', and 'cat' to be available.  So it works
 #		in Linux systems and possibly Mac OS X, but not in Windows.
 #		If you want to fix it up to work other than in Linux, look 
@@ -343,16 +344,16 @@ clean:
 # initially, too, so we would still like to automate that work when we can.
 
 2003200.v: $(TARGETS_V_2003200) tb-2003200.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003200) | ../Scripts/dumbTestbench.py tb-2003200.v $(DEFAULT_GATE_DELAY) >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003200) | dumbTestbench.py tb-2003200.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 2003100.v: $(TARGETS_V_2003100) tb-2003100.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003100) | ../Scripts/dumbTestbench.py tb-2003100.v $(DEFAULT_GATE_DELAY) >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003100) | dumbTestbench.py tb-2003100.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 2003993.v: $(TARGETS_V_2003993) tb-2003993.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003993) | ../Scripts/dumbTestbench.py tb-2003993.v $(DEFAULT_GATE_DELAY) >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003993) | dumbTestbench.py tb-2003993.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 1003700.v: $(TARGETS_V_1003700) tb-1003700.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_1003700) | ../Scripts/dumbTestbench.py tb-1003700.v $(DEFAULT_GATE_DELAY) >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_1003700) | dumbTestbench.py tb-1003700.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
@@ -362,7 +363,7 @@ clean:
 
 .SECONDARY: testVerilog/module_tb.v $(DRAWINGS_AGC:%=%/module_tb.v)
 %/module_tb.v: %/module.v %/tb.v
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py $*/tb.v $(DEFAULT_GATE_DELAY) >$@ ; fi
+	@if test ! -f $@ ; then cat $^ | dumbTestbench.py $*/tb.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
 
@@ -384,8 +385,8 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # do it at Verilog-compile time, rather than changing the Verilog source
 # files.  However, the value 0.2 seems to work well.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
-%/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(WIRETYPE) >$*/temp.v
+%/module.v: %/module.net %/module.init pins.txt
+	dumbVerilog.py $(module_$*) $*/module.net pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(WIRETYPE) >$*/temp.v
 	mv $*/temp.v $@
 
 # The following target can be used as 2003200.init, 2003993.init, etc.
@@ -395,7 +396,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # module.init files are change in the process, you'll need to rebuild all
 # of the Verilog afterward, and this target doesn't do that for you.
 %.init:
-	cat $*.v tb-$*.v $(TARGETS_V_$*) | ../Scripts/dumbInitialization.py
+	cat $*.v tb-$*.v $(TARGETS_V_$*) | dumbInitialization.py
 	@n=1; \
 	for d in $(DRAWINGS_$*) ; \
 	do \

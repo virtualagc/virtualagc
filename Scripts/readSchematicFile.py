@@ -71,10 +71,10 @@ import re
 import tatsu
 
 gateLocations = {}
-schPadsJ1 = [ "?" ] * 73
-schPadsJ2 = [ "?" ] * 73
-schPadsJ3 = [ "?" ] * 73
-schPadsJ4 = [ "?" ] * 73
+schPadsJ1 = [ "?" ] * 72
+schPadsJ2 = [ "?" ] * 72
+schPadsJ3 = [ "?" ] * 72
+schPadsJ4 = [ "?" ] * 72
 
 def normalizeCaption(caption):
 	if caption[:3] in ["0VD", "+4V", "+4S", "FAP"]:

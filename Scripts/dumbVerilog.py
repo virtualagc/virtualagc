@@ -118,6 +118,9 @@ import sys
 import os
 from readSchematicFile import *
 
+scriptFolder = os.path.dirname(__file__) + os.sep
+#print(scriptFolder, file=sys.stderr)
+
 error = False
 
 # Hard-coded info about components from our custom symbol libraries.  It would probably be
@@ -243,7 +246,11 @@ if len(sys.argv) >= 3:
 		# The list has been padded so that the index to the entry is always equal
 		# to the pad number.  For example, pad 425 is pinsDB[425].
 		try:
-			f = open(pathToPinsTxt, "r")
+			try:
+				f = open(pathToPinsTxt, "r")
+			except:
+				if os.sep not in pathToPinsTxt:
+					f = open(scriptFolder + pathToPinsTxt, "r")
 			pinsDB = []
 			lines = f.readlines()
 			for line in lines:
@@ -314,7 +321,8 @@ if error:
 	print("alphanumeric (or '_', not leading with a digit) can be used.", file=sys.stderr)
 	print("INPUT.net is a netlist output by KiCad in OrcadPCB2 format.", file=sys.stderr)
 	print("If the optional path to pins.txt is omitted, it is assumed", file=sys.stderr)
-	print("that pins.txt is in the current directory.  If the optional", file=sys.stderr)
+	print("that pins.txt is in the current directory, or else in the", file=sys.stderr)
+	print("same folder as dumbVerilog.py itself.  If the optional", file=sys.stderr)
 	print("gate DELAY is omitted, then it is omitted from the Verilog.", file=sys.stderr)
 	print("The optional (but not really, in practice!) INPUT.init file", file=sys.stderr)
 	print("provides initial conditions for any NOR gates that need it;", file=sys.stderr)

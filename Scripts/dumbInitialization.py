@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # Copyright 2018 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
@@ -41,6 +41,7 @@
 #				gets rid of a bunch of involuntaries at startup.
 #		2018-10-19 RSB	Had forgotten to take care of signals set 
 #				with "reg SIGNAL=1" within the test bench.
+#		2025-01-11 RSB	Converted from Python2 to Python3, using 2to3.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -232,7 +233,7 @@ for line in lines:
 if "STRT2" in netValues:
 	netValues["STRT2"] = True
 else:
-	print >> sys.stderr, "Warning: Could not find signal STRT2."
+	print("Warning: Could not find signal STRT2.", file=sys.stderr)
 
 # Now iterate the logic until nothing changes.  Once you've reached that 
 # point, the ordering of the evaluations no longer matters at all, and you
@@ -247,12 +248,12 @@ changed = []
 while unchanged < 2:
 	count += 1
 	if count > 1000:
-		print "Did not converge."
+		print("Did not converge.")
 		sys.exit(1)
 	if numchanged <= 100:
-		print "Iteration " + str(count) + " " + str(numchanged) + " " + str(changed)
+		print("Iteration " + str(count) + " " + str(numchanged) + " " + str(changed))
 	else:
-		print "Iteration " + str(count) + " " + str(numchanged) + " [...]"
+		print("Iteration " + str(count) + " " + str(numchanged) + " [...]")
 	unchanged += 1
 	numchanged = 0
 	changed = []
@@ -281,7 +282,7 @@ while unchanged < 2:
 		netValues[norNet] = value	
 
 for netName in []:
-	print netName + " = " + str(netValues[netName]) + ", " + str(nors[netName])
+	print(netName + " = " + str(netValues[netName]) + ", " + str(nors[netName]))
 #print nors
 
 ones = []
@@ -295,7 +296,7 @@ for norNet in nors:
 		ones.append(nor)
 
 # Create the MODULE.init files.
-for moduleNumber in range(1, 25) + [99, 52]:
+for moduleNumber in list(range(1, 25)) + [99, 52]:
 	f = open("A" + str(moduleNumber) + ".init", "w")
 	f.write("# Auto-generated for module A" + str(moduleNumber) + " by dumbInitialization.py.\n")
 	for sheet in range(1, 5):

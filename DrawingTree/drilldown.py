@@ -161,7 +161,8 @@ for f in files:
 		continue
 	if not os.path.isdir(tdir + f):
 		continue
-	if os.system("git ls-files --error-unmatch " + tdir + f + "/module.pro 2>/dev/null 1>/dev/null"):
+	if os.system("git ls-files --error-unmatch " + tdir + f + "/module.pro 2>/dev/null 1>/dev/null") and \
+			os.system("git ls-files --error-unmatch " + tdir + f + "/module.kicad_pro 2>/dev/null 1>/dev/null"):
 		print("CAD directory " + f + " is present but not tracked in git, so any electrical schematics in it are ignored.", file=sys.stderr)
 		continue
 	if len(f) in [8,9]:
