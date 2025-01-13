@@ -19,6 +19,11 @@
 #		2016-11-11 RSB	Added the (optional) EXTRA_TARGETS.
 #               2024-05-13 RSB  Updated the notes to cover the case of having
 #                               *only* a binary file but no *.agc files.
+#		2025-01-13 RSB  Now allow the calling Makefile to override the
+#				assignment of TOPLEVEL within this file.
+#				Basically, if that's done it allows the AGC
+#				program to reside in a single source-code file
+#				that's not named MAIN.agc.
 
 # Notes: 
 #
@@ -59,7 +64,9 @@ ifeq "$(BASENAME)" "Validation"
 TARGETS+=$(BASENAME).txt
 TOPLEVEL=Validation
 else
-TOPLEVEL=MAIN
+  ifndef TOPLEVEL
+    TOPLEVEL=MAIN
+  endif
 endif
 ifeq "$(GEN_HTML)" "yes"
 TARGETS+=$(TOPLEVEL).agc.html
