@@ -5,9 +5,7 @@
 
 LOG_FILE=/home/virtualagc/Desktop/Update.log
 
-echo The process of updating Virtual AGC should be harmless and easy,
-echo although it will probably take several minutes. But if you have  
-echo made changes yourself to the source-code tree, the update process 
+echo If you have made local changes yourself to Virtual AGC, the update process 
 echo will discard your changes.  If this is your situation, you might want 
 echo to copy your changed files out of the source tree before proceeding.
 echo ""
@@ -16,21 +14,35 @@ if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
         echo ""
         date > $LOG_FILE
-        for dir in virtualagc virtualagc-schematics
-        do
-                echo Pulling from $dir >> $LOG_FILE
-                cd ~/git/$dir 2>&1 >> $LOG_FILE
-                git stash 2>&1 >> $LOG_FILE
-                git stash drop 2>&1 >> $LOG_FILE
-                git pull 2>&1 >> $LOG_FILE
-        done
-        /home/virtualagc/git/virtualagc-schematics/Schematics/vmDesktopIcons.sh
         
-        # The build stuff is separated out into an independent script, so
-        # as to make sure that changes to the build procedure are captured
-        # without a 2nd git pull.
+        echo Stashing/dropping/pulling schematics branch >> $LOG_FILE
+        cd ~/git/virtualagc-schematics 2>&1 >> $LOG_FILE
+        git stash 2>&1 >> $LOG_FILE
+        git stash drop 2>&1 >> $LOG_FILE
+        git pull 2>&1 >> $LOG_FILE
+        Schematics/vmDesktopIcons.sh
+        
+        echo Stashing/dropping master branch >> $LOG_FILE
         cd ~/git/virtualagc 2>&1 >> $LOG_FILE
-        time ./rebuildVirtualAGC.sh 2>&1 | tee -a $LOG_FILE
+        git stash 2>&1 >> $LOG_FILE
+        git stash drop 2>&1 >> $LOG_FILE
+        
+        echo =================================================================
+        echo Updates to be retrieved from Virtual AGC repository:
+        git log HEAD..origin/master
+        echo =================================================================
+        read -p "Proceed with update and rebuild (y/N)? " -n 1 -r
+        if [[ "$REPLY" =~ ^[Yy]$ ]]
+        then
+                echo Pulling master branch >> $LOG_FILE
+                cd ~/git/virtualagc
+                git pull 2>&1 >> $LOG_FILE
+                # The build stuff is separated out into an independent script, so
+                # as to make sure that changes to the build procedure are captured
+                # without a 2nd git pull.
+                cd ~/git/virtualagc 2>&1 >> $LOG_FILE
+                time ./rebuildVirtualAGC.sh 2>&1 | tee -a $LOG_FILE
+        fi
         
         echo "Terminated.  Hit ENTER key or close this window."
         date >> $LOG_FILE
