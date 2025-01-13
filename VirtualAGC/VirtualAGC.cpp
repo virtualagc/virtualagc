@@ -244,6 +244,7 @@ int showTelemetry, xTelemetry, yTelemetry, wTelemetry, hTelemetry;
 // versus the nominal designed-in display.
 double scaleDPI = 1.0;
 #define SCALED(x) ((x) * scaleDPI)
+wxString AGC_WISH = wxT("");
 
 // This is a function that stands in place of the function
 // wxBitmap(filename, imagetype) to load an a jpg but to scale it according
@@ -561,8 +562,9 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
                 | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
   wxString envString;
+  wxGetEnv(wxT("AGC_WISH"), &AGC_WISH);
   if (wxGetEnv(wxT("AGC_SCALE"), &envString))
-  envString.ToDouble(&scaleDPI);
+    envString.ToDouble(&scaleDPI);
   LineSize = wxSize(-1, SCALED(LINE_SIZE));
 
   minWidthRHS = wxSize(SCALED(340), -1);
@@ -3421,11 +3423,7 @@ VirtualAGC::FormCommands(void)
   if (yaDEDA != "")
 	  yaDEDA += xyOptions(xDEDA, yDEDA);
   if (DeviceCpumonCheckbox->GetValue())
-#ifdef WIN32
-    LM_Simulator = wxT("%AGC_WISH%wish VirtualAGC.tcl --cfg=lm_simulator.ini");
-#else
-    LM_Simulator = wxT("$AGC_WISH''wish VirtualAGC.tcl --cfg=lm_simulator.ini");
-#endif
+    LM_Simulator = AGC_WISH + wxT("wish VirtualAGC.tcl --cfg=lm_simulator.ini");
   else
     LM_Simulator = wxT("");
   wxString basename;
