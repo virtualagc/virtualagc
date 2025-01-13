@@ -28,7 +28,7 @@ then
         git stash drop 2>&1 >> $LOG_FILE
         
         echo =================================================================
-        get fetch origin 2>&1 >> $LOG_FILE
+        git fetch origin 2>&1 >> $LOG_FILE
         echo Updates to be retrieved from Virtual AGC repository:
         git log --reverse HEAD..origin/master | grep '^ '
         echo =================================================================
