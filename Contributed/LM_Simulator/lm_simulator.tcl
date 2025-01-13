@@ -30,6 +30,8 @@
 #			correct the invocation order of startup functions in order to 
 #			make the Colossus simulations work again.  This was broken at
 #			v0.91.
+# 01.12.2025 Ron Burkey Changed "-encoding binary" to "-translation binary" at line 689,
+#                       Due to complaints from Tcl/Tk v9.
 #
 # ***********************************************************************************************
 
@@ -686,7 +688,7 @@ proc open_socket {} {
 
  set err [catch {set sockChan [socket $serverIP $serverSock]}]
  if {$err != 0} {ShowMessageBox "error" "Can't connect to yaAGC!"; exit_program}
- fconfigure ${sockChan} -blocking 0 -buffering none -buffersize 0 -encoding binary
+ fconfigure ${sockChan} -blocking 0 -buffering none -buffersize 0 -translation binary
 }
 
 
