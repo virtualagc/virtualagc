@@ -98,7 +98,7 @@ T6RUPT	CA	OPR-ERR	# Turn off OPR-ERR lamp (even if its not on...)
 	CA	TURN	# Check if Game Over
 	EXTEND
 	BZF	T6WIN	# Game Over, blink
-	CA	HUMANTURN
+	CA	MANTURN
 	EXTEND
 	BZF	T6CPU
 	TCF	T6DONE
@@ -156,8 +156,8 @@ START	CA	T3-100MS	# T3RUPT in 100 ms to tickle night watchman
 	CAE	ZEROREG	# Disable all lamps (io channel 0163)
 	EXTEND
 	WRITE	LAMP163	################################ #TODO# WOR or so
-	CA	TRUE	# Set CPUPLAYER to 1
-	TS	CPUPLAYER
+	CA	TRUE	# Set CPUPYR to 1
+	TS	CPUPYR
 	TCR	PROGLAMP	# Update DSKY PROG lamp
 	CA	PLAYERX
 	TS	STARTPYR
@@ -166,9 +166,9 @@ START	CA	T3-100MS	# T3RUPT in 100 ms to tickle night watchman
 	CA	ZEROREG	# Initialize RAND9 to zero
 	TS	RAND9
 IDLELOOP	CCS	RAND9	# CCS instead of BZF, fewer steps
-	TCF	RANDSTOR1	# RAND9 > 0 (A = RAND9-1)
+	TCF	RNDSTOR1	# RAND9 > 0 (A = RAND9-1)
 	CAF	EIGHT	# RAND9 = 0, make it 8 again
-RANDSTOR1	TS	RAND9
+RNDSTOR1	TS	RAND9
 	TCF	IDLELOOP	# Loop again (wrapping around to 8 after 0)
 
 
@@ -184,7 +184,7 @@ GAMEINI	CA	Q	# Save return pointer, cuz of TCRs
 	CA 	NINE	# Reset the countdown of moves.
 	TS	CNTDOWN
 
-	CA	CPUPLAYER	# No CPU player means 2 person game.
+	CA	CPUPYR	# No CPU player means 2 person game.
 	EXTEND
 	BZF	INIHUMAN
 	CA	TURN	# If current Turn is 'O' (-2), CPU starts.
@@ -194,7 +194,7 @@ GAMEINI	CA	Q	# Save return pointer, cuz of TCRs
 	CA	ZEROREG
 	TCF	INISAVE
 INIHUMAN	CA	TRUE	# Humans first! (TM)
-INISAVE	TS	HUMANTURN
+INISAVE	TS	MANTURN
 	EXTEND
 	BZF	INICPU
 
@@ -318,9 +318,9 @@ DRAW	CA	Q	# Save return pointer, cuz of TCRs
 	RETURN
 
 
-# Function to turn on or off the Prog lamp, controlled by 'CPUPLAYER'
+# Function to turn on or off the Prog lamp, controlled by 'CPUPYR'
 # No inputs or outputs.
-PROGLAMP	CA	CPUPLAYER
+PROGLAMP	CA	CPUPYR
 	EXTEND
 	BZF	LAMPOFF
 	CA	PAIR12
@@ -364,12 +364,12 @@ BTNRSET	TCR	GAMEINI
 	TCF	B-END
 
 BTN2PL	CA	ZEROREG
-	TS	CPUPLAYER	# Set to Zero, no CPU player
+	TS	CPUPYR	# Set to Zero, no CPU player
 	TCR	PROGLAMP	# DSKY PROG light
 	TCF	B-END
 
-BTN1PL	CA	TRUE	# Set CPUPLAYER to 1
-	TS	CPUPLAYER
+BTN1PL	CA	TRUE	# Set CPUPYR to 1
+	TS	CPUPYR
 	TCR	PROGLAMP	# DSKY PROG light
 	TCF	B-END
 
@@ -382,11 +382,11 @@ BTN1-9	INDEX	L
 BTN-FREE	CA	TURN
 	EXTEND
 	BZF	B-ERROR	# Game was already over
-	CA	HUMANTURN
+	CA	MANTURN
 	EXTEND
 	BZF	B-ERROR	# Keyboard locked due to pending CPU move.
 	TCR	PLAYHERE	# Play Human's move
-	CA	CPUPLAYER # If a 2 player game, skip the CPU player.
+	CA	CPUPYR # If a 2 player game, skip the CPU player.
 	EXTEND
 	BZF	B-END
 
@@ -394,7 +394,7 @@ BTN-FREE	CA	TURN
 	EXTEND
 	BZF	B-END	# Game over after human played
 	CA	ZEROREG
-	TS	HUMANTURN
+	TS	MANTURN
 	TCR	COMPON
 	TCR	CALLT6
 
@@ -436,7 +436,7 @@ COMPOFF	CA	COMPBIT
 # Function to play in a cell.
 # Input: L is the cell number to play.  No outputs.
 PLAYHERE	CA	Q	# Save return pointer, cuz of TCRs
-	TS	QPLAYHERE
+	TS	QPLYHERE
 	CA	TURN
 	INDEX	L
 	TS	BOARD
@@ -446,7 +446,7 @@ PLAYHERE	CA	Q	# Save return pointer, cuz of TCRs
 	DIM	CNTDOWN
 	TCR	DRAW
 	TCR	THINK	# Analyze board & check win (not AI)
-	CA	QPLAYHERE	# Restore Q
+	CA	QPLYHERE	# Restore Q
 	TS	Q
 	RETURN
 
@@ -554,9 +554,9 @@ CPUPLAY	CA	TURN	# Bail if game is over
 	CA	TURN	# Strategy 1: Search for winning hole.
 	TCR	SEARCH
 	EXTEND
-	BZF	PLAYBLOCK
+	BZF	PLAYBLOK
 	TCF	PLAYSPOT
-PLAYBLOCK	CA	TURN
+PLAYBLOK	CA	TURN
 	COM		# Strategy 2: Search for blocking hole.
 	TCR	SEARCH
 	EXTEND
@@ -568,16 +568,16 @@ PLAYRAND	INDEX	RAND9	# Strategy 3: Out of good ideas, just play randomly.
 	EXTEND
 	BZF	PLAYFREE	# If cell is not empty, step the random number
 RANDSTEP	CCS	RAND9	# CCS instead of BZF, fewer steps
-	TCF	RANDSTOR2	# RAND9 > 0 (A = RAND9-1)
+	TCF	RNDSTOR2	# RAND9 > 0 (A = RAND9-1)
 	CAF	EIGHT	# RAND9 = 0, make it 8 again
-RANDSTOR2	TS	RAND9
+RNDSTOR2	TS	RAND9
 	TCF	PLAYRAND
 PLAYFREE	CA	RAND9	# Found a free cell, play here.
 	INCR	A	# RAND9 is 0-8, the board is 1-9.
 PLAYSPOT	TS	L
 	TCR	PLAYHERE
 	CA	TRUE	# Human turn next.
-	TS	HUMANTURN
+	TS	MANTURN
 	CA	QCPUPLAY	# Restore Q
 	TS	Q
 CPUOVER	RETURN
@@ -741,12 +741,12 @@ QGAMEINI	=	074	# Backup locations for Q register (allows more than one function 
 QDRAW	=	075	# Some of these could be shared, if space is tight.
 QTHINK	=	076
 QCPUPLAY	=	077
-QPLAYHERE	=	100
+QPLYHERE	=	100
 
 CALC	=	101	# Local scratchpad (ran out of free registers)
 DOBLINK	=	102	# Global flag indicating that a blink out is needed (1=blink, 0=undo blink)
 CNTDOWN	=	103	# Countdown of moves from 9 to 0.  Game ends at 0.
-CPUPLAYER	=	104	# If Computer has to play (0 = False, 1 is player O)
-HUMANTURN	=	105	# Waiting for human (1), or computer player is scheduled to play within a second (0).
+CPUPYR	=	104	# If Computer has to play (0 = False, 1 is player O)
+MANTURN	=	105	# Waiting for human (1), or computer player is scheduled to play within a second (0).
 STARTPYR	=	106	# Which player (2 = X, -2 = O) starts the game.
 GOAL	=	107	# Local scratchpad (ran out of free registers)
