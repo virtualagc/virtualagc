@@ -232,6 +232,8 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
 
 
 
+
+
                       Fusion Pro</a></td>
                   <td valign="middle"><font color="#ff0000">No<br>
                     </font></td>
@@ -366,6 +368,8 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
 
 
 
+
+
             of the VM</a><br>
         </li>
         <li><a href="#Installation_of_the_Virtual_AGC_VM_">Installation
@@ -380,7 +384,9 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
         <li><a href="#Limitation">Limitation</a></li>
         <li><a href="#Getting_the_Source_Code_">Getting the Source Code</a></li>
         <li><a moz-do-not-send="true" href="#4K">High-Resolution
-            Displays Such As 4K</a><br>
+            Displays Such As 4K</a></li>
+        <li><a moz-do-not-send="true" href="#AlternateTcl">Alternate
+            Installations of Tcl/Tk</a><br>
         </li>
         <li><a moz-do-not-send="true" href="#wxWidgets">Regarding
             wxWidgets</a><br>
@@ -740,6 +746,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
 
 
 
+
+
           7.1.4</a>, but I hope it will work with other versions as
         well.&nbsp; Be sure to install not only VirtualBox as such, but
         also its so-called "Extension Pack".</li>
@@ -999,10 +1007,14 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
+
 
 
 
@@ -1107,11 +1119,15 @@ the
 
 
 
+
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
+
 
 
 
@@ -1178,6 +1194,8 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     sections.&nbsp; It's also possible though increasingly unlikely that
     <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
+
 
 
 
@@ -1303,10 +1321,59 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
         <br>
       </li>
     </ul>
+    <h3><a name="AlternateTcl"></a>Alternate Installations of Tcl/Tk</h3>
+    <p>Tcl/Tk is required for the Virtual AGC component <b>LM_Simulator</b>.&nbsp;
+
+      If you have installed an alternate version of Tcl/Tk than the one
+      found first in your PATH, and prefer to use it instead of the one
+      in your PATH, then Virtual AGC needs to be made aware of that
+      fact.&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Why would this situation
+          arise?&nbsp; For example, there's a situation in Mac OS
+          versions <i>at least</i> from Monterey through Sequoia in
+          which:<br>
+        </font></p>
+      <ul>
+        <li><font size="-1">The version of Tcl/Tk in a base Mac OS
+            installation is defective.&nbsp; (The symptom is that the
+            Tcl/Tk program <b>wish</b> crashes instantly when invoked.)</font></li>
+        <li><font size="-1">The defective version of Tcl/Tk cannot be
+            uninstalled, since Mac OS regards it as essential.</font></li>
+        <li><font size="-1">A new, non-defective version of Tcl/Tk can
+            be installed (say, from source), but since it will be
+            installed somewhere other than in /usr/bin (typically in
+            /usr/local/bin) which has priority in the PATH environment
+            variable, invoking <b>wish</b> from a command line without
+            specifying an absolute path to it will always find the
+            defective version and abort.</font><br>
+        </li>
+      </ul>
+    </blockquote>
+    <p>If you have this situation, the workaround is to create an
+      environment variable called <code>AGC_WISH</code>.&nbsp; This
+      environment variable must be assigned a value which is the path to
+      your preferred installation of Tcl/Tk.&nbsp; Specifically, it's
+      the name of the folder in which the Tcl program called <b>wish</b>
+      is found.&nbsp; This path <i>must</i> include a trailing path
+      separator native to your system:&nbsp; \ for Windows or / for all
+      others.&nbsp; For example, on Linux or Mac OS, a default
+      installation of Tcl/Tk would place <b>wish</b> at /usr/bin/wish,
+      whereas an alternate installation would typically put it in
+      /usr/local/bin/wish, so you would assign <code>AGC_WISH=/usr/local/bin/</code>.<br>
+    </p>
+    <p>The methods for permanently creating an environment variable are
+      described in the preceding section.<br>
+    </p>
+    <ul>
+    </ul>
     <h3><a name="wxWidgets"></a>Regarding wxWidgets</h3>
     <p><b>wxWidgets</b> is a cross-platform toolkit, suitable for
       writing software have a graphical user interface (GUI) that can be
       used with a simple recompilation on any platform supported by <b>wxWidgets</b>.&nbsp;
+
+
 
 
 
@@ -1363,6 +1430,8 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       Michael!), and if the "official" instructions below don't appeal
       to you, or if you simply like the idea of using CMake, Michael's <a
 href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-CMake">documentation
+
+
 
 
 
@@ -1536,6 +1605,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
+
         Makefile</a> itself for more explanation.&nbsp; The switches can
       override not merely the filesystem paths for locating the compiler
       (when you have multiple versions of gcc or g++ installed), but can
@@ -1609,6 +1680,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
+
 
 
 
@@ -1778,6 +1851,8 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
 
 
 
+
+
           Oracle Developer Studio tools</a>.&nbsp; I used version 12.5,
         and only installed the tools rather than the complete IDE.&nbsp;
         This is to give you the C and C++ compilers ('cc' and 'CC'),
@@ -1829,25 +1904,10 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
       </tbody>
     </table>
     <br>
-    There are aspects of Virtual AGC that I simply can't personally
-    check on Mac OS X, because Apple no longer supports my particular
-    Mac with newer versions of Mac OS X.&nbsp; I'm stuck at Mac OS X
-    Lion (10.7), and with whatever version of Xcode is compatible with
-    that.&nbsp; The Apple Way out of this situation is, of course,
-    simply to buy a new Mac which can run a newer Mac OS.&nbsp; But the
-    Tao of Apple is not the Tao of Ron.<br>
-    <br>
-    One particular drawback of this situation is that Xcode is now
-    apparently based on the clang compiler, rather than on the gcc
-    compiler that Virtual AGC was designed for.&nbsp; Now that I've
-    found this out, of course, Virtual AGC has been adapted for use with
-    clang, and seems to work well with clang on the Linux platforms I
-    use for development purposes.&nbsp; But I can't personally test it
-    for you on the Mac, since the Xcode on <i>my</i> older Mac uses
-    gcc.<br>
-    <br>
-    Now that I've warned you, the subsections below cover what I know
-    and what I theorize about building Virtual AGC on Macs.<br>
+    Without boring you with the details, I'll warn you that I'm crippled
+    in terms of testing most things to do with Mac OS.&nbsp; Now that
+    I've warned you, the subsections below cover what I know and what I
+    theorize about building Virtual AGC on Macs.<br>
     <h4><a name="Older_Macs:_Xcode_with_gcc"></a>Older Macs<br>
     </h4>
     The executive summary is that this works (on <i>my</i> Mac, with
@@ -1860,6 +1920,8 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <ol>
       <li>Install <a href="https://developer.apple.com/download/more">most-current
 version
+
+
 
 
 
@@ -1953,6 +2015,8 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
+
 
 
 
@@ -2135,6 +2199,8 @@ You
 
 
 
+
+
         The first time you run <b>VirtualAGC</b> from its desktop icon
         after installation, it may take a considerable amount of time to
         start up.&nbsp; There will be no such delays on subsequent
@@ -2204,9 +2270,13 @@ href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-
 
 
 
+
+
           its source code</a>, and building it from source according to
         <a moz-do-not-send="true"
 href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
+
 
 
 
@@ -2246,6 +2316,8 @@ href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">th
 
 
 
+
+
           Or more specifically, if Macports has installed some of the
           libraries (such as libjpeg) that wxWidgets requires, because
           those libraries will be of incompatible versions.&nbsp; On
@@ -2263,12 +2335,39 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
             instructions for doing so are in the Macports manual</a>,
           and it may be worth rebooting afterward.&nbsp; But if you
           can't remove Macports, and if wxWidgets doesn't build for you
           with Macports present, I'm not in a position to advise you how
-          to proceed.<br>
-        </li>
+          to proceed.</li>
+      </ul>
+      <li>(One-time setup.)&nbsp; In all known recent versions of Mac OS
+        (Monterey through Sequoia), the version of Tcl/Tk (required for
+        Virtual AGC component <b>LM_Simulator</b>) installed by default
+        by Mac OS is defective, the symptom of which is the immediate
+        abort of the Tcl program <b>wish</b>.&nbsp; In other words,
+        this is one case where Mac OS "just <i>doesn't</i> work".&nbsp;
+        Ha!&nbsp; One distasteful workaround is to avoid using
+        LM_Simulator, which <a moz-do-not-send="true"
+          href="https://www.iyaTelemetry.html#LM_Simulator_by_Stephan_Hotto">you
+          can read about here</a> to make a decision whether that's
+        satisfactory to you.&nbsp; Better from my point of view,
+        installation of a correctly-working version of Tcl/Tk can
+        probably be achieved in several ways.&nbsp; I am not personally
+        in a position to try any of those approaches, but I have reason
+        to believe that <a moz-do-not-send="true"
+          href="https://www.tcl.tk/software/tcltk/download.html">building
+          Tcl/Tk from source code</a> does work on <i>some</i> recent
+        Mac OS versions but not others.&nbsp; Specifically, I'm told
+        that Tcl/Tk 9 works on Mac OS Sequoia.&nbsp; If you succeed in
+        such an alternate installation, there's some additional setup
+        that needs to be performed:&nbsp; See <a moz-do-not-send="true"
+          href="#AlternateTcl">the section on installation of alternate
+          versions of Tcl/Tk</a>.<br>
+      </li>
+      <ul>
       </ul>
       <li>(Building Virtual AGC.)&nbsp; In a shell session:</li>
     </ol>
@@ -2296,10 +2395,12 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     Note that while any Python scripts used above are in Python 3, which
     is now installed by default (as far as I know) in Mac OS, some
     Python 2 scripts are also present in Virtual AGC even though not
-    used in the installation process.&nbsp; Python 2 is no longer
-    installed by default, so in the relatively-rare case in which you
-    want to use one of those scripts you will need to explicitly install
-    Python 2.&nbsp; As of this writing, <a
+    used in the installation process.&nbsp; Python 2 scripts are
+    gradually being phased out of Virtual AGC, but this process has not
+    yet completed.&nbsp; Python 2 is no longer installed by default, so
+    in the relatively-rare case in which you want to use one of those
+    scripts you will need to explicitly install Python 2.&nbsp; As of
+    this writing, <a
       href="https://www.python.org/downloads/release/python-2718/">the
       MacOS installer for the so-called "final" release of Python 2,
       namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
@@ -2352,6 +2453,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
         At this writing, <b>MSYS2</b> supports only Windows 10 or
         later.</font><br>
     </blockquote>
@@ -2379,6 +2482,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -2387,6 +2492,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
+
 
 
 
@@ -2428,10 +2535,18 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         $MINGW_PACKAGE_PREFIX-gcc \<br>	$MINGW_PACKAGE_PREFIX-libc++ \<br>	$MINGW_PACKAGE_PREFIX-winpthreads \
 	$MINGW_PACKAGE_PREFIX-libsystre \
 	$MINGW_PACKAGE_PREFIX-ncurses \
-	$MINGW_PACKAGE_PREFIX-clang \<br>	$MINGW_PACKAGE_PREFIX-wxwidgets3.2-msw<br></pre>
+	$MINGW_PACKAGE_PREFIX-clang \<br>	$MINGW_PACKAGE_PREFIX-wxwidgets3.2-msw \<br>	$MINGW_PACKAGE_PREFIX-tcl \<br>	$MINGW_PACKAGE_PREFIX-tk<br></pre>
       </blockquote>
     </blockquote>
     <ol start="4">
+      <li>The folder \msys64\ucrt64\bin will have to be added to your
+        PATH.&nbsp; Do this from the Control Panel.&nbsp; (From the
+        Windows menu, search for "edit environment variables".&nbsp;
+        Among the user variables, highlight the "Path" variable and hit
+        the Edit button, then add the folder.&nbsp; The change won't be
+        seen in command-line windows that are already open, and will
+        only take effect in new command lines.)<br>
+      </li>
       <li><a moz-do-not-send="true"
           href="https://github.com/virtualagc/virtualagc">Download the
           entire Virtual AGC source tree</a>.&nbsp; For brevity, I'm
@@ -2493,6 +2608,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -2502,6 +2619,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
+
 
 
 
@@ -2596,6 +2715,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
     So the idea is that you can load the WebAssembly build of <b>yaAGC</b>
     into an HTML web-page you create, along with a core-rope images of
     an AGC program, and then run the whole thing in a supporting browser
@@ -2661,6 +2782,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -2679,6 +2802,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
+
 
 
 
@@ -2768,6 +2893,8 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     </ul>
     Now, you may wonder why there's a need to run an HTTP server at all,
     when one could simply browse to "file:///<i>PathToWebAGC</i>/demo/index.html"
+
+
 
 
 
@@ -2937,10 +3064,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-08<br>
+          2025-01-13<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
