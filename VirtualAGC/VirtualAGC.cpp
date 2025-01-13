@@ -186,6 +186,7 @@
  *                              rather than in the simulation script.
  *              2025-01-08 RSB  Adjustment to simulation-status window sizing.
  *              2025-01-11 RSB  Added a Tic-tac-toe "mission".
+ *              2025-01-13 RSB  Added the AGC_WISH environment variable.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -3420,7 +3421,11 @@ VirtualAGC::FormCommands(void)
   if (yaDEDA != "")
 	  yaDEDA += xyOptions(xDEDA, yDEDA);
   if (DeviceCpumonCheckbox->GetValue())
-    LM_Simulator = wxT("wish VirtualAGC.tcl --cfg=lm_simulator.ini");
+#ifdef WIN32
+    LM_Simulator = wxT("%AGC_WISH%wish VirtualAGC.tcl --cfg=lm_simulator.ini");
+#else
+    LM_Simulator = wxT("$AGC_WISH''wish VirtualAGC.tcl --cfg=lm_simulator.ini");
+#endif
   else
     LM_Simulator = wxT("");
   wxString basename;
