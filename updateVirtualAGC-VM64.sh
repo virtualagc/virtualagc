@@ -10,9 +10,9 @@ echo will discard your changes.  If this is your situation, you might want
 echo to preserve your changed files in some manner.
 echo ""
 read -p "Are you sure you're ready to proceed at this time (y/N)? " -n 1 -r
+echo ""
 if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
-        echo ""
         date > $LOG_FILE
         
         echo Updating schematics ...
@@ -33,12 +33,14 @@ then
         git log --reverse HEAD..origin/master | ./gitLogCleanup.awk
         echo =================================================================
         read -p "Proceed with update of Virtual AGC source code (y/N)? " -n 1 -r
+        echo ""
         if [[ "$REPLY" =~ ^[Yy]$ ]]
         then
                 echo Updating source code ...
                 cd ~/git/virtualagc
                 git pull 2>&1 >> $LOG_FILE
                 read -p "Proceed with rebuild of Virtual AGC (y/N)? " -n 1 -r
+                echo ""
                 if [[ "$REPLY" =~ ^[Yy]$ ]]
                 then                
                         echo Rebuilding from source code ...
