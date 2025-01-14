@@ -53,8 +53,8 @@ then
         fi
         
         echo ""
-        echo "Terminated.  Hit ENTER key or close this window."
+        echo "End of update process."
         date >> $LOG_FILE
-        read
+        read -p "Hit any key or close this window." -n -1
 fi
 
