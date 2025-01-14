@@ -55,6 +55,6 @@ then
         echo ""
         echo "End of update process."
         date >> $LOG_FILE
-        read -p "Hit any key or close this window." -n 1
+        read -p "Hit any key or close this window: " -n 1
 fi
 
