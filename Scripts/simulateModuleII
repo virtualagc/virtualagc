@@ -13,7 +13,7 @@
 
 # First, parse the command line and perform sanity checks.
 
-if [[ "$1" == "" ]]
+if [ "$1" = "" ]
 then
         echo "No module number (A1, A2, ..., A24) given"
         exit 1
@@ -22,10 +22,10 @@ else
 fi
 
 # Does the schematic exist?
-if [[ -f module.kicad_sch ]]
+if [ -f module.kicad_sch ]
 then
         schematic=module.kicad_sch
-elif [[ -f module.sch ]]
+elif [ -f module.sch ]
 then
         schematic=module.sch
 else
@@ -34,7 +34,7 @@ else
 fi
 
 # Does the minimal test bench file exist?
-if [[ ! -f tb.v ]]
+if [ ! -f tb.v ]
 then
         echo cannot find tb.v
         exit 1
@@ -44,16 +44,16 @@ fi
 
 # Workflow step #2.
 
-if [[ "$2" == "" ]]
+if [ "$2" = "" ]
 then
         # Requires KiCad v7 or later.
         netlist=module.net
-        rm module.net &>/dev/null
+        rm module.net &> /dev/null
         kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
 else
         netlist=$2
 fi
-if [[ ! -f "$netlist" ]]
+if [ ! -f "$netlist" ]
 then
         echo Cannot find/generate netlist file $netlist
         exit 1
@@ -61,15 +61,15 @@ fi
 
 # Workflow step #3
 
-rm empty.init &>/dev/null
+rm empty.init &> /dev/null
 touch empty.init
-dumbVerilog.py $modulenum $netlist pins.txt 20 empty.init $schematic >module.v
-dumbInitialization.py <module.v
-dumbVerilog.py $modulenum $netlist pins.txt 20 $modulenum.init $schematic >module.v
+dumbVerilog.py $modulenum $netlist pins.txt 20 empty.init $schematic > module.v
+dumbInitialization.py < module.v
+dumbVerilog.py $modulenum $netlist pins.txt 20 $modulenum.init $schematic > module.v
 
 # Workflow step #4
 
-dumbTestbench.py <module.v >module_tb.v
+dumbTestbench.py < module.v > module_tb.v
 
 # Workflow step #5: None needed for stand-alone logic modules.
 
