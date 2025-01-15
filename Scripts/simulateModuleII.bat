@@ -59,13 +59,13 @@ IF not exist "%netlist%" (
 
 DEL  "empty.init" >NUL 2>&1
 touch "empty.init"
-dumbVerilog.py "%modulenum%" "%netlist%" "pins.txt" "20" "empty.init" "%schematic%" >module.v
-dumbInitialization.py <module.v
-dumbVerilog.py "%modulenum%" "%netlist%" "pins.txt" "20" "%modulenum%.init" "%schematic%" >module.v
+python -m dumbVerilog "%modulenum%" "%netlist%" "pins.txt" "20" "empty.init" "%schematic%" >module.v
+python -m dumbInitialization <module.v
+python -m dumbVerilog "%modulenum%" "%netlist%" "pins.txt" "20" "%modulenum%.init" "%schematic%" >module.v
 
 # Workflow step #4
 
-dumbTestbench.py <module.v >module_tb.v
+python -m dumbTestbench <module.v >module_tb.v
 
 # Workflow step #5: None needed for stand-alone logic modules.
 
