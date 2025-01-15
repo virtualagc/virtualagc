@@ -1,4 +1,7 @@
 @echo off
+REM Note: This batch file was auto-converted from the BASH shell script 
+REM simulateModuleII, and then manually tweaked.  How correct it is remains
+REM to be seen.
 
 REM This script can be used in Windows to perform a digital simulation
 REM of a single logical module, or portion thereof.  It should be executed from
@@ -14,7 +17,7 @@ REM we can generate the netlist file ourself from the command line.
 
 REM First, parse the command line and perform sanity checks.
 
-IF "%~1" "=" "" (
+IF "%~1" == "" (
   echo "No module number (A1, A2, ..., A24) given"
   exit "1"
 ) ELSE (
@@ -43,7 +46,7 @@ REM Workflow step #1: Should have been done before ever running this script!
 
 REM Workflow step #2.
 
-IF "%~2" "=" "" (
+IF "%~2" == "" (
   SET "netlist=module.net"
   DEL  "module.net" >NULL 2>&1
   kicad-cli "sch" "export" "netlist" "--output" "module.net" "--format" "orcadpcb2" "module.kicad_sch"
