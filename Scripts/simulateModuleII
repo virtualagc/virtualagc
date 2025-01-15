@@ -1,0 +1,86 @@
+#!/bin/bash
+# This script can be used for Linux or Mac OS to perform a digital simulation
+# of a single logical module, or portion thereof.  It should be executed from
+# the folder containing the schematic file (module.kicad_sch) and a 
+# user-created partial-testbench file called tb.v.
+#
+# Usage:
+#       simulateModule MODULENAME [NETLISTFILE]
+# where MODULENAME is one of the names of Block II AGC logic modules:
+# A1, A2, A3, ..., A24.  The optional parameter can give the name of a netlist
+# file.  If it is not present, then KiCad v7 or later is required so that
+# we can generate the netlist file ourself from the command line.
+
+# First, parse the command line and perform sanity checks.
+
+if [[ "$1" == "" ]]
+then
+        echo "No module number (A1, A2, ..., A24) given"
+        exit 1
+else
+        modulenum=$1
+fi
+
+# Does the schematic exist?
+if [[ -f module.kicad_sch ]]
+then
+        schematic=module.kicad_sch
+elif [[ -f module.sch ]]
+then
+        schematic=module.sch
+else
+        echo Cannot find either module.sch or module.kicad_sch
+        exit 1
+fi
+
+# Does the minimal test bench file exist?
+if [[ ! -f tb.v ]]
+then
+        echo cannot find tb.v
+        exit 1
+fi
+
+# Workflow step #1: Should have been done before ever running this script!
+
+# Workflow step #2.
+
+if [[ "$2" == "" ]]
+then
+        # Requires KiCad v7 or later.
+        netlist=module.net
+        rm module.net &>/dev/null
+        kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
+else
+        netlist=$2
+fi
+if [[ ! -f "$netlist" ]]
+then
+        echo Cannot find/generate netlist file $netlist
+        exit 1
+fi
+
+# Workflow step #3
+
+rm empty.init &>/dev/null
+touch empty.init
+dumbVerilog.py $modulenum $netlist pins.txt 20 empty.init $schematic >module.v
+dumbInitialization.py <module.v
+dumbVerilog.py $modulenum $netlist pins.txt 20 $modulenum.init $schematic >module.v
+
+# Workflow step #4
+
+dumbTestbench.py <module.v >module_tb.v
+
+# Workflow step #5: None needed for stand-alone logic modules.
+
+# Workflow step #6
+
+iverilog -o module.vvp module_tb.v module.v
+
+# Workflow step #7
+
+vvp module.vvp -fst
+
+# Workflow step #8
+
+gtkwave module.fst
