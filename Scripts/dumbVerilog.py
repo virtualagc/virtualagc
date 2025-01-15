@@ -198,7 +198,7 @@ if len(sys.argv) >= 3:
 	if len(sys.argv) > 5:
 		initsFile = sys.argv[5]
 		try:
-			# The format of the inits file is ASCII lines, each with 3 
+			# The format of the inits file is ASCII lines, each with 5 
 			# space-delimited fields:
 			#	NOR_REFD [ J_LEVEL [ K_LEVEL [ J_DELAY [ K_DELAY ]]]]
 			# J_LEVEL and K_LEVEL are each either 0 or 1 and are the logic

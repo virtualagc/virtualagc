@@ -1,8 +1,9 @@
-// Include-file used by dumbTestbench.py for automating testbench generation.
+// Include-file used by module_tb.py for automating testbench generation.
 
 reg rst = 1;
 initial begin
-  $dumpfile("testVerilog.vcd");
+  // Assumes compilation with -fst switch.
+  $dumpfile("module.fst");
   $dumpvars(0, agc);
   
   # 2000 rst = 0;

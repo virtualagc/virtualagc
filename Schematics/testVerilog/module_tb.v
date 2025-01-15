@@ -4,7 +4,7 @@
 module agc;
 
 parameter GATE_DELAY = 20;
-`include "testVerilog/tb.v"
+`include "tb.v"
 
 wire F02A, F02B, FS02, FS02A;
 
