@@ -1,18 +1,18 @@
 @echo off
 
-# This script can be used in Windows to perform a digital simulation
-# of a single logical module, or portion thereof.  It should be executed from
-# the folder containing the schematic file (module.kicad_sch) and a 
-# user-created partial-testbench file called tb.v.
-#
-# Usage:
-#       simulateModule MODULENAME [NETLISTFILE]
-# where MODULENAME is one of the names of Block II AGC logic modules:
-# A1, A2, A3, ..., A24.  The optional parameter can give the name of a netlist
-# file.  If it is not present, then KiCad v7 or later is required so that
-# we can generate the netlist file ourself from the command line.
+REM This script can be used in Windows to perform a digital simulation
+REM of a single logical module, or portion thereof.  It should be executed from
+REM the folder containing the schematic file (module.kicad_sch) and a 
+REM user-created partial-testbench file called tb.v.
+REM
+REM Usage:
+REM       simulateModule MODULENAME [NETLISTFILE]
+REM where MODULENAME is one of the names of Block II AGC logic modules:
+REM A1, A2, A3, ..., A24.  The optional parameter can give the name of a netlist
+REM file.  If it is not present, then KiCad v7 or later is required so that
+REM we can generate the netlist file ourself from the command line.
 
-# First, parse the command line and perform sanity checks.
+REM First, parse the command line and perform sanity checks.
 
 IF "%~1" "=" "" (
   echo "No module number (A1, A2, ..., A24) given"
@@ -21,7 +21,7 @@ IF "%~1" "=" "" (
   SET "modulenum=%~1"
 )
 
-# Does the schematic exist?
+REM Does the schematic exist?
 IF exist "module.kicad_sch" (
   SET "schematic=module.kicad_sch"
 ) ELSE (
@@ -33,15 +33,15 @@ IF exist "module.kicad_sch" (
   )
 )
 
-# Does the minimal test bench file exist?
+REM Does the minimal test bench file exist?
 IF not exist "tb.v" (
   echo "cannot" "find" "tb.v"
   exit "1"
 )
 
-# Workflow step #1: Should have been done before ever running this script!
+REM Workflow step #1: Should have been done before ever running this script!
 
-# Workflow step #2.
+REM Workflow step #2.
 
 IF "%~2" "=" "" (
   SET "netlist=module.net"
@@ -55,7 +55,7 @@ IF not exist "%netlist%" (
   exit "1"
 )
 
-# Workflow step #3
+REM Workflow step #3
 
 DEL  "empty.init" >NUL 2>&1
 touch "empty.init"
@@ -63,20 +63,20 @@ python -m dumbVerilog "%modulenum%" "%netlist%" "pins.txt" "20" "empty.init" "%s
 python -m dumbInitialization <module.v
 python -m dumbVerilog "%modulenum%" "%netlist%" "pins.txt" "20" "%modulenum%.init" "%schematic%" >module.v
 
-# Workflow step #4
+REM Workflow step #4
 
 python -m dumbTestbench <module.v >module_tb.v
 
-# Workflow step #5: None needed for stand-alone logic modules.
+REM Workflow step #5: None needed for stand-alone logic modules.
 
-# Workflow step #6
+REM Workflow step #6
 
 iverilog "-o" "module.vvp" "module_tb.v" "module.v"
 
-# Workflow step #7
+REM Workflow step #7
 
 vvp "module.vvp" "-fst"
 
-# Workflow step #8
+REM Workflow step #8
 
 gtkwave "module.fst"
