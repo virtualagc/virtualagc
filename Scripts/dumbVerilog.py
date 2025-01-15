@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Copyright 2018 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
