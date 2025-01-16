@@ -1,0 +1,156 @@
+#!/bin/bash
+# Script for digital simulation of an AGC CPU.  There are two command-line
+# parameters:
+#       MODEL           The AGC model.  In principle, only 1003565, 1003700,
+#                       2003100, 2003200, or 2003993.  Presently, only
+#                       2003200 or 2003993.  Defaults to 2003993.
+#       SOFTWARE        AGC software to run on the simulated CPU.  Defaults
+#                       to "Validation".
+
+# Parse command line and perform sanity checks.
+
+if [ "$1" == "" ]
+then
+        model=2003993
+        sameAs=2003993
+elif [ "$1" == 2003993 ]
+        model=$1
+        sameAs=2003993
+elif [ "$1" == 2003200 ]
+        model=$1
+        sameAs=2003200
+elif [ "$1" == 2003100 ]
+        model=$1
+        sameAs=2003100
+        echo Model not yet supported.
+        exit 1
+elif [ "$1" == 1003700 ]
+        model=$1
+        sameAs=1003700
+        echo Model not yet supported.
+        exit 1
+elif [ "$1" == 1003565 ]
+        model=$1
+        sameAs=1003700
+        echo Model not yet supported.
+        exit 1
+else
+        echo Unrecognized AGC model number.
+        exit 1
+fi
+if [ $sameAs == 2003993 ]
+then
+        # Schematic drawings for logic modules A1-A24.
+        modules=
+        modules="$modules 2005259A"
+        modules="$modules 2005260A"
+        modules="$modules 2005251A"
+        modules="$modules 2005262A"
+        modules="$modules 2005261A"
+        modules="$modules 2005263A"
+        modules="$modules 2005252A"
+        modules="$modules 2005255-"
+        modules="$modules 2005256A"
+        modules="$modules 2005257A"
+        modules="$modules 2005258A"
+        modules="$modules 2005253A"
+        modules="$modules 2005269-"
+        modules="$modules 2005264B"
+        modules="$modules 2005265A"
+        modules="$modules 2005266-"
+        modules="$modules 2005267A"
+        modules="$modules 2005268A"
+        modules="$modules 2005270-"
+        modules="$modules 2005254-"
+        modules="$modules 2005250-"
+        modules="$modules 2005271-"
+        modules="$modules 2005272A"
+        modules="$modules 2005273A"
+fi
+
+# Workflow Step #1:
+for d in $modules
+do
+        if [ ! -f $d/module.kicad_sch ]
+        then
+                echo Schematic $d/module.kicad_sch does not exist
+                exit 1
+        fi
+done
+
+if [ "$2" == "" ]
+then
+        software=Validation
+else
+        software=$1
+fi
+if [ ! -f roms/$software.v ]
+then
+        echo Selected AGC software version has no Verilog source-code file.
+        exit 1
+fi
+
+# Workflow Step #2:
+if which kicad-cli &>/dev/null
+then
+        # kicad-cli does exist.
+        for d in modules
+        do
+                cd $d &>/dev/null
+                kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
+                cd .. &>/dev/null
+        done
+else
+        # kicad-cli not found.  The netlist files must pre-exist.
+        for d in modules
+        do
+                if [ ! -f $d/module.net ]
+                then
+                        echo Netlist $d/module.net does not exist.
+                        exit 1
+                fi
+        done
+fi
+
+# Workflow Step #3:
+n=0
+rm $model.v &>/dev/null
+for d in modules
+do
+        n=$((n+1))
+        cd $d &>/dev/null
+        rm empty.init &> /dev/null
+        touch empty.init
+        dumbVerilog.py A$n module.net pins.txt 20 empty.init module.kicad_sch >>../$model.v
+        cd - &>/dev/null
+done
+dumbInitialization.py <$model.v
+n=0
+rm $model.v &>/dev/null
+for d in modules
+do
+        n=$((n+1))
+        cd $d &>/dev/null
+        dumbVerilog.py A$n module.net pins.txt 20 ../A$n.init module.kicad_sch >>../$model.v
+        cd - &>/dev/null
+done
+
+# Workflow step #4
+dumbTestbench.py <$model.v >$model_tb.v
+cp tb-$model.v tb.v
+
+# Workflow step #5
+cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v roms/$software.v >>$model.v
+
+# Workflow step #6
+
+iverilog -o $model.vvp $model_tb.v $model.v
+
+# Workflow step #7
+
+vvp $model.vvp -fst
+mv agc.fst $model.fst
+
+# Workflow step #8
+
+gtkwave $model.fst
