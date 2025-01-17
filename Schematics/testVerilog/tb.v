@@ -11,7 +11,7 @@ initial begin
 end
 
 reg FS01_ = 0;
-always #4882.8125 FS01_ = !FS01_;
+always #9765.625 FS01_ = !FS01_;
   
 initial
   $timeformat(-6, 0, " us", 10);
