@@ -61,6 +61,8 @@
 #		2018-10-27 RSB	Changed simulation time units from 100ns/1ns to 1ns/1ps.
 #		2025-01-06 RSB	Converted from Python 2 to Python 3 using the 2to3 
 #				utility.
+#		2025-01-17 RSB	Account for the "unconnected" nets which KiCad now
+#				may add to the netlists.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -301,8 +303,11 @@ if len(sys.argv) >= 3:
 	
 	# Let's read the netlist into memory.
 	try:
+		lines = []
 		f = open(netlistFilename, "r")
-		lines = f.readlines()
+		for line in f:
+			if "unconnected" not in line:
+				lines.append(line)
 		f.close()
 	except:
 		print("Could not read netlist " + netlistFilename, file=sys.stderr)
