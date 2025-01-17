@@ -1,11 +1,42 @@
 #!/bin/bash
-# Script for digital simulation of an AGC CPU.  There are two command-line
-# parameters:
+# Script for digital simulation of an AGC CPU.  The command-line arguments,
+# all optional, appear in the following order:
 #       MODEL           The AGC model.  In principle, only 1003565, 1003700,
 #                       2003100, 2003200, or 2003993.  Presently, only
-#                       2003200 or 2003993.  Defaults to 2003993.
+#                       2003200 or 2003993.  Defaults to 2003993, if missing
+#                       or "".
 #       SOFTWARE        AGC software to run on the simulated CPU.  Defaults
-#                       to "Validation".
+#                       to "Validation-hardware-simulation" if missing or "".
+#       VERILOGPARMS    Parameters for iverilog compilation.  Multiple 
+#                       parameters are separated by spaces and the entire
+#                       set of parameters should be quoted.  This script 
+#                       accepts these as-is, and performs no check of 
+#                       correctness.  The default is "-DDUMP_ALL"
+#                       if missing or "".  The known optional useful parameters 
+#                       are:
+
+#                       -Pagc.RUNLENGTH=N, where N is a time in nanoseconds
+#                               which overrides the total runtime of the 
+#                               simulation.  The default is 1/4 second.
+#                       -DSPOOF_SC, spoofs certain input signals from the 
+#                               spacecraft.
+#                       -DDUMP_ALL, which means that all signals are dumped to
+#                               the logged simulation datafile.
+#                       -DUMP_BACKPLANE, which means that all backplane signals
+#                               are dumped.
+#                       -DUMP_DECODER, which means to dump all of the variables
+#                               used by the instruction-decoder circuitry.
+#                       -DUMP_HELPFUL, which means to dump all "helpful" signals.
+#                       
+#                       These switches are all interpreted by the test-bench 
+#                       file tb_xxxx.v where xxxx represents the AGC model 
+#                       number.  At present, though, tb_xxxx.v requires that
+#                       exactly one of the DUMP_xxxx options be present.
+
+# Let's find out what the name of the python3 executable is:
+export python_exe=python
+which python3 &>/dev/null && export python_exe=python3
+export PYTHONPATH="$PATH"
 
 # Parse command line and perform sanity checks.
 
@@ -14,22 +45,27 @@ then
         model=2003993
         sameAs=2003993
 elif [ "$1" == 2003993 ]
+then
         model=$1
         sameAs=2003993
 elif [ "$1" == 2003200 ]
+then
         model=$1
         sameAs=2003200
 elif [ "$1" == 2003100 ]
+then
         model=$1
         sameAs=2003100
         echo Model not yet supported.
         exit 1
 elif [ "$1" == 1003700 ]
+then
         model=$1
         sameAs=1003700
         echo Model not yet supported.
         exit 1
 elif [ "$1" == 1003565 ]
+then
         model=$1
         sameAs=1003700
         echo Model not yet supported.
@@ -37,6 +73,12 @@ elif [ "$1" == 1003565 ]
 else
         echo Unrecognized AGC model number.
         exit 1
+fi
+if [ $model == $sameAs ]
+then
+        echo "AGC model: $model"
+else
+        echo "AGC model: $model (same as $sameAs)"
 fi
 if [ $sameAs == 2003993 ]
 then
@@ -69,6 +111,7 @@ then
 fi
 
 # Workflow Step #1:
+echo Checking existence of all schematic diagrams needed ...
 for d in $modules
 do
         if [ ! -f $d/module.kicad_sch ]
@@ -80,10 +123,11 @@ done
 
 if [ "$2" == "" ]
 then
-        software=Validation
+        software=Validation-hardware-simulation
 else
         software=$1
 fi
+echo AGC software: $software 
 if [ ! -f roms/$software.v ]
 then
         echo Selected AGC software version has no Verilog source-code file.
@@ -93,16 +137,18 @@ fi
 # Workflow Step #2:
 if which kicad-cli &>/dev/null
 then
+        echo Checking existence of netlist files ...
         # kicad-cli does exist.
-        for d in modules
+        for d in $modules
         do
                 cd $d &>/dev/null
                 kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
                 cd .. &>/dev/null
         done
 else
+        echo Generating netlist files ...
         # kicad-cli not found.  The netlist files must pre-exist.
-        for d in modules
+        for d in $modules
         do
                 if [ ! -f $d/module.net ]
                 then
@@ -113,44 +159,55 @@ else
 fi
 
 # Workflow Step #3:
+echo Generation of flip-flop initialization file ...
 n=0
 rm $model.v &>/dev/null
-for d in modules
+for d in $modules
 do
         n=$((n+1))
         cd $d &>/dev/null
         rm empty.init &> /dev/null
         touch empty.init
-        dumbVerilog.py A$n module.net pins.txt 20 empty.init module.kicad_sch >>../$model.v
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 empty.init module.kicad_sch >>../$model.v
         cd - &>/dev/null
 done
-dumbInitialization.py <$model.v
+$python_exe -m dumbInitialization <$model.v
+echo Generation of logic-module Verilog source code ...
 n=0
 rm $model.v &>/dev/null
-for d in modules
+for d in $modules
 do
         n=$((n+1))
         cd $d &>/dev/null
-        dumbVerilog.py A$n module.net pins.txt 20 ../A$n.init module.kicad_sch >>../$model.v
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 ../A$n.init module.kicad_sch >>../$model.v
         cd - &>/dev/null
 done
 
 # Workflow step #4
-dumbTestbench.py <$model.v >$model_tb.v
+echo Generation of testbench object-definition file ...
+$python_exe -m dumbTestbench <$model.v >"$model"_tb.v
 cp tb-$model.v tb.v
 
 # Workflow step #5
-cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v roms/$software.v >>$model.v
+echo Setup of erasable/fixed memory Verilog source code ...
+cp roms/$software.v roms/rom.v
+cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v fixed_erasable_memory/BUFFER.v >>$model.v
 
 # Workflow step #6
-
-iverilog -o $model.vvp $model_tb.v $model.v
+echo Compiling Verilog source code ...
+if [ "$3" == "" ]
+then
+        verilogOptions="-DDUMP_ALL"
+else
+        verilogOptions="$3"
+fi
+iverilog $verilogOptions -o $model.vvp "$model"_tb.v $model.v
 
 # Workflow step #7
-
+echo Performing simulation ...
 vvp $model.vvp -fst
 mv agc.fst $model.fst
 
 # Workflow step #8
-
+echo Simulation-results data visualization ...
 gtkwave $model.fst

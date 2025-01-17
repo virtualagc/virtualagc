@@ -15,6 +15,8 @@ REM A1, A2, A3, ..., A24.  The optional parameter can give the name of a netlist
 REM file.  If it is not present, then KiCad v7 or later is required so that
 REM we can generate the netlist file ourself from the command line.
 
+SET PYTHONPATH=%PATH%
+
 REM First, parse the command line and perform sanity checks.
 
 IF "%~1" == "" (

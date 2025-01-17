@@ -11,6 +11,11 @@
 # file.  If it is not present, then KiCad v7 or later is required so that
 # we can generate the netlist file ourself from the command line.
 
+# Let's find out what the name of the python3 executable is:
+export python_exe=python
+which python3 &>/dev/null && export python_exe=python3
+export PYTHONPATH="$PATH"
+
 # First, parse the command line and perform sanity checks.
 
 if [ "$1" = "" ]
@@ -63,13 +68,13 @@ fi
 
 rm empty.init &> /dev/null
 touch empty.init
-dumbVerilog.py $modulenum $netlist pins.txt 20 empty.init $schematic > module.v
-dumbInitialization.py < module.v
-dumbVerilog.py $modulenum $netlist pins.txt 20 $modulenum.init $schematic > module.v
+$python_exe -m dumbVerilog $modulenum $netlist pins.txt 20 empty.init $schematic > module.v
+$python_exe -m dumbInitialization < module.v
+$python_exe -m dumbVerilog $modulenum $netlist pins.txt 20 $modulenum.init $schematic > module.v
 
 # Workflow step #4
 
-dumbTestbench.py < module.v > module_tb.v
+$python_exe -m dumbTestbench < module.v > module_tb.v
 
 # Workflow step #5: None needed for stand-alone logic modules.
 
