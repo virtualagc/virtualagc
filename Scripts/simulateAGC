@@ -40,31 +40,31 @@ export PYTHONPATH="$PATH"
 
 # Parse command line and perform sanity checks.
 
-if [ "$1" == "" ]
+if [ "$1" = "" ]
 then
         model=2003993
         sameAs=2003993
-elif [ "$1" == 2003993 ]
+elif [ "$1" = 2003993 ]
 then
         model=$1
         sameAs=2003993
-elif [ "$1" == 2003200 ]
+elif [ "$1" = 2003200 ]
 then
         model=$1
         sameAs=2003200
-elif [ "$1" == 2003100 ]
+elif [ "$1" = 2003100 ]
 then
         model=$1
         sameAs=2003100
         echo Model not yet supported.
         exit 1
-elif [ "$1" == 1003700 ]
+elif [ "$1" = 1003700 ]
 then
         model=$1
         sameAs=1003700
         echo Model not yet supported.
         exit 1
-elif [ "$1" == 1003565 ]
+elif [ "$1" = 1003565 ]
 then
         model=$1
         sameAs=1003700
@@ -74,13 +74,13 @@ else
         echo Unrecognized AGC model number.
         exit 1
 fi
-if [ $model == $sameAs ]
+if [ $model = $sameAs ]
 then
         echo "AGC model: $model"
 else
         echo "AGC model: $model (same as $sameAs)"
 fi
-if [ $sameAs == 2003993 ]
+if [ $sameAs = 2003993 ]
 then
         # Schematic drawings for logic modules A1-A24.
         modules=
@@ -108,11 +108,12 @@ then
         modules="$modules 2005271-"
         modules="$modules 2005272A"
         modules="$modules 2005273A"
+        module52=2003305B
 fi
 
 # Workflow Step #1:
 echo Checking existence of all schematic diagrams needed ...
-for d in $modules
+for d in $modules $module52
 do
         if [ ! -f $d/module.kicad_sch ]
         then
@@ -121,7 +122,7 @@ do
         fi
 done
 
-if [ "$2" == "" ]
+if [ "$2" = "" ]
 then
         software=Validation-hardware-simulation
 else
@@ -139,7 +140,7 @@ if which kicad-cli &>/dev/null
 then
         echo Generating netlist files ...
         # kicad-cli does exist.
-        for d in $modules
+        for d in $modules $module52
         do
                 cd $d &>/dev/null
                 kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
@@ -148,7 +149,7 @@ then
 else
         echo Checking existence of netlist files ...
         # kicad-cli not found.  The netlist files must pre-exist.
-        for d in $modules
+        for d in $modules $module52
         do
                 if [ ! -f $d/module.net ]
                 then
@@ -162,9 +163,14 @@ fi
 echo Generation of flip-flop initialization file ...
 n=0
 rm $model.v &>/dev/null
-for d in $modules
+for d in $modules $modules
 do
-        n=$((n+1))
+        if [ $n = 24 ]
+        then
+                n=52
+        else
+                n=$((n+1))
+        fi
         cd $d &>/dev/null
         rm empty.init &> /dev/null
         touch empty.init
@@ -195,7 +201,7 @@ cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v fixed_erasable_memor
 
 # Workflow step #6
 echo Compiling Verilog source code ...
-if [ "$3" == "" ]
+if [ "$3" = "" ]
 then
         verilogOptions="-DDUMP_ALL"
 else
