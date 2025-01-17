@@ -28,55 +28,48 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
       <li><a moz-do-not-send="true" href="#EntireAGC">Big Example:&nbsp;
           Simulating an Entire AGC</a></li>
       <ul>
-        <li><a moz-do-not-send="true" href="#SomeBackground">Some
-            Background Information</a><br>
+        <li><a moz-do-not-send="true" href="#AGCchoices">Choices To Make</a></li>
+        <li><a moz-do-not-send="true" href="#AGCworkflow">The Workflow</a><br>
         </li>
-        <li><a href="#Steps_1_2_and_3:_Creating_Verilog">Workflow Steps
-            1, 2, and
-            3: Creating Verilog Source-Code Files Corresponding To the
-            AGC Schematics</a><br>
-        </li>
-        <li><a href="#Step_4:_The_Test_BenchTBD">Workflow Step 4: The
-            Test Bench,
-            and Initial States and Gate Delays<br>
-          </a></li>
-        <ul>
-          <li><a href="#module.init">module.init</a></li>
-          <li><a href="#Testbench_files">Testbench files</a><br>
-          </li>
-        </ul>
-        <li><a href="#Step_5:_Providing_ErasableFixed_Memory">Workflow
-            Step 5:
-            Providing Erasable/Fixed Memory</a><br>
-        </li>
-        <li><a href="#Step_5:_Compilation_of_the_Verilog">Workflow Step
-            6:
-            Compilation of the Verilog</a></li>
-        <li><a href="#Step_6:_Running_the_Simulation">Workflow Step 7:
-            Running the
-            Simulation</a></li>
-        <li><a href="#Step_7:_Viewing_the_Results">Workflow Step 8:
-            Viewing the
-            Results</a></li>
       </ul>
-      <li><a href="#Appendix:_Translation_from_KiCad_into">Appendix:
-          Technical Details</a></li>
       <ul>
-        <li><a moz-do-not-send="true" href="#CreatingSchematic">Creating/Editing
-            a Schematic Diagram</a><br>
+      </ul>
+      <li><a href="#Appendix:_Translation_from_KiCad_into">Technical
+          Appendix</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#CreatingSchematic">Transcribing/Editing
+
+
+
+
+
+
+
+            a Schematic Diagram with eeschema</a><br>
         </li>
         <li><a moz-do-not-send="true" href="#CreatingNetlists">Creating
-            a Netlist</a><br>
+            a Netlist with eeschema</a><br>
         </li>
         <li><a href="#Converting_Netlist_to_Verilog">Converting Netlists
-            to Verilog Source code</a></li>
+            to Verilog Source code with dumbVerilog.py<br>
+          </a></li>
         <li><a moz-do-not-send="true" href="#PinsTxt">The pins.txt File</a><br>
         </li>
-        <li><a href="#Generating_Flip-flop_Initialization">Generating
-            Flip-Flop Initialization Files (module.init)</a><br>
+        <li><a href="#Generating_Flip-flop_Initialization">The
+            module.init file and dumbInitialization.py</a><br>
         </li>
         <li><a href="#Converting_Verilog_Module_to_Verilog">Converting
             Verilog Module(s) to Verilog Test Bench</a></li>
+        <li><a moz-do-not-send="true" href="#compilation">Compilation of
+            the Verilog Source Code</a><br>
+        </li>
+        <li><a moz-do-not-send="true" href="#RunningTheSimulation">Running
+
+
+
+            the Simulation</a></li>
+        <li><a moz-do-not-send="true" href="#visualization">Visualization</a><br>
+        </li>
         <li><a moz-do-not-send="true" href="#tying">Tying It All
             Together</a><br>
         </li>
@@ -85,36 +78,54 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>Digital simulation of the AGC electrical design can provide
       detailed insight into how the computer functions.&nbsp; Aside from
-      satisfying simple personal interest,
-      this is very valuable if you wish to create a simulation of the
-      AGC, in the manner of Virtual AGC Project's <a
-        href="http://www.ibiblio.org/apollo/yaAGC.html">Block II AGC
-        software simulator</a> or <a
+      satisfying simple personal interest, this is very valuable if you
+      wish to create a simulation of the AGC, in the manner of Virtual
+      AGC Project's <a href="http://www.ibiblio.org/apollo/yaAGC.html">Block
+
+
+
+
+
+
+        II AGC software simulator</a> or <a
         href="Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1">Block I
         AGC software simulator</a>, or John Pultorak's <a
 href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Block
 I
+
+
+
+
+
+
+
         AGC hardware simulator</a>, and want to have some way of
       verifying that your creation works properly.<br>
     </p>
-    <p>Realize, though, that the purpose of such simulations can only
-      be accurate examination or verification of AGC behavior, and they
-      are not practical substitutes for software (such as our <a
+    <p>Realize, though, that the purpose of such simulations can only be
+      accurate examination or verification of AGC behavior, and they are
+      not practical substitutes for software (such as our <a
         moz-do-not-send="true" href="yaAGC.html"><b>yaAGC</b></a>
       program) designed and dedicated solely to running AGC
       software.&nbsp; While you <i>can</i> use digital electrical
       simulations to run AGC software, these simulations are very much
-      slower than real
-      time.&nbsp; One day, as computer speeds continue to advance, I
-      expect that digital electrical simulations will be much faster
-      than now!&nbsp; But not now.&nbsp; Recognize too that while
-      simulation of the AGC or DSKY's <i>analog</i> circuitry is also
-      possible, that's not what I'm talking about here.&nbsp; It is
-      simulation of the digital circuitry — i.e., the collection of
-      logic gates in the AGC — that will be of interest.<br>
+      slower than real time.&nbsp; One day, as computer speeds continue
+      to advance, I expect that digital electrical simulations will be
+      much faster than now!&nbsp; But "faster than now" not <i>now</i>.&nbsp;
+
+
+
+
+
+
+      Recognize too that while simulation of the AGC or DSKY's <i>analog</i>
+      circuitry is also possible, that's not what I'm talking about
+      here.&nbsp; It is simulation of the digital circuitry — i.e., the
+      collection of logic gates in the AGC — that will be of interest.<br>
     </p>
     <p>Here's an executive summary of the workflow of the
-      digital-simulation process as I envisage it:&nbsp; <br>
+      digital-simulation process as I envisage it, and which will be
+      used throughout the remainder of this page:&nbsp; <br>
     </p>
     <table cellspacing="2" cellpadding="2" border="1" height="739"
       align="center">
@@ -144,9 +155,9 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
         <tr>
           <td valign="middle">2<br>
           </td>
-          <td valign="middle">Netlists — i.e., files that list
-            every electrical connection in a given electrical schematic
-            — are created.<br>
+          <td valign="middle">Netlists — i.e., files that list every
+            electrical connection in a given electrical schematic — are
+            created.<br>
           </td>
           <td valign="middle"><b>KiCad</b> itself creates the netlist
             files.&nbsp; There are many different formats of netlist
@@ -162,29 +173,36 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">here<
             are translated into Verilog source code.</td>
           <td valign="middle"> <a moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
-            is a high-level
-            hardware description language.&nbsp; The translation into
-            Verilog source code is performed by <a
+            is a high-level hardware description language.&nbsp; The
+            translation into Verilog source code is performed by <a
               moz-do-not-send="true"
               href="https://github.com/virtualagc/virtualagc/tree/schematics/Scripts">a
               Python 3 script called <b>dumbVerilog.py</b></a> that we
-            provide.&nbsp; <br>
+            provide, assisted by another such script that's called <a
+              moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbInitialization.py"><b>dumbInitialization.py</b></a>.&nbsp;
+
+
+
+
+
+
             <br>
-            <b>Note:</b>&nbsp; The script <b>dumbVerilog.py</b> is
-            specialized for AGC digital circuits ~1970, and will not
-            produce anything useful when applied to non-AGC circuitry or
-            to analog circuitry.<br>
+            <br>
+            <b>Note:</b>&nbsp; These scripts are specialized for AGC
+            digital circuits ~1970, and will not produce anything useful
+            when applied to non-AGC circuitry or to analog circuitry.<br>
           </td>
         </tr>
         <tr>
           <td valign="middle">4<br>
           </td>
           <td valign="middle">A "test bench" — i.e., a description in
-            Verilog source code of the external
-            inputs into the emulated circuitry vs time — is written.</td>
-          <td valign="middle">There's a helpful Python 3 script, <a
-              moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbTestbench.py">dumbTestbench.py</a>,
+            Verilog source code of the external inputs into the emulated
+            circuitry vs time — is written.</td>
+          <td valign="middle">There's a helpful Python 3 script, <b><a
+                moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbTestbench.py">dumbTestbench.py</a></b>,
             which can automate a little of this for you, but the script
             can't read your mind (yet!), so you still have to make some
             choices for yourself.<br>
@@ -199,6 +217,13 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbTestb
             Verilog source code.</td>
           <td valign="middle"><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">This
+
+
+
+
+
+
+
               has already been done</a>, at least for an incomplete
             selection of the AGC software versions available to us.<br>
           </td>
@@ -207,10 +232,8 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
           <td valign="middle">6<br>
           </td>
           <td valign="middle">The Verilog source code for the AGC
-            circuitry, the test bench, and the
-            erasable/fixed memory are compiled together into an
-            executable
-            form.</td>
+            circuitry, the test bench, and the erasable/fixed memory are
+            compiled together into an executable form.</td>
           <td valign="middle">Our workflow specifically uses the <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/Icarus_Verilog">Icarus
@@ -225,16 +248,14 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
           </td>
           <td valign="middle">Our workflow uses the <b>iVerilog</b>
             emulator for this.&nbsp; Typically, this creates a "dump
-            file" of
-            whichever of the AGC's signals were considered to be
-            interesting when the test bench was written.</td>
+            file" of whichever of the AGC's signals were considered to
+            be interesting when the test bench was written.</td>
         </tr>
         <tr>
           <td valign="middle">8<br>
           </td>
           <td valign="middle">The output data dumped by the emulation is
-            viewed as
-            waveforms, similar to an oscilloscope, or else is
+            viewed as waveforms, similar to an oscilloscope, or else is
             post-processed in some other manner.</td>
           <td valign="middle">Our workflow uses a program called <a
               moz-do-not-send="true"
@@ -261,35 +282,26 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
         alternate tool may be, but at least I'll be interested to hear
         the news and can parrot it back to the general public!<br>
       </font></blockquote>
-    <p>Multiple types of simulation are possible, including:<br>
+    <p>Although multiple types of simulation are possible, we'll
+      concentrate just on these particular configurations:<br>
     </p>
     <ul>
-      <li>Full AGC + DSKY</li>
-      <li>Full AGC</li>
-      <li>Individual AGC "module" (A1 - A24)</li>
-      <li>Individual circuit board within an AGC module<br>
+      <li>A full AGC, consisting of multiple "logic modules"
+        interconnected via a backplane into which they plug.<br>
+      </li>
+      <li>A single logic module, or portion thereof.<br>
       </li>
     </ul>
-    <p>Indeed, if you are capable of writing your own Verilog
-      descriptions of <i>Other</i> peripheral hardware in the LM or CM,
-      you can
-      probably even simulate AGC+DSKY+<i>Other</i>.&nbsp; What we'll
-      concentrate on discussing, however, is the full AGC.&nbsp;
-      Hopefully, with that background, you'll be able to see for
-      yourself how to create and run some other granularity of the
-      simulation.<br>
-    </p>
-    <p>One slight point of confusion is that in the AGC design, the
-      various plug-in circuits are called "modules", while Verilog also
-      uses the term "modules" for its constructs that are similar to
-      "functions" or "subroutines" in other programming languages.&nbsp;
-      Now as it happens, we've implemented the simulation in such a way
-      that each AGC module <i>actually is</i> modeled as a single
-      Verilog module.&nbsp; That's more-or-less a coincidence, though,
-      and if you attempt to work with any simulations that differ from
-      those we've pre-prepared for you, you may have to watch out for
-      the dual meaning of this term.<br>
-    </p>
+    One slight point of confusion is that in the AGC design, the various
+    plug-in circuits are called "modules", while Verilog also uses the
+    term "modules" for its constructs that are similar to "functions" or
+    "subroutines" in other programming languages.&nbsp; Now as it
+    happens, we've implemented the simulation in such a way that each
+    AGC module <i>actually is</i> modeled as a single Verilog
+    module.&nbsp; That's more-or-less a coincidence, though, and if you
+    attempt to work with any simulations that differ from those we've
+    pre-prepared for you, you may have to watch out for the dual meaning
+    of this term.<br>
     <ul>
     </ul>
     <h1><a name="References"></a>References</h1>
@@ -304,6 +316,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
           href="https://archive.org/details/apollocommandmodacel">Volume
           1</a> and <a
           href="https://archive.org/details/apollocommandmodacel_0">Volume
+
+
+
+
+
+
+
           2</a>.<br>
       </li>
       <li><a href="klabs/history/agc_schematics_block2/">Scans of the
@@ -321,6 +340,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
       <li><a
           href="ElectroMechanical.html#Appendix:_Index_and_Links_to_all_AGC_">Drawing-by-drawing
 index
+
+
+
+
+
+
+
           into the items above.</a></li>
     </ul>
     AGC/DSKY electrical schematics transcribed into KiCad
@@ -328,6 +354,13 @@ index
     <ul>
       <li><a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHub
+
+
+
+
+
+
+
           repository</a></li>
     </ul>
     <p>Open-source software:<br>
@@ -338,6 +371,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHu
       <li><a
 href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbVerilog.py">KiCad-to-Verilog
 translator
+
+
+
+
+
+
+
           script</a></li>
       <li><a href="http://iverilog.icarus.com/">Icarus Verilog (Verilog
           compiler and simulator)</a></li>
@@ -350,131 +390,278 @@ translator
       <li><a href="https://github.com/virtualagc/agc_hardware/">KiCad
           schematics</a></li>
       <li><a href="https://github.com/virtualagc/agc_simulation/">Verilog
+
+
+
+
+
+
+
           translations</a></li>
     </ul>
     <blockquote>
       <p><font size="-1"><b>Aside:</b>&nbsp; It should be noted that the
-          AGC simulations described on
-          this page were <i>not</i> based on Mike Stewart's
-          pre-existing
-          project, other than in spirit.&nbsp; Mike's simulation was a
-          very important resource in the
-          sense that cross comparisons of the results output by Mike's
-          implementation with those output by mine provided a way to
-          detect errors in both implementations
-          that would not have been easily discoverable otherwise.&nbsp;
-          And I can honestly tell you that it would never even have
-          occurred to me to try this if Mike hadn't already done what he
-          did!&nbsp; It's very much a case of "me too!" on my part.
-          &nbsp; With that said, there are some pros and cons that work
-          in both directions.&nbsp; My schematics closely match the
-          original AGC schematics, so closely that you can overlay them,
-          while Mike's schematics are intended to be — and I believe,
-          are! — <i>functionally</i> identical to the original
-          schematics, but impossible to verify vs the original
-          schematics without considerable intellectual effort.&nbsp;
-          Mike's version is more efficient in the sense that his
-          simulation runs significantly faster than mine ... but you
-          can't compare his side-by-side with the original schematics to
-          verify correctness as you can with mine.&nbsp; Which approach
-          you prefer is a matter of taste.&nbsp; What I'll be discussing
-          <i>here</i> is my own approach rather than Mike's.</font><br>
+          AGC simulations described on this page were <i>not</i> based
+          on Mike Stewart's pre-existing project, other than in
+          spirit.&nbsp; Mike's simulation was a very important resource
+          in the sense that cross comparisons of the results output by
+          Mike's implementation with those output by mine provided a way
+          to detect errors in both implementations that would not have
+          been easily discoverable otherwise.&nbsp; And I can honestly
+          tell you that it would never even have occurred to me to try
+          this if Mike hadn't already done what he did!&nbsp; It's very
+          much a case of "me too!" on my part. &nbsp; With that said,
+          there are some pros and cons that work in both
+          directions.&nbsp; My schematics closely match the original AGC
+          schematics, so closely that you can overlay them, while Mike's
+          schematics are intended to be — and I believe, are! — <i>functionally</i>
+          identical to the original schematics, but impossible to verify
+          vs the original schematics without considerable intellectual
+          effort.&nbsp; Mike's version is more efficient in the sense
+          that his simulation runs significantly faster than mine ...
+          but you can't compare his side-by-side with the original
+          schematics to verify correctness as you can with mine.&nbsp;
+          Which approach you prefer is a matter of taste.&nbsp; What
+          I'll be discussing <i>here</i> is my own approach rather than
+          Mike's.</font><br>
       </p>
     </blockquote>
     <ul>
     </ul>
     <h1><a name="WorkstationSetup"></a>Workstation Setup</h1>
-    <p>Install the following software on your computer:<br>
+    <p>If you are using Virtual AGC via the Virtual AGC 64-bit Virtual
+      Machine, then everything is already set up for you.<br>
+    </p>
+    <p>If not, you'll want to install the following software on your
+      computer:<br>
     </p>
     <ul>
+    </ul>
+    <ul>
       <li><a moz-do-not-send="true" href="https://www.kicad.org/">KiCad
-          EDA</a><br>
-      </li>
+          EDA</a></li>
       <li><a moz-do-not-send="true"
           href="https://steveicarus.github.io/iverilog/">Icarus Verilog</a><br>
       </li>
       <li><a moz-do-not-send="true"
           href="https://gtkwave.github.io/gtkwave/">GTKWave</a></li>
     </ul>
-    <p>On Ubuntu or Linux Mint, this is as simple as using the command<br>
+    <p>On Ubuntu Linux or Debian Linux, or derivatives of either of them
+      like Linux Mint, installation of the three programs mentioned
+      above is as simple as using the command "<font color="#663300"><code>sudo
+
+
+
+          apt install kicad iverilog gtkwave</code></font>"; with Red
+      Hat or Fedora, I believe but don't guarantee that you could use "<font
+        color="#663300"><code>sudo yum install kicad iverilog gtkwave</code></font>";
+
+
+
+      on other Linux platforms, Solaris, or FreeBSD there's likely to be
+      some easy way, but you'll have to research it yourself.<br>
     </p>
-    <blockquote>
-      <pre>sudo apt install kicad iverilog gtkwave<br></pre>
-    </blockquote>
-    <p>On other platforms, installation may or may not be something as
-      simple, but you should follow the hyperlinks given above to find
-      out.<br>
+    <p>On Windows, install KiCad from the installer found at the
+      hyperlink given above; watch for an option to add the KiCad
+      command-line program (kicad-cli.exe) to your PATH, and if there is
+      such an option then be sure to take advantage of it.&nbsp; There's
+      also an <a moz-do-not-send="true"
+        href="https://bleyer.org/icarus/">installer providing both
+        Icarus Verilog and GTKWave</a>, and I'd suggest using it rather
+      than the individual hyperlinks given above.&nbsp; But note that
+      you'll find some additional setup instructions at the end of this
+      section.<br>
     </p>
-    <p>Download <a moz-do-not-send="true"
+    <p>On Mac OS these installations have proven to be far less
+      straightforward, and I've had to put considerable research into
+      just figuring out how to do them.&nbsp; KiCad is easy, sort of,
+      and can indeed be installed in the sense of copying a dmg file to
+      your computer, from&nbsp; the hyperlink for step #1 above.&nbsp;
+      However, the dmg file in which KiCad is found needs to remain
+      mounted for KiCad to be usable, so double-click the dmg file to
+      mount it.&nbsp; As for the other two programs, the following <i>may</i>
+      work if you have <a moz-do-not-send="true"
+        href="https://brew.sh/">homebrew</a> installed:<br>
+    </p>
+    <ul>
+      <li>brew install icarus-verilog</li>
+      <li>brew install --HEAD randomplum/gtkwave/gtkwave<br>
+      </li>
+    </ul>
+    <p>On all operating systems, download <a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/tree/schematics">the
+
+
+
+
+
+
+
         "schematics" branch of the Virtual AGC repository</a> from
       GitHub.&nbsp; There are many different ways you might do this,
       depending on your computer platform and personal tastes, and I
       wouldn't presume to dictate to you.&nbsp; For the sake of
       discussion, however, I'll assume that you've done this by creating
-      a folder called "virtualagc-schematics" in your "home
-      directory".&nbsp; For example, if you have the git program
+      a folder called "virtualagc-schematics" in your home
+      directory.&nbsp; For example, if you have the <b>git</b> program
       installed on your computer, you could do it with a command like:<br>
     </p>
     <blockquote>
       <pre>git clone --depth=1 -b schematics https://github.com/virtualagc/virtualagc.git virtualagc-schematics<br></pre>
     </blockquote>
-    <p>Within the folder you've just created you'll find a folder called
+    <p>Install Python 3 if not already installed, and then install the
+      Python module TatSu:<br>
+    </p>
+    <blockquote>
+      <pre>pip install tatsu<br></pre>
+    </blockquote>
+    <p>or perhaps<br>
+    </p>
+    <blockquote>
+      <pre>pip3 install tatsu</pre>
+    </blockquote>
+    <p>Within the virtualagc-schematics folder (or whatever you chose to
+      call it) you've just created, you'll find a folder called
       "Scripts".&nbsp; Add the path to this Scripts folder into your
       PATH environment variable.&nbsp; Depending on your particular
       computer platform, the way of doing that varies.&nbsp; But the
       following should usually work:<br>
     </p>
     <ul>
-      <li>Linux: Add the line "<code>export PATH=$PATH:</code><code><i>PathToYourNewFolder</i></code>"
+      <li>Linux: Add the line "<code>export PATH=$PATH:</code><code><i>PathToScripts</i></code>"
         to the file ~/.bashrc using a text editor.</li>
-      <li>Mac OS: Add the line "<code>export PATH=$PATH:</code><code><i>PathToYourNewFolder</i></code>"
+      <li>Mac OS: Add the line "<code>export PATH=$PATH:</code><code><i>PathToScripts</i></code>"
         to <i>both</i> of the files ~/.bashrc and ~/.zprofile using a
         text editor.</li>
       <li>Windows:&nbsp; I'd suggest opening up the desktop menu and
         searching for "edit environment variables".&nbsp; Edit the
-        "Path" variable for your account and add <code><i>PathToYourNewFolder</i></code>
+        "Path" variable for your account and add <code><i>PathToScripts</i></code>
         to it.</li>
     </ul>
-    <p>It's likely the changes the PATH won't affect any existing
-      command lines which are open, so you'll probably have to open a
-      new command-line terminal to get the benefit of the change.<br>
+    <i>Extra Environment Variables for Windows and Mac OS:&nbsp; </i><br>
+    <ul>
+      <li>The folder you just added to the PATH needs also to be added
+        to a probably-new environment variable called PYTHONPATH if
+        you'd like all of the instructions you'll find in the text below
+        to work for you.&nbsp; Use the same technique as described above
+        for editing the PATH.</li>
+    </ul>
+    <p><i>Even More Environment Variables for Windows:</i><br>
     </p>
+    <ul>
+      <li>After installing KiCad, perform the test of opening a command
+        line and using the command "kicad-cli".&nbsp; if you are told
+        that kicad-cli cannot be found, then you have encountered <a
+          moz-do-not-send="true"
+          href="https://gitlab.com/kicad/code/kicad/-/issues/19639">a
+          bug in the KiCad installer</a>, which you ought to work around
+        by adding the folder containing the kicad-cli.exe file to your
+        PATH.&nbsp; For me, that folder was C:\Users\<i>USERNAME</i>\AppData\Local\Programs\KiCad\8.0\bin.&nbsp;
+
+
+
+        For you, it may turn out to be different.</li>
+    </ul>
+    <p><i>Even More Environment Variables for Mac OS:</i><br>
+    </p>
+    <ul>
+      <li>After installing KiCad, perform the test of opening a command
+        line and using the command "kicad-cli".&nbsp; if you are told
+        that kicad-cli cannot be found, then you have to add the folder
+        containing the <b>kicad-cli</b> program to your PATH.&nbsp; For
+        me, that folder was
+        /Volumes/KiCad/KiCad/KiCad.app/Contents/MacOS. <br>
+      </li>
+    </ul>
+    <p>It's likely that the changes to the PATH or PYTYONPATH won't
+      affect any existing command line terminals which are already open,
+      so you'll probably have to open a new command-line terminal to get
+      the benefit of the change(s).</p>
     <h1><a name="An_Example:_testVerilog"></a>First Example: Simulating
       a Small Digital Circuit<br>
     </h1>
     <p>The Virtual AGC software repository already contains some
       fully-worked out examples of digital simulations. The simplest
-      example is
-      something called "<a moz-do-not-send="true"
+      example is something called "<a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVerilog">testVerilog</a>",
-      which is actually a small circuit
-      block extracted from the AGC's circuit module A1, the "scaler"
-      module.&nbsp; In this section we'll cover the testVerilog
-      simulation workflow.<br>
+
+
+
+
+
+
+
+      which is actually a small circuit block extracted from the AGC's
+      circuit module A1, the "scaler" module.&nbsp; Per the installation
+      instructions in the preceding section, all of the workflow steps
+      will be carried out in the folder
+      virtualagc-schematics/Schematics/testVerilog/.&nbsp; The results
+      given below were generated using KiCad v6, but any later version
+      should work as well, I hope.&nbsp; If you have KiCad v5 or
+      earlier, the transcribed schematics are no longer present in the
+      current repository, and the module schematics (testVerilog/*.sch)
+      would have to be retrieved from <a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tags">the older
+        repository version tagged as "KiCad-5"</a>; but I have not
+      tested, and other files might need retrieval as well.<br>
     </p>
-    <p>Workflow Step #1:&nbsp; Start with the original Apollo Program
-      schematic-diagram drawing for module A1, which is drawing
-      2005259A, two sheets (click to enlarge):<br>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; My intent is to walk you
+          through the steps of the simulation workflow.&nbsp; If you
+          haven't the fortitude for that — I understand and forgive you!
+          — and are running Linux or Windows, there's a script (<b>simulateModuleII</b>
+          or <b>simulateModuleII.bat</b>) which can do all of the work
+          for you and just present you with the visualization of the
+          simulation data created by the workflow.&nbsp; (With Mac OS,
+          I'm afraid you'll just have to muddle through without scripted
+          support.)&nbsp; If you feel strong enough, then take the high
+          road and skip past <b>simulateBlockII</b> to the main
+          narrative instead of running the script.<br>
+        </font></p>
+      <p><font size="-1">But if you must, here's how to take the low
+          road and use the script.&nbsp; For KiCad 7 or later, you can
+          do the following (with \ in place of / in Windows):<br>
+        </font></p>
+      <blockquote>
+        <pre><font size="-1">cd virtualagc-schematics/Schematics/testVerilog<br>simulateModuleII A1</font> <br></pre>
+      </blockquote>
+      <p><font size="-1">It's slightly more involved for KiCad 6:<br>
+        </font></p>
+      <blockquote>
+        <pre><font size="-1">cd virtualagc-schematics/Schematics/testVerilog<br># Edit module.kicad_sch in eeschema and generate netlist file module.net,<br># via eeschema's <u>File</u>/<u>Export</u>/<u>Netlist</u>/<u>OrcadPCB2</u>/<u>Export Netlist</u>.<br># Then exit eeschema.<br>eeschema module.kicad_sch<br>simulateModuleII A1 module.net</font> <br></pre>
+      </blockquote>
+      <font size="-1">After the simulation completes, <a
+          moz-do-not-send="true" href="#simple8">you can just jump down
+          to workflow step #8</a> to see the simulation data displayed
+        in a visualization program.</font><br>
+    </blockquote>
+    <p>Workflow Step #1:&nbsp; We've actually transcribed this circuit
+      for you already as a file called module.kicad_sch, so you needn't
+      do anything.&nbsp; Still, just to give you an idea how it works,
+      here's very high-level summary.<br>
+    </p>
+    <p>Start with the original Apollo Program schematic-diagram drawing
+      for module A1, which is drawing 2005259A, two sheets (click to
+      enlarge):<br>
     </p>
     <div align="center"><a
         href="klabs/history/agc_schematics_block2/logic/a01-1.jpg"><img
-          src="a01-1-small.jpg" alt="" border="2" height="241"
-          width="300"></a>&nbsp; <a
+          src="a01-1-small.jpg" alt="" width="300" border="2"
+          height="241"></a>&nbsp; <a
         href="klabs/history/agc_schematics_block2/logic/a01-2.jpg"><img
-          src="a01-2-small.jpg" alt="" border="2" height="239"
-          width="300"></a><br>
+          src="a01-2-small.jpg" alt="" width="300" border="2"
+          height="239"></a><br>
     </div>
     <p>Don't be confused by the fact that the inputs of NOR gates in the
       circuit are decorated with little triangles that make the gates
       look like rocket ships.&nbsp; (Was it intentional, I
-      wonder?)&nbsp; They're just regular NOR gates in
-      spite of that.&nbsp; The numbered oval pads are the inputs from or
-      outputs to the AGC backplane into which the various AGC circuitry
-      modules plug.&nbsp; Perhaps I should also point out that the NOR
-      gates used in the AGC were open-drain gates, in which you can
-      directly tie together outputs from different gates (effectively
-      AND'ing them without any literal AND gate).&nbsp;&nbsp; <br>
+      wonder?)&nbsp; They're just regular NOR gates in spite of
+      that.&nbsp; The numbered oval pads are the inputs from or outputs
+      to the AGC backplane into which the various AGC circuitry modules
+      plug.&nbsp; Perhaps I should also point out that the NOR gates
+      used in the AGC were open-drain gates, in which you can directly
+      tie together outputs from different gates (effectively AND'ing
+      them without any literal AND gate).&nbsp;&nbsp; <br>
     </p>
     <blockquote>
       <p><font size="-1"><b>Aside:</b>&nbsp; I won't cover here how to
@@ -518,174 +705,155 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVe
       additional criteria) look like this: <br>
     </p>
     <div align="center"><a href="KiCad/2005259A-p1of2.png"><img
-          src="2005259A-p1of2-small.png" alt="" border="2" height="232"
-          width="300">&nbsp; </a><a href="KiCad/2005259A-p2of2.png"><img
-          src="2005259A-p2of2-small.png" alt="" border="2" height="232"
-          width="300"></a><br>
+          src="2005259A-p1of2-small.png" alt="" width="300" border="2"
+          height="232">&nbsp; </a><a href="KiCad/2005259A-p2of2.png"><img
+          src="2005259A-p2of2-small.png" alt="" width="300" border="2"
+          height="232"></a><br>
     </div>
     <p>Now as I mentioned, AGC module A1 is the "scaler" circuit.&nbsp;
-      If you want to
-      read about it in some detail, you can look at <a
+      If you want to read about it in some detail, you can look at <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">section
 4-5.3.4
-        of document ND-1021042</a>, which covers the theory of
-      operation of this module.&nbsp; The module's purpose is to take
-      clock signal called FS01/ (a 102.4 KHz square wave), which you can
-      see coming into the module from the AGC's backplane near the upper
+
+
+
+
+
+
+
+        of document ND-1021042</a>, which covers the theory of operation
+      of this module.&nbsp; The module's purpose is to take a clock
+      signal called FS01/ (a 51.2 KHz square wave), which you can see
+      coming into the module from the AGC's backplane near the upper
       left on the first sheet of the schematic, and to run it through a
       sequence of identical circuit blocks that successively cut the
-      frequency of
-      that signal in half, as follows, and outputting those slower
-      clocks back to the AGC's backplane:<br>
+      frequency of that signal in half, as follows, outputting those
+      slower clocks back to the AGC's backplane:<br>
     </p>
     <ul>
-      <li>Output signal FS02 is 51.2 KHz</li>
-      <li> Output signal FS03 is 25.6 KHz</li>
+      <li>Output signal FS02 is 25.6 KHz</li>
+      <li> Output signal FS03 is 12.8 KHz</li>
       <li>...</li>
-      <li>Output signal FS33 is 0.000023842 Hz</li>
+      <li>Output signal FS33 is 0.000011921 Hz</li>
     </ul>
+    <p>ND-1021042 has <a moz-do-not-send="true"
+        href="Documents/apollolunarexcuracel_0.pdf#page=367">a handy
+        table</a> listing all of the values for FS01 through FS17, but
+      for whatever reason doesn't deign to list FS18 through FS33 for
+      us.<br>
+    </p>
     <p>To simplify things, the testVerilog example cuts this all down so
       that just the <i>first</i> of the many divide-by-two circuit
-      blocks.&nbsp; The abridged circuit produces
-      the output signal FS02 from input signal FS01/ and implements
-      what's known to electrical engineers as a "flip-flop". &nbsp; Here
-      is an
-      image of that circuit:<br>
+      blocks.&nbsp; The abridged circuit produces the output signal FS02
+      from input signal FS01/ and implements what's known to electrical
+      engineers as a "flip-flop". &nbsp; Here is an image of that
+      circuit:<br>
     </p>
     <div align="center"><img src="testVerilogCircuit.png" alt=""
-        height="549" width="643"><br>
+        width="446" height="382"><br>
     </div>
-    <p>Workflow Step 2:&nbsp; <a moz-do-not-send="true"
-        href="#CreatingNetlists">Consult the Appendix</a> for detailed
-      instructions of how to create the netlist.&nbsp; While it isn't
-      terribly instructive in itself, the netlist file for this circuit
-      is
-      relatively short and relatively readable without any explanation,
-      so here it is in full:<br>
+    <p>Workflow Step 2:&nbsp; One way to create the netlist is to load
+      the schematic file into <b>eeschema</b>, then from the main menu
+      select File/Export/Netlist/OrcadPCB2/ExportNetlist and create a
+      file called module.net.&nbsp; For this discussion, I did this from
+      using KiCad v6, and got the resulting file<br>
     </p>
     <blockquote>
       <p>
         <meta http-equiv="content-type" content="text/html;
           charset=UTF-8">
       </p>
-      <pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">( { EESchema Netlist Version 1.1 created  Wed 26 Sep 2018 08:21:48 AM CDT }
-( /5D281B38 $noname  J2 ConnectorA1-200
-(  202 Net-(J2-Pad202) )
-(  204 Net-(J2-Pad204) )
-(  205 Net-(J2-Pad205) )
-(  206 Net-(J2-Pad206) )
-(  208 Net-(J2-Pad208) )
-(  209 Net-(J2-Pad209) )
-(  212 0VDCA )
-(  222 +4VDC )
-(  236 0VDCA )
-(  250 +4VDC )
-(  260 0VDCA )
-)
-( /5D281B3E $noname  U126 D3NOR-+4VDC-0VDCA-A_B-E_F
-(    6 0VDCA )
-(    7 Net-(U126-Pad7) )
-(    8 Net-(J2-Pad206) )
-(    9 Net-(J2-Pad208) )
-)
-( /5D281B45 $noname  U128 D3NOR-+4VDC-0VDCA-ABC-E_F
-(    1 Net-(U127-Pad2) )
-(    2 Net-(U127-Pad8) )
-(    3 Net-(J2-Pad205) )
-(    4 Net-(J2-Pad209) )
-(    5 0VDCA )
-(    6 0VDCA )
-(    7 Net-(U126-Pad7) )
-(    8 Net-(U127-Pad2) )
-(    9 Net-(J2-Pad209) )
-(   10 +4VDC )
-)
-( /5D281B77 $noname  U127 D3NOR-+4VDC-0VDCA-B_C-E_F
-(    1 Net-(U126-Pad7) )
-(    2 Net-(U127-Pad2) )
-(    3 Net-(J2-Pad204) )
-(    4 0VDCA )
-(    5 0VDCA )
-(    6 0VDCA )
-(    7 Net-(U126-Pad7) )
-(    8 Net-(U127-Pad8) )
-(    9 Net-(J2-Pad204) )
-(   10 +4VDC )
-)
-( /5D281B9B $noname  U129 D3NOR-+4VDC-0VDCA-ABC-E_F
-(    1 Net-(U127-Pad8) )
-(    2 Net-(J2-Pad202) )
-(    3 Net-(J2-Pad205) )
-(    4 Net-(U127-Pad2) )
-(    5 0VDCA )
-(    6 0VDCA )
-(    7 Net-(U127-Pad8) )
-(    8 Net-(J2-Pad204) )
-(    9 Net-(J2-Pad202) )
-(   10 +4VDC )
-)
-)
-*</font><br></pre>
+      <pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">( { EESchema Netlist Version 1.1 created  Tue 14 Jan 2025 05:51:55 AM CST }<br> ( /00000000-0000-0000-0000-00005d281baf $noname  J2 ConnectorA1-200<br>  (  202 Net-(J2-Pad202) )<br>  (  204 Net-(J2-Pad204) )<br>  (  205 Net-(J2-Pad205) )<br>  (  206 Net-(J2-Pad206) )<br>  (  208 Net-(J2-Pad208) )<br>  (  209 Net-(J2-Pad209) )<br>  (  212 0VDCA )<br>  (  222 +4VDC )<br>  (  236 0VDCA )<br>  (  250 +4VDC )<br>  (  260 0VDCA )<br> )<br> ( /00000000-0000-0000-0000-00005d281ba1 $noname  U129 D3NOR-+4VDC-0VDCA-ABC-E_F<br>  (    1 Net-(U127-Pad8) )<br>  (    2 Net-(J2-Pad202) )<br>  (    3 Net-(J2-Pad205) )<br>  (    4 Net-(U127-Pad2) )<br>  (    5 0VDCA )<br>  (    6 0VDCA )<br>  (    7 Net-(U127-Pad8) )<br>  (    8 Net-(J2-Pad204) )<br>  (    9 Net-(J2-Pad202) )<br>  (   10 +4VDC )<br> )<br> ( /00000000-0000-0000-0000-00005d281b3e $noname  U126 D3NOR-+4VDC-0VDCA-A_B-E_F<br>  (    6 0VDCA )<br>  (    7 Net-(U126-Pad7) )<br>  (    8 Net-(J2-Pad206) )<br>  (    9 Net-(J2-Pad208) )<br> )<br> ( /00000000-0000-0000-0000-00005d281b94 $noname  U127 D3NOR-+4VDC-0VDCA-B_C-E_F<br>  (    1 Net-(U126-Pad7) )<br>  (    2 Net-(U127-Pad2) )<br>  (    3 Net-(J2-Pad204) )<br>  (    4 0VDCA )<br>  (    5 0VDCA )<br>  (    6 0VDCA )<br>  (    7 Net-(U126-Pad7) )<br>  (    8 Net-(U127-Pad8) )<br>  (    9 Net-(J2-Pad204) )<br>  (   10 +4VDC )<br> )<br> ( /00000000-0000-0000-0000-00005d281b45 $noname  U128 D3NOR-+4VDC-0VDCA-ABC-E_F<br>  (    1 Net-(U127-Pad2) )<br>  (    2 Net-(U127-Pad8) )<br>  (    3 Net-(J2-Pad205) )<br>  (    4 Net-(J2-Pad209) )<br>  (    5 0VDCA )<br>  (    6 0VDCA )<br>  (    7 Net-(U126-Pad7) )<br>  (    8 Net-(U127-Pad2) )<br>  (    9 Net-(J2-Pad209) )<br>  (   10 +4VDC )<br> )<br>)<br>*</font><br></pre>
     </blockquote>
-    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
-        I hinted earlier that some of the tools in the workflow have
-        evolved since this section was written.&nbsp; The principal
-        offender in this regard is the KiCad EDA program, which has
-        moved from v.5 when the netlist file above was created, to v.8
-        now, with major changes having occurred in the transition from
-        v.5 to v.6.&nbsp; The moral is that if you creat the same
-        netlist <i>today</i>, it will look very different than what you
-        see above, though it will be functionally identical.</font><br>
-    </blockquote>
-    Workflow Step #3: Conversion to Verilog.&nbsp; <br>
+    Workflow Step #3: Conversion to Verilog source code.&nbsp; <br>
     <br>
-    The Verilog source code is created by the command:<br>
-    <blockquote><font face="Courier 10 Pitch">dumbVerilog.py A1 <font
-          face="Courier 10 Pitch">module</font>.net pins.txt 0.2 <font
-          face="Courier 10 Pitch">module.init</font> module.kicad_sch
-        &gt;<font face="Courier 10 Pitch">module</font>.v</font><br>
+    The Verilog source code is created by the following steps in Linux:<br>
+    <blockquote><font color="#663300" face="Courier 10 Pitch">dumbVerilog.py
+
+
+
+
+
+
+        A1 <font face="Courier 10 Pitch">module</font>.net pins.txt 20
+        ../empty<font face="Courier 10 Pitch">.init</font>
+        module.kicad_sch &gt;<font face="Courier 10 Pitch">module</font>.v<br>
+        dumbInitialization.py &lt;module.v<br>
+      </font><font color="#663300" face="Courier 10 Pitch"><font
+          face="Courier 10 Pitch">dumbVerilog.py A1 <font face="Courier
+            10 Pitch">module</font>.net pins.txt 20 A1<font
+            face="Courier 10 Pitch">.init</font> module.kicad_sch &gt;<font
+            face="Courier 10 Pitch">module</font>.v</font></font> </blockquote>
+    In Windows, it would instead be<br>
+    <blockquote><font color="#663300" face="Courier 10 Pitch">python -m
+        dumbVerilog A1 <font face="Courier 10 Pitch">module</font>.net
+        pins.txt 20 ..\empty<font face="Courier 10 Pitch">.init</font>
+        module.kicad_sch &gt;<font face="Courier 10 Pitch">module</font>.v<br>
+        python -m dumbInitialization &lt;module.v<br>
+      </font><font color="#663300" face="Courier 10 Pitch"><font
+          face="Courier 10 Pitch">python -m dumbVerilog A1 <font
+            face="Courier 10 Pitch">module</font>.net pins.txt 20 A1<font
+            face="Courier 10 Pitch">.init</font> module.kicad_sch &gt;<font
+            face="Courier 10 Pitch">module</font>.v</font></font> </blockquote>
+    While in Mac OS, it would be<br>
+    <blockquote><font color="#663300" face="Courier 10 Pitch">python3 -m
+        dumbVerilog A1 <font face="Courier 10 Pitch">module</font>.net
+        pins.txt 20 ..\empty<font face="Courier 10 Pitch">.init</font>
+        module.kicad_sch &gt;<font face="Courier 10 Pitch">module</font>.v<br>
+        python3 -m dumbInitialization &lt;module.v<br>
+      </font><font color="#663300" face="Courier 10 Pitch"><font
+          face="Courier 10 Pitch">python3 -m dumbVerilog A1 <font
+            face="Courier 10 Pitch">module</font>.net pins.txt 20 A1<font
+            face="Courier 10 Pitch">.init</font> module.kicad_sch &gt;<font
+            face="Courier 10 Pitch">module</font>.v</font></font> </blockquote>
+    The details of this procedure are covered in <a
+      moz-do-not-send="true"
+      href="#Appendix:_Translation_from_KiCad_into">the technical
+      Appendix</a>.&nbsp; In brief, pins.txt is a file describing
+    backplane connections that's appropriate for AGC models 2003200 or
+    2003993, though it doesn't really serve any purpose here since the
+    backplane is used only to interconnect multiple logic modules, and
+    uses only a portion of a single logic module.&nbsp; 20 is the
+    propagation delay of the NOR gates in nanoseconds.&nbsp; As I
+    mentioned before, in this example circuit the various NOR gates form
+    a flip-flop.&nbsp; The file A1.init is used to specify whether the
+    flip-flop is initially "on" or "off" at the start of the digital
+    simulation.&nbsp; It is a file that you can create manually — though
+    generally with considerable inconvenience —, and the purpose of the
+    first two steps of the process above is to heuristically create a
+    version of A1.init that will probably be "good enough".&nbsp; In
+    point of fact, the repository supplies a module.init for you that
+    could have been used in place of A1.init in the third step above, so
+    that the first two steps above could have been skipped.&nbsp; The
+    A1.init generated above might look like<br>
+    <blockquote>
+      <pre><font color="#663300"># Auto-generated for module A1 by dumbInitialization.py.<br>U127 1 0<br>U129 1 0</font><br></pre>
     </blockquote>
-    The command-line parameters are the AGC logic module designation
-    (A1, since testVerilog was snipped out of module A1), the name of
-    the netlist file (module.net), <a moz-do-not-send="true"
-      href="#PinsTxt">a file describing backplane connections</a>
-    (pins.txt), the propagation delay of NOR gates ("0.2" meaning "20
-    ns"), <a moz-do-not-send="true"
-      href="#Generating_Flip-flop_Initialization">the initial states of
-      flip-flops</a> (module.init), and the name of the top-level
-    schematic file (module.kicad_sch for KiCad v.6 or later, module.sch
-    for KiCad v.5 or earlier).&nbsp; For the purpose of this particular
-    example, just take pins.txt and module.init on faith, and trust that
-    they will become clear later.&nbsp; <br>
-    <br>
-    The Verilog source code you get looks somewhat similar to the
-    following.&nbsp; (It's only "somewhat similar" because this is
-    another case of tools that have evolved since I first wrote this
-    section.)&nbsp; Even if you don't know Verilog, I think you can get
-    a good sense of what's what.&nbsp; The <font color="#663300"><code>rst</code></font>
+    and is telling us that initially, we can choose output signal U127-J
+    to be HIGH (1), U127-K to be LOW (0), U129-J to be HIGH, and U129-K
+    to be LOW.&nbsp; I say it "might" look like that, because there are
+    other consisten initial conditions that could be generated instead,
+    such as:<br>
+    <blockquote>
+      <pre><font color="#663300"># Auto-generated for module A1 by dumbInitialization.py.<br>U126 0 1<br>U127 0 1<br>U128 1 0</font></pre>
+    </blockquote>
+    The Verilog source code (module.v) that you get after the final step
+    is below, depending on which initial conditions were
+    generated.&nbsp; Even if you don't know Verilog, I think you can get
+    some sense of what's what.&nbsp; The bulk of the file, namely the <font
+      color="#663300"><code>assign</code></font> statements, define how
+    the internal signals and output signals change at each timestep of
+    the simulation.&nbsp; The <font color="#663300"><code>rst</code></font>
     signal is not present in the schematic, and is simply always added
-    by <b>dumbVerilog.py</b>; it's what allows the initial conditions
-    of memory — in this case, the flip-flop — to be set up, but is
-    normally active only at the very beginning of the simulation.&nbsp;
-    Verilog doesn't allow signal names like "FS01/", because the
-    character "/" isn't legal for signal names, so the translator has
-    automatically changed "FS01/" to "FS01_".<br>
+    by <b>dumbVerilog.py</b>.&nbsp; It's what allows the initial
+    conditions of memory — in this case, the flip-flop — to be set up,
+    but is normally active only at the very beginning of the
+    simulation.&nbsp; Verilog doesn't allow signal names like "FS01/",
+    because the character "/" isn't legal for signal names, so the
+    translator has automatically changed "FS01/" to "FS01_".<br>
     <blockquote>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <pre style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; word-spacing: 0px; -webkit-text-stroke-width: 0px; overflow-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">// Verilog module auto-generated for AGC module A1 by dumbVerilog.py
-module A1 (
-rst, FS01_, F02A, F02B, FS02, FS02A
-);
-input wire rst, FS01_;
-output wire F02A, F02B, FS02, FS02A;
-assign FS02A = rst ? 0 : ~(0|U126Pad7);
-assign FS02 = rst ? 0 : ~(0|U126Pad7|U127Pad8);
-assign U127Pad8 = rst ? 1 : ~(0|F02B|FS01_|U127Pad2);
-assign U126Pad7 = rst ? 1 : ~(0|U127Pad2|FS02);
-assign U127Pad2 = rst ? 0 : ~(0|U127Pad8|FS01_|F02A);
-assign F02A = rst ? 0 : ~(0|U126Pad7|U127Pad2);
-assign F02B = rst ? 0 : ~(0|U127Pad8|FS02);
-endmodule</font></pre>
+      <pre style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; word-spacing: 0px; -webkit-text-stroke-width: 0px; overflow-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">// Verilog module auto-generated for AGC module A1 by dumbVerilog.py<br><br>module A1 ( <br>  rst, FS01_, F02A, F02B, FS02, FS02A<br>);<br><br>input wire rst, FS01_;<br><br>output wire F02A, F02B, FS02, FS02A;<br><br>parameter GATE_DELAY = 20; // This default may be overridden at compile time.<br>initial $display("Gate delay (A1) will be %f ns.", GATE_DELAY);<br><br>// Gate A1-U129A<br>pullup(g38205);<br>assign #GATE_DELAY g38205 = rst ? 1'bz : ((0|g38203|FS01_|F02B) ? 1'b0 : 1'bz);<br>// Gate A1-U129B<br>pullup(F02B);<br>assign #GATE_DELAY F02B = rst ? 0 : ((0|g38205|FS02) ? 1'b0 : 1'bz);<br>// Gate A1-U126B<br>pullup(FS02A);<br>assign #GATE_DELAY FS02A = rst ? 0 : ((0|g38204) ? 1'b0 : 1'bz);<br>// Gate A1-U127A<br>pullup(g38204);<br>assign #GATE_DELAY g38204 = rst ? 1'bz : ((0|FS02|g38203) ? 1'b0 : 1'bz);<br>// Gate A1-U127B<br>pullup(FS02);<br>assign #GATE_DELAY FS02 = rst ? 0 : ((0|g38204|g38205) ? 1'b0 : 1'bz);<br>// Gate A1-U128A<br>pullup(g38203);<br>assign #GATE_DELAY g38203 = rst ? 0 : ((0|F02A|FS01_|g38205) ? 1'b0 : 1'bz);<br>// Gate A1-U128B<br>pullup(F02A);<br>assign #GATE_DELAY F02A = rst ? 0 : ((0|g38204|g38203) ? 1'b0 : 1'bz);<br>// End of NOR gates<br><br><br>endmodule<br></font></pre>
     </blockquote>
     <a name="TestbenchExplanations"></a>Workflow Step #4: Creation of a
     test bench.&nbsp; This is the point in a simulation workflow where
@@ -693,196 +861,252 @@ endmodule</font></pre>
     the circuit to vary over time, as well as which output signals from
     the circuit you want to log for later viewing or analysis.&nbsp;
     Those decisions together comprise what's called the "test
-    bench".&nbsp; The test bench is yet another Verilog source-code
-    file.&nbsp; But again, take it on faith that this will become
-    clearer later.&nbsp; The test-bench file I've provided for the
-    testVerilog example looks something like this:<br>
+    bench".&nbsp; The test bench could be yet another Verilog
+    source-code file, though it turns out to be more-convenient for it
+    to be a pair of files, one to hold your personal choices, and
+    another to include anything that can be figured out via automation.<br>
+    <br>
+    The automated portion is performed like so:<br>
     <blockquote>
-      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <pre style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; word-spacing: 0px; -webkit-text-stroke-width: 0px; overflow-wrap: break-word; white-space: pre-wrap;"><font color="#663300" face="Courier">// Test bench for testVerilog.v
-`timescale 1us / 1ns
-module testVerilog;
-reg rst = 1;
-initial begin
-$dumpfile("testVerilog.vcd");
-$dumpvars(0, testVerilog);
-# 2 rst = 0;
-# 500 $finish;
-end
-reg FS01_ = 0;
-always #4.883 FS01_ = !FS01_;
-wire F02A, F02B, FS02, FS02A;
-A1 A1A (
-rst, FS01_, F02A, F02B, FS02, FS02A
-);
-initial
-$timeformat(-6, 0, " us", 10);
-initial
-$monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);
-endmodule</font></pre>
+      <pre><font color="#663300"># In Linux:<br>dumbTestbench.py &lt;module.v &gt;module_tb.v<br># Or in Windows:<br>python -m dumbTestbench &lt;module.v &gt;module_tb.v<br># Or in Mac OS:<br>python3 -m dumbTestbench &lt;module.v &gt;module_tb.v<br></font></pre>
     </blockquote>
-    Let's take a look at this test-bench source-code file and see what
-    it's trying to say.&nbsp; First, the "timescale" directive explains
-    how to understand the timings (the things marked with "#") that
-    appear within the test-bench file.&nbsp; It says that the time scale
-    will be 1 μs, so that the numbers for the "#" timings are in
-    microseconds.<br>
-    <blockquote><font size="-1"><b>Aside:</b>&nbsp; This is another case
-        of the software having evolved after this initial description
-        was written, so there are some differences between this sample
-        testbench file, and one you'd use for this example today.&nbsp;
-        For example, the time scale conventionally used now is 100 ns
-        rather than </font><font size="-1">1 μs.&nbsp; <br>
-      </font></blockquote>
-    The "reg rst =1" means that the <font color="#663300"><code>rst</code></font>
-    signal is going to be an input signal into the circuit we're
-    testing, but here within the test bench it's going to be a
-    "register" that remembers it's own settings, as opposed to a "wire"
-    (which cannot remember anything).&nbsp; Thus, we set <font
-      color="#663300"><code>rst</code></font> to 1 and it will stay that
-    way until we say otherwise.&nbsp; A few lines later we see "# 2 rst
-    = 0", which means that 2 us after startup, the test bench is going
-    to reset the <font color="#663300"><code>rst</code></font> signal
-    to 0, and leave it there.&nbsp; The "# 500 $finish" that you also
-    see there says that the simulation itself will actually end after
-    500 μs.&nbsp; The "$dumpfile" and "$dumpvars" statements say that an
-    output logfile called testVerilog.vcd is going to be opened, and
-    that the values of all of the input and output variables are going
-    to be dumped into it on a cycle-by-cycle basis, for later analysis.<br>
+    which gives you the following:<br>
+    <blockquote>
+      <pre><font color="#663300">// Verilog testbench created by dumbTestbench.py<br>`timescale 1ns / 1ps<br><br>module agc;<br><br>parameter GATE_DELAY = 20;<br>`include "tb.v"<br><br>wire F02A, F02B, FS02, FS02A;<br><br>A1 iA1 (<br>  rst, FS01_, F02A, F02B, FS02, FS02A<br>);<br>defparam iA1.GATE_DELAY = GATE_DELAY;<br><br>endmodule</font><br></pre>
+    </blockquote>
+    You needn't worry (I hope!) about what any of that means.&nbsp; I'll
+    just point out that it tells the emulator that the basic time scale
+    of the simulation is 1 nanosecond (with a precision of 1
+    picosecond), the propagation delay through the NOR gates is by
+    default 20 nanoseconds, and that the file tb.v, which is where the
+    "personal choices" mentioned above are stored, is automatically
+    imported.<br>
     <br>
-    The "reg FS01_ = 0" means that <font color="#663300"><code>FS01_</code></font>
-    (FS01/) is also an input to the circuit being tested, and that it
-    starts out at 0.&nbsp; But "always #4.883 FS01_ = !FS01_" means that
-    <font color="#663300"><code>FS01_</code></font> is going to be
-    toggled every 4.883 us during the simulation.&nbsp; Recall that
-    FS01/ is a 102.4 KHz square wave in the AGC, and therefore it
-    toggles from low-to-high or high-to-low at a rate of 204.8 KHz, or
-    (surprise!) every 4.8828125 us.<br>
+    <a name="tbdotv"></a>In our case, the "personal choices" are mine
+    rather than yours, unless you invent new ones, and the tb.v file I
+    give you is this:<br>
+    <blockquote>
+      <pre><font color="#663300">// Include-file used by module_tb.py for automating testbench generation.<br><br>reg rst = 1;<br>initial begin<br>  // Assumes compilation with the -fst option.<br>  $dumpfile("module.fst");<br>  $dumpvars(0, agc);<br>  <br>  # 2000 rst = 0;<br>  # 500000 $finish;<br>end<br><br>reg FS01_ = 0;<br>always #9765.625 FS01_ = !FS01_;<br>  <br>initial<br>  $timeformat(-6, 0, " us", 10);<br>initial<br>  $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);</font><br></pre>
+    </blockquote>
+    The "<font color="#663300"><code>reg rst =1</code></font>" means
+    that the <font color="#663300"><code>rst</code></font> signal is
+    going to be an input signal into the circuit we're testing, but here
+    within the test bench it's going to be a "register" that remembers
+    it's own settings, as opposed to a "wire" (which cannot remember
+    anything).&nbsp; Thus, we set <font color="#663300"><code>rst</code></font>
+    to 1 and it will stay that way until we say otherwise.&nbsp; A few
+    lines later we will see "<font color="#663300"><code># 2000 rst = 0</code></font>",
+
+
+
+
+
+
+    which means that 2000 nanoseconds (2 μs) after startup, the test
+    bench is going to reset the <font color="#663300"><code>rst</code></font>
+    signal to 0, and leave it there.&nbsp; The "<font color="#663300"><code>#
+        500000 $finish</code></font>" that you will also see there says
+    that the simulation itself will actually end after 500 μs.&nbsp; The
+    intervening "<font color="#663300"><code>$dumpfile</code></font>"
+    and "<font color="#663300"><code>$dumpvars</code></font>" statements
+    say that an output log-file called testVerilog.lxt is going to be
+    opened, and that the values of all of the input and output variables
+    are going to be dumped into it on a cycle-by-cycle basis, for later
+    analysis.&nbsp; <br>
     <br>
-    The statements "wire F02A, ..." and "A1 A1A ( ... )" simply mean
-    that a circuit module of type A1 (which is what the Verilog shown in
-    step #3 above implements) is being tested, and has outputs named <font
-      color="#663300"><code>F02A</code></font> etc.<br>
+    The "<font color="#663300"><code>reg FS01_ = 0</code></font>" means
+    that <font color="#663300"><code>FS01_</code></font> (FS01/) is
+    also an input to the circuit being tested, and that it starts out at
+    0.&nbsp; But "<font color="#663300"><code>always #9765.625 FS01_ =
+        !FS01_</code></font>" means that <font color="#663300"><code>FS01_</code></font>
+    is going to be toggled every 9.765625 μs during the
+    simulation.&nbsp; Recall that FS01/ is a 51.2 KHz square wave in the
+    AGC, and therefore it toggles from low-to-high or high-to-low at a
+    rate of 102.4 KHz, or (surprise!) every 9.765625 μs.<br>
     <br>
-    Finally, the "initial" statements at the very end describe the
-    status messages which the simulation is going to print out whilst
-    running.&nbsp; These messages are just informative, and have nothing
-    to do with the data being dumped out on the testVerilog.vcd.&nbsp;
-    You don't even need to print out any status messages if you don't
-    want to.<br>
+    Finally, the "<font color="#663300"><code>initial</code></font>"
+    statements at the very end describe the status messages which the
+    simulation is going to print out whilst running.&nbsp; These
+    messages are just informative, and have nothing to do with the data
+    being dumped out on the module.fst.&nbsp; You don't even need to
+    print out any status messages if you don't want to.<br>
     <br>
     Workflow Step #5:&nbsp; Modeling memory.&nbsp; Since we're just
     simulating a single logic module of the AGC, rather than the AGC as
     a whole, we don't need any memory other than the flip-flop that the
     circuit implements, so&nbsp; we don't need this step.<br>
     <br>
-    Workflow Step #6:&nbsp; Compiling the Verilog source-code
-    files.&nbsp; There's really nothing to show you; it's dead simple.<br>
+    Workflow Step #6:&nbsp; In this example, we have created two Verilog
+    source code files, the one describing the logic module (module.v)
+    and the one describing the test-bench (module_tb.v, which
+    automatically imports tb.v as well).&nbsp; We need to compile these
+    together to get the "executable" form of the digital simulation we
+    want to perform:<br>
+    <blockquote>
+      <pre>iverilog -o module.vvp module_tb.v module.v<br></pre>
+    </blockquote>
+    I can't show you the contents of module.vvp — I bet you're relieved!
+    —, since it's a binary file rather than a human-readable one.<br>
     <br>
-    Workflow Step #7:&nbsp; Running the simulation.&nbsp; After
-    compilation, when you run the simulation, you see something like
-    this:<br>
-    <blockquote><font size="-1" face="Courier"><font color="#663300">VCD
-          info: dumpfile testVerilog.vcd opened for output.<br>
+    Workflow Step #7:&nbsp; Here's how to run the simulation:<br>
+    <blockquote>
+      <pre>vvp module.vvp -fst<br></pre>
+    </blockquote>
+    I get messages something like this when I do that:<br>
+    <blockquote><font size="-1" face="Courier"><font color="#663300">Gate
+
+
+
+
+
+
+          delay (A1) will be 20.000000 ns.<br>
+          FST info: dumpfile module.fst opened for output.<br>
+          Gate delay (A1) will be 20.000000 ns.<br>
+          FST info: dumpfile module.fst opened for output.<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1,
+          FS01_=0, F02B=x, FS02=x, FS02A=x, FS02A=x<br>
           At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1,
           FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>
           At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 us, rst=0,
           FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5 us, rst=0,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9 us, rst=0,
+          FS01_=1, F02B=0, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9 us, rst=0,
           FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 us, rst=0, FS01_=0,
-          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15 us, rst=0, FS01_=1,
-          F02B=0, FS02=1, FS02A=1, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20 us, rst=0, FS01_=0,
-          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24 us, rst=0, FS01_=1,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 19 us, rst=0, FS01_=0,
           F02B=1, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=0,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 19 us, rst=0, FS01_=0,
+          F02B=1, FS02=1, FS02A=0, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 19 us, rst=0, FS01_=0,
           F02B=0, FS02=1, FS02A=0, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 34 us, rst=0, FS01_=1,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=1,
+          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=1,
           F02B=0, FS02=1, FS02A=1, FS02A=1<br>
           At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0,
-          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44 us, rst=0, FS01_=1,
-          F02B=1, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 49 us, rst=0, FS01_=0,
-          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 54 us, rst=0, FS01_=1,
           F02B=0, FS02=1, FS02A=1, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 us, rst=0, FS01_=0,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0,
+          F02B=0, FS02=0, FS02A=1, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0,
           F02B=0, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 63 us, rst=0, FS01_=1,
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 48 us, rst=0, FS01_=1,
+          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 48 us, rst=0, FS01_=1,
           F02B=1, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68 us, rst=0, FS01_=0,
-          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 73 us, rst=0, FS01_=1,
-          F02B=0, FS02=1, FS02A=1, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 78 us, rst=0, FS01_=0,
-          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 83 us, rst=0, FS01_=1,
-          F02B=1, FS02=0, FS02A=0, FS02A=0<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 88 us, rst=0, FS01_=0,
-          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 93 us, rst=0, FS01_=1,
-          F02B=0, FS02=1, FS02A=1, FS02A=1<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 98 us, rst=0, FS01_=0,
-          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
           ...<br>
-          At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=0,
-          F02B=0, FS02=1, FS02A=0, FS02A=1</font><br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 468 us, rst=0, FS01_=0,
+          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 478 us, rst=0, FS01_=1,
+          F02B=0, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 478 us, rst=0, FS01_=1,
+          F02B=1, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 488 us, rst=0, FS01_=0,
+          F02B=1, FS02=0, FS02A=0, FS02A=0<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 488 us, rst=0, FS01_=0,
+          F02B=1, FS02=1, FS02A=0, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 488 us, rst=0, FS01_=0,
+          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=1,
+          F02B=0, FS02=1, FS02A=0, FS02A=1<br>
+          At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=1,
+          F02B=0, FS02=1, FS02A=1, FS02A=1<br>
+        </font><br>
       </font></blockquote>
     Thus as promised, <font color="#663300"><code>FS01_</code></font>
-    (FS01/) toggles about very 5 microseconds, while <font
-      color="#663300"><code>FS02</code></font> toggles about every 10
-    microseconds.<br>
+    (FS01/) toggles about every 10 microseconds, while <font
+      color="#663300"><code>FS02</code></font> toggles about every 20
+    microseconds, though it's a bit of a pain to extract that conclusion
+    from the messages.<br>
     <blockquote>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     </blockquote>
-    Workflow Step #8: Visualization.&nbsp; When the dump-file created by
-    running the simulation, namely testVerilog.vcd, is pulled into the <b>GTKWave</b>
-    visualization program, you see something like the following.&nbsp;
-    The picture doesn't seem to require any explanation, though it's fun
-    to compare it to <a
-href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the
-      corresponding picture on p. 4-222A of document ND-1021042</a>,
-    which I'll leave as an exercise for the reader.<br>
+    Workflow Step #8: Visualization.&nbsp; Pull the dump-file created by
+    running the simulation, namely module.fst, into the <b>GTKWave</b>
+    visualization program, <br>
+    <blockquote>
+      <pre># In Linux or Windows:<br>gtkwave module.fst<br></pre>
+    </blockquote>
+    In Mac OS, I think it would just be easier to open <b>GTKWave</b>
+    from the desktop (rather than figuring out how to do it from a
+    command line), and use its File menu to navigate to
+    virtualagc-schematics/Schematics/testVerilog/module.fst.<br>
+    <br>
+    <a name="simple8"></a>You'll see something like the following.&nbsp;
+    (Actually, there are a few interactive steps to set the viewing
+    timescale, select the specific signals to view, and the order in
+    which the signals should appear, but if you've been motivated enough
+    to get this far, I think you can figure those bits out for
+    yourself!&nbsp; But you can look at <a moz-do-not-send="true"
+      href="https://gtkwave.github.io/gtkwave/index.html">GTKwave's
+      online documentation</a> to see how to use the visualizer, if you
+    cannot monkey through it yourself.)&nbsp; <br>
     <br>
     <div align="center"><img src="testVerilog.Wave.png" alt=""
-        height="499" width="1030"><br>
+        moz-do-not-send="true" width="1456" height="365"><br>
     </div>
     <br>
+    In comparison, here's a clipping out of the corresponding waveform <a
+      moz-do-not-send="true"
+href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figure
+
+
+
+
+      4-121</a> from the contemporary theory of operation document
+    ND-1021042:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="file:///home/rburkey/git/virtualagc-web/ND1011042-Fig4-121.jpg"
+        alt="" width="1316" height="282"><br>
+      <div align="left"><br>
+        <blockquote><font size="-1"><b>Note:</b>&nbsp; While the
+            waveforms shown in the two graphs are the same, there
+            is&nbsp; nevertheless a significant difference:&nbsp;&nbsp;
+            Figure 4-121 purports to display the signal FS01, whereas
+            our data visualization displays signal FS01/, which is
+            inverted from FS01.&nbsp; Then too, the position of the
+            final pulse of F02B doesn't match.&nbsp; </font><font
+            size="-1"><font size="-1">One of us must be wrong!&nbsp;
+              Which one could it be?&nbsp; Could it be ... me?&nbsp;
+              Could it be ... them?&nbsp; The suspense is terrible!</font>&nbsp;
+            I hope it'll last.&nbsp; Check it out yourself. <br>
+            <br>
+            <b>Cheat sheet:</b>&nbsp; I've made most of this line
+            white-on-white, to make it harder to read
+            accidentally.&nbsp; If you highlight this entire line, I
+            expect it will be enlightening. &nbsp; <font
+              color="#ffffff">To figure out who's wrong, it's relatively
+              easy to work backward from the condition F02A HIGH to see
+              what conditions it requires for the inputs of the various
+              NOR gates, then to work backward to the NOR gates feeding
+              those inputs, and so on.&nbsp; You'll quickly find that
+              F02A HIGH implies that FS01/ is HIGH as well, which means
+              that Figure 4-121 is wrong in asserting that F02A is HIGH
+              at the same time as FS01 is HIGH.&nbsp; Identical
+              reasoning applies to determining the conditions for F02B
+              being HIGH, demonstrating that Figure 4-121 is incorrect
+              about the positioning of the final pulse.</font><br>
+          </font> </blockquote>
+      </div>
+    </div>
     <h1><a name="EntireAGC"></a>Big Example: Simulating an Entire AGC</h1>
-    <h2><a name="SomeBackground"></a>Some Background Information</h2>
-    <p>As with the discussion of the simulation of the simple
-      "testVerilog" circuit in the preceding section, we'll be
-      concentrating on what the various steps of the simulation workflow
-      produce rather than on the detailed commands needed to accomplish
-      those steps.&nbsp; Coverage of those detail commands is again
-      relegated to <a moz-do-not-send="true"
-        href="#Appendix:_Translation_from_KiCad_into">the Appendix</a>.<br>
-    </p>
-    <p>Simulating an entire AGC is similar to simulating just a small
-      portion of an AGC as in the example of "testVerilog" that we saw
-      above.&nbsp; There are some differences, though.&nbsp; For one
-      thing, we can't work with just one huge electrical schematic that
-      covers the entire AGC, as we could with testVerilog.&nbsp; Well,
-      we <i>could</i>, except that we don't have such a monstrous
-      drawing to work with.&nbsp; Rather, we have lots of drawings of
-      electrical schematics for the individual logic modules comprising
-      the AGC.&nbsp; We have to cobble the simulation together using the
-      various bits and pieces we can get from schematics, netlists, and
-      Verilog source-code files created individually for the separate
-      "logic modules" of the AGC.&nbsp; But doing that would only get us
-      the AGC's CPU, and a CPU needs a program to run.&nbsp; So we also
-      need Verilog source-code files that model whatever particular AGC
-      program — such as LUMINARY, COLOSSUS, or whatever — that we want
-      to run.&nbsp; So one choice we have to make is which AGC software
-      are we going to use?<br>
-    </p>
-    <p>Another choice we have to make in principle is <i>which model</i>
-      of AGC do we want to simulate?&nbsp; Some of the choices are:<br>
-    </p>
+    <h2><a name="AGCchoices"></a>Choices To Make</h2>
+    There are several important choices to be made at the very beginning
+    of any attempt at simulating a whole AGC.&nbsp; I suppose that
+    making those choices could form a Step #0 in the simulation
+    workflow:<br>
+    <ol>
+      <li>Which model of AGC is to be simulated?</li>
+      <li>Which of the available AGC programs is going to be run on the
+        simulated AGC?</li>
+      <li>What is the test bench going to be like?<br>
+      </li>
+    </ol>
+    Regarding choice of AGC model:&nbsp; Aside from dash numbers
+    suffixed to part numbers, the list of AGC models really boils down
+    to those in the following table:<br>
+    <br>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
@@ -930,7 +1154,8 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the
           </td>
         </tr>
         <tr>
-          <td valign="middle">2003100</td>
+          <td rowspan="2" colspan="1" valign="middle">2003100<br>
+          </td>
           <td valign="middle">II<br>
           </td>
           <td valign="top">2TV-1<br>
@@ -941,8 +1166,6 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the
           </td>
         </tr>
         <tr>
-          <td valign="top"><br>
-          </td>
           <td valign="top">II<br>
           </td>
           <td valign="top">LTA-8<br>
@@ -995,405 +1218,326 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the
         </tr>
       </tbody>
     </table>
-    <p>Model 2003993, in differing specific dash numbers, was used for
-      almost all missions, so I hope you'll forgive me for running out
-      of steam at the end of the table and just covering all of the
-      remaining missions with a bland "<i>etc.</i>" rather than giving
-      you 20 more rows of model 2003993!&nbsp; The way to get the
-      information for the missing entries is by drilling down into <a
-        moz-do-not-send="true"
-        href="ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">the
-        GN&amp;C mission hierarchy table</a>.&nbsp; That is also the
-      place to go in order to match a particular AGC model to a specific
-      set of electrical schematics.<br>
-    </p>
-    <p>The good news is that in so far as the digital logic is
-      concerned, there is very little difference between the two Block I
-      models (1003565 and 1003700) nor between two Block II models
-      2003200 and 2003993.&nbsp; (As for the Block II model 2003100, we
-      unfortunately don't have the electrical schematics for it.)&nbsp;
-      Mike Stewart, who is far more knowledgeable about this topic than
-      I am, explains it thusly (as slightly edited by me):<br>
-    </p>
     <blockquote>
-      <div>
-        <meta http-equiv="content-type" content="text/html;
-          charset=UTF-8">
-        "It doesn't actually matter that much, because there were very
-        nearly&nbsp;no <i>logic</i> changes between 2003200 and
-        2003993. Probably the best [or possibly only difference] is the
-        signal MAMU as an input to module A14 (on sheet 1). That
-        backplane wire was introduced with 2003993-011 and was not
-        present on any 2003200 computers. Most of the other changes
-        between the two models were in the B tray or power supply, which
-        [isn't being simulated] with the Verilog sim."</div>
-    </blockquote>
-    <p>With that said, the full-AGC example we'll be working through
-      below is for the model 2003200, which never flew in any mission
-      though it was in fact installed in LM-2.&nbsp; Why I made the
-      oddball choice of this particular model for the example, rather
-      than the far-more-common 2003993, is a mystery.<br>
-    </p>
-    <h2><a name="Steps_1_2_and_3:_Creating_Verilog"></a>Workflow Steps
-      1, 2, and 3: Creating Verilog Source-Code Files Corresponding To
-      the AGC Schematics</h2>
-    There's really nothing to see here beyond what we've already seen,
-    so let's move on.<br>
-    <h2><a name="Step_4:_The_Test_BenchTBD"></a>Workflow Step 4: The
-      Test Bench, and Initial States and Gate Delays<br>
-    </h2>
-    <h3><a name="module.init"></a>module.init</h3>
-    <p><img src="testVerilogCircuit.png" alt="" height="372"
-        align="left" width="438">The AGC's logic module circuits,
-      modules A1-A24, mostly consist of so-called "combinational" logic,
-      in which a unique set of inputs determines a unique set of outputs
-      at any specific moment of time.&nbsp; However, some of the NOR
-      gates, such as those in the figure to the left (which is from <a
-        href="#An_Example:_testVerilog">the testVerilog example</a>
-      given earlier), contain feedback in which the inputs to a NOR gate
-      may depend indirectly on its output.&nbsp; The net result is for
-      those portions of the circuit to have a kind of "memory", in which
-      the current output depends not just on the inputs at this precise
-      moment in time, but also on the inputs at earlier times as well.<br>
-    </p>
-    <p>When confronted with a situation like this, the Verilog simulator
-      software may not be able to initially figure out what the outputs
-      of the circuit are, because those depend on times before the
-      simulation started, about which the simulator software has no
-      information. In <i>real</i> life, such as in the real physical
-      AGC units, those circuits will settle very quickly into <i>some</i>
-      stable state.&nbsp; But in simulation that may not be the case,
-      and the circuit may oscillate endlessly.&nbsp; So we have to have
-      some way to initially get the system into some stable state in
-      which all of the feedback signals have some nice, consistent
-      values. <br>
-    </p>
-    <p><img alt="" src="dualNOR.png" height="216" align="right"
-        width="224">The way that is done is with module.init
-      files.&nbsp; Each schematic drawing needs to have one of
-      these.&nbsp; A module.init file can provide settings for any or
-      all of the NOR gates, driving their outputs to a desired state
-      when a signal ("rst") is initially applied to the circuit.<br>
-    </p>
-    <p>Before describing the format of the module.init files, though, we
-      need to agree on some basic facts about the NOR gates used in the
-      AGC circuits.&nbsp; The NOR gates are packaged into 10-pin
-      integrated circuits, each of which contains two independent NOR
-      gates, as in the figure to the right.&nbsp; One of the NOR-gates
-      outputs to the chip's pin 1 (called "J") on the schematics, while
-      the other NOR-gate outputs to pin 9 (or "K").<br>
-    </p>
-    <p>And important fact about the NOR gates is that they are "open
-      drain", which means that the outputs of two or more NOR gates can
-      simply be tied together without any intervening circuitry.&nbsp;
-      Logically this is equivalent to AND'ing all of the signals which
-      are tied together.<br>
-    </p>
-    <p>Yet another thing to notice is that, as in the figure to the
-      left, the dual NOR-gates are identified in the Verilog design by
-      reference designators like U1<i>nn</i>, U2<i>nn</i>, or U3<i>nn</i>,
-      although only the 2-digit number <i>nn</i> is written on the
-      NOR-gate's schematic symbol.&nbsp; In the figure at left, for
-      example, we have both NOR gates from U127, both NOR gates from
-      U128, both NOR gates from U129, and one of the two NOR gates from
-      U126.&nbsp; How did I know that we had U127 rather than
-      U227?&nbsp; Well, usually U1<i>nn</i> is on the first sheet of the
-      schematic and U2<i>nn</i> is on the second sheet.&nbsp; However,
-      to know for sure, you really need to read the textual notes
-      provided within the schematic.<br>
-    </p>
-    <p>With those understandings in mind, here's a portion of a
-      module.init file for your consideration.&nbsp; (It does <i>not</i>
-      belong to the example figure above.)<br>
-    </p>
-    <blockquote>
-      <p><font face="Courier 10 Pitch"># For module A2<br>
-          U151 1 0 0.<font face="Courier 10 Pitch">2</font><br>
-          U152 0 0 0.<font face="Courier 10 Pitch">2</font><br>
-          U153 0 0 0.<font face="Courier 10 Pitch">2</font><br>
-          U155 1 0 0.<font face="Courier 10 Pitch">2</font><br>
-          U156 0 0 0.<font face="Courier 10 Pitch">2</font><br>
-          U157 1 0 0.<font face="Courier 10 Pitch">2</font><br>
-          <br>
-          U308 0 0<br>
-          U309 0 0<br>
-          U228 1 0<br>
-          ...</font><br>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Model 2003993, in differing
+          specific dash numbers, was used for almost all missions, so I
+          hope you'll forgive me for running out of steam at the end of
+          the table and just covering all of the remaining missions with
+          a bland "<i>etc.</i>" rather than giving you 20+ more rows of
+          model 2003993!&nbsp; The way to get the information for the
+          missing entries is by drilling down into <a
+            moz-do-not-send="true"
+            href="ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">the
+
+
+
+
+
+
+
+            GN&amp;C mission hierarchy table</a>.&nbsp; That is also the
+          place to go in order to match a particular AGC model to a
+          specific set of electrical schematics.</font><br>
       </p>
     </blockquote>
-    <p>You can decorate the module.init file with comments (preceded by
-      "#") or blank lines, if it helps you document what's being
-      done.&nbsp; More importantly, the file can be edited in a
-      text-editor and consists of lines of the form<br>
+    <p>But there are really less choices than it appears at first
+      glance.&nbsp; There's a table in <a moz-do-not-send="true"
+        href="#ReverseLookup">the Technical Appendix</a> that lists all
+      of the logic modules appearing in the different AGC models, in
+      terms of the assocated schematic-diagram drawing numbers, and we
+      can summarize what we learn from that table as follows:<br>
+    </p>
+    <ul>
+      <li>AGC models 1003656 and 1003700 use the same logic modules, in
+        so far as the electrical schematics are concerned.</li>
+      <li> AGC model 2003100 uses logic modules for which the electrical
+        schematics aren't available to us.</li>
+      <li>AGC models 2003200 and 2003993 use the same logic modules, in
+        so far as the electrical schematics are concerned.</li>
+    </ul>
+    <p>Or in other words, the only essentially-different cases are that
+      we can simulate either AGC model 1003700 (Block I) or model
+      2003993 (Block II).&nbsp; <br>
     </p>
     <blockquote>
-      <p>U<i>nnn</i> [ <i>JVALUE</i> [ <i>KVALUE</i> [ <i>JDELAY</i>
-        [ <i>KDELAY</i> ]]]<br>
+      <p><font size="-1"><b>Aside:</b>&nbsp; And of <i>those</i> two
+          choices, only the simulation workflow for Block II has been
+          debugged so far and can be considered mature enough to be
+          "working", so the choice reduces to AGC model 2003993 ...
+          which coincidentally, is the one that is likely most desired
+          by people.</font><br>
       </p>
     </blockquote>
-    <p>by which I mean that the lines consist of the chip's reference
-      designator, follow by 0 to 4 numerical values. <i>JVALUE</i> and
-      <i>KVALUE</i> are simply the values of the NOR gates' outputs at
-      reset, and always have the settings 0 or 1.&nbsp; 0 is the
-      default, meaning that the output of the NOR is LOW.<br>
+    The executive summary of all that is that as of right <i>now</i>,
+    any simulating we'll be doing will be for AGC model 2003993.<br>
+    <br>
+    Regarding the choice of AGC software:&nbsp; In principle, any of the
+    available Block I AGC software versions can be used in a simulated
+    AGC model 1003700, while any of the available Block II AGC software
+    versions can be used in a simulated AGC model 2003993.&nbsp; Any
+    Block II core-rope — in the form of a "bin" file produced by the AGC
+    assembler, <b>yaYUL</b> — can be converted to a Verilog source code
+    by a Python program provided by Mike Stewart that's called <b>bin_to_verilog_rom.py</b>.&nbsp;
+
+
+
+    In practice, 15 or so AGC software versions have been converted by
+    Mike and are already found with the transcribed schematics, in a
+    folder called "roms".&nbsp; I would recommend the program called
+    "Validation-hardware-simulation".
+    <p>Regarding the test bench:&nbsp; Well, this is really no different
+      than what was discussed in the preceding section, except that we
+      need a test bench for the entire AGC, rather than test benches for
+      individual logic modules.&nbsp; I have created some test-bench
+      files that can be used as starting points.&nbsp; The are named
+      tb-2003993.v, tb-2003200.v, etc.<br>
     </p>
-    <p>How does one determine what values <i>JVALUE</i> and <i>KVALUE</i>
-      should be given?&nbsp; What you are looking for, minimally, is
-      that all of the outputs from the NOR gates should be consistent
-      with their inputs.&nbsp; You know that that's possible, since the
-      original AGCs didn't simply oscillate out of control,&nbsp; But
-      how?&nbsp; <br>
-    </p>
-    <p>One way is to use a handy script we've provided, <b>dumbInitialization.py</b>,
-      which I describe in more detail in <a
-        href="#Appendix:_Translation_from_KiCad_into">the Appendix</a>.&nbsp;
-      This was the method used to create the module.init files presently
-      in the repository.&nbsp; But if the initializations created this
-      way don't satisfy you, you can edit them according to your own
-      liking, because they're just text files.&nbsp; It is certainly a
-      drawback of <b>dumbInitialization.py</b> that the initializations
-      aren't necessarily "natural", since the only guarantee is that
-      they are mutually consistent rather than to have any other
-      properties you might like.&nbsp; For example, module A1 is
-      basically just a 33-bit counter, and that counter is initialized
-      to some "random" value by <b>dumInitialization.py</b>, whereas <i>you</i>
-      might like it to be initialized to 0.&nbsp; I fear that's just a
-      consequence of how the flip-flops were implemented in the AGC, as
-      there's nothing (as far as I know) that guarantees how they're
-      initialized.&nbsp; And sadly, I have nothing other than that smug
-      platitude to offer you about creating your own custom
-      initializations.<br>
-    </p>
-    <p>What are <i>JDELAY</i> and <i>KDELAY</i>?&nbsp; Well, they have
-      to do with a completely different topic.&nbsp; The Verilog
-      description of the design allows you to assign any gate delay you
-      like to any of the NOR gates.&nbsp; Mostly it isn't critical, and
-      the default we use is a delay of 0.&nbsp; But in some cases it <i>is</i>
-      critical that it be non-zero, or even that it is confined within a
-      narrow range of acceptable values.&nbsp; The units of time are
-      defined by the "timescale" operative that appears near the top of
-      many of the Verilog files.&nbsp; Usually this is 100 ns per
-      simulator timer tick.&nbsp; Therefore, for example, a <i>JDELAY</i>
-      or <i>KDELAY</i> of 0.1 would be 10 ns.<br>
-    </p>
-    <h3><a name="Testbench_files"></a>Testbench files</h3>
-    <p>A "test bench" is a Verilog file that lets you define how to
-      stimulate the inputs of the Verilog file(s) for an individual AGC
-      module or combination of AGC modules, and therefore to produce
-      outputs that you can either view immediately or log for later
-      analysis/viewing.&nbsp; When you compile the Verilog file for the
-      test bench along with the Verilog file(s) it is the test bench
-      for, you get a file that can be used to simulate the design
-      without further ado.<br>
-    </p>
-    <p>Unfortunately, I cannot tell you much about how to write Verilog
-      test-bench files, since it's going to depend so much on the
-      particular AGC p/n or AGC module or PCB you're trying to test, and
-      what you're trying to test within it.&nbsp; You'll simply have to
-      research these topics for yourself.<br>
-    </p>
-    <h2><a name="Step_5:_Providing_ErasableFixed_Memory"></a>Workflow
-      Step 5: Providing Erasable/Fixed Memory</h2>
-    <p>Alas! there's one point in the simulation with somewhat less
-      verisimilitude with respect to the original AGC circuitry, and
-      that's in the simulation of the AGC's erasable memory (the "RAM")
-      and fixed memory (the "ROM"). Because the AGC's memory was made
-      from Permalloy-wire cores, surrounded by lots of analog circuitry
-      to drive them and to sense their states, it becomes a bit tricky
-      to simulate their behavior in essentially digital simulation tools
-      like Icarus Verilog.&nbsp; <br>
-    </p>
-    <p>What's done in the simulation instead is to continue to use the
-      digital signals that the AGC feeds into the analog circuitry
-      driving the cores or extracts from the analog circuitry sensing
-      the cores, but to replace the cores themselves and their
-      surrounding analog circuitry with <a
-href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/fixed_erasable_memory">a
-        fully digital model whose schematics and associated Verilog can
-        be found in the github repository</a>.&nbsp; Specifically, the
-      fixed memory ends up being <a
-        href="http://ww1.microchip.com/downloads/en/DeviceDoc/25001A.pdf">modeled
-        after a Microchip SST39VF200A flash-memory chip</a> (Verilog
-      module ROM.v), not that the choice of this specific part has too
-      much significance, as long as it has sufficient capacity.&nbsp; As
-      far as the <i>contents</i> of the memory are concerned, it can be
-      any of the AGC programs available to us in the Virtual AGC project
-      — though not all of them have been pre-converted to Verilog as of
-      yet —, such as Artemis 072, Aurora 12, Colossus 237, etc.&nbsp;
-      It's only necessary to make sure that the particular Verilog file
-      implementing the desired AGC program is present in <a
-        moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">the
-        Schematics/roms/ folder</a> at Verilog compile time, and is
-      named "rom.v".<br>
-    </p>
-    <p>It is worth reiterating, though, that the simulation of the
-      electronics runs <i>very slowly</i> relative to real time, and
-      that there isn't presently any way to model an interactive DSKY in
-      the simulation, so the choice of which AGC programs to use is
-      really limited greatly by which of them are easy to use,
-      pragmatically speaking.&nbsp; The AGC program called
-      "Validation-hardware-simulation" is one such program: it has been
-      modified to operate without DSKY input, and only require about 40
-      seconds to run in real life.&nbsp; In the simulation, it requires
-      much, much more time.<br>
-    </p>
-    <h2><a name="Step_5:_Compilation_of_the_Verilog"></a>Workflow Step
-      6: Compilation of the Verilog Source Code<br>
+    <h2><a name="AGCworkflow"></a>The Workflow<br>
     </h2>
-    If you are running Linux, or conceivably Mac OS X (I've never tested
-    it there!), there is actually a Makefile (namely,
-    Schematics/Makefile) for GNU 'make' which can do the following for
-    you:<br>
-    <ol>
-      <li>Translate the AGC module netlists into Verilog files.</li>
-      <li>Create empty module initialization files for them, if such
-        files don't already exist.&nbsp; But you'll typically need to
-        edit those files later.<br>
+    So as just explained, we'll be simulating the model 2003993
+    AGC.&nbsp; <br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; As in the case of
+        simulating a single module, I've provided a script which can
+        perform the entire sequence of steps needed to carry out the
+        simulation, assuming that the choices described in the preceding
+        section have been made.&nbsp; At the moment, the script only
+        works for Linux, or something similar enough to it, and not yet
+        for Windows or Mac OS.&nbsp; The script is run from the
+        Schematics directory, and its calling sequence from the command
+        line is<br>
+      </font>
+      <blockquote>
+        <pre><font size="-1">simulateAGC <i>AGCMODEL</i> <i>SOFTWARE</i> <i>VERILOGPARMS</i></font><br></pre>
+      </blockquote>
+      <font size="-1">where <i><code>AGCMODEL</code></i> defaults to
+        "2003993", <i><code>SOFTWARE</code></i> defaults to
+        "Validation-hardware-simulation", and <i><code>VERILOGPARMS</code></i>
+        (a quoted list of command-line parameters for the Verilog
+        compiler that alter values in the test bench) is empty
+        ("").&nbsp; By default, only a list of signals I've designated
+        as "helpful" are logged by the simulation. To run the simulation
+        while accepting all of the defaults, you could use the simple
+        command.<br>
+      </font>
+      <blockquote>
+        <pre><font size="-1">simulateAGC</font><br></pre>
+      </blockquote>
+      <font size="-1">Another good choice is to log <i>all</i>
+        signals.&nbsp; To do that while accepting the defaults for the
+        AGC model and software, the command would be</font><br>
+      <blockquote>
+        <pre><font size="-1">simulateAGC "" "" "-DDUMP_ALL"<br></font></pre>
+      </blockquote>
+      <font size="-2"><font size="-1">Doing either of these will jump
+          you right to the visualization of the data output by the
+          simulation, thus avoiding the chance of learning anything in
+          the meantime.</font><br>
+      </font></blockquote>
+    What makes whole-AGC simulations trickier than single module
+    simulations is that while the same basic workflow holds, some of the
+    steps of the workflow are carried for each logic module comprising
+    the circuit, while other steps combine the logic-module-specific
+    large into single large files pertaining to the whole AGC, and yet
+    other steps operate on those whole-AGC files.<br>
+    <br>
+    Thus given a particular AGC model that's a candidate for simulation,
+    we must first have a proper idea of what schematic diagrams are
+    specific to the logic modules in that AGC model.&nbsp; <a
+      moz-do-not-send="true" href="#ReverseLookup">The table in the
+      Technical Appendix</a> informs us on this topic.&nbsp; In the case
+    of our present example, it tells us a model 2003993 AGC has the
+    following logic modules:<br>
+    <ul>
+      <li>A1 = 2005259A</li>
+      <li>A2 = 2005260A</li>
+      <li>A3 = 2005251A</li>
+      <li>A4 = 2005262A</li>
+      <li>A5 = 2005261A</li>
+      <li>A6 = 2005263A</li>
+      <li>A7 = 2005252A</li>
+      <li>A8 =&nbsp; 2005255-</li>
+      <li>A9 =&nbsp; 2005256A</li>
+      <li>A10 =&nbsp; 2005257A</li>
+      <li>A11 =&nbsp; 2005258A</li>
+      <li>A12 = 2005253A</li>
+      <li>A13 =&nbsp; 2005269-</li>
+      <li>A14 =&nbsp; 2005264B</li>
+      <li>A15 =&nbsp; 2005265A</li>
+      <li>A16 =&nbsp; 2005266-</li>
+      <li>A17 =&nbsp; 2005267A</li>
+      <li>A18 =&nbsp; 2005268A</li>
+      <li>A19 =&nbsp; 2005270-</li>
+      <li>A20 =&nbsp; 2005254-</li>
+      <li>A21 =&nbsp; 2005250-</li>
+      <li>A22 =&nbsp; 2005271-</li>
+      <li>A23 =&nbsp; 2005272A</li>
+      <li>A24 =&nbsp; 2005273A"<br>
       </li>
-      <li>Create testbench Verilog files for them, if such files don't
-        already exist.&nbsp; But you'll typically need to edit those
-        files later.</li>
-      <li>Compile the Verilog for each AGC module along with its test
-        bench to get a simulation file just for that module.</li>
-      <li>Create a testbench Verilog file to the AGC unit as a whole
-        (AGC model 2003200, with other models coming later).&nbsp; But
-        you'll typically have to edit that file later.</li>
-      <li>Compile the AGC unit testbench Verilog along with the Verilog
-        for all of the modules that go into that AGC, to create a
-        simulation file for the AGC as a whole</li>
+    </ul>
+    Of course, these schematic transcriptions already exist, so once
+    again, workflow Step #1 (creation of schematic transcriptions)
+    leaves us with nothing to do.<br>
+    <br>
+    Workflow Step #2 is creation of netlist files.&nbsp; This is done
+    precisely as for the single logic modules we talked about in the
+    preceding section, and must be done for <i>each</i> of the unique
+    schematics listed above.&nbsp; I mention "unique" schematics,
+    because it's certainly possible for the same schematic to apply to
+    more than logic module.&nbsp; That's not the case for the 2003993,
+    but is the case for AGC model 1003700.<br>
+    <br>
+    At Workflow Step #3 (creation of Verilog source-code files for the
+    logic modules we begin to experience some differences from the
+    single-module case.&nbsp; In the case of single-module simulation,
+    this step was roughly:<br>
+    <ol>
+      <li>Run <b>dumbVerilog.py</b> for<i> </i>the logic module to
+        generate a kind of "rough draft" of the Verilog source code.</li>
+      <li>Run <b>dumbInitialization.py</b> on the rough drafts to
+        create an initialization file for the implicit flip-flops in the
+        design.</li>
+      <li>Run <b>dumbVerilog.py</b> again, using the new initialization
+        file to get the final form of the module's Verilog source code.
+        <br>
+      </li>
     </ol>
-    <p>But if you're running Windows or just want to know how to do the
-      steps yourself, that doesn't really help you too much.&nbsp;
-      (Unless somebody wants to fix up a Windows version of the Makefile
-      for me? It shouldn't be too hard, but I don't want to mess with
-      Windows myself, so it's left as an exercise for the reader.)&nbsp;
-      For you folks, here's how the compilation step works.<br>
-    </p>
-    <p>There are really two cases of interest.&nbsp; First, you might
-      want to simulate a single AGC module, to exercise its functions
-      and perhaps to debug it.&nbsp; For concreteness, let's imagine
-      that this module has drawing number 2005123A, and hence its files
-      reside in the directory Schematics/2005123A.&nbsp; There will be
-      two relevant files in that directory:&nbsp; module.v, which is the
-      Verilog of the module itself, automatically translated from the
-      CAD files for drawing 2005123A, and module_tb.v, the Verilog file
-      of the "test bench" of the module.&nbsp; As explained earlier,
-      there will be either an automatically-generated version of the
-      test bench or else a manually tweaked version of the test bench
-      file already in place.&nbsp; But it's up to you to insure that the
-      test bench does what you want.&nbsp; The compilation is simple:<br>
-    </p>
-    <blockquote><font face="Courier 10 Pitch">cd Schematics/2005123A<br>
-        iverilog -o module.vvp module_tb.v module.v</font><br>
-    </blockquote>
-    <p>which produces an object file, Schematics/2005123A/module.vvp.<br>
-    </p>
-    <p>The second case is simulation of a complete AGC unit.&nbsp; Let's
-      suppose that this is the AGC with p/n 2003200.&nbsp; AGC p/n is
-      essentially a collection of various AGC modules, plugged into a
-      "backplane".&nbsp; Module A1 is drawing 2005259A, module A2 is
-      drawing 2005260A, etc., up through module A24, drawing
-      2005273A.&nbsp; As above, there is a testbench file, 2003200.v,
-      which represents the backplane, along with any stimulation you
-      need to apply to the backplane symbols, and any probing you need
-      to do on those signals.&nbsp; So here is what the Verilog
-      compilation looks like:<br>
-    </p>
-    <blockquote><font face="Courier 10 Pitch">cd Schematics<br>
-        <font face="Courier 10 Pitch">iverilog -o 2003200.vvp 200<font
-            face="Courier 10 Pitch">3</font>200.v 2005259A/module.v
-          2005260A/module.v ... 2005273A/module.v</font><br>
-      </font></blockquote>
-    <p>This produces an object file, Schematics/2003200.vvp.<br>
-    </p>
-    <h2><a name="Step_6:_Running_the_Simulation"></a>Workflow Step 7:
-      Running the Simulation</h2>
-    This is simplicity itself.&nbsp; In terms of the examples in the
-    preceding section, to simulate drawing 2005123A we'd do this:<br>
-    <blockquote><font face="Courier 10 Pitch">cd Schematics/2005123A<br>
-        <font face="Courier 10 Pitch">vvp module.<font face="Courier 10
-            Pitch">vvp</font></font><br>
-      </font></blockquote>
-    while to simulate AGC p/n 2003200 we'd do this:<br>
-    <blockquote><font face="Courier 10 Pitch">cd Schematics<br>
-        <font face="Courier 10 Pitch">vvp 2003200.vvp</font></font><font
-        face="Courier 10 Pitch"><font face="Courier 10 Pitch"><font
-            face="Courier 10 Pitch"><font face="Courier 10 Pitch"> -lxt2</font></font></font></font></blockquote>
-    Depending on your intentions — i.e., how the testbench is written —
-    the simulation may or may not be a hands-off operation.&nbsp;
-    Typically, though, it would result either in messages printed out to
-    the terminal or creation of a log file for later viewing and
-    analysis, or both.&nbsp; <br>
+    For whole-AGC simulation, this step instead becomes the following
+    procedure:<br>
+    <ol>
+      <li>Run <b>dumbVerilog.py</b> for<i> each</i> of the logic
+        modules comprising the AGC to generate a kind of "rough draft"
+        of the Verilog source code for each of them.</li>
+      <li><i>Combine</i> all of the rough-draft Verilog source-code
+        files for the modules by appending them end-to-end into one big
+        file.</li>
+      <li>Run <b>dumbInitialization.py</b> on the big Verilog file to
+        generate an initialization file.</li>
+      <li>Run <b>dumbVerilog.py</b> for<i> each</i> of the logic
+        modules comprising the AGC, this time using the just-created
+        initialization file, to generate a final form of the Verilog
+        source code for each of them.</li>
+      <li><i>Combine</i> all of the final Verilog source-code files for
+        the modules by appending them end-to-end into one big file that
+        contains their collective final Verilog source code.</li>
+    </ol>
+    For the sake of simplifying the discussion, let's abbreviate "big
+    final Verilog file" as BFVF.<br>
     <br>
-    For example, the sample testVerilog design discussed earlier
-    produces a log file called testVerilog.vcd, whereas the
-    automatically-generated test-bench files instead cause a log file
-    called module.lxt2 to be created.&nbsp; VCD and LXT2 files contain
-    the same kind of information, but VCD has the advantage of being
-    ASCII and therefore easily processed (for example) with scripts,
-    whereas LXT2 is compressed and is therefore very tiny in
-    comparison.&nbsp; It's up to you!&nbsp; Regarding the command-line
-    switches given above, you'll notice the "-lxt2" switch in just one
-    of the cases.&nbsp; By default, the log file will be in VCD format,
-    regardless of the naming for it used in the test bench.&nbsp; By
-    adding the "-lxt2" switch, we tell the simulator to use LXT2
-    format.&nbsp; There are several variations of this switch, with
-    "-lxt2-space" specifying you want LXT2 files as small as possible,
-    and "-lxt2-space" specifying that you want LXT2 files that are
-    produced as fast as possible.&nbsp; <b>Note:</b>&nbsp; It's
-    important that the -lxt2 switch, or similar switches, come <i>after</i>
-    the filename on the 'vvp' command line.<br>
+    Workflow Step #4 (testbench generation).&nbsp; The BFVF is used as
+    input for <b>dumbTestbench.py</b>.&nbsp; And the appropriate file
+    tb-<i>AGCMODEL</i>.v must be copied to tb.v or else you must devise
+    your own testbench file for tb.v instead.<br>
     <br>
-    On the other hand, if you want to instead (or additionally) view
-    messages printed out in "real" time by the simulation, you do this
-    with the $monitor command in the test bench Verilog.&nbsp; Again,
-    it's up to you!<br>
-    <h2><a name="Step_7:_Viewing_the_Results"></a>Workflow Step 8:
-      Viewing the Results</h2>
-    <p>Assuming that your simulation produces a log file for later
-      viewing or analysis, there are several choices.<br>
+    Workflow Step #5 (Verilog source-code creation for erasable and
+    fixed memory) is completely new, since we didn't have to do it at
+    all for the single-module case.&nbsp; Three separate things go into
+    simulation of erasable and fixed memory:<br>
+    <ul>
+      <li>A model for erasable memory hardware.&nbsp; This Verilog file
+        has been pre-created, and is always the same.&nbsp; It's the
+        file called RAM.v in the folder
+        Schematics/fixed_erasable_memory/.</li>
+      <li>A model for TBD.&nbsp; This Verilog file has been pre-created,
+        and is always the same.&nbsp; It's the file called BUFFER.v in
+        the folder Schematics/fixed_erasable_memory/.</li>
+      <li>A model for fixed-memory hardware.&nbsp; As for the erasable
+        memory, this is simply a file that always is the same, namely
+        ROM.v in the folder Schematics/fixed_erasable_memory/.</li>
+      <li>A model for the AGC software.&nbsp; ROM.v, mentioned just
+        above, always includes a file called rom.v from the folder
+        Schematics/roms/ that contains this model.&nbsp; As I mentioned
+        earlier, Schematics/roms/ already contains a number of models
+        for specific AGC software versions, such as Luminary099.v or
+        Validation-hardware-simulation.v.</li>
+    </ul>
+    <p>Combining those ideas, what Step #5 of the workflow does is to
+      copy the appropriate file Schematics/roms/SOFTWAREVERSION.v to
+      Schematics/roms/rom.v, and then appends the holy trinity of RAM.v,
+      ROM.v, and BUFFER.v to the end of the BFVF.<br>
     </p>
-    <p>For example, as mentioned in the preceding section, a VCD log
-      file is ASCII, and therefore very suited for some kind of
-      post-processing with scripts written in AWK or Python or some
-      other language.&nbsp; <br>
+    <p>Workflow Step #6 (compilation of the Verilog). The BFVF and the
+      testbench file generated by <b>dumbTestbench.py</b> in Step #4
+      above are the input files to the compiler.&nbsp; <br>
     </p>
-    <p>Often, though, it's nicer to just view some set of signals of
-      interest as if using an oscilloscope or logic analyzer.&nbsp; A
-      program like GTKWave is great for this, in that it can view either
-      VCD or LXT2 files, and you can select the specific signals you
-      want to view, and the ordering of those signals.&nbsp; For the
-      examples we've been using, you'd do one of the following and then
-      just monkey around in GTKWave's GUI:<br>
+    Workflow Steps #7 and #8 differ from the single-module case in no
+    respect.<br>
+    <p><a name="AGCvisualization"></a>But the full AGC has a <i>lot</i>
+      of signal nets in it — about 8500 of them —, so there's a lot more
+      flexibility in choosing which of those you want to look at in the
+      data visualization than there is in any single logic module.&nbsp;
+      In case it hasn't been clear already, any or all of the signals
+      logged when the simulation was performed can be displayed, in any
+      order, with or without various kinds of decorations.&nbsp; Which
+      ones of them to display, and how, is typically a matter on which
+      you'd consult the schematic diagrams and/or the
+      theory-of-operation documents a lot in order to figure out which
+      signals were helpful and which were merely clutter.&nbsp; What
+      I've done for pedagogical purposes in the screenshot below is to
+      select the signals corresponding to the upper portion of Figure
+      4-121 of the theory-of-operations document&nbsp; ND-1021042, of
+      which you may recall that in the preceding section I used only the
+      lower portion of that figure.&nbsp; One comforting feature of this
+      simulation is that when we saw this same data in the preceding
+      section, the test bench had <i>supplied</i> the input signal
+      FS01/ at the proper clock rate, whereas in our full-AGC simulation
+      here, signal FS01/ is instead <i>generated</i> by the upstream
+      portions of the circuitry.&nbsp; And yet the simulation still
+      generates an FS01/ signal at the same correct frequency as before.<br>
     </p>
-    <blockquote>
-      <p><font face="Courier 10 Pitch">cd Schematics/2005123A<br>
-          <font face="Courier 10 Pitch">gtkwa<font face="Courier 10
-              Pitch">ve module.vcd</font></font><br>
-        </font></p>
-    </blockquote>
-    <p>or<br>
+    <div align="center"><img moz-do-not-send="true"
+        src="2003993.Wave.png" alt="" width="844" height="352"><br>
+    </div>
+    <br>
+    And here's the aforementioned upper portion of Figure 4-121:<br>
+    <div align="center"><img moz-do-not-send="true"
+        src="Figure4-121top.jpg" alt="" width="703" height="264"><br>
+    </div>
+    Perfect match!<br>
+    <br>
+    Because you're sharp-eyed and clever — if not, how could you
+    possibly be reading this right now? —, I can detect some
+    skepticism.&nbsp; I can hear you saying, "But wait!&nbsp; Didn't you
+    conclusively demonstrate in the preceding section that Figure 4-121
+    was bonkers, and was mistakenly displaying the signal FS01/ where it
+    wrongly says it's displaying signal FS01?&nbsp; And if that's true,
+    how could this <i>now</i> be a perfect match?!!!"&nbsp; You know
+    what?&nbsp; You're right.&nbsp; Well, right and wrong, I
+    think.&nbsp; I can't give you a 100% certain explanation of what
+    happened when Figure 4-121 was drawn, but I visualize it something
+    like this:<br>
+    <ul>
+      <li>The top portion of Figure 4-121, from POI/ through FS01, shows
+        signals that are all from logic module A2.&nbsp; I imagine that
+        this drawn first, and was correctly drawn.</li>
+      <li>The bottom portion of Figure 4-121, below but not including
+        FS01, shows signals from logic module A1.&nbsp; <br>
+      </li>
+      <li>Signal FS01 is not present in module A1, but FS01/ is present
+        instead.&nbsp; I imagine that when the bottom portion was drawn,
+        whoever drew it simply became confused and thought that FS01 was
+        present in module A1, when it was really signal FS01/.</li>
+    </ul>
+    <p>There!&nbsp; That neatly explains, I think, why I'm right, and
+      everyone else is to blame for any apparent errors, and how my
+      simulation is beautiful and perfect.&nbsp; And they said it could
+      not be done!&nbsp; My next trick will to be to run for public
+      office of some kind.&nbsp; On the other hand, alternate
+      explanations concluding that I and my simulations are idiotic are
+      welcome too.&nbsp; Anything that advances the dialog!&nbsp; Let me
+      know if you come up with one.<br>
     </p>
-    <blockquote><font face="Courier 10 Pitch">cd Schematics<br>
-        <font face="Courier 10 Pitch">gtk<font face="Courier 10 Pitch">wave
-            2003200.lxt2</font></font><br>
-      </font></blockquote>
     <ul>
     </ul>
-    <h1><a name="Appendix:_Translation_from_KiCad_into"></a>Appendix:
-      Technical Details<br>
+    <h1><a name="Appendix:_Translation_from_KiCad_into"></a>Technical
+      Appendix<br>
     </h1>
-    <p>This Appendix discusses the details of how to perform the
-      operations that have only been described in somewhate more-general
-      terms above.&nbsp; The operations are presented in roughly the
-      order they are used.<br>
-    </p>
-    <h2><a name="CreatingSchematic"></a>Creating/Editing a Schematic
-      Diagram</h2>
+    <h2><a name="CreatingSchematic"></a>Transcribing/Editing a Schematic
+      Diagram with eeschema<br>
+    </h2>
     <p>This is too detailed a topic for me to give much helpful advice
-      about in a limited space.&nbsp; I will simply point out the
-      following:<br>
+      about in a limited space.&nbsp; Plus, I consider it unlikely that
+      you'll find yourself needing to transcribe an AGC-related
+      schematic diagram.&nbsp; I will simply point out the following:<br>
     </p>
     <ul>
       <li>The schematic-capture editor supplied with KiCad EDA is called
@@ -1403,6 +1547,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
         Guidance, Navigation &amp; Control (GNC) system are found in <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
+
+
+
+
+
+
+
           "schematics" branch of our Virtual AGC repository, in the
           folder called "Schematics"</a>.</li>
       <li>There is a separate folder for each original drawing number,
@@ -1420,7 +1571,8 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
         tested them.<br>
       </li>
     </ul>
-    <h2><a name="CreatingNetlists"></a>Creating a Netlist</h2>
+    <h2><a name="CreatingNetlists"></a>Creating a Netlist with eeschema<br>
+    </h2>
     <p>There are two methods.&nbsp; <br>
     </p>
     <p>Method 1:&nbsp; While viewing the top-level page of a schematic
@@ -1433,13 +1585,20 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
     </p>
     <p>Method 2:&nbsp; For KiCad v.7 or later, the netlist can be
       created from a command line without even running <b>eeschema</b>.&nbsp;
+
+
+
+
+
+
+
       The command would be<br>
     </p>
     <blockquote>
       <pre>kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch<br></pre>
     </blockquote>
     <h2><a name="Converting_Netlist_to_Verilog"></a>Converting Netlists
-      to Verilog Source Code<br>
+      to Verilog Source Code with dumbVerilog.py<br>
     </h2>
     The supplied tools for converting a netlist (or more accurately, a
     netlist plus the associated schematic) to Verilog source code are
@@ -1485,6 +1644,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
       </li>
     </ul>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+
+
+
+
         To be completely honest, I'm no longer entirely sure how many of
         these rules the supplied tools actually depend upon, as opposed
         to these rules just being the ones obeyed by the original
@@ -1498,15 +1664,16 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
         module.kicad_sch [<i>WIRETYPE</i>] &gt;<font face="Courier 10
           Pitch">module</font>.v</font><br>
     </blockquote>
-    The files called pins.txt and module.init are described in <a
-      moz-do-not-send="true" href="#Generating_Flip-flop_Initialization">the
-      next section</a>.&nbsp; The file pins.txt will be searched for if
-    not found; it may be either in the current directory, the directory
-    containing <b>dumbVerilog.py</b> itself (the usual case), or else
-    specified with an explicit path.&nbsp; The parameters "module.net",
-    "module.kicad_sch" (or just "module.sch" for KiCad v.5), and
-    "module.v" are literal.&nbsp; As for the remaining command-line
-    parameters:<br>
+    The files called <a moz-do-not-send="true" href="#PinsTxt">pins.txt</a>
+    and <a moz-do-not-send="true"
+      href="#Generating_Flip-flop_Initialization">module.init</a> are
+    covered in the succeeding sections.&nbsp; The file pins.txt will be
+    searched for if not found; it may be either in the current
+    directory, the directory containing <b>dumbVerilog.py</b> itself
+    (the usual case), or else specified with an explicit path.&nbsp; The
+    parameters "module.net", "module.kicad_sch" (or just "module.sch"
+    for KiCad v.5), and "module.v" are generally literal.&nbsp; As for
+    the remaining command-line parameters:<br>
     <ul>
       <li><code><i>MODULE</i></code> would be something like "A1", "A2",
         etc.&nbsp; It's the designation of the specific logic module to
@@ -1525,6 +1692,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
         a reasonable <code><i>DELAY</i></code> might be 0.2.</li>
       <li><code><i>WIRETYPE</i></code> is an optional parameter having
         the value either "<code>wire</code>" or "<code>wand</code>".&nbsp;
+
+
+
+
+
+
+
         It shouldn't matter which is chosen, so this parameter should
         probably be omitted.<br>
       </li>
@@ -1566,6 +1740,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
       you could equally-well consider it physically to be a 276-pin
       connector consisting of 4 rows of 69 pins each.&nbsp; But the pin
       numbering pretends that the missing pins were present.)&nbsp; <i>On
+
+
+
+
+
+
+
         the other hand</i>, on the electrical schematics for the logic
       modules, each of the 71-pin rows was considered a separate
       connector, and thus the schematics show 4 separate connectors
@@ -1583,94 +1764,135 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
       other AGC models is concerned, there is presently no available
       pins.txt for them.<br>
     </p>
-    <blockquote>
-      <p><font size="-1"><b>Aside:</b>&nbsp; The existing pins.txt was
-          derived from Mike Stewart's digital simulation of the
-          AGC.&nbsp; Mike's backplane pin data was derived in turn <a
-            moz-do-not-send="true"
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Strictly speaking,
+        this isn't quite true.&nbsp; The existing pins.txt was derived
+        from Mike Stewart's digital simulation of the AGC.&nbsp; Mike's
+        backplane pin data was derived in turn <a
+          moz-do-not-send="true"
 href="https://github.com/virtualagc/agc_simulation/blob/master/scripts/generate_agc_backplane.py">by
-            a script</a> that analyzed his Verilog files.&nbsp; Thus if
-          we indeed wanted to generate a separate pins.txt file for each
-          Block II AGC model we'd have an awkward chicken-and-egg
-          problem, since <b>dumbVerilog.py</b> needs pins.txt <i>before</i>
-          generating our Verilog files, whereas the only automated way
-          of generating pins.txt does so <i>after</i> creating the
-          Verilog files.&nbsp; On the other hand, for Block I AGC's I've
-          created a similar file, <a moz-do-not-send="true"
+
+
+
+
+
+
+
+          a script</a> that analyzed his Verilog files.&nbsp; Thus if we
+        indeed wanted to generate a separate pins.txt file for each
+        Block II AGC model we'd have an awkward chicken-and-egg problem,
+        since <b>dumbVerilog.py</b> needs pins.txt <i>before</i>
+        generating our Verilog files, whereas the only automated way of
+        generating pins.txt does so <i>after</i> creating the Verilog
+        files.&nbsp; On the other hand, for Block I AGC's I've created a
+        similar file, <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsBlockI.txt">pinsBlockI.txt</a>,
-          by processing Block I schematics (rather than Verilog files)
-          using <a moz-do-not-send="true"
+        by processing Block I schematics (rather than Verilog files)
+        using <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlockI.awk">an
-            AWK script</a>, so perhaps the same technique could be used
-          for Block II as well.&nbsp; However, the pinsBlockI.txt file
-          is in a somewhat different format than pins.txt, and <b>dumbVerilog.py</b>
-          isn't presently able to support that particular format.&nbsp;
-          Although I don't recall for certain, I suppose this means that
-          I had only done preliminary work on Block I AGC simulation,
-          without having taken it to the point of the simulation
-          actually functioning.&nbsp; <br>
-        </font></p>
-    </blockquote>
-    <h2><a name="Generating_Flip-flop_Initialization"></a>Generating
-      Flip-flop Initialization files (module.init)</h2>
-    <p><img src="testVerilogCircuitInit.png" alt=""
-        moz-do-not-send="true" height="485" align="right" width="348">The
-      only digital components present in AGC logic-module schematics are
-      dual triple-input open-drain NOR gates, which in themselves are
-      stateless; i.e., the output signal of a NOR gate is directly
-      determined by the <i>current</i> state of its input
-      signals.&nbsp; Or at least, the state of the input signals after
-      however long it takes the signals to propagate through the gate,
-      which is nominally 20 nanoseconds.&nbsp; Nevertheless, it is
-      possible to interconnect NOR gates in such a way that the
-      constellation of NOR gates has an output signal that does not
-      necessarily depend on the current state of the inputs.&nbsp; In
-      other words, the constellation of NOR gates has "memory".&nbsp;
-      The most-common such circuit block in the AGC uses several NOR
-      gates to form what's known as a "flip-flop"; i.e., a memory
-      element capable of indefinitely storing a single bit
+
+
+
+
+
+
+
+          AWK script</a>, so perhaps the same technique could be used
+        for Block II as well.&nbsp; However, the pinsBlockI.txt file is
+        in a somewhat different format than pins.txt, and <b>dumbVerilog.py</b>
+        isn't presently able to support that particular format.&nbsp;
+        Although I don't recall for certain, I suppose this means that I
+        had only done preliminary work on Block I AGC simulation,
+        without having taken it to the point of the simulation actually
+        functioning.&nbsp; </font><br>
+      <font size="-1"> </font></blockquote>
+    <blockquote> </blockquote>
+    <h2><a name="Generating_Flip-flop_Initialization"></a>The
+      module.init file and dumbInitialization.py<br>
+    </h2>
+    <p><img alt="" src="dualNOR.png" moz-do-not-send="true" width="162"
+        hspace="5" height="157" align="left">The only digital components
+      present in AGC logic-module schematics are dual triple-input
+      open-drain NOR gates (as in the figure to the left), which in
+      themselves are stateless; i.e., the output signal of a NOR gate is
+      directly determined by the <i>current</i> state of its input
+      signals.&nbsp; Or at least, the output is determined by the state
+      of the input signals after however long it takes the signals to
+      propagate through the gate, which is nominally 20
+      nanoseconds.&nbsp; Nevertheless, it is possible to interconnect
+      NOR gates in such a way that a block of NOR gates has an output
+      signal that does not necessarily depend on the current state of
+      the inputs.&nbsp; In other words, the block of NOR gates has
+      "memory".&nbsp; The most-common such circuit block in the AGC uses
+      several NOR gates to form what's known as a "flip-flop"; i.e., a
+      memory element capable of indefinitely storing a single bit
       indefinitely.&nbsp; Or rather, of storing a bit until the power is
       cycled, at which point the value of the bit is lost.&nbsp; The
-      testVerilog circuit used in examples above, and shown yet again in
-      the image at the right, is such a flip-flop.<br>
+      testVerilog circuit used in examples above is such a
+      flip-flop.&nbsp; <br>
     </p>
-    <p>For simulation of a circuit containing flip-flops like this, the
-      question becomes "What are the states of the flip-flops at
-      power-up?"&nbsp; <i>After</i> power-up is no issue, since if we
-      know the states of the flip-flops at power up, the simulation
-      itself takes care of computing their states at later times.&nbsp;
-      But we first have to have some way of knowing what the states were
-      at power-up in order to do that.<br>
+    <p>This has an implication on the initial conditions for a digital
+      simulation, since we need to specify not only the levels of the
+      input signals to the circuit being simulated, but the initial
+      states of these implicit flip-flops as well.&nbsp; <i>After</i>
+      power-up is no issue, since if we know the states of the
+      flip-flops at power up, the simulation itself takes care of
+      computing their states at later times.&nbsp; But we first have to
+      have some way of knowing what the states were at power-up in order
+      to do that.<br>
     </p>
-    <p>In the design of the physical AGC, almost no effort is given to
-      putting these implicit flip-flops into any given state.&nbsp; (And
-      in those cases where an effort had been made, the mechanisms used
-      would put the simulated flip-flops into a known state too.)&nbsp;
-      Rather, the developers just seemed to feel that the flip-flops
-      would generally settle down into <i>some</i> stable state, and
-      that assurance proved to be enough for their purposes.&nbsp; For <i>our</i>
-      purposes, namely digital simulation, it's <i>not</i>
-      enough!&nbsp; In simulation, it's perfectly possible for a such a
-      flip-flop to oscillate indefinitely without ever settling down
-      into some stable state, which means that the Verilog emulator
-      could get stuck in an infinite loop or timeout while trying to
-      compute the initial state of the circuit.&nbsp; No good!<br>
+    <p>In the design of the <i>physical</i> AGC, almost no effort was
+      given to putting these implicit flip-flops into any given
+      state.&nbsp; (And in those cases where an effort had been made,
+      the mechanisms used would put the simulated flip-flops into a
+      known state too.)&nbsp; Rather, the developers just seemed to feel
+      that the flip-flops would generally settle down into <i>some</i>
+      stable state, and that happy thought proved to be adequate for
+      their purposes.&nbsp; For <i>our</i> purposes, namely digital
+      simulation, it's <i>not</i> enough!&nbsp; In simulation, it's
+      perfectly possible for a such a flip-flop to oscillate
+      indefinitely without ever settling down into some stable state,
+      which means that the Verilog emulator could get stuck in an
+      infinite loop or timeout while trying to compute the initial state
+      of the circuit.&nbsp; No good!<br>
     </p>
     <p>To specify the initial states of flip-flops, module.init allows
       you to state the initial output signal of any or all of the NOR
-      gates.&nbsp; A dual NOR gate component used in the AGC has two
-      outputs, which are designated as pin J for one of the NOR gates
-      and K for the other of the NOR gates.&nbsp; The way these are
-      specified in module.init is that there is a line in the file for
-      each dual NOR component that you want to specify, and that line
-      has the format<br>
+      gates.&nbsp; As we say in the figure above, a dual NOR-gate
+      component used in the AGC has two outputs, which are designated as
+      pin J for one of the NOR gates and K for the other of the NOR
+      gates.&nbsp; The way these are specified in module.init is that
+      there is a line in the file for each dual NOR component that you
+      want to specify, and that line has the format<br>
     </p>
-    <blockquote><i>Unnn OutputJ OutputK</i><br>
+    <blockquote><i>Unnn OutputJ</i> [ <i>OutputK</i> [ <i>DelayJ</i> [
+      <i>DelayK</i> ] ] ]<br>
     </blockquote>
     where <i>Unnn</i> is the reference designator of the dual-NOR
     component and <i>OutputJ</i> and <i>OutputK</i> are the output
-    signal levels (0 or 1).&nbsp; For testVerilog, for example,
-    module.init looks like:<br>
+    signal levels (0 or 1, default 0) at pins J and K of the dual-NOR
+    component.&nbsp; <i>DelayJ</i> and <i>DelayK</i> are the
+    respective propagation delays for the two NOR gates, in units as
+    described for the <i>DELAY</i> parameter of <b>dumbVerilog.py</b>
+    <a moz-do-not-send="true" href="#Converting_Netlist_to_Verilog">as
+      discussed earlier</a>, which is also the default for any omitted <i>DelayJ</i>
+    or <i>DelayK</i>.<br>
+    <br>
+    <img src="testVerilogCircuitInit.png" alt="" moz-do-not-send="true"
+      width="228" hspace="5" height="319" align="right">You can also
+    annotate the module.init file with comments (preceded by "#") or
+    blank lines, if it helps you document what's being done.<br>
+    <br>
+    In general, there won't be any single "correct" module-init file,
+    since the only constraint on possible module.init files is that the
+    specified signal levels are logically consistent with respect to the
+    properties of NOR gates.&nbsp; For a single flip-flop in its
+    simplest form, there are two guaranteed consistent states, namely
+    "on" and "off".&nbsp; Indeed, if there were a single
+    logically-consistent configuration, then the circuit would be
+    useless since its state could never change.&nbsp; So there are
+    multiple consistent forms of module.int.&nbsp; For testVerilog, for
+    example, one such form for module.init (and indeed, the one we've
+    provided within the repository) looks like:<br>
     <blockquote>
       <pre>U127 1 0<br>U129 1 0<br></pre>
     </blockquote>
@@ -1679,19 +1901,34 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
       image to the right by coloring NOR-gate outputs specified
       initially as 1 in <font color="#33cc00">green</font>, and those
       specified initially as 0 in <font color="#ff0000">red</font>.&nbsp;
+
+
+
+
+
+
+
       You don't need to specify the output for every NOR gate, and thus
       the outputs of U126 and U128 are left unspecified.&nbsp; But if
       you manually create the module.init file, it's entirely up to you
-      to determine which ones you want to specify; and worse, not all
-      possible combinations of signals are consistent, and <i>you</i>
-      must insure the consistency.&nbsp; Because of the way NOR gates
-      work, specifying that U129's OutputJ is 1 <i>forces</i> U127
-      OutputK, U128 OutputJ, and U129 OutputK all to be 0.&nbsp; So if
-      you specified any of those latter outputs to be 1, you'd be
-      creating an inconsistent set of inital conditions.<br>
+      to determine which ones you want to specify; and since not all
+      possible combinations of signals are logically consistent, you
+      must insure the consistency, which can be quite tiresome if done
+      manually.&nbsp; Because of the way NOR gates work, specifying that
+      U129's OutputJ is 1 <i>forces</i> U127 OutputK, U128 OutputJ, and
+      U129 OutputK all to be 0.&nbsp; So if you specified any of those
+      latter outputs to be 1, you'd be creating an inconsistent set of
+      inital conditions.<br>
     </p>
     Fortunately, a consistent set of flip-flop initializations can
     conveniently be generated using the Python 3 script <b>dumbInitialization.py</b>.&nbsp;
+
+
+
+
+
+
+
     The syntax is simply<br>
     <blockquote>
       <p><font face="Courier 10 Pitch">dumbInitialization.py &lt;<i>TheVerilogSourceCode</i>.v</font></p>
@@ -1699,7 +1936,13 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     <p>where<code> <i>TheVerilogSourceCode</i>.v</code><code></code> is
       (surprise!) the Verilog source-code for which you wish to generate
       some initialization information.&nbsp; There are actually two
-      basically-different scenarios in terms of acquiring the <i>TheVerilogSourceCode</i><i>.v</i>
+      basically-different scenarios in terms of acquiring the <i>TheVerilogSourceCode</i>.v
+
+
+
+
+
+
       file:<br>
     </p>
     <ol>
@@ -1737,267 +1980,281 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
-          <th rowspan="2" colspan="1" align="center" valign="bottom">Logic<br>
+          <th rowspan="2" colspan="1" valign="bottom" align="center">Logic<br>
             Module<br>
           </th>
-          <th rowspan="1" colspan="5" align="center" valign="bottom">Drawing
+          <th rowspan="1" colspan="5" valign="bottom" align="center">Drawing
+
+
+
+
+
+
+
             Number <br>
           </th>
-          <th rowspan="1" colspan="2" align="center" valign="bottom">Module
+          <th rowspan="1" colspan="2" valign="bottom" align="center">Module
+
+
+
+
+
+
+
             Description<br>
           </th>
         </tr>
         <tr>
-          <th align="center" valign="bottom">AGC 1003565<br>
+          <th valign="bottom" align="center">AGC 1003565<br>
           </th>
-          <th align="center" valign="bottom">AGC 1003700<br>
+          <th valign="bottom" align="center">AGC 1003700<br>
           </th>
-          <th align="center" valign="bottom">AGC 2003100<br>
+          <th valign="bottom" align="center">AGC 2003100<br>
           </th>
-          <th align="center" valign="bottom">AGC 2003200<br>
+          <th valign="bottom" align="center">AGC 2003200<br>
           </th>
-          <th align="center" valign="bottom">AGC 2003993<br>
+          <th valign="bottom" align="center">AGC 2003993<br>
           </th>
-          <th align="center" valign="bottom">Block I<br>
+          <th valign="bottom" align="center">Block I<br>
           </th>
-          <th align="center" valign="bottom">Block II<br>
+          <th valign="bottom" align="center">Block II<br>
           </th>
         </tr>
         <tr>
-          <td align="center" valign="top">A1<br>
+          <td valign="top" align="center">A1<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005059E</font><br>
+          <td valign="top" align="center"><font color="#ff0000">2005059E</font><br>
           </td>
-          <td align="center" valign="top">2005259A<br>
+          <td valign="top" align="center">2005259A<br>
           </td>
-          <td align="center" valign="top">2005259A<br>
+          <td valign="top" align="center">2005259A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Scaler Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A2<br>
+          <td valign="top" align="center">A2<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top">2005060D<br>
+          <td valign="top" align="center">2005060D<br>
           </td>
-          <td align="center" valign="top">2005260A<br>
+          <td valign="top" align="center">2005260A<br>
           </td>
-          <td align="center" valign="top">2005260A<br>
+          <td valign="top" align="center">2005260A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Scaler Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A3<br>
+          <td valign="top" align="center">A3<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005051D</font><br>
+          <td valign="top" align="center"><font color="#ff0000">2005051D</font><br>
           </td>
-          <td align="center" valign="top">2005251A<br>
+          <td valign="top" align="center">2005251A<br>
           </td>
-          <td align="center" valign="top">2005251A<br>
+          <td valign="top" align="center">2005251A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">S Q Register and Decoding<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A4<br>
+          <td valign="top" align="center">A4<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005062C<br>
+          <td valign="top" align="center"><font color="#ff0000">2005062C<br>
             </font></td>
-          <td align="center" valign="top">2005262A<br>
+          <td valign="top" align="center">2005262A<br>
           </td>
-          <td align="center" valign="top">2005262A<br>
+          <td valign="top" align="center">2005262A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Stage Branch Decoding Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A5<br>
+          <td valign="top" align="center">A5<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005061D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005061D<br>
             </font></td>
-          <td align="center" valign="top">2005261A<br>
+          <td valign="top" align="center">2005261A<br>
           </td>
-          <td align="center" valign="top">2005261A<br>
+          <td valign="top" align="center">2005261A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Cross Point Generator No. I<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A6<br>
+          <td valign="top" align="center">A6<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005063F<br>
+          <td valign="top" align="center"><font color="#ff0000">2005063F<br>
             </font></td>
-          <td align="center" valign="top">2005263A<br>
+          <td valign="top" align="center">2005263A<br>
           </td>
-          <td align="center" valign="top">2005263A<br>
+          <td valign="top" align="center">2005263A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Cross Point Generator II<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A7<br>
+          <td valign="top" align="center">A7<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005052D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005052D<br>
             </font></td>
-          <td align="center" valign="top">2005252A<br>
+          <td valign="top" align="center">2005252A<br>
           </td>
-          <td align="center" valign="top">2005252A<br>
+          <td valign="top" align="center">2005252A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Service Gates<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A8<br>
+          <td valign="top" align="center">A8<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005055D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005055D<br>
             </font></td>
-          <td align="center" valign="top">2005255-<br>
+          <td valign="top" align="center">2005255-<br>
           </td>
-          <td align="center" valign="top">2005255-<br>
+          <td valign="top" align="center">2005255-<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">4 Bit Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A9<br>
+          <td valign="top" align="center">A9<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005056C<br>
+          <td valign="top" align="center"><font color="#ff0000">2005056C<br>
             </font></td>
-          <td align="center" valign="top">2005256A<br>
+          <td valign="top" align="center">2005256A<br>
           </td>
-          <td align="center" valign="top">2005256A<br>
+          <td valign="top" align="center">2005256A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">4 Bit Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A10<br>
+          <td valign="top" align="center">A10<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005057E<br>
+          <td valign="top" align="center"><font color="#ff0000">2005057E<br>
             </font></td>
-          <td align="center" valign="top">2005257A<br>
+          <td valign="top" align="center">2005257A<br>
           </td>
-          <td align="center" valign="top">2005257A<br>
+          <td valign="top" align="center">2005257A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">4 Bit Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A11<br>
+          <td valign="top" align="center">A11<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005058D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005058D<br>
             </font></td>
-          <td align="center" valign="top">2005258A<br>
+          <td valign="top" align="center">2005258A<br>
           </td>
-          <td align="center" valign="top">2005258A<br>
+          <td valign="top" align="center">2005258A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">4 Bit Module<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A12<br>
+          <td valign="top" align="center">A12<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005053F<br>
+          <td valign="top" align="center"><font color="#ff0000">2005053F<br>
             </font></td>
-          <td align="center" valign="top">2005253A<br>
+          <td valign="top" align="center">2005253A<br>
           </td>
-          <td align="center" valign="top">2005253A<br>
+          <td valign="top" align="center">2005253A<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Parity and S Register<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A13<br>
+          <td valign="top" align="center">A13<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005069E<br>
+          <td valign="top" align="center"><font color="#ff0000">2005069E<br>
             </font></td>
-          <td align="center" valign="top">2005269-<br>
+          <td valign="top" align="center">2005269-<br>
           </td>
-          <td align="center" valign="top">2005269-<br>
+          <td valign="top" align="center">2005269-<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Alarms<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A14<br>
+          <td valign="top" align="center">A14<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005064F<br>
+          <td valign="top" align="center"><font color="#ff0000">2005064F<br>
             </font></td>
-          <td align="center" valign="top">2005264A<br>
+          <td valign="top" align="center">2005264A<br>
           </td>
-          <td align="center" valign="top">2005264B<br>
+          <td valign="top" align="center">2005264B<br>
           </td>
           <td valign="top">Logic Flow, Bit</td>
           <td valign="top">Memory Timing &amp; Addressing<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A15<br>
+          <td valign="top" align="center">A15<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005065D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005065D<br>
             </font></td>
-          <td align="center" valign="top">2005265A<br>
+          <td valign="top" align="center">2005265A<br>
           </td>
-          <td align="center" valign="top">2005265A<br>
+          <td valign="top" align="center">2005265A<br>
           </td>
           <td valign="top">Logic Flow, Bit<br>
           </td>
@@ -2005,16 +2262,16 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A16<br>
+          <td valign="top" align="center">A16<br>
           </td>
-          <td align="center" valign="top">1006540A</td>
-          <td align="center" valign="top">1006540A<br>
+          <td valign="top" align="center">1006540A</td>
+          <td valign="top" align="center">1006540A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005066D<br>
+          <td valign="top" align="center"><font color="#ff0000">2005066D<br>
             </font></td>
-          <td align="center" valign="top">2005266-<br>
+          <td valign="top" align="center">2005266-<br>
           </td>
-          <td align="center" valign="top">2005266-<br>
+          <td valign="top" align="center">2005266-<br>
           </td>
           <td valign="top">Logic Flow, Bit<br>
           </td>
@@ -2022,17 +2279,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A17<br>
+          <td valign="top" align="center">A17<br>
           </td>
-          <td align="center" valign="top">1006543D<br>
+          <td valign="top" align="center">1006543D<br>
           </td>
-          <td align="center" valign="top">1006543D<br>
+          <td valign="top" align="center">1006543D<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005067B<br>
+          <td valign="top" align="center"><font color="#ff0000">2005067B<br>
             </font></td>
-          <td align="center" valign="top">2005267A<br>
+          <td valign="top" align="center">2005267A<br>
           </td>
-          <td align="center" valign="top">2005267A<br>
+          <td valign="top" align="center">2005267A<br>
           </td>
           <td valign="top">Logic Flow "C"<br>
           </td>
@@ -2040,17 +2297,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A18<br>
+          <td valign="top" align="center">A18<br>
           </td>
-          <td align="center" valign="top">1006542-<br>
+          <td valign="top" align="center">1006542-<br>
           </td>
-          <td align="center" valign="top">1006542-<br>
+          <td valign="top" align="center">1006542-<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005068C<br>
+          <td valign="top" align="center"><font color="#ff0000">2005068C<br>
             </font></td>
-          <td align="center" valign="top">2005268A<br>
+          <td valign="top" align="center">2005268A<br>
           </td>
-          <td align="center" valign="top">2005268A<br>
+          <td valign="top" align="center">2005268A<br>
           </td>
           <td valign="top">Logic Flow "B"<br>
           </td>
@@ -2058,17 +2315,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A19<br>
+          <td valign="top" align="center">A19<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005070E<br>
+          <td valign="top" align="center"><font color="#ff0000">2005070E<br>
             </font></td>
-          <td align="center" valign="top">2005270-<br>
+          <td valign="top" align="center">2005270-<br>
           </td>
-          <td align="center" valign="top">2005270-<br>
+          <td valign="top" align="center">2005270-<br>
           </td>
           <td valign="top"><br>
           </td>
@@ -2076,17 +2333,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A20<br>
+          <td valign="top" align="center">A20<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005054C<br>
+          <td valign="top" align="center"><font color="#ff0000">2005054C<br>
             </font></td>
-          <td align="center" valign="top">2005254-<br>
+          <td valign="top" align="center">2005254-<br>
           </td>
-          <td align="center" valign="top">2005254-<br>
+          <td valign="top" align="center">2005254-<br>
           </td>
           <td valign="top"><br>
           </td>
@@ -2094,17 +2351,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A21<br>
+          <td valign="top" align="center">A21<br>
           </td>
-          <td align="center" valign="top">1006556A<br>
+          <td valign="top" align="center">1006556A<br>
           </td>
-          <td align="center" valign="top">1006556B<br>
+          <td valign="top" align="center">1006556A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005050J<br>
+          <td valign="top" align="center"><font color="#ff0000">2005050J<br>
             </font></td>
-          <td align="center" valign="top">2005250-<br>
+          <td valign="top" align="center">2005250-<br>
           </td>
-          <td align="center" valign="top">2005250-<br>
+          <td valign="top" align="center">2005250-<br>
           </td>
           <td valign="top">Logic Flow "S"<br>
           </td>
@@ -2112,17 +2369,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A22<br>
+          <td valign="top" align="center">A22<br>
           </td>
-          <td align="center" valign="top">1006553E<br>
+          <td valign="top" align="center">1006553E<br>
           </td>
-          <td align="center" valign="top">1006553F<br>
+          <td valign="top" align="center">1006553E<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005071B<br>
+          <td valign="top" align="center"><font color="#ff0000">2005071B<br>
             </font></td>
-          <td align="center" valign="top">2005271-<br>
+          <td valign="top" align="center">2005271-<br>
           </td>
-          <td align="center" valign="top">2005271-<br>
+          <td valign="top" align="center">2005271-<br>
           </td>
           <td valign="top">Logic Flow "P"<br>
           </td>
@@ -2130,17 +2387,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A23<br>
+          <td valign="top" align="center">A23<br>
           </td>
-          <td align="center" valign="top">1006545-<br>
+          <td valign="top" align="center">1006545-<br>
           </td>
-          <td align="center" valign="top">1006545-<br>
+          <td valign="top" align="center">1006545-<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005072C<br>
+          <td valign="top" align="center"><font color="#ff0000">2005072C<br>
             </font></td>
-          <td align="center" valign="top">2005272A<br>
+          <td valign="top" align="center">2005272A<br>
           </td>
-          <td align="center" valign="top">2005272A<br>
+          <td valign="top" align="center">2005272A<br>
           </td>
           <td valign="top">Logic Flow "E"<br>
           </td>
@@ -2148,17 +2405,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A24<br>
+          <td valign="top" align="center">A24<br>
           </td>
-          <td align="center" valign="top">1006555A<br>
+          <td valign="top" align="center">1006555A<br>
           </td>
-          <td align="center" valign="top">1006555A<br>
+          <td valign="top" align="center">1006555A<br>
           </td>
-          <td align="center" valign="top"><font color="#ff0000">2005073A<br>
+          <td valign="top" align="center"><font color="#ff0000">2005073A<br>
             </font></td>
-          <td align="center" valign="top">2005273A<br>
+          <td valign="top" align="center">2005273A<br>
           </td>
-          <td align="center" valign="top">2005273A<br>
+          <td valign="top" align="center">2005273A<br>
           </td>
           <td valign="top">Logic Flow "R"<br>
           </td>
@@ -2166,17 +2423,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A25<br>
+          <td valign="top" align="center">A25<br>
           </td>
-          <td align="center" valign="top">1006554-<br>
+          <td valign="top" align="center">1006554-<br>
           </td>
-          <td align="center" valign="top">1006554-<br>
+          <td valign="top" align="center">1006554-<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow Q<br>
           </td>
@@ -2184,17 +2441,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A26<br>
+          <td valign="top" align="center">A26<br>
           </td>
-          <td align="center" valign="top">1006549B<br>
+          <td valign="top" align="center">1006549B<br>
           </td>
-          <td align="center" valign="top">1006549B<br>
+          <td valign="top" align="center">1006549B<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "J"<br>
           </td>
@@ -2202,17 +2459,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A27<br>
+          <td valign="top" align="center">A27<br>
           </td>
-          <td align="center" valign="top">1006544B<br>
+          <td valign="top" align="center">1006544B<br>
           </td>
-          <td align="center" valign="top">1006544B<br>
+          <td valign="top" align="center">1006544B<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow D<br>
           </td>
@@ -2220,17 +2477,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A28<br>
+          <td valign="top" align="center">A28<br>
           </td>
-          <td align="center" valign="top">1006552A<br>
+          <td valign="top" align="center">1006552A<br>
           </td>
-          <td align="center" valign="top">1006552A<br>
+          <td valign="top" align="center">1006552A<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "N"<br>
           </td>
@@ -2238,17 +2495,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A29<br>
+          <td valign="top" align="center">A29<br>
           </td>
-          <td align="center" valign="top">1006559D<br>
+          <td valign="top" align="center">1006559D<br>
           </td>
-          <td align="center" valign="top">1006559D<br>
+          <td valign="top" align="center">1006559D<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "V"<br>
           </td>
@@ -2256,34 +2513,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A30<br>
+          <td valign="top" align="center">A30<br>
           </td>
-          <td align="center" valign="top">1006548-<br>
+          <td valign="top" align="center">1006548-<br>
           </td>
-          <td align="center" valign="top">1006548-<br>
+          <td valign="top" align="center">1006548-<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td valign="top">Logic Flow "H"<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td align="center" valign="top">A31<br>
-          </td>
-          <td align="center" valign="top">1006548-</td>
-          <td align="center" valign="top">1006548-<br>
-          </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "H"<br>
           </td>
@@ -2291,16 +2531,33 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A32<br>
+          <td valign="top" align="center">A31<br>
           </td>
-          <td align="center" valign="top">1006546A</td>
-          <td align="center" valign="top">1006546A<br>
+          <td valign="top" align="center">1006548-</td>
+          <td valign="top" align="center">1006548-<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top">Logic Flow "H"<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">A32<br>
+          </td>
+          <td valign="top" align="center">1006546A</td>
+          <td valign="top" align="center">1006546A<br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "F"<br>
           </td>
@@ -2308,35 +2565,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A33<br>
+          <td valign="top" align="center">A33<br>
           </td>
-          <td align="center" valign="top">1006547G<br>
+          <td valign="top" align="center">1006547G<br>
           </td>
-          <td align="center" valign="top">1006547G<br>
+          <td valign="top" align="center">1006547G<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td valign="top">Logic Flow "G"<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td align="center" valign="top">A34<br>
-          </td>
-          <td align="center" valign="top">1006547G<br>
-          </td>
-          <td align="center" valign="top">1006547G<br>
-          </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td align="center" valign="top"><br>
-          </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "G"<br>
           </td>
@@ -2344,17 +2583,35 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A35<br>
+          <td valign="top" align="center">A34<br>
           </td>
-          <td align="center" valign="top">1006541B<br>
+          <td valign="top" align="center">1006547G<br>
           </td>
-          <td align="center" valign="top">1006541B<br>
+          <td valign="top" align="center">1006547G<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top">Logic Flow "G"<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">A35<br>
+          </td>
+          <td valign="top" align="center">1006541B<br>
+          </td>
+          <td valign="top" align="center">1006541B<br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "A"<br>
           </td>
@@ -2362,17 +2619,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A36<br>
+          <td valign="top" align="center">A36<br>
           </td>
-          <td align="center" valign="top">1006557D<br>
+          <td valign="top" align="center">1006557D<br>
           </td>
-          <td align="center" valign="top">1006557D<br>
+          <td valign="top" align="center">1006557D<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "T"<br>
           </td>
@@ -2380,17 +2637,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A37<br>
+          <td valign="top" align="center">A37<br>
           </td>
-          <td align="center" valign="top">1006550F<br>
+          <td valign="top" align="center">1006550F<br>
           </td>
-          <td align="center" valign="top">1006550F<br>
+          <td valign="top" align="center">1006550F<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "L"<br>
           </td>
@@ -2398,16 +2655,16 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">A38<br>
+          <td valign="top" align="center">A38<br>
           </td>
-          <td align="center" valign="top">1006551-</td>
-          <td align="center" valign="top">1006551-<br>
+          <td valign="top" align="center">1006551-</td>
+          <td valign="top" align="center">1006551-<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
           <td valign="top">Logic Flow "M"<br>
           </td>
@@ -2415,17 +2672,17 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">Fixed and Erasable Memory<br>
+          <td valign="top" align="center">Fixed and Erasable Memory<br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top"><br>
+          <td valign="top" align="center"><br>
           </td>
-          <td align="center" valign="top">fixed_erasable_memory<br>
+          <td valign="top" align="center">fixed_erasable_memory<br>
           </td>
-          <td align="center" valign="top">fixed_erasable_memory<br>
+          <td valign="top" align="center">fixed_erasable_memory<br>
           </td>
-          <td align="center" valign="top">fixed_erasable_memory<br>
+          <td valign="top" align="center">fixed_erasable_memory<br>
           </td>
           <td valign="top"><br>
           </td>
@@ -2435,7 +2692,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
       </tbody>
     </table>
     <p>Because <b>dumbInitialization.py</b> expects to be dealing with
-      a collection of modules rather than necessarily an indivisual
+      a collection of modules rather than necessarily an individual
       module, it does not output any file specifically called
       "module.init".&nbsp; Rather, it expects to be operating on an
       entire AGC circuit, so it outputs separate initialization files
@@ -2443,20 +2700,28 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
       so on.&nbsp; As you may recall, the testVerilog circuit is a
       snippet from the circuit for logic module A1, so we'd have to
       rename A1.init as module.init after running <b>dumbInitializion.py</b>.&nbsp;
+
+
+
+
+
+
+
       Still, the operation seems pretty simple.<br>
     </p>
-    <p>This description hides a nasty chicken-and-egg truth, namely that
-      we need to have module.init for <b>dumbVerilog.py</b> to produce
-      module.v, and we need module.v for <b>dumbInitialization.py</b>
+    <p>This supposed simplicity hides a nasty chicken-and-egg truth,
+      namely that we need to have module.init for <b>dumbVerilog.py</b>
+      to produce module.v, and we need module.v for <b>dumbInitialization.py</b>
       to produce module.init.&nbsp; Catch 22!<br>
     </p>
-    <p>Fortunately, this circle is not
-      as vicious as it appears, since all you really have to do is
-      follow this 3-step procedure:<br>
+    <p>Fortunately, this circle is not as vicious as it appears, since
+      all you really have to do is follow this 3-step procedure:<br>
     </p>
     <ol>
-      <li>Use <b>dumbVerilog.py</b> with an empty module.init, or else
-        one of your own devising, to create module.v.<br>
+      <li>Use <b>dumbVerilog.py</b> with an <i>empty</i> module.init,
+        or else one of your own devising, to create module.v.&nbsp; We
+        actually provide such an empty module.init
+        (Schematics/empty.init) for this very purpose.<br>
       </li>
       <li>Use <b>dumbInitialization.py</b> to generate A1.init, and
         rename A1.init as module.init.<br>
@@ -2484,15 +2749,36 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     the test bench.&nbsp; But first, there's an automation procedure
     that can be performed to get you partway there.&nbsp; Recall that in
     the preceding section we talked about how to create what we called <i>TheVerilogSourceCode</i>.v
+
+
+
+
+
+
+
     for the circuitry you want to simulate.&nbsp; We reuse that file
     right now:<br>
     <blockquote><font face="Courier 10 Pitch">dumbTestbench.py &lt;<i>TheVerilogSourceCode</i>.v
+
+
+
+
+
+
+
         &gt;<i>TestBench</i>.v</font><br>
     </blockquote>
     The Verilog source-code created by <b>dumbTestbench.py</b> is not <i>quite</i>
     the complete test bench, because <b>dumbTestbench.py</b> isn't
     aware of any personalized choices which needs to be made by you
     rather than by a computer.&nbsp; The file it creates, <i>TestBench</i>.v,
+
+
+
+
+
+
+
     itself imports another Verilog source-code file called "tb.v" to
     contain these personalized changes, and it's this file tb.v that you
     must create.&nbsp; The kinds of customizations covered by tb.v
@@ -2519,117 +2805,177 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     </blockquote>
     and here's the tb.v file it includes, as created by me:<br>
     <blockquote>
-      <pre>// Include-file used by dumbTestbench.py for automating testbench generation.<br><br>reg rst = 1;<br>initial begin<br>  $dumpfile("testVerilog.vcd");<br>  $dumpvars(0, agc);<br>  <br>  # 2000 rst = 0;<br>  # 500000 $finish;<br>end<br><br>reg FS01_ = 0;<br>always #4882.8125 FS01_ = !FS01_;<br>  <br>initial<br>  $timeformat(-6, 0, " us", 10);<br>initial<br>  $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);<br></pre>
+      <pre>// Include-file used by dumbTestbench.py for automating testbench generation.<br><br>reg rst = 1;<br>initial begin<br>  // Assume compilation with -fst switch.<br>  $dumpfile("testVerilog.fst");<br>  $dumpvars(0, agc);<br>  <br>  # 2000 rst = 0;<br>  # 500000 $finish;<br>end<br><br>reg FS01_ = 0;<br>always #4882.8125 FS01_ = !FS01_;<br>  <br>initial<br>  $timeformat(-6, 0, " us", 10);<br>initial<br>  $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);<br></pre>
     </blockquote>
     Some of the features of this file were <a moz-do-not-send="true"
       href="#TestbenchExplanations">already explained earlier</a>, at
     least somewhat, though the testbench discussed there was a somewhat
     earlier version than the one shown above.<br>
+    <h2><a name="compilation"></a>Compilation of the Verilog Source Code</h2>
+    The Icarus Verilog compiler, <b>iverilog</b>, has a lot of options
+    <a moz-do-not-send="true"
+      href="https://steveicarus.github.io/iverilog/">that you can
+      research online</a> if you need them.&nbsp; I'm not aware of any
+    options we need, though, and think that compilation is just<br>
+    <blockquote>
+      <pre>iverilog -o <i>OUTPUT</i>.vvp <i>ListOfVerilogSourceCodeModulesIncludingTheTestBench</i><br></pre>
+    </blockquote>
+    <p>For a single logic module or other standalone schematic, that's
+      typically just<br>
+    </p>
+    <blockquote>
+      <pre>iverilog -o module.vvp module_tb.v module.v<br></pre>
+    </blockquote>
+    <p>For a collection of modules, such as an entire AGC, the basic
+      command is still the same, but it's a bit more complicated since
+      the list of Verilog source-code files is much larger and includes:</p>
+    <ul>
+      <li>One source-code file for each module.&nbsp; If schematics are
+        reused for several modules, there will still be separate Verilog
+        files for each, since they will have been generated (using <b>dumbVerilog.py</b>)
+        with different module designations (A1, A2, A3, and so on).</li>
+      <li>One for the ROM containing the AGC software the simulated CPU
+        will run.</li>
+      <li>One for the test bench.</li>
+    </ul>
+    <h2><a name="RunningTheSimulation"></a>Running the Simulation</h2>
+    <p>This is the easiest thing of all, since the command is simply<br>
+    </p>
+    <blockquote>
+      <pre>vvp module.vvp -fst<br></pre>
+    </blockquote>
+    <p>The <font color="#663300"><code>-fst</code></font> option
+      perhaps requires some explanation.&nbsp; It selects the file
+      format to be used for logging simulation data.&nbsp; Because our
+      intention is to use <b>gtkwave</b> to visualize the logged data
+      (see the next section), it's necessary to choose a file format
+      supported both by <b>vvp</b> and by <b>gtkwave</b>, or at least
+      can be inter-converted.&nbsp; At the <i>present</i> writing (<b>vvp</b>
+      v11 and <b>gtkwave</b> v3.3.<i>x</i>), that would appear to be a
+      wide and confusing range of formats:<br>
+    </p>
+    <ul>
+      <li><b>vvp</b>:&nbsp; VCD, LXT, LXT2, FST</li>
+      <li><b>gtkwave</b>:&nbsp; VCD, FST, <i>LXT</i>, <i>LXT2</i>, <i>VZT</i>,
+        <i>IDX</i>, GHW, <i>AET2</i>, <i>VPD</i>, <i>WLF</i>, <i>FSDB</i></li>
+    </ul>
+    <p>The bad news or good news (depending on your point of view) is
+      that <b>gtkwave</b> documentation makes it clear that all of the
+      formats I've <i>italicized</i> are scheduled to be deleted in <b>gtkwave</b>
+      v4, in addition to which GHW is a format used only for VHDL and
+      therefore is unlikely ever to be supported by Verilog
+      systems.&nbsp; That leaves <i>only</i> VCD and FST likely to be
+      common to <b>iverilog</b> and <b>gtkwave</b> in the
+      future.&nbsp; Of these two remaining formats, VCD (from <b>gtkwave</b>
+      documentation) "is the industry standard file format generated by
+      most Verilog simulators and is specified in IEEE-1364. This is the
+      <b>slowest</b> of the formats for the viewer to process and
+      requires the most memory. However, this format is ubiquitous, and
+      almost all tools support it".&nbsp; Whereas FST "is designed for
+      very fast sequential and random access".&nbsp; Which to choose is,
+      of course, a matter of personal preference.<br>
+    </p>
+    <h2><a name="visualization"></a>Visualization of the Simulation Data</h2>
+    <p>It's probably best to review <a moz-do-not-send="true"
+        href="https://gtkwave.github.io/gtkwave/index.html">the gtkwave
+        documentation</a> if you have questions, rather than relying on
+      anything I have to say about it.&nbsp; The command to do it is
+      simply<br>
+    </p>
+    <blockquote>
+      <pre>gtkwave <i>NameOfTheSimulationLogFile</i><br></pre>
+    </blockquote>
     <h2><a name="Tying"></a>Tying It All Together</h2>
-    If you waded through the preceding sections, you'll likely have come
-    to the conclusion that simulating a single AGC module or portion of
-    one is rather straightforward, even if there are a number of steps
-    involved in doing it.&nbsp; You'll likely also have come to the
-    conclusion that setting up the simulation for an entire AGC, though
-    not the simulations process itself, is quite involved.&nbsp; Having
-    come to that same conclusion myself, I've provided the automation
-    need to carry out all of the steps.<br>
+    <h3><a name="simulateBlockII"></a>For a Single Block II Logic
+      Module, a Portion Thereof, or Similar</h3>
+    As mentioned earlier, if you're running Linux or Windows, I've
+    written a shell script (for Linux) and a corresponding batch file
+    (for Windows) that combines all of the steps, mostly.&nbsp; So far,
+    I have no Mac OS equivalent.<br>
     <br>
-    TBD<br>
-    <br>
-    <strike>There is also a way to semi-automate creation of the
-      netlist(s) and other portions of the simulation workflow if you
-      want to simulate an </strike><strike><i>entire AGC</i></strike><strike>.&nbsp;
+    All you have to do is this:<br>
+    <ol>
+      <li>Create a schematic (module.sch for KiCad v5- or
+        module.kicad_sch for KiCad v6+), if it doesn't already exist.<br>
+      </li>
+      <li><a moz-do-not-send="true"
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">Create
 
-      Or at least there is such a shortcut in Linux and possibly Mac OS,
-      though not presently in Windows.&nbsp; Specifically, there's a
-      Makefile which can be used with the GNU </strike><strike><b>make</b></strike><strike>
-      utility to batch produce Verilog source for all of the available
-      schematics, as well as creating a rough draft of a "test bench" (</strike><strike><a
-        moz-do-not-send="true"
-href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#Converting_Verilog_Module_to_Verilog">see
-        below</a></strike><strike>) for a given AGC module.</strike><strike><br>
-    </strike><strike>
-    </strike><strike><br>
-    </strike><strike>
-      As mentioned earlier, we don't really translate from KiCad into
-      Verilog,
-      but rather from a KiCad netlist (in "OrcadPCB2" format) into
-      Verilog.&nbsp; If you are lucky enough to be running Linux, or
-      possibly Mac OS X, you can simply use the convenient Makefile:</strike><strike><br>
-    </strike>
-    <blockquote><strike><font face="Courier 10 Pitch">cd Schematics<br>
-          make</font></strike><strike><br>
-      </strike></blockquote>
-    <strike>or perhaps</strike><strike><br>
-    </strike><strike><font face="Courier 10 Pitch">cd Schematics<br>
-        make clean all</font></strike>
-    <p><strike>(</strike><strike><i>Come back to the following later and
-          fix it up.)</i></strike></p>
-    <p><strike>If you are running Linux then the simplest thing to do
-        (for, say, AGC model 2003200) is just</strike><strike><br>
-      </strike></p>
+
+
+          a tb.v file, as described above</a>.</li>
+      <li>From within the folder containing your schematic and the tb.v
+        file, run the following command:</li>
+    </ol>
     <blockquote>
-      <p><strike><font face="Courier 10 Pitch">cd <font face="Courier
-              10 Pitch">S</font>chematics<br>
-            <font face="Courier 10 Pitch">make clean all <br>
-              <font face="Courier 10 Pitch">make </font>2003200.init<br>
-              <font face="Courier 10 Pitch"><font face="Courier 10
-                  Pitch">make clea<font face="Courier 10 Pitch">n all</font></font></font><br>
-            </font></font></strike></p>
+      <blockquote>
+        <pre>simulateBlockII A1 [<i>NETLIST</i>.net]<br></pre>
+      </blockquote>
     </blockquote>
-    <p><strike>Of course, if you don't have Linux then this doesn't help
-        you too much, so let's consider how to go about generating the
-        flip-flop initialization files (</strike><strike><i>DRAWING</i></strike><strike>/module.init)
-        as a manual operation rather than using the handy-dandy
-        Makefile.&nbsp; The basic syntax is simply</strike><strike><br>
-      </strike></p>
+    <p>Of course, the parameter A1 is specific to the testVerilog
+      example, and probably would be something else for you.&nbsp; The
+      module.net parameter is optional, in the sense that <b>simulateBlockII</b>
+      will try to generate a file called module.net itself if the
+      parameter is missing, but <i>NETLIST</i>.net must already exist
+      if the parameter is present.&nbsp; KiCad v7 or later is required
+      if you're going to omit the <i>NETLIST</i>.net parameter.</p>
+    <h3> <a name="simulateAGC"></a>For an Entire AGC</h3>
+    The equivalent for an entire AGC is the shell script <b>simulateAGC</b>.&nbsp;
+    I do not yet have a Windows batch file nor a Mac OS shell script for
+    this.&nbsp; The script is run from the Schematics/ folder containing
+    the folders for the individual schematics.&nbsp; The usage is:<br>
     <blockquote>
-      <p><strike><font face="Courier 10 Pitch">dumbInitialization.py
-            &lt;module.v</font></strike><strike><br>
-        </strike></p>
+      <pre>simulateAGC <i>AGC_MODEL</i> <i>AGC_SOFTWARE</i> "<i>LIST_OF_OPTIONS</i>"<br></pre>
     </blockquote>
-    <strike><br>
-    </strike>
-    <p><strike>That's why in the Makefile example we started with, there
-        are two "make clean all" steps.</strike><strike><br>
-      </strike></p>
-    <p><strike>There are two basic scenarios for which you'd want to
-        generate initialization files, I think:&nbsp; You might want an
-        initialization file for an AGC module considered as a
-        stand-alone unit.&nbsp; Or, you might want an initialization
-        file for the complete set of AGC modules of a given AGC part
-        number.&nbsp; The latter has an advantage over the former, in
-        that the initialization is internally consistent throughout the
-        entire AGC.&nbsp; Besides, an initialization file of the
-        full-AGC type works perfectly well for an individual module, but
-        not vice-versa.&nbsp; So let's assume you really want
-        initialization files for the AGC as a whole.</strike><strike><br>
-      </strike></p>
-    <p><strike>The first step, of course, is to take all of the Verilog
-        files for the individual AGC modules, and concatenate them to
-        form one large file.&nbsp; For AGC model 2003200, for example,
-        those files are 2005259A/module.v, 2005260A/module.v, ...,
-        2005273A/module.v.&nbsp; (The drawing numbers for the AGC
-        modules, which is essentially what these are, are listed both on
-      </strike><strike><a
-href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/ElectroMechanical.html">the
-          Electro-Mechanical page</a></strike><strike> of the website,
-        and in Schematics/Makefile.)&nbsp; You can combine these files,
-        for example, using a text-editor program.&nbsp; The second step
-        is to actually run dumbInitialization.py:</strike><strike><br>
-      </strike></p>
-    <blockquote><strike><font face="Courier 10 Pitch">Scripts/dumbInitialization.py
-          &lt; </font></strike><strike><font face="Courier 10 Pitch"><font
-            face="Courier 10 Pitch">Bi<font face="Courier 10 Pitch">gCombined<font
-                face="Courier 10 Pitch">VerilogFile</font></font></font>.v</font></strike></blockquote>
-    <strike>
-      The result is the creation of files files A1.init, A2.init, ...,
-      A24.init.&nbsp; These need to be copied into the appropriate
-      drawing directories and be renamed to module.init.&nbsp; For
-      example, A1.init
-      might become 2005259A/module.init.
-    </strike><br>
+    Any of the command-line parameters can be omitted (from the end of
+    the line) or replaced by "" (if in the middle of the line) to use
+    default values for them.<br>
+    <br>
+    These parameters are:<br>
+    <ul>
+      <li><i><code>AGC_MODEL</code></i>:&nbsp; One of 1003565, 1003700,
+        2003100, 2003200, or 2003993 (the default).&nbsp; However,
+        1003565 and 1003700 are in fact equivalent, as are 2003200 and
+        2003993.&nbsp; But at present, the simulation isn't yet expected
+        to work for Block I AGC's, and we do not yet have any of the
+        schematic diagrams for Block II model 2003100.&nbsp; So in
+        reality, the only presently-viable choice is essentially
+        2003993.</li>
+      <li><i><code>AGC_SOFTWARE</code></i>:&nbsp; Any of the software
+        versions present in Schematics/roms/, such as Comanche055,
+        Luminary099, or Borealis.&nbsp; The default is
+        Validation-hardware-simulation.</li>
+      <li><code>"<i>LIST_OF_OPTIONS</i>"</code>:&nbsp; A quoted list of
+        space-separated options used to override hard-coded values in
+        the testbench files tb-<i><code>AGC_MODEL</code></i>.v.&nbsp;
+        The default is <code>"-DDUMP_ALL"</code>.&nbsp; Here are some
+        of the individual options which can appear in the list:</li>
+      <ul>
+        <li><code>-Pagc.GATE_DELAY=<i>N</i> </code>— Specify the
+          NOR-gate propagation delay in nanoseconds.&nbsp; Default is
+          20.</li>
+        <li><code>-DSPOOF_SC</code><code> </code>— Provides a Verilog
+          model for certain signals from the spacecraft.&nbsp; It is
+          primarily useful in attempting to match simulation results
+          versus simulation results from Mike Stewart's Verilog-based
+          simulation of the AGC.</li>
+        <li><code>-DDUMP_ALL</code><code> </code>— Dump <i>all</i> AGC
+          signals to the simulation's output dataset.&nbsp; <b>Note:</b>&nbsp;
+          The various <code>DUMP_<i>xxx</i></code> options are mutually
+          exclusive.</li>
+        <li><code>-DUMP_DECODER</code><code> </code>— Dump signals
+          pertaining to the CPU's instruction decoder to the
+          simulation's output dataset. </li>
+        <li><code>-DUMP_HELPFUL</code> <code> </code>— Dump only those
+          signals I've designated as "helpful" to the simulation's
+          output dataset, which is the same as <code>-DDUMP_DECODER</code>
+          plus a few others.<br>
+        </li>
+        <li><code>-DUMP_BACKPLANE</code> <code> </code>— Dump signals
+          from the AGC's backplane to the simulation's output dataset.<br>
+        </li>
+      </ul>
+    </ul>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -2643,15 +2989,22 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/ElectroMechanical.html
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
+
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-12<br>
+          2025-01-16<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" border="0" height="100"
-              width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" border="0"
+              height="100"></a><br>
         </font></i> </center>
     <br>
     <br>
