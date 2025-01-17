@@ -137,7 +137,7 @@ fi
 # Workflow Step #2:
 if which kicad-cli &>/dev/null
 then
-        echo Checking existence of netlist files ...
+        echo Generating netlist files ...
         # kicad-cli does exist.
         for d in $modules
         do
@@ -146,7 +146,7 @@ then
                 cd .. &>/dev/null
         done
 else
-        echo Generating netlist files ...
+        echo Checking existence of netlist files ...
         # kicad-cli not found.  The netlist files must pre-exist.
         for d in $modules
         do
