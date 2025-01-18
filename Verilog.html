@@ -37,6 +37,11 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
       <li><a href="#Appendix:_Translation_from_KiCad_into">Technical
           Appendix</a></li>
       <ul>
+        <li><a moz-do-not-send="true" href="#AGCSoftwareForSimulation">AGC
+            Software for Simulation Purposes</a><br>
+        </li>
+      </ul>
+      <ul>
         <li><a moz-do-not-send="true" href="#CreatingSchematic">Transcribing/Editing
 
 
@@ -472,22 +477,55 @@ translator
       you'll find some additional setup instructions at the end of this
       section.<br>
     </p>
-    <p>On Mac OS these installations have proven to be far less
-      straightforward, and I've had to put considerable research into
-      just figuring out how to do them.&nbsp; KiCad is easy, sort of,
-      and can indeed be installed in the sense of copying a dmg file to
-      your computer, from&nbsp; the hyperlink for step #1 above.&nbsp;
-      However, the dmg file in which KiCad is found needs to remain
-      mounted for KiCad to be usable, so double-click the dmg file to
-      mount it.&nbsp; As for the other two programs, the following <i>may</i>
-      work if you have <a moz-do-not-send="true"
-        href="https://brew.sh/">homebrew</a> installed:<br>
+    <p>On Mac OS, the least-painful approach would seem to be installing
+      <a moz-do-not-send="true" href="https://brew.sh/">homebrew</a>, if
+      you don't already have it, and then using <b>brew</b> to install
+      the three programs rather than doing anything recommended at the
+      links above.<br>
     </p>
     <ul>
-      <li>brew install icarus-verilog</li>
-      <li>brew install --HEAD randomplum/gtkwave/gtkwave<br>
+      <li><font color="#663300"><code>brew install --cask kicad</code></font><br>
+      </li>
+      <li><font color="#663300"><code>brew install icarus-verilog</code></font></li>
+      <li><font color="#663300"><code>brew install --HEAD
+            randomplum/gtkwave/gtkwave</code><font color="#000000"> </font><br>
+        </font></li>
+      <li>Close any open command-line terminals.<br>
       </li>
     </ul>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; While the foregoing advice
+          about Mac OS results in an easy installation, there are things
+          about the process that are unpleasant and perhaps warrant a
+          few words of warning so that you won't be blind-sided when you
+          encounter them.&nbsp; <br>
+        </font></p>
+      <ul>
+        <li><font size="-1">KiCad:&nbsp; Expect that the first usage
+            after installation of any of the programs in the KiCad suite
+            (including <b>kicad-cli</b>) will take a <i>very</i> long
+            time to load.&nbsp; Load times of the KiCad applications
+            after that first load take a much more reasonable amount of
+            time. <br>
+          </font></li>
+        <li><font size="-1">Icarus Verilog:&nbsp; A pleasure!<br>
+          </font></li>
+        <li><font size="-1"><font size="-1">GTKWave:&nbsp; At some point
+              in the installation, it will abort and insist that you
+              change ownership and permissions of a couple of folders
+              before retrying the installation.&nbsp; Whether this is
+              good to do as a security matter, I'm not qualified to say;
+              moreover, the installation will take a long time, measured
+              in hours rather than minutes because of the many, many
+              prerequisites it has to build.&nbsp; Supposedly there is a
+              second possibility, "<a moz-do-not-send="true"
+                href="https://formulae.brew.sh/cask/gtkwave#default">brew
+                install --cask gtkwave</a>", but this command has been
+              deprecated and (I believe) does not actually result in a
+              functional gtkwave.<br>
+            </font></font></li>
+      </ul>
+    </blockquote>
     <p>On all operating systems, download <a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/tree/schematics">the
 
@@ -519,6 +557,27 @@ translator
     </p>
     <blockquote>
       <pre>pip3 install tatsu</pre>
+    </blockquote>
+    <p>or perhaps<br>
+    </p>
+    <blockquote>
+      <pre>pip[3] install --break-system-packages tatsu<br></pre>
+    </blockquote>
+    <blockquote>
+      <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; This
+          "<font color="#663300"><code>--break-system-packages</code></font>"
+          option doesn't imply that there's anything wrong with the
+          TatSu package.&nbsp; Rather, it relates to a wonderful new
+          trend of using Python environments which are "externally
+          managed", in which <i>no new Python modules whatever</i> can
+          be installed in the default environment without this </font><font
+          size="-1"><font size="-1">"<font color="#663300"><code>--break-system-packages</code></font>"
+          </font>command-line option.&nbsp;&nbsp; Isn't that a lovely
+          development in user-friendliness?&nbsp; Easily-extensible
+          systems that can't be extended? &nbsp; Ubuntu has it; Mac OS
+          has it; soon, everybody may have it.&nbsp; Oh brave new world
+          that has such stuff in it!</font><br>
+      </p>
     </blockquote>
     <p>Within the virtualagc-schematics folder (or whatever you chose to
       call it) you've just created, you'll find a folder called
@@ -562,17 +621,6 @@ translator
 
         For you, it may turn out to be different.</li>
     </ul>
-    <p><i>Even More Environment Variables for Mac OS:</i><br>
-    </p>
-    <ul>
-      <li>After installing KiCad, perform the test of opening a command
-        line and using the command "kicad-cli".&nbsp; if you are told
-        that kicad-cli cannot be found, then you have to add the folder
-        containing the <b>kicad-cli</b> program to your PATH.&nbsp; For
-        me, that folder was
-        /Volumes/KiCad/KiCad/KiCad.app/Contents/MacOS. <br>
-      </li>
-    </ul>
     <p>It's likely that the changes to the PATH or PYTYONPATH won't
       affect any existing command line terminals which are already open,
       so you'll probably have to open a new command-line terminal to get
@@ -609,12 +657,10 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVe
       <p><font size="-1"><b>Aside:</b>&nbsp; My intent is to walk you
           through the steps of the simulation workflow.&nbsp; If you
           haven't the fortitude for that — I understand and forgive you!
-          — and are running Linux or Windows, there's a script (<b>simulateModuleII</b>
-          or <b>simulateModuleII.bat</b>) which can do all of the work
-          for you and just present you with the visualization of the
-          simulation data created by the workflow.&nbsp; (With Mac OS,
-          I'm afraid you'll just have to muddle through without scripted
-          support.)&nbsp; If you feel strong enough, then take the high
+          —, there's a script (<b>simulateModuleII</b> or <b>simulateModuleII.bat</b>)
+          which can do all of the work for you and just present you with
+          the visualization of the simulation data created by the
+          workflow.&nbsp; If you feel strong enough, then take the high
           road and skip past <b>simulateBlockII</b> to the main
           narrative instead of running the script.<br>
         </font></p>
@@ -1301,10 +1347,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
         perform the entire sequence of steps needed to carry out the
         simulation, assuming that the choices described in the preceding
         section have been made.&nbsp; At the moment, the script only
-        works for Linux, or something similar enough to it, and not yet
-        for Windows or Mac OS.&nbsp; The script is run from the
-        Schematics directory, and its calling sequence from the command
-        line is<br>
+        works for Linux or Mac OS, or something similar enough,&nbsp;
+        but I haven't yet created the equivalent batch file for Windows</font><font
+        size="-1">.&nbsp; The script is run from the Schematics
+        directory, and its calling sequence from the command line is<br>
       </font>
       <blockquote>
         <pre><font size="-1">simulateAGC <i>AGCMODEL</i> <i>SOFTWARE</i> <i>VERILOGPARMS</i></font><br></pre>
@@ -1314,24 +1360,17 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
         "Validation-hardware-simulation", and <i><code>VERILOGPARMS</code></i>
         (a quoted list of command-line parameters for the Verilog
         compiler that alter values in the test bench) is empty
-        ("").&nbsp; By default, only a list of signals I've designated
-        as "helpful" are logged by the simulation. To run the simulation
-        while accepting all of the defaults, you could use the simple
-        command.<br>
+        ("").&nbsp; By default, every signal is logged by the
+        simulation. To run the simulation while accepting all of the
+        defaults, you could use the simple command.<br>
       </font>
       <blockquote>
         <pre><font size="-1">simulateAGC</font><br></pre>
       </blockquote>
-      <font size="-1">Another good choice is to log <i>all</i>
-        signals.&nbsp; To do that while accepting the defaults for the
-        AGC model and software, the command would be</font><br>
-      <blockquote>
-        <pre><font size="-1">simulateAGC "" "" "-DDUMP_ALL"<br></font></pre>
-      </blockquote>
-      <font size="-2"><font size="-1">Doing either of these will jump
-          you right to the visualization of the data output by the
-          simulation, thus avoiding the chance of learning anything in
-          the meantime.</font><br>
+      <font size="-1">This will perform the entire workflow and </font><font
+        size="-2"><font size="-1">jump you right to the visualization of
+          the data output by the simulation, thus avoiding the
+          possibility of having to learn anything in the meantime.</font><br>
       </font></blockquote>
     What makes whole-AGC simulations trickier than single module
     simulations is that while the same basic workflow holds, some of the
@@ -1529,8 +1568,54 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     <ul>
     </ul>
     <h1><a name="Appendix:_Translation_from_KiCad_into"></a>Technical
-      Appendix<br>
-    </h1>
+      Appendix</h1>
+    <h2><a name="AGCSoftwareForSimulation"></a>AGC Software for
+      Simulation Purposes</h2>
+    <p>Unmodified AGC software may not be 100% suitable for the purposes
+      of digitally simulating the AGC electronics, and may require some
+      modifications in order to be suitable.&nbsp; At this writing, the
+      only example of this is in the <a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tree/master/Validation">Validation</a>
+      program, which is a small suite of test routines for the AGC CPU
+      that I wrote, based on the original documentation.&nbsp; However,
+      Validation is an interactive program, and dependence on a DSKY may
+      not be very desirable in the context of simulating the digital
+      electronics of the AGC.&nbsp; One approach to this problem would
+      be simply to clone the AGC program one wishes to run, and then
+      make whatever changes were desired directly to the cloned source
+      code.<br>
+    </p>
+    <p>Another approach is to embed directives in the original AGC
+      program that act like conditional compilation, so that sections of
+      the source code can be modified at assembly time without
+      maintaining two copies of the source code.&nbsp; The assembler (<b>yaYUL</b>)
+      supports this approach via a command-line switch, <font
+        color="#663300"><code>--simulation</code></font>, and embedded
+      directives <font color="#663300"><code>-SIMULATION</code></font>
+      or <font color="#663300"><code>+SIMULATION</code></font> within <i>end-of-line
+        comments</i> in the AGC source code.&nbsp; Lines of AGC source
+      code without either of these embedded directives, or with those
+      directives embedded in full-line comments, are processed normally
+      by <b>yaYUL</b> whether or not the <font color="#663300"><code>--simulation</code></font>
+      command-line switch is present.&nbsp; However, if <font
+        color="#663300"><code>--simulation</code></font> is in effect, <b>yaYUL</b>
+      comments out any lines with an embedded <font color="#663300"><code>-SIMULATION</code></font>
+      directive.&nbsp; Conversely, if <font color="#663300"><code>--simulation</code></font>
+      is <i>not</i> in effect, <b>yaYUL</b> comments out any lines
+      with an embedded <font color="#663300"><code>+SIMULATION</code></font>
+      directive.<br>
+    </p>
+    <p>The AGC Validation program has such directives embedded in it,
+      and when assembled with <font color="#663300"><code>--simulation</code></font>
+      produces a version of the program more-suitable for simulating the
+      AGC electronics.&nbsp; This alternate version of Validation is
+      known as Validation-hardware-simulation, and thus is the program
+      run by default when simulating the AGC electronics.<br>
+    </p>
+    <p>More-sophisticated AGC test programs (such as Borealis) and the
+      original test programs (like Aurora and Sundial) are available as
+      well, but they have not received the treatment mentioned above.<br>
+    </p>
     <h2><a name="CreatingSchematic"></a>Transcribing/Editing a Schematic
       Diagram with eeschema<br>
     </h2>
@@ -2921,11 +3006,13 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
       if you're going to omit the <i>NETLIST</i>.net parameter.</p>
     <h3> <a name="simulateAGC"></a>For an Entire AGC</h3>
     The equivalent for an entire AGC is the shell script <b>simulateAGC</b>.&nbsp;
-    I do not yet have a Windows batch file nor a Mac OS shell script for
-    this.&nbsp; The script is run from the Schematics/ folder containing
-    the folders for the individual schematics.&nbsp; The usage is:<br>
+    I do not yet have a Windows batch that duplicates this shell script,
+    so for now it's only for platforms like Linux or Mac OS that support
+    <b>bash</b>-type shell scripts.&nbsp; The script is run from the
+    Schematics/ folder containing the folders for the individual
+    schematics.&nbsp; The usage is:<br>
     <blockquote>
-      <pre>simulateAGC <i>AGC_MODEL</i> <i>AGC_SOFTWARE</i> "<i>LIST_OF_OPTIONS</i>"<br></pre>
+      <pre><font color="#663300">simulateAGC <i>AGC_MODEL</i> <i>AGC_SOFTWARE</i> "<i>LIST_OF_OPTIONS</i>"</font><br></pre>
     </blockquote>
     Any of the command-line parameters can be omitted (from the end of
     the line) or replaced by "" (if in the middle of the line) to use
@@ -2976,6 +3063,37 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
         </li>
       </ul>
     </ul>
+    <i>Prior</i> to the creation of the shell script <b>simulateAGC</b>,
+    the simulation-workflow steps could instead be performed via the <b>make</b>
+    utility, using the makefile Schematics/Makefile.&nbsp; This Makefile
+    has since been deemphasized due to the fact that it is Linux-only
+    and I felt that maintaining it by extending it to Mac OS and/or
+    Windows would be too troublesome and fragile.&nbsp; Nevertheless, it
+    still works and provides essentially the same functionality as <b>simulateAGC</b>,
+    with these provisos:<br>
+    <ul>
+      <li>It does not attempt to create netlist files, so those must
+        pre-exist.</li>
+      <li>The simulation is <i>not</i> run automatically after Verilog
+        source-code compilation, nor is data visualization performed
+        automatically.</li>
+      <li>In addition to creation of the whole-AGC simulation file
+        (named <i>AGC_MODEL</i>.vvp), simulation files (module.vvp) are
+        created as well for each of the logic modules comprising the AGC
+        design.</li>
+      <li>The defaults are equivalent to:&nbsp; <i>AGC_MODULE</i>=2003200,
+        <i>AGC_SOFTWARE</i>=Validation-hardware-simulation, "<i>LIST_OF_OPTIONS</i>"="-DSPOOF_SC
+        -DDUMP_HELPFUL", however this is not the actual syntax used for
+        specifiying options.&nbsp; <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Schematics/Makefile">See
+          the comments in the makefile itself for that syntax and
+          supported options</a>.<br>
+      </li>
+    </ul>
+    For example, the makefile could be used as:<br>
+    <blockquote>
+      <pre><font color="#663300">cd Schematics<br>make<br>vvp 2003200.vvp -fst<br>gtkwave agc.fst</font><br></pre>
+    </blockquote>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -2999,7 +3117,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-16<br>
+          2025-01-17<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
