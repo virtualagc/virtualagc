@@ -446,7 +446,7 @@ if shuttle:
     blurbRecentlyAdded = """
     This section lists all documents updated in the last 
     """ + "%d" % cutoffMonths + """ months
-    or the last """ + "%d" % cutoffFiles + """ files, whichever is greeater. 
+    or the last """ + "%d" % cutoffFiles + """ files, whichever is greater. 
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
     """
