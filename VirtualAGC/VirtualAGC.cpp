@@ -3037,7 +3037,7 @@ VirtualAGC::FormTiling(void)
     int xScreen, yScreen, wScreen, hScreen;
     wxClientDisplayRect(&xScreen, &yScreen, &wScreen, &hScreen);
     printf("Display rect: %d %d %d %d\n", xScreen, yScreen, wScreen, hScreen);
-    printf("DPI scale factor: %g\n", this->GetDPIScaleFactor());
+    //printf("DPI scale factor: %g\n", this->GetDPIScaleFactor());
 
     xScreen += 5;
     yScreen += 5;
