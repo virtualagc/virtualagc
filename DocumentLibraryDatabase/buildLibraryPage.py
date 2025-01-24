@@ -532,7 +532,7 @@ else:
     This section lists all documents updated in the last 
     """ + "%d" % cutoffMonths + """ months or the last """ + \
     "%d" % cutoffFiles + """ files, whichever is greater. Note that recently-added <a href="#EngineeringDrawings">G&N 
-    engineering drawings</a> are <i>not</i> included in the list.
+    engineering drawings</a> may not be included in the list.
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
     <br><br>
