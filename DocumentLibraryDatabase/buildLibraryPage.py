@@ -855,6 +855,12 @@ else:
     related information.
     """
 
+    blurbSkylab = """
+    This section is devoted to Skylab-related documents in general, since so
+    many of them were either common to all Skylab missions, or at least can't 
+    be confidently associated with any specific mission.
+    """
+
     blurbEverything = """
     If none of the sections above coincides with your special interests, this 
     section may help.  It contains <i>every</i> item in our Document Library, 
@@ -1701,6 +1707,7 @@ else:
         { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
          
         { "anchor" : "EngineeringDrawings", "title" : "Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree", "NARASW" ], "blurb" : blurbElectroMechanical },
+        { "anchor" : "EverythingSkylab", "title" : "Everything Skylab", "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"], "targets" : ["Skylab 1", "Skylab 2", "Skylab 3", "Skylab 4"], "keywords" : [ "aap", "skylab", "skylark", "skylark 48", "skylark 47", "skylark 46", "skylark 45" ], "blurb" : blurbSkylab },
         { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
     ]
 

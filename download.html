@@ -1330,19 +1330,19 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       </li>
     </ul>
     <h3><a name="AlternateTcl"></a>Alternate Installations of Tcl/Tk</h3>
-    <p>Tcl/Tk is required for the Virtual AGC component <b>LM_Simulator</b>.&nbsp;
-
-
-      If you have installed an alternate version of Tcl/Tk than the one
-      found first in your PATH, and prefer to use it instead of the one
-      in your PATH, then Virtual AGC needs to be made aware of that
-      fact.&nbsp; <br>
+    <p>Tcl/Tk, and in particular the Tcl program <b>wish</b>, is
+      required for running the optional Virtual AGC component <b>LM_Simulator</b>.&nbsp;
+      If <b>wish</b> already works for you, then you can just skip this
+      section.<br>
+    </p>
+    <p>You may find, however, that <b>wish</b> does not work on your
+      computer, making <b>LM_Simulator</b> is unusable.&nbsp;
+      Additional setup is needed.<br>
     </p>
     <blockquote>
-      <p><font size="-1"><b>Aside:</b>&nbsp; Why would this situation
-          arise?&nbsp; For example, there's a situation in Mac OS
-          versions <i>at least</i> from Monterey through Sequoia in
-          which:<br>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Why might this
+          happen?&nbsp; For example, in Mac OS versions <i>at least</i>
+          from Monterey through Sequoia:<br>
         </font></p>
       <ul>
         <li><font size="-1">The version of Tcl/Tk in a base Mac OS
@@ -1351,26 +1351,43 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
         <li><font size="-1">The defective version of Tcl/Tk cannot be
             uninstalled, since Mac OS regards it as essential.</font></li>
         <li><font size="-1">A new, non-defective version of Tcl/Tk can
-            be installed (say, from source), but since it will be
-            installed in a folder (typically in /usr/local/bin) that may
-            have a lower priority in the PATH environment variable than
-            the original defective version, invoking <b>wish</b> from a
-            command line may continue to find the defective version
-            rather than the new installation.</font><br>
-        </li>
+            be installed by various means that bypass the Apple
+            Store.&nbsp; (But even then, the new version would typically
+            be installed in a folder that may have a lower priority in
+            the PATH environment variable than the original defective
+            version, invoking <b>wish</b> from a command line may
+            continue to run the defective version rather than the new
+            installation.)</font></li>
+      </ul>
+      <ul>
       </ul>
     </blockquote>
-    <p>If you have this situation, the workaround is to create an
-      environment variable called <code>AGC_WISH</code>.&nbsp; This
-      environment variable must be assigned a value which is the path to
-      your preferred installation of Tcl/Tk.&nbsp; Specifically, it's
-      the name of the folder in which the Tcl program called <b>wish</b>
-      is found.&nbsp; This path <i>must</i> include a trailing path
-      separator native to your system:&nbsp; \ for Windows or / for all
-      others.&nbsp; For example, on Linux or Mac OS, a default
-      installation of Tcl/Tk would place <b>wish</b> at /usr/bin/wish,
-      whereas an alternate installation would typically put it in
-      /usr/local/bin/wish, so you would assign <code>AGC_WISH=/usr/local/bin/</code>.<br>
+    <p>If you haven't done so already, the first step is to install a
+      correctly-working version of Tcl/Tk on your computer, using
+      whatever method is appropriate for your computer.&nbsp; On Mac OS,
+      for example, appropriate methods might be via Homebrew, MacPorts,
+      or (my recommendation) building Tcl/Tk from source.&nbsp; As long
+      as <b>wish</b> works after doing so, you're fine!<br>
+    </p>
+    <p>If <b>wish</b> is <i>not</i> working once you've installed a
+      good version of Tcl/Tk, it's presumably because the version of
+      Tcl/Tk you've installed is not the one being found when <b>wish</b>
+      is used from a command line.&nbsp; You <i>could</i> just alter
+      your PATH to insure that your chosen version of Tcl/Tk is one
+      being found, though in principle such a change to your PATH could
+      have undesirable side effects.&nbsp; A workaround that eliminates
+      any undesirable side effects by isolating any effects to Virtual
+      AGC alone is to create an environment variable called <code>AGC_WISH</code>.&nbsp;
+      This environment variable must be assigned a value which is the
+      path to your preferred correctly-working installation of
+      Tcl/Tk.&nbsp; Specifically, it's the name of the folder in which
+      the Tcl program called <b>wish</b> is found.&nbsp; This path <i>must</i>
+      include a trailing path separator native to your system:&nbsp; \
+      for Windows or / for all others.&nbsp; For example, on Linux or
+      Mac OS, a default installation of Tcl/Tk would place <b>wish</b>
+      at /usr/bin/wish, whereas an alternate installation might put it
+      in /usr/local/bin/wish, so you would assign <code>AGC_WISH=/usr/local/bin/</code>.
+      <br>
     </p>
     <p>The methods for permanently creating an environment variable are
       described in the preceding section.<br>
@@ -3103,7 +3120,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-13<br>
+          2025-01-25<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
