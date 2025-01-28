@@ -2446,6 +2446,99 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       MacOS installer for the so-called "final" release of Python 2,
       namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
     <br>
+    <a name="ApoDisKey"></a>In spite of my own distaste for dealing with
+    Mac OS — which I admit may stem largely from the fact that I reject
+    the notion of being forced to buy new Macs whenever Apple decides
+    it'd be swell for them if I do so —, and my consequent lack of any
+    personal enthusiasm to support the platform, it ironically turns out
+    the Mac may be a platform in which you can get an improved Virtual
+    AGC experience relative to some other platforms.&nbsp; <br>
+    <br>
+    How so?&nbsp; Well, when running AGC software in a simulation, the
+    emulation of the AGC CPU is typically supplemented by a simulated
+    DSKY (Display Keyboard).&nbsp; Traditionally, the simulated DSKY has
+    been provided by a Virtual AGC program called <b>yaDSKY2</b>.&nbsp;
+    My emphasis in the design of <b>yaDSKY2</b> was its functionality
+    and cross-platform portability, with short shrift given to the
+    surface features — such as what it looks like! — that everybody
+    loves.&nbsp; As a result, <b>yaDSKY2</b> leaves something to be
+    desired in terms of visual accuracy compared to the physical DSKY
+    and in its conformance to the conventions of the particular
+    computing platforms on which it's running.&nbsp; This is a
+    particular problem on Mac OS, since Apple aficionados have a more
+    strongly-shared view of how they expect Mac OS apps to appear and
+    behave than do (say) Linux users.&nbsp; For Mac OS, Gavin Eadie has
+    relieved some of my potential guilt [note: in reality I felt none at
+    all] on this front by creating an alternate simulated-DSKY program
+    that he calls <b>ApoDisKey</b>.&nbsp; <b>ApoDisKey</b> is not
+    provided within the Virtual AGC release proper, but rather is found
+    in <a href="https://github.com/gavineadie/ApoDisKey"
+      moz-do-not-send="true">Gavin's own GitHub repository</a>, from
+    which you can download the executable form of the <b>ApoDisKey</b>
+    app or the source code (in Swift) for building <b>ApoDisKey</b>
+    using Xcode.&nbsp; I'm told that only Mac OS Sequoia and Sonoma are
+    officially supported, though the supplied executable works for Mac
+    OS versions at least as early as Monterey, albeit potentially with
+    some minor visual deficiencies.&nbsp; <br>
+    <blockquote><img moz-do-not-send="true" src="InterfaceStyles.png"
+        alt="" height="198" align="right" width="411"><font size="-1"><b>Note:</b>&nbsp;
+        If you do decide to use <b>ApoDisKey</b> and discover some
+        problem or think of a suggestion, report it directly to Gavin
+        and not to me!&nbsp; I've got enough problems of my own to worry
+        about, and couldn't fix a problem in Swift if I had a flying
+        laboratory to help me do so.</font><br>
+    </blockquote>
+    <p>To "install" <b>ApoDisKey</b> for use with the <b>VirtualAGC</b>
+      GUI, I found that all I had to do was to download the zip-file
+      containing the executable.&nbsp; There were no other installation
+      steps.&nbsp; I simply left the zip-file in my downloads
+      folder.&nbsp; I was even able to download multiple versions of <b>ApoDisKey</b>
+      over time, without bothering to erase or even rename the old ones,
+      because I have arranged for <b>VirtualAGC</b> to always use the
+      most-recently "installed" version.&nbsp; All of which I think is
+      pretty nifty.<br>
+    </p>
+    <p>The presence of <b>ApoDisKey</b> does not automatically override
+      the use of <b>yaDSKY2</b>.&nbsp; Rather, when you run <b>VirtualAGC</b>,
+      you'll see choices of DSKY "interface styles", as in the image to
+      the right.&nbsp; The <font color="#663300">COM</font> and <font
+        color="#663300">COM/2</font> styles refer to <b>yaDSKY2</b>
+      (full-size and half-size respectively), while the <font
+        color="#663300">Mac</font> and <font color="#663300">Mac/2</font>
+      styles refer instead to <b>ApoDisKey</b>.&nbsp; The <font
+        color="#663300">Mac</font> and <font color="#663300">Mac/2</font>
+      options will be grayed-out and disabled if <b>ApoDisKey</b> isn't
+      found.&nbsp; <br>
+    </p>
+    <p>Having trouble deciding whether to install <b>ApoDisKey</b> or
+      not?&nbsp; The screenshots below give you a side-by-side
+      comparison of <b>yaDSKY2</b> vs an actual DSKY vs <b>ApoDisKey</b>
+      on Mac OS Monterey, in which I mentioned above that <b>ApoDisKey</b>
+      has some visual deficiencies due to the obsolescence of the
+      Monterey system libraries.&nbsp; See if you can spot them!&nbsp;
+      (Hint: It's not the color of the metal face!&nbsp; Nor the labels
+      on the 2×7 array of indicator<br>
+      lamps, which vary by mission anyway.)<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="0" align="center"
+      width="100%">
+      <tbody>
+        <tr>
+          <td valign="top"><img moz-do-not-send="true"
+              src="yaDSKY-Monterey.jpg" alt="" shrinktofit="true"
+              height="100%" width="100%"><br>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="AgcDskyCloseup-656.jpg" alt="" height="100%"
+              width="100%"><br>
+          </td>
+          <td valign="top"><img moz-do-not-send="true"
+              src="ApoDisKey6-Monterey.jpg" alt="" shrinktofit="true"
+              height="100%" width="100%"></td>
+        </tr>
+      </tbody>
+    </table>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <p> </p>
     <blockquote>
       <blockquote> </blockquote>
@@ -3120,7 +3213,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-25<br>
+          2025-01-28<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
