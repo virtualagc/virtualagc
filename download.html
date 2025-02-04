@@ -20,13 +20,13 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
       align="center">
       <tbody>
         <tr>
-          <th align="left" valign="bottom">Target Platform<small><br>
+          <th valign="bottom" align="left">Target Platform<small><br>
             </small></th>
-          <th align="left" valign="bottom"> Description<small><br>
+          <th valign="bottom" align="left"> Description<small><br>
             </small></th>
-          <th align="left" valign="bottom">Download<small><br>
+          <th valign="bottom" align="left">Download<small><br>
             </small></th>
-          <th align="left" valign="bottom"> Instructions<small><br>
+          <th valign="bottom" align="left"> Instructions<small><br>
             </small></th>
         </tr>
         <tr>
@@ -59,16 +59,28 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
             as the risk that those builds or installations could fail on
             your particular computer platform.&nbsp; <br>
             <br>
-            <a name="LubuntuUpdates"></a>Since the VM is a rather
-            substantial download, you would typically download the VM
-            just once and then update it in-place to newer versions of
-            Virtual AGC as desired.&nbsp; Updating Virtual AGC is a very
-            simple and convenient procedure that can be performed
-            unattended in under 20 minutes (estimated) at any time you
-            care to do so.&nbsp; On the other hand, updates to the VM's
-            Linux operating system are a different matter, and should
-            only be performed on an as-advised basis to avoid breaking
-            the VM's Virtual AGC installation.<br>
+            <a name="LubuntuUpdates"></a>After downloading the
+            compressed VM, I'd recommend verifying that it has the same
+            MD5 checksum as listed in the next column to the right, if
+            only to insure that the download was not corrupted.&nbsp;
+            The commands to compute the MD5 checksum from the command
+            line are:<br>
+            <ul>
+              <li>In Windows:&nbsp; <font color="#663300"><code>CertUtil
+                    -hashfile VirtualAGC-VM64-Release.7z MD5</code></font></li>
+              <li>In Linux or Mac OS:&nbsp; <code><font color="#663300">md5sum
+                    VirtualAGC-VM64-Release.7z</font></code></li>
+            </ul>
+            Since the VM is a rather substantial download, you would
+            typically download the VM just once and then update it
+            in-place to newer versions of Virtual AGC as desired.&nbsp;
+            Updating Virtual AGC is a very simple and convenient
+            procedure that can be performed unattended in under 20
+            minutes (estimated) at any time you care to do so.&nbsp; On
+            the other hand, updates to the VM's Linux operating system
+            are a different matter, and should only be performed on an
+            as-advised basis to avoid breaking the VM's Virtual AGC
+            installation.<br>
             <br>
             <div align="center"><i><b>Currently-Recommended Updates</b></i><br>
             </div>
@@ -87,8 +99,8 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
                   <td valign="middle">Virtual AGC<br>
                   </td>
                   <td valign="middle"><img moz-do-not-send="true"
-                      src="VM64-images/update.png" alt="" height="24"
-                      align="left" width="24">on VM desktop<br>
+                      src="VM64-images/update.png" alt="" width="24"
+                      height="24" align="left">on VM desktop<br>
                   </td>
                   <td valign="middle">Minor update: 2025-01-08 or later<br>
                   </td>
@@ -98,10 +110,10 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
                   </td>
                   <td valign="middle"><img moz-do-not-send="true"
                       src="VM64-images/preferences-system.svg" alt=""
-                      height="24" width="24">on VM desktop, then <img
+                      width="24" height="24">on VM desktop, then <img
                       moz-do-not-send="true"
                       src="VM64-images/system-software-update.svg"
-                      alt="" height="24" align="right" width="24"><br>
+                      alt="" width="24" height="24" align="right"><br>
                   </td>
                   <td valign="middle">None recommended<br>
                   </td>
@@ -118,8 +130,8 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
             some of the more-popular hypervisors in which I know or
             speculate that the VM will run:<br>
             <br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center" width="80%">
+            <table width="80%" cellspacing="2" cellpadding="2"
+              border="1" align="center">
               <tbody>
                 <tr>
                   <th rowspan="2" colspan="1" valign="bottom">Hypervisor<br>
@@ -235,6 +247,7 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
 
 
 
+
                       Fusion Pro</a></td>
                   <td valign="middle"><font color="#ff0000">No<br>
                     </font></td>
@@ -312,8 +325,12 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
             </table>
             <br>
           </td>
-          <td valign="middle"><a moz-do-not-send="true"
-              href="Downloads/VirtualAGC-VM64-Release.7z">Compressed VM</a><br>
+          <td nowrap="nowrap" valign="middle"><a moz-do-not-send="true"
+              href="Downloads/VirtualAGC-VM64-Release.7z">Download the
+              compressed VM</a><br>
+            <br>
+            The compressed VM's MD5 checksum:<br>
+            094ca9ec03ac8c52d42f4e756c0985f6<br>
             <br>
             Release 2025-01-07<br>
             <br>
@@ -321,7 +338,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
             <br>
             Uncompressed: 20.8GB<br>
             <br>
-            Maximum in use:&nbsp; Up to 40GB<br>
+            Maximum in use:&nbsp; Up to 40GB<font color="#663300"><code></code></font><br>
           </td>
           <td valign="middle"><a moz-do-not-send="true"
               href="#Installation_of_the_Virtual_AGC_VM_">Installation
@@ -356,6 +373,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Use and
             Updating of the VM</a></li>
         <li><a moz-do-not-send="true" href="#Customization">Customization
+
 
 
 
@@ -453,8 +471,8 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     something like this:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/InitialDesktop.jpg" alt="" height="347"
-        width="461"><br>
+        src="VM64-images/InitialDesktop.jpg" alt="" width="461"
+        height="347"><br>
     </div>
     <br>
     (This desktop will actually be surrounded by a border with
@@ -466,29 +484,29 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     I suspect, but here's what a few of the desktop icons do:<br>
     <p><img moz-do-not-send="true"
         src="VM64-images/Icon-round-Question_mark.svg.png" alt=""
-        height="24" width="24"> calls up an information screen, similar
+        width="24" height="24"> calls up an information screen, similar
       to what you're reading now but with much more information.<br>
     </p>
-    <img moz-do-not-send="true" src="ApolloPatch2.jpg" alt=""
-      height="24" width="24"> opens the VirtualAGC GUI application,
-    which is a portal that allows you to run an AGC/AGS simulation in a
-    multitude of configurations.<br>
+    <img moz-do-not-send="true" src="ApolloPatch2.jpg" alt="" width="24"
+      height="24"> opens the VirtualAGC GUI application, which is a
+    portal that allows you to run an AGC/AGS simulation in a multitude
+    of configurations.<br>
     <p><img moz-do-not-send="true" src="VM64-images/update.png" alt=""
-        height="24" width="24"> updates the Virtual AGC software in the
+        width="24" height="24"> updates the Virtual AGC software in the
       VM by downloading all of the latest source code from the GitHub
       repository, and rebuilding it.<br>
     </p>
     <p><img moz-do-not-send="true" src="VM64-images/codeblocks.png"
-        alt="" height="24" width="24"> lets you perform visual debugging
+        alt="" width="24" height="24"> lets you perform visual debugging
       on a variety of different AGC software versions.<br>
     </p>
     <img moz-do-not-send="true" src="VM64-images/eeschema.svg" alt=""
-      height="24" width="24"> lets you view/edit the electrical
+      width="24" height="24"> lets you view/edit the electrical
     schematics for the AGC and DSKY as transcribed into a modern
     computer-aided design (CAD) system. <br>
     <br>
     <img moz-do-not-send="true" src="VM64-images/PTC-64x64.png" alt=""
-      height="24" width="29"> opens a simulation of the original test
+      width="29" height="24"> opens a simulation of the original test
     panel used for debugging Apollo Launch Vehicle Digital Computer
     (LVDC) software. <br>
     <br>
@@ -509,7 +527,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     application from its icon, you'd see something like the following:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/GUI.jpg" alt="" height="474" width="631"><br>
+        src="VM64-images/GUI.jpg" alt="" width="631" height="474"><br>
     </div>
     <br>
     You can do a number of things from this VirtualAGC GUI, such as run
@@ -538,7 +556,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     </blockquote>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/running.jpg" alt="" height="383" width="680"><br>
+        src="VM64-images/running.jpg" alt="" width="680" height="383"><br>
     </div>
     <br>
     &nbsp; Another thing you can do is view the AGC source code (in this
@@ -547,7 +565,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     around a few times before creating the screenshot below:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/source.jpg" alt="" height="427" width="759"><br>
+        src="VM64-images/source.jpg" alt="" width="759" height="427"><br>
     </div>
     <br>
     <br>
@@ -564,8 +582,8 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     is not available.)<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/codeblocksFolder.jpg" alt="" height="419"
-        width="558"><br>
+        src="VM64-images/codeblocksFolder.jpg" alt="" width="558"
+        height="419"><br>
     </div>
     <br>
     Visual debugging AGC software works pretty much as you'd expect, if
@@ -579,7 +597,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     in the main menu.)<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/codeblocks.jpg" alt="" height="716" width="896"><br>
+        src="VM64-images/codeblocks.jpg" alt="" width="896" height="716"><br>
     </div>
     <br>
     The reason I've clicked on "Tools" in the image above is that since
@@ -609,7 +627,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
       href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">here</a>.<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/paused.jpg" alt="" height="860" width="1215"><br>
+        src="VM64-images/paused.jpg" alt="" width="1215" height="860"><br>
     </div>
     <br>
     I think the electrical-schematics feature is pretty nifty too.&nbsp;
@@ -617,8 +635,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
     ~140 electrical-schematics to choose from:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/selectSchematic.jpg" alt="" height="477"
-        width="638"><br>
+        src="VM64-images/selectSchematic.jpg" alt="" width="638"
+        height="477"><br>
     </div>
     <br>
     Clicking on one of those schematics opens the schematic in and
@@ -628,7 +646,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
     little tricks familiar to electrical engineers:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/schematic.jpg" alt="" height="478" width="708"><br>
+        src="VM64-images/schematic.jpg" alt="" width="708" height="478"><br>
     </div>
     <br>
     You can also perform digital simulations of circuitry like that
@@ -650,8 +668,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
     changed!<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/ptcSimulation.jpg" alt="" height="530"
-        width="785"><br>
+        src="VM64-images/ptcSimulation.jpg" alt="" width="785"
+        height="530"><br>
     </div>
     <h3><a name="Customization"></a>Customization of the VM</h3>
     Beyond Virtual AGC itself, you might like to personalize the VM'd
@@ -681,8 +699,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
     VirtualBox scale to 150%, as in the screenshot below:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-        src="VM64-images/virtualscreen.jpg" alt="" height="432"
-        width="499"><br>
+        src="VM64-images/virtualscreen.jpg" alt="" width="499"
+        height="432"><br>
     </div>
     <br>
     Unfortunately, I've been unable to find any corresponding scaling
@@ -702,6 +720,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
 
 
 
@@ -1013,10 +1032,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1127,11 +1148,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1201,6 +1224,7 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     sections.&nbsp; It's also possible though increasingly unlikely that
     <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -1332,6 +1356,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <h3><a name="AlternateTcl"></a>Alternate Installations of Tcl/Tk</h3>
     <p>Tcl/Tk, and in particular the Tcl program <b>wish</b>, is
       required for running the optional Virtual AGC component <b>LM_Simulator</b>.&nbsp;
+
       If <b>wish</b> already works for you, then you can just skip this
       section.<br>
     </p>
@@ -1378,6 +1403,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       have undesirable side effects.&nbsp; A workaround that eliminates
       any undesirable side effects by isolating any effects to Virtual
       AGC alone is to create an environment variable called <code>AGC_WISH</code>.&nbsp;
+
       This environment variable must be assigned a value which is the
       path to your preferred correctly-working installation of
       Tcl/Tk.&nbsp; Specifically, it's the name of the folder in which
@@ -1398,6 +1424,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <p><b>wxWidgets</b> is a cross-platform toolkit, suitable for
       writing software have a graphical user interface (GUI) that can be
       used with a simple recompilation on any platform supported by <b>wxWidgets</b>.&nbsp;
+
 
 
 
@@ -1490,6 +1517,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
         for the CMake-based build process can be found in our GitHub
         repository's wiki</a>.&nbsp; Whether those instructions are
       up-to-date or not is a question I'd prefer not to address.<br>
@@ -1506,10 +1534,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This works!<br>
+          <td valign="middle" align="center"><big><big><b>This works!<br>
                 </b> <small><small><small><i>Last verified (Ubuntu
                         24.04 64-bit):&nbsp; 2024-12-29<br>
                         Last verified (Linux Mint 21.3): 2024-12-29</i></small></small></small></big></big><big><big><small><small><small><i><br>
@@ -1636,6 +1664,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
         Makefile</a> itself for more explanation.&nbsp; The switches can
       override not merely the filesystem paths for locating the compiler
       (when you have multiple versions of gcc or g++ installed), but can
@@ -1676,10 +1705,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This worked<br>
+          <td valign="middle" align="center"><big><big><b>This worked<br>
                 </b> <small><small><small><i>Last verified (Raspbian
                         Jessie): 2017-11-20<br>
                         Last verified (Raspbian Stretch): 2018-05-11<br>
@@ -1696,10 +1725,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This worked<br>
+          <td valign="middle" align="center"><big><big><b>This worked<br>
                 </b> <i><small><small><small>Last verified: 2017-08-31</small></small></small></i><br>
               </big></big></td>
         </tr>
@@ -1709,6 +1738,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
 
 
 
@@ -1815,10 +1845,10 @@ That
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This worked<br>
+          <td valign="middle" align="center"><big><big><b>This worked<br>
                 </b> <small><small><small><i>Last verified: 2017-08-31</i></small></small></small><br>
               </big></big></td>
         </tr>
@@ -1835,6 +1865,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1923,9 +1954,9 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"> </td>
-          <td align="center" valign="middle"><big><big><b>This works!<br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"> </td>
+          <td valign="middle" align="center"><big><big><b>This works!<br>
                 </b> <small><small><small><i>Last verified (older
                         Macs): 2021-11-12</i></small></small></small><br>
                 <font size="-1"><i>Last verified without LM_Simulator
@@ -1952,6 +1983,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     <ol>
       <li>Install <a href="https://developer.apple.com/download/more">most-current
 version
+
 
 
 
@@ -2048,6 +2080,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -2236,6 +2269,7 @@ You
 
 
 
+
         The first time you run <b>VirtualAGC</b> from its desktop icon
         after installation, it may take a considerable amount of time to
         start up.&nbsp; There will be no such delays on subsequent
@@ -2308,9 +2342,11 @@ href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-
 
 
 
+
           its source code</a>, and building it from source according to
         <a moz-do-not-send="true"
 href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
 
 
 
@@ -2356,12 +2392,14 @@ href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">th
 
 
 
+
           Or more specifically, if Macports has installed some of the
           libraries (such as libjpeg) that wxWidgets requires, because
           those libraries will be of incompatible versions.&nbsp; On
           solutions is to uninstall Macports and all of the packages
           Macports had installed.&nbsp; <a moz-do-not-send="true"
 href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">The
+
 
 
 
@@ -2392,6 +2430,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         which <a moz-do-not-send="true"
           href="https://www.iyaTelemetry.html#LM_Simulator_by_Stephan_Hotto">you
 
+
           can read about here</a> to make a decision whether that's
         satisfactory to you.&nbsp; Better from my point of view,
         installation of a correctly-working version of Tcl/Tk can
@@ -2399,6 +2438,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         in a position to try any of those approaches, but I have reason
         to believe that <a moz-do-not-send="true"
           href="https://www.tcl.tk/software/tcltk/download.html">building
+
 
           Tcl/Tk from source code</a> does work on <i>some</i> recent
         Mac OS versions but not others.&nbsp; Specifically, I'm told
@@ -2481,7 +2521,8 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     OS versions at least as early as Monterey, albeit potentially with
     some minor visual deficiencies.&nbsp; <br>
     <blockquote><img moz-do-not-send="true" src="InterfaceStyles.png"
-        alt="" height="198" align="right" width="411"><font size="-1"><b>Note:</b>&nbsp;
+        alt="" width="411" height="198" align="right"><font size="-1"><b>Note:</b>&nbsp;
+
         If you do decide to use <b>ApoDisKey</b> and discover some
         problem or think of a suggestion, report it directly to Gavin
         and not to me!&nbsp; I've got enough problems of my own to worry
@@ -2520,21 +2561,21 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       on the 2×7 array of indicator<br>
       lamps, which vary by mission anyway.)<br>
     </p>
-    <table cellspacing="2" cellpadding="2" border="0" align="center"
-      width="100%">
+    <table width="100%" cellspacing="2" cellpadding="2" border="0"
+      align="center">
       <tbody>
         <tr>
           <td valign="top"><img moz-do-not-send="true"
               src="yaDSKY-Monterey.jpg" alt="" shrinktofit="true"
-              height="100%" width="100%"><br>
+              width="100%" height="100%"><br>
           </td>
-          <td align="center" valign="middle"><img moz-do-not-send="true"
-              src="AgcDskyCloseup-656.jpg" alt="" height="100%"
-              width="100%"><br>
+          <td valign="middle" align="center"><img moz-do-not-send="true"
+              src="AgcDskyCloseup-656.jpg" alt="" width="100%"
+              height="100%"><br>
           </td>
           <td valign="top"><img moz-do-not-send="true"
               src="ApoDisKey6-Monterey.jpg" alt="" shrinktofit="true"
-              height="100%" width="100%"></td>
+              width="100%" height="100%"></td>
         </tr>
       </tbody>
     </table>
@@ -2547,10 +2588,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" moz-do-not-send="true"
-              height="75" width="72"> </td>
-          <td align="center" valign="middle"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" moz-do-not-send="true" width="72"
+              height="75"> </td>
+          <td valign="middle" align="center"><br>
             <font size="+2"><b>This works!</b></font><big><big><big><big><font
                       size="-1"><b><br>
                       </b></font><font size="-1"><i>Last verified (RSB,
@@ -2572,6 +2613,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       Linux/Mac-like process which created them.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -2620,6 +2662,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -2628,6 +2671,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
 
 
 
@@ -2748,6 +2792,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -2757,6 +2802,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
 
 
 
@@ -2807,10 +2853,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt=""
-              src="greenCheckmark.png" height="75" width="72"><br>
+          <td valign="middle" align="center"><img alt=""
+              src="greenCheckmark.png" width="72" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This worked</b><small><small><small><i><br>
+          <td valign="middle" align="center"><big><big><b>This worked</b><small><small><small><i><br>
                         Last verified (RSB, Linux Mint 21): 2022-09-25</i></small></small></small><br>
               </big></big></td>
         </tr>
@@ -2832,6 +2878,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     WebAssembly builds of Virtual AGC don't provide the entire Virtual
     AGC suite of programs, but merely the AGC CPU emulation (<b>yaAGC</b>).&nbsp;
+
 
 
 
@@ -2925,6 +2972,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -2943,6 +2991,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
 
 
 
@@ -3060,6 +3109,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
 
 
 
+
     rather than to "http://localhost:8000/demo/" and seemingly avoid
     HTTP entirely?&nbsp; In other words, why can't this demo, or
     presumably similar web apps, simply run entirely within the
@@ -3088,10 +3138,10 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt="" src="redX.png"
-              moz-do-not-send="true" height="75" width="70"><br>
+          <td valign="middle" align="center"><img alt="" src="redX.png"
+              moz-do-not-send="true" width="70" height="75"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>Sorry!</b></big></big><br>
+          <td valign="middle" align="center"><big><big><b>Sorry!</b></big></big><br>
           </td>
         </tr>
       </tbody>
@@ -3210,14 +3260,15 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-28<br>
+          2025-02-03<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
   </body>
