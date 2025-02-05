@@ -41,6 +41,10 @@
 #               2023-11-24 RSB  Corrected many STS flight titles.
 #               2024-02-28 RSB  Added section for flight software
 #                               user notes and requirements waivers.
+#               2025-02-05 RSB  For reasons no longer clear to me, I was always
+#                               converting the first letter of the document
+#                               "portion" to lower case; that was not a good 
+#                               idea.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1332,7 +1336,7 @@ def documentEntryHTML(record, showComment):
         html += "\"" + record["Title"] + "\""
     if record["Portion"] != "":
         portion = record["Portion"]
-        portion = portion[:1].lower() + portion[1:]
+        #portion = portion[:1].lower() + portion[1:]
         html += ", " + portion
     published,year = makeSensiblePublicationDate(record)
     if hrForYearChange:
