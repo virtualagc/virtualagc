@@ -67,6 +67,8 @@
  *                              the latest compiler version now detects
  *                              a potential string overflow, which I've
  *                              worked around.
+ *              2025-02-06 RSB  Pragmas added to eliminate useless format-overflow
+ *                              warnings in Linux Mint 22.01.  See issue #1244.
  */
 
 #include <stdlib.h>
@@ -1623,6 +1625,7 @@ Pass(enum PassType_t PassType)
                     }
                   // It's possible that "(operand)" already
                   // exists, from some prior HOP/STO/CLA.
+#pragma GCC diagnostic ignored "-Wformat-overflow"
                   sprintf(Key2.Name, "(%s)", OperandField);
                   Result2 = bsearch(&Key2, Symbols, NumSymbols,
                       sizeof(Symbol_t), CompareSymbols);
@@ -1709,6 +1712,7 @@ Pass(enum PassType_t PassType)
                       qsort(Symbols, NumSymbols, sizeof(Symbol_t),
                           CompareSymbols);
                     }
+#pragma GCC diagnostic ignored "-Wformat-overflow"
                   sprintf(OperandBuffer, "(%s)", OperandField);
                   OperandField = OperandBuffer;
                 }
