@@ -42,6 +42,9 @@
 #		2018-10-19 RSB	Had forgotten to take care of signals set 
 #				with "reg SIGNAL=1" within the test bench.
 #		2025-01-11 RSB	Converted from Python2 to Python3, using 2to3.
+#		2025-01-18 RSB	Removed signals E7_, g48402, g48406, PIPAFL from 
+#				want0 or want1 because they cause convergence of 2005272A to
+#				fail.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -71,23 +74,26 @@ if False:
 else:
 	want0 = [
 		# STNDBY is controlled from a B-module that we're not simulating.
-		"STNDBY", "STRT1",
+		"STNDBY", "STRT1", "STOPA", 
 		# CHORxx
-		"PIPAFL", "AGCWAR",
+		#"PIPAFL", 
+		"AGCWAR",
 		# Misc
-		"g32607"
+		"g32607",
+		# RAM related
+		#"g42247", "g42239", "g42235", "g42210", "g42205"
 	]
 	want1 = [
 		#"GOSET_", 
-		"STOPA", 
+		"g37233",
 		# This zeroes the 32-bit counter in scaler module A1.
 		"g38104", "g38114", "g38124", "g38134", "g38144", "g38154", "g38164", "g38174",
-		#"g38204", 
+		"g38204", 
 		"g38214", "g38224", "g38234", "g38244", "g38254", "g38264", "g38274",
 		"g38304", "g38314", "g38324", "g38334", "g38344", "g38354", "g38364", "g38374",
 		"g38404", "g38414", "g38424", "g38434", "g38444", "g38454", "g38464", "g38474",
 		"g38105", "g38115", "g38125", "g38135", "g38145", "g38155", "g38165", "g38175",
-		#"g38205", 
+		"g38205", 
 		"g38215", "g38225", "g38235", "g38245", "g38255", "g38265", "g38275",
 		"g38305", "g38315", "g38325", "g38335", "g38345", "g38355", "g38365", "g38375",
 		"g38405", "g38415", "g38425", "g38435", "g38445", "g38455", "g38465", "g38475",
@@ -133,7 +139,10 @@ else:
 		#"g98033", 
 		"g98035", "g98037", "g98039", "g98041",	"g98013",
 		# Various flip-flops affecting the behavior of CHORxx.
-		"g48402", "g48406", "E7_", "g45117", "g45105", "g45225"
+		#"g48402", "g48406", "E7_", 
+		"g45117", "g45105", "g45225",
+		# RAM related
+		#"g42246", "g42238", "g42234", "g42209", "g42206"
 	]
 
 random.seed(12345)
@@ -151,7 +160,7 @@ lines = sys.stdin.readlines()
 #	Its reference designator and pin (or in this case, the list of connected ones).
 #	Its output netname.
 #	Its input netnames.
-nors = {}
+netRules = {}
 netValues = {}
 module = ""
 inReg = False
@@ -218,13 +227,12 @@ for line in lines:
 			innets = stripped.split("|")
 	if len(innets) < 1:
 		continue
-	#print outnet
-	#print innets
 	# Save the data in structures.
-	if outnet not in nors:
-		nors[outnet] = { "gates":gates, "innets":innets }
+	if outnet not in netRules:
+		netRules[outnet] = { "gates":gates, "innets":innets }
 	else:
-		nors[outnet] = { "gates":(nors[outnet]["gates"]+gates), "innets":(nors[outnet]["innets"]+innets) }
+		netRules[outnet] = { "gates":(netRules[outnet]["gates"]+gates), \
+						"innets":(netRules[outnet]["innets"]+innets) }
 	if outnet not in netValues:
 		netValues[outnet] = False
 	for innet in innets:
@@ -257,22 +265,28 @@ while unchanged < 2:
 	unchanged += 1
 	numchanged = 0
 	changed = []
-	# Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
-	for netName in want0:
-		netValues[netName] = False
-	for netName in want1:
-		netValues[netName] = True
+	# Certain flip-flops we want to make sure are initialized specifically to 
+	# 0 or 1.  However!  This worked well originally, when using KiCad 5, but
+	# after convesion to KiCad 6 I can no longer make it work for a large design
+	# like 2003993, because it won't converge.  Therefore, for now, we treat
+	# these merely as "serving suggestions", and set them only prior to the first
+	# iteration.  If they change after that, then too bad! 
+	if count == 1:
+		for netName in want0:
+			netValues[netName] = False
+		for netName in want1:
+			netValues[netName] = True
 	
 	# Choose a random evaluation order.
 	randomNors = []
-	for netName in nors:
+	for netName in netRules:
 		randomNors.append(netName)
 	random.shuffle(randomNors)
 	
 	# Evaluate all of the logic, in the chosen order.
 	for norNet in randomNors:
 		value = False
-		for netName in nors[norNet]["innets"]:
+		for netName in netRules[norNet]["innets"]:
 			value = value or netValues[netName]
 		value = not value
 		if value != netValues[norNet]:
@@ -282,17 +296,17 @@ while unchanged < 2:
 		netValues[norNet] = value	
 
 for netName in []:
-	print(netName + " = " + str(netValues[netName]) + ", " + str(nors[netName]))
-#print nors
+	print(netName + " = " + str(netValues[netName]) + ", " + str(netRules[netName]))
+#print netRules
 
 ones = []
 #zeroes = []
-for norNet in nors:
+for norNet in netRules:
 	if not netValues[norNet]:
-		#for nor in nors[norNet]["gates"]:
+		#for nor in netRules[norNet]["gates"]:
 		#	zeroes.append(nor)
 		continue
-	for nor in nors[norNet]["gates"]:
+	for nor in netRules[norNet]["gates"]:
 		ones.append(nor)
 
 # Create the MODULE.init files.

@@ -51,7 +51,7 @@ initial
     $display("Dumping helpful signals.");
 `endif
     $display("Run length will be %f ms.", RUNLENGTH/1000000.0);
-    # 5000 rst = 0;
+    #5000 rst = 0;
     //# 1000000000000 $finish; // 100 seconds
     //# 60000000000 $finish; // 60 seconds ... should be enough time for Validation to run.
     //# 10000000000 $finish; // 10 seconds

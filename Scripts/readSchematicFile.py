@@ -70,8 +70,12 @@ import time
 import re
 import tatsu
 
+# The reason J1 has more pins, when all of the logic modules seem to require
+# only 71 (plus pin 0 unused for a total of 72) is that the reference designator
+# J1 is also used for module A52's (2003305) backplane connector, which has a 
+# lot more pins on it.
 gateLocations = {}
-schPadsJ1 = [ "?" ] * 72
+schPadsJ1 = [ "?" ] * 144
 schPadsJ2 = [ "?" ] * 72
 schPadsJ3 = [ "?" ] * 72
 schPadsJ4 = [ "?" ] * 72

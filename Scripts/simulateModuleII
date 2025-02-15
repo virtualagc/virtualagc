@@ -69,7 +69,7 @@ fi
 rm empty.init &> /dev/null
 touch empty.init
 $python_exe -m dumbVerilog $modulenum $netlist pins.txt 20 empty.init $schematic > module.v
-$python_exe -m dumbInitialization < module.v
+$python_exe -m dumbInitialization0 < module.v
 $python_exe -m dumbVerilog $modulenum $netlist pins.txt 20 $modulenum.init $schematic > module.v
 
 # Workflow step #4

@@ -66,10 +66,11 @@
 #		2018-10-27 RSB	Changed time units from 100ns/1ns to 1ns/1ps.
 #				Also, I notice that 'clean' doesn't delete the
 #				generated module_tb.v files, so that's been fixed.
+#		2025-01-17 RSB	Updates for KiCad v6+.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
-# Python 2 is also required (rather than Python 3).
+# Python 3 is required.
 #
 # Underneath the Schematics/ directory, Makefile expects the following 
 # hierarchy and file-naming convention:
@@ -110,13 +111,16 @@
 # has regs, wires, and modules for all of the DRAWINGs used in it, those aren't
 # necessarily correctly set up, nor do they necessarily behave correctly.  
 #
-# Finally, there are various environment variables that can be defined to alter
+# There are various environment variables that can be defined to alter
 # the default setup: 
 #
 #	[VAR1=VAL1] [VAR2=VAL2] ... make ...
 #
 # These variables are:
 #
+#	KICAD_EXT=EXTENSION	Filename extension for KiCad schematics.  Default
+#				is "kicad_sch" (KiCad v6+), but could be "sch" (KiCad v5-).
+#	AGC_MODEL=N		Default 2003200.  Choices are 2003993 etc.
 #	WIRETYPE=wand		The affect which Verilog constructs are used to accomplish
 #	WIRETYPE=wire		wire-AND'ing of signals.  By default, "wire" is used, which
 #				means that signals are defined to actively pull to ground
@@ -137,7 +141,7 @@
 #				targets (module A1, A2, etc.) may differ, but all will be
 #				affected by this setting.
 #	DUMP_ALL=1		These affect which set of signals is stored in the 
-#	DUMP_BACKPLANE=1	file (.lxt2, .lxt, or .vcd) dumped to the filesystem
+#	DUMP_BACKPLANE=1	file (.lxt2, .lxt, .vcd, .fst) dumped to the filesystem
 #	DUMP_DECODER=1		during the simulation run.  Respectively, they mean
 #	DUMP_HELPFUL=1		literally all the signals, just the signals appearing
 #				on the backplane, just the signals needed by the 
@@ -146,7 +150,7 @@
 #				The default is DUMP_HELPFUL.  This is only guaranteed to
 #				affect full-AGC targets; whether it affects other testbenches
 #				depend on how those are defined internally.
-#	DUMPFILE=FILENAME	Name of the dumpfile to create, defaulting to "agc.lxt2"
+#	DUMPFILE=FILENAME	Name of the dumpfile to create, defaulting to "agc.fst"
 #				for full-AGC targets (2003200, 2003100, ...).  Other 
 #				targets, like those for module A1, A2, and so on, may 
 #				have different defaults, but all will be affected equally
@@ -157,6 +161,10 @@
 # git repository.  The others affect only the Verilog compilation process, and therefore
 # do not modify files saved in git.
 
+ifndef AGC_MODEL
+	AGC_MODEL = 2003200
+endif
+
 ifndef DEFAULT_GATE_DELAY
 	# In 1ns units.
 	DEFAULT_GATE_DELAY = 20
@@ -164,6 +172,10 @@ endif
 
 ifndef ROM
 	ROM := Validation-hardware-simulation
+endif
+
+ifndef KICAD_EXT
+	KICAD_EXT=kicad_sch
 endif
 
 ifndef GATE_DELAY
@@ -254,7 +266,6 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003100),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003100 += fixed_erasable_memory
-#DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003100 := $(DRAWINGS_2003100:%=%/module.vvp)
 TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
 TARGETS_TB_V_2003100 := $(DRAWINGS_2003100:%=%/module_tb.v)
@@ -288,7 +299,6 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003993 += fixed_erasable_memory
-#DRAWINGS_2003993 += 2003305B
 TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 TARGETS_TB_V_2003993 := $(DRAWINGS_2003993:%=%/module_tb.v)
@@ -310,10 +320,7 @@ EXTRA_V := fixed_erasable_memory/BUFFER.v fixed_erasable_memory/RAM.v fixed_eras
 
 # Here are the specific example and AGC targets we're actually trying to build. 
 TARGETS = testVerilog/module.vvp
-TARGETS += 2003200.vvp $(TARGETS_VVP_2003200)
-#TARGETS += 2003100.vvp $(TARGETS_VVP_2003100)
-#TARGETS += 2003993.vvp $(TARGETS_VVP_2003993)
-#TARGETS += 1003700.vvp $(TARGETS_VVP_1003700)
+TARGETS += $(AGC_MODEL).vvp $(TARGETS_VVP_$(AGC_MODEL))
 
 .PHONY: all
 all: $(TARGETS)
@@ -386,7 +393,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # files.  However, the value 0.2 seems to work well.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
 %/module.v: %/module.net %/module.init pins.txt
-	dumbVerilog.py $(module_$*) $*/module.net pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(WIRETYPE) >$*/temp.v
+	dumbVerilog.py $(module_$*) $*/module.net pins.txt "$(delay_$*)" $*/module.init $*/module.$(KICAD_EXT) $(WIRETYPE) >$*/temp.v
 	mv $*/temp.v $@
 
 # The following target can be used as 2003200.init, 2003993.init, etc.
@@ -430,7 +437,7 @@ test:
 test-%.lxt: 
 	WIRETYPE=$* make clean all
 	cp fixed_erasable_memory/module.v test-$*.v
-	vvp 2003200.vvp -lxt
+	vvp $(AGC_MODEL).vvp -lxt
 	mv agc.lxt $@
 
 	

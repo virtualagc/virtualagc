@@ -1,5 +1,5 @@
-parameter DUMPFILE = "moduleA1.lxt2";
-parameter RUNLENGTH = 1000000;
+parameter DUMPFILE = "module.fst";
+parameter RUNLENGTH = 10000000;
 
 reg rst = 1;
 initial

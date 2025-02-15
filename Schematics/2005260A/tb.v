@@ -1,7 +1,7 @@
 // Custom stuff for inclusion in auto-generated testbenches.
 // Edit this file, not module_tb.v.
 
-parameter DUMPFILE = "moduleA2.lxt2";
+parameter DUMPFILE = "module.fst";
 parameter RUNLENGTH = 1000;
 
 reg rst = 1;

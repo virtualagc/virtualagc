@@ -4,7 +4,7 @@
 module agc;
 
 parameter GATE_DELAY = 20;
-`include "2005259A/tb.v"
+`include "tb.v"
 
 reg CGA1 = 0, RCHAT_ = 0, RCHBT_ = 0;
 

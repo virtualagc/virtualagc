@@ -108,6 +108,35 @@ then
         modules="$modules 2005271-"
         modules="$modules 2005272A"
         modules="$modules 2005273A"
+fi
+if [ $sameAs = 2003200 ]
+then
+        # Schematic drawings for logic modules A1-A24, A52.
+        modules=
+        modules="$modules 2005259A"
+        modules="$modules 2005260A"
+        modules="$modules 2005251A"
+        modules="$modules 2005262A"
+        modules="$modules 2005261A"
+        modules="$modules 2005263A"
+        modules="$modules 2005252A"
+        modules="$modules 2005255-"
+        modules="$modules 2005256A"
+        modules="$modules 2005257A"
+        modules="$modules 2005258A"
+        modules="$modules 2005253A"
+        modules="$modules 2005269-"
+        modules="$modules 2005264A"
+        modules="$modules 2005265A"
+        modules="$modules 2005266-"
+        modules="$modules 2005267A"
+        modules="$modules 2005268A"
+        modules="$modules 2005270-"
+        modules="$modules 2005254-"
+        modules="$modules 2005250-"
+        modules="$modules 2005271-"
+        modules="$modules 2005272A"
+        modules="$modules 2005273A"
         module52=2003305B
 fi
 
@@ -140,7 +169,7 @@ if which kicad-cli &>/dev/null
 then
         echo Generating netlist files ...
         # kicad-cli does exist.
-        for d in $modules $module52
+        for d in $modules $module52 fixed_erasable_memory
         do
                 cd $d &>/dev/null
                 kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
@@ -149,7 +178,7 @@ then
 else
         echo Checking existence of netlist files ...
         # kicad-cli not found.  The netlist files must pre-exist.
-        for d in $modules $module52
+        for d in $modules $module52 fixed_erasable_memory
         do
                 if [ ! -f $d/module.net ]
                 then
@@ -161,43 +190,59 @@ fi
 
 # Workflow Step #3:
 echo Generation of flip-flop initialization file ...
+
 n=0
-rm $model.v &>/dev/null
-for d in $modules $modules
+rm dummy.v &>/dev/null
+for d in $modules $module52 fixed_erasable_memory
 do
-        if [ $n = 24 ]
+        if [ $d = fixed_erasable_memory ]
+        then
+                n=99
+        elif [ $n = 24 ]
         then
                 n=52
         else
                 n=$((n+1))
         fi
+        echo Initial Verilog creation for A$n $d ...
         cd $d &>/dev/null
         rm empty.init &> /dev/null
         touch empty.init
-        $python_exe -m dumbVerilog A$n module.net pins.txt 20 empty.init module.kicad_sch >>../$model.v
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 empty.init module.kicad_sch >>../dummy.v
         cd - &>/dev/null
 done
-$python_exe -m dumbInitialization <$model.v
-echo Generation of logic-module Verilog source code ...
+
+echo Flip-flop initilizer creation ...
+$python_exe -m dumbInitialization <dummy.v
+
 n=0
-rm $model.v &>/dev/null
-for d in $modules
+for d in $modules $module52 fixed_erasable_memory
 do
-        n=$((n+1))
+        if [ $d = fixed_erasable_memory ]
+        then
+                n=99
+        elif [ $n = 24 ]
+        then
+                n=52
+        else
+                n=$((n+1))
+        fi
+        echo Final Verilog creation for A$n $d ...
         cd $d &>/dev/null
-        $python_exe -m dumbVerilog A$n module.net pins.txt 20 ../A$n.init module.kicad_sch >>../$model.v
+        cp ../A$n.init module.init
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 module.init module.kicad_sch >module.v
         cd - &>/dev/null
 done
 
 # Workflow step #4
 echo Generation of testbench object-definition file ...
-$python_exe -m dumbTestbench <$model.v >"$model"_tb.v
+$python_exe -m dumbTestbench <dummy.v >"$model"_tb.v
 cp tb-$model.v tb.v
 
 # Workflow step #5
 echo Setup of erasable/fixed memory Verilog source code ...
 cp roms/$software.v roms/rom.v
-cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v fixed_erasable_memory/BUFFER.v >>$model.v
+#cat fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v fixed_erasable_memory/BUFFER.v >>$dummy.v
 
 # Workflow step #6
 echo Compiling Verilog source code ...
@@ -207,7 +252,17 @@ then
 else
         verilogOptions="$3"
 fi
-iverilog $verilogOptions -o $model.vvp "$model"_tb.v $model.v
+vsources=
+for f in $modules $module52 fixed_erasable_memory
+do
+        vsources="$vsources $f/module.v"
+done
+iverilog $verilogOptions -o $model.vvp \
+        "$model"_tb.v \
+        $vsources \
+        fixed_erasable_memory/RAM.v \
+        fixed_erasable_memory/ROM.v \
+        fixed_erasable_memory/BUFFER.v
 
 # Workflow step #7
 echo Performing simulation ...
