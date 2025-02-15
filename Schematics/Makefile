@@ -65,6 +65,7 @@
 #		2018-10-27 RSB	Changed time units from 100ns/1ns to 1ns/1ps.
 #				Also, I notice that 'clean' doesn't delete the
 #				generated module_tb.v files, so that's been fixed.
+#		2025-02-15 RSB	Removed testVerilog from the default targets.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -308,8 +309,9 @@ TARGETS_TB_V_AGC := $(TARGETS_TB_V_2003200) $(TARGETS_TB_V_2003100) $(TARGETS_V_
 EXTRA_V := fixed_erasable_memory/BUFFER.v fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v 
 
 # Here are the specific example and AGC targets we're actually trying to build. 
-TARGETS = testVerilog/module.vvp
-TARGETS += 2003200.vvp $(TARGETS_VVP_2003200)
+#TARGETS = testVerilog/module.vvp
+#TARGETS += 2003200.vvp $(TARGETS_VVP_2003200)
+TARGETS = 2003200.vvp $(TARGETS_VVP_2003200)
 #TARGETS += 2003100.vvp $(TARGETS_VVP_2003100)
 #TARGETS += 2003993.vvp $(TARGETS_VVP_2003993)
 #TARGETS += 1003700.vvp $(TARGETS_VVP_1003700)

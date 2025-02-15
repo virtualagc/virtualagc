@@ -1,5 +1,8 @@
 # Electrical Schematics for the AGC and DSKY
 
+**Important Note:**  This branch ("schematics-KiCad-5") of the repository is specific to
+AGC/DSKY electrical schematics and digital simulations of the electronics for version 5 of the KiCad EDA system.  It is incompatible with KiCad v6.  For versions 6 and beyond of KiCad, use the "schematics" branch of the repository instead.
+
 ## Introduction
 
 The "schematics" branch of the Virtual AGC repository is devoted to conversion of the original hardcopies of AGC and DSKY electrical schematics into electrical CAD files, and eventually, to translation of those designs into Verilog, and the simulation thereof. We convert these schematics so that they are as close as possible to the originals, on the same size sheets, with identical title blocks and borders, with electrical components positioned and sized as close to the original as possible, but with electrical correctness in mind.

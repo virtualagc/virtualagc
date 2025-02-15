@@ -1,6 +1,6 @@
 // For use by dumbTestbench.py in autogenerating an AGC testbench.
 
-parameter DUMPFILE = "agc.lxt2";
+parameter DUMPFILE = "agc.fst";
 
 // In units of ns.
 parameter RUNLENGTH = 250000000; // 0.25 seconds
