@@ -267,8 +267,9 @@ iverilog $verilogOptions -o $model.vvp \
 # Workflow step #7
 echo Performing simulation ...
 vvp $model.vvp -fst
-mv agc.fst $model.fst
+#mv agc.fst $model.fst
 
 # Workflow step #8
 echo Simulation-results data visualization ...
-gtkwave $model.fst
+#gtkwave $model.fst
+gtkwave agc.gtkw
