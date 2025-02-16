@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 # Copyright 2018 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
@@ -30,6 +30,7 @@
 #				uses, for the purpose of making it easier
 #				to compare his sim to mine.
 #		2018-10-27 RSB	Changed simulation time units from 100ns/1ns to 1ns/1ps.
+#		2025-01-12 RSB	Converted from Python2 to Python3, using 2to3.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v
@@ -117,15 +118,15 @@ regs.sort()
 wires.sort()
 
 # Write the output.
-print "// Verilog testbench created by dumbTestbench.py"
-print "`timescale 1ns / 1ps"
-print ""
-print "module agc;"
-print ""
-print "parameter GATE_DELAY = " + DEFAULT_GATE_DELAY + ";"
+print("// Verilog testbench created by dumbTestbench.py")
+print("`timescale 1ns / 1ps")
+print("")
+print("module agc;")
+print("")
+print("parameter GATE_DELAY = " + DEFAULT_GATE_DELAY + ";")
 #print "initial $display(\"Gate Delay is %f ns.\", GATE_DELAY);"
-print "`include \"" + tbInclude + "\""
-print ""
+print("`include \"" + tbInclude + "\"")
+print("")
 desiredLineLength = 70
 newRegs = []
 for reg in regs:
@@ -147,11 +148,11 @@ if len(newRegs) > 0:
 		else:
 			line += ";"
 		if len(line) >= desiredLineLength:
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line
-	print ""
+		print(line)
+	print("")
 if len(wires) > 0:
 	line = wireType
 	for i in range(0, len(wires)):
@@ -164,26 +165,26 @@ if len(wires) > 0:
 		else:
 			line += ";"
 		if len(line) >= desiredLineLength:
-			print line
+			print(line)
 			line = ""
 	if len(line) > 0:
-		print line
-	print ""
+		print(line)
+	print("")
 inModule = False
 for line in lines:
 	fields = line.strip().split()
 	if inModule and len(fields) == 1 and fields[0] == ");":
 		inModule = False
-		print ");"
-		print "defparam " + moduleName + ".GATE_DELAY = GATE_DELAY;"
-		print ""
+		print(");")
+		print("defparam " + moduleName + ".GATE_DELAY = GATE_DELAY;")
+		print("")
 		continue
 	if len(fields) == 3 and fields[0] == "module" and not inModule:
 		inModule = True
 		moduleName = "i" + fields[1]
-		print fields[1] + " " + moduleName + " ("
+		print(fields[1] + " " + moduleName + " (")
 		continue
 	if inModule:
-		print line.rstrip()
-print "endmodule"
+		print(line.rstrip())
+print("endmodule")
 

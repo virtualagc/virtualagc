@@ -135,7 +135,7 @@ while True:
                 toks = line.split()
                 sig_num = int(toks[3])
                 if toks[4][-3:] == "[0]":
-                	sig_name = re.match('^(?:__.*?__)?(.+?)\[', toks[4]).groups()[0]
+                	sig_name = re.match('^(?:__.*?__)?(.+?)\\[', toks[4]).groups()[0]
                 else:
                 	sig_name = re.match('^(?:__.*?__)?(.+?)$', toks[4]).groups()[0]
                 signal_names[sig_num] = sig_name
