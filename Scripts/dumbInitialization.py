@@ -1,5 +1,5 @@
-#!/usr/bin/python2
-# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+#!/usr/bin/env python
+# Copyright 2018 Ronald S. Burkey
 # 
 # This file is part of yaAGC.
 # 
@@ -41,6 +41,7 @@
 #				gets rid of a bunch of involuntaries at startup.
 #		2018-10-19 RSB	Had forgotten to take care of signals set 
 #				with "reg SIGNAL=1" within the test bench.
+#		2025-02-16 RSB	Converted to Python 3.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -72,13 +73,17 @@ else:
 		# STNDBY is controlled from a B-module that we're not simulating.
 		"STNDBY", "STRT1",
 		# CHORxx
-		"PIPAFL", "AGCWAR",
+		"PIPAFL", 
+		"AGCWAR",
 		# Misc
-		"g32607"
+		"g32607",
+		# RAM related
+		#"g42247", "g42239", "g42235", "g42210", "g42205"
 	]
 	want1 = [
 		#"GOSET_", 
 		"STOPA", 
+		#"g37233",
 		# This zeroes the 32-bit counter in scaler module A1.
 		"g38104", "g38114", "g38124", "g38134", "g38144", "g38154", "g38164", "g38174",
 		#"g38204", 
@@ -132,7 +137,10 @@ else:
 		#"g98033", 
 		"g98035", "g98037", "g98039", "g98041",	"g98013",
 		# Various flip-flops affecting the behavior of CHORxx.
-		"g48402", "g48406", "E7_", "g45117", "g45105", "g45225"
+		"g48402", "g48406", "E7_", 
+		"g45117", "g45105", "g45225",
+		# RAM related
+		#"g42246", "g42238", "g42234", "g42209", "g42206"
 	]
 
 random.seed(12345)
@@ -150,7 +158,7 @@ lines = sys.stdin.readlines()
 #	Its reference designator and pin (or in this case, the list of connected ones).
 #	Its output netname.
 #	Its input netnames.
-nors = {}
+netRules = {}
 netValues = {}
 module = ""
 inReg = False
@@ -217,13 +225,12 @@ for line in lines:
 			innets = stripped.split("|")
 	if len(innets) < 1:
 		continue
-	#print outnet
-	#print innets
 	# Save the data in structures.
-	if outnet not in nors:
-		nors[outnet] = { "gates":gates, "innets":innets }
+	if outnet not in netRules:
+		netRules[outnet] = { "gates":gates, "innets":innets }
 	else:
-		nors[outnet] = { "gates":(nors[outnet]["gates"]+gates), "innets":(nors[outnet]["innets"]+innets) }
+		netRules[outnet] = { "gates":(netRules[outnet]["gates"]+gates), \
+						"innets":(netRules[outnet]["innets"]+innets) }
 	if outnet not in netValues:
 		netValues[outnet] = False
 	for innet in innets:
@@ -232,7 +239,7 @@ for line in lines:
 if "STRT2" in netValues:
 	netValues["STRT2"] = True
 else:
-	print >> sys.stderr, "Warning: Could not find signal STRT2."
+	print("Warning: Could not find signal STRT2.", file=sys.stderr)
 
 # Now iterate the logic until nothing changes.  Once you've reached that 
 # point, the ordering of the evaluations no longer matters at all, and you
@@ -247,12 +254,12 @@ changed = []
 while unchanged < 2:
 	count += 1
 	if count > 1000:
-		print "Did not converge."
+		print("Did not converge.")
 		sys.exit(1)
 	if numchanged <= 100:
-		print "Iteration " + str(count) + " " + str(numchanged) + " " + str(changed)
+		print("Iteration " + str(count) + " " + str(numchanged) + " " + str(changed))
 	else:
-		print "Iteration " + str(count) + " " + str(numchanged) + " [...]"
+		print("Iteration " + str(count) + " " + str(numchanged) + " [...]")
 	unchanged += 1
 	numchanged = 0
 	changed = []
@@ -264,14 +271,14 @@ while unchanged < 2:
 	
 	# Choose a random evaluation order.
 	randomNors = []
-	for netName in nors:
+	for netName in netRules:
 		randomNors.append(netName)
 	random.shuffle(randomNors)
 	
 	# Evaluate all of the logic, in the chosen order.
 	for norNet in randomNors:
 		value = False
-		for netName in nors[norNet]["innets"]:
+		for netName in netRules[norNet]["innets"]:
 			value = value or netValues[netName]
 		value = not value
 		if value != netValues[norNet]:
@@ -281,21 +288,21 @@ while unchanged < 2:
 		netValues[norNet] = value	
 
 for netName in []:
-	print netName + " = " + str(netValues[netName]) + ", " + str(nors[netName])
-#print nors
+	print(netName + " = " + str(netValues[netName]) + ", " + str(netRules[netName]))
+#print netRules
 
 ones = []
 #zeroes = []
-for norNet in nors:
+for norNet in netRules:
 	if not netValues[norNet]:
-		#for nor in nors[norNet]["gates"]:
+		#for nor in netRules[norNet]["gates"]:
 		#	zeroes.append(nor)
 		continue
-	for nor in nors[norNet]["gates"]:
+	for nor in netRules[norNet]["gates"]:
 		ones.append(nor)
 
 # Create the MODULE.init files.
-for moduleNumber in range(1, 25) + [99, 52]:
+for moduleNumber in list(range(1, 25)) + [99, 52]:
 	f = open("A" + str(moduleNumber) + ".init", "w")
 	f.write("# Auto-generated for module A" + str(moduleNumber) + " by dumbInitialization.py.\n")
 	for sheet in range(1, 5):

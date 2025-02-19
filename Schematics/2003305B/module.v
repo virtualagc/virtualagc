@@ -67,7 +67,7 @@ pullup(g98051);
 assign #GATE_DELAY g98051 = rst ? 0 : ((0|g98015|g98033) ? 1'b0 : 1'bz);
 // Gate A52-U124A
 pullup(MDT04);
-assign #GATE_DELAY MDT04 = rst ? 0 : ((0|g98018|g98031) ? 1'b0 : 1'bz);
+assign #GATE_DELAY MDT04 = rst ? 1'bz : ((0|g98018|g98031) ? 1'b0 : 1'bz);
 // Gate A52-U124B
 pullup(g98049);
 assign #GATE_DELAY g98049 = rst ? 0 : ((0|g98015|g98031) ? 1'b0 : 1'bz);
@@ -100,7 +100,7 @@ pullup(g98029);
 assign #GATE_DELAY g98029 = rst ? 0 : ((0|g98028|g98047) ? 1'b0 : 1'bz);
 // Gate A52-U115A
 pullup(g98030);
-assign #GATE_DELAY g98030 = rst ? 1'bz : ((0|MRPTAL_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98030 = rst ? 0 : ((0|MRPTAL_) ? 1'b0 : 1'bz);
 // Gate A52-U115B
 pullup(g98031);
 assign #GATE_DELAY g98031 = rst ? 0 : ((0|g98030|g98049) ? 1'b0 : 1'bz);

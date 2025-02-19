@@ -49,7 +49,7 @@ pullup(BKTF_);
 assign #GATE_DELAY BKTF_ = rst ? 0 : ((0|T10_) ? 1'b0 : 1'bz);
 // Gate A21-U132A
 pullup(DINC_);
-assign #GATE_DELAY DINC_ = rst ? 0 : ((0|DINC) ? 1'b0 : 1'bz);
+assign #GATE_DELAY DINC_ = rst ? 1'bz : ((0|DINC) ? 1'b0 : 1'bz);
 // Gate A21-U132B
 pullup(CHINC_);
 assign #GATE_DELAY CHINC_ = rst ? 1'bz : ((0|INOTRD|INOTLD) ? 1'b0 : 1'bz);
@@ -64,7 +64,7 @@ pullup(g32062);
 assign #GATE_DELAY g32062 = rst ? 0 : ((0|g32061|INCSET_) ? 1'b0 : 1'bz);
 // Gate A21-U134B
 pullup(DINCNC_);
-assign #GATE_DELAY DINCNC_ = rst ? 0 : ((0|DINC|g32049) ? 1'b0 : 1'bz);
+assign #GATE_DELAY DINCNC_ = rst ? 1'bz : ((0|DINC|g32049) ? 1'b0 : 1'bz);
 // Gate A21-U135A
 pullup(SHANC_);
 assign #GATE_DELAY SHANC_ = rst ? 1'bz : ((0|g32062|SHANC) ? 1'b0 : 1'bz);
@@ -73,10 +73,10 @@ pullup(SHANC);
 assign #GATE_DELAY SHANC = rst ? 0 : ((0|T12A|SHANC_) ? 1'b0 : 1'bz);
 // Gate A21-U136B
 pullup(DINC);
-assign #GATE_DELAY DINC = rst ? 1'bz : ((0|T12A|DINCNC_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY DINC = rst ? 0 : ((0|T12A|DINCNC_) ? 1'b0 : 1'bz);
 // Gate A21-U154A A21-U148A A21-U150A A21-U157A A21-U159A A21-U153A
 pullup(g32033);
-assign #GATE_DELAY g32033 = rst ? 0 : ((0|C44A|C37A|C36A|C57A|C56A|C54A|C55A|C35A|C34A|C27A|C26A|C24A|C25A|C46A|C47A|C45A) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32033 = rst ? 1'bz : ((0|C44A|C37A|C36A|C57A|C56A|C54A|C55A|C35A|C34A|C27A|C26A|C24A|C25A|C46A|C47A|C45A) ? 1'b0 : 1'bz);
 // Gate A21-U154B A21-U156B A21-U158B A21-U147A A21-U153B
 pullup(g32022);
 assign #GATE_DELAY g32022 = rst ? 1'bz : ((0|C53A|C52A|C47A|C33A|C36A|C37A|C32A|C26A|C27A|C56A|C57A|C46A|C42A|C43A) ? 1'b0 : 1'bz);
@@ -91,10 +91,10 @@ pullup(g32016);
 assign #GATE_DELAY g32016 = rst ? 1'bz : ((0|d50SUM|C46A|C47A|C40A|C41A|C42A|C60A|C45A|C44A|C43A) ? 1'b0 : 1'bz);
 // Gate A21-U156A A21-U158A A21-U155A
 pullup(d32004K);
-assign #GATE_DELAY d32004K = rst ? 0 : ((0|C36A|C37A|C30A|C31A|C32A|C33A|C34A|C35A) ? 1'b0 : 1'bz);
+assign #GATE_DELAY d32004K = rst ? 1'bz : ((0|C36A|C37A|C30A|C31A|C32A|C33A|C34A|C35A) ? 1'b0 : 1'bz);
 // Gate A21-U160A A21-U160B A21-U145A
 pullup(g32015);
-assign #GATE_DELAY g32015 = rst ? 0 : ((0|C24A|C25A|C26A|C60A|d30SUM|C27A) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32015 = rst ? 1'bz : ((0|C24A|C25A|C26A|C60A|d30SUM|C27A) ? 1'b0 : 1'bz);
 // Gate A21-U141A
 pullup(CAD3);
 assign #GATE_DELAY CAD3 = rst ? 0 : ((0|RSCT_|g32033) ? 1'b0 : 1'bz);
@@ -109,7 +109,7 @@ pullup(CAD6);
 assign #GATE_DELAY CAD6 = rst ? 0 : ((0|g32016|RSCT_) ? 1'b0 : 1'bz);
 // Gate A21-U143A
 pullup(g32007);
-assign #GATE_DELAY g32007 = rst ? 0 : ((0|d50SUM|d30SUM) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32007 = rst ? 1'bz : ((0|d50SUM|d30SUM) ? 1'b0 : 1'bz);
 // Gate A21-U143B
 pullup(CAD1);
 assign #GATE_DELAY CAD1 = rst ? 0 : ((0|RSCT_|g32021) ? 1'b0 : 1'bz);
@@ -130,7 +130,7 @@ pullup(SHINC);
 assign #GATE_DELAY SHINC = rst ? 0 : ((0|SHINC_|T12A) ? 1'b0 : 1'bz);
 // Gate A21-U146A
 pullup(d30SUM);
-assign #GATE_DELAY d30SUM = rst ? 1'bz : ((0|d32004K) ? 1'b0 : 1'bz);
+assign #GATE_DELAY d30SUM = rst ? 0 : ((0|d32004K) ? 1'b0 : 1'bz);
 // Gate A21-U146B
 pullup(SHINC_);
 assign #GATE_DELAY SHINC_ = rst ? 1'bz : ((0|SHINC|g32058) ? 1'b0 : 1'bz);
@@ -196,7 +196,7 @@ pullup(g32244);
 assign #GATE_DELAY g32244 = rst ? 1'bz : ((0|g32245|g32240) ? 1'b0 : 1'bz);
 // Gate A21-U108B
 pullup(g32242);
-assign #GATE_DELAY g32242 = rst ? 1'bz : ((0|g32239|CTROR_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32242 = rst ? 0 : ((0|g32239|CTROR_) ? 1'b0 : 1'bz);
 // Gate A21-U105A A21-U102B
 pullup(INKL_);
 assign #GATE_DELAY INKL_ = rst ? 1'bz : ((0|g32245|MONpCH) ? 1'b0 : 1'bz);
@@ -412,10 +412,10 @@ pullup(g32620);
 assign #GATE_DELAY g32620 = rst ? 0 : ((0|g32619|C45R) ? 1'b0 : 1'bz);
 // Gate A21-U208B
 pullup(g32650);
-assign #GATE_DELAY g32650 = rst ? 0 : ((0|g32647|CG16|g32633) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32650 = rst ? 1'bz : ((0|g32647|CG16|g32633) ? 1'b0 : 1'bz);
 // Gate A21-U205A
 pullup(CG16);
-assign #GATE_DELAY CG16 = rst ? 1'bz : ((0|g32622) ? 1'b0 : 1'bz);
+assign #GATE_DELAY CG16 = rst ? 0 : ((0|g32622) ? 1'b0 : 1'bz);
 // Gate A21-U205B A21-U204B
 pullup(CXB0_);
 assign #GATE_DELAY CXB0_ = rst ? 1'bz : ((0|XB0) ? 1'b0 : 1'bz);
@@ -424,10 +424,10 @@ pullup(g32624);
 assign #GATE_DELAY g32624 = rst ? 1'bz : ((0|g32625|INLNKM) ? 1'b0 : 1'bz);
 // Gate A21-U207A
 pullup(g32622);
-assign #GATE_DELAY g32622 = rst ? 0 : ((0|g32620|CG15|g32607) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32622 = rst ? 1'bz : ((0|g32620|CG15|g32607) ? 1'b0 : 1'bz);
 // Gate A21-U207B
 pullup(CG26);
-assign #GATE_DELAY CG26 = rst ? 1'bz : ((0|g32650) ? 1'b0 : 1'bz);
+assign #GATE_DELAY CG26 = rst ? 0 : ((0|g32650) ? 1'b0 : 1'bz);
 // Gate A21-U206A
 pullup(g32659);
 assign #GATE_DELAY g32659 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
@@ -451,7 +451,7 @@ pullup(C45R);
 assign #GATE_DELAY C45R = rst ? 0 : ((0|CXB5_|CA4_|g32611) ? 1'b0 : 1'bz);
 // Gate A21-U255A A21-U253A
 pullup(CTROR_);
-assign #GATE_DELAY CTROR_ = rst ? 0 : ((0|g32547|g32540|g32533|CG23) ? 1'b0 : 1'bz);
+assign #GATE_DELAY CTROR_ = rst ? 1'bz : ((0|g32547|g32540|g32533|CG23) ? 1'b0 : 1'bz);
 // Gate A21-U255B
 pullup(g32559);
 assign #GATE_DELAY g32559 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
@@ -592,16 +592,16 @@ pullup(CA5_);
 assign #GATE_DELAY CA5_ = rst ? 1'bz : ((0|OCTAD5) ? 1'b0 : 1'bz);
 // Gate A21-U256B
 pullup(CG15);
-assign #GATE_DELAY CG15 = rst ? 1'bz : ((0|g32522) ? 1'b0 : 1'bz);
+assign #GATE_DELAY CG15 = rst ? 0 : ((0|g32522) ? 1'b0 : 1'bz);
 // Gate A21-U257B
 pullup(g32524);
 assign #GATE_DELAY g32524 = rst ? 1'bz : ((0|g32525|BMAGYM) ? 1'b0 : 1'bz);
 // Gate A21-U254A
 pullup(CTROR);
-assign #GATE_DELAY CTROR = rst ? 1'bz : ((0|CTROR_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY CTROR = rst ? 0 : ((0|CTROR_) ? 1'b0 : 1'bz);
 // Gate A21-U254B
 pullup(g32522);
-assign #GATE_DELAY g32522 = rst ? 0 : ((0|g32520|CG13|g32507) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g32522 = rst ? 1'bz : ((0|g32520|CG13|g32507) ? 1'b0 : 1'bz);
 // Gate A21-U252B
 pullup(C43A);
 assign #GATE_DELAY C43A = rst ? 0 : ((0|CG13|g32519|g32507) ? 1'b0 : 1'bz);

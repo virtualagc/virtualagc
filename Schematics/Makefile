@@ -176,7 +176,7 @@ ifdef DUMPFILE
 	EXTRA_IV_ARGS += -Pagc.DUMPFILE='"$(DUMPFILE)"'
 endif
 ifdef RUNLENGTH
-	EXTRA_IV_ARGS += -Pagc.RUNLENGTH=$(RUNLENGTH)
+	EXTRA_IV_ARGS += -DRUNLENGTH=$(RUNLENGTH)
 endif
 DUMPED =
 ifdef DUMP_ALL
@@ -323,7 +323,7 @@ all: $(TARGETS)
 clean:
 	-rm $(TARGETS) roms/rom.v 2003200.v 2003100.v 2003993.v 1003700.v \
 		testVerilog/module.v testVerilog/module_tb.v \
-		$(TARGETS_V_AGC) $(TARGETS_TB_V_AGC) 2>/dev/null
+		$(TARGETS_V_AGC) $(TARGETS_TB_V_AGC) A*.init 2>/dev/null
 
 2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v $(EXTRA_V) roms/rom.v
 	iverilog $(EXTRA_IV_ARGS) -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
