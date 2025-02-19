@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2018 Ronald S. Burkey
 # 
 # This file is part of yaAGC.
 # 
@@ -58,6 +58,9 @@ import sys
 import random
 import re
 
+# Number of passes on which to force the requirements before giving up on them.
+servingSuggestion = 20
+
 # Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
 # I'm told (and my experience is) that the only one that actually matters is STNDBY.  
 # However, explicitly initializing other flip-flops can be helpful helpful in terms
@@ -74,7 +77,7 @@ if False:
 else:
 	want0 = [
 		# STNDBY is controlled from a B-module that we're not simulating.
-		"STNDBY", "STRT1", "STOPA", 
+		"STNDBY", "STRT1",
 		# CHORxx
 		#"PIPAFL", 
 		"AGCWAR",
@@ -85,6 +88,7 @@ else:
 	]
 	want1 = [
 		#"GOSET_", 
+		"STOPA",
 		"g37233",
 		# This zeroes the 32-bit counter in scaler module A1.
 		"g38104", "g38114", "g38124", "g38134", "g38144", "g38154", "g38164", "g38174",
@@ -271,7 +275,7 @@ while unchanged < 2:
 	# like 2003993, because it won't converge.  Therefore, for now, we treat
 	# these merely as "serving suggestions", and set them only prior to the first
 	# iteration.  If they change after that, then too bad! 
-	if count == 1:
+	if count <= servingSuggestion:
 		for netName in want0:
 			netValues[netName] = False
 		for netName in want1:

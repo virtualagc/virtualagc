@@ -134,7 +134,10 @@ while True:
             if line.startswith('$var wire'):
                 toks = line.split()
                 sig_num = int(toks[3])
-                sig_name = toks[4]
+                if toks[4][-3:] == "[0]":
+                    sig_name = re.match('^(?:__.*?__)?(.+?)\\[', toks[4]).groups()[0]
+                else:
+                    sig_name = re.match('^(?:__.*?__)?(.+?)$', toks[4]).groups()[0]
                 signal_names[sig_num] = sig_name
                 signals[sig_name] = 0
             elif line.startswith('$dumpvars'):

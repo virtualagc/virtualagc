@@ -75,10 +75,10 @@ pullup(g48139);
 assign #GATE_DELAY g48139 = rst ? 0 : ((0|g48148|g48138|g48129) ? 1'b0 : 1'bz);
 // Gate A23-U157A
 pullup(g48143);
-assign #GATE_DELAY g48143 = rst ? 1'bz : ((0|g48140|g48139|g48144) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48143 = rst ? 0 : ((0|g48140|g48139|g48144) ? 1'b0 : 1'bz);
 // Gate A23-U157B
 pullup(g48144);
-assign #GATE_DELAY g48144 = rst ? 0 : ((0|g48143|g48142|g48141) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48144 = rst ? 1'bz : ((0|g48143|g48142|g48141) ? 1'b0 : 1'bz);
 // Gate A23-U149A
 pullup(MISSX);
 assign #GATE_DELAY MISSX = rst ? 1'bz : ((0|PIPGXp|PIPGXm|g48154) ? 1'b0 : 1'bz);

@@ -33,6 +33,8 @@
 #                       number.  At present, though, tb_xxxx.v requires that
 #                       exactly one of the DUMP_xxxx options be present.
 
+extension=kicad_sch
+
 # Let's find out what the name of the python3 executable is:
 export python_exe=python
 which python3 &>/dev/null && export python_exe=python3
@@ -144,9 +146,9 @@ fi
 echo Checking existence of all schematic diagrams needed ...
 for d in $modules $module52
 do
-        if [ ! -f $d/module.kicad_sch ]
+        if [ ! -f $d/module.$extension ]
         then
-                echo Schematic $d/module.kicad_sch does not exist
+                echo Schematic $d/module.$extension does not exist
                 exit 1
         fi
 done
@@ -165,7 +167,15 @@ then
 fi
 
 # Workflow Step #2:
-if which kicad-cli &>/dev/null
+autonet=0
+if [ $extension = kicad_sch ]
+then
+	if which kicad-cli &>/dev/null
+	then
+		autonet=1
+	fi
+fi
+if [ $autonet = 1 ]
 then
         echo Generating netlist files ...
         # kicad-cli does exist.
@@ -208,7 +218,7 @@ do
         cd $d &>/dev/null
         rm empty.init &> /dev/null
         touch empty.init
-        $python_exe -m dumbVerilog A$n module.net pins.txt 20 empty.init module.kicad_sch >>../dummy.v
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 empty.init module.$extension >>../dummy.v
         cd - &>/dev/null
 done
 
@@ -230,14 +240,14 @@ do
         echo Final Verilog creation for A$n $d ...
         cd $d &>/dev/null
         cp ../A$n.init module.init
-        $python_exe -m dumbVerilog A$n module.net pins.txt 20 module.init module.kicad_sch >module.v
+        $python_exe -m dumbVerilog A$n module.net pins.txt 20 module.init module.$extension >module.v
         cd - &>/dev/null
 done
 
 # Workflow step #4
 echo Generation of testbench object-definition file ...
-$python_exe -m dumbTestbench <dummy.v >"$model"_tb.v
 cp tb-$model.v tb.v
+$python_exe -m dumbTestbench <dummy.v >"$model"_tb.v
 
 # Workflow step #5
 echo Setup of erasable/fixed memory Verilog source code ...

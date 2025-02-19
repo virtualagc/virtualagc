@@ -109,7 +109,7 @@ pullup(g39248);
 assign #GATE_DELAY g39248 = rst ? 0 : ((0|GOJAM|GNHNC) ? 1'b0 : 1'bz);
 // Gate A5-U128B A5-U126A A5-U129A A5-U129B
 pullup(g39253);
-assign #GATE_DELAY g39253 = rst ? 0 : ((0|C27A|C30A|C24A|C25A|C26A|C41P|C40P|C37P|C44P|C43P|C42P) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g39253 = rst ? 1'bz : ((0|C27A|C30A|C24A|C25A|C26A|C41P|C40P|C37P|C44P|C43P|C42P) ? 1'b0 : 1'bz);
 // Gate A5-U124A
 pullup(g39241);
 assign #GATE_DELAY g39241 = rst ? 0 : ((0|T11_|MASK0_) ? 1'b0 : 1'bz);

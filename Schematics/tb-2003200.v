@@ -3,21 +3,21 @@
 parameter DUMPFILE = "agc.fst";
 
 // In units of ns.
-parameter RUNLENGTH = 250000000; // 0.25 seconds
+`ifdef RUNLENGTH
+    parameter RUNLENGTH = `RUNLENGTH;
+`else
+    parameter RUNLENGTH = 250000000; // 0.25 seconds
+`endif
 
 reg rst = 1;
 initial
   begin
     $dumpfile(DUMPFILE);
-`ifdef DUMP_ALL    
-    // Dump all of the signals, including those local to individual modules.
-    $dumpvars(0,agc);
-    $display("Dumping all signals.");
-`endif
 `ifdef DUMP_BACKPLANE
     // Dump just the backplane signals; this makes the file considerably shorter.
     $dumpvars(1, agc);
     $display("Dumping backplane signals.");
+    `define DUMP_ok
 `endif
 `ifdef DUMP_DECODER
     // Or, use just the list of variables needed by the instruction decoder.
@@ -26,8 +26,16 @@ initial
     	agc.G07, agc.G06, agc.G05, agc.G04, agc.G03, agc.G02, agc.G01, agc.FUTEXT, agc.IC2, 
     	agc.STG3, agc.STG2, agc.STG1, agc.WSQG_, agc.GOJAM, agc.RPTFRC, agc.PCDU, agc.MCDU, 
     	agc.SHINC, agc.SHANC, agc.S12, agc.S11, agc.S10, agc.S09, 
-    	agc.S08, agc.S07, agc.S06, agc.S05, agc.S04, agc.S03, agc.S02, agc.S01);
+    	agc.S08, agc.S07, agc.S06, agc.S05, agc.S04, agc.S03, agc.S02, agc.S01,
+    	agc.SUMB16_, agc.SUMB15_, agc.SUMB14_, agc.SUMB13_, agc.SUMB12_, 
+    	agc.SUMB11_, agc.SUMB10_, agc.SUMB09_, agc.SUMB08_, agc.SUMB07_, 
+    	agc.SUMB06_, agc.SUMB05_, agc.SUMB04_, agc.SUMB03_, agc.SUMB02_, 
+    	agc.SUMB01_, agc.SUMA16_, agc.SUMA15_, agc.SUMA14_, agc.SUMA13_, 
+    	agc.SUMA12_, agc.SUMA11_, agc.SUMA10_, agc.SUMA09_, agc.SUMA08_,
+    	agc.SUMA07_, agc.SUMA06_, agc.SUMA05_, agc.SUMA04_, agc.SUMA03_, 
+    	agc.SUMA02_, agc.SUMA01_);
     $display("Dumping instruction-decoder signals.");
+    `define DUMP_ok
 `endif
 `ifdef DUMP_HELPFUL
     // Or, use the list of variables needed by the instruction decoder, plus a few
@@ -46,12 +54,30 @@ initial
     	agc.L16_, agc.L15_, agc.L14_, agc.L13_, agc.L12_, agc.L11_, agc.L10_, agc.L09_, agc.L08_, 
     	agc.L07_, agc.L06_, agc.L05_, agc.L04_, agc.L03_, agc.L02_, agc.L01_,
     	agc.SA16, agc.SAP, agc.SA14, agc.SA13, agc.SA12, agc.SA11, agc.SA10, agc.SA09, agc.SA08, 
-    	agc.SA07, agc.SA06, agc.SA05, agc.SA04, agc.SA03, agc.SA02, agc.SA01
+    	agc.SA07, agc.SA06, agc.SA05, agc.SA04, agc.SA03, agc.SA02, agc.SA01,
+        agc.SUMB16_, agc.SUMB15_, agc.SUMB14_, agc.SUMB13_, agc.SUMB12_, 
+        agc.SUMB11_, agc.SUMB10_, agc.SUMB09_, agc.SUMB08_, agc.SUMB07_, 
+        agc.SUMB06_, agc.SUMB05_, agc.SUMB04_, agc.SUMB03_, agc.SUMB02_, 
+        agc.SUMB01_, agc.SUMA16_, agc.SUMA15_, agc.SUMA14_, agc.SUMA13_, 
+        agc.SUMA12_, agc.SUMA11_, agc.SUMA10_, agc.SUMA09_, agc.SUMA08_,
+        agc.SUMA07_, agc.SUMA06_, agc.SUMA05_, agc.SUMA04_, agc.SUMA03_, 
+        agc.SUMA02_, agc.SUMA01_
     );
     $display("Dumping helpful signals.");
+    `define DUMP_ok
 `endif
+`ifndef DUMP_ok
+    `define DUMP_ALL
+`endif
+`ifdef DUMP_ALL    
+    // Dump all of the signals, including those local to individual modules.
+    $dumpvars(0,agc);
+    $display("Dumping all signals.");
+    `define DUMP_ok
+`endif
+
     $display("Run length will be %f ms.", RUNLENGTH/1000000.0);
-    #5000 rst = 0;
+    # 5000 rst = 0;
     //# 1000000000000 $finish; // 100 seconds
     //# 60000000000 $finish; // 60 seconds ... should be enough time for Validation to run.
     //# 10000000000 $finish; // 10 seconds

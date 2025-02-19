@@ -27,14 +27,7 @@ while True:
             if line.startswith('$var wire'):
                 toks = line.split()
                 sig_num = int(toks[3])
-                name_match = re.match('^(__.*?___)?(.+?)\\[', toks[4])
-                sig_name = name_match.group(2)
-                if name_match.group(1) is not None:
-                    nums = re.match('__A(\\d+)_(\\d+)', name_match.group(1)).groups()
-                    board_num = int(sig_name[-1])
-                    sig_name = sig_name[:-1] + '%02u' % ((int(nums[0])-8)*4 + (int(nums[1])-1)*2 + board_num)
-                else:
-                    sig_name = sig_name[:-2]
+                sig_name = toks[4][:-1]
                 signal_names[sig_num] = sig_name
                 signals[sig_name] = 0
             elif line.startswith('$dumpvars'):
