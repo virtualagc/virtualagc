@@ -20,7 +20,14 @@ then
         git stash 2>&1 >> $LOG_FILE
         git stash drop 2>&1 >> $LOG_FILE
         git pull 2>&1 >> $LOG_FILE
+        
         Schematics/vmDesktopIcons.sh
+        # This identifies 'python' with 'python3' if that isn't already happening.
+        if ! which python &>/dev/null
+        then 
+                echo virtualagc | sudo -S apt -q install python-is-python3
+        fi
+        
         
         echo Preparing to update source code ...
         cd ~/git/virtualagc 2>&1 >> $LOG_FILE
