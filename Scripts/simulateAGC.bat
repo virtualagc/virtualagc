@@ -155,7 +155,7 @@ IF "%sameAs%" == "2003200" (
 REM Workflow Step #1:
 echo "Checking" "existence" "of" "all" "schematic" "diagrams" "needed" "..."
 FOR %%d IN ( %modules% %module52% ) DO (
-  IF NOT "-f" "%%d/module.%extension%" (
+  IF NOT exist "%%d/module.%extension%" (
     echo "Schematic" "%%d/module.%extension%" "does" "not" "exist"
     exit "1"
   )
@@ -167,7 +167,7 @@ IF "%~2" == "" (
   SET software=%~1
 )
 echo "AGC" "software:" "%software%"
-IF NOT "-f" "roms/%software%.v" (
+IF NOT exist "roms/%software%.v" (
   echo "Selected" "AGC" "software" "version" "has" "no" "Verilog" "source-code" "file."
   exit "1"
 )
@@ -191,7 +191,7 @@ IF "%autonet%" == "1" (
   echo "Checking" "existence" "of" "netlist" "files" "..."
   REM kicad-cli not found.  The netlist files must pre-exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-    IF NOT "-f" "%%d\module.net" (
+    IF NOT exist "%%d\module.net" (
       echo "Netlist" "%%d\module.net" "does" "not" "exist."
       exit "1"
     )
