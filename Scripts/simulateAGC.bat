@@ -11,7 +11,6 @@ REM https://github.com/daniel-sc/bash-shell-to-bat-converter/issues/58.
 REM Workarounds of a similar nature I developed for poor piping are found here:
 REM https://github.com/daniel-sc/bash-shell-to-bat-converter/issues/72.
 
-@echo off
 REM Script for digital simulation of an AGC CPU.  The command-line arguments,
 REM all optional, appear in the following order:
 REM       MODEL           The AGC model.  In principle, only 1003565, 1003700,
@@ -52,31 +51,31 @@ SET PYTHONPATH="%PATH%"
 
 REM Parse command line and perform sanity checks.
 
-IF "%~1" "=" "" (
+IF "%~1" == "" (
   SET model=2003993
   SET sameAs=2003993
 ) ELSE (
-  IF "%~1" "=" "2003993" (
+  IF "%~1" == "2003993" (
     SET model=%~1
     SET sameAs=2003993
   ) ELSE (
-    IF "%~1" "=" "2003200" (
+    IF "%~1" == "2003200" (
       SET model=%~1
       SET sameAs=2003200
     ) ELSE (
-      IF "%~1" "=" "2003100" (
+      IF "%~1" == "2003100" (
         SET model=%~1
         SET sameAs=2003100
         echo "Model" "not" "yet" "supported."
         exit "1"
       ) ELSE (
-        IF "%~1" "=" "1003700" (
+        IF "%~1" == "1003700" (
           SET model=%~1
           SET sameAs=1003700
           echo "Model" "not" "yet" "supported."
           exit "1"
         ) ELSE (
-          IF "%~1" "=" "1003565" (
+          IF "%~1" == "1003565" (
             SET model=%~1
             SET sameAs=1003700
             echo "Model" "not" "yet" "supported."
@@ -90,12 +89,12 @@ IF "%~1" "=" "" (
     )
   )
 )
-IF "%model%" "=" "%sameAs%" (
+IF "%model%" == "%sameAs%" (
   echo "AGC model: %model%"
 ) ELSE (
   echo "AGC model: %model% (same as %sameAs%)"
 )
-IF "%sameAs%" "=" "2003993" (
+IF "%sameAs%" == "2003993" (
   REM Schematic drawings for logic modules A1-A24.
   SET modules="
   SET modules=%modules% 2005259A
@@ -123,7 +122,7 @@ IF "%sameAs%" "=" "2003993" (
   SET modules=%modules% 2005272A
   SET modules=%modules% 2005273A
 )
-IF "%sameAs%" "=" "2003200" (
+IF "%sameAs%" == "2003200" (
   REM Schematic drawings for logic modules A1-A24, A52.
   SET modules=
   SET modules=%modules% 2005259A
@@ -162,7 +161,7 @@ FOR %%d IN ( %modules% %module52% ) DO (
   )
 )
 
-IF "%~2" "=" "" (
+IF "%~2" == "" (
   SET software=Validation-hardware-simulation
 ) ELSE (
   SET software=%~1
@@ -175,12 +174,12 @@ IF NOT "-f" "roms/%software%.v" (
 
 REM Workflow Step #2:
 SET autonet=0
-IF "%extension%" "=" "kicad_sch" (
+IF "%extension%" == "kicad_sch" (
   IF which "kicad-cli" 2>&1 > NUL (
     SET autonet=1
   )
 )
-IF "%autonet%" "=" "1" (
+IF "%autonet%" == "1" (
   echo "Generating" "netlist" "files" "..."
   REM kicad-cli does exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
@@ -205,10 +204,10 @@ echo "Generation" "of" "flip-flop" "initialization" "file" "..."
 SET n=0
 DEL  "dummy.v" 2>&1 > NUL
 FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
-  IF "%%d" "=" "fixed_erasable_memory" (
+  IF "%%d" == "fixed_erasable_memory" (
     SET n=99
   ) ELSE (
-    IF "%n%" "=" "24" (
+    IF "%n%" == "24" (
       SET n=52
     ) ELSE (
       SET /A n=n+1
@@ -227,10 +226,10 @@ python "-m" "dumbInitialization" < "dummy.v"
 
 SET n=0
 FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-  IF "%%d" "=" "fixed_erasable_memory" (
+  IF "%%d" == "fixed_erasable_memory" (
     SET n=99
   ) ELSE (
-    IF "%n%" "=" "24" (
+    IF "%n%" == "24" (
       SET n=52
     ) ELSE (
       SET /A n=n+1
@@ -254,7 +253,7 @@ COPY  "roms/%software%.v" "roms\rom.v"
 
 REM Workflow step #6
 echo "Compiling" "Verilog" "source" "code" "..."
-IF "%~3" "=" "" (
+IF "%~3" == "" (
   SET verilogOptions=-DDUMP_ALL
 ) ELSE (
   SET verilogOptions=%~3
