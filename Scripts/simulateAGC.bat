@@ -175,7 +175,7 @@ IF NOT exist "roms/%software%.v" (
 REM Workflow Step #2:
 SET autonet=0
 IF "%extension%" == "kicad_sch" (
-  IF which "kicad-cli" 2>&1 > NUL (
+  IF which "kicad-cli" > NUL 2>&1 (
     SET autonet=1
   )
 )
@@ -183,9 +183,9 @@ IF "%autonet%" == "1" (
   echo "Generating" "netlist" "files" "..."
   REM kicad-cli does exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-    cd "%%d" 2>&1 > NUL
+    cd "%%d" > NUL 2>&1
     kicad-cli "sch" "export" "netlist" "--output" "module.net" "--format" "orcadpcb2" "module.kicad_sch"
-    cd ".." 2>&1 > NUL
+    cd ".." > NUL 2>&1
   )
 ) ELSE (
   echo "Checking" "existence" "of" "netlist" "files" "..."
@@ -202,7 +202,7 @@ REM Workflow Step #3:
 echo "Generation" "of" "flip-flop" "initialization" "file" "..."
 
 SET n=0
-DEL  "dummy.v" 2>&1 > NUL
+DEL  "dummy.v" > NUL 2>&1
 FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
   IF "%%d" == "fixed_erasable_memory" (
     SET n=99
@@ -214,11 +214,11 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
     )
   )
   echo "Initial" "Verilog" "creation" "for" "A%n%" "%%d" "..."
-  cd "%%d" 2>&1 > NUL
-  DEL  "empty.init" 2>&1 > NUL
+  cd "%%d" > NUL 2>&1
+  DEL  "empty.init" > NUL 2>&1
   touch "empty.init"
   python "-m" "dumbVerilog" "A%n%" "module.net" "pins.txt" "20" "empty.init" "module.%extension%" >> "%CD%\..\dummy.v"
-  cd .. 2>&1 > NUL
+  cd .. > NUL 2>&1
 )
 
 echo "Flip-flop" "initilizer" "creation" "..."
@@ -236,10 +236,10 @@ FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
     )
   )
   echo "Final" "Verilog" "creation" "for" "A%n%" "%%d" "..."
-  cd "%%d" 2>&1 > NUL
+  cd "%%d" > NUL 2>&1
   COPY  "../A%n%.init" "module.init"
   python "-m" "dumbVerilog" "A%n%" "module.net" "pins.txt" "20" "module.init" "module.%extension%" > "module.v"
-  cd .. 2>&1 > NUL
+  cd .. > NUL 2>&1
 )
 
 REM Workflow step #4
