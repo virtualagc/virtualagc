@@ -66,6 +66,7 @@
 
 
 
+
         <br>
       </font>
       <ul>
@@ -89,6 +90,7 @@
 
 
 
+
               git/virtualagc-schematics/</a> under your home directory.<br>
           </font></li>
         <li><font size="-1">Your "installed" version of the built
@@ -96,6 +98,7 @@
               href="file:///home/rburkey/VirtualAGC/">subfolder
               VirtualAGC/</a> under your home directory.</font></li>
         <li><font size="-1">In Linux, filenames and folder names are <i>case
+
 
 
 
@@ -207,6 +210,7 @@
       <p><img moz-do-not-send="true" src="ApolloPatch2-transparent.png"
           alt="" height="24"> opens <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updating">the
+
 
 
 
@@ -335,6 +339,7 @@ href="https://www.ibiblio.org/apollo/download.html#Downloading_Running_or_Updati
 
 
 
+
         so</strike> are not (yet?) available and therefore are not
       included the VM.<br>
     </p>
@@ -359,6 +364,7 @@ href="https://www.ibiblio.org/apollo/Gemini.html#yaOBC_the_OBC_CPU_Emulation"><b
         the OBS CPU emulator.&nbsp; Note that the emulator has a <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">built-in
+
 
 
 
@@ -391,6 +397,7 @@ href="https://www.ibiblio.org/apollo/Gemini.html#Debugging_Interface_of_yaOBC">b
         the Block II AGC CPU emulator.&nbsp; &nbsp; Note that the
         emulator has a <a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/yaAGC.html#Debugging">built-in
+
 
 
 
@@ -430,6 +437,7 @@ href="https://www.ibiblio.org/apollo/yaTelemetry.html#LM_Simulator_by_Stephan_Ho
       </ul>
       <li><a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/yaTelemetry.html#yaACA"><b>yaACA,
+
 
 
 
@@ -505,6 +513,7 @@ href="https://www.ibiblio.org/apollo/yaAGS.html#yaAGS_the_AGS_CPU_Emulation"><b>
 
 
 
+
           debugging facility</a>.<br>
       </li>
       <ul>
@@ -540,6 +549,7 @@ href="https://www.ibiblio.org/apollo/LVDC.html#yaLVDC_the_LVDC_CPU_Emulation"><b
 
 
 
+
           debugging facility</a>, or can work with the telemetry or
         Programmable Test Controller systems (see next items), so LVDC
         code execution need not be entirely black-box.</li>
@@ -561,12 +571,14 @@ href="https://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program">See
 
 
 
+
           here also</a>.<br>
       </li>
       <ul>
       </ul>
       <li><b>analyzeBoost.py</b>:&nbsp; <a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/LVDC.html#DoingSomething">See
+
 
 
 
@@ -734,6 +746,7 @@ href="https://www.ibiblio.org/apollo/DIY.html#Your_Own_Peripheral_Devices">serve
 
 
 
+
       as such a model</a>, as do the more-fully worked-out <b>piDSKY.py</b>
     and <b>piDEDA.py</b> programs.&nbsp; For example, in the screenshot
     below, I am running <b>piDSKY.py</b> in parallel with the
@@ -852,6 +865,7 @@ href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Nu
 
 
 
+
         lookup facility</a> to choose "Apollo 11 Lunar Module" to reach
       drawing 2014999-101 of the GN&amp;C system, then choose "COMPUTER
       ASSEMBLY" to reach drawing 2003993-031, at which point you can
@@ -887,6 +901,7 @@ href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Nu
 
 
 
+
         The CAD files can be directly used in later versions of KiCad,
         but you may see a harmless warning banner reading "This file was
         created by an older versions of KiCad. It will be converted to
@@ -918,10 +933,12 @@ href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Nu
 
 
 
+
           folder</a>, while alternate schematics intended to convey the
         correct functionality without corresponding to any specific
         original drawing are instead in <a moz-do-not-send="true"
           href="file:///home/virtualagc/git/virtualagc-schematics/msSchematics/">this
+
 
 
 
@@ -949,8 +966,16 @@ href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Nu
       need to know too much about the details of how it works.&nbsp; The
       most-likely thing you'd want to do, I think, is to simulate some
       model of the Block II AGC, running some particular AGC
-      software.&nbsp; In brief, you'd do this from a command line, using
-      the commands:<br>
+      software.&nbsp; There's a script called <b>simulateAGC</b> that
+      builds the simulation for you, runs it, and then displays the
+      results in a waveform viewer.&nbsp; Alas, the waveform viewer
+      doesn't really know enough to zoom in or out to the magnification
+      level you'd like, nor to guess which of the ~5000 available
+      signals you'd like to see, so you'll have to manually adjust those
+      yourself.&nbsp; Though once you do make those adjustments, you can
+      save the setup to reuse it later.<br>
+    </p>
+    <p>In brief, you use the commands:<br>
     </p>
     <blockquote>
       <pre><font color="#663300">cd ~/git/virtualagc-schematics/Schematics<br>simulateAGC <i>AGC_MODEL</i> <i>AGC_SOFTWARE</i> "<i>VERILOG_OPTIONS</i>"</font><br></pre>
@@ -1009,15 +1034,63 @@ href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Search_by_Drawing_Nu
     </ul>
     <p>In choosing from among these various parameters, note that the
       output log of the simulation, which is a file called agc.fst, has
-      a size <i>very</i> roughly equal to 20 bytes, times the run
-      length in milliseconds, times the number of signals logged.<br>
-      <br>
+      a size <i>very</i> roughly equal to 20 bytes times the run length
+      in milliseconds times the number of signals logged.&nbsp; The
+      logged waveforms in agc.fst can be re-displayed later by using
+      the&nbsp;<img moz-do-not-send="true" src="gtkwave.svg" alt=""
+        width="16" height="16"> desktop icon.<br>
     </p>
+    <p>The next-most-likely thing I think you'd want to do is to
+      simulate the electronics of a single AGC logic module, such as
+      module A1, implemented perhaps by the schematic drawing
+      2005259A.&nbsp; You could do this via the commands</p>
+    <blockquote>
+      <pre><font color="#663300">cd ~/git/virtualagc-schematics/Schematics/2005259A<br>simulateModuleII <i>MODULE_NUMBER</i></font></pre>
+    </blockquote>
+    <p>with <font color="#663300"><i><code>MODULE_NUMBER</code></i></font>
+      being <font color="#663300"><code>A1</code></font>.&nbsp; This
+      creates a simulation log-file called module.fst and displays the
+      signal traces logged in it.&nbsp; Note, though, that it will not
+      attempt to guess which signals you want to view, so when the
+      waveform viewer appears, you'll have to make that selection
+      yourself.&nbsp; Moreover, the desktop icon does <i>not</i>
+      re-display module.fst for you, and you would instead need to use
+      the command "<font color="#663300"><code>gtkwave module.fst</code></font>"
+      (or one of several alternative techniques found in GTKWave
+      documentation) to re-display the simulation results later.<br>
+    </p>
+    <p>Or if you wanted to simulate just a portion of a logic module,
+      say the subcircuit of module A1 called "testVerilog" that's used
+      by the online documentation as an example, its schematics would
+      have to reside in a subdirectory of the same name, and it would be
+      simulated via</p>
+    <blockquote>
+      <pre><font color="#663300">cd ~/git/virtualagc-schematics/Schematics/testVerilog<br></font><font color="#663300">simulateModuleII A1</font></pre>
+    </blockquote>
+    <p> </p>
     <ul>
     </ul>
     <ul>
     </ul>
-    <p> <i>(Last updated 2025-02-20 by Ron Burkey)</i><br>
+    <p>However, to meaningfully simulate any circuit via <b>simulateModuleII</b>
+      would require you to create a "test bench" source-code file in the
+      Verilog language, specifically tailored to what you want to
+      accomplish in the simulation.&nbsp; For example, what input
+      signals are applied, and when?&nbsp; What signals do you want to
+      log the values of for later viewing?&nbsp; What messages do you
+      want to print during the simulation process?&nbsp; You are
+      provided with sample test-bench files, but other than the case of
+      module A1 these are unlikely to meet your need without significant
+      modification, and it's outside of our scope here to try and cover
+      the process of creating such test-bench files.&nbsp; I would note,
+      however, that if you rewrite any of the sample test-bench files
+      provided, your changes will be unceremoniously and silently dumped
+      the next time you update the VM, so you are advised always to
+      create a <i>new</i> folder for any logic module you want to
+      simulate.<br>
+    </p>
+    <p><i><br>
+        (Last updated 2025-02-20 by Ron Burkey)</i><br>
       <br>
     </p>
   </body>
