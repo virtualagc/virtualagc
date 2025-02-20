@@ -40,6 +40,6 @@ echo 'Type=Application' >>temp.desktop
 echo 'Icon=/usr/share/icons/Papirus/64x64/apps/io.github.gtkwave.GTKWave.svg' >>temp.desktop
 echo 'Terminal=false' >>temp.desktop
 mv temp.desktop 'AGC Verilog Simulation Results'.desktop
-gio set "$desktop"/'AGC Verilog Simulation Results'.desktop "metadata::trusted" true
+gio set 'AGC Verilog Simulation Results'.desktop "metadata::trusted" true
 
 
