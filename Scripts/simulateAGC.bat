@@ -47,7 +47,7 @@ REM                       exactly one of the DUMP_xxxx options be present.
 
 SET extension=kicad_sch
 
-SET PYTHONPATH="%PATH%"
+SET PYTHONPATH=%PATH%
 
 REM Parse command line and perform sanity checks.
 
@@ -66,23 +66,23 @@ IF "%~1" == "" (
       IF "%~1" == "2003100" (
         SET model=%~1
         SET sameAs=2003100
-        echo "Model" "not" "yet" "supported."
-        exit "1"
+        echo Model not yet supported.
+        exit 1
       ) ELSE (
         IF "%~1" == "1003700" (
           SET model=%~1
           SET sameAs=1003700
-          echo "Model" "not" "yet" "supported."
-          exit "1"
+          echo Model not yet supported.
+          exit 1
         ) ELSE (
           IF "%~1" == "1003565" (
             SET model=%~1
             SET sameAs=1003700
-            echo "Model" "not" "yet" "supported."
-            exit "1"
+            echo Model not yet supported.
+            exit 1
           ) ELSE (
-            echo "Unrecognized" "AGC" "model" "number."
-            exit "1"
+            echo Unrecognized AGC model number.
+            exit 1
           )
         )
       )
@@ -90,13 +90,13 @@ IF "%~1" == "" (
   )
 )
 IF "%model%" == "%sameAs%" (
-  echo "AGC model: %model%"
+  echo AGC model: %model%
 ) ELSE (
-  echo "AGC model: %model% (same as %sameAs%)"
+  echo AGC model: %model% (same as %sameAs%)
 )
 IF "%sameAs%" == "2003993" (
   REM Schematic drawings for logic modules A1-A24.
-  SET modules="
+  SET modules=""
   SET modules=%modules% 2005259A
   SET modules=%modules% 2005260A
   SET modules=%modules% 2005251A
@@ -153,11 +153,11 @@ IF "%sameAs%" == "2003200" (
 )
 
 REM Workflow Step #1:
-echo "Checking" "existence" "of" "all" "schematic" "diagrams" "needed" "..."
+echo Checking existence of all schematic diagrams needed ...
 FOR %%d IN ( %modules% %module52% ) DO (
-  IF NOT exist "%%d/module.%extension%" (
-    echo "Schematic" "%%d/module.%extension%" "does" "not" "exist"
-    exit "1"
+  IF NOT exist %%d/module.%extension% (
+    echo Schematic %%d/module.%extension% does not exist
+    exit 1
   )
 )
 
@@ -166,43 +166,41 @@ IF "%~2" == "" (
 ) ELSE (
   SET software=%~1
 )
-echo "AGC" "software:" "%software%"
-IF NOT exist "roms/%software%.v" (
-  echo "Selected" "AGC" "software" "version" "has" "no" "Verilog" "source-code" "file."
-  exit "1"
+echo AGC software: %software%
+IF NOT exist roms\%software%.v (
+  echo Selected AGC software version has no Verilog source-code file.
+  exit 1
 )
 
 REM Workflow Step #2:
 SET autonet=0
 IF "%extension%" == "kicad_sch" (
-  IF which "kicad-cli" > NUL 2>&1 (
-    SET autonet=1
-  )
+  SET autonet=1
 )
 IF "%autonet%" == "1" (
-  echo "Generating" "netlist" "files" "..."
+  echo Generating netlist files ...
   REM kicad-cli does exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-    cd "%%d" > NUL 2>&1
-    kicad-cli "sch" "export" "netlist" "--output" "module.net" "--format" "orcadpcb2" "module.kicad_sch"
-    cd ".." > NUL 2>&1
+    cd %%d > NUL 2>&1
+    kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
+    cd .. > NUL 2>&1
   )
 ) ELSE (
-  echo "Checking" "existence" "of" "netlist" "files" "..."
+  echo Checking existence of netlist files ...
   REM kicad-cli not found.  The netlist files must pre-exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-    IF NOT exist "%%d\module.net" (
-      echo "Netlist" "%%d\module.net" "does" "not" "exist."
-      exit "1"
+    IF NOT exist %%d\module.net (
+      echo Netlist %%d\module.net does not exist.
+      exit 1
     )
   )
 )
 
 REM Workflow Step #3:
-echo "Generation" "of" "flip-flop" "initialization" "file" "..."
+echo Generation of flip-flop initialization file ...
 
 SET n=0
-DEL  "dummy.v" > NUL 2>&1
+DEL  dummy.v > NUL 2>&1
 FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
   IF "%%d" == "fixed_erasable_memory" (
     SET n=99
@@ -213,46 +211,46 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
       SET /A n=n+1
     )
   )
-  echo "Initial" "Verilog" "creation" "for" "A%n%" "%%d" "..."
-  cd "%%d" > NUL 2>&1
-  DEL  "empty.init" > NUL 2>&1
-  touch "empty.init"
-  python "-m" "dumbVerilog" "A%n%" "module.net" "pins.txt" "20" "empty.init" "module.%extension%" >> "%CD%\..\dummy.v"
+  echo Initial Verilog creation for A%n% %%d ...
+  cd %%d > NUL 2>&1
+  DEL  empty.init > NUL 2>&1
+  touch empty.init
+  python -m dumbVerilog A%n% module.net pins.txt 20 empty.init module.%extension% >> %CD%\..\dummy.v
   cd .. > NUL 2>&1
 )
 
-echo "Flip-flop" "initilizer" "creation" "..."
-python "-m" "dumbInitialization" < "dummy.v"
+echo Flip-flop initilizer creation ...
+python -m dumbInitialization < dummy.v
 
 SET n=0
 FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
-  IF "%%d" == "fixed_erasable_memory" (
+  IF %%d == fixed_erasable_memory (
     SET n=99
   ) ELSE (
-    IF "%n%" == "24" (
+    IF %n% == 24 (
       SET n=52
     ) ELSE (
       SET /A n=n+1
     )
   )
-  echo "Final" "Verilog" "creation" "for" "A%n%" "%%d" "..."
-  cd "%%d" > NUL 2>&1
-  COPY  "../A%n%.init" "module.init"
-  python "-m" "dumbVerilog" "A%n%" "module.net" "pins.txt" "20" "module.init" "module.%extension%" > "module.v"
+  echo Final Verilog creation for A%n% %%d ...
+  cd %%d > NUL 2>&1
+  COPY  ../A%n%.init module.init
+  python -m dumbVerilog A%n% module.net pins.txt 20 module.init module.%extension% > module.v
   cd .. > NUL 2>&1
 )
 
 REM Workflow step #4
-echo "Generation" "of" "testbench" "object-definition" "file" "..."
-COPY  "tb-%model%.v" "tb.v"
-python "-m" "dumbTestbench" < "dummy.v" > "%model%"_tb.v
+echo Generation of testbench object-definition file ...
+COPY  tb-%model%.v tb.v
+python -m dumbTestbench < dummy.v > %model%_tb.v
 
 REM Workflow step #5
-echo "Setup" "of" "erasable\fixed" "memory" "Verilog" "source" "code" "..."
-COPY  "roms/%software%.v" "roms\rom.v"
+echo Setup of erasable/fixed memory Verilog source code ...
+COPY  roms\%software%.v roms\rom.v
 
 REM Workflow step #6
-echo "Compiling" "Verilog" "source" "code" "..."
+echo Compiling Verilog source code ...
 IF "%~3" == "" (
   SET verilogOptions=-DDUMP_ALL
 ) ELSE (
@@ -262,14 +260,14 @@ SET vsources=
 FOR %%f in ( %modules% %module52% fixed_erasable_memory ) DO (
   SET vsources=%vsources% %%f/module.v
 )
-iverilog "%verilogOptions%" "-o" "%model%.vvp" "%model%"_tb.v "%vsources%" "fixed_erasable_memory\RAM.v" "fixed_erasable_memory\ROM.v" "fixed_erasable_memory\BUFFER.v"
+iverilog %verilogOptions% -o %model%.vvp %model%_tb.v %vsources% fixed_erasable_memory\RAM.v fixed_erasable_memory\ROM.v fixed_erasable_memory\BUFFER.v
 
 REM Workflow step #7
-echo "Performing" "simulation" "..."
-vvp "%model%.vvp" "-fst"
+echo Performing simulation ...
+vvp %model%.vvp -fst
 REM mv agc.fst %model%.fst
 
 REM Workflow step #8
-echo "Simulation-results" "data" "visualization" "..."
+echo Simulation-results data visualization ...
 REM gtkwave %model%.fst
-gtkwave "agc.gtkw"
+gtkwave agc.gtkw
