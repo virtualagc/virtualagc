@@ -28,3 +28,17 @@ do
                 gio set "$desktop"/$f.desktop "metadata::trusted" true
         fi
 done
+
+cd ~/Desktop
+echo '[Desktop Entry]' >temp.desktop
+echo 'Name=AGC Verilog Simulation Results' >>temp.desktop
+echo 'GenericName=' >>temp.desktop
+echo 'Comment=' >>temp.desktop
+echo 'Exec=gtkwave /home/virtualagc/git/virtualagc-schematics/Schematics/agc.gtkw' >>temp.desktop
+echo 'Path=/home/virtualagc/git/virtualagc-schematics/Schematics' >>temp.desktop
+echo 'Type=Application' >>temp.desktop
+echo 'Icon=/usr/share/icons/Papirus/64x64/apps/io.github.gtkwave.GTKWave.svg' >>temp.desktop
+echo 'Terminal=false' >>temp.desktop
+mv temp.desktop 'AGC Verilog Simulation Results'
+
+
