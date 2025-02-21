@@ -8,7 +8,7 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-<script type="text/javascript">
+    <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").replace("@SUBTITLE@","Digital Simulation of the AGC Electronics"))</script>
     <h1><a name="Contents"></a>Contents</h1>
     <ul>
@@ -38,11 +38,13 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
 
 
 
+
             Software for Simulation Purposes</a><br>
         </li>
       </ul>
       <ul>
         <li><a moz-do-not-send="true" href="#CreatingSchematic">Transcribing/Editing
+
 
 
 
@@ -79,6 +81,7 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
 
 
 
+
             the Simulation</a></li>
         <li><a moz-do-not-send="true" href="#visualization">Visualization</a><br>
         </li>
@@ -93,6 +96,7 @@ document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").repl
       satisfying simple personal interest, this is very valuable if you
       wish to create a simulation of the AGC, in the manner of Virtual
       AGC Project's <a href="http://www.ibiblio.org/apollo/yaAGC.html">Block
+
 
 
 
@@ -117,6 +121,7 @@ I
 
 
 
+
         AGC hardware simulator</a>, and want to have some way of
       verifying that your creation works properly.<br>
     </p>
@@ -130,6 +135,7 @@ I
       slower than real time.&nbsp; One day, as computer speeds continue
       to advance, I expect that digital electrical simulations will be
       much faster than now!&nbsp; But "faster than now" is not <i>now</i>.&nbsp;
+
 
 
 
@@ -211,6 +217,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbIniti
 
 
 
+
             <br>
             <br>
             <b>Note:</b>&nbsp; These scripts are specialized for AGC
@@ -241,6 +248,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbTestb
             Verilog source code.</td>
           <td valign="middle"><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">This
+
 
 
 
@@ -333,6 +341,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
     In the unlikely event that you have KiCad 5 and refuse to upgrade
     it, consult <a moz-do-not-send="true" href="Verilog-KiCad-5.html">the
 
+
       older version of this page</a>.<br>
     <ul>
     </ul>
@@ -348,6 +357,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/roms">
           href="https://archive.org/details/apollocommandmodacel">Volume
           1</a> and <a
           href="https://archive.org/details/apollocommandmodacel_0">Volume
+
 
 
 
@@ -385,6 +395,7 @@ index
 
 
 
+
           into the items above.</a></li>
     </ul>
     AGC/DSKY electrical schematics transcribed into KiCad
@@ -392,6 +403,7 @@ index
     <ul>
       <li><a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHub
+
 
 
 
@@ -422,6 +434,7 @@ translator
 
 
 
+
           script</a></li>
       <li><a href="http://iverilog.icarus.com/">Icarus Verilog (Verilog
           compiler and simulator)</a></li>
@@ -434,6 +447,7 @@ translator
       <li><a href="https://github.com/virtualagc/agc_hardware/">KiCad
           schematics</a></li>
       <li><a href="https://github.com/virtualagc/agc_simulation/">Verilog
+
 
 
 
@@ -505,9 +519,11 @@ translator
 
 
 
+
           apt install kicad iverilog gtkwave</code></font>"; with Red
       Hat or Fedora, I believe but don't guarantee that you could use "<font
         color="#663300"><code>sudo yum install kicad iverilog gtkwave</code></font>";
+
 
 
 
@@ -574,6 +590,7 @@ translator
 
 
 
+
                 install --cask gtkwave</a>", but this command has been
               deprecated and (I believe) does not actually result in a
               functional gtkwave.<br>
@@ -582,6 +599,7 @@ translator
     </blockquote>
     <p>On all operating systems, download <a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/tree/schematics">the
+
 
 
 
@@ -679,6 +697,7 @@ translator
 
 
 
+
         For you, it may turn out to be different.</li>
     </ul>
     <p>It's likely that the changes to the PATH or PYTHONPATH won't
@@ -692,6 +711,7 @@ translator
       fully-worked out examples of digital simulations. The simplest
       example is something called "<a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVerilog">testVerilog</a>",
+
 
 
 
@@ -827,6 +847,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
 
 
 
+
         of document ND-1021042</a>, which covers the theory of operation
       of this module.&nbsp; The module's purpose is to take a clock
       signal called FS01/ (a 51.2 KHz square wave), which you can see
@@ -861,7 +882,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     <p>Workflow Step 2:&nbsp; One way to create the netlist is to load
       the schematic file into <b>eeschema</b>, then from the main menu
       select File/Export/Netlist/OrcadPCB2/ExportNetlist and create a
-      file called module.net.&nbsp; For this discussion, I did this from
+      file called module.net.&nbsp; For this discussion, I did this
       using KiCad v6, and got the resulting file<br>
     </p>
     <blockquote>
@@ -875,6 +896,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     <br>
     The Verilog source code is created by the following steps in Linux:<br>
     <blockquote><font color="#663300" face="Courier 10 Pitch">dumbVerilog.py
+
 
 
 
@@ -919,10 +941,11 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
       moz-do-not-send="true"
       href="#Appendix:_Translation_from_KiCad_into">the technical
       Appendix</a>.&nbsp; In brief, pins.txt is a file describing
-    backplane connections that's appropriate for AGC models 2003200 or
+    backplane connections that are appropriate for AGC models 2003200 or
     2003993, though it doesn't really serve any purpose here since the
-    backplane is used only to interconnect multiple logic modules, and
-    uses only a portion of a single logic module.&nbsp; 20 is the
+    backplane is used only to interconnect multiple logic modules,
+    whereas this circuit uses only a portion of a single logic module
+    and thus doesn't connect to any other logic modules.&nbsp; 20 is the
     propagation delay of the NOR gates in nanoseconds.&nbsp; As I
     mentioned before, in this example circuit the various NOR gates form
     a flip-flop.&nbsp; The file A1.init is used to specify whether the
@@ -997,7 +1020,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     <blockquote>
       <pre><font color="#663300">// Include-file used by module_tb.py for automating testbench generation.<br><br>reg rst = 1;<br>initial begin<br>  // Assumes compilation with the -fst option.<br>  $dumpfile("module.fst");<br>  $dumpvars(0, agc);<br>  <br>  # 2000 rst = 0;<br>  # 500000 $finish;<br>end<br><br>reg FS01_ = 0;<br>always #9765.625 FS01_ = !FS01_;<br>  <br>initial<br>  $timeformat(-6, 0, " us", 10);<br>initial<br>  $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);</font><br></pre>
     </blockquote>
-    The "<font color="#663300"><code>reg rst =1</code></font>" means
+    The "<font color="#663300"><code>reg rst = 1</code></font>" means
     that the <font color="#663300"><code>rst</code></font> signal is
     going to be an input signal into the circuit we're testing, but here
     within the test bench it's going to be a "register" that remembers
@@ -1014,6 +1037,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
 
 
 
+
     which means that 2000 nanoseconds (2 μs) after startup, the test
     bench is going to reset the <font color="#663300"><code>rst</code></font>
     signal to 0, and leave it there.&nbsp; The "<font color="#663300"><code>#
@@ -1021,7 +1045,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     that the simulation itself will actually end after 500 μs.&nbsp; The
     intervening "<font color="#663300"><code>$dumpfile</code></font>"
     and "<font color="#663300"><code>$dumpvars</code></font>" statements
-    say that an output log-file called testVerilog.lxt is going to be
+    say that an output log-file called testVerilog.fst is going to be
     opened, and that the values of all of the input and output variables
     are going to be dumped into it on a cycle-by-cycle basis, for later
     analysis.&nbsp; <br>
@@ -1052,8 +1076,8 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     source code files, the one describing the logic module (module.v)
     and the one describing the test-bench (module_tb.v, which
     automatically imports tb.v as well).&nbsp; We need to compile these
-    together to get the "executable" form of the digital simulation we
-    want to perform:<br>
+    together to get the "executable" form (which we'll call module.vvp)
+    of the digital simulation we want to perform:<br>
     <blockquote>
       <pre>iverilog -o module.vvp module_tb.v module.v<br></pre>
     </blockquote>
@@ -1066,18 +1090,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     </blockquote>
     I get messages something like this when I do that:<br>
     <blockquote><font size="-1" face="Courier"><font color="#663300">Gate
-
-
-
-
-
-
-
-
-
           delay (A1) will be 20.000000 ns.<br>
-          FST info: dumpfile module.fst opened for output.<br>
-          Gate delay (A1) will be 20.000000 ns.<br>
           FST info: dumpfile module.fst opened for output.<br>
           At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1,
           FS01_=0, F02B=x, FS02=x, FS02A=x, FS02A=x<br>
@@ -1147,15 +1160,44 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     command line), and use its File menu to navigate to
     virtualagc-schematics/Schematics/testVerilog/module.fst.<br>
     <br>
-    <a name="simple8"></a>You'll see something like the following.&nbsp;
-    (Actually, there are a few interactive steps to set the viewing
-    timescale, select the specific signals to view, and the order in
-    which the signals should appear, but if you've been motivated enough
-    to get this far, I think you can figure those bits out for
-    yourself!&nbsp; But you can look at <a moz-do-not-send="true"
-      href="https://gtkwave.github.io/gtkwave/index.html">GTKwave's
-      online documentation</a> to see how to use the visualizer, if you
-    cannot monkey through it yourself.)&nbsp; <br>
+    <a name="simple8"></a>You'll see something like the following
+    screenshot.&nbsp; <br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Actually, I won't
+        pretend that what you see will magically resemble the
+        screenshot.&nbsp; There will a few interactive steps within the
+        <b>GTKWave</b> program's user interface to set the viewing
+        timescale, select the specific signals to view, and the order in
+        which the signals should appear, but I don't want to get
+        sidetracked into a discussion of GTKWave's operation.&nbsp; If
+        you've been motivated enough to get this far, I think you can
+        figure those bits out for yourself!&nbsp; But you can look at <a
+          moz-do-not-send="true"
+          href="https://gtkwave.github.io/gtkwave/index.html">GTKwave's
+          online documentation</a> to see how to use the visualizer, if
+        you cannot monkey through it yourself.&nbsp;&nbsp; Or you can
+        try these steps to quickly get something reasonably viewable,
+        even it won't look precisely like the screenshot:<br>
+      </font>
+      <ul>
+        <li><font size="-1">Select some signals to view:</font></li>
+        <ul>
+          <li><font size="-1">Left-Click on where it says "agc" in the
+              SST pane.&nbsp; That will open up a subheading called "iA1
+              (A1)".<br>
+            </font></li>
+          <li><font size="-1">Right-Click on the subheading "iA1 (A1)"
+              in the SST pane.</font></li>
+          <li><font size="-1">In the pop-up menu that appears, choose
+              Recurse-Import / Append / Yes.<br>
+            </font></li>
+        </ul>
+        <li><font size="-1">Zoom out a bit by clicking the Zoom-Fit
+            hot-button in the toolbar at the top.&nbsp; (In the
+            screenshot below, that's the button between the clipboard
+            button and the + button.)<br>
+          </font></li>
+      </ul>
+    </blockquote>
     <br>
     <div align="center"><img src="testVerilog.Wave.png" alt=""
         moz-do-not-send="true" width="1456" height="365"><br>
@@ -1164,6 +1206,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">sect
     In comparison, here's a clipping out of the corresponding waveform <a
       moz-do-not-send="true"
 href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figure
+
 
 
 
@@ -1188,6 +1231,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
             size="-1"><font size="-1">One of us must be wrong!&nbsp;
               Which one could it be?&nbsp; Could it be ... me?&nbsp;
               Could it be ... them?&nbsp; The suspense is terrible!</font>&nbsp;
+
 
 
 
@@ -1359,6 +1403,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
 
 
 
+
             GN&amp;C mission hierarchy table</a>.&nbsp; That is also the
           place to go in order to match a particular AGC model to a
           specific set of electrical schematics.</font><br>
@@ -1380,7 +1425,9 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
         so far as the electrical schematics are concerned, except that
         model 2003200 has an additional "restart monitor" alarm box
         bolted to it.&nbsp; The restart monitor is interesting, but it
-        monitors rather than affects the functioning of the AGC.<br>
+        monitors rather than affects the functioning of the AGC, so in
+        most cases its presence or absence is a distinction without a
+        difference.<br>
       </li>
     </ul>
     <p>Or in other words, the only essentially-different cases that we
@@ -1403,6 +1450,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     Block II core-rope — in the form of a "bin" file produced by the AGC
     assembler, <b>yaYUL</b> — can be converted to a Verilog source code
     by a Python program provided by Mike Stewart that's called <b>bin_to_verilog_rom.py</b>.&nbsp;
+
 
 
 
@@ -1461,7 +1509,9 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
           possibility of having to learn anything in the meantime.&nbsp;
           Among the useful files left behind are the simulation file <i>AGC_MODEL</i>.vvp
 
+
           (in case you'd like to re-run the simulation), and<i> </i>agc.fst
+
 
           (the results of the simulation run, in case you'd like to
           re-view them).</font></font><br>
@@ -1557,9 +1607,11 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     </ol>
     Workflow Step #4 (testbench generation). The appropriate file tb-<i>AGC_MODEL</i>.v
 
+
     must be copied to tb.v or else you must devise your own testbench
     file for tb.v instead.&nbsp; Use the combined Verilog source-file
     created in workflow step #3 as input for <b>dumbTestbench.py</b>.&nbsp;
+
 
     This produces a Verilog file <i>AGC_MODEL</i>_tb.v that's the
     testbench.<br>
@@ -1568,6 +1620,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     fixed memory) is completely new, since we didn't have to do it at
     all for the single-module case.&nbsp; <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
 
         Note that the while the AGC's physical memory, both erasable and
         fixed, was binary in the sense that it stored 1's and 0's, it
@@ -1613,22 +1666,34 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
         Validation-hardware-simulation.v.</li>
     </ul>
     <p>Combining those ideas, what Step #5 of the workflow does is to
-      copy the appropriate file Schematics/roms/SOFTWAREVERSION.v to
-      Schematics/roms/rom.v.&nbsp; Since RAM.v, ROM.v, and BUFFER.v
+      copy the appropriate file Schematics/roms/<i>SOFTWARE_VERSION</i>.v
+      to Schematics/roms/rom.v.&nbsp; Since RAM.v, ROM.v, and BUFFER.v
       already exist and are never changed, nothing needs to be done with
       them.<br>
     </p>
     <p>Workflow Step #6 (compilation of the Verilog). The compiler, <b>iverilog</b>,
-      using all of the Verilog source-code files as inputs —
-      specifically, <i>AGC_MODEL</i>_tb.v, model.v for each of the
-      AGC's logic modules, RAM.v, ROM.v, and BUFFER.v&nbsp; —,&nbsp; to
-      create the simulation itself, which will be a file called <i>AGC_MODEL</i>.vvp.<br>
+      uses all of the Verilog source-code files as inputs —
+      specifically, <i>AGC_MODEL</i>_tb.v, <i>module</i>.v for each of
+      the AGC's logic modules, RAM.v, ROM.v, rom.v, and BUFFER.v&nbsp;
+      —,&nbsp; to create the simulation itself, which will be a file
+      called <i>AGC_MODEL</i>.vvp.<br>
     </p>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        Don't worry about the notion that we have different Verilog
+        source-code files called ROM.v and rom.v that might be confused
+        with each other because of the loony notion in Mac OS and
+        Windows that filenames could be case-insensitive.&nbsp; Those
+        source-code files are in different folders, so even Mac OS and
+        Windows can't get them mixed up.</font><br>
+    </blockquote>
+    <p> </p>
     Workflow Step #7 (performing the simulation):<br>
     <blockquote>
       <pre>vvp <i>AGC_MODEL</i>.vvp -fst<br></pre>
     </blockquote>
-    This creates a simulation-result "dump file" called agc.fst.<br>
+    This creates a simulation-result "dump file" called agc.fst, in
+    which the signals selected by the test bench are logged for
+    subsequent viewing or analysis.<br>
     <br>
     Workflow Step #8 (viewing the simulation results):<br>
     <blockquote>
@@ -1638,14 +1703,22 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     saw in the simulation of an individual module, from which we would
     have instead suspected a command of "<font color="#663300"><code>gtkwave
 
+
         agc.fst</code></font>".&nbsp; Make no mistake: the latter
-    command would have worked fine!&nbsp; But as we'll see in the next
+    command would have worked fine!&nbsp; But unlike the case of a
+    single-module simulation, in the case of a full-AGC simulation we
+    are actually in a position to make a guess as to which signal-traces
+    might be usefully displayed.&nbsp; And as we'll see in the next
     section, there are certain enhancements that can be made to our
-    signal-viewing experience when an entire AGC is being analyzed, and
-    the former command helps us to enable those enhancements.<br>
+    signal-viewing experience when an entire AGC is being
+    analyzed.&nbsp; The provided agc.gtkw file, or a similar one, is a
+    kind of "project-settings" file that helps us to apply those
+    improvements to the viewing experience without having to manually
+    perform a lot of tedious interactive setup within the <b>GTKWave</b>
+    user interface.<br>
     <br>
-    <a name="AGCvisualization"></a>The full AGC has a <i>lot</i> of
-    signal nets in it — about 8500 of them —, so there's a lot more
+    <a name="AGCvisualization"></a>But the full AGC has a <i>lot</i> of
+    signal nets in it — about 5000 of them —, so there's a lot more
     flexibility in choosing which of those you want to look at in the
     data visualization than there is in any single logic module.&nbsp;
     In case it hasn't been clear already, any or all of the signals
@@ -1704,10 +1777,11 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
       everyone else is to blame for any apparent errors, and how my
       simulation is beautiful and perfect.&nbsp; And they said it could
       not be done!&nbsp; My next trick will to be to run for public
-      office of some kind.&nbsp; On the other hand, alternate
+      office of some kind.&nbsp; On the other hand, alternative
       explanations concluding that I and my simulations are idiotic are
-      welcome too.&nbsp; Anything that advances the dialog!&nbsp; Let me
-      know if you come up with one.<br>
+      welcome too.&nbsp; Well, perhaps not <i>welcome</i> exactly
+      ....&nbsp; but I say, anything that advances the dialog!&nbsp; Let
+      me know if you come up with one.<br>
     </p>
     <h2><a name="Transactions"></a>Enhanced Viewing of an AGC's
       Simulation Results</h2>
@@ -1718,8 +1792,8 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
         interpret this as <a moz-do-not-send="true"
           href="https://github.com/gtkwave/gtkwave/issues/416">a bug</a>
         in the Windows versions of the GTKWave viewing program.&nbsp;
-        Perhaps if GTKWave were built from source, the problem would
-        disappear, but I haven't tried doing that.&nbsp; And your
+        Perhaps if <b>GTKWave</b> were built from source, the problem
+        would disappear, but I haven't tried doing that.&nbsp; And your
         experience may vary anyway.&nbsp; Hopefully it's a temporary
         problem, but at the moment it's out of my hands.</font><br>
     </blockquote>
@@ -1728,22 +1802,24 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
       is not obvious at a glance, or indeed probably after an extended
       effort.&nbsp; Some simplification is needed if poor mortals as
       finite as human beings are to use the simulation results in any
-      meaningful way.&nbsp; Fortunately, GTKWave and Mike Stewart come
-      to the rescue, at least partially!<br>
+      meaningful way.&nbsp; Fortunately, <b>GTKWave</b> and Mike
+      Stewart come to the rescue, at least partially!<br>
     </p>
-    <p>GTKWave's contributions is a feature in which you can optionally
-      apply a so-called "<a moz-do-not-send="true"
+    <p><b>GTKWave</b>'s contribution is a feature in which you can
+      optionally apply a so-called "<a moz-do-not-send="true"
         href="https://gtkwave.sourceforge.net/gtkwave.pdf#page=60">transaction
 
 
+
         filter</a>" to a selection of signals.&nbsp; A transaction
-      filter is a user-supplied Python 3 program that is applied by
-      GTKWave at each change to the levels of any of the selected
-      signals.&nbsp; The transaction filter can then process the levels
-      of the selected signals in any manner it chooses, and can do
-      things like log the results of its calculations to a file or add a
-      new trace containing those results to GTKWave's display of the
-      signals.<br>
+      filter is a user-supplied program, in our case written in Python
+      3, that is applied by
+      <b> GTKWave</b> at each change to the levels of any of the
+      selected signals.&nbsp; The transaction filter can then process
+      the levels of the selected signals in any manner it chooses, and
+      can do things like log the results of its calculations to a file
+      or add a new trace containing those results to <b>GTKWave</b>'s
+      display of the signals.<br>
     </p>
     <p>One of Mike's contributions, among many others, is to actually
       supply such a transaction filter that decodes the AGC signals as
@@ -1760,6 +1836,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
       schematics and run simulations based on them.<br>
     </p>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
 
         Since I seem to be implying that Mike's simulations are so
         terrific — which I am — you may wonder why in the world you
@@ -1808,6 +1885,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
           <tr>
             <td valign="top"><font size="-1"><a moz-do-not-send="true"
 href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Documentation
+
 
                   is in Mike's GitHub repository</a><br>
               </font></td>
@@ -1880,6 +1958,7 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
       href="assembly_language_manual.html#UnprogrammedSequences">"unprogrammed
 
 
+
       sequence"</a>, which is type of AGC instruction that's executed
     without any corresponding mnemonic for the operation appearing in
     the assembly-language source code.&nbsp; The AGC has various types
@@ -1913,7 +1992,8 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
         expectation was that after power-up the flip-flops would just
         settle on their own into some benign mutually-consistent
         configuration.&nbsp; So it's hard to be too terribly worried
-        that we're essentially doing the same thing.<br>
+        that we're treating initialization of the flip-flops somewhat
+        loosely ourselves.<br>
         <br>
         In point of fact, I was comparing apples-to-oranges anyway,
         since Mike's simulation was of AGC model 2003993 and mine was of
@@ -1955,6 +2035,7 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
     covered in the <a moz-do-not-send="true" href="#visualization">Technical
 
 
+
       Appendix</a> below.<br>
     <p> </p>
     <ul>
@@ -1972,10 +2053,12 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
       that I wrote, based on the original documentation.&nbsp; However,
       Validation is an interactive program, and dependence on a DSKY may
       not be very desirable in the context of simulating the digital
-      electronics of the AGC.&nbsp; One approach to this problem would
-      be simply to clone the AGC program one wishes to run, and then
-      make whatever changes were desired directly to the cloned source
-      code.<br>
+      electronics of the AGC.&nbsp; Much better to run AGC software
+      which doesn't have to wait for the (non-existent) astronaut to do
+      something on the (non-existent) DSKY!&nbsp; One approach to this
+      problem would be simply to clone the AGC program one wishes to
+      run, and then make whatever changes were desired directly to the
+      cloned source code.<br>
     </p>
     <p>Another approach is to embed directives in the original AGC
       program that act like conditional compilation, so that sections of
@@ -1985,6 +2068,7 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
         color="#663300"><code>--simulation</code></font>, and embedded
       directives <font color="#663300"><code>-SIMULATION</code></font>
       or <font color="#663300"><code>+SIMULATION</code></font> within <i>end-of-line
+
 
 
 
@@ -2009,7 +2093,8 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
     </p>
     <p>More-sophisticated AGC test programs (such as Borealis) and the
       original test programs (like Aurora and Sundial) are available as
-      well, but they have not received the treatment mentioned above.<br>
+      well, but they have not received the treatment mentioned above, as
+      of this writing.<br>
     </p>
     <h2><a name="CreatingSchematic"></a>Transcribing/Editing a Schematic
       Diagram with eeschema<br>
@@ -2027,6 +2112,7 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/README.md">Docume
         Guidance, Navigation &amp; Control (GNC) system are found in <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
+
 
 
 
@@ -2068,6 +2154,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
     </p>
     <p>Method 2:&nbsp; For KiCad v.7 or later, the netlist can be
       created from a command line without even running <b>eeschema</b>.&nbsp;
+
 
 
 
@@ -2140,6 +2227,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
 
 
 
+
         To be completely honest, I'm no longer entirely sure how many of
         these rules the supplied tools actually depend upon, as opposed
         to these rules just being the ones obeyed by the original
@@ -2181,6 +2269,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
         a reasonable <code><i>DELAY</i></code> might be 0.2.</li>
       <li><code><i>WIRETYPE</i></code> is an optional parameter having
         the value either "<code>wire</code>" or "<code>wand</code>".&nbsp;
+
 
 
 
@@ -2242,6 +2331,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">the
 
 
 
+
         the other hand</i>, on the electrical schematics for the logic
       modules, each of the 71-pin rows was considered a separate
       connector, and thus the schematics show 4 separate connectors
@@ -2275,6 +2365,7 @@ href="https://github.com/virtualagc/agc_simulation/blob/master/scripts/generate_
 
 
 
+
           a script</a> that analyzed his Verilog files.&nbsp; Thus if we
         indeed wanted to generate a separate pins.txt file for each
         Block II AGC model we'd have an awkward chicken-and-egg problem,
@@ -2287,6 +2378,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsBlock
         by processing Block I schematics (rather than Verilog files)
         using <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlockI.awk">an
+
 
 
 
@@ -2351,27 +2443,27 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
       their purposes.&nbsp; For <i>our</i> purposes, namely digital
       simulation, it's <i>not</i> enough!&nbsp; In simulation, it's
       perfectly possible for a such a flip-flop to oscillate
-      indefinitely without ever settling down into some stable state,
-      which means that the Verilog emulator could get stuck in an
-      infinite loop or timeout while trying to compute the initial state
-      of the circuit.&nbsp; Indeed, that has happened to me many times,
-      if insufficient attention is paid to the initial state.&nbsp; No
+      indefinitely without ever settling down into some stable
+      state.&nbsp; Indeed, that has happened to me many times.&nbsp; Not
       good!&nbsp; <br>
     </p>
-    <p>A precondition is that the circuit itself must allow there to be
-      some configuration of signals which is logically consistent; i.e.,
-      which is stable if you iterate it.&nbsp; If, for example, our
-      circuit consisted of a single NOR gate in which two of the input
-      were tied LOW but the third input was connected to the output,
-      then there is no logically-consistent set of signals, and the
-      signal values change with each iteration.&nbsp; So we assume that
-      the AGC designers have left us with a circuit which has at least
-      some logically-consistent state.&nbsp; In an ideal world, we'd
-      simply start our simulation with the signals in a
-      logically-consistent state and work forward from there.&nbsp;
-      Alas, that has proven tricky to do, so we're generally forced to
-      start with some state that isn't logically consistent, but which
-      iterates quickly into a consistent state.<br>
+    <p>One way to guarantee that the simulation will settle into a
+      stable state is to give it initial conditions in which it's <i>already</i>
+      in a stable state.&nbsp; Not all logical networks of NOR gates
+      have have such a stable state.&nbsp; If, for example, our circuit
+      consisted of a single NOR gate in which two of the inputs were
+      tied LOW but the third input was connected to the output, then
+      there is no logically-consistent set of signals, and the signal
+      values change with each timestep.&nbsp; But besides being stable,
+      we'd also like other properties to be satisfied, such as that all
+      counter registers are zeroed out and that the RAM isn't being
+      simultaneously read and written to.&nbsp; That the AGC does have
+      some stable states we do know, simply because we do know that it
+      can be simulated.&nbsp; Alas, finding such stable states with the
+      additional constraints we'd like to impose has proven
+      tricky.&nbsp; So in the interest of having a simulation which
+      settles down, we're generally forced to start with some state
+      having other properties that may not be entirely to our liking.<br>
     </p>
     <blockquote>
       <p><font size="-1"><b>Aside:</b>&nbsp; Why the difference between
@@ -2448,6 +2540,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
 
 
 
+
       You don't need to specify the output for every NOR gate, and thus
       the outputs of U126 and U128 are left unspecified.&nbsp; But if
       you manually create the module.init file, it's entirely up to you
@@ -2472,6 +2565,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
 
 
 
+
     The syntax is simply<br>
     <blockquote>
       <p><font face="Courier 10 Pitch">dumbInitialization.py &lt;<i>TheVerilogSourceCode</i>.v</font></p>
@@ -2480,6 +2574,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
       (surprise!) the Verilog source-code for which you wish to generate
       some initialization information.&nbsp; There are actually two
       basically-different scenarios in terms of acquiring the <i>TheVerilogSourceCode</i>.v
+
 
 
 
@@ -2512,6 +2607,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
             href="https://github.com/virtualagc/virtualagc/issues/1239">issue
 
 
+
             #1239</a>.&nbsp; <br>
         </font></p>
       <p><font size="-1">The <b>dumbInitialization0.py</b> program
@@ -2533,18 +2629,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
           Even if the trick of computing all of the logical consequences
           of an assignment effectively removes 99% of the signals, it's
           still a search space of 2<sup>50</sup> configurations.&nbsp;
-          Too big!<br>
+          Too big!&nbsp; Nevertheless, when it does succeed, we're
+          guaranteed that the signals we'd like to force to some
+          desirable value, such as the counter registers mentioned
+          above, are indeed forced to those values.<br>
         </font></p>
       <p><font size="-1">The <b>dumbInitialization.py</b> program
           implements an entirely different algorithm.&nbsp; It assigns
           all of the "required" signal levels, with all of the other
           signals assigned 0, and then iterates simulations the same way
           as Verilog would do.&nbsp; Except that the "required" signals
-          are reassigned they specified values at the beginning of each
+          are reassigned their specified values at the beginning of each
           iteration, and that a random order is chosen in which to
           evaluate the logic gates.&nbsp; This algorithm did indeed
           converge to a logically-consistent configuration when used
           with <a moz-do-not-send="true" href="Verilog-KiCad-5.html">our
+
 
             older, KiCad 5 based simulation framework</a>, but fails to
           do so in the current framework that has been upgraded to KiCad
@@ -2607,9 +2707,11 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
 
 
 
+
             Number <br>
           </th>
           <th rowspan="1" colspan="2" valign="bottom" align="center">Module
+
 
 
 
@@ -3347,6 +3449,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
 
 
 
+
       Still, the operation seems pretty simple.<br>
     </p>
     <p>This supposed simplicity hides a nasty chicken-and-egg truth,
@@ -3399,9 +3502,11 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
 
 
 
+
     for the circuitry you want to simulate.&nbsp; We reuse that file
     right now:<br>
     <blockquote><font face="Courier 10 Pitch">dumbTestbench.py &lt;<i>TheVerilogSourceCode</i>.v
+
 
 
 
@@ -3418,6 +3523,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     the complete test bench, because <b>dumbTestbench.py</b> isn't
     aware of any personalized choices which needs to be made by you
     rather than by a computer.&nbsp; The file it creates, <i>TestBench</i>.v,
+
 
 
 
@@ -3559,6 +3665,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     using <font color="#663300">File</font> / <font color="#663300">Write
 
 
+
       Save File</font> might save your setup information as
     agc.fst.gtkw.&nbsp; When you later want to view data again using the
     same setup, then rather than using the command given above, you can
@@ -3571,6 +3678,7 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/pinsDbBlo
     <br>
     Recall the instruction-decoding transaction filter that I <a
       moz-do-not-send="true" href="#decoder">illustrated earlier</a>).&nbsp;
+
 
     There are actually two separate optional transaction filters
     provided in the Virtual AGC source tree:<br>
@@ -3712,6 +3820,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
 
 
 
+
           a tb.v file, as described above</a>.</li>
       <li>From within the folder containing your schematic and the tb.v
         file, run the following command:</li>
@@ -3776,6 +3885,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
           simulation of the AGC.</li>
         <li><code>-DDUMP_ALL</code><code> </code>— Dump <i>all</i> AGC
           signals to the simulation-result dumpfile.&nbsp; <b>Note:</b>&nbsp;
+
 
 
 
@@ -3854,6 +3964,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
     own selection of signals, as well as inventing your own name for the
     group (such as <code>DUMP_MINE</code>), and adding them to the tb-<i>AGC_MODEL</i>.v
 
+
     file of your choice.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
@@ -3868,6 +3979,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
 
