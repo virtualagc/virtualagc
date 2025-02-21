@@ -159,13 +159,13 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
   IF "%%d" == "fixed_erasable_memory" (
     SET "n=99"
   ) ELSE (
-    IF "%n%" == "24" (
+    IF "!n!" == "24" (
       SET "n=52"
     ) ELSE (
       SET /A n+=1
     )
   )
-  echo Initial Verilog creation for A%n% %%d ...
+  echo Initial Verilog creation for A!n! %%d ...
   cd %%d > NUL 2>&1
   DEL  empty.init > NUL 2>&1
   touch empty.init
@@ -181,16 +181,16 @@ FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
   IF %%d == fixed_erasable_memory (
     SET "n=99"
   ) ELSE (
-    IF %n% == 24 (
+    IF !n! == 24 (
       SET "n=52"
     ) ELSE (
       SET /A n+=1
     )
   )
-  echo Final Verilog creation for A%n% %%d ...
+  echo Final Verilog creation for A!n! %%d ...
   cd %%d > NUL 2>&1
   COPY  ../A!n!.init module.init
-  python -m dumbVerilog A%n% module.net pins.txt 20 module.init module.%extension% > module.v
+  python -m dumbVerilog A!n! module.net pins.txt 20 module.init module.%extension% > module.v
   cd .. > NUL 2>&1
 )
 
