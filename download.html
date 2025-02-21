@@ -49,7 +49,7 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
               href="https://www.virtualbox.org/">VirtualBox</a>
             hypervisor.<br>
             <br>
-            The VM provides the ability to run or build <i>all</i>
+            This VM provides the ability to run or build <i>all</i>
             software related to Gemini, Apollo, or the Space Shuttle
             that's publicly provided freely by the Virtual AGC
             Project.&nbsp; That includes even software not covered by
@@ -67,8 +67,16 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
             line are:<br>
             <ul>
               <li>In Windows:&nbsp; <font color="#663300"><code>CertUtil
+
+
+
+
                     -hashfile VirtualAGC-VM64-Release.7z MD5</code></font></li>
               <li>In Linux or Mac OS:&nbsp; <code><font color="#663300">md5sum
+
+
+
+
                     VirtualAGC-VM64-Release.7z</font></code></li>
             </ul>
             Since the VM is a rather substantial download, you would
@@ -82,10 +90,10 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
             as-advised basis to avoid breaking the VM's Virtual AGC
             installation.<br>
             <br>
-            <div align="center"><i><b>Currently-Recommended Updates</b></i><br>
+            <div align="center"><i><b>Recommended Updates</b></i><br>
             </div>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
+            <table cellspacing="2" cellpadding="2" height="100"
+              border="1" align="center">
               <tbody>
                 <tr>
                   <th valign="bottom">Type of Update<br>
@@ -96,18 +104,18 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
                   </th>
                 </tr>
                 <tr>
-                  <td valign="middle">Virtual AGC<br>
-                  </td>
+                  <th valign="middle">Virtual AGC Features<br>
+                  </th>
                   <td valign="middle"><img moz-do-not-send="true"
                       src="VM64-images/update.png" alt="" width="24"
                       height="24" align="left">on VM desktop<br>
                   </td>
-                  <td valign="middle">Minor update: 2025-01-08 or later<br>
+                  <td valign="middle">Update to 2025-02-20 or later<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="middle">Lubuntu Operating System<br>
-                  </td>
+                  <th valign="middle">Operating System Features<br>
+                  </th>
                   <td valign="middle"><img moz-do-not-send="true"
                       src="VM64-images/preferences-system.svg" alt=""
                       width="24" height="24">on VM desktop, then <img
@@ -235,6 +243,10 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
                 <tr>
                   <td valign="middle"><a moz-do-not-send="true"
                       href="https://access.broadcom.com/default/ui/v1/signin/">VMware
+
+
+
+
 
 
 
@@ -390,6 +402,10 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
 
 
 
+
+
+
+
             of the VM</a><br>
         </li>
         <li><a href="#Installation_of_the_Virtual_AGC_VM_">Installation
@@ -427,7 +443,8 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
         <li><a href="#Windows">Windows</a></li>
         <li><a href="#WebAssembly">WebAssembly</a><br>
         </li>
-        <li><a href="#iPhone">iPhone</a></li>
+        <li><a href="#iPhone">iOS<br>
+          </a></li>
       </ul>
       <li><a href="#Running_the_Validation_Suite">Running the Validation
           Suite of the Simulated AGC</a></li>
@@ -456,16 +473,16 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     physical computer.&nbsp; <br>
     <br>
     But before talking about how to install the Virtual AGC VM, let's
-    talk first about how you can use it once it's installed.&nbsp; In
-    other words, let's have an advertisement for it.&nbsp; Everyone
-    loves those!&nbsp; One nice thing about the VM approach is that the
-    virtual machine's "display screen" can be made as big or small as
-    you like, within the limits of the size of your physical
-    display.&nbsp; For the sake of my explanations below, I'll make the
-    VM screen smaller than I normally would for my own purposes — which
-    would be just to expand it to fill an entire monitor —, but perhaps
-    appropriately for our modern times in which people are often more
-    prone to use tiny laptop computers rather than huge desktop systems.<br>
+    take a very brief tour of it.&nbsp; In other words, let's have an
+    advertisement for VM.&nbsp; Everyone loves advertisements!&nbsp; One
+    nice thing about the VM approach is that the virtual machine's
+    "display screen" can be made as big or small as you like, within the
+    limits of the size of your physical display.&nbsp; For the sake of
+    my explanations below, I'll make the VM screen smaller than I
+    normally would for my own purposes — which would be just to expand
+    it to fill an entire monitor —, but perhaps appropriately for our
+    modern times in which people are often more prone to use tiny laptop
+    computers rather than huge desktop systems.<br>
     <br>
     When the VM is run, the desktop you'll be presented with is
     something like this:<br>
@@ -480,51 +497,47 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     operating-system-provided title bar, but I don't want to complicate
     matters so I've omitted such extras.) <br>
     <br>
-    What is all of this stuff?&nbsp; Well, it's pretty self-explanatory,
-    I suspect, but here's what a few of the desktop icons do:<br>
-    <p><img moz-do-not-send="true"
-        src="VM64-images/Icon-round-Question_mark.svg.png" alt=""
-        width="24" height="24"> calls up an information screen, similar
-      to what you're reading now but with much more information.<br>
-    </p>
-    <img moz-do-not-send="true" src="ApolloPatch2.jpg" alt="" width="24"
-      height="24"> opens the VirtualAGC GUI application, which is a
-    portal that allows you to run an AGC/AGS simulation in a multitude
-    of configurations.<br>
-    <p><img moz-do-not-send="true" src="VM64-images/update.png" alt=""
-        width="24" height="24"> updates the Virtual AGC software in the
-      VM by downloading all of the latest source code from the GitHub
-      repository, and rebuilding it.<br>
-    </p>
-    <p><img moz-do-not-send="true" src="VM64-images/codeblocks.png"
-        alt="" width="24" height="24"> lets you perform visual debugging
-      on a variety of different AGC software versions.<br>
-    </p>
-    <img moz-do-not-send="true" src="VM64-images/eeschema.svg" alt=""
-      width="24" height="24"> lets you view/edit the electrical
-    schematics for the AGC and DSKY as transcribed into a modern
-    computer-aided design (CAD) system. <br>
-    <br>
-    <img moz-do-not-send="true" src="VM64-images/PTC-64x64.png" alt=""
-      width="29" height="24"> opens a simulation of the original test
-    panel used for debugging Apollo Launch Vehicle Digital Computer
-    (LVDC) software. <br>
-    <br>
-    But there's a lot of stuff in the VM not covered by this handful of
-    desktop icons, that rather are instead accessed from the VM's
-    command line.&nbsp; The information screen you get from using the
-    desktop's question-mark icon tells you about them.&nbsp; Some of the
-    more-significant ones are:&nbsp; Assemblers for the assembly
-    languages used by the Apollo Guidance Computer (AGC), Apollo Abort
-    Guidance System (AGS), Apollo Launch Vehicle Digital Computer
-    (LVDC), and Space Shuttle General Purpose Computer (GPC).&nbsp;
-    Compilers for the Space Shuttle's HAL/S and XPL higher-level
-    languages.&nbsp; CPU emulators for the AGC, AGS, and LVDC.&nbsp; And
-    so on.<br>
-    <ul>
-    </ul>
-    But back to the desktop!&nbsp; If you were to run the Virtual AGC
-    application from its icon, you'd see something like the following:<br>
+    What is all of this stuff?&nbsp; Well, it's somewhat
+    self-explanatory, I suspect, but here are a few of the highlights:<br>
+    <blockquote>
+      <p><img moz-do-not-send="true"
+          src="VM64-images/Icon-round-Question_mark.svg.png" alt=""
+          width="24" height="24"> Calls up an information screen,
+        similar to the tour you're reading now but with <i>much</i>
+        more information ... particularly about the numerous features
+        such as assemblers, compilers, and simulators that are available
+        from the command line rather than from desktop icons.<br>
+      </p>
+      <img moz-do-not-send="true" src="ApolloPatch2.jpg" alt=""
+        width="24" height="24"> Opens the VirtualAGC GUI application,
+      which is a portal that allows you to run an AGC/AGS simulation in
+      a multitude of configurations.<br>
+      <p><img moz-do-not-send="true" src="VM64-images/update.png" alt=""
+          width="24" height="24"> Updates the Virtual AGC software in
+        the VM by downloading all of the latest source code from the
+        GitHub repository, and rebuilding it.<br>
+      </p>
+      <p><img moz-do-not-send="true" src="VM64-images/codeblocks.png"
+          alt="" width="24" height="24"> Lets you perform visual
+        debugging on a variety of different AGC software versions.<br>
+      </p>
+      <p><img moz-do-not-send="true" src="VM64-images/eeschema.svg"
+          alt="" width="24" height="24"> Lets you view/edit the
+        electrical schematics for the AGC and DSKY as transcribed into a
+        modern computer-aided design (CAD) system. </p>
+      <img moz-do-not-send="true" src="VM64-images/gtkwave.jpg" alt=""
+        width="24" height="24"> <i>(Requires update 2025-02-20 or
+        later.)</i>&nbsp; Re-displays the signal traces of the
+      last-performed electrical simulation of the AGC.&nbsp; The
+      simulations themselves are performed from a command line.<br>
+      <p><img moz-do-not-send="true" src="VM64-images/PTC-64x64.png"
+          alt="" width="29" height="24"> Opens a simulation of the
+        original test panel used for debugging Apollo Launch Vehicle
+        Digital Computer (LVDC) software. </p>
+    </blockquote>
+    If you were to run the Virtual AGC application from its desktop icon
+    <img moz-do-not-send="true" src="ApolloPatch2.jpg" alt="" width="16"
+      height="16">, you'd see something like the following:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
         src="VM64-images/GUI.jpg" alt="" width="631" height="474"><br>
@@ -569,17 +582,20 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
     </div>
     <br>
     <br>
-    I promised above to talk a little bit about the desktop icon labeled
-    "AGC Visual Debugging.&nbsp; If you click it, a new window will pop
-    up that lists a number of the Apollo Guidance Computer software
-    versions available, though by no means all (or even most) of
-    them.&nbsp; These are the AGC software versions for which we've
-    created visual-debugging projects.&nbsp; Hopefully, many more such
-    AGC versions will be debuggable in the future, but for now these are
-    the only ones provided.&nbsp; Click on one of them to begin visual
-    debugging of the associated AGC software version.&nbsp;
-    (Unfortunately, visual debugging for Abort Guidance System software
-    is not available.)<br>
+    I promised above to talk a little bit about the visual-debugging
+    desktop icon <img moz-do-not-send="true"
+      src="VM64-images/codeblocks.png" alt="" width="16" height="16">.&nbsp;
+
+    If you click it, a new window will pop up that lists a number of the
+    Apollo Guidance Computer software versions available, though by no
+    means all (or even most) of them.&nbsp; These are just the AGC
+    software versions for which we've created visual-debugging
+    projects.&nbsp; Hopefully, many more such AGC versions will be
+    debuggable in the future, but for now these are the only ones
+    provided.&nbsp; Click on one of them to begin visual debugging of
+    the associated AGC software version.&nbsp; (Unfortunately, visual
+    debugging for Abort Guidance System software is not available, but
+    debugging can still be done from a command line.)<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
         src="VM64-images/codeblocksFolder.jpg" alt="" width="558"
@@ -630,16 +646,18 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
         src="VM64-images/paused.jpg" alt="" width="1215" height="860"><br>
     </div>
     <br>
-    I think the electrical-schematics feature is pretty nifty too.&nbsp;
-    If you click its desktop icon, you're presented with a selection of
-    ~140 electrical-schematics to choose from:<br>
+    I think the VM's electrical-schematics feature is pretty nifty
+    too.&nbsp; If you click its desktop icon <img
+      moz-do-not-send="true" src="VM64-images/eeschema.svg" alt=""
+      width="16" height="16">, you're presented with a selection of ~140
+    electrical-schematics to choose from:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
         src="VM64-images/selectSchematic.jpg" alt="" width="638"
         height="477"><br>
     </div>
     <br>
-    Clicking on one of those schematics opens the schematic in and
+    Clicking on one of those schematics opens the schematic in an
     electrical computer-aided design (CAD) system, also known as an
     electronic design automation (EDA) system, in which you can view the
     schematic ... or for that matter, edit it or perform various other
@@ -649,30 +667,60 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
         src="VM64-images/schematic.jpg" alt="" width="708" height="478"><br>
     </div>
     <br>
-    You can also perform digital simulations of circuitry like that
-    shown in the screenshot above, using the Verilog electronic
-    description language.&nbsp; Or for that matter, you can perform a
-    digital simulation of the entire AGC circuitry.&nbsp; At least in
-    principle!&nbsp; At present there's a temporary technical hurdle
-    which prevents automated conversion of the electrical schematics
-    into Verilog source-code files, so I'll defer any description of
-    Verilog-based simulation until the hurdles are once again cleared.<br>
+    <i>(Requires update 2025-02-20 or later.)</i>&nbsp; From a command
+    line, you can also perform digital simulations of circuits like the
+    one shown in the screenshot above, using automated conversion of the
+    circuit into the Verilog electronic description language.&nbsp; Or
+    for that matter, you can perform a digital simulation of the <i>entire</i>
+    digital circuitry of an AGC and run software on the simulation of
+    the AGC CPU's electronics.&nbsp; (But you can't attach a DSKY to the
+    electronics simulation at the moment!)&nbsp; While simulations are
+    performed from a command line, you can handily re-view the results
+    of the last-performed simulation at any later time by using the
+    provided desktop icon <img moz-do-not-send="true"
+      src="VM64-images/gtkwave.jpg" alt="" width="16" height="16">.&nbsp;
+
+    However, if you do subsequently perform an update of the VM, it will
+    reset the last-performed simulation to the default one, so you'll
+    lose your last simulation if you haven't saved it before updating.<br>
     <br>
-    Finally, clicking on the PTC icon, you'd get a simulation of the
-    LVDC's Programmable Test Controller.&nbsp; That's sort of a
-    control-panel-based approach to software debugging, similar to the
-    Code::Blocks visual debugging described above, but involving
-    push-buttons and flashing lights instead.&nbsp; More convenient than
-    having <i>no</i> debugger, no doubt, but with a considerably bigger
-    learning curve than Code::Blocks.&nbsp; My, how the times have
-    changed!<br>
+    The results of the default full-AGC simulation — which is the first
+    millisecond of the AGC CPU running the AGC program known as
+    Validation — looks something like the following screenshot, in which
+    at the cursor (the red vertical line) we see instruction <font
+      color="#663300"><code>TS 0023</code></font> being executed at
+    address 4076, followed by instruction <font color="#663300"><code>AD
+
+        0020</code></font> at address 4077, <font color="#663300"><code>AD
+
+        0022</code></font> at 4100, and so on.&nbsp; The simulation of a
+    full AGC provides about 5000 separate signals, of which I'm
+    displaying a small, somewhat-random selection in the screenshot, but
+    you naturally have complete control over the signal traces that the
+    waveform-viewing software shows.<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="VM64-images/AGC-Verilog-sim.png" alt="" width="1200"
+        height="676"><br>
+    </div>
+    <br>
+    <br>
+    Finally, clicking on the PTC icon <img moz-do-not-send="true"
+      src="VM64-images/PTC-64x64.png" alt="" width="20" height="16">,
+    you'd get a simulation of the LVDC's Programmable Test
+    Controller.&nbsp; That's sort of a control-panel-based approach to
+    software debugging, similar to the Code::Blocks visual debugging
+    described above, but involving push-buttons and flashing lights
+    instead.&nbsp; More convenient than having <i>no</i> debugger, no
+    doubt, but with a considerably bigger learning curve than
+    Code::Blocks.&nbsp; My, how the times have changed!<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
         src="VM64-images/ptcSimulation.jpg" alt="" width="785"
         height="530"><br>
     </div>
     <h3><a name="Customization"></a>Customization of the VM</h3>
-    Beyond Virtual AGC itself, you might like to personalize the VM'd
+    Beyond Virtual AGC itself, you might like to personalize the VM's
     desktop for your own convenience and taste.&nbsp; For example, <i>I</i>
     personally think that single-clicking desktop items to activate them
     is better than double-clicking them, so I've configured the VM that
@@ -720,6 +768,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
+
+
+
 
 
 
@@ -851,7 +903,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
       (or a lot) of gigabytes.&nbsp; The procedure to do so is trickier
       than I'd like, so I won't explain it unless somebody actually asks
       me about it.&nbsp; Personally, I'd suggest just googling it if
-      you're interested.<br>
+      you're interested, though I'd more-vigorously suggest not
+      decreasing the virtual-disk size at all.<br>
     </p>
     <p>Finally, technically, for any Linux pros, the VM does not have a
       swap partition.&nbsp; You can adjust the VM itself to give
@@ -1033,10 +1086,18 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
+
+
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
+
+
+
 
 
 
@@ -1149,11 +1210,19 @@ the
 
 
 
+
+
+
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
+
+
+
 
 
 
@@ -1224,6 +1293,10 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     sections.&nbsp; It's also possible though increasingly unlikely that
     <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
+
+
+
 
 
 
@@ -1357,6 +1430,10 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <p>Tcl/Tk, and in particular the Tcl program <b>wish</b>, is
       required for running the optional Virtual AGC component <b>LM_Simulator</b>.&nbsp;
 
+
+
+
+
       If <b>wish</b> already works for you, then you can just skip this
       section.<br>
     </p>
@@ -1404,6 +1481,10 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       any undesirable side effects by isolating any effects to Virtual
       AGC alone is to create an environment variable called <code>AGC_WISH</code>.&nbsp;
 
+
+
+
+
       This environment variable must be assigned a value which is the
       path to your preferred correctly-working installation of
       Tcl/Tk.&nbsp; Specifically, it's the name of the folder in which
@@ -1424,6 +1505,10 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <p><b>wxWidgets</b> is a cross-platform toolkit, suitable for
       writing software have a graphical user interface (GUI) that can be
       used with a simple recompilation on any platform supported by <b>wxWidgets</b>.&nbsp;
+
+
+
+
 
 
 
@@ -1484,6 +1569,10 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       Michael!), and if the "official" instructions below don't appeal
       to you, or if you simply like the idea of using CMake, Michael's <a
 href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-CMake">documentation
+
+
+
+
 
 
 
@@ -1666,6 +1755,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
+
+
+
         Makefile</a> itself for more explanation.&nbsp; The switches can
       override not merely the filesystem paths for locating the compiler
       (when you have multiple versions of gcc or g++ installed), but can
@@ -1739,6 +1832,10 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
+
+
+
 
 
 
@@ -1916,6 +2013,10 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
 
 
 
+
+
+
+
           Oracle Developer Studio tools</a>.&nbsp; I used version 12.5,
         and only installed the tools rather than the complete IDE.&nbsp;
         This is to give you the C and C++ compilers ('cc' and 'CC'),
@@ -2034,6 +2135,10 @@ version
 
 
 
+
+
+
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -2081,6 +2186,10 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
+
+
+
 
 
 
@@ -2246,12 +2355,35 @@ You
       MacOS installer for the so-called "final" release of Python 2,
       namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
     <br>
+    In general, Virtual AGC expects that either of the commands "<font
+      color="#663300"><code>python</code></font>" or "<font
+      color="#663300"><code>python3</code></font>" can be used
+    interchangeably to run Python 3, and thus certain uses will fail if
+    that's not true, so some additional setup is needed to restore the
+    expected functionality.&nbsp; Alas, there are so many possibilities
+    as to how this might fail and how it might be fixed that I cannot
+    much helpful guidance.&nbsp; I will limit myself to the following
+    observation:&nbsp; Verilog simulation of AGC electronics will fail
+    if the command "<font color="#663300"><code>python</code></font>"
+    does not run Python 3, but if the command "<font color="#663300"><code>/usr/local/bin/python3</code></font>"
+    does run Python 3, then the command<br>
+    <blockquote>
+      <pre><font color="#663300">ln -s /usr/local/bin/python3 /usr/local/bin/python</font><br></pre>
+    </blockquote>
+    will allow the command "<font color="#663300"><code>python</code></font>"
+    subsequently to work as expected and Verilog simulations to
+    function.<br>
+    <br>
     I'd also note that a full installation of Xcode is not necessary for
     this build to succeed.&nbsp; It's merely necessary to have the Xcode
     "command-line tools", which is a much smaller package than the full
     Xcode.&nbsp; Admittedly, that's probably not a point that's of much
     concern to Apple aficionados.<br>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
+
+
 
 
 
@@ -2344,9 +2476,17 @@ href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-
 
 
 
+
+
+
+
           its source code</a>, and building it from source according to
         <a moz-do-not-send="true"
 href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
+
+
+
 
 
 
@@ -2394,12 +2534,20 @@ href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">th
 
 
 
+
+
+
+
           Or more specifically, if Macports has installed some of the
           libraries (such as libjpeg) that wxWidgets requires, because
           those libraries will be of incompatible versions.&nbsp; On
           solutions is to uninstall Macports and all of the packages
           Macports had installed.&nbsp; <a moz-do-not-send="true"
 href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">The
+
+
+
+
 
 
 
@@ -2432,6 +2580,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
           href="https://www.iyaTelemetry.html#LM_Simulator_by_Stephan_Hotto">you
 
 
+
+
+
+
           can read about here</a> to make a decision whether that's
         satisfactory to you.&nbsp; Better from my point of view,
         installation of a correctly-working version of Tcl/Tk can
@@ -2439,6 +2591,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         in a position to try any of those approaches, but I have reason
         to believe that <a moz-do-not-send="true"
           href="https://www.tcl.tk/software/tcltk/download.html">building
+
+
+
+
 
 
           Tcl/Tk from source code</a> does work on <i>some</i> recent
@@ -2487,6 +2643,25 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       MacOS installer for the so-called "final" release of Python 2,
       namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
     <br>
+    Moreover, in general, Virtual AGC expects that either of the
+    commands "<font color="#663300"><code>python</code></font>" or "<font
+      color="#663300"><code>python3</code></font>" can be used
+    interchangeably to run Python 3, and thus certain uses will fail if
+    that's not true, so some additional setup is needed to restore the
+    expected functionality.&nbsp; Alas, there are so many possibilities
+    as to how this might fail and how it might be fixed that I cannot
+    much helpful guidance.&nbsp; I will limit myself to the following
+    observation:&nbsp; Verilog simulation of AGC electronics will fail
+    if the command "<font color="#663300"><code>python</code></font>"
+    does not run Python 3, but if the command "<font color="#663300"><code>/usr/local/bin/python3</code></font>"
+    does run Python 3, then the command<br>
+    <blockquote>
+      <pre><font color="#663300">ln -s /usr/local/bin/python3 /usr/local/bin/python</font><br></pre>
+    </blockquote>
+    will allow the command "<font color="#663300"><code>python</code></font>"
+    subsequently to work as expected and Verilog simulations to
+    function.<br>
+    <br>
     <a name="ApoDisKey"></a>In spite of my own distaste for dealing with
     Mac OS — which I admit may stem largely from the fact that I reject
     the notion of being forced to buy new Macs whenever Apple decides
@@ -2523,6 +2698,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     some minor visual deficiencies.&nbsp; <br>
     <blockquote><img moz-do-not-send="true" src="InterfaceStyles.png"
         alt="" width="411" height="198" align="right"><font size="-1"><b>Note:</b>&nbsp;
+
+
+
+
 
         If you do decide to use <b>ApoDisKey</b> and discover some
         problem or think of a suggestion, report it directly to Gavin
@@ -2633,6 +2812,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
+
+
         At this writing, <b>MSYS2</b> supports only Windows 10 or
         later.</font><br>
     </blockquote>
@@ -2664,6 +2847,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
+
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -2672,6 +2859,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
+
+
+
 
 
 
@@ -2794,6 +2985,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
+
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -2803,6 +2998,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
+
+
+
 
 
 
@@ -2905,6 +3104,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
+
+
     So the idea is that you can load the WebAssembly build of <b>yaAGC</b>
     into an HTML web-page you create, along with a core-rope images of
     an AGC program, and then run the whole thing in a supporting browser
@@ -2974,6 +3177,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
+
+
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -2992,6 +3199,10 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
+
+
+
 
 
 
@@ -3111,6 +3322,10 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
 
 
 
+
+
+
+
     rather than to "http://localhost:8000/demo/" and seemingly avoid
     HTTP entirely?&nbsp; In other words, why can't this demo, or
     presumably similar web apps, simply run entirely within the
@@ -3135,7 +3350,8 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     <blockquote>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     </blockquote>
-    <h3><a name="iPhone" id="iPhone"></a>iPhone</h3>
+    <h3><a name="iPhone" id="iPhone"></a>iOS<br>
+    </h3>
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
@@ -3149,9 +3365,11 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     </table>
     <br>
     I'm told that <a moz-do-not-send="true"
-      href="download-still-less-old.html#iPhone">the instructions which
-      used to appear in this space</a>, while valid back in 2009, no
-    longer work, and I don't have any substitutes to offer you.<br>
+      href="download-still-less-old.html#iPhone">the iPhone instructions
+      which used to appear in this space</a>, while valid back in 2009,
+    no longer work, and I don't have any substitutes to offer you at
+    present although I am aware of work on the ApoDisKey app described
+    earlier that may or may not yield results at some point.<br>
     <h2><a name="Running_the_Validation_Suite"
         id="Running_the_Validation_Suite"></a>Running the Validation
       Suite of the simulated AGC<br>
@@ -3262,10 +3480,14 @@ Commons
 
 
 
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-02-06<br>
+          2025-02-20<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
