@@ -112,6 +112,8 @@ FOR %%d IN ( %modules% %module52% ) DO (
   IF NOT exist %%d/module.%extension% (
     echo Schematic %%d/module.%extension% does not exist
     EXIT /b 1
+  ) ELSE (
+    echo Schematic %%d found
   )
 )
 
@@ -135,6 +137,7 @@ IF "%autonet%" == "1" (
   echo Generating netlist files ...
   REM kicad-cli does exist.
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
+    echo Generating netlist for schematic %%d
     cd %%d > NUL 2>&1
     kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
     cd .. > NUL 2>&1
@@ -146,6 +149,8 @@ IF "%autonet%" == "1" (
     IF NOT exist %%d\module.net (
       echo Netlist %%d\module.net does not exist.
       EXIT /b 1
+    ) ELSE (
+      echo Found netlist for schematic %%d
     )
   )
 )
@@ -169,7 +174,7 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
   cd %%d > NUL 2>&1
   DEL  empty.init > NUL 2>&1
   touch empty.init
-  python -m dumbVerilog A!n! module.net pins.txt 20 empty.init module.%extension% >> %CD%\..\dummy.v
+  python -m dumbVerilog A!n! module.net pins.txt 20 empty.init module.%extension% >> ..\dummy.v
   cd .. > NUL 2>&1
 )
 
