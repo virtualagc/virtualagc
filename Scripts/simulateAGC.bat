@@ -96,59 +96,11 @@ IF "%model%" == "%sameAs%" (
 )
 IF "%sameAs%" == "2003993" (
   REM Schematic drawings for logic modules A1-A24.
-  SET "modules="
-  SET "modules=%modules% 2005259A"
-  SET "modules=%modules% 2005260A"
-  SET "modules=%modules% 2005251A"
-  SET "modules=%modules% 2005262A"
-  SET "modules=%modules% 2005261A"
-  SET "modules=%modules% 2005263A"
-  SET "modules=%modules% 2005252A"
-  SET "modules=%modules% 2005255-"
-  SET "modules=%modules% 2005256A"
-  SET "modules=%modules% 2005257A"
-  SET "modules=%modules% 2005258A"
-  SET "modules=%modules% 2005253A"
-  SET "modules=%modules% 2005269-"
-  SET "modules=%modules% 2005264B"
-  SET "modules=%modules% 2005265A"
-  SET "modules=%modules% 2005266-"
-  SET "modules=%modules% 2005267A"
-  SET "modules=%modules% 2005268A"
-  SET "modules=%modules% 2005270-"
-  SET "modules=%modules% 2005254-"
-  SET "modules=%modules% 2005250-"
-  SET "modules=%modules% 2005271-"
-  SET "modules=%modules% 2005272A"
-  SET "modules=%modules% 2005273A"
+  SET "modules=2005259A 2005260A 2005251A 2005262A 2005261A 2005263A 2005252A 2005255- 2005256A 2005257A 2005258A 2005253A 2005269- 2005264B 2005265A 2005266- 2005267A 2005268A 2005270- 2005254- 2005250- 2005271- 2005272A 2005273A"
 )
 IF "%sameAs%" == "2003200" (
   REM Schematic drawings for logic modules A1-A24, A52.
-  SET "modules="
-  SET "modules=%modules% 2005259A"
-  SET "modules=%modules% 2005260A"
-  SET "modules=%modules% 2005251A"
-  SET "modules=%modules% 2005262A"
-  SET "modules=%modules% 2005261A"
-  SET "modules=%modules% 2005263A"
-  SET "modules=%modules% 2005252A"
-  SET "modules=%modules% 2005255-"
-  SET "modules=%modules% 2005256A"
-  SET "modules=%modules% 2005257A"
-  SET "modules=%modules% 2005258A"
-  SET "modules=%modules% 2005253A"
-  SET "modules=%modules% 2005269-"
-  SET "modules=%modules% 2005264A"
-  SET "modules=%modules% 2005265A"
-  SET "modules=%modules% 2005266-"
-  SET "modules=%modules% 2005267A"
-  SET "modules=%modules% 2005268A"
-  SET "modules=%modules% 2005270-"
-  SET "modules=%modules% 2005254-"
-  SET "modules=%modules% 2005250-"
-  SET "modules=%modules% 2005271-"
-  SET "modules=%modules% 2005272A"
-  SET "modules=%modules% 2005273A"
+  SET "modules=2005259A 2005260A 2005251A 2005262A 2005261A 2005263A 2005252A 2005255- 2005256A 2005257A 2005258A 2005253A 2005269- 2005264A 2005265A 2005266- 2005267A 2005268A 2005270- 2005254- 2005250- 2005271- 2005272A 2005273A"
   SET "module52=2003305B"
 )
 
@@ -208,7 +160,7 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
     IF "%n%" == "24" (
       SET "n=52"
     ) ELSE (
-      SET /A "n=n+1"
+      SET /A n=n+1
     )
   )
   echo Initial Verilog creation for A%n% %%d ...
@@ -230,7 +182,7 @@ FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
     IF %n% == 24 (
       SET "n=52"
     ) ELSE (
-      SET /A "n=n+1"
+      SET /A n=n+1
     )
   )
   echo Final Verilog creation for A%n% %%d ...
