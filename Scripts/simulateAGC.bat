@@ -45,44 +45,44 @@ REM                       file tb_xxxx.v where xxxx represents the AGC model
 REM                       number.  At present, though, tb_xxxx.v requires that
 REM                       exactly one of the DUMP_xxxx options be present.
 
-SET extension=kicad_sch
+SET "extension=kicad_sch"
 
-SET PYTHONPATH=%PATH%
+SET "PYTHONPATH=%PATH%"
 
 REM Parse command line and perform sanity checks.
 
 IF "%~1" == "" (
-  SET model=2003993
-  SET sameAs=2003993
+  SET "model=2003993"
+  SET "sameAs=2003993"
 ) ELSE (
   IF "%~1" == "2003993" (
-    SET model=%~1
-    SET sameAs=2003993
+    SET "model=%~1"
+    SET "sameAs=2003993"
   ) ELSE (
     IF "%~1" == "2003200" (
-      SET model=%~1
-      SET sameAs=2003200
+      SET "model=%~1"
+      SET "sameAs=2003200"
     ) ELSE (
       IF "%~1" == "2003100" (
-        SET model=%~1
-        SET sameAs=2003100
+        SET "model=%~1"
+        SET "sameAs=2003100"
         echo Model not yet supported.
-        exit 1
+        EXIT /b 1
       ) ELSE (
         IF "%~1" == "1003700" (
-          SET model=%~1
-          SET sameAs=1003700
+          SET "model=%~1"
+          SET "sameAs=1003700"
           echo Model not yet supported.
-          exit 1
+          EXIT /b 1
         ) ELSE (
           IF "%~1" == "1003565" (
-            SET model=%~1
-            SET sameAs=1003700
+            SET "model=%~1"
+            SET "sameAs=1003700"
             echo Model not yet supported.
-            exit 1
+            EXIT /b 1
           ) ELSE (
             echo Unrecognized AGC model number.
-            exit 1
+            EXIT /b 1
           )
         )
       )
@@ -96,60 +96,60 @@ IF "%model%" == "%sameAs%" (
 )
 IF "%sameAs%" == "2003993" (
   REM Schematic drawings for logic modules A1-A24.
-  SET modules=""
-  SET modules=%modules% 2005259A
-  SET modules=%modules% 2005260A
-  SET modules=%modules% 2005251A
-  SET modules=%modules% 2005262A
-  SET modules=%modules% 2005261A
-  SET modules=%modules% 2005263A
-  SET modules=%modules% 2005252A
-  SET modules=%modules% 2005255-
-  SET modules=%modules% 2005256A
-  SET modules=%modules% 2005257A
-  SET modules=%modules% 2005258A
-  SET modules=%modules% 2005253A
-  SET modules=%modules% 2005269-
-  SET modules=%modules% 2005264B
-  SET modules=%modules% 2005265A
-  SET modules=%modules% 2005266-
-  SET modules=%modules% 2005267A
-  SET modules=%modules% 2005268A
-  SET modules=%modules% 2005270-
-  SET modules=%modules% 2005254-
-  SET modules=%modules% 2005250-
-  SET modules=%modules% 2005271-
-  SET modules=%modules% 2005272A
-  SET modules=%modules% 2005273A
+  SET "modules="
+  SET "modules=%modules% 2005259A"
+  SET "modules=%modules% 2005260A"
+  SET "modules=%modules% 2005251A"
+  SET "modules=%modules% 2005262A"
+  SET "modules=%modules% 2005261A"
+  SET "modules=%modules% 2005263A"
+  SET "modules=%modules% 2005252A"
+  SET "modules=%modules% 2005255-"
+  SET "modules=%modules% 2005256A"
+  SET "modules=%modules% 2005257A"
+  SET "modules=%modules% 2005258A"
+  SET "modules=%modules% 2005253A"
+  SET "modules=%modules% 2005269-"
+  SET "modules=%modules% 2005264B"
+  SET "modules=%modules% 2005265A"
+  SET "modules=%modules% 2005266-"
+  SET "modules=%modules% 2005267A"
+  SET "modules=%modules% 2005268A"
+  SET "modules=%modules% 2005270-"
+  SET "modules=%modules% 2005254-"
+  SET "modules=%modules% 2005250-"
+  SET "modules=%modules% 2005271-"
+  SET "modules=%modules% 2005272A"
+  SET "modules=%modules% 2005273A"
 )
 IF "%sameAs%" == "2003200" (
   REM Schematic drawings for logic modules A1-A24, A52.
-  SET modules=
-  SET modules=%modules% 2005259A
-  SET modules=%modules% 2005260A
-  SET modules=%modules% 2005251A
-  SET modules=%modules% 2005262A
-  SET modules=%modules% 2005261A
-  SET modules=%modules% 2005263A
-  SET modules=%modules% 2005252A
-  SET modules=%modules% 2005255-
-  SET modules=%modules% 2005256A
-  SET modules=%modules% 2005257A
-  SET modules=%modules% 2005258A
-  SET modules=%modules% 2005253A
-  SET modules=%modules% 2005269-
-  SET modules=%modules% 2005264A
-  SET modules=%modules% 2005265A
-  SET modules=%modules% 2005266-
-  SET modules=%modules% 2005267A
-  SET modules=%modules% 2005268A
-  SET modules=%modules% 2005270-
-  SET modules=%modules% 2005254-
-  SET modules=%modules% 2005250-
-  SET modules=%modules% 2005271-
-  SET modules=%modules% 2005272A
-  SET modules=%modules% 2005273A
-  SET module52=2003305B
+  SET "modules="
+  SET "modules=%modules% 2005259A"
+  SET "modules=%modules% 2005260A"
+  SET "modules=%modules% 2005251A"
+  SET "modules=%modules% 2005262A"
+  SET "modules=%modules% 2005261A"
+  SET "modules=%modules% 2005263A"
+  SET "modules=%modules% 2005252A"
+  SET "modules=%modules% 2005255-"
+  SET "modules=%modules% 2005256A"
+  SET "modules=%modules% 2005257A"
+  SET "modules=%modules% 2005258A"
+  SET "modules=%modules% 2005253A"
+  SET "modules=%modules% 2005269-"
+  SET "modules=%modules% 2005264A"
+  SET "modules=%modules% 2005265A"
+  SET "modules=%modules% 2005266-"
+  SET "modules=%modules% 2005267A"
+  SET "modules=%modules% 2005268A"
+  SET "modules=%modules% 2005270-"
+  SET "modules=%modules% 2005254-"
+  SET "modules=%modules% 2005250-"
+  SET "modules=%modules% 2005271-"
+  SET "modules=%modules% 2005272A"
+  SET "modules=%modules% 2005273A"
+  SET "module52=2003305B"
 )
 
 REM Workflow Step #1:
@@ -157,25 +157,25 @@ echo Checking existence of all schematic diagrams needed ...
 FOR %%d IN ( %modules% %module52% ) DO (
   IF NOT exist %%d/module.%extension% (
     echo Schematic %%d/module.%extension% does not exist
-    exit 1
+    EXIT /b 1
   )
 )
 
 IF "%~2" == "" (
-  SET software=Validation-hardware-simulation
+  SET "software=Validation-hardware-simulation"
 ) ELSE (
-  SET software=%~1
+  SET "software=%~1"
 )
 echo AGC software: %software%
 IF NOT exist roms\%software%.v (
   echo Selected AGC software version has no Verilog source-code file.
-  exit 1
+  EXIT /b 1
 )
 
 REM Workflow Step #2:
-SET autonet=0
+SET "autonet=0"
 IF "%extension%" == "kicad_sch" (
-  SET autonet=1
+  SET "autonet=1"
 )
 IF "%autonet%" == "1" (
   echo Generating netlist files ...
@@ -191,7 +191,7 @@ IF "%autonet%" == "1" (
   FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
     IF NOT exist %%d\module.net (
       echo Netlist %%d\module.net does not exist.
-      exit 1
+      EXIT /b 1
     )
   )
 )
@@ -199,16 +199,16 @@ IF "%autonet%" == "1" (
 REM Workflow Step #3:
 echo Generation of flip-flop initialization file ...
 
-SET n=0
+SET "n=0"
 DEL  dummy.v > NUL 2>&1
 FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
   IF "%%d" == "fixed_erasable_memory" (
-    SET n=99
+    SET "n=99"
   ) ELSE (
     IF "%n%" == "24" (
-      SET n=52
+      SET "n=52"
     ) ELSE (
-      SET /A n=n+1
+      SET /A "n=n+1"
     )
   )
   echo Initial Verilog creation for A%n% %%d ...
@@ -222,15 +222,15 @@ FOR %%d IN ( %modules% %module52% fixed_erasable_memory ) DO (
 echo Flip-flop initilizer creation ...
 python -m dumbInitialization < dummy.v
 
-SET n=0
+SET "n=0"
 FOR %%d in ( %modules% %module52% fixed_erasable_memory ) DO (
   IF %%d == fixed_erasable_memory (
-    SET n=99
+    SET "n=99"
   ) ELSE (
     IF %n% == 24 (
-      SET n=52
+      SET "n=52"
     ) ELSE (
-      SET /A n=n+1
+      SET /A "n=n+1"
     )
   )
   echo Final Verilog creation for A%n% %%d ...
@@ -252,13 +252,13 @@ COPY  roms\%software%.v roms\rom.v
 REM Workflow step #6
 echo Compiling Verilog source code ...
 IF "%~3" == "" (
-  SET verilogOptions=-DDUMP_ALL
+  SET "verilogOptions=-DDUMP_ALL"
 ) ELSE (
-  SET verilogOptions=%~3
+  SET "verilogOptions=%~3"
 )
-SET vsources=
+SET "vsources="
 FOR %%f in ( %modules% %module52% fixed_erasable_memory ) DO (
-  SET vsources=%vsources% %%f/module.v
+  SET "vsources=%vsources% %%f/module.v"
 )
 iverilog %verilogOptions% -o %model%.vvp %model%_tb.v %vsources% fixed_erasable_memory\RAM.v fixed_erasable_memory\ROM.v fixed_erasable_memory\BUFFER.v
 
