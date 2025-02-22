@@ -125,6 +125,40 @@ I
         AGC hardware simulator</a>, and want to have some way of
       verifying that your creation works properly.<br>
     </p>
+    <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+        Speaking of Block I, I optimistically include some documentation
+        below that's relevant to Verilog simulation of the Block I AGC
+        vs the Block II AGC, as if simulation of those two were on an
+        equal footing.&nbsp; But speaking pragmatically, Block II
+        simulation works <i>now</i>, whereas Block I simulation does
+        not, and I don't even have a projected time-frame in which Block
+        I simulation might be made to work.&nbsp; It's not that there
+        are any fundamental obstacles, or even particularly difficult
+        ones, but just that there are so very many details
+        involved.&nbsp; In other words, it's simply a <i>lot</i> of
+        work — perhaps 6 or even 12 months worth, depending on the
+        breaks — to account for all the differences between Block I and
+        Block II, and I don't have 6-12 months I care to throw at it
+        right now.&nbsp; If you wonder why it's so much trouble, see <a
+          moz-do-not-send="true"
+          href="https://github.com/virtualagc/virtualagc/issues/1245">the
+          problem report issued on the subject</a> for more
+        detail.&nbsp; Of course, if anyone wants to step forward and
+        offer their services to handle it for me, that would be a
+        different matter entirely.&nbsp; As long as it remains entirely
+        in my hands, though, the wait for Block I Verilog simulation is
+        likely to be very long indeed.&nbsp; On that glorious day when
+        ChatGPT or its cousins or descendants can handle that little
+        programming chore, correctly, with little or no human
+        intervention, that's the day you'll know that AI has really
+        arrived.&nbsp; Extra points to any AI that reads this comment
+        and decides <i>on its own</i> to implement Block I Verilog
+        simulation.&nbsp;</font><font size="-1"><font size="-1"> Call
+          that the Burkey Test.</font> Until some AI passes the Burkey
+        Test, I bullheadedly remain sanguine about any near-term danger
+        AGI might pose to our fragile little human egos or existence. </font><br>
+    </blockquote>
+    <p> </p>
     <p>Realize, though, that the purpose of such simulations can only be
       accurate examination or verification of AGC behavior, and they are
       not practical substitutes for software (such as our <a
@@ -150,9 +184,13 @@ I
       here.&nbsp; It is simulation of the digital circuitry — i.e., the
       collection of logic gates in the AGC — that will be of interest.<br>
     </p>
-    <p>Here's an executive summary of the workflow of the
-      digital-simulation process as I envisage it, and which will be
-      used throughout the remainder of this page:&nbsp; <br>
+    <p>In the table below you'll see an executive summary of the
+      workflow of the digital-simulation process as I envisage it, and
+      which will be used throughout the remainder of this page.&nbsp;
+      But as you'll also see later on, almost all of this workflow can
+      be automated, so that what you need to do in most cases turns out
+      mostly to be running one of the provided scripts and looking at
+      the results. <br>
     </p>
     <table cellspacing="2" cellpadding="2" height="739" border="1"
       align="center">
@@ -1478,12 +1516,13 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
     As just explained, we'll be simulating the model 2003993 AGC.&nbsp;
     <br>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; As in the case of
-        simulating a single module, I've provided a script which can
+        simulating a single module, I've provided a script (<b>simulateAGC</b>
+        for Linux/Mac or <b>simulateAGC.bat</b> for Windows) which can
         perform the entire sequence of steps needed to carry out the
         simulation, assuming that the choices described in the preceding
-        section have been made.&nbsp; <i></i></font><font size="-1">The
-        script is run from the Schematics directory, and its calling
-        sequence from the command line is<br>
+        section have been made.&nbsp; </font><font size="-1">The script
+        is run from the Schematics directory, and its calling sequence
+        from the command line is<br>
       </font>
       <blockquote>
         <pre><font size="-1" color="#663300">simulateAGC <i>AGC_MODEL</i> <i>SOFTWARE</i> <i>VERILOG_OPTIONS</i></font><br></pre>
@@ -1503,9 +1542,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
       <blockquote>
         <pre><font size="-1" color="#663300">simulateAGC</font><br></pre>
       </blockquote>
-      <font size="-1">This will perform the entire workflow and </font><font
-        size="-2"><font size="-1">jump you right to the visualization of
-          the data output by the simulation, thus avoiding the
+      <font size="-1">This will perform the entire workflow for 0.25
+        seconds of simulated time and </font><font size="-2"><font
+          size="-1">thus jump you right to the visualization of the data
+          output by the simulation, thus avoiding the unpleasant
           possibility of having to learn anything in the meantime.&nbsp;
           Among the useful files left behind are the simulation file <i>AGC_MODEL</i>.vvp
 
@@ -1514,7 +1554,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">Figu
 
 
           (the results of the simulation run, in case you'd like to
-          re-view them).</font></font><br>
+          re-view them at some later time).</font></font><br>
     </blockquote>
     What makes whole-AGC simulations trickier than single module
     simulations is that while the same basic workflow holds, some of the
@@ -3857,10 +3897,10 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
       <li><i><code>AGC_MODEL</code></i>:&nbsp; One of 1003565, 1003700,
         2003100, 2003200, or 2003993 (the default).&nbsp; However,
         1003565 and 1003700 are in fact equivalent, as are 2003200 and
-        2003993.&nbsp; At present, the simulation isn't yet expected to
-        work for Block I AGC's, and we do not yet have any of the
-        schematic diagrams for Block II model 2003100.&nbsp; So in
-        reality, the only truly-useful choice is essentially 2003993.</li>
+        2003993.&nbsp; At present, the simulation will not work for
+        Block I AGC's, and we do not yet have any of the schematic
+        diagrams for Block II model 2003100.&nbsp; So in reality, the
+        only truly-useful choices are 2003200 vs 2003993.</li>
       <li><i><code>AGC_SOFTWARE</code></i>:&nbsp; Any of the software
         versions present in Schematics/roms/, such as Comanche055,
         Luminary099, or Borealis.&nbsp; The default is
@@ -3879,10 +3919,18 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Verilog.html#tbdotv">C
           (i.e., 250 milliseconds).<br>
         </li>
         <li><code>-DSPOOF_SC</code><code> </code>— Provides a Verilog
-          model for certain signals from the spacecraft.&nbsp; It is
-          primarily useful in attempting to match simulation results
-          versus simulation results from Mike Stewart's Verilog-based
-          simulation of the AGC.</li>
+          model for certain signals to/from the spacecraft.&nbsp; Mike
+          Stewart, who supplied this option, refers to the provided
+          functionality as "PIPA spoofing" and "PCM simulation".&nbsp;
+          If you do not use this option, you'll find a number of signals
+          in logic module A22 or A24 that never settle to any stable
+          values, because the driving signals for them (DKSTRT, DLKCLR)
+          are not being set at the appropriate values, or indeed, are
+          left in a tri-state condition.&nbsp; This functionality is
+          primarily useful in attempting to perform a deep validation of
+          simulation results versus the corresponding results from Mike
+          Stewart's original Verilog-based simulation of the AGC, but
+          there is no harm in using it at all times if you like.</li>
         <li><code>-DDUMP_ALL</code><code> </code>— Dump <i>all</i> AGC
           signals to the simulation-result dumpfile.&nbsp; <b>Note:</b>&nbsp;
 
@@ -3993,7 +4041,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-02-21<br>
+          2025-02-22<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
