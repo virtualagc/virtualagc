@@ -150,6 +150,8 @@ do
         then
                 echo Schematic $d/module.$extension does not exist
                 exit 1
+        else
+                echo Schematic $d found
         fi
 done
 
@@ -181,6 +183,7 @@ then
         # kicad-cli does exist.
         for d in $modules $module52 fixed_erasable_memory
         do
+                echo Generating netlist for schematic $d
                 cd $d &>/dev/null
                 kicad-cli sch export netlist --output module.net --format orcadpcb2 module.kicad_sch
                 cd .. &>/dev/null
@@ -194,6 +197,8 @@ else
                 then
                         echo Netlist $d/module.net does not exist.
                         exit 1
+        else
+                echo Found netlist for schematic $d
                 fi
         done
 fi
