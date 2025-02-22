@@ -1,17 +1,19 @@
 #!/bin/bash
+# ***** This script is under development and is not usable. *****
+
 # This script can be used for Linux or Mac OS to perform a digital simulation
 # of a single logical module, or portion thereof.  At the moment, it's 
-# specialized for Block II and you should look at `simulateModuleI` instead 
+# specialized for Block I and you should look at `simulateModuleII` instead 
 # for Block I.  It should be executed from
 # the folder containing the schematic file (module.kicad_sch) and a 
 # user-created partial-testbench file called tb.v.
 #
 # Usage:
 #       simulateModuleII MODULENAME [NETLISTFILE]
-# where MODULENAME is one of the names of Block II AGC logic modules:
-# A1, A2, A3, ..., A24.  The optional parameter can give the name of a netlist
-# file.  If it is not present, then KiCad v7 or later is required so that
-# we can generate the netlist file ourself from the command line.
+# where MODULENAME is one of the names of Block II AGC logic modules:  A1 
+# through A18 or A21 through A38.  The optional parameter can give the name of a 
+# netlist file.  If it is not present, then KiCad v7 or later is required so 
+# that we can generate the netlist file ourself from the command line.
 
 # Let's find out what the name of the python3 executable is:
 export python_exe=python
@@ -22,7 +24,7 @@ export PYTHONPATH="$PATH"
 
 if [ "$1" = "" ]
 then
-        echo "No module number (A1, A2, ..., A24) given"
+        echo "No module number (A1-A18, A21-A38) given"
         exit 1
 else
         modulenum=$1
@@ -67,7 +69,7 @@ then
 fi
 
 # Workflow step #3
-
+###REWORK###
 rm empty.init &> /dev/null
 touch empty.init
 $python_exe -m dumbVerilog $modulenum $netlist pins.txt 20 empty.init $schematic > module.v
