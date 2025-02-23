@@ -277,4 +277,4 @@ REM mv agc.fst %model%.fst
 REM Workflow step #8
 echo Simulation-results data visualization ...
 REM gtkwave %model%.fst
-gtkwave agc.gtkw
+gtkwave agc-windows.gtkw
