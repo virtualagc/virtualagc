@@ -29,8 +29,8 @@
  
   Filename:	DecodeDownlinkList.c
   Purpose:	The DecodeDigitalDownlink function can be used to print out
-			a downlink list.  Simply keep feeding it data from channel
-			013, 034, and 035 as the data arrives.
+		a downlink list.  Simply keep feeding it data from channel
+		013, 034, and 035 as the data arrives.
   Compiler:	GNU gcc.
   Contact:	Ron Burkey <info@sandroid.org>
   Ref:		http://www.ibiblio.org/apollo/index.html
