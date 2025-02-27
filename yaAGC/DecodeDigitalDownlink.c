@@ -35,29 +35,29 @@
   Contact:	Ron Burkey <info@sandroid.org>
   Ref:		http://www.ibiblio.org/apollo/index.html
   Mods:		06/27/05 RSB.	Began.
-			06/28/05 RSB.	Rewrote a lot to base the printing on
-							arrays of specifications.
-			06/30/05 RSB	Now completely configurable at runtime.
-			07/01/05 RSB	Now *even more* completely configurable at
-							runtime.  Finished LM Coast/Align.
-			07/03/05 RSB	Removed the LeftShift and Mask table
-							parameters, and replaced with a user-
-							definable formatting function.  Completed
-							the LM Orbital Maneuvers downlist.
-							Completed LM Surface Align downlist.
-							Completed LM Rendezvous/Prethrust downlist.
-							Completed LM Descent/Ascent downlist.
-			07/26/05 RSB	Corrected scaling for all SP quantities.
-							(Oops!)  Added CM Powered List..
-			07/27/05 RSB	Added CM Program 22 list.
-			07/28/05 RSB	Added remainder of CM downlink lists.
-			04/07/09 RSB	Added ProcessDownlinkList for overriding
-							PrintDownlinkList.  The idea is that its
-							default is NULL, in which case PrintDownlinkList
-							is used.  If non-NULL, then whateverit points
-							to is used in place of PrintDownlinkList.
-			11/22/10 RSB    Eliminated a compiler warning I suddenly
-                            encountered in Ubuntu 10.04.
+		06/28/05 RSB.	Rewrote a lot to base the printing on
+				arrays of specifications.
+		06/30/05 RSB	Now completely configurable at runtime.
+		07/01/05 RSB	Now *even more* completely configurable at
+				runtime.  Finished LM Coast/Align.
+		07/03/05 RSB	Removed the LeftShift and Mask table
+				parameters, and replaced with a user-
+				definable formatting function.  Completed
+				the LM Orbital Maneuvers downlist.
+				Completed LM Surface Align downlist.
+				Completed LM Rendezvous/Prethrust downlist.
+				Completed LM Descent/Ascent downlist.
+		07/26/05 RSB	Corrected scaling for all SP quantities.
+				(Oops!)  Added CM Powered List..
+		07/27/05 RSB	Added CM Program 22 list.
+		07/28/05 RSB	Added remainder of CM downlink lists.
+		04/07/09 RSB	Added ProcessDownlinkList for overriding
+				PrintDownlinkList.  The idea is that its
+				default is NULL, in which case PrintDownlinkList
+				is used.  If non-NULL, then whateverit points
+				to is used in place of PrintDownlinkList.
+		11/22/10 RSB    Eliminated a compiler warning I suddenly
+				encountered in Ubuntu 10.04.
   
 */
 
@@ -2077,7 +2077,8 @@ DecodeErasableDump (char *Title)
           sprintf (&Sbuffer[row][col], "%03o:", j);
 	  col += 4;
 	}
-      sprintf (&Sbuffer[row][col], " %05o %05o", DownlinkListBuffer[j + 4], DownlinkListBuffer[j + 5]);
+      sprintf (&Sbuffer[row][col], " %05o %05o", DownlinkListBuffer[j + 4],
+	       DownlinkListBuffer[j + 5]);
       col += 12;
       if (0 == (i & 3))
         {
