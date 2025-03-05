@@ -1922,6 +1922,7 @@ DownlinkListSpec_t *lmIdToSpec[] = {
 static void
 printSpecs(const char *filename, DownlinkListSpec_t **specs)
 {
+#ifdef DEBUG_DOWNLIST_SPEC_FILES
   FILE *f;
   int i, j;
   FieldSpec_t *fieldSpec;
@@ -1955,6 +1956,7 @@ printSpecs(const char *filename, DownlinkListSpec_t **specs)
 
     }
   fclose(f);
+#endif
 }
 
 static int
@@ -1973,7 +1975,6 @@ dddConfigure (char *agcSoftware)
 {
   int id;
   DownlinkListSpec_t **IdToSpec;
-  // ###DEBUG###
   printSpecs("before.txt", lmIdToSpec);
   // Software is assumed to be for the LM unless its name begins with one of the
   // known CM programs.
@@ -2134,7 +2135,7 @@ dddConfigure (char *agcSoftware)
 	}
       fclose(fp);
     }
-  // ###DEBUG###
+
   printSpecs("after.txt", lmIdToSpec);
   return CmOrLm;
 }
