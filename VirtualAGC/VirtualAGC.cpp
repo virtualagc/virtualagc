@@ -187,6 +187,7 @@
  *              2025-01-08 RSB  Adjustment to simulation-status window sizing.
  *              2025-01-11 RSB  Added a Tic-tac-toe "mission".
  *              2025-01-13 RSB  Added the AGC_WISH environment variable.
+ *              2025-03-03 RSB	Added --software switch for yaTelemetry.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -3486,6 +3487,8 @@ VirtualAGC::FormCommands(void)
       LmSim = true;
       TelemetrySwitches = wxT(" --port=19800 --spacecraft=LM");
     }
+  if (!block1)
+    TelemetrySwitches += wxT(" --software=") + basename;
   if (!yaTelemetry.IsSameAs(wxT("")))
     yaTelemetry += TelemetrySwitches;
   if (!yaAGC.IsSameAs(wxT("")))

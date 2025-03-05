@@ -58,10 +58,12 @@
 				to is used in place of PrintDownlinkList.
 		11/22/10 RSB    Eliminated a compiler warning I suddenly
 				encountered in Ubuntu 10.04.
+		03/03/25 RSB	Added `dddConfigure`.
   
 */
 
 #define DECODE_DIGITAL_DOWNLINK_C
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "agc_engine.h"
@@ -385,6 +387,8 @@ Sclear (void)
 // Specifications for the DEFAULT downlink lists.  Changing the names or formats
 // of the downlink-list fields, or changing their screen positions, is just
 // a matter of editing the following lists.
+// If the `dddConfigure` function is called, then these structures will be
+// modified.
 
 static DownlinkListSpec_t CmPoweredListSpec = {
   "CM Powered downlink list",
@@ -1096,8 +1100,8 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 44, "DELVEET1+2=", B7, FMT_DP },
     { 46, "DELVEET1+4=", B7, FMT_DP },
     { 50, "TTPF=", B28, FMT_DP },
-    { 52, "X789=", B5, FMT_SP, FormatEarthOrMoonDP },
-    { 54, "X789+2=", B5, FMT_SP, FormatEarthOrMoonDP },
+    { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
+    { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { -1 },
     { 56, "LASTYCMD=", B0, FMT_DEC },
     { 57, "LASTXCMD=", B0, FMT_DEC },
@@ -1370,8 +1374,8 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 46, "RLS+2=", B27, FMT_DP },
     { 48, "RLS+4=", B27, FMT_DP },
     { 50, "ZDOTD=", B7, FMT_DP },
-    { 52, "X789=", B5, FMT_SP, FormatEarthOrMoonDP },
-    { 54, "X789+2=", B5, FMT_SP, FormatEarthOrMoonDP },
+    { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
+    { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { -1 }, { -1 },
     { 56, "LASTYCMD=", B0, FMT_DEC },
     { 57, "LASTXCMD=", B0, FMT_DEC },
@@ -1521,8 +1525,8 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 48, "ZNBSAV+2=", B1, FMT_DP },
     { 50, "ZNBSAV+4=", B1, FMT_DP },
     { -1 },
-    { 52, "X789=", B5, FMT_SP, FormatEarthOrMoonDP },
-    { 54, "X789+2=", B5, FMT_SP, FormatEarthOrMoonDP },
+    { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
+    { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { 56, "LASTYCMD=", B0, FMT_DEC },
     { 57, "LASTXCMD=", B0, FMT_DEC },
     { 58, "REDOCTR=", B0, FMT_DEC },
@@ -1889,6 +1893,253 @@ DownlinkListSpec_t *DownlinkListSpecs[11] = {
 };
 
 //---------------------------------------------------------------------------
+// The `dddConfigure` function can be called at startup to modify the default
+// downlist specifications given above, so that they instead contain
+// mission-specific data obtained from files in the filesystem.  The input
+// parameter is the name of an AGC software version, and the return value is
+// 1 if that software corresponds to a CM or 0 for an LM.  Any files not found
+// transparently leave the corresponding default downlist specification unchanged,
+// though an info message is output to the console.
+DownlinkListSpec_t *cmIdToSpec[] = {
+    NULL, // 77772
+    &CmProgram22Spec, // 77773
+    &CmPoweredListSpec, // 77774
+    &CmRendezvousPrethrustSpec, // 77775
+    &CmEntryUpdateSpec, // 77776
+    &CmCoastAlignSpec // 77777
+};
+DownlinkListSpec_t *lmIdToSpec[] = {
+    &LmLunarSurfaceAlignSpec, // 77772
+    &LmDescentAscentSpec, // 77773
+    &LmOrbitalManeuversSpec, // 77774
+    &LmRendezvousPrethrustSpec, // 77775
+    &LmAgsInitializationUpdateSpec, // 77776
+    &LmCoastAlignSpec // 77777
+};
+
+// Print a selected table of specs (either `cmIdToSpec` or `lmIdToSpec`) to
+// a file.
+static void
+printSpecs(const char *filename, DownlinkListSpec_t **specs)
+{
+  FILE *f;
+  int i, j;
+  FieldSpec_t *fieldSpec;
+  f = fopen(filename, "wt");
+  if (f == NULL)
+    {
+      fprintf(stderr, "Could not open %s\n", filename);
+      exit(1);
+    }
+  for (i = 0; i < 6; i++, specs++)
+    {
+      fprintf(f, "%05o:\n", 077772 + i);
+      if (*specs == NULL)
+	{
+	  fprintf(f, "\tNULL\n");
+	  continue;
+	}
+      fprintf(f, "\t%s\n", (*specs)->Title);
+      fieldSpec = (*specs)->FieldSpecs;
+      for (j = 0; j < MAX_DOWNLINK_LIST; j++, fieldSpec++)
+	{
+	  fprintf(f, "\t%d: %d, %s, %08X, %d, %p, %s\n", j,
+		  fieldSpec->IndexIntoList,
+		  fieldSpec->Name,
+		  fieldSpec->Scale,
+		  fieldSpec->Format,
+		  fieldSpec->Formatter,
+		  fieldSpec->Unit
+		  );
+	}
+
+    }
+  fclose(f);
+}
+
+static int
+isUnsigned (char *s)
+{
+  if (*s == 0)
+    return 0;
+  for (; *s != 0; s++)
+    if (*s < '0' || *s > '9')
+      return 0;
+  return 1;
+}
+
+int
+dddConfigure (char *agcSoftware)
+{
+  int id;
+  DownlinkListSpec_t **IdToSpec;
+  // ###DEBUG###
+  printSpecs("before.txt", lmIdToSpec);
+  // Software is assumed to be for the LM unless its name begins with one of the
+  // known CM programs.
+  CmOrLm = 0;
+  if (!strncmp(agcSoftware, "Artemis", 7) ||
+      !strncmp(agcSoftware, "Colossus", 8) ||
+      !strncmp(agcSoftware, "Comanche", 8) ||
+      !strncmp(agcSoftware, "Manche", 6) ||
+      !strncmp(agcSoftware, "Skylark", 7) ||
+      !strncmp(agcSoftware, "CM", 2))
+    CmOrLm = 1;
+  if (CmOrLm)
+    IdToSpec = cmIdToSpec;
+  else
+    IdToSpec = lmIdToSpec;
+  for (id = 077772; id <= 077777; id++)
+    {
+      char filename[64];
+      DownlinkListSpec_t *dls;
+      FieldSpec_t *fieldSpec;
+      FILE *fp;
+      int i;
+      dls = IdToSpec[id - 077772];
+      sprintf(filename, "ddd-%05o-%s.tsv", id, agcSoftware);
+      fp = fopen(filename, "rt");
+      if (fp == NULL)
+	{
+	  fprintf(stderr, "Using default configuration because file %s not found.\n", filename);
+	  continue;
+	}
+      fprintf(stderr, "Opening %s\n", filename);
+      for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+	{
+	  // Note that we cannot use `fscanf` to read lines from these files,
+	  // because in a tab-delimited file it's find for fields to be empty,
+	  // but %s will simply skip right past them.  So we have to read entire
+	  // lines an find the tab delimiters ourself.
+	  int n, offset;
+	  char *s, *ss, line[81], *offsetField, *varField, *scalerField, *formatField,
+	    *formatterField, *unitField;
+	  if (NULL == fgets(line, sizeof(line), fp))
+	    {
+	      fprintf(stderr, "Records read from %s:  %d\n", filename, i);
+	      break;
+	    }
+	  //fprintf(stderr, "\tParsing line: %s", line);
+	  for (s = line, n = 0; n < 6; s = ss + 1, n++)
+	    {
+	      for (ss = s; *ss != 0; ss++)
+		if (*ss == '\t' || *ss == '\r' || *ss == '\n')
+		  break;
+	      if (*ss == 0 && n < 5)
+		{
+		  fprintf(stderr, "Ill-formed line %d in %s\n", i, filename);
+		  exit(1);
+		}
+	      *ss = 0;
+	      if (n == 0)
+		offsetField = s;
+	      else if (n == 1)
+		varField = s;
+	      else if (n == 2)
+		scalerField = s;
+	      else if (n == 3)
+		formatField = s;
+	      else if (n == 4)
+		formatterField = s;
+	      else if (n == 5)
+		unitField = s;
+	    }
+	  if (!isUnsigned(offsetField) &&
+	      !(offsetField[0] == '-' && isUnsigned(&offsetField[1])))
+	    {
+	      fprintf(stderr, "Non-numeric field %s at line %d in %s\n",
+		      offsetField, i, filename);
+	      exit(1);
+	    }
+	  offset = atoi(offsetField);
+	  fieldSpec = &(dls->FieldSpecs[i]);
+	  fieldSpec->IndexIntoList = offset;
+	  fieldSpec->Name[0] = 0;
+	  fieldSpec->Scale = 0;
+	  fieldSpec->Format = FMT_SP;
+	  fieldSpec->Formatter = NULL;
+	  fieldSpec->Unit[0] = 0;
+	  if (offset == -1)
+	    continue;
+	  strcpy(fieldSpec->Name, varField);
+	  strcat(fieldSpec->Name, "=");
+	  // For the scaler field, at the moment I only recognize items of the
+	  // form %u or B%u.
+	  if (isUnsigned(scalerField))
+	    fieldSpec->Scale = atoi(scalerField);
+	  else if (scalerField[0] == 'B' && isUnsigned(&scalerField[1]))
+	    fieldSpec->Scale = 1 << atoi(&scalerField[1]);
+	  else
+	    fprintf(stderr, "Unrecognized scaler field in %s: %s\n", filename, scalerField);
+	  // Only the formats in `enum Format_t` are recognized.
+	  if (!strcmp(formatField, "FMT_SP"))
+	    fieldSpec->Format = FMT_SP;
+	  else if (!strcmp(formatField, "FMT_DP"))
+	    fieldSpec->Format = FMT_DP;
+	  else if (!strcmp(formatField, "FMT_OCT"))
+	    fieldSpec->Format = FMT_OCT;
+	  else if (!strcmp(formatField, "FMT_2OCT"))
+	    fieldSpec->Format = FMT_2OCT;
+	  else if (!strcmp(formatField, "FMT_DEC"))
+	    fieldSpec->Format = FMT_DEC;
+	  else if (!strcmp(formatField, "FMT_2DEC"))
+	    fieldSpec->Format = FMT_2DEC;
+	  else if (!strcmp(formatField, "FMT_USP"))
+	    fieldSpec->Format = FMT_USP;
+	  else
+	    fprintf(stderr, "Unrecognized format field in %s: %s\n", filename, formatField);
+	  // Similarly for the formatter field.
+	  if (strlen(formatterField) == 0)
+	    ;
+	  else if (!strcmp(formatterField, "FormatOTRUNNION"))
+	    fieldSpec->Formatter = &FormatOTRUNNION;
+	  else if (!strcmp(formatterField, "FormatEarthOrMoonSP"))
+	    fieldSpec->Formatter = &FormatEarthOrMoonSP;
+	  else if (!strcmp(formatterField, "FormatEarthOrMoonDP"))
+	    fieldSpec->Formatter = &FormatEarthOrMoonDP;
+	  else if (!strcmp(formatterField, "FormatEpoch"))
+	    fieldSpec->Formatter = &FormatEpoch;
+	  else if (!strcmp(formatterField, "FormatAdotsOrOga"))
+	    fieldSpec->Formatter = &FormatAdotsOrOga;
+	  else if (!strcmp(formatterField, "FormatDELV"))
+	    fieldSpec->Formatter = &FormatDELV;
+	  else if (!strcmp(formatterField, "FormatRDOT"))
+	    fieldSpec->Formatter = &FormatRDOT;
+	  else if (!strcmp(formatterField, "FormatHalfDP"))
+	    fieldSpec->Formatter = &FormatHalfDP;
+	  else if (!strcmp(formatterField, "FormatGtc"))
+	    fieldSpec->Formatter = &FormatGtc;
+	  else if (!strcmp(formatterField, "FormatHMEAS"))
+	    fieldSpec->Formatter = &FormatHMEAS;
+	  else if (!strcmp(formatterField, "FormatXACTOFF"))
+	    fieldSpec->Formatter = &FormatXACTOFF;
+	  else if (!strcmp(formatterField, "FormatLrRange"))
+	    fieldSpec->Formatter = &FormatLrRange;
+	  else if (!strcmp(formatterField, "FormatLrVz"))
+	    fieldSpec->Formatter = &FormatLrVz;
+	  else if (!strcmp(formatterField, "FormatLrVy"))
+	    fieldSpec->Formatter = &FormatLrVy;
+	  else if (!strcmp(formatterField, "FormatLrVx"))
+	    fieldSpec->Formatter = &FormatLrVx;
+	  else if (!strcmp(formatterField, "FormatRrRange"))
+	    fieldSpec->Formatter = &FormatRrRange;
+	  else if (!strcmp(formatterField, "FormatRrRangeRate"))
+	    fieldSpec->Formatter = &FormatRrRangeRate;
+	  else
+	    fprintf(stderr, "Unrecognized formatter field in %s: %s\n", filename, formatterField);
+	  // Units.
+	  if (!strcmp(unitField, "TBD"))
+	    unitField[0] = 0;
+	  strcpy(fieldSpec->Unit, unitField);
+	}
+      fclose(fp);
+    }
+  // ###DEBUG###
+  printSpecs("after.txt", lmIdToSpec);
+  return CmOrLm;
+}
+
+//---------------------------------------------------------------------------
 // Print a double-precision number.  I cut-and-pasted this from CheckDec.c,
 // and modified trivially;
 
@@ -2130,17 +2381,17 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
 	      DownlinkListExpected = 260; 
 	      DownlinkListZero = -1;
 	    }
-	  else if (Value == 077774)	// LM orbital maneuvers, CM powered list.
-	    DownlinkListExpected = 200;
-	  else if (Value == 077777)	// LM or CM coast align
-	    DownlinkListExpected = 200;
-	  else if (Value == 077775)	// LM or CM rendezvous/prethrust
+	  else if (Value == 077772)	// Lunar surface align
 	    DownlinkListExpected = 200;
 	  else if (Value == 077773)	// LM descent/ascent, CM program 22 list
 	    DownlinkListExpected = 200;
-	  else if (Value == 077772)	// Lunar surface align
+	  else if (Value == 077774)	// LM orbital maneuvers, CM powered list.
+	    DownlinkListExpected = 200;
+	  else if (Value == 077775)	// LM or CM rendezvous/prethrust
 	    DownlinkListExpected = 200;
 	  else if (Value == 077776)	// LM AGS initialization/update, CM entry/update
+	    DownlinkListExpected = 200;
+	  else if (Value == 077777)	// LM or CM coast align
 	    DownlinkListExpected = 200;
 	  else
 	    goto AbortList;

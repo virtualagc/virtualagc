@@ -26,6 +26,8 @@
 #				NATIVE flag, since it shouldn't be needed.
 #				Changed back some stuff for the .exe 
 #				sub-target of all-archs.
+#		2025-03-05 RSB	Compensated for lack of a --static-libs switch
+#				in `sdl-config`.
 
 APPNAME=yaACA3
 
@@ -42,14 +44,20 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
+#-----------------------------------------------------------------------------
+# I've eliminated the following because `sdl-config` seems no longer to have
+# a --static-libs switch.
+
 # This is just so that when I build it, it will be statically linked.  For
 # anybody else, it will just accept whatever your wxWidgets default library is.
-ifeq "${USER}" "rburkey"
+#ifeq "${USER}" "rburkey"
+ifdef NEVER_DO_THIS
 WXSTATIC=--static
 SDLIBS=--static-libs
 else
 SDLIBS=--libs
 endif
+#------------------------------------------------------------------------------
 
 NATIVE_SDL_CFLAGS:=$(shell sdl-config --cflags)
 NATIVE_SDL_LIBS:= $(shell sdl-config ${SDLIBS})

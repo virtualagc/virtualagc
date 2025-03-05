@@ -40,7 +40,7 @@ cmDownlists = {
     [ 42, "RTARG+4=", "B29", "FMT_DP" ],
     [ 44, "TGO=", "B28", "FMT_DP" ],
     [ 46, "PIPTIME1=", "B28", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 48, "DELV=", "B14", "FMT_DP", "&FormatDELV" ],
     [ 50, "DELV+2=", "B14", "FMT_DP", "&FormatDELV" ],
     [ 52, "DELV+4=", "B14", "FMT_DP", "&FormatDELV" ],
@@ -51,14 +51,14 @@ cmDownlists = {
     [ 57, "YCMD=", "B14", "FMT_SP", "&FormatXACTOFF" ],
     [ 58, "CSTEER=", "4", "FMT_SP" ],
     [ 60, "DELVEET1=", "B7", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 66, "REFSMMAT=", "2", "FMT_DP" ],
     [ 68, "REFSMMAT+2=", "2", "FMT_DP" ],
     [ 70, "REFSMMAT+4=", "2", "FMT_DP" ],
     [ 72, "REFSMMAT+6=", "2", "FMT_DP" ],
     [ 74, "REFSMMAT+8=", "2", "FMT_DP" ],
     [ 76, "REFSMMAT+10=", "2", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 78, "STATE=", "B0", "FMT_2OCT" ],
     [ 80, "STATE+2=", "B0", "FMT_2OCT" ],
     [ 82, "STATE+4=", "B0", "FMT_2OCT" ],
@@ -101,7 +101,7 @@ cmDownlists = {
     [ 161, "CSMMASS=", "B16", "FMT_SP" ],
     [ 162, "DAPDATR1=", "B0", "FMT_OCT" ],
     [ 163, "DAPDATR2=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 164, "ERRORX=", "180", "FMT_SP" ],
     [ 165, "ERRORY=", "180", "FMT_SP" ],
     [ 166, "ERRORZ=", "180", "FMT_SP" ],
@@ -213,7 +213,7 @@ cmDownlists = {
     [ 134, "RSBBQ=", "B0", "FMT_2OCT" ],
     [ 137, "CHAN77=", "B0", "FMT_OCT" ],
     [ 138, "C31FLWRD=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 139, "FAILREG=", "B0", "FMT_OCT" ],
     [ 140, "FAILREG+1=", "B0", "FMT_OCT" ],
     [ 141, "FAILREG+2=", "B0", "FMT_OCT" ],
@@ -310,7 +310,7 @@ cmDownlists = {
     [ 72, "DELVSLV+4=", "B7", "FMT_DP" ],
     [ 74, "RANGE=", "B29", "FMT_DP" ],
     [ 76, "RRATE=", "B7", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 78, "STATE=", "B0", "FMT_2OCT" ],
     [ 80, "STATE+2=", "B0", "FMT_2OCT" ],
     [ 82, "STATE+4=", "B0", "FMT_2OCT" ],
@@ -337,7 +337,7 @@ cmDownlists = {
     [ 134, "RSBBQ=", "B0", "FMT_2OCT" ],
     [ 137, "CHAN77=", "B0", "FMT_OCT" ],
     [ 138, "C31FLWRD=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 139, "FAILREG=", "B0", "FMT_OCT" ],
     [ 140, "FAILREG+1=", "B0", "FMT_OCT" ],
     [ 141, "FAILREG+2=", "B0", "FMT_OCT" ],
@@ -356,7 +356,7 @@ cmDownlists = {
     [ 161, "CSMMASS=", "B16", "FMT_SP" ],
     [ 162, "DAPDATR1=", "B0", "FMT_OCT" ],
     [ 163, "DAPDATR2=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 164, "ERRORX=", "180", "FMT_SP" ],
     [ 165, "ERRORY=", "180", "FMT_SP" ],
     [ 166, "ERRORZ=", "180", "FMT_SP" ],
@@ -483,7 +483,7 @@ cmDownlists = {
     [ 161, "CSMMASS=", "B16", "FMT_SP" ],
     [ 162, "DAPDATR1=", "B0", "FMT_OCT" ],
     [ 163, "DAPDATR2=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 164, "ERRORX=", "180", "FMT_SP" ],
     [ 165, "ERRORY=", "180", "FMT_SP" ],
     [ 166, "ERRORZ=", "180", "FMT_SP" ],
@@ -647,14 +647,14 @@ lmDownlists = {
     [ 22, "RTARGZ=", "B29", "FMT_DP" ],
     [ 24, "ELEV=", "360", "FMT_DP" ],
     [ 26, "TEVENT=", "B28", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 28, "REFSMMAT=", "B0", "FMT_DP" ],
     [ 30, "REFSMMAT+2=", "B0", "FMT_DP" ],
     [ 32, "REFSMMAT+4=", "B0", "FMT_DP" ],
     [ 34, "REFSMMAT+6=", "B0", "FMT_DP" ],
     [ 36, "REFSMMAT+8=", "B0", "FMT_DP" ],
     [ 38, "REFSMMAT+10=", "B0", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 40, "TCSI=", "B28", "FMT_DP" ],
     [ 42, "DELVEET1=", "B7", "FMT_DP" ],
     [ 44, "DELVEET1+2=", "B7", "FMT_DP" ],
@@ -673,7 +673,7 @@ lmDownlists = {
     [ -1 ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -692,14 +692,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -722,7 +722,7 @@ lmDownlists = {
     [ -1 ],
     [ 126, "RADMODES=", "B0", "FMT_OCT" ],
     [ 127, "DAPBOOLS=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 128, "POSTORKU=", "32", "FMT_DEC" ],
     [ 129, "NEGTORKU=", "32", "FMT_DEC" ],
     [ 130, "POSTORKV=", "32", "FMT_DEC" ],
@@ -737,7 +737,7 @@ lmDownlists = {
     [ 148, "DELVEET3+4=", "B7", "FMT_DP" ],
     [ 150, "DNRRANGE=", "B0", "FMT_SP", "&FormatRrRange" ],
     [ 151, "DNRRDOT=", "B0", "FMT_SP", "&FormatRrRangeRate" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 152, "DNLRVELX=", "B27", "FMT_SP", "&FormatLrVx" ],
     [ 153, "DNLRVELY=", "B27", "FMT_SP", "&FormatLrVy" ],
     [ 154, "DNLRVELZ=", "B27", "FMT_SP", "&FormatLrVz" ],
@@ -748,7 +748,7 @@ lmDownlists = {
     [ -1 ],
     [ 160, "IMODES30=", "B0", "FMT_OCT" ],
     [ 161, "IMODES33=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 162, "TIG=", "B28", "FMT_DP" ],   
     [ 164, "OMEGAP=", "45", "FMT_SP" ],
     [ 165, "OMEGAQ=", "45", "FMT_SP" ],
@@ -782,7 +782,7 @@ lmDownlists = {
     [ 14, "T-OTHER=", "B28", "FMT_DP" ],
     [ 16, "AGSK=", "B28", "FMT_DP" ],
     [ 18, "TALIGN=", "B28", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 20, "POSTORKU=", "32", "FMT_DEC" ],
     [ 21, "NEGTORKU=", "32", "FMT_DEC" ],
     [ 22, "POSTORKV=", "32", "FMT_DEC" ],
@@ -797,7 +797,7 @@ lmDownlists = {
     [ 34, "REFSMMAT+6=", "B0", "FMT_DP" ],
     [ 36, "REFSMMAT+8=", "B0", "FMT_DP" ],
     [ 38, "REFSMMAT+10=", "B0", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 40, "AOTCODE=", "B0", "FMT_OCT" ],
     [ 42, "RLS=", "B27", "FMT_DP" ],
     [ 44, "RLS+2=", "B27", "FMT_DP" ],
@@ -816,7 +816,7 @@ lmDownlists = {
     [ -1 ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -835,14 +835,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -865,7 +865,7 @@ lmDownlists = {
     [ -1 ],
     [ 126, "RADMODES=", "B0", "FMT_OCT" ],
     [ 127, "DAPBOOLS=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 128, "OGC=", "360", "FMT_DP" ],
     [ 130, "IGC=", "360", "FMT_DP" ],
     [ 132, "MGC=", "360", "FMT_DP" ],
@@ -913,7 +913,7 @@ lmDownlists = {
     [ 12, "V-OTHER+4=", "B7", "FMT_DP" ],
     [ 14, "T-OTHER=", "B28", "FMT_DP" ],
     [ 16, "RANGRDOT=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ], [ -1 ],
     [ 18, "AIG=", "360", "FMT_SP" ],
     [ 19, "AMG=", "360", "FMT_SP" ],
     [ 20, "AOG=", "360", "FMT_SP" ],
@@ -948,7 +948,7 @@ lmDownlists = {
     [ -1 ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -967,14 +967,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -997,7 +997,7 @@ lmDownlists = {
     [ -1 ],
     [ 126, "RADMODES=", "B0", "FMT_OCT" ],
     [ 127, "DAPBOOLS=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 128, "POSTORKU=", "32", "FMT_DEC" ],
     [ 129, "NEGTORKU=", "32", "FMT_DEC" ],
     [ 130, "POSTORKV=", "32", "FMT_DEC" ],
@@ -1012,7 +1012,7 @@ lmDownlists = {
     [ 148, "DELVEET3+4=", "B7", "FMT_DP" ],
     [ 150, "ELEV=", "360", "FMT_DP" ],
     [ 152, "CDUS=", "360", "FMT_SP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 153, "PIPAX=", "B14", "FMT_SP" ],
     [ 154, "PIPAY=", "B14", "FMT_SP" ],
     [ 155, "PIPAZ=", "B14", "FMT_SP" ],
@@ -1023,7 +1023,7 @@ lmDownlists = {
     [ 159, "CSMMASS=", "B16", "FMT_SP" ],
     [ 160, "IMODES30=", "B0", "FMT_OCT" ],
     [ 161, "IMODES33=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 162, "TIG=", "B28", "FMT_DP" ],   
     [ 164, "OMEGAP=", "45", "FMT_SP" ],
     [ 165, "OMEGAQ=", "45", "FMT_SP" ],
@@ -1056,7 +1056,7 @@ lmDownlists = {
     [ 12, "MKTIME=", "B28", "FMT_DP" ],
     [ 14, "HMEAS=", "B28", "FMT_DP", "&FormatHMEAS" ],
     [ 16, "RANGRDOT=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 18, "AIG=", "360", "FMT_SP" ],
     [ 19, "AMG=", "360", "FMT_SP" ],
     [ 20, "AOG=", "360", "FMT_SP" ],
@@ -1075,14 +1075,14 @@ lmDownlists = {
     [ -1 ], 
     [ 40, "TTF/8=", "B17", "FMT_DP" ],
     [ 42, "DELTAH=", "B24", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 44, "RLS=", "B27", "FMT_DP" ],
     [ 46, "RLS+2=", "B27", "FMT_DP" ],
     [ 48, "RLS+4=", "B27", "FMT_DP" ],
     [ 50, "ZDOTD=", "B7", "FMT_DP" ],
     [ 52, "X789=", "B5", "FMT_SP", "FormatEarthOrMoonDP" ],
     [ 54, "X789+2=", "B5", "FMT_SP", "FormatEarthOrMoonDP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 56, "LASTYCMD=", "B0", "FMT_DEC" ],
     [ 57, "LASTXCMD=", "B0", "FMT_DEC" ],
     [ 58, "REDOCTR=", "B0", "FMT_DEC" ],
@@ -1093,7 +1093,7 @@ lmDownlists = {
     [ -1 ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -1112,14 +1112,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -1142,7 +1142,7 @@ lmDownlists = {
     [ -1 ],
     [ 126, "RADMODES=", "B0", "FMT_OCT" ],
     [ 127, "DAPBOOLS=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 128, "POSTORKU=", "32", "FMT_DEC" ],
     [ 129, "NEGTORKU=", "32", "FMT_DEC" ],
     [ 130, "POSTORKV=", "32", "FMT_DEC" ],
@@ -1169,7 +1169,7 @@ lmDownlists = {
     [ 159, "CSMMASS=", "B16", "FMT_SP" ],
     [ 160, "IMODES30=", "B0", "FMT_OCT" ],
     [ 161, "IMODES33=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 162, "TIG=", "B28", "FMT_DP" ],   
     [ 164, "OMEGAP=", "45", "FMT_SP" ],
     [ 165, "OMEGAQ=", "45", "FMT_SP" ],
@@ -1203,7 +1203,7 @@ lmDownlists = {
     [ 12, "V-OTHER+4=", "B7", "FMT_DP" ],
     [ 14, "T-OTHER=", "B28", "FMT_DP" ],
     [ 16, "RANGRDOT=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ], [ -1 ],
     [ 18, "AIG=", "360", "FMT_SP" ],
     [ 19, "AMG=", "360", "FMT_SP" ],
     [ 20, "AOG=", "360", "FMT_SP" ],
@@ -1218,7 +1218,7 @@ lmDownlists = {
     [ 34, "REFSMMAT+6=", "B0", "FMT_DP" ],
     [ 36, "REFSMMAT+8=", "B0", "FMT_DP" ],
     [ 38, "REFSMMAT+10=", "B0", "FMT_DP" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 40, "YNBSAV=", "B1", "FMT_DP" ],
     [ 42, "YNBSAV+2=", "B1", "FMT_DP" ],
     [ 44, "YNBSAV+4=", "B1", "FMT_DP" ],
@@ -1237,7 +1237,7 @@ lmDownlists = {
     [ 61, "THETAD+2=", "360", "FMT_SP" ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -1256,14 +1256,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -1286,7 +1286,7 @@ lmDownlists = {
     [ -1 ],
     [ 126, "RADMODES=", "B0", "FMT_OCT" ],
     [ 127, "DAPBOOLS=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 128, "OGC=", "360", "FMT_DP" ],
     [ 130, "IGC=", "360", "FMT_DP" ],
     [ 132, "MGC=", "360", "FMT_DP" ],
@@ -1297,7 +1297,7 @@ lmDownlists = {
     [ 138, "STARSAV1+2=", "2", "FMT_DP" ],
     [ 140, "STARSAV1+4=", "2", "FMT_DP" ],
     [ 142, "STARSAV2=", "2", "FMT_DP" ],
-    [ 144, "STARSAV2+2=", "2", "FMT_DP" ]
+    [ 144, "STARSAV2+2=", "2", "FMT_DP" ],
     [ 146, "STARSAV2+4=", "2", "FMT_DP" ],
     [ 148, "GSAV=", "2", "FMT_DP" ],
     [ 150, "GSAV+2=", "2", "FMT_DP" ],
@@ -1367,7 +1367,7 @@ lmDownlists = {
     [ -1 ],
     [ 62, "RSBBQ=", "B0", "FMT_OCT" ],
     [ 63, "RSBBQ+1=", "B0", "FMT_OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 64, "OMEGAP=", "45", "FMT_SP" ],
     [ 65, "OMEGAQ=", "45", "FMT_SP" ],
     [ 66, "OMEGAR=", "45", "FMT_SP" ],
@@ -1386,14 +1386,14 @@ lmDownlists = {
     [ 82, "STATE+6=", "B0", "FMT_2OCT" ],
     [ 84, "STATE+8=", "B0", "FMT_2OCT" ],
     [ 86, "STATE+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 88, "DSPTAB=", "B0", "FMT_2OCT" ],
     [ 90, "DSPTAB+2=", "B0", "FMT_2OCT" ],
     [ 92, "DSPTAB+4=", "B0", "FMT_2OCT" ],
     [ 94, "DSPTAB+6=", "B0", "FMT_2OCT" ],
     [ 96, "DSPTAB+8=", "B0", "FMT_2OCT" ],
     [ 98, "DSPTAB+10=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 102, "RN=", "B29", "FMT_DP" ],
     [ 104, "RN+2=", "B29", "FMT_DP" ],
     [ 106, "RN+4=", "B29", "FMT_DP" ],
@@ -1432,7 +1432,7 @@ lmDownlists = {
     [ 152, "UPBUF+14=", "B0", "FMT_2OCT" ],
     [ 154, "UPBUF+16=", "B0", "FMT_2OCT" ],
     [ 156, "UPBUF+18=", "B0", "FMT_2OCT" ],
-    [ -1 ] [ -1 ],
+    [ -1 ], [ -1 ],
     [ 158, "LEMMASS=", "B16", "FMT_SP" ],
     [ 159, "CSMMASS=", "B16", "FMT_SP" ],
     [ 160, "IMODES30=", "B0", "FMT_OCT" ],
@@ -1448,50 +1448,32 @@ lmDownlists = {
 ]
 }
 
-for id in cmDownlists:
-    f = open("ddd-%05o-CM.tsv", "wt")
-    dl = cmDownlists[id]
-    for rec in dl:
-        if len(rec) == 1:
-            offset = -1
-            variable = ""
-            scale = ""
-            format = ""
-            formatter = ""
-            units = ""
-        else:
-            offset = rec[0]
-            variable = rec[1][:-1]
-            scale = rec[2]
-            format = rec[3]
-            if len(rec) > 4:
-                formatter = rec[4]
-            else:
+def doDownlists(downlists, craft):
+    for id in downlists:
+        f = open("ddd-%05o-%s.tsv" % (id, craft), "wt")
+        dl = downlists[id]
+        for rec in dl:
+            if len(rec) == 1:
+                offset = -1
+                variable = ""
+                scale = ""
+                format = ""
                 formatter = ""
-            units = "TBD"
-        print("%d\t%s\%s\%s\%s\%s" % (offset, variable, scale, format, formatter, units), file=f)
-    f.close()
-for id in lmDownlists:
-    f = open("ddd-%05o-LM.tsv", "wt")
-    dl = lmDownlists[id]
-    for rec in dl:
-        if len(rec) == 1:
-            offset = -1
-            variable = ""
-            scale = ""
-            format = ""
-            formatter = ""
-            units = ""
-        else:
-            offset = rec[0]
-            variable = rec[1][:-1]
-            scale = rec[2]
-            format = rec[3]
-            if len(rec) > 4:
-                formatter = rec[4]
+                units = ""
             else:
-                formatter = ""
-            units = "TBD"
-        print("%d\t%s\%s\%s\%s\%s" % (offset, variable, scale, format, formatter, units), file=f)
-    f.close()
+                offset = rec[0]
+                variable = rec[1][:-1]
+                scale = rec[2]
+                format = rec[3]
+                if len(rec) > 4:
+                    formatter = rec[4]
+                    if formatter.startswith("&"):
+                        formatter = formatter[1:]
+                else:
+                    formatter = ""
+                units = "TBD"
+            print("%d\t%s\t%s\t%s\t%s\t%s" % (offset, variable, scale, format, formatter, units), file=f)
+        f.close()
 
+doDownlists(cmDownlists, "CM")
+doDownlists(lmDownlists, "LM")

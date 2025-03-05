@@ -106,7 +106,7 @@
 		03/27/17 MAS	Added a bit for Night Watchman's 1.28s-long assertion of
 				its channel 77 bit.
 		03/29/17 RSB    More integer types needed for Windows.
-    04/02/17 MAS  Added a couple of flags used for simulation of the
+		04/02/17 MAS    Added a couple of flags used for simulation of the
                 		TC Trap hardware bug.
 		04/16/17 MAS    Added a voltage counter and input flag for the AGC
 				warning filter, as well as a channel 163 flag for
@@ -121,6 +121,8 @@
 				functions that are safe for us to use.
 		01/29/24 MAS	Added the 4-bit RadarGateCounter for timing
 				RADARUPT generation.
+		03/03/25 RSB	Added `dddConfigure`.  Added a units field to
+				`FieldSpec_t`.
 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -326,6 +328,7 @@ typedef struct {
   int Scale;
   Format_t Format;
   Sformat_t *Formatter;
+  char Unit[32];
   int Row;		// If 0,0, then just "next" position.
   int Col;
 } FieldSpec_t;
@@ -566,6 +569,7 @@ int AddSP16 (int Addend1, int Addend2);
 void UnprogrammedIncrement (agc_t *State, int Counter, int IncType);
 
 void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);
+int dddConfigure(char *agcSoftware);
 ProcessDownlinkList_t PrintDownlinkList;
 void PrintDP (int *Ptr, int Scale, int row, int col);
 void PrintSP (int *Ptr, int Scale, int row, int col);

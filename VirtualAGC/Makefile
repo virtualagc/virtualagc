@@ -91,6 +91,7 @@
 #		2016-11-29 RSB	Fixed formation of .app sub-directories for Mac.
 #		2017-08-24 RSB	Added wxFLAGS.
 #		2017-12-11 RSB	Added yaDSKY2/*.canned files.
+#		2025-03-03 RSB	Accounted for ddd-*.tsv files in Resources/
 
 APP=VirtualAGC
 # *** BEWARE! ***  The MISSIONS variable is normally inherited from the 
@@ -270,7 +271,7 @@ endif
 	-rm -rf $@/images-yaDSKYb1/CVS $@/images-yaDSKYb1/.xvpics
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics
-	${CP} ../yaTelemetry/*.jpg $@
+	${CP} ../yaTelemetry/*.jpg ../yaAGC/ddd-*.tsv $@
 	${CP} ../Contributed/LM_Simulator $@
 	${CP} VirtualAGC.tcl $@
 	-rm -rf $@/LM_Simulator/CVS

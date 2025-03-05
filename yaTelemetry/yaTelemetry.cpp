@@ -49,6 +49,8 @@
                 2025-01-01 RSB  Had been required to keep the executable in the
                                 same folder as the image files it loads; fixed
                                 that.
+                2025-02-27 RSB  Began adapting for downlist specifications that
+                                vary by AGC software+version.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -88,6 +90,7 @@ using namespace std;
 
 ProcessDownlinkList_t PrintMsk683, PrintMsk966, PrintMsk1123, PrintMsk1137;
 
+static char agcSoftware[32] = "";
 #define PULSE_INTERVAL 100
 static char DefaultHostname[] = "localhost";
 char *Hostname = DefaultHostname;
@@ -718,6 +721,7 @@ bool yaTelemetryApp::OnInit()
     // Read the command-line arguments.
     Portnum = 19800;
     CmOrLm = 0;
+
     for (i = 1; i < argc; i++)
       {
         long IntValue;
@@ -763,7 +767,19 @@ bool yaTelemetryApp::OnInit()
             printf ("                     of the upper-left corner, relative to the upper\n");
             printf ("                     left of the screen.\n");
             printf ("     --spacecraft=S  The type of spacecraft, either LM or CM.  This\n");
-            printf ("                     defaults to LM.\n");
+            printf ("                     defaults to LM.  Note, however, that this value,\n");
+            printf ("                     may be overridden by the --software option below.\n");
+            printf ("                     Conversely, though, --spacecraft should usually be\n");
+            printf ("                     specified even if the --software option is given.\n");
+            printf ("     --software=S    Indicates the downlist specification appropriate\n");
+            printf ("                     for the specific AGC software+revision. If omitted,\n");
+            printf ("                     then generic specifications appropriate to the\n");
+            printf ("                     --software option are used. The AGC software+revision,\n");
+            printf ("                     such as in Luminary099 or Comanche055, must match the\n");
+            printf ("                     corresponding folder name for that software in the\n");
+            printf ("                     Virtual AGC software repository, or else be one of the\n");
+            printf ("                     generic designations LM or CM to match --spacecraft.\n");
+            printf ("                     Note also that these values are all case-sensitive.\n");
             printf ("     --font-size=P   Font size, in points.  Defaults to %d on this\n", DEFAULT_FONTSIZE_RETRO);
             printf ("                     platform for the default or --undecorated style,\n");
             printf ("                     and to %d for the --simple style (see below).\n", DEFAULT_FONTSIZE_RESIZABLE);
@@ -818,6 +834,10 @@ bool yaTelemetryApp::OnInit()
                 goto Help;
               }
           }
+        else if (Command.IsSameAs (wxT ("--software")))
+          {
+            strcpy(agcSoftware, Value.mb_str());
+          }
         else if (Command.IsSameAs (wxT ("--font-size")))
           {
             Points = IntValue;
@@ -840,13 +860,21 @@ bool yaTelemetryApp::OnInit()
           }
       }
 
+    // Let's figure out what downlist specification to use.
+    if (strlen(agcSoftware) == 0)
+      {
+	if (CmOrLm)
+	  strcpy(agcSoftware, "CM");
+	else
+	  strcpy(agcSoftware, "LM");
+      }
+    CmOrLm = dddConfigure(agcSoftware);
+
     printf ("     --delay=%d\n", StartupDelay);
     printf ("     --port=%d\n", Portnum);
     printf ("     --ip=%s\n", Hostname);
-    if (CmOrLm)
-      printf ("     --spacecraft=CM\n");
-    else
-      printf ("     --spacecraft=LM\n");
+    printf ("      --spacecraft=%d\n", CmOrLm);
+    printf ("     --software=%s\n", agcSoftware);
     printf ("     --font-size=%d\n", Points);
 #ifdef __APPLE__
     Undecorated = true;
