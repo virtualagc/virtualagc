@@ -68,6 +68,8 @@
 #include <string.h>
 #include "agc_engine.h"
 
+#define DEBUG_DOWNLIST_SPEC_FILES
+
 //#define FLOAT_SCALE (1.0 / 0x10000000)
 #define FLOAT_SCALE (1.0 / 02000000000)
 #define S_FLOAT_SCALE (1.0 / 040000)
@@ -2019,6 +2021,11 @@ dddConfigure (char *agcSoftware)
 	    {
 	      fprintf(stderr, "Records read from %s:  %d\n", filename, i);
 	      break;
+	    }
+	  if (strlen(line) > 0 && line[0] == '#')
+	    {
+	      i--;
+	      continue;
 	    }
 	  //fprintf(stderr, "\tParsing line: %s", line);
 	  for (s = line, n = 0; n < 6; s = ss + 1, n++)
