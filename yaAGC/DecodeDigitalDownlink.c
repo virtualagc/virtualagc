@@ -59,6 +59,10 @@
 		11/22/10 RSB    Eliminated a compiler warning I suddenly
 				encountered in Ubuntu 10.04.
 		03/03/25 RSB	Added `dddConfigure`.
+		03/06/25 RSB	Some corrections (or at least changes) to the
+				hard-coded downlist specifications.
+				Changed interpretation of { -1 } spacers in
+				downlists.
   
 */
 
@@ -284,6 +288,16 @@ FormatAdotsOrOga (int IndexIntoList, int Scale, Format_t Format)
   return (DefaultFormatBuffer);
 }
 
+// CM CDUT
+static char *
+FormatCDUT (int IndexIntoList, int Scale, Format_t Format)
+{
+  double x;
+  x = GetDP (&DownlinkListBuffer[IndexIntoList], Scale);
+  sprintf (DefaultFormatBuffer, "%.10g", x + 19.7754);
+  return (DefaultFormatBuffer);
+}
+
 // CM Powered list -- DELVs
 static char *
 FormatDELV (int IndexIntoList, int Scale, Format_t Format)
@@ -410,7 +424,7 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
-    { 19, "CDUT=", B0, FMT_OCT },	// Confused about this one.
+    { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 24, "ADOT+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -453,6 +467,7 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { 82, "STATE+4=", B0, FMT_2OCT },
     { 84, "STATE+6=", B0, FMT_2OCT },
     { 86, "STATE+8=", B0, FMT_2OCT },
+    { 152, "STATE+10=", B0, FMT_2OCT },
     { -1 },
     { 88, "DSPTAB=", B0, FMT_2OCT },
     { 90, "DSPTAB+2=", B0, FMT_2OCT },
@@ -468,7 +483,8 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { 110, "V-OTHER+2=", B7, FMT_DP },
     { 112, "V-OTHER+4=", B7, FMT_DP },
     { 114, "T-OTHER=", B28, FMT_DP },
-    { 134, "RSBBQ=", B0, FMT_2OCT },
+    { 134, "RSBBQ=", B0, FMT_OCT },
+    { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
     { 138, "C31FLWRD=", B0, FMT_OCT },
     { -1 },
@@ -482,7 +498,6 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { 146, "ELEV=", 360, FMT_DP },
     { 148, "CENTANG=", 360, FMT_DP },
     { 150, "OFFSET=", B29, FMT_DP },
-    { 152, "STATE+10=", B0, FMT_2OCT },
     { 154, "TEVENT=", B28, FMT_DP },
     { 158, "OPTMODES=", B0, FMT_OCT },
     { 159, "HOLDFLAG=", B0, FMT_DEC },
@@ -543,12 +558,12 @@ static DownlinkListSpec_t LmOrbitalManeuversSpec = {
     { 24, "ELEV=", 360, FMT_DP },
     { 26, "TEVENT=", B28, FMT_DP },
     { -1 }, { -1 },
-    { 28, "REFSMMAT=", B0, FMT_DP },
-    { 30, "REFSMMAT+2=", B0, FMT_DP },
-    { 32, "REFSMMAT+4=", B0, FMT_DP },
-    { 34, "REFSMMAT+6=", B0, FMT_DP },
-    { 36, "REFSMMAT+8=", B0, FMT_DP },
-    { 38, "REFSMMAT+10=", B0, FMT_DP },
+    { 28, "REFSMMAT=", 2, FMT_DP },
+    { 30, "REFSMMAT+2=", 2, FMT_DP },
+    { 32, "REFSMMAT+4=", 2, FMT_DP },
+    { 34, "REFSMMAT+6=", 2, FMT_DP },
+    { 36, "REFSMMAT+8=", 2, FMT_DP },
+    { 38, "REFSMMAT+10=", 2, FMT_DP },
     { -1 }, { -1 },
     { 40, "TCSI=", B28, FMT_DP },
     { 42, "DELVEET1=", B7, FMT_DP },
@@ -580,7 +595,7 @@ static DownlinkListSpec_t LmOrbitalManeuversSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -682,7 +697,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
-    { 19, "CDUT=", B0, FMT_OCT },	// Confused about this one.
+    { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 24, "ADOT+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -711,7 +726,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 52, "MARK2DWN+6=", 45, FMT_SP, &FormatOTRUNNION },
     { 54, "HAPOX=", B29, FMT_DP },
     { 56, "HPERX=", B29, FMT_DP },
-    { 58, "DELTAR=", 360, FMT_DP },		// Differs between Colossus 1 & 3
+    { 58, "DELTAR=", 360, FMT_DP },	// Differs between Colossus 1 & 3
     { 58, "PACTOFF=", B14, FMT_SP, &FormatXACTOFF },
     { 59, "YACTOFF=", B14, FMT_SP, &FormatXACTOFF },
     { 60, "VGTIG=", B7, FMT_DP },
@@ -728,6 +743,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 82, "STATE+4=", B0, FMT_2OCT },
     { 84, "STATE+6=", B0, FMT_2OCT },
     { 86, "STATE+8=", B0, FMT_2OCT },
+    { 152, "STATE+10=", B0, FMT_2OCT },
     { -1 },
     { 88, "DSPTAB=", B0, FMT_2OCT },
     { 90, "DSPTAB+2=", B0, FMT_2OCT },
@@ -735,6 +751,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 94, "DSPTAB+6=", B0, FMT_2OCT },
     { 96, "DSPTAB+8=", B0, FMT_2OCT },
     { 98, "DSPTAB+10=", B0, FMT_2OCT },
+    { -1 },
     { 102, "R-OTHER=", B29, FMT_DP },
     { 104, "R-OTHER+2=", B29, FMT_DP },
     { 106, "R-OTHER+4=", B29, FMT_DP },
@@ -746,10 +763,11 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
     { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
     { 128, "TET=", B28, FMT_DP },	// ... or this
-    { 134, "RSBBQ=", B0, FMT_2OCT },
+    { 134, "RSBBQ=", B0, FMT_OCT },
+    { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
     { 138, "C31FLWRD=", B0, FMT_OCT },
-    { -1 }, { -1 },
+    { -1 }, //{ -1 },
     { 139, "FAILREG=", B0, FMT_OCT },
     { 140, "FAILREG+1=", B0, FMT_OCT },
     { 141, "FAILREG+2=", B0, FMT_OCT },
@@ -761,7 +779,6 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 146, "OGC=", 360, FMT_DP },
     { 148, "IGC=", 360, FMT_DP },
     { 150, "MGC=", 360, FMT_DP },
-    { 152, "STATE+10=", B0, FMT_2OCT },
     { 154, "TEVENT=", B28, FMT_DP },
     { 156, "LAUNCHAZ=", 360, FMT_DP },
     { 158, "OPTMODES=", B0, FMT_OCT },
@@ -773,7 +790,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 164, "ERRORX=", 180, FMT_SP },
     { 165, "ERRORY=", 180, FMT_SP },
     { 166, "ERRORZ=", 180, FMT_SP },
-    { -1 },
+    { -1 }, { -1 },
     { 168, "WBODY=", 450, FMT_DP, &FormatAdotsOrOga },
     { 170, "WBODY+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 172, "WBODY+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -819,12 +836,12 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { 25, "DNRRDOT=", B0, FMT_SP, &FormatRrRangeRate },
     { 26, "TEVENT=", B28, FMT_DP },
     { -1 },
-    { 28, "REFSMMAT=", B0, FMT_DP },
-    { 30, "REFSMMAT+2=", B0, FMT_DP },
-    { 32, "REFSMMAT+4=", B0, FMT_DP },
-    { 34, "REFSMMAT+6=", B0, FMT_DP },
-    { 36, "REFSMMAT+8=", B0, FMT_DP },
-    { 38, "REFSMMAT+10=", B0, FMT_DP },
+    { 28, "REFSMMAT=", 2, FMT_DP },
+    { 30, "REFSMMAT+2=", 2, FMT_DP },
+    { 32, "REFSMMAT+4=", 2, FMT_DP },
+    { 34, "REFSMMAT+6=", 2, FMT_DP },
+    { 36, "REFSMMAT+8=", 2, FMT_DP },
+    { 38, "REFSMMAT+10=", 2, FMT_DP },
     { -1 }, { -1 },
     { 40, "AOTCODE=", B0, FMT_OCT },
     { 42, "RLS=", B27, FMT_DP },
@@ -857,7 +874,7 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -949,7 +966,7 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
-    { 19, "CDUT=", B0, FMT_OCT },	// Confused about this one.
+    { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 24, "ADOT+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -994,6 +1011,7 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 82, "STATE+4=", B0, FMT_2OCT },
     { 84, "STATE+6=", B0, FMT_2OCT },
     { 86, "STATE+8=", B0, FMT_2OCT },
+    { 198, "STATE+10=", B0, FMT_2OCT },
     { -1 },
     { 88, "DSPTAB=", B0, FMT_2OCT },
     { 90, "DSPTAB+2=", B0, FMT_2OCT },
@@ -1001,6 +1019,7 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 94, "DSPTAB+6=", B0, FMT_2OCT },
     { 96, "DSPTAB+8=", B0, FMT_2OCT },
     { 98, "DSPTAB+10=", B0, FMT_2OCT },
+    { -1 },
     { 102, "R-OTHER=", B29, FMT_DP },
     { 104, "R-OTHER+2=", B29, FMT_DP },
     { 106, "R-OTHER+4=", B29, FMT_DP },
@@ -1012,7 +1031,8 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
     { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
     { 128, "TET=", B28, FMT_DP },	// ... or this
-    { 134, "RSBBQ=", B0, FMT_2OCT },
+    { 134, "RSBBQ=", B0, FMT_OCT },
+    { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
     { 138, "C31FLWRD=", B0, FMT_OCT },
     { -1 }, { -1 },
@@ -1023,7 +1043,7 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 143, "PIPAX=", B14, FMT_SP },
     { 144, "PIPAY=", B14, FMT_SP },
     { 145, "PIPAZ=", B14, FMT_SP }, 
-    { 146, "DIFFALT=", B0, FMT_2DEC },	// Don't yet know the scaling of this.
+    { 146, "DIFFALT=", B29, FMT_DP },
     { 148, "CENTANG=", 360, FMT_DP },
     { 152, "DELVEET3=", B7, FMT_DP },
     { 154, "DELVEET3+2=", B7, FMT_DP },
@@ -1060,7 +1080,6 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 192, "LNG(SPL)=", 360, FMT_DP },
     { 194, "VPRED=", B7, FMT_DP },
     { 196, "GAMMAEI=", 360, FMT_DP },
-    { 198, "STATE+10=", B0, FMT_2OCT }
   }
 };
 
@@ -1105,8 +1124,8 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { -1 },
-    { 56, "LASTYCMD=", B0, FMT_DEC },
-    { 57, "LASTXCMD=", B0, FMT_DEC },
+    { 56, "LASTYCMD=", B0, FMT_OCT },
+    { 57, "LASTXCMD=", B0, FMT_OCT },
     { 58, "REDOCTR=", B0, FMT_DEC },
     { -1 },
     { 59, "THETAD=", 360, FMT_SP },
@@ -1127,7 +1146,7 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -1228,7 +1247,7 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
-    { 19, "CDUT=", B0, FMT_OCT },	// Confused about this one.
+    { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 24, "ADOT+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -1277,6 +1296,8 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 82, "STATE+4=", B0, FMT_2OCT },
     { 84, "STATE+6=", B0, FMT_2OCT },
     { 86, "STATE+8=", B0, FMT_2OCT },
+    { 152, "STATE+10=", B0, FMT_2OCT },
+    { -1 },
     { 88, "DSPTAB=", B0, FMT_2OCT },
     { 90, "DSPTAB+2=", B0, FMT_2OCT },
     { 92, "DSPTAB+4=", B0, FMT_2OCT },
@@ -1289,7 +1310,8 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
     { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
     { 128, "TET=", B28, FMT_DP },	// ... or this
-    { 134, "RSBBQ=", B0, FMT_2OCT },
+    { 134, "RSBBQ=", B0, FMT_OCT },
+    { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
     { 138, "C31FLWRD=", B0, FMT_OCT },
     { -1 },
@@ -1301,7 +1323,7 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 144, "PIPAY=", B14, FMT_SP },
     { 145, "PIPAZ=", B14, FMT_SP },
     { 146, "8NN=", B0, FMT_DEC },
-    { 152, "STATE+10=", B0, FMT_2OCT },
+    { -1 },
     { 154, "RLS=", B27, FMT_DP },
     { 156, "RLS+2=", B27, FMT_DP },
     { 158, "RLS+4=", B27, FMT_DP },
@@ -1379,8 +1401,8 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { -1 }, { -1 },
-    { 56, "LASTYCMD=", B0, FMT_DEC },
-    { 57, "LASTXCMD=", B0, FMT_DEC },
+    { 56, "LASTYCMD=", B0, FMT_OCT },
+    { 57, "LASTXCMD=", B0, FMT_OCT },
     { 58, "REDOCTR=", B0, FMT_DEC },
     { -1 },
     { 59, "THETAD=", 360, FMT_SP },
@@ -1401,7 +1423,7 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -1512,12 +1534,12 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 23, "TANGNB+1=", 360, FMT_SP },
     { 24, "MARKTIME=", B28, FMT_DP },
     { 26, "TALIGN=", B28, FMT_DP },
-    { 28, "REFSMMAT=", B0, FMT_DP },
-    { 30, "REFSMMAT+2=", B0, FMT_DP },
-    { 32, "REFSMMAT+4=", B0, FMT_DP },
-    { 34, "REFSMMAT+6=", B0, FMT_DP },
-    { 36, "REFSMMAT+8=", B0, FMT_DP },
-    { 38, "REFSMMAT+10=", B0, FMT_DP },
+    { 28, "REFSMMAT=", 2, FMT_DP },
+    { 30, "REFSMMAT+2=", 2, FMT_DP },
+    { 32, "REFSMMAT+4=", 2, FMT_DP },
+    { 34, "REFSMMAT+6=", 2, FMT_DP },
+    { 36, "REFSMMAT+8=", 2, FMT_DP },
+    { 38, "REFSMMAT+10=", 2, FMT_DP },
     { -1 }, { -1 },
     { 40, "YNBSAV=", B1, FMT_DP },
     { 42, "YNBSAV+2=", B1, FMT_DP },
@@ -1529,8 +1551,8 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { -1 },
     { 52, "X789=", B5, FMT_SP, &FormatEarthOrMoonDP },
     { 54, "X789+2=", B5, FMT_SP, &FormatEarthOrMoonDP },
-    { 56, "LASTYCMD=", B0, FMT_DEC },
-    { 57, "LASTXCMD=", B0, FMT_DEC },
+    { 56, "LASTYCMD=", B0, FMT_OCT },
+    { 57, "LASTXCMD=", B0, FMT_OCT },
     { 58, "REDOCTR=", B0, FMT_DEC },
     { 59, "THETAD=", 360, FMT_SP },
     { 60, "THETAD+1=", 360, FMT_SP },
@@ -1549,7 +1571,7 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -1644,7 +1666,7 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
-    { 19, "CDUT=", B0, FMT_OCT },	// Confused about this one.
+    { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
     { 24, "ADOT+4=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -1689,6 +1711,8 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 82, "STATE+4=", B0, FMT_2OCT },
     { 84, "STATE+6=", B0, FMT_2OCT },
     { 86, "STATE+8=", B0, FMT_2OCT },
+    { 196, "STATE+10=", B0, FMT_2OCT },
+    { -1 },
     { 88, "DSPTAB=", B0, FMT_2OCT },
     { 90, "DSPTAB+2=", B0, FMT_2OCT },
     { 92, "DSPTAB+4=", B0, FMT_2OCT },
@@ -1737,16 +1761,15 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 182, "CHN13,14=", B0, FMT_2OCT },
     { 184, "CHN30,31=", B0, FMT_2OCT },
     { 186, "CHN32,33=", B0, FMT_2OCT },
-    { 188, "RSBBQ=", B0, FMT_2OCT },
+    { 188, "RSBBQ=", B0, FMT_OCT },
+    { 189, "RSBBQ+1=", B0, FMT_OCT },
     { 191, "CHAN77=", B0, FMT_OCT },
     { 192, "C31FLWRD=", B0, FMT_OCT },
     { -1 },
     { 193, "FAILREG=", B0, FMT_OCT },
     { 194, "FAILREG+1=", B0, FMT_OCT },
     { 195, "FAILREG+2=", B0, FMT_OCT },
-    { -1 },
-    { 196, "STATE+10=", B0, FMT_2OCT },
-    { 196, "GAMMAEI=", 360, FMT_DP }
+    { 198, "GAMMAEI=", 360, FMT_DP },
   }
 };
 
@@ -1808,7 +1831,7 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 72, "CDUX=", 360, FMT_SP },
     { 73, "CDUY=", 360, FMT_SP },
     { 74, "CDUZ=", 360, FMT_SP },
-    { 75, "CDUT=", 360, FMT_OCT },
+    { 75, "RR_TRUN=", 360, FMT_SP },
     { 76, "STATE=", B0, FMT_2OCT },
     { 78, "STATE+2=", B0, FMT_2OCT },
     { 80, "STATE+4=", B0, FMT_2OCT },
@@ -2109,6 +2132,8 @@ dddConfigure (char *agcSoftware)
 	    fieldSpec->Formatter = &FormatEpoch;
 	  else if (!strcmp(formatterField, "FormatAdotsOrOga"))
 	    fieldSpec->Formatter = &FormatAdotsOrOga;
+	  else if (!strcmp(formatterField, "FormatCDUT"))
+	    fieldSpec->Formatter = &FormatCDUT;
 	  else if (!strcmp(formatterField, "FormatDELV"))
 	    fieldSpec->Formatter = &FormatDELV;
 	  else if (!strcmp(formatterField, "FormatRDOT"))
@@ -2235,6 +2260,15 @@ PrintField (const FieldSpec_t *FieldSpec)
     {
       row = LastRow;
       col = LastCol;
+    }
+  if (FieldSpec->IndexIntoList < 0)
+    {
+      if (col > 0)
+	{
+	  LastCol = 0;
+	  LastRow = row + 1;
+	}
+      return;
     }
   LastCol = col + 20;
   if (LastCol < Swidth)
