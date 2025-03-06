@@ -2038,7 +2038,7 @@ dddConfigure (char *agcSoftware)
 	  // but %s will simply skip right past them.  So we have to read entire
 	  // lines an find the tab delimiters ourself.
 	  int n, offset;
-	  char *s, *ss, line[81], *offsetField, *varField, *scalerField, *formatField,
+	  char *s, *ss, line[200], *offsetField, *varField, *scalerField, *formatField,
 	    *formatterField, *unitField;
 	  if (NULL == fgets(line, sizeof(line), fp))
 	    {
