@@ -1922,7 +1922,10 @@ DownlinkListSpec_t *DownlinkListSpecs[11] = {
 //---------------------------------------------------------------------------
 /*
  * Perform certain manipulations on a `DownlinkListSpec_t` structure to
- * improve the viewing experience.  At present, those cleanups are as follows:
+ * improve the viewing experience.  The potential cleanups are as follows,
+ * though in the sober light of day, I realize that not all of them make
+ * good sense and thus have either not implemented them or else disabled them
+ * after implementing them:
  *
  *   1.	Remove all "spacer" elements.  Those were created manually, were never
  *   	thoroughly checked, and are difficult to maintain.  Not to mention, they
@@ -1933,6 +1936,7 @@ DownlinkListSpec_t *DownlinkListSpecs[11] = {
  *   3.	Whenever a set of at least two (possibly change this later to 3)
  *   	consecutive variables VARIABLE, VARIABLE+n are found, insert a spacer
  *   	element prior to the first one.
+ *   4.	Convert all spaces in variable names to underscores.
  */
 
 // Pop a `FieldSpec_t` at a given index in a `DownlinkListSpec_t` structure.
@@ -1977,9 +1981,11 @@ dddCmp (const void *e1, const void *e2)
 void
 dddNormalize(DownlinkListSpec_t *dls)
 {
+  int i;
+  FieldSpec_t *FieldSpecs;
 #ifdef DO_DDD_NORMALIZATION
-  int i, numNames;
-  FieldSpec_t *FieldSpecs, fs;
+  int numNames;
+  FieldSpec_t *Fifs;
   dddName_t names[MAX_DOWNLINK_LIST];
 
   // Step 1:  Eliminate all spacers.
@@ -2050,6 +2056,18 @@ dddNormalize(DownlinkListSpec_t *dls)
 	}
     }
 #endif // DO_DDD_NORMALIZATION
+
+  // Step 4:  Convert spaces to underscores.
+  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+    {
+      char *s;
+      FieldSpecs = dls->FieldSpecs;
+      if (FieldSpecs[i].IndexIntoList < 0)
+	continue;
+      for (s = FieldSpecs[i].Name; *s; s++)
+	if (*s == ' ')
+	  *s = '_';
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -2207,6 +2225,8 @@ dddConfigure (char *agcSoftware)
       FILE *fp;
       int i;
       dls = IdToSpec[id - 077772];
+      if (dls == NULL)
+	continue;
       sprintf(filename, "ddd-%05o-%s.tsv", id, agcSoftware);
       fp = fopen(filename, "rt");
       if (fp == NULL)
