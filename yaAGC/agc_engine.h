@@ -123,6 +123,7 @@
 				RADARUPT generation.
 		03/03/25 RSB	Added `dddConfigure`.  Added a units field to
 				`FieldSpec_t`.
+		03/08/25 RSB	Adjusted displayed line width.
 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -286,12 +287,16 @@ extern long random (void);
 
 #define NUM_INTERRUPT_TYPES 10
 
-// Max number of 15-bit words in a downlink-telemetry list.
-#define MAX_DOWNLINK_LIST 260
+// Max number of 15-bit words in a downlink-telemetry list.  I'm pretty sure
+// that 200 is the actual max, but I've beefed it up somewhat to allow
+// insertion of "spacer" elements for display purposes.
+#define MAX_DOWNLINK_LIST 400
 
 // Screen buffer for telemetry downlinks.  The terminal must be at least
 // one bigger in each dimension than the actual amount of text used.
-#define DEFAULT_SWIDTH 79
+//#define DISPLAYED_FIELD_WIDTH 20
+#define DISPLAYED_FIELD_WIDTH 24
+#define DEFAULT_SWIDTH (4*DISPLAYED_FIELD_WIDTH - 1)
 #define DEFAULT_SHEIGHT 42
 #define SWIDTH 160
 #define SHEIGHT 100
@@ -322,9 +327,11 @@ typedef enum {
 typedef void Swrite_t (void);
 typedef char *Sformat_t (int IndexIntoList, int Scale, Format_t Format);
 
+typedef char FieldSpecName_t[65];
+
 typedef struct {
   int IndexIntoList;	// if -1, then is a spacer.
-  char Name[65];
+  FieldSpecName_t Name;
   int Scale;
   Format_t Format;
   Sformat_t *Formatter;

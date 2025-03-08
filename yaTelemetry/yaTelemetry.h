@@ -23,6 +23,8 @@
   Reference:	http://www.ibibio.org/apollo
   Mode:		2009-03-09 RSB.	Began.
   		2009-04-07 RSB	Began adding stuff related to MSK formatting.
+  		2025-03-08 RSB	Tied screen width to number of text columns
+  				in agc_engine.h.
 */
 
 #include <wx/wx.h>
@@ -34,10 +36,11 @@
 #ifndef YATELEMETRY_H
 #define YATELEMETRY_H
 
+#include "../yaAGC/agc_engine.h"
 
 // Screen size.
 #define TELEMETRY_ROWS 40
-#define TELEMETRY_COLUMNS 80
+#define TELEMETRY_COLUMNS (4 * DISPLAYED_FIELD_WIDTH)
 
 // begin wxGlade: ::extracode
 // end wxGlade

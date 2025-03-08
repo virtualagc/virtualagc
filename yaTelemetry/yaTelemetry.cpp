@@ -51,6 +51,7 @@
                                 that.
                 2025-02-27 RSB  Began adapting for downlist specifications that
                                 vary by AGC software+version.
+                2025-03-08 RSB	Moved #include for agc_engine.h to yaTelemetry.h.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -73,7 +74,6 @@
 
 #include "yaTelemetry.h"
 #include "../yaAGC/yaAGC.h"
-#include "../yaAGC/agc_engine.h"
 
 MainFrameClass *MainFrame = NULL;
 SimpleFrameClass *SimpleFrame = NULL;

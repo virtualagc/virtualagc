@@ -63,6 +63,8 @@
 				hard-coded downlist specifications.
 				Changed interpretation of { -1 } spacers in
 				downlists.
+		03/08/25 RSB	Increased the width of displayed fields from 20
+				to 24.  (See `DISPLAYED_FIELD_WIDTH`.)
   
 */
 
@@ -1918,6 +1920,139 @@ DownlinkListSpec_t *DownlinkListSpecs[11] = {
 };
 
 //---------------------------------------------------------------------------
+/*
+ * Perform certain manipulations on a `DownlinkListSpec_t` structure to
+ * improve the viewing experience.  At present, those cleanups are as follows:
+ *
+ *   1.	Remove all "spacer" elements.  Those were created manually, were never
+ *   	thoroughly checked, and are difficult to maintain.  Not to mention, they
+ *   	conflict with some of the operations below.
+ *   2.	Whenever a set of variables like VARIABLE and VARIABLE+n are found,
+ *   	bubble them around so that they're both contiguous and in order of
+ *   	increasing n (where VARIABLE is treated like VARIABLE+0).
+ *   3.	Whenever a set of at least two (possibly change this later to 3)
+ *   	consecutive variables VARIABLE, VARIABLE+n are found, insert a spacer
+ *   	element prior to the first one.
+ */
+
+// Pop a `FieldSpec_t` at a given index in a `DownlinkListSpec_t` structure.
+// The return structure for the FieldSpec_t must have been pre-allocated.
+void
+dddPop(DownlinkListSpec_t *dls, int index, FieldSpec_t *fs)
+{
+  memcpy(fs, &(dls->FieldSpecs[index]), sizeof(FieldSpec_t));
+  if (index < MAX_DOWNLINK_LIST - 1)
+    memmove(&(dls->FieldSpecs[index]), &(dls->FieldSpecs[index + 1]),
+	sizeof(FieldSpec_t) * (MAX_DOWNLINK_LIST - 1 - index));
+  memset(&(dls->FieldSpecs[MAX_DOWNLINK_LIST - 1]), 0, sizeof(FieldSpec_t));
+}
+
+// Push a `FieldSpec_t` into a given index in a `DownlinkListSpec_t` structure.
+void
+dddPush(DownlinkListSpec_t *dls, int index, FieldSpec_t *fs)
+{
+  if (index < MAX_DOWNLINK_LIST - 1)
+    memmove(&(dls->FieldSpecs[index + 1]), &(dls->FieldSpecs[index]),
+	sizeof(FieldSpec_t) * (MAX_DOWNLINK_LIST - 1 - index));
+  memcpy(&(dls->FieldSpecs[index]), fs, sizeof(FieldSpec_t));
+}
+
+// A comparison function for sorting the field-spec names.
+typedef struct {
+  char name[DISPLAYED_FIELD_WIDTH];
+  int index;
+} dddName_t;
+int
+dddCmp (const void *e1, const void *e2)
+{
+  dddName_t *s1 = (dddName_t *) e1, *s2 = (dddName_t *) e2;
+  int i;
+
+  i = strcmp(s1->name, s2->name);
+  if (i != 0)
+    return i;
+  return s1->index - s2->index;
+}
+
+void
+dddNormalize(DownlinkListSpec_t *dls)
+{
+#ifdef DO_DDD_NORMALIZATION
+  int i, numNames;
+  FieldSpec_t *FieldSpecs, fs;
+  dddName_t names[MAX_DOWNLINK_LIST];
+
+  // Step 1:  Eliminate all spacers.
+  FieldSpecs = dls->FieldSpecs;
+  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+    if (FieldSpecs[i].IndexIntoList == -1)
+      {
+	dddPop(dls, i, &fs);
+	i--;
+      }
+
+  // Step 2:  Group stuff like VARIABLE, VARIABLE+n together.  A preliminary
+  // step is to sort the variable names, so that we can even find out if there
+  // are any sets of names like this.  This is done into the `names` array.
+  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+    {
+      int n, length;
+      char *plus, *Name;
+      FieldSpecName_t name;
+
+      Name = FieldSpecs[i].Name;
+      plus = strstr(Name, "+");
+      if (plus == NULL)
+	{
+	  n = 0;
+	  length = strlen(Name) - 1;
+	}
+      else
+	{
+	  n = atoi(plus + 1);
+	  length = plus - Name;
+	}
+      if (length < 0)
+	break;
+      strncpy(name, Name, length);
+      name[length] = 0;
+      strcpy(names[i].name, name);
+      names[i].index = n;
+    }
+  numNames = i;
+  qsort(names, numNames, sizeof(dddName_t), dddCmp);
+  /*
+  for (i = 0; i < numNames; i++)
+    if (names[i].index)
+      fprintf(stderr, "%3d: %s+%d\n", i, names[i].name, names[i].index);
+    else
+      fprintf(stderr, "%3d: %s\n", i, names[i].name);
+  exit(1);
+  */
+  // TBD ... do the actual rearrangements.
+
+  // Step 3:  Insert spacers as necessary.
+  for (i = 0; i < MAX_DOWNLINK_LIST - 1; i++)
+    {
+      FieldSpec_t *fs, *fs1, fsSpacer = { -1 };
+      int length;
+      fs = &FieldSpecs[i];
+      length = strlen(fs->Name);
+      if (length == 0)
+	break;
+      fs1 = &FieldSpecs[i + 1];
+      if (NULL == strstr(fs->Name, "+") &&
+	  !strncmp(fs->Name, fs1->Name, length - 1) &&
+	  fs1->Name[length - 1] == '+')
+	{
+	  dddPush(dls, i, &fsSpacer);
+	  i++;
+	}
+    }
+#endif // DO_DDD_NORMALIZATION
+}
+
+//---------------------------------------------------------------------------
 // The `dddConfigure` function can be called at startup to modify the default
 // downlist specifications given above, so that they instead contain
 // mission-specific data obtained from files in the filesystem.  The input
@@ -1995,6 +2130,55 @@ isUnsigned (char *s)
   return 1;
 }
 
+#ifdef DO_FLEXIBLE_FALLBACK
+// The following function is like `fopen`, but specifically tailored to files
+// with names of the form
+//	ddd-ID_SSSVVV.tsv
+// where ddd is literal, ID is a 5-digit octal number, SSS is an alphabetic
+// string, VVV is a decimal number, and tsv is literal.  The idea is that
+// SSSVVV is the name of an AGC software version, such as Luminary099 or
+// Comanche055.  If a file with the specified name isn't found, then VVV is
+// decremented until a matching file is found.
+char filenameFlexible[100];
+FILE *
+fopenFlexibly(char *filename, char *options)
+{
+  FILE *fp;
+  char *s, *ss, format[32];
+  int vvv, vvvLength;
+
+  strcpy(filenameFlexible, filename);
+
+  // If the specified file exists, then just return it!
+  fp = fopen(filenameFlexible, options);
+  if (fp != NULL)
+    return fp;
+
+  // We need to parse the filename, so that we can alter it and try again.
+  int parsed = 0;
+  if (strncmp(filenameFlexible, "ddd-", 4))
+    return NULL;  // Doesn't start with "ddd-".
+  ss = strstr(filenameFlexible, ".tsv");
+  if (ss == NULL)
+    return NULL;  // Doesn't end with ".tsv"
+  for (s = ss; isdigit(s[-1]); s--); // Find VVV.
+  if (s == ss)
+    return NULL;  // No digits found.
+  vvvLength = ss - s;
+  sprintf(format, "%%0%dd.tsv", vvvLength);
+  vvv = atoi(s);
+  for (vvv--; vvv >= 0; vvv--)
+    {
+      sprintf(s, format, vvvLength, vvv);
+      fp = fopen(filenameFlexible, options);
+      if (fp != NULL)
+	return fp;
+    }
+
+  return NULL;
+}
+#endif // FLEXIBLE_FALLBACK
+
 int
 dddConfigure (char *agcSoftware)
 {
@@ -2028,6 +2212,7 @@ dddConfigure (char *agcSoftware)
       if (fp == NULL)
 	{
 	  fprintf(stderr, "Using default configuration because file %s not found.\n", filename);
+	  dddNormalize(dls);
 	  continue;
 	}
       fprintf(stderr, "Opening %s\n", filename);
@@ -2043,6 +2228,7 @@ dddConfigure (char *agcSoftware)
 	  if (NULL == fgets(line, sizeof(line), fp))
 	    {
 	      fprintf(stderr, "Records read from %s:  %d\n", filename, i);
+	      memset(&(dls->FieldSpecs[i]), 0, sizeof(FieldSpec_t) * (MAX_DOWNLINK_LIST - i));
 	      break;
 	    }
 	  if (strlen(line) > 0 && line[0] == '#')
@@ -2166,6 +2352,7 @@ dddConfigure (char *agcSoftware)
 	  strcpy(fieldSpec->Unit, unitField);
 	}
       fclose(fp);
+      dddNormalize(dls);
     }
 
   printSpecs("after.txt", lmIdToSpec);
@@ -2270,7 +2457,7 @@ PrintField (const FieldSpec_t *FieldSpec)
 	}
       return;
     }
-  LastCol = col + 20;
+  LastCol = col + DISPLAYED_FIELD_WIDTH;
   if (LastCol < Swidth)
     LastRow = row;
   else
