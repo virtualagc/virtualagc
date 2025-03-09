@@ -64,7 +64,10 @@
 				Changed interpretation of { -1 } spacers in
 				downlists.
 		03/08/25 RSB	Increased the width of displayed fields from 20
-				to 24.  (See `DISPLAYED_FIELD_WIDTH`.)
+				to 24.  (See `DISPLAYED_FIELD_WIDTH`.)  The
+				new `USE_COLONS` constant can be used to switch
+				between the formats VARIABLE=VALUE and
+				VARIABLE: VALUE at compile time.
   
 */
 
@@ -389,13 +392,13 @@ Swrite (void)
 }
 
 // Clear the screen buffer.
-static int LastRow = 1, LastCol = 0;
+static int LastRow = 1, LastCol = 1;
 static void
 Sclear (void)
 {
   int i, j;
   LastRow = 1;
-  LastCol = 0;
+  LastCol = 1;
   for (i = 0; i < Sheight; i++)
     for (j = 0; j < Swidth; j++)
       Sbuffer[i][j] = ' ';  
@@ -2460,7 +2463,17 @@ PrintUSP (int *Ptr, int Scale, int row, int col)
 static void
 PrintField (const FieldSpec_t *FieldSpec)
 {
-  int row, col, *Ptr;
+  int row, col, *Ptr, nameLength;
+  FieldSpecName_t fsn;
+
+  strcpy(fsn, FieldSpec->Name);
+  nameLength = strlen(fsn);
+#define USE_COLONS
+#ifdef USE_COLONS
+  strcpy(&fsn[nameLength-1], ": ");
+  nameLength += 1;
+#endif
+
   row = FieldSpec->Row;
   col = FieldSpec->Col;
   if (row == 0 && col == 0)
@@ -2470,9 +2483,9 @@ PrintField (const FieldSpec_t *FieldSpec)
     }
   if (FieldSpec->IndexIntoList < 0)
     {
-      if (col > 0)
+      if (col > 1)
 	{
-	  LastCol = 0;
+	  LastCol = 1;
 	  LastRow = row + 1;
 	}
       return;
@@ -2482,7 +2495,7 @@ PrintField (const FieldSpec_t *FieldSpec)
     LastRow = row;
   else
     {
-      LastCol = 0;
+      LastCol = 1;
       LastRow = row + 1;
     }
   if (FieldSpec->IndexIntoList < 0)
@@ -2493,12 +2506,12 @@ PrintField (const FieldSpec_t *FieldSpec)
       s = (*FieldSpec->Formatter) (FieldSpec->IndexIntoList,
       				   FieldSpec->Scale, FieldSpec->Format);
       if (s != NULL)
-        sprintf (&Sbuffer[row][col], "%s%s", FieldSpec->Name, s);
+        sprintf (&Sbuffer[row][col], "%s%s", fsn, s);
     }
   else
     {
-      sprintf (&Sbuffer[row][col], "%s", FieldSpec->Name);
-      col += strlen (FieldSpec->Name);
+      sprintf (&Sbuffer[row][col], "%s", fsn);
+      col += nameLength;
       Ptr = &DownlinkListBuffer[FieldSpec->IndexIntoList];
       switch (FieldSpec->Format)
 	{

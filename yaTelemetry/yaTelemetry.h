@@ -40,7 +40,7 @@
 
 // Screen size.
 #define TELEMETRY_ROWS 40
-#define TELEMETRY_COLUMNS (4 * DISPLAYED_FIELD_WIDTH)
+#define TELEMETRY_COLUMNS (4 * DISPLAYED_FIELD_WIDTH + 1)
 
 // begin wxGlade: ::extracode
 // end wxGlade

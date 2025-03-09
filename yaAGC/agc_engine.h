@@ -296,7 +296,7 @@ extern long random (void);
 // one bigger in each dimension than the actual amount of text used.
 //#define DISPLAYED_FIELD_WIDTH 20
 #define DISPLAYED_FIELD_WIDTH 24
-#define DEFAULT_SWIDTH (4*DISPLAYED_FIELD_WIDTH - 1)
+#define DEFAULT_SWIDTH (4*DISPLAYED_FIELD_WIDTH)
 #define DEFAULT_SHEIGHT 42
 #define SWIDTH 160
 #define SHEIGHT 100
