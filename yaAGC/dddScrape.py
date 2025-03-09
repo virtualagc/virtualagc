@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
-This is a script that can be run using DecodeDigitalDownlink.c as input to 
-produce the files ddd-ID-LM.tsv, ddd-ID-CM.tsv, and ddd-format-lookup.tsv.
+This is a script that can be run using DecodeDigitalDownlinkHardcodes.c as input
+to produce the files ddd-*-LM.tsv, ddd-*-CM.tsv, and ddd-format-lookup.tsv.
 '''
 
 import sys
