@@ -77,6 +77,10 @@
 #		2016-11-12 RSB	"Permanently" disabled READLINE.
 #		2016-11-18 RSB	Explicitly include socket library in Solaris.
 #		2021-05-13 MKF	Defined WASI and targets yaAGC.wasm, yaAGC.wast.
+#		2025-03-09 RSB	Automatically scrapes DecodeDigitalDownlink.c
+#				to produce the files ddd-*-LM.tsv, ddd-*-CM.tsv,
+#				and ddd-format-lookup.tsv, all for use in 
+#				yaTelemetry.
 
 LIBS=${LIBS2}
 
@@ -217,6 +221,7 @@ endif
 yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
 	${cc} -pthread ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
 	libyaAGC.a -L. ${STATIC} ${LIBS} -lyaAGC -lm ${CURSES}
+	./dddScrape.py <DecodeDigitalDownlink.c
 
 yaAGC.wasm: wasm.o agc_engine.o agc_engine_init.o agc_utilities.o ringbuffer_api.o ringbuffer.o
 	${WASI_SDK_PATH}/bin/wasm-ld ${LDFLAGS2} -o $@ $^
