@@ -867,6 +867,12 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
+    // https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf#page=128 :
+    //      "Optics CDU trunnion angle"
+    // https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf#page=131 :
+    //      "Optics Trunnion angle, scaled (degrees-19.7754)/45 (two's complement).
+    //       The bias, 19.7754, is programmed-in."
+    // https://github.com/virtualagc/virtualagc/blob/master/Colossus249/DOWNLINK_LISTS.agc line 145.
     { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -1301,6 +1307,14 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 16, "CDUX=", 360, FMT_SP },
     { 17, "CDUY=", 360, FMT_SP },
     { 18, "CDUZ=", 360, FMT_SP },
+    // https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf#page=117 :
+    //      "Optics CDU trunnion angle"
+    // https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf#page=121 :
+    //       "Same as words 2-17 on the Powered List".
+    // https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf#page=37 :
+    //       "10b   CDUT. The optics trunnion angle CDU, scaled (degrees - 19.7754)/
+    //        45 (two's complement). The angle varies from -19.775 to +45 degrees."
+    // https://github.com/virtualagc/virtualagc/blob/master/Colossus249/DOWNLINK_LISTS.agc line 145.
     { 19, "CDUT=", 45, FMT_SP, &FormatCDUT },
     { 20, "ADOT=", 450, FMT_DP, &FormatAdotsOrOga },
     { 22, "ADOT+2=", 450, FMT_DP, &FormatAdotsOrOga },
@@ -1363,6 +1377,7 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 110, "TTE=", B28, FMT_DP },
     { 112, "VIO=", B7, FMT_DP },
     { 114, "VPRED=", B7, FMT_DP },
+    // CDUX, CDUY, CDUZ, and CDUT have been omitted here.
     { -1 },
     // Don't know what this is.
     { 126, "OPTION1=", B0, FMT_OCT },
@@ -1538,3 +1553,4 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 186, "CHN32,33=", B0, FMT_2OCT },
   }
 };
+
