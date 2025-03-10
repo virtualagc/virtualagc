@@ -1,15 +1,15 @@
- /*
+/*
   Declared to be in the Public Domain by its original author, Ron Burkey.
 
-  Filename:	DecodeDownlinkListHardcodes.c
-  Purpose:	This file is used only by DecodeDigitalDownlink.c.  It provides
-		hard-code downlist specifications for yaTelemetry.  The original
-		version of this file was manually coded, but future versions
-		may be generated via scripts such as dddUnscrape.py from
-		files ddd-*-*.tsv.  Therefore, no modification history is
-		maintained internally to this file.
-  Contact:	Ron Burkey <info@sandroid.org>
-  Ref:		http://www.ibiblio.org/apollo/index.html
+  Filename:     DecodeDownlinkListHardcodes.c
+  Purpose:      This file is used only by DecodeDigitalDownlink.c.  It provides
+                hard-code downlist specifications for yaTelemetry.  The original
+                version of this file was manually coded, but future versions
+                may be generated via scripts such as dddUnscrape.py from
+                files ddd-*-*.tsv.  Therefore, no modification history is
+                maintained internally to this file.
+  Contact:      Ron Burkey <info@sandroid.org>
+  Ref:          http://www.ibiblio.org/apollo/index.html
 */
 
 static DownlinkListSpec_t CmPoweredListSpec = {
@@ -138,7 +138,7 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { -1 },
     { 194, "DELVEET2=", B7, FMT_DP },
     { 196, "DELVEET2+2=", B7, FMT_DP },
-    { 198, "DELVEET2+4=", B7, FMT_DP }
+    { 198, "DELVEET2+4=", B7, FMT_DP },
   }
 };
 
@@ -281,7 +281,7 @@ static DownlinkListSpec_t LmOrbitalManeuversSpec = {
     { 190, "DELV=", B14, FMT_DP },
     { 192, "DELV+2=", B14, FMT_DP },
     { 194, "DELV+4=", B14, FMT_DP },
-    { 198, "TGO=", B28, FMT_DP }
+    { 198, "TGO=", B28, FMT_DP },
   }
 };
 
@@ -332,7 +332,8 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 52, "MARK2DWN+6=", 45, FMT_SP, &FormatOTRUNNION },
     { 54, "HAPOX=", B29, FMT_DP },
     { 56, "HPERX=", B29, FMT_DP },
-    { 58, "DELTAR=", 360, FMT_DP },	// Differs between Colossus 1 & 3
+    // Differs between Colossus 1 & 3
+    { 58, "DELTAR=", 360, FMT_DP },
     { 58, "PACTOFF=", B14, FMT_SP, &FormatXACTOFF },
     { 59, "YACTOFF=", B14, FMT_SP, &FormatXACTOFF },
     { 60, "VGTIG=", B7, FMT_DP },
@@ -366,9 +367,12 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 110, "V-OTHER+2=", B7, FMT_DP },
     { 112, "V-OTHER+4=", B7, FMT_DP },
     { 114, "T-OTHER=", B28, FMT_DP },
-    { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
-    { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
-    { 128, "TET=", B28, FMT_DP },	// ... or this
+    // Don't know what this is.
+    { 126, "OPTION1=", B0, FMT_OCT },
+    // ... or this
+    { 127, "OPTION2=", B0, FMT_OCT },
+    // ... or this
+    { 128, "TET=", B28, FMT_DP },
     { 134, "RSBBQ=", B0, FMT_OCT },
     { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
@@ -412,7 +416,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { 180, "CHN11,12=", B0, FMT_2OCT },
     { 182, "CHN13,14=", B0, FMT_2OCT },
     { 184, "CHN30,31=", B0, FMT_2OCT },
-    { 186, "CHN32,33=", B0, FMT_2OCT }
+    { 186, "CHN32,33=", B0, FMT_2OCT },
   }
 };
 
@@ -525,12 +529,18 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { -1 },
     { 134, "BESTI=", 6, FMT_DEC },
     { 135, "BESTJ=", 6, FMT_DEC },
-    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.
-    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.
-    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.
-    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.
-    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.
-    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.
+    // Fix later.
+    { 136, "STARSAV1=", 2, FMT_DP },
+    // Fix later.
+    { 138, "STARSAV1+2=", 2, FMT_DP },
+    // Fix later.
+    { 140, "STARSAV1+4=", 2, FMT_DP },
+    // Fix later.
+    { 142, "STARSAV2=", 2, FMT_DP },
+    // Fix later.
+    { 144, "STARSAV2+2=", 2, FMT_DP },
+    // Fix later.
+    { 146, "STARSAV2+4=", 2, FMT_DP },
     { 152, "CDUS=", 360, FMT_SP },
     { 153, "PIPAX=", B14, FMT_SP },
     { 154, "PIPAY=", B14, FMT_SP },
@@ -550,7 +560,7 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { 180, "CHN11,12=", B0, FMT_2OCT },
     { 182, "CHN13,14=", B0, FMT_2OCT },
     { 184, "CHN30,31=", B0, FMT_2OCT },
-    { 186, "CHN32,33=", B0, FMT_2OCT }
+    { 186, "CHN32,33=", B0, FMT_2OCT },
   }
 };
 
@@ -634,9 +644,12 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 110, "V-OTHER+2=", B7, FMT_DP },
     { 112, "V-OTHER+4=", B7, FMT_DP },
     { 114, "T-OTHER=", B28, FMT_DP },
-    { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
-    { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
-    { 128, "TET=", B28, FMT_DP },	// ... or this
+    // Don't know what this is.
+    { 126, "OPTION1=", B0, FMT_OCT },
+    // ... or this
+    { 127, "OPTION2=", B0, FMT_OCT },
+    // ... or this
+    { 128, "TET=", B28, FMT_DP },
     { 134, "RSBBQ=", B0, FMT_OCT },
     { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
@@ -704,7 +717,8 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 10, "V-OTHER+2=", B7, FMT_DP },
     { 12, "V-OTHER+4=", B7, FMT_DP },
     { 14, "T-OTHER=", B28, FMT_DP },
-    { 16, "RANGRDOT=", B0, FMT_2OCT },	// Look at this later.
+    // Look at this later.
+    { 16, "RANGRDOT=", B0, FMT_2OCT },
     { -1 },
     { 18, "AIG=", 360, FMT_SP },
     { 19, "AMG=", 360, FMT_SP },
@@ -831,7 +845,7 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 190, "CENTANG=", 360, FMT_DP },
     { 192, "NN=", B0, FMT_DEC },
     { 194, "DIFFALT=", B29, FMT_DP },
-    { 196, "DELVTPF=", B7, FMT_DP }
+    { 196, "DELVTPF=", B7, FMT_DP },
   }
 };
 
@@ -866,31 +880,36 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 31, "THETADY=", 360, FMT_USP },
     { 32, "THETADZ=", 360, FMT_USP },
     { -1 },
-    { 34, "SVMRKDAT=", B28, FMT_DP },	// 1st mark
+    // 1st mark
+    { 34, "SVMRKDAT=", B28, FMT_DP },
     { 36, "SVMRKDAT+2=", 360, FMT_USP },
     { 37, "SVMRKDAT+3=", 360, FMT_USP },
     { 38, "SVMRKDAT+4=", 360, FMT_USP },
     { 39, "SVMRKDAT+5=", 45, FMT_SP, &FormatOTRUNNION },
     { 40, "SVMRKDAT+6=", 360, FMT_USP },
-    { 41, "SVMRKDAT+7=", B28, FMT_DP },	// 2nd mark
+    // 2nd mark
+    { 41, "SVMRKDAT+7=", B28, FMT_DP },
     { 43, "SVMRKDAT+9=", 360, FMT_USP },
     { 44, "SVMRKDAT+10=", 360, FMT_USP },
     { 45, "SVMRKDAT+11=", 360, FMT_USP },
     { 46, "SVMRKDAT+12=", 45, FMT_SP, &FormatOTRUNNION },
     { 47, "SVMRKDAT+13=", 360, FMT_USP },
-    { 48, "SVMRKDAT+14=", B28, FMT_DP },// 3rd mark
+    // 3rd mark
+    { 48, "SVMRKDAT+14=", B28, FMT_DP },
     { 50, "SVMRKDAT+16=", 360, FMT_USP },
     { 51, "SVMRKDAT+17=", 360, FMT_USP },
     { 52, "SVMRKDAT+18=", 360, FMT_USP },
     { 53, "SVMRKDAT+19=", 45, FMT_SP, &FormatOTRUNNION },
     { 54, "SVMRKDAT+20=", 360, FMT_USP },
-    { 55, "SVMRKDAT+21=", B28, FMT_DP },// 4th mark
+    // 4th mark
+    { 55, "SVMRKDAT+21=", B28, FMT_DP },
     { 57, "SVMRKDAT+23=", 360, FMT_USP },
     { 58, "SVMRKDAT+24=", 360, FMT_USP },
     { 59, "SVMRKDAT+25=", 360, FMT_USP },
     { 60, "SVMRKDAT+26=", 45, FMT_SP, &FormatOTRUNNION },
     { 61, "SVMRKDAT+27=", 360, FMT_USP },
-    { 62, "SVMRKDAT+28=", B28, FMT_DP },// 5th mark
+    // 5th mark
+    { 62, "SVMRKDAT+28=", B28, FMT_DP },
     { 64, "SVMRKDAT+30=", 360, FMT_USP },
     { 65, "SVMRKDAT+31=", 360, FMT_USP },
     { 66, "SVMRKDAT+32=", 360, FMT_USP },
@@ -913,9 +932,12 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { 102, "LAT=", 360, FMT_DP },
     { 104, "LONG=", 360, FMT_DP },
     { 106, "ALT=", B29, FMT_DP },
-    { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
-    { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
-    { 128, "TET=", B28, FMT_DP },	// ... or this
+    // Don't know what this is.
+    { 126, "OPTION1=", B0, FMT_OCT },
+    // ... or this
+    { 127, "OPTION2=", B0, FMT_OCT },
+    // ... or this
+    { 128, "TET=", B28, FMT_DP },
     { 134, "RSBBQ=", B0, FMT_OCT },
     { 135, "RSBBQ+1=", B0, FMT_OCT },
     { 137, "CHAN77=", B0, FMT_OCT },
@@ -979,7 +1001,8 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 10, "VMEAS=", B28, FMT_DP },
     { 12, "MKTIME=", B28, FMT_DP },
     { 14, "HMEAS=", B28, FMT_DP, &FormatHMEAS },
-    { 16, "RANGRDOT=", B0, FMT_2OCT },	// Look at this later.
+    // Look at this later.
+    { 16, "RANGRDOT=", B0, FMT_2OCT },
     { -1 },
     { 18, "AIG=", 360, FMT_SP },
     { 19, "AMG=", 360, FMT_SP },
@@ -1111,7 +1134,7 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 192, "DELV+2=", B14, FMT_DP },
     { 194, "DELV+4=", B14, FMT_DP },
     { 196, "PSEUDO55=", B14, FMT_SP, &FormatGtc },
-    { 198, "TTOGO=", B28, FMT_DP }
+    { 198, "TTOGO=", B28, FMT_DP },
   }
 };
 
@@ -1130,7 +1153,8 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 10, "V-OTHER+2=", B7, FMT_DP },
     { 12, "V-OTHER+4=", B7, FMT_DP },
     { 14, "T-OTHER=", B28, FMT_DP },
-    { 16, "RANGRDOT=", B0, FMT_2OCT },	// Look at this later.
+    // Look at this later.
+    { 16, "RANGRDOT=", B0, FMT_2OCT },
     { -1 },
     { 18, "AIG=", 360, FMT_SP },
     { 19, "AMG=", 360, FMT_SP },
@@ -1221,12 +1245,17 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { -1 },
     { 134, "BESTI=", 6, FMT_DEC },
     { 135, "BESTJ=", 6, FMT_DEC },
-    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.
-    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.
-    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.
-    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.
-    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.
-    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.
+    // Fix later.
+    { 136, "STARSAV1=", 2, FMT_DP },
+    // Fix later.
+    { 138, "STARSAV1+2=", 2, FMT_DP },
+    // Fix later.
+    { 140, "STARSAV1+4=", 2, FMT_DP },
+    // Fix later.
+    { 142, "STARSAV2=", 2, FMT_DP },
+    { 144, "STARSAV2+2=", 2, FMT_DP },
+    // Fix later.
+    { 146, "STARSAV2+4=", 2, FMT_DP },
     { 148, "GSAV=", 2, FMT_DP },
     { 150, "GSAV+2=", 2, FMT_DP },
     { 152, "GSAV+4=", 2, FMT_DP },
@@ -1250,7 +1279,7 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 188, "PIPTIME1=", B28, FMT_DP },
     { 190, "DELV=", B14, FMT_DP },
     { 192, "DELV+2=", B14, FMT_DP },
-    { 194, "DELV+4=", B14, FMT_DP }
+    { 194, "DELV+4=", B14, FMT_DP },
   }
 };
 
@@ -1335,9 +1364,12 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { 112, "VIO=", B7, FMT_DP },
     { 114, "VPRED=", B7, FMT_DP },
     { -1 },
-    { 126, "OPTION1=", B0, FMT_OCT },	// Don't know what this is.
-    { 127, "OPTION2=", B0, FMT_OCT },	// .. or this
-    { 128, "TET=", B28, FMT_DP },	// ... or this
+    // Don't know what this is.
+    { 126, "OPTION1=", B0, FMT_OCT },
+    // ... or this
+    { 127, "OPTION2=", B0, FMT_OCT },
+    // ... or this
+    { 128, "TET=", B28, FMT_DP },
     { -1 },
     { 130, "ERRORX=", 180, FMT_SP },
     { 131, "ERRORY=", 180, FMT_SP },
@@ -1386,10 +1418,10 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 1, "SYNC=", B0, FMT_OCT },
     { 100, "TIME=", B28, FMT_DP },
     { -1 },
-    { 2,  "AGSBUFF=", B25, FMT_SP, &FormatEarthOrMoonSP },
-    { 4,  "AGSBUF+2=", B25, FMT_SP, &FormatEarthOrMoonSP },
-    { 6,  "AGSBUF+4=", B25, FMT_SP, &FormatEarthOrMoonSP },
-    { 8,  "LM EPOCH=", B18, FMT_DP, &FormatEpoch },
+    { 2, "AGSBUFF=", B25, FMT_SP, &FormatEarthOrMoonSP },
+    { 4, "AGSBUF+2=", B25, FMT_SP, &FormatEarthOrMoonSP },
+    { 6, "AGSBUF+4=", B25, FMT_SP, &FormatEarthOrMoonSP },
+    { 8, "LM EPOCH=", B18, FMT_DP, &FormatEpoch },
     { 10, "AGSBUF+1=", B15, FMT_SP, &FormatEarthOrMoonSP },
     { 12, "AGSBUF+3=", B15, FMT_SP, &FormatEarthOrMoonSP },
     { 14, "AGSBUF+5=", B15, FMT_SP, &FormatEarthOrMoonSP },
@@ -1503,6 +1535,6 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 180, "CHN11,12=", B0, FMT_2OCT },
     { 182, "CHN13,14=", B0, FMT_2OCT },
     { 184, "CHN30,31=", B0, FMT_2OCT },
-    { 186, "CHN32,33=", B0, FMT_2OCT }
+    { 186, "CHN32,33=", B0, FMT_2OCT },
   }
 };
