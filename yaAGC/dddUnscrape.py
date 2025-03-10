@@ -71,6 +71,9 @@ for structureName in downlists:
         line = line.rstrip("\n\r")
         if len(line) == 0:
             continue
+        if line[0] == "#":
+            print("    //" + line[1:])
+            continue
         fields = line.split('\t')
         if len(fields) != 6:
             print('Corrupted line "%s" in %s' % (line, filename), file=sys.stderr)

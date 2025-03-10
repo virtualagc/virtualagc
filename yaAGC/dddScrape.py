@@ -42,6 +42,9 @@ for line in sys.stdin:
         f.close();
         downlist = None
         id = None
+    if line.startswith("//"):
+        print("#" + line[2:], file=f)
+        continue
     if line.startswith("{") and line != "{":
         line = line[1:].lstrip()
         fields = line.split(",")
