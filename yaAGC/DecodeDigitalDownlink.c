@@ -861,6 +861,10 @@ dddConfigure (char *agcSoftware)
 	  // Similarly for the formatter field.
 	  if (strlen(formatterField) == 0)
 	    ;
+	  else if (!strcmp(formatterField, "FormatUnknown"))
+	    ;
+	  else if (!strcmp(formatterField, "FormatRequired"))
+	    ;
 	  else if (!strcmp(formatterField, "FormatOTRUNNION"))
 	    fieldSpec->Formatter = &FormatOTRUNNION;
 	  else if (!strcmp(formatterField, "FormatEarthOrMoonSP"))

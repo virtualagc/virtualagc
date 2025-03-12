@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This is a script that can be run using DecodeDigitalDownlinkHardcodes.c as input
 to produce the files ddd-*-LM.tsv, ddd-*-CM.tsv, and ddd-format-lookup.tsv.

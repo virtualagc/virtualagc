@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This script is the opposite of dddScrape.py.  It can be used to read the files
 ddd-*-LM.tsv and ddd-*.CM.tsv (or some other AGC software versions) and 
