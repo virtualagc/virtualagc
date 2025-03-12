@@ -124,6 +124,7 @@
 		03/03/25 RSB	Added `dddConfigure`.  Added a units field to
 				`FieldSpec_t`.
 		03/08/25 RSB	Adjusted displayed line width.
+		03/11/25 RSB	Added SHOW_WORD_NUMBERS.
 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -190,6 +191,8 @@ extern long random (void);
 
 //----------------------------------------------------------------------------
 // Constants.
+
+#define DEFAULT_URL "https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry"
 
 // Max number of symbols in a yaAGC sym-dump.
 #define MAX_SYM_DUMP 25
@@ -295,7 +298,12 @@ extern long random (void);
 // Screen buffer for telemetry downlinks.  The terminal must be at least
 // one bigger in each dimension than the actual amount of text used.
 //#define DISPLAYED_FIELD_WIDTH 20
+//#define SHOW_WORD_NUMBERS
+#ifdef SHOW_WORD_NUMBERS
+#define DISPLAYED_FIELD_WIDTH 30
+#else
 #define DISPLAYED_FIELD_WIDTH 24
+#endif
 #define DEFAULT_SWIDTH (4*DISPLAYED_FIELD_WIDTH)
 #define DEFAULT_SHEIGHT 42
 #define SWIDTH 160
@@ -342,8 +350,11 @@ typedef struct {
 
 typedef struct {
   char Title[SWIDTH + 1];
+  char URL[SWIDTH + 1];
   FieldSpec_t FieldSpecs[MAX_DOWNLINK_LIST];
 } DownlinkListSpec_t;
+
+extern char *DocumentationURL;
 
 // A type of function for processing downlink lists.
 typedef void ProcessDownlinkList_t (const DownlinkListSpec_t *Spec);

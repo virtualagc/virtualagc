@@ -29,7 +29,13 @@ unique = {}
 downlist = None
 id = None
 for line in sys.stdin:
-    line = line.strip().replace("  ", " ")
+    line = line.lstrip()
+    if downlist != None and line.startswith("//"):
+        print("#" + line[2:].rstrip(), file=f)
+        continue
+    line = line.rstrip()
+    while "  " in line:
+        line = line.replace("  ", " ")
     if downlist == None:
         if line.startswith("static DownlinkListSpec_t"):
             fields = line.split()
@@ -38,13 +44,16 @@ for line in sys.stdin:
             filename = "ddd-%05o-%s.tsv" % (id, downlist[:2].upper())
             f = open(filename, "w")
         continue
+    if line.startswith("DEFAULT_URL"):
+        print('https://www.ibiblio.org/apollo/yaTelemetry.html#yaTelemetry', file=f)
+        continue
+    if line.startswith('"'):
+        print(line.rstrip(",").strip('"'), file=f)
+        continue
     if line == "}":
         f.close();
         downlist = None
         id = None
-    if line.startswith("//"):
-        print("#" + line[2:], file=f)
-        continue
     if line.startswith("{") and line != "{":
         line = line[1:].lstrip()
         fields = line.split(",")

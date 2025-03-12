@@ -99,7 +99,7 @@ SOURCESc:=\
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${SOURCESc} ${HEADERS}
-	${CC} -DNVER=${NVER} \
+	${CC} ${YATELEMETRY_SWITCHES} -DNVER=${NVER} \
 		`wx-config --cxxflags` ${wxFLAGS} \
 		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`wx-config --libs` \
@@ -107,7 +107,7 @@ ${APP}: ${SOURCES} ${SOURCESc} ${HEADERS}
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${SOURCESc} ${HEADERS}
-	${PREFIX_WIN}${CC} \
+	${PREFIX_WIN}${CC} ${YATELEMETRY_SWITCHES} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --libs` \

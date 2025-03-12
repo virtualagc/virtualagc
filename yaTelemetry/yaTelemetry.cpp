@@ -52,6 +52,8 @@
                 2025-02-27 RSB  Began adapting for downlist specifications that
                                 vary by AGC software+version.
                 2025-03-08 RSB	Moved #include for agc_engine.h to yaTelemetry.h.
+                2025-03-11 RSB	Altered on the basis of SHOW_WORD_NUMBERS in
+				agc_engine.h.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -74,6 +76,7 @@
 
 #include "yaTelemetry.h"
 #include "../yaAGC/yaAGC.h"
+#include "../yaAGC/agc_engine.h"
 
 MainFrameClass *MainFrame = NULL;
 SimpleFrameClass *SimpleFrame = NULL;
@@ -484,6 +487,9 @@ SwriteTelemetrySimple (void)
       Dummy += wxString::FromAscii (Sbuffer[i]);
     }
   SimpleFrame->TextCtrl->SetLabel (Dummy);
+#ifdef SHOW_WORD_NUMBERS
+  SimpleFrame->documentation->SetURL(DocumentationURL);
+#endif
 }
 
 // This is the event handler for the background timer.  The background timer
@@ -715,8 +721,8 @@ bool yaTelemetryApp::OnInit()
     int i, FontSizeSwitch = 0;
     
     printf ("\n");
-    printf ("yaTelemetry build " __DATE__ " " __TIME__ ", Copyright 2009,2022 Ronald Burkey\n");
-    printf ("For more information, consult http://www.ibiblio.org/apollo.\n");
+    printf ("yaTelemetry build " __DATE__ " " __TIME__ ", Copyright 2009,2022,2025 Ronald Burkey\n");
+    printf ("For more information, consult " DEFAULT_URL ".\n");
 
     // Read the command-line arguments.
     Portnum = 19800;
@@ -948,6 +954,14 @@ SimpleFrameClass::SimpleFrameClass(wxWindow* parent, int id, const wxString& tit
     };
     DecodingBox = new wxRadioBox(panel_1, ID_DECODINGBOX, wxT("Downlink formatting"), wxDefaultPosition, wxDefaultSize, 5, DecodingBox_choices, 0, wxRA_SPECIFY_ROWS);
     TextCtrl = new wxStaticText(this, wxID_ANY, wxEmptyString);
+#ifdef SHOW_WORD_NUMBERS
+    // The constructor's URL has to be replaced somehow at runtime on the basis
+    // of AGC software version and downlist ID.  The default URL given below is
+    // useful for detecting implementation errors, i.e., failure to set the
+    // URL properly.
+    documentation = new wxHyperlinkCtrl(this, wxID_ANY, wxT("Documentation"),
+	wxT("https://example.org"));
+#endif
 
     set_properties();
     do_layout();
@@ -1103,6 +1117,9 @@ void SimpleFrameClass::do_layout()
     sizer_7->Add(20, 10, 0, 0, 0);
     panel_1->SetSizer(sizer_7);
     sizer_6->Add(panel_1, 0, wxEXPAND, 0);
+#ifdef SHOW_WORD_NUMBERS
+    sizer_6->Add(documentation, 0, wxEXPAND, 0);
+#endif
     sizer_6->Add(TextCtrl, 1, wxEXPAND, 0);
     SetSizer(sizer_6);
     sizer_6->Fit(this);

@@ -29,6 +29,7 @@
 
 #include <wx/wx.h>
 #include <wx/image.h>
+#include <wx/hyperlink.h>
 // begin wxGlade: ::dependencies
 // end wxGlade
 
@@ -86,6 +87,7 @@ public:
     wxRadioBox* DecodingBox;
     wxPanel* panel_1;
     wxStaticText* TextCtrl;
+    wxHyperlinkCtrl* documentation;
     // end wxGlade
 
     DECLARE_EVENT_TABLE()

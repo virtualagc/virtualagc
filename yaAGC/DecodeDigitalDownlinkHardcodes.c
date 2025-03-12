@@ -13,7 +13,8 @@
 */
 
 static DownlinkListSpec_t CmPoweredListSpec = {
-  "CM Powered downlink list",
+  "Powered List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -143,7 +144,8 @@ static DownlinkListSpec_t CmPoweredListSpec = {
 };
 
 static DownlinkListSpec_t LmOrbitalManeuversSpec = {
-  "LM Orbital Maneuvers downlink list",
+  "Orbital Maneuvers List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -286,7 +288,8 @@ static DownlinkListSpec_t LmOrbitalManeuversSpec = {
 };
 
 static DownlinkListSpec_t CmCoastAlignSpec = {
-  "CM Coast Align downlink list",
+  "Coast and Align List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -421,7 +424,8 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
 };
 
 static DownlinkListSpec_t LmCoastAlignSpec = {
-  "LM Coast Align downlink list",
+  "Coast and Align List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -565,7 +569,8 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
 };
 
 static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
-  "CM Rendezvous/Prethrust downlink list",
+  "Rendezvous and Prethrust List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -703,7 +708,8 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
 };
 
 static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
-  "LM Rendezvous/Prethrust downlink list",
+  "Rendezvous and Prethrust List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -850,7 +856,8 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
 };
 
 static DownlinkListSpec_t CmProgram22Spec = {
-  "CM Program 22 downlink list",
+  "Program 22 List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -992,7 +999,8 @@ static DownlinkListSpec_t CmProgram22Spec = {
 };
 
 static DownlinkListSpec_t LmDescentAscentSpec = {
-  "LM Descent/Ascent downlink list",
+  "Descent and Ascent List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -1145,7 +1153,8 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
 };
 
 static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
-  "LM Lunar Surface Align downlink list",
+  "Lunar Surface Align List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -1290,7 +1299,8 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
 };
 
 static DownlinkListSpec_t CmEntryUpdateSpec = {
-  "CM Entry/Update downlink list",
+  "Entry and Update List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },
@@ -1427,7 +1437,8 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
 };
 
 static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
-  "LM AGS initialization/update downlink list",
+  "AGS Initialization and Update List",
+  DEFAULT_URL,
   {
     { 0, "ID=", B0, FMT_OCT },
     { 1, "SYNC=", B0, FMT_OCT },

@@ -68,6 +68,8 @@
 				new `USE_COLONS` constant can be used to switch
 				between the formats VARIABLE=VALUE and
 				VARIABLE: VALUE at compile time.
+		03/11/25 RSB	Altered on the basis of SHOW_WORD_NUMBERS in
+				agc_engine.h.
   
 */
 
@@ -489,13 +491,20 @@ dddCmp (const void *e1, const void *e2)
 void
 dddNormalize(DownlinkListSpec_t *dls)
 {
-  int i;
-  FieldSpec_t *FieldSpecs;
+#ifdef SHOW_WORD_NUMBERS
+  int skip = 1;
+#else
+  int skip = 0;
+#endif
+  int i, j;
+  FieldSpec_t *FieldSpecs, fs;
 #ifdef DO_DDD_NORMALIZATION
   int numNames;
   FieldSpec_t *Fifs;
   dddName_t names[MAX_DOWNLINK_LIST];
+#endif
 
+#if defined(DO_DDD_NOORMALIZATION) || defined(SHOW_WORD_NUMBERS)
   // Step 1:  Eliminate all spacers.
   FieldSpecs = dls->FieldSpecs;
   for (i = 0; i < MAX_DOWNLINK_LIST; i++)
@@ -504,7 +513,9 @@ dddNormalize(DownlinkListSpec_t *dls)
 	dddPop(dls, i, &fs);
 	i--;
       }
+#endif
 
+#ifdef DO_DDD_NORMALIZATION
   // Step 2:  Group stuff like VARIABLE, VARIABLE+n together.  A preliminary
   // step is to sort the variable names, so that we can even find out if there
   // are any sets of names like this.  This is done into the `names` array.
@@ -572,9 +583,14 @@ dddNormalize(DownlinkListSpec_t *dls)
       FieldSpecs = dls->FieldSpecs;
       if (FieldSpecs[i].IndexIntoList < 0)
 	continue;
-      for (s = FieldSpecs[i].Name; *s; s++)
+      for (s = FieldSpecs[i].Name, j = skip; *s; s++)
 	if (*s == ' ')
-	  *s = '_';
+	  {
+	    j--;
+	    if (j >= 0)
+	      continue;
+	    *s = '_';
+	  }
     }
 }
 
@@ -747,7 +763,7 @@ dddConfigure (char *agcSoftware)
       for (i = 0; i < MAX_DOWNLINK_LIST; i++)
 	{
 	  // Note that we cannot use `fscanf` to read lines from these files,
-	  // because in a tab-delimited file it's find for fields to be empty,
+	  // because in a tab-delimited file it's fine for fields to be empty,
 	  // but %s will simply skip right past them.  So we have to read entire
 	  // lines an find the tab delimiters ourself.
 	  int n, offset;
@@ -765,10 +781,21 @@ dddConfigure (char *agcSoftware)
 	      continue;
 	    }
 	  //fprintf(stderr, "\tParsing line: %s", line);
+	  // Detect a couple of special cases.
+	  line[strcspn(line, "\r\n")] = 0; // remove trailing CR or LF.
+	  if (strstr(line, "\t") == NULL) // No tabs?
+	    {
+	      if (!strncmp(line, "http", 4))
+		strcpy(dls->URL, line);
+	      else
+		strcpy(dls->Title, line);
+	      i--;
+	      continue;
+	    }
 	  for (s = line, n = 0; n < 6; s = ss + 1, n++)
 	    {
 	      for (ss = s; *ss != 0; ss++)
-		if (*ss == '\t' || *ss == '\r' || *ss == '\n')
+		if (*ss == '\t')
 		  break;
 	      if (*ss == 0 && n < 5)
 		{
@@ -806,8 +833,6 @@ dddConfigure (char *agcSoftware)
 	  fieldSpec->Unit[0] = 0;
 	  if (offset == -1)
 	    continue;
-	  strcpy(fieldSpec->Name, varField);
-	  strcat(fieldSpec->Name, "=");
 	  // For the scaler field, at the moment I only recognize items of the
 	  // form %u or B%u.
 	  if (isUnsigned(scalerField))
@@ -878,6 +903,19 @@ dddConfigure (char *agcSoftware)
 	  if (!strcmp(unitField, "TBD"))
 	    unitField[0] = 0;
 	  strcpy(fieldSpec->Unit, unitField);
+#ifdef SHOW_WORD_NUMBERS
+	  if (fieldSpec->Format == FMT_DP ||
+	      fieldSpec->Format == FMT_2OCT ||
+	      fieldSpec->Format == FMT_2DEC)
+	    sprintf(fieldSpec->Name, "%d ", (offset / 2) + 1);
+	  else
+	    sprintf(fieldSpec->Name, "%d%c ", (offset / 2) + 1,
+		    (offset % 2) ? 'b' : 'a');
+	  strcat(fieldSpec->Name, varField);
+#else
+	  strcpy(fieldSpec->Name, varField);
+#endif
+	  strcat(fieldSpec->Name, "=");
 	}
       fclose(fp);
       dddNormalize(dls);
@@ -1047,6 +1085,7 @@ PrintField (const FieldSpec_t *FieldSpec)
 
 // Print an entire downlink list.
 
+char *DocumentationURL = (char *) DEFAULT_URL;
 void
 PrintDownlinkList (const DownlinkListSpec_t *Spec)
 {
@@ -1055,6 +1094,7 @@ PrintDownlinkList (const DownlinkListSpec_t *Spec)
   // used for printing "raw" downlink data, but it can be overridden if the buffered
   // downlink list needs to be processed differently, for example to be printed on 
   // a simulated MSK CRT.
+  DocumentationURL = (char *) Spec->URL;
   if (ProcessDownlinkList != NULL)
     {
       (*ProcessDownlinkList) (Spec);
@@ -1082,6 +1122,7 @@ DecodeErasableDump (char *Title)
 {
   int i, j, row, col;
   Sclear ();
+  DocumentationURL = (char *) DEFAULT_URL;
   sprintf (&Sbuffer[0][0], "%s", Title);
   sprintf (&Sbuffer[1][0], "ID=%05o  SYNC=%05o  PASS=%o  EBANK=%o  TIME1=%05o",
            DownlinkListBuffer[0], DownlinkListBuffer[1],
