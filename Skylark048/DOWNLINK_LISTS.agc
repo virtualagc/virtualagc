@@ -13,6 +13,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2023-09-04 MAS  Created from Artemis 072.
 ##		2024-03-04 MAS  Updated for Skylark 48.
+##              2025-03-13 RSB  DVOTAL -> DVTOTAL in a comment.
 
 		SETLOC	DOWNTELM
 		BANK
@@ -76,7 +77,7 @@ CMPOWEDL	EQUALS
 		DNPTR	CMPOWE10			# COLLECT SNAPSHOT
 		1DNADR	DNTMBUFF			# SEND SNAPSHOT
 		1DNADR	FIXTIME				# FIXTIME,+1
-		1DNADR	DVTOTAL				# DVOTAL,+1
+		1DNADR	DVTOTAL				# DVTOTAL,+1
 		6DNADR	REFSMMAT			# REFSMMAT,+1,...+10,+11
 		DNPTR	CMPOWE04			# COMMON DATA
 		1DNADR	TIME2				# TIME2,TIME1
