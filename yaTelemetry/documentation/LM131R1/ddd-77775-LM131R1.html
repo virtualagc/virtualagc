@@ -15,6 +15,7 @@
 
 
 
+
       1C <i>Guidance System Operations Plan</i></a>.<br>
     <br>
     Go directly to word: <a moz-do-not-send="true" href="#10">10</a> <a
@@ -187,7 +188,7 @@
       CSI/A subroutine in P32/P72 and after display of ΔV<sub>LV</sub>
       at CSI, regardless of whether display is overwritten.&nbsp; In
       reference coordinates.&nbsp; Earth or moon-centered depending upon
-      whether bit 12 of flagword 8 (CMOONFLG is zero or one,
+      whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
       respectively.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
     </p>
     <h1>25</h1>
@@ -303,6 +304,7 @@
         second at the beginning of the DAP cycle; otherwise these are
         zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
         such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
+
 
 
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
@@ -738,6 +740,7 @@
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
 
 
+
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -762,6 +765,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
             equivalent to <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
               switch f<sub>1</sub> of Section 5.5 of this GSOP</a>. </td>
@@ -815,7 +819,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">ACMODFLG.&nbsp; A 1 means Manual Radar
             Acquisition Mode (R23) used to lock-on.&nbsp; A 0 means
             Manual Radar Acquisition Mode (R23) ot used to
-            lock-on.&nbsp; Se to 0 at beginning of P20 or P22.&nbsp; Set
+            lock-on.&nbsp; Set to 0 at beginning of P20 or P22.&nbsp; Set
             to 1 upon return from R23 to P20 or P22 before going to R22
             RR Data Read Routine.<br>
           </td>
@@ -1162,11 +1166,11 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">D60R9FLG.&nbsp; Used by orbital integration
+          <td valign="top">D6OR9FLG.&nbsp; Used by orbital integration
             for W-Matrix integration: if bit is 1, 9 × 9 matrix is
             integrated; if bit is 0, 6 × 6 matrix is integrated.&nbsp;
             Set to 0 or 1 by P00 periodic integration, P20, P22 and
-            Average-G coasting flight.<br>
+            Average-G to coasting flight.<br>
           </td>
         </tr>
         <tr>
@@ -1176,7 +1180,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             for W-Matrix integration:&nbsp; if bit is 1, W-Matrix is to
             be integrated; if bit is 0, no W-Matrix integration is to be
             done.&nbsp; Set to 0 or 1 by P00 periodic integration, P20,
-            P22 and Average-G coasting flight.<br>
+            P22 and Average-G to coasting flight.<br>
           </td>
         </tr>
       </tbody>
@@ -1444,7 +1448,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           </td>
           <td valign="top">ENGONFLG.&nbsp; Bit set to 1 just after the
             DPS or APS engine is turned on (bit 13 of channel 11 set to
-            1 and bit 14 of the channel set to 0), and reset to 0 when
+            1 and bit 14 of channel set to 0), and reset to 0 when
             the engine is turned off (bit 14 set 1 and bit 13 set to 0
             in channel 11).&nbsp; This happens in P12, P40, P42, P70,
             and P71.&nbsp; Bit is set to 1 in P63 and reset to 0 in
@@ -1516,6 +1520,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
 
 
+
               switches f<sub>5</sub></a> and <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
@@ -1575,6 +1580,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
             ft/sec will terminate iterative loop.<br>
@@ -1642,9 +1648,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           <td valign="top">MUNFLAG.&nbsp; Bit is set to 1 at entry to
             P12 and P63.&nbsp; Bit is reset to 0 at the termination of
             SERVICER.&nbsp; Bit is checked by R25: if both AVEGFLAG and
-            MUNFLAG are set to 1, R25 exists without checking RR gimbal
+            MUNFLAG are set to 1, R25 exi<s>s</s>ts without checking RR gimbal
             angles.&nbsp; Bit is checked by SERVIDLE (the routine
-            executed if a P00D00 abort occurs while SERVICER is
+            executed if a POODOO abort occurs while SERVICER is
             running): if bit is set to 1, restart group 2 is left alone;
             otherwise it is inactivated.&nbsp; Bit is checked by
             READACCS: if bit is set to 1, R09 is initiated; otherwise it
@@ -1806,7 +1812,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">SWNDISP.&nbsp; Bit is set to 1 in the Master
+          <td valign="top">SWANDISP.&nbsp; Bit is set to 1 in the Master
             Ignition Routine at P63IGN and P12IGN portions of the
             program to enable Landing Analog Displays (R10).&nbsp; The
             mode select switch must be set to the PGNCS position n order
@@ -1859,9 +1865,11 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
 
 
+
               switch f<sub>2</sub> of Section 5.5</a>, and to <a
               moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">the
+
 
 
               switch S<sub>R</sub> of Section 5.3.3. of this GSOP</a>. </td>
@@ -1882,6 +1890,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">th
             Pre-TPI Maneuver Program P34 or P74.&nbsp; The bit is
             equivalent to the inverse of <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">the
+
 
 
               switch f<sub>6</sub> of Section 5.5 of this GSOP</a>.<br>
@@ -2134,6 +2143,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
 
 
+
               f<sub>7</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -2146,6 +2156,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             conic subroutines).&nbsp; This bit is equivalent to the <a
               moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">switch
+
 
 
               f<sub>4</sub> of Section 5.5 of this GSOP</a>.<br>
@@ -2168,6 +2179,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             1.)&nbsp; This bit is equivalent to the <a
               moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
 
 
               f<sub>8</sub> in Section 5.5 of this GSOP</a>.<br>
@@ -2218,6 +2230,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             Routine itself.&nbsp; the bit is equivalent to the <a
               moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86">switch
+
 
 
               f<sub>W</sub> of Fig. 5.10-4 of Section 5.5 of this GSOP</a>.<br>
@@ -2303,6 +2316,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             Equations.&nbsp; A 1 indicates that the thrust-magnitude
             filter will be bypassed, and that the Ascent Guidance
             Equations will only be used to generate <u>V</u><sub>GB</sub>.&nbsp;
+
 
 
             Bit is assumed to be 0 in padload.&nbsp; Bit is reset to 0
@@ -2545,6 +2559,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       its contents are only used during the programs P63 thru P66.&nbsp;
       During all other programs, bit 15 is set, bits 14 thru 1 are
       reset, and the contents of flagword 11 should be 40000<sub>8</sub>.&nbsp;
+
 
 
       The exception, bit 8, which can be set and reset by extended verb
@@ -2978,6 +2993,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3260,6 +3276,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       the velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
 
 
+
       Word 58 contains the time associated with the state vector scaled
       centiseconds/2<sup>28</sup>, referenced to the computer
       clock.&nbsp; The scaling for position, velocity and time is the
@@ -3376,7 +3393,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             Verb 40 with Noun 72.&nbsp; Set to 0 by the RR zero
             subroutine at the end of the CDU zero, by Verb 56 or a Verb
             37 request for another program and by a change in the RR
-            auto-mod discrete from 0 to 1.<br>
+            auto-mode discrete from 0 to 1.<br>
           </td>
         </tr>
         <tr>
@@ -3717,6 +3734,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p>Spare.&nbsp; The first half of each spare contains 00000<sub>8</sub>.&nbsp;
 
 
+
       The second half is ARUPT (the contents of the accumulator when the
       telemetry interrupt was recognized).<br>
     </p>
@@ -3756,7 +3774,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       or at TPM Time of ignition.&nbsp; Rotated to local vertical and
       line-of-sight coordinate systems and displayed to astronaut via
       V06 N81 and V06 N59, respectively.&nbsp; Computed once per program
-      pass by P34/P74 and p35/P75.&nbsp; Updated during burn programs by
+      pass by P34/P74 and P35/P75.&nbsp; Updated during burn programs by
       RASTEER1 for Lambert targeted burns.&nbsp; Scaled
       (meters/centisecond)/2<sup>7</sup>.<br>
     </p>
@@ -3802,12 +3820,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         Maneuvers List.</i><br>
     </p>
     <p>VGTIG (Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp; For
-      external -ΔV type burns this is the input ΔV rotated through half
+      external-ΔV type burns this is the input ΔV rotated through half
       the calculated central angle expected to be covered by the
       burn.&nbsp; Calculated once a the beginning of each of P40, P41,
       and P42.&nbsp; In reference coordinates, scaled
       (meters/centisecond)/2<sup>7</sup>.&nbsp; VGPREV (Z) appears in
-      the same location once Average G has been turned on (TIG -30
+      the same location once Average G has been turned on (TIG - 30
       seconds).&nbsp; This is the velocity-to-be-gained used by steering
       in P40 and P42, and for display in P41.&nbsp; VGPREV is updated
       every 2 seconds during the burn.&nbsp; In reference
@@ -4003,7 +4021,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p><i>Same as word 81b on Orbital Maneuvers List.</i><br>
     </p>
     <p>IMODES33.&nbsp; A flagword which monitors various channel 32,
-      channel 33, and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
+      channel 33 and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
       test".&nbsp; Set to 16040<sub>8</sub> by a fresh start. Set to
       16000<sub>8</sub> + the contents of bit 6 by a restart.&nbsp; An
       error reset key code sets bits 13, 12, and 11 to 1 and does not
@@ -4116,7 +4134,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           </td>
           <td valign="top">Set to 1 in IMU zeroing routine external to
             T4RUPT (by V40N20 or prelaunch or IMU tests).&nbsp; Remains
-            set to 1 for an interval of a bout 10.56 seconds while
+            set to 1 for an interval of about 10.56 seconds while
             zeroing taking place.&nbsp; Bit 6 of this word is set to 1
             at the same time as bit 5.<br>
           </td>
@@ -4187,6 +4205,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
 
 
+
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
     </blockquote>
     <h1>85a,85b,86a</h1>
@@ -4241,7 +4260,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
 
 
-      Expected range is ±:35 degrees/second<sup>2</sup>.<br>
+
+      Expected range is ±35 degrees/second<sup>2</sup>.<br>
     </p>
     <h1><a name="90"></a>90a</h1>
     <p><i>Same as word 90a on Orbital Maneuvers List.</i><br>
@@ -4865,7 +4885,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           </td>
           <td valign="top">A 1 in this bit causes output pulses from
             register used to drive Z-axis IMU CDU error counter.&nbsp;
-            (IMU Z-axis coarse align mode or error needles for pitch
+            (IMU Z-axis coarse align mode or error needles for roll
             axis in FDAI mode). </td>
         </tr>
         <tr>
@@ -4909,7 +4929,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">8-7<br>
           </td>
-          <td valign="top">These its indicate the axis for gyro
+          <td valign="top">These bits indicate the axis for gyro
             compensation (in the sequence Y, Z, X for inner, middle,
             outer).&nbsp; Program resets to 00<sub>2</sub> when
             finished.<br>
@@ -4918,6 +4938,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
               <tbody>
                 <tr>
                   <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
                     <br>
@@ -5544,6 +5565,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p> </p>
     <p> </p>
     <p> </p>
-    <hr width="100%" size="2"> <i>Last edited by RSB, 2025-03-16</i><br>
+    <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
+      2025-03-18</i><br>
   </body>
 </html>
