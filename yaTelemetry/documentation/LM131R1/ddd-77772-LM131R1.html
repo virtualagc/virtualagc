@@ -2,31 +2,20 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Luminary 1C Lunar Surface Align List</title>
+    <title>Telemetry Documentation for Luminary 1C Lunar Surface Align
+      List</title>
+    <link rel="stylesheet" href="../downlists.css">
   </head>
   <body>
-    For full documentation, see the <a moz-do-not-send="true"
+    For full documentation, see the <a
       href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">Luminary
-
-
-
-
-
-
-
-
 
       1C <i>Guidance System Operations Plan</i></a>.<br>
     <br>
-    Go directly to word: <a moz-do-not-send="true" href="#10">10</a> <a
-      moz-do-not-send="true" href="#20">20</a> <a
-      moz-do-not-send="true" href="#30">30</a> <a
-      moz-do-not-send="true" href="#40">40</a> <a
-      moz-do-not-send="true" href="#50">50</a> <a
-      moz-do-not-send="true" href="#60">60</a> <a
-      moz-do-not-send="true" href="#70">70</a> <a
-      moz-do-not-send="true" href="#80">80</a> <a
-      moz-do-not-send="true" href="#90">90</a><br>
+    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
+      href="#30">30</a> <a href="#40">40</a> <a href="#50">50</a> <a
+      href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
+      href="#90">90</a><br>
     <h1>1a</h1>
     <p>I.D. word for this list.&nbsp; Will contain 77772<sub>8</sub>.<br>
     </p>
@@ -49,6 +38,53 @@
       velocity and time is the same whether earth-centered or
       moon-centered.&nbsp; The CSM state vector and time are set in the
       following:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <td valign="top">P00<br>
+          </td>
+          <td valign="top">—</td>
+          <td valign="top">every four time steps</td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">P20, P22 <br>
+          </td>
+          <td valign="top">—</td>
+          <td valign="top">every mark and every Incorp if CSM corrected</td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">P76<br>
+          </td>
+          <td valign="top">—</td>
+          <td valign="top">after operation</td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Average G<br>
+          </td>
+          <td valign="top">—</td>
+          <td valign="top">at completion</td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">P27<br>
+          </td>
+          <td valign="top">—</td>
+          <td valign="top">uplink of state vector V66<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
     </p>
     P00 — every four time steps<br>
     P20, P22 — every mark and every Incorp if CSM corrected<br>
@@ -167,7 +203,7 @@
       R<sub>2</sub>C<sub>2</sub>, R<sub>2</sub>C<sub>3</sub>.&nbsp;
       REFSMMAT is the 3 × 3 matrix used to convert from reference to
       stable member coordinates.&nbsp; The remaining three components of
-      REFSMMAT may be computes as follows:<br>
+      REFSMMAT may be computed as follows:<br>
     </p>
     <blockquote>
       <p>R<sub>3</sub>C<sub>1</sub> = (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>3</sub>)
@@ -296,6 +332,7 @@
         second at the beginning of the DAP cycle; otherwise these are
         zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
         such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
+
 
 
 
@@ -729,8 +766,8 @@
             variable for use on the next pass).&nbsp; The bit controls
             the type of computation performed in the ITERATOR
             subroutine.&nbsp; This bit is equivalent to <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
 
@@ -757,8 +794,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             by the Pre-TPI Maneuver Program P-34 or P74, the Pre-TPM
             Maneuver Program P-35 or P75, and the Lambert Aim-Point
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
-            equivalent to <a moz-do-not-send="true"
+            equivalent to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
 
@@ -1443,10 +1481,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           </td>
           <td valign="top">ENGONFLG.&nbsp; Bit set to 1 just after the
             DPS or APS engine is turned on (bit 13 of channel 11 set to
-            1 and bit 14 of channel set to 0), and reset to 0 when
-            the engine is turned off (bit 14 set 1 and bit 13 set to 0
-            in channel 11).&nbsp; This happens in P12, P40, P42, P70,
-            and P71.&nbsp; Bit is set to 1 in P63 and reset to 0 in
+            1 and bit 14 of channel set to 0), and reset to 0 when the
+            engine is turned off (bit 14 set 1 and bit 13 set to 0 in
+            channel 11).&nbsp; This happens in P12, P40, P42, P70, and
+            P71.&nbsp; Bit is set to 1 in P63 and reset to 0 in
             P68.&nbsp; Bit is used when a restart occurs to determine
             the proper setting for the channel bits.&nbsp; Engine is
             turned off following ENTER response to V97.<br>
@@ -1511,13 +1549,13 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             of this bit to 0 does not necessarily imply a successful
             TIME-RADIUS solution.&nbsp; This bit is never tested by any
             of the mission programs.&nbsp; This bit is equivalent to <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
 
 
 
 
-              switches f<sub>5</sub></a> and <a moz-do-not-send="true"
+
+              switches f<sub>5</sub></a> and <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
             are represented by the same bit in the AGC.<br>
@@ -1576,6 +1614,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
 
@@ -1641,8 +1680,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           <td valign="top">MUNFLAG.&nbsp; Bit is set to 1 at entry to
             P12 and P63.&nbsp; Bit is reset to 0 at the termination of
             SERVICER.&nbsp; Bit is checked by R25: if both AVEGFLAG and
-            MUNFLAG are set to 1, R25 exi<s>s</s>ts without checking RR gimbal
-            angles.&nbsp; Bit is checked by SERVIDLE (the routine
+            MUNFLAG are set to 1, R25 exi<s>s</s>ts without checking RR
+            gimbal angles.&nbsp; Bit is checked by SERVIDLE (the routine
             executed if a POODOO abort occurs while SERVICER is
             running): if bit is set to 1, restart group 2 is left alone;
             otherwise it is inactivated.&nbsp; Bit is checked by
@@ -1854,15 +1893,15 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             inside the cone during a powered maneuver.&nbsp; NORMSW
             should generally remain 0, unless transfers between 165° and
             195° are intended.&nbsp; NORMSW is equivalent to <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
 
 
 
 
+
               switch f<sub>2</sub> of Section 5.5</a>, and to <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">the
+
 
 
 
@@ -1883,8 +1922,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">th
             Pre-CSI Maneuver Program P32 or P72.&nbsp; Set to 0 by the
             Pre-CDH Maneuver Program P33 or P73.&nbsp; Set to 1 by the
             Pre-TPI Maneuver Program P34 or P74.&nbsp; The bit is
-            equivalent to the inverse of <a moz-do-not-send="true"
+            equivalent to the inverse of <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">the
+
 
 
 
@@ -2135,8 +2175,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             physically realizable transfer.&nbsp; The bit is never
             tested or set either way outside the conic
             subroutines.&nbsp; The bit is equivalent to the <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
 
 
 
@@ -2151,8 +2191,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             as part of a fresh start.&nbsp; Used to control the type of
             computation performed in the ITERATOR routine (part of the
             conic subroutines).&nbsp; This bit is equivalent to the <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">switch
+
 
 
 
@@ -2175,8 +2215,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             than pericenter radius and less than apocenter radius.&nbsp;
             (Such a solution will be reached unless INFINFLG is set to
             1.)&nbsp; This bit is equivalent to the <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
 
 
 
@@ -2227,8 +2267,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             outside these three conic routines and in fact is neither
             tested nor set either way outside the Universal Variable
             Routine itself.&nbsp; The bit is equivalent to the <a
-              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86">switch
+
 
 
 
@@ -2316,6 +2356,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             Equations.&nbsp; A 1 indicates that the thrust-magnitude
             filter will be bypassed, and that the Ascent Guidance
             Equations will only be used to generate <u>V</u><sub>GB</sub>.&nbsp;
+
 
 
 
@@ -2560,6 +2601,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       its contents are only used during the programs P63 thru P66.&nbsp;
       During all other programs, bit 15 is set, bits 14 thru 1 are
       reset, and the contents of flagword 11 should be 40000<sub>8</sub>.&nbsp;
+
 
 
 
@@ -2993,6 +3035,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3184,7 +3227,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p>DSPTAB+11D.&nbsp; This register drives relays for the display
       lights.&nbsp; The bit assignments are:<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -3277,6 +3320,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
       Word 58 contains the time associated with the state vector scaled
       centiseconds/2<sup>28</sup>, referenced to the computer
       clock.&nbsp; The scaling for position, velocity and time is the
@@ -3341,7 +3385,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       fresh start sets bits 7 and 2 to 1, sets bit 6 to the value of bit
       6 of channel 33, and sets all other bits to 0.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -3794,7 +3838,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       preserves bits 9, 5, 4, 3, 1.&nbsp; Updated every 0.48 second by
       T4RUPT program.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -3962,7 +4006,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       affect other bits.&nbsp; Updated every 0.48 second by T4RUPT
       program except for bit 14 which is updated every 0.12 second.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -4140,6 +4184,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
     </blockquote>
     <h1>85a,85b,86a</h1>
@@ -4196,6 +4241,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
       Expected range is ±35 degrees/second<sup>2</sup>.<br>
     </p>
     <h1><a name="90"></a>90a</h1>
@@ -4223,7 +4269,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       bit 13 to 1 if ENGONFLG (bit 7 of flagword 5) is 1 and sets bit 14
       to 1 if ENGONFLG is 0.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -4352,7 +4398,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       start.&nbsp; A restart preserves bits 14, 12, 11, 10, 9, 6, 5, 4
       and sets remaining bits to 0.&nbsp; Set 0 by a hardware restart.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -4513,7 +4559,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       sets bit 12 to 1, preserves bits 15-13 and 7-5 and sets remaining
       bits to 0.&nbsp; Set 0 by a hardware restart.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -4622,7 +4668,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td rowspan="1" colspan="1" valign="top">These three bits
             select the radar parameter to be read as follows:<br>
             <br>
-            <table cellspacing="5" cellpadding="2">
+            <table cellspacing="2" cellpadding="2">
               <tbody>
                 <tr>
                   <td valign="top">Bit<br>
@@ -4783,7 +4829,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       restart or V37 preserves bit 6 and sets remaining bits to 0.&nbsp;
       Caging command zeroes bits 15-6.&nbsp; Set 0 by a hardware reset.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -4814,8 +4860,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           </td>
           <td valign="top">A 1 in this bit causes output pulses from
             register used to drive Z-axis IMU CDU error counter.&nbsp;
-            (IMU Z-axis coarse align mode or error needles for roll
-            axis in FDAI mode). </td>
+            (IMU Z-axis coarse align mode or error needles for roll axis
+            in FDAI mode). </td>
         </tr>
         <tr>
           <td valign="top" align="center">12<br>
@@ -4863,10 +4909,11 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             outer).&nbsp; Program resets to 00<sub>2</sub> when
             finished.<br>
             <br>
-            <table cellspacing="5" cellpadding="2">
+            <table cellspacing="2" cellpadding="2">
               <tbody>
                 <tr>
                   <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -4974,7 +5021,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p>CHANNEL 30.&nbsp; Input channel.&nbsp; Bits are used for various
       purposes.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -5092,7 +5139,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     </p>
     <p>CHANNEL 31.&nbsp; Inputs from crew control devices, used by DAP.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -5208,7 +5255,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p>CHANNEL 32.&nbsp; Input channel.&nbsp; Additional crew input to
       DAP, etc.<br>
     </p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
@@ -5318,7 +5365,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       the T4RUPT loop every 0.48 second.&nbsp; They are also reset by a
       restart.<br>
       <i></i></p>
-    <table cellspacing="5" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <th valign="top"><u>Bit</u><u><br>
