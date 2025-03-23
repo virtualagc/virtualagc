@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Colossus 3 Entry and Update List</title>
+    <title>Telemetry Documentation for Colossus 3 Program 22 List</title>
     <link rel="stylesheet" href="../downlists.css">
   </head>
   <body>
@@ -22,7 +22,7 @@
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77776<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77773<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
@@ -344,130 +344,115 @@
     <p><i>Same as Powered List.</i></p>
     <p>Garbage.<br>
     </p>
-    <h1>18a</h1>
-    <p>ENTRY DAP MODE. A 4-position switch specifying branching<br>
-      in ENTRY DAP, scaled 2<sup>-14</sup>.</p>
+    <h1><a name="20"></a><a name="30"></a>18-35a</h1>
+    LANDING SITE MARK DATA. These thirty-five registers contain the mark
+    data which is being used to update the CSM state vector in P22 and
+    the landmark position coordinates in P22 and P24. Each mark, of
+    which five in P22 and an unlimited number in P24 are allowed,
+    consists of six parameters stored in seven registers. These
+    quantities, listed in the correct transmitted order, are:<br>
     <ul>
-      <li>Set to "-1" (77776<sub>8</sub>) if entry equations sense drag
-        in excess of 0.05 g.</li>
-      <li>Set to "-0" (77777<sub>8</sub>) if the ALFA angle (pitch
-        attitude) magnitude is greater than 135°.</li>
-      <li>Set to "+1" (00001<sub>8</sub>) if the ALFA angle magnitude is
-        in the range 45°-135°.</li>
-      <li>Set to "+0" (00000<sub>8</sub>) if the ALFA angle is less than
-        45°.</li>
+      <li>Time since epoch (double precision) scaled centiseconds/2<sup>28</sup>.</li>
+      <li>Inner gimbal angle (CDUY), 15-bit unsigned fraction, scaled
+        degrees/360.</li>
+      <li>Optics Shaft angle, 15-bit unsigned fraction, scaled
+        degrees/360.</li>
+      <li>Middle gimbal angle (CDUZ), 15-bit unsigned fraction, scaled
+        degrees/360.</li>
+      <li>Optics Trunnion angle, scaled (degrees-19.7754)/45 (two's
+        complement). The bias, 19.7754, is programmed-in.</li>
+      <li>Outer gimbal angle (CDUX). A 15 unsigned fraction, scaled
+        degrees/360.</li>
     </ul>
-    <p>The expected value sequence would be, +1 ⟶ +0 ⟶ -1. The value,
-      -0, is not generally expected. This item is calculated each 0.1
-      second after the DAP is turned on in P62. Flagword 6, bits 12 and
-      2, indicates an active DAP.<br>
+    SVMRKDAT through SVMRKDAT +34 are set to zero upon entry to P24.
+    They are set with mark data immediately after each individual mark
+    in P22 and P24. P22MKFLG (bit 11 flagword 3) is cleared upon entry
+    to P22, P24. It is set to 1 in P22 after all marks have been taken
+    and in P24 after every individual mark to signify that SVMRKDAT
+    (words 18-35a) contains the latest mark information. If CMOONFLG bit
+    12, flagword 8, is a zero, the coordinate system is earth centered.
+    A one in this bit position would indicate a moon-centered coordinate
+    system. In P24, if more than five marks are taken, they are stored
+    in a cyclic manner, i.e., the sixth mark is stored in SVMRKDAT
+    through SVMRKDAT +6, the seventh mark is stored in SVMRKDAT +7
+    through SVMRKDAT +13, etc. A "mark reject" in P22 and P24 will cause
+    the time registers of the latest mark to be complemented. In P22,
+    the next mark after a rejected mark is written over the rejected
+    mark while in P24 the next location is used.<br>
+    <h1>35b</h1>
+    <p>Garbage.<br>
     </p>
-    <h1>18b,19a,19b</h1>
-    <p>PREL, QREL, RREL. The single-precision roll, pitch and yaw rates,
-      components of the CM angular velocity vector along the body X, Y,
-      and Z axes and scaled (degrees/sec)/1800. All are corrected for γ̇<sub>E</sub>
-      if γ̇<sub>E</sub> &gt; γ̇<sub>E</sub> min. The expected range of
-      values would be: PREL ± 20°/sec, QREL ± 4°/sec, RREL ≈ ± 17°/sec.
-      These quantities are calculated each 0.1 see after the DAP is
-      turned on in P62.</p>
-    <p>The functioning is indicated by non-zero values in both bit 1 and
-      bit 2 of flagword 6.<br>
+    <h1>36a</h1>
+    <p>LANDMARK ID contains the R2 entry by the astronaut after a V05N70
+      or V05N71 action. It contains five octal digits, ABCDE, which
+      describe the landmark as follows:<br>
     </p>
-    <p> </p>
-    <h1><a name="20"></a>20</h1>
-    <p>L/D1. The commanded value of lift-to-drag ratio used in Reentry
-      Steering to provide Roll Command, scaled 2<sup>0</sup>. It is
-      computed whenever lateral logic is exercised, normally each 2
-      seconds after the initiation of P64 until the velocity becomes
-      less than 1000 ft/sec in P67. The value range should be equal to,
-      or less than, 1.0.&nbsp; It is omitted in P66. LAD is pad loaded.<br>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">A<br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">1 if landmark is known.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A<br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">2 if landmark is unknown.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B<br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">index of offset designator.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">C<br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">not used<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DE<br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">00 for a landmark whose coordinates are not
+            stored in the CMC memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">=<br>
+          </td>
+          <td valign="top">01 for the landing site.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    The offset indicator, B, is set to zero at the start of P22. The
+    astronaut may change all items after a V05N70 or V05N71. It is used
+    by P22 after each of these displays to extract the information
+    described above. P24 does not touch LANDMARK ID.<br>
+    <h1>36b</h1>
+    <p>Garbage<br>
     </p>
-    <h1><a name="30"></a>21-30</h1>
-    UPBUFF's. These twenty registers, UPBUFF through UPBUFF +19D,
-    contain the uplinked octal components in the transmitted order. If
-    the update is composed of less than twenty quantities, the remaining
-    registers will contain garbage.<br>
-    <h1>31a</h1>
-    <p>COMPNUMB. The total number (octal) of components the update
-      program expects to receive. For a Verb 71 or a Verb 72 update,
-      COMPNUMB will be set equal to the index value.<br>
+    <h1>37-39</h1>
+    <p>SPARES. The first half of each spare contains 00000<sub>8</sub>.
+      The second half is ARUPT (the contents of the accumulator when the
+      telemetry interrupt was recognized).<br>
     </p>
-    <h1>31b</h1>
-    <p>UPOLDMOD. This is the number of the CMC program which was
-      interrupted by P27, the update program. It will indicate program
-      0, 2, or Fresh Start (-0<sub>8</sub>).<br>
-    </p>
-    <h1>32a</h1>
-    <p>UPVERB. The least significant digit of the verb number which was
-      selected to initiate a desired CMC update.<br>
-    </p>
-    <h1>32b</h1>
-    <p>UPCOUNT. The octal identifier of the next quantity that the
-      update program expects to receive. As each quantity goes into
-      UPBUFF, UPCOUNT will be incremented by one, until it is equal to
-      COMPNUMB. It will not change during a line-by-line correction of
-      the data load.</p>
-    <h1>33a</h1>
-    <p>ROLL ERROR. The CM roll attitude error in body axes generated by
-      the DAP and displayed on the FDAI needle, scaled degrees/360. The
-      error is integrated each 0.1 sec between 2-second DAP updates.
-      This quantity is the same as the item, AK, except for the scale
-      factor, and is active only after the DAP is turned on in P62. A
-      one in bit 12 of flagword 6 indicates such activity.<br>
-    </p>
-    <h1>33b</h1>
-    <p>ROLL ANGLE. The roll attitude angle used by ENTRY DAP,scaled
-      degrees/180. It is the first Euler rotation of the CM body triad
-      about the negative relative velocity vector -<u>UVA</u>, along
-      which <u>UBX</u> points. The value ranges ±180°, is calculated
-      after the DAP is turned on in P62 and is updated each 0.1 second
-      during its operating period. Operation is indicated by a non-zero
-      in bit 12 of flagword 6.<br>
-    </p>
-    <h1>34</h1>
-    <p>LATANG. The lateral range expressed as an angle, scaled
-      radians/4. It will range at less than 200 nmi and is calculated
-      each 2 seconds after the initiation of P63 until the end of P67.<br>
-    </p>
-    <h1>35</h1>
-    <p>RDOT. Altitude rate. The radial component of velocity (negative
-      if descending), scaled (feet/sec)/(2 × 25766.1973). This is a
-      scalar component calculated in earth-centered reference
-      coordinates. If bit 9, flagword 6 (RELVELSW) is zero, the velocity
-      used is inertial. If bit 9, flagword 6 is a one, a velocity
-      relative to air mass is used. The expected range of values runs
-      from less than -7000 ft/sec to +1000 ft/sec and is calculated each
-      2 seconds after P63 until the end of P67.<br>
-    </p>
-    <h1>36</h1>
-    <p>THETAH. The range between the present position and the estimated
-      landing site, expressed as an angle and scaled, degrees/360. The
-      expected value is less than 180° It is calculated each 2 seconds
-      after P63 until the end of P67. It is used in P61 for computing
-      EMS display but is not on the Powered Flight downlist, however.<br>
-    </p>
-    <h1>37</h1>
-    <p>LAT(SPL). The geodetic latitude of the entry target, scaled
-      degrees/360. A positive quantity denotes North while a negative
-      quantity indicates South. This parameter is pad loaded or DSKY
-      loaded when P61 or P62 is in progress. It is also computed in P37
-      (Return to Earth) and displayed.<br>
-    </p>
-    <h1>38</h1>
-    <p>ALPHA. The pitch attitude angle, used by ENTRY DAP and scaled,
-      degrees/180. It is the third rotation of the CM body triad in the
-      Euler sequence R, β, α, and is about <u>UBY</u>. The value range
-      is ±180° and is calculated each 0.1 second after the DAP is turned
-      on in P62. Operation of such is indicated by a non-zero value in
-      bit 12, flagword 6. (Bits 1 and 2 are also non-zero.)<br>
-    </p>
-    <h1>39</h1>
-    <p>BETA. The yaw attitude angle, used by ENTRY DAP and scaled,
-      degrees/180. It is the second rotation of the CM body triad in the
-      Euler sequence R, β, α, and is about <u>UBZ</u>. The value range
-      is ±90° and is calculated each 0.1 second after the DAP is turned
-      on in P62. This state is indicated by a non-zero value in bit 12,
-      flagword 6. (Bits 1 and 2 are also non-zero.)</p>
     <h1><a name="40"></a>40a</h1>
     <p><i>Same as Powered List.</i><br>
     </p>
@@ -3077,62 +3062,64 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       verb 70 (P27).&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
     <h1>52</h1>
-    <p>PIPTIME1. The time (T2/T1) at which the PIPAs are read, scaled
-      centiseconds/2<sup>28</sup>. Integration stores the PREREAD state
-      vector time in anticipation of reading PIPAs at that time. PIPASR
-      stores TIME2/TIME1 every two seconds during Average g.<br>
+    LANDMARK LATITUDE is the latitude of the landmark which P22 is
+    updating, scaled degrees/360. It may be either earth-centered or
+    moon-centered. If, upon entry of P22; CMOONFLG (Flagword 8, bit 12)
+    equals zero, the coordinate system is earth-centered. Conversely,
+    the coordinate system will be moon-centered if CMOONFLG equals one.
+    It does not change within P22. The landmark may be either known or
+    unknown. If known, it may be either entered by the astronaut, or
+    obtained from the item, RLS (lunar landing site). The range of
+    values is -.25 revolutions ≤ LAT ≤ .25 revolutions. The latitude is
+    computed for known landmarks only at the start of P22. At the
+    completion of P22, the latitude is computed for all landmarks and
+    contains the updated value. Item LANDLAT occupies the same locations
+    as LAT and is identical in meaning. LANDLAT is the item used by noun
+    89 to display landmark latitude. The foregoing description applies
+    to P24 with the exception that the landmark must be known and
+    LANDMARK LATITUDE is only obtained from astronaut input. Also, it
+    changes whenever a mark is used to compute new landmark coordinates.<br>
+    <h1>53</h1>
+    <p>LANDMARK LONGITUDE is the longitude of the landmark which P22 is
+      updating, scaled degrees/360. The range of values is -.5
+      revolutions ≤ LONG &lt; .5 revolutions. It may be either
+      earth-centered or moon-centered. If, upon entry of P22, CMOONFLG
+      (Flagword 8, bit 12) equals zero, the coordinate system is
+      earth-centered. Conversely, the coordinate system will be
+      moon-centered if CMOONFLG equals one. The longitude is computed
+      for known landmarks only at the start of P22. At the completion of
+      P22, the longitude is computed for all landmarks and contains the
+      updated value. The foregoing description applies P24 with the
+      exception that the landmark must be known and LANDMARK LONGITUDE
+      is only obtained from astronaut input. Also, it changes whenever a
+      mark is used to compute new landmark coordinates.<br>
     </p>
-    <h1>53-55</h1>
-    <p>DELVs. The sampled X, Y, &amp; Z PIPA accumulations (velocity
-      increments) with compensation for PIPA bias and scale factor
-      errors. These quantities are in the stable member coordinate
-      system and are scaled, (cm/sec)/(5.85 × 2<sup>14</sup>).
-      Calculation takes place every two seconds during AVE G. The
-      variation with time and the range of values depend on the
-      acceleration level and compensation. There is a zeroing of all
-      low-order components and a momentary zeroing of DELVY and DELVZ
-      prior to the loading of PIPA contents into respective high-order
-      words (part of READACCS, or REREADAC task). If no restarts occur
-      the momentary zeroing would not appear on the downlink. PIPA
-      compensation follows in Servicer job (inhinted, so that all or no
-      PIPA compensation shows up).<br>
+    <h1>54</h1>
+    <p>LANDMARK ALTITUDE is the altitude of the landmark above the
+      Fischer Ellipsoid for earth orbit and above the mean lunar radius
+      for moon orbit, scaled meters/2<sup>29</sup>. Tested values have
+      varied between +2000 to -2000 meters. It may be either
+      earth-centered or moon-centered. If, upon entry of P22, CMOONFLG
+      (Flagword 8, bit 12) equals zero, the coordinate system is
+      earth-centered. Conversely, the coordinate system will be
+      moon-centered if CMOONFLG equals one. The altitude is computed for
+      known landmarks only at the start of P22. At the completion of
+      P22, the altitude is computed for all landmarks and contains the
+      updated value. The foregoing description applies to P24 with the
+      exception that the landmark must be known and LANDMARK ALTITUDE is
+      only obtained from astronaut input. Also, it changes whenever a
+      mark is used to compute new landmark coordinates.<br>
     </p>
-    <h1>56</h1>
-    <p>TTE(EMS). The time required to traverse the conic path from the
-      present position to the specified EMS altitude above the Fischer
-      ellipsoid, expressed as a negative number, counting down and
-      scaled, centiseconds/2<sup>28</sup>. The value is calculated in
-      P61. It will be decremented every two seconds thru P63 and
-      displayed via N63. (See Note 1).<br>
+    <h1>55-58</h1>
+    <p>SPARES.&nbsp; Same description as word 37 of the Program 22 list.<br>
     </p>
-    <p>(Note 1: If the Recycle option (V32E) of N63 in P61 is exercised,
-      this quantity is recalculated using the current state vector.
-      However, only the result of the final calculation will appear on
-      the ENTRY and UPDATE list).<br>
-    </p>
-    <h1>57</h1>
-    <p>VIO. The predicted entry velocity at the EMS altitude above the
-      Fischer radius along a conic path from the present position,
-      scaled (meters/centisecond)/2<sup>7</sup>. The value will be
-      approximately 38,000 ft/s and be calculated in P61. (See Note 1).</p>
-    <p>(Note 1: If the Recycle option (V32E) of N63 in P61 is exercised,
-      this quantity is recalculated using the current state vector.
-      However, only the result of the final calculation will appear on
-      the ENTRY and UPDATE list).</p>
-    <h1>58<br>
-    </h1>
-    <p>VPRED(EI). The predicted entry velocity at 400K feet above the
-      Fischer radius along a conic path from the present position,
-      scaled (meters/centisecond)/2<sup>7</sup>. The value will be
-      approximately 38K ft/s and be calculated in P61. (See Note 1)<br>
-    </p>
-    <p>(Note 1: If the Recycle option (V32E) of N63 in P61 is exercised,
-      this quantity is recalculated using the current state vector.
-      However, only the result of the final calculation will appear on
-      the ENTRY and UPDATE list).</p>
+    <blockquote><font size="-1">I.e.: "SPARES. The first half of each
+        spare contains 00000<sub>8</sub>. The second half is ARUPT (the
+        contents of the accumulator when the telemetry interrupt was
+        recognized)."</font></blockquote>
     <h1><a name="60"></a>59a,59b,60a</h1>
-    <p><i>Same as Powered List, which is the same as words 9a,9b,10a of
-        Powered List.</i><br>
+    <p><i>Same as the Powered List, which is the same as words 9a,9b,10a
+        of Powered List.</i><br>
     </p>
     <p>CDUX (outer gimbal) CDUY(inner gimbal) CDUZ (middle
       gimbal):&nbsp; The actual values of the IMU CDU angles.&nbsp; Each
@@ -3147,15 +3134,15 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       -70 degrees and +70 degrees.<br>
     </p>
     <h1>60b</h1>
-    <p><i><i>Same as Powered List, which is the s</i>ame as word 10b of
-        Powered List.</i></p>
+    <p><i><i>Same as the Powered List, which is the s</i>ame as word 10b
+        of Powered List.</i></p>
     <p>CDUT.&nbsp; The optics trunnion angle CDU, scaled
       (degrees-19.7754)/45 (two's complement).&nbsp; The angle varies
       from -19.775° to +45°.<br>
     </p>
     <h1>61-63</h1>
-    <p><i><i>Same as Powered List, which is the s</i>ame as words 11-13
-        of Powered List.</i></p>
+    <p><i><i>Same as the Powered List, which is the s</i>ame as words
+        11-13 of Powered List.</i></p>
     <p>ADOTs (if RCS DAP on) or OGARATE and OMEGABs (if TVC DAP
       on).&nbsp; ADOTs are the RCS DAP-measured vehicle body rates (i.e.
       the outputs from the RCS DAP rate filter), roll, pitch and yaw,
@@ -3261,28 +3248,9 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
     increments (plus or minus) whenever integration is being done. It is
     scaled, centiseconds/2<sup>28</sup>.
     <p> </p>
-    <h1>66a,66b,67 </h1>
-    <p><i>Same as words 83a,83b,84a of Powered List.</i></p>
-    <p>ERRORX, ERRORY, ERRORZ. The RCS DAP phase plane (roll, pitch,
-      yaw) attitude errors scaled degrees/180. During steady state
-      operation the magnitude of ERRORX, Y, and Z should be less than
-      the attitude deadband, ADB, (either 0.5 deg. or 5 deg.). When the
-      CMC mode switch is in AUTO or HOLD, a magnitude greater than the
-      ADB which exists for long intervals without diminishing at the
-      rate as specified in DAPDATR1 would be an indication of bad RCS
-      DAP performance. The RCS control axes, with which these errors are
-      concerned, are rotated, with respect to the body axes, by -7.25
-      degrees about the +X axis. The error values are calculated:<br>
-    </p>
-    <ol>
-      <li>During RCS DAP operation with CMC MODE switch in AUTO or HOLD,
-        every 100 millisecs.</li>
-      <li>During RCS DAP operation with CMC MODE switch in FREE — not
-        updated.</li>
-    </ol>
-    <h1>67b,68a,68b</h1>
-    <p><i>Same as words 16a,16b,17a on Powered List.</i><br>
-    </p>
+    <h1>66a,66b,67a</h1>
+    <p><i>Same as Powered List, which is the same as words 16a,16b,17a
+        of Powered List.</i></p>
     <p>THETADX, THETADY, THETADZ.&nbsp; During normal RCS DAP operation,
       when the CMC Mode switch is in AUTO or HOLD and there are no RHC
       commands, these registers contain the desired current, (i.e., of
@@ -3301,50 +3269,746 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       <li>During manual rate maneuvers and then in FREE mode the
         registers are not updated.</li>
     </ol>
-    <h1>69a</h1>
-    <p><i>Same as word 18a of Entry and Update List.</i><br>
-    </p>
-    <p>ENTRY DAP MODE. A 4-position switch specifying branching<br>
-      in ENTRY DAP, scaled 2<sup>-14</sup>.</p>
-    <ul>
-      <li>Set to "-1" (77776<sub>8</sub>) if entry equations sense drag
-        in excess of 0.05 g.</li>
-      <li>Set to "-0" (77777<sub>8</sub>) if the ALFA angle (pitch
-        attitude) magnitude is greater than 135°.</li>
-      <li>Set to "+1" (00001<sub>8</sub>) if the ALFA angle magnitude is
-        in the range 45°-135°.</li>
-      <li>Set to "+0" (00000<sub>8</sub>) if the ALFA angle is less than
-        45°.</li>
-    </ul>
-    <p>The expected value sequence would be, +1 ⟶ +0 ⟶ -1. The value,
-      -0, is not generally expected. This item is calculated each 0.1
-      second after the DAP is turned on in P62. Flagword 6, bits 12 and
-      2, indicates an active DAP.<br>
-    </p>
-    <h1><a name="70"></a>69b,70a,70b</h1>
-    <p><i>Same as words 18b,19a,19b of Entry and Update List.</i><br>
-    </p>
-    <p>PREL, QREL, RREL. The single-precision roll, pitch and yaw rates,
-      components of the CM angular velocity vector along the body X, Y,
-      and Z axes and scaled (degrees/sec)/1800. All are corrected for γ̇<sub>E</sub>
-      if γ̇<sub>E</sub> &gt; γ̇<sub>E</sub> min. The expected range of
-      values would be: PREL ± 20°/sec, QREL ± 4°/sec, RREL ≈ ± 17°/sec.
-      These quantities are calculated each 0.1 see after the DAP is
-      turned on in P62.</p>
-    <p>The functioning is indicated by non-zero values in both bit 1 and
-      bit 2 of flagword 6.<br>
-    </p>
-    <h1><a name="80"></a>71-80</h1>
-    <p><i>Same as words 21-30 of Entry and Update List.</i><br>
-    </p>
-    UPBUFF's. These twenty registers, UPBUFF through UPBUFF +19D,
-    contain the uplinked octal components in the transmitted order. If
-    the update is composed of less than twenty quantities, the remaining
-    registers will contain garbage.
+    <h1>67b</h1>
+    <p><i><i>Same as Powered List, which is the s</i>ame as word 17b of
+        Powered List.</i></p>
+    Garbage.<br>
     <p> </p>
-    <h1>81a</h1>
+    <h1>68a</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>RSBBQ. When a hardware "restart" occurs, this register is loaded
+      with the setting of the BBANK portion of the calling address + 1
+      and also Superbank information which is in channel 7.<br>
+    </p>
+    <h1>68b</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>RSBBQ+1. Loaded with the setting of the Q-register when a
+      hardware restart occurs.<br>
+    </p>
+    <h1>69a</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>Garbage.&nbsp; This register will contain all zeros.<br>
+    </p>
+    <h1>69b</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p> </p>
+    <p>Channel 77.&nbsp; A computer output channel, the individual bits
+      of which, are used to indicate the source of a hardware
+      restart.&nbsp; The channel is initialized to 0 by a V36E (request
+      fresh start).&nbsp; The channel will be zeroed by the final V33E
+      on a P27 state vector uplink and also by a crew or ground
+      V21N10E77EE.&nbsp; Should a hardware restart occur, one of the
+      bits in the channel should be set to 1 indicating the
+      source.&nbsp; If multiple restarts occur, more than one bit could
+      possibly be left set afterwards (i.e., if they were different
+      types).&nbsp; Many restarts of the same type would leave just one
+      bit set with the software REDO COUNTER indicating the
+      number.&nbsp; The bit definitions are:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="bottom"><u>BIT</u><br>
+          </th>
+          <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+            <br>
+          </th>
+          <th valign="bottom" align="left">RESTART (and/or AGC<br>
+            <u>warning)
+              CAUSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp; &nbsp;&nbsp; </u><br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15-10<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Scalar double freq.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Scalar fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Counter fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Voltage fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Nightwatchman<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Ruptlock<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">TC Trap<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">E-memory parity fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">E or F-memory parity fail<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="70"></a>70a</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>C31FLWRD. A single-precision erasable memory cell used to<br>
+      determine if the channel representations of the CMC mode switch,<br>
+      SC control switch, optics mode switch, or optics zero switch are<br>
+      to be used or if back-up indicators are to be used. The erasable<br>
+      is of the form AXXBX, where:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top" align="center"><u>A Value</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">0 or 4<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Bits 13, 14, 15 of channel 31 are valid</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">G&amp;N Control FREE</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">G&amp;N Control ATTITUDE HOLD</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">G&amp;N Control AUTO<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">SCS Control FREE<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">SCS Control ATTITUDE HOLD<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">SCS Control AUTO<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <th valign="top" align="center"><u>B Value</u><br>
+          </th>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">0 or 4<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Bits 4 and 5 of channel 33 are valid<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1 or 5<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Optics Mode CMC<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2 or 6<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Optics Mode ZERO<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3 or 7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Optics Mode MANUAL<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>70b,71a,71b</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>FAILREG's. A set of three single-precision cells used to retain
+      alarm pattern code information. They are all reset to zero by a
+      Fresh Start. FAILREG and FAILREG+1 are also reset to zero by use
+      of the "ERROR RESET" keycode. FAILREG contains the first alarm
+      code received after the "ERROR RESET", FAILREG+1 contains the
+      second, and FAILREG+2 will always contain the most recent alarm
+      code. Octal quantities.<br>
+    </p>
+    <h1>72a</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>SHAFT. The optics CDU shaft angle.&nbsp; This register is an
+      unsigned 15-bit fraction scaled, degrees/360. The angle varies
+      ±180°.<br>
+    </p>
+    <h1>72b,73a,73b</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>PIPA's. The accumulation of output pulses from the X,Y, and Z
+      accelerometers (a measure of the velocity changes), scaled
+      (centimeters/second)/(5.85 × 2<sup>14</sup>). These registers are
+      zeroed by PIPUSE (called by LASTBIAS which is called by PREREAD at
+      the start of AVEG). They are then read and zeroed every two
+      seconds by READACCS (or REREADAC) throughout AVEG.<br>
+    </p>
+    <h1>74a</h1>
+    <p>The number Of valid Landing site marks, from one to five in P22
+      and any number in P24, which are stored in the SVMRKDAT table,
+      scaled 2<sup>-14</sup>. This item is computed by R53 and left in
+      8NN. In P22 and P24, this quantity is initialized to 0 and
+      incremented by one immediately after every mark. In P24, if a mark
+      is rejected, the counter will not be decremented, while in P22, it
+      will be decremented.<br>
+    </p>
+    <h1>74b</h1>
+    <p>Garbage.<br>
+    </p>
+    <p> </p>
+    <h1>75a</h1>
+    <p><i>Same as word 77a of the Powered List.</i><br>
+    </p>
+    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
+          </td>
+          <td valign="top">PCMANFLG. When set, indicates P20 to exit
+            after plane Change maneuver and P79 maneuver. Set by MINKEY
+            controller after plane change burn. Set by P79. Cleared by
+            controller after the tracking maneuver which follows the P36
+            plane change burn. Cleared by P79 upon termination. Cleared
+            when new program selected via V37.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">INTFLAG. A 1 indicates that some program or
+            routine has called INTSTALL and is presumably in the process
+            of integrating. Other programs calling INTSTALL will wait
+            until this bit is reset to 0. A 0 indicates that no program
+            or routine is currently using integration. Set 1 by
+            INTSTALL. Set 0 by INTWAKE. A hardware or software restart
+            sets this bit to 0.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13<br>
+          </td>
+          <td valign="top">REINTFLG. A 1 indicates that the routine
+            currently using INTSTALL is to be restarted. A 0 indicates
+            that no restartable integration is in progress. Programs
+            which have restart points during integration set this bit to
+            1. INTWAKE sets this bit to 0. Bit is also set to 0 by
+            POODOO.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">12<br>
+          </td>
+          <td valign="top">REJCTFLG. When set, R22 is to ignore optics
+            mark currently being processed. Set by MARK REJECT interrupt
+            and by V86. Cleared in R22 after mark data processing.</td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">HDSUPFLG. A 1 indicates "heads-up" tracking
+            attitude. This flag is not altered by a Fresh Start. Set or
+            cleared by ground or crew action.</td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">BURNFLAG. When set, indicates that the CSM
+            performed a burn. Cleared at start of P40 and P41. Set by
+            P40 and P41 if there has been any thrusting by the CSM. Set
+            in P36 if ΔV is zero.</td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">RANGFLAG. Bit set to indicate range
+            &lt;327.67 n.mi. Set or cleared in R61 depending on range.</td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">P35FLAG. A 1 indicates MCC targeting has been
+            completed. Set after final computation cycle of P35. Cleared
+            in R22 after W-matrix initialization.</td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">AUTOSEQ. When set, indicates automatic
+            sequence operating. Set in R00 when MINKEY is selected.
+            Cleared in V56, POODOO, R00 logic after MINKEY is
+            terminated, and V37 program selection if a non-MINKEY
+            program is requested. Set temporarily in V37 selection of
+            all rendezvous targeting programs for purpose of P2O
+            initialization and subsequently cleared on ENTER response to
+            V50N25FL (R1 = 17). Set to 1 at PRO response to V50N25FL (R1
+            = 17). It can be set 0 by a verb 34 response to the V50 N18
+            display in R60, if R6O was called from R61. A verb 34
+            response to a V06N49 display in R22 will also set the bit to
+            0.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">MANEUFLG. When set, indicates no mark has
+            been processed since the last final computation cycle of a
+            targeting program. Set after final computation cycle of all
+            rendezvous targeting programs except P36. Set on PROCEED
+            response to V50N25FL (R1 = 17). Cleared after mark
+            incorporation in R22.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">PTV93FLG. A 1 indicates W-matrix
+            initialization to be performed after the next burn. Set on
+            PROCEED response to V50N25FL (R1 = 17). Set if RENDWFLG is 0
+            in AUTOW logic of R22 if age of W-matrix and other criteria
+            indicate W-matrix initialization is desired after next burn.
+            Cleared in R22 after W-matrix initialization.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">TPIMNFLG. Set to indicate that TPI targeting
+            has been completed. Cleared at start of P34; set after final
+            pass of P34.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">FULTKFLG. When set, indicates only one type
+            of marking (optics or VHF) is being performed for targeting.
+            Set or cleared by crew option in V57.</td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">PCFLAG. Set to indicate P36 plane change
+            targeting. Set in P36. Cleared by P31, 32/72, 33/73, 34/74,
+            35/75, 36. Cleared on PROCEED response to V50N25FL (R1 =
+            17). Cleared by P52 if pulse torquing is done.</td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>75b</h1>
+    <p><i>Same as word 77b of the Powered List.</i><br>
+    </p>
+    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
+          </td>
+          <td valign="top">S32.1F1. Used in P32/P72. Used to terminate
+            iteration if ΔV<sub>CSI</sub> exceeds 1000 ft/sec twice
+            during the iteration. Set to 0 at start of each iterative
+            loop. Set to 1 if |ΔV<sub>CSI</sub>| &gt; 1000 ft/sec and
+            subsequent test of bit in case |ΔV<sub>CSI</sub>| &gt; 1000
+            ft/sec will terminate iterative loop.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">S32.1F2. Used in P32/P72. Controls first step
+            size of iterative loop to establish two points for
+            Newton-Raphson iteration. Set to 1 at start of each
+            iterative loop. Set to 0 after first step.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13 and 12<br>
+          </td>
+          <td valign="top">S32.1F3A and S32.1F3B. Used in P32/P72.
+            Control setting of alarm codes during first iterative loop
+            and control the 50 ft/sec steps utilized to establish the
+            starting point of the second iterative loop. Bits set (0, 1)
+            at start of first iterative loop to allow setting of the
+            alarm codes. Set (0, 0) at start of second iterative loop
+            until after first 50 ft/sec step is taken, when set (1,1).
+            Set (1,0) after the angular error undergoes a sign change.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">AZIMFLAG. A 1 indicates 3-axis maneuver
+            desired in R61. Bit set to 1 by MINKEY and by P20 when
+            option 4 or 5 is selected. Cleared by P20 for other options
+            and by V89 before maneuver is calculated.</td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">HAFLAG. Set to indicate P31 Height Adjustment
+            targeting. Set and subsequently cleared in P31.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">CSISFLAG. A 1 indicates multiple CSI
+            targeting. Cleared in first MINKEY CSI targeting, set in
+            succeeding MINKEY CSI targeting. Cleared after V06N37FL
+            display in P32.</td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">Not used. </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <h1>76-78</h1>
+    LUNAR LANDING SITE POSITION VECTOR (X, Y, Z) measured in moon-fixed
+    coordinates from the center of the moon to the surface of the moon
+    at the landing site, scaled meters/2<sup>27</sup>. It is used in
+    lunar orbits only and must be selected by the astronaut using nouns
+    70 or 71. If selected by the astronaut, it is used at the start of
+    P22 to compute the initial landmark vector (<u>R</u><sub>L</sub>)
+    and then updated at the end of P22 as a result of data computed from
+    the results of astronaut-acquired sighting marks.<br>
+    <h1> 79</h1>
+    SPARE.&nbsp; Same description as word 37 of the Program 22 list.<br>
+    <blockquote><font size="-1">I.e.: "SPARES. The first half of each
+        spare contains 00000<sub>8</sub>. The second half is ARUPT (the
+        contents of the accumulator when the telemetry interrupt was
+        recognized)."</font><br>
+    </blockquote>
+    <p> </p>
+    <h1><a name="80"></a>80a</h1>
     <p><i>Same as Powered List.</i><br>
     </p>
+    <p>OPTMODES, a cell whose individual bits are used to control the
+      performance of optics functions within the "T4RUPT" package. Set
+      to 00130<sub>8</sub> (bits 7, 5, 4 = 1) as part of a fresh start;
+      a restart preserves the present values of the bits 9, 5, 4, while
+      setting bit 7 to 1 and zeroing the remaining bits (15-10, 8, 6,
+      3-1). Word is updated once every 0.48 seconds, about 0.24 seconds
+      before the interrupt that updates IMODES30 &amp; IMODES33.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15-11<br>
+          </td>
+          <td valign="top">Not assigned, hence expected to remain 0.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Bit set 1 to indicate that zeroing of optics
+            completed since last fresh start or restart (both of which
+            set the bit 0). If an attempt is made to drive the optics
+            and this bit is found to be zero, alarm 0120<sub>8</sub> is
+            generated (but computation proceeds).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Not assigned, hence expected to remain 0. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Not assigned, hence expected to remain 0. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Last sampled value of channel 30 bit 7 (0 if
+            an optics CDU fail indication has been generated by the
+            optics CDU hardware). If bit 2 of this word is 0, a Tracker
+            alarm (bit 8 of DSPTAB+11) is generated if this bit has a 1
+            to 0 transition. Bit set 1 by a fresh start or restart.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Not assigned, hence expected to remain 0. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top"><a name="OPTMODES_5"></a>Last sampled value
+            of channel 33 bit 5 (0 if optics mode switch set to computer
+            control).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top"><a name="OPTMODES_4"></a>Last sampled value
+            Of channel 33 bit 4 (0 if optics mode switch set to zero
+            optics). If bits 5-4 = 11<sub>2</sub>, this means that
+            optics mode switch set to manual mode.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Bit set 1 when optics mode switch changed
+            from manual or computer control mode to zero optics mode, to
+            indicate that zeroing of the optics is in progress. If bit
+            is 1, then a switch out of zero optics mode will cause alarm
+            0116<sub>8</sub> to be generated (if switched to manual, a
+            "grace period" of about 5.3 seconds is provided before the
+            optics-zeroing time counter is reset, during which time a
+            switch back to optics zeroing can be made). Bit remains 1
+            for about 16.2 seconds, and is then reset to 0 (at same time
+            that bit 10 of this word is set 1, and bit 2 of this word
+            set 0).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Bit set 1 to inhibit generation of Tracker
+            alarm (bit 8 of DSPTAB+11) if bit 7 of this word goes from 1
+            to 0. Bit set and reset at the same time as bit 3.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">This bit is not used.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>80b</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>HOLDFLAG. A multiple purpose switch which is used for
+      establishing the control reference of the autopilot. It has the
+      following three states:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top"><u>State</u><u><br>
+            </u></th>
+          <th valign="top">&nbsp;&nbsp;<u> </u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">(+)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Sample the CDU angles and store in THETADX,
+            THETADY, and THETADZ before resuming attitude hold and
+            resetting HOLDFLAG to (+0).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">(+0)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Remain in attitude hold about previously
+            established reference angles, THETADX, THETADY and THETADZ.
+            Set to this state by RCS DAP when MGA &gt; 75°.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">(-)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Enable automatic steering.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>81a</h1>
+    <p><i>Same as Powered List.</i></p>
     <p>LEMMASS. The current mass of the LM vehicle, scaled kilograms/2<sup>16</sup>.
       This is a pad load erasable and is not changed in normal use. The
       astronaut can change it, however, as part of the normal DAPDATA
@@ -3597,175 +4261,31 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
         </tr>
       </tbody>
     </table>
-    <h1>83a</h1>
-    <p><i>Same as word 33b of Entry and Update List.</i><br>
+    <h1>83a,83b,84a</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>ERRORX, ERRORY, ERRORZ. The RCS DAP phase plane (roll, pitch,
+      yaw) attitude errors scaled degrees/180. During steady state
+      operation the magnitude of ERRORX, Y, and Z should be less than
+      the attitude deadband, ADB, (either 0.5 deg. or 5 deg.). When the
+      CMC mode switch is in AUTO or HOLD, a magnitude greater than the
+      ADB which exists for long intervals without diminishing at the
+      rate as specified in DAPDATR1 would be an indication of bad RCS
+      DAP performance. The RCS control axes, with which these errors are
+      concerned, are rotated, with respect to the body axes, by -7.25
+      degrees about the +X axis. The error values are calculated:<br>
     </p>
-    <p>ROLL ANGLE. The roll attitude angle used by ENTRY DAP,scaled
-      degrees/180. It is the first Euler rotation of the CM body triad
-      about the negative relative velocity vector -<u>UVA</u>, along
-      which <u>UBX</u> points. The value ranges ±180°, is calculated
-      after the DAP is turned on in P62 and is updated each 0.1 second
-      during its operating period. Operation is indicated by a non-zero
-      in bit 12 of flagword 6.</p>
-    <h1>84a</h1>
-    <i>Same as word 80a on Powered List.</i><br>
-    <p>OPTMODES, a cell whose individual bits are used to control the
-      performance of optics functions within the "T4RUPT" package. Set
-      to 00130<sub>8</sub> (bits 7, 5, 4 = 1) as part of a fresh start;
-      a restart preserves the present values of the bits 9, 5, 4, while
-      setting bit 7 to 1 and zeroing the remaining bits (15-10, 8, 6,
-      3-1). Word is updated once every 0.48 seconds, about 0.24 seconds
-      before the interrupt that updates IMODES30 &amp; IMODES33.<br>
-    </p>
-    <table cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top" align="center"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15-11<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10<br>
-          </td>
-          <td valign="top">Bit set 1 to indicate that zeroing of optics
-            completed since last fresh start or restart (both of which
-            set the bit 0). If an attempt is made to drive the optics
-            and this bit is found to be zero, alarm 0120<sub>8</sub> is
-            generated (but computation proceeds).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top">Last sampled value of channel 30 bit 7 (0 if
-            an optics CDU fail indication has been generated by the
-            optics CDU hardware). If bit 2 of this word is 0, a Tracker
-            alarm (bit 8 of DSPTAB+11) is generated if this bit has a 1
-            to 0 transition. Bit set 1 by a fresh start or restart.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top"><a name="OPTMODES_5"></a>Last sampled value
-            of channel 33 bit 5 (0 if optics mode switch set to computer
-            control).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top"><a name="OPTMODES_4"></a>Last sampled value
-            Of channel 33 bit 4 (0 if optics mode switch set to zero
-            optics). If bits 5-4 = 11<sub>2</sub>, this means that
-            optics mode switch set to manual mode.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top">Bit set 1 when optics mode switch changed
-            from manual or computer control mode to zero optics mode, to
-            indicate that zeroing of the optics is in progress. If bit
-            is 1, then a switch out of zero optics mode will cause alarm
-            0116<sub>8</sub> to be generated (if switched to manual, a
-            "grace period" of about 5.3 seconds is provided before the
-            optics-zeroing time counter is reset, during which time a
-            switch back to optics zeroing can be made). Bit remains 1
-            for about 16.2 seconds, and is then reset to 0 (at same time
-            that bit 10 of this word is set 1, and bit 2 of this word
-            set 0).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top">Bit set 1 to inhibit generation of Tracker
-            alarm (bit 8 of DSPTAB+11) if bit 7 of this word goes from 1
-            to 0. Bit set and reset at the same time as bit 3.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top">This bit is not used.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <ol>
+      <li>During RCS DAP operation with CMC MODE switch in AUTO or HOLD,
+        every 100 millisecs.</li>
+      <li>During RCS DAP operation with CMC MODE switch in FREE — not
+        updated.</li>
+    </ol>
     <h1>84b</h1>
-    <p><i>Same as word 80b on Powered List.</i><br>
-    </p>
-    <p>HOLDFLAG. A multiple purpose switch which is used for
-      establishing the control reference of the autopilot. It has the
-      following three states:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <th valign="top"><u>State</u><u><br>
-            </u></th>
-          <th valign="top">&nbsp;&nbsp;<u> </u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(+)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Sample the CDU angles and store in THETADX,
-            THETADY, and THETADZ before resuming attitude hold and
-            resetting HOLDFLAG to (+0).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(+0)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Remain in attitude hold about previously
-            established reference angles, THETADX, THETADY and THETADZ.
-            Set to this state by RCS DAP when MGA &gt; 75°.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(-)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Enable automatic steering.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <p><i>Same as Powered List.</i></p>
+    Garbage.<br>
     <p> </p>
     <h1>85-87</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
+    <p><i>Same as Powered List.</i></p>
     WBODYs or OMEGACs (when TVC DAP is on). WBODYs are the desired
     angular body rates (roll, pitch, yaw) about the control axes when
     RCS DAP is on, scaled (degrees/second)/450. The RCS DAP control axes
@@ -5178,559 +5698,12 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       </tbody>
     </table>
     <p> </p>
-    <h1>95a</h1>
-    <p><i>Same as word 68a on Powered List.</i><br>
-    </p>
-    RSBBQ. When a hardware "restart" occurs, this register is loaded
-    with the setting of the BBANK portion of the calling address + 1 and
-    also Superbank information which is in channel 7.
-    <h1>95b</h1>
-    <p><i>Same as word 68b on Powered List.</i></p>
-    <p>RSBBQ+1. Loaded with the setting of the Q-register when a
-      hardware restart occurs.<br>
-    </p>
-    <h1>96a</h1>
-    <p><i>Same as word 69a on Powered List.</i></p>
-    <p>Garbage.&nbsp; This register will contain all zeros.<br>
-    </p>
-    <h1>96b</h1>
-    <p><i>Same as word 69b on Powered List.</i></p>
-    <p> </p>
-    <p>Channel 77.&nbsp; A computer output channel, the individual bits
-      of which, are used to indicate the source of a hardware
-      restart.&nbsp; The channel is initialized to 0 by a V36E (request
-      fresh start).&nbsp; The channel will be zeroed by the final V33E
-      on a P27 state vector uplink and also by a crew or ground
-      V21N10E77EE.&nbsp; Should a hardware restart occur, one of the
-      bits in the channel should be set to 1 indicating the
-      source.&nbsp; If multiple restarts occur, more than one bit could
-      possibly be left set afterwards (i.e., if they were different
-      types).&nbsp; Many restarts of the same type would leave just one
-      bit set with the software REDO COUNTER indicating the
-      number.&nbsp; The bit definitions are:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <th valign="bottom"><u>BIT</u><br>
-          </th>
-          <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-            <br>
-          </th>
-          <th valign="bottom" align="left">RESTART (and/or AGC<br>
-            <u>warning)
-              CAUSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp; &nbsp;&nbsp; </u><br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15-10<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Spare<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Scalar double freq.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Scalar fail<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Counter fail<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Voltage fail<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Nightwatchman<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Ruptlock<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">TC Trap<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">E-memory parity fail<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">E or F-memory parity fail<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>97a</h1>
-    <p><i>Same as word 70a on Powered List.</i></p>
-    <p>C31FLWRD. A single-precision erasable memory cell used to<br>
-      determine if the channel representations of the CMC mode switch,<br>
-      SC control switch, optics mode switch, or optics zero switch are<br>
-      to be used or if back-up indicators are to be used. The erasable<br>
-      is of the form AXXBX, where:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <th valign="top" align="center"><u>A Value</u><br>
-          </th>
-          <td valign="top">&nbsp;&nbsp;&nbsp; <br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">0 or 4<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Bits 13, 14, 15 of channel 31 are valid</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">G&amp;N Control FREE</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">G&amp;N Control ATTITUDE HOLD</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">G&amp;N Control AUTO<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">SCS Control FREE<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">SCS Control ATTITUDE HOLD<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">SCS Control AUTO<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <th valign="top" align="center"><u>B Value</u><br>
-          </th>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">0 or 4<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Bits 4 and 5 of channel 33 are valid<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1 or 5<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Optics Mode CMC<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2 or 6<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Optics Mode ZERO<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3 or 7<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Optics Mode MANUAL<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>97b,98a,98b</h1>
-    <p><i>Same as words 70b,71a,71b on Powered List.</i></p>
-    FAILREG's. A set of three single-precision cells used to retain
-    alarm pattern code information. They are all reset to zero by a
-    Fresh Start. FAILREG and FAILREG+1 are also reset to zero by use of
-    the "ERROR RESET" keycode. FAILREG contains the first alarm code
-    received after the "ERROR RESET", FAILREG+1 contains the second, and
-    FAILREG+2 will always contain the most recent alarm code. Octal
-    quantities.
-    <h1>99a</h1>
-    <p><i>Same as word 77a on the Powered List.</i><br>
-    </p>
-    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">PCMANFLG. When set, indicates P20 to exit
-            after plane Change maneuver and P79 maneuver. Set by MINKEY
-            controller after plane change burn. Set by P79. Cleared by
-            controller after the tracking maneuver which follows the P36
-            plane change burn. Cleared by P79 upon termination. Cleared
-            when new program selected via V37.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">INTFLAG. A 1 indicates that some program or
-            routine has called INTSTALL and is presumably in the process
-            of integrating. Other programs calling INTSTALL will wait
-            until this bit is reset to 0. A 0 indicates that no program
-            or routine is currently using integration. Set 1 by
-            INTSTALL. Set 0 by INTWAKE. A hardware or software restart
-            sets this bit to 0.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13<br>
-          </td>
-          <td valign="top">REINTFLG. A 1 indicates that the routine
-            currently using INTSTALL is to be restarted. A 0 indicates
-            that no restartable integration is in progress. Programs
-            which have restart points during integration set this bit to
-            1. INTWAKE sets this bit to 0. Bit is also set to 0 by
-            POODOO.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
-          <td valign="top">REJCTFLG. When set, R22 is to ignore optics
-            mark currently being processed. Set by MARK REJECT interrupt
-            and by V86. Cleared in R22 after mark data processing.</td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">HDSUPFLG. A 1 indicates "heads-up" tracking
-            attitude. This flag is not altered by a Fresh Start. Set or
-            cleared by ground or crew action.</td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">BURNFLAG. When set, indicates that the CSM
-            performed a burn. Cleared at start of P40 and P41. Set by
-            P40 and P41 if there has been any thrusting by the CSM. Set
-            in P36 if ΔV is zero.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">RANGFLAG. Bit set to indicate range
-            &lt;327.67 n.mi. Set or cleared in R61 depending on range.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">P35FLAG. A 1 indicates MCC targeting has been
-            completed. Set after final computation cycle of P35. Cleared
-            in R22 after W-matrix initialization.</td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">AUTOSEQ. When set, indicates automatic
-            sequence operating. Set in R00 when MINKEY is selected.
-            Cleared in V56, POODOO, R00 logic after MINKEY is
-            terminated, and V37 program selection if a non-MINKEY
-            program is requested. Set temporarily in V37 selection of
-            all rendezvous targeting programs for purpose of P2O
-            initialization and subsequently cleared on ENTER response to
-            V50N25FL (R1 = 17). Set to 1 at PRO response to V50N25FL (R1
-            = 17). It can be set 0 by a verb 34 response to the V50 N18
-            display in R60, if R6O was called from R61. A verb 34
-            response to a V06N49 display in R22 will also set the bit to
-            0.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">MANEUFLG. When set, indicates no mark has
-            been processed since the last final computation cycle of a
-            targeting program. Set after final computation cycle of all
-            rendezvous targeting programs except P36. Set on PROCEED
-            response to V50N25FL (R1 = 17). Cleared after mark
-            incorporation in R22.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">PTV93FLG. A 1 indicates W-matrix
-            initialization to be performed after the next burn. Set on
-            PROCEED response to V50N25FL (R1 = 17). Set if RENDWFLG is 0
-            in AUTOW logic of R22 if age of W-matrix and other criteria
-            indicate W-matrix initialization is desired after next burn.
-            Cleared in R22 after W-matrix initialization.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">TPIMNFLG. Set to indicate that TPI targeting
-            has been completed. Cleared at start of P34; set after final
-            pass of P34.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">FULTKFLG. When set, indicates only one type
-            of marking (optics or VHF) is being performed for targeting.
-            Set or cleared by crew option in V57.</td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">PCFLAG. Set to indicate P36 plane change
-            targeting. Set in P36. Cleared by P31, 32/72, 33/73, 34/74,
-            35/75, 36. Cleared on PROCEED response to V50N25FL (R1 =
-            17). Cleared by P52 if pulse torquing is done.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>99b</h1>
-    <p><i>Same as word 77b on the Powered List.</i><br>
-    </p>
-    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">S32.1F1. Used in P32/P72. Used to terminate
-            iteration if ΔV<sub>CSI</sub> exceeds 1000 ft/sec twice
-            during the iteration. Set to 0 at start of each iterative
-            loop. Set to 1 if |ΔV<sub>CSI</sub>| &gt; 1000 ft/sec and
-            subsequent test of bit in case |ΔV<sub>CSI</sub>| &gt; 1000
-            ft/sec will terminate iterative loop.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">S32.1F2. Used in P32/P72. Controls first step
-            size of iterative loop to establish two points for
-            Newton-Raphson iteration. Set to 1 at start of each
-            iterative loop. Set to 0 after first step.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13 and 12<br>
-          </td>
-          <td valign="top">S32.1F3A and S32.1F3B. Used in P32/P72.
-            Control setting of alarm codes during first iterative loop
-            and control the 50 ft/sec steps utilized to establish the
-            starting point of the second iterative loop. Bits set (0, 1)
-            at start of first iterative loop to allow setting of the
-            alarm codes. Set (0, 0) at start of second iterative loop
-            until after first 50 ft/sec step is taken, when set (1,1).
-            Set (1,0) after the angular error undergoes a sign change.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">AZIMFLAG. A 1 indicates 3-axis maneuver
-            desired in R61. Bit set to 1 by MINKEY and by P20 when
-            option 4 or 5 is selected. Cleared by P20 for other options
-            and by V89 before maneuver is calculated.</td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">HAFLAG. Set to indicate P31 Height Adjustment
-            targeting. Set and subsequently cleared in P31.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">CSISFLAG. A 1 indicates multiple CSI
-            targeting. Cleared in first MINKEY CSI targeting, set in
-            succeeding MINKEY CSI targeting. Cleared after V06N37FL
-            display in P32.</td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-      </tbody>
-    </table>
-    <p> </p>
-    <p> </p>
-    <h1>100a</h1>
-    <p>GAMMA(EI). The conic flight path angle between the inertial
-      velocity and the local horizontal at the entry interface altitude
-      of 400,000 ft above the Fischer ellipsoid, scaled degrees/360. A
-      minus quantity indicates that the flight path is below the
-      horizontal plane. This item is calculated in P61. (See Note 1).<br>
-    </p>
-    <p>(Note 1: If the Recycle option (V32E) of N63 in P61 is exercised,
-      this quantity is recalculated using the current state vector.
-      However, only the result of the final calculation will appear on
-      the ENTRY and UPDATE list).</p>
-    <h1>100b</h1>
-    <p>RANGE for INITIALIZATION. The predicted range angle from the EMS
-      altitude above Fischer radius to target along conic from present
-      position, scaled degrees/360. This value is calculated in P61,
-      (See Note 1).<br>
-    </p>
-    <p>(Note 1: If the Recycle option (V32E) of N63 in P61 is exercised,
-      this quantity is recalculated using the current state vector.
-      However, only the result of the final calculation will appear on
-      the ENTRY and UPDATE list).</p>
+    <h1>95-100</h1>
+    SPARES.&nbsp; Same description as word 37 of the Program 22 List.<br>
+    <blockquote><font size="-1">I.e.: "SPARES. The first half of each
+        spare contains 00000<sub>8</sub>. The second half is ARUPT (the
+        contents of the accumulator when the telemetry interrupt was
+        recognized)."</font></blockquote>
     <p><br>
     </p>
     <h1><font size="-1"> </font></h1>
@@ -5738,6 +5711,6 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-03-22</i><br>
+      2025-03-23</i><br>
   </body>
 </html>
