@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Colossus 1,1A Coast and Align
-      List</title>
+    <title>Telemetry Documentation for Colossus 1,1A Rendezvous and
+      Prethrust List</title>
     <link rel="stylesheet" href="../downlists.css">
   </head>
   <body>
@@ -17,7 +17,7 @@
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77777<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77775<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
@@ -319,157 +319,172 @@
       set to -24, and the least significant half remains unchanged. <br>
     </p>
     <h1>19</h1>
-    <p><font face="Courier New, Courier, monospace"> </font></p>
-    <p><font face="Courier New, Courier, monospace">STAR ID1, 2. The
-        star I.D.'s associated with the sighting vectors in words 21-23
-        and 25-27. Each star I.D. will be the octal equivalent of the
-        CMC star catalogue number multiplied by six. Each register is
-        scaled (star number × 6)/2<sup>14</sup>.</font></p>
-    <p><font face="Courier New, Courier, monospace">Example:</font></p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td valign="top" align="center"><font face="Courier New,
-              Courier, monospace">Star</font><br>
-          </td>
-          <td valign="top" align="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <br>
-          </td>
-          <td valign="top" align="center">Cat. Number<br>
-          </td>
-          <td valign="top" align="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <br>
-          </td>
-          <td valign="top" align="center">Downlink Star I.D.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">Alpha Tauri<br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">11<sub>8</sub><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">66<sub>8</sub><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p><font face="Courier New, Courier, monospace">BESTI and BESTJ are
-        calculated during PICAPAR and after the astronaut changes the
-        star number.</font></p>
-    <h1><a name="20"></a>20</h1>
-    <p>MARKTIME1. The time of the mark (TIME2, TIME1) associated with
-      the data described in words 21a, 21b, 22a, 22b, and 23a, scaled
-      centiseconds/2<sup>28</sup>.<br>
+    <p><i>Same as Powered List.</i></p>
+    <p><font face="Courier New, Courier, monospace">DELLT4 (The desired
+        transfer time) The time from TIG until the target (RTARG) is
+        reached, scaled centiseconds/2<sup>28</sup>. It is used as an
+        input to the INITVEL subroutine and calculated by each user of
+        this subroutine. <br>
+      </font></p>
+    <h1><a name="20"></a>20-22</h1>
+    <p><i>Same as Powered List.</i></p>
+    <p>RTARG. The aimpoint vector X, Y, Z, in either earth-centered or
+      lunar-centered coordinates and scaled meters/2<sup>29</sup>. The
+      origin of the coordinate system is the same as that of the CSM
+      state vector at TIG. Caution must be exercised in ground/AGC
+      communications whenever the spacecraft is operating near the
+      "sphere-of-influence" switchover point. Bit 12, flagword 8
+      (CMOONFLG) indicates whether the CSM state vector is earth- or
+      moon-centered. This parameter is calculated in P34/P74, P35/P75,
+      P38/P39, P78/P79 and updated in the Initial Velocity Subroutine. <br>
     </p>
-    <h1>21a,21b,22a,22b,23a</h1>
-    <p>SIGHTING DATA SET 1. These five registers contain, in the
-      following order: YCDU angle, optics shaft angle, ZCDU angle,
-      optics trunnion angle and XCDU angle. This data is valid at
-      MARKTIME1 and is associated with the star indexed by BESTI (word
-      19a). XCDU, YCDU, ZCDU and the optics shaft angle are treated as
-      unsigned 15-bit fractions, scaled degrees/360. The optics trunnion
-      angle is scaled (degrees-19.7754)/45. The bias, 19.7754,is
-      programmed-in.<br>
-    </p>
-    <h1>23b</h1>
-    <p>Garbage. Same as word 30b of the Powered downlist.<br>
+    <br>
+    <h1>23</h1>
+    <p>VHF TIME. The time (TIME2, TIME1) of the last VHF Range mark,
+      scaled centiseconds/2<sup>28</sup>. This item is calculated each
+      time the VHF Range is read. It is also used to determine if one
+      minute has elapsed since the last mark was processed and to
+      integrate the state vector to the mark-time.<br>
     </p>
     <h1>24</h1>
-    <p>MARKTIME2. The time of the mark (TIME2, TIME1) associated with
-      the data described in words 25a, 25b, 26a, 26b, and 27a, scaled
-      centiseconds/2<sup>28</sup>.<br>
+    <p>OPTICS MARKTIME. The time of mark (TIME2, TIME1) associated with
+      the data described in words 25-27a, scaled centiseconds/2<sup>28</sup>.<br>
     </p>
     <h1>25a,25b,26a,26b,27a</h1>
-    <p>SIGHTING DATA SET 2. Same as words 21a, 21b, 22a, 22b, and 23a of
-      this list except that this set is associated with MARKTIME2 and
-      Star ID2 indexed by BESTJ (word 19b).<br>
+    <p>SIGHTING DATA. These five registers contain, in the following
+      order: YCDU angle, optics shaft angle, ZCDU angle, optics trunnion
+      angle and XCDU angle. This data is valid at the time an optics
+      mark is taken on the LM vehicle during rendezvous tracking (P20).
+      XCDU, YCDU, ZCDU and optics shaft angle are unsigned 15-bit
+      fractions, scaled degrees/360. The trunnion angle is a 14-bit
+      signed fraction scaled, (degrees-19.7754)/45 (two's complement).
+      The bias, 19.7754, is programmed-in.<br>
     </p>
     <h1>27b</h1>
-    <p>Garbage. The Z component of the third BVECTOR can appear here. In
-      P20 and P23 this register is set to zero. During P22 it is set to
-      the negative value of the first component of the BVECTOR.<br>
+    <p>VHF RANGE. (Raw Data). The range from the CSM to the LM as
+      measured by the VHF range link, using the Rendezvous Tracking Data
+      Processing Routine. This quantity is a 15-bit integer with the
+      least significant bit equal to 0.01 nmi. (multiply by 18.52 to
+      obtain meters). Whenever the VHF Range Flag is found to be set,
+      the routine (R22) reads the range value if at least 60 seconds
+      have expired since the time of last reading. If so, the t<sub>VHF</sub>
+      is updated to the present time and a VHF range reading made. It is
+      assumed, for practical purposes, that the range data is acquired
+      at this present t<sub>VHF</sub> but there actually is a very small
+      time delay.<br>
     </p>
     <p> </p>
-    <h1>28</h1>
-    <p>APOGEE. The altitude of the apogee above a fixed radius, scaled
-      meters/2<sup>29</sup>. For Earth Orbit it is calculated above the
-      launch pad radius and for Moon Orbit it is computed above the
-      landing-site radius. If Flagword 9, bit 13 (V82EMFLG), is a one,
-      the radius is Moon-centered. A zero in this bit position will
-      indicate an Earth-centered radius. R30 obtains the state vector
-      from precision routines with an indication of the coordinate
-      system. V82EMFLG is then set accordingly. This item is calculated
-      and displayed (V82N44) once if Average G is off and approximately
-      every ten seconds if Average G is on. The maximum value is 9999.9
-      nmi. <br>
+    <h1>28a</h1>
+    <p>VHF MARKS. The number of VHF ranging marks incorporated into the
+      state vector since the initialization of P20, scaled 2<sup>-14</sup>.
+      This value is used in the N45 display and has a range of 0 to 99.
+      VHFCNT is incremented each time a VHF ranging mark is incorporated
+      (approx. 1/min if P20 is operating, VHF ranging is on and
+      VHFRFLAG, UPDATFLAG and TRACKFLAG are set).<br>
+    </p>
+    <h1>28b</h1>
+    <p>OPTIC MARKS. The number of optic marks incorporated into the
+      state vector since the initialization of P20, scaled 2<sup>-14</sup>.
+      This item is used in the N45 display and has a range in that
+      display of 0 to 99. TRKMKCNT is incremented each time an optics
+      mark is incorporated. The frequency depends upon the astronaut
+      because marking is a manual operation.<br>
     </p>
     <h1>29</h1>
-    <p>PERIGEE. The altitude of the perigee above a fixed radius, scaled
-      meters/2<sup>29</sup>. For Earth Orbit it is calculated above the
-      launch pad radius and for Moon Orbit it is computed above the
-      landing-site radius. If Flagword 9, bit 13 (V28EMFLG), is a one,
-      the radius is Moon-centered. A zero in this bit position will
-      indicate an Earth-centered radius. R30 obtains the state vector
-      from precision routines with an indication of the coordinate
-      system. V82EMFLG is then set accordingly. This item is calculated
-      and displayed (V82N44) once if Average G is off and approximately
-      every ten seconds if Average G is on. The maximum value is 9999.9
-      nmi. <br>
+    <p>TPI TIME. The time of ignition for the Rendezvous programs,
+      scaled centiseconds/2<sup>28</sup>. An estimate of this item can
+      be calculated in P17 and then modified in P34 or left the same in
+      P38. It can also be inputted via the DSKY. <br>
     </p>
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
-    <h1><a name="30"></a>30</h1>
-    <p>DELTA R. An approximate measure of the in-plane splash-down
-      error, scaled degrees/360. If the free-fall transfer angle to
-      300,000 feet above the pad radius is positive, the splash error =
-      free-fall transfer angle + estimated entry angle - range to
-      target. The target location at estimated time of impact is used.
-      If the free-fall transfer angle is negative, the splash error = -
-      range to target. The present target location is used. This
-      parameter is called by V82 if in CSM and if P11 is operating
-      (every 2 seconds). <br>
+    <h1><a name="30"></a>30a</h1>
+    <p>ECSTEER. A pad-load erasable which may be used by P40 to set
+      CSTEER, the constant "c" in the cross-product steering equation: Δ<u>m</u>
+      = c<u>b</u>Δt - Δ<u>v</u>, and in certain prethrust computations
+      for P40/41. It is scaled as a 14-bit fraction/4. P34, P35, P38,
+      P39 and P17 will set ECSTEER = 1.0. P37 will set ECSTEER = 0.5
+      whereas in P31 the value of "c" is determined by RTCC and uplinked
+      with other target parameters. Values for "C" from -4.0 to +4.0
+      (less 1 bit) can be handled. The MIT standard is 1.0, except for
+      P37 where 0.5 is used. Once set up prior to a burn, ECSTEER should
+      be constant throughout the burn and post-burn sequences. <br>
     </p>
-    <h1>31-33</h1>
-    <p><i>Same as words 95-97 of the Powered List.</i><br>
+    <h1>30b</h1>
+    <p>Garbage. This register may contain any of the following: (a)
+      DVTOTAL, the summation of the magnitude of the Delta V's and also
+      R3 of the N40 display during the P40, powered flight maneuver.
+      This item is zeroed by PREREAD (TIG-30) and also shortly after
+      entering P40. It is updated every 2 sec by SERVICER (after PIPA
+      compensation). (b) END-DELV, the External Delta V Update. (c) DEL,
+      MFI, MFS, three names given to the first of eighteen storage
+      locations used for storing matrix information in the KALCMANU
+      computations. <br>
     </p>
-    <p>VGTIGs. The predicted velocity (X, Y, Z) to be gained at TIG in
-      reference coordinates, scaled (meter/centiseconds)/2<sup>7</sup>.
-      During Lambert burns, the DELVEET3s from pre-thrust targeting are
-      picked up and stored in VGTIG. External ΔV burns compute and store
-      a rotated VG. It is calculated in burn programs: S40.1 computes
-      (X-DELV) or copies (LAMBERT) as part of pre-thrust computations. </p>
-    <h1>34-39</h1>
-    <p><i>Same as Powered List.</i><br>
+    <h1>31</h1>
+    <p>DELVTPF. The difference between the absolute velocities of the
+      passive and active vehicles at intercept time [ABVAL (VPASS4 -
+      VTPRIME)], scaled (meters /centisecond)/2<sup>7</sup>. This
+      quantity is calculated once for each pass through either P34 or
+      P38. <br>
     </p>
-    <p>REFSMMAT.&nbsp; Six elements of REFSMMAT, double precision
-      quantities, transmitted R<sub>1</sub>C<sub>1</sub>, R<sub>1</sub>C<sub>2</sub>,
-      R<sub>1</sub>C<sub>3</sub>, R<sub>2</sub>C<sub>1</sub>, R<sub>2</sub>C<sub>2</sub>,
-      R<sub>2</sub>C<sub>3</sub>, each scaled 2<sup>-1</sup>.&nbsp;
-      REFSMMAT is the 3 × 3 matrix used to convert between reference and
-      stable member coordinates.&nbsp; The remaining three components of
-      REFSMMAT may be computed as follows:<br>
-    </p>
-    <blockquote>
-      <p>R<sub>3</sub>C<sub>1</sub> = (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>3</sub>)
-        - (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>2</sub>)<br>
-      </p>
-      R<sub>3</sub>C<sub>2</sub> = (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>1</sub>)
-      - (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>3</sub>)<br>
-      <br>
-      R<sub>3</sub>C<sub>3</sub> = (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>2</sub>)
-      - (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>1</sub>)<br>
+    <h1>32-33</h1>
+    Spares. The description will be the same as the one used for word 31
+    of the Powered List.<br>
+    <blockquote><font size="-1">I.e., "The first half of each spare
+        contains 00000<sub>8</sub>. The second half is ARUPT (the
+        contents of the accumulator when the telemetry interrupt was
+        recognized)."</font><br>
     </blockquote>
-    <p>where R = Row and C = Column.<br>
+    <h1>34</h1>
+    TPF Time. The time of intercept for the various rendezvous programs,
+    scaled centiseconds/2<sup>28</sup>. It is one of the variables used
+    in the determination of the required delta velocity for a rendezvous
+    maneuver. It is calculated in P34/P74, P38/P78 and inputted to the
+    midcourse programs, P35/P75 and P39/P79. <br>
+    <h1>35-37</h1>
+    <p>P30 DELV's. An impulsive Delta V in the local vertical
+      coordinates of the active vehicle at the time of ignition
+      specified by the astronaut (V06N81) or uplink and scaled
+      meters/centisecond/2<sup>7</sup>. The local vertical coordinate
+      system may be either earth-centered or moon-centered. There is no
+      flagbit to indicate the origin point. The P30 ΔV vector is rotated
+      into a basic reference coordinate system for use by P40 or P41.<br>
     </p>
-    <p>REFSMMAT is calculated in P51, P52, P53 and P54.<br>
+    <h1>38</h1>
+    <p>RANGE. This parameter is involved in two areas, R31/R34 and R36.
+      In either category it is scaled, meters/2<sup>29</sup>. In
+      R31/R34, RANGE is the magnitude of the difference between the two
+      vehicles' (CSM-LM) radius vectors. In R36, RANGE represents the
+      out-of-plane position for the CSM and is computed as Y = <u>r</u><sub>C</sub>
+      • {UNIT(<u>V</u><sub>L</sub> × <u>r</u><sub>L</sub>)}. This item
+      is calculated whenever R31, R34 or R36 is selected by the
+      astronaut via V83, V85, or V9O. The displayed value can range from
+      000.00 nmi. to 999.99 nmi. Once the routine is selected, RANGE is
+      recomputed every 0.5 sec in R31/R34 until program termination
+      ("PROCEED"); in R36 it is necessary to "RECYCLE" in order to have
+      the value recomputed.<br>
+    </p>
+    <h1>39</h1>
+    <p>RRATE. This parameter is involved in two areas, R31/R34 and R36.
+      It is scaled(meters/centisecond)/2<sup>7</sup>. In R31/R34 it is
+      defined as the range rate between the two vehicles (CSM-LM) and is
+      computed as Ṙ = (<u>V</u><sub>L</sub> - <u>V</u><sub>C</sub>) •
+      {UNIT(<u>R</u><sub>L</sub> - <u>R</u><sub>C</sub>)}. A negative
+      quantity indicates closing. In R36, RRATE represents velocity in
+      the sense of Ẏ = <u>V</u><sub>C</sub> • {UNIT(<u>V</u><sub>L</sub>
+      × <u>R</u><sub>L</sub>)}. This item is calculated whenever R31,
+      R34, or R36 s selected by the astronaut using verbs V83, V85, or
+      V90. The displayed value can range from 0000.0 fps to 9999.9 fps.
+      It is recomputed every 0.5 second in R31/R34 until program
+      termination ("PROCEED"). In R36 it is necessary to RECYCLE in
+      order to update the value, which is valid for an
+      astronaut-selected time.<br>
     </p>
     <h1><a name="40"></a>40a</h1>
-    <p><i>Same as Powered List.</i></p>
+    <p><i>Same as Powered List.</i><br>
+    </p>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -3436,235 +3451,52 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       the start of AVEG). They are then read and zeroed every two
       seconds by READACCS (or REREADAC) throughout AVEG.<br>
     </p>
-    <h1>74-76</h1>
-    OGC, IGC, MGC. During R55, the X, Y, and Z gyro torquing angles.
-    During coarse align, in P52 and P54, the desired gimbal angles
-    (outer, inner &amp; middle), scaled degrees/360.<br>
-    <h1>77a</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
-    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">INTFLAG. A 1 indicates that some program or
-            routine has called INTSTALL and is presumably in the process
-            of integrating. Other programs calling INTSTALL will wait
-            until this bit is reset to 0. A 0 indicates that no program
-            or routine is currently using integration. Set 1 by
-            INTSTALL. Set 0 by INTWAKE. A hardware or software restart
-            sets this bit to 0. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">REINTFLG. A 1 indicates that the routine
-            currently using INTSTALL is to be restarted. A 0 indicates
-            that no restartable integration is in progress. Programs
-            which have restart points during integration set this bit to
-            1. INTWAKE sets this bit to 0. Bit is untouched by hardware
-            and software restarts thus retaining INTSTALL for
-            restartable programs.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>77b</h1>
+    <h1>74</h1>
     <p><i>Same as Powered List.</i></p>
-    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
+    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
+        1&amp;1A GSOP, the following description is adapted from the
+        Colossus 3 GSOP. The item names are consistent with Colossus
+        1&amp;1A source code, but their textual description may not be
+        fully accurate.</i><br>
     </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-      </tbody>
-    </table>
-    <p> </p>
-    <p> </p>
-    <h1>78</h1>
+    <p>ELEVATION ANGLE. The angle between the local horizontal plane of
+      the active vehicle and the line of sight vector to the passive
+      vehicle at TPI. The scaling is degrees/360. This parameter is an
+      input (N55) to P34/P74 (preset to 0); also to P32/P72 and P31
+      (preset to 208.3°). Also set to 0 on final pass through P34
+      (elevation option) in MINKEY. The angle is measured in a counter
+      clockwise rotation from the forward-direction path of the active
+      vehicle (determined by the positive direction of the active
+      vehicle's velocity vector) to the active-passive line of sight
+      vector.<br>
+    </p>
+    <h1>75</h1>
     <p><i>Same as Powered List.</i></p>
-    <p>TEVENT. The time of liftoff (P11, clock zeroing) or time of any
-      SPS ignition or shutdown (P40), whichever occurs last. It is
-      scaled centiseconds/2<sup>28</sup> and referenced to the computer
-      clock. In P11, for the space of eight instructions (approx. 17
-      MCT), the 2 OCT value (7776400013) is stored in TLIFTOFF/TEVENT
-      for P11 restart protection. The correct TIME2/TIME1 then
-      overwrites the 2 OCT constant. <br>
+    <p>CENTRAL ANGLE. The angle traversed by the passive vehicle between
+      TPI time (TTPI) and intercept time (TPASS4), scaled degrees/360,
+      This item can be computed by the TPI Search program or inputted
+      via the DSKY and it is used in computing the time of flight
+      (TPASS4-TTPI), It is calculated once during each pass through P17
+      (TPI Search), <br>
     </p>
-    <h1> 79</h1>
-    LAUNCHAZ: The clockwise angle from true north to the IMU stable
-    member X axis, measured in the local horizontal plane and scaled
-    degrees/360. The expected angles will range from +72° to +108°
-    (approx.). The item is pad loaded and may be reloaded during P02,
-    gyrocompassing program, via Verb 78E. <br>
+    <h1>76</h1>
+    <p><i>Same as Powered List.</i></p>
+    OFFSET POINT. The desired distance between the CSM and LM measured.
+    along the orbit of the passive vehicle and scaled, meters/2<sup>29</sup>,
+    This quantity is never calculated but is always used as an input,
+    via the DSKY, to the Stable Orbit program (P38/P78) and used in
+    determining the target vector for Lambert. <br>
+    <h1>77-79</h1>
+    <p>P31 DELVEET3s. The impulsive DELTA V (X, Y, Z) calculated via the
+      Lambert routine, scaled (meters /centisecond)/2<sup>7</sup>. These
+      quantities are based on the uplinked offset-target vector, time of
+      ignition, and transfer time. They are calculated once and are used
+      only for display purposes during P31. The Reference Coordinates
+      may be either moon- or earth-centered, The system in use is
+      indicated by the contents of erasable register, RTX2. If RTX2=0
+      the system is earth-centered but, if RTX2=2, the system is
+      moon-centered. <br>
+    </p>
     <p> </p>
     <h1><a name="80"></a>80a</h1>
     <p><i>Same as Powered List.</i></p>
@@ -5587,527 +5419,262 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <p> </p>
-    <h1>95a,95b,96a,96b,97a,97b,98a,98b,99a,99b,100a</h1>
-    <i>Same as words 45a through 50a of the Powered List.</i><br>
-    <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
-      indicate the status of the DSKY displays.&nbsp; If bit 15 through
-      12 are 0001, the next 11 bits will indicate the actual status of
-      the DSKY displays; if bits 15 through 12 are 1110, the next 11
-      bits indicate the "ones" complement of the status to which the CMC
-      will command the DSKY display.&nbsp; Bits 11-1 of DSPTAB+0 through
-      DSPTAB+10D are decoded as follows:<br>
+    <h1>95</h1>
+    RTHETA serves two areas, R31/R34 and R36. In R31/R34 it is the angle
+    from the local horizontal plane to either the CSM X-body axis (Noun
+    54 flashing) or to the SXT line of sight (Noun 53 flashing). In R36
+    it is the angle between the line of sight and the forward direction,
+    measured in the local horizontal plane. The scaling, in both
+    conditions, is in degrees/360. This item is calculated whenever R31,
+    R34 or R36 is selected by the astronaut via V83, V85, or V90. It is
+    computed every 0.5 second in R31/R34 until program termination
+    ("PROCEED"). In P36, it is necessary to "RECYCLE" in order to have
+    the value recomputed. <br>
+    <h1>96</h1>
+    <p>LAT (SPL). The latitude of the landing site (earth), scaled
+      degrees/360. It is used only for DSKY display and is calculated
+      and displayed at the end of both the conic phase and also the
+      precision phase of the Return to Earth program. The range of
+      values is from -90° to +90°. A negative value indicates south of
+      the equator, whereas a positive one denotes north of the equator.<br>
     </p>
-    <table cellspacing="2" cellpadding="2">
+    <h1>97</h1>
+    <p>LNG (SPL). The longitude of the landing site (earth), scaled
+      degrees/360. The range of values is from -180° to +180°. A
+      negative quantity indicates west of Greenwich, whereas a positive
+      one denotes east of Greenwich. This item is used for DSKY display
+      only and is calculated and displayed at the end of both the conic
+      phase and the precision phase of the Return to Earth program.<br>
+    </p>
+    <h1>98</h1>
+    <p>VPRED. The predicted velocity magnitude at an entry altitude of
+      400,000 ft above the Fischer Ellipsoid, scaled
+      (meters/centisecond)/2<sup>7</sup>. The range of values is from
+      +75 meters/centisecond to +115 meters/centisecond. This item is
+      used for DSKY display only and is calculated and displayed at the
+      end of both the conic phase and the precision phase of the Return
+      to Earth program.<br>
+    </p>
+    <h1>99</h1>
+    <p>GAMMAEI. The flight path angle between the inertial velocity
+      vector and the local horizontal at the entry interface altitude of
+      400,000 ft. above the Fischer Ellipsoid, scaled degrees/360. The
+      range of values runs from -1° to -7° and is used for display only.
+      A negative value indicates that the flight path is below the
+      horizontal plane. This item is calculated and displayed at the end
+      of both the conic and precision phases of the Return to Earth
+      program.<br>
+    </p>
+    <h1>100a</h1>
+    <p><i>Same as word 77a of the Powered List.</i><br>
+    </p>
+    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
-          </th>
-        </tr>
-        <tr>
-          <th valign="bottom">DSPTAB<br>
-            <u>Register</u><br>
-          </th>
-          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
-          </td>
-          <th valign="bottom">Downlink<br>
-            <u>Word No.</u><br>
-          </th>
-          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
-          </td>
-          <th valign="bottom"><u>Bit 11</u><u><br>
+          <th valign="top"><u>Bit</u><u><br>
             </u></th>
-          <th valign="bottom"><u>Bits 10-6</u><u><br>
-            </u></th>
-          <th valign="bottom"><u>Bits 5-1</u><u><br>
+          <th valign="top"><u>Meaning</u><u><br>
             </u></th>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+0<br>
+          <td valign="top">15<br>
           </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">45a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">-R3S<br>
-          </td>
-          <td valign="top" align="center">R3D4<br>
-          </td>
-          <td valign="top" align="center">R3D5<br>
+          <td valign="top">Not used.<br>
           </td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+1</td>
-          <td valign="top"><br>
+          <td valign="top">14<br>
           </td>
-          <td valign="top" align="center">45b<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">+R3S<br>
-          </td>
-          <td valign="top" align="center">R3D2<br>
-          </td>
-          <td valign="top" align="center">R3D3<br>
+          <td valign="top">INTFLAG. A 1 indicates that some program or
+            routine has called INTSTALL and is presumably in the process
+            of integrating. Other programs calling INTSTALL will wait
+            until this bit is reset to 0. A 0 indicates that no program
+            or routine is currently using integration. Set 1 by
+            INTSTALL. Set 0 by INTWAKE. A hardware or software restart
+            sets this bit to 0. <br>
           </td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+2</td>
-          <td valign="top"><br>
+          <td valign="top">13<br>
           </td>
-          <td valign="top" align="center">46a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">R2D5<br>
-          </td>
-          <td valign="top" align="center">R3D1<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+3</td>
-          <td valign="top"><br>
+          <td valign="top">12<br>
           </td>
-          <td valign="top" align="center">46b<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">-R2S<br>
-          </td>
-          <td valign="top" align="center">R2D3<br>
-          </td>
-          <td valign="top" align="center">R2D4<br>
-          </td>
+          <td valign="top">Not used.</td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+4</td>
-          <td valign="top"><br>
+          <td valign="top">11<br>
           </td>
-          <td valign="top" align="center">47a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">+R2S<br>
-          </td>
-          <td valign="top" align="center">R2D1<br>
-          </td>
-          <td valign="top" align="center">R2D2<br>
-          </td>
+          <td valign="top">Not used.</td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+5</td>
-          <td valign="top"><br>
+          <td valign="top">10<br>
           </td>
-          <td valign="top" align="center">47b<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">-R1S<br>
-          </td>
-          <td valign="top" align="center">R1D4<br>
-          </td>
-          <td valign="top" align="center">R1D5<br>
-          </td>
+          <td valign="top">Not used.</td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+6</td>
-          <td valign="top"><br>
+          <td valign="top">9<br>
           </td>
-          <td valign="top" align="center">48a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">+R1S<br>
-          </td>
-          <td valign="top" align="center">R1D2<br>
-          </td>
-          <td valign="top" align="center">R1D3<br>
-          </td>
+          <td valign="top">Not used.</td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+7</td>
-          <td valign="top"><br>
+          <td valign="top">8<br>
           </td>
-          <td valign="top" align="center">48b<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">R1D1<br>
-          </td>
+          <td valign="top">Not used.</td>
         </tr>
         <tr>
-          <td valign="top">DSPTAB+8D</td>
-          <td valign="top"><br>
+          <td valign="top">7<br>
           </td>
-          <td valign="top" align="center">49a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">ND1<br>
-          </td>
-          <td valign="top" align="center">ND2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">DSPTAB+9D</td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">49b<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">VD1<br>
-          </td>
-          <td valign="top" align="center">VD2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">DSPTAB+10D</td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center">50a<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top" align="center"><br>
-          </td>
-          <td valign="top" align="center">MD1<br>
-          </td>
-          <td valign="top" align="center">MD2<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p>R3D1 stands for digit one of the third register and VD1 stand for
-      the first digit of the verb display, etc.&nbsp; For the right
-      character of a pair, bit 5 is the MSB with bit 1 the LSB.&nbsp;
-      For the left character of a pair, the MSB is bit 10 with bit 6 the
-      LSB.&nbsp; Bit 11 of some of the DSPTABs contains discrete
-      information, a one indicating that the discrete is on.&nbsp; For
-      example, a one in bit 11 of DSPTAB+1 indicates that R3 has a plus
-      sign.&nbsp; If the sign bits associated with a given register are
-      both zeros, then the content of that particular register is octal;
-      if either of the bits is set, the register content is decimal
-      data.</p>
-    <p>The five bit codes associated with the digits are as follows:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <br>
-          </td>
-          <td valign="top">MSB<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">LSB<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top" align="right">0<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top" align="right">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">0<br>
+          <td valign="top">REINTFLG. A 1 indicates that the routine
+            currently using INTSTALL is to be restarted. A 0 indicates
+            that no restartable integration is in progress. Programs
+            which have restart points during integration set this bit to
+            1. INTWAKE sets this bit to 0. Bit is untouched by hardware
+            and software restarts thus retaining INTSTALL for
+            restartable programs.<br>
           </td>
         </tr>
         <tr>
           <td valign="top">6<br>
           </td>
-          <td valign="top" align="right">1<br>
+          <td valign="top">Not used.<br>
           </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">1<br>
+          <td valign="top">Not used. <br>
           </td>
-          <td valign="top">0<br>
+        </tr>
+      </tbody>
+    </table>
+    <h1>100b</h1>
+    <p><i>Same as word 77b of the Powered List.</i><br>
+    </p>
+    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
           </td>
-          <td valign="top">0<br>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">12<br>
+          </td>
+          <td valign="top">Not used. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">Not used. <br>
           </td>
         </tr>
         <tr>
           <td valign="top">7<br>
           </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
+          <td valign="top">Not used. <br>
           </td>
         </tr>
         <tr>
-          <td valign="top">8<br>
+          <td valign="top">6<br>
           </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">1<br>
+          <td valign="top">Not used. <br>
           </td>
         </tr>
         <tr>
-          <td valign="top">9<br>
+          <td valign="top">5<br>
           </td>
-          <td valign="top" align="right">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">1<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
         <tr>
-          <td valign="top">Blank<br>
+          <td valign="top">4<br>
           </td>
-          <td valign="top" align="right">0<br>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
           </td>
-          <td valign="top">0<br>
+          <td valign="top">Not used. </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
           </td>
-          <td valign="top">0<br>
+          <td valign="top">Not used.</td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
           </td>
-          <td valign="top">0<br>
-          </td>
-          <td valign="top">0<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
       </tbody>
     </table>
-    <p>The following is a diagram of the DSKY face showing positions of
-      the different digits:</p>
-    <pre>                             Program<br>                        ┌───────┬───────┐
-                        │  MD1  │  MD2  │
-                        └───────┴───────┘
-<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
-  │  VD1  │  VD2  │     │  ND1  │  ND2  │
-  └───────┴───────┘     └───────┴───────┘
-<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
-│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
-└───────┴───────┴───────┴───────┴───────┴───────┘
-<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
-│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
-└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
-│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
-└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
-    <h1>100b</h1>
-    <p><i>Same as word 50b of Powered List.</i><br>
-    </p>
-    <p>DSPTAB+11D.&nbsp; This register drives relays for the display
-      lights.&nbsp; The bit assignments are:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top" align="left"><u>Assignment</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top">No Attitude<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top">Gimbal Lock<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top">Tracker<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top">Program Caution<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    If bits 15 through 12 of DSPTAB+11D are 1000, the last 11 bits
-    indicate the state to which the CMC will command the relays; if bits
-    15 through 12 are 0000, the last 11 bits indicate the actual state
-    of the relays.&nbsp; A one indicates that the discrete is on.
+    <p> </p>
+    <p> </p>
     <p><br>
     </p>
     <blockquote>
