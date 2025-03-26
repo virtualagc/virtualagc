@@ -264,7 +264,7 @@ FormatGtc (int IndexIntoList, int Scale, Format_t Format)
 static char *
 FormatAdotsOrOga (int IndexIntoList, int Scale, Format_t Format)
 {
-  static char Unknown[] = "(unknown)";
+  static char Unknown[] = "(Not RCS/TVC)";
   int Flagword6, Dapdatr1, Flagword9;
   double fScale, x;
   x = GetDP (&DownlinkListBuffer[IndexIntoList], 1);
@@ -725,8 +725,6 @@ int
 dddConfigure (char *agcSoftware)
 {
   int id;
-  DownlinkListSpec_t **IdToSpec;
-  printSpecs("before.txt", lmIdToSpec);
   // Software is assumed to be for the LM unless its name begins with one of the
   // known CM programs.
   CmOrLm = 0;
@@ -738,9 +736,9 @@ dddConfigure (char *agcSoftware)
       !strncmp(agcSoftware, "CM", 2))
     CmOrLm = 1;
   if (CmOrLm)
-    IdToSpec = cmIdToSpec;
+    printSpecs("before.txt", cmIdToSpec);
   else
-    IdToSpec = lmIdToSpec;
+    printSpecs("before.txt", lmIdToSpec);
   for (id = 077772; id <= 077777; id++)
     {
       char filename[64];
@@ -748,7 +746,10 @@ dddConfigure (char *agcSoftware)
       FieldSpec_t *fieldSpec;
       FILE *fp;
       int i;
-      dls = IdToSpec[id - 077772];
+      if (CmOrLm)
+	dls = cmIdToSpec[id - 077772];
+      else
+	dls = lmIdToSpec[id - 077772];
       if (dls == NULL)
 	continue;
       sprintf(filename, "ddd-%05o-%s.tsv", id, agcSoftware);
@@ -775,17 +776,17 @@ dddConfigure (char *agcSoftware)
 	      memset(&(dls->FieldSpecs[i]), 0, sizeof(FieldSpec_t) * (MAX_DOWNLINK_LIST - i));
 	      break;
 	    }
-	  if (strlen(line) > 0 && line[0] == '#')
+	  line[strcspn(line, "\r\n")] = 0; // remove trailing CR or LF.
+	  if (line[0] == 0 || line[0] == '#')
 	    {
 	      i--;
 	      continue;
 	    }
 	  //fprintf(stderr, "\tParsing line: %s", line);
 	  // Detect a couple of special cases.
-	  line[strcspn(line, "\r\n")] = 0; // remove trailing CR or LF.
 	  if (strstr(line, "\t") == NULL) // No tabs?
 	    {
-	      if (!strncmp(line, "http", 4))
+	      if (NULL != strstr(line, "://") /*!strncmp(line, "http", 4)*/ )
 		strcpy(dls->URL, line);
 	      else
 		strcpy(dls->Title, line);
@@ -925,7 +926,10 @@ dddConfigure (char *agcSoftware)
       dddNormalize(dls);
     }
 
-  printSpecs("after.txt", lmIdToSpec);
+  if (CmOrLm)
+    printSpecs("after.txt", cmIdToSpec);
+  else
+    printSpecs("after.txt", lmIdToSpec);
   return CmOrLm;
 }
 
