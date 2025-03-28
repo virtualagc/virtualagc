@@ -21,7 +21,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
     </p>
-    <h1>*2,3,4,5,6,7,8</h1>
+    <h1>2,3,4,5,6,7,8</h1>
     <p>RN, VN, PIPTIME.&nbsp; CSM state vector and time. The CMC'S
       latest calculated state vector for the CSM. Words 2-4 contain the
       position components X, Y, Z, scaled meters/2<sup>29</sup>. Words
@@ -74,7 +74,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <br>
-    <h1>*<a name="10"></a>9a,9b,10a</h1>
+    <h1><a name="10"></a>9a,9b,10a</h1>
     <p>CDUX,Y,Z. The actual values of the IMU CDU angles. Each register
       is an unsigned 15-bit fraction, scaled degrees/360, and is updated
       by counter interrupts. A middle gimbal angle greater than 70
@@ -86,12 +86,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       register should maintain values that correspond to middle gimbal
       angles between -70 degrees and +70 degrees.<br>
     </p>
-    <h1>*10b</h1>
+    <h1>10b</h1>
     <p>CDUT. The optics trunnion angle CDU, scaled (degrees-19.7754)/45
       (two's complement). The angle measurement varies from -19.775° to
       45°, corresponding to a range of 0° to about 65° in actual
       trunnion. </p>
-    <h1>*11-13</h1>
+    <h1>11-13</h1>
     <p>ADOTs (if CSM-alone or Docked DAP on) or OGARATE and OMEGABs (if
       TVC DAP on). ADOTs are DAP-measured vehicle body rates (i.e. the
       outputs from the CSM-alone or Docked DAP rate filter), roll, pitch
@@ -132,7 +132,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       <li>Word 13b = ZOLDBUF, contains PIPA value previously in PIPBUF.</li>
     </ul>
     <p> </p>
-    <h1>*14a,14b,15a</h1>
+    <h1>14a,14b,15a</h1>
     <p>AK,AK1,AK2.&nbsp; The X, Y and Z (roll, pitch and yaw,
       respectively) attitude errors used to drive the FDAI display,
       scaled degrees/180. The roll attitude error register (AK) is
@@ -161,7 +161,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       will normally have peak values of up to 3 degrees, converging to
       0-1 degrees with time.<br>
     </p>
-    <h1>*15b</h1>
+    <h1>15b</h1>
     RCSFLAGS.&nbsp; A cell whose individual bits are used in monitoring
     the CSM-alone or Docked DAP.<br>
     <br>
@@ -272,7 +272,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <p> </p>
-    <h1>*16a,16b,17a,17b</h1>
+    <h1>16a,16b,17a,17b</h1>
     During normal CSM-alone or docked DAP operation, when the CMC Mode
     switch is in AUTO or HOLD and there are no RHC commands, these
     registers contain the desired current, (i.e., of this DAP cycle
@@ -301,7 +301,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     </ul>
     <font size="-1"><sup>*</sup>Not expected to be computed for SKYLAB
       missions.</font>
-    <h1>*18</h1>
+    <h1>18</h1>
     <p>TIG.&nbsp; The time of ignition (prethrust) or time of cutoff
       (while thrusting). The changeover in definition for P40 occurs at
       ignition if an impulsive burn and at first TGOCALC (nominal TIG+2)
@@ -317,18 +317,18 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       the most significant half of TIG is set to -24<sub>8</sub> and the
       least significant half remains unchanged.<br>
     </p>
-    <h1>*19a</h1>
+    <h1>19a</h1>
     <p>SLOPE.&nbsp; A DAP quantity specifying the slope of the phase
       plane boundaries, scaled ((degrees/second)/degree)/2.5.<br>
     </p>
-    <h1>*19b<br>
+    <h1>19b<br>
     </h1>
     <p>ADB.&nbsp; The DAP deadband, scaled degrees/180. If the CSM-alone
       RCS DAP or the Docked DAP is actively in control and if the CMC
       MODE switch is in HOLD or AUTO, ADB is the deadband value being
       currently used by the DAP.<br>
     </p>
-    <h1>*<a name="20"></a>20a</h1>
+    <h1><a name="20"></a>20a</h1>
     <p>DAPDATR3.&nbsp; Information concerning the Docked DAP interfaces.<br>
     </p>
     <p>DAPDATR3 is packed with 5 octal digits of information as follows:<br>
@@ -464,7 +464,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     If both XTAC and XTBD are loaded 0, no jets will fire in response to
     ±X THC commands; if both are loaded 1 the autopilot will attempt to
     use all four quads.<br>
-    <h1>*20b</h1>
+    <h1>20b</h1>
     <p>CH5FAIL.&nbsp; Docked DAP channel 5 jet inhibit. Contains octal
       sum of codes corresponding to channel 5 jets to be inhibited:<br>
     </p>
@@ -544,7 +544,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*21a</h1>
+    <h1>21a</h1>
     <p>CH6FAIL.&nbsp; Docked DAP channel 6 jet inhibit. Contains octal
       sum of codes corresponding to channel 6 jets to be inhibited:<br>
     </p>
@@ -624,23 +624,23 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*21b</h1>
+    <h1>21b</h1>
     <p>DKRATE.&nbsp; Docked DAP maneuver rate for both manual rotation
       and automatic maneuvers scaled (degrees/sec)/(450 × 2<sup>-6</sup>).
       For manual rotations it is the per axis rate. For automatic
       maneuvers it is the total command angular rate. This variable is
       normally loaded in R04 as R1 of N89.<br>
     </p>
-    <h1>*22a</h1>
+    <h1>22a</h1>
     <p>DKDB.&nbsp; Docked DAP deadband, scaled degrees/180. This
       variable is normally loaded in R04 as R2 of N89.<br>
     </p>
-    <h1>*22b</h1>
+    <h1>22b</h1>
     <p>WHICHDAP.&nbsp; Indicates whether CSM-alone or Docked DAP is
       operating. Set to 0 at start of CSM-alone DAP; set to 1 at start
       of Docked DAP.<br>
     </p>
-    <h1>*23</h1>
+    <h1>23</h1>
     <p>TGO.&nbsp; The time to go until engine cutoff, scaled
       centiseconds/2<sup>28</sup>. At TIG-5 for an impulsive burn (TGO
       &lt; 6) it is calculated once to represent the time from ignition
@@ -656,13 +656,13 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         short burn logic.<br>
       </p>
     </blockquote>
-    <h1>*24</h1>
+    <h1>24</h1>
     <p>PIPTIME1.&nbsp; The time (TIME2, TIME1) at which the PIPAs are
       read, scaled centiseconds/2<sup>28</sup>. Integration stores the
       PREREAD state vector time in anticipation of reading PIPAs at that
       time. Updated by PIPASR every two seconds during Average-G. <br>
     </p>
-    <h1>*25-27</h1>
+    <h1>25-27</h1>
     <p>DELVX,Y,Z.&nbsp; The sampled X, Y, &amp; Z PIPA accumulations
       (velocity increments) with compensation for PIPA bias and scale
       factor errors. These quantities are in the stable member
@@ -677,7 +677,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       compensation follows in Servicer job (inhinted, so that all or no
       PIPA compensation shows up).<br>
     </p>
-    <h1>*28</h1>
+    <h1>28</h1>
     <p>PACTOFF, YACTOFF.&nbsp; The SPS engine gimbal-actuator trim angle
       estimates in the pitch and yaw planes (used to align the engine
       with the vehicle cg), scaled (seconds of arc)/(85.41 × 2<sup>14</sup>).
@@ -697,7 +697,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         option exists in the SKYLARK program, although it will not be
         exercised for SKYLAB missions.</font><br>
     </p>
-    <h1>*29</h1>
+    <h1>29</h1>
     <p>PCMD, YCMD.&nbsp; The pitch and yaw SPS engine gimbal-actuator
       position commands from the respective<br>
       TVC DAPs, scaled (seconds of arc)/(85.41 × 2<sup>14</sup>). The
@@ -713,7 +713,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
-    <h1>*<a name="30"></a>30a</h1>
+    <h1><a name="30"></a>30a</h1>
     <p>CSTEER. The Cross Product Steering Constant, "c", used by P40/P41
       in the equation Δ<u>m</u> = c<u>b</u>Δt - Δ<u>v</u> and certain
       prethrust computations. It is scaled "c"/4. The value range will
@@ -721,7 +721,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       if a Lambert burn. It will be zeroed by P40 prethrust if an
       external ΔV burn and also by P41 prethrust.<br>
     </p>
-    <h1>*30b</h1>
+    <h1>30b</h1>
     <p>The range (raw data), from the CSM to the OWS as measured by the
       VHF range link, using the VHF Range Read Routine (R08). This
       quantity is a 15-bit integer with the least significant bit equal
@@ -729,24 +729,24 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       modulo 327.68 n.m. Set to zero by P40 and P41.<br>
     </p>
     <p> </p>
-    <h1>*31</h1>
+    <h1>31</h1>
     <p>The time (TIME2,TIME1) of the last VHF Range mark that is read by
       R08 when called by P48. It is scaled centiseconds/2<sup>28</sup>.
       It is assumed for practical purposes that the range data is
       acquired at this time but actually there is a very small time
       delay.<br>
     </p>
-    <h1>*32</h1>
+    <h1>32</h1>
     <p>FIXTIME. The time for which range and range rate are optimized in
       R27. Loaded into N72 by astronaut. Automatically incremented by
       four minutes in R27 after each optimization pass is complete.
       Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
-    <h1>*33</h1>
+    <h1>33</h1>
     <p>DVTOTAL.&nbsp; Magnitude of the delta V accumulated since the
       start of Average-G. Scaled (meters/centisecond)/2<sup>7</sup>.<br>
     </p>
-    <h1>*34-39</h1>
+    <h1>34-39</h1>
     <p>REFSMMAT.&nbsp; Six elements of REFSMMAT, double precision
       quantities, transmitted R<sub>1</sub>C<sub>1</sub>, R<sub>1</sub>C<sub>2</sub>,
       R<sub>1</sub>C<sub>3</sub>, R<sub>2</sub>C<sub>1</sub>, R<sub>2</sub>C<sub>2</sub>,
@@ -768,7 +768,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     </blockquote>
     <p>REFSMMAT is calculated in P11, P51, P52, P53 and P54.<br>
     </p>
-    <h1>*<a name="40"></a>40a</h1>
+    <h1><a name="40"></a>40a</h1>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1120,7 +1120,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*40b</h1>
+    <h1>40b</h1>
     <p>FLAGWORD 1.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1535,7 +1535,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*41a</h1>
+    <h1>41a</h1>
     <p>FLAGWORD 2.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -1980,7 +1980,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*41b</h1>
+    <h1>41b</h1>
     <p>FLAGWORD 3.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -2400,7 +2400,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*42a</h1>
+    <h1>42a</h1>
     <p>FLAGWORD 4.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -2852,7 +2852,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*42b</h1>
+    <h1>42b</h1>
     <p>FLAGWORD 5.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -3194,7 +3194,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*43a</h1>
+    <h1>43a</h1>
     <p>FLAGWORD 6.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -3565,7 +3565,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*43b</h1>
+    <h1>43b</h1>
     <p>FLAGWORD 7.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -3930,7 +3930,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*44a</h1>
+    <h1>44a</h1>
     <p>FLAGWORD 8.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -4274,7 +4274,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*44b</h1>
+    <h1>44b</h1>
     <p>FLAGWORD 9.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -4607,7 +4607,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <p> </p>
     <p> </p>
     <p> </p>
-    <h1>*<a name="50"></a>45-50</h1>
+    <h1><a name="50"></a>45-50</h1>
     <p>DSPTABs.&nbsp; The eleven registers, DSPTAB+0 through DSPTAB+10D,
       indicate the status of the DSKY displays. If bits 15 through 12
       are 0001, the next 11 bits will indicate the actual status of the
@@ -5127,14 +5127,14 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       restart preserves bits 9, 6 and 4.&nbsp; All other bits are
       zeroed.&nbsp; An error reset code preserves bits 6 and 4.<br>
     </p>
-    <h1>*51</h1>
+    <h1>51</h1>
     <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
       elapsed time.&nbsp; Used for all timing while CMC is on.&nbsp;
       Zeroed at liftoff and incremented by one bit per
       centisecond.&nbsp; May be updated by verb 55, verb 70 (P27) or
       verb 73 (P27).&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
-    <h1>*52-57</h1>
+    <h1>52-57</h1>
     <p>R-OTHER, V-OTHER.&nbsp; OWS state vector. The CMC's latest
       calculated state vector for the OWS. Words 52-54 contain the
       position coordinates, X, Y, and Z, scaled meters/2<sup>29</sup>.
@@ -5185,12 +5185,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*58<br>
+    <h1>58<br>
     </h1>
     T-OTHER. The time associated with the OWS state vector in words 52
     through 57, scaled centiseconds/2<sup>28</sup>, referenced to the
     computer clock.<br>
-    <h1>*<a name="60"></a>59a,59b,60a</h1>
+    <h1><a name="60"></a>59a,59b,60a</h1>
     CDUX,Y,Z. The actual values of the IMU CDU angles. Each register is
     an unsigned 15-bit fraction, scaled degrees/360, and is updated by
     counter interrupts. A middle gimbal angle greater than 70 degrees
@@ -5201,12 +5201,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     configuration. As a result, the CDUZ register should maintain values
     that correspond to middle gimbal angles between -70 degrees and +70
     degrees.
-    <h1>*60b</h1>
+    <h1>60b</h1>
     CDUT. The optics trunnion angle CDU, scaled (degrees-19.7754)/45
     (two's complement). The angle measurement varies from -19.775° to
     45°, corresponding to a range of 0° to about 65° in actual trunnion.
     <br>
-    <h1>*61-63</h1>
+    <h1>61-63</h1>
     ADOTs (if CSM-alone or Docked DAP on) or OGARATE and OMEGABs (if TVC
     DAP on). ADOTs are DAP-measured vehicle body rates (i.e. the outputs
     from the CSM-alone or Docked DAP rate filter), roll, pitch and yaw,
@@ -5244,7 +5244,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       <li>Word 63a = YOLDBUF, contains PIPA value previously in PIPBUF.</li>
       <li>Word 63b = ZOLDBUF, contains PIPA value previously in PIPBUF.</li>
     </ul>
-    <h1>*64a,64b,65a</h1>
+    <h1>64a,64b,65a</h1>
     AK,AK1,AK2.&nbsp; The X, Y and Z (roll, pitch and yaw, respectively)
     attitude errors used to drive the FDAI display, scaled degrees/180.
     The roll attitude error register (AK) is loaded with one-quarter the
@@ -5271,7 +5271,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     but a jet failed-on could produce a diverging roll attitude. AK1 and
     AK2 will normally have peak values of up to 3 degrees, converging to
     0-1 degrees with time.
-    <h1>*65b</h1>
+    <h1>65b</h1>
     <p>RCSFLAGS.&nbsp; A cell whose individual bits are used in
       monitoring the CSM-alone or Docked DAP.<br>
     </p>
@@ -5383,7 +5383,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <p> </p>
-    <h1>*66a,66b,67a</h1>
+    <h1>66a,66b,67a</h1>
     During normal CSM-alone or docked DAP operation, when the CMC Mode
     switch is in AUTO or HOLD and there are no RHC commands, these
     registers contain the desired current, (i.e., of this DAP cycle
@@ -5412,22 +5412,22 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     </ul>
     <font size="-1"><sup>*</sup>Not expected to be computed for SKYLAB
       missions.</font>
-    <h1>*67b</h1>
+    <h1>67b</h1>
     Garbage.<br>
     <p> </p>
-    <h1>*68a</h1>
+    <h1>68a</h1>
     <p>RSBBQ. When a hardware restart occurs, this register is loaded
       with the setting of the BBANK portion of the calling address +1
       and also Superbank information which is in channel 7.<br>
     </p>
-    <h1>*68b</h1>
+    <h1>68b</h1>
     <p>RSBBQ + 1. Loaded with the setting of the Q-register when a
       hardware restart occurs.<br>
     </p>
-    <h1>*69a</h1>
+    <h1>69a</h1>
     <p>Garbage.<br>
     </p>
-    <h1>*69b</h1>
+    <h1>69b</h1>
     <p> </p>
     <p>CHAN77.&nbsp; Channel 77.&nbsp; A computer output channel, the
       individual bits of which are used to indicate the source of a
@@ -5549,7 +5549,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <u>Note:</u> A restart due to oscillator fail is not shown in this
     channel.<br>
     <br>
-    <h1>*<a name="70"></a>70a</h1>
+    <h1><a name="70"></a>70a</h1>
     <p>C31FLWRD. A single-precision erasable memory cell used to
       determine if the channel representations of the CMC mode switch,
       SC control switch, optics mode switch, or optics zero switch are
@@ -5669,7 +5669,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*70b,71a,71b</h1>
+    <h1>70b,71a,71b</h1>
     <p>FAILREG's. A set of three single-precision cells used to retain
       alarm pattern code information. They are all reset to zero by a
       Fresh Start. FAILREG and FAILREG+1 are also reset to zero by use
@@ -5678,11 +5678,11 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       second, and FAILREG+2 will always contain the most recent alarm
       code. Octal quantities.<br>
     </p>
-    <h1>*72a</h1>
+    <h1>72a</h1>
     <p>CDUS. The optics CDU shaft angle. This register is an unsigned
       15-bit fraction scaled, degrees/360. The angle varies ±180°. <br>
     </p>
-    <h1>*72b,73a,73b</h1>
+    <h1>72b,73a,73b</h1>
     <p>PIPAX,Y,Z. The accumulation of output pulses from the X, Y, and Z
       accelerometers (a measure of the velocity changes), scaled
       (centimeters/second)/(5.85 × 2<sup>14</sup>). These registers are
@@ -5690,7 +5690,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       the start of Average-G). They are then read and zeroed every two
       seconds by READACCS (or REREADAC) throughout Average-G.<br>
     </p>
-    <h1>*74</h1>
+    <h1>74</h1>
     <p>ELEV.&nbsp; The angle between the local horizontal plane of the
       CSM and the line of sight vector to the OWS at TPI. The scaling is
       degrees/360. This parameter is an input (N55) to P35 also to P31,
@@ -5701,18 +5701,18 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       direction of the CSM's velocity vector) to the CSM-OWS line of
       sight vector. See Fig. 4.1-1 of Section 5 of this GSOP.<br>
     </p>
-    <h1>*75</h1>
+    <h1>75</h1>
     <p>SVEC +2.&nbsp; The R27 range rate, either current or (during an
       optimization) converging, scaled<br>
       (meters/centisecond)/2<sup>6</sup>.<br>
     </p>
-    <h1>*76</h1>
+    <h1>76</h1>
     TET.&nbsp; The time of state vector being integrated or the time to
     which the last state vector<br>
     was integrated. It is stepped by half-time-step increments (plus or
     minus) whenever<br>
     integration is being done. It is scaled, centiseconds/2<sup>28</sup>.
-    <h1>*77a</h1>
+    <h1>77a</h1>
     <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -6122,7 +6122,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*77b</h1>
+    <h1>77b</h1>
     <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
     </p>
     <br>
@@ -6455,14 +6455,14 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     </table>
     <p> </p>
     <p> </p>
-    <h1>*78</h1>
+    <h1>78</h1>
     <p>The time of liftoff (P11 clock zeroing), or time of any SPS
       ignition or shutdown<br>
       command (P40); whichever occurs last. It is scaled centiseconds/2<sup>28</sup>
       and<br>
       referenced to the computer clock.<br>
     </p>
-    <h1> *79</h1>
+    <h1> 79</h1>
     <p>PCMD, YCMD.&nbsp; The pitch and yaw SPS engine gimbal-actuator
       position commands from the respective<br>
       TVC DAPs, scaled (seconds of arc)/(85.41 × 2<sup>14</sup>). The
@@ -6477,7 +6477,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         for SKYLAB missions.</font><br>
       <sup></sup></p>
     <p> </p>
-    <h1>*<a name="80"></a>80a</h1>
+    <h1><a name="80"></a>80a</h1>
     <p>OPTMODES. A cell whose individual bits are used to control the
       performance of optics functions within the T4RUPT package. Set to
       00130<sub>8</sub> (bits 7, 5, 4 = 1) as part of a fresh start; a
@@ -6579,7 +6579,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*80b</h1>
+    <h1>80b</h1>
     <p>HOLDFLAG. A multiple purpose switch which is used for
       establishing the control reference of the autopilot. It has the
       following three states:<br>
@@ -6626,7 +6626,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*81a</h1>
+    <h1>81a</h1>
     <p>LEMMASS. The current mass of the LM vehicle<sup>*</sup>, scaled
       kilograms/2<sup>16</sup>. This is a pad load erasable and is not
       changed in normal use. The astronaut can change it, however, as
@@ -6637,7 +6637,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         exercised for SKYLAB missions.</font><br>
     </p>
     <p> </p>
-    <h1>*81b</h1>
+    <h1>81b</h1>
     <p>CSMMASS. The current weight of the CSM vehicle, scaled
       kilograms/2<sup>16</sup>. It is a pad load erasable which can be
       altered by the astronaut in R03 (V48). It is changed automatically
@@ -6646,7 +6646,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       the pad-loaded quantity EMDOT, which represents the value of the
       SPS mass-flow rate in kg/cs.<br>
     </p>
-    <h1>*82a</h1>
+    <h1>82a</h1>
     <p>DAPDATR1.&nbsp; Information concerning the CSM-alone DAP
       interfaces:<br>
     </p>
@@ -6822,7 +6822,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <font size="-1"><sup>*</sup>The LM-CSM docked configuration option
       exists in the SKYLARK program, although it will not be exercised
       for SKYLAB missions.</font><br>
-    <h1>*82b<br>
+    <h1>82b<br>
     </h1>
     <p>DAPDATR2.&nbsp; Information concerning the CSM-alone DAP
       interfaces:<br>
@@ -6885,7 +6885,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*83a,83b,84a</h1>
+    <h1>83a,83b,84a</h1>
     <p>ERRORX,Y,Z. The CSM-alone or Docked DAP phase plane (roll, pitch,
       yaw) attitude errors scaled degrees/180. During steady state
       operation the magnitude of ERRORX, Y, and Z should be less than
@@ -6916,10 +6916,10 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     </ul>
     <ol>
     </ol>
-    <h1>*84b</h1>
+    <h1>84b</h1>
     Garbage.<br>
     <p> </p>
-    <h1>*85-87</h1>
+    <h1>85-87</h1>
     <p>WBODYs (when CSM-alone or Docked DAP is on) or OMEGACs (when TVC
       DAP is on). WBODYs are the desired angular body rates (roll,
       pitch, yaw) about the control axes scaled (degrees/second)/450.
@@ -7001,12 +7001,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <p><font size="-1"><sup>*</sup>This portion of Entry programs not
         expected to be exercised for SKYLAB missions.</font><br>
     </p>
-    <h1>*88a</h1>
+    <h1>88a</h1>
     <p>REDOCTR.&nbsp; Counter for hardware restarts. Set to zero by a
       keyboard fresh start (VERB 36). Incremented once per hardware
       restart by the restart program (GOPROG) and scaled 2<sup>-14</sup>.<br>
     </p>
-    <h1>*88b,89a,89b</h1>
+    <h1>88b,89a,89b</h1>
     <p>THETAD. The final desired CDU angles, (X, Y, Z) treated as 15-bit
       unsigned quantities and scaled, degrees/360. THETAD+2 should not
       be in gimbal lock or near it. These items should not be confused
@@ -7020,7 +7020,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <p><font size="-1"><sup>*</sup>This portion of ENTRY program not
         expected to be exercised for SKYLAB missions.</font><br>
     </p>
-    <h1>*<a name="90"></a>90a</h1>
+    <h1><a name="90"></a>90a</h1>
     <p>IMODES30. A cell whose individual bits are used to control the
       monitoring of IMU functions associated with channel 30 (and in a
       few cases channel 33). Set to 37411<sub>8</sub> for a fresh start;
@@ -7215,7 +7215,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*90b</h1>
+    <h1>90b</h1>
     <p>IMODES33. A cell whose individual bits are used to control the
       monitoring of functions associated with channel 33 (and other
       items). Set to 16000<sub>8</sub> as part of a Fresh Start; a
@@ -7326,7 +7326,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <p> </p>
-    <h1>*91a</h1>
+    <h1>91a</h1>
     <p>DSALMOUT.&nbsp; Channel 11. A computer output channel whose
       individual bits are used for display parameter quantities and
       engine on-off control. A fresh start sets all bits to 0.
@@ -7458,7 +7458,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*91b</h1>
+    <h1>91b</h1>
     <p>CHAN12. Channel 12. A computer output channel whose individual
       bits are used for control of optics/TVC and IMU hardware, and for
       control of the ISS. A fresh start zeroes all bits and then sets
@@ -7613,7 +7613,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*92a</h1>
+    <h1>92a</h1>
     <p>CHAN13. Channel 13. A computer output channel whose outputs are
       used for miscellaneous purposes. Set to 0 by a fresh start or
       hardware restart. Processing of a verb 37 first clears bits 8 and
@@ -7749,7 +7749,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <br>
-    <h1>*92b</h1>
+    <h1>92b</h1>
     <p>CHAN14. Channel 14. A computer output channel whose outputs are
       used for control of computer counter cells. Set 0 by a fresh start
       or hardware restart. Processing of a verb 37 or software restart
@@ -7896,7 +7896,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <br>
-    <h1>*93a</h1>
+    <h1>93a</h1>
     CHAN30. Channel 30. A computer input channel for miscellaneous
     functions.<br>
     <br>
@@ -8019,7 +8019,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*93b</h1>
+    <h1>93b</h1>
     <p>CHAN31. Channel 31. A computer input from crew control devices,
       used by CSM-alone or Docked DAP.<br>
     </p>
@@ -8131,7 +8131,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*94a</h1>
+    <h1>94a</h1>
     CHAN32. Channel 32. A computer input channel for additional crew
     input to CSM-alone or Docked DAP, etc.<br>
     <br>
@@ -8200,7 +8200,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         </tr>
       </tbody>
     </table>
-    <h1>*94b</h1>
+    <h1>94b</h1>
     CHAN33. Channel 33. A computer input channel for hardware status and
     command information. Bits 15-11 are flip-flop bits (which are reset
     by a channel "write" command) that are also reset when a restart is
@@ -8309,14 +8309,14 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <p> </p>
-    <h1>*95-97</h1>
+    <h1>95-97</h1>
     VGTIG.&nbsp; The predicted velocity (X, Y, Z) to be gained at TIG in
     reference coordinates, scaled (meters/centisecond)/2<sup>7</sup>.
     During Lambert burns, the DELVEET3s from pre-thrust targeting are
     picked up and stored in VGTIG. External ΔV burns compute and store a
     rotated VG. It is calculated in burn programs: S40.1 computes
     (X-DELV) or copies (LAMBERT) as part of pre-thrust computations.<br>
-    <h1>*98-100</h1>
+    <h1>98-100</h1>
     <p>DELVSLV.&nbsp; Impulsive delta V of the CSM in local vertical
       coordinates at the time of ignition. Vector, scaled
       (meters/centisecond)/2<sup>7</sup>, is specified by the astronaut
