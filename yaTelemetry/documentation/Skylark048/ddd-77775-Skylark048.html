@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Skylark 1 Powered List</title>
+    <title>Telemetry Documentation for Skylark 1 Rendezvous and
+      Prethrust List</title>
     <link rel="stylesheet" href="../downlists.css">
   </head>
   <body>
@@ -16,7 +17,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77774<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77775<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
@@ -627,6 +628,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <h1>21b</h1>
     <p>DKRATE.&nbsp; Docked DAP maneuver rate for both manual rotation
       and automatic maneuvers scaled (degrees/sec)/(450 × 2<sup>-6</sup>).
+
       For manual rotations it is the per axis rate. For automatic
       maneuvers it is the total command angular rate. This variable is
       normally loaded in R04 as R1 of N89.<br>
@@ -641,133 +643,132 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       of Docked DAP.<br>
     </p>
     <h1>23</h1>
-    <p>TGO.&nbsp; The time to go until engine cutoff, scaled
-      centiseconds/2<sup>28</sup>. At TIG-5 for an impulsive burn (TGO
-      &lt; 6) it is calculated once to represent the time from ignition
-      to engine cutoff. If the estimated maneuver time is greater than
-      six seconds and active steering has been initiated, TGO becomes
-      the length of the time from the last PIPA reading to engine
-      cutoff. During a burn in which steering is used, TGO is calculated
-      every two seconds from the start of steering until steering is
-      stopped.</p>
-    <blockquote>
-      <p>NOTE: TGO +1 is also set to the Δt to cutoff when the call to
-        ENGINOFF is set up by the steering logic or by the computer
-        short burn logic.<br>
-      </p>
-    </blockquote>
-    <h1>24</h1>
-    <p>PIPTIME1.&nbsp; The time (TIME2, TIME1) at which the PIPAs are
-      read, scaled centiseconds/2<sup>28</sup>. Integration stores the
-      PREREAD state vector time in anticipation of reading PIPAs at that
-      time. Updated by PIPASR every two seconds during Average-G. <br>
-    </p>
-    <h1>25-27</h1>
-    <p>DELVX,Y,Z.&nbsp; The sampled X, Y, &amp; Z PIPA accumulations
-      (velocity increments) with compensation for PIPA bias and scale
-      factor errors. These quantities are in the stable member
-      coordinate system and are scaled, (cm/ sec)/(5.85 × 2<sup>14</sup>).
-      Calculation takes place every two seconds during Average-G. The
-      variation with time and the range of values depend on the
-      acceleration level and compensation. There is a zeroing of all
-      low-order components and a momentary zeroing of DELVY and DELVZ
-      prior to the loading of PIPA contents into respective high-order
-      words (part of READACCS, or REREADAC task). If no restarts occur
-      the momentary zeroing would not appear on the downlink. PIPA
-      compensation follows in Servicer job (inhinted, so that all or no
-      PIPA compensation shows up).<br>
-    </p>
-    <h1>28</h1>
-    <p>PACTOFF, YACTOFF.&nbsp; The SPS engine gimbal-actuator trim angle
-      estimates in the pitch and yaw planes (used to align the engine
-      with the vehicle cg), scaled (seconds of arc)/(85.41 × 2<sup>14</sup>).
-      These values are added to the DAP filter output every DAP sample
-      period as part of the engine gimbal servo command. The variation
-      is usually less than ±2 degrees over the course of a burn. These
-      are equivalent to the upper halves of the double-precision
-      registers, PDELOFF and YDELOFF. These items are set initially by
-      astronauts in R03. They change significantly at the CSM "one-shot"
-      correction time, which is about 3.4 seconds after ignition. For
-      the CSM/LM DAP<sup>*</sup> configuration the "one-shot" occurs at
-      TVC initialization and hence causes no change to PACTOFF or
-      YACTOFF. Incremental changes are made every 0.5 second after the
-      "one-shot" correction and an end-of-burn update is made following
-      the engine shut-down command.</p>
-    <p><font size="-1"><sup>*</sup>The LM-CSM docked configuration
-        option exists in the SKYLARK program, although it will not be
-        exercised for SKYLAB missions.</font><br>
-    </p>
-    <h1>29</h1>
-    <p>PCMD, YCMD.&nbsp; The pitch and yaw SPS engine gimbal-actuator
-      position commands from the respective<br>
-      TVC DAPs, scaled (seconds of arc)/(85.41 × 2<sup>14</sup>). The
-      expected range of values is<br>
-      between ±1 degree, while the maximum possible values are ±6
-      degrees. They are<br>
-      calculated at every TVC DAP sample period: 40 ms for CSM, 80 ms
-      for CSM/LM.<sup>*<br>
-      </sup><br>
-      <font size="-1"><sup>*</sup>The LM-CSM docked configuration option
-        exists in the SKYLARK program, although it will not be exercised
-        for SKYLAB missions.</font></p>
-    <blockquote>
-      <blockquote> </blockquote>
-    </blockquote>
-    <h1><a name="30"></a>30a</h1>
-    <p>CSTEER. The Cross Product Steering Constant, "c", used by P40/P41
-      in the equation Δ<u>m</u> = c<u>b</u>Δt - Δ<u>v</u> and certain
-      prethrust computations. It is scaled "c"/4. The value range will
-      be from -4 to +4 (less one bit). It is set by P40 prethrust to 1
-      if a Lambert burn. It will be zeroed by P40 prethrust if an
-      external ΔV burn and also by P41 prethrust.<br>
-    </p>
-    <h1>30b</h1>
+    VHFTIME. The time (TIME2,TIME1) of the last VHF Range mark that is
+    read by R08 when called by R22. It is scaled centiseconds/2<sup>28</sup>.
+    When VHFRFLAG is found to be set and at least 60 seconds have
+    expired since the time of the last reading, R22 calls R08 to read
+    the range and record time of reading. This time is stored in VHFTIME
+    upon return to R22. It is used to determine if one minute has
+    elapsed since the last mark was processed and to integrate the state
+    vector to the mark time. It is assumed, for practical purposes, that
+    the range data is acquired at this time but actually there is a very
+    small time delay.<br>
+    <h1>24,25a,25b,26a,26b,27a</h1>
+    <p>MARKDOWN.&nbsp; These seven registers contain, in the following
+      order: the time of the mark (TIME2, TIME1), scaled centiseconds/2<sup>28</sup>,
+      YCDU angle, optics shaft angle, ZCDU angle, optics trunnion angle
+      and XCDU angle. This data is valid at the time an optics mark is
+      taken in alignment or rendezvous programs. XCDU, YCDU, ZCDU and
+      the optics shaft angle are treated as unsigned 15-bit fractions,
+      scaled degrees/360. The optics trunnion angle is scaled
+      (degrees-19.7754)45. The bias, 19.7754, is programmed-in.<br>
+      <br>
+      For P51, P52, P53, and P54, this data is associated with the star
+      indexed by BESTI. When mark data is obtained using ATM star
+      tracker, optics shaft and trunnion angles are replaced by tracker
+      azimuth and elevation angles, respectively, also treated as
+      unsigned 15-bit fractions, scaled degrees/360.</p>
+    <h1>27b</h1>
     <p>RM.&nbsp; The range (raw data), from the CSM to the OWS as
       measured by the VHF range link, using the VHF Range Read Routine
       (R08). This quantity is a 15-bit integer with the least
       significant bit equal to 0.01 nmi (multiply by 18.52 to obtain
       meters). This quantity is modulo 327.68 n.m. Set to zero by P40
-      and P41.<br>
+      and P41.</p>
+    <h1>28a</h1>
+    <p>VHFCNT. The number of VHF ranging marks incorporated into the
+      state vector since the initialization of P20, scaled 2<sup>-14</sup>.
+      This item is used in the N45 display (two most significant digits
+      of R1) and has a range in that display of 0 to 99 (modulo 100).
+      VHFCNT is incremented each time a VHF ranging mark is incorporated
+      (approx. 1/min if P20 is operating, VHF ranging is on and
+      VHFRFLAG, UPDATFLG and TRACKFLG are set and SNAPFLAG is not set).
+      Set to 0 by Fresh Start and when the W-matrix is re-initialized.<br>
+    </p>
+    <h1>28b</h1>
+    <p>TRKMKCNT. The number of optics marks incorporated into the state
+      vector since the initialization of P20, scaled 2<sup>-14</sup>.
+      This item is used in the N45 display (two least significant digits
+      of R1) and has a range in that display of 0 to 99 (modulo 100).
+      TRKMKCNT is incremented each time an optics mark is incorporated.
+      The frequency depends upon the astronaut because marking is a
+      manual operation. Set to 0 as in above (VHFCNT).<br>
+    </p>
+    <h1>29</h1>
+    <p>TTPI.&nbsp; The time of TPI ignition for the rendezvous programs,
+      scaled centiseconds/2<sup>28</sup>. It is an input to P31, P32,
+      P33, P34, and P35. It can be updated by P34 and will be computed
+      by P35 if elevation angle is provided.<br>
+    </p>
+    <blockquote>
+      <blockquote> </blockquote>
+    </blockquote>
+    <h1><a name="30"></a>30</h1>
+    <p>SVEC +2.&nbsp; The R27 range rate, either current or (during an
+      optimization) converging, scaled (meters/centisecond)/2<sup>6</sup>.
     </p>
     <p> </p>
     <h1>31</h1>
-    <p>MARKTIME. The time (TIME2,TIME1) of the last VHF Range mark that
-      is read by R08 when called by P48. It is scaled centiseconds/2<sup>28</sup>.
-      It is assumed for practical purposes that the range data is
-      acquired at this time but actually there is a very small time
-      delay.<br>
+    <p>DELVTPF.&nbsp; The required impulsive delta V to accomplish the
+      TPF maneuver at time of intercept, scaled (meters/centisecond)/2<sup>7</sup>.
+      This quantity is calculated by P35.<br>
     </p>
     <h1>32</h1>
-    <p>FIXTIME. The time for which range and range rate are optimized in
-      R27. Loaded into N72 by astronaut. Automatically incremented by
-      four minutes in R27 after each optimization pass is complete.
-      Scaled centiseconds/2<sup>28</sup>.<br>
+    <p>TNSR.&nbsp; The time of ignition of the NSR maneuver. Input in
+      P34 (N13). Used to initialize state vector for CDHMVR subroutine.
+      Calculated by P31, P32 and P33. Scaled centiseconds/2<sup>28</sup>,
+      referenced to computer clock.<br>
     </p>
     <h1>33</h1>
-    <p>DVTOTAL.&nbsp; Magnitude of the delta V accumulated since the
-      start of Average-G. Scaled (meters/centisecond)/2<sup>7</sup>.<br>
+    <p>TNCC.&nbsp; The time of ignition for the NCC maneuver. Computed
+      by P31 and P32. Input to P33 in N11. Scaled centiseconds/2<sup>28</sup>,
+      referenced to computer clock.<br>
     </p>
-    <h1>34-39</h1>
-    <p>REFSMMAT.&nbsp; Six elements of REFSMMAT, double precision
-      quantities, transmitted R<sub>1</sub>C<sub>1</sub>, R<sub>1</sub>C<sub>2</sub>,
-      R<sub>1</sub>C<sub>3</sub>, R<sub>2</sub>C<sub>1</sub>, R<sub>2</sub>C<sub>2</sub>,
-      R<sub>2</sub>C<sub>3</sub>, each scaled 2<sup>-1</sup>.&nbsp;
-      REFSMMAT is the 3 × 3 matrix used to convert between reference and
-      stable member coordinates.&nbsp; The remaining three components of
-      REFSMMAT may be computed as follows:<br>
+    <h1>34</h1>
+    <p>TPASS4.&nbsp; The time of arrival, scaled centiseconds/2<sup>28</sup>,
+      associated with the target vector, RTARG. It is one of the
+      variables used in the determination of the required delta velocity
+      for a rendezvous maneuver. It is calculated in P33 and P35 and is
+      input to the midcourse program P36. It is used in the powered
+      flight programs for Lambert burns.<br>
     </p>
-    <blockquote>
-      <p>R<sub>3</sub>C<sub>1</sub> = (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>3</sub>)
-        - (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>2</sub>)<br>
-      </p>
-      R<sub>3</sub>C<sub>2</sub> = (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>1</sub>)
-      - (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>3</sub>)<br>
-      <br>
-      R<sub>3</sub>C<sub>3</sub> = (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>2</sub>)
-      - (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>1</sub>), where
-      R = ROW and C = COLUMN.<br>
-    </blockquote>
-    <p>REFSMMAT is calculated in P11, P51, P52, P53 and P54.<br>
+    <h1>35-37</h1>
+    <p>DELVSLV.&nbsp; Impulsive delta V of the CSM in local vertical
+      coordinates at the time of ignition. Vector, scaled
+      (meters/centisecond)/2<sup>7</sup>, is specified by the astronaut
+      (V06N81), uplink, or one of the targeting programs.<br>
+    </p>
+    <h1>38</h1>
+    <p>RANGE.&nbsp; This parameter is involved in two areas, R31/R34/P37
+      andR36. In either category it is scaled, meters/2<sup>29</sup>. In
+      R31/R34/P37, RANGE is the magnitude of the difference between the
+      radius vectors of the two vehicles (CSM-OWS). In R36, RANGE
+      represents the out-of-plane position for the CSM and is computed
+      as Y = <u>r</u><c><sub>C</sub> · {UNIT(<u>v</u><sub>W</sub> × <u>r</u><sub>W</sub>)}</c>.
+      This item is calculated in P37 or whenever R31, R34 or R36 is
+      selected by the astronaut via V83, V85, or V90. The displayed
+      value can range from 000.00 n.m. to 999.99 n.m. Once the routine
+      is selected, RANGE is recomputed in R31/R34/P37 until program
+      termination ("PROCEED"); in R36 it is necessary to "RECYCLE" in
+      order to have the value recomputed. The update rate in R31/R34/P37
+      is a function of what other jobs are running.<br>
+    </p>
+    <h1>39</h1>
+    <p>RRATE.&nbsp; This parameter is involved in two areas, R31/R34/P37
+      and R36. In either category it is scaled (meters/centisecond)/2<sup>7</sup>.
+      In R31/R34/P37 it is defined as the range rate between the two
+      vehicles (CSM-OWS) and is computed as Ṙ = (<u>v</u><sub>W</sub> -
+      <u>v</u><sub>C</sub>) · {UNIT(<u>r</u><sub>W</sub> - <u>r</u><sub>C</sub>)}.
+      A negative quantity indicates closing. In R36, RRATE represents
+      velocity for CSM in the sense of Ẏ = <u>v</u><c><sub>C</sub> ·
+        {UNIT(<u>v</u><sub>W</sub> × <u>r</u><sub>W</sub>)}</c>. This
+      item is calculated in P37 or whenever R31, R34, or R36 is selected
+      by the astronaut using verbs V83, V85, or V90. The displayed value
+      can range from 0000.0 fps to 9999.9 fps. It is recomputed in
+      R31/R34/P37 until program termination ("PROCEED"). In R36 it is
+      necessary to RECYCLE in order to update the value, which is valid
+      for an astronaut-selected time. The update rate in R31/R34/P37 is
+      a function of what other jobs are running.<br>
     </p>
     <h1><a name="40"></a>40a</h1>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
@@ -1159,8 +1160,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top">CSM-alone DAP X-translation will be 2 jet<br>
           </td>
-          <td valign="top">Bit 10 of DAPDATR1 not = bit 7 of DAPDATR1
-          </td>
+          <td valign="top">Bit 10 of DAPDATR1 not = bit 7 of DAPDATR1 </td>
           <td valign="top">R03<br>
             FRESHDAP<br>
           </td>
@@ -1202,8 +1202,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             radius<br>
           </td>
           <td valign="top">This bit is never set to 1 in the SKYLARK
-            program
-          </td>
+            program </td>
           <td valign="top">P11<br>
             P21<br>
             P29<br>
@@ -1225,8 +1224,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           <td valign="top">Prelaunch phase completed; selection of P01
             and summing of uplink key codes prohibited<br>
           </td>
-          <td valign="top">This bit is unchanged by Fresh Start
-          </td>
+          <td valign="top">This bit is unchanged by Fresh Start </td>
           <td valign="top">Pad load<br>
           </td>
           <td valign="top">Prelaunch phase in progress; P01 and summing
@@ -1245,8 +1243,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           <td valign="top">Thrusting will be done by RCS<br>
           </td>
           <td valign="top">For branching in common P40/P41 code and for
-            proper thrust levels in preburn attitude computations
-          </td>
+            proper thrust levels in preburn attitude computations </td>
           <td valign="top">P40<br>
           </td>
           <td valign="top">Thrusting will be done by SPS<br>
@@ -1442,8 +1439,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
               <dt>V56</dt>
               <dd>(or any other P20 termi­nation)</dd>
               <dt>V37</dt>
-              <dt>
-                <br>
+              <dt> <br>
               </dt>
             </dl>
           </td>
@@ -1738,8 +1734,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top">P40<br>
           </td>
-          <td valign="top">Burn time ≤ 6 seconds
-          </td>
+          <td valign="top">Burn time ≤ 6 seconds </td>
           <td valign="top">Set after completion of S40.13 at TIG-5<br>
           </td>
           <td valign="top">R00<br>
@@ -1906,8 +1901,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           <td valign="top">P40<br>
           </td>
           <td valign="top">Complex Short Burn Routine has been requested
-            — Average-G routine will accumulate the PIPAs
-          </td>
+            — Average-G routine will accumulate the PIPAs </td>
           <td valign="top">Set at start of P40 and at ENTR response to
             V97<br>
           </td>
@@ -2218,8 +2212,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top">P52<br>
             P54<br>
-            R52
-          </td>
+            R52 </td>
           <td valign="top">Star is not occulted; or, in R52, required
             sextant trunnion angle &lt; or = 90 deg<br>
           </td>
@@ -2255,8 +2248,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
               <dd>(if W-matrix overflows)</dd>
               <dt>SETIFLGS</dt>
               <dt>SETINTG</dt>
-              <dt>
-                <br>
+              <dt> <br>
               </dt>
             </dl>
           </td>
@@ -2321,8 +2313,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">3<br>
           </td>
-          <td valign="top" align="left">VINTFLAG
-          </td>
+          <td valign="top" align="left">VINTFLAG </td>
           <td valign="top">AVETOMID<br>
             CSMCONIC<br>
             CSMPREC<br>
@@ -2331,8 +2322,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             P21<br>
             P29<br>
             STATEUP<br>
-            R41
-          </td>
+            R41 </td>
           <td valign="top">Extrapolate CSM state vector<br>
           </td>
           <td valign="top"><br>
@@ -2353,8 +2343,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">2<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -2371,8 +2360,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">1<br>
           </td>
-          <td valign="top" align="left">DIMOFLAG
-          </td>
+          <td valign="top" align="left">DIMOFLAG </td>
           <td valign="top">AVETOMID<br>
             P20<br>
             R22<br>
@@ -2454,8 +2442,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             </dl>
           </td>
           <td valign="top">No mark or extended verb display is in
-            ENDIDLE
-          </td>
+            ENDIDLE </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2482,8 +2469,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
               </dt>
             </dl>
           </td>
-          <td valign="top">No priority display is in ENDIDLE
-          </td>
+          <td valign="top">No priority display is in ENDIDLE </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2498,8 +2484,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
               <dd>interface routines</dd>
             </dl>
           </td>
-          <td valign="top">Normal display is in ENDIDLE
-          </td>
+          <td valign="top">Normal display is in ENDIDLE </td>
           <td valign="top"><br>
           </td>
           <td valign="top">
@@ -2738,8 +2723,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             </dl>
           </td>
           <td valign="top">Mark/extended verb display not interrupted by
-            priority display
-          </td>
+            priority display </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2767,8 +2751,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             </dl>
           </td>
           <td valign="top">Normal display not interrupted by priority or
-            mark/extended verb display
-          </td>
+            mark/extended verb display </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2796,8 +2779,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
             </dl>
           </td>
           <td valign="top">No mark/extended verb display over normal
-            priority
-          </td>
+            priority </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2819,8 +2801,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
               <dd>display STARTSB2</dd>
             </dl>
           </td>
-          <td valign="top">Display is not a VNFLASH display
-          </td>
+          <td valign="top">Display is not a VNFLASH display </td>
           <td valign="top"><br>
           </td>
         </tr>
@@ -2922,8 +2903,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">13<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -2934,14 +2914,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -2952,8 +2930,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
@@ -2999,8 +2976,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">9<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -3011,14 +2987,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">8<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -3029,8 +3003,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">7<br>
@@ -3101,14 +3074,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top">Backup liftoff has not been requested<br>
           </td>
-          <td valign="top">Not set to 0 except by Fresh Start
-          </td>
+          <td valign="top">Not set to 0 except by Fresh Start </td>
         </tr>
         <tr>
           <td valign="top" align="center">4<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -3119,8 +3090,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">3<br>
@@ -3165,8 +3135,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">1<br>
@@ -3213,7 +3182,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           <th valign="bottom">1 INDICATES<br>
           </th>
           <th valign="bottom">CONDITIONS,<br>
-            COMMENTS<br>
+            Y = r c. 1UNIT(vwx rw)1. COMMENTS<br>
           </th>
           <th valign="bottom">SET 0<br>
             BY<br>
@@ -3300,25 +3269,18 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top" align="left">CMDAPARM
-          </td>
-          <td valign="top">CM/DAPON
-          </td>
+          <td valign="top" align="left">CMDAPARM </td>
+          <td valign="top">CM/DAPON </td>
           <td valign="top">Entry DAP "armed" (allow Entry firings and
-            calculations)
-          </td>
+            calculations) </td>
           <td valign="top">Set shortly after GAMDIFSW (flag 6 bit 11)
-            becomes 1 (within 0.5 seconds)
-          </td>
-          <td valign="top">P62
-          </td>
+            becomes 1 (within 0.5 seconds) </td>
+          <td valign="top">P62 </td>
           <td valign="top">Inhibit Entry firings and calculations; Entry
             DAP computations halted after computation of vehicle body
-            rates
-          </td>
+            rates </td>
           <td valign="top">Reset shortly before start of V50N25 (R1 =
-            41) display
-          </td>
+            41) display </td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
@@ -3981,8 +3943,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">14<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -3993,8 +3954,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">13<br>
@@ -4019,8 +3979,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -4031,14 +3990,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -4049,14 +4006,12 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">10<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -4067,8 +4022,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">9<br>
@@ -4105,8 +4059,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
         <tr>
           <td valign="top" align="center">8<br>
           </td>
-          <td valign="top" align="left">Not Used
-          </td>
+          <td valign="top" align="left">Not Used </td>
           <td valign="top"><br>
           </td>
           <td valign="top"><br>
@@ -4117,8 +4070,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">7<br>
@@ -4357,8 +4309,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">12<br>
@@ -4393,8 +4344,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">10<br>
@@ -4411,8 +4361,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">Should always be 0
-          </td>
+          <td valign="top">Should always be 0 </td>
         </tr>
         <tr>
           <td valign="top" align="center">9<br>
@@ -4856,6 +4805,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -5245,144 +5195,198 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       <li>Word 63a = YOLDBUF, contains PIPA value previously in PIPBUF.</li>
       <li>Word 63b = ZOLDBUF, contains PIPA value previously in PIPBUF.</li>
     </ul>
-    <h1>64a,64b,65a</h1>
-    AK,AK1,AK2.&nbsp; The X, Y and Z (roll, pitch and yaw, respectively)
-    attitude errors used to drive the FDAI display, scaled degrees/180.
-    The roll attitude error register (AK) is loaded with one-quarter the
-    "raw" value during P11 and entry programs while Entry DAP is
-    running, to increase the scale by a factor of four. The attitude
-    errors are about the control axes for CSM-alone or Docked DAP and
-    about the body axes for TVC and Entry DAP. Zeros in bits 15, 14 and
-    13 of DAPDATR1 and a one in bit 2 of Flagword 6 indicate that the
-    Entry DAP is active. During CSM-alone or Docked DAP operation the
-    particular error quantities depend upon the display mode selected,
-    as follows: MODE 1 (selected by V61) results in Autopilot
-    phase-plane errors; MODE 2 (selected by V62) results in total
-    attitude errors with respect to the angles in N22; MODE 3 (selected
-    by V63) results in total astronaut attitude errors with respect to
-    the angles in N17. In MODE 1 the errors should generally remain less
-    than the attitude deadband, ADB. The values are calculated every 200
-    ms during CSM-alone or Docked DAP operation, whereas in TVC DAP
-    operation, AK is updated every 0.5 second in TVC EXECUTIVE with the
-    complement of OGAERR, and AK1 and AK2 are updated every TVC DAP
-    sample period (in PCOPY and YCOPY) with the respective values of
-    ERRBTMP. The error needles themselves, however, are updated with AKs
-    only every one-half second on a call from TVC EXECUTIVE. Also, with
-    TVC DAP, AK will normally have a magnitude of less than 5 degrees
-    but a jet failed-on could produce a diverging roll attitude. AK1 and
-    AK2 will normally have peak values of up to 3 degrees, converging to
-    0-1 degrees with time.
-    <h1>65b</h1>
-    <p>RCSFLAGS.&nbsp; A cell whose individual bits are used in
-      monitoring the CSM-alone or Docked DAP.<br>
+    <h1>64a,64b</h1>
+    <p>OPTION1 (64a). The option code which is displayed in R1 in
+      conjunction with a flashing V04N06 to request the astronaut to
+      load into R2 the option he desires.</p>
+    <p>OPTION2 (64b). The astronaut-selected option which was loaded
+      into R2 as a result of the displayed OPTION1 code.</p>
+    <p>The OPTION1 and OPTION2 codes, scaled in octal, are as follows: <br>
     </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <br>
+    <table cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
+          <th valign="top"><u>OPTION1 Code</u><br>
+          </th>
+          <th valign="top">&nbsp;&nbsp; <br>
+          </th>
+          <th valign="top"><u>Purpose</u><br>
+          </th>
+          <th valign="top">&nbsp;&nbsp; <br>
+          </th>
+          <th valign="top"><u>OPTION2 Code (Astronaut Input)</u><br>
+          </th>
         </tr>
         <tr>
-          <td valign="top" align="center">15<br>
+          <td valign="top">00001 (during P52, P54)<br>
           </td>
-          <td valign="top">Bit set to 1 during R60 or R67 auto maneuver
-            if high rate (2 deg/sec) has been specified in R03. Bit is
-            reset to 0 at termination of auto maneuver.<br>
+          <td valign="top"><br>
           </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">14<br>
+          <td valign="top">Specify IMU Orientation<br>
           </td>
-          <td valign="top">Bit is set to 1 if rate estimates are not
-            good and a repeat of the rate filter initialization is
-            required. Bit is reset to 0 if the G&amp;N is in control and
-            the IMU data is usable. Approximately 1 second after bit is
-            reset to 0 the rate filter initialization is complete.<br>
+          <td valign="top"><br>
           </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">13<br>
-          </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the roll axis. Bit is reset to 0 if the rate
-            damping has been completed on the roll axis.<br>
+          <td valign="top">1=Preferred<br>
+            2=Nominal<br>
+            3=REFSMMAT<br>
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">12<br>
+          <td valign="top">00002 (during P21 &amp; P29)<br>
           </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the pitch axis. Bit is reset to 0 if the rate
-            damping has been completed on the pitch axis.<br>
+          <td valign="top"><br>
           </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
+          <td valign="top">Specify Vehicle<br>
           </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the yaw axis. Bit reset to 0 if the rate
-            damping has been completed on the yaw axis.</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10,9<br>
+          <td valign="top"><br>
           </td>
-          <td valign="top">Either or both bits are set to 1 when there
-            has been a change in RHC roll command since the last DAP
-            cycle. Additionally, the Docked DAP sets bit 9 to 1 to
-            indicate the beginning or end of an automatic maneuver.<br>
+          <td valign="top">1=This Vehicle<br>
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">8,7<br>
+          <td valign="top"><br>
           </td>
-          <td valign="top">Either or both bits are set to 1 when there
-            has been a change in RHC yaw command since the last DAP
-            cycle. Additionally, the Docked DAP sets bit 7 to 1 to
-            indicate the beginning or end of an automatic maneuver.</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6,5<br>
+          <td valign="top"><br>
           </td>
-          <td valign="top">Either or both bits are set to 1 when there
-            has been a change in the RHC pitch command since the last
-            DAP cycle. Additionally, the Docked DAP sets bit 5 to 1 to
-            indicate the beginning or end of an automatic maneuver.</td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
+          <td valign="top"><br>
           </td>
-          <td valign="top">Bit set 1 indicates that the AK values should
-            be updated. Bit is reset to 0 to indicate that the NEEDLE
-            DRIVE routine should be processed with the AK values which
-            have been previously acquired.<br>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">2=Other Vehicle<br>
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">3,2<br>
+          <td valign="top">00012 (during P50)<br>
           </td>
-          <td valign="top">If Bit 3, Bit 2 = 11<sub>2</sub> or 10<sub>2</sub>,
-            it is necessary to follow the initialization path of the
-            NEEDLE DRIVE routine.<br>
-            <br>
-            If Bit 3, Bit 2 = 01<sub>2</sub>, it is necessary to follow
-            pass 2 of the NEEDLE DRIVE routine.<br>
-            <br>
-            If Bit 3, Bit 2 = 00<sub>2</sub>, it is necessary to follow
-            pass 3 and greater paths of the NEEDLE DRIVE routine.<br>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Specify ATM Orientation Determination
+            Technique<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">1=ATM Sun Sensor<br>
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">1<br>
+          <td valign="top"><br>
           </td>
-          <td valign="top">Bit is set 1 to indicate that the initial
-            pass path in the T6 program should not be followed. Bit is
-            reset to 0 if the T6 program should be initialized.<br>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">2=ATM Sun Sensor &amp; Star Tracker<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">3=Docking Angles from External source<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">00013 (during P55)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Specify tracker angle computation data source<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">1=Mark on celestial body &amp; IMU
+            Orientation<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">2=Mark on celestial body &amp; ATM in Solar
+            Inertial Orientation<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">00024 (during P20)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Specify Tracking Option<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">0=Rendezvous, VECPOINT<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">1=Celestial body, VECPOINT<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">2=Rotation<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">4=Rendezvous, 3-axis<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">5=Celestial body, 3-axis<br>
           </td>
         </tr>
       </tbody>
     </table>
+    <h1>65</h1>
+    TET.&nbsp; The time of state vector being integrated or the time to
+    which the last state vector<br>
+    was integrated. It is stepped by half-time-step increments (plus or
+    minus) whenever<br>
+    integration is being done. It is scaled, centiseconds/2<sup>28</sup>.
     <p> </p>
     <h1>66a,66b,67a</h1>
     THETADX,Y,Z.&nbsp; During normal CSM-alone or docked DAP operation,
@@ -5448,6 +5452,7 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
           <th valign="bottom"><u>BIT</u><br>
           </th>
           <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -5692,790 +5697,27 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       seconds by READACCS (or REREADAC) throughout Average-G.<br>
     </p>
     <h1>74</h1>
-    <p>ELEV.&nbsp; The angle between the local horizontal plane of the
-      CSM and the line of sight vector to the OWS at TPI. The scaling is
-      degrees/360. This parameter is an input (N55) to P35 also to P31,
-      P32, P33 and P34 (padloaded). Also set to 0 on final pass through
-      P35 (computed TPI time option) in MINKEY if a new time was loaded
-      in N37. The angle is measured in a counter clockwise rotation from
-      the forward-direction path of the CSM (determined by the positive
-      direction of the CSM's velocity vector) to the CSM-OWS line of
-      sight vector. See Fig. 4.1-1 of Section 5 of this GSOP.<br>
+    <p>NC1TIG.&nbsp; The time of ignition for the NC1 Rendezvous
+      maneuver, scaled centiseconds/2<sup>28</sup>. It is an input to
+      P31.<br>
     </p>
     <h1>75</h1>
-    <p>SVEC +2.&nbsp; The R27 range rate, either current or (during an
-      optimization) converging, scaled<br>
-      (meters/centisecond)/2<sup>6</sup>.<br>
+    <p>NC2TIG.&nbsp; The time of ignition for the NC2 Rendezvous
+      maneuver, scaled centiseconds/2<sup>28</sup>. It is computed in
+      P31 and is an input to P32<br>
     </p>
     <h1>76</h1>
-    TET.&nbsp; The time of state vector being integrated or the time to
-    which the last state vector was integrated. It is stepped by
-    half-time-step increments (plus or minus) whenever integration is
-    being done. It is scaled, centiseconds/2<sup>28</sup>.
-    <h1>77a</h1>
-    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
-    </p>
+    DHDSP.&nbsp; In P31, the computed altitude between the CSM and OWS
+    orbits at NC2 time, scaled meters/2<sup>29</sup>. In P32, the
+    desired altitude (pad loaded erasable DHNCC) between the CSM and OWS
+    orbits at NCC time, scaled meters/2<sup>29</sup>.<br>
     <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="bottom">BIT<u><br>
-            </u></th>
-          <th valign="bottom">AGC<br>
-            MNEMONIC<br>
-          </th>
-          <th valign="bottom">SET 1<br>
-            BY<br>
-          </th>
-          <th valign="bottom">1 INDICATES<br>
-          </th>
-          <th valign="bottom">CONDITIONS,<br>
-            COMMENTS<br>
-          </th>
-          <th valign="bottom">SET 0<br>
-            BY<br>
-          </th>
-          <th valign="bottom">0 INDICATES<br>
-          </th>
-          <th valign="bottom">CONDITIONS,<br>
-            COMMENTS<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15<br>
-          </td>
-          <td valign="top" align="left">PCMANFLG<br>
-          </td>
-          <td valign="top">R07<br>
-          </td>
-          <td valign="top">P20 is to exit after plane change attitude
-            maneuver<br>
-          </td>
-          <td valign="top">Set before call to P20 after plane change
-            burn<br>
-          </td>
-          <td valign="top">R07<br>
-            V37<br>
-          </td>
-          <td valign="top">P20 may operate normally<br>
-          </td>
-          <td valign="top">Reset upon completion of attitude maneuver;
-            will not be reset when changing major mode in a MINKEY
-            sequence<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">14<br>
-          </td>
-          <td valign="top" align="left">INTFLAG<br>
-          </td>
-          <td valign="top">INTSTALL<br>
-          </td>
-          <td valign="top">Some program or routine has called INTSTALL
-            and is in the process of integrating; other users desiring
-            to use integration must wait<br>
-          </td>
-          <td valign="top">INTSTALL is a subroutine called by all
-            programs and routines prior to using integration, in order
-            to avoid sharing of integration erasable registers<br>
-          </td>
-          <td valign="top">INTWAKE<br>
-            GOPROG<br>
-            GOPROG2<br>
-            ENEMA<br>
-          </td>
-          <td valign="top">No program or routine is currently using
-            integration; the integration routines are free to be used by
-            the next caller of INTSTALL, unless REINTFLG (flag 10 bit
-            13) is 1<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">13<br>
-          </td>
-          <td valign="top" align="left">REINTFLG<br>
-          </td>
-          <td valign="top">All programs having restart points during
-            integration<br>
-          </td>
-          <td valign="top">Integration currently in progress is to be
-            restarted<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">INTWAKE<br>
-            POODOO<br>
-          </td>
-          <td valign="top">Current integration, if any, is not
-            restartable<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">12<br>
-          </td>
-          <td valign="top" align="left">REJCTFLG<br>
-          </td>
-          <td valign="top">MARK REJ<br>
-            V86<br>
-          </td>
-          <td valign="top">Optics mark currently being processed by R22
-            has been rejected<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">R22<br>
-          </td>
-          <td valign="top">Optics mark being processed by R22 has not
-            been rejected<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
-          </td>
-          <td valign="top" align="left">HDSUPFLG<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">"Heads Up" tracking attitude (AZIMANGL
-            initialized to 0 degrees)<br>
-          </td>
-          <td valign="top">This bit is unchanged by Fresh Start; this
-            bit is normally pad loaded as "1"<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">"Heads Down" tracking attitude (AZIMANGL
-            initialized to 180 degrees)<br>
-          </td>
-          <td valign="top">This bit is set or reset by ground or crew
-            action<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10<br>
-          </td>
-          <td valign="top" align="left">Not Used<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Should always be 0<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top" align="left">EXTRANGE<br>
-          </td>
-          <td valign="top">R61<br>
-          </td>
-          <td valign="top">R63RANGE (computed in R61) is valid<br>
-          </td>
-          <td valign="top">R63RANGE is used by R08 to determine if range
-            &gt; 327.68 n.m.<br>
-          </td>
-          <td valign="top">V37<br>
-          </td>
-          <td valign="top">R63RANGE is invalid<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top" align="left">P35FLAG<br>
-          </td>
-          <td valign="top">P36<br>
-          </td>
-          <td valign="top">TPM targeting has been completed<br>
-          </td>
-          <td valign="top">Set on final pass through P36<br>
-          </td>
-          <td valign="top">R22<br>
-          </td>
-          <td valign="top">TPM targeting has not been completed<br>
-          </td>
-          <td valign="top">Reset after W-matrix is initialized<br>
-          </td>
-        </tr>
-        <tr>
-          <td rowspan="3" colspan="1" valign="top" align="center">7<br>
-          </td>
-          <td rowspan="3" colspan="1" valign="top" align="left">AUTOSEQ<br>
-          </td>
-          <td valign="top">R00<br>
-          </td>
-          <td rowspan="3" colspan="1" valign="top">MINKEY automatic
-            sequence operating<br>
-          </td>
-          <td valign="top">Set temporarily at selection of all
-            rendezvous targeting programs for purpose of P20
-            initialization<br>
-          </td>
-          <td valign="top">
-            <dl>
-              <dt>R00</dt>
-              <dt>V56</dt>
-              <dd>(or any other P20 termination)</dd>
-              <dt>POODOO</dt>
-              <dt>
-                <br>
-              </dt>
-            </dl>
-          </td>
-          <td rowspan="3" colspan="1" valign="top">MINKEY not operating<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">R07<br>
-          </td>
-          <td valign="top">Set on PRO response to V50N25 (R1 = 17)<br>
-          </td>
-          <td valign="top">R07<br>
-          </td>
-          <td valign="top">Reset on ENTR response to V50N25 (R1 = 17)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">V37<br>
-          </td>
-          <td valign="top">V37 DSKY selection of any program<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top" align="left">TCOMPFLG<br>
-          </td>
-          <td valign="top">P52<br>
-          </td>
-          <td valign="top">During MINKEY plane change pulse torquing,
-            the Z-gyro will be torqued -45 degrees the first time and
-            +45 degrees the second time<br>
-          </td>
-          <td valign="top">Set in P52 when COS(CDUY) and delta V(Y local
-            vertical) have different signs<br>
-          </td>
-          <td valign="top">P52<br>
-          </td>
-          <td valign="top">During MINKEY plane change pulse torquing,
-            the Z-gyro will be torqued +45 degrees and then -45 degrees<br>
-          </td>
-          <td valign="top">Reset when COS(CDUY) and delta V(Y local
-            vertical) have the same sign<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top" align="left">MANEUFLG<br>
-          </td>
-          <td valign="top">P31<br>
-            P32<br>
-            P33<br>
-            P34<br>
-            P35<br>
-            P36<br>
-            R07<br>
-          </td>
-          <td valign="top">No mark has been incorporated since the last
-            final computation cycle of rendezvous targeting program<br>
-          </td>
-          <td valign="top">Set after second PRO response to V16N45
-            display and on PRO response to V50N25 (R1 = 17) if RENDWFLG
-            (flag 5 bit 1) = 0<br>
-          </td>
-          <td valign="top">R22<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Reset after mark incorporation<br>
-          </td>
-        </tr>
-        <tr>
-          <td rowspan="2" colspan="1" valign="top" align="center">4<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top" align="left">PTV93FLG<br>
-          </td>
-          <td valign="top">R22<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top">W-matrix
-            initialization to be performed after the next burn<br>
-          </td>
-          <td valign="top">Set if age of W-matrix and other criteria
-            indicate W-matrix initialization is desired after next burn<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top">R22<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top"><br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top">Reset when W-matrix
-            initialized<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">R07<br>
-          </td>
-          <td valign="top">Set in R07 on PRO response to V50N25 (R1=17)
-            if RENDWFLG (flag 5 bit 1) = 0<br>
-          </td>
-        </tr>
-        <tr>
-          <td rowspan="2" colspan="1" valign="top" align="center">3<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top" align="left">TPIMNFLG<br>
-          </td>
-          <td valign="top">P35<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top">TPI targeting has
-            been completed<br>
-          </td>
-          <td valign="top">Set on final pass in P35<br>
-          </td>
-          <td valign="top">P35<br>
-          </td>
-          <td rowspan="2" colspan="1" valign="top">TPI targeting has not
-            been completed<br>
-          </td>
-          <td valign="top">Reset on entrance to P35<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">P36<br>
-          </td>
-          <td valign="top">Set on entrance to P36<br>
-          </td>
-          <td valign="top">V38<br>
-          </td>
-          <td valign="top">This bit will not be reset when changing
-            major mode in an automatic MINKEY sequence<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top" align="left">FULTKFLG<br>
-          </td>
-          <td valign="top">V57<br>
-          </td>
-          <td valign="top">Only one type of marking (optics or VHF) is
-            being performed for rendezvous navigation<br>
-          </td>
-          <td valign="top">Crew option (load)<br>
-          </td>
-          <td valign="top">V57<br>
-          </td>
-          <td valign="top">Both optics and VHF are being used for
-            rendezvous navigation<br>
-          </td>
-          <td valign="top">Crew option (load)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top" align="left">PCFLAG<br>
-          </td>
-          <td valign="top">P38<br>
-          </td>
-          <td valign="top">Plane change targeting (P38) and first
-            entrance to P52 for MINKEY plane change torquing<br>
-          </td>
-          <td valign="top">Set on selection of P38<br>
-          </td>
-          <td valign="top">P31<br>
-            P32<br>
-            P33<br>
-            P34<br>
-            P35<br>
-            P36<br>
-            P37<br>
-            P52<br>
-            R07<br>
-          </td>
-          <td valign="top">Not plane change targeting<br>
-          </td>
-          <td valign="top">Reset by selection of P31-P37; at PRO
-            response to V50N25 (R1 = 17); Reset when pulse torquing done
-            in P52 in first MINKEY selection<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>77b</h1>
-    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
+    <h1>77-79</h1>
+    <p>DELVEET3.&nbsp; The impulsive delta V (X, Y, Z) calculated via
+      the LAMBERT routine, scaled (meters/centisecond)/2<sup>7</sup>.
+      These quantities are based on the target vector, time of ignition,
+      and transfer time.<br>
     </p>
-    <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="bottom">BIT<u><br>
-            </u></th>
-          <th valign="bottom">AGC<br>
-            MNEMONIC<br>
-          </th>
-          <th valign="bottom">SET 1<br>
-            BY<br>
-          </th>
-          <th valign="bottom">1 INDICATES<br>
-          </th>
-          <th valign="bottom">CONDITIONS,<br>
-            COMMENTS<br>
-          </th>
-          <th valign="bottom">SET 0<br>
-            BY<br>
-          </th>
-          <th valign="bottom">0 INDICATES<br>
-          </th>
-          <th valign="bottom">CONDITIONS,<br>
-            COMMENTS<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15<br>
-          </td>
-          <td valign="top" align="left">Not Used<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Should always be 0<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">14<br>
-          </td>
-          <td valign="top" align="left">Not Used
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Should always be 0
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">13<br>
-          </td>
-          <td valign="top" align="left">Not Used
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Should always be 0
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">12<br>
-          </td>
-          <td valign="top" align="left">R27FLAG<br>
-          </td>
-          <td valign="top">V76<br>
-          </td>
-          <td valign="top">Allow R27 to be called from R22<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">P20<br>
-            V77<br>
-          </td>
-          <td valign="top">Inhibit R27 in R22<br>
-          </td>
-          <td valign="top">Reset on entrance to P20<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
-          </td>
-          <td valign="top" align="left">CYCLFLAG<br>
-          </td>
-          <td valign="top">P48<br>
-          </td>
-          <td valign="top">R27 in P48 has not yet finished its mark
-            processing<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">V37<br>
-            P48<br>
-          </td>
-          <td valign="top">R27 in P48 has completed its mark processing<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10<br>
-          </td>
-          <td valign="top" align="left">NOUNFLG<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">Display N77 in P25 and P48<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">Display N76 in P25 and P48<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top" align="left">N77FLAG<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">R1 and R2 of N77 remain static<br>
-          </td>
-          <td valign="top">N77 holds either last current or optimized
-            range and range rate<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">R1 and R2 of N77 are being updated<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top" align="left">AZIMFLAG<br>
-          </td>
-          <td valign="top">
-            <dl>
-              <dt>P20</dt>
-              <dd>(option 4 or 5)</dd>
-              <dt>R07</dt>
-            </dl>
-          </td>
-          <td valign="top">P20 (option 4 or 5) operating; R61 attitude
-            maneuvers to be 3-axis<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">
-            <dl>
-              <dt>P20</dt>
-              <dd>(option 0,1,2)</dd>
-              <dt>V89</dt>
-            </dl>
-          </td>
-          <td valign="top">R61 attitude maneuvers to be VECPOINT<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top" align="left">FIXFLAG<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">R27 is optimizing range and range rate for a
-            given time<br>
-          </td>
-          <td valign="top">Optimizing interval is optimization time +/-
-            95 seconds<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">R27 is updating range and range rate for the
-            current time<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top" align="left">SNAPFLAG<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">Optimization time is 20 seconds or less in
-            the future<br>
-          </td>
-          <td valign="top">R27 inhibits R22 state vector updates; R3 of
-            N77 remains static at -00001<br>
-          </td>
-          <td valign="top">R27<br>
-            V37<br>
-          </td>
-          <td valign="top">Optimization time is in the past or &gt;20
-            seconds in the future<br>
-          </td>
-          <td valign="top">R27 does not inhibit R22 state vector updates<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top" align="left">P48FLAG<br>
-          </td>
-          <td valign="top">P48<br>
-          </td>
-          <td valign="top">Program is P48<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">V37<br>
-            P47<br>
-          </td>
-          <td valign="top">Program not P48<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top" align="left">P25FLAG<br>
-          </td>
-          <td valign="top">P25<br>
-          </td>
-          <td valign="top">Program is P25<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">V37<br>
-          </td>
-          <td valign="top">Program not P25<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top" align="left">TDFLAG<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">Either Phi or Theta at the time of
-            optimization has been computed<br>
-          </td>
-          <td valign="top">R3 of N77 remains static at value computed at
-            optimization time<br>
-          </td>
-          <td valign="top">V37<br>
-            R27<br>
-          </td>
-          <td valign="top">Angle at time of optimization not yet
-            computed<br>
-          </td>
-          <td valign="top">R3 of N77 is updated (except in P25)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top" align="left">R27UP2<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">Second initialization pass in R27 complete<br>
-          </td>
-          <td valign="top">Set after first estimate of range state
-            vector<br>
-          </td>
-          <td valign="top">V37<br>
-            V76<br>
-          </td>
-          <td valign="top">Second pass in R27 not yet complete<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top" align="left">R27UP1<br>
-          </td>
-          <td valign="top">R27<br>
-          </td>
-          <td valign="top">First initialization pass in R27 complete<br>
-          </td>
-          <td valign="top">Set after first mark has been stored<br>
-          </td>
-          <td valign="top">V37<br>
-            V76<br>
-          </td>
-          <td valign="top">First pass in R27 not yet complete<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p> </p>
-    <p> </p>
-    <h1>78</h1>
-    <p>TEVENT. The time of liftoff (P11 clock zeroing), or time of any
-      SPS ignition or shutdown<br>
-      command (P40); whichever occurs last. It is scaled centiseconds/2<sup>28</sup>
-      and<br>
-      referenced to the computer clock.<br>
-    </p>
-    <h1> 79</h1>
-    <p>PCMD, YCMD.&nbsp; The pitch and yaw SPS engine gimbal-actuator
-      position commands from the respective<br>
-      TVC DAPs, scaled (seconds of arc)/(85.41 × 2<sup>14</sup>). The
-      expected range of values is<br>
-      between ±1 degree, while the maximum possible values are ±6
-      degrees. They are<br>
-      calculated at every TVC DAP sample period: 40 ms for CSM, 80 ms
-      for CSM/LM.<sup>*<br>
-      </sup><br>
-      <font size="-1"><sup>*</sup>The LM-CSM docked configuration option
-        exists in the SKYLARK program, although it will not be exercised
-        for SKYLAB missions.</font><br>
-      <sup></sup></p>
     <p> </p>
     <h1><a name="80"></a>80a</h1>
     <p>OPTMODES. A cell whose individual bits are used to control the
@@ -8309,19 +7551,767 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
       </tbody>
     </table>
     <p> </p>
-    <h1>95-97</h1>
-    VGTIG.&nbsp; The predicted velocity (X, Y, Z) to be gained at TIG in
-    reference coordinates, scaled (meters/centisecond)/2<sup>7</sup>.
-    During Lambert burns, the DELVEET3s from pre-thrust targeting are
-    picked up and stored in VGTIG. External ΔV burns compute and store a
-    rotated VG. It is calculated in burn programs: S40.1 computes
-    (X-DELV) or copies (LAMBERT) as part of pre-thrust computations.<br>
-    <h1>98-100</h1>
-    <p>DELVSLV.&nbsp; Impulsive delta V of the CSM in local vertical
-      coordinates at the time of ignition. Vector, scaled
-      (meters/centisecond)/2<sup>7</sup>, is specified by the astronaut
-      (V06N81), uplink, or one of the targeting programs<br>
+    <h1>95</h1>
+    <p>This parameter is involved in two areas, RTHETA in R31/R34/P37
+      and RRATE2 in R36.</p>
+    <p>RTHETA. In R31/R34/P37 it is the angle from the local horizontal
+      plane to either the CSM X-body axis (Noun 54 flashing) or to the
+      SXT line of sight (Noun 53 flashing). The scaling is in
+      degrees/360. This item is calculated in P37 or whenever R31 or R34
+      is selected by the astronaut via V83 or V85. It is computed in
+      R31/R34/P37 until program termination ("PROCEED"). The update rate
+      is a function of what other jobs are running.</p>
+    <p>RRATE2. Same as RRATE for R36 except velocity is for OWS.<br>
     </p>
+    <h1>96</h1>
+    DVDSP1. In P31, the computed delta V magnitude at NC2 time, scaled
+    (m/csec)/2<sup>7</sup>. In P32, the computed delta V magnitude at
+    NCC time, scaled (m/csec)/2<sup>7</sup>.<br>
+    <h1>97</h1>
+    DVDSP2. In P31, the computed delta V magnitude at NCC time, scaled
+    (m/csec)/2<sup>7</sup>. In P32, the computed delta V magnitude at
+    NSR time, scaled (m/csec)/2<sup>7</sup>.
+    <h1>98,99</h1>
+    UTPIT, UTYAW. Angles specifying the desired spacecraft axis (SCAXIS)
+    for P20, scaled degrees/360.<br>
+    <h1>100a</h1>
+    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <br>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="bottom">BIT<u><br>
+            </u></th>
+          <th valign="bottom">AGC<br>
+            MNEMONIC<br>
+          </th>
+          <th valign="bottom">SET 1<br>
+            BY<br>
+          </th>
+          <th valign="bottom">1 INDICATES<br>
+          </th>
+          <th valign="bottom">CONDITIONS,<br>
+            COMMENTS<br>
+          </th>
+          <th valign="bottom">SET 0<br>
+            BY<br>
+          </th>
+          <th valign="bottom">0 INDICATES<br>
+          </th>
+          <th valign="bottom">CONDITIONS,<br>
+            COMMENTS<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top" align="left">PCMANFLG<br>
+          </td>
+          <td valign="top">R07<br>
+          </td>
+          <td valign="top">P20 is to exit after plane change attitude
+            maneuver<br>
+          </td>
+          <td valign="top">Set before call to P20 after plane change
+            burn<br>
+          </td>
+          <td valign="top">R07<br>
+            V37<br>
+          </td>
+          <td valign="top">P20 may operate normally<br>
+          </td>
+          <td valign="top">Reset upon completion of attitude maneuver;
+            will not be reset when changing major mode in a MINKEY
+            sequence<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top" align="left">INTFLAG<br>
+          </td>
+          <td valign="top">INTSTALL<br>
+          </td>
+          <td valign="top">Some program or routine has called INTSTALL
+            and is in the process of integrating; other users desiring
+            to use integration must wait<br>
+          </td>
+          <td valign="top">INTSTALL is a subroutine called by all
+            programs and routines prior to using integration, in order
+            to avoid sharing of integration erasable registers<br>
+          </td>
+          <td valign="top">INTWAKE<br>
+            GOPROG<br>
+            GOPROG2<br>
+            ENEMA<br>
+          </td>
+          <td valign="top">No program or routine is currently using
+            integration; the integration routines are free to be used by
+            the next caller of INTSTALL, unless REINTFLG (flag 10 bit
+            13) is 1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top" align="left">REINTFLG<br>
+          </td>
+          <td valign="top">All programs having restart points during
+            integration<br>
+          </td>
+          <td valign="top">Integration currently in progress is to be
+            restarted<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">INTWAKE<br>
+            POODOO<br>
+          </td>
+          <td valign="top">Current integration, if any, is not
+            restartable<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top" align="left">REJCTFLG<br>
+          </td>
+          <td valign="top">MARK REJ<br>
+            V86<br>
+          </td>
+          <td valign="top">Optics mark currently being processed by R22
+            has been rejected<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">R22<br>
+          </td>
+          <td valign="top">Optics mark being processed by R22 has not
+            been rejected<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top" align="left">HDSUPFLG<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">"Heads Up" tracking attitude (AZIMANGL
+            initialized to 0 degrees)<br>
+          </td>
+          <td valign="top">This bit is unchanged by Fresh Start; this
+            bit is normally pad loaded as "1"<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">"Heads Down" tracking attitude (AZIMANGL
+            initialized to 180 degrees)<br>
+          </td>
+          <td valign="top">This bit is set or reset by ground or crew
+            action<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top" align="left">Not Used<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Should always be 0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top" align="left">EXTRANGE<br>
+          </td>
+          <td valign="top">R61<br>
+          </td>
+          <td valign="top">R63RANGE (computed in R61) is valid<br>
+          </td>
+          <td valign="top">R63RANGE is used by R08 to determine if range
+            &gt; 327.68 n.m.<br>
+          </td>
+          <td valign="top">V37<br>
+          </td>
+          <td valign="top">R63RANGE is invalid<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top" align="left">P35FLAG<br>
+          </td>
+          <td valign="top">P36<br>
+          </td>
+          <td valign="top">TPM targeting has been completed<br>
+          </td>
+          <td valign="top">Set on final pass through P36<br>
+          </td>
+          <td valign="top">R22<br>
+          </td>
+          <td valign="top">TPM targeting has not been completed<br>
+          </td>
+          <td valign="top">Reset after W-matrix is initialized<br>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="3" colspan="1" valign="top" align="center">7<br>
+          </td>
+          <td rowspan="3" colspan="1" valign="top" align="left">AUTOSEQ<br>
+          </td>
+          <td valign="top">R00<br>
+          </td>
+          <td rowspan="3" colspan="1" valign="top">MINKEY automatic
+            sequence operating<br>
+          </td>
+          <td valign="top">Set temporarily at selection of all
+            rendezvous targeting programs for purpose of P20
+            initialization<br>
+          </td>
+          <td valign="top">
+            <dl>
+              <dt>R00</dt>
+              <dt>V56</dt>
+              <dd>(or any other P20 termination)</dd>
+              <dt>POODOO</dt>
+              <dt> <br>
+              </dt>
+            </dl>
+          </td>
+          <td rowspan="3" colspan="1" valign="top">MINKEY not operating<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">R07<br>
+          </td>
+          <td valign="top">Set on PRO response to V50N25 (R1 = 17)<br>
+          </td>
+          <td valign="top">R07<br>
+          </td>
+          <td valign="top">Reset on ENTR response to V50N25 (R1 = 17)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">V37<br>
+          </td>
+          <td valign="top">V37 DSKY selection of any program<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top" align="left">TCOMPFLG<br>
+          </td>
+          <td valign="top">P52<br>
+          </td>
+          <td valign="top">During MINKEY plane change pulse torquing,
+            the Z-gyro will be torqued -45 degrees the first time and
+            +45 degrees the second time<br>
+          </td>
+          <td valign="top">Set in P52 when COS(CDUY) and delta V(Y local
+            vertical) have different signs<br>
+          </td>
+          <td valign="top">P52<br>
+          </td>
+          <td valign="top">During MINKEY plane change pulse torquing,
+            the Z-gyro will be torqued +45 degrees and then -45 degrees<br>
+          </td>
+          <td valign="top">Reset when COS(CDUY) and delta V(Y local
+            vertical) have the same sign<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top" align="left">MANEUFLG<br>
+          </td>
+          <td valign="top">P31<br>
+            P32<br>
+            P33<br>
+            P34<br>
+            P35<br>
+            P36<br>
+            R07<br>
+          </td>
+          <td valign="top">No mark has been incorporated since the last
+            final computation cycle of rendezvous targeting program<br>
+          </td>
+          <td valign="top">Set after second PRO response to V16N45
+            display and on PRO response to V50N25 (R1 = 17) if RENDWFLG
+            (flag 5 bit 1) = 0<br>
+          </td>
+          <td valign="top">R22<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Reset after mark incorporation<br>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="2" colspan="1" valign="top" align="center">4<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top" align="left">PTV93FLG<br>
+          </td>
+          <td valign="top">R22<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top">W-matrix
+            initialization to be performed after the next burn<br>
+          </td>
+          <td valign="top">Set if age of W-matrix and other criteria
+            indicate W-matrix initialization is desired after next burn<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top">R22<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top"><br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top">Reset when W-matrix
+            initialized<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">R07<br>
+          </td>
+          <td valign="top">Set in R07 on PRO response to V50N25 (R1=17)
+            if RENDWFLG (flag 5 bit 1) = 0<br>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="2" colspan="1" valign="top" align="center">3<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top" align="left">TPIMNFLG<br>
+          </td>
+          <td valign="top">P35<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top">TPI targeting has
+            been completed<br>
+          </td>
+          <td valign="top">Set on final pass in P35<br>
+          </td>
+          <td valign="top">P35<br>
+          </td>
+          <td rowspan="2" colspan="1" valign="top">TPI targeting has not
+            been completed<br>
+          </td>
+          <td valign="top">Reset on entrance to P35<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">P36<br>
+          </td>
+          <td valign="top">Set on entrance to P36<br>
+          </td>
+          <td valign="top">V38<br>
+          </td>
+          <td valign="top">This bit will not be reset when changing
+            major mode in an automatic MINKEY sequence<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top" align="left">FULTKFLG<br>
+          </td>
+          <td valign="top">V57<br>
+          </td>
+          <td valign="top">Only one type of marking (optics or VHF) is
+            being performed for rendezvous navigation<br>
+          </td>
+          <td valign="top">Crew option (load)<br>
+          </td>
+          <td valign="top">V57<br>
+          </td>
+          <td valign="top">Both optics and VHF are being used for
+            rendezvous navigation<br>
+          </td>
+          <td valign="top">Crew option (load)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top" align="left">PCFLAG<br>
+          </td>
+          <td valign="top">P38<br>
+          </td>
+          <td valign="top">Plane change targeting (P38) and first
+            entrance to P52 for MINKEY plane change torquing<br>
+          </td>
+          <td valign="top">Set on selection of P38<br>
+          </td>
+          <td valign="top">P31<br>
+            P32<br>
+            P33<br>
+            P34<br>
+            P35<br>
+            P36<br>
+            P37<br>
+            P52<br>
+            R07<br>
+          </td>
+          <td valign="top">Not plane change targeting<br>
+          </td>
+          <td valign="top">Reset by selection of P31-P37; at PRO
+            response to V50N25 (R1 = 17); Reset when pulse torquing done
+            in P52 in first MINKEY selection<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>100b</h1>
+    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <br>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="bottom">BIT<u><br>
+            </u></th>
+          <th valign="bottom">AGC<br>
+            MNEMONIC<br>
+          </th>
+          <th valign="bottom">SET 1<br>
+            BY<br>
+          </th>
+          <th valign="bottom">1 INDICATES<br>
+          </th>
+          <th valign="bottom">CONDITIONS,<br>
+            COMMENTS<br>
+          </th>
+          <th valign="bottom">SET 0<br>
+            BY<br>
+          </th>
+          <th valign="bottom">0 INDICATES<br>
+          </th>
+          <th valign="bottom">CONDITIONS,<br>
+            COMMENTS<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top" align="left">Not Used<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Should always be 0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top" align="left">Not Used </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Should always be 0 </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top" align="left">Not Used </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Should always be 0 </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top" align="left">R27FLAG<br>
+          </td>
+          <td valign="top">V76<br>
+          </td>
+          <td valign="top">Allow R27 to be called from R22<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">P20<br>
+            V77<br>
+          </td>
+          <td valign="top">Inhibit R27 in R22<br>
+          </td>
+          <td valign="top">Reset on entrance to P20<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top" align="left">CYCLFLAG<br>
+          </td>
+          <td valign="top">P48<br>
+          </td>
+          <td valign="top">R27 in P48 has not yet finished its mark
+            processing<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">V37<br>
+            P48<br>
+          </td>
+          <td valign="top">R27 in P48 has completed its mark processing<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top" align="left">NOUNFLG<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">Display N77 in P25 and P48<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">Display N76 in P25 and P48<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top" align="left">N77FLAG<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">R1 and R2 of N77 remain static<br>
+          </td>
+          <td valign="top">N77 holds either last current or optimized
+            range and range rate<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">R1 and R2 of N77 are being updated<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top" align="left">AZIMFLAG<br>
+          </td>
+          <td valign="top">
+            <dl>
+              <dt>P20</dt>
+              <dd>(option 4 or 5)</dd>
+              <dt>R07</dt>
+            </dl>
+          </td>
+          <td valign="top">P20 (option 4 or 5) operating; R61 attitude
+            maneuvers to be 3-axis<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">
+            <dl>
+              <dt>P20</dt>
+              <dd>(option 0,1,2)</dd>
+              <dt>V89</dt>
+            </dl>
+          </td>
+          <td valign="top">R61 attitude maneuvers to be VECPOINT<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top" align="left">FIXFLAG<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">R27 is optimizing range and range rate for a
+            given time<br>
+          </td>
+          <td valign="top">Optimizing interval is optimization time +/-
+            95 seconds<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">R27 is updating range and range rate for the
+            current time<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top" align="left">SNAPFLAG<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">Optimization time is 20 seconds or less in
+            the future<br>
+          </td>
+          <td valign="top">R27 inhibits R22 state vector updates; R3 of
+            N77 remains static at -00001<br>
+          </td>
+          <td valign="top">R27<br>
+            V37<br>
+          </td>
+          <td valign="top">Optimization time is in the past or &gt;20
+            seconds in the future<br>
+          </td>
+          <td valign="top">R27 does not inhibit R22 state vector updates<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top" align="left">P48FLAG<br>
+          </td>
+          <td valign="top">P48<br>
+          </td>
+          <td valign="top">Program is P48<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">V37<br>
+            P47<br>
+          </td>
+          <td valign="top">Program not P48<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top" align="left">P25FLAG<br>
+          </td>
+          <td valign="top">P25<br>
+          </td>
+          <td valign="top">Program is P25<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">V37<br>
+          </td>
+          <td valign="top">Program not P25<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top" align="left">TDFLAG<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">Either Phi or Theta at the time of
+            optimization has been computed<br>
+          </td>
+          <td valign="top">R3 of N77 remains static at value computed at
+            optimization time<br>
+          </td>
+          <td valign="top">V37<br>
+            R27<br>
+          </td>
+          <td valign="top">Angle at time of optimization not yet
+            computed<br>
+          </td>
+          <td valign="top">R3 of N77 is updated (except in P25)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top" align="left">R27UP2<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">Second initialization pass in R27 complete<br>
+          </td>
+          <td valign="top">Set after first estimate of range state
+            vector<br>
+          </td>
+          <td valign="top">V37<br>
+            V76<br>
+          </td>
+          <td valign="top">Second pass in R27 not yet complete<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top" align="left">R27UP1<br>
+          </td>
+          <td valign="top">R27<br>
+          </td>
+          <td valign="top">First initialization pass in R27 complete<br>
+          </td>
+          <td valign="top">Set after first mark has been stored<br>
+          </td>
+          <td valign="top">V37<br>
+            V76<br>
+          </td>
+          <td valign="top">First pass in R27 not yet complete<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <p> </p>
     <p><br>
     </p>
     <h1><font size="-1"> </font></h1>
@@ -8329,6 +8319,6 @@ href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-Data
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-03-28</i><br>
+      2025-03-29</i><br>
   </body>
 </html>
