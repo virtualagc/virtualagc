@@ -934,13 +934,18 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             (CSM-docked), 0.36 m/sec (DPS), or 3.08 m/sec (APS) (for the
             2-second interval).&nbsp; Bit is set to 1 if the
             accelerometer output goes above these thresholds (if bit 7
-            FLAGWRD7 = 0).&nbsp; If bit is 0, only the required velocity
-            is updated (no derivation of time-to-go or steering commands
-            are performed).&nbsp; Bit is set to 1 in SERVICER (P12, P63
-            thru P66) but it is not looked at in P12, P66, and
-            P70/P71.&nbsp; Set 0 in SERVICER in P12 and descent
+            FLAGWRD7 = 0).&nbsp; <sup>*</sup>If bit is 0, only the
+            required velocity is updated (no derivation of time-to-go or
+            steering commands are performed).&nbsp; Bit is set to 1 in
+            SERVICER (P12, P63 thru P66) but it is not looked at in P12,
+            P66, and P70/P71.&nbsp; Set 0 in SERVICER in P12 and descent
             programs.<br>
-          </td>
+            <br>
+            <font size="-1"><sup>*</sup>There is reason to believe that
+              this sentence or an additional sentence, should contain
+              information about a check of the auto-throttle discrete
+              input (channel 30 bit 5).&nbsp; If so, this additional
+              descriptive text is not available.</font> </td>
         </tr>
         <tr>
           <td valign="top">10<br>
@@ -1739,15 +1744,19 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             is bypassed.&nbsp; Bit is checked by NORMLIZE (which is
             called by PREREAD to initialize state vectors for SERVICER):
             if bit is set to 1, MUNRVG is initialized; otherwise CALCRVG
-            is initialized.&nbsp; Bit is checked by SERVICER: if bit is
-            set to 1 (either P12, P63, P64, P66, P70 or P71 running),
-            the average-g routine MUNRVG is called; otherwise (either
-            P40, P41, P42 or P47 running) the average-g routine CALCRVG
-            is called.&nbsp; Bit is checked by BURNBABY (Master Ignition
-            routine): if bit is set to 1, CSMPREC is called prior to
-            calling R41; otherwise it is omitted.&nbsp; Bit is reset to
-            0 by V37.<br>
-          </td>
+            is initialized.&nbsp; <sup>*</sup>Bit is checked by
+            SERVICER: if bit is set to 1 (either P12, P63, P64, P66, P70
+            or P71 running), the average-g routine MUNRVG is called;
+            otherwise (either P40, P41, P42 or P47 running) the
+            average-g routine CALCRVG is called.&nbsp; Bit is checked by
+            BURNBABY (Master Ignition routine): if bit is set to 1,
+            CSMPREC is called prior to calling R41; otherwise it is
+            omitted.&nbsp; Bit is reset to 0 by V37.<br>
+            <br>
+            <font size="-1"><sup>*</sup>This sentence, from the Luminary
+              1C GSOP, is believe to differ from its Luminary 1B form in
+              some undetermined manner.&nbsp; Possibly the reference to
+              P66 is inappropriate.</font> </td>
         </tr>
         <tr>
           <td valign="top">7<br>
