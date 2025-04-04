@@ -879,7 +879,7 @@ bool yaTelemetryApp::OnInit()
     else
       {
 #ifdef __APPLE__
-	wxString docPrefixW = wxStandardPaths::GetResourcesDir();
+	wxString docPrefixW = wxStandardPaths::Get().GetResourcesDir();
 	docPrefixW = wxT("file://") + docPrefixW + wxT("/documentation/");
 	CmOrLm = dddConfigure(agcSoftware, docPrefixW.mb_str());
 #else
