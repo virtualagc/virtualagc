@@ -590,7 +590,7 @@ int AddSP16 (int Addend1, int Addend2);
 void UnprogrammedIncrement (agc_t *State, int Counter, int IncType);
 
 void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);
-int dddConfigure(char *agcSoftware, char *docPrefix);
+int dddConfigure(char *agcSoftware, const char *docPrefix);
 ProcessDownlinkList_t PrintDownlinkList;
 void PrintDP (int *Ptr, int Scale, int row, int col);
 void PrintSP (int *Ptr, int Scale, int row, int col);

@@ -723,7 +723,7 @@ fopenFlexibly(char *filename, char *options)
 #endif // FLEXIBLE_FALLBACK
 
 int
-dddConfigure (char *agcSoftware, char *docPrefix)
+dddConfigure (char *agcSoftware, const char *docPrefix)
 {
   int id;
   FILE *aliases = NULL;
