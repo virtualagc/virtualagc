@@ -877,7 +877,16 @@ bool yaTelemetryApp::OnInit()
 	  strcpy(agcSoftware, "LM");
       }
     else
-      CmOrLm = dddConfigure(agcSoftware);
+      {
+#ifdef MACOSX
+	wxString docPrefixW = wxStandardPaths::GetResourcesDir();
+	docPrefixW = wxT("file://") + docPrefixW + wxT("/documentation/");
+	CmOrLm = dddConfigure(agcSoftware, docPrefixW.mb_str());
+#else
+	char docPrefix[32] = "file://documentation/";
+	CmOrLm = dddConfigure(agcSoftware, docPrefix);
+#endif
+      }
 
     printf ("     --delay=%d\n", StartupDelay);
     printf ("     --port=%d\n", Portnum);
@@ -958,6 +967,8 @@ SimpleFrameClass::SimpleFrameClass(wxWindow* parent, int id, const wxString& tit
     DecodingBox = new wxRadioBox(panel_1, ID_DECODINGBOX, wxT("Downlink formatting"), wxDefaultPosition, wxDefaultSize, 5, DecodingBox_choices, 0, wxRA_SPECIFY_ROWS);
     TextCtrl = new wxStaticText(this, wxID_ANY, wxEmptyString);
 #ifdef SHOW_WORD_NUMBERS
+    // The following is a dummy assignment that will be overwritten without
+    // the specific URL ever being used.  I hope.
     documentation = new wxHyperlinkCtrl(this, wxID_ANY, wxT("Documentation"),
 	wxT("file://documentation/ddd-unavailable.html"));
 #endif

@@ -438,6 +438,7 @@ temp/VirtualAGC.app : % : VirtualAGC create-bundle %/Contents/MacOS %/Contents/R
 	  sed ${INPLACE} "s/VirtualAGC/$$n/" $@/Contents/MacOS/$$n.app/Contents/Info.plist ; \
 	  mv $@/Contents/MacOS/$$n $@/Contents/MacOS/$$n.app/Contents/MacOS ; \
 	done
+	mv $@/Contents/Resources/documentation $@/Contents/MacOS/yaTelemetry.app/Contents/Resources
 	${CP} ../scripts/SimStop $@/Contents/MacOS
 	chmod +x $@/Contents/MacOS/SimStop
 ifeq "$YADSKY2" ""	

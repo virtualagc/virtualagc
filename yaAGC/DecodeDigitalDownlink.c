@@ -723,7 +723,7 @@ fopenFlexibly(char *filename, char *options)
 #endif // FLEXIBLE_FALLBACK
 
 int
-dddConfigure (char *agcSoftware)
+dddConfigure (char *agcSoftware, char *docPrefix)
 {
   int id;
   FILE *aliases = NULL;
@@ -797,22 +797,24 @@ dddConfigure (char *agcSoftware)
 	continue;
       if (aliasDoc[0] != 0)
 	{
-	  sprintf(dls->URL, "file://documentation/%s/ddd-%05o-%s.html", aliasDoc, id, aliasDoc);
+	  sprintf(dls->URL, "%s%s/ddd-%05o-%s.html", docPrefix, aliasDoc, id, aliasDoc);
 	  // Test if the chosen file exists.
 	  aliases = fopen(&(dls->URL[7]), "r");
 	  if (aliases == NULL)
-	    strcpy(dls->URL, "file://documentation/ddd-unavailable.html");
+	    dls->URL[0] = 0;
 	  else
 	    fclose(aliases);
 	}
       else
-	strcpy(dls->URL, "file://documentation/ddd-unavailable.html");
-      if (!strcmp(dls->URL, "file://documentation/ddd-unavailable.html"))
+	dls->URL[0] = 0;
+      if (dls->URL[0] == 0)
 	{
 	  if (CmOrLm)
-	    strcpy(dls->URL, "file://documentation/ddd-unavailable-CM.html");
+	    sprintf(dls->URL, "%sddd-unavailable-CM.html", docPrefix);
 	  else if (!Sundance)
-	    strcpy(dls->URL, "file://documentation/ddd-unavailable-LM.html");
+	    sprintf(dls->URL, "%sddd-unavailable-LM.html", docPrefix);
+	  else
+	    sprintf(dls->URL, "%sddd-unavailable.html", docPrefix);
 	}
       sprintf(filename, "ddd-%05o-%s.tsv", id, aliasTsv);
       fp = fopen(filename, "rt");
