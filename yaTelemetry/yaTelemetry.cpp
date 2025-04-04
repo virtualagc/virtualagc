@@ -491,6 +491,8 @@ SwriteTelemetrySimple (void)
   SimpleFrame->TextCtrl->SetLabel (Dummy);
 #ifdef SHOW_WORD_NUMBERS
   SimpleFrame->documentation->SetURL(DocumentationURL);
+  SimpleFrame->documentation->Enable();
+  //SimpleFrame->documentation->Show();
 #endif
 }
 
@@ -971,6 +973,8 @@ SimpleFrameClass::SimpleFrameClass(wxWindow* parent, int id, const wxString& tit
     // the specific URL ever being used.  I hope.
     documentation = new wxHyperlinkCtrl(this, wxID_ANY, wxT("Documentation"),
 	wxT("file://documentation/ddd-unavailable.html"));
+    documentation->Enable(false);
+    //documentation->Show(false);
 #endif
 
     set_properties();
