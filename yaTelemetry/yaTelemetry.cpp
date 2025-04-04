@@ -878,7 +878,7 @@ bool yaTelemetryApp::OnInit()
       }
     else
       {
-#ifdef MACOSX
+#ifdef __APPLE__
 	wxString docPrefixW = wxStandardPaths::GetResourcesDir();
 	docPrefixW = wxT("file://") + docPrefixW + wxT("/documentation/");
 	CmOrLm = dddConfigure(agcSoftware, docPrefixW.mb_str());
@@ -891,7 +891,7 @@ bool yaTelemetryApp::OnInit()
     printf ("     --delay=%d\n", StartupDelay);
     printf ("     --port=%d\n", Portnum);
     printf ("     --ip=%s\n", Hostname);
-    printf ("      --spacecraft=%d\n", CmOrLm);
+    printf ("     --spacecraft=%d\n", CmOrLm);
     printf ("     --software=%s\n", agcSoftware);
     printf ("     --font-size=%d\n", Points);
 #ifdef __APPLE__
