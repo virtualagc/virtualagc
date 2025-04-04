@@ -54,6 +54,8 @@
                 2025-03-08 RSB	Moved #include for agc_engine.h to yaTelemetry.h.
                 2025-03-11 RSB	Altered on the basis of SHOW_WORD_NUMBERS in
 				agc_engine.h.
+		2025-04-02 RSB	No longer uses the "generic" ddd-ID-LM.tsv and
+				ddd-ID-CM.tsv files.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -874,7 +876,8 @@ bool yaTelemetryApp::OnInit()
 	else
 	  strcpy(agcSoftware, "LM");
       }
-    CmOrLm = dddConfigure(agcSoftware);
+    else
+      CmOrLm = dddConfigure(agcSoftware);
 
     printf ("     --delay=%d\n", StartupDelay);
     printf ("     --port=%d\n", Portnum);
@@ -955,12 +958,8 @@ SimpleFrameClass::SimpleFrameClass(wxWindow* parent, int id, const wxString& tit
     DecodingBox = new wxRadioBox(panel_1, ID_DECODINGBOX, wxT("Downlink formatting"), wxDefaultPosition, wxDefaultSize, 5, DecodingBox_choices, 0, wxRA_SPECIFY_ROWS);
     TextCtrl = new wxStaticText(this, wxID_ANY, wxEmptyString);
 #ifdef SHOW_WORD_NUMBERS
-    // The constructor's URL has to be replaced somehow at runtime on the basis
-    // of AGC software version and downlist ID.  The default URL given below is
-    // useful for detecting implementation errors, i.e., failure to set the
-    // URL properly.
     documentation = new wxHyperlinkCtrl(this, wxID_ANY, wxT("Documentation"),
-	wxT("https://example.org"));
+	wxT("file://documentation/ddd-unavailable.html"));
 #endif
 
     set_properties();

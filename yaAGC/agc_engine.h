@@ -305,7 +305,7 @@ extern long random (void);
 #define DISPLAYED_FIELD_WIDTH 24
 #endif
 #define DEFAULT_SWIDTH (4*DISPLAYED_FIELD_WIDTH)
-#define DEFAULT_SHEIGHT 42
+#define DEFAULT_SHEIGHT 52
 #define SWIDTH 160
 #define SHEIGHT 100
 
@@ -349,6 +349,7 @@ typedef struct {
 } FieldSpec_t;
 
 typedef struct {
+  int id;
   char Title[SWIDTH + 1];
   char URL[SWIDTH + 1];
   FieldSpec_t FieldSpecs[MAX_DOWNLINK_LIST];
@@ -524,6 +525,7 @@ int DownlinkListBuffer[MAX_DOWNLINK_LIST];
 int DownlinkListCount = 0, DownlinkListExpected = 0, DownlinkListZero = -1;
 ProcessDownlinkList_t *ProcessDownlinkList = NULL;
 int CmOrLm = 0;	// Default is 0 (LM); other choice is 1 (CM)
+int Sundance = 0;
 char Sbuffer[SHEIGHT][SWIDTH + 1];
 int Sheight = DEFAULT_SHEIGHT, Swidth = DEFAULT_SWIDTH;
 int LastRhcPitch = 0, LastRhcYaw = 0, LastRhcRoll = 0;
@@ -547,6 +549,7 @@ extern int DownlinkListBuffer[MAX_DOWNLINK_LIST];
 extern int DownlinkListCount, DownlinkListExpected, DownlinkListZero;
 extern ProcessDownlinkList_t *ProcessDownlinkList;
 extern int CmOrLm;
+extern int Sundance;
 extern char Sbuffer[SHEIGHT][SWIDTH + 1];
 extern int Sheight, Swidth;
 extern int LastRhcPitch, LastRhcYaw, LastRhcRoll;

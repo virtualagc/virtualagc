@@ -92,6 +92,7 @@
 #		2017-08-24 RSB	Added wxFLAGS.
 #		2017-12-11 RSB	Added yaDSKY2/*.canned files.
 #		2025-03-03 RSB	Accounted for ddd-*.tsv files in Resources/
+#		2025-04-03 RSB	Same for yaTelemetry/documentation/.
 
 APP=VirtualAGC
 # *** BEWARE! ***  The MISSIONS variable is normally inherited from the 
@@ -272,6 +273,7 @@ endif
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics
 	${CP} ../yaTelemetry/*.jpg ../yaAGC/ddd-*.tsv $@
+	${CP} ../yaTelemetry/documentation $@
 	${CP} ../Contributed/LM_Simulator $@
 	${CP} VirtualAGC.tcl $@
 	-rm -rf $@/LM_Simulator/CVS

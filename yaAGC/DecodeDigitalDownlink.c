@@ -70,6 +70,7 @@
 				VARIABLE: VALUE at compile time.
 		03/11/25 RSB	Altered on the basis of SHOW_WORD_NUMBERS in
 				agc_engine.h.
+		04/03/25 RSB	Added AGC software-version aliasing.
   
 */
 
@@ -725,8 +726,50 @@ int
 dddConfigure (char *agcSoftware)
 {
   int id;
+  FILE *aliases = NULL;
+  char aliasDoc[32] = { 0 }, aliasTsv[32] = { 0 };
+  /*
+   * The downlists vary by AGC software version.  There are two aspects of
+   * this that concern us here.  First, a "tsv" file (ddd-ID-version.tsv) must
+   * be chosen that's appropriate to the AGC software version.  These files
+   * give the symbolic names, scaling, format, and so forth for the downlinked
+   * items in the downlist.  There are only a few of these tsv files, because
+   * any given one of them is suitable for multiple AGC software versions.
+   * Similarly, there are the documentation (ddd-ID-tsvVersion.html) files that
+   * describe the downlink items.  Again, there are only a limited number of
+   * them, but they do not partition in the same way as the tsv files, because
+   * any given downlink item, though have the same name, scale, format, etc. as
+   * in other AGC software versions, could nevertheless be described differently.
+   * This is handled by reading a file callsed ddd-version-aliases.tsv, which
+   * is a tab-delimited file, with one line for each AGC software version; each
+   * line has three fields, namely:
+   * 	AGC software version (such as "Luminary099")
+   * 	TSV version (such as "Luminary099" also, but could be "Luminary098", etc.)
+   * 	HTML version (such as "Luminary1A")
+   */
+  aliases = fopen("ddd-version-aliases.tsv", "r");
+  if (aliases != NULL)
+    {
+      char line[256], *ss;
+      int lenAgcSoftware;
+      lenAgcSoftware = strlen(agcSoftware);
+      while (NULL != fgets(line, sizeof(line), aliases))
+	if (!strncmp(line, agcSoftware, lenAgcSoftware) && line[lenAgcSoftware] == '\t')
+	  {
+	    ss = strstr(&line[lenAgcSoftware + 1], "\t"); // Find 2nd tab.
+	    if (ss == NULL)
+	      continue;
+	    strcpy(aliasDoc, ss + 1);
+	    aliasDoc[strcspn(aliasDoc, "\r\n")] = 0; // remove trailing CR or LF.
+	    *ss = 0;
+	    strcpy(aliasTsv, &line[lenAgcSoftware + 1]);
+	  }
+      fclose(aliases);
+    }
   // Software is assumed to be for the LM unless its name begins with one of the
   // known CM programs.
+  if (!strncmp(agcSoftware, "Sundance", 8))
+    Sundance = 1;
   CmOrLm = 0;
   if (!strncmp(agcSoftware, "Artemis", 7) ||
       !strncmp(agcSoftware, "Colossus", 8) ||
@@ -752,7 +795,26 @@ dddConfigure (char *agcSoftware)
 	dls = lmIdToSpec[id - 077772];
       if (dls == NULL)
 	continue;
-      sprintf(filename, "ddd-%05o-%s.tsv", id, agcSoftware);
+      if (aliasDoc[0] != 0)
+	{
+	  sprintf(dls->URL, "file://documentation/%s/ddd-%05o-%s.html", aliasDoc, id, aliasDoc);
+	  // Test if the chosen file exists.
+	  aliases = fopen(&(dls->URL[7]), "r");
+	  if (aliases == NULL)
+	    strcpy(dls->URL, "file://documentation/ddd-unavailable.html");
+	  else
+	    fclose(aliases);
+	}
+      else
+	strcpy(dls->URL, "file://documentation/ddd-unavailable.html");
+      if (!strcmp(dls->URL, "file://documentation/ddd-unavailable.html"))
+	{
+	  if (CmOrLm)
+	    strcpy(dls->URL, "file://documentation/ddd-unavailable-CM.html");
+	  else if (!Sundance)
+	    strcpy(dls->URL, "file://documentation/ddd-unavailable-LM.html");
+	}
+      sprintf(filename, "ddd-%05o-%s.tsv", id, aliasTsv);
       fp = fopen(filename, "rt");
       if (fp == NULL)
 	{

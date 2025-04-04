@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Specific Downlist Documentation Unavailable</title>
+    <link rel="stylesheet" href="downlists.css">
+  </head>
+  <body>
+    <b>Note:</b>&nbsp; Downlist documentation for this specific AGC
+    software version is not (yet) available, most likely due to an
+    unavailable <i>Guidance System Operations Plan</i> (GSOP) for it,
+    so only completely-generic information can be provided.<br>
+    <h1>1a</h1>
+    <p>I.D. word for this list.&nbsp; This octal word identifies the
+      particular downlist being displayed.&nbsp; The value is one of the
+      following:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Value<br>
+          </th>
+          <th valign="top">Lunar Module<br>
+          </th>
+          <th valign="top">Command Module<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">77772<br>
+          </td>
+          <td valign="top">Lunar Surface Align List</td>
+          <td valign="top">(Not applicable)</td>
+        </tr>
+        <tr>
+          <td valign="top">77773<br>
+          </td>
+          <td valign="top">Descent and Ascent List<br>
+          </td>
+          <td valign="top">Program 22 List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77774<br>
+          </td>
+          <td valign="top">Orbital Maneuvers List<br>
+          </td>
+          <td valign="top">Powered List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77775<br>
+          </td>
+          <td valign="top">Rendezvous and Prethrust List<br>
+          </td>
+          <td valign="top">Rendezvous and Prethrust List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77776<br>
+          </td>
+          <td valign="top">AGS Initialization and Update List<br>
+          </td>
+          <td valign="top">Entry and Update List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77777<br>
+          </td>
+          <td valign="top">Coast and Align List<br>
+          </td>
+          <td valign="top">Coast and Align List<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>1b</h1>
+    <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
+    </p>
+    <h1>51 </h1>
+    <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
+      elapsed time.&nbsp; Used for all timing while the AGC is on.&nbsp;
+      Zeroed at liftoff (by crew procedure), increment by one bit per
+      centisecond.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
+    </p>
+    <h1>Other</h1>
+    <p>All (or most) other downlink items vary somewhat according to the
+      AGC software version in symbolic name, precision (single or
+      double), scaling, numeric format (decimal, octal, floating point),
+      textual description, and so forth.&nbsp; Because of the absence of
+      an appropriate Guidance System Operations Plan (GSOP) covering
+      this specific software version, such details cannot be provided
+      here.&nbsp; Therefore, all downlinked data other than the ones
+      described above are presented in raw (unscaled single-precision
+      octal) form.&nbsp; Careful examination of the source code for the
+      AGC software version may provide additional detail.&nbsp; Refer
+      particularly to source-code files with names such as:<br>
+    </p>
+    <ul>
+      <li>ERASABLE_ASSIGNMENTS.agc</li>
+      <li>FLAGWORD_ASSIGNMENTS.agc<br>
+      </li>
+      <li>INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc</li>
+      <li>DOWNLINK_LISTS.agc</li>
+      <li>DOWN-TELEMETRY_PROGRAM.agc</li>
+    </ul>
+    <p><br>
+    </p>
+    <h1><font size="-1"> </font></h1>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
+      2025-04-04</i><br>
+  </body>
+</html>

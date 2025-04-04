@@ -2,35 +2,111 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Colossus 1,1A Program 22 List</title>
-    <link rel="stylesheet" href="../downlists.css">
+    <title>Telemetry Documentation for Generic Command Module Downlists</title>
+    <link rel="stylesheet" href="downlists.css">
   </head>
   <body>
-    For full documentation, see the <a
-      href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf"
-      moz-do-not-send="true">Colossus 1,1A <i>Guidance System
-        Operations Plan</i></a>.<br>
-    <br>
-    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
-      href="#30">30</a> <a href="#40">40</a> <a href="#50">50</a> <a
-      href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
+    <b>Note:</b>&nbsp; Telemetry documentation for this specific Command
+    Module software version is not (yet) available, most likely due to
+    an unavailable <i>Guidance System Operations Plan</i> (GSOP) for
+    it.&nbsp; Only those telemetered items which are essentially the
+    same across all software versions are described herein, while those
+    items which differ significantly by software version are
+    omitted.&nbsp; Nevertheless, even the behavior of those items
+    included here may still differ in subtle ways from one AGC software
+    version to another, so do not assume that the generic documentation
+    herein is perfectly reliable.&nbsp; Careful examination of the
+    source code for the AGC software version, if available, may provide
+    additional detail in resolving questions; refer particularly to
+    source-code files with names such as:
+    <ul>
+      <li>ERASABLE_ASSIGNMENTS.agc</li>
+      <li>FLAGWORD_ASSIGNMENTS.agc<br>
+      </li>
+      <li>INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc</li>
+      <li>DOWNLINK_LISTS.agc</li>
+      <li>DOWN-TELEMETRY_PROGRAM.agc</li>
+    </ul>
+    Go directly to downlink word: <a href="#10">10</a> <strike>20</strike>
+    <strike>30</strike> <a href="#40">40</a> <a href="#50">50</a> <a
+      href="#60">60</a> <strike>70</strike> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77773<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; This octal word identifies the
+      particular downlist being displayed.&nbsp; The value is one of the
+      following:<br>
     </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Value<br>
+          </th>
+          <td valign="top">&nbsp;&nbsp; <br>
+          </td>
+          <th valign="top" align="left">Downlist Title<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">77772<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">(Not applicable)</td>
+        </tr>
+        <tr>
+          <td valign="top">77773<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Program 22 List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77774<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Powered List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77775<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Rendezvous and Prethrust List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77776<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Entry and Update List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">77777<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">Coast and Align List<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
     </p>
     <h1>2,3,4,5,6,7,8</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
     <p>CSM STATE VECTOR and TIME. The CMC's latest calculated state
       vector for the CSM in either earth-centered or moon-centered
       reference coordinates. During the Orbital Integration Routine, the
       sphere of influence will be indicated by Flagword 8, bit 12
-      (CMOONFLG): zero = earth-centered; one = lunar-centered. It is
-      important to note that the Average-G routine is initialized with a
-      state in RN, VN which can have a different origin than is
+      (CMOONFLG): zero = earth-centered; one = lunar-centered.&nbsp; It
+      is important to note that the Average-G routine is initialized
+      with a state in RN, VN which can have a different origin than is
       indicated by CMOONFLG. This means an inconsistency in the Downlink
       of the state vector actual origin and CMOONFLG origin. Words 2-4
       contain the position components, X, Y, Z, scaled meters/2<sup>29</sup>,
@@ -39,54 +115,9 @@
       associated with the CSM state vector in words 2-7, scaled
       centiseconds/2<sup>28</sup>, referenced to the computer clock.
       These parameters are calculated whenever the CSM state vector is
-      permanently extrapolated or changed, as follows: <br>
+      permanently extrapolated or changed<br>
     </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td nowrap="nowrap" valign="top">&nbsp;&nbsp; <br>
-          </td>
-          <td nowrap="nowrap" valign="top" align="left">P00</td>
-          <td valign="top">—</td>
-          <td valign="top">every four time steps</td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td nowrap="nowrap" valign="top" align="left">P20, P22, P23</td>
-          <td valign="top">—</td>
-          <td valign="top">every mark and every Incorp if CSM updated</td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td nowrap="nowrap" valign="top">P27<br>
-          </td>
-          <td valign="top">—</td>
-          <td valign="top">update of state vector<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td nowrap="nowrap" valign="top" align="left">Average G</td>
-          <td valign="top">—</td>
-          <td valign="top">every cycle</td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td nowrap="nowrap" valign="top" align="left">V47</td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top"><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
     <h1><a name="10"></a>9a,9b,10a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>CDUX (outer gimbal) CDUY (inner gimbal) CDUZ (middle gimbal): The
       actual values of the IMU CDU angles. Each register is an unsigned
       15-bit fraction, scaled degrees/360, and is updated by counter
@@ -98,13 +129,11 @@
       +70 degrees.<br>
     </p>
     <h1>10b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>CDUT. The optics trunnion angle CDU, scaled (degrees -
       19.7754)/45 (two's complement). The angle varies from -19.775° to
       +45°. <br>
     </p>
     <h1>11-13</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>ADOTs (if RCS DAP on) or OGARATE and OMEGABs (if TVC DAP on).
       ADOTs are the RCS DAP-measured vehicle body rates (i.e. the
       outputs from the RCS DAP rate filter), roll, pitch and yaw, about
@@ -122,15 +151,7 @@
       same as for the OMEGACs, described in words 85-87 of the Powered
       downlist. The maximum OMEGAB rate will be less than 5 deg/sec. <br>
     </p>
-    <p>NOTE: Even though the TVC zeroing loop treats OGARATE as a single
-      precision quantity, it will be transmitted and considered as a
-      double precision quantity in which the low-order register will
-      always be zero. This is due to the fact that OGARATE = OMEGAXB and
-      after zeroing OMEGAXB and OMEGAYB, as part of the TVC zeroing
-      loop, OGARATE is computed and stored in DP. <br>
-    </p>
     <h1>14a,14b,15a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>AKs. The X, Y and Z (roll, pitch and yaw, respectively) attitude
       errors used to drive the FDAI display, scaled degrees/180, The
       roll attitude error register (AK +0) is loaded with one-quarter
@@ -154,11 +175,9 @@
       TVC DAP sample period (in PCOPY and YCOPY) with the respective
       values of ERRBTMP. Also, with TVC DAP, AK will normally have a
       magnitude of less than 5 degrees but a jet failed-on could produce
-      up to 30 degrees. AK 1 and AK 2 will normally have peak values of
-      up to 10 degrees, converging to 0-4 degrees with time.<br>
+      larger angles.<br>
     </p>
     <h1>15b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>RCSFLAGS.&nbsp; A cell whose individual bits are used in
       monitoring the RCS.<br>
     </p>
@@ -173,9 +192,9 @@
         <tr>
           <td valign="top" align="center">15<br>
           </td>
-          <td valign="top">Bit set 1 to indicate a high rate (4 deg/sec)
-            auto maneuver in progress. Bit is reset to 0 to indicate
-            that a high-rate auto maneuver is not in progress. <br>
+          <td valign="top">Bit set 1 to indicate a high rate auto
+            maneuver in progress. Bit is reset to 0 to indicate that a
+            high-rate auto maneuver is not in progress. <br>
           </td>
         </tr>
         <tr>
@@ -275,7 +294,6 @@
     </table>
     <p> </p>
     <h1>16a,16b,17a</h1>
-    <p><i>Same as Powered List.</i></p>
     THETADX, THETADY, THETADZ. During normal RCS DAP operation, when the
     CMC Mode switch is in AUTO or HOLD and there are no RHC commands,
     these registers contain the desired current, (i,e., of this DAP
@@ -283,7 +301,6 @@
     15-bit unsigned fractions and scaled degrees/360, These quantities
     are used in the computation of phase plane attitude errors and are
     calculated as follows:<br>
-    <br>
     <ol>
       <li>During automatic maneuvers they are updated every 100
         milliseconds.</li>
@@ -292,139 +309,9 @@
       <li>At the end of manual rate maneuvers, after rate damping is
         complete, THETADX, Y &amp; Z are set to the current CDU angles.</li>
       <li>During manual rate maneuvers and when in FREE mode the
-        registers are not updated, </li>
+        registers are not updated. </li>
     </ol>
-    <h1>17b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p>Garbage. This register is used in TVC Zeroing (P40) by the item,
-      C5, which is the yaw TVC CSM/LM filter (5th node). It also may
-      contain DELCDUX, the high-order part of the double-precision
-      quantity which is the incremental value used in the THETADX
-      computation during automatic maneuvers. <br>
-    </p>
-    <h1>18-35a</h1>
-    LANDING SITE MARK DATA. These thirty-five registers contain the mark
-    data which is being used to update the CSM state vector and the
-    landmark position coordinates. Each mark, of which five are allowed,
-    consists of six parameters stored in seven registers. These
-    quantities, listed in the correct transmitted order, are: <br>
-    <ul>
-      <li>Time since epoch (double precision) scaled centiseconds/2<sup>-28</sup>.</li>
-      <li>Inner gimbal angle (CDUY), 15-bit unsigned fraction, scaled
-        degrees/360.</li>
-      <li>Optics Shaft angle, 15-bit unsigned fraction, scaled
-        degrees/360.</li>
-      <li>Middle gimbal angle (CDUZ), 15-bit unsigned fraction, scaled
-        degrees/360.</li>
-      <li>Optics Trunnion angle, scaled (degrees-19.7754)/45 (two's
-        complement). The bias, 19.7754, is programmed-in.</li>
-      <li>Outer gimbal angle (CDUX). A 15 unsigned fraction, scaled
-        degrees/360.</li>
-    </ul>
-    SVMRKDAT through SVMRKDAT +34 is set at the beginning of P22 after
-    the operation of the Sighting Mark Routine, R53. R53 leaves the mark
-    data in the VAC area and, for simplicity, P22 moves a total of 36
-    registers via a six-cycle loop of a VLOAD followed by a STORE
-    instruction. P22 performs in this manner not caring whether the
-    number of marks is one or five. P22 clears flag, P22MKFLG, before
-    moving the mark data and sets it after moving the data to signify
-    that the SVMRKDAT table contains the latest mark data. If CMOONFLG,
-    bit 12, Flagword 8, is a zero, the coordinate system is
-    earth-centered. A one in this bit position would indicate a
-    moon-centered coordinate system. <br>
-    <h1>35b</h1>
-    <p>Garbage. This register will contain an indeterminable background
-      quantity from the 36th register of the Marking program, SXTMARK. <br>
-    </p>
-    <h1>36a</h1>
-    <p>LANDMARK ID contains the R2 entry by the astronaut after a V05N70
-      or V05N71 action. It contains five octal digits, ABCDE, which
-      describe the landmark as follows:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td valign="top">A<br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">1 if landmark is known.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A<br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">2 if landmark is unknown.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B<br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">index of offset designator.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">C<br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">not used<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">DE<br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">00 for a landmark whose coordinates are not
-            stored in the CMC memory.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">01 for the landing site.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">=<br>
-          </td>
-          <td valign="top">02 through 32<sub>8</sub> for the index
-            number whose coordinates are stored in CMC fixed memory.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    The offset indicator, B, is set to zero at the start of P22. The
-    astronaut may change all items after a V05N70 or V05N71. It is used
-    by P22 after each of these verbs to extract the information<br>
-    described above. <br>
-    <h1>36b</h1>
-    <p>Garbage. This register is used for the low-order register of the
-      first component of the VMOON vector and also by the item, HORIZON
-      (the P23 horizon identification). <br>
-    </p>
-    <h1>37-39</h1>
-    <p>SPARES. Same description as word 31 of the Powered List. <br>
-    </p>
-    <blockquote><font size="-1">I.e., "The first half of each spare
-        contains 00000<sub>8</sub>. The second half is ARUPT (the
-        contents of the accumulator when the telemetry interrupt was
-        recognized)."</font><br>
-    </blockquote>
-    <p> </p>
     <h1><a name="40"></a>40a</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -455,49 +342,22 @@
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">MIDFLAG.&nbsp; Set to 1 within orbital
-            integration routine at beginning of time step when magnitude
-            of conic position vector is greater than the constants RME
-            (earth-centered) or RMM (moon-centered) and set to 0 if less
-            than these constants.&nbsp; If MIDFLAG is set to 1
-            integration will include secondary body and solar
-            perturbations to the orbit.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">MOONFLAG.&nbsp; Set by orbital integration to
-            1 or 0 when integrating the stored CSM and LM state vectors;
-            1 indicates lunar orbit, 0 indicates earth orbit.&nbsp; Also
-            set to 1 or 0 in integration when switching coordinate
-            centers.&nbsp; MOONFLAG is also set to 1 or 0 by callers of
-            INTEGRVS which specify the state vector to be integrated and
-            in P27, P76, V67 and V47 when using integration subroutine
-            to permanently store state vectors.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">NORFHOR.&nbsp; A 1 indicates far
-            horizon.&nbsp; A 0 indicates near horizon.&nbsp; Set to 0 or
-            1 in P23 from astronaut input of near or far horizon.&nbsp;
-            Used to determine which point of tangency equation is to be
-            used (near or far).<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">10<br>
           </td>
-          <td valign="top">ZMEASURE.&nbsp; A 1 indicates measurement
-            planet and primary planet different.&nbsp; A 0 indicates
-            measurement planet and primary planet the same.&nbsp; Set 0
-            in P23 when state vector sphere of influence and sighting
-            planet measurement are in the same sphere of influence;
-            otherwise set to 1.&nbsp; Used in P23 to pick up the vector
-            difference between state vector and landmark vector.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -585,42 +445,12 @@
         <tr>
           <td valign="top">5<br>
           </td>
-          <td valign="top">F2RTE. A 1 means Return to Earth Targeting is
-            operating in the time-critical mode. A 0 means Return to
-            Earth Targeting is operating in the fuel-critical mode. In
-            the time-critical mode the program generates a trajectory
-            which meets the re-entry constraints and returns the
-            spacecraft in the shortest possible time. In the fuel
-            critical mode the program generates a trajectory which meets
-            the re-entry constraints and minimizes the impulsive
-            velocity change required to achieve this trajectory. Bit set
-            0 if the astronaut sets the desired velocity change (ΔV<sub>D</sub>)
-            equal to 0 or to a value less than the minimum required
-            impulsive velocity change. Otherwise a time-critical
-            trajectory is provided (bit set 1). Bit is set and tested in
-            P37. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">4<br>
           </td>
-          <td valign="top">TRUNFLAG. Bit set 1 to indicate that driving
-            of optics trunnion allowed in R52 (due to fact that desired
-            trunnion angle is not greater than 50° and is not less than
-            0°). If not tracking the LM and trunnion angle exceeds 90°
-            (bit 7 of FLAGWRD3), alarm 0404<sub>8</sub> is generated. If
-            desired trunnion angle is more than 50° but less than 90°,
-            alarm 0407<sub>8</sub> is generated. The allowable driving
-            refers to location of object being sighted (actual loading
-            of desired optics interface cells takes place only if optics
-            in Computer Control Mode). Driving of the optics shaft
-            (loading of "desired shaft angle" cell) takes place
-            regardless of the value of the TRUNFLAG bit; driving of both
-            takes place in a routine entered every 0.48 second ("T4RUPT"
-            package), and is subject to optics moding constraints there.
-            Bit set 1 at start of routine 52, but required setting is
-            reevaluated each time a new value of desired optics angles
-            is computed. <br>
+          <td valign="top">(Differs by software version)<br>
           </td>
         </tr>
         <tr>
@@ -637,22 +467,16 @@
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">Not used. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">KFLAG. A 1 indicates preferred central angle
-            search sector less than 180°. A 0 indicates greater than
-            180°. Set 1 or 0 in P17.1 and/or S17.1. Tested in P17.1 and
-            S17.2. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
       </tbody>
     </table>
     <h1>40b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 1.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -713,8 +537,7 @@
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top">Not used. <br>
-          </td>
+          <td valign="top">(Differs by software version)</td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
@@ -739,19 +562,7 @@
         <tr>
           <td valign="top" align="center">9<br>
           </td>
-          <td valign="top">Bit has two distinct functions, hence two
-            difference mnemonics.<br>
-            <br>
-            TARG2FLG. Bit set 1 at start of P22 to flag the fact
-            (combined with bit 10 = 0) that tracking of a landmark is
-            required by routine 52. Bit is set 0 in P52, P54
-            (indicating, with bit 10 = 0, that tracking of a star is
-            required).<br>
-            <br>
-            R23FLG. Bit set 1 by extended V54 (COAS MARKING) reset 0 by
-            extended V57 (regular optics marking). Communication to R22
-            as to which marking system is operating. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">8<br>
@@ -821,10 +632,7 @@
         <tr>
           <td valign="top" align="center">4<br>
           </td>
-          <td valign="top">TRM03FLG. Bit set 1 when request made to
-            terminate P03 before P03 is completed. Otherwise bit set 0.
-            <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">3<br>
@@ -843,10 +651,8 @@
             occasionally during powered-flight guidance computation
             sequencing), then ITERATOR is not called, and consequently
             the bit is left set to 1 when LAMBERT is exited. This bit is
-            equivalent to the <a moz-do-not-send="true"
-href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=148">switch
-
-              f<sub>3</sub> of Section 5.5 of this GSOP</a>. <br>
+            equivalent to the switch f<sub>3</sub> of Section 5.5 of the
+            GSOP. <br>
           </td>
         </tr>
         <tr>
@@ -869,11 +675,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             special entrance is used only by the Pre-TPI Maneuver
             Program P34/P74, the Pre-TPM Maneuver Program P35/P75, and
             the Lambert Aim-Point Maneuver Pre-Thrust Computation
-            Routine. This bit is equivalent to the <a
-              moz-do-not-send="true"
-href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=148">switch
-
-              f<sub>1</sub>, in Section 5.5 of this GSOP</a>. <br>
+            Routine. This bit is equivalent to the switch f<sub>1</sub>,
+            in Section 5.5 of the GSOP. <br>
           </td>
         </tr>
         <tr>
@@ -898,7 +701,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>41a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 2.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -936,20 +738,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">22DSPFLG. A 1 means display ΔR and ΔV which
-            are computed by the measurement incorporation routine for
-            astronaut approval. A 0 means do not display. Set 1 in P22
-            prior to displaying the ΔR and ΔV values which are computed
-            from the first set of mark data. Tested after the first ΔR
-            and AV are computed, then cleared to 0 for the remainder of
-            the present operation of P22. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version)</td>
         </tr>
         <tr>
           <td valign="top">11<br>
@@ -968,8 +762,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">10<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version)</td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -1005,24 +798,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">7<br>
           </td>
-          <td valign="top">Bit used for three distinct functions, hence
-            assigned three separate mnemonics.<br>
-            <br>
-            ETPIFLAG, A 1 means an elevation angle has been input to
-            P34/P74 and that TPI time is to be computed. A 0 means that
-            TPI time is input and an elevation angle is to be computed.
-            Bit set 1 on PROCEED response to V06N55 display with R2 = 0.<br>
-            <br>
-            FIRSTFLG. A 1 means initialization pass for Lambert
-            targeting in P40. A 0 means not initialization pass. Set 1
-            during pre-thrust in P40/P41. Set 0 when Lambert starts
-            about TIG -30 seconds. Tested every Lambert update.<br>
-            <br>
-            OPTNSW. A 1 means SOI phase of P38/P78. A 0 means SOR phase
-            of P38/P78. Set 1 at PROCEED response to V04N06 display if
-            option code in R2 is 1 (SOI phase), set 0 if R2 is 2 (SOR
-            phase). <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">6<br>
@@ -1038,11 +814,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">5<br>
           </td>
-          <td valign="top">AVFLAG. Bit set 1 at start of P74, P75, P77,
-            P78, P79 to indicate that the LM is the active vehicle. Bit
-            set 0 at start of P34, P35, P78, P79, P17 to indicate that
-            the CSM is the active vehicle, <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">4<br>
@@ -1056,12 +828,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">3<br>
           </td>
-          <td valign="top">CALCMAN3, Bit set to 1 in large attitude
-            maneuver routine. Originally intended to indicate whether
-            final roll maneuver was required, but, since automatic
-            gimbal-lock avoidance has been eliminated, this bit actually
-            is functionless. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">2<br>
@@ -1087,13 +854,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             0. Bit is set 1 in P62 after the entry DAP is initialized
             (shortly after the "enter" response to checklist code 00041<sub>8</sub>).
 
+
+
             <br>
           </td>
         </tr>
       </tbody>
     </table>
     <h1>41b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 3.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1107,8 +875,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">15<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">14<br>
@@ -1150,21 +917,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">LUNAFLAG. Used in lat-long subroutine. A 1
-            means lunar lat-long. A 0 means earth lat-long. Set to 0 or
-            1 by routines that call lat-long subroutine. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">P22MKFLG. A 1 means the block of landmark
-            data on the P22 downlist is valid. A 0 means not valid. Set
-            0 upon entry to P22. Set 1 in P22 after the mark data which
-            is taken upon the present landmark has been moved from a VAC
-            area to the SVMRKDAT table in erasable memory to avoid loss
-            of data if a restart occurs. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">10<br>
@@ -1182,8 +940,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">8<br>
@@ -1204,6 +961,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             too close to the computed positions of the earth (about 4
             minutes after response to the checklist code 00015<sub>8</sub>),
 
+
+
             sun, or moon. Bit also used in optics angle coordinate
             transformation routine to indicate (if bit 1 when return
             from the routine) that the indicated sextant trunnion angle
@@ -1216,22 +975,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">6<br>
           </td>
-          <td valign="top">ORBWFLAG. Bit set 1 if W-Matrix is considered
-            valid for use in performing orbital navigation. Bit 1 of
-            flagword 5 is used for the analogous function with
-            rendezvous navigation. In P22 and P23 bit is set 1 for a
-            valid W-Matrix and 0 for an invalid W-Matrix. Set 0 in P27
-            after receipt of a CSM state vector update, at the start of
-            P20 and in P22 if the reduction of the W-Matrix to 6 × 6
-            form after completion of the mark information for a given
-            object overflows. Set 0 in orbital integration if overflow
-            occurs when integrating the W-Matrix. Set 0 in V67 following
-            an ENTER followed by PROCEED on N99 display. Tested in
-            AVETOMID: if bit 1 the 6×6 W-Matrix is integrated to PIPTIME
-            using CSM state vector. Also tested in P00 periodic
-            integration: if 1, 6x6 W-Matrix is integrated to CSM state
-            vector time (TETCSM) using CSM state vector. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">5<br>
@@ -1269,11 +1013,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">D6OR9FLG. Used by orbital integration for
-            W-Matrix integration. A 1 means 9 × 9 W-Matrix is integrated
-            for P22, A 0 means 6 × 6 W-Matrix is integrated for P20,
-            P23. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">1<br>
@@ -1286,7 +1026,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>42a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 4.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1419,8 +1158,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">1<br>
@@ -1432,7 +1170,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>42b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 5.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1456,26 +1193,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">14<br>
           </td>
-          <td valign="top">Not used. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">Not used. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">V59FLAG. Bit set 1 at the start of P23 in
-            conjunction with initiation of a V59 display. Reset 0 if a
-            proceed or enter response is received. If a mark is made a
-            special display job is set up to display the calibration
-            data at MARKDISP in R57 using a V06N87. After display of
-            V06N87, V59FLAG is reset to prevent display from recurring.
-            <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">11<br>
@@ -1491,33 +1219,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">10<br>
           </td>
-          <td valign="top">PRFTRKAT. Preferred attitude flag. Defines to
-            which attitude the spacecraft is to be aligned by R61. Set 1
-            by turn on of P20 or V76E. Reset 0 by V77E. A 1 means
-            preferred tracking attitude. A 0 means X-axis attitude. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">DMENFLG. Bit set 0 at the start of processing
-            of optics mark data from a given object in P22 to indicate
-            that r<sub>1</sub>, W<sub>6</sub>, W<sub>7</sub>, W<sub>8</sub>
-            have not been computed yet; bit set 1 after computation of
-            these items. Bit also set 0 at the start of R22 (of P20). <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">8<br>
           </td>
-          <td valign="top">COMPUTER. Bit set 1 as part of a fresh start
-            and not subsequently changed, hence should remain at 1.
-            Indicates that computations are being performed by CSM
-            computer (as contrasted with LM computer), for use in those
-            routines otherwise identical between the two computers. It
-            is in erasable memory to permit the interpretive language
-            bit-sensing orders to be used. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">7<br>
@@ -1557,13 +1269,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">4<br>
           </td>
-          <td valign="top">R60FLAG. When bit set 1 R61 will use R60 to
-            perform attitude maneuver. When bit set 0 R61 will compute
-            desired gimbal angles and determine whether R60 maneuver is
-            necessary. Bit is set and reset in P20 initialization and
-            P20 restart (P20 in background when targeting program is
-            selected via V37). Tested in CRS 61.1. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">3<br>
@@ -1592,12 +1298,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">MGLVFLAG. Bit used by MIDGIM subroutine. Set
-            0 if middle gimbal angle of the active vehicle to the input
-            delta velocity vector was computed. Set 1 if the input delta
-            velocity vector was converted to local vertical coordinates
-            of the active vehicle. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">1<br>
@@ -1619,7 +1320,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>43a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 6.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1663,23 +1363,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">13<br>
           </td>
-          <td rowspan="1" colspan="1" valign="top">Bit used for two
-            distinct functions, hence assigned two separate mnemonics.<br>
-            <br>
-            ENTRYDSP. Set 1 in P62 after N61 responded to, and actuates
-            the entry current display nouns when the entry exit code
-            sequence is used (set 0 to suppress display). Set 0 in P65
-            before flashing display N69 is activated. Set 1 in P65 after
-            N69 is responded to with a PROCEED, Set 1 at start of P67 if
-            came from P65 with flashing display N69 still active.<br>
-            <br>
-            STRULLSW. A 1 indicates steering and time to engine cutoff
-            computations should be permitted (STEERSW set 1) 2 seconds
-            after ignition. When 0 STEERSW not touched. Cleared to 0 for
-            the V97E response (R40) if re-ignition is for impulsive
-            burn. Set 1 at ignition if non-impulsive burn (steering to
-            be done). Cleared to 0 at re-ignition for impulsive burn. <br>
-          </td>
+          <td rowspan="1" colspan="1" valign="top">(Differs by software
+            version) </td>
         </tr>
         <tr>
           <td valign="top">12<br>
@@ -1732,24 +1417,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">8<br>
           </td>
-          <td valign="top">Bit used for three distinct functions, hence
-            assigned three separate mnemonics. <br>
-            <br>
-            KNOWNFLG. Always 1 if earth is sphere of influence. Set as
-            follows if moon is sphere of influence: Set to 1 in P22 if
-            DSKY input indicates that landmark is known (octal digit #1
-            is odd in R2 for the V05N70 display), and set 0 in same
-            routine if DSKY input indicates that landmark is "unknown"
-            (octal digit #1 is even).<br>
-            <br>
-            EGSW. Bit initialized to 0 near the start of P63 and
-            subsequently set to 1 when P67 is started (the "final phase”
-            of the entry computations). Used by TARGETING for range
-            prediction.<br>
-            <br>
-            R57FLAG. A 1 means do not do optics calibration. A 0 means
-            do optics calibration. Set 0 or 1 and tested within P23. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">7<br>
@@ -1797,26 +1465,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top">3<br>
           </td>
-          <td valign="top">Bit used for two distinct functions, hence
-            assigned two separate mnemonics.<br>
-            <br>
-            .05GSW. Bit initialized to 0 in P62 shortly before start of
-            00041<sub>8</sub> checklist display, and also near the start
-            of P63. Bit set to 0 when sensed drag in P64 becomes less
-            than 0.05g and set to 1 when it is (P63 too) 0.05g or more.
-            Bit used in entry DAP to control nature of computations
-            which are performed.<br>
-            <br>
-            NTARGFLG. A 1 means astronaut did overwrite delta velocity.
-            A 0 means astronaut did not overwrite delta velocity. Set to
-            0 in subroutine S34/35.5 (used by P34, P35, P74 and P75)
-            initially before displaying Noun 81. Upon receipt of new
-            data (recycle) for Noun 81, NTARGFLG is set to 1 before
-            recycling to display the new data. Upon proceed response to
-            Noun 81 when NTARGFLG has been set to 1 subroutine S34/35.3
-            is called to compute the new delta velocity in reference
-            coordinates and the new target position. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top">2<br>
@@ -1848,7 +1497,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>43b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 7.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2078,7 +1726,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>44a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 8.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2092,18 +1739,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">15<br>
           </td>
-          <td valign="top">RPQFLAG. Internal flag in integration to
-            indicate if primary body to secondary body position vector
-            (RPQ) was computed; a 0 indicates RPQ was computed, a 1
-            indicates RPQ was not computed. RPQ is computed only when
-            MIDFLAG is set 1. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">14<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">13<br>
@@ -2116,56 +1757,27 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top">CMOONFLG. Indicates origin of "permanent" CSM
-            State Vector; 1 means lunar-centered, 0 means
-            earth-centered. Always set to 0 or 1 depending on MOONFLAG
-            when permanently updating the CSM state vector. Set to 0 in
-            fresh start. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top">LMOONFLG. Indicates origin of "permanent" LM
-            State Vector; 1 means lunar-centered, 0 means
-            earth-centered. Always set to 0 or 1 depending on MOONFLAG
-            when permanently updating the LM state vector. Set to 0 in
-            fresh start. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">10<br>
           </td>
-          <td valign="top">ADVTRK. A 1 means use auto optics to drive
-            optics to a LMK on advanced ground track, A 0 means use auto
-            optics to drive to star, LM or landmark. Set 1 when entering
-            auto optics via ADVORB (advanced orbit). Set 0 when entering
-            auto optics via R52. Tested in each computational cycle of
-            auto optics. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">9<br>
           </td>
-          <td valign="top">P39/79 SW. A 1 means P39/P79 operating. A 0
-            means P38/P78 operating. Bit set 1 when P39 or P79 is
-            selected. Set 0 when P38 or P78 is selected. Bit tested in
-            code shared by P38/P78, P39/P79 to determine points of
-            return upon execution completion. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">8<br>
           </td>
-          <td valign="top">SURFFLAG. Indicates whether LM is on lunar
-            surface. Set and reset manually with extended verbs 44 and
-            45 respectively. Tested in P00 periodic integration and if
-            set, LM state vector is not integrated. Also tested in
-            orbital integration and if set, the planetary inertial
-            orientation routine is used to transform RLS to reference
-            coordinate system. Lunar velocity is also computed in
-            reference coordinate system. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">7<br>
@@ -2246,14 +1858,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">3<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">2<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">1<br>
@@ -2271,7 +1881,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>44b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>FLAGWORD 9.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2298,25 +1907,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">14<br>
           </td>
-          <td valign="top">V67FLAG. Set 0 whenever an extended verb V67
-            is taken. This verb displays the RMS position and velocity
-            errors from the W matrix using a V06N99. If the astronaut
-            then changes these values the bit is set 1. The bit is
-            tested in the V67CALL routine: a 1 means compute new initial
-            W-Matrix values for either rendezvous, orbital, or cislunar
-            navigation; a 0 means do not compute these values.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">13<br>
           </td>
-          <td valign="top">V82EMFLG. A 1 indicates moon vicinity. A 0
-            indicates earth vicinity. Set 1 or 0 by R30 according to
-            whether state vectors are moon- or earth-centered. Bit
-            tested by SR30.1 when called by R30 to compute PERIGEE,
-            APOGEE radius and PERIGEE, APOGEE height above launch pad or
-            lunar landing site. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">12<br>
@@ -2338,22 +1934,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top">V94FLAG, A 1 indicates Extended Verb 94 is
-            allowed. A 0 indicates Extended Verb 94 not allowed. Set 1
-            before P23 enters R52 so astronaut may re-maneuver
-            spacecraft LLOS before marking. Set 0 after mark so
-            spacecraft does not re-maneuver after that time. Tested at
-            VERB94. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">10<br>
           </td>
-          <td valign="top">SAVECFLG. A 1 means P23 display code used and
-            data stored after mark is done. A 0 means P23 display code
-            used and data stored before mark is done. Used in unpacking
-            of N70/N71. <br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">9<br>
@@ -2377,8 +1963,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">7<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td valign="top" align="center">6<br>
@@ -2458,7 +2043,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     <p> </p>
     <p> </p>
     <h1><a name="50"></a>45a,45b,46a,46b,47a,47b,48a,48b,49a,49b,50a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
       indicate the status of the DSKY displays.&nbsp; If bit 15 through
       12 are 0001, the next 11 bits will indicate the actual status of
@@ -2707,6 +2291,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
 
 
 
+
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -2893,7 +2479,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
 │   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
 └───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
     <h1>50b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>DSPTAB+11D.&nbsp; This register drives relays for the display
       lights.&nbsp; The bit assignments are:<br>
     </p>
@@ -2980,7 +2565,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       on.<br>
     </p>
     <h1>51</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
       elapsed time.&nbsp; Used for all timing while CMC is on.&nbsp;
       Zeroed at liftoff and incremented by one bit per
@@ -2988,107 +2572,31 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       by Extended Verb 73<br>
       (P27). Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
-    <h1>52</h1>
-    LANDMARK LATITUDE is the latitude of the landmark which P22 is
-    updating, scaled degrees/360. It may be either earth-centered or
-    moon-centered. If, upon entry of P22, CMOONFLG (Flagword 8, bit 12)
-    equals zero, the coordinate system is earth-centered. Conversely,
-    the coordinate system will be moon-centered if CMOONFLG equals one.
-    It does not change within P22. The landmark may be either known or
-    unknown. If known, it may be either entered by the astronaut, or
-    obtained from the item, RLS (lunar landing site). The range of
-    values is -.25 revolutions ≤ LAT ≤ .25 revolutions. The latitude is
-    computed for known landmarks only at the start of P22. At the
-    completion of P22, the latitude is computed for all landmarks and
-    contains the updated value. Item LANDLAT occupies the same locations
-    as LAT and is identical in meaning. LANDLAT is the item used by noun
-    89 to display landmark latitude.<br>
-    <h1>53</h1>
-    <p>LANDMARK LONGITUDE is the longitude of the landmark which P22 is
-      updating, scaled degrees/360. The range of values is -.5
-      revolutions ≤ LONG &lt; .5 revolutions. It may be either
-      earth-centered or moon-centered. If, upon entry of P22, CMOONFLG
-      (Flagword 8, bit 12) equals zero, the coordinate system is
-      earth-centered. Conversely, the coordinate system will be
-      moon-centered if CMOONFLG equals one. The longitude is computed
-      for known landmarks only at the start of P22. At the completion of
-      P22, the longitude is computed for all landmarks and contains the
-      updated value.<br>
-    </p>
-    <h1>54</h1>
-    <p>LANDMARK ALTITUDE is the altitude of the landmark above the
-      Fischer Ellipsoid for earth orbit and above the mean lunar radius
-      for moon orbit, scaled meters/2<sup>29</sup>. Tested values have
-      varied between +2000 to -2000 meters. It may be either
-      earth-centered or moon-centered. If, upon entry of P22, CMOONFLG
-      (Flagword 8, bit 12) equals zero, the coordinate system is
-      earth-centered. Conversely, the coordinate system will be
-      moon-centered if CMOONFLG equals one. The altitude is computed for
-      known landmarks only at the start of P22. At the completion of
-      P22, the altitude is computed for all landmarks and contains the
-      updated value.<br>
-    </p>
-    <h1>55-58</h1>
-    <p>SPARES.&nbsp; Same description as word 37 of the Program 22 list.<br>
-    </p>
-    <blockquote><font size="-1">I.e.: "SPARES. The first half of each
-        spare contains 00000<sub>8</sub>. The second half is ARUPT (the
-        contents of the accumulator when the telemetry interrupt was
-        recognized)."</font></blockquote>
     <h1><a name="60"></a>59a,59b,60a</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as words 9a,9b,10a of Powered List.</i><br>
-    </p>
-    <p>CDUX (outer gimbal) CDUY(inner gimbal) CDUZ (middle
-      gimbal):&nbsp; The actual values of the IMU CDU angles.&nbsp; Each
-      register is an unsigned 15-bit fraction, scaled degrees/360, and
-      is updated by counter interrupts.&nbsp; A middle gimbal angle
-      greater than 70 degrees will light the Gimbal Lock lamp on the
-      DSKY. Whenever the magnitude of the MGA exceeds 85 degrees the ISS
-      stabilization loop will be disabled except during Average-G when
-      the "config" window of DAPDATR1 indicates Saturn
-      configuration.&nbsp; As a result, the CDUZ register should
-      maintain values that correspond to middle gimbal angles between
-      -70 degrees and +70 degrees.<br>
-    </p>
+    CDUX (outer gimbal) CDUY(inner gimbal) CDUZ (middle gimbal):&nbsp;
+    The actual values of the IMU CDU angles.&nbsp; Each register is an
+    unsigned 15-bit fraction, scaled degrees/360, and is updated by
+    counter interrupts.&nbsp; A middle gimbal angle greater than 70
+    degrees will light the Gimbal Lock lamp on the DSKY. Whenever the
+    magnitude of the MGA exceeds 85 degrees the ISS stabilization loop
+    will be disabled except during Average-G when the "config" window of
+    DAPDATR1 indicates Saturn configuration.&nbsp; As a result, the CDUZ
+    register should maintain values that correspond to middle gimbal
+    angles between -70 degrees and +70 degrees.<br>
     <h1>60b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as word 10b of Powered List.</i></p>
-    <p>CDUT.&nbsp; The optics trunnion angle CDU, scaled
-      (degrees-19.7754)/45 (two's complement).&nbsp; The angle varies
-      from -19.775° to +45°.<br>
-    </p>
+    CDUT.&nbsp; The optics trunnion angle CDU, scaled
+    (degrees-19.7754)/45 (two's complement).&nbsp; The angle varies from
+    -19.775° to +45°.<br>
     <h1>61-63</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as words 11-13 of Powered List.</i></p>
-    <p>ADOTs (if RCS DAP on) or OGARATE and OMEGABs (if TVC DAP
-      on).&nbsp; ADOTs are the RCS DAP-measured vehicle body rates (i.e.
-      the outputs from the RCS DAP rate filter), roll, pitch and yaw,
-      about the control axes.&nbsp; These axes are aligned with the RCS
-      jet quads and, consequently, are rotated, with respect to the NAV
-      base axes, -7.25 degrees about +X.&nbsp; ADOTs are scaled,
-      (degrees/second)/450.&nbsp; OGARATE, in word 11, is the measured
-      roll rate obtained by back-differencing the outer gimbal angle
-      (OGA) measurements every 0.5 second, scaled (rev/sec)/2<sup>-4</sup>.&nbsp;
+    ADOTs (if RCS DAP on) or OGARATE and OMEGABs (if TVC DAP on).&nbsp;
+    ADOTs are the RCS DAP-measured vehicle body rates (i.e. the outputs
+    from the RCS DAP rate filter), roll, pitch and yaw, about the
+    control axes.&nbsp; These axes are aligned with the RCS jet quads
+    and, consequently, are rotated, with respect to the NAV base axes,
+    -7.25 degrees about +X.&nbsp; ADOTs are scaled,
+    (degrees/second)/450.&nbsp; OGARATE, in word 11, is the measured
+    roll rate obtained by back-differencing the outer gimbal angle (OGA)
+    measurements every 0.5 second, scaled (rev/sec)/2<sup>-4</sup>.&nbsp;
 
 
 
@@ -3097,716 +2605,20 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
 
 
 
-      This quantity will normally be near zero magnitude but a roll jet
-      failed-on could produce 2-3°/sec rates.&nbsp; OMEGABs in words 12
-      and 13, are the measured attitude rates about the pitch and yaw
-      body axes, obtained by transforming the back-differenced CDU
-      readings taken each DAP sample period.&nbsp; OMEGAYB is computed
-      each pitch DAP pass; OMEGAZB is computed each yaw DAP pass.&nbsp;
-      The first OMEGAZB value when the TVC DAP is started (or after a
-      hardware restart) is measured over 1.5 DAP sample periods.&nbsp;
-      The time sharing and scaling for OMEGABs are the same as for the
-      OMEGACs, described in words 85-87 of the Powered List.&nbsp; The
-      maximum OMEGAB rate will be less than 5 deg/sec.<br>
-    </p>
-    <h1>64a,64b,65a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as words 14a,14b,15a of Powered List.</i></p>
-    <p>AKs.&nbsp; The X, Y and Z (roll, pitch and yaw, respectively)
-      attitude errors used to drive the FDAI display, scaled
-      degrees/180.&nbsp; The roll attitude error register (AK+0) is
-      loaded with one-quarter the "raw" value during P11 and entry
-      programs while Entry DAP is running, to increase the scale by a
-      factor of four.&nbsp; The attitude errors are about the control
-      axes for RCS DAP and about the body axes for TVC and Entry
-      DAP.&nbsp; Zeros in bits 15, 14 and 13 of DAPDATR1 and a one in
-      bit 2 of Flagword 6 indicate that the Entry DAP is active.&nbsp;
-      During RCS DAP operation the particular error quantities depend
-      upon the display mode selected, as follows:&nbsp; MODE 1 (selected
-      by V61) results in Autopilot phase-plane errors; MODE 2 (selected
-      in V62) results in total attitude errors with respect to the
-      angles in N22; MODE 3 (selected by V63) results in total astronaut
-      attitude errors with respect to the angles in N17.&nbsp; In MODE 1
-      the errors should generally remain less than the attitude
-      deadband, ADB, (either 0.5 degree or 5 degrees as selected in
-      DAPDATR1).&nbsp; The values are calculated every 200 ms during RCS
-      DAP operation, whereas in TVC DAP operation, AK is updated every
-      0.5 second in TVC EXECUTIVE with the complement of OGAERROR, and
-      AK 1 and AK 2 are updated every TVC DAP sample period (in PCOPY
-      and YCOPY) with the respective values of ERRBTMP.&nbsp; The error
-      needles themselves, however, are updated with AKs only every
-      one-half second on a call from TVC EXECUTIVE.&nbsp; Also, with TVC
-      DAP, AK will normally have a magnitude of less than 5 degrees but
-      a jet failed-on could produce a diverging roll attitude.&nbsp; AK1
-      and AK2 will normally have peak values of up to 3 degrees,
-      converging to 0-1 degrees with time.<br>
-    </p>
-    <h1>65b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as word 15b of Powered List.</i></p>
-    <p>RCSFLAGS.&nbsp; A cell whose individual bits are used in
-      monitoring the RCS DAP<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15<br>
-          </td>
-          <td valign="top">Bit set 1 to indicate a high rate (2 deg/sec)
-            auto maneuver in progress.&nbsp; Bit is reset to 0 to
-            indicate that a high-rate auto maneuver is not in progress.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">14<br>
-          </td>
-          <td valign="top">Bit is set to 1 if rate estimates are not
-            good and a repeat of the rate filter initialization is
-            required.&nbsp; Bit is reset to 0 if the G&amp;N is in
-            control and the IMU data is usable.&nbsp; Approximately 1
-            second after bit is reset to 0 the rate filter
-            initialization is complete.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">13<br>
-          </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the roll axis.&nbsp; Bit is reset to 0 if the
-            rate damping on the roll axis has been completed.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">12<br>
-          </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the pitch axis.&nbsp; Bit is reset to 0 if the
-            rate damping has been completed on the pitch axis.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
-          </td>
-          <td valign="top">Bit set 1 if the rate damping has not been
-            completed on the yaw axis.&nbsp; Bit is reset to 0 if the
-            rate damping has been completed on the yaw axis. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10,9<br>
-          </td>
-          <td valign="top">If either or both bits have been set to 1,
-            there has been a change in the RHC roll command since the
-            last DAP cycle.&nbsp; If both bits are reset to 0, it
-            implies that no change in the RHC roll command has occurred
-            since the last DAP cycle.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8,7<br>
-          </td>
-          <td valign="top">If either or both bits have been set to 1,
-            there has been a change in the RHC yaw command since the
-            last DAP cycle.&nbsp; If both bits are reset to 0, it
-            implies that no change in the RHC yaw command has occurred
-            since the last DAP cycle. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6,5<br>
-          </td>
-          <td valign="top">If either or both bits have been set to 1,
-            there has been a change in the RHC pitch command since the
-            last DAP cycle.&nbsp; If both bits are reset to 0, it
-            implies that no change in the RHC pitch command has occurred
-            since the last DAP cycle. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top">Bit set 1 indicates that the AK values should
-            be updated.&nbsp; Bit is reset to 0 to indicate that the
-            NEEDLE DRIVE routine should be processed with the AK values
-            which have been previously acquired.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3,2<br>
-          </td>
-          <td valign="top"> If Bit 3, Bit 2 = 11<sub>2</sub> or 10<sub>2</sub>,
-            it is necessary to follow the initialization path of the
-            NEEDLE DRIVE routine.<br>
-            <br>
-            If Bit 3, Bit 2 = 01<sub>2</sub>, it is necessary to follow
-            pass 2 of the NEEDLE DRIVE routine.<br>
-            <br>
-            If Bit 3, Bit 2 = 00<sub>2</sub>, it is necessary to follow
-            pass 3 and greater paths of the NEEDLE DRIVE routine.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top">Bit is set 1 to indicate that the initial
-            pass path in the T6 program should not be followed.&nbsp;
-            Bit is reset to 0 if the T6 program should be initialized.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p> </p>
-    <h1>66a,66b,67a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as words 16a,16b,17a of Powered List.</i></p>
-    <p>THETADX, THETADY, THETADZ.&nbsp; During normal RCS DAP operation,
-      when the CMC Mode switch is in AUTO or HOLD and there are no RHC
-      commands, these registers contain the desired current, (i.e., of
-      this DAP cycle opposed to final) roll, pitch, and yaw CDU angles,
-      treated as 15-bit unsigned fractions and scaled degrees/360.&nbsp;
-      These quantities are used in the computation of phase plane
-      attitude errors and are calculated as follows:<br>
-    </p>
-    <ol>
-      <li>During automatic maneuvers they are updated every 100
-        milliseconds.</li>
-      <li>During attitude hold they are constants (the desired CDU
-        angles to be held).</li>
-      <li>At the end of manual rate maneuvers, after rate damping is
-        complete, THETADX, Y &amp; Z are set to the current CDU angles.</li>
-      <li>During manual rate maneuvers and then in FREE mode the
-        registers are not updated.</li>
-    </ol>
-    <h1>67b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p><i>Same as word 17b of Powered List.</i></p>
-    Garbage.<br>
-    <p> </p>
-    <h1>68a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p>RSBBQ. When a hardware "restart" occurs, this register is loaded
-      with the setting of the BBANK portion of the calling address + 1
-      and also Superbank information which is in channel 7.<br>
-    </p>
-    <h1>68b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p>RSBBQ+1. Loaded with the setting of the Q-register when a
-      hardware restart occurs.<br>
-    </p>
-    <h1><a name="70"></a>69a,69b,70a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, and the fact that these entries are no longer
-        used in the Colossus 3 downlists, the following description is
-        from words 61a,61b,62a of the Luminary 1C GSOP. The item names
-        are consistent with Colossus 1&amp;1A source code, but their
-        textual description may not be fully accurate.</i><br>
-    </p>
-    CADRFLSHs.&nbsp; A set of three single-precision erasable memory
-    cells used to retain return address information from the display
-    interface routine.&nbsp; CADRFLSH contains the FCADR of the last
-    priority display request, CADRFLSH+1 the FCADR of the last
-    mark/extended verb display, and CADRFLSH+2 contains the FCADR for
-    the last normal display.&nbsp; Octal quantities.
-    <h1>70b,71a,71b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p>FAILREG's. A set of three single-precision cells used to retain
-      alarm pattern code information. They are all reset to zero by a
-      Fresh Start. FAILREG and FAILREG+1 are also reset to zero by use
-      of the "ERROR RESET" keycode. FAILREG contains the first alarm
-      code received after the "ERROR RESET", FAILREG+1 contains the
-      second, and FAILREG+2 will always contain the most recent alarm
-      code. Octal quantities.<br>
-    </p>
-    <h1>72a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p>SHAFT. The optics CDU shaft angle.&nbsp; This register is an
-      unsigned 15-bit fraction scaled, degrees/360. The angle varies
-      ±180°.<br>
-    </p>
-    <h1>72b,73a,73b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p><i><b>Warning:</b></i><i> Due to a missing page from the Colossus
-        1&amp;1A GSOP, the following description is from the Colossus 3
-        GSOP. The item names are consistent with Colossus 1&amp;1A
-        source code, but their textual description may not be fully
-        accurate.</i><br>
-    </p>
-    <p>PIPA's. The accumulation of output pulses from the X,Y, and Z
-      accelerometers (a measure of the velocity changes), scaled
-      (centimeters/second)/(5.85 × 2<sup>14</sup>). These registers are
-      zeroed by PIPUSE (called by LASTBIAS which is called by PREREAD at
-      the start of AVEG). They are then read and zeroed every two
-      seconds by READACCS (or REREADAC) throughout AVEG.<br>
-    </p>
-    <h1>74a</h1>
-    <p> </p>
-    <p>The number of valid Landing site marks, from one to five, which<br>
-      are stored in the SVMRKDAT table, scaled 2<sup>-14</sup>. This
-      item is<br>
-      computed by R53 and left in QPRET. P22 moves it from QPRET<br>
-      to 8NN. This quantity is computed once per operation of P22 and<br>
-      does not change. <br>
-    </p>
-    <h1>74b</h1>
-    <p>Garbage. This register is used by S22LOC which indicates the
-      address, within the SVMRKDAT table, of the present set of mark
-      data. <br>
-    </p>
-    <p> </p>
-    <h1>75a</h1>
-    <p><i>Same as word 77a of the Powered List.<br>
-      </i></p>
-    <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">INTFLAG. A 1 indicates that some program or
-            routine has called INTSTALL and is presumably in the process
-            of integrating. Other programs calling INTSTALL will wait
-            until this bit is reset to 0. A 0 indicates that no program
-            or routine is currently using integration. Set 1 by
-            INTSTALL. Set 0 by INTWAKE. A hardware or software restart
-            sets this bit to 0. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">REINTFLG. A 1 indicates that the routine
-            currently using INTSTALL is to be restarted. A 0 indicates
-            that no restartable integration is in progress. Programs
-            which have restart points during integration set this bit to
-            1. INTWAKE sets this bit to 0. Bit is untouched by hardware
-            and software restarts thus retaining INTSTALL for
-            restartable programs.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>75b</h1>
-    <p><i>Same as word 77b of the Powered List.<br>
-      </i></p>
-    <p>FLAGWORD 11.&nbsp; Bit assignments are as follows:<br>
-    </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top">15<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">14<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">13<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">11<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">10<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">9<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">8<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">7<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">6<br>
-          </td>
-          <td valign="top">Not used. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">5<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">4<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">3<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-        <tr>
-          <td valign="top">2<br>
-          </td>
-          <td valign="top">Not used.</td>
-        </tr>
-        <tr>
-          <td valign="top">1<br>
-          </td>
-          <td valign="top">Not used. </td>
-        </tr>
-      </tbody>
-    </table>
-    <p> </p>
-    <p> </p>
-    <h1>76-78</h1>
-    LUNAR LANDING SITE POSITION VECTOR (X, Y, Z) measured in moon-fixed
-    coordinates from the center of the moon to the surface of the moon
-    at the landing site, scaled meters /2<sup>27</sup>. It is used in
-    lunar orbits only and must be selected by the astronaut using nouns
-    70 or 71. If selected by the astronaut, it is used at the start of
-    P22 to compute the initial landmark vector (<u>R</u><sub>L</sub>)
-    and then updated at the end of P22 as a result of data computed from
-    the results of astronaut-acquired sighting marks. <br>
-    <h1> 79</h1>
-    SPARE. Same description as word 31 of the Powered List. <br>
-    <blockquote><font size="-1">I.e., "The first half of each spare
-        contains 00000<sub>8</sub>. The second half is ARUPT (the
-        contents of the accumulator when the telemetry interrupt was
-        recognized)."</font><br>
-    </blockquote>
-    <p> </p>
-    <h1><a name="80"></a>80a</h1>
-    <p><i>Same as Powered List.</i><br>
-    </p>
-    <p>OPTMODES, a cell whose individual bits are used to control the
-      performance of optics functions within the "T4RUPT" package. Set
-      to 00130<sub>8</sub> (bits 7, 5, 4 = 1) as part of a fresh start;
-      a restart preserves the present values of the bits 9, 5, 4, while
-      setting bit 7 to 1 and zeroing the remaining bits (15-10, 8, 6,
-      3-1). Word is updated once every 0.48 seconds, about 0.12 seconds
-      before the interrupt that updates IMODES30 &amp; IMODES33. <br>
-    </p>
-    <table cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-        <tr>
-          <th valign="top"><u>Bit</u><u><br>
-            </u></th>
-          <th valign="top" align="center"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">15-11<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">10<br>
-          </td>
-          <td valign="top">Bit set 1 to indicate that zeroing of optics
-            completed since last fresh start or restart (both of which
-            set the bit 0). If an attempt is made to drive the optics
-            and this bit is found to be zero, alarm 0120<sub>8</sub> is
-            generated (but computation proceeds).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">9<br>
-          </td>
-          <td valign="top">Bit set 1 if optics switched from computer
-            control mode (while being driven, i.e. "coarse aligned") to
-            another mode. Value used when switch back to computer
-            control mode to re-enable driving. Bit set 0 as part of
-            fresh start and when optics system released (at end of
-            marking); a restart preserves the bit (see, however, bit
-            10). <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">8<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">7<br>
-          </td>
-          <td valign="top">Last sampled value of channel 30 bit 7 (0 if
-            an optics CDU fail indication has been generated by the
-            optics CDU hardware). If bit 2 of this word is 0, a Tracker
-            alarm (bit 8 of DSPTAB+11) is generated if this bit has a 1
-            to 0 transition. Bit set 1 by a fresh start or restart.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">6<br>
-          </td>
-          <td valign="top">Not assigned, hence expected to remain 0. </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">5<br>
-          </td>
-          <td valign="top"><a name="OPTMODES_5"></a>Last sampled value
-            of channel 33 bit 5 (0 if optics mode switch set to computer
-            control).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">4<br>
-          </td>
-          <td valign="top"><a name="OPTMODES_4"></a>Last sampled value
-            Of channel 33 bit 4 (0 if optics mode switch set to zero
-            optics). If bits 5-4 = 11<sub>2</sub>, this means that
-            optics mode switch set to manual mode.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">3<br>
-          </td>
-          <td valign="top">Bit set 1 when optics mode switch changed
-            from manual or computer control mode to zero optics mode, to
-            indicate that zeroing of the optics is in progress. If bit
-            is 1, then a switch out of zero optics mode will cause alarm
-            0116<sub>8</sub> to be generated (if switched to manual, a
-            "grace period" of about 5.3 seconds is provided before the
-            optics-zeroing time counter is reset, during which time a
-            switch back to optics zeroing can be made). Bit remains 1
-            for about 16.2 seconds, and is then reset to 0 (at same time
-            that bit 10 of this word is set 1, and bits 2-1 of this word
-            set 0).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">2<br>
-          </td>
-          <td valign="top">Bit set 1 to inhibit generation of Tracker
-            alarm (bit 8 of DSPTAB+11) if bit 7 of this word goes from 1
-            to 0. Bit set 1 at the same time as bit 3, and reset 0 at
-            end of wait (again at the same time as bit 3). This bit does
-            not affect the setting of bit 8 of DSPTAB+11 due to
-            excessive IMU CDU change after an optics mark (which also
-            produces alarm 0121<sub>8</sub>). <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">1<br>
-          </td>
-          <td valign="top">Bit set 1 to indicate that end of optics
-            zeroing delay will occur in 0.4 seconds (remains 1 for that
-            length of time, and then is reset to 0 at the same time as
-            bits 3-2). If bit is 1, generation of alarm 0116<sub>8</sub>
-            (see bit 3) is inhibited. Since updating of other bits (i.e.
-            bit 5-4) of this word done only once every 0.48 seconds,
-            this bit has negligible effect on program performance (since
-            start of 0.4 second period is the same as one of the 0.48
-            second samples). <br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>80b</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p>HOLDFLAG. A multiple purpose switch which is used for
-      establishing the control reference of the autopilot. It has the
-      following three states:<br>
-    </p>
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <th valign="top"><u>State</u><u><br>
-            </u></th>
-          <th valign="top">&nbsp;&nbsp;<u> </u><u><br>
-            </u></th>
-          <th valign="top"><u>Meaning</u><u><br>
-            </u></th>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(+)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Sample the CDU angles and store in THETADX,
-            THETADY, and THETADZ before resuming attitude hold and
-            resetting HOLDFLAG to (+0).<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(+0)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Remain in attitude hold about previously
-            established reference angles, THETADX, THETADY and THETADZ.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">(-)<br>
-          </td>
-          <td valign="top"><br>
-          </td>
-          <td valign="top">Enable automatic steering.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1>81a</h1>
-    <p><i>Same as Powered List.</i></p>
+
+
+    This quantity will normally be near zero magnitude but a roll jet
+    failed-on could produce 2-3°/sec rates.&nbsp; OMEGABs in words 12
+    and 13, are the measured attitude rates about the pitch and yaw body
+    axes, obtained by transforming the back-differenced CDU readings
+    taken each DAP sample period.&nbsp; OMEGAYB is computed each pitch
+    DAP pass; OMEGAZB is computed each yaw DAP pass.&nbsp; The first
+    OMEGAZB value when the TVC DAP is started (or after a hardware
+    restart) is measured over 1.5 DAP sample periods.&nbsp; The time
+    sharing and scaling for OMEGABs are the same as for the OMEGACs,
+    described in words 85-87 of the Powered List.&nbsp; The maximum
+    OMEGAB rate will be less than 5 deg/sec.<br>
+    <h1><a name="80"></a>81a </h1>
     <p>LEMMASS. The current mass of the LM vehicle, scaled kilograms/2<sup>16</sup>.
       This is a pad load erasable and is not changed in normal use. The
       astronaut can change it, however, as part of the normal DAPDATA
@@ -3814,7 +2626,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     </p>
     <p> </p>
     <h1>81b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>CSMMASS. The current weight of the CSM vehicle, scaled
       kilograms/2<sup>16</sup>. It is a pad load erasable which can be
       altered by the astronaut in R03 (V48). It is changed automatically
@@ -3822,7 +2633,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       of decrementing the parameter by 290 kg. (638 lbs). <br>
     </p>
     <h1>82a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>DAPDATR1.&nbsp; Information concerning the RCS-CSM DAP
       interfaces:<br>
     </p>
@@ -3989,13 +2799,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">3&nbsp; 4.0 degrees/second<br>
+          <td valign="top">3&nbsp; 2.0 or 4.0 degrees/second, depending
+            on software version<br>
           </td>
         </tr>
       </tbody>
     </table>
-    <h1>82b</h1>
-    <p><i>Same as Powered List.</i></p>
+    <h1>82b<br>
+    </h1>
     <p>DAPDATR2.&nbsp; Information concerning the RCS-CSM DAP
       interfaces:<br>
     </p>
@@ -4057,32 +2868,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         </tr>
       </tbody>
     </table>
-    <h1>83a,83b,84a</h1>
-    <p><i>Same as Powered List.</i></p>
-    <p>ERRORX, ERRORY, ERRORZ. The RCS DAP phase plane (roll, pitch,
-      yaw) attitude errors scaled degrees/180. During steady state
-      operation the magnitude of ERRORX, Y, and Z should be less than
-      the attitude deadband, ADB, (either 0.5 deg. or 5 deg.). When the
-      CMC mode switch is in AUTO or HOLD, a magnitude greater than the
-      ADB which exists for long intervals without diminishing at the
-      rate as specified in DAPDATR1 would be an indication of bad RCS
-      DAP performance. The RCS control axes, with which these errors are
-      concerned, are rotated, with respect to the body axes, by -7.25
-      degrees about the +X axis. The error values are calculated: <br>
-    </p>
-    <ol>
-      <li>During RCS DAP operation with CMC MODE switch in AUTO or HOLD,
-        every 100 millisecs.</li>
-      <li>During RCS DAP operation with CMC MODE switch in FREE — not
-        updated.</li>
-    </ol>
-    <h1>84b</h1>
-    <p><i>Same as Powered List.</i></p>
-    Garbage. THETADX, which is described in word 16a of the Powered
-    Downlist will appear here. <br>
-    <p> </p>
     <h1>85-87</h1>
-    <p><i>Same as Powered List.</i></p>
     WBODYs or OMEGACs (when TVC DAP is on). WBODYs are the desired
     angular body rates (roll, pitch, yaw) about the control axes when
     RCS DAP is on, scaled (degrees/second)/450. The RCS DAP control axes
@@ -4097,38 +2883,25 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     <table cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <td nowrap="nowrap" valign="bottom" align="center">Bits 15, 14<br>
+          <td valign="bottom" align="center">Bits 15, 14<br>
             Flagword 6<br>
           </td>
-          <td nowrap="nowrap" valign="bottom" align="center">&nbsp;
-            &nbsp; <br>
+          <td valign="bottom" align="center">&nbsp; &nbsp; <br>
           </td>
-          <td nowrap="nowrap" valign="bottom" align="center">Bits 15,
-            14, 13<br>
+          <td valign="bottom" align="center">Bits 15, 14, 13<br>
             DAPDATR1<br>
           </td>
-          <td nowrap="nowrap" valign="bottom" align="center">&nbsp;&nbsp;
-
-            <br>
-          </td>
-          <td nowrap="nowrap" valign="top" align="center">Bit 9<br>
-            Flagword 9<br>
-          </td>
-          <td valign="top"><br>
+          <td valign="bottom">&nbsp;&nbsp; <br>
           </td>
           <td valign="bottom"><br>
           </td>
         </tr>
         <tr>
-          <td nowrap="nowrap" valign="middle" align="center">01<br>
+          <td valign="middle" align="center">01<br>
           </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
+          <td valign="middle" align="center"><br>
           </td>
-          <td nowrap="nowrap" valign="middle" align="center">XXX<br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center">X<br>
+          <td valign="middle" align="center">XXX<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -4136,47 +2909,16 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
           </td>
         </tr>
         <tr>
-          <td nowrap="nowrap" valign="middle" align="center">10<br>
+          <td valign="middle" align="center">10<br>
           </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
+          <td valign="middle" align="center"><br>
           </td>
-          <td nowrap="nowrap" valign="middle" align="center">001<br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center">X<br>
+          <td valign="middle" align="center">001<br>
           </td>
           <td valign="middle"><br>
           </td>
           <td valign="middle">OMEGACs for CSM alone scaled
             (rev/sec)/12.5.<br>
-          </td>
-        </tr>
-        <tr>
-          <td nowrap="nowrap" valign="middle" align="center">10<br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center">010<br>
-            110<br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center"><br>
-          </td>
-          <td nowrap="nowrap" valign="middle" align="center">0<br>
-          </td>
-          <td valign="middle"><br>
-          </td>
-          <td valign="middle">OMEGAC: for pre-switchover CSM/LM
-            DAP.&nbsp; Scaled (rev/sec/<br>
-            ┌&nbsp; &nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┐-1<br>
-            │ 2&nbsp; (ETVCDT/2)│<br>
-            │2&nbsp; ───────────│<br>
-            │&nbsp;&nbsp; &nbsp; &nbsp; 100&nbsp;&nbsp;&nbsp; │<br>
-            └&nbsp; &nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┘<br>
-            where ETVCDT/2 is pad-loaded erasable integer (1/2 the
-            sample interval in centiseconds)<br>
           </td>
         </tr>
         <tr>
@@ -4187,35 +2929,27 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
           <td valign="middle" align="center">010<br>
             110<br>
           </td>
-          <td valign="middle" align="center"><br>
-          </td>
-          <td valign="middle" align="center">1<br>
-          </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle">OMEGACs for post-switchover CSM/LM
-            DAP.&nbsp; Scaled (rev/sec)/6.25.<br>
+          <td valign="middle">OMEGACs for CSM/LM DAP. Scaled
+            (rev/sec)/6.25.<br>
           </td>
         </tr>
       </tbody>
     </table>
-    <br>
     <h1>88a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>REDO COUNTER. Counter for hardware restarts. Set to zero by a
       keyboard fresh start (VERB 36). Incremented once per hardware
       restart by the restart program (GOPROG) and scaled 2<sup>14</sup>.
       <br>
     </p>
     <h1>88b,89a,89b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>THETAD's. The <u>final</u> desired CDU angles, (X, Y, Z) treated
       as 15-bit unsigned quantities and scaled, degrees/360. THETAD+2
       should not be in gimbal lock or near it. These items should not be
       confused with THETADX, Y, and Z. <br>
     </p>
     <h1><a name="90"></a>90a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>IMODES30, a cell whose individual bits are used to control the
       monitoring of IMU functions associated with channel 30 (and in a
       few cases channel 33). Set to 37411<sub>8</sub> as part of a fresh
@@ -4411,7 +3145,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>90b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>IMODES33, a cell whose individual bits are used to control the
       monitoring of functions associated with channel 33 (and other
       items). Set to 16000<sub>8</sub> as part of a fresh start; a
@@ -4530,7 +3263,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     </table>
     <p> </p>
     <h1>91a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>Channel 11. A computer output channel whose individual bits are
       used for display parameter quantities and engine on/off control.
       Set 0 by a fresh start. A restart or processing of a V37 program
@@ -4660,7 +3392,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>91b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>Channel 12. A computer output channel whose individual bits are
       used for control of optics/TVC and IMU hardware, and for control
       of the ISS. Set 0 by a fresh start. A restart or V37 processing
@@ -4814,7 +3545,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>92a</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>Channel 13. A computer output channel whose outputs are used for
       miscellaneous purposes. Set 0 by a fresh start. A restart or V37
       processing (cf. channel 11) causes bits 15-12 and 7-5 to be
@@ -4843,7 +3573,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">14<br>
           </td>
-          <td valign="top">Reset input trap circuit 32, concerned with
+          <td valign="top">Reset input trap circuit 32 , concerned with
             bits 10-1 of channel 32. <br>
           </td>
         </tr>
@@ -4955,7 +3685,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     </table>
     <br>
     <h1>92b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>Channel 14. A computer output channel whose outputs are used for
       control of computer counter cells. Set 0 by a fresh start. A
       restart or V37 processing (cf. channel 11) causes bit 6 to be
@@ -5103,7 +3832,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     </table>
     <br>
     <h1>93a</h1>
-    <p><i>Same as Powered List.</i></p>
     Channel 30. A computer input channel for miscellaneous functions. <br>
     <br>
     Bit assignments are as follows:<br>
@@ -5228,7 +3956,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>93b</h1>
-    <p><i>Same as Powered List.</i></p>
     <p>Channel 31. A computer input from crew control devices, used by
       RCS DAP.<br>
     </p>
@@ -5343,7 +4070,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>94a</h1>
-    <p><i>Same as Powered List.</i></p>
     Channel 32. A computer input channel for additional crew input to
     RCS DAP, etc.<br>
     <br>
@@ -5379,10 +4105,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td nowrap="nowrap" valign="top" align="center">11<br>
           </td>
-          <td valign="top">Bit sensed as 0 if spacecraft switch set to
-            indicate that LM attached: bit not used by program (<a
-              moz-do-not-send="true" href="#FLAGWORD7_2">cf. bit 2 of
-              Flagword 7</a>).</td>
+          <td valign="top">(Differs by software version) </td>
         </tr>
         <tr>
           <td nowrap="nowrap" valign="top" align="center">10-7<br>
@@ -5428,7 +4151,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <h1>94b</h1>
-    <p><i>Same as Powered List.</i></p>
     Channel 33. A computer input channel for hardware status and command
     information. Bits 15-11 are flip-flop bits (which are reset by a
     channel "write" command)<br>
@@ -5554,15 +4276,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       </tbody>
     </table>
     <p> </p>
-    <h1>95-100</h1>
-    <p>Spares.&nbsp; Same description as word 31 of the Powered List. <br>
-    </p>
-    <blockquote>
-      <p><font size="-1">I.e., "The first half of each spare contains
-          00000<sub>8</sub>. The second half is ARUPT (the contents of
-          the accumulator when the telemetry interrupt was recognized)."<br>
-        </font></p>
-    </blockquote>
     <p><br>
     </p>
     <blockquote>
@@ -5573,6 +4286,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-03-26</i><br>
+      2025-04-04</i><br>
   </body>
 </html>
