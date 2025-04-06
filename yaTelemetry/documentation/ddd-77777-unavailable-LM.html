@@ -2,30 +2,43 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Luminary 1C Rendezvous and
-      Prethrust List</title>
-    <link rel="stylesheet" href="./../downlists.css">
+    <title>Generic Telemetry Documentation for Luminary Coast and Align
+      List</title>
+    <link rel="stylesheet" href="downlists.css">
   </head>
   <body>
-    For full documentation, see the <a
-      href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">Luminary
-
-
-      1C <i>Guidance System Operations Plan</i></a>.<br>
-    <br>
+    <b>Note:</b>&nbsp; Telemetry documentation for this specific Lunar
+    Module software version is not (yet) available, most likely due to
+    an unavailable <i>Guidance System Operations Plan</i> (GSOP) for
+    it.&nbsp; Only those telemetered items which are essentially the
+    same across all software versions are described herein, while those
+    items which differ significantly by software version are
+    omitted.&nbsp; Nevertheless, even the behavior of those items
+    included here may still differ in subtle ways from one AGC software
+    version to another, so do not assume that the generic documentation
+    herein is perfectly reliable.&nbsp; Careful examination of the
+    source code for the AGC software version, if available, may provide
+    additional detail in resolving questions; refer particularly to
+    source-code files with names such as:<br>
+    <ul>
+      <li>ERASABLE_ASSIGNMENTS.agc</li>
+      <li>FLAGWORD_ASSIGNMENTS.agc<br>
+      </li>
+      <li>INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc</li>
+      <li>DOWNLINK_LISTS.agc</li>
+      <li>DOWN-TELEMETRY_PROGRAM.agc</li>
+    </ul>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
       href="#30">30</a> <a href="#40">40</a> <a href="#50">50</a> <a
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77775<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77777<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
     </p>
     <h1>2,3,4,5,6,7,8</h1>
-    <p><i>Same as words 2-8 on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CSM STATE VECTOR and TIME.&nbsp; The LGC's latest calculated
       state vector for the CSM in reference coordinates.&nbsp; The
       coordinates may be either earth-centered or moon-centered; a zero
@@ -37,255 +50,229 @@
       associated with the state vector scaled centimeters/2<sup>28</sup>,
       referenced to the computer clock.&nbsp; The scaling for position,
       velocity and time is the same whether earth-centered or
-      moon-centered.&nbsp; The CSM state vector and time are set in the
-      following:</p>
+      moon-centered. <br>
+    </p>
+    <h1>9</h1>
+    K-FACTOR.&nbsp; The ground elapsed time of the zero reference time
+    of the Abort Guidance System (AGS).&nbsp; It is set only by the AGS
+    Initialization Routine (R47).&nbsp; Calculated on the first use of
+    R47 and on subsequent calls to R47 if requested by the
+    astronaut.&nbsp; Scaled centiseconds/2<sup>28</sup>.
+    <h1><a name="10"></a>10</h1>
+    <p>TALIGN.&nbsp; Time to which a landing site or LM state vector is
+      referenced for the landing site and nominal IMU alignment
+      orientations during P52 and P57.&nbsp; Scaled centiseconds/2<sup>28</sup>,
+      referenced to computer clock.</p>
+    <h1>11a</h1>
+    <p>POSTORKU.&nbsp; Running sum of positive torque commands about
+      control axis U (RCS on-time multiplied by the number of jets
+      used).&nbsp; POSTORKU will, in time, overflow and subsequently
+      increase once more from zero (overflow does not go into sign
+      bit).&nbsp; The scaling is such as to preclude more than one
+      overflow per downlink cycle (2 sec) thus making the change from
+      one reading to the next unambiguous. &nbsp; Calculated every 0.1
+      second when DAP is running.&nbsp; Scaled jetseconds/32 (1
+      jetsecond is defined as 1 jet firing for 1 second). </p>
+    <h1>11b</h1>
+    <p>NEGTORKU.&nbsp; Running sum (always positive) of negative torque
+      about control axis U.&nbsp; Calculated every 0.1 second when DAP
+      is running.&nbsp; Scaled jetseconds/32. </p>
+    <h1>12a</h1>
+    <p>POSTORKV.&nbsp; Running sum of positive torque about control axis
+      V.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
+      Scaled jetseconds/32. </p>
+    <h1>12b</h1>
+    NEGTORKV.&nbsp; Running sum (always positive) of negative torque
+    about control axis V.&nbsp; Calculated every 0.1 second when DAP is
+    running.&nbsp; Scaled jetseconds/32.
+    <h1>13a</h1>
+    <p> RR RANGE (Raw Data).&nbsp; Treated as a 15-bit integer which is
+      multiplied by either 9.38 for the low scale or by 75.04 for the
+      high scale to convert to units of feet.&nbsp; a 1 in bit 3 of
+      RADMODES indicates high scale.&nbsp; See page 2-98 for more
+      complete description.</p>
+    <h1>13b<br>
+    </h1>
+    <p>RR RANGE RATE (Raw Data).&nbsp; Treated as a 15-bit
+      integer.&nbsp; To convert to units of feet per second the
+      following computation is done:<br>
+    </p>
+    <blockquote>(15-bit integer - 17000) × (-0.6278)<br>
+    </blockquote>
+    A negative quantity indicates closing.
+    <p> </p>
+    <h1>14</h1>
+    <p>TIME OF EVENT.&nbsp; Contains the image of TIME2, TIME1 at the
+      time of the last significant event.&nbsp; Loaded in burn programs
+      with time of ignition and time of engine cutoff as they
+      occur.&nbsp; Loaded with abort initiation time in P70 and
+      P71.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
+    </p>
+    <h1><a name="20"></a>15-20</h1>
+    <p>REFSMMAT.&nbsp; Six elements of REFSMMAT, in the order R<sub>1</sub>C<sub>1</sub>,
+      R<sub>1</sub>C<sub>2</sub>, R<sub>1</sub>C<sub>3</sub>, R<sub>2</sub>C<sub>1</sub>,
+      R<sub>2</sub>C<sub>2</sub>, R<sub>2</sub>C<sub>3</sub>.&nbsp;
+      REFSMMAT is the 3 × 3 matrix used to convert from reference to
+      stable member coordinates.&nbsp; The remaining three components of
+      REFSMMAT may be computed as follows:<br>
+    </p>
+    <blockquote>
+      <p>R<sub>3</sub>C<sub>1</sub> = (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>3</sub>)
+        - (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>2</sub>)<br>
+      </p>
+      R<sub>3</sub>C<sub>2</sub> = (R<sub>1</sub>C<sub>3</sub>) (R<sub>2</sub>C<sub>1</sub>)
+      - (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>3</sub>)<br>
+      <br>
+      R<sub>3</sub>C<sub>3</sub> = (R<sub>1</sub>C<sub>1</sub>) (R<sub>2</sub>C<sub>2</sub>)
+      - (R<sub>1</sub>C<sub>2</sub>) (R<sub>2</sub>C<sub>1</sub>)<br>
+    </blockquote>
+    <p>where R = Row and C = Column.<br>
+    </p>
+    <p>Calculated at the end of P51, prior to IMU coarse align in P52
+      for alignment options 1, 2 and 4, and in P57 for alignment
+      techniques 1 and 4.&nbsp; Each row is a half-unit vector.<br>
+    </p>
+    <blockquote>
+      <blockquote> </blockquote>
+    </blockquote>
+    <h1>21a</h1>
+    <p>AOT CODE.&nbsp; Bits 6-1 contain the octal identification number
+      of the celestial body being sighted.<br>
+    </p>
+    <p>Bits 9-7 contain the Detent Code as follows:<br>
+    </p>
     <table cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          <td valign="top">0&nbsp;&nbsp;&nbsp; <br>
           </td>
-          <td valign="top">P00<br>
+          <td valign="top">Optical System Calibration Code &nbsp; &nbsp;
+            <br>
           </td>
-          <td valign="top">—</td>
-          <td valign="top">every four time steps</td>
+          <td rowspan="1" colspan="2" valign="top">Valid only in R52<br>
+          </td>
         </tr>
         <tr>
-          <td valign="top"><br>
+          <td valign="top">1<br>
           </td>
-          <td valign="top">P20, P22 <br>
+          <td valign="top">is AOT Position 1 (left forward)<br>
           </td>
-          <td valign="top">—</td>
-          <td valign="top">every mark and every Incorp if CSM corrected</td>
+          <td valign="top">AZ = -60°</td>
+          <td valign="top">EL = 45°</td>
         </tr>
         <tr>
-          <td valign="top"><br>
+          <td valign="top">2<br>
           </td>
-          <td valign="top">P76<br>
+          <td valign="top">is AOT Position 2 (forward)<br>
           </td>
-          <td valign="top">—</td>
-          <td valign="top">after operation</td>
+          <td valign="top">AZ = 0°</td>
+          <td valign="top">EL = 45°</td>
         </tr>
         <tr>
-          <td valign="top"><br>
+          <td valign="top">3<br>
           </td>
-          <td valign="top">Average G<br>
+          <td valign="top">is AOT Position 3 (right forward)<br>
           </td>
-          <td valign="top">—</td>
-          <td valign="top">at completion</td>
+          <td valign="top">AZ = 60°</td>
+          <td valign="top">EL = 45°</td>
         </tr>
         <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">is AOT Position 4 (right rear)<br>
+          </td>
+          <td valign="top">AZ = 120°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">is AOT Position 5 (rear)<br>
+          </td>
+          <td valign="top">AZ = 180°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">is AOT Position 6 (left rear)<br>
+          </td>
+          <td valign="top">AZ = -120°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">Crew Optical Alignment Sight<br>
+          </td>
           <td valign="top"><br>
           </td>
-          <td valign="top">P27<br>
-          </td>
-          <td valign="top">—</td>
-          <td valign="top">uplink of state vector V66<br>
+          <td valign="top"><br>
           </td>
         </tr>
       </tbody>
     </table>
-    <p></p>
-    <h1>9a<sup>*</sup></h1>
-    <p>RR RANGE (Raw data).&nbsp; The RR range reading as it is
-      transmitted from the radar interface.&nbsp; Varies from 0 to 400
-      nmi.&nbsp; Each time a mark is taken in P20, P22, the reading is
-      stored in this register.&nbsp; Frequency is as follows:<br>
-    </p>
-    <ol>
-      <li>About once per minute in P20 if the No Update Flag is set 0
-        and the Update Flag is set 1.</li>
-      <li>About every 15 seconds in P20 if the No Update Flag is set 0
-        and the Update Flag is set 0.</li>
-      <li>About every 45 seconds in P20 if the No Update Flag is set 1
-        (whether the Update Flag is set or not).</li>
-      <li>About every 15 seconds in P22 if the No Update Flag is set 0
-        and the Update Flag is set 1.</li>
-      <li>About every 4 seconds in P22 if the No Update Flag is set 1.</li>
-    </ol>
-    <p>At Marktime (MKTIME).&nbsp; RR Range is a 15-bit integer which is
-      multiplied by either 9.38 for the low scale or 75.04 for the high
-      scale to convert to units of feet.&nbsp; A 1 in bit 3 of RADMODES
-      indicates high scale.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font><br>
-    </p>
-    <h1>9b<sup>*</sup></h1>
-    <p>RR RANGE RATE (Raw data).&nbsp; At MARKTIME (MKTIME).&nbsp;
-      Treated as a 15-bit integer.&nbsp; To convert to units of feet per
-      second the following computation is done:&nbsp; (15-bit integer
-      minus 17000) × (-0.6278).&nbsp; A negative quantity indicates
-      closing.&nbsp; Read when RR Range is read.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font><br>
-    </p>
-    <h1><a name="10">10a,10b,11a<sup>*</sup></a></h1>
-    <p>CDUs (Y, Z, X).&nbsp; At Marktime (MKTIME).&nbsp; The IMU CDU
-      counter readings (inner, middle and outer gimbals).&nbsp; Used to
-      define stable member to nav-base coordinate transformation during
-      state vector correction in Rendezvous Navigation.&nbsp; Read when
-      RR Range is read except not read in R04.&nbsp; These are unsigned
-      15-bit fractions scaled degrees/360.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font><br>
-    </p>
-    <h1>11b</h1>
-    <p>NUMBER OF MARKS.&nbsp; The number of RR marks used to correct the
-      state vector during rendezvous navigation.&nbsp; Used for display
-      to the astronaut.&nbsp; An integer which ranges from 0 to N (the
-      number of marks taken in a sequence).&nbsp; Incremented by 1 each
-      time a state vector correction is done in P20 or P22 (UPDATFLG
-      must be set to allow state vector corrections).&nbsp; Set to 0
-      when:<br>
-    </p>
-    <ol>
-      <li>P20 or P22 is selected as a new program.</li>
-      <li>The W-Matrix is re-initialized.</li>
-      <li>A thrust program is completed.</li>
-      <li>P76 is selected.</li>
-      <li>R24 END (goes to beginning of P20/P22).</li>
-    </ol>
-    <p>Scaled 2<sup>-14</sup>.<br>
-    </p>
-    <h1>12a,12b<sup>*</sup><br>
+    <p> </p>
+    AOT CODE is the erasable storage for Display Nouns 70 and 71 in the
+    routines AOTMARK (R53), Auto Optics Positioning (R52), and Star
+    Acquisition (R59).&nbsp; AOTCODE is always equal to the data keyed
+    in by the astronaut under Nouns 70 and 71 except during R59 where
+    the detent code in bits 9-7 is computed to reflect the azimuth
+    position code in R3 under the display V06 N79.
+    <h1>21b<br>
     </h1>
-    <p>RR TRUNNION and SHAFT CDUs.&nbsp; At Marktime (MKTIME).&nbsp; RR
-      trunnion and shaft angles used to define RR antenna position; 12a
-      is trunnion, 12b is shaft.&nbsp; Read from the RR CDU counters
-      when RR Range is read except not read in R04.&nbsp; Also read once
-      every 6 seconds during R24 RR Automatic Search Routine in P20 or
-      P22.&nbsp; Read once during Verb 41 RR Coarse Align.&nbsp; Also
-      read once per second during Verb 85 RR Angle Display.&nbsp; These
-      are unsigned 15-bit fractions scaled degrees/360.</p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font></p>
-    <h1>13<sup>*</sup></h1>
-    <p>MARKTIME (mnemonic is MKTIME).&nbsp; Time of RR Mark (Range,
-      Range-rate, CDUs, trunnion and shaft readings).&nbsp; The LM and
-      CSM state vectors are integrated to this time in order to perform
-      the state vector correction.&nbsp; The time is read from the Time
-      2, Time 1 counter.&nbsp; Read when RR Range Rate is read except
-      not read in R04.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font></p>
-    <h1>14</h1>
-    <p><i>Same as word 9 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>T<sub>F</sub> LAMBERT(DELLT4 — The desired transfer time).&nbsp;
-      The time from TIG until the target (RTARG) is reached, scaled
-      centiseconds/2<sup>28</sup>.&nbsp; During a burn, the time from
-      present state vector time until intercept.&nbsp; It is used as an
-      input to the INITVEL subroutine and calculated by each user of
-      this subroutine.<br>
-    </p>
-    <h1>15,16,17</h1>
-    <p><i>Same as words 10-12 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>RTARG.&nbsp; The aim point vector X, Y, Z&nbsp; in either
-      earth-centered or lunar-centered coordinates.&nbsp; Scaled
-      meters/2<sup>29</sup>.&nbsp; The origin of the coordinate system
-      is the same as that of the LM state vector at TIG and TIG-30
-      sec.&nbsp; Bit 11 of flagword 8 (LMOONFLG) indicates whether the
-      LM state vector is earth or moon-centered.&nbsp; RTARG is
-      initially calculated in P34/P74, P35/P75, and updated in the
-      Initial Velocity Subroutine.<br>
-    </p>
-    <h1><a name="20"></a>18,19,20</h1>
-    <p>DELVSLVs (X, Y, Z).&nbsp; For P30: input delta-V for an external
-      delta-V burn.&nbsp; DSKY or uplink input once per burn.&nbsp; Noun
-      81.&nbsp; In local vertical coordinates.&nbsp; Scaled
-      (meters/centiseconds)/2<sup>7</sup>.<br>
-    </p>
-    <h1>21</h1>
-    <p><i>Same as word 21 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>CSI TIME.&nbsp; The time of ignition for the CSI maneuver.&nbsp;
-      Used in P32/P72 calculations; may also be calculated in
-      P32/P72.&nbsp; Input by V25N11.&nbsp; Scaled centiseconds/2<sup>28</sup>,
-      referenced to computer clock.<br>
+    <p>Garbage.<br>
     </p>
     <h1>22,23,24</h1>
-    <p><i>Same as words 22-24 on Orbital Maneuvers List.</i><br>
+    <p>LANDING SITE VECTOR (X, Y, Z).&nbsp; Landing site in moon-fixed
+      coordinates.&nbsp; "LAND" is initialized from this vector (RLS) at
+      the start of P63.&nbsp; RLS is recomputed after landing by P68 and
+      is computed by P57 if the landing site determination option is
+      selected.&nbsp; Otherwise except perhaps by uplink, it does not
+      change.&nbsp; Scaled meters/2<sup>27</sup>. </p>
+    <h1>25a,25b,26a</h1>
+    <p>LR VELOCITIES (Raw Data).&nbsp; Landing radar beam velocities (X,
+      Y, Z).&nbsp; The data readout from the Landing Radar High Speed
+      Counter into LGC input counter 46<sub>8</sub>.&nbsp; Always
+      contain the last values which were read, i.e., these registers are
+      never initialized.&nbsp; Each component read once per second
+      during R77.&nbsp; Each component read once per four seconds during
+      LR option of R04.&nbsp; Scaled (15-bit integer - 12288.2) × K
+      ft/sec where K = -0.6440 for V<sub>x</sub>, K = 1.212 for V<sub>y</sub>,
+      and K = -0.8668 for V<sub>z</sub>.<br>
     </p>
-    <p>CSI DELTA Vs (X, Y, Z).&nbsp; The required delta velocity for the
-      CSI maneuver.&nbsp; Used to calculate delta velocity in local
-      vertical coordinates.&nbsp; Calculated during each iteration of
-      CSI/A subroutine in P32/P72 and after display of ΔV<sub>LV</sub>
-      at CSI, regardless of whether display is overwritten.&nbsp; In
-      reference coordinates.&nbsp; Earth or moon-centered depending upon
-      whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-      respectively.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <h1>25</h1>
-    <p>Spare.&nbsp; See page 2-70 for definition.<br>
-    </p>
-    <blockquote><font size="-1">From p. 2-70:&nbsp; The first half of
-        each spare contains 00000<sub>8</sub>. The second half is ARUPT
-        (the contents of the accumulator when the telemetry interrupt
-        was recognized).</font><br>
-    </blockquote>
-    <h1>26</h1>
-    <p><i>Same as word 29 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>TPF TIME.&nbsp; Time of rendezvous of active and passive
-      vehicles.&nbsp; Time to which the passive vehicle is extrapolated
-      to compute the target vector.&nbsp; Computed once per pass through
-      P34, and P74, and passed on to P35, and P75.&nbsp; Dependent on
-      TIG and CENTANG.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    </p>
-    <h1>27-28</h1>
-    <p>RR SHAFT and TRUNNION BIASES.&nbsp; The estimate of the RR angle
-      biases; 27 is shaft, 28 is trunnion.&nbsp; Computed by the
-      Rendezvous Navigation Program.&nbsp; Initially pad-loaded to
-      0.&nbsp; They can oscillate in sign and magnitude with a maximum
-      magnitude of about 20 milliradians.&nbsp; Calculated during state
-      vector correction in P20 four times per mark (Range, Range-Rate,
-      Trunnion and Shaft incorporations).&nbsp; Marks are taken about
-      once a minute in P20, so four calculations are made about once a
-      minute when UPDATFLG is set.&nbsp; They are not calculated if the
-      No Update Flag is set.&nbsp; Scaled radians/2<sup>5</sup> if in
-      earth sphere of influence.&nbsp; Scaled radians/2<sup>3</sup> if
-      in lunar sphere of influence.&nbsp; A 0 in bit 11 of flagword 8
-      (LMOONFLG) indicates earth sphere, a 1 indicates lunar
-      sphere.&nbsp; These words are updated only in P20, hence they are
-      useful only on the Rendezvous and Prethrust List.<br>
-    </p>
-    <h1>29a,29b<br>
-    </h1>
-    <p>RR TRUNNION and SHAFT ERROR COUNTERS.&nbsp; Rendezvous Radar
-      error counter commands; 29a is trunnion, 29b is shaft.&nbsp; They
-      are placed in the RR error counters and specify the rate at which
-      the RR antenna is driven.&nbsp; Values range from +384 to -384 and
-      vary according to the angular error between the present and
-      desired RR positions.&nbsp; Calculated every 0.5 second in the
-      Radar Designate Routine (DODES) whenever the LGC is driving the RR
-      antenna which occurs when:<br>
-    </p>
-    <ol>
-      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
-      <li>V41 N72 (RR Coarse Align) is operated.</li>
-      <li>R2 (RR designate) is operated in P20/P22.</li>
-      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
-    </ol>
-    <p>A magnitude of 384 corresponds to a rate command of about 10
-      degrees/second.&nbsp; The exact rate depends on the
-      characteristics of the motors in the RR gyros.&nbsp; 29a and 29b
-      are each scaled 2<sup>-14</sup>.<br>
-    </p>
+    <h1>26b</h1>
+    LR RANGE (Raw Data).&nbsp; Landing radar slant range.&nbsp; The data
+    readout from the LR High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+
+
+
+
+
+    Always contains the last value read, i.e., this register is never
+    initialized.&nbsp; Read once per second in R77.&nbsp; Read once
+    every 4 sec during LR option of R04.&nbsp; A 15-bit integer which is
+    multiplied by either 5.395 on the high scale or 1.079 on the low
+    scale to convert to units of feet.&nbsp; A 1 in bit 9 of RADMODES
+    indicates high scale.<br>
+    <h1>27-29</h1>
+    VGTIGs (X, Y, Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp; For
+    external-ΔV type burns this is the input ΔV rotated through half the
+    calculated central angle expected to be covered by the burn.&nbsp;
+    Calculated once a the beginning of each of P40, P41, and P42.&nbsp;
+    In reference coordinates, scaled (meters/centisecond)/27.&nbsp;
+    VGPREV (X, Y, Z) appears in the same location once Average G has
+    been turned on (TIG - 30 seconds).&nbsp; This is the
+    velocity-to-be-gained used by steering in P40 and P42, and for
+    display in P41.&nbsp; VGPREV is updated every 2 seconds during the
+    burn.&nbsp; In reference coordinates.&nbsp; Scaled
+    (meters/centisecond)/27.
     <h1><a name="30"></a>30a</h1>
-    <p><i>Same as word 30a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>REDO COUNTER.&nbsp; Counter for hardware restarts.&nbsp; Set to
       zero by keyboard freshstart (Verb 36).&nbsp; Incremented once per
-      hardware freshstart (Verb 36).&nbsp; Incremented once per hardware
-      restart by restart program (GO PROG).&nbsp; Scaled 2<sup>-14</sup>.<br>
+      hardware restart by restart program (GO PROG).&nbsp; Scaled 2<sup>-14</sup>.<br>
     </p>
     <h1>30b,31a,31b</h1>
-    <p><i>Same as words 30b,31a,31b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FINAL DESIRED CDUs (X, Y, Z).&nbsp; The target attitude (desired
       outer, inner and middle gimbal angles) for all coasting flight
       automatic maneuvers and for the ISS coarse align loop.&nbsp; Also,
@@ -299,50 +286,24 @@
       fractions.&nbsp; The quantities are scaled degrees/360<br>
     </p>
     <h1>32a</h1>
-    <p><i>Same as word 32a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>RSBBQ.&nbsp; Loaded with the setting of the BBANK and Superbank
       when a hardware restart occurs.<br>
     </p>
     <h1>32b</h1>
-    <p><i>Same as word 32b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>RSBBQ + 1.&nbsp; Loaded with the setting of the Q-register when a
       hardware restart occurs.<br>
     </p>
     <h1>33a,33b,34a</h1>
-    <p><i>Same as words 33a,33b,34a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated current rates about
       body axis.&nbsp; Calculated at the beginning of every DAP cycle
       every 0.1 sec.&nbsp; Zeroed at DAP start-up.&nbsp; Scaled
-      (degrees/sec)/45.&nbsp; Expected range of ±45 degrees/sec
-      possible. </p>
+      (degrees/sec)/45.&nbsp; Expected range of ±10 degrees/sec but ±45
+      degrees/sec possible. </p>
     <h1>34b</h1>
-    <p><i>Same as word 34b on Orbital Maneuvers List.</i><br>
+    <p>Garbage. <br>
     </p>
-    <p>Garbage.&nbsp; This is the same erasable location as the one
-      described for word 89a of this list.<br>
-    </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; Word 89a of the
-        Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
-        Calculated angular acceleration about Y body axis due to the
-        fact that the main engine is not exactly aligned with the center
-        of gravity. During powered flight this is calculated every 0.1
-        second at the beginning of the DAP cycle; otherwise these are
-        zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
-        such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-        Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
-    </blockquote>
     <p> </p>
     <h1>35a,35b,36a</h1>
-    <p><i>Same as words 35a,35b,36a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
       to DAP.&nbsp; Generated during a burn by guidance equations or
@@ -353,22 +314,15 @@
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>36b</h1>
-    <p><i>Same as word 36b on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage.<br>
     </p>
     <h1>37a,37b,38a</h1>
-    <p><i>Same as words 37a,37b,38a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
       when the IMU is on.&nbsp; These registers are unsigned 15-bit
       fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>38b</h1>
-    <p><i>Same as word 38b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
       counter.&nbsp; Defines the RR antenna position (along with shaft
       angle).&nbsp; Updated from RR CDUs as trunnion angle
@@ -376,8 +330,6 @@
       Scaled degrees/360.<br>
     </p>
     <h1>39a</h1>
-    <p><i>Same as word 39a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -395,7 +347,7 @@
             on FDAI needles.&nbsp; A 0 means needles will have either
             mode 1 or mode 2 attitude error displays.&nbsp; Set 1 by
             V60.&nbsp; Set 0 when V61 or V62 selected.&nbsp; Also set 0
-            when R50 selected.<br>
+            when R60 selected.<br>
           </td>
         </tr>
         <tr>
@@ -435,7 +387,7 @@
             orbit.&nbsp; Also set to 0 or 1 in integration when
             switching coordinate centers but this can't be done in
             LUMINARY because logic is engaged by MIDFLAG = 1.&nbsp; Also
-            set to 0 (earth-orbit) or 1 (lunar-orbit) in P31, R31,
+            set to 0 (earth-orbit) or 1 (lunar-orbit) in P21, R31,
             INITVEL, P32 thru P35, P72 thru P75 when specifying a state
             vector to integrate and in P27, P76 when using integration
             subroutines to store modified state vectors for systems use.<br>
@@ -550,33 +502,8 @@
           <td valign="top">3<br>
           </td>
           <td valign="top">FREEFLAG.&nbsp; Used as a temporary flag to
-            control the internal logic of the following subroutines:<br>
-            <blockquote>R54 — Used as a counter to control two passes
-              through CHKSB which computes the star data check
-              error.&nbsp; Set to 1 for first pass, set to 0 for second
-              pass.&nbsp; Also used to indicate the response of the
-              astronaut to the star data check display V06N05.&nbsp; Set
-              to 1 if the astronaut performed PROCEED, V33E.&nbsp; Set
-              to 0 if the astronaut performed RECYCLE, V32E.<br>
-              <br>
-              R51 — Bit interrogated after R54 in P52.&nbsp; If bit is
-              1, gyro torquing (R55) is accomplished.&nbsp; If bit is 0,
-              gyro torquing is bypassed and V50N25 R1 = 00014 is
-              displayed.<br>
-              <br>
-              P57 — GRAVITY VECTOR DETERMINATION routine is used to
-              indicate astronaut response to error display.&nbsp; Bit is
-              set to 0 if the astronaut performed PROCEED, and set to 1
-              if the astronaut performed RECYCLE.<br>
-              <br>
-              P51 — Bit interrogated after R54.&nbsp; If bit is 1, the
-              new REFSMMAT is computed and stored and the REFSMMAT flag
-              is set.&nbsp; If bit is 0, P51 is started again and V50N25
-              R1 = 00015 is displayed.<br>
-              <br>
-              LSPOS — Used as a counter to control two passes through
-              POSITB.&nbsp; Bit is 0 for first pass, 1 for second pass.<br>
-            </blockquote>
+            control the internal logic of the following
+            subroutines:&nbsp; R51, R54, P51, P57, and LSPOS.<br>
           </td>
         </tr>
         <tr>
@@ -596,21 +523,44 @@
         <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">OLDESFLG. Bit set 1 when gyro command loop
-            requested in R29. Bit set 0 when gyro command loop not
-            requested in R29.<br>
-            <blockquote><b>Note:</b> The Luminary 1C GSOP states that
-              this is a flagbit called P66PROFL. <a
-                moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-2780959979">It
-                is in error</a>.</blockquote>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">OLDESFLG.&nbsp; Set to 1 when R29
+                    gyro command loop requested, and set to 0 when not
+                    requested.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">P66PROFL.&nbsp; Set to 1 when P66 is
+                    entered for the first time (in R13) as a directive
+                    to continue P66 horizontal nulling.&nbsp; It is
+                    reset to 0 when the astronaut proceeds on a flashing
+                    V06 N60 after touchdown, the 0 specifying a stop to
+                    P66 horizontal nulling.&nbsp; It is tested in P66
+                    after horizontal commands have been calculated, but
+                    before commands are issued.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
       </tbody>
     </table>
     <h1>39b</h1>
-    <p><i>Same as word 39b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 1.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -663,19 +613,47 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
           <td valign="top">RODFLAG.&nbsp; Bit is set to 1 on the first
             pass thru P66 to designate continuation of algorithm without
             reinitialization.&nbsp; A 1 indicates that the
-            rate-of-descent mode is in progress.&nbsp; bit is reset to 0
-            during a restart, to insure reinitialization of P66
-            algorithm.&nbsp; If in P66, a 0 indicates that there has
-            been a restart.&nbsp; Bit is set to 1 to check for restarts
-            and fresh start.&nbsp; Bit is set to 1 only when the
-            vertical guidance (landing phase) is in effect, the SCSMODE
-            is in attitude hold, and the ROD switch has been activated.<br>
+            rate-of-descent mode is in progress.&nbsp; If in P66, a 0
+            indicates that there has been a restart.&nbsp; Bit is set to
+            1 to check for restarts and fresh start.&nbsp; Bit is set to
+            1 only when the vertical guidance (landing phase) is in
+            effect, the SCSMODE is in attitude hold, and the ROD switch
+            has been activated.<br>
           </td>
         </tr>
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">Not used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">Garbage or Spare.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">NOTERFLG.&nbsp; Set 1 by V68 and also
+                    entrance to P66 (in R13) in order to bypass the
+                    terrain model computations.&nbsp; It is reset to 0
+                    in P63 and by V36 meaning that terrain model
+                    computations are to be performed.&nbsp; The bit is
+                    checked each guidance pass (every 2 sec.) in
+                    Servicer.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -701,9 +679,9 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
           <td valign="top">VEHUPFLG.&nbsp; A 1 means CSM state vector to
             be corrected by Navigation.&nbsp; A 0 means LM state vector
             to be corrected by Navigation.&nbsp; Set to 0 at the
-            beginning of P20.&nbsp; Set to 0 at the beginning of
-            P20.&nbsp; Set to 0 by V80 Update LM.&nbsp; Set to 1 by V81
-            Update CSM.&nbsp; Set to 1 at the beginning of P22.<br>
+            beginning of P20.&nbsp; Set to 0 by V80 Update LM.&nbsp; Set
+            to 1 by V81 Update CSM.&nbsp; Set to 1 at the beginning of
+            P22.<br>
           </td>
         </tr>
         <tr>
@@ -753,7 +731,39 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
         <tr>
           <td valign="top">4<br>
           </td>
-          <td valign="top">Note used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Garbage or Spare.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">FRSTIME.&nbsp; Bit is set to 1 during
+                    P22 when the line of sight is not in Rendezvous
+                    Radar Mode 2 coverage (the Predesignate Routine,
+                    R26, is necessary).&nbsp; A 1 indicates that LOS has
+                    not yet been found inside Mode 2 coverage.&nbsp; Bit
+                    is reset to 0 by R26 when line of sight is inside
+                    Mode 2 coverage; another line of sight computation
+                    is done before continuous designation starts.&nbsp;
+                    A 0 indicates that the LOS has been found to be
+                    inside Mode 2 coverage by R26.&nbsp; Tested by R26.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -766,14 +776,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
             calculates the increment to be added to the independent
             variable for use on the next pass).&nbsp; The bit controls
             the type of computation performed in the ITERATOR
-            subroutine.&nbsp; This bit is equivalent to <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
-
-
-
-
-
-              switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
+            subroutine.&nbsp; This bit is equivalent to the switch f<sub>3</sub>
+            of Section 5.5 of the GSOP.<br>
           </td>
         </tr>
         <tr>
@@ -782,7 +786,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">GUESSW.&nbsp; Set to 1 to indicate to the
             LAMBERT routine than an initial guess of the independent
             variable used in the internal LAMBERT iteration process is
-            not available, thus forcing LAMBERT to start operating from
+            not available, thus forcing LAMBERT to start iterating from
             the mid-point of the range of the independent
             variable.&nbsp; The bit is set to&nbsp; 0 to indicate to
             LAMBERT than an initial guess is available; this will in
@@ -795,14 +799,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             by the Pre-TPI Maneuver Program P-34 or P74, the Pre-TPM
             Maneuver Program P-35 or P75, and the Lambert Aim-Point
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
-            equivalent to <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
-
-
-
-
-
-              switch f<sub>1</sub> of Section 5.5 of this GSOP</a>. </td>
+            equivalent to the switch f<sub>1</sub> of Section 5.5 of the
+            GSOP. </td>
         </tr>
         <tr>
           <td valign="top">1<br>
@@ -813,8 +811,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1><a name="40"></a>40a</h1>
-    <p><i>Same as word 40a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 2.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -852,7 +848,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           </td>
           <td valign="top">ACMODFLG.&nbsp; A 1 means Manual Radar
             Acquisition Mode (R23) used to lock-on.&nbsp; A 0 means
-            Manual Radar Acquisition Mode (R23) ot used to
+            Manual Radar Acquisition Mode (R23) not used to
             lock-on.&nbsp; Set to 0 at beginning of P20 or P22.&nbsp;
             Set to 1 upon return from R23 to P20 or P22 before going to
             R22 RR Data Read Routine.<br>
@@ -887,11 +883,11 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             (CSM-docked), 0.36 m/sec (DPS), or 3.08 m/sec (APS) (for the
             2-second interval).&nbsp; Bit is set to 1 if the
             accelerometer output goes above these thresholds (if bit 7
-            FLAGWRD7 = 0).&nbsp; If bit is 0, only the required velocity
-            is updated (no derivation of time-to-go or steering commands
-            are performed).&nbsp; Bit is set to 1 in SERVICER (P12, P63
-            thru P66) but it is not looked at in P12,P66, and
-            P70/P71.&nbsp; Set 0 in SERVICER in P12 and descent
+            FLAGWRD7 = 0).&nbsp; <sup>*</sup>If bit is 0, only the
+            required velocity is updated (no derivation of time-to-go or
+            steering commands are performed).&nbsp; Bit is set to 1 in
+            SERVICER (P12, P63 thru P66) but it is not looked at in P12,
+            P66, and P70/P71.&nbsp; Set 0 in SERVICER in P12 and descent
             programs.<br>
           </td>
         </tr>
@@ -924,7 +920,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">8<br>
           </td>
           <td valign="top">XDELVFLG.&nbsp; Set to 1 if an External Delta
-            V turn is to be performed.&nbsp; Set to 0 if a Lambert burn
+            V burn is to be performed.&nbsp; Set to 0 if a Lambert burn
             is required.&nbsp; Set to 1 in P30 before N42 display.&nbsp;
             Set 1 by P72 and P73.&nbsp; For P34, P35, P74, and P75 — set
             to 0 in subroutine S34/35.2.&nbsp; For P32/P72 and P33/P73
@@ -990,7 +986,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             avoidance feature have been removed, the bit should be 1
             after the first maneuver computation and remain so (the
             final middle gimbal angle, THETAD+2 is checked and must be
-            less than about 70° for the maneuver to be carried out. </td>
+            less than about 70° for the maneuver to be carried out). </td>
         </tr>
         <tr>
           <td valign="top">2<br>
@@ -998,10 +994,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">CALCMAN2.&nbsp; A 1 means perform maneuver
             starting procedure (in KALCMANU).&nbsp; A 0 means bypass
             starting procedure.&nbsp; Set to 1 at the end of a large
-            attitude calculation of maneuver parameters and react after
+            attitude calculation of maneuver parameters and reset after
             some computations concerning initial conditions for
             generation of the commands have been completed.&nbsp; Bit
-            signified that first iteration through the command
+            signifies that first iteration through the command
             generation equations is being performed; depending on
             phasing of the telemetry output with respect to the guidance
             computations, the 1 setting may or may not be observed on
@@ -1011,20 +1007,18 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">NODOFLAG.&nbsp; Set to 1 by R47, P76, P06,
-            and P00 integration to inhibit selection of any new program
-            except P00.&nbsp; Attempted selection of a new program other
-            than P00 when the bit is 1 results in a program alarm (code
-            1520).&nbsp; Reset to 0 by P00, P76 and R47 when they are
-            completed and by P06 when recovering from standby.&nbsp;
-            Reset 0 by POODOO routine.<br>
+          <td valign="top">NODOFLAG.&nbsp; Set to 1 by R47, <s>P76</s>,
+            P06, and P00 integration to inhibit selection of any new
+            program except P00.&nbsp; Attempted selection of a new
+            program other than P00 when the bit is 1 results in a
+            program alarm (code 1520).&nbsp; Reset to 0 by P00, <s>P76</s>
+            and R47 when they are completed and by P06 when recovering
+            from standby.&nbsp; Reset 0 by POODOO routine.<br>
           </td>
         </tr>
       </tbody>
     </table>
     <h1>40b</h1>
-    <p><i>Same as word 40b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 3.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1083,14 +1077,44 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">NOR29FLG.&nbsp; bit is set by FRESH START,
-            and when the Servicer routine terminates.&nbsp; A 1
-            indicates that R29 is not allowed.&nbsp; Bit is reset to 0
-            by P12 Ascent Guidance.&nbsp; A 0 indicates that R29 is
-            allowed.&nbsp; Bit is tested during the RR read cycle of R29
-            and during software restart (V37).&nbsp; Bit is tested by
-            R04 and R77 to determine if another program/routine is using
-            the radar.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">NOR29FLG.&nbsp; Bit is set by FRESH
+                    START, and when the Servicer routine
+                    terminates.&nbsp; A 1 indicates that R29 is not
+                    allowed.&nbsp; Bit is reset to 0 by P12 Ascent
+                    Guidance.&nbsp; A 0 indicates that R29 is
+                    allowed.&nbsp; Bit is tested during the RR read
+                    cycle of R29 and during software restart
+                    (V37).&nbsp; Bit is tested by R04 and R77 to
+                    determine if another program/routine is using the
+                    radar. </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">NODOP07.&nbsp; Bit can be set to 1 by
+                    ground uplink prior to liftoff.&nbsp; It is also set
+                    to 1 by V37.&nbsp; Tested by V92 which gives the
+                    operator error if the bit is set.&nbsp; Tested in
+                    UPRUPT which maintains erasable sum of key codes if
+                    the bit is 0.&nbsp; (NOTE:&nbsp; this bit is not
+                    cleared by FRESH START).</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -1107,31 +1131,22 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">Bit used for two distinct functions, hence
-            assigned two separate mnemonics.<br>
+          <td valign="top">In all Luminary software versions, this bit
+            has the following interpretation:&nbsp; R04FLAG.&nbsp; Set
+            to 1 by Verb 63 entry to indicate R04 is running and set to
+            0 at the end of R04.&nbsp; Set to 0 by P20 or P22
+            selection.&nbsp; Set to 0 in R00 (V37). <br>
             <br>
-            R04FLAG.&nbsp; Set to 1 by Verb 63 entry to indicate R04 is
-            running and set to 0 at the end of R04.&nbsp; Set to 0 by
-            Verb 78 entry to indicate R77 is running, rather than R04,
-            since the two routines use much of the same coding.&nbsp;
-            Set to 0 in R00 (V37).&nbsp; Set to 0 in the beginning of
-            P20/P22 in order that alarm 521 be sent if the radar cannot
-            be read.&nbsp; Set to 1 by R65 before reading RR and set to
-            0 by R65 after reading RR.&nbsp; The bit is checked in the
-            RADAREAD routine (which is used by R04 And P20/P22) if the
-            radar cannot be read; if the bit is 1 (R04 is running),
-            alarm 521 will not be sent.<br>
-            <br>
-            READRFLG. Bit is set to 1 by R29 when RR lock-on has been
-            achieved and the RR read cycle is starting.&nbsp; A 1
-            indicates that R29 is reading RR data.&nbsp; Bit is reset to
-            0 by R29 when exiting the RR read cycle because of a bad
-            reading or the RR not in LGC mode.&nbsp; Bit is reset to 0
-            by software restart (V37), FRESH START, and hardware
-            restart.&nbsp; A 0 indicates that R29 is not reading RR
-            data.&nbsp; Bit is tested by the RR read cycle of R29 to
-            determine if radar read is allowed.<br>
-          </td>
+            However, in Luminary 1, 1A, 1B, and 1C, it also has an
+            additional secondary interpretation:&nbsp; READRFLG. Bit is
+            set to 1 by R29 when RR lock-on has been achieved and the RR
+            read cycle is starting.&nbsp; A 1 indicates that R29 is
+            reading RR data.&nbsp; Bit is reset to 0 by R29 when exiting
+            the RR read cycle because of a bad reading or the RR not in
+            LGC mode.&nbsp; Bit is reset to 0 by software restart (V37),
+            FRESH START, and hardware restart.&nbsp; A 0 indicates that
+            R29 is not reading RR data.&nbsp; Bit is tested by the RR
+            read cycle of R29 to determine if radar read is allowed.</td>
         </tr>
         <tr>
           <td valign="top">8<br>
@@ -1220,8 +1235,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>41a</h1>
-    <p><i>Same as word 41a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 4.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1261,9 +1274,32 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">PDSPFLAG.&nbsp; Set to 1 to indicate that a
-            priority display status exists.&nbsp; This will lock out
-            mark displays and normal displays.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">PDSPFLAG.&nbsp; Set to 1 to indicate
+                    that a priority display status exists.&nbsp; This
+                    will lock out mark displays and normal displays. </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">Checked by the display routines, but
+                    remains 0 throughout the mission.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -1374,8 +1410,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>41b</h1>
-    <p><i>Same as word 41b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 5.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1399,7 +1433,33 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">14<br>
           </td>
-          <td valign="top">Not used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">PDSPFLAG.&nbsp; Set to 1 by R61 and
+                    R65, tested by R60 so that V50N18 display will be a
+                    priority display, if called by P20 or P25.&nbsp; Set
+                    to 0 by R61 and R65.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -1453,7 +1513,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             range.&nbsp; A 0 means no change has occurred.&nbsp; Set to
             0 at the beginning of each RR Read sequence in R22 RR Data
             Read Routine.&nbsp; Set to 1 by the Radar Interrupt
-            Processor if the range scale discrete changed while reading
+            Processor if the range scale discrete changes while reading
             the range.<br>
           </td>
         </tr>
@@ -1463,7 +1523,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">DMENFLG.&nbsp; Set to 1 if the dimension of
             the W-Matrix is 9 for measurement incorporation.&nbsp; Set
             to 0 if the dimension of the W-Matrix is 6 for measurement
-            incorporation.&nbsp; set to 1 by the Rendezvous Navigation
+            incorporation.&nbsp; Set to 1 by the Rendezvous Navigation
             Routine.<br>
           </td>
         </tr>
@@ -1498,7 +1558,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             by three gimbal angles (Noun 22).&nbsp; A 0 means maneuver
             specified by two vectors.&nbsp; Set to 1 prior to entering
             R60 if the attitude maneuver to be made is specified by
-            three angles (Noun22).&nbsp; If it is 0, the attitude is
+            three angles (Noun 22).&nbsp; If it is 0, the attitude is
             specified by two vectors, the body fix vector (SCAXIS) and
             the direction in which this is to be pointed
             (POINTVSM).&nbsp; Another routine, VECPOINT, is used to
@@ -1549,17 +1609,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             vector).&nbsp; Thus, for TIME-RADIUS Routine, the resetting
             of this bit to 0 does not necessarily imply a successful
             TIME-RADIUS solution.&nbsp; This bit is never tested by any
-            of the mission programs.&nbsp; This bit is equivalent to <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
-
-
-
-
-
-              switches f<sub>5</sub></a> and <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
-              of Section 5.5 of this GSOP</a>.&nbsp; These two switches
-            are represented by the same bit in the AGC.<br>
+            of the mission programs.&nbsp; This bit is equivalent to the
+            switches f<sub>5</sub> and f<sub>9</sub> of Section 5.5 of
+            the GSOP.&nbsp; These two switches are represented by the
+            same bit in the AGC.<br>
           </td>
         </tr>
         <tr>
@@ -1595,8 +1648,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       </tbody>
     </table>
     <h1>42a</h1>
-    <p><i>Same as word 42a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 6.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1620,6 +1671,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
+
+
+
+
+
             ft/sec will terminate iterative loop.<br>
           </td>
         </tr>
@@ -1634,9 +1691,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           </td>
         </tr>
         <tr>
-          <td valign="top">13<br>
+          <td valign="top">13-12<br>
           </td>
-          <td rowspan="2" colspan="1" valign="top">S32.1F3A and
+          <td rowspan="1" colspan="1" valign="top">S32.1F3A and
             S32.1F3B.&nbsp; Control setting of alarm codes during first
             iterative loop and control the 50 ft/sec steps utilized to
             establish the starting point of the second iterative loop in
@@ -1645,10 +1702,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             at start of second iterative loop until after first 50
             ft/sec step is taken, when set (1, 1).&nbsp; Set (1, 0)
             after the angular error undergoes a sign change. </td>
-        </tr>
-        <tr>
-          <td valign="top">12<br>
-          </td>
         </tr>
         <tr>
           <td valign="top">11<br>
@@ -1694,14 +1747,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             is bypassed.&nbsp; Bit is checked by NORMLIZE (which is
             called by PREREAD to initialize state vectors for SERVICER):
             if bit is set to 1, MUNRVG is initialized; otherwise CALCRVG
-            is initialized.&nbsp; Bit is checked by SERVICER: if bit is
-            set to 1 (either P12, P63, P64, P66, P70 or P71 running),
-            the average-g routine MUNRVG is called; otherwise (either
-            P40, P41, P42 or P47 running) the average-g routine CALCRVG
-            is called.&nbsp; Bit is checked by BURNBABY (Master Ignition
-            routine): if bit is set to 1, CSMPREC is called prior to
-            calling R41; otherwise it is omitted.&nbsp; Bit is reset to
-            0 by V37.<br>
+            is initialized.&nbsp; <sup>*</sup>Bit is checked by
+            SERVICER: if bit is set to 1 (either P12, P63, P64, P66, P70
+            or P71 running), the average-g routine MUNRVG is called;
+            otherwise (either P40, P41, P42 or P47 running) the
+            average-g routine CALCRVG is called.&nbsp; Bit is checked by
+            BURNBABY (Master Ignition routine): if bit is set to 1,
+            CSMPREC is called prior to calling R41; otherwise it is
+            omitted.&nbsp; Bit is reset to 0 by V37.<br>
           </td>
         </tr>
         <tr>
@@ -1716,12 +1769,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           <td valign="top">REDFLAG.&nbsp; Bit is set to 1 by "proceed"
             response to V06N64 in P64 to enable landing site
             redesignation capability.&nbsp; Bit is reset to 0 at the
-            start of P66 to prohibit landing site redesignation
-            capability, and at the start of P63, P64 as
-            initialization.&nbsp; Set 0 in P64 if TREDES = 0.&nbsp; Bit
-            is tested by P64 display routine to determine whether to
-            flash V06N64, and by redesignation logic to determine
-            whether to allow redesignations.<br>
+            start of P63, P64 as initialization.&nbsp; Set 0 in P64 if
+            TREDES = 0.&nbsp; Bit is tested by P64 display routine to
+            determine whether to flash V06N64, and by redesignation
+            logic to determine whether to allow redesignations.<br>
           </td>
         </tr>
         <tr>
@@ -1781,8 +1832,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       </tbody>
     </table>
     <h1>42b</h1>
-    <p><i>Same as word 42b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 7.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1800,14 +1849,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             time has not yet been reached.&nbsp; A 0 means a solution
             for TPI time has been reached.&nbsp; Bit is reset to 0 in
             P34, P74 if the TPI time is given and the elevation angle is
-            to be computed.&nbsp; Bit is set to 1 i P33, P34, P73, and
+            to be computed.&nbsp; Bit is set to 1 in P33, P34, P73, and
             P74 when the elevation angle is given and TPI time is to be
             computed.&nbsp; Bit is tested at SWCHCLR: if 1, it is
             immediately set to 0 and control is transferred to INTLOOP
-            where the final solution for TPI time is reached if 0, then
+            where the final solution for TPI time is reached; if 0, then
             either the TPI time or the elevation angle is displayed
             depending on the setting of ETPIFLAG.&nbsp; ITSWICH also
-            test at TESTY: if 1, the prtgram looking for a solution for
+            test at TESTY: if 1, the program looking for a solution for
             TPI time; if 0, the computed elevation angle is stored.<br>
           </td>
         </tr>
@@ -1897,21 +1946,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             possibility of a transfer angle changing from outside to
             inside the cone during a powered maneuver.&nbsp; NORMSW
             should generally remain 0, unless transfers between 165° and
-            195° are intended.&nbsp; NORMSW is equivalent to <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
-
-
-
-
-
-              switch f<sub>2</sub> of Section 5.5</a>, and to <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">the
-
-
-
-
-
-              switch S<sub>R</sub> of Section 5.3.3. of this GSOP</a>. </td>
+            195° are intended.&nbsp; NORMSW is equivalent to the switch
+            f<sub>2</sub> of Section 5.5, and to the switch S<sub>R</sub>
+            of Section 5.3.3. of the GSOP. </td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -1927,14 +1964,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">th
             Pre-CSI Maneuver Program P32 or P72.&nbsp; Set to 0 by the
             Pre-CDH Maneuver Program P33 or P73.&nbsp; Set to 1 by the
             Pre-TPI Maneuver Program P34 or P74.&nbsp; The bit is
-            equivalent to the inverse of <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">the
-
-
-
-
-
-              switch f<sub>6</sub> of Section 5.5 of this GSOP</a>.<br>
+            equivalent to the inverse of the switch f<sub>6</sub> of
+            Section 5.5 of the GSOP.<br>
           </td>
         </tr>
         <tr>
@@ -1956,7 +1987,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           <td valign="top">IDLEFLAG.&nbsp; Bit set to 1 as part of a
             fresh start, and used if 0 to permit the Delta-V monitor
             computations to be performed by the Average-G loop.&nbsp;
-            bit is always set to 0 when engine is turned on in P12 and
+            Bit is always set to 0 when engine is turned on in P12 and
             P63 (or in P70 and P71 if the astronaut has attempted to
             relight the engine following an engine failure).&nbsp; In
             P40 and P42 the bit is set to 0 at engine ignition if and
@@ -1969,7 +2000,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             determined (i.e. when V97 appears on the DSKY).&nbsp; In
             addition the bit is set to 0 if an engine failure is
             detected and the astronaut keys in a "proceed" to the
-            V97.&nbsp; the bit is set to 1 also if a "POODOO" type of
+            V97.&nbsp; The bit is set to 1 also if a "POODOO" type of
             abort occurs while Average-G is running. </td>
         </tr>
         <tr>
@@ -2044,8 +2075,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       </tbody>
     </table>
     <h1>43a</h1>
-    <p><i>Same as word 43a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 8.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2102,11 +2131,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           </td>
           <td valign="top">FLUNDISP.&nbsp; Bit is set to 1 by R40
             (Engine-fail routine) to suppress guidance displays that
-            P12, P63 thru P66, P70, and P71 issue in order to avoid
-            conflict with V97 or V99.&nbsp; Bit is reset to 0 by TIG-0
-            to allow guidance displays to be presented by the guidance
-            equations.&nbsp; The bit is examined by P12, P63 thru P66,
-            P70, and P71 prior to issuing a display.<br>
+            P12, P63 thru <strike>P66</strike> P65, P70, and P71 issue
+            in order to avoid conflict with V97 or V99.&nbsp; Bit is
+            reset to 0 by TIG-0 to allow guidance displays to be
+            presented by the guidance equations.&nbsp; The bit is
+            examined by P12, P63 thru <strike>P66</strike> P65, P70,
+            and P71 prior to issuing a display.<br>
           </td>
         </tr>
         <tr>
@@ -2179,14 +2209,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             LAMBERT if the preceding internal iteration yielded a
             physically realizable transfer.&nbsp; The bit is never
             tested or set either way outside the conic
-            subroutines.&nbsp; The bit is equivalent to the <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
-
-
-
-
-
-              f<sub>7</sub> of Section 5.5 of this GSOP</a>.<br>
+            subroutines.&nbsp; The bit is equivalent to the switch f<sub>7</sub>
+            of Section 5.5 of the GSOP.<br>
           </td>
         </tr>
         <tr>
@@ -2195,14 +2219,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
           <td valign="top">ORDERSW.&nbsp; Never set to 1.&nbsp; Set to 0
             as part of a fresh start.&nbsp; Used to control the type of
             computation performed in the ITERATOR routine (part of the
-            conic subroutines).&nbsp; This bit is equivalent to the <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">switch
-
-
-
-
-
-              f<sub>4</sub> of Section 5.5 of this GSOP</a>.<br>
+            conic subroutines).&nbsp; This bit is equivalent to the
+            switch f<sub>4</sub> of Section 5.5 of the GSOP.<br>
           </td>
         </tr>
         <tr>
@@ -2219,14 +2237,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             desired radius, since the desired radius input was greater
             than pericenter radius and less than apocenter radius.&nbsp;
             (Such a solution will be reached unless INFINFLG is set to
-            1.)&nbsp; This bit is equivalent to the <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
-
-
-
-
-
-              f<sub>8</sub> in Section 5.5 of this GSOP</a>.<br>
+            1.)&nbsp; This bit is equivalent to the switch f<sub>8</sub>
+            in Section 5.5 of the GSOP.<br>
           </td>
         </tr>
         <tr>
@@ -2271,21 +2283,13 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             TIME-RADIUS routines).&nbsp; The bit is not of interest
             outside these three conic routines and in fact is neither
             tested nor set either way outside the Universal Variable
-            Routine itself.&nbsp; the bit is equivalent to the <a
-href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86">switch
-
-
-
-
-
-              f<sub>W</sub> of Fig. 5.10-4 of Section 5.5 of this GSOP</a>.<br>
+            Routine itself.&nbsp; The bit is equivalent to the switch f<sub>W</sub>
+            of Fig. 5.10-4 of Section 5.5 of the GSOP.<br>
           </td>
         </tr>
       </tbody>
     </table>
     <h1>43b</h1>
-    <p><i>Same as word 43b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 9.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2332,8 +2336,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td valign="top">12<br>
           </td>
           <td valign="top">FLPC.&nbsp; Bit is set to 1 in Ascent
-            Guidance Equations when Tie-to-go is less than 10
-            seconds.&nbsp; a 1 indicates that the pitch rate parameter
+            Guidance Equations when Time-to-go is less than 10
+            seconds.&nbsp; A 1 indicates that the pitch rate parameter
             is nulled, thereby releasing altitude control.&nbsp; Bit is
             assumed to be 0 in padload.&nbsp; A 0 indicates that the
             pitch rate parameter is a function of altitude and altitude
@@ -2361,6 +2365,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             Equations.&nbsp; A 1 indicates that the thrust-magnitude
             filter will be bypassed, and that the Ascent Guidance
             Equations will only be used to generate <u>V</u><sub>GB</sub>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -2403,12 +2413,36 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">7<br>
           </td>
-          <td valign="top">ABTTGFLG.&nbsp; The bit is normally a 0
-            (reset 0 by V37).&nbsp; In P70 and P71, if the J<sub>1</sub>,K<sub>1</sub>
-            parameters are being used for Abort Targeting, the bit will
-            remain a 0.&nbsp; If the J<sub>2</sub>,K<sub>2</sub>
-            parameters are to be used, the bit will be set to 1.&nbsp;
-            The bit will then be reset to 0 by the next V37.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B<br>
+                  </td>
+                  <td valign="top">Spare or garbage.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1C, 1D, 1E<br>
+                  </td>
+                  <td valign="top">ABTTGFLG.&nbsp; The bit is normally a
+                    0 (reset 0 by V37).&nbsp; In P70 and P71, if the J<sub>1</sub>,K<sub>1</sub>
+                    parameters are being used for Abort Targeting, the
+                    bit will remain a 0.&nbsp; If the J<sub>2</sub>,K<sub>2</sub>
+                    parameters are to be used, the bit will be set to
+                    1.&nbsp; The bit will then be reset to 0 by the next
+                    V37.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -2447,7 +2481,35 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">4<br>
           </td>
-          <td valign="top">Not used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">FLT59FLG.&nbsp; Used to select
+                    cursor-spiral mark procedure during inflight
+                    alignment.&nbsp; Set by V32 response to V50N25
+                    display (checklist code 15).&nbsp; Reset prior to
+                    V50N25 display (checklist code 15) in R51.&nbsp;
+                    Also reset by V36 and V37 and at the start of P57.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -2477,8 +2539,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>44a</h1>
-    <p><i>Same as word 44a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2517,7 +2577,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             by P42.&nbsp; A 1 indicates that LM has staged or that it is
             on the lunar surface.&nbsp; Bit is reset to 0 before launch
             or by the astronaut in R03 (V48).&nbsp; A 0 indicates that
-            the descent stage is attached and that the LM is no on the
+            the descent stage is attached and that the LM is not on the
             lunar surface.&nbsp; Bit is the only indicator of state and
             is not changed by FRESH START.&nbsp; Bit is used in the
             autopilot and in burn programs.<br>
@@ -2589,23 +2649,89 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">2<br>
           </td>
-          <td valign="top">Not used. </td>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">CONTRLFL.&nbsp; A 1 indicates that
+                    the DAP is controlling (or attempting to control)
+                    the vehicle; a 0 indicates that it is not.&nbsp; A
+                    routine is executed every 480 msec under TIME4
+                    control that forces the state of the No DAP Control
+                    DSKY light (DSPTAB + 11D/bit 2) to be the opposite
+                    of the state of this bit; it then initializes the
+                    bit to 1.&nbsp; The bit is reset to 0 by the DAP if
+                    it executes its Idling routine or Minimum Impulse
+                    routine.&nbsp; The bit is not set, reset or tested
+                    except in the routines mentions.</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
         </tr>
         <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">Not used.</td>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">NPGNCSFL.&nbsp; The bit is an image
+                    from the non-idling autopilot cycle of Channel
+                    30/bit 10 (0 for PGNCS Guidance select indication; 1
+                    for AGS).&nbsp; At the beginning of any non-idling
+                    autopilot cycle, if the channel bit is 0 and
+                    NPGNCSFL is 1 the bit is reset, and then the DAP
+                    goes through an initialization pass.</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
         </tr>
       </tbody>
     </table>
     <h1>44b</h1>
-    <p><i>Same as word 44b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FLAGWORD 11.&nbsp; Flagword 11 is used to control the operation
       of R12, the Descent State Vector Update routine.&nbsp; Therefore,
       its contents are only used during the programs P63 thru P66.&nbsp;
       During all other programs, bit 15 is set, bits 14 thru 1 are
       reset, and the contents of flagword 11 should be 40000<sub>8</sub>.&nbsp;
+
+
+
+
 
 
 
@@ -2618,8 +2744,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       an abort is requested), and by a fresh start.&nbsp; Also set to
       40000<sub>8</sub> whenever a POODOO abort occurs when Average-G is
       running.<br>
-    </p>
-    <p>Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
       <tbody>
@@ -2644,13 +2768,67 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">14<br>
           </td>
-          <td valign="top">Not used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">VFAILFLG.&nbsp; Velocity fail
+                    test.&nbsp; Set 1 when velocity radar reading has
+                    failed the LR data reasonability test.&nbsp; Bit is
+                    reset 0 when the corresponding radar reading has
+                    passed the reasonability test.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">Not used.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">HFAILFLG.&nbsp; Altitude fail
+                    test.&nbsp; Set 1 when altitude radar reading has
+                    failed the LR data reasonability test.&nbsp; Bit is
+                    reset 0 when the corresponding radar reading has
+                    passed the reasonability test.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -2709,10 +2887,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             but not incorporated into the state vector.&nbsp; The bit
             may be set to 1 via extended verb 57, permitting landing
             radar data incorporation into the state vector.&nbsp; It is
-            reset to 0 via extended verb 58 and also R12 (when LM
-            altitude below 50 feet) inhibiting landing radar data
-            incorporation.&nbsp; Bit may be reset to 0 after it has been
-            set to 1 in V57.<br>
+            reset to 0 via extended verb 58.&nbsp; Bit may be reset to 0
+            after it has been set to 1 in V57.<br>
           </td>
         </tr>
         <tr>
@@ -2733,21 +2909,72 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">6<br>
           </td>
-          <td valign="top">LPOS2FLG.&nbsp; Set 1 in SETPOS2 to inform
-            that position 2 transformation is being used.&nbsp; Reset 0
-            in fresh start and V37 logic.&nbsp; Also set 0 for abort or
-            abort stage.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A<br>
+                  </td>
+                  <td valign="top">READLR.&nbsp; Set 1 if OK to read LR
+                    range data, set to 0 if not OK.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">LPOS2FLG.&nbsp; Set 1 in SETPOS2 to
+                    inform that position 2 transformation is being
+                    used.&nbsp; Reset 0 in fresh start and V37
+                    logic.&nbsp; Also set 0 for abort or abort stage. </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">Not used.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
           <td valign="top">5<br>
           </td>
-          <td valign="top">READVEL.&nbsp; Bit is set to 1 when the LM
-            inertial velocity estimate drops below 6K feet per
-            second.&nbsp; When the bit is set to 1, it permits R12 to
-            read the landing radar velocity components, and process the
-            data.&nbsp; This bit remains set to 1 during the entire
-            landing.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+                  </td>
+                  <td valign="top">READVEL.&nbsp; Bit is set to 1 when
+                    the LM inertial velocity estimate drops below 6K
+                    feet per second.&nbsp; When the bit is set to 1, it
+                    permits R12 to read the landing radar velocity
+                    components, and process the data.&nbsp; This bit
+                    remains set to 1 during the entire landing.</td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">Not used.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -2768,10 +2995,54 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">3<br>
           </td>
-          <td valign="top">NO511FLG.&nbsp; A 1 means do not test LR
-            antenna position in R12.&nbsp; Set 1 by V33 response to a
-            flashing V05N09, alarm code=523.&nbsp; If bit is 1, R12
-            won't test for 511 alarm.<br>
+          <td valign="top">This bit is known to vary by Luminary
+            software version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A<br>
+                  </td>
+                  <td valign="top">SCALBAD.&nbsp; Set to 1 if LR low
+                    scale discrete not present when it should be, set to
+                    0 if LR scale discrete appears OK.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1B, 1C<br>
+                  </td>
+                  <td valign="top">NO511FLG.&nbsp; A 1 means do not test
+                    LR antenna position in R12.&nbsp; Set 1 by V33
+                    response to a flashing V05N09, alarm code=523.&nbsp;
+                    If bit is 1, R12 won't test for 511 alarm. </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary163<br>
+                  </td>
+                  <td valign="top">Spare or garbage.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1D, 1E<br>
+                  </td>
+                  <td valign="top">R12RDFLG.&nbsp; Bit is set to 1 as an
+                    indication to wait (R12) until all velocity readings
+                    are finished.&nbsp; It is reset to 0 as an
+                    indication that all radar reads are completed.&nbsp;
+                    The bit is set 1 when R12READ begins and is reset to
+                    0 when R12READ is finished.&nbsp; R12 (itself a part
+                    of SERVICER) waits until the bit is reset.&nbsp;
+                    This flagbit is also reset by a Fresh Start or
+                    Restart.</td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -2799,8 +3070,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         </tr>
       </tbody>
     </table>
-    <p><br>
-    </p>
     <p> </p>
     <p> </p>
     <p> </p>
@@ -2813,8 +3082,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     <p> </p>
     <p> </p>
     <h1><a name="50"></a>45a,45b,46a,46b,47a,47b,48a,48b,49a,49b,50a</h1>
-    <p><i>Same as words 45-49,50a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
       indicate the status of the DSKY displays.&nbsp; If bit 15 through
       12 are 0001, the next 11 bits will indicate the actual status of
@@ -3045,6 +3312,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
+
+
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3231,8 +3502,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 │   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
 └───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
     <h1>50b</h1>
-    <p><i>Same as word 50b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>DSPTAB+11D.&nbsp; This register drives relays for the display
       lights.&nbsp; The bit assignments are:<br>
     </p>
@@ -3247,13 +3516,60 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">1<br>
           </td>
-          <td valign="top"><br>
+          <td valign="top">This bit differs by Lunar Module software
+            version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">Priority Display<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">2<br>
           </td>
-          <td valign="top"><br>
+          <td valign="top">This bit differs by Lunar Module software
+            version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">No DAP Control<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
         <tr>
@@ -3307,8 +3623,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       on.<br>
     </p>
     <h1>51</h1>
-    <p><i>Same as word 51 on Orbital Maneuvers List.</i><br>
-    </p>
     <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
       elapsed time.&nbsp; Used for all timing while LGC is on.&nbsp;
       Zeroed at liftoff (by crew procedure), increment by one bit per
@@ -3316,8 +3630,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       or V73 (P27).&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
     <h1>52,53,54,55,56,57,58</h1>
-    <p><i>Same as words 52-58 on Orbital Maneuvers List.</i><br>
-    </p>
     <p>LM STATE VECTOR and TIME.&nbsp; The LGC's latest calculated state
       vector for the LM in reference coordinates.&nbsp; The coordinates
       may be either earth-centered or moon-centered; a zero in bit 11 of
@@ -3325,6 +3637,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       moon-centered.&nbsp; Words 52-54 contain the position components
       X, Y, Z scaled meters/2<sup>29</sup>.&nbsp; Words 55-57 contain
       the velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -3345,11 +3663,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       <li>P57 — If P57 is used to compute the LM landing site position
         by keying in "enter" to the display of checklist code 14 then
         only time and position are updated.</li>
+      <li>P77 in some software versions.</li>
     </ul>
     <p> </p>
     <h1><a name="60"></a>59a,59b,60a</h1>
-    <p><i>Same as words 59-60a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>DESIRED BODY RATES (X, Y, Z).&nbsp; Desired automatic maneuver
       rates about body axes as given to the DAP.&nbsp; Calculated at the
       beginning of an automatic coasting flight maneuver (KALCMANU) and
@@ -3357,28 +3674,274 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       flight when steering (FINDCDUW) is enabled.&nbsp; Scaled
       (radians/sec)/(π/4).&nbsp; Range is ±10 degrees/sec. </p>
     <h1>60b</h1>
-    <p><i>Same as word 60b on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>Garbage.&nbsp; The first half of the first element of a 3 × 3
-      direction cosine matrix (double-precision) relating a desired set
-      of S/C axes to stable member axes.&nbsp; Used by the VECPOINT
-      routine and by the coasting flight attitude maneuver routine
-      (KALCMANU).&nbsp; Scaled 2<sup>-1</sup>.&nbsp; Also contains
-      ECDUW, the contents of the EBANK at the time user called FINDCDUW.
+    <p>Garbage. <br>
     </p>
     <h1>61a,61b,62a</h1>
-    <p><i>Same as words 61,62a on Orbital Maneuvers List.</i><br>
+    <p>These downlink items are known to differ somewhat by Luminary
+      software version.<br>
     </p>
-    <p>CADRFLSHs.&nbsp; A set of three single-precision erasable memory
-      cells used to retain return address information from the display
-      interface routine.&nbsp; CADRFLSH contains the FCADR of the last
-      priority display request, CADRFLSH+1 the FCADR of the last
-      mark/extended verb display, and CADRFLSH+2 contains the FCADR for
-      the last normal display.&nbsp; Octal quantities.<br>
-    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">&nbsp;Version<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1, 1A, 1B, and 1C<br>
+          </td>
+          <td valign="top">CADRFLSHs.&nbsp; A set of three
+            single-precision erasable memory cells used to retain return
+            address information from the display interface
+            routine.&nbsp; CADRFLSH contains the FCADR of the last
+            priority display request, CADRFLSH+1 the FCADR of the last
+            mark/extended verb display, and CADRFLSH+2 contains the
+            FCADR for the last normal display.&nbsp; Octal quantities.</td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1D<br>
+          </td>
+          <td valign="top">
+            <ul>
+              <li>61a: Garbage or Spare<br>
+              </li>
+              <li>61b: CHAN77.</li>
+              <li>62a: CADRFLSH +2 as above.</li>
+            </ul>
+            <p>As for CHAN77 (Channel 77):&nbsp; A computer output
+              channel, the individual bits of which are used to indicate
+              the source of a hardware restart.&nbsp; The channel is
+              initialized to 0 by a V36E (request fresh start).&nbsp;
+              The channel will be zeroed by the final V33E on a P27
+              state vector uplink and also by a crew or ground
+              V21N10E77EE.&nbsp; Should a hardware restart occur, one of
+              the bits in the channel should be set to 1 indicating the
+              source.&nbsp; If multiple restarts occur, more than one
+              bit could possibly be left set afterwards (i.e., if they
+              were different types).&nbsp; Many restarts of the same
+              type would leave just one bit set with the software REDO
+              COUNTER indicating the number.&nbsp; The bit definitions
+              are:<br>
+            </p>
+            <table cellspacing="2" cellpadding="2">
+              <tbody>
+                <tr>
+                  <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+                    <br>
+                  </th>
+                  <th valign="bottom"><u>BIT</u><br>
+                  </th>
+                  <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+                    <br>
+                  </th>
+                  <th valign="bottom" align="left">RESTART (and/or AGC<br>
+                    <u>warning)
+                      CAUSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      &nbsp; &nbsp;&nbsp; </u><br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">15-10<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">9<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Scalar double freq.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">8<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Scalar fail<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">7<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Counter fail<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">6<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Voltage fail<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">5<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Nightwatchman<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">4<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Ruptlock<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">3<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">TC Trap<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">2<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">E-memory parity fail<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">1<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">E <u>or</u> F-memory parity fail<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            Note that a restart due to oscillator fail is not shown in
+            this channel.</td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1E<br>
+          </td>
+          <td valign="top">
+            <ul>
+              <li>61a: Garbage or Spare<br>
+              </li>
+              <li>61b: CHAN77 as above</li>
+              <li>62a: CHANBKUP</li>
+            </ul>
+            <p>As for CHANBKUP:&nbsp; A single-precision erasable memory
+              cell used to bypass logic check of channel 30, bits 1, 4,
+              and 5.&nbsp; Displayed as R2 of NOUN 46 in R03.<br>
+            </p>
+            <table cellspacing="2" cellpadding="2">
+              <tbody>
+                <tr>
+                  <th valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+                    <br>
+                  </th>
+                  <th valign="top"><u>Bit</u><br>
+                  </th>
+                  <th valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+                    <br>
+                  </th>
+                  <th valign="top"><u>Meaning (If set to 1)</u><br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">4<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Bypass logic for Auto Throttle (bit
+                    5)<br>
+                    in P66 and pre-ignition powered-flight<br>
+                    programs if the APSFLAG is not set.<br>
+                    Assumes Auto Throttle.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top" align="center">1<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">Bypass logic for Abort (bit 1) and
+                    Abort<br>
+                    State (bit 4) in aborts monitor routine<br>
+                    (R10, R11).&nbsp; Assumes no abort or abort<br>
+                    stage request; P70 or P71 must be<br>
+                    called if this bit is set.</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <h1>62b,63a,63b</h1>
-    <p><i>Same as words 62b,63 on Orbital Maneuvers List.</i><br>
-    </p>
     <p>FAILREG's, a set of three single-precision cells used to retain
       alarm pattern code information.&nbsp; They are all reset to 0 by a
       fresh start.&nbsp; FAILREG and FAILREG+1 are also reset to 0 by
@@ -3388,8 +3951,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       alarm code.&nbsp; Octal quantities.<br>
     </p>
     <h1>64a</h1>
-    <p><i>Same as word 64a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>RADMODES.&nbsp; A flagword associated with radar modes.&nbsp; A
       fresh start sets bits 7 and 2 to 1, sets bit 6 to the value of bit
       6 of channel 33, and sets all other bits to 0.<br>
@@ -3405,45 +3966,46 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">15<br>
           </td>
-          <td valign="top">Continuous Designate.&nbsp; A 1 means that
-            commands are issued by the LGC to the Rendezvous Radar
-            without checking to see if lock-on is achieved.&nbsp; A 0
-            indicates that the LGC checks for lock-on when designating
-            the antenna.&nbsp; set to 1 by selection of the continuous
-            designate option of Verb 41, RR Coarse Align, and RR
-            Automatic Search Routine (R24).&nbsp; Set 0 by Verb 56
+          <td valign="top">CDESFLAG. Continuous Designate.&nbsp; A 1
+            means that commands are issued by the LGC to the Rendezvous
+            Radar without checking to see if lock-on is achieved.&nbsp;
+            A 0 indicates that the LGC checks for lock-on when
+            designating the antenna.&nbsp; Set to 1 by selection of the
+            continuous designate option of Verb 41, RR Coarse Align, and
+            RR Automatic Search Routine (R24).&nbsp; Set 0 by Verb 56
             (Terminate Tracking), Verb 37 selection of P00, Verb 44
             (Terminate RR Coarse Align), by answering the display (V16
             N80) of R24, and by RR Monitor Routine (R25) if the RR mode
-            changes from LGC to manual or off, i.e., if the RR auto ode
-            discrete (bit 2 of channel 33) changes from 0 to 1.&nbsp;
+            changes from LGC to manual or off, i.e., if the RR auto mode
+            discrete (Bit 2 of channel 33) changes from 0 to 1.&nbsp;
             Also set 0 at the start of P20, P22, and P12.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">14<br>
           </td>
-          <td valign="top">Remode.&nbsp; A 1 means that a change in the
-            antenna mode has been requested or is in progress.&nbsp; A 0
-            indicates that no remode is requested.&nbsp; Set to 1 when
-            the Radar Designate Routines (R21, R24, Verb 41) determine
-            that a designate may be performed after a remode has been
-            done, and by R21 when on the lunar surface (in P22).&nbsp;
-            Set to 0 by the remode subroutine at the end of remoding and
-            by Verb 56 or a Verb 37 request for another program and by
-            R25 when the RR auto-mode discrete changes from 0&nbsp; to
-            1.&nbsp; Set to 1 by R29 before it calls the remode routine.<br>
+          <td valign="top">REMODFLG. Remode.&nbsp; A 1 means that a
+            change in the antenna mode has been requested or is in
+            progress.&nbsp; A 0 indicates that no remode is
+            requested.&nbsp; Set to 1 when the Radar Designate Routines
+            (R21, R24, Verb 41) determine that a designate may be
+            performed after a remode has been done, and by R21 when on
+            the lunar surface (in P22).&nbsp; Set to 0 by the remode
+            subroutine at the end of remoding and by Verb 56 or a Verb
+            37 request for another program and by R25 when the RR
+            auto-mode discrete changes from 0&nbsp; to 1.&nbsp; Set to 1
+            by R29 before it calls the remode routine.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">13<br>
           </td>
-          <td valign="top">RR CDU Zero.&nbsp; A 1 means that the RR CDUs
-            are being zeroed.&nbsp; A 0 means that they are not being
-            zeroed.&nbsp; A 1 inhibits an RR CDU fail from lighting the
-            tracker fail light.&nbsp; Set to 1 by R25 when the RR
-            auto-mode discrete changes from off/manual to on, and by
-            Verb 40 with Noun 72.&nbsp; Set to 0 by the RR zero
+          <td valign="top">RCDU0FLG. RR CDU Zero.&nbsp; A 1 means that
+            the RR CDUs are being zeroed.&nbsp; A 0 means that they are
+            not being zeroed.&nbsp; A 1 inhibits an RR CDU fail from
+            lighting the tracker fail light.&nbsp; Set to 1 by R25 when
+            the RR auto-mode discrete changes from off/manual to on, and
+            by Verb 40 with Noun 72.&nbsp; Set to 0 by the RR zero
             subroutine at the end of the CDU zero, by Verb 56 or a Verb
             37 request for another program and by a change in the RR
             auto-mode discrete from 0 to 1.<br>
@@ -3452,20 +4014,20 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top">RR antenna mode.&nbsp; A zero means the
-            antenna is in Mode I, a 1 indicates Mode II.&nbsp; the bit
-            is set to the appropriate value by the RR turn-on sequence
-            in R25 after an RR CDU zero, by the remode subroutine at the
-            conclusion of a remode, and by a Verb 37 request for a new
-            program.<br>
+          <td valign="top">ANTENFLG. RR antenna mode.&nbsp; A zero means
+            the antenna is in Mode I, a 1 indicates Mode II.&nbsp; The
+            bit is set to the appropriate value by the RR turn-on
+            sequence in R25 after an RR CDU zero, by the remode
+            subroutine at the conclusion of a remode, and by a Verb 37
+            request for a new program.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top">Monitor Reposition.&nbsp; A 1 means that an
-            RR reposition is taking place.&nbsp; A 0 means that no
-            reposition is taking place.&nbsp; A 1 inhibits further
+          <td valign="top">REPOSMON. Monitor Reposition.&nbsp; A 1 means
+            that an RR reposition is taking place.&nbsp; A 0 means that
+            no reposition is taking place.&nbsp; A 1 inhibits further
             checking of the antenna gimbal limits by R25.&nbsp; When a
             designate is possible and about to begin, a 1 in this bit
             delays the designate until the reposition is
@@ -3484,8 +4046,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">10<br>
           </td>
-          <td valign="top">Designate.&nbsp; A 1 means that an RR
-            designate has been requested or is in progress.&nbsp; A 0
+          <td valign="top">DESIGFLG. Designate.&nbsp; A 1 means that an
+            RR designate has been requested or is in progress.&nbsp; A 0
             indicates that a designate has not been requested nor is one
             in progress.&nbsp; Set to 1 at the start of a designate by
             R21, R24 or verb 41.&nbsp; Set to 0 by Verb 44, by R21 when
@@ -3502,104 +4064,104 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">9<br>
           </td>
-          <td valign="top">Landing Radar Altitude Scale.&nbsp; A 1 means
-            that the landing radar altitude reading is on the high
-            scale.&nbsp; A 0 means low scale.&nbsp; Set to the value in
-            channel 33 bit 9 by R04 and R77 and each time the LR
-            altitude is read.<br>
+          <td valign="top">ALTSCALE. Landing Radar Altitude Scale.&nbsp;
+            A 1 means that the landing radar altitude reading is on the
+            high scale.&nbsp; A 0 means low scale.&nbsp; Set to the
+            value in channel 33 bit 9 by R04 and R77 and each time the
+            LR altitude is read.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">8<br>
           </td>
-          <td valign="top">Landing Radar Velocity Data Fail.&nbsp; A 1
-            means that landing radar velocity data could not be read
-            successfully.&nbsp; Set to the value in channel 33 bit 8
-            each time landing radar velocity data is read.&nbsp; Set to
-            0 by pressing the error reset button on the DSKY and by a
-            lamp test.<br>
+          <td valign="top">LRVELFLG. Landing Radar Velocity Data
+            Fail.&nbsp; A 1 means that landing radar velocity data could
+            not be read successfully.&nbsp; Set to the value in channel
+            33 bit 8 each time landing radar velocity data is
+            read.&nbsp; Set to 0 by pressing the error reset button on
+            the DSKY and by a lamp test.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">7<br>
           </td>
-          <td valign="top">No RR CDU Fail.&nbsp; A 1 means that an RR
-            CDU fail has not occurred.&nbsp; A 0 means one has
-            occurred.&nbsp; Set to the value in channel 30 bit 7
+          <td valign="top">RCDUFAIL. No RR CDU Fail.&nbsp; A 1 means
+            that an RR CDU fail has not occurred.&nbsp; A 0 means one
+            has occurred.&nbsp; Set to the value in channel 30 bit 7
             whenever the RR CDU fail discrete changes.&nbsp; Set to 1 by
-            an IMU tun-on sequence.&nbsp; Set to 1 by a fresh start or a
-            hardware restart.<br>
+            an IMU turn-on sequence.&nbsp; Set to 1 by a fresh start or
+            a hardware restart.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">6<br>
           </td>
-          <td valign="top">Landing Radar Position.&nbsp; A 1 indicates
-            LR position 2.&nbsp; A 0 indicates position 1.&nbsp; Set to
-            1 by Verb 59.&nbsp; Set to value of bit 6 of channel 33 at
-            start of R04/R77.&nbsp;&nbsp; Also set 1 by R12.<br>
+          <td valign="top">LRPOSFLG. Landing Radar Position.&nbsp; A 1
+            indicates LR position 2.&nbsp; A 0 indicates position
+            1.&nbsp; Set to 1 by Verb 59.&nbsp; Set to value of bit 6 of
+            channel 33 at start of R04/R77.&nbsp;&nbsp; Also set 1 by
+            R12.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">5<br>
           </td>
-          <td valign="top">Landing Radar Altitude Data Fail.&nbsp; A 1
-            means that LR altitudedata could not be read
-            successfully.&nbsp; Set to the value in channel 33 bit 5
-            each time LR altitude data is read.&nbsp; Set to 0 by
+          <td valign="top">LRALTFLG. Landing Radar Altitude Data
+            Fail.&nbsp; A 1 means that LR altitude data could not be
+            read successfully.&nbsp; Set to the value in channel 33 bit
+            5 each time LR altitude data is read.&nbsp; Set to 0 by
             pressing the error reset button on the DSKY and by a lamp
             test.</td>
         </tr>
         <tr>
           <td valign="top" align="center">4<br>
           </td>
-          <td valign="top">RR Data Fail.&nbsp; A 1 means that RR data
-            could not be read successfully.&nbsp; Set to the value in
-            channel 33 bit 4 each time RR data is read.&nbsp; Set to 0
-            by pressing the error reset button on the DSKY, and by a
-            lamp test.<br>
+          <td valign="top">RRDATAFL. RR Data Fail.&nbsp; A 1 means that
+            RR data could not be read successfully.&nbsp; Set to the
+            value in channel 33 bit 4 each time RR data is read.&nbsp;
+            Set to 0 by pressing the error reset button on the DSKY, and
+            by a lamp test.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">3<br>
           </td>
-          <td valign="top">RR Range Scale.&nbsp; A 1 indicates the RR
-            range reading is on the high scale.&nbsp; A 0 indicates low
-            scale.&nbsp; Set to the value in channel 33 bit 3 by R22
-            prior to reading RR range, and also set by R22 when a scale
-            change is detected.&nbsp; Set to value of bit 3 of channel
-            33 at start of R04/R77.<br>
+          <td valign="top">RRRSFLAG. RR Range Scale.&nbsp; A 1 indicates
+            the RR range reading is on the high scale.&nbsp; A 0
+            indicates low scale.&nbsp; Set to the value in channel 33
+            bit 3 by R22 prior to reading RR range, and also set by R22
+            when a scale change is detected.&nbsp; Set to value of bit 3
+            of channel 33 at start of R04/R77.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">2<br>
           </td>
-          <td valign="top">RR Auto Mode.&nbsp; A 1 means that RR is not
-            in the auto mode; i.e., the RR auto mode discrete is not
-            present.&nbsp; A 0 means the RR is in the auto mode.&nbsp;
-            Set to the appropriate value by R25 when a change occurs in
-            the RR auto mode discrete (channel 33 bit 2).&nbsp; Set to 1
-            by an IMU turn-on sequence.&nbsp; Set to 1 by a fresh start
-            or hardware restart.<br>
+          <td valign="top">AUTOMODE. RR Auto Mode.&nbsp; A 1 means that
+            RR is not in the auto mode; i.e., the RR auto mode discrete
+            is not present.&nbsp; A 0 means the RR is in the auto
+            mode.&nbsp; Set to the appropriate value by R25 when a
+            change occurs in the RR auto mode discrete (channel 33 bit
+            2).&nbsp; Set to 1 by an IMU turn-on sequence.&nbsp; Set to
+            1 by a fresh start or hardware restart.<br>
           </td>
         </tr>
         <tr>
           <td valign="top" align="center">1<br>
           </td>
-          <td valign="top">RR Turn-On.&nbsp; A 1 indicates than an RR
-            turn-on sequence (zero the RR CDUs and establish the antenna
-            mode) is in progress.&nbsp; A 0 means that no RR turn-on
-            sequence is in progress.&nbsp; Set to 1 by R25 when the RR
-            auto mode discrete changes from off/manual to auto.&nbsp;
-            Set to 0 at the termination of the turn-on sequence.<br>
+          <td valign="top">TURNONFL. RR Turn-On.&nbsp; A 1 indicates
+            than an RR turn-on sequence (zero the RR CDUs and establish
+            the antenna mode) is in progress.&nbsp; A 0 means that no RR
+            turn-on sequence is in progress.&nbsp; Set to 1 by R25 when
+            the RR auto mode discrete changes from off/manual to
+            auto.&nbsp; Set to 0 at the termination of the turn-on
+            sequence.<br>
           </td>
         </tr>
       </tbody>
     </table>
     <p> </p>
     <h1>64b</h1>
-    <p><i>Same as word 64b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>DAPBOOLS.&nbsp; A flagword associated with the DAP.&nbsp; A fresh
       start sets DAPBOOLS to 21322<sub>8</sub>.<br>
     </p>
@@ -3618,7 +4180,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">15<br>
           </td>
-          <td valign="top">PULSES<br>
+          <td valign="top">PULSES, PULSEFLG<br>
           </td>
           <td valign="top">Minimum impulse command mode.<br>
           </td>
@@ -3628,7 +4190,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">14<br>
           </td>
-          <td valign="top">USEQRJTS<br>
+          <td valign="top">USEQRJTS, USEQRFLG<br>
           </td>
           <td valign="top">Gimbal unusable.&nbsp; Use jets only.<br>
           </td>
@@ -3638,7 +4200,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">CSMDOCKED<br>
+          <td valign="top">CSMDOCKED, CSMDKFLG<br>
           </td>
           <td valign="top">CSM-DOCKED (Use backup DAP)<br>
           </td>
@@ -3648,7 +4210,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">12<br>
           </td>
-          <td valign="top">OURRCBIT<br>
+          <td valign="top">OURRCBIT, OURRCFLG<br>
           </td>
           <td valign="top">Still in rate command<br>
           </td>
@@ -3657,7 +4219,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">ACC4OR2X<br>
+          <td valign="top">ACC4OR2X, ACC4-2FL<br>
           </td>
           <td valign="top">4-Jet X-Axis translation requested<br>
           </td>
@@ -3666,7 +4228,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">10<br>
           </td>
-          <td valign="top">AORBTRAN<br>
+          <td valign="top">AORBTRAN, AORBTFLG<br>
           </td>
           <td valign="top">B-System for X-translation<br>
           </td>
@@ -3675,7 +4237,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">LPDPHASE (XOVINHIB)<br>
+          <td valign="top">LPDPHASE (XOVINHIB), XOVINFLG<br>
           </td>
           <td valign="top">In LPD Phase (X-Axis override locked out).<br>
           </td>
@@ -3685,17 +4247,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">8<br>
           </td>
-          <td valign="top">DRIFTBIT<br>
+          <td valign="top">DRIFTBIT, DRIFTDFL<br>
           </td>
           <td valign="top">Assume zero offset.&nbsp; Drifting Flight.<br>
           </td>
-          <td valign="top">Offset acceleration (likely (DPS, APS).<br>
+          <td valign="top">Offset acceleration likely (DPS, APS).<br>
           </td>
         </tr>
         <tr>
           <td valign="top">7<br>
           </td>
-          <td valign="top">RHCSCALE<br>
+          <td valign="top">RHCSCALE, RHCSCFLG<br>
           </td>
           <td valign="top">Normal RHC scaling requested.<br>
           </td>
@@ -3705,7 +4267,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">6<br>
           </td>
-          <td valign="top">ULLAGER<br>
+          <td valign="top">ULLAGER, ULLAGFLG<br>
           </td>
           <td valign="top">Internal Ullage request<br>
           </td>
@@ -3715,7 +4277,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">5-4<br>
           </td>
-          <td valign="top">DBSL2FLG, DBSELECT<br>
+          <td valign="top">DBSL2FLG, DBSELECT, DBSELFLG<br>
           </td>
           <td rowspan="1" colspan="2" valign="top">These bits are used
             together to indicate astronaut-chosen deadband (5°, 1° or
@@ -3725,7 +4287,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">3<br>
           </td>
-          <td valign="top">ACCSOKAY<br>
+          <td valign="top">ACCSOKAY, ACCOKFLG<br>
           </td>
           <td valign="top">Computed accelerations probably correct.<br>
           </td>
@@ -3735,7 +4297,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top">2-1<br>
           </td>
-          <td valign="top">AUTORATE2, AUTORATE1<br>
+          <td valign="top">AUTORATE2, AUTORATE1 (AUTR2FLG, AUTR1FLG)<br>
           </td>
           <td rowspan="1" colspan="2" valign="top">These bits are used
             together to indicate astronaut-chosen KALCMANU maneuver
@@ -3744,151 +4306,151 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         </tr>
       </tbody>
     </table>
-    <p>Bits 13, 11, 10, 7, 5, 4, 2, 1 are changed only in R03.&nbsp; Bit
-      15 is set by V76, cleared by V77; also cleared by P63, P70 and
-      P71.&nbsp; Bit 12 is under internal DAP control.&nbsp; Bit 3 is
-      set by 1/ACCs, cleared by fresh start and restart.<br>
-    </p>
-    <h1>65a</h1>
-    <p><i>Same as word 65a on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>POSTORKU.&nbsp; Running sum of positive torque commands about
-      control axis U (RCS on-time multiplied by the number of jets
-      used).&nbsp; POSTORKU will, in time, overflow and subsequently
-      increase once more from zero (overflow does not go into sign
-      bit).&nbsp; The scaling is such as to preclude more than one
-      overflow per downlink cycle (2 sec) thus making the change from
-      one reading to the next unambiguous. &nbsp; Calculated every 0.1
-      second when DAP is running.&nbsp; Scaled jetseconds/32 (1
-      jetsecond is defined as 1 jet firing for 1 second). </p>
+    <br>
+    Bits 13, 11, 10, 7, 5, 4, 2, 1 are changed only in R03.&nbsp; Bit 15
+    is set by V76, cleared by V77; also cleared by P63, P70 and
+    P71.&nbsp; Bit 12 is under internal DAP control.&nbsp; Bit 3 is set
+    by 1/ACCs, cleared by fresh start and restart.
+    <h1>65-67</h1>
+    <p>OGC, IGC, MGC.&nbsp; The X, Y, and Z gyro torquing angles
+      computed in CALCGTA in P52, P57; counted down as gyros are
+      torqued.&nbsp; During coarse align in CALCGA in P52, P57 the
+      desired gimbal angles.&nbsp; Scaled degrees/360.</p>
     <p> </p>
-    <h1>65b</h1>
-    <p><i>Same as word 65b on Orbital Maneuvers List.</i><br>
+    <h1>68a, 68b<br>
+    </h1>
+    <p>STAR IDs.&nbsp; 68a contains the star I.D. for the sighting
+      vector in words 69-71.&nbsp; 68b contains the star I.D. for the
+      sighting vector in words 72-74.&nbsp; Set during PICAPAR and after
+      astronaut changes star number.&nbsp; These I.D.s will be the LGC
+      catalogue number (Refer to Control Data section of this GSOP)
+      multiplied by six.&nbsp; Scaled 2<sup>-14</sup>.<br>
     </p>
-    <p>NEGTORKU.&nbsp; Running sum (always positive) of negative torque
-      about control axis U.&nbsp; Calculated every 0.1 second when DAP
-      is running.&nbsp; Scaled jetseconds/32. </p>
-    <h1>66a</h1>
-    <p><i>Same as word 66a on Orbital Maneuvers List.</i><br>
+    <h1><a name="70"></a>69-71</h1>
+    <p>STAR SIGHTING VECTOR 1 (STARSAV1).&nbsp; During P52, P51 and
+      Technique 2 of P57 STARSAV1 contains the 1st optics sighting
+      vector.&nbsp; During Technique 0 of P57 it contains the Y
+      spacecraft axis and the gravity vector during techniques 1 and
+      3.&nbsp; In stable member coordinates.&nbsp; Scaled 2<sup>-1</sup>.<br>
     </p>
-    <p>POSTORKV.&nbsp; Running sum of positive torque about control axis
-      V.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
-      Scaled jetseconds/32. </p>
-    <h1>66b</h1>
-    <p><i>Same as word 66b on Orbital Maneuvers List.</i><br>
+    <h1>72-74</h1>
+    STAR SIGHTING VECTOR 2 (STARSAV2).&nbsp; During P52, P51 and
+    Techniques 2&nbsp; and 3 of P57 STARSAV2 contains the 2nd optics
+    sighting vector and contains the 1st sighting vector temporarily
+    during sighting on the 2nd body.&nbsp; During P57 techniques 0 and
+    1, STARSAV2 contains the Z spacecraft axis.&nbsp; In stable member
+    coordinates.&nbsp; Scaled 2<sup>-1</sup>.
+    <h1>75-76</h1>
+    <p>These words are known to vary by Luminary software version.<br>
     </p>
-    <p>NEGTORKV.&nbsp; Running sum (always positive) of negative torque
-      about control axis V.&nbsp; Calculated every 0.1 second when DAP
-      is running.&nbsp; Scaled jetseconds/32.<br>
-    </p>
-    <h1>67</h1>
-    <p><i>Same as word 67 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>Spare.&nbsp; The first half of each spare contains 00000<sub>8</sub>.&nbsp;
-
-
-
-
-
-      The second half is ARUPT (the contents of the accumulator when the
-      telemetry interrupt was recognized).<br>
-    </p>
-    <h1>68</h1>
-    <p><i>Same as word 68 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>CDH TIME.&nbsp; The time of ignition of the CDH maneuver.&nbsp;
-      Used in CDHMVR subroutine.&nbsp; Calculated each iteration of
-      CSI/A subroutine in P32/P72.&nbsp; Input to P33/P73.&nbsp; Scaled
-      centiseconds/2<sup>28</sup>, referenced to computer clock.<br>
-    </p>
-    <h1><a name="70"></a>69,70,71</h1>
-    <p><i>Same as words 69-71 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>DELTA VELOCITY (X, Y, Z) at CDH.&nbsp; In reference
-      coordinates.&nbsp; Used to calculate ΔV<sub>CDH</sub> in local
-      vertical coordinates.&nbsp; Calculated each iteration of CDHMVR
-      subroutine (once in P33/P73, possibly numerous times in
-      P32/P72).&nbsp; Also calculated after the local-vertical velocity
-      is displayed in P33/P73 (regardless of whether or not overwrite
-      occurs).&nbsp; Earth-centered if CMOONFLG is zero, moon-centered
-      if CMOONFLG is one.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <h1>72</h1>
-    <p><i>Same as word 72 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>TPI TIME.&nbsp; Time of TPI ignition.&nbsp; Ultimately passed on
-      to burn program.&nbsp; Also used as input to orbital
-      integration.&nbsp; Computed by P33/P73, may be recomputed by
-      P34/P74.&nbsp; Input to P32/P72.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    </p>
-    <h1>73,74,75</h1>
-    <p><i>Same as words 73-75 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>DELTA VELOCITY (X, Y, Z) for TPI MANEUVER.&nbsp; In reference
-      coordinates.&nbsp; Delta Velocity required at TPI Time of Ignition
-      or at TPM Time of ignition.&nbsp; Rotated to local vertical and
-      line-of-sight coordinate systems and displayed to astronaut via
-      V06 N81 and V06 N59, respectively.&nbsp; Computed once per program
-      pass by P34/P74 and P35/P75.&nbsp; Updated during burn programs by
-      RASTEER1 for Lambert targeted burns.&nbsp; Scaled
-      (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <p> </p>
-    <h1>76</h1>
-    <p><i>Same as word 13 on the Orbital Maneuvers List.</i><br>
-    </p>
-    <p>ELEVATION ANGLE.&nbsp; The angle between the horizontal plane
-      defined by the active vehicle's position at TPI and the line of
-      sight from the active to the passive vehicle.&nbsp; The angle is
-      measured in a counter-clockwise rotation from the plane in the
-      forward-direction path of the active vehicle (determined by the
-      positive direction of the active vehicle's velocity vector) to the
-      active-passive line-of-sight vector.&nbsp; Used to compute TPI
-      Time by P33/P73 and P34/P74.&nbsp; Input to P32/P72.&nbsp; Input
-      to P34/P74 or computed by P34/P74.&nbsp; Scaled degrees/360.<br>
-    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Version<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1, 1A, 1B, 1C<br>
+          </td>
+          <td valign="top">
+            <dl>
+              <dt>75a,75b,76a:&nbsp;</dt>
+              <dd>LR VELOCITIES (Raw Data).&nbsp; Landing radar beam
+                velocities (X, Y, Z).&nbsp; The data readout from the
+                Landing Radar High Speed Counter into LGC input counter
+                46<sub>8</sub>.&nbsp; Always contain the last values
+                which were read, i.e., these registers are never
+                initialized.&nbsp; Each component read once per second
+                during R77.&nbsp; Each component read once per four
+                seconds during LR option of R04.&nbsp; Scaled (15-bit
+                integer - 12288.2) × K ft/sec where K = -0.6440 for V<sub>x</sub>,
+                K = 1.212 for V<sub>y</sub>, and K = -0.8668 for V<sub>z</sub>.
+              </dd>
+              <dt>76b: <br>
+              </dt>
+              <dd> LR RANGE (Raw Data).&nbsp; Landing radar slant
+                range.&nbsp; The data readout from the LR High Speed
+                Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+                Always contains the last value read, i.e., this register
+                is never initialized.&nbsp; Read once per second in
+                R77.&nbsp; Read once every 4 sec during LR option of
+                R04.&nbsp; A 15-bit integer which is multiplied by
+                either 5.395 on the high scale or 1.079 on the low scale
+                to convert to units of feet.&nbsp; A 1 in bit 9 of
+                RADMODES indicates high scale. </dd>
+            </dl>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1D, 1E<br>
+          </td>
+          <td valign="top">
+            <dl>
+              <dt>75a:</dt>
+              <dd>SERVDURN.&nbsp; The Average-G cycle duration which is
+                computed as the difference between TIME1 and the least
+                significant half of PIPTIME at exit from the Average-G
+                in SERVICER.&nbsp; It is a measure of TLOSS; the greater
+                the TLOSS, the larger that time will be.&nbsp; The
+                quantity is scaled centiseconds/2<sup>14</sup>, and is
+                corrected for overflow (always &gt; 0).</dd>
+              <dt>75b:</dt>
+              <dd>DUMLOOPS.&nbsp; The number of passes through Dummy
+                Job, scaled counts/2<sup>14</sup>.&nbsp; The register is
+                incremented when there is less than 100% duty cycle to
+                indicate relative amounts of DUMMYJOB activity at
+                various times.&nbsp; The rate at which it is incremented
+                indicates the amount of available processing time.</dd>
+              <dt>76:</dt>
+              <dd> TET.&nbsp; Time of state vector being integrated or
+                time to which last state vector was integrated.&nbsp; It
+                is stepped by half-time-step increments, plus or minus,
+                whenever integration is being done.&nbsp; Scaled,
+                centiseconds/2<sup>28</sup>.</dd>
+            </dl>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <h1>77a</h1>
-    <p><i>Same as word 77a on Coast and Align List.</i><br>
-    </p>
     <p>ACTUAL RR SHAFT CDU.&nbsp; RR shaft angle CDU counter.&nbsp;
       Defines RR antenna position (along with trunnion angle).&nbsp;
       Updated from RR CDUs as shaft angle changes.&nbsp; This register
       is an unsigned 15-bit fraction.&nbsp; The quantity is scaled
       degrees/360.<br>
     </p>
-    <h1>77b,78a,79b<br>
+    <h1>77b,78a,78b<br>
     </h1>
-    <p><i>Same as words 77b,78 on Coast and Align List.<br>
-      </i></p>
-    <p>ACTUAL PIPAS (X, Y, Z).&nbsp; Velocity increments along the IMU
-      Stable Member X, Y, and Z axes.&nbsp; Data is valid commencing at
-      approximately 15 seconds after ISS Turn-on.&nbsp; Automatic
-      increments when ISS is on.&nbsp; Zeroed every 2 seconds during
-      powered flight.&nbsp; Zeroed after coarse alignment in P51, P52,
-      and P57.&nbsp; Zeroed by NBDONLY (after reading) if SURFFLAG is
-      set 1.&nbsp; In stable member coordinates.&nbsp; Scaled
-      (centimeters/second)/2<sup>14</sup>.<br>
-      <i></i></p>
-    <h1>79</h1>
-    <p><i>Same as word 79 on Coast and Align List, which is same as word
-        29 of Coast and Align List, which is same as word 27 of Orbital
-        Maneuvers List.</i><br>
-    </p>
-    <p>VGTIG (Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp; For
-      external-ΔV type burns this is the input ΔV rotated through half
-      the calculated central angle expected to be covered by the
-      burn.&nbsp; Calculated once a the beginning of each of P40, P41,
-      and P42.&nbsp; In reference coordinates, scaled
-      (meters/centisecond)/2<sup>7</sup>.&nbsp; VGPREV (Z) appears in
-      the same location once Average G has been turned on (TIG - 30
-      seconds).&nbsp; This is the velocity-to-be-gained used by steering
-      in P40 and P42, and for display in P41.&nbsp; VGPREV is updated
-      every 2 seconds during the burn.&nbsp; In reference
-      coordinates.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
+    ACTUAL PIPAS (X, Y, Z).&nbsp; Velocity increments along the IMU
+    Stable Member X, Y, and Z axes.&nbsp; Data is valid commencing at
+    approximately 15 seconds after ISS Turn-on.&nbsp; Automatic
+    increments when ISS is on.&nbsp; Zeroed every 2 seconds during
+    powered flight.&nbsp; Zeroed after coarse alignment in P51, P52, and
+    P57.&nbsp; Zeroed by NBDONLY (after reading) if SURFFLAG is set
+    1.&nbsp; In stable member coordinates.&nbsp; Scaled
+    (centimeters/second)/2<sup>14</sup>.
+    <h1> 79</h1>
+    RR TRUNNION and SHAFT ERROR COUNTERS.&nbsp; Rendezvous Radar error
+    counter commands; 79a is trunnion, 79b is shaft.&nbsp; They are
+    placed in the RR error counters and specify the rate at which the RR
+    antenna is driven.&nbsp; Values range from +384 to -384 and vary
+    according to the angular error between the present and desired RR
+    positions.&nbsp; Calculated every 0.5 second in the Radar Designate
+    Routine (DODES) whenever the the LGC is driving the RR antenna which
+    occurs when:<br>
+    <ol>
+      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
+      <li>V41 N72 (RR Coarse Align) is operated.</li>
+      <li>R21 (RR designate) is operated in P20/P22.</li>
+      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
+    </ol>
+    A magnitude of 384 corresponds to a rate command of about 10
+    degrees/second.&nbsp; The exact rate depends on the characteristics
+    of the motors in the RR gyros.&nbsp; 79a and 79b are each scaled 2<sup>-14</sup>.
+    <p> </p>
     <h1><a name="80"></a>80a</h1>
-    <p><i>Same as word 80a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>LM MASS.&nbsp; Current mass of the LM.&nbsp; First part of Noun
       47.&nbsp; A buffered quantity that is determined by MASS (and
       CSMMASS when desired).&nbsp; Pad-loaded.&nbsp; Can also be loaded
@@ -3899,16 +4461,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       function of acceleration).&nbsp; Scaled kilograms/2<sup>16</sup>.<br>
     </p>
     <h1>80b</h1>
-    <p><i>Same as word 80b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CSM MASS.&nbsp; Current mass of the CSM.&nbsp; Used in the
       computation of the RCS and GTS control authorities when the LM is
       docked to the CSM.&nbsp; Second half of Noun 47.&nbsp;
       Pad-loaded.&nbsp; Can also be loaded by crew via R03 (Verb 48 —
       DAP Data Load).&nbsp; Scaled kilograms/2<sup>16</sup>. </p>
     <h1>81a</h1>
-    <p><i>Same as word 81a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>IMODES30.&nbsp; A flagword which monitors IMU conditions.&nbsp;
       Set to 37411<sub>8</sub> by a fresh start.&nbsp; A restart sets
       bits 14, 13, 12, 11, 10 to 1, sets bits 15, 8, 7, 6, 2 to 0 and
@@ -4008,12 +4566,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td valign="top" align="center">6<br>
           </td>
           <td valign="top">A 1 indicates that IMU initialization is
-            begin carried out.&nbsp; Set 1 during turn-on sequence, if a
+            being carried out.&nbsp; Set 1 during turn-on sequence, if a
             cage command is received, or if IMU zeroing is done in
             T4RUPT.&nbsp; Set 0 about 10.56 seconds after cage command
             removed, 10.56 seconds after start of zeroing in T4RUPT, or
             about 100 seconds after start of turn-on sequence.&nbsp; If
-            it is 1, verb 37 input will not be processed (alarm 1520<sub>8</sub>
+            bit is 1, verb 37 input will not be processed (alarm 1520<sub>8</sub>
             will be generated).&nbsp; If bit is 1, an error exit will be
             forced from the internal IMU routines.<br>
           </td>
@@ -4025,9 +4583,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             0212<sub>8</sub> if a PIPA fail signal occurs.&nbsp; Not
             used unless bit 1 of this word is 1.&nbsp; Set 1 during IMU
             turn-on sequence and reset 0 about 4 seconds after bit 6 is
-            reset 0.&nbsp; (If it 10 of this word is 0, an alarm will be
-            generated when Average-G is stopped regardless of the value
-            of bit 5.)<br>
+            reset 0.&nbsp; (If bit 10 of this word is 0, an alarm will
+            be generated when Average-G is stopped regardless of the
+            value of bit 5.)<br>
           </td>
         </tr>
         <tr>
@@ -4073,10 +4631,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
     </table>
     <p> </p>
     <h1>81b</h1>
-    <p><i>Same as word 81b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>IMODES33.&nbsp; A flagword which monitors various channel 32,
-      channel 33 and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
+      channel 33, and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
       test".&nbsp; Set to 16040<sub>8</sub> by a fresh start. Set to
       16000<sub>8</sub> + the contents of bit 6 by a restart.&nbsp; An
       error reset key code sets bits 13, 12, and 11 to 1 and does not
@@ -4224,19 +4780,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>82</h1>
-    <p><i>Same as word 82 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>TIG.&nbsp; Targeted time of ignition.&nbsp; Calculated during
-      pre-burn programs (P30s, P70s).&nbsp; Updated in P12, P40, P41,
-      P42, or P63 by MIDTOAVE routine if integration cannot be completed
-      in time (1703 alarm).&nbsp; After ignition TIG is set to time of
-      engine cutoff (PIPTIME + TGO).&nbsp; See also pg. 2-106 for use on
-      Descent/Ascent List.&nbsp; Scaled centiseconds / 2<sup>28</sup>.<br>
-    </p>
+    <br>
+    TIG.&nbsp; Targeted time of ignition.&nbsp; Calculated during
+    pre-burn programs (P30s, P70s).&nbsp; Updated in P12, P40, P41, P42,
+    or P63 by MIDTOAVE routine if integration cannot be completed in
+    time (1703 alarm).&nbsp; After ignition TIG is set to time of engine
+    cutoff (PIPTIME + TGO).&nbsp; See also pg. 2-106 for use on
+    Descent/Ascent List.&nbsp; Scaled centiseconds / 2<sup>28</sup>.<br>
     <h1>83a,83b,84a</h1>
-    <p><i>Same as words 83a,83b,84a on Orbital Maneuvers List, which are
-        the same as the words 33,34a on Orbital Maneuvers List.<br>
-      </i></p>
     <p>CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated current rates about
       body axis.&nbsp; Calculated at the beginning of every DAP cycle
       every 0.1 sec.&nbsp; Zeroed at DAP start-up.&nbsp; Scaled
@@ -4244,31 +4795,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       degrees/sec is possible.<br>
       <i></i></p>
     <h1>84b</h1>
-    <p><i>Same as word 84b on Orbital Maneuvers List, which is the same
-        as the word 34b on Orbital Maneuvers List.<br>
-      </i></p>
-    <p>Garbage.&nbsp; This is the same erasable location as the one
-      described for word 89a on the Orbital Maneuvers List.<br>
+    <p>Garbage. <br>
     </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; Word 89a of the
-        Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
-        Calculated angular acceleration about Y body axis due to the
-        fact that the main engine is not exactly aligned with the center
-        of gravity. During powered flight this is calculated every 0.1
-        second at the beginning of the DAP cycle; otherwise these are
-        zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
-        such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-        Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
-    </blockquote>
     <h1>85a,85b,86a</h1>
-    <p><i>Same as words 85,86a on Orbital Maneuvers List, which are the
-        same as the words 34,36a on Orbital Maneuvers List.<br>
-      </i></p>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
       to DAP.&nbsp; Generated during a burn by guidance equations or
@@ -4279,70 +4808,74 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>86b</h1>
-    <p><i>Same as word 86b on Orbital Maneuvers List, which is the same
-        as the word 36b on Orbital Maneuvers List.<br>
-      </i></p>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage.<br>
       <i> </i></p>
     <h1>87a,87b,88a</h1>
-    <p><i>Same as words 87,88a on Orbital Maneuvers List, which are the
-        same as the words 37,38a on Orbital Maneuvers List.<br>
-      </i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
       when the IMU is on.&nbsp; These registers are unsigned 15-bit
       fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>88b</h1>
-    <p><i>Same as word 88b on Orbital Maneuvers List, which is the same
-        as the word 38b on Orbital Maneuvers List.<br>
-      </i></p>
     <p>ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
       counter.&nbsp; Defines the RR antenna position (along with shaft
       angle).&nbsp; Updated from RR CDUs as trunnion angle
       changes.&nbsp; This register is an unsigned 15-bit fraction.&nbsp;
       Scaled degrees/360.<br>
       <i> </i></p>
-    <h1>89a,89b<br>
-    </h1>
-    <p><i>Same as words 89a,89b on Orbital Maneuvers List.</i><br>
+    <h1>89a,89b</h1>
+    <p>These words are known to differ by Luminary software version.<br>
     </p>
-    <p>Y, Z MOMENT OFFSETS.&nbsp; Calculated angular acceleration about
-      Y and Z body axes due to the fact that the main engine is not
-      exactly aligned with the center of gravity.&nbsp; During powered
-      flight these are calculated every 0.1 second at the beginning of
-      the DAP cycle; otherwise these are zeroed in every DAP
-      cycle.&nbsp; Also zeroed at discrete times, such as fresh start
-      and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-      Expected range is ±35 degrees/second<sup>2</sup>.<br>
-    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <td valign="top">Version<br>
+          </td>
+          <td valign="top">Description<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+          </td>
+          <td valign="top">Y, Z MOMENT OFFSETS.&nbsp; Calculated angular
+            acceleration about Y and Z body axes due to the fact that
+            the main engine is not exactly aligned with the center of
+            gravity.&nbsp; During powered flight these are calculated
+            every 0.1 second at the beginning of the DAP cycle;
+            otherwise these are zeroed in every DAP cycle.&nbsp; Also
+            zeroed at discrete times, such as fresh start and engine
+            off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
+            Expected range is ±35 degrees/second<sup>2</sup>.</td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary 1E<br>
+          </td>
+          <td valign="top">CH5MASK, CH6MASK.&nbsp; Flagwords whose bits
+            correspond to the bits of channel 5 and channel 6
+            respectively.&nbsp; Only bits 1-8 are used.&nbsp; When a bit
+            is set, the autopilot regards the corresponding jet as being
+            disabled.&nbsp; The bits are set and cleared either
+            automatically in response to changes in the LGC Thruster
+            Pair Command Switches (channel 32/bits 1-8), or manually via
+            the DSKY.</td>
+        </tr>
+      </tbody>
+    </table>
     <h1><a name="90"></a>90a</h1>
-    <p><i>Same as word 90a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>POSTORKP.&nbsp; Running sum of positive torque about control axis
       P.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
       Scaled jetseconds/32. </p>
     <h1>90b</h1>
-    <p><i>Same as word 90b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>NEGTORKP.&nbsp; Running sum (always positive) of negative torque
       about control axis P.&nbsp; Calculated every 0.1 second when DAP
       is running.&nbsp; Scaled jetseconds/32.<br>
     </p>
     <h1>91a</h1>
-    <p><i>Same as word 91a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CHANNEL 11.&nbsp; Output channel.&nbsp; Bits are used to control
       engine on/off and for display parameter quantities.&nbsp; Set 0 by
       a fresh start.&nbsp; A restart zeroes all output channels by
       hardware means.&nbsp; The program associated with restart or
-      processing of aV37 program change preserves the value of bits 14,
+      processing of a V37 program change preserves the value of bits 14,
       13, and 1 and sets remaining bits to 0.&nbsp; A restart then sets
       bit 13 to 1 if ENGONFLG (bit 7 of flagword 5) is 1 and sets bit 14
       to 1 if ENGONFLG is 0.<br>
@@ -4372,13 +4905,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">12<br>
-          </td>
-          <td valign="top">Not used.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">11<br>
+          <td valign="top" align="center">12-11<br>
           </td>
           <td valign="top">Not used.<br>
           </td>
@@ -4475,8 +5002,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>91b</h1>
-    <p><i>Same as word 91b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CHANNEL 12.&nbsp; Output channel.&nbsp; Bits are used for control
       of the rendezvous radar and IMU CDUs.&nbsp; Set 0 by a fresh
       start.&nbsp; A restart preserves bits 14, 12, 11, 10, 9, 6, 5, 4
@@ -4513,7 +5038,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td valign="top">Landing radar position command.&nbsp; If this
             bit is set 1 and the antenna position switch is in LGC
             position, the LR antenna will move to position 2
-            (Hoer).&nbsp; Removing the discrete will not return the
+            (Hover).&nbsp; Removing the discrete will not return the
             antenna to position 1.<br>
           </td>
         </tr>
@@ -4558,10 +5083,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">9<br>
           </td>
-          <td valign="top">Minus pitch gimbal trim.&nbsp; A 1 in this
-            bit will cause the descent engine to rotate negatively about
-            the +Y axis causing the vehicle to rotate positively about
-            the +Y axis if the engine is thrusting.<br>
+          <td valign="top">Plus pitch gimbal trim.&nbsp; A 1 in this bit
+            will cause the descent engine to rotate negatively about the
+            +Y axis causing the vehicle to rotate positively about the
+            +Y axis if the engine is thrusting.<br>
             <br>
             <font size="-1"><sup>*</sup>This bit will issue commands of
               opposite polarity to the names.&nbsp; (Missile vs gimbal
@@ -4636,8 +5161,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>92a</h1>
-    <p><i>Same as word 92a on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CHANNEL 13. Output channel.&nbsp; Bits are used for various
       purposes.&nbsp; Set 0 by a fresh start.&nbsp; A restart or V37
       sets bit 12 to 1, preserves bits 15-13 and 7-5 and sets remaining
@@ -4692,7 +5215,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
           <td valign="top" align="center">10<br>
           </td>
           <td valign="top">Test DSKY lights.&nbsp; Set 0 if an error
-            reset keycode is receive.&nbsp; Set 1 (for about 5 seconds)
+            reset keycode is received.&nbsp; Set 1 (for about 5 seconds)
             if a V35 input received.<br>
           </td>
         </tr>
@@ -4906,8 +5429,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>92b</h1>
-    <p><i>Same as word 92b on Orbital Maneuvers List.</i><br>
-    </p>
     <p>CHANNEL 14.&nbsp; Output channel. Bits are used for control of
       computer counter registers.&nbsp; Set 0 by fresh start.&nbsp; A
       restart or V37 preserves bit 6 and sets remaining bits to 0.&nbsp;
@@ -4950,7 +5471,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">12<br>
           </td>
-          <td valign="top">A 1 in this bit caused output pulses from the
+          <td valign="top">A 1 in this bit causes output pulses from the
             register used to drive rendezvous radar trunnion or lateral
             horizontal velocity meter depending on the mode of
             operation.&nbsp; Reset 0 after counter register reduced to 0
@@ -4960,7 +5481,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top">A 1 in this bit caused output pulses from the
+          <td valign="top">A 1 in this bit causes output pulses from the
             register used to drive radar shaft or forward velocity meter
             depending on the mode of operation.&nbsp; Reset 0 after
             counter register reduced to 0 (3200 pps). </td>
@@ -4997,6 +5518,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
               <tbody>
                 <tr>
                   <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
 
 
 
@@ -5100,8 +5627,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>93a</h1>
-    <p><i>Same as word 93a on Orbital Maneuvers List.</i><br>
-    </p>
+    <table width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><u>NOTE</u>:<br>
+          </td>
+          <td valign="top">For channel 30, the logic is inverted, i.e.,
+            0 is considered "set" and 1 is considered "cleared."<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>CHANNEL 30.&nbsp; Input channel.&nbsp; Bits are used for various
       purposes.<br>
     </p>
@@ -5219,8 +5755,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>93b</h1>
-    <p><i>Same as word 93b on Orbital Maneuvers List.</i><br>
-    </p>
+    <table width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><u>NOTE</u>:<br>
+          </td>
+          <td valign="top">For channel 30, the logic is inverted, i.e.,
+            0 is considered "set" and 1 is considered "cleared."<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>CHANNEL 31.&nbsp; Inputs from crew control devices, used by DAP.<br>
     </p>
     <table cellspacing="2" cellpadding="2" border="1">
@@ -5334,8 +5879,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>94a</h1>
-    <p><i>Same as word 94a on Orbital Maneuvers List.</i><br>
-    </p>
+    <table width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><u>NOTE</u>:<br>
+          </td>
+          <td valign="top">For channel 30, the logic is inverted, i.e.,
+            0 is considered "set" and 1 is considered "cleared."<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>CHANNEL 32.&nbsp; Input channel.&nbsp; Additional crew input to
       DAP, etc.<br>
     </p>
@@ -5405,8 +5959,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
         <tr>
           <td valign="top" align="center">6<br>
           </td>
-          <td valign="top">A 0 indicates a thruster 13&amp;5 fail signal
-            has been produced. </td>
+          <td valign="top">A 0 indicates a thruster 13&amp;15 fail
+            signal has been produced. </td>
         </tr>
         <tr>
           <td valign="top" align="center">5<br>
@@ -5441,8 +5995,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <h1>94b</h1>
-    <p><i>Same as word 94b on Orbital Maneuvers List.<br>
-      </i></p>
+    <table width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><u>NOTE</u>:<br>
+          </td>
+          <td valign="top">For channel 30, the logic is inverted, i.e.,
+            0 is considered "set" and 1 is considered "cleared."<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>CHANNEL 33.&nbsp; Input channel.&nbsp; Bits are used for hardware
       status and command information.&nbsp; Bits 15-11 are "flip-flop"
       bits (reset by a channel "write" command).&nbsp; They are reset in
@@ -5563,70 +6126,554 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       </tbody>
     </table>
     <p> </p>
-    <h1>95</h1>
-    <p>Spare.&nbsp; See page 2-70 for definition.<br>
+    <h1>95a,95b,96a,96b,97a,97b,98a,98b,99a,99b,100a</h1>
+    <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
+      indicate the status of the DSKY displays.&nbsp; If bit 15 through
+      12 are 0001, the next 11 bits will indicate the actual status of
+      the DSKY displays; if bits 15 through 12 are 1110, the next 11
+      bits indicate the "ones" complement of the status to which the LGC
+      will command the DSKY display.&nbsp; Bits 11-1 of DSPTAB+0 through
+      DSPTAB+10D are decoded as follows:<br>
     </p>
-    <blockquote><font size="-1">From p. 2-70:&nbsp; The first half of
-        each spare contains 00000<sub>8</sub>. The second half is ARUPT
-        (the contents of the accumulator when the telemetry interrupt
-        was recognized).</font><br>
-    </blockquote>
-    <h1>96</h1>
-    <p>CENTRAL ANGLE from IGNITION to INTERCEPT.&nbsp; Central angle
-      covered by the passive vehicle from ignition time to intercept
-      time.&nbsp; Used in P32/P72 as flag for program control
-      purposes.&nbsp; Astronaut input by V25 N55 during P34/P74.&nbsp;
-      Used as input to TIME THETA routine to calculate time of
-      transfer.&nbsp; Scaled degrees/360.<br>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom">DSPTAB<br>
+            <u>Register</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">Downlink<br>
+            <u>Word No.</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+0<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+1</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+2</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+3</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+4</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+5</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+6</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+7</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+8D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+9D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+10D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">50a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>R3D1 stands for digit one of the third register and VD1 stand for
+      the first digit of the verb display, etc.&nbsp; For the right
+      character of a pair, bit 5 is the MSB with bit 1 the LSB.&nbsp;
+      For the left character of a pair, the MSB is bit 10 with bit 6 the
+      LSB.&nbsp; Bit 11 of some of the DSPTABs contains discrete
+      information, a one indicating that the discrete is on.&nbsp; For
+      example, a one in bit 11 of DSPTAB+1 indicates that R3 has a plus
+      sign.&nbsp; If the sign bits associated with a given register are
+      both zeros, then the content of that particular register is octal;
+      if either of the bits is set, the register content is decimal
+      data.</p>
+    <p>The five bit codes associated with the digits are as follows:<br>
     </p>
-    <h1>97</h1>
-    <p>CDH APSIS.&nbsp; The number of apsidal crossings (apogee or
-      perigee) until the CDH time.&nbsp; the register will contain 00001
-      to indicate CDH ignition will occur at first crossing, etc.&nbsp;
-      Input by astronaut by V25 N55.&nbsp; In P34/P35 and P74/P75, 0
-      means use conic integration and no target offsets; not 0 means use
-      precision integration and the number of offsets contained in this
-      register.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+            <br>
+          </td>
+          <td valign="top">MSB<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">LSB<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following is a diagram of the DSKY face showing positions of
+      the different digits:</p>
+    <pre>                             Program<br>                        ┌───────┬───────┐
+                        │  MD1  │  MD2  │
+                        └───────┴───────┘
+<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
+  │  VD1  │  VD2  │     │  ND1  │  ND2  │
+  └───────┴───────┘     └───────┴───────┘
+<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘
+<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    <h1>100b</h1>
+    <p>DSPTAB+11D.&nbsp; This register drives relays for the display
+      lights.&nbsp; The bit assignments are:<br>
     </p>
-    <h1>98</h1>
-    <p><i>Same as word 79 on Orbital Maneuvers List.</i><br>
-    </p>
-    <p>CDH DELTA ALTITUDE.&nbsp; The altitude between the active and
-      passive vehicle orbits at CDH time.&nbsp; Used for display and
-      other CDHMVR calculations.&nbsp; Calculated each iteration of
-      CDHMVR subroutine — once in P33/P73, numerous times possible in
-      P32/P72.&nbsp; Earth or moon-centered altitude depending upon
-      whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-      respectively.&nbsp; Scaled meters/2<sup>29</sup>.<br>
-    </p>
-    <h1>99</h1>
-    <p>TPF ΔV MAGNITUDE.&nbsp; Magnitude of the delta velocity vector at
-      Intercept.&nbsp; Calculated each P34/P74 or P35/P75 cycle.&nbsp;
-      Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <h1>100</h1>
-    <p>Spare.&nbsp; See page 2-70 for definition.<br>
-    </p>
-    <blockquote><font size="-1">From p. 2-70:&nbsp; The first half of
-        each spare contains 00000<sub>8</sub>. The second half is ARUPT
-        (the contents of the accumulator when the telemetry interrupt
-        was recognized).</font></blockquote>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
-    <p> </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="left"><u>Assignment</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">This bit differs by Lunar Module software
+            version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D<br>
+                  </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">Priority Display<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">This bit differs by Lunar Module software
+            version.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1">
+              <tbody>
+                <tr>
+                  <th valign="top">Version<br>
+                  </th>
+                  <th valign="top">Description<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1, 1A, 1B, 1C, 1D </td>
+                  <td valign="top">Not used.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Luminary 1E<br>
+                  </td>
+                  <td valign="top">No DAP Control<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Landing Radar Velocity Fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">No Attitude<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Landing Radar Altitude Fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Gimbal Lock<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Tracker<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Program Caution<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
+    If bits 15 through 12 of DSPTAB+11D are 1000, the last 11 bits
+    indicate the state to which the LGC will command the relays; if bits
+    15 through 12 are 0000, the last 11 bits indicate the actual state
+    of the relays.&nbsp; A one indicates that the discrete is on.
+    <p><br>
+    </p>
+    <h1><font size="-1"> </font></h1>
     <p> </p>
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-03-18</i><br>
+      2025-04-05</i><br>
   </body>
 </html>

@@ -810,9 +810,34 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       if (dls->URL[0] == 0)
 	{
 	  if (CmOrLm)
-	    sprintf(dls->URL, "%sddd-unavailable-CM.html", docPrefix);
+	    {
+	      sprintf(filename, "%sddd-%05o-unavailable-CM.html", docPrefix, id);
+	      fp = fopen(&filename[7], "r");
+	      if (fp != NULL)
+		{
+		  fclose(fp);
+		  strcpy(dls->URL, filename);
+		}
+	      else
+		sprintf(dls->URL, "%sddd-unavailable-CM.html", docPrefix);
+	    }
 	  else if (!Sundance)
-	    sprintf(dls->URL, "%sddd-unavailable-LM.html", docPrefix);
+	    {
+	      sprintf(filename, "%sddd-%05o-unavailable-LM.html", docPrefix, id);
+	      //fprintf(stderr, "Checking for %s\n", filename);
+	      fp = fopen(&filename[7], "r");
+	      if (fp != NULL)
+		{
+		  //fprintf(stderr, "Found\n");
+		  fclose(fp);
+		  strcpy(dls->URL, filename);
+		}
+	      else
+		{
+		  //fprintf(stderr, "Not found\n");
+		  sprintf(dls->URL, "%sddd-unavailable-LM.html", docPrefix);
+		}
+	    }
 	  else
 	    sprintf(dls->URL, "%sddd-unavailable.html", docPrefix);
 	}
