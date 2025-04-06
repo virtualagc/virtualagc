@@ -10,6 +10,7 @@
     For full documentation, see the <a
       href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">Luminary
 
+
       1C <i>Guidance System Operations Plan</i></a>.<br>
     <br>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
@@ -51,6 +52,7 @@
       indicated by VSELECT, word 4a on this list).&nbsp; Each is the sum
       of five readings.&nbsp; A different component is read every 2
       seconds during LR velocity updates.&nbsp; Scaled (f/sec)/(K × 2<sup>28</sup>),
+
 
 
       where K = -0.6440 for X, K = 1.212 for Y, and K = -0.8668 for
@@ -146,6 +148,7 @@
       current velocity error.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
 
 
+
       Calculated every 2 sec. during P12 (after ignition), P70 and
       P71.&nbsp; Good for ascent and aborts, not good for descent.<br>
     </p>
@@ -162,8 +165,8 @@
     </p>
     <h1>22</h1>
     <p>DELTAH.&nbsp; LR Altitude minus LGC altitude.&nbsp; Scaled
-      meters/224.&nbsp; Calculated every 2 seconds during altitude
-      updates.<br>
+      meters/2<sup>24</sup>.&nbsp; Calculated every 2 seconds during
+      altitude updates.<br>
     </p>
     <p> </p>
     <h1>23-25</h1>
@@ -275,6 +278,7 @@
         second at the beginning of the DAP cycle; otherwise these are
         zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
         such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
+
 
 
 
@@ -548,6 +552,7 @@
               this is a flagbit called P66PROFL. <a
                 moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-2780959979">It
+
                 is in error</a>.</blockquote>
           </td>
         </tr>
@@ -720,6 +725,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -744,6 +750,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
             equivalent to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
 
@@ -1507,6 +1514,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switches f<sub>5</sub></a> and <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
@@ -1566,6 +1574,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
 
@@ -1855,8 +1864,10 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>2</sub> of Section 5.5</a>, and to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">the
+
 
 
 
@@ -1882,6 +1893,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">th
             Pre-TPI Maneuver Program P34 or P74.&nbsp; The bit is
             equivalent to the inverse of <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">the
+
 
 
 
@@ -2143,6 +2155,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
               f<sub>7</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -2154,6 +2167,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             computation performed in the ITERATOR routine (part of the
             conic subroutines).&nbsp; This bit is equivalent to the <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">switch
+
 
 
 
@@ -2180,6 +2194,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             (Such a solution will be reached unless INFINFLG is set to
             1.)&nbsp; This bit is equivalent to the <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
 
 
 
@@ -2234,6 +2249,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             tested nor set either way outside the Universal Variable
             Routine itself.&nbsp; The bit is equivalent to the <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86">switch
+
 
 
 
@@ -2324,6 +2340,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
             Equations.&nbsp; A 1 indicates that the thrust-magnitude
             filter will be bypassed, and that the Ascent Guidance
             Equations will only be used to generate <u>V</u><sub>GB</sub>.&nbsp;
+
 
 
 
@@ -2571,6 +2588,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       its contents are only used during the programs P63 thru P66.&nbsp;
       During all other programs, bit 15 is set, bits 14 thru 1 are
       reset, and the contents of flagword 11 should be 40000<sub>8</sub>.&nbsp;
+
 
 
 
@@ -3010,6 +3028,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3290,6 +3309,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       moon-centered.&nbsp; Words 52-54 contain the position components
       X, Y, Z scaled meters/2<sup>29</sup>.&nbsp; Words 55-57 contain
       the velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
+
 
 
 
@@ -3753,6 +3773,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       contain the position vector (X, Y, Z) scaled meters/2<sup>24</sup>.&nbsp;
 
 
+
       Words 70-72 contain the velocity vector (X, Y, Z) scaled
       (meters/centisecond)/2<sup>10</sup>.&nbsp; Calculated once every 2
       sec. during P63 (after full throttle and P64.&nbsp; Not good
@@ -3798,21 +3819,32 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       neither of which is calculated during Descent/Ascent.<br>
     </p>
     <h1>79</h1>
-    <p><i>Same as word 29 on the Coast and Align List, which is the same
-        as word 27 on the Orbital Maneuvers List.</i><br>
+    <p>RR TRUNNION and SHAFT ERROR COUNTERS.&nbsp; Rendezvous Radar
+      error counter commands; 79a is trunnion, 79b is shaft.&nbsp; They
+      are placed in the RR error counters and specify the rate at which
+      the RR antenna is driven.&nbsp; Values range from +384 to -384 and
+      vary according to the angular error between the present and
+      desired RR positions.&nbsp; Calculated every 0.5 second in the
+      Radar Designate Routine (DODES) whenever the LGC is driving the RR
+      antenna which occurs when:<br>
     </p>
-    <p>VGTIG (Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp; For
-      external-ΔV type burns this is the input ΔV rotated through half
-      the calculated central angle expected to be covered by the
-      burn.&nbsp; Calculated once a the beginning of each of P40, P41,
-      and P42.&nbsp; In reference coordinates, scaled
-      (meters/centisecond)/2<sup>7</sup>.&nbsp; VGPREV (Z) appears in
-      the same location once Average G has been turned on (TIG - 30
-      seconds).&nbsp; This is the velocity-to-be-gained used by steering
-      in P40 and P42, and for display in P41.&nbsp; VGPREV is updated
-      every 2 seconds during the burn.&nbsp; In reference
-      coordinates.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
+    <ol>
+      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
+      <li>V41 N72 (RR Coarse Align) is operated.</li>
+      <li>R2 (RR designate) is operated in P20/P22.</li>
+      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
+    </ol>
+    A magnitude of 384 corresponds to a rate command of about 10
+    degrees/second.&nbsp; The exact rate depends on the characteristics
+    of the motors in the RR gyros.&nbsp; 79a and 79b are each scaled 2<sup>-14</sup>.
+    <blockquote>
+      <p><font size="-1"><b>Note:</b> According to the Luminary 1C GSOP,
+          this is the same as word 29 on the Coast and Align List, which
+          is the same as word 27 on the Orbital Maneuvers List, which is
+          a quantity called VGTIGZ.&nbsp; From inspection of Luminary 1C
+          source code, the GSOP is in error.</font><br>
+      </p>
+    </blockquote>
     <p> </p>
     <h1><a name="80"></a>80a</h1>
     <p><i>Same as the Orbital Maneuvers List.</i><br>
@@ -4191,6 +4223,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
 
 
 
+
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
     </blockquote>
     <h1>85a,85b,86a</h1>
@@ -4243,6 +4276,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
       beginning of the DAP cycle; otherwise these are zeroed in every
       DAP cycle.&nbsp; Also zeroed at discrete times, such as fresh
       start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
+
 
 
 
@@ -4921,6 +4955,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86
               <tbody>
                 <tr>
                   <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
