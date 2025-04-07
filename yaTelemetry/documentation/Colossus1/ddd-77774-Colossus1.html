@@ -95,8 +95,9 @@
       +70 degrees.<br>
     </p>
     <h1>10b</h1>
-    <p>CDUT. The optics trunnion angle CDU, scaled (degrees - 19.7754)/45
-      (two's complement). The angle varies from -19.775° to +45°. <br>
+    <p>CDUT. The optics trunnion angle CDU, scaled (degrees -
+      19.7754)/45 (two's complement). The angle varies from -19.775° to
+      +45°. <br>
     </p>
     <h1>11-13</h1>
     <p>ADOTs (if RCS DAP on) or OGARATE and OMEGABs (if TVC DAP on).
@@ -304,7 +305,8 @@
       by P40 impulsive burn logic; or two-second updates of time to
       engine cutoff, initiated at the first steering pass (nominal
       TIG+2). Upon engine failure, the most significant half of TIG is
-      set to -24, and the least significant half remains unchanged. <br>
+      set to -24<sub>8</sub> and the least significant half remains
+      unchanged. <br>
     </p>
     <h1>19</h1>
     <p><font face="Courier New, Courier, monospace">DELLT4 (The desired
@@ -840,6 +842,8 @@
             the bit is left set to 1 when LAMBERT is exited. This bit is
             equivalent to the <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=148">switch
+
+
               f<sub>3</sub> of Section 5.5 of this GSOP</a>. <br>
           </td>
         </tr>
@@ -866,6 +870,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             Routine. This bit is equivalent to the <a
               moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=148">switch
+
+
               f<sub>1</sub>, in Section 5.5 of this GSOP</a>. <br>
           </td>
         </tr>
@@ -1078,6 +1084,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             the processing of the V37 input if number of new program is
             0. Bit is set 1 in P62 after the entry DAP is initialized
             (shortly after the "enter" response to checklist code 00041<sub>8</sub>).
+
+
             <br>
           </td>
         </tr>
@@ -1193,6 +1201,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             indicator (if 1) that the particular star being checked is
             too close to the computed positions of the earth (about 4
             minutes after response to the checklist code 00015<sub>8</sub>),
+
+
             sun, or moon. Bit also used in optics angle coordinate
             transformation routine to indicate (if bit 1 when return
             from the routine) that the indicated sextant trunnion angle
@@ -2321,7 +2331,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">11<br>
           </td>
-          <td valign="top">V94FLAG, A 1 indicates Extended Verb 94 is
+          <td valign="top">V94FLAG. A 1 indicates Extended Verb 94 is
             allowed. A 0 indicates Extended Verb 94 not allowed. Set 1
             before P23 enters R52 so astronaut may re-maneuver
             spacecraft LLOS before marking. Set 0 after mark so
@@ -2666,6 +2676,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
       <tbody>
         <tr>
           <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -3072,6 +3084,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
 
 
 
+
+
       This quantity will normally be near zero magnitude but a roll jet
       failed-on could produce 2-3°/sec rates.&nbsp; OMEGABs in words 12
       and 13, are the measured attitude rates about the pitch and yaw
@@ -3143,10 +3157,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
         <tr>
           <td valign="top" align="center">15<br>
           </td>
-          <td valign="top">Bit set 1 to indicSame as Powered List.ate a
-            high rate (2 deg/sec) auto maneuver in progress.&nbsp; Bit
-            is reset to 0 to indicate that a high-rate auto maneuver is
-            not in progress.<br>
+          <td valign="top">Bit set 1 to indicate a high rate (2 deg/sec)
+            auto maneuver in progress.&nbsp; Bit is reset to 0 to
+            indicate that a high-rate auto maneuver is not in progress.
           </td>
         </tr>
         <tr>
@@ -4080,6 +4093,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=14
             DAPDATR1<br>
           </td>
           <td nowrap="nowrap" valign="bottom" align="center">&nbsp;&nbsp;
+
+
             <br>
           </td>
           <td nowrap="nowrap" valign="top" align="center">Bit 9<br>
