@@ -16,6 +16,7 @@
 
 
 
+
       3 <i>Guidance System Operations Plan</i></a>.<br>
     <br>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
@@ -42,6 +43,7 @@
       Flagword 0 (AMOONFLG) indicates sphere of influence for Average G
       state vector: 0 = earth-centered, 1 = lunar-centered.&nbsp; Words
       2-4 contain the position components X, Y, Z, scaled meters/2<sup>29</sup>.&nbsp;
+
 
 
 
@@ -155,6 +157,7 @@
       (degrees/second)/450.&nbsp; OGARATE, in word 11, is the measured
       roll rate obtained by back-differencing the outer gimbal angle
       (OGA) measurements every 0.5 second, scaled (rev/sec)/2<sup>-4</sup>.&nbsp;
+
 
 
 
@@ -1285,6 +1288,7 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=308"
 
 
 
+
             sun, or moon.&nbsp; Bit also used in optics angle coordinate
             transformation routine to indicate (if bit 1 when return
             from the routine) that the indicated sextant trunnion angle
@@ -2305,6 +2309,7 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=308"
 
 
 
+
               f7 of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -2808,6 +2813,7 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3179,6 +3185,7 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       (degrees/second)/450.&nbsp; OGARATE, in word 11, is the measured
       roll rate obtained by back-differencing the outer gimbal angle
       (OGA) measurements every 0.5 second, scaled (rev/sec)/2<sup>-4</sup>.&nbsp;
+
 
 
 
@@ -3621,7 +3628,16 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
       which <u>UBX</u> points. The value ranges ±180°, is calculated
       after the DAP is turned on in P62 and is updated each 0.1 second
       during its operating period. Operation is indicated by a non-zero
-      in bit 12 of flagword 6.</p>
+      in bit 12 of flagword 6.<br>
+    </p>
+    <h1>83b</h1>
+    <p>ROLL COMMAND. The most significant half of roll attitude command
+      issued by Entry Guidance equations and used by the Entry DAP,
+      scaled degrees/360. The angle is defined as a rotation about the
+      negative relative velocity vector, -<u>V</u><sub>REL</sub>. The
+      value will range ±180° and is initially set in P62, based on
+      HEADSUP, and holds until the drag exceeds 0.05 g. The quantity
+      will be changed each 2 seconds after P64 until P67.</p>
     <h1>84a</h1>
     <i>Same as word 80a on Powered List.</i><br>
     <p>OPTMODES, a cell whose individual bits are used to control the
@@ -5239,6 +5255,7 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
 
 
 
+
             <br>
           </th>
           <th valign="bottom" align="left">RESTART (and/or AGC<br>
@@ -5754,6 +5771,6 @@ href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=308"
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-03-22</i><br>
+      2025-04-07</i><br>
   </body>
 </html>
