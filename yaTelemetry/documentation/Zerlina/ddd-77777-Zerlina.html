@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for Zerlina Orbital Maneuvers List</title>
+    <title>Telemetry Documentation for Zerlina Coast and Align List</title>
     <link rel="stylesheet" href="./../downlists.css">
   </head>
   <body>
@@ -17,6 +17,7 @@
 
 
 
+
       1C <i>Guidance System Operations Plan</i></a>.<br>
     <br>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
@@ -24,12 +25,13 @@
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77774<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77777<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
     </p>
     <h1>2,3,4,5,6,7,8</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CSM STATE VECTOR and TIME.&nbsp; The LGC's latest calculated
       state vector for the CSM in reference coordinates.&nbsp; The
       coordinates may be either earth-centered or moon-centered; a zero
@@ -90,34 +92,68 @@
       </tbody>
     </table>
     <h1>9</h1>
-    T<sub>F</sub> LAMBERT(DELLT4 — The desired transfer time).&nbsp; The
-    time from TIG until the target (RTARG) is reached, scaled
-    centiseconds/2<sup>28</sup>.&nbsp; During a burn, the time from
-    present state vector time until intercept.&nbsp; It is used as an
-    input to the INITVEL subroutine and calculated by each user of this
-    subroutine.<br>
-    <h1>10-12</h1>
-    <p>RTARG.&nbsp; The aim point vector X, Y, Z&nbsp; in either
-      earth-centered or lunar-centered coordinates.&nbsp; Scaled
-      meters/2<sup>29</sup>.&nbsp; The origin of the coordinate system
-      is the same as that of the LM state vector at TIG and TIG-30
-      sec.&nbsp; Bit 11 of flagword 8 (LMOONFLG) indicates whether the
-      LM state vector is earth or moon-centered.&nbsp; RTARG is
-      initially calculated in P34/P74, P35/P75, and updated in the
-      Initial Velocity Subroutine.<br>
+    K-FACTOR.&nbsp; The ground elapsed time of the zero reference time
+    of the Abort Guidance System (AGS).&nbsp; It is set only by the AGS
+    Initialization Routine (R47).&nbsp; Calculated on the first use of
+    R47 and on subsequent calls to R47 if requested by the
+    astronaut.&nbsp; Scaled centiseconds/2<sup>28</sup>.
+    <h1>10</h1>
+    <p>TALIGN.&nbsp; Time to which a landing site or LM state vector is
+      referenced for the landing site and nominal IMU alignment
+      orientations during P52 and P57.&nbsp; Scaled centiseconds/2<sup>28</sup>,
+      referenced to computer clock.<br>
     </p>
-    <h1>13</h1>
-    <p>ELEVATION ANGLE.&nbsp; The angle between the horizontal plane
-      defined by the active vehicle's position at TPI and the line of
-      sight from the active to the passive vehicle.&nbsp; The angle is
-      measured in a counter-clockwise rotation from the plane in the
-      forward-direction path of the active vehicle (determined by the
-      positive direction of the active vehicle's velocity vector) to the
-      active-passive line-of-sight vector.&nbsp; Used to compute TPI
-      Time by P33/P73 and P34/P74.&nbsp; Input to P32/P72.&nbsp; Input
-      to P34/P74 or computed by P34/P74.&nbsp; Scaled degrees/360.<br>
+    <h1>11a</h1>
+    <p><i>Same as word 65a on Orbital Maneuvers List.</i><br>
     </p>
+    <p>POSTORKU.&nbsp; Running sum of positive torque commands about
+      control axis U (RCS on-time multiplied by the number of jets
+      used).&nbsp; POSTORKU will, in time, overflow and subsequently
+      increase once more from zero (overflow does not go into sign
+      bit).&nbsp; The scaling is such as to preclude more than one
+      overflow per downlink cycle (2 sec) thus making the change from
+      one reading to the next unambiguous. &nbsp; Calculated every 0.1
+      second when DAP is running.&nbsp; Scaled jetseconds/32 (1
+      jetsecond is defined as 1 jet firing for 1 second). </p>
+    <p> </p>
+    <h1>11b</h1>
+    <p><i>Same as word 65b on Orbital Maneuvers List.</i></p>
+    <p>NEGTORKU.&nbsp; Running sum (always positive) of negative torque
+      about control axis U.&nbsp; Calculated every 0.1 second when DAP
+      is running.&nbsp; Scaled jetseconds/32. </p>
+    <h1>12a</h1>
+    <p><i>Same as word 66a on Orbital Maneuvers List.</i></p>
+    <p>POSTORKV.&nbsp; Running sum of positive torque about control axis
+      V.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
+      Scaled jetseconds/32. </p>
+    <h1>12b</h1>
+    <p><i>Same as word 66b on Orbital Maneuvers List.</i></p>
+    NEGTORKV.&nbsp; Running sum (always positive) of negative torque
+    about control axis V.&nbsp; Calculated every 0.1 second when DAP is
+    running.&nbsp; Scaled jetseconds/32.
+    <p> </p>
+    <h1>13a</h1>
+    <p><i>Same as word 76a on Orbital Maneuvers List.</i></p>
+    RR RANGE (Raw Data).&nbsp; Treated as a 15-bit integer which is
+    multiplied by either 9.38 for the low scale or by 75.04 for the high
+    scale to convert to units of feet.&nbsp; a 1 in bit 3 of RADMODES
+    indicates high scale.&nbsp; See page 2-98 for more complete
+    description.<br>
+    <h1>13b</h1>
+    <p><i>Same as word 76b on Orbital Maneuvers List.</i><br>
+    </p>
+    <p>RR RANGE RATE (Raw Data).&nbsp; Treated as a 15-bit
+      integer.&nbsp; To convert to units of feet per second the
+      following computation is done:<br>
+    </p>
+    <blockquote>(15-bit integer - 17000) × (-0.6278)<br>
+    </blockquote>
+    A negative quantity indicates closing.&nbsp; See page 2-98 for more
+    complete description.
+    <p> </p>
     <h1>14</h1>
+    <p><i>Same as Orbital Maneuvers List.</i><br>
+    </p>
     <p>TIME OF EVENT.&nbsp; Contains the image of TIME2, TIME1 at the
       time of the last significant event.&nbsp; Loaded in burn programs
       with time of ignition and time of engine cutoff as they
@@ -125,6 +161,7 @@
       P71.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
     <h1><a name="20"></a>15-20</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>REFSMMAT.&nbsp; Six elements of REFSMMAT, in the order R<sub>1</sub>C<sub>1</sub>,
       R<sub>1</sub>C<sub>2</sub>, R<sub>1</sub>C<sub>3</sub>, R<sub>2</sub>C<sub>1</sub>,
       R<sub>2</sub>C<sub>2</sub>, R<sub>2</sub>C<sub>3</sub>.&nbsp;
@@ -151,69 +188,159 @@
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
-    <h1>21</h1>
-    <p>CSI TIME.&nbsp; The time of ignition for the CSI maneuver.&nbsp;
-      Used in P32/P72 calculations; may also be calculated in
-      P32/P72.&nbsp; Input by V25N11.&nbsp; Scaled centiseconds/2<sup>28</sup>,
-      referenced to computer clock.<br>
+    <h1>21a</h1>
+    <p>AOT CODE.&nbsp; Bits 6-1 contain the octal identification number
+      of the celestial body being sighted.<br>
+    </p>
+    <p>Bits 9-7 contain the Detent Code as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">0&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <td valign="top">Optical System Calibration Code &nbsp; &nbsp;
+            <br>
+          </td>
+          <td rowspan="1" colspan="2" valign="top">Valid only in R52<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">is AOT Position 1 (left forward)<br>
+          </td>
+          <td valign="top">AZ = -60°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">is AOT Position 2 (forward)<br>
+          </td>
+          <td valign="top">AZ = 0°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">is AOT Position 3 (right forward)<br>
+          </td>
+          <td valign="top">AZ = 60°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">is AOT Position 4 (right rear)<br>
+          </td>
+          <td valign="top">AZ = 120°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">is AOT Position 5 (rear)<br>
+          </td>
+          <td valign="top">AZ = 180°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">is AOT Position 6 (left rear)<br>
+          </td>
+          <td valign="top">AZ = -120°</td>
+          <td valign="top">EL = 45°</td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">Crew Optical Alignment Sight<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    AOT CODE is the erasable storage for Display Nouns 70 and 71 in the
+    routines AOTMARK (R53), Auto Optics Positioning (R52), and Star
+    Acquisition (R59).&nbsp; AOTCODE is always equal to the data keyed
+    in by the astronaut under Nouns 70 and 71 except during R59 where
+    the detent code in bits 9-7 is computed to reflect the azimuth
+    position code in R3 under the display V06 N79.<br>
+    <h1>21b</h1>
+    <p>Garbage.&nbsp; Contains the sine of the Y CDU angle, or the sine
+      of Y CDU desired or the sine of an LR antenna angle.&nbsp; Scaled
+      2<sup>-1</sup>.<br>
     </p>
     <h1>22,23,24</h1>
-    <p>CSI DELTA Vs (X, Y, Z).&nbsp; The required delta velocity for the
-      CSI maneuver.&nbsp; Used to calculate delta velocity in local
-      vertical coordinates.&nbsp; Calculated during each iteration of
-      CSI/A subroutine in P32/P72 and after display of ΔV<sub>LV</sub>
-      at CSI, regardless of whether display is overwritten.&nbsp; In
-      reference coordinates.&nbsp; Earth or moon-centered depending upon
-      whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-      respectively.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
+    <p><i>Same as words 23-25 on Descent/Ascent List.</i><br>
     </p>
-    <h1>25-27</h1>
-    <p>VGTIGs (X, Y, Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp;
-      For external-ΔV type burns this is the input ΔV rotated through
-      half the calculated central angle expected to be covered by the
-      burn.&nbsp; Calculated once a the beginning of each of P40, P41,
-      and P42.&nbsp; In reference coordinates, scaled
-      (meters/centisecond)/2<sup>7</sup>.&nbsp; VGPREV (X, Y, Z) appears
-      in the same location once Average G has been turned on (TIG - 30
-      seconds).&nbsp; This is the velocity-to-be-gained used by steering
-      in P40 and P42, and for display in P41.&nbsp; VGPREV is updated
-      every 2 seconds during the burn.&nbsp; In reference
-      coordinates.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.</p>
-    <h1>28a</h1>
-    <p><i>Same as word 78a of Orbital Maneuvers list.</i><br>
+    <p>LANDING SITE VECTOR (X, Y, Z).&nbsp; Landing site in moon-fixed
+      coordinates.&nbsp; "LAND" is initialized from this vector (RLS) at
+      the start of P63.&nbsp; RLS is recomputed after landing by P68 and
+      is computed by P57 if the landing site determination option is
+      selected.&nbsp; Otherwise except perhaps by uplink, it does not
+      change.&nbsp; Scaled meters/2<sup>27</sup>.<br>
     </p>
-    <p>LR VELOCITY (Raw Data).&nbsp; Landing radar beam velocity
-      (Z).&nbsp; The data readout from the Landing Radar High Speed
+    <h1>25a,25b,26a</h1>
+    <p><i>Same as words 77a, 77b, 78a on Orbital Maneuvers List.</i><br>
+    </p>
+    <p>LR VELOCITIES (Raw Data).&nbsp; Landing radar beam velocities (X,
+      Y, Z).&nbsp; The data readout from the Landing Radar High Speed
       Counter into LGC input counter 46<sub>8</sub>.&nbsp; Always
-      contains the last value which was read, i.e., this register is
-      never initialized.&nbsp; Read once per second during R77.&nbsp;
-      Read once per four seconds during LR option of R04.&nbsp; Scaled
-      (15-bit integer - 12288.2) × K ft/sec where K = -0.8668 for V<sub>Z</sub>.<br>
+      contain the last values which were read, i.e., these registers are
+      never initialized.&nbsp; Each component read once per second
+      during R77.&nbsp; Each component read once per four seconds during
+      LR option of R04.&nbsp; Scaled (15-bit integer - 12288.2) × K
+      ft/sec where K = -0.6440 for V<sub>x</sub>, K = 1.212 for V<sub>y</sub>,
+      and K = -0.8668 for V<sub>z</sub>.<br>
     </p>
-    <h1>28b</h1>
-    <p><i>Same as word 78b of Orbital Maneuvers list.</i><br>
+    <h1>26b</h1>
+    <p><i>Same as word 78b on Orbital Maneuvers List.</i><br>
     </p>
-    <p>LR RANGE (Raw Data).&nbsp; Landing radar slant range.&nbsp; The
-      data readout from the LR High Speed Counter into LGC input counter
-      46<sub>8</sub>.&nbsp; Always contains the last value read, i.e.,
-      this register is never initialized.&nbsp; Read once per second in
-      R77.&nbsp; Read once every 4 sec during LR option of R04.&nbsp; A
-      15-bit integer which is multiplied by either 5.395 on the high
-      scale or 1.079 on the low scale to convert to units of feet.&nbsp;
-      A 1 in bit 9 of RADMODES indicates high scale.<br>
-    </p>
-    <h1>29</h1>
-    <p>TPF TIME.&nbsp; Time of rendezvous of active and passive
-      vehicles.&nbsp; Time to which the passive vehicle is extrapolated
-      to compute the target vector.&nbsp; Computed once per pass through
-      P34, and P74, and passed on to P35, and P75.&nbsp; Dependent on
-      TIG and CENTANG.&nbsp; Scaled centiseconds/2<sup>28</sup>.</p>
+    LR RANGE (Raw Data).&nbsp; Landing radar slant range.&nbsp; The data
+    readout from the LR High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+
+
+
+
+
+
+
+    Always contains the last value read, i.e., this register is never
+    initialized.&nbsp; Read once per second in R77.&nbsp; Read once
+    every 4 sec during LR option of R04.&nbsp; A 15-bit integer which is
+    multiplied by either 5.395 on the high scale or 1.079 on the low
+    scale to convert to units of feet.&nbsp; A 1 in bit 9 of RADMODES
+    indicates high scale.<br>
+    <h1>27-29</h1>
+    <i>Same as words 25-27 on Orbital Maneuvers List.</i><br>
+    <br>
+    VGTIGs (X, Y, Z).&nbsp; Velocity-to-be-gained at ignition.&nbsp; For
+    external-ΔV type burns this is the input ΔV rotated through half the
+    calculated central angle expected to be covered by the burn.&nbsp;
+    Calculated once a the beginning of each of P40, P41, and P42.&nbsp;
+    In reference coordinates, scaled (meters/centisecond)/27.&nbsp;
+    VGPREV (X, Y, Z) appears in the same location once Average G has
+    been turned on (TIG - 30 seconds).&nbsp; This is the
+    velocity-to-be-gained used by steering in P40 and P42, and for
+    display in P41.&nbsp; VGPREV is updated every 2 seconds during the
+    burn.&nbsp; In reference coordinates.&nbsp; Scaled
+    (meters/centisecond)/27.<br>
     <h1><a name="30"></a>30a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i><br>
+    </p>
     <p>REDO COUNTER.&nbsp; Counter for hardware restarts.&nbsp; Set to
       zero by keyboard freshstart (Verb 36).&nbsp; Incremented once per
       hardware restart by restart program (GO PROG).&nbsp; Scaled 2<sup>-14</sup>.<br>
     </p>
     <h1>30b,31a,31b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FINAL DESIRED CDUs (X, Y, Z).&nbsp; The target attitude (desired
       outer, inner and middle gimbal angles) for all coasting flight
       automatic maneuvers and for the ISS coarse align loop.&nbsp; Also,
@@ -227,25 +354,29 @@
       fractions.&nbsp; The quantities are scaled degrees/360<br>
     </p>
     <h1>32a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>RSBBQ.&nbsp; Loaded with the setting of the BBANK and Superbank
       when a hardware restart occurs.<br>
     </p>
     <h1>32b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>RSBBQ + 1.&nbsp; Loaded with the setting of the Q-register when a
       hardware restart occurs.<br>
     </p>
     <h1>33a,33b,34a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated current rates about
       body axis.&nbsp; Calculated at the beginning of every DAP cycle
       every 0.1 sec.&nbsp; Zeroed at DAP start-up.&nbsp; Scaled
       (degrees/sec)/45.&nbsp; Expected range of ±10 degrees/sec but ±45
       degrees/sec possible. </p>
     <h1>34b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>Garbage.&nbsp; This is the same erasable location as the one
       described for word 89a of this list.<br>
     </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; *FIXME* Word 89a of
-        the Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; Word 89a of the
+        Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
         Calculated angular acceleration about Y body axis due to the
         fact that the main engine is not exactly aligned with the center
         of gravity. During powered flight this is calculated every 0.1
@@ -263,10 +394,12 @@
 
 
 
+
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
     </blockquote>
     <p> </p>
     <h1>35a,35b,36a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
       to DAP.&nbsp; Generated during a burn by guidance equations or
@@ -277,16 +410,19 @@
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>36b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
       by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
     </p>
     <h1>37a,37b,38a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
       when the IMU is on.&nbsp; These registers are unsigned 15-bit
       fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>38b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
       counter.&nbsp; Defines the RR antenna position (along with shaft
       angle).&nbsp; Updated from RR CDUs as trunnion angle
@@ -294,6 +430,7 @@
       Scaled degrees/360.<br>
     </p>
     <h1>39a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 0.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -524,6 +661,7 @@
       </tbody>
     </table>
     <h1>39b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 1.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -610,7 +748,8 @@
           <td valign="top">9<br>
           </td>
           <td valign="top">ALW66FLG.&nbsp; Bit set 1 when P66 selection
-            allowed now, set 0 when P66 cannot be selected now. </td>
+            allowed now, set 0 when P66 cannot be selected now.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">8<br>
@@ -696,6 +835,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -731,6 +871,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>1</sub> of Section 5.5 of this GSOP</a>. </td>
         </tr>
         <tr>
@@ -742,6 +883,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1><a name="40"></a>40a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 2.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -827,7 +969,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           </td>
           <td valign="top">SERVOVER. Bit is set 1 when guidance portion
             of SERVICER job is in progress, set to 0 when servicer
-            portion of SERVICER job is in progress. </td>
+            portion of SERVICER job is in progress.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -951,6 +1094,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>40b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 3.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1130,6 +1274,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>41a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 4.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1282,6 +1427,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>41b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 5.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1455,10 +1601,24 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             vector).&nbsp; Thus, for TIME-RADIUS Routine, the resetting
             of this bit to 0 does not necessarily imply a successful
             TIME-RADIUS solution.&nbsp; This bit is never tested by any
-            of the mission programs.&nbsp; This bit is equivalent to the
-            switches f<sub>5</sub> and f<sub>9</sub> of Section 5.5 of
-            the Luminary 1C GSOP.&nbsp; These two switches are
-            represented by the same bit in the AGC.<br>
+            of the mission programs.&nbsp; This bit is equivalent to <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
+
+
+
+
+
+
+
+
+
+
+
+              switches f<sub>5</sub></a> and <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
+              of Section 5.5 of this GSOP</a>.&nbsp; These two switches
+            are represented by the same bit in the AGC.<br>
           </td>
         </tr>
         <tr>
@@ -1494,6 +1654,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>42a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 6.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1512,6 +1673,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
 
@@ -1680,6 +1842,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>42b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 7.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1794,9 +1957,35 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             possibility of a transfer angle changing from outside to
             inside the cone during a powered maneuver.&nbsp; NORMSW
             should generally remain 0, unless transfers between 165° and
-            195° are intended.&nbsp; NORMSW is equivalent to the switch
-            f<sub>2</sub> of Section 5.5, and to the switch S<sub>R</sub>
-            of Section 5.3.3. of the Luminary 1C GSOP. </td>
+            195° are intended.&nbsp; NORMSW is equivalent to <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
+
+
+
+
+
+
+
+
+
+
+
+              switch f<sub>2</sub> of Section 5.5</a>, and to <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf#page=39">the
+
+
+
+
+
+
+
+
+
+
+
+
+              switch S<sub>R</sub> of Section 5.3.3. of this GSOP</a>. </td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -1812,8 +2001,21 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Pre-CSI Maneuver Program P32 or P72.&nbsp; Set to 0 by the
             Pre-CDH Maneuver Program P33 or P73.&nbsp; Set to 1 by the
             Pre-TPI Maneuver Program P34 or P74.&nbsp; The bit is
-            equivalent to the inverse of the switch f<sub>6</sub> of
-            Section 5.5 of the Luminary 1C GSOP.<br>
+            equivalent to the inverse of <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">the
+
+
+
+
+
+
+
+
+
+
+
+
+              switch f<sub>6</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
         <tr>
@@ -1923,6 +2125,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>43a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 8.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2056,8 +2259,21 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             LAMBERT if the preceding internal iteration yielded a
             physically realizable transfer.&nbsp; The bit is never
             tested or set either way outside the conic
-            subroutines.&nbsp; The bit is equivalent to the switch f<sub>7</sub>
-            of Section 5.5 of the Luminary 1C GSOP.<br>
+            subroutines.&nbsp; The bit is equivalent to the <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
+
+
+
+
+
+
+
+
+
+
+
+              f<sub>7</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
         <tr>
@@ -2066,8 +2282,21 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <td valign="top">ORDERSW.&nbsp; Never set to 1.&nbsp; Set to 0
             as part of a fresh start.&nbsp; Used to control the type of
             computation performed in the ITERATOR routine (part of the
-            conic subroutines).&nbsp; This bit is equivalent to the
-            switch f<sub>4</sub> of Section 5.5 of the Luminary 1C GSOP.<br>
+            conic subroutines).&nbsp; This bit is equivalent to the <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">switch
+
+
+
+
+
+
+
+
+
+
+
+
+              f<sub>4</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
         <tr>
@@ -2084,8 +2313,21 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             desired radius, since the desired radius input was greater
             than pericenter radius and less than apocenter radius.&nbsp;
             (Such a solution will be reached unless INFINFLG is set to
-            1.)&nbsp; This bit is equivalent to the switch f<sub>8</sub>
-            in Section 5.5 of this GSOP.<br>
+            1.)&nbsp; This bit is equivalent to the <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">switch
+
+
+
+
+
+
+
+
+
+
+
+
+              f<sub>8</sub> in Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
         <tr>
@@ -2130,13 +2372,27 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             TIME-RADIUS routines).&nbsp; The bit is not of interest
             outside these three conic routines and in fact is neither
             tested nor set either way outside the Universal Variable
-            Routine itself.&nbsp; The bit is equivalent to the switch f<sub>W</sub>
-            of Fig. 5.10-4 of Section 5.5 of the Luminary 1C GSOP.<br>
+            Routine itself.&nbsp; The bit is equivalent to the <a
+href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=86">switch
+
+
+
+
+
+
+
+
+
+
+
+
+              f<sub>W</sub> of Fig. 5.10-4 of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
       </tbody>
     </table>
     <h1>43b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 9.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2212,6 +2468,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Equations.&nbsp; A 1 indicates that the thrust-magnitude
             filter will be bypassed, and that the Ascent Guidance
             Equations will only be used to generate <u>V</u><sub>GB</sub>.&nbsp;
+
 
 
 
@@ -2334,6 +2591,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>44a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 10.&nbsp; Bit assignments are as follows:<br>
     </p>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -2454,11 +2712,13 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>44b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FLAGWORD 11.&nbsp; Flagword 11 is used to control the operation
       of R12, the Descent State Vector Update routine.&nbsp; Therefore,
       its contents are only used during the programs P63 thru P66.&nbsp;
       During all other programs, bit 15 is set, bits 14 thru 1 are
       reset, and the contents of flagword 11 should be 40000<sub>8</sub>.&nbsp;
+
 
 
 
@@ -2505,7 +2765,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             1 when velocity radar reading has failed the LR data
             reasonability test.&nbsp; Bit is reset 0 when the
             corresponding radar reading has passed the reasonability
-            test.</td>
+            test. </td>
         </tr>
         <tr>
           <td valign="top">13<br>
@@ -2663,6 +2923,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     <p> </p>
     <p> </p>
     <h1><a name="50"></a>45a,45b,46a,46b,47a,47b,48a,48b,49a,49b,50a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
       indicate the status of the DSKY displays.&nbsp; If bit 15 through
       12 are 0001, the next 11 bits will indicate the actual status of
@@ -2899,6 +3160,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -3085,6 +3347,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 │   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
 └───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
     <h1>50b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>DSPTAB+11D.&nbsp; This register drives relays for the display
       lights.&nbsp; The bit assignments are:<br>
     </p>
@@ -3159,6 +3422,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       on.<br>
     </p>
     <h1>51</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
       elapsed time.&nbsp; Used for all timing while LGC is on.&nbsp;
       Zeroed at liftoff (by crew procedure), increment by one bit per
@@ -3166,6 +3430,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       or V73 (P27).&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
     </p>
     <h1>52,53,54,55,56,57,58</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>LM STATE VECTOR and TIME.&nbsp; The LGC's latest calculated state
       vector for the LM in reference coordinates.&nbsp; The coordinates
       may be either earth-centered or moon-centered; a zero in bit 11 of
@@ -3173,6 +3438,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       moon-centered.&nbsp; Words 52-54 contain the position components
       X, Y, Z scaled meters/2<sup>29</sup>.&nbsp; Words 55-57 contain
       the velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
+
 
 
 
@@ -3202,6 +3468,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     </ul>
     <p> </p>
     <h1><a name="60"></a>59a,59b,60a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>DESIRED BODY RATES (X, Y, Z).&nbsp; Desired automatic maneuver
       rates about body axes as given to the DAP.&nbsp; Calculated at the
       beginning of an automatic coasting flight maneuver (KALCMANU) and
@@ -3213,9 +3480,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     <h1>61a</h1>
     Spare or garbage.<br>
     <h1>61b</h1>
-    <p><i>Adapted from word 61b of the Luminary 1E Orbital Maneuvers
-        List.</i><br>
-    </p>
     CHAN77. Channel 77.&nbsp; A computer output channel, the individual
     bits of which, are used to indicate the source of a hardware
     restart.&nbsp; The channel is initialized to 0 by a V36E (request
@@ -3228,10 +3492,13 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     restarts of the same type would leave just one bit set with the
     software REDO COUNTER indicating the number.&nbsp; The bit
     definitions are:<br>
+    <br>
     <table cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -3245,6 +3512,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
           <th valign="bottom"><u>BIT</u><br>
           </th>
           <th valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -3367,13 +3636,13 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     Note that a restart due to oscillator fail is not shown in this
     channel.
     <h1>62a </h1>
-    <p>CADRFLSH +2.&nbsp; The final value of a set of three
-      single-precision erasable memory cells used to retain return
-      address information from the display interface routine.&nbsp;
-      CADRFLSH+2 contains the FCADR for the last normal display.&nbsp;
-      Octal quantity.<br>
-    </p>
+    CADRFLSH +2.&nbsp; The final value of a set of three
+    single-precision erasable memory cells used to retain return address
+    information from the display interface routine.&nbsp; CADRFLSH+2
+    contains the FCADR for the last normal display.&nbsp; Octal
+    quantity.
     <h1>62b,63a,63b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>FAILREG's, a set of three single-precision cells used to retain
       alarm pattern code information.&nbsp; They are all reset to 0 by a
       fresh start.&nbsp; FAILREG and FAILREG+1 are also reset to 0 by
@@ -3383,6 +3652,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       alarm code.&nbsp; Octal quantities.<br>
     </p>
     <h1>64a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>RADMODES.&nbsp; A flagword associated with radar modes.&nbsp; A
       fresh start sets bits 7 and 2 to 1, sets bit 6 to the value of bit
       6 of channel 33, and sets all other bits to 0.<br>
@@ -3591,6 +3861,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     </table>
     <p> </p>
     <h1>64b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>DAPBOOLS.&nbsp; A flagword associated with the DAP.&nbsp; A fresh
       start sets DAPBOOLS to 21322<sub>8</sub>.<br>
     </p>
@@ -3740,128 +4011,111 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       P71.&nbsp; Bit 12 is under internal DAP control.&nbsp; Bit 3 is
       set by 1/ACCs, cleared by fresh start and restart.<br>
     </p>
-    <h1>65a</h1>
-    <p>POSTORKU.&nbsp; Running sum of positive torque commands about
-      control axis U (RCS on-time multiplied by the number of jets
-      used).&nbsp; POSTORKU will, in time, overflow and subsequently
-      increase once more from zero (overflow does not go into sign
-      bit).&nbsp; The scaling is such as to preclude more than one
-      overflow per downlink cycle (2 sec) thus making the change from
-      one reading to the next unambiguous. &nbsp; Calculated every 0.1
-      second when DAP is running.&nbsp; Scaled jetseconds/32 (1
-      jetsecond is defined as 1 jet firing for 1 second). </p>
+    <h1>65-67</h1>
+    <p>OGC, IGC, MGC.&nbsp; The X, Y, and Z gyro torquing angles
+      computed in CALCGTA in P52, P57; counted down as gyros are
+      torqued.&nbsp; During coarse align in CALCGA in P52, P57 the
+      desired gimbal angles.&nbsp; Scaled degrees/360.<br>
+    </p>
+    <h1> </h1>
+    <h1>68a, 68b<br>
+    </h1>
+    <p>STAR IDs.&nbsp; 68a contains the star I.D. for the sighting
+      vector in words 69-71.&nbsp; 68b contains the star I.D. for the
+      sighting vector in words 72-74.&nbsp; Set during PICAPAR and after
+      astronaut changes star number.&nbsp; These I.D.s will be the LGC
+      catalogue number (Refer to Control Data section of this GSOP)
+      multiplied by six.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    </p>
+    <h1><a name="70"></a>69-71</h1>
+    <p>STAR SIGHTING VECTOR 1 (STARSAV1).&nbsp; During P52, P51 and
+      Technique 2 of P57 STARSAV1 contains the 1st optics sighting
+      vector.&nbsp; During Technique 0 of P57 it contains the Y
+      spacecraft axis and the gravity vector during techniques 1 and
+      3.&nbsp; In stable member coordinates.&nbsp; Scaled 2<sup>-1</sup>.<br>
+    </p>
+    <h1>72-74</h1>
+    <p>STAR SIGHTING VECTOR 2 (STARSAV2).&nbsp; During P52, P51 and
+      Techniques 2&nbsp; and 3 of P57 STARSAV2 contains the 2nd optics
+      sighting vector and contains the 1st sighting vector temporarily
+      during sighting on the 2nd body.&nbsp; During P57 techniques 0 and
+      1, STARSAV2 contains the Z spacecraft axis.&nbsp; In stable member
+      coordinates.&nbsp; Scaled 2<sup>-1</sup>.<br>
+    </p>
+    <h1>75a</h1>
+    <p>SERVDURN.&nbsp; The Average-G cycle duration which is computed as
+      the difference between TIME1 and the least significant half of
+      PIPTIME at exit from the Average-G in SERVICER.&nbsp; It is a
+      measure of TLOSS; the greater the TLOSS, the larger that time will
+      be.&nbsp; The quantity is scaled centiseconds/2<sup>14</sup>, and
+      is corrected for overflow (always &gt; 0).</p>
+    <h1>75b</h1>
+    <p>DUMLOOPS.&nbsp; The number of passes through Dummy Job, scaled
+      counts/2<sup>14</sup>.&nbsp; The register is incremented when
+      there is less than 100% duty cycle to indicate relative amounts of
+      DUMMYJOB activity at various times.&nbsp; The rate at which it is
+      incremented indicates the amount of available processing time.</p>
+    <h1>76</h1>
+    TET.&nbsp; Time of state vector being integrated or time to which
+    last state vector was integrated.&nbsp; It is stepped by
+    half-time-step increments, plus or minus, whenever integration is
+    being done.&nbsp; Scaled, centiseconds/2<sup>28</sup>.
+    <p></p>
+    <h1> </h1>
+    <h1>77a</h1>
+    <p>ACTUAL RR SHAFT CDU.&nbsp; RR shaft angle CDU counter.&nbsp;
+      Defines RR antenna position (along with trunnion angle).&nbsp;
+      Updated from RR CDUs as shaft angle changes.&nbsp; This register
+      is an unsigned 15-bit fraction.&nbsp; The quantity is scaled
+      degrees/360.<br>
+    </p>
+    <h1>77b,78a,79b<br>
+    </h1>
+    <p>ACTUAL PIPAS (X, Y, Z).&nbsp; Velocity increments along the IMU
+      Stable Member X, Y, and Z axes.&nbsp; Data is valid commencing at
+      approximately 15 seconds after ISS Turn-on.&nbsp; Automatic
+      increments when ISS is on.&nbsp; Zeroed every 2 seconds during
+      powered flight.&nbsp; Zeroed after coarse alignment in P51, P52,
+      and P57.&nbsp; Zeroed by NBDONLY (after reading) if SURFFLAG is
+      set 1.&nbsp; In stable member coordinates.&nbsp; Scaled
+      (centimeters/second)/2<sup>14</sup>.<br>
+    </p>
+    <h1>79</h1>
+    <p>RR TRUNNION and SHAFT ERROR COUNTERS.&nbsp; Rendezvous Radar
+      error counter commands; 79a is trunnion, 79b is shaft.&nbsp; They
+      are placed in the RR error counters and specify the rate at which
+      the RR antenna is driven.&nbsp; Values range from +384 to -384 and
+      vary according to the angular error between the present and
+      desired RR positions.&nbsp; Calculated every 0.5 second in the
+      Radar Designate Routine (DODES) whenever the the LGC is driving
+      the RR antenna which occurs when:<br>
+    </p>
+    <ol>
+      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
+      <li>V41 N72 (RR Coarse Align) is operated.</li>
+      <li>R21 (RR designate) is operated in P20/P22.</li>
+      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
+    </ol>
+    A magnitude of 384 corresponds to a rate command of about 10
+    degrees/second.&nbsp; The exact rate depends on the characteristics
+    of the motors in the RR gyros.&nbsp; 79a and 79b are each scaled 2<sup>-14</sup>.<br>
+    <blockquote><font size="-1"><b>Note:</b> The Luminary 1C GSOP states
+        that word 79 is the same as word 29 of Coast and Align List,
+        which is same as word 27 of Orbital Maneuvers List, which
+        instead of what's shown above would be a quantity known as
+        VGTIGZ.&nbsp; The GSOP appears to be in error. <a
+          moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-2781142823">See
+
+
+
+          here</a>.</font><i><br>
+      </i></blockquote>
     <p> </p>
-    <h1>65b</h1>
-    <p>NEGTORKU.&nbsp; Running sum (always positive) of negative torque
-      about control axis U.&nbsp; Calculated every 0.1 second when DAP
-      is running.&nbsp; Scaled jetseconds/32. </p>
-    <h1>66a</h1>
-    <p>POSTORKV.&nbsp; Running sum of positive torque about control axis
-      V.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
-      Scaled jetseconds/32. </p>
-    <h1>66b</h1>
-    <p>NEGTORKV.&nbsp; Running sum (always positive) of negative torque
-      about control axis V.&nbsp; Calculated every 0.1 second when DAP
-      is running.&nbsp; Scaled jetseconds/32.<br>
-    </p>
-    <h1>67a</h1>
-    <p><i>Adapted from word 67a of the Luminary 1E Orbital Maneuvers
-        List.</i><br>
-    </p>
-    SERVDURN.&nbsp; The Average-G cycle duration which is computed as
-    the difference between TIME1 and the least significant half of
-    PIPTIME at exit from the Average-G in SERVICER.&nbsp; It is a
-    measure of TLOSS; the greater the TLOSS, the larger that time will
-    be.&nbsp; The quantity is scaled centiseconds/2<sup>14</sup>, and is
-    corrected for overflow (always &gt; 0).<br>
-    <h1>67b</h1>
-    <p><i>Adapted from word 67b of the Luminary 1E Orbital Maneuvers
-        List.</i></p>
-    DUMLOOPS.&nbsp; The number of passes through Dummy Job, scaled
-    counts/2<sup>14</sup>.&nbsp; The register is incremented when there
-    is less than 100% duty cycle to indicate relative amounts of
-    DUMMYJOB activity at various times.&nbsp; The rate at which it is
-    incremented indicates the amount of available processing time.
-    <h1>68</h1>
-    <p>CDH TIME.&nbsp; The time of ignition of the CDH maneuver.&nbsp;
-      Used in CDHMVR subroutine.&nbsp; Calculated each iteration of
-      CSI/A subroutine in P32/P72.&nbsp; Input to P33/P73.&nbsp; Scaled
-      centiseconds/2<sup>28</sup>, referenced to computer clock.<br>
-    </p>
-    <h1><a name="70"></a>69,70,71</h1>
-    <p>DELTA VELOCITY (X, Y, Z) at CDH.&nbsp; In reference
-      coordinates.&nbsp; Used to calculate ΔV<sub>CDH</sub> in local
-      vertical coordinates.&nbsp; Calculated each iteration of CDHMVR
-      subroutine (once in P33/P73, possibly numerous times in
-      P32/P72).&nbsp; Also calculated after the local-vertical velocity
-      is displayed in P33/P73 (regardless of whether or not overwrite
-      occurs).&nbsp; Earth-centered if CMOONFLG is zero, moon-centered
-      if CMOONFLG is one.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <h1>72</h1>
-    <p>TPI TIME.&nbsp; Time of TPI ignition.&nbsp; Ultimately passed on
-      to burn program.&nbsp; Also used as input to orbital
-      integration.&nbsp; Computed by P33/P73, may be recomputed by
-      P34/P74.&nbsp; Input to P32/P72.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    </p>
-    <h1>73,74,75</h1>
-    <p>DELTA VELOCITY (X, Y, Z) for TPI MANEUVER.&nbsp; In reference
-      coordinates.&nbsp; Delta Velocity required at TPI Time of Ignition
-      or at TPM Time of ignition.&nbsp; Rotated to local vertical and
-      line-of-sight coordinate systems and displayed to astronaut via
-      V06 N81 and V06 N59, respectively.&nbsp; Computed once per program
-      pass by P34/P74 and P35/P75.&nbsp; Updated during burn programs by
-      RASTEER1 for Lambert targeted burns.&nbsp; Scaled
-      (meters/centisecond)/2<sup>7</sup>.<br>
-    </p>
-    <p> </p>
-    <h1>76a</h1>
-    <p>RR RANGE (Raw Data).&nbsp; Treated as a 15-bit integer which is
-      multiplied by either 9.38 for the low scale or by 75.04 for the
-      high scale to convert to units of feet.&nbsp; a 1 in bit 3 of
-      RADMODES indicates high scale.&nbsp; See page 2-98 for more
-      complete description.<br>
-    </p>
-    <h1>76b</h1>
-    <p>RR RANGE RATE (Raw Data).&nbsp; Treated as a 15-bit
-      integer.&nbsp; To convert to units of feet per second the
-      following computation is done:<br>
-    </p>
-    <blockquote>(15-bit integer - 17000) × (-0.6278)<br>
-    </blockquote>
-    A negative quantity indicates closing.&nbsp; See page 2-98 for more
-    complete description.<br>
-    <h1>77a,77b,78a</h1>
-    <p>LR VELOCITIES (Raw Data).&nbsp; Landing radar beam velocities (X,
-      Y, Z).&nbsp; The data readout from the Landing Radar High Speed
-      Counter into LGC input counter 46<sub>8</sub>.&nbsp; Always
-      contain the last values which were read, i.e., these registers are
-      never initialized.&nbsp; Each component read once per second
-      during R77.&nbsp; Each component read once per four seconds during
-      LR option of R04.&nbsp; Scaled (15-bit integer - 12288.2) × K
-      ft/sec where K = -0.6440 for V<sub>x</sub>, K = 1.212 for V<sub>y</sub>,
-      and K = -0.8668 for V<sub>z</sub>.<br>
-    </p>
-    <h1>78b</h1>
-    <p>LR RANGE (Raw Data).&nbsp; Landing radar slant range.&nbsp; The
-      data readout from the LR High Speed Counter into LGC input counter
-      46<sub>8</sub>.&nbsp; Always contains the last value read, i.e.,
-      this register is never initialized.&nbsp; Read once per second in
-      R77.&nbsp; Read once every 4 sec during LR option of R04.&nbsp; A
-      15-bit integer which is multiplied by either 5.395 on the high
-      scale or 1.079 on the low scale to convert to units of feet.&nbsp;
-      A 1 in bit 9 of RADMODES indicates high scale.<br>
-    </p>
-    <h1> 79</h1>
-    <p>CDH DELTA ALTITUDE.&nbsp; The altitude between the active and
-      passive vehicle orbits at CDH time.&nbsp; Used for display and
-      other CDHMVR calculations.&nbsp; Calculated each iteration of
-      CDHMVR subroutine — once in P33/P73, numerous times possible in
-      P32/P72.&nbsp; Earth or moon-centered altitude depending upon
-      whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-      respectively.&nbsp; Scaled meters/2<sup>29</sup>.</p>
     <p> </p>
     <h1><a name="80"></a>80a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i><br>
+    </p>
     <p>LM MASS.&nbsp; Current mass of the LM.&nbsp; First part of Noun
       47.&nbsp; A buffered quantity that is determined by MASS (and
       CSMMASS when desired).&nbsp; Pad-loaded.&nbsp; Can also be loaded
@@ -3872,12 +4126,14 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       function of acceleration).&nbsp; Scaled kilograms/2<sup>16</sup>.<br>
     </p>
     <h1>80b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CSM MASS.&nbsp; Current mass of the CSM.&nbsp; Used in the
       computation of the RCS and GTS control authorities when the LM is
       docked to the CSM.&nbsp; Second half of Noun 47.&nbsp;
       Pad-loaded.&nbsp; Can also be loaded by crew via R03 (Verb 48 —
       DAP Data Load).&nbsp; Scaled kilograms/2<sup>16</sup>. </p>
     <h1>81a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>IMODES30.&nbsp; A flagword which monitors IMU conditions.&nbsp;
       Set to 37411<sub>8</sub> by a fresh start.&nbsp; A restart sets
       bits 14, 13, 12, 11, 10 to 1, sets bits 15, 8, 7, 6, 2 to 0 and
@@ -4042,8 +4298,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     </table>
     <p> </p>
     <h1>81b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>IMODES33.&nbsp; A flagword which monitors various channel 32,
-      channel 33, and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
+      channel 33 and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
       test".&nbsp; Set to 16040<sub>8</sub> by a fresh start. Set to
       16000<sub>8</sub> + the contents of bit 6 by a restart.&nbsp; An
       error reset key code sets bits 13, 12, and 11 to 1 and does not
@@ -4191,14 +4448,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>82</h1>
-    TIG.&nbsp; Targeted time of ignition.&nbsp; Calculated during
+    <i>Same as Orbital Maneuvers List.<br>
+      <br>
+    </i> TIG.&nbsp; Targeted time of ignition.&nbsp; Calculated during
     pre-burn programs (P30s, P70s).&nbsp; Updated in P12, P40, P41, P42,
     or P63 by MIDTOAVE routine if integration cannot be completed in
     time (1703 alarm).&nbsp; After ignition TIG is set to time of engine
     cutoff (PIPTIME + TGO).&nbsp; See also pg. 2-106 for use on
     Descent/Ascent List.&nbsp; Scaled centiseconds / 2<sup>28</sup>.<br>
     <h1>83a,83b,84a</h1>
-    <p><i>Same as the words 33,34a on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are s</i>ame as the
+        words 33,34a on Orbital Maneuvers List.<br>
       </i></p>
     <p>CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated current rates about
       body axis.&nbsp; Calculated at the beginning of every DAP cycle
@@ -4207,7 +4467,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       degrees/sec is possible.<br>
       <i></i></p>
     <h1>84b</h1>
-    <p><i>Same as the word 34b on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are s</i>ame as the
+        word 34b on Orbital Maneuvers List.<br>
       </i></p>
     <p>Garbage.&nbsp; This is the same erasable location as the one
       described for word 89a on the Orbital Maneuvers List.<br>
@@ -4231,10 +4492,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
         Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
     </blockquote>
     <h1>85a,85b,86a</h1>
-    <p><i>Same as the words 34,36a on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are the s</i>ame as
+        the words 34,36a on Orbital Maneuvers List.<br>
       </i></p>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
@@ -4246,13 +4509,15 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>86b</h1>
-    <p><i>Same as the word 36b on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are the s</i>ame as
+        the word 36b on Orbital Maneuvers List.<br>
       </i></p>
     <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
       by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
       <i> </i></p>
     <h1>87a,87b,88a</h1>
-    <p><i>Same as the words 37,38a on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are the s</i>ame as
+        the words 37,38a on Orbital Maneuvers List.<br>
       </i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
@@ -4260,7 +4525,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>88b</h1>
-    <p><i>Same as the word 38b on Orbital Maneuvers List.<br>
+    <p><i><i>Same as Orbital Maneuvers List, which are the s</i>ame as
+        the word 38b on Orbital Maneuvers List.<br>
       </i></p>
     <p>ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
       counter.&nbsp; Defines the RR antenna position (along with shaft
@@ -4268,8 +4534,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       changes.&nbsp; This register is an unsigned 15-bit fraction.&nbsp;
       Scaled degrees/360.<br>
       <i> </i></p>
-    <h1>89a,89b<br>
-    </h1>
+    <h1>89a,89b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>Y, Z MOMENT OFFSETS.&nbsp; Calculated angular acceleration about
       Y and Z body axes due to the fact that the main engine is not
       exactly aligned with the center of gravity.&nbsp; During powered
@@ -4288,18 +4554,22 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
       Expected range is ±35 degrees/second<sup>2</sup>.<br>
     </p>
     <h1><a name="90"></a>90a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>POSTORKP.&nbsp; Running sum of positive torque about control axis
       P.&nbsp; Calculated every 0.1 second when DAP is running.&nbsp;
       Scaled jetseconds/32. </p>
     <h1>90b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>NEGTORKP.&nbsp; Running sum (always positive) of negative torque
       about control axis P.&nbsp; Calculated every 0.1 second when DAP
       is running.&nbsp; Scaled jetseconds/32.<br>
     </p>
     <h1>91a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 11.&nbsp; Output channel.&nbsp; Bits are used to control
       engine on/off and for display parameter quantities.&nbsp; Set 0 by
       a fresh start.&nbsp; A restart zeroes all output channels by
@@ -4431,6 +4701,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>91b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 12.&nbsp; Output channel.&nbsp; Bits are used for control
       of the rendezvous radar and IMU CDUs.&nbsp; Set 0 by a fresh
       start.&nbsp; A restart preserves bits 14, 12, 11, 10, 9, 6, 5, 4
@@ -4590,6 +4861,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>92a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 13. Output channel.&nbsp; Bits are used for various
       purposes.&nbsp; Set 0 by a fresh start.&nbsp; A restart or V37
       sets bit 12 to 1, preserves bits 15-13 and 7-5 and sets remaining
@@ -4858,6 +5130,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>92b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 14.&nbsp; Output channel. Bits are used for control of
       computer counter registers.&nbsp; Set 0 by fresh start.&nbsp; A
       restart or V37 preserves bit 6 and sets remaining bits to 0.&nbsp;
@@ -4947,6 +5220,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
               <tbody>
                 <tr>
                   <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -5056,6 +5330,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>93a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 30.&nbsp; Input channel.&nbsp; Bits are used for various
       purposes.<br>
     </p>
@@ -5173,6 +5448,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>93b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 31.&nbsp; Inputs from crew control devices, used by DAP.<br>
     </p>
     <table cellspacing="2" cellpadding="2" border="1">
@@ -5286,6 +5562,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>94a</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 32.&nbsp; Input channel.&nbsp; Additional crew input to
       DAP, etc.<br>
     </p>
@@ -5391,6 +5668,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <h1>94b</h1>
+    <p><i>Same as Orbital Maneuvers List.</i></p>
     <p>CHANNEL 33.&nbsp; Input channel.&nbsp; Bits are used for hardware
       status and command information.&nbsp; Bits 15-11 are "flip-flop"
       bits (reset by a channel "write" command).&nbsp; They are reset in
@@ -5511,35 +5789,505 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       </tbody>
     </table>
     <p> </p>
-    <h1>95</h1>
-    <p>PIPTIME.&nbsp; The time at which the accelerometers were read
-      (associated with words 96-98, but since the group is not a
-      snapshot quantity, their values as transmitted may not be valid
-      simultaneously).&nbsp; When the PIPAs are read, the time is stored
-      in PIPTIME1; when the state vector is updated, the contents of
-      PIPTIME1 is stored in PIPTIME.&nbsp; Scaled centiseconds/2<sup>28</sup>,
-      referenced to computer clock.<br>
+    <h1>95a,95b,96a,96b,97a,97b,98a,98b,99a,99b,100a</h1>
+    <p><i>Same as words 45-49,50a on the Orbital Maneuvers List.</i><br>
     </p>
-    <h1>96-98</h1>
-    <p>DELVs (X, Y, Z).&nbsp; The accumulated PIPA counts when the
-      servicer is running.&nbsp; At the start of each 2-second cycle the
-      PIPAs are zeroed and the contents of the PIPAs are loaded into
-      DELVs.&nbsp; In stable member coordinates.&nbsp; Scaled
-      (centimeters/second)/2<sup>14</sup>.<br>
+    <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
+      indicate the status of the DSKY displays.&nbsp; If bit 15 through
+      12 are 0001, the next 11 bits will indicate the actual status of
+      the DSKY displays; if bits 15 through 12 are 1110, the next 11
+      bits indicate the "ones" complement of the status to which the LGC
+      will command the DSKY display.&nbsp; Bits 11-1 of DSPTAB+0 through
+      DSPTAB+10D are decoded as follows:<br>
     </p>
-    <h1>99<br>
-    </h1>
-    Spare.&nbsp; See page 2-70 for definition.<br>
-    <blockquote><font size="-1">From p. 2-70:&nbsp; The first half of
-        each spare contains 00000<sub>8</sub>. The second half is ARUPT
-        (the contents of the accumulator when the telemetry interrupt
-        was recognized).</font><br>
-    </blockquote>
-    <h1>100</h1>
-    <p>TGO.&nbsp; Calculated time to engine cutoff.&nbsp; Calculated
-      every 2 seconds during P40, P42 (after burn starts).&nbsp; Also
-      calculated 5 seconds before ignition in P40, P42.&nbsp; Scaled
-      centiseconds/2<sup>28</sup>.</p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom">DSPTAB<br>
+            <u>Register</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">Downlink<br>
+            <u>Word No.</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+0<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+1</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+2</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+3</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+4</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+5</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+6</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+7</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+8D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+9D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+10D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">50a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>R3D1 stands for digit one of the third register and VD1 stand for
+      the first digit of the verb display, etc.&nbsp; For the right
+      character of a pair, bit 5 is the MSB with bit 1 the LSB.&nbsp;
+      For the left character of a pair, the MSB is bit 10 with bit 6 the
+      LSB.&nbsp; Bit 11 of some of the DSPTABs contains discrete
+      information, a one indicating that the discrete is on.&nbsp; For
+      example, a one in bit 11 of DSPTAB+1 indicates that R3 has a plus
+      sign.&nbsp; If the sign bits associated with a given register are
+      both zeros, then the content of that particular register is octal;
+      if either of the bits is set, the register content is decimal
+      data.</p>
+    <p>The five bit codes associated with the digits are as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+            <br>
+          </td>
+          <td valign="top">MSB<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">LSB<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following is a diagram of the DSKY face showing positions of
+      the different digits:</p>
+    <pre>                             Program<br>                        ┌───────┬───────┐
+                        │  MD1  │  MD2  │
+                        └───────┴───────┘
+<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
+  │  VD1  │  VD2  │     │  ND1  │  ND2  │
+  └───────┴───────┘     └───────┴───────┘
+<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘
+<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    <h1>100b</h1>
+    <p><i>Same as word 50b on the Orbital Maneuvers List.</i><br>
+    </p>
+    <p>DSPTAB+11D.&nbsp; This register drives relays for the display
+      lights.&nbsp; The bit assignments are:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="left"><u>Assignment</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Landing Radar Velocity Fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">No Attitude<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Landing Radar Altitude Fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Gimbal Lock<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Tracker<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Program Caution<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    If bits 15 through 12 of DSPTAB+11D are 1000, the last 11 bits
+    indicate the state to which the LGC will command the relays; if bits
+    15 through 12 are 0000, the last 11 bits indicate the actual state
+    of the relays.&nbsp; A one indicates that the discrete is on.
     <p><br>
     </p>
     <h1><font size="-1"> </font></h1>
