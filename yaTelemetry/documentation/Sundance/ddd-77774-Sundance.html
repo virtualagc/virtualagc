@@ -6,15 +6,18 @@
     <link rel="stylesheet" href="./../downlists.css">
   </head>
   <body>
-    <b>Disclaimer:</b>&nbsp; Documentation of the telemetry for the
-    Sundance flight program is provided by Section 2 ("Data Links") of
-    the Apollo-era document R-557, "Guidance System Operations Plan for
-    Manned LM Earth Orbital Missions using program SUNDANCE 306"
-    (GSOP).&nbsp; Unfortunately, that is not presently available.&nbsp;
-    Rather, the documentation herein is speculative, and has been
-    adapted from the Luminary 1C GSOP and comparison of Sundance306
-    source code (Apollo 9) versus LUM69R2 source code (Apollo 10).&nbsp;
-    Do not regard this information as reliable.<br>
+    <b>Disclaimer:</b>&nbsp; Authoritative documentation of the
+    telemetry for the Sundance flight program is provided by Section 2
+    ("Data Links") of the Apollo-era document R-557, "Guidance System
+    Operations Plan for Manned LM Earth Orbital Missions using program
+    SUNDANCE 306" (GSOP), which is not presently available. We do have
+    the <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/sundance_functional_description_vol1.pdf#page=230">Sundance
+      Functional Description</a>, which includes lists but not
+    descriptions of downlinked items, and reconstructed Sundance 306
+    source code is available as well.&nbsp; The documentation herein is
+    speculative, and has been adapted from the resources just
+    mentioned.&nbsp; Do not regard this information as reliable.<br>
     <br>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
       href="#30">30</a> <a href="#40">40</a> <a href="#50">50</a> <a
@@ -35,6 +38,7 @@
       moon-centered; a zero in bit 12 of flagword 8 (CMOONFLG) indicates
       earth-centered, a one indicates moon-centered.&nbsp; Words 2-4
       contain the position components X, Y, Z scaled meters/2<sup>29</sup>.&nbsp;
+
       Words 5-7 contain the velocity components X, Y, Z scaled
       (meters/centisecond)/2<sup>7</sup>.&nbsp; Word 8 contains the time
       associated with the state vector scaled centimeters/2<sup>28</sup>,
@@ -94,6 +98,7 @@
     <p>DNRVELX, Y, Z.&nbsp; LR VELOCITIES (Raw Data).&nbsp; Landing
       radar beam velocities (X, Y, Z).&nbsp; The data readout from the
       Landing Radar High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+
       Always contain the last values which were read, i.e., these
       registers are never initialized.&nbsp; Each component read once
       per second during R77.&nbsp; Each component read once per four
@@ -213,9 +218,10 @@
       scaled (meters/centisecond)/2<sup>7</sup>.<br>
     </p>
     <h1>34</h1>
-    <p>MASS. <i>TBD</i>, though I think it's probably the current mass
-      of the LM or LM+CSM (if docked), in kg.<br>
+    <p><i>Information from Sundance Functional Description.</i><br>
     </p>
+    MASS. LM current weight.
+    <p> </p>
     <h1>35a</h1>
     <p><i>Adapted from</i><i> word 32a of Luminary </i><i>1C Orbital
         Maneuvers List.</i></p>
@@ -250,6 +256,7 @@
     </p>
     <h1>38a,38b,39a</h1>
     <p><i>Adapted from</i><i> words 37a,37b,38a of Luminary </i><i>1C </i><i><i>Orbital
+
           Maneuvers</i> List.</i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
@@ -258,6 +265,7 @@
     </p>
     <h1>39b</h1>
     <p><i>Adapted from</i><i> word 38b of Luminary </i><i>1C </i><i><i>Orbital
+
           Maneuvers</i> List.</i></p>
     ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU counter.&nbsp;
     Defines the RR antenna position (along with shaft angle).&nbsp;
@@ -623,6 +631,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -647,6 +656,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
             equivalent to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
 
@@ -1395,6 +1405,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switches f<sub>5</sub></a> and <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
@@ -1454,6 +1465,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
 
@@ -2141,6 +2153,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
             Bit is assumed to be 0 in padload.&nbsp; Bit is reset to 0
             in P70, P71 initialization.&nbsp; A 0 indicates that the
             thrust-magnitude filter will be used (if ΔV is large
@@ -2473,6 +2486,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -2773,6 +2787,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
       Word 58 contains the time associated with the state vector scaled
       centiseconds/2<sup>28</sup>, referenced to the computer
       clock.&nbsp; The scaling for position, velocity and time is the
@@ -2829,6 +2844,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
     <p>DNRVELX, Y, Z.&nbsp; LR VELOCITIES (Raw Data).&nbsp; Landing
       radar beam velocities (X, Y, Z).&nbsp; The data readout from the
       Landing Radar High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+
       Always contain the last values which were read, i.e., these
       registers are never initialized.&nbsp; Each component read once
       per second during R77.&nbsp; Each component read once per four
@@ -4358,6 +4374,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
                     <br>
                   </td>
                   <td valign="top">00<sub>2</sub><br>
@@ -5148,6 +5165,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       <tbody>
         <tr>
           <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 

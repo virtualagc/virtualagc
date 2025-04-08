@@ -7,15 +7,18 @@
     <link rel="stylesheet" href="./../downlists.css">
   </head>
   <body>
-    <b>Disclaimer:</b>&nbsp; Documentation of the telemetry for the
-    Sundance flight program is provided by Section 2 ("Data Links") of
-    the Apollo-era document R-557, "Guidance System Operations Plan for
-    Manned LM Earth Orbital Missions using program SUNDANCE 306"
-    (GSOP).&nbsp; Unfortunately, that is not presently available.&nbsp;
-    Rather, the documentation herein is speculative, and has been
-    adapted from the Luminary 1C GSOP and comparison of Sundance306
-    source code (Apollo 9) versus LUM69R2 source code (Apollo 10).&nbsp;
-    Do not regard this information as reliable.<br>
+    <b>Disclaimer:</b>&nbsp; Authoritative documentation of the
+    telemetry for the Sundance flight program is provided by Section 2
+    ("Data Links") of the Apollo-era document R-557, "Guidance System
+    Operations Plan for Manned LM Earth Orbital Missions using program
+    SUNDANCE 306" (GSOP), which is not presently available. We do have
+    the <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/sundance_functional_description_vol1.pdf#page=230">Sundance
+      Functional Description</a>, which includes lists but not
+    descriptions of downlinked items, and reconstructed Sundance 306
+    source code is available as well.&nbsp; The documentation herein is
+    speculative, and has been adapted from the resources just
+    mentioned.&nbsp; Do not regard this information as reliable.<br>
     <br>
     Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
       href="#30">30</a> <a href="#40">40</a> <a href="#50">50</a> <a
@@ -44,6 +47,7 @@
 
 
 
+
     These are all two's complement quantities in stable member
     coordinates.&nbsp; The position and velocity components are
     rounded.&nbsp; The order is as follows:<br>
@@ -56,6 +60,7 @@
           <td valign="top">LM X Position<br>
           </td>
           <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -310,9 +315,10 @@
     R47 and on subsequent calls to R47 if requested by the
     astronaut.&nbsp; Scaled centiseconds/2<sup>28</sup>.
     <h1>34</h1>
-    <p>MASS. <i>TBD</i>, though I think it's probably the current mass
-      of the LM or LM+CSM (if docked), in kg.<br>
+    <p><i>Information from Sundance Functional Description.</i><br>
     </p>
+    MASS. LM current weight.
+    <p> </p>
     <h1>35a</h1>
     <p><i>Adapted from</i><i> word 32a of Luminary </i><i>1C Orbital
         Maneuvers List.</i></p>
@@ -348,6 +354,7 @@
     <h1>38a,38b,39a</h1>
     <p><i>Adapted from</i><i> words 37a,37b,38a of Luminary </i><i>1C </i><i><i>Orbital
 
+
           Maneuvers</i> List.</i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
@@ -356,6 +363,7 @@
     </p>
     <h1>39b</h1>
     <p><i>Adapted from</i><i> word 38b of Luminary </i><i>1C </i><i><i>Orbital
+
 
           Maneuvers</i> List.</i></p>
     ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU counter.&nbsp;
@@ -723,6 +731,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -747,6 +756,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
             equivalent to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
+
 
 
 
@@ -1497,6 +1507,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
+
               switches f<sub>5</sub></a> and <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
@@ -1556,6 +1567,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
+
 
 
 
@@ -2245,6 +2257,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
             Bit is assumed to be 0 in padload.&nbsp; Bit is reset to 0
             in P70, P71 initialization.&nbsp; A 0 indicates that the
             thrust-magnitude filter will be used (if ΔV is large
@@ -2578,6 +2591,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -2870,6 +2884,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       moon-centered.&nbsp; Words 52-54 contain the position components
       X, Y, Z scaled meters/2<sup>29</sup>.&nbsp; Words 55-57 contain
       the velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
+
 
 
 
@@ -4383,6 +4398,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
+
                     <br>
                   </td>
                   <td valign="top">00<sub>2</sub><br>
@@ -5173,6 +5189,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       <tbody>
         <tr>
           <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
