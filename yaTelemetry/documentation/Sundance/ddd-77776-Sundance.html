@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Telemetry Documentation for the Sundance Rendezvous and
-      Prethrust List</title>
+    <title>Telemetry Documentation for the Sundance AGS Initialization
+      and Update List</title>
     <link rel="stylesheet" href="./../downlists.css">
   </head>
   <body>
@@ -22,298 +22,294 @@
       href="#60">60</a> <a href="#70">70</a> <a href="#80">80</a> <a
       href="#90">90</a><br>
     <h1>1a</h1>
-    <p>I.D. word for this list.&nbsp; Will contain 77775<sub>8</sub>.<br>
+    <p>I.D. word for this list.&nbsp; Will contain 77776<sub>8</sub>.<br>
     </p>
     <h1>1b</h1>
     <p>Sync bits.&nbsp; Will contain 77340<sub>8</sub>.<br>
     </p>
-    <h1>2,3,4,5,6,7,8</h1>
-    <p><i>Adapted from words 2-8 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>R-OTHER, V-OTHER, T-OTHER.&nbsp; CSM STATE VECTOR and TIME.&nbsp;
-      The LGC's latest calculated state vector for the CSM in reference
-      coordinates.&nbsp; The coordinates may be either earth-centered or
-      moon-centered; a zero in bit 12 of flagword 8 (CMOONFLG) indicates
-      earth-centered, a one indicates moon-centered.&nbsp; Words 2-4
-      contain the position components X, Y, Z scaled meters/2<sup>29</sup>.&nbsp;
-
-
-
-
-      Words 5-7 contain the velocity components X, Y, Z scaled
-      (meters/centisecond)/2<sup>7</sup>.&nbsp; Word 8 contains the time
-      associated with the state vector scaled centimeters/2<sup>28</sup>,
-      referenced to the computer clock.&nbsp; The scaling for position,
-      velocity and time is the same whether earth-centered or
-      moon-centered.</p>
-    <h1>9a</h1>
-    <p>Spare or garbage.<br>
+    <h1><a name="10"></a>2-17</h1>
+    <p><i>Adapted from words 2-17 of Luminary 1C AGS Initialization and
+        Update List.</i><br>
     </p>
-    <h1><a name="10"></a>9b,10a,10b</h1>
-    <p><i>Adapted from words 35a,35b,36a of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>CDUXD, CDUYD, CDUZD. DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp;
-      Outer, inner and middle intermediate desired gimbal angles.&nbsp;
-      Steering commands to DAP.&nbsp; Generated during a burn by
-      guidance equations or during an automatic maneuver.&nbsp;
-      Calculated every 2 secs during a PGNCS controlled burn (i.e., P40,
-      P42).&nbsp; Updated every 0.1 sec by the DAP (using DELCDUs)
-      during an automatic maneuver (KALCMANU) and also during powered
-      flight.&nbsp; These registers are unsigned 15-bit fractions.&nbsp;
-      Scaled degrees/360.<br>
-    </p>
-    <h1>11a,11b,12a</h1>
-    <p><i>Adapted from words 33a,33b,34a of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>OMEGAP, Q, R. CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated
-      current rates about body axis.&nbsp; Calculated at the beginning
-      of every DAP cycle every 0.1 sec.&nbsp; Zeroed at DAP
-      start-up.&nbsp; Scaled (degrees/sec)/45.&nbsp; Expected range of
-      ±10 degrees/sec but ±45 degrees/sec possible. </p>
-    <h1>12b</h1>
-    Spare or garbage.<br>
-    <h1>13a,13b</h1>
-    <i>Adapted from words 79a,79b of Luminary 1C Coast and Align list.</i><br>
+    STATE VECTORS FOR AGS INITIALIZATION.&nbsp; The state vectors of the
+    LM and CSM for transmission to the AGS during the AGS initialization
+    (R47).&nbsp; Filled every time R47 is called.&nbsp; The position
+    components are scaled ft/2<sup>25</sup> for earth-orbital and ft/2<sup>23</sup>
+    for moon-orbital.&nbsp; The velocity components are scaled
+    (ft/sec)/2<sup>15</sup> for earth orbital and (ft/sec)/2<sup>13</sup>
+    for moon-orbital.&nbsp; The epoch times are scaled sec/2<sup>18</sup>.&nbsp;
+
+
+
+
+
+
+    These are all two's complement quantities in stable member
+    coordinates.&nbsp; The position and velocity components are
+    rounded.&nbsp; The order is as follows:<br>
     <br>
-    LASTYCMD, LASTXCMD.&nbsp; RR TRUNNION and SHAFT ERROR
-    COUNTERS.&nbsp; Rendezvous Radar error counter commands; 79a is
-    trunnion, 79b is shaft.&nbsp; They are placed in the RR error
-    counters and specify the rate at which the RR antenna is
-    driven.&nbsp; Values range from +384 to -384 and vary according to
-    the angular error between the present and desired RR
-    positions.&nbsp; Calculated every 0.5 second in the Radar Designate
-    Routine (DODES) whenever the the LGC is driving the RR antenna which
-    occurs when:<br>
-    <ol>
-      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
-      <li>V41 N72 (RR Coarse Align) is operated.</li>
-      <li>R21 (RR designate) is operated in P20/P22.</li>
-      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
-    </ol>
-    A magnitude of 384 corresponds to a rate command of about 10
-    degrees/second.&nbsp; The exact rate depends on the characteristics
-    of the motors in the RR gyros.&nbsp; 79a and 79b are each scaled 2<sup>-14</sup>.<br>
-    <h1>14a,14b,15a</h1>
-    <i>Adapted from words 77a,77b,78a of Luminary </i><i>1C Orbital
-      Maneuvers List.</i>
-    <p>DNRVELX, Y, Z.&nbsp; LR VELOCITIES (Raw Data).&nbsp; Landing
-      radar beam velocities (X, Y, Z).&nbsp; The data readout from the
-      Landing Radar High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">2a<br>
+          </td>
+          <td valign="top">LM X Position<br>
+          </td>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
 
-      Always contain the last values which were read, i.e., these
-      registers are never initialized.&nbsp; Each component read once
-      per second during R77.&nbsp; Each component read once per four
-      seconds during LR option of R04.&nbsp; Scaled (15-bit integer -
-      12288.2) × K ft/sec where K = -0.6440 for V<sub>x</sub>, K = 1.212
-      for V<sub>y</sub>, and K = -0.8668 for V<sub>z</sub>.<br>
-    </p>
-    <h1>15b</h1>
-    <i>Adapted from word 78b of Luminary </i><i>1C Orbital Maneuvers
-      List.</i><br>
+
+
+            <br>
+          </td>
+          <td valign="top">2b<br>
+          </td>
+          <td valign="top">LM X Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3a<br>
+          </td>
+          <td valign="top">LM Y Position<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">3b<br>
+          </td>
+          <td valign="top">LM Y Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4a<br>
+          </td>
+          <td valign="top">LM Z Position<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">4b<br>
+          </td>
+          <td valign="top">LM Z Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5a<br>
+          </td>
+          <td valign="top">LM Epoch Time<br>
+            (Most Significant Bits)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">5b<br>
+          </td>
+          <td valign="top">LM Epoch Time<br>
+            (Least Significant Bits)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6a<br>
+          </td>
+          <td valign="top">LM X Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">6b<br>
+          </td>
+          <td valign="top">LM Y Position<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7a<br>
+          </td>
+          <td valign="top">LM Y Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">7b<br>
+          </td>
+          <td valign="top">LM Z Position<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8a<br>
+          </td>
+          <td valign="top">LM Z Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">8b<br>
+          </td>
+          <td valign="top">CSM X Position<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9a<br>
+          </td>
+          <td valign="top">LM Epoch Time<br>
+            (Least Significant Bits)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">9b<br>
+          </td>
+          <td valign="top">Garbage (Temporary used<br>
+            in R30, R31 and R36)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10a<br>
+          </td>
+          <td valign="top">CSM X Position<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">10b<br>
+          </td>
+          <td valign="top">CSM X Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">11a<br>
+          </td>
+          <td valign="top">CSM Y Position<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">11b<br>
+          </td>
+          <td valign="top">CSM Y Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">12a<br>
+          </td>
+          <td valign="top">CSM Z Position<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">12b<br>
+          </td>
+          <td valign="top">CSM Z Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13a<br>
+          </td>
+          <td valign="top">CSM Epoch Time<br>
+            (Most Significant Bits)<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">13b<br>
+          </td>
+          <td valign="top">CSM Epoch Time<br>
+            (Least Significant Bits)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14a<br>
+          </td>
+          <td valign="top">CSM X Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">14b<br>
+          </td>
+          <td valign="top">CSM Y Position<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">15a<br>
+          </td>
+          <td valign="top">CSM Y Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">15b<br>
+          </td>
+          <td valign="top">CSM Z Position<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">16a<br>
+          </td>
+          <td valign="top">CSM Z Velocity<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">16b<br>
+          </td>
+          <td valign="top">CSM Epoch Time<br>
+            (Most Significant Bits)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">17a<br>
+          </td>
+          <td valign="top">CSM Epoch Time<br>
+            (Least Significant Bits<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">17b<br>
+          </td>
+          <td valign="top">Garbage (Temporary used<br>
+            in R30, R31 and R36)<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
-    DNLRALT.&nbsp; LR RANGE (Raw Data).&nbsp; Landing radar slant
-    range.&nbsp; The data readout from the LR High Speed Counter into
-    LGC input counter 46<sub>8</sub>.&nbsp; Always contains the last
-    value read, i.e., this register is never initialized.&nbsp; Read
-    once per second in R77.&nbsp; Read once every 4 sec during LR option
-    of R04.&nbsp; A 15-bit integer which is multiplied by either 5.395
-    on the high scale or 1.079 on the low scale to convert to units of
-    feet.&nbsp; A 1 in bit 9 of RADMODES indicates high scale.<br>
-    <h1>16</h1>
-    Spare or garbage.<br>
-    <h1>17a</h1>
-    <p><i>Adapted from</i><i> word 76a of Luminary </i><i>1C Orbital
-        Maneuvers List.<br>
-      </i></p>
-    <p>DNRRANGE.&nbsp; RR RANGE (Raw Data).&nbsp; Treated as a 15-bit
-      integer which is multiplied by either 9.38 for the low scale or by
-      75.04 for the high scale to convert to units of feet.&nbsp; a 1 in
-      bit 3 of RADMODES indicates high scale.&nbsp; See page 2-98 for
-      more complete description.<br>
+    <h1>18a</h1>
+    <p><i>Adapted from word 18a of Luminary 1C AGS Initialization and
+        Update List.</i><br>
     </p>
-    <h1>17b</h1>
-    <p><i>Adapted from</i><i> word 76b of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>DNRRDOT.&nbsp; RR RANGE RATE (Raw Data).&nbsp; Treated as a
-      15-bit integer.&nbsp; To convert to units of feet per second the
-      following computation is done:<br>
+    <p>COMPNUMB.&nbsp; The octal equivalent of the number of components
+      the update program expects to receive.&nbsp; For a Verb 71 or Verb
+      72 update COMPNUMB will be set equal to the index value.&nbsp;
+      Scaled 2<sup>-14</sup>.<br>
     </p>
-    <blockquote>(15-bit integer - 17000) × (-0.6278)<br>
-    </blockquote>
-    A negative quantity indicates closing.&nbsp; See page 2-98 for more
-    complete description.<br>
-    <h1>18a,18b,19a<sup>*</sup></h1>
-    <p><i>Adapted from</i><i> words 10a,10b,11a of Luminary </i><i>1C
-        Rendezvous and Prethrust List.</i></p>
-    <p>CDUs (Y, Z, X).&nbsp; At Marktime (MKTIME).&nbsp; The IMU CDU
-      counter readings (inner, middle and outer gimbals).&nbsp; Used to
-      define stable member to nav-base coordinate transformation during
-      state vector correction in Rendezvous Navigation.&nbsp; Read when
-      RR Range is read except not read in R04.&nbsp; These are unsigned
-      15-bit fractions scaled degrees/360.<br>
+    <h1>18b</h1>
+    <p><i>Adapted from word 18b of Luminary 1C AGS Initialization and
+        Update List.</i></p>
+    <p>UPOLDMOD.&nbsp; The number of the LGC program interrupted by the
+      update program (P27).&nbsp; Will contain 0 or -0.&nbsp; Scaled 2<sup>-14</sup>.<br>
     </p>
-    <font size="-1"><sup>*</sup>RR downlink data from P20, P22 are time
-      homogeneous.<br>
-    </font>
+    <h1>19a</h1>
+    <p><i>Adapted from word 19a of Luminary 1C AGS Initialization and
+        Update List.</i></p>
+    <p>UPVERB.&nbsp; The least significant digit of the update verb used
+      to initiate the last LGC update.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    </p>
     <h1>19b</h1>
-    <p><i>Adapted from</i><i> word 11b of Luminary </i><i>1C Rendezvous
-        and Prethrust List.</i></p>
-    <p>TRKMKCNT. NUMBER OF MARKS.&nbsp; The number of RR marks used to
-      correct the state vector during rendezvous navigation.&nbsp; Used
-      for display to the astronaut.&nbsp; An integer which ranges from 0
-      to N (the number of marks taken in a sequence).&nbsp; Incremented
-      by 1 each time a state vector correction is done in P20 or P22
-      (UPDATFLG must be set to allow state vector corrections).&nbsp;
-      Set to 0 when:<br>
+    <p><i>Adapted from word 19b of Luminary 1C AGS Initialization and
+        Update List.</i></p>
+    <p>UPCOUNT.&nbsp; The octal identifier of the next quantity that the
+      update program expects to receive.&nbsp; As each quantity goes
+      into UPBUFF, UPCOUNT will be incremented by one, until it is equal
+      to COMPNUMB.&nbsp; It will not change during a line-by-line
+      correction of the data load.&nbsp; Scaled 2<sup>-14</sup>.<br>
     </p>
-    <ol>
-      <li>P20 or P22 is selected as a new program.</li>
-      <li>The W-Matrix is re-initialized.</li>
-      <li>A thrust program is completed.</li>
-      <li>P76 is selected.</li>
-      <li>R24 END (goes to beginning of P20/P22).</li>
-    </ol>
-    Scaled 2<sup>-14</sup>.<br>
-    <h1><a name="20"></a>20a,20b<sup>*</sup></h1>
-    <p><i>Adapted from</i><i> words 12a,12b of Luminary </i><i>1C
-        Rendezvous and Prethrust List.</i></p>
-    <p>TANGNG, +1.&nbsp; RR TRUNNION and SHAFT CDUs.&nbsp; At Marktime
-      (MKTIME).&nbsp; RR trunnion and shaft angles used to define RR
-      antenna position; 12a is trunnion, 12b is shaft.&nbsp; Read from
-      the RR CDU counters when RR Range is read except not read in
-      R04.&nbsp; Also read once every 6 seconds during R24 RR Automatic
-      Search Routine in P20 or P22.&nbsp; Read once during Verb 41 RR
-      Coarse Align.&nbsp; Also read once per second during Verb 85 RR
-      Angle Display.&nbsp; These are unsigned 15-bit fractions scaled
-      degrees/360.</p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font></p>
-    <h1>21<sup>*</sup></h1>
-    <p><i>Adapted from</i><i> word 13 of Luminary </i><i>1C Rendezvous
-        and Prethrust List.</i></p>
-    <p>MARKTIME (mnemonic is MKTIME).&nbsp; Time of RR Mark (Range,
-      Range-rate, CDUs, trunnion and shaft readings).&nbsp; The LM and
-      CSM state vectors are integrated to this time in order to perform
-      the state vector correction.&nbsp; The time is read from the Time
-      2, Time 1 counter.&nbsp; Read when RR Range Rate is read except
-      not read in R04.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font></p>
-    <h1>22a<sup>*</sup></h1>
-    <p><i>Adapted from word 9a of the Luminary 1C Descent and Ascent
-        List.</i><br>
-    </p>
-    <p>RM. RR RANGE (Raw data).&nbsp; The RR range reading as it is
-      transmitted from the radar interface.&nbsp; Varies from 0 to 400
-      nmi.&nbsp; Each time a mark is taken in P20, P22, the reading is
-      stored in this register.&nbsp; Frequency is as follows:<br>
-    </p>
-    <ol>
-      <li>About once per minute in P20 if the No Update Flag is set 0
-        and the Update Flag is set 1.</li>
-      <li>About every 15 seconds in P20 if the No Update Flag is set 0
-        and the Update Flag is set 0.</li>
-      <li>About every 45 seconds in P20 if the No Update Flag is set 1
-        (whether the Update Flag is set or not).</li>
-      <li>About every 15 seconds in P22 if the No Update Flag is set 0
-        and the Update Flag is set 1.</li>
-      <li>About every 4 seconds in P22 if the No Update Flag is set 1.</li>
-    </ol>
-    <p>At Marktime (MKTIME).&nbsp; RR Range is a 15-bit integer which is
-      multiplied by either 9.38 for the low scale or 75.04 for the high
-      scale to convert to units of feet.&nbsp; A 1 in bit 3 of RADMODES
-      indicates high scale.<br>
-    </p>
-    <p><font size="-1"><sup>*</sup>RR downlink data from P20, P22 are
-        time homogeneous.</font><br>
-    </p>
-    <h1>22b<sup>*</sup></h1>
-    <p><i>Adapted from word 9b of the Luminary 1C Descent and Ascent
-        List.</i></p>
-    <p>RM +1. RR RANGE RATE (Raw data).&nbsp; At MARKTIME
-      (MKTIME).&nbsp; Treated as a 15-bit integer.&nbsp; To convert to
-      units of feet per second the following computation is done:&nbsp;
-      (15-bit integer minus 17000) × (-0.6278).&nbsp; A negative
-      quantity indicates closing.&nbsp; Read when RR Range is read.<br>
-    </p>
-    <font size="-1"><sup>*</sup>RR downlink data from P20, P22 are time
-      homogeneous.</font><br>
-    <h1>23</h1>
-    <p><i>Adapted from program comments in Sundance source code (P27).</i><br>
-    </p>
-    <p>RDOTM.&nbsp; The RR range-rate reading, double precision, in
-      meters/centisecond, scaled B-7.<br>
-    </p>
-    <h1>24-25</h1>
-    <p><i>Adapted from</i><i> words 27-28 of Luminary </i><i>1C
-        Rendezvous and Prethrust List.</i></p>
-    X789, +2.&nbsp; RR SHAFT and TRUNNION BIASES.&nbsp; The estimate of
-    the RR angle biases; 27 is shaft, 28 is trunnion.&nbsp; Computed by
-    the Rendezvous Navigation Program.&nbsp; Initially pad-loaded to
-    0.&nbsp; They can oscillate in sign and magnitude with a maximum
-    magnitude of about 20 milliradians.&nbsp; Calculated during state
-    vector correction in P20 four times per mark (Range, Range-Rate,
-    Trunnion and Shaft incorporations).&nbsp; Marks are taken about once
-    a minute in P20, so four calculations are made about once a minute
-    when UPDATFLG is set.&nbsp; They are not calculated if the No Update
-    Flag is set.&nbsp; Scaled radians/2<sup>5</sup> if in earth sphere
-    of influence.&nbsp; Scaled radians/2<sup>3</sup> if in lunar sphere
-    of influence.&nbsp; A 0 in bit 11 of flagword 8 (LMOONFLG) indicates
-    earth sphere, a 1 indicates lunar sphere.&nbsp; These words are
-    updated only in P20, hence they are useful only on the Rendezvous
-    and Prethrust List.<br>
-    <h1>26</h1>
-    <p><i>Adapted from</i><i> word 21 of Luminary </i><i>1C Rendezvous
-        and Prethrust List.</i></p>
     <p> </p>
-    <p>TCSI. CSI TIME.&nbsp; The time of ignition for the CSI
-      maneuver.&nbsp; Used in P32/P72 calculations; may also be
-      calculated in P32/P72.&nbsp; Input by V25N11.&nbsp; Scaled
-      centiseconds/2<sup>28</sup>, referenced to computer clock.<br>
-    </p>
-    <h1>27-29</h1>
-    <p><i>Adapted from</i><i> words 22-24 of Luminary </i><i>1C
-        Rendezvous and Prethrust List.</i></p>
-    <p> </p>
-    DELVEET, +2, +4.&nbsp; CSI DELTA Vs (X, Y, Z).&nbsp; The required
-    delta velocity for the CSI maneuver.&nbsp; Used to calculate delta
-    velocity in local vertical coordinates.&nbsp; Calculated during each
-    iteration of CSI/A subroutine in P32/P72 and after display of ΔV<sub>LV</sub>
-    at CSI, regardless of whether display is overwritten.&nbsp; In
-    reference coordinates.&nbsp; Earth or moon-centered depending upon
-    whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-    respectively.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    <h1>30-31</h1>
-    <p>Spares or garbage.<br>
-    </p>
-    <h1>32a</h1>
-    <p><i>Adapted from</i><i> word 30a of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>REDOCTR.&nbsp; REDO COUNTER.&nbsp; Counter for hardware
-      restarts.&nbsp; Set to zero by keyboard freshstart (Verb
-      36).&nbsp; Incremented once per hardware restart by restart
-      program (GO PROG).&nbsp; Scaled 2<sup>-14</sup>.<br>
-    </p>
-    <h1>32b,33a,33b</h1>
-    <p><i>Adapted from</i><i> words 30b,31a,31b of Luminary </i><i>1C
-        Orbital Maneuvers List.</i></p>
-    <p>THETAD, +1, +2.&nbsp; FINAL DESIRED CDUs (X, Y, Z).&nbsp; The
-      target attitude (desired outer, inner and middle gimbal angles)
-      for all coasting flight automatic maneuvers and for the ISS coarse
-      align loop.&nbsp; Also, used in the FDAI attitude error display
-      checkout routine (V43).&nbsp; Computed as inputs to the coasting
-      flight automatic attitude maneuver routine (KALCMANU) and prior to
-      or during R60.&nbsp; Also computed whenever a coarse alignment is
-      to be made.&nbsp; The astronaut can load these quantities directly
-      via N22.&nbsp; The extended verbs V41N20, V43, V49, will request a
-      load of these angles.&nbsp; These registers are unsigned 15-bit
-      fractions.&nbsp; The quantities are scaled degrees/360.<br>
-    </p>
-    <h1>34 </h1>
+    <h1><a name="20"></a>20-29</h1>
+    <p><i>Adapted from words 20-29 of Luminary 1C AGS Initialization and
+        Update List.</i></p>
+    UPBUFFs.&nbsp; These 20 registers, UPBUFF through UPBUFF+19D,
+    contain the uplinked octal parameters in the same order they were
+    transmitted.&nbsp; In the event the update has less than twenty
+    quantities, the remaining registers will contain garbage.
+    <h1>30-32</h1>
+    Spare or garbage.<br>
+    <h1>33</h1>
+    <p><i>Adapted from word 69 of Luminary 1C AGS Initialization and
+        Update List.</i></p>
+    K-FACTOR.&nbsp; The ground elapsed time of the zero reference time
+    of the Abort Guidance System (AGS).&nbsp; It is set only by the AGS
+    Initialization Routine (R47).&nbsp; Calculated on the first use of
+    R47 and on subsequent calls to R47 if requested by the
+    astronaut.&nbsp; Scaled centiseconds/2<sup>28</sup>.
+    <h1>34</h1>
     <p>MASS. <i>TBD</i>, though I think it's probably the current mass
       of the LM or LM+CSM (if docked), in kg.<br>
     </p>
@@ -352,27 +348,20 @@
     <h1>38a,38b,39a</h1>
     <p><i>Adapted from</i><i> words 37a,37b,38a of Luminary </i><i>1C </i><i><i>Orbital
 
-
-
-
           Maneuvers</i> List.</i></p>
-    <p>CDUX, Y, Z.&nbsp; ACTUAL CDUs (X, Y, Z).&nbsp; The current outer,
-      inner and middle IMU gimbal angles.&nbsp; Automatically updated by
-      the hardware when the IMU is on.&nbsp; These registers are
-      unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
+    <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
+      IMU gimbal angles.&nbsp; Automatically updated by the hardware
+      when the IMU is on.&nbsp; These registers are unsigned 15-bit
+      fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>39b</h1>
     <p><i>Adapted from</i><i> word 38b of Luminary </i><i>1C </i><i><i>Orbital
 
-
-
-
           Maneuvers</i> List.</i></p>
-    CDUT. ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
-    counter.&nbsp; Defines the RR antenna position (along with shaft
-    angle).&nbsp; Updated from RR CDUs as trunnion angle changes.&nbsp;
-    This register is an unsigned 15-bit fraction.&nbsp; Scaled
-    degrees/360.<br>
+    ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU counter.&nbsp;
+    Defines the RR antenna position (along with shaft angle).&nbsp;
+    Updated from RR CDUs as trunnion angle changes.&nbsp; This register
+    is an unsigned 15-bit fraction.&nbsp; Scaled degrees/360.<br>
     <h1><a name="40"></a>40a</h1>
     <p><i>Adapted from</i><i> word 39a of Luminary </i><i>1C Orbital
         Maneuvers List.</i></p>
@@ -734,9 +723,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
-
-
-
               switch f<sub>3</sub> of Section 5.5 of this GSOP</a>.<br>
           </td>
         </tr>
@@ -761,9 +747,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
             Maneuver Pre-Thrust Computation Routine.&nbsp; This bit is
             equivalent to <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50">the
-
-
-
 
 
 
@@ -1514,9 +1497,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
 
 
 
-
-
-
               switches f<sub>5</sub></a> and <a
 href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51">f<sub>9</sub>
               of Section 5.5 of this GSOP</a>.&nbsp; These two switches
@@ -1576,9 +1556,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
             during the iteration.&nbsp; Set to 0 at start of each
             iteration loop.&nbsp; Set to 1 if |ΔV<sub>CSI</sub>|&gt;1000
             ft/sec and subsequent test of bit in case |ΔV<sub>CSI</sub>|&gt;1000
-
-
-
 
 
 
@@ -2268,9 +2245,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
-
-
-
             Bit is assumed to be 0 in padload.&nbsp; Bit is reset to 0
             in P70, P71 initialization.&nbsp; A 0 indicates that the
             thrust-magnitude filter will be used (if ΔV is large
@@ -2604,9 +2578,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
-
-
-
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -2908,37 +2879,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
-
-
-
       Word 58 contains the time associated with the state vector scaled
       centiseconds/2<sup>28</sup>, referenced to the computer
       clock.&nbsp; The scaling for position, velocity and time is the
       same whether earth-centered or moon-centered.&nbsp; These
       parameters are calculated whenever the LM state vector is
-      permanently extrapolated or changed.<br>
-    </p>
-    <h1>52-58</h1>
-    <p><i>Adapted from words 2-8 of Colossus249 Rendezvous and Prethrust
-        List.</i><br>
-    </p>
-    <p>CSM STATE VECTOR and TIME. The CMC's latest calculated state
-      vector for the CSM in either earth-centered or moon-centered
-      reference coordinates. During the Orbital Integration Routine, the
-      sphere of influence will be indicated by Flagword 8, bit 12
-      (CMOONFLG): zero = earth-centered; one = lunar-centered. It is
-      important to note that the Average-G routine is initialized with a
-      state in RN, VN which can have a different origin than is
-      indicated by CMOONFLG. This means an inconsistency in the Downlink
-      of the state vector actual origin and CMOONFLG origin. Words 2-4
-      contain the position components, X, Y, Z, scaled meters/2<sup>29</sup>,
-      Words 5-7 contain the velocity components, X, Y, Z, scaled
-      (meters/centisecond)/2<sup>7</sup>. Word 8 contains the time
-      associated with the CSM state vector in words 2-7, scaled
-      centiseconds/2<sup>28</sup>, referenced to the computer clock.
-      These parameters are calculated whenever the CSM state vector is
-      permanently extrapolated or changed.<br>
-    </p>
+      permanently extrapolated or changed.</p>
     <h1>59a</h1>
     <p>Spare or garbage.<br>
     </p>
@@ -2962,165 +2908,73 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
       of every DAP cycle every 0.1 sec.&nbsp; Zeroed at DAP
       start-up.&nbsp; Scaled (degrees/sec)/45.&nbsp; Expected range of
       ±10 degrees/sec but ±45 degrees/sec possible. </p>
-    <h1>62b</h1>
+    <h1>62b,63a,63b</h1>
     Spare or garbage.<br>
-    <h1>63a,63b</h1>
-    <p><i>Same as words 13a,13b of Sundance Powered list.</i></p>
-    LASTYCMD, LASTXCMD.&nbsp; RR TRUNNION and SHAFT ERROR
-    COUNTERS.&nbsp; Rendezvous Radar error counter commands; 79a is
-    trunnion, 79b is shaft.&nbsp; They are placed in the RR error
-    counters and specify the rate at which the RR antenna is
-    driven.&nbsp; Values range from +384 to -384 and vary according to
-    the angular error between the present and desired RR
-    positions.&nbsp; Calculated every 0.5 second in the Radar Designate
-    Routine (DODES) whenever the the LGC is driving the RR antenna which
-    occurs when:<br>
-    <ol>
-      <li>The RR monitor (R25) detects the antenna out of mode limits.</li>
-      <li>V41 N72 (RR Coarse Align) is operated.</li>
-      <li>R21 (RR designate) is operated in P20/P22.</li>
-      <li>R24 (RR Automatic Search) is operated in P20/P22.</li>
-    </ol>
-    A magnitude of 384 corresponds to a rate command of about 10
-    degrees/second.&nbsp; The exact rate depends on the characteristics
-    of the motors in the RR gyros.&nbsp; 79a and 79b are each scaled 2<sup>-14</sup>.<br>
-    <h1>64a,64b,65a</h1>
-    <p><i>Same as words 14a,14b,15a of Sundance Powered list.</i></p>
-    <p>DNRVELX, Y, Z.&nbsp; LR VELOCITIES (Raw Data).&nbsp; Landing
-      radar beam velocities (X, Y, Z).&nbsp; The data readout from the
-      Landing Radar High Speed Counter into LGC input counter 46<sub>8</sub>.&nbsp;
-
-
-
-
-      Always contain the last values which were read, i.e., these
-      registers are never initialized.&nbsp; Each component read once
-      per second during R77.&nbsp; Each component read once per four
-      seconds during LR option of R04.&nbsp; Scaled (15-bit integer -
-      12288.2) × K ft/sec where K = -0.6440 for V<sub>x</sub>, K = 1.212
-      for V<sub>y</sub>, and K = -0.8668 for V<sub>z</sub>.<br>
+    <h1>64a</h1>
+    <p><i>Adapted from word</i><i> 30a on Luminary 1C AGS Initialization
+        and Update List.</i><br>
     </p>
-    <h1>65b</h1>
-    <p><i>Same as word 15b of Sundance Powered list.</i></p>
-    DNLRALT.&nbsp; LR RANGE (Raw Data).&nbsp; Landing radar slant
-    range.&nbsp; The data readout from the LR High Speed Counter into
-    LGC input counter 46<sub>8</sub>.&nbsp; Always contains the last
-    value read, i.e., this register is never initialized.&nbsp; Read
-    once per second in R77.&nbsp; Read once every 4 sec during LR option
-    of R04.&nbsp; A 15-bit integer which is multiplied by either 5.395
-    on the high scale or 1.079 on the low scale to convert to units of
-    feet.&nbsp; A 1 in bit 9 of RADMODES indicates high scale.<br>
-    <h1>66</h1>
-    <p><i>Adapted from</i><i> word 82 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    TIG.&nbsp; Targeted time of ignition.&nbsp; Calculated during
-    pre-burn programs (P30s, P70s).&nbsp; Updated in P12, P40, P41, P42,
-    or P63 by MIDTOAVE routine if integration cannot be completed in
-    time (1703 alarm).&nbsp; After ignition TIG is set to time of engine
-    cutoff (PIPTIME + TGO).&nbsp; See also pg. 2-106 for use on
-    Descent/Ascent List.&nbsp; Scaled centiseconds / 2<sup>28</sup>.<br>
-    <h1>67-69</h1>
-    <i>Adapted from words 18,19,20 of the Luminary 1C Rendezvous and
-      Prethrust List.</i><br>
-    <p>DELVSLVs (X, Y, Z).&nbsp; For P30: input delta-V for an external
-      delta-V burn.&nbsp; DSKY or uplink input once per burn.&nbsp; Noun
-      81.&nbsp; In local vertical coordinates.&nbsp; Scaled
-      (meters/centiseconds)/2<sup>7</sup>.</p>
-    <h1><a name="70"></a>70</h1>
-    <p><i>Adapted from</i><i> word 96 of Luminary </i><i>1C Rendezvous
-        and Prethrust List.</i></p>
-    <p>CENTRAL ANGLE from IGNITION to INTERCEPT.&nbsp; Central angle
-      covered by the passive vehicle from ignition time to intercept
-      time.&nbsp; Used in P32/P72 as flag for program control
-      purposes.&nbsp; Astronaut input by V25 N55 during P34/P74.&nbsp;
-      Used as input to TIME THETA routine to calculate time of
-      transfer.&nbsp; Scaled degrees/360.<br>
+    <p>REDOCTR. REDO COUNTER.&nbsp; Counter for hardware restarts.&nbsp;
+      Set to zero by keyboard freshstart (Verb 36).&nbsp; Incremented
+      once per hardware restart by restart program (GO PROG).&nbsp;
+      Scaled 2<sup>-14</sup>.</p>
+    <h1>64b,65a,65b</h1>
+    <i>Adapted from words 30b,31a,31b on Luminary 1C AGS Initialization
+      and Update List.</i><br>
+    <p>THETAD, +1, +2.&nbsp; FINAL DESIRED CDUs (X, Y, Z).&nbsp; The
+      target attitude (desired outer, inner and middle gimbal angles)
+      for all coasting flight automatic maneuvers and for the ISS coarse
+      align loop.&nbsp; Also, used in the FDAI attitude error display
+      checkout routine (V43).&nbsp; Computed as inputs to the coasting
+      flight automatic attitude maneuver routine (KALCMANU) and prior to
+      or during R60.&nbsp; Also computed whenever a coarse alignment is
+      to be made.&nbsp; The astronaut can load these quantities directly
+      via N22.&nbsp; The extended verbs V41N20, V43, V49, will request a
+      load of these angles.&nbsp; These registers are unsigned 15-bit
+      fractions.&nbsp; The quantities are scaled degrees/360</p>
+    <h1>66-67</h1>
+    <p>Spare or garbage.<br>
     </p>
-    <h1>71</h1>
-    <i>Adapted from word 68 on Luminary 1C Rendezvous and Prethrust
-      List.</i><br>
-    <p>TCDH. CDH TIME.&nbsp; The time of ignition of the CDH
-      maneuver.&nbsp; Used in CDHMVR subroutine.&nbsp; Calculated each
-      iteration of CSI/A subroutine in P32/P72.&nbsp; Input to
-      P33/P73.&nbsp; Scaled centiseconds/2<sup>28</sup>, referenced to
-      computer clock.<br>
+    <h1>68a</h1>
+    <p><i>Adapted from word</i><i> 18a on Luminary 1C AGS Initialization
+        and Update List.</i><br>
     </p>
-    <h1>72-74<br>
-    </h1>
-    Adapted from words 69,70,71 on Luminary 1C Rendezvous and Prethrust
-    List.<br>
-    <br>
-    DELVEET2, +2, +4.&nbsp; DELTA VELOCITY (X, Y, Z) at CDH.&nbsp; In
-    reference coordinates.&nbsp; Used to calculate ΔV<sub>CDH</sub> in
-    local vertical coordinates.&nbsp; Calculated each iteration of
-    CDHMVR subroutine (once in P33/P73, possibly numerous times in
-    P32/P72).&nbsp; Also calculated after the local-vertical velocity is
-    displayed in P33/P73 (regardless of whether or not overwrite
-    occurs).&nbsp; Earth-centered if CMOONFLG is zero, moon-centered if
-    CMOONFLG is one.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.<br>
-    <h1>75</h1>
-    Adapted from word 98 on Luminary 1C Rendezvous and Prethrust List.<br>
-    <br>
-    DIFFALT. CDH DELTA ALTITUDE.&nbsp; The altitude between the active
-    and passive vehicle orbits at CDH time.&nbsp; Used for display and
-    other CDHMVR calculations.&nbsp; Calculated each iteration of CDHMVR
-    subroutine — once in P33/P73, numerous times possible in
-    P32/P72.&nbsp; Earth or moon-centered altitude depending upon
-    whether bit 12 of flagword 8 (CMOONFLG) is zero or one,
-    respectively.&nbsp; Scaled meters/2<sup>29</sup>.<br>
-    <h1>76a</h1>
-    <i>Adapted from word 97a on Luminary 1C Rendezvous and Prethrust
-      List.</i><br>
-    <p>NN. CDH APSIS.&nbsp; The number of apsidal crossings (apogee or
-      perigee) until the CDH time.&nbsp; the register will contain 00001
-      to indicate CDH ignition will occur at first crossing, etc.&nbsp;
-      Input by astronaut by V25 N55.&nbsp; In P34/P35 and P74/P75, 0
-      means use conic integration and no target offsets; not 0 means use
-      precision integration and the number of offsets contained in this
-      register.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    <p>COMPNUMB.&nbsp; The octal equivalent of the number of components
+      the update program expects to receive.&nbsp; For a Verb 71 or Verb
+      72 update COMPNUMB will be set equal to the index value.&nbsp;
+      Scaled 2<sup>-14</sup>.<br>
     </p>
-    <h1>76b</h1>
-    <i>Adapted from word 97b on Luminary Rendezvous and Prethrust List.</i><br>
-    <br>
-    NN +1. Garbage.<br>
-    <h1>77</h1>
-    <p><i>Adapted from</i><i> word 72 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    TTPI. TPI TIME.&nbsp; Time of TPI ignition.&nbsp; Ultimately passed
-    on to burn program.&nbsp; Also used as input to orbital
-    integration.&nbsp; Computed by P33/P73, may be recomputed by
-    P34/P74.&nbsp; Input to P32/P72.&nbsp; Scaled centiseconds/2<sup>28</sup>.<br>
-    <h1><a name="80"></a>78-80</h1>
-    <p><i>Adapted from</i><i> words 73-75 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    DELVEET3, +2, +4. DELTA VELOCITY (X, Y, Z) for TPI MANEUVER.&nbsp;
-    In reference coordinates.&nbsp; Delta Velocity required at TPI Time
-    of Ignition or at TPM Time of ignition.&nbsp; Rotated to local
-    vertical and line-of-sight coordinate systems and displayed to
-    astronaut via V06 N81 and V06 N59, respectively.&nbsp; Computed once
-    per program pass by P34/P74 and P35/P75.&nbsp; Updated during burn
-    programs by RASTEER1 for Lambert targeted burns.&nbsp; Scaled
-    (meters/centisecond)/2<sup>7</sup>.<br>
-    <h1>81</h1>
-    <p><i>Adapted from</i><i> word 13 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    ELEV. ELEVATION ANGLE.&nbsp; The angle between the horizontal plane
-    defined by the active vehicle's position at TPI and the line of
-    sight from the active to the passive vehicle.&nbsp; The angle is
-    measured in a counter-clockwise rotation from the plane in the
-    forward-direction path of the active vehicle (determined by the
-    positive direction of the active vehicle's velocity vector) to the
-    active-passive line-of-sight vector.&nbsp; Used to compute TPI Time
-    by P33/P73 and P34/P74.&nbsp; Input to P32/P72.&nbsp; Input to
-    P34/P74 or computed by P34/P74.&nbsp; Scaled degrees/360.<br>
-    <h1>82</h1>
-    <p><i>Adapted from</i><i> word 29 of Luminary </i><i>1C Orbital
-        Maneuvers List.</i></p>
-    <p>TPASS4. TPF TIME.&nbsp; Time of rendezvous of active and passive
-      vehicles.&nbsp; Time to which the passive vehicle is extrapolated
-      to compute the target vector.&nbsp; Computed once per pass through
-      P34, and P74, and passed on to P35, and P75.&nbsp; Dependent on
-      TIG and CENTANG.&nbsp; Scaled centiseconds/2<sup>28</sup>.</p>
+    <h1>68b</h1>
+    <p><i>Adapted from word</i><i> 18b on Luminary 1C AGS Initialization
+        and Update List.</i></p>
+    <p>UPOLDMOD.&nbsp; The number of the LGC program interrupted by the
+      update program (P27).&nbsp; Will contain 0 or -0.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    </p>
+    <h1>69a</h1>
+    <p><i>Adapted from word</i><i> 19a on Luminary 1C AGS Initialization
+        and Update List.</i></p>
+    <p>UPVERB.&nbsp; The least significant digit of the update verb used
+      to initiate the last LGC update.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    </p>
+    <h1>69b</h1>
+    <p><i>Adapted from word</i><i> 19b on Luminary 1C AGS Initialization
+        and Update List.</i></p>
+    UPCOUNT.&nbsp; The octal identifier of the next quantity that the
+    update program expects to receive.&nbsp; As each quantity goes into
+    UPBUFF, UPCOUNT will be incremented by one, until it is equal to
+    COMPNUMB.&nbsp; It will not change during a line-by-line correction
+    of the data load.&nbsp; Scaled 2<sup>-14</sup>.<br>
+    <h1><a name="70"></a>70-79</h1>
+    <p><i>Adapted from words</i><i> 20-29 </i><i> on Luminary 1C AGS
+        Initialization and Update List.</i></p>
+    <p>UPBUFFs.&nbsp; These 20 registers, UPBUFF through UPBUFF+19D,
+      contain the uplinked octal parameters in the same order they were
+      transmitted.&nbsp; In the event the update has less than twenty
+      quantities, the remaining registers will contain garbage.</p>
+    <h1></h1>
+    <h1><a name="80"></a>80-82</h1>
+    <p>Spare or garbage.<br>
+    </p>
     <h1>83a</h1>
     <p><i>Adapted from</i><i> word 64a of Luminary </i><i>1C Orbital
         Maneuvers List. Note that due to limitations in the available
@@ -3497,7 +3351,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
         (ERASABLE_ASSIGNMENTS.agc).</i><br>
     </p>
     SUMRATEQ, SUMRATER.&nbsp; Sum of unweighted JETRATE terms, scaled at
-    π/4 radians/second.<br>
+    π/4 radians/second.
     <h1>85a,85b,86a</h1>
     <p><i>Adapted from</i><i> words 61a,61b,62a of Luminary </i><i>1C
         Orbital Maneuvers List.</i></p>
@@ -4529,9 +4383,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
-
-
-
                     <br>
                   </td>
                   <td valign="top">00<sub>2</sub><br>
@@ -5331,9 +5182,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
 
 
 
-
-
-
             <br>
           </td>
           <td valign="top">MSB<br>
@@ -5613,6 +5461,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=51
     <p> </p>
     <p> </p>
     <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
-      2025-04-08</i><br>
+      2025-04-07</i><br>
   </body>
 </html>
