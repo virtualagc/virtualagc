@@ -9,7 +9,7 @@
     <u>Note</u>: Zerlina was branched from the main Luminary development
     at Luminary 145 (early Luminary 1D), but has no telemetry
     documentation of its own.&nbsp; The documentation herein was adapted
-    from the the <a
+    from the <a
       href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">Luminary
 
 
@@ -180,8 +180,6 @@
       every 2 seconds during the burn.&nbsp; In reference
       coordinates.&nbsp; Scaled (meters/centisecond)/2<sup>7</sup>.</p>
     <h1>28a</h1>
-    <p><i>Same as word 78a of Orbital Maneuvers list.</i><br>
-    </p>
     <p>LR VELOCITY (Raw Data).&nbsp; Landing radar beam velocity
       (Z).&nbsp; The data readout from the Landing Radar High Speed
       Counter into LGC input counter 46<sub>8</sub>.&nbsp; Always
@@ -191,8 +189,6 @@
       (15-bit integer - 12288.2) × K ft/sec where K = -0.8668 for V<sub>Z</sub>.<br>
     </p>
     <h1>28b</h1>
-    <p><i>Same as word 78b of Orbital Maneuvers list.</i><br>
-    </p>
     <p>LR RANGE (Raw Data).&nbsp; Landing radar slant range.&nbsp; The
       data readout from the LR High Speed Counter into LGC input counter
       46<sub>8</sub>.&nbsp; Always contains the last value read, i.e.,
@@ -241,30 +237,7 @@
       (degrees/sec)/45.&nbsp; Expected range of ±10 degrees/sec but ±45
       degrees/sec possible. </p>
     <h1>34b</h1>
-    <p>Garbage.&nbsp; This is the same erasable location as the one
-      described for word 89a of this list.<br>
-    </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; *FIXME* Word 89a of
-        the Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
-        Calculated angular acceleration about Y body axis due to the
-        fact that the main engine is not exactly aligned with the center
-        of gravity. During powered flight this is calculated every 0.1
-        second at the beginning of the DAP cycle; otherwise these are
-        zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
-        such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-        Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
-    </blockquote>
+    <p>Garbage.</p>
     <p> </p>
     <h1>35a,35b,36a</h1>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
@@ -277,8 +250,7 @@
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>36b</h1>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage.<br>
     </p>
     <h1>37a,37b,38a</h1>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
@@ -3189,16 +3161,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       clock.&nbsp; The scaling for position, velocity and time is the
       same whether earth-centered or moon-centered.&nbsp; These
       parameters are calculated whenever the LM state vector is
-      permanently extrapolated or changed as follows:<br>
-    </p>
+      permanently extrapolated or changed.</p>
     <ul>
-      <li>SERVICER on — every 2 seconds</li>
-      <li>P00 — every 10 min. to CSM state vector time</li>
-      <li>P20 — every mark and every Incorp if LM corrected</li>
-      <li>P27 — state vector update</li>
-      <li>P57 — If P57 is used to compute the LM landing site position
-        by keying in "enter" to the display of checklist code 14 then
-        only time and position are updated.</li>
     </ul>
     <p> </p>
     <h1><a name="60"></a>59a,59b,60a</h1>
@@ -3213,9 +3177,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     <h1>61a</h1>
     Spare or garbage.<br>
     <h1>61b</h1>
-    <p><i>Adapted from word 61b of the Luminary 1E Orbital Maneuvers
-        List.</i><br>
-    </p>
     CHAN77. Channel 77.&nbsp; A computer output channel, the individual
     bits of which, are used to indicate the source of a hardware
     restart.&nbsp; The channel is initialized to 0 by a V36E (request
@@ -3765,9 +3726,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       is running.&nbsp; Scaled jetseconds/32.<br>
     </p>
     <h1>67a</h1>
-    <p><i>Adapted from word 67a of the Luminary 1E Orbital Maneuvers
-        List.</i><br>
-    </p>
     SERVDURN.&nbsp; The Average-G cycle duration which is computed as
     the difference between TIME1 and the least significant half of
     PIPTIME at exit from the Average-G in SERVICER.&nbsp; It is a
@@ -3775,8 +3733,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     be.&nbsp; The quantity is scaled centiseconds/2<sup>14</sup>, and is
     corrected for overflow (always &gt; 0).<br>
     <h1>67b</h1>
-    <p><i>Adapted from word 67b of the Luminary 1E Orbital Maneuvers
-        List.</i></p>
     DUMLOOPS.&nbsp; The number of passes through Dummy Job, scaled
     counts/2<sup>14</sup>.&nbsp; The register is incremented when there
     is less than 100% duty cycle to indicate relative amounts of
@@ -4198,8 +4154,6 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
     cutoff (PIPTIME + TGO).&nbsp; See also pg. 2-106 for use on
     Descent/Ascent List.&nbsp; Scaled centiseconds / 2<sup>28</sup>.<br>
     <h1>83a,83b,84a</h1>
-    <p><i>Same as the words 33,34a on Orbital Maneuvers List.<br>
-      </i></p>
     <p>CURRENT BODY RATES (X, Y, Z).&nbsp; Estimated current rates about
       body axis.&nbsp; Calculated at the beginning of every DAP cycle
       every 0.1 sec.&nbsp; Zeroed at DAP start-up.&nbsp; Scaled
@@ -4207,35 +4161,8 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       degrees/sec is possible.<br>
       <i></i></p>
     <h1>84b</h1>
-    <p><i>Same as the word 34b on Orbital Maneuvers List.<br>
-      </i></p>
-    <p>Garbage.&nbsp; This is the same erasable location as the one
-      described for word 89a on the Orbital Maneuvers List.<br>
-    </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; Word 89a of the
-        Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
-        Calculated angular acceleration about Y body axis due to the
-        fact that the main engine is not exactly aligned with the center
-        of gravity. During powered flight this is calculated every 0.1
-        second at the beginning of the DAP cycle; otherwise this is
-        zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
-        such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-        Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
-    </blockquote>
-    <h1>85a,85b,86a</h1>
-    <p><i>Same as the words 34,36a on Orbital Maneuvers List.<br>
-      </i></p>
+    <p>Garbage.</p>
+    <h1>85a,85b,86a </h1>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
       to DAP.&nbsp; Generated during a burn by guidance equations or
@@ -4246,22 +4173,15 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>86b</h1>
-    <p><i>Same as the word 36b on Orbital Maneuvers List.<br>
-      </i></p>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage.<br>
       <i> </i></p>
     <h1>87a,87b,88a</h1>
-    <p><i>Same as the words 37,38a on Orbital Maneuvers List.<br>
-      </i></p>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
       IMU gimbal angles.&nbsp; Automatically updated by the hardware
       when the IMU is on.&nbsp; These registers are unsigned 15-bit
       fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>88b</h1>
-    <p><i>Same as the word 38b on Orbital Maneuvers List.<br>
-      </i></p>
     <p>ACTUAL RR TRUNNION CDU.&nbsp; RR trunnion angle CDU
       counter.&nbsp; Defines the RR antenna position (along with shaft
       angle).&nbsp; Updated from RR CDUs as trunnion angle

@@ -9,7 +9,7 @@
     <u>Note</u>: Zerlina was branched from the main Luminary development
     at Luminary 145 (early Luminary 1D), but has no telemetry
     documentation of its own.&nbsp; The documentation herein was adapted
-    from the the <a
+    from the <a
       href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">Luminary
 
 
@@ -228,30 +228,8 @@
       (degrees/sec)/45.&nbsp; Expected range of ±10 degrees/sec but ±45
       degrees/sec possible. </p>
     <h1>34b</h1>
-    <p>Garbage.&nbsp; This is the same erasable location as the one
-      described for word 89a of the Orbital Maneuvers List.<br>
-    </p>
-    <blockquote><font size="-1"><b>Note:</b>&nbsp; *FIXME* Word 89a of
-        the Orbital Maneuvers list is this:&nbsp; Y MOMENT OFFSET.&nbsp;
-        Calculated angular acceleration about Y body axis due to the
-        fact that the main engine is not exactly aligned with the center
-        of gravity. During powered flight this is calculated every 0.1
-        second at the beginning of the DAP cycle; otherwise these are
-        zeroed in every DAP cycle.&nbsp; Also zeroed at discrete times,
-        such as fresh start and engine off.&nbsp; Scaled (degrees/second<sup>2</sup>)/90.&nbsp;
-
-
-
-
-
-
-
-
-
-        Expected range is ±35 degrees/second<sup>2</sup>.</font><br>
-    </blockquote>
-    <p> </p>
-    <h1>35a,35b,36a</h1>
+    <p>Garbage.</p>
+    <h1>35a,35b,36a </h1>
     <p>DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp; Outer, inner and
       middle intermediate desired gimbal angles.&nbsp; Steering commands
       to DAP.&nbsp; Generated during a burn by guidance equations or
@@ -262,8 +240,7 @@
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
     </p>
     <h1>36b</h1>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage. <br>
     </p>
     <h1>37a,37b,38a</h1>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
@@ -497,17 +474,14 @@
         <tr>
           <td valign="top">1<br>
           </td>
-          <td valign="top">OLDESFLG. Bit set 1 when gyro command loop
-            requested in R29. Bit set 0 when gyro command loop not
-            requested in R29.<br>
-            <blockquote><b>Note:</b> The Luminary 1C GSOP states that
-              this is a flagbit called P66PROFL. <a
-                moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-2780959979">It
-
-
-                is in error</a>.</blockquote>
-          </td>
+          <td valign="top">P66PROFL.&nbsp; Set to 1 when P66 is entered
+            for the first time (in R13) as a directive to continue P66
+            horizontal nulling.&nbsp; It is reset to 0 when the
+            astronaut proceeds on a flashing V06 N60 after
+            touchdown.&nbsp; It is tested in P66 after horizontal
+            commands have been calculated if the DPS engine found to be
+            disarmed.&nbsp; If bit is 0, nulling commands are not issued
+            to the RCS jets.</td>
         </tr>
       </tbody>
     </table>
@@ -576,8 +550,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">NOTERFLG.&nbsp; Set 1 by V68 and also
+            entrance to P66 (in R13) in order to bypass the terrain
+            model computations.&nbsp; It is reset to 0 in P63 and by V36
+            meaning that terrain model computations are to be
+            performed.&nbsp; The bit is checked each guidance pass
+            (every 2 sec.) in Servicer. </td>
         </tr>
         <tr>
           <td valign="top">10<br>
@@ -593,8 +571,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1243#issuecomment-27809599
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">ALW66FLG.&nbsp; Bit set 1 when P66 selection
+            allowed now, set 0 when P66 cannot be selected now. </td>
         </tr>
         <tr>
           <td valign="top">8<br>
@@ -805,8 +783,9 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">10<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">SERVOVER. Bit is set 1 when guidance portion
+            of SERVICER job is in progress, set to 0 when servicer
+            portion of SERVICER job is in progress. </td>
         </tr>
         <tr>
           <td valign="top">9<br>
@@ -988,15 +967,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">11<br>
           </td>
-          <td valign="top">NOR29FLG.&nbsp; Bit is set by FRESH START,
-            and when the Servicer routine terminates.&nbsp; A 1
-            indicates that R29 is not allowed.&nbsp; Bit is reset to 0
-            by P12 Ascent Guidance.&nbsp; A 0 indicates that R29 is
-            allowed.&nbsp; Bit is tested during the RR read cycle of R29
-            and during software restart (V37).&nbsp; Bit is tested by
-            R04 and R77 to determine if another program/routine is using
-            the radar.<br>
-          </td>
+          <td valign="top">NODOP07.&nbsp; Bit can be set to 1 by ground
+            uplink prior to liftoff.&nbsp; It is also set to 1 by
+            V37.&nbsp; Tested by V92 which gives the operator error if
+            the bit is set.&nbsp; Tested in UPRUPT which maintains
+            erasable sum of key codes if the bit is 0.&nbsp;
+            (NOTE:&nbsp; this bit is not cleared by FRESH START). </td>
         </tr>
         <tr>
           <td valign="top">10<br>
@@ -1012,30 +988,17 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">9<br>
           </td>
-          <td valign="top">Bit used for two distinct functions, hence
-            assigned two separate mnemonics.<br>
-            <br>
-            R04FLAG.&nbsp; Set to 1 by Verb 63 entry to indicate R04 is
-            running and set to 0 at the end of R04.&nbsp; Set to 0 by
-            Verb 78 entry to indicate R77 is running, rather than R04,
-            since the two routines use much of the same coding.&nbsp;
-            Set to 0 in R00 (V37).&nbsp; Set to 0 in the beginning of
-            P20/P22 in order that alarm 521 be sent if the radar cannot
-            be read.&nbsp; Set to 1 by R65 before reading RR and set to
-            0 by R65 after reading RR.&nbsp; The bit is checked in the
-            RADAREAD routine (which is used by R04 And P20/P22) if the
-            radar cannot be read; if the bit is 1 (R04 is running),
-            alarm 521 will not be sent.<br>
-            <br>
-            READRFLG. Bit is set to 1 by R29 when RR lock-on has been
-            achieved and the RR read cycle is starting.&nbsp; A 1
-            indicates that R29 is reading RR data.&nbsp; Bit is reset to
-            0 by R29 when exiting the RR read cycle because of a bad
-            reading or the RR not in LGC mode.&nbsp; Bit is reset to 0
-            by software restart (V37), FRESH START, and hardware
-            restart.&nbsp; A 0 indicates that R29 is not reading RR
-            data.&nbsp; Bit is tested by the RR read cycle of R29 to
-            determine if radar read is allowed.<br>
+          <td valign="top">R04FLAG.&nbsp; Set to 1 by Verb 63 entry to
+            indicate R04 is running and set to 0 at the end of
+            R04.&nbsp; Set to 0 by Verb 78 entry to indicate R77 is
+            running, rather than R04, since the two routines use much of
+            the same coding.&nbsp; Set to 0 in R00 (V37).&nbsp; Set to 0
+            in the beginning of P20/P22 in order that alarm 521 be sent
+            if the radar cannot be read.&nbsp; Set to 1 by R65 before
+            reading RR and set to 0 by R65 after reading RR.&nbsp; The
+            bit is checked in the RADAREAD routine (which is used by R04
+            And P20/P22) if the radar cannot be read; if the bit is 1
+            (R04 is running), alarm 521 will not be sent.<br>
           </td>
         </tr>
         <tr>
@@ -2490,14 +2453,20 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">14<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">VFAILFLG.&nbsp; Velocity fail test.&nbsp; Set
+            1 when velocity radar reading has failed the LR data
+            reasonability test.&nbsp; Bit is reset 0 when the
+            corresponding radar reading has passed the reasonability
+            test.</td>
         </tr>
         <tr>
           <td valign="top">13<br>
           </td>
-          <td valign="top">Not used.<br>
-          </td>
+          <td valign="top">HFAILFLG.&nbsp; Altitude fail test.&nbsp; Set
+            1 when altitude radar reading has failed the LR data
+            reasonability test.&nbsp; Bit is reset 0 when the
+            corresponding radar reading has passed the reasonability
+            test. </td>
         </tr>
         <tr>
           <td valign="top">12<br>
@@ -2579,22 +2548,12 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">6<br>
           </td>
-          <td valign="top">LPOS2FLG.&nbsp; Set 1 in SETPOS2 to inform
-            that position 2 transformation is being used.&nbsp; Reset 0
-            in fresh start and V37 logic.&nbsp; Also set 0 for abort or
-            abort stage.<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
         <tr>
           <td valign="top">5<br>
           </td>
-          <td valign="top">READVEL.&nbsp; Bit is set to 1 when the LM
-            inertial velocity estimate drops below 6K feet per
-            second.&nbsp; When the bit is set to 1, it permits R12 to
-            read the landing radar velocity components, and process the
-            data.&nbsp; This bit remains set to 1 during the entire
-            landing.<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
         <tr>
           <td valign="top">4<br>
@@ -2614,11 +2573,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
         <tr>
           <td valign="top">3<br>
           </td>
-          <td valign="top">NO511FLG.&nbsp; A 1 means do not test LR
-            antenna position in R12.&nbsp; Set 1 by V33 response to a
-            flashing V05N09, alarm code=523.&nbsp; If bit is 1, R12
-            won't test for 511 alarm.<br>
-          </td>
+          <td valign="top">Not used. </td>
         </tr>
         <tr>
           <td valign="top">2<br>
@@ -3793,8 +3748,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       2 seconds during landing.&nbsp; Scaled lbs/(2.817 × 2<sup>14</sup>).<br>
     </p>
     <h1>78b</h1>
-    <p>Garbage.&nbsp; This erasable location contains RDOTV and ITCTR,
-      neither of which is calculated during Descent/Ascent.<br>
+    <p>Garbage.<br>
     </p>
     <h1>79</h1>
     <p>RR TRUNNION and SHAFT ERROR COUNTERS.&nbsp; Rendezvous Radar
@@ -4182,8 +4136,7 @@ href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf#page=50
       are unsigned 15-bit fractions.&nbsp; Scaled degrees/360.<br>
       <i> </i></p>
     <h1>86b</h1>
-    <p>Garbage.&nbsp; The increment subtracted from CDUXD each .1 second
-      by the DAP.&nbsp; An unsigned 15-bit fraction scaled degrees/360.<br>
+    <p>Garbage.<br>
       <i> </i></p>
     <h1>87a,87b,88a</h1>
     <p>ACTUAL CDUs (X, Y, Z).&nbsp; The current outer, inner and middle
