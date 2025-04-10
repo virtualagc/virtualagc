@@ -1,0 +1,382 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Virtual AGC Peripheral Components</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="author" content="Ron Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ron Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <div align="center"><font size="+2"><i>
+          <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","yaTelemetry Implementation Details").replace("@SUBTITLE@","Supporting New AGC Versions"))
+</script></i><i> (This page is under construction.&nbsp; Don't read it.)</i></font><br>
+    </div>
+    <br>
+    <h1>Table of Contents</h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#references">References</a></li>
+      <li><a moz-do-not-send="true" href="#blockI">Block I Telemetry
+          Protocol</a></li>
+      <li><a moz-do-not-send="true" href="#blockII">Block II Telemetry
+          Protocol</a></li>
+      <li><a moz-do-not-send="true" href="#versioning">Downlist
+          Versioning</a></li>
+      <li><a moz-do-not-send="true" href="#aliases">Version Aliases</a></li>
+      <li><a moz-do-not-send="true" href="#tsv">The "TSV" Files</a></li>
+      <li><a moz-do-not-send="true" href="#documentation">The
+          "Documentation" Files</a><br>
+      </li>
+    </ul>
+    <h1><a name="introduction"></a>Introduction</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="references"></a>References</h1>
+    <p>There's some surviving documentation to help us out:<br>
+    </p>
+    <ul>
+      <li>In most missions, the downlinked data is described in detail
+        in the so-called <a moz-do-not-send="true"
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/links2.html#GSOPs"><i>Guidance
+            System Operations Plan (GSOP)</i></a>, Section 2 "Data
+        Links", associated with the mission. Unfortunately, we have only
+        a few of these sections of the various GSOP versions, and hence
+        only a subset of the flown missions:</li>
+      <ul>
+        <li>Colossus 1&amp;1A</li>
+        <li>Luminary 1C</li>
+        <li>Colossus 3</li>
+        <li>Luminary 1E</li>
+        <li>Skylark 1<br>
+        </li>
+      </ul>
+      <li>For Apollo 1 (Sunspot 247) we can find this data, though
+        perhaps in preliminary form,&nbsp; in the <a
+          moz-do-not-send="true"
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Documents/agc_software_requirements_as204.pdf#page=26"><i>Command
+
+
+
+            Module Guidance Computer Software Requirements</i></a>.&nbsp;
+
+
+
+        And there's info about downlink formats in the <a
+          moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/as204_reference_cards.pdf#page=22">AS-204
+
+
+
+          Reference Cards</a>.<br>
+      </li>
+      <li>For the CM checkout program, Sundial, the <a
+          moz-do-not-send="true"
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Documents/sundial_d_reference_cards.pdf">Sundial
+          D reference cards</a> give us some (alas!) sketchy data,
+        though whether this data exactly matches the Sundial E source
+        code we actually have remains in question.</li>
+    </ul>
+    <h1><a name="blockI"></a>Block I Telemetry Protocol</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="blockII"></a>Block II Telemetry Protocol</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="versioning"></a>Downlist Versioning</h1>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <th valign="top">Unique Downlink Formats<br>
+          </th>
+          <th valign="top">Additional AGC Software Versions Using the
+            Same Downlink-List Format<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">Sunrise45<br>
+          </td>
+          <td valign="top">Sunrise69<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Corona261<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Solarium055<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Sunspot247<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">SundialE<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Colossus249<br>
+          </td>
+          <td valign="top">Colossus237<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Manche45R2<br>
+          </td>
+          <td valign="top">Comanche044, Comanche045, Comanche051,
+            Comanche055, Comanche067, Comanche072, Manche72R3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Artemis072<br>
+          </td>
+          <td valign="top">Artemis071<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Skylark048<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Borealis<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Aurora88<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Aurora12<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Sunburst37<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Sunburst120<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Sundance306ish<br>
+          </td>
+          <td valign="top">SundanceXXX<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">LUM69R2<br>
+          </td>
+          <td valign="top">Luminary069<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary099<br>
+          </td>
+          <td valign="top">Luminary096, Luminary097, Luminary098,
+            LMY99R0, LUM99R2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">LM131R1<br>
+          </td>
+          <td valign="top">Luminary116, Luminary130, Luminary131<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary163<br>
+          </td>
+          <td valign="top">Luminary173<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary178<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Luminary210<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Zerlina56<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="aliases"></a>Version Aliases</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="tsv"></a>The "TSV" Files</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="documentation"></a>The "Documentation" Files</h1>
+    <p>TBD<br>
+    </p>
+    <h1>Legacy material ... blow it away completely after writing the
+      stuff above!<br>
+    </h1>
+    It's rocket science, what did you expect?&nbsp; But all is not lost:
+    It's not terribly difficult, just terribly intricate.&nbsp; So just
+    keep reading.<br>
+    <br>
+    First, the telemetry data that was downlinked varied somewhat from
+    mission to mission.&nbsp; These differences were small and gradual
+    from one later Apollo mission to the next, but could be quite large
+    between early versions of the AGC software.&nbsp; Among the AGC
+    software versions we've managed to obtain here at Virtual AGC,&nbsp;
+    and Apollo 1 for which we <i>haven't</i> (yet?), here's a table of
+    the unique downlink behaviors we've identified.&nbsp; Fortunately,
+    you don't really need to know these details since <b>yaTelemetry</b>
+    knows it and selects the proper formats for you.&nbsp; But hey, if I
+    didn't list all of this stuff in excruciating detail, how would you
+    know you're getting your money's worth?<br>
+    <br>
+    <br>
+    So one thing you need to keep in mind when interpreting the
+    telemetry data is the answer to the question, <i>What mission is
+      this from?</i>&nbsp; Of course, if you were running the simulation
+    yourself, it goes without saying that you would know what AGC
+    software version you were using.&nbsp; For the screenshot above, I
+    can tell you that I was running an Apollo 13 Lunar Module — or very
+    close to it, anyway —, and that the AGC software was what's known as
+    LM131R1.<br>
+    <br>
+    Second, different downlink lists were emitted during different
+    phases of the mission.&nbsp; Like most or all of the flown missions,
+    in Apollo 13 there were 5 different phases (and thus 5 corresponding
+    types of downlink lists) for the CM, and 6 for the LM.&nbsp; We can
+    identify the flight phases with the AGC P<i>nn</i> programs running
+    during those phases. These downlink lists were identified both by
+    title — "Coast and Align" in our sample screenshot — and by a
+    5-digit octal ID number — 77777 in our sample.&nbsp; For example,
+    the most-common thing you'll see upon starting an AGC simulation is
+    the "Coast and Align List" (ID 77777), which is emitted during
+    idling (program P00).<br>
+    <br>
+    While there are some missions for which we haven't yet obtained the
+    appropriate section of the associated GSOP documents, we have done
+    so for the Apollo 13 Lunar Module.&nbsp; Unfortunately, we do not
+    presently have the GSOP for the Apollo 13 Command Module, and hence
+    can only provide similar information via possibly-suspect
+    inference.&nbsp; <br>
+    <ul>
+      <li>Command Module:</li>
+      <ul>
+        <li>Powered List (ID ): P11 Earth Orbit Injection (EOI) Monitor,
+          P40 SPS Thrust, P41 RCS Thrust, P47 Thrust Monitor, P61 Entry
+          Preparation Program</li>
+        <li>Coast and Align List (ID 77777): P00 CMC Idling, P01
+          Prelaunch Initialization, P02 Gyro Compassing, P03 Optical
+          Verification of Azimuth, P06 CMC Power Down, P07 System Test,
+          P51 IMU Orientation Determination, P52 IMU Realignment
+          Program, P53 Backup IMU Orientation Determination, and P54
+          Backup IMU Realignment</li>
+        <li>Rendezvous and Prethrust List (ID ): P17 CSM TPI Search, P20
+          Rendezvous Navigation, P21 Ground Track Determination, P23
+          Cislunar Navigation, P30 External ΔV Maneuver Guidance, P31
+          Lambert Aim Point Maneuver Guidance, P34 Transfer Phase
+          Initiation (TPI) Guidance, P35 Transfer Phase Midcourse (TPM)
+          Guidance, P37 Return to Earth Maneuver Guidance, P38 Stable
+          Orbit Rendezvous Guidance, P39 Stable Orbit Midcourse
+          Guidance, P74 LM Transfer Phase Initiation (TPI) Targeting,
+          P75 LM Transfer Phase Midcourse (TPM) Targeting, P76 Target
+          ΔV, P77 LM TPI Search Program, P78 LM Stable Orbit Rendezvous,
+          P79 LM Stable Orbit Midcourse Targeting<br>
+        </li>
+        <li>Entry and Update List (ID ): P27 CMC Update, P62 CM/SM
+          Separation and Pre-entry Maneuver, P63 Entry Initialization,
+          P64 Post 0.05 G Entry Mode, P65 Up Control Entry Mode, P66
+          Ballistic Entry Mode, P67 Final Entry Mode</li>
+        <li>Program 22 List (ID ): P22 Orbital Navigation<br>
+        </li>
+      </ul>
+      <li>Lunar Module:</li>
+      <ul>
+        <li>Orbital Maneuvers List (ID ): P40 DPS Thrust, P41 RCS
+          Thrust, P42 APS Thrust, and P47 Thrust Monitor</li>
+        <li>Coast and Align List (ID 77777): P00 LGC Idling, P06 LGC
+          Power Down, P51 IMU Orientation Determination, and P52 IMU
+          Realignment</li>
+        <li>Rendezvous and Prethrust List (ID ): P20 Rendezvous
+          Navigation, P21 Ground Track Determination, P25 Preferred
+          Tracking Attitude, P30 External ΔV Maneuver Guidance, P32
+          Coelliptic Sequence Initiation (CSI), P33 Constant
+          Differential Altitude (CDH), P34 Transfer Phase Initiation
+          (TPI), P35 Transfer Phase Midcourse (TPM), P72 CSM CSI
+          Targeting, P73 CSM CDH Targeting, P74 CSM TPI Targeting, P75
+          TPM Targeting, and P76 Target DELTA V</li>
+        <li>Descent and Ascent List (ID ): P12 Powered Ascent Guidance,
+          P63 Braking Phase Guidance, P64 Approach Phase Guidance, P66
+          Rate of Descent (ROD) Landing Phase Guidance, P68 Confirm
+          Lunar Landing, P70 DPS Abort Guidance, and P71 APS Abort
+          Guidance</li>
+        <li>Lunar Surface Align List (ID ): P22 Lunar Surface Navigation
+          and P57 Lunar Surface Alignment</li>
+        <li>AGS Initialization and Update List (ID ): P27 LGC Update and
+          <b>R</b>47 AGS Initialization.&nbsp; <i>Note the <b>R</b>!</i><br>
+        </li>
+      </ul>
+    </ul>
+    Which is all very well and good, but what about the mysterious data
+    that <b>yaTelemetry</b> is showing within the downlink lists
+    themselves?&nbsp; For example, in the sample screenshot earlier, we
+    see TBD<br>
+    <br clear="all">
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons
+
+
+
+
+
+          No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2025-04-09.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+        </font></i> </center>
+    <br>
+  </body>
+</html>
