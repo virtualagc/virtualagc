@@ -766,6 +766,7 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 	  }
       fclose(aliases);
     }
+  //fprintf(stderr, "***DEBUG*** aliasDoc = %s\n", aliasDoc);
   // Software is assumed to be for the LM unless its name begins with one of the
   // known CM programs.
   if (!strncmp(agcSoftware, "Sundance", 8))
@@ -798,12 +799,19 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       if (aliasDoc[0] != 0)
 	{
 	  sprintf(dls->URL, "%s%s/ddd-%05o-%s.html", docPrefix, aliasDoc, id, aliasDoc);
+	  //fprintf(stderr, "***DEBUG*** trying %s\n", dls->URL);
 	  // Test if the chosen file exists.
 	  aliases = fopen(&(dls->URL[7]), "r");
 	  if (aliases == NULL)
-	    dls->URL[0] = 0;
+	    {
+	      //fprintf(stderr, "***DEBUG*** Nope!\n");
+	      dls->URL[0] = 0;
+	    }
 	  else
-	    fclose(aliases);
+	    {
+	      //fprintf(stderr, "***DEBUG*** Yup!\n");
+	      fclose(aliases);
+	    }
 	}
       else
 	dls->URL[0] = 0;
