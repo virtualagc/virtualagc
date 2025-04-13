@@ -15,7 +15,16 @@ EXT=$3
 WIN=$4
 
 SRCPATHS="*.binsource *.agc *.aea Apollo32.png *.agc.html *.aea.html"
-SRCPATHS="$SRCPATHS *.pad *.cbp Makefile Solarium055.lst"
+SRCPATHS="$SRCPATHS *.pad *.cbp Makefile"
+# The Block I .lst files have to be added to the Resources/source/ directory
+# so that source code can be displayed when doing command-line debugging of the
+# AGC program.  Unfortunately, I don't know any way of getting them there 
+# without explicitly adding them.  (I could just use *.lst, but that would
+# include lots of unnecessary stuff as well.)
+SRCPATHS="$SRCPATHS Solarium055.lst"
+SRCPATHS="$SRCPATHS Corona261.lst"
+SRCPATHS="$SRCPATHS Sunrise45.lst"
+SRCPATHS="$SRCPATHS Sunrise69.lst"
 
 mkdir $DESTDIR
 
