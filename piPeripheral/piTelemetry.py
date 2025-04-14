@@ -1,85 +1,35 @@
 #!/usr/bin/python3
 # Copyright:	None, placed in the PUBLIC DOMAIN by its author (Ron Burkey)
 # Filename: 	piTelemetry.py
-# Purpose:	This is the skeleton of a program that can be used for creating
-#		a Python-language based peripheral for the AGC or AGS simulator program,
-#		yaAGC or yaAGS.  You can see an example of how to use it in piDSKY.py.  
+# Purpose:	Reverse engineering and/or proof-of-concept implementation
+#         	of neglected AGC telemetry protocols.
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2025-04-11 RSB	Adapted from piPeripheral.py for AGC telemetry studies.
-#
-# The parts which need to be modified to be target-system specific are the 
-# outputFromAGx() and inputsForAGx() functions.
-#
-# To run the program in its present form, assuming you had a directory setup in 
-# which all of the appropriate files could be found, you could run (presumably 
-# from different consoles)
-#
-#	yaAGC --core=Luminary099.bin --port=19797 --cfg=LM.ini
-#	piPeripheral.py
-#
-# The --gps and --imu features assume an appropriate BerryGPS or BerryGPS-IMU device 
-# (see http://ozzmaker.com/berrygps-berrygps-imu-quick-start-guide/).
-# For the --gps and --imu features to work (Pi only!), it's necessary to first use "sudo raspi-config"
-# to set the "interfacing options" so that:
-#
-#	For --imu: i2c is enabled
-#	For --gps: serial console is disabled and serial hardware is enabled. These are actually the same
-#		   interfacing option on the --raspi-config menu, but you have to answer two separate prompts.
-#
-# The --gps and --imu features also rely on pigpio, so that has to be installed as well:
-#
-#	sudo apt-get install pigpio python3-pigpio
-#
-# Note that because pigpio relies on a client/server architecture and it is only the server that interacts
-# with the (locked) gpio hardware, rather than the client, this does not conflict with other software such
-# as piDSKY2.py already interacting with the GPIO using the pigpio method.  However, it may conflict with
-# other GPIO-interfacing programs that expect to have an exclusive lock on the hardware.
 
 import sys
 import datetime
+import os
+import glob
 #import tkinter as tk
+
+# Find out where piTelemetry.py itself is located.
+scriptPath = os.path.abspath(__file__)
+scriptDirectory = os.path.dirname(scriptPath)
+#print(scriptDirectory, file=sys.stderr)
 
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaAGC/yaAGS, defaulting to 19799 for AGC or 19899 for AGS.", type=int)
-cli.add_argument("--slow", help="For use on really slow host systems.")
-cli.add_argument("--ags", help="For use with yaAGS (defaults to yaAGC).")
-cli.add_argument("--time", help="Demo current date/time on AGC input channels 040-042.")
-cli.add_argument("--gps", help="Demo current GPS data on AGC, using a BerryGPS or BerryGPS-IMU. Requires --time.")
-cli.add_argument("--imu", help="Demo current IMU data on AGC, using a BerryGPS-IMU.  Requires --time.")
-cli.add_argument("--imudebug", help="Simply print out --imu reading, without using AGC.")
-cli.add_argument("--gpsdebug", help="Generate fake GPS data.")
-cli.add_argument("--protocol", help="Select a non-default downlist protocol, among: raw (default), early1, late1, early1, early2.")
-cli.add_argument("--packet", help="Nominal packet size for --protocol=raw.")
-cli.add_argument("--block", help="1 or 2 (default) for Block I or Block II for --protocol=raw.")
+cli.add_argument("--software", help="Select AGC software version, or omit for reverse engineering.")
+cli.add_argument("--packet", help="Nominal packet size (default 40); omit if --software is used.")
+cli.add_argument("--block", help="1 or 2 (default) for Block I or Block II; omit if --software is used.")
 args = cli.parse_args()
 
-gpio = ""
-spiHandle = -1
-def shutdownGPIO():
-	if args.imu or args.gps:
-		global spiHandle, gpio
-		if spiHandle >= 0:
-			gpio.spi_close(spiHandle)
-			spiHandle = -1
-		if gpio != "":
-			gpio.stop()
-			gpio = ""
-import atexit
-atexit.register(shutdownGPIO)
+host="AGC"
 
-if args.ags:
-	host="AGS"
-else:
-	host="AGC"
-
-# Responsiveness settings.
-if args.slow:
-	PULSE = 0.25
-else:
-	PULSE = 0.05
+PULSE = 0.25
 
 # Characteristics of the host and port being used for yaAGC/yaAGS communications.  
 if args.host:
@@ -88,129 +38,65 @@ else:
 	TCP_IP = 'localhost'
 if args.port:
 	TCP_PORT = args.port
-elif args.ags:
-	TCP_PORT = 19699
 else:
 	TCP_PORT = 19799
 
-packetWidth = 40
-protocol = "raw"
-if args.protocol:
-	protocol = args.protocol.lower()
-	if protocol not in ["raw", "early1"]:
-		print("Unsupported protocol:", protocol, file=sys.stderr)
+# Read a TSV file (pit-ID-AGSSOFTWARE.tsv) containing a downlist definition.
+downlistDefinitions = {}
+def tsvRead(filename):
+	fields = filename.split("-")
+	id = fields[1]
+	downlistDefinitions[id] = { "title": "TBD", "url": "TBD", "items": {}}
+	downlistDefinition = downlistDefinitions[id]
+	f = open(filename, "r")
+	for line in f:
+		if line[:1] == "#" or line.strip() == "":
+			continue
+		fields = line.rstrip("\r\n").split("\t")
+		if len(fields) == 1:
+			if "://" in fields[0]:
+				downlistDefinition["url"] = fields[0]
+			else:
+				downlistDefinition["title"] = fields[0]
+			continue
+		offset = int(fields[0])
+		item = { "name": "%d %s" % (offset+1, fields[1])}
+		downlistDefinition["items"][offset] = item
+	f.close
+
+softwareEarly1 = { "Sunrise45", "Sunrise69"}
+softwareLate1 = { "Corona261, Sunspot247, Solarium055"}
+softwareEarly2 = { "SundialE", "Aurora88", "Aurora12", "Borealis", "Sunburst37", "Sunburst120"}
+software = None
+if args.software:
+	raw = False
+	software = args.software
+	if software in softwareEarly1:
+		block = 1
+		early1 = True
+	elif software in softwareLate1:
+		block = 1
+		late1 = True
+	elif software in softwareEarly2:
+		block = 2
+		early2 = True
+	else:
+		print("Software version %s not supported." % software, file=sys.stderr)
 		sys.exit(1)
-raw = (protocol == "raw")
-early1 = (protocol == "early1")
-
-if raw and args.packet:
-	packetWidth = int(args.packet)
-
-block = 2
-if args.block:
-	block = int(args.block)
-
-lastTime = None
-if args.time:
-	import datetime
-	lastTime = datetime.datetime.now()
-
-if args.gps:
-	from LSM9DS0 import *
-	import serial
-	import threading
-	bearing = 0.0
-	groundspeed = 0.0
-	latitude = 0.0
-	longitude = 0.0
-	altitude = 0.0
-	gpsSerialPort = serial.Serial('/dev/ttyS0')
-	def dmmDPmToFloat(input):
-		try:
-			leftRight = input.split('.')
-		except:
-			leftRight = [input, '0']
-		if len(leftRight) == 0:
-			return 0.0
-		elif len(leftRight) == 1:
-			leftRight.append('0')
-		elif leftRight[1] == '':
-			leftRight[1] = '0' 
-		try:
-			degrees = int(leftRight[0][:-2])
-		except:
-			degrees = 0
-		try:
-			minutes = float(leftRight[0][-2:] + '.' + leftRight[1])
-		except:
-			minutes = 0.0
-		return degrees + minutes / 60.0
-	mutex = threading.Lock()
-	fakeLatitude = 36.12345
-	fakeLongitude = -97.54321
-	def checkGPS():
-		global gpsSerialPort, bearing, groundspeed, latitude, longitude, mutex
-		while True:
-			time.sleep(0.05)
-			line = gpsSerialPort.readline()
-			fields = line.decode('ascii').split(',')
-			if len(fields) >= 8 and fields[0] == '$GPVTG':
-				#print('$GPVTG: ' + str(fields))
-				try:
-					bearing = float(fields[1])
-					groundspeed = float(fields[7])
-				except:
-					bearing = 0.0
-					groundspeed = 0.0
-				#print("groundspeed=" + str(groundspeed) + " bearing=" + str(bearing))
-			elif len(fields) >= 10 and fields[0] == '$GPGGA':
-				#print('$GPGGA: ' + str(fields))
-				mutex.acquire()
-				try:
-					latitude = dmmDPmToFloat(fields[2])
-					if fields[3] == 'S':
-						latitude = -latitude
-					longitude = dmmDPmToFloat(fields[4])
-					if fields[5] == 'W':
-						longitude = -longitude
-					altitude = float(fields[9])
-				except:
-					if args.gpsdebug:
-						global fakeLatitude, fakeLongitude
-						latitude = fakeLatitude
-						fakeLatitude += 0.00001
-						longitude = fakeLongitude
-						fakeLongitude += 0.00001
-					else:
-						latitude = 0.0
-						longitude = 0.0
-					altitude = 0.0
-				mutex.release()
-				#print("latitude=" + str(latitude) + " longitude=" + str(longitude) + " altitude=" + str(altitude))
-	gpsThread = threading.Thread(target=checkGPS)
-	gpsThread.start()
-
-if args.imu:
-	from BMP280 import *
-	
-	# A test.
-	if args.imudebug:
-		while True:
-			# Read stuff from LSM9DS0.
-			acc = readAccelerometer()
-			mag = readMagnetometer()
-			gyro = readGyro()
-			
-			# Read stuff from BMP180.
-			temperature, pressure = readTemperatureAndPressure()
-					
-			print("")
-			print("acc = " + str(acc))
-			print("mag = " + str(mag))
-			print("gyro = " + str(gyro))
-			print("temp = " + str(temperature))
-			print("pressure = " + str(pressure))
-			time.sleep(1)
+	tsvFiles = glob.glob(scriptDirectory + os.sep + "pit-*-" + software + ".tsv")
+	for tsvFile in tsvFiles:
+		tsvRead(tsvFile)
+	print(downlistDefinitions)
+else:
+	raw = True
+	if args.packet:
+		packetWidth = int(args.packet)
+	else:
+		packetWidth = 40
+	if args.block:
+		block = int(args.block)
+	else:
+		block = 2
 
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
@@ -222,132 +108,6 @@ def toOnesComplement(value):
 	if value < 0:
 		value -= 1
 	return value & 0o77777
-
-# This function is automatically called periodically by the event loop to check for 
-# conditions that will result in sending messages to yaAGC/yaAGS that are interpreted
-# as changes to bits on its input channels.  The return
-# value is supposed to be a list of 3-tuples of the form
-#	[ (channel0,value0,mask0), (channel1,value1,mask1), ...]
-# for AGC, or 
-#	[ (channel0,value0), (channel1,value1), ...]
-# for AGS, and may be an empty list.  The "values" are written to the AGC/AGS's input "channels",
-# while the "masks" tell which bits of the "values" are valid.  (The AGC will ignore
-# the invalid bits.  We don't need such masks for AGS.)
-def inputsForAGx():
-	global lastTime
-	returnValue = []
-	
-	if args.time:
-		now = datetime.datetime.now()
-		if now.second == lastTime.second:
-			return []
-		lastTime = now
-	
-	# Just a demo ... supplies current BerryGPS-IMU IMU data to AGC on input channels
-	# 051-063.  The values (all 1's-complement) supplied are:
-	#	051	x-acceleration in units of mm/sec/sec
-	#	052	y-acceleration in units of mm/sec/sec
-	#	053	z-acceleration in units of mm/sec/sec
-	#	054	x magnetic field in units of 0.0001 gauss
-	#	055	y magnetic field in units of 0.0001 gauss
-	#	056	z magnetic field in units of 0.0001 gauss
-	#	057	x gyro in units of 0.1 degrees per second
-	#	060	y gyro in units of 0.1 degrees per second
-	#	061	z gyro in units of 0.1 degrees per second
-	#	062	Barometric pressure in units of 0.1 hPa
-	#	063	Temperature in units of 0.01 degrees C
-	# Delete everything associated with args.imu (here and above) if you don't
-	# like --imu.  It's not necessary for the generic functioning of this program.
-	if args.imu:
-		# Read stuff from LSM9DS0.
-		acc = readAccelerometer()
-		mag = readMagnetometer()
-		gyro = readGyro()
-		
-		# Read stuff from BMP180.
-		temperature, pressure = readTemperatureAndPressure()
-		
-		# Convert the stuff we just read to 1's-complement.
-		for i in ("x", "y", "z"):
-			acc[i] = toOnesComplement(round(1000*acc[i]))
-			mag[i] = toOnesComplement(round(10000*mag[i]))
-			gyro[i] = toOnesComplement(round(10*gyro[i]))
-		pressure = toOnesComplement(round(10*pressure))
-		temperature = toOnesComplement(round(100*temperature))
-		
-		# Pack the values for transmission.
-		returnValue.append( ( 0o51, acc["x"], 0o77777) )
-		returnValue.append( ( 0o52, acc["y"], 0o77777) )
-		returnValue.append( ( 0o53, acc["z"], 0o77777) )
-		returnValue.append( ( 0o54, mag["x"], 0o77777) )
-		returnValue.append( ( 0o55, mag["y"], 0o77777) )
-		returnValue.append( ( 0o56, mag["z"], 0o77777) )
-		returnValue.append( ( 0o57, gyro["x"], 0o77777) )
-		returnValue.append( ( 0o60, gyro["y"], 0o77777) )
-		returnValue.append( ( 0o61, gyro["z"], 0o77777) )
-		returnValue.append( ( 0o62, pressure, 0o77777) )
-		returnValue.append( ( 0o63, temperature, 0o77777) )
-	
-	# Just a demo ... supplies current BerryGPS-IMU GPS data to AGC on input channels
-	# 064-072.  The values (all 1's-complement) supplied are:
-	#	064	integral part of latitude*10
-	#	065	integral part of longitude*10
-	#	066	Altitude in units of meters
-	#	067	Groundspeed in units of kph
-	#	070	Direction relative to true North, 0.1 degrees
-	#	071	fractional part of latitude*10, times 10000, matches sign
-	#	072	fractional part of longitude*10, times 10000, matches sign
-	# In other words, the full lat and lon are given to a resolution of a hundred-thousandth
-	# of a degree, about 1 meter. For example, if the longitude were -41.623456, then
-	#	channel 065 would be -416
-	#	channel 072 would be 2345
-	# Delete everything associated with args.gps (here and above) if you don't
-	# like --gps.  It's not necessary for the generic functioning of this program.
-	if args.gps:
-		global mutex
-		
-		def partitionLatLon10(x):
-			x10 = x * 10
-			integral = int(x10)
-			fractional = x10 - integral
-			fractional = int(10000*fractional)
-			return (integral, fractional)
-		
-		mutex.acquire()
-		integralLat10, fractionalLat10 = partitionLatLon10(latitude)
-		integralLon10, fractionalLon10 = partitionLatLon10(longitude)
-		lAltitude = int(altitude)
-		mutex.release()
-		lGroundspeed = round(groundspeed)
-		lBearing = round(bearing * 10)
-		
-		# Pack the values for transmission.
-		returnValue.append( ( 0o64, toOnesComplement(integralLat10), 0o77777) )
-		returnValue.append( ( 0o65, toOnesComplement(integralLon10), 0o77777) )
-		returnValue.append( ( 0o66, toOnesComplement(lAltitude), 0o77777) )
-		returnValue.append( ( 0o67, toOnesComplement(lGroundspeed), 0o77777) )
-		returnValue.append( ( 0o70, toOnesComplement(lBearing), 0o77777) )
-		returnValue.append( ( 0o71, toOnesComplement(fractionalLat10), 0o77777) )
-		returnValue.append( ( 0o72, toOnesComplement(fractionalLon10), 0o77777) )
-	
-	# Just a demo ... supplies current date/time to AGC on input channels 040-042.
-	# Delete everything associated with args.time (here and above) if you don't
-	# like --time.  It's not necessary for the generic functioning of this program.
-	if args.time:
-		# Pack the values for transmission.
-		minutesSeconds = (now.minute << 6) | (now.second)
-		monthsDaysHours = (now.month << 10) | (now.day << 5) | (now.hour)
-		# The values are all positive, so the 1's complement
-		# and 2's complement representations are the same.
-		# The AGC should poll these until channel 040 changes,
-		# and then should immediately read the other ports
-		# (which are guaranteed not to change for at least a minute
-		# after 040 does).
-		returnValue.append( ( 0o42, now.year, 0o77777) )
-		returnValue.append( ( 0o41, monthsDaysHours, 0o77777) )
-		returnValue.append( ( 0o40, minutesSeconds, 0o77777) )
-	
-	return returnValue
 
 #------------------------------------------------------------------------------
 # Various stuff useful in Block I
@@ -525,110 +285,92 @@ if raw:
 				col = 0
 		return
 elif early1:
-	tsv = [
-		{ "name": "TIME1"},
-		{ "name": "TIME2"},
-		{ "name": "IN0"},
-		{ "name": "IN2"},
-		{ "name": "IN3"},
-		{ "name": "OUT1"},
-		{ "name": "RRECT"},
-		{ "name": "RRECT+1"},
-		{ "name": "RRECT+2"},
-		{ "name": "RRECT+3"},
-		{ "name": "RRECT+4"},
-		{ "name": "RRECT+5"},
-		{ "name": "TDELTAV"},
-		{ "name": "TDELTAV+1"},
-		{ "name": "TDELTAV+2"},
-		{ "name": "TDELTAV+3"},
-		{ "name": "TDELTAV+4"},
-		{ "name": "TDELTAV+5"},
-		{ "name": "VRECT"},
-		{ "name": "VRECT+1"},
-		{ "name": "VRECT+2"},
-		{ "name": "VRECT+3"},
-		{ "name": "VRECT+4"},
-		{ "name": "VRECT+5"},
-		{ "name": "TNUV"},
-		{ "name": "TNUV+1"},
-		{ "name": "TNUV+2"},
-		{ "name": "TNUV+3"},
-		{ "name": "TNUV+4"},
-		{ "name": "TNUV+5"},
-		{ "name": "GYROD+5"},
-		{ "name": "GYROD+3"}
-		]
+	tsv = downlistDefinitions["XXXXX"]["items"]
 	downlistLength = len(tsv)
+	downlistLengthWithoutIDsMinus1 = (4 * downlistLength) // 5 - 1
+	#print("***DEBUG***", downlistLength)
 	lastIndex = downlistLength - 1
 	data = [""]*downlistLength
 	pending = None
 	ready = False
-	index = lastIndex
+	index = 0
 	def outputFromAGx(channel, value):
 		global pending, ready, index, data
 		import sys
 		
-		if early1:
-			# At the moment, just discards the relay words and input-character words.
-			if channel == 0o11: # OUT1
-				if pending != None:
-					newline = False
-					if value & 0o00400: # word-order bit
-						dataword = True
-					else:
-						dataword = False # ID word.
-						if pending == None:
-							return
-						if (pending & 0o76000) == 0o00000: # ID word
-							if pending == 0:
-								newline = True
-								ready = True
-								index = lastIndex
-							# Could cross check the index here vs our internal
-							# one, but won't for now.
-						elif (pending & 0o76000) == 0o02000: # character-indicator word
-							if (pending >> 6) & 1:
-								print("Mark", file=sys.stderr)
+		if channel == 0o11: # OUT1
+			if pending != None:
+				newline = False
+				dataword = False
+				indexword = False
+				if value & 0o00400: # word-order bit
+					dataword = True
+				else:
+					if pending == None:
+						return
+					if (pending & 0o76000) == 0o00000: # ID word
+						if pending == 0:
+							newline = True
+							ready = True
+						# In this protocol, the ID words have the index of the
+						# previously-transmitted data word, but doesn't account
+						# for the reversed ordering nor the insertion of the 
+						# ID words themselves.  After compensating for those
+						# things, we can double-check that it agrees with the
+						# index we've been calculating internally.
+						i = (pending * 5) // 4
+						if i != index:
+							print("Readjusting index from %d to %d" % (index, i), file=sys.stderr)
+						indexword = True
+						# Could cross check the index here vs our internal
+						# one, but won't for now.
+					elif (pending & 0o76000) == 0o02000: # character-indicator word
+						if (pending >> 6) & 1:
+							print("Mark", file=sys.stderr)
+						else:
+							if (pending >> 5) & 1:
+								print("Uplink ", end="", file=sys.stderr)
 							else:
-								if (pending >> 5) & 1:
-									print("Uplink ", end="", file=sys.stderr)
-								else:
-									print("Key ", end="", file=sys.stderr)
-								keycode = pending & 0o37
-								if keycode in keycodesBlockI:
-									print(keycodesBlockI[keycode], file=sys.stderr)
-								else:
-									print("unknown (%02o)" % keycode, file=sys.stderr)
-							#print("Character %d %d %02o" % \
-							#	((pending >> 6) & 1, (pending >> 5) & 1, pending & 0o37), \
-							#	file=sys.stderr)
-						else: # relay word
-							address = (pending >> 11) & 0o17
-							bit11 = (pending >> 10) & 1
-							bits10to6 = (pending >> 5) & 0o37
-							bits5to1 = pending & 0o37
-							printRelayBlockI(address, bit11, bits10to6, bits5to1)
-					if ready and dataword:
-						data[index] = "%s: %05o" % (tsv[index]["name"], pending)
-						index -= 1
-						if index < 0:
-							print("Downlist", file=sys.stderr)
-							count = 0
-							for item in data:
-								print("%-20s" % item, end="", file=sys.stderr)
-								count += 1
-								if count >= 8:
-									print(file=sys.stderr)
-									count = 0
-							index = lastIndex
-							if count > 0:
+								print("Key ", end="", file=sys.stderr)
+							keycode = pending & 0o37
+							if keycode in keycodesBlockI:
+								print(keycodesBlockI[keycode], file=sys.stderr)
+							else:
+								print("unknown (%02o)" % keycode, file=sys.stderr)
+						#print("Character %d %d %02o" % \
+						#	((pending >> 6) & 1, (pending >> 5) & 1, pending & 0o37), \
+						#	file=sys.stderr)
+						pending = None
+						return
+					else: # relay word
+						address = (pending >> 11) & 0o17
+						bit11 = (pending >> 10) & 1
+						bits10to6 = (pending >> 5) & 0o37
+						bits5to1 = pending & 0o37
+						printRelayBlockI(address, bit11, bits10to6, bits5to1)
+						pending = None
+						return
+				#print("***DEBUG***", dataword, indexword, "%05o" % pending, index, file=sys.stderr)
+				if ready and (dataword or indexword):
+					data[index] = "%s: %05o" % (tsv[index]["name"], pending)
+					index -= 1
+					if index < 0:
+						print("Downlist", file=sys.stderr)
+						count = 0
+						for item in data:
+							print("%-20s" % item, end="", file=sys.stderr)
+							count += 1
+							if count >= 5:
 								print(file=sys.stderr)
-					pending = None
-				return
-			if channel == 0o14: # OUT4
-				pending = value
-		
+								count = 0
+						index = lastIndex
+						if count > 0:
+							print(file=sys.stderr)
+				pending = None
+			return
+		if channel == 0o14: # OUT4
+			pending = value
+	
 		return
 
 ###################################################################################
@@ -643,7 +385,6 @@ s.setblocking(0)
 
 def connectToAGC():
 	import sys
-	count = 0
 	sys.stderr.write("Connecting to AGC " + TCP_IP + ":" + str(TCP_PORT) + "\n")
 	while True:
 		try:
@@ -652,46 +393,30 @@ def connectToAGC():
 			break
 		except socket.error as msg:
 			sys.stderr.write(str(msg) + "\n")
-			count += 1
-			if count >= 10:
-				sys.stderr.write("Too many retries ...\n")
-				shutdownGPIO()
-				time.sleep(3)
-				sys.exit(1)
 			time.sleep(1)
 
 connectToAGC()
 
 ###################################################################################
 # Event loop.  Just check periodically for output from yaAGC (in which case the
-# user-defined callback function outputFromAGx is executed) or data in the 
-# user-defined function inputsForAGx (in which case a message is sent to yaAGC).
-# But this section has no target-specific code, and shouldn't need to be modified
-# unless there are bugs.
+# user-defined callback function outputFromAGx is executed).
 
 # Given a 3-tuple (channel,value,mask) for yaAGC, creates packet data and sends it to yaAGC.
 # Or, given a 2-tuple (channel,value) for yaAGS, creates packet data and sends it to yaAGS.
 def packetize(tuple):
 	outputBuffer = bytearray(4)
-	if args.ags:
-		outputBuffer[0] = 0x00 | (tuple[0] & 0x3F)
-		outputBuffer[1] = 0xC0 | ((tuple[0] >> 12) & 0x3F)
-		outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
-		outputBuffer[3] = 0x40 | (tuple[1] & 0x3F)
-		s.send(outputBuffer)
-	else:
-		# First, create and output the mask command.
-		outputBuffer[0] = 0x20 | ((tuple[0] >> 3) & 0x0F)
-		outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[2] >> 12) & 0x07)
-		outputBuffer[2] = 0x80 | ((tuple[2] >> 6) & 0x3F)
-		outputBuffer[3] = 0xC0 | (tuple[2] & 0x3F)
-		s.send(outputBuffer)
-		# Now, the actual data for the channel.
-		outputBuffer[0] = 0x00 | ((tuple[0] >> 3) & 0x0F)
-		outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[1] >> 12) & 0x07)
-		outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
-		outputBuffer[3] = 0xC0 | (tuple[1] & 0x3F)
-		s.send(outputBuffer)
+	# First, create and output the mask command.
+	outputBuffer[0] = 0x20 | ((tuple[0] >> 3) & 0x0F)
+	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[2] >> 12) & 0x07)
+	outputBuffer[2] = 0x80 | ((tuple[2] >> 6) & 0x3F)
+	outputBuffer[3] = 0xC0 | (tuple[2] & 0x3F)
+	s.send(outputBuffer)
+	# Now, the actual data for the channel.
+	outputBuffer[0] = 0x00 | ((tuple[0] >> 3) & 0x0F)
+	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[1] >> 12) & 0x07)
+	outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
+	outputBuffer[3] = 0xC0 | (tuple[1] & 0x3F)
+	s.send(outputBuffer)
 
 # Buffer for a packet received from yaAGC/yaAGS.
 packetSize = 4
@@ -724,24 +449,14 @@ while True:
 			# Parse the packet just read, and call outputFromAGx().
 			# Start with a sanity check.
 			ok = 1
-			if args.ags:
-				if (inputBuffer[0] & 0xC0) != 0x00:
-					ok = 0
-				elif (inputBuffer[1] & 0xC0) != 0xC0:
-					ok = 0
-				elif (inputBuffer[2] & 0xC0) != 0x80:
-					ok = 0
-				elif (inputBuffer[3] & 0xC0) != 0x40:
-					ok = 0
-			else:
-				if (inputBuffer[0] & 0xF0) != 0x00:
-					ok = 0
-				elif (inputBuffer[1] & 0xC0) != 0x40:
-					ok = 0
-				elif (inputBuffer[2] & 0xC0) != 0x80:
-					ok = 0
-				elif (inputBuffer[3] & 0xC0) != 0xC0:
-					ok = 0
+			if (inputBuffer[0] & 0xF0) != 0x00:
+				ok = 0
+			elif (inputBuffer[1] & 0xC0) != 0x40:
+				ok = 0
+			elif (inputBuffer[2] & 0xC0) != 0x80:
+				ok = 0
+			elif (inputBuffer[3] & 0xC0) != 0xC0:
+				ok = 0
 			# Packet has the various signatures we expect.
 			if ok == 0:
 				# Note that, depending on the yaAGC/yaAGS version, it occasionally
@@ -762,12 +477,6 @@ while True:
 								j += 1
 							view = view[j:]
 							leftToRead = packetSize - j
-			elif args.ags:
-				channel = (inputBuffer[0] & 0x3F)
-				value = (inputBuffer[1] & 0x3F) << 12
-				value |= (inputBuffer[2] & 0x3F) << 6
-				value |= (inputBuffer[3] & 0x3F)
-				outputFromAGx(channel, value)
 			else:
 				channel = (inputBuffer[0] & 0x0F) << 3
 				channel |= (inputBuffer[1] & 0x38) >> 3
@@ -777,12 +486,4 @@ while True:
 				outputFromAGx(channel, value)
 			didSomething = True
 	
-	# Check for locally-generated data for which we must generate messages
-	# to yaAGC over the socket.  In theory, the externalData list could contain
-	# any number of channel operations, but in practice (at least for something
-	# like a DSKY implementation) it will actually contain only 0 or 1 operations.
-	externalData = inputsForAGx()
-	for i in range(0, len(externalData)):
-		packetize(externalData[i])
-		didSomething = True
 		

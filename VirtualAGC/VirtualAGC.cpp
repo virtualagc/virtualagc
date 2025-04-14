@@ -188,6 +188,7 @@
  *              2025-01-11 RSB  Added a Tic-tac-toe "mission".
  *              2025-01-13 RSB  Added the AGC_WISH environment variable.
  *              2025-03-03 RSB	Added --software switch for yaTelemetry.
+ *              2025-04-14 RSB	Enabled command-line debugging for Block I.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -2520,9 +2521,9 @@ VirtualAGC::EnforceConsistency(void)
   DedaLabel->Enable(!block1);
   DedaFullButton->Enable(!block1);
   DedaHalfButton->Enable(!block1);
-  AgcDebugLabel->Enable(!block1);
-  AgcDebugNormalButton->Enable(!block1);
-  AgcDebugMonitorButton->Enable(!block1);
+  AgcDebugLabel->Enable(true);
+  AgcDebugNormalButton->Enable(true);
+  AgcDebugMonitorButton->Enable(true);
   AeaDebugLabel->Enable(!block1);
   AeaDebugNormalButton->Enable(!block1);
   AeaDebugMonitorButton->Enable(!block1);
@@ -3280,6 +3281,10 @@ VirtualAGC::FormCommands(void)
       if (block1)
         {
           yaAGC = localExecutableDirectory + PathDelimiter + wxT("yaAGCb1");
+          if (AgcDebugMonitorButton->GetValue())
+            DebugMode = 1;
+          else
+            yaAGC += wxT(" --run");
         }
       else
         {
@@ -3470,9 +3475,11 @@ VirtualAGC::FormCommands(void)
       CoreBin = wxT("source/") + basename + wxT("/") + basename + wxT(".bin");
       CorePad = wxT("source/") + basename + wxT("/") + basename + wxT(".pad");
       CoreLst = wxT("source/") + basename + wxT("/") + basename + wxT(".lst");
-      if (DebugMode)
+      if (DebugMode && !block1)
         DirCmd += wxT("source/" + basename);
     }
+  //if (DebugMode && block1)
+  //  yaAGC += wxT(" --symtab=\"source/") + basename + wxT("/") + basename + wxT(".symtab\"");
   if (mission == ID_SUNBURST37BUTTON)
     {
       yaAGC += wxT(" --initialize-sunburst-37");
@@ -3497,7 +3504,7 @@ VirtualAGC::FormCommands(void)
           + Port + DirCmd;
       if (block1)
         {
-          yaAGC += wxT(" --run --pads=\"") + CorePad + wxT("\" --listing=\"")
+          yaAGC += wxT(" --pads=\"") + CorePad + wxT("\" --listing=\"")
               + CoreLst + wxT("\"");
         }
       else
@@ -3511,7 +3518,7 @@ VirtualAGC::FormCommands(void)
       if (CustomResumeButton->GetValue()
           && wxFileExists(CoreFilename->GetValue()))
         yaAGC += wxT(" --resume=\"") + CoreFilename->GetValue() + wxT("\"");
-      if (AgcDebugMonitorButton->GetValue())
+      if (AgcDebugMonitorButton->GetValue() && !block1)
         {
           wxString Symtab = CoreBin + wxT(".symtab");
           if (wxFileExists(Symtab))
