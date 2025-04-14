@@ -86,7 +86,7 @@ if args.software:
 	tsvFiles = glob.glob(scriptDirectory + os.sep + "pit-*-" + software + ".tsv")
 	for tsvFile in tsvFiles:
 		tsvRead(tsvFile)
-	print(downlistDefinitions)
+	#print(downlistDefinitions)
 else:
 	raw = True
 	if args.packet:

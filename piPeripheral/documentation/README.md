@@ -1,0 +1,1 @@
+The HTML files in this "documentation" folder are solely for use in piTelemetry.py for documenting the downlists it supports.
