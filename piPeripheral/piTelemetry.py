@@ -1,21 +1,28 @@
 #!/usr/bin/python3
-# Copyright:	None, placed in the PUBLIC DOMAIN by its author (Ron Burkey)
-# Filename: 	piTelemetry.py
-# Purpose:	Reverse engineering and/or proof-of-concept implementation
-#         	of neglected AGC telemetry protocols.
-# Reference:	http://www.ibiblio.org/apollo/developer.html
-# Mod history:	2025-04-11 RSB	Adapted from piPeripheral.py for AGC telemetry studies.
+# Copyright:    None, placed in the PUBLIC DOMAIN by its author (Ron Burkey)
+# Filename:     piTelemetry.py
+# Purpose:      Reverse engineering and/or proof-of-concept implementation
+#               of neglected AGC telemetry protocols.
+# Reference:    http://www.ibiblio.org/apollo/developer.html
+# Mod history:  2025-04-11 RSB	Adapted from piPeripheral.py for AGC telemetry studies.
 
 import sys
 import datetime
 import os
 import glob
+import webbrowser
+from pynput import keyboard
 #import tkinter as tk
 
 # Find out where piTelemetry.py itself is located.
 scriptPath = os.path.abspath(__file__)
 scriptDirectory = os.path.dirname(scriptPath)
 #print(scriptDirectory, file=sys.stderr)
+
+# `id` is the ID of the current downlist, formatted "%05o", or else "XXXXX" if
+# tha particular AGC software version has only a single downlist with no ID
+# number.
+id = "XXXXX"
 
 # Parse command-line arguments.
 import argparse
@@ -41,12 +48,12 @@ if args.port:
 else:
 	TCP_PORT = 19799
 
-# Read a TSV file (pit-ID-AGSSOFTWARE.tsv) containing a downlist definition.
+# Read a TSV file (ddd-ID-AGSSOFTWARE.tsv) containing a downlist definition.
 downlistDefinitions = {}
 def tsvRead(filename):
 	fields = filename.split("-")
 	id = fields[1]
-	downlistDefinitions[id] = { "title": "TBD", "url": "TBD", "items": {}}
+	downlistDefinitions[id] = { "title": "Downlist", "items": {}}
 	downlistDefinition = downlistDefinitions[id]
 	f = open(filename, "r")
 	for line in f:
@@ -59,10 +66,40 @@ def tsvRead(filename):
 			else:
 				downlistDefinition["title"] = fields[0]
 			continue
+		if len(fields) != 6:
+			continue
 		offset = int(fields[0])
-		item = { "name": "%d %s" % (offset+1, fields[1])}
+		name = fields[1]
+		scale = fields[2]
+		if scale.isdigit():
+			scale = int(scale)
+		elif scale[:1] == "B":
+			scale = 1 << int(scale[1:])
+		else:
+			print("Illegal scale:", scale, file=sys.stderr)
+			sys.exit(1)
+		format = fields[3]
+		item = { 
+			"name": "%d %s" % (offset+1, name),
+			"scale": scale,
+			"format": format
+			}
 		downlistDefinition["items"][offset] = item
 	f.close
+
+# Only single-precision at the moment.  That needs rethinking!
+def formatDownlinkItem(item, tsv, index):
+	name = tsv[index]["name"]
+	scale = tsv[index]["scale"]
+	format = tsv[index]["format"]
+	item = item // scale
+	if format == "FMT_OCT":
+		item = "%05o" % item
+	elif format == "FMT_DEC":
+		item = "%d" % item
+	else:
+		item = str(item)
+	return "%s: %s" % (name, item)
 
 softwareEarly1 = { "Sunrise45", "Sunrise69"}
 softwareLate1 = { "Corona261, Sunspot247, Solarium055"}
@@ -83,7 +120,7 @@ if args.software:
 	else:
 		print("Software version %s not supported." % software, file=sys.stderr)
 		sys.exit(1)
-	tsvFiles = glob.glob(scriptDirectory + os.sep + "pit-*-" + software + ".tsv")
+	tsvFiles = glob.glob(scriptDirectory + os.sep + "ddd-*-" + software + ".tsv")
 	for tsvFile in tsvFiles:
 		tsvRead(tsvFile)
 	#print(downlistDefinitions)
@@ -290,12 +327,13 @@ elif early1:
 	downlistLengthWithoutIDsMinus1 = (4 * downlistLength) // 5 - 1
 	#print("***DEBUG***", downlistLength)
 	lastIndex = downlistLength - 1
-	data = [""]*downlistLength
+	data = [None]*downlistLength
+	fillCount = 0
 	pending = None
 	ready = False
 	index = 0
 	def outputFromAGx(channel, value):
-		global pending, ready, index, data
+		global pending, ready, index, data, id, fillCount
 		import sys
 		
 		if channel == 0o11: # OUT1
@@ -320,7 +358,8 @@ elif early1:
 						# index we've been calculating internally.
 						i = (pending * 5) // 4
 						if i != index:
-							print("Readjusting index from %d to %d" % (index, i), file=sys.stderr)
+							#print("Readjusting index from %d to %d" % (index, i), file=sys.stderr)
+							index = i
 						indexword = True
 						# Could cross check the index here vs our internal
 						# one, but won't for now.
@@ -337,9 +376,6 @@ elif early1:
 								print(keycodesBlockI[keycode], file=sys.stderr)
 							else:
 								print("unknown (%02o)" % keycode, file=sys.stderr)
-						#print("Character %d %d %02o" % \
-						#	((pending >> 6) & 1, (pending >> 5) & 1, pending & 0o37), \
-						#	file=sys.stderr)
 						pending = None
 						return
 					else: # relay word
@@ -350,22 +386,34 @@ elif early1:
 						printRelayBlockI(address, bit11, bits10to6, bits5to1)
 						pending = None
 						return
-				#print("***DEBUG***", dataword, indexword, "%05o" % pending, index, file=sys.stderr)
 				if ready and (dataword or indexword):
-					data[index] = "%s: %05o" % (tsv[index]["name"], pending)
+					# The following conditional fails in SUNRISE, but it's a 
+					# model for how to detect the downlist ID in other protocols.
+					if tsv[index]["name"][-3:] == " ID":
+						id = "%05o" % pending
+					if data[index] == None:
+						fillCount += 1
+					#data[index] = "%s: %05o" % (tsv[index]["name"], pending)
+					data[index] = formatDownlinkItem(pending, tsv, index)
 					index -= 1
 					if index < 0:
-						print("Downlist", file=sys.stderr)
-						count = 0
-						for item in data:
-							print("%-20s" % item, end="", file=sys.stderr)
-							count += 1
-							if count >= 5:
-								print(file=sys.stderr)
-								count = 0
-						index = lastIndex
-						if count > 0:
+						if fillCount >= len(data):
+							print('-'*80, file=sys.stderr)
+							print("Hit D key for documentation or Q to quit.", \
+								file=sys.stderr)
 							print(file=sys.stderr)
+							print("Downlist", file=sys.stderr)
+							count = 0
+							for item in data:
+								print("%-20s" % item, end="", file=sys.stderr)
+								count += 1
+								if count >= 5:
+									print(file=sys.stderr)
+									count = 0
+							if count > 0:
+								print(file=sys.stderr)
+							print(file=sys.stderr)
+						index = lastIndex
 				pending = None
 			return
 		if channel == 0o14: # OUT4
@@ -424,8 +472,30 @@ inputBuffer = bytearray(packetSize)
 leftToRead = packetSize
 view = memoryview(inputBuffer)
 
+quit = False
+if software != None:
+	def on_press(key):
+		global quit, foundKey
+		key = str(key)[1:-1].upper()
+		if key == "Q":
+			print("\nQuitting ...", file=sys.stderr)
+			quit = True
+		elif key == "D":
+			docDir = scriptDirectory + "/documentation"
+			filename = "file://" + \
+						os.path.abspath("%s/%s/ddd-%5s-%s.html" % \
+									(docDir, software, id, software))
+			print("\nOpening documentation in browser ...", file=sys.stderr)
+			webbrowser.open(filename)
+		else:
+			print("\nUnrecognized command.", file=sys.stderr)
+	listener = keyboard.Listener(on_press=on_press)
+	listener.start()
+
 didSomething = False
 while True:
+	if quit:
+		break
 	if not didSomething:
 		time.sleep(PULSE)
 	didSomething = False
@@ -466,9 +536,12 @@ while True:
 				# data and need to be ignored, but for other corrupted packets
 				# we print a message. And try to realign past the corrupted
 				# bytes.
-				if inputBuffer[0] != 0xff or inputBuffer[1] != 0xff or inputBuffer[2] != 0xff or inputBuffer[2] != 0xff:
+				if inputBuffer[0] != 0xff or inputBuffer[1] != 0xff or \
+						inputBuffer[2] != 0xff or inputBuffer[2] != 0xff:
 					if inputBuffer[0] != 0xff:
-						print("Illegal packet: " + hex(inputBuffer[0]) + " " + hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + " " + hex(inputBuffer[3]))
+						print("Illegal packet: " + hex(inputBuffer[0]) + " " + \
+							hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + \
+							" " + hex(inputBuffer[3]))
 					for i in range(1,packetSize):
 						if (inputBuffer[i] & 0xC0) == 0:
 							j = 0
