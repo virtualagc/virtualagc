@@ -102,9 +102,12 @@ def formatDownlinkItem(item, tsv, index):
 	return "%s: %s" % (name, item)
 
 softwareEarly1 = { "Sunrise45", "Sunrise69"}
-softwareLate1 = { "Corona261, Sunspot247, Solarium055"}
+softwareLate1 = { "Corona261", "Sunspot247", "Solarium055"}
 softwareEarly2 = { "SundialE", "Aurora88", "Aurora12", "Borealis", "Sunburst37", "Sunburst120"}
 software = None
+early1 = False
+late1 = False
+early2 = False
 if args.software:
 	raw = False
 	software = args.software
@@ -419,6 +422,54 @@ elif early1:
 		if channel == 0o14: # OUT4
 			pending = value
 	
+		return
+elif late1:
+	listNumber = "XXXXX"
+	pending = None
+	buffer = []
+	marks = []
+	def outputFromAGx(channel, value):
+		global pending, listNumber
+		
+		if channel == 0o11: # OUT1
+			if pending == None:
+				return
+			while len(marks) > 0 and len(buffer) in [48, 49, 50, 97, 98, 99]:
+				buffer.append(marks.pop(0))
+			if 0 == (value & 0o00400): # Data word.
+				buffer.append(pending)
+			elif pending == 0o74000:
+				buffer.append(pending)
+			elif (pending & 0o74000) == 0o74000: # MARK word.
+				marks.append(pending)	
+			else: # ID word
+				if len(buffer) >= 100 and listNumber in downlistDefinitions:
+					tsv = downlistDefinitions[listNumber]["items"]
+					for i in range(100):
+						buffer[i] = formatDownlinkItem(buffer[i], tsv, i)
+					print('-'*125, file=sys.stderr)
+					print("Hit D key for documentation or Q to quit.", \
+						file=sys.stderr)
+					print(file=sys.stderr)
+					print(downlistDefinitions[listNumber]["title"], file=sys.stderr)
+					count = 0
+					for item in buffer:
+						print("%-25s" % item, end="", file=sys.stderr)
+						count += 1
+						if count >= 5:
+							print(file=sys.stderr)
+							count = 0
+					if count > 0:
+						print(file=sys.stderr)
+					print(file=sys.stderr)
+				listNumber = "%05o" % pending
+				buffer.clear()
+				buffer.append(pending)
+				marks.clear()
+			pending = None
+		elif channel == 0o14: # CPU channel used for downlink data
+			pending = value
+		
 		return
 
 ###################################################################################
