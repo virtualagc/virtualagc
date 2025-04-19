@@ -6,13 +6,43 @@
 # Reference:    http://www.ibiblio.org/apollo/developer.html
 # Mod history:  2025-04-11 RSB	Adapted from piPeripheral.py for AGC telemetry studies.
 
+instructions = "Hit the D key for documentation or Q to quit."
+
 import sys
 import datetime
 import os
 import glob
 import webbrowser
-from pynput import keyboard
-#import tkinter as tk
+
+# The `keyCheck` function does a non-blocking check to see if a keyboard 
+# character is available, returning `None` if not, and the character itself
+# otherwise.  There is no native way in Python to do this, and all of the 
+# Python modules I've tried (keyboard, pynput) either require root access or
+# have ridiculous behaviors such as not associating the key with the specific
+# app in which it was typed, ... or both!  The following code was adapted from 
+# answers I found while googling this ridiculous problem.
+try: # Method for Windows
+	import msvcrt
+	def keyCheck():
+		if msvcrt.kbhit():
+		    return msvcrt.getch()
+		return None
+except: # Method for Linux, Mac OS, or other *nix
+	import select
+	import termios
+	import tty
+	def keyCheck():
+	    fd = sys.stdin.fileno()
+	    old_settings = termios.tcgetattr(fd)
+	    try:
+	        tty.setraw(sys.stdin.fileno())
+	        rlist, _, _ = select.select([sys.stdin], [], [], 0.01) # Non-blocking read with timeout
+	        if rlist:
+	            return sys.stdin.read(1)
+	        else:
+	            return None
+	    finally:
+	        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 # Find out where piTelemetry.py itself is located.
 scriptPath = os.path.abspath(__file__)
@@ -103,11 +133,13 @@ def formatDownlinkItem(item, tsv, index):
 
 softwareEarly1 = { "Sunrise45", "Sunrise69"}
 softwareLate1 = { "Corona261", "Sunspot247", "Solarium055"}
-softwareEarly2 = { "SundialE", "Aurora88", "Aurora12", "Borealis", "Sunburst37", "Sunburst120"}
+softwareEarly2 = { "SundialE", "Aurora88", "Aurora12", "Borealis", "Sunburst37"}
+softwareMid2 = {"Sunburst120"}
 software = None
 early1 = False
 late1 = False
 early2 = False
+mid2 = False
 if args.software:
 	raw = False
 	software = args.software
@@ -120,6 +152,9 @@ if args.software:
 	elif software in softwareEarly2:
 		block = 2
 		early2 = True
+	elif software in softwareMid2:
+		block = 2
+		mid2 = True
 	else:
 		print("Software version %s not supported." % software, file=sys.stderr)
 		sys.exit(1)
@@ -275,10 +310,39 @@ def printRelayBlockI(address, bit11, bits10to6, bits5to1):
 #----------------------------------------------------------------------------
 # The output function.
 
-# This function is called by the event loop only when yaAGC has written
+# `outputFromAGx` is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.
+
+def printBuffer(listNumber, buffer):
+	print('-'*125, file=sys.stderr)
+	print(instructions, file=sys.stderr)
+	print(file=sys.stderr)
+	if listNumber not in downlistDefinitions:
+		print("Unknown list number (%s))" % listNumber, file=sys.stderr)
+	elif len(buffer) != len(downlistDefinitions[listNumber]["items"]):
+		print("Wrong number of items (%d != %d) on list (%s)" % \
+			(len(buffer), 
+			len(downlistDefinitions[listNumber]["items"]), 
+			listNumber), file=sys.stderr)
+	else:
+		tsv = downlistDefinitions[listNumber]["items"]
+		for i in range(len(tsv)):
+			buffer[i] = formatDownlinkItem(buffer[i], tsv, i)
+		print(downlistDefinitions[listNumber]["title"], file=sys.stderr)
+		count = 0
+		for item in buffer:
+			print("%-25s" % item, end="", file=sys.stderr)
+			count += 1
+			if count >= 5:
+				print(file=sys.stderr)
+				count = 0
+		if count > 0:
+			print(file=sys.stderr)
+		print(file=sys.stderr)
+	buffer.clear()
+
 if raw:
 	pending = False
 	col = 0
@@ -401,14 +465,14 @@ elif early1:
 					index -= 1
 					if index < 0:
 						if fillCount >= len(data):
-							print('-'*80, file=sys.stderr)
-							print("Hit D key for documentation or Q to quit.", \
-								file=sys.stderr)
+							print('-'*125, file=sys.stderr)
+							print(instructions, file=sys.stderr)
 							print(file=sys.stderr)
-							print("Downlist", file=sys.stderr)
+							print(downlistDefinitions["XXXXX"]["title"], 
+								file=sys.stderr)
 							count = 0
 							for item in data:
-								print("%-20s" % item, end="", file=sys.stderr)
+								print("%-25s" % item, end="", file=sys.stderr)
 								count += 1
 								if count >= 5:
 									print(file=sys.stderr)
@@ -443,27 +507,8 @@ elif late1:
 			elif (pending & 0o74000) == 0o74000: # MARK word.
 				marks.append(pending)	
 			else: # ID word
-				if len(buffer) >= 100 and listNumber in downlistDefinitions:
-					tsv = downlistDefinitions[listNumber]["items"]
-					for i in range(100):
-						buffer[i] = formatDownlinkItem(buffer[i], tsv, i)
-					print('-'*125, file=sys.stderr)
-					print("Hit D key for documentation or Q to quit.", \
-						file=sys.stderr)
-					print(file=sys.stderr)
-					print(downlistDefinitions[listNumber]["title"], file=sys.stderr)
-					count = 0
-					for item in buffer:
-						print("%-25s" % item, end="", file=sys.stderr)
-						count += 1
-						if count >= 5:
-							print(file=sys.stderr)
-							count = 0
-					if count > 0:
-						print(file=sys.stderr)
-					print(file=sys.stderr)
+				printBuffer(listNumber, buffer)
 				listNumber = "%05o" % pending
-				buffer.clear()
 				buffer.append(pending)
 				marks.clear()
 			pending = None
@@ -471,6 +516,43 @@ elif late1:
 			pending = value
 		
 		return
+elif early2:
+	listNumber = "XXXXX"
+	buffer = []
+	def outputFromAGx(channel, value):
+		global col, pending, lastWordOrder, listNumber
+		
+		if channel in [0o34, 0o35]:
+			buffer.append(value)
+		elif channel == 0o13:
+			wordOrder = value & 0o00100
+			if wordOrder == 0: # Start of new downlist
+				if len(buffer) == 0: 
+					return
+				pending = buffer.pop() # Get back the ID of the new downlist
+				printBuffer(listNumber, buffer)
+				listNumber = "%05o" % pending
+				buffer.append(pending)
+		return
+elif mid2:
+	listNumber = "XXXXX"
+	buffer = []
+	wordOrder = 1
+	def outputFromAGx(channel, value):
+		global wordOrder, listNumber
+		
+		if channel == 0o34 and wordOrder == 0:
+			wordOrder = 1
+			if len(buffer) != 0: 
+				printBuffer(listNumber, buffer)
+			listNumber = "%05o" % value
+		
+		if channel in [0o34, 0o35]:
+			buffer.append(value)
+		elif channel == 0o13:
+			wordOrder = value & 0o00100
+		return
+
 
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
@@ -523,30 +605,21 @@ inputBuffer = bytearray(packetSize)
 leftToRead = packetSize
 view = memoryview(inputBuffer)
 
-quit = False
-if software != None:
-	def on_press(key):
-		global quit, foundKey
-		key = str(key)[1:-1].upper()
-		if key == "Q":
-			print("\nQuitting ...", file=sys.stderr)
-			quit = True
-		elif key == "D":
-			docDir = scriptDirectory + "/documentation"
-			filename = "file://" + \
-						os.path.abspath("%s/%s/ddd-%5s-%s.html" % \
-									(docDir, software, id, software))
-			print("\nOpening documentation in browser ...", file=sys.stderr)
-			webbrowser.open(filename)
-		else:
-			print("\nUnrecognized command.", file=sys.stderr)
-	listener = keyboard.Listener(on_press=on_press)
-	listener.start()
-
 didSomething = False
 while True:
-	if quit:
+	c = keyCheck()
+	if c in ['q', 'Q']:
+		print("\nQuitting ...", file=sys.stderr)
 		break
+	elif c in ['d', 'D']:
+		docDir = scriptDirectory + "/documentation"
+		filename = "file://" + \
+					os.path.abspath("%s/%s/ddd-%5s-%s.html" % \
+								(docDir, software, id, software))
+		print("\nOpening documentation in browser ...", file=sys.stderr)
+		webbrowser.open(filename)
+	elif c != None:
+		print("\nUnrecognized command.", file=sys.stderr)
 	if not didSomething:
 		time.sleep(PULSE)
 	didSomething = False
