@@ -8,21 +8,40 @@
     <meta name="author" content="Ron Burkey">
     <script type="text/javascript" src="Header.js"></script>
   </head>
-  <body style="background-image: url(gray3.jpg);">
+  <body style="background-image: url(gray3.jpg);" link="#0000EE"
+    vlink="#551A8B" text="#000000" bgcolor="transparent" alink="#EE0000">
     <div align="center"><font size="+2"><i>
           <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","yaTelemetry Implementation Details").replace("@SUBTITLE@","Supporting New AGC Versions"))
-</script></i><i> (This page is under construction.&nbsp; Don't read it.)</i></font><br>
+</script></i><i> (This page is under construction.&nbsp; Ye who enter
+          here, abandon all hope!)</i></font><br>
     </div>
     <br>
     <h1>Table of Contents</h1>
     <ul>
       <li><a moz-do-not-send="true" href="#introduction">Introduction</a></li>
-      <li><a moz-do-not-send="true" href="#references">References</a></li>
-      <li><a moz-do-not-send="true" href="#blockI">Block I Telemetry
-          Protocol</a></li>
-      <li><a moz-do-not-send="true" href="#blockII">Block II Telemetry
-          Protocol</a></li>
+      <li><a moz-do-not-send="true" href="#references">Downlist
+          References</a></li>
+      <li><a moz-do-not-send="true" href="#protocols">Downlist Protocols</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#reverse">Reverse
+            Engineering</a><br>
+        </li>
+      </ul>
+      <ul>
+        <li><a moz-do-not-send="true" href="#sundial">Early Block I
+            Downlist Protocol</a></li>
+        <li><a moz-do-not-send="true" href="#lateI">Late Block I
+            Downlist Protocol</a></li>
+        <li><a moz-do-not-send="true" href="#earlyII">Early Block II
+            Downlist Protocol</a></li>
+        <li><a moz-do-not-send="true" href="#midII">Mid Block II
+            Downlist Protocol</a><br>
+        </li>
+        <li><a moz-do-not-send="true" href="#lateII">Late Block II
+            Downlist Protocol</a><br>
+        </li>
+      </ul>
       <li><a moz-do-not-send="true" href="#versioning">Downlist
           Versioning</a></li>
       <li><a moz-do-not-send="true" href="#aliases">Version Aliases</a></li>
@@ -32,61 +51,1315 @@ document.write(headerTemplate.replace("@TITLE@","yaTelemetry Implementation Deta
       </li>
     </ul>
     <h1><a name="introduction"></a>Introduction</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="references"></a>References</h1>
-    <p>There's some surviving documentation to help us out:<br>
+    <p>The original AGC (and our emulators, <b>yaAGC</b> and <b>yaAGCb1</b>)
+      periodically emitted (emit) telemetry data in the form of
+      "downlists" that consist of individual "downlinked" items of
+      data.&nbsp; By a downlist, I mean a sequence of downlinks, each
+      having a fixed interpretation in terms of its position in the
+      emitted data stream.&nbsp; Virtual AGC has up to now provided two
+      methods of accessing those downlists, with one of the methods
+      being based on the other:<br>
     </p>
     <ul>
-      <li>In most missions, the downlinked data is described in detail
-        in the so-called <a moz-do-not-send="true"
-href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/links2.html#GSOPs"><i>Guidance
-            System Operations Plan (GSOP)</i></a>, Section 2 "Data
-        Links", associated with the mission. Unfortunately, we have only
-        a few of these sections of the various GSOP versions, and hence
-        only a subset of the flown missions:</li>
-      <ul>
-        <li>Colossus 1&amp;1A</li>
-        <li>Luminary 1C</li>
-        <li>Colossus 3</li>
-        <li>Luminary 1E</li>
-        <li>Skylark 1<br>
+      <li>An API based on the files DecodeDigitalDownlink.c,
+        ddd-*-*.tsv, and the header file agc_engine.h appearing in the
+        Virtual AGC software tree's yaAGC/ folder.&nbsp; <a
+          moz-do-not-send="true" href="developer.html#Downlink_Lists">Usage
+
+
+
+
+
+          of the API is discussed elsewhere</a>.<br>
+      </li>
+      <li><b>yaTelemetry</b>, which is itself a stand-alone C++ program
+        based on the API.&nbsp; <a moz-do-not-send="true"
+          href="yaTelemetry.html#yaTelemetry"><b>yaTelemetry</b> is
+          discussed elsewhere</a>.<br>
+      </li>
+    </ul>
+    <p>However up to now, these methods have implemented only the
+      downlist transmission protocol used the flown manned Apollo
+      missions, leaving the unmanned missions and the AGC software
+      versions that were not flown completely untouched.&nbsp; The
+      emphasis of this page is implementation of those overlooked
+      earlier protocols.&nbsp; Whereas to the extent that the final
+      protocol is discussed, it is merely for completeness.<br>
+    </p>
+    <p>The basic facts which must be understood to proceed with the
+      discussion are these:<br>
+    </p>
+    <ul>
+      <li>Each AGC software version partitions the telemetry information
+        it emits into 1-6 different types of downlists, with the
+        particular downlist being emitted at any given time depending on
+        the current context, i.e. on which numbered program (P<i>nn</i>)
+        or major routine (R<i>nn</i>) currently executing.</li>
+      <li>Over the course of the Apollo software-development effort, the
+        protocol for transmission of the downlists evolved.&nbsp; For
+        our purposes here, I've partitioned those into four categories,
+        in roughly chronological order.&nbsp; This partitioning is
+        subjective, based on how convenient I felt implementation was,
+        and your opinion may vary.<br>
+      </li>
+      <ol>
+        <li>The early Block I protocol</li>
+        <li>The late Block I protocol</li>
+        <li>The early Block II protocol</li>
+        <li>The mid (and late) Block II protocol(s)<br>
         </li>
-      </ul>
-      <li>For Apollo 1 (Sunspot 247) we can find this data, though
-        perhaps in preliminary form,&nbsp; in the <a
-          moz-do-not-send="true"
-href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Documents/agc_software_requirements_as204.pdf#page=26"><i>Command
+      </ol>
+      <li>Each downlist consists of fixed number of downlinked 15-bit
+        "words", which varies from 40 to 200, depending on the
+        particular protocol.&nbsp; For the early Block I protocol, the
+        downlist size is only <i>nominally</i> fixed (40 words),
+        because a few extra words can be downlinked asynchronously with
+        respect to the fixed 40 words.</li>
+      <li>Each downlinked word is accompanied by a separate "word-order"
+        bit whose value distinguishes downlinked words that have a
+        special purpose rather than being just pure "data".&nbsp;
+        Special words include ID words (see the next item) and
+        asynchronously-emitted words (see the preceding item).&nbsp; The
+        level (i.e., set vs reset) of the word-order bit that signifies
+        a data word is not the same in all versions.<br>
+      </li>
+      <li>Some AGC software versions have several different types of
+        downlists, all sharing the same protocol, but nevertheless
+        differing in the interpretations of the downlinked data.&nbsp;
+        In these cases, the first word of a downlist is always an "ID"
+        word giving the type of the downlist.&nbsp; Moreover, sometimes
+        one of the items on a downlist is what's known as a "SYNC" word,
+        which always has the same value, and seems to have no purpose
+        other than to exist.&nbsp; We won't be considering the existence
+        or non-existence of ID and SYNC words to be part of the
+        protocols, but merely exemplars of downlinked items that happen
+        to belong to the downlists, though we will provide information
+        concerning them.&nbsp; This will perhaps become clearer later.<br>
+      </li>
+    </ul>
+    <h1><a name="references"></a>Downlist References</h1>
+    <p>Here's an abbreviated, roughly-chronological list of reference
+      materials consulted in implementing AGC downlists in Virtual
+      AGC.&nbsp; It's "abbreviated" in the sense that I haven't
+      necessarily listed references that aren't relevantly different
+      from those already listed.&nbsp; Conversely, in a burst of
+      uncharacteristic wishful thinking, references I wish I had but
+      currently <i>don't</i> are also sometimes listed.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="bottom">Mission or Software<br>
+          </th>
+          <th valign="bottom">CM<br>
+          </th>
+          <th valign="bottom">LM<br>
+          </th>
+          <th valign="bottom">Notes<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="middle">SUNRISE program<br>
+          </td>
+          <td valign="top">"<a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/hrst/archive/1721.pdf#page=66">R-467,
+
+              "The Compleat Sunrise, Being a Description of Program
+              SUNRISE (SUNRISE 33)", Section&nbsp; "DOWNRUPT PROCESSOR"</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="listings/Sunrise45/DOWN-TELEMETRY_PROGRAM.agc.html">Sunrise
+              45 source code</a><br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">AS-202<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/R477-AS202-GSOP-Rev2.pdf#page=185">GSOP
 
 
 
-            Module Guidance Computer Software Requirements</i></a>.&nbsp;
+
+
+              R-477 Rev 2, Section 8.1.1 "AGC Digital Downlink"</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="listings/Corona261/DOWN-TELEMETRY_PROGRAM.agc.html">Corona
+              261 source code</a><br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="top">MSC 66-FM-50 (Apollo 1, see below) in some
+            cases describes differences from the AS-202 downlists. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 1<br>
+          </td>
+          <td valign="middle">
+            <ul>
+            </ul>
+            <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agc_software_requirements_as204.pdf">MSC
 
 
 
-        And there's info about downlink formats in the <a
-          moz-do-not-send="true"
+
+
+              66-FM-50, "Command Module Guidance Computer Software
+              Requirements, Mission AS-204"</a><br>
+            <br>
+            Sunspot 247 source code<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle">An additional reference, <a
+              moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Documents/as204_reference_cards.pdf#page=22">AS-204
 
 
 
-          Reference Cards</a>.<br>
+
+
+              reference cards, "AGC DOWNLINK FORMAT"</a>, contains
+            downlist documentation that could be interpreted as being
+            for AS-204, but I would advise against doing so, since it's
+            far out of date with respect to 66-FM-50, and contradictory
+            to it as well. </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 4<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/R537-AS501-GSOP-Volume-I.pdf#page=26">GSOP
+
+
+
+
+
+              R-537, Section 3.4 "AGC Digital Downlink"</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="listings/Solarium055/DOWN-TELEMETRY_PROGRAM.agc.html">SOLRUM55
+              source code</a><br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Aurora 88 program<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+              href="listings/Aurora88/DOWN-TELEMETRY_PROGRAM.agc.html">Aurora
+              88 source code</a><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">SUNBURST 37 program<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/listings/Sunburst37/DOWN-TELEMETRY_PROGRAM.agc.html">Sunburst
+              37 source code</a><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DAP Aurora 12 program<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+              href="listings/Aurora12/DOWN-TELEMETRY_PROGRAM.agc.html">DAP
+              Aurora 12 source code</a><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 5<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="top"><a moz-do-not-send="true"
+              href="listings/Sunburst120/DOWN-TELEMETRY_PROGRAM.agc.html">Sunburst
+              120 source code</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 6<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/R537-AS501-GSOP-Volume-I.pdf#page=26">GSOP
+
+
+
+
+
+              R-537, Section 3.4 "AGC Digital Downlink"</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="listings/Solarium055/DOWN-TELEMETRY_PROGRAM.agc.html">SOLRUM55
+              source code</a></td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">2TV-1<br>
+          </td>
+          <td valign="top"><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/sundial_d_reference_cards.pdf#page=3">SUNDIAL
+
+
+
+
+
+              D reference cards, "NOMINAL CGC DOWNLINK LIST"</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="listings/SundialE/DOWN-TELEMETRY_PROGRAM.agc.html">Sundial
+              E source code</a><br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 7<br>
+          </td>
+          <td valign="top">Sundisk 282 source code<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 8<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="middle"><a
+              moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf">GSOP
+
+
+
+
+
+              R-577 (COLOSSUS 1 &amp; 1A), Section 2 "Data Links" Rev 2</a><br>
+            <br>
+            Colossus 237 source code: <a moz-do-not-send="true"
+              href="listings/Colossus237/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Colossus237/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 9<br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/NARA-SW/R-577-sec2-rev2.pdf">GSOP
+
+
+
+
+
+              R-577 (COLOSSUS 1 &amp; 1A), Section 2 "Data Links" Rev 2</a><br>
+            <br>
+            Colossus 249 source code: <a moz-do-not-send="true"
+              href="listings/Colossus249/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Colossus249/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">
+            <ul>
+            </ul>
+            GSOP R-557 (SUNDANCE 306), Section 2 "Data Links" Rev TBD<br>
+            <br>
+            <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/sundance_functional_description_vol1.pdf#page=224">Document
+
+
+
+
+
+              E-2164, "Guidance, Navigation, and Control Lunar Module
+              Functional Description and Operation Using Flight Program
+              SUNDANCE", Section 3.4.1 "LGC Digital Downlink"</a><br>
+            <br>
+            Sundance 306 source code: <a moz-do-not-send="true"
+              href="listings/Sundance306ish/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Sundance306ish/DOWN-TELEMETRY_PROGRAM.agc.html">here</a></td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 10<br>
+          </td>
+          <td valign="middle">GSOP R-577 (COLOSSUS 2), Section 2 "Data
+            Links" Rev 4<br>
+            <br>
+            MANCHE45R2 source code: <a moz-do-not-send="true"
+              href="listings/Manche45R2/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Manche45R2/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">GSOP R-567 (LUMINARY), Section 2 "Data
+            Links" Rev 3<br>
+            <br>
+            LUM69R2 source code: <a moz-do-not-send="true"
+              href="listings/LUM69R2/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/LUM69R2/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 11<br>
+          </td>
+          <td valign="middle">GSOP R-577 (COLOSSUS 2A), Section 2 "Data
+            Links" Rev 5<br>
+            <br>
+            Comanche 55 source code: <a moz-do-not-send="true"
+              href="listings/Comanche055/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Comanche055/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">GSOP R-567 (LUMINARY 1A), Section 2 "Data
+            Links" Rev 4<br>
+            <br>
+            LMY99R1 source code: <a moz-do-not-send="true"
+              href="listings/Luminary099/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Luminary099/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 12<br>
+          </td>
+          <td valign="middle">GSOP R-577 (COLOSSUS 2C), Section 2 "Data
+            Links" Rev 7<br>
+            <br>
+            Comanche 67 source code: <a moz-do-not-send="true"
+              href="listings/Comanche067/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Comanche067/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">GSOP R-567 (LUMINARY 1B), Section 2 "Data
+            Links" Rev 6<br>
+            <br>
+            Luminary 116 source code: <a moz-do-not-send="true"
+              href="listings/Luminary116/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Luminary116/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 13<br>
+          </td>
+          <td valign="middle">GSOP R-577 (COLOSSUS 2D), Section 2 "Data
+            Links" Rev 9<br>
+            <br>
+            MANCHE72R3 source code: <a moz-do-not-send="true"
+              href="listings/Manche72R3/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Manche72R3/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">GSOP
+
+
+
+
+
+              R-567 (LUMINARY 1C), Section 2 "Data Links" Rev 8</a><br>
+            <br>
+            LM131R1 source code: <a moz-do-not-send="true"
+              href="listings/LM131R1/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/LM131R1/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">ZERLINA program</td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="top">Zerlina 56 source code: <a
+              moz-do-not-send="true"
+              href="listings/Zerlina56/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Zerlina56/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">LUMINARY 163 program</td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle">Luminary 163 source code: <a
+              moz-do-not-send="true"
+              href="listings/Luminary163/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Luminary163/DOWN-TELEMETRY_PROGRAM.agc.html">here</a></td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 14<br>
+          </td>
+          <td valign="middle">GSOP R-577 (COLOSSUS 2E), Section 2 "Data
+            Links" Rev 13<br>
+            <br>
+            Comanche 108 source code<br>
+          </td>
+          <td valign="middle">
+            <ul>
+            </ul>
+            <a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Documents/R-567-secs2-5-issue1.pdf">GSOP
+
+
+
+
+
+              R-567 (LUMINARY 1D), Sections 2, 4, &amp; 5 PRELIMINARY</a><br>
+            <br>
+            <a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Documents/R-567-secs2-5-issue2.pdf">GSOP
+
+
+
+
+
+              R-567 (LUMINARY 1D), Sections 2, 3, 4, &amp; 5 PRELIMINARY
+              CHANGE PAGES, Second Issue</a><br>
+            <br>
+            GSOP R-567 (LUMINARY 1D), Section 2 "Data Links" Rev 10
+            <ul>
+            </ul>
+            Luminary 178 source code: <a moz-do-not-send="true"
+              href="listings/Luminary178/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Luminary178/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle">From the list of PCRs incorporated, the
+            PRELIMINARY documents confine their changes to Rev 9, so
+            they remain incomplete with respect to the final (Rev
+            10).&nbsp; As to whether any of the uncompleted PCRs affect
+            the downlist data specifically, I don't know.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 15<br>
+          </td>
+          <td rowspan="3" colspan="1" valign="middle"><a
+              moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf">GSOP
+
+
+
+
+
+              R-577 (COLOSSUS 3), Section 2 "Data Links" Rev 14</a><br>
+            <br>
+            Artemis 72 source code:&nbsp; <a moz-do-not-send="true"
+              href="listings/Artemis072/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Artemis072/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td rowspan="3" colspan="1" valign="middle"><a
+              moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC2-REV12_text.pdf">GSOP
+
+
+
+
+
+              R-567 (LUMINARY 1E), Section 2 "Data Links" Rev 12</a><br>
+            <br>
+            Luminary 210 source code: <a moz-do-not-send="true"
+              href="listings/Luminary210/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Luminary210/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 16<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Apollo 17<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Skylab 2<br>
+          </td>
+          <td rowspan="4" colspan="1" valign="middle"><a
+              moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/R-693-GSOP-Skylark1-Section2-DataLinks.pdf">GSOP
+
+
+
+
+
+              R-693 (SKYLARK 1), Section 2 "Data Links"</a><br>
+            <br>
+            Skylark 48 source code: <a moz-do-not-send="true"
+              href="listings/Skylark048/DOWNLINK_LISTS.agc.html">here</a>
+            and <a moz-do-not-send="true"
+              href="listings/Skylark048/DOWN-TELEMETRY_PROGRAM.agc.html">here</a><br>
+          </td>
+          <td rowspan="4" colspan="1" valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Skylab 3<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Skylab 4<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">ASTP<br>
+          </td>
+          <td valign="middle"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="protocols"></a>Early Downlist Protocols</h1>
+    <h2><a name="reverse"></a>Reverse Engineering<br>
+    </h2>
+    For those who are confident in their ability to deal with Block I
+    and Block II assembly language, or want to consider it as a learning
+    experience, the principal means of understanding the
+    downlist-protocol details is the source code of the
+    DOWN-TELEMETRY_PROGRAM.agc source code for the AGC software version
+    of interest.<br>
+    <br>
+    For those of us with less such confidence, the program
+    piPeripherals/piTelemetry.py has been created to view the actual
+    downlinks emitted by the AGC, to experiment with&nbsp;
+    implementation of the protocols, or even to "unofficially" be used
+    much as <b>yaTelemetry</b> is, albeit less flair and style.&nbsp;
+    The syntax for doing so is this:<br>
+    <blockquote>
+      <pre>piTelemetry.py --port=<i>PORTNUMBER</i> [ --software=<i>AGCSOFTWARE</i> ] [ --block=<i>N</i> ] [ --packet=<i>M</i> ]</pre>
+    </blockquote>
+    <p>where:<br>
+    </p>
+    <ul>
+      <li><code>--port=</code><code><i>PORTNUMBER</i></code> (default
+        19799) is an unused TCP port monitored by the AGC emulator<br>
       </li>
-      <li>For the CM checkout program, Sundial, the <a
-          moz-do-not-send="true"
-href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/Documents/sundial_d_reference_cards.pdf">Sundial
-          D reference cards</a> give us some (alas!) sketchy data,
-        though whether this data exactly matches the Sundial E source
-        code we actually have remains in question.</li>
+      <li><code>--software=<i>AGCSOFTWARE</i></code><code></code>, if
+        present, specifies the AGC software being run by the AGC CPU
+        emulator <b>yaAGC</b> or <b>yaAGCb1</b>, which implicitly sets
+        the protocol used and the lists of items on the downlists;
+        <code><i> AGCSOFTWARE</i></code> must match one of the
+        following:&nbsp; Sunrise45, Sunrise69, Corona261, Sunspot247,
+        Solarium055, SundialE, Aurora88, Aurora12, Borealis, Sunburst37,
+        or Sunburst120.&nbsp; If <i>not</i> present, then raw downlinks
+        suitable for reverse engineering an unknown protocol are
+        displayed; in this case, the following additional command-line
+        switches are also useful:</li>
+      <ul>
+        <ul>
+        </ul>
+        <li><code>--block=<i>N</i></code>, where <i><code>N</code></i>
+          is either 1 (Block I) or 2 (Block 2/LGC).</li>
+        <li><code>--packet=<i>M</i></code> (default 40) is the maximum
+          number of downlinked items to print per line.</li>
+        <ul>
+        </ul>
+      </ul>
     </ul>
-    <h1><a name="blockI"></a>Block I Telemetry Protocol</h1>
-    <p>TBD<br>
+    <p>Here's a table of the command-line switches I've personally found
+      to be helpful for reverse engineering the downlists of specific
+      AGC software versions that I've run under the <b>VirtualAGC</b>
+      GUI:<br>
     </p>
-    <h1><a name="blockII"></a>Block II Telemetry Protocol</h1>
-    <p>TBD<br>
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="bottom">AGC Software Version<br>
+          </th>
+          <th valign="bottom">Usage<br>
+          </th>
+          <th valign="bottom">&nbsp;Reverse-Engineering Command<sup>*</sup><br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">SUNRISE 45<br>
+            SUNRISE 69<br>
+          </td>
+          <td valign="middle">Block I CM G&amp;N Acceptance<br>
+          </td>
+          <td valign="top">
+            <pre><br>piTelemetry.py --port=19672 --packet=40 --block=1</pre>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">CORONA 261<br>
+            SUNSPOT 247<br>
+            SOLARIUM 55<br>
+          </td>
+          <td valign="top">AS-202 CM<br>
+            Apollo 1 CM<br>
+            Apollo 4, 6 CM<br>
+          </td>
+          <td valign="middle">
+            <pre><br>piTelemetry.py --port=19672 --packet=100 --block=1</pre>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">SUNDIAL E<br>
+          </td>
+          <td valign="top">2TV-1 CM<br>
+            Block II CM G&amp;N Acceptance<br>
+          </td>
+          <td valign="middle">
+            <pre><br>piTelemetry.py --port=19698 --packet=100 --block=2</pre>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="middle">AURORA 88<br>
+            DAP AURORA 12<br>
+            BOREALIS<br>
+          </td>
+          <td nowrap="nowrap" valign="top">LM G&amp;N Acceptance<br>
+            Concept development<br>
+            Validation of <b>yaAGC</b><br>
+          </td>
+          <td valign="middle">
+            <pre><br>piTelemetry.py --port=19798 --packet=100 --block=2</pre>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">SUNBURST 37<br>
+            SUNBURST 120<br>
+          </td>
+          <td valign="middle">Development<br>
+            Apollo 5 LM<br>
+          </td>
+          <td valign="middle">
+            <pre><br>piTelemetry.py --port=19798 --packet=200 --block=2</pre>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="1" colspan="3" valign="top"><font size="-1"><sup>*</sup>Since
+
+
+
+
+              <code>--packet=40, 100,</code> or <code>200</code>&nbsp;
+              downlinks per line might be too wide to comfortably
+              display on your computer's screen, you might try <code>--packet=20</code>
+              to cleanly divide each downlink into multiple lines.</font><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ul>
+    </ul>
+    Another helpful thing to be able to do while reverse engineering
+    these protocols is to run the AGC emulator in debugging mode, so
+    that the AGC software's execution can be paused and easily trackable
+    values inserted into the AGC memory locations being
+    downlinked.&nbsp; Otherwise, it all too often can happen that the
+    AGC's erasable memory is mostly zeroes, and that's not too
+    informative when your entire downlist is 0, since you find yourself
+    asking, Was it parsed correctly by the receiving software or
+    not?&nbsp; Whereas if you forced a certain memory location to have a
+    value of (say) 12345 and 12345 shows up where you expect it in the
+    downlist, then you've got something!<br>
+    <h2><a name="sundial"></a>Early Block I Downlist Protocol<br>
+    </h2>
+    This protocol applies only to the AGC program SUNRISE.&nbsp; SUNRISE
+    is the earliest surviving Block I AGC program we've seen, though
+    it's known that there are earlier ones still that we haven't.&nbsp;
+    SUNRISE is available to us in two versions (SUNRISE 45 and 69),
+    though the two versions are identical in terms of telemetry.&nbsp;
+    These programs were not flown, but were used in acceptance testing
+    for the Block I Command Module G&amp;N systems.&nbsp; Here's
+    relevant info from document R-467, from the standpoint of Virtual
+    AGC's "virtual wiring" framework:<br>
+    <ul>
+      <li>Emits a 15-bit word every 40 ms.&nbsp; The AGC does this by
+        placing the word into the CPU's OUT4 register (address octal 14)
+        and then writing to the CPU register OUT1 (address octal
+        11).&nbsp; The only bit of OUT1 that's relevant to this
+        discussion is the word-order bit (mask 00400).</li>
+      <li>Entries are emitted in reverse order from their appearance in
+        the downlist definitions of DOWN-TELEMETRY_PROGRAM.agc.<br>
+      </li>
+      <li>The emitted words are of four types:</li>
+      <ul>
+        <li>Relay words.&nbsp; These relate to AGC manipulations of the
+          "relay banks" and are emitted asynchronously (with respect to
+          the timing and ordering of the downlists) whenever they
+          occur.&nbsp; I think that the relay banks referred are those
+          of the DSKY, and are what would be referred to as DSPTAB, ...,
+          DSPTAB +10 in the downlists of later AGC software (though not
+          asynchronous in that later software).<br>
+        </li>
+        <li>Input Character words.&nbsp; These are keycodes received by
+          the AGC from the DSKY keypad or from the uplink from the
+          ground, or else are "marks" from astronauts taking star
+          sightings.&nbsp; These too are emitted asynchronously with
+          respect to the downlists. <br>
+        </li>
+        <li>Downlist-data words.&nbsp; A downlist-ID word is
+          distinguished from all of the other emitted types of words by
+          the word-order bit (see OUT1 above) being 1.&nbsp; From the <a
+            moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/listings/Sunrise45/DOWN-TELEMETRY_PROGRAM.agc.html#444E4C535431">Sunrise
+
+
+
+
+
+            source code</a>, I see that there is a single downlist,
+          containing 32 data entries.<br>
+        </li>
+        <li>Downlist-ID words.&nbsp; A downlist ID word is emitted after
+          each chunk of 4 downlist-data words. The ID word contains the
+          index of the data word emitted immediately prior.<br>
+        </li>
+      </ul>
+      <li>In the absence of relay words or input-character words, a
+        complete downlist (32 data words + 8 ID words) is emitted every
+        1.6 seconds.</li>
+    </ul>
+    <p>Here's a summary of the formats of the 4 different word types,
+      representing OUT4 in binary as <code>ABC DEF GHI JKL MNO</code>:<br>
     </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="bottom">Word Type<br>
+          </th>
+          <th valign="bottom">Word-Order Bit (OUT1)<br>
+          </th>
+          <th valign="bottom">OUT4<code></code><br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">Relay Words<br>
+          </td>
+          <td valign="middle" align="center">0<br>
+          </td>
+          <td valign="top"><code>ABC D</code> ≠ <code>000 0</code> is a
+            relay-word address, <code>EF GHI JKL MNO</code> contains
+            the relay settings.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Input-Character Words<br>
+          </td>
+          <td valign="middle" align="center">0<br>
+          </td>
+          <td valign="middle"><code>ABC DE</code> = <code>000 01</code>,
+            <code>F GH</code> are unused, <code>I</code> = MARK button,
+            <code>J</code> = <code>0</code> for keyboard or <code>1</code>
+            for uplink, <code>KL MNO</code> = character code for the
+            DSKY keyboard or uplinked character.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Downlist-Data Words<br>
+          </td>
+          <td valign="middle" align="center">1<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="middle" align="left">Entire
+
+
+
+
+
+            word is data</td>
+        </tr>
+        <tr>
+          <td valign="top">Downlist-ID Words<br>
+          </td>
+          <td valign="middle" align="center">0<br>
+          </td>
+          <td valign="middle"><code>ABC DE</code> = <code>000 00</code>,
+            <code>F GHI JKL MNO</code> is the index into the downlist of
+            the immediately-preceding data word.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    So for concreteness:&nbsp; The downlist data items as specified by
+    DOWN-TELEMETRY_PROGRAM.agc&nbsp; in the Sunrise source code (at
+    label <code>DNLST1</code>) consist of:<br>
+    <blockquote>
+      <pre>TIME1 TIME2 IN0 IN2 IN3 ... TNUV+3 TNUV+4 TNUV+5 GYROD+5 GYROD+3
+</pre>
+    </blockquote>
+    Absent any relay or input-character data, the downlist would
+    actually be emitted as follows:<br>
+    <ul>
+      <li>data <code>GYROD+3</code></li>
+      <li>data <code>GYROD+5</code></li>
+      <li>data <code>TNUV+5</code></li>
+      <li>data <code>TNUV+4</code></li>
+      <li>ID <code>34</code> octal</li>
+      <li>data <code>TNUV+3</code></li>
+      <li>...</li>
+      <li>data <code>IN3</code></li>
+      <li>ID <code>04</code> octal</li>
+      <li>data <code>IN2</code></li>
+      <li>data <code>IN0</code></li>
+      <li>data <code>TIME2</code></li>
+      <li>data <code>TIME1</code></li>
+      <li>ID <code>00</code> octal</li>
+    </ul>
+    <p>If SUNRISE is run from the VirtualAGC GUI, a suitable command for
+      displaying the telemetry is:<br>
+    </p>
+    <blockquote>
+      <pre>piPeripheral/piTelemetry.py --protocol=sunrise --port=19672<br></pre>
+    </blockquote>
+    Here's a sample, in which I ran SUNRISE 45 and punched the DSKY keys
+    V37E00E:<br>
+    <pre><font size="-1" color="#663300">...<br>Downlist<br>TIME1: 01270        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Downlist<br>TIME1: 01530        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Key VERB<br>Downlist<br>TIME1: 01774        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Key 3<br>Relay NOFLASH VD1=3 VD2=(blank)<br>Key 7<br>Relay NOFLASH VD1=3 VD2=7<br>Downlist<br>TIME1: 02254        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Key ENTER<br>Relay FLASH VD1=3 VD2=7<br>Relay  ND1=(blank) ND2=(blank)<br>Downlist<br>TIME1: 02530        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Key 0<br>Relay  ND1=0 ND2=(blank)<br>Key 0<br>Relay  ND1=0 ND2=0<br>Downlist<br>TIME1: 03010        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Key ENTER<br>Relay  ND1=(blank) ND2=(blank)<br>Relay  MD1=0 MD2=0<br>Relay NOFLASH VD1=3 VD2=7<br>Downlist<br>TIME1: 03270        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>Downlist<br>TIME1: 03530        TIME2: 00000        IN0: 00000          IN2: 00000          IN3: 00000          OUT1: 00400         RRECT: 00000        RRECT+1: 00000      <br>RRECT+2: 00000      RRECT+3: 00000      RRECT+4: 00000      RRECT+5: 00000      TDELTAV: 00000      TDELTAV+1: 00000    TDELTAV+2: 00000    TDELTAV+3: 00000    <br>TDELTAV+4: 00000    TDELTAV+5: 00000    VRECT: 00000        VRECT+1: 00000      VRECT+2: 00000      VRECT+3: 00000      VRECT+4: 00000      VRECT+5: 00000      <br>TNUV: 00000         TNUV+1: 00000       TNUV+2: 00000       TNUV+3: 00000       TNUV+4: 00000       TNUV+5: 00000       GYROD+5: 00000      GYROD+3: 00000      <br>...</font><br></pre>
+    Notice the Key and Relay downlinked items, which occur
+    asynchronously with respect to the downlists.<br>
+    <h2><a name="lateI"></a>Late Block I Protocol</h2>
+    <p>This protocol applies to the AGC programs CORONA, SUNSPOT, and
+      SOLARIUM.<br>
+    </p>
+    <ul>
+      <li>The AGC emits a 15-bit downlinked word by placing it into the
+        CPU's OUT4 register (address octal 14) and then writing to the
+        CPU register OUT1 (address octal 11).&nbsp; The only bit of OUT1
+        that's relevant to this discussion is the word-order bit (mask
+        00400).</li>
+      <li>Downlists consist of 100 15-bit words. <br>
+      </li>
+      <li>Entries are emitted in reverse order from their appearance in
+        the downlist definitions of DOWN-TELEMETRY_PROGRAM.agc.</li>
+      <li>The word-order bit is normally set to 0.&nbsp; Certain words
+        having a special purpose have a word-order bit of 1.&nbsp; (The
+        original documentation refers to these as "data" and "ID" words
+        respectively, but that nomenclature does not reflect their
+        usage, so please ignore that ancient usage for the purpose of
+        this discussion.)<br>
+      </li>
+      <li>The first word in the downlist has a word-order bit of 1 <i>and</i>
+        has a value in the octal range 40000-74777 <i>except</i> 7400<i>N</i>.&nbsp;
+
+        This pattern uniquely indicates the beginning of a downlist.</li>
+      <li>Additionally, words having the octal values 7400<i>N</i> may
+        have a word-order bit of 1 and if so, are referred to as
+        "marker" words.&nbsp; The usage of these words is tricky, so I
+        apologize for the complexity of the description.&nbsp; Every
+        downlist has precisely 6 marker words, three of which are
+        logically in positions 49, 50, 51, 97, 98, and 99, assuming that
+        the downlist's words are indexed from 1 to 100.&nbsp; I say
+        "nominally" because there's a difference in the <i>transmitted</i>
+        order of the marker words vs the <i>logical</i> order.&nbsp;
+        Marker words may be emitted out-of-order with respect the
+        logical ordering, in that they may be transmitted <i>earlier</i>
+        than their logical order implies.&nbsp; The first three marker
+        words may be transmitted prior to position 49, and the second
+        three marker words may be transmitted prior to position 97 (but
+        after position 51).&nbsp; Therefore, the receiving algorithm
+        must shuffle the order of the received words to move the move
+        the marker words into their expected positions. <br>
+      </li>
+    </ul>
+    Although I've said that ID and SYNC words in the downlists are not a
+    part of the protocol in my estimation, but merely exemplars of
+    downlinked words contained in the downlists, now is as good a place
+    as any to describe what I've found about them, and about the
+    downlist titles as well.&nbsp; The first two words of the downlist
+    are an ID word and a SYNC word.&nbsp; The value of the SYNC word is
+    always octal 00437.&nbsp; Because there is an ID word, each AGC
+    software version using this protocol can have multiple downlist
+    types.&nbsp; And here they are, to the best of my understanding:<br>
+    <ul>
+      <li>AS-202 (Corona261):</li>
+      <ul>
+        <li>Powered List:&nbsp; ID=62067</li>
+        <li>Update List:&nbsp; ID=62001<br>
+        </li>
+      </ul>
+      <li>Apollo 1 (Sunspot247):</li>
+      <ul>
+        <li>Update List:&nbsp; ID=62001</li>
+        <li>Powered and Boost List:&nbsp; ID=62066</li>
+        <li>Coast and Align List:&nbsp; ID=62153</li>
+        <li>Entry List:&nbsp; ID=62240<br>
+        </li>
+      </ul>
+      <li>Apollo 4, 6 (Solarium055):</li>
+      <ul>
+        <li>Powered List:&nbsp; ID=62067</li>
+        <li>Update List:&nbsp; ID=62001</li>
+      </ul>
+    </ul>
+    <blockquote> </blockquote>
+    <p>However, some of the ID words and titles listed above are based
+      on inferences on my part.<br>
+    </p>
+    <p>As far as the ID is concerned, it appears to me that it is
+      constructed by the assembler when the source-code of
+      DOWN-TELEMETRY_PROGRAM.agc is assembled, by applying the <code>ADRES</code>
+      pseudo-op (which linearizes the address space) to the starting
+      address of the downlist definition.&nbsp; (Or more precisely, to
+      the first segment of the downlist that's specific to the downlist
+      type, rather than being a segment that's common to all of the
+      downlist types of that AGC version.)&nbsp; In Solarium 55, for
+      example, the relevant code in DOWN-TELEMETRY_PROGRAM.agc is:<br>
+    </p>
+    <pre>...<br>006177,000204:    2566           06067        LDNLST1            ADRES    501LSTA1                      	(linearized address of first downlist)<br>006178,000205:    2567           06001        LDNLST2            ADRES    501LSTA2                      	(linearized address of second downlist)<br>...<br>006229,000256: 10,6001           01117        501LSTA2           ADRES    COMPNUMB                      	(starting point of second downlist)<br>...<br>006286,000313: 10,6067           01457        501LSTA1           ADRES    TFF        +1                 	(starting point of first downlist)<br>...<br></pre>
+    <p> </p>
+    <p>At some point during the actual process of emitting the downlist,
+      <code>LDNLST1</code> or <code>LDNLST2</code> gets loaded into the
+      variable <code>DNLSTADR</code>, which is further processed by
+      discarding all but the lowest 11 bits, and then adding 60000, thus
+      turning 06067 or 06001 as above into 62067 or 62001:<br>
+    </p>
+    <pre>006027,000054:    2417           40672                           CS       DNLSTADR                      	# CHANGES IN DNLSTADR NOT HONORED UNTIL<br>006028,000055:    2420           40000                           COM                                    	# THIS PHASE.<br>006029,000056:    2421           50671                           TS       LDATALST                      	#<br>006030,000057:    2422           74302                           MASK     LOW11                         	#<br>006031,000058:    2423           64170                           AD       60K                           	# AT FOD'S REQUEST.<br></pre>
+    <p>As far as the titles of the downlists are concerned, Sunspot
+      titles (and IDs) are easy to find since they're documented.&nbsp;
+      For Corona and Solarium, documentation and AGC source code seem to
+      agree that ID 62001 is the the Update List.&nbsp; Unfortunately,
+      I've found no smoking gun in either documentation or source code
+      about a reasonable title for ID 62067, though there is agreement
+      that the associated downlist is emitted all of the time except
+      during updates, and program comments sometimes mention the
+      "nominal" list.&nbsp; In spite of that, I've settled on Powered
+      List as the name, in analogy with Sunspot and with the CM
+      downlists in the late Block II protocol.<br>
+    </p>
+    <p> </p>
+    <h2><a name="earlyII"></a>Early Block II Protocol</h2>
+    <p>This protocol applies to the AGC programs SUNDIAL, AURORA, DAP
+      AURORA, BOREALIS, and early versions of SUNBURST.<br>
+    </p>
+    <ul>
+      <li>Each downlist has 100 15-bit words, except that SUNBURST has
+        200.&nbsp; (Note that it is not necessary to know how many words
+        the downlist has, because the start/end of a downlist is always
+        detectable regardless.)</li>
+      <li>Entries are emitted in reverse order from their appearance in
+        the downlist definitions of DOWN-TELEMETRY_PROGRAM.agc.</li>
+      <li>Data is always emitted in pairs of 15-bit words, in the
+        following invariable sequence:</li>
+      <ul>
+        <li>The first word is placed in CPU register 34<sub>8</sub>.&nbsp;
+
+        </li>
+        <li>The word-order bit (mask 00100 of register 13<sub>8</sub>)
+          is normally set to 1 and is left at that value, but it is
+          explicitly set to 0 if the word just emitted is the start of a
+          downlist.</li>
+        <li>The second word (i.e., the word immediately following the
+          first word in memory) is placed in register 35<sub>8</sub>.</li>
+        <li>The word-order bit is restored to 1 if necessary.</li>
+      </ul>
+    </ul>
+    This works much the same (in the abstract) as for the late Block I
+    protocol described in the preceding section.&nbsp; But there are
+    some differences in detail, so let me just list those differences:<br>
+    <ul>
+      <li>The <code>GENADR</code> pseudo-op is used to generate the
+        addresses of the downlist definitions, rather than the <code>ADRES</code>
+        pseudo-op used in Block I, and the only subsequent arithmetical
+        manipulation is that only the least-significant 10 bits are
+        retained.&nbsp; For example, in Sundial E, the downlist
+        definition starts at <code>NOMDNLST</code>, and <code>GENADR
+          NOMDNLST</code> generates&nbsp; the value 01724, which is
+        already just a 10-bit number ... so that's the ID of the
+        downlist.</li>
+      <li>The AGC source code makes it much more difficult for us to
+        extract the definitions of the downlists hard-coded into the
+        software, because those definitions in
+        DOWN-TELEMETRY_PROGRAM.agc only list the first word of each pair
+        of downlinked words.&nbsp; In principle it's therefore
+        necessary, for each pair of words, to consult
+        ERASABLE_ASSIGNMENTS.agc (or other material) to figure out what
+        the missing downlinks are.&nbsp; Whereas
+        DOWN-TELEMETRY_PROGRAM.agc source-code files for the late Block
+        I protocol simply listed every word in the downlist.&nbsp;
+        Fortunately, the program comments do explain what the
+        even-numbered words are, so in practice it's seldom necessary to
+        consult the erasable assignments.<br>
+      </li>
+    </ul>
+    <p>Although I've said that ID and SYNC words in the downlists are
+      not a part of the protocol in my estimation, but merely exemplars
+      of downlinked words contained in the downlists, now is as good a
+      place as any to describe what I've found about them, and about the
+      downlist titles as well.&nbsp; The first two words of the downlist
+      are an ID word and a SYNC word.&nbsp; The value of the SYNC word
+      is always octal 00437.&nbsp; Since there is an ID word, each AGC
+      software version using this protocol can have multiple downlist
+      types.&nbsp; <br>
+    </p>
+    Here are the specifics by AGC version, as I understand them:<br>
+    <ul>
+      <li>Sundial E:</li>
+      <ul>
+        <li>Nominal List:&nbsp; ID=01724<br>
+        </li>
+      </ul>
+      <li>Aurora 88:</li>
+      <ul>
+        <li>Nominal List:&nbsp; ID=00321<br>
+        </li>
+        <li>Radar List:&nbsp; ID=00253<br>
+        </li>
+        <li>AGS Initialization List:&nbsp; ID=00001<br>
+        </li>
+      </ul>
+      <li> DAP Aurora 12:&nbsp; Same as Aurora 88.&nbsp; (I.e., the
+        downlist types, titles, and IDs match.&nbsp; But the downlinked
+        items on the downlists differ somewhat.)<br>
+      </li>
+      <li>Borealis:&nbsp; Same as Aurora 88.&nbsp; (I.e., the downlist
+        types, titles, IDs, <i>and</i> the downlinked items on the
+        downlists match identically.)</li>
+      <li>Sunburst 37<br>
+      </li>
+      <ul>
+        <li>Nominal List:&nbsp; ID=00354</li>
+        <li>AGS List:&nbsp; ID=00001.&nbsp; However ... while the
+          Sunburst 37 source code does include this downlist, the
+          comments say that "<code>AGSLIST IS NOT REQUIRED FOR AS206 <i>[i.e.,
+
+              Apollo 5]</i> BUT IS INSERTED IN SUNBURST TO </code><code>RESERVE
+
+            SPACE FOR IT IN 207/8 AND FUTURE MISSIONS</code>".&nbsp; By
+          the time of Sunburst 120, the AGS List was missing entirely
+          from the source code.&nbsp; At any rate, since there's no way
+          for Sunburst 37 to actually emit the AGS List, it's not
+          implemented in piTelemetry.py.</li>
+      </ul>
+    </ul>
+    <h2><a name="midII"></a>Mid Block II Downlist Protocol</h2>
+    <p>This protocol applies only to later versions of the AGC program
+      SUNBURST, as far as I know.&nbsp; By the standards I've claimed
+      apply, this is not really a different protocol than <a
+        moz-do-not-send="true" href="#lateII">the late Block II protocol</a>
+      described in the next section, but it does differ in certain
+      superficial parameters that I thought were definitive when I
+      originally wrote <b>yaTelemetry</b>, and therefore SUNBURST will
+      not work with <b>yaTelemetry</b> as it is at present.&nbsp; The
+      differences are as follows:<br>
+    </p>
+    <ul>
+      <li>Each downlist has 100 words rather than 200 words.</li>
+      <li>The values of the ID words differ.&nbsp; The rules for the
+        values of the ID words is the same as for <a
+          moz-do-not-send="true" href="#earlyII">the early Block II
+          protocol</a>.<br>
+      </li>
+      <li>The value of the SYNC word is 00437 rather than 77340. <br>
+      </li>
+    </ul>
+    And here are those ID words vs downlist types:<br>
+    <ul>
+      <li>Sunburst 120 (Apollo 5):</li>
+      <ul>
+        <li>Nominal List:&nbsp; ID=00236</li>
+      </ul>
+    </ul>
+    <p>To be clear, every AGC version using the late Block II downlist
+      protocol should work with the mid Block II protocol as implemented
+      in piTelemetry.py, since piTelemetry.py entirely ignores the
+      parameters which differ from the late Block II protocol.<br>
+    </p>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <h2><a name="lateII"></a>Late Block II Downlist Protocol</h2>
+    In the earlier protocols, all downlists were defined in the file
+    DOWN-TELEMETRY_PROGRAM.agc.&nbsp; Whereas in the late Block II
+    protocol, definitions of the downlists were moved to the file
+    DOWNLINK_LISTS.agc, and the DOWN-TELEMETRY_PROGRAM.agc is merely the
+    algorithm.<br>
+    <br>
+    Each downlist has 200 15-bit words.&nbsp; Data is always emitted in
+    pairs of 15-bit words, i.e., in doublewords, in the following
+    invariable sequence: <br>
+    <ul>
+      <li>The word-order bit (mask 00100 of register 13<sub>8</sub>) is
+        normally 1 and left as-is, but at the start of a downlist is set
+        to 0 by explicitly outputting it.</li>
+      <li>The first word placed in CPU register 34<sub>8</sub>.&nbsp; <br>
+      </li>
+      <li>The second word (i.e., the word immediately following the
+        first word in memory) is placed in register 35<sub>8</sub>.</li>
+      <li>The word-order bit is restored to 1 if necessary.</li>
+    </ul>
+    In earlier protocols, items were downlinked in reverse order of
+    their appearance in DOWN-TELEMETRY_PROGRAM.agc.&nbsp; This seems to
+    no longer be the case, and items are downlinked in the same order as
+    their appearance in DOWNLINK_LISTS.agc.&nbsp; There is an exception,
+    though, in that if a section of a downlist is designated as a
+    "snapshot sublist", the final item in the definition is emitted
+    first, followed by the other items from the beginning of the
+    definition working downward.<br>
+    <br>
+    Although I've said that ID and SYNC words in the downlists are not a
+    part of the protocol in my estimation, but merely exemplars of
+    downlinked words contained in the downlists, now is as good a place
+    as any to describe what I've found about them, and about the
+    downlist titles as well.&nbsp; The first two words of the downlist
+    are an ID word and a SYNC word.&nbsp; The value of the SYNC word is
+    always octal 77340.&nbsp; <br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+        Notice the slightly-amusing factoid that the 7<b>734</b>0
+        contains 437 (from the late Block I and early Block II protocol
+        SYNC word 00<b>437</b>) in reverse order.&nbsp; Whether that's
+        significant or a coincidence, I don't know.&nbsp; It seems to me
+        that 73400 would have been a better choice aesthetically than
+        77340, but what do I know?</font><br>
+    </blockquote>
+    <p>Since there is an ID word, each AGC software version using this
+      protocol can have multiple downlist types.&nbsp; Regarding the ID
+      words and titles of the downlists, these are simply fixed for all
+      AGC software versions using this protocol, and are not
+      algorithmically generated:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><br>
+          </th>
+          <th rowspan="1" colspan="2" valign="top">Downlist Title<br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="top">ID<br>
+          </th>
+          <th valign="top">Command Module<br>
+          </th>
+          <th valign="top">Lunar Module<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77777<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top" align="center">Coast
+            and Align</td>
+          <td valign="top" align="center">Coast and Align</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77776<br>
+          </td>
+          <td valign="top" align="center">Entry and Update List<br>
+          </td>
+          <td valign="top" align="center">AGS Initialization and Update
+            List<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77775<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top" align="center">Rendezvous
+
+
+
+
+
+
+            and Prethrust List<br>
+          </td>
+          <td valign="top" align="center">Rendezvous and Prethrust List</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77774<br>
+          </td>
+          <td valign="top" align="center">Powered List<br>
+          </td>
+          <td valign="top" align="center">Orbital Maneuvers List<sup>*</sup>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77773 </td>
+          <td valign="top" align="center">Program 22 List<br>
+          </td>
+          <td valign="top" align="center">Descent and Ascent List<sup>†</sup>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">77772 </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">Lunar Surface Align List<sup>†</sup>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="1" colspan="3" valign="top"><font size="-1"><sup>*</sup>An
+
+
+
+
+
+
+              exception is the Apollo 9 Lunar Module SUNDANCE software,
+              in which the downlist title for ID 77774 is "Powered
+              List".</font><br>
+            <font size="-1"><sup>†</sup>Not emitted by the Apollo 9
+              Lunar Module SUNDANCE software.</font> </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
     <h1><a name="versioning"></a>Downlist Versioning</h1>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <th valign="top">Unique Downlink Formats<br>
@@ -368,10 +1641,16 @@ Commons
 
 
 
+
+
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-04-09.<br>
+          2025-04-18.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

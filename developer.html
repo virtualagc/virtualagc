@@ -17,6 +17,7 @@ document.write(headerTemplate.replace("@TITLE@","Developer Info").replace("@SUBT
       <li><a href="#Contributing_Changes_Back_to_the_Virtual">Contributing
 Changes
 
+
           Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -67,6 +68,7 @@ Changes
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
 Interconnections
+
 
             API</a></li>
         <li><a href="#AGC_CPU-Engine_API">AGC CPU-Engine API</a></li>
@@ -127,6 +129,7 @@ Interconnections
     even completely replacing <span style="font-weight: bold;">yaDSKY</span>—or
 of
 
+
     introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -139,6 +142,7 @@ of
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
 As
+
 
     far as interoperability requirements are concerned, these
     alternatives are drop-in replacements for each other.<br>
@@ -339,6 +343,7 @@ As
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
 vs.
+
 
       yaAGS Packets</h3>
     The <span style="font-weight: bold;">yaAGC</span> and <span
@@ -1266,6 +1271,7 @@ vs.
     <h3><a name="Working_with_the_DEDA" id="Working_with_the_DEDA"></a>Working
 with
 
+
       the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
     standpoint than working with the DSKY.&nbsp; The DSKY is simply a
@@ -1428,6 +1434,7 @@ with
     sequences", refer to the <a
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
 Architecture
+
 
       section of the assembly-language manual</a>.&nbsp; Numerically,
     unprogrammed sequences are represented as follows:<br>
@@ -1679,6 +1686,7 @@ Architecture
     <h3><a name="Input-Channel_Bitmasks" id="Input-Channel_Bitmasks"></a>yaAGC
 Input-Channel
 
+
       Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1750,6 +1758,7 @@ Input-Channel
     which bits of the output channels are applicable.<br>
     <h3><a name="Fictitious_IO_Channels" id="Fictitious_IO_Channels"></a>Fictitious
 I/O
+
 
       Channels</h3>
     For the purpose of communicating various types of information
@@ -2005,7 +2014,7 @@ I/O
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">0163<br>
+          <td valign="middle" align="center">0163<br>
           </td>
           <td valign="middle">Output from CPU to DSKY<br>
           </td>
@@ -2043,6 +2052,7 @@ I/O
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
 I/O
 
+
       Channel Specifics</h2>
     The real AGC CPU interfaced with peripheral hardware by means of
     instructions that access "i/o channels" rather than main memory.<br>
@@ -2077,6 +2087,7 @@ I/O
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
 of
 
+
       I/O Channels</h3>
     Output Channel 10 (octal)<br>
     <div style="margin-left: 40px;"> Used for driving the DSKY's
@@ -2088,8 +2099,8 @@ of
       <br>
       <div style="text-align: center;"> <img
           src="yaAGC-7segpositions.jpg" title="" alt="Output-code
-          positions." style="width: 202px; height: 339px;" height="339"
-          width="202"><br>
+          positions." style="width: 202px; height: 339px;" width="202"
+          height="339"><br>
       </div>
     </div>
     <br>
@@ -2405,14 +2416,15 @@ of
       five 7-segment displays per grouping, you might think it would be
       possible to spell out the wordlet <br>
       <br>
-      <div align="center"><img alt="" src="APOLO.png" height="90"
-          width="322"><br>
+      <div align="center"><img alt="" src="APOLO.png" width="322"
+          height="90"><br>
       </div>
       <br>
       Hugh Blair-Smith actually made this amusing suggestion.&nbsp; But,
       alas, it is not possible. The page of the DSKY's electrical
       schematics that defines what patterns can be displayed is <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">found
+
 
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
@@ -2426,9 +2438,9 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       agreement.<br>
       <br>
       <div align="center"><a href="traceDSKY.png"><img title="Click to
-            enlarge" alt="" src="traceDSKY-small.png" border="2"
-            height="269" width="383"></a> &nbsp; &nbsp; <img alt=""
-          src="traceDSKYA.jpg" height="269" width="646"><br>
+            enlarge" alt="" src="traceDSKY-small.png" width="383"
+            height="269" border="2"></a> &nbsp; &nbsp; <img alt=""
+          src="traceDSKYA.jpg" width="646" height="269"><br>
       </div>
       <br>
     </div>
@@ -3123,6 +3135,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     </p>
     <p align="center"><tt>[ (<i>CHANNEL0</i>,<i>VALUE0</i>,<i>MASK0</i>),
 
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3156,6 +3169,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     program, will probably be interested in the architecture and other
     internal details of <span style="font-weight: bold;">yaDSKY</span>.&nbsp;
 
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
@@ -3163,6 +3177,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
 to
+
 
       yaAGC</h3>
     As mentioned earlier, the AGC interacted with hardware such as the
@@ -3187,6 +3202,7 @@ to
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
 
       Architecture</h3>
     The <span style="font-weight: bold;">yaDSKY</span> program is
@@ -3271,7 +3287,7 @@ to
     </h3>
     <div style="text-align: center;"> <img src="yaAGC-indpositions.jpg"
         title="" alt="Indicator positions." style="width: 195px; height:
-        329px;" height="329" width="195"><br>
+        329px;" width="195" height="329"><br>
       <br>
     </div>
     The indicator legends in the upper-left quadrant of the <span
@@ -3400,6 +3416,7 @@ to
       value of an AGC single-precision integer is 2<sup>14</sup>-1=16383.&nbsp;
 Therefore,
 
+
       the operation of 16383+1 will overflow.&nbsp; In terms of bits,
       this operation results in 01 000000 000000.&nbsp; The mismatch
       between the most significant bits is an indication of
@@ -3414,6 +3431,7 @@ Therefore,
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
 Interconnections
+
 
       API</h3>
     This is perhaps the most important part of the AGC API, because it
@@ -3441,6 +3459,7 @@ Interconnections
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
 New
+
 
     <span style="font-weight: bold;">yaAGC</span>-to-<span
       style="font-weight: bold;">yaDSKY</span> interface with no code
@@ -3862,6 +3881,7 @@ New
     physically outputs the data.&nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
 It's
 
+
     important to use this function rather than reading the mirror array
     directly, since the function accounts for the fact that the L and Q
     registers appear in both i/o space and erasable-memory space.&nbsp;
@@ -3870,6 +3890,7 @@ It's
     external to the CPU.<br>
     <h3><a name="AGC_Backtrace_API" id="AGC_Backtrace_API"></a><strike>AGC
 Backtrace
+
 
         API</strike></h3>
     <strike> To understand what "backtraces" are and why you might want
@@ -3951,6 +3972,26 @@ Backtrace
         monospace;">BacktraceRestore</span></strike><strike> (see
       above).</strike><br>
     <h3><a name="Downlink_Lists" id="Downlink_Lists"></a>Downlink Lists</h3>
+    <p><font color="#ff0000"><i><b>Important note</b></i><i>:&nbsp;
+          Significant rework was performed in Spring 2025 on the
+          mechanism described in this section, and at that time I had
+          forgotten during that process that it had been written up here
+          as a presumably-stable API.&nbsp; In other words, if you have
+          actually been using this API with Virtual AGC versions prior
+          to that, you too may be in the position of having to rework
+          your code now.&nbsp; My apologies!&nbsp; You may or may not
+          find useful <a moz-do-not-send="true"
+            href="yaTelemetry2.html">supplemental information here</a>.&nbsp;
+          The changes to the API were the result of the belated
+          realization that the downlists emitted by the AGC depend on
+          the AGC software version being run, and that the existing code
+          did not take that into account.&nbsp; So the changes were, I
+          think, necessary even though having this unfortunate
+          collateral damage.&nbsp; The write-up below is very close to
+          what it was before, with the important changes highlighted in
+          red to call them to your attention if you need to change
+          existing code.</i></font><br>
+    </p>
     The AGC provides digital downlinks for 13 different types of
     "downlink lists".&nbsp; One of these lists, the "AGS
     Initialization/Update list" was used by the AGC to initialize the
@@ -3971,27 +4012,65 @@ Backtrace
     types of data fields, you should conclude that it is a lot easier to
     use what I've provided than to take care of it all yourself.<br>
     <br>
-    If you want more information on downlink-lists in general, refer to
-    our <a href="links2.html#GSOPs">Document Library page</a>.<br>
-    <br>
-    <span style="font-family: monospace;"><span style="font-family:
-        monospace;">#include "agc_engine.h"</span><br>
-    </span> <span style="font-family: monospace;">void
-      DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);<br>
+    <font color="#ff0000"><code><span style="font-family: monospace;">#include
+          "agc_engine.h"<br>
+          void dddConfigure(char *agcSoftware, const char *docPrefix);</span></code><br>
+      <br>
+      This function must be used to set up the downlist system prior to
+      any subsequent use of the downlist API.&nbsp; The function's
+      parameters are:<br>
+    </font>
+    <ul>
+      <li><code><font color="#ff0000"><tt>agcSoftware</tt></font></code><font
+          color="#ff0000">:&nbsp; Supplies the exact name of the AGC
+          software version being run by the AGC emitting the
+          downlists.&nbsp; These names must be identical to the names of
+          the folders for those software versions in the Virtual AGC
+          software repository.&nbsp; For example, "Luminary099" for the
+          Apollo 11 LM, "LM131R1" for the Apollo 13 LM, "Manche45R2" for
+          the Apollo 10 CM, and so on.</font><br>
+      </li>
+      <li><font color="#ff0000"><code>docPrefix</code>:&nbsp; Supplies a
+          string related to the location of HTML documentation files
+          associated with the downlists.&nbsp; This is something used by
+          the <b>yaTelemetry</b> program to optionally display
+          documentation related to the downlist currently being
+          received, so if your application doesn't desire to display
+          such documentation, this parameter is irrelevant an could just
+          be an empty string.&nbsp; If for some reason you do want your
+          app to have access to these files:&nbsp; The files in question
+          are those in the yaTelemetry/documentation/ folder of the
+          Virtual AGC software repository; the files themselves are HTML
+          files designed to be displayed in a browser; <code>docPrefix</code>
+          is that portion of one of those file's URLs that isolate the
+          documentation folder; for example,
+          "file://.../documentation/".<br>
+        </font></li>
+    </ul>
+    <p><font color="#ff0000">The <code>dddConfigure</code> function
+        uses the auxiliary files ddd-*-*.tsv, which are <a
+          moz-do-not-send="true" href="yaTelemetry2.html">documented
+          elsewhere</a>.&nbsp; The files </font><font color="#ff0000">must
+        be in the current working directory.&nbsp; That's a drawback
+        that I guess I'll have to fix if anybody complains about
+        it.&nbsp; Unfortunately, I was only thinking about <b>yaTelemetry</b>
+        as being run by the <b>VirtualAGC</b> GUI when I implemented <code>dddConfigure</code>.
+        <br>
+      </font></p>
+    <span style="font-family: monospace;"><br>
+      #include "agc_engine.h"<br>
+      void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);<br>
     </span><br>
     This function completely handles all buffering, parsing, and
     formatting of downlink-lists.&nbsp; Simply call it with appropriate
     i/o channel address and value every time the CPU writes to output
     channels 013, 034, or 035.&nbsp; The variable <span
       style="font-family: monospace;">CmOrLm</span> is 1 for the CM or 0
-    for the LM.&nbsp; (The <span style="font-weight: bold;">yaDSKY</span>
-    program already does so, if started with the "--test-downlink"
-    command-line switch.)&nbsp; The default behavior is simply to print
-    each downlink list as it arrives to the standard output, which is
-    assumed to be an ANSI terminal of at least 80 columns and 43
-    rows.&nbsp; If this behavior suits you, then you need do nothing
-    more.&nbsp; If, on the other hand, you wish to customize the
-    behavior, then read on.<br>
+    for the LM.&nbsp; The default behavior is simply to print each
+    downlink list as it arrives to the standard output, which is assumed
+    to be an ANSI terminal of at least 80 columns and 43 rows.&nbsp; If
+    this behavior suits you, then you need do nothing more.&nbsp; If, on
+    the other hand, you wish to customize the behavior, then read on.<br>
     <br>
     <span style="font-family: monospace;">#include "agc_engine.h"<br>
       /*<br>
@@ -4239,6 +4318,7 @@ Backtrace
         (1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 //
 
+
         No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4464,14 +4544,15 @@ Backtrace
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-01-10.<br>
+          2025-04-10.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
     <br>
