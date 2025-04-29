@@ -71,6 +71,9 @@
 		03/11/25 RSB	Altered on the basis of SHOW_WORD_NUMBERS in
 				agc_engine.h.
 		04/03/25 RSB	Added AGC software-version aliasing.
+		04/20/25 RSB	Substantial rework in order to support additional
+				downlist protocols.  Just Sunburst 120 added
+				so far.
   
 */
 
@@ -78,6 +81,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <glob.h>
 #include "agc_engine.h"
 
 #define DEBUG_DOWNLIST_SPEC_FILES
@@ -408,27 +412,12 @@ Sclear (void)
 }
 
 //---------------------------------------------------------------------------
-// Specifications for the DEFAULT downlink lists.  Originally these hard-coded
-// structures of type `DownlinkListSpec_t` were internal to the present
-// source-code file, but they have been removed to a separate file for easier
-// maintenance.
-#include "DecodeDigitalDownlinkHardcodes.c"
+// Definitions of the allowed downlink types for the given AGC software
+// version.  The list is set up by `dddConfigure`.
 
-// The ACTUAL downlink lists used.  The following array can be modified
-// at runtime to get different lists.  Or, the array can be used to get
-// pointers to the default lists, which could be modified in-place
-// (for example, to have different row,col coordinates).
-
-// The following array entries must correspond to the numerical order
-// of the DL_xxx constants.
-DownlinkListSpec_t *DownlinkListSpecs[11] = {
-  &CmPoweredListSpec, &LmOrbitalManeuversSpec,
-  &CmCoastAlignSpec, &LmCoastAlignSpec,
-  &CmRendezvousPrethrustSpec, &LmRendezvousPrethrustSpec,
-  &CmProgram22Spec, &LmDescentAscentSpec,
-  &LmLunarSurfaceAlignSpec, &CmEntryUpdateSpec,
-  &LmAgsInitializationUpdateSpec
-};
+#define MAX_DOWNLISTS 10
+int numDownlists = 0;
+DownlinkListSpec_t DownlistSpecifications[MAX_DOWNLISTS] = { { 0 } };
 
 //---------------------------------------------------------------------------
 /*
@@ -505,7 +494,7 @@ dddNormalize(DownlinkListSpec_t *dls)
   dddName_t names[MAX_DOWNLINK_LIST];
 #endif
 
-#if defined(DO_DDD_NOORMALIZATION) || defined(SHOW_WORD_NUMBERS)
+#if defined(DO_DDD_NORMALIZATION) || defined(SHOW_WORD_NUMBERS)
   // Step 1:  Eliminate all spacers.
   FieldSpecs = dls->FieldSpecs;
   for (i = 0; i < MAX_DOWNLINK_LIST; i++)
@@ -596,34 +585,10 @@ dddNormalize(DownlinkListSpec_t *dls)
 }
 
 //---------------------------------------------------------------------------
-// The `dddConfigure` function can be called at startup to modify the default
-// downlist specifications given above, so that they instead contain
-// mission-specific data obtained from files in the filesystem.  The input
-// parameter is the name of an AGC software version, and the return value is
-// 1 if that software corresponds to a CM or 0 for an LM.  Any files not found
-// transparently leave the corresponding default downlist specification unchanged,
-// though an info message is output to the console.
-DownlinkListSpec_t *cmIdToSpec[] = {
-    NULL, // 77772
-    &CmProgram22Spec, // 77773
-    &CmPoweredListSpec, // 77774
-    &CmRendezvousPrethrustSpec, // 77775
-    &CmEntryUpdateSpec, // 77776
-    &CmCoastAlignSpec // 77777
-};
-DownlinkListSpec_t *lmIdToSpec[] = {
-    &LmLunarSurfaceAlignSpec, // 77772
-    &LmDescentAscentSpec, // 77773
-    &LmOrbitalManeuversSpec, // 77774
-    &LmRendezvousPrethrustSpec, // 77775
-    &LmAgsInitializationUpdateSpec, // 77776
-    &LmCoastAlignSpec // 77777
-};
 
-// Print a selected table of specs (either `cmIdToSpec` or `lmIdToSpec`) to
-// a file.
+// Print the table of downlist specifications to a file.
 static void
-printSpecs(const char *filename, DownlinkListSpec_t **specs)
+printSpecs(const char *filename)
 {
 #ifdef DEBUG_DOWNLIST_SPEC_FILES
   FILE *f;
@@ -635,16 +600,17 @@ printSpecs(const char *filename, DownlinkListSpec_t **specs)
       fprintf(stderr, "Could not open %s\n", filename);
       exit(1);
     }
-  for (i = 0; i < 6; i++, specs++)
+  for (i = 0; i < numDownlists; i++)
     {
-      fprintf(f, "%05o:\n", 077772 + i);
-      if (*specs == NULL)
+      DownlinkListSpec_t *specs = &DownlistSpecifications[i];
+      if (specs == NULL)
 	{
 	  fprintf(f, "\tNULL\n");
 	  continue;
 	}
-      fprintf(f, "\t%s\n", (*specs)->Title);
-      fieldSpec = (*specs)->FieldSpecs;
+      fprintf(f, "%05o:\n", specs->id);
+      fprintf(f, "\t%s\n", specs->Title);
+      fieldSpec = specs->FieldSpecs;
       for (j = 0; j < MAX_DOWNLINK_LIST; j++, fieldSpec++)
 	{
 	  fprintf(f, "\t%d: %d, %s, %08X, %d, %p, %s\n", j,
@@ -673,63 +639,18 @@ isUnsigned (char *s)
   return 1;
 }
 
-#ifdef DO_FLEXIBLE_FALLBACK
-// The following function is like `fopen`, but specifically tailored to files
-// with names of the form
-//	ddd-ID_SSSVVV.tsv
-// where ddd is literal, ID is a 5-digit octal number, SSS is an alphabetic
-// string, VVV is a decimal number, and tsv is literal.  The idea is that
-// SSSVVV is the name of an AGC software version, such as Luminary099 or
-// Comanche055.  If a file with the specified name isn't found, then VVV is
-// decremented until a matching file is found.
-char filenameFlexible[100];
-FILE *
-fopenFlexibly(char *filename, char *options)
-{
-  FILE *fp;
-  char *s, *ss, format[32];
-  int vvv, vvvLength;
-
-  strcpy(filenameFlexible, filename);
-
-  // If the specified file exists, then just return it!
-  fp = fopen(filenameFlexible, options);
-  if (fp != NULL)
-    return fp;
-
-  // We need to parse the filename, so that we can alter it and try again.
-  int parsed = 0;
-  if (strncmp(filenameFlexible, "ddd-", 4))
-    return NULL;  // Doesn't start with "ddd-".
-  ss = strstr(filenameFlexible, ".tsv");
-  if (ss == NULL)
-    return NULL;  // Doesn't end with ".tsv"
-  for (s = ss; isdigit(s[-1]); s--); // Find VVV.
-  if (s == ss)
-    return NULL;  // No digits found.
-  vvvLength = ss - s;
-  sprintf(format, "%%0%dd.tsv", vvvLength);
-  vvv = atoi(s);
-  for (vvv--; vvv >= 0; vvv--)
-    {
-      sprintf(s, format, vvvLength, vvv);
-      fp = fopen(filenameFlexible, options);
-      if (fp != NULL)
-	return fp;
-    }
-
-  return NULL;
-}
-#endif // FLEXIBLE_FALLBACK
-
+int early1 = 0, late1 = 0, early2 = 0, mid2 = 0, late2 = 0;
 int
 dddConfigure (char *agcSoftware, const char *docPrefix)
 {
-  int id;
+  int i, useFallbackDocumentation = 1;
   FILE *aliases = NULL;
   char aliasDoc[32] = { 0 }, aliasTsv[32] = { 0 };
+  glob_t globResult;
+  char globPattern[64];
+
   /*
-   * The downlists vary by AGC software version.  There are two aspects of
+   * The downlists vary by AGC software version.  There are three aspects of
    * this that concern us here.  First, a "tsv" file (ddd-ID-version.tsv) must
    * be chosen that's appropriate to the AGC software version.  These files
    * give the symbolic names, scaling, format, and so forth for the downlinked
@@ -740,29 +661,58 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
    * them, but they do not partition in the same way as the tsv files, because
    * any given downlink item, though have the same name, scale, format, etc. as
    * in other AGC software versions, could nevertheless be described differently.
-   * This is handled by reading a file callsed ddd-version-aliases.tsv, which
+   * Finally, the downlink protocol evolved over time, so different AGC software
+   * versions employed differing versions of the protocol.  These various
+   * differences are handled by reading a file called ddd-version-aliases.tsv, which
    * is a tab-delimited file, with one line for each AGC software version; each
-   * line has three fields, namely:
+   * line has four fields, namely:
    * 	AGC software version (such as "Luminary099")
    * 	TSV version (such as "Luminary099" also, but could be "Luminary098", etc.)
    * 	HTML version (such as "Luminary1A")
+   * 	The protocol version ("early1", "late1", "early2", "mid2", "late2")
    */
   aliases = fopen("ddd-version-aliases.tsv", "r");
   if (aliases != NULL)
     {
-      char line[256], *ss;
+      char line[256], *ss, *sss, *at, *ad;
       int lenAgcSoftware;
       lenAgcSoftware = strlen(agcSoftware);
       while (NULL != fgets(line, sizeof(line), aliases))
 	if (!strncmp(line, agcSoftware, lenAgcSoftware) && line[lenAgcSoftware] == '\t')
 	  {
-	    ss = strstr(&line[lenAgcSoftware + 1], "\t"); // Find 2nd tab.
-	    if (ss == NULL)
+	    line[strcspn(line, "\r\n")] = 0; // remove trailing CR or LF.
+	    ss = &line[lenAgcSoftware + 1];
+
+	    sss = strstr(ss, "\t"); // Find 2nd tab.
+	    if (sss == NULL)
 	      continue;
-	    strcpy(aliasDoc, ss + 1);
-	    aliasDoc[strcspn(aliasDoc, "\r\n")] = 0; // remove trailing CR or LF.
-	    *ss = 0;
-	    strcpy(aliasTsv, &line[lenAgcSoftware + 1]);
+	    *sss = 0;
+	    at = ss;
+	    ss = sss + 1;
+
+	    sss = strstr(ss, "\t"); // Find 3rd tab.
+	    if (sss == NULL)
+	      continue;
+	    *sss = 0;
+	    ad = ss;
+	    ss = sss + 1;
+
+	    // Now on the final field of the line.
+	    if (!strcmp(ss, "early1"))
+	      early1 = 1;
+	    else if (!strcmp(ss, "late1"))
+	      late1 = 1;
+	    else if (!strcmp(ss, "early2"))
+	      early2 = 1;
+	    else if (!strcmp(ss, "mid2"))
+	      mid2 = 1;
+	    else if (!strcmp(ss, "late2"))
+	      late2 = 1;
+	    else
+	      continue;
+	    strcpy(aliasTsv, at);
+	    strcpy(aliasDoc, ad);
+	    break;
 	  }
       fclose(aliases);
     }
@@ -777,25 +727,45 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       !strncmp(agcSoftware, "Comanche", 8) ||
       !strncmp(agcSoftware, "Manche", 6) ||
       !strncmp(agcSoftware, "Skylark", 7) ||
+      !strncmp(agcSoftware, "Sunrise", 7) ||
+      !strncmp(agcSoftware, "Corona", 6) ||
+      !strncmp(agcSoftware, "Sunspot", 7) ||
+      !strncmp(agcSoftware, "Solarium", 8) ||
+      !strncmp(agcSoftware, "Sundial", 7) ||
       !strncmp(agcSoftware, "CM", 2))
     CmOrLm = 1;
-  if (CmOrLm)
-    printSpecs("before.txt", cmIdToSpec);
-  else
-    printSpecs("before.txt", lmIdToSpec);
-  for (id = 077772; id <= 077777; id++)
+  if (!strncmp(agcSoftware, "Sunrise", 7) ||
+      !strncmp(agcSoftware, "Corona", 6) ||
+      !strncmp(agcSoftware, "Sunspot", 7) ||
+      !strncmp(agcSoftware, "Solarium", 8) ||
+      !strncmp(agcSoftware, "Sundial", 7) ||
+      !strncmp(agcSoftware, "Aurora", 6) ||
+      !strncmp(agcSoftware, "Borealis", 8) ||
+      !strncmp(agcSoftware, "Sunburst", 7))
+    useFallbackDocumentation = 0;
+  sprintf(globPattern, "ddd-*-%s.tsv", aliasTsv);
+  if (0 != glob(globPattern, 0, NULL, &globResult))
     {
+      fprintf(stderr, "Cannot find any TSV files for %s\n", agcSoftware);
+      exit(1);
+    }
+  for (int j = 0; j < globResult.gl_pathc && j < MAX_DOWNLISTS; j++)
+    {
+      int id;
       char filename[64];
       DownlinkListSpec_t *dls;
       FieldSpec_t *fieldSpec;
       FILE *fp;
       int i;
-      if (CmOrLm)
-	dls = cmIdToSpec[id - 077772];
-      else
-	dls = lmIdToSpec[id - 077772];
+      // At this point, globResult.gl_pathv[i] should be a filename of the form
+      // ddd-%05o-softwarename.tsv.  We need to pick off the middle field and
+      // turn it into an integer ID.
+      if (1 != sscanf(globResult.gl_pathv[j], "ddd-%05o", &id))
+	continue;
+      dls = &DownlistSpecifications[numDownlists++];
       if (dls == NULL)
 	continue;
+      dls->id = id;
       if (aliasDoc[0] != 0)
 	{
 	  sprintf(dls->URL, "%s%s/ddd-%05o-%s.html", docPrefix, aliasDoc, id, aliasDoc);
@@ -817,7 +787,9 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 	dls->URL[0] = 0;
       if (dls->URL[0] == 0)
 	{
-	  if (CmOrLm)
+	  if (!useFallbackDocumentation)
+	    sprintf(dls->URL, "%sddd-no-documentation.html", docPrefix);
+	  else if (CmOrLm)
 	    {
 	      sprintf(filename, "%sddd-%05o-unavailable-CM.html", docPrefix, id);
 	      fp = fopen(&filename[7], "r");
@@ -1019,14 +991,13 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 #endif
 	  strcat(fieldSpec->Name, "=");
 	}
+      dls->numFieldSpecs = i;
       fclose(fp);
       dddNormalize(dls);
     }
 
-  if (CmOrLm)
-    printSpecs("after.txt", cmIdToSpec);
-  else
-    printSpecs("after.txt", lmIdToSpec);
+  globfree(&globResult);
+  printSpecs("after.txt");
   return CmOrLm;
 }
 
@@ -1164,35 +1135,55 @@ PrintField (const FieldSpec_t *FieldSpec)
       switch (FieldSpec->Format)
 	{
 	case FMT_SP:
-	  PrintSP (Ptr, FieldSpec->Scale, row, col);
+	  if (Ptr[0] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    PrintSP (Ptr, FieldSpec->Scale, row, col);
 	  break;
 	case FMT_DP:
-	  PrintDP (Ptr, FieldSpec->Scale, row, col);
+	  if (Ptr[0] == -1 || Ptr[1] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    PrintDP (Ptr, FieldSpec->Scale, row, col);
 	  break;
 	case FMT_OCT:
-	  sprintf (&Sbuffer[row][col], "%05o", Ptr[0]);
+	  if (Ptr[0] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    sprintf (&Sbuffer[row][col], "%05o", Ptr[0]);
 	  break;
 	case FMT_2OCT:
-	  sprintf (&Sbuffer[row][col], "%05o%05o", Ptr[0], Ptr[1]);
+	  if (Ptr[0] == -1 || Ptr[1] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    sprintf (&Sbuffer[row][col], "%05o%05o", Ptr[0], Ptr[1]);
 	  break;
 	case FMT_DEC:
-	  sprintf (&Sbuffer[row][col], "%+d", Ptr[0]);
+	  if (Ptr[0] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    sprintf (&Sbuffer[row][col], "%+d", Ptr[0]);
 	  break;
 	case FMT_2DEC:
-	  sprintf (&Sbuffer[row][col], "%+d", 0100000 * Ptr[0] + Ptr[1]);
+	  if (Ptr[0] == -1 || Ptr[1] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    sprintf (&Sbuffer[row][col], "%+d", 0100000 * Ptr[0] + Ptr[1]);
 	  break;
 	case FMT_USP:		
-	  PrintUSP (Ptr, FieldSpec->Scale, row, col);
+	  if (Ptr[0] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    PrintUSP (Ptr, FieldSpec->Scale, row, col);
 	  break;
 	}
     }
 }
 
 // Print an entire downlink list.
-
 char *DocumentationURL = (char *) DEFAULT_URL;
 void
-PrintDownlinkList (const DownlinkListSpec_t *Spec)
+PrintDownlinkList (DownlinkListSpec_t *Spec)
 {
   // This is a global pointer to a function which can override PrintDownlinkList().
   // The idea is that PrintDownlinkList() is the default processor, and can be
@@ -1217,6 +1208,26 @@ PrintDownlinkList (const DownlinkListSpec_t *Spec)
 	}
       Swrite ();
     }
+}
+
+// Print an entire downlink list for the early Block I protocol.
+FieldSpec_t markSpec = {
+
+};
+void
+PrintDownlinkListEarly1 (DownlinkListSpec_t *Spec, int *marks, int numMarks)
+{
+  int i;
+  DocumentationURL = (char *) Spec->URL;
+  Sclear ();
+  sprintf (&Sbuffer[0][0], "%s", Spec->Title);
+  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+    {
+      if (i && !Spec->FieldSpecs[i].IndexIntoList)
+	break;		// End of field-list.
+      PrintField (&Spec->FieldSpecs[i]);
+    }
+  Swrite ();
 }
 
 //---------------------------------------------------------------------------
@@ -1255,13 +1266,33 @@ DecodeErasableDump (char *Title)
 
 //----------------------------------------------------------------------------
 // If you want to print digital downlinks to stdout, just keep feeding 
-// DecodeDigitalDownlink the data read from output channels 013, 034, and 035
-// as it arrives.  (Actually, you can just feed it data for all AGC output
-// channels, if you like.)  The function takes care of buffering the data and
-// parsing it out, so there's nothing else you have to do.
+// `DecodeDigitalDownlink` the data read from output channels 013, 034, and 035
+// (or 011 and 014 for Block I) as it arrives.  (Actually, you can just feed it
+// data for all AGC output channels, if you like.)  The function takes care of
+// buffering the data and parsing it out, so there's nothing else you have to
+// do.  There are actually 4 different "protocols" used, depending on the AGC
+// software version, and `DecodeDigitalDownlink` simply calls the appropriate
+// one.
 
 void
 DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
+{
+  void DecodeEarly1(int Channel, int Value, int CmOrLm);
+  void DecodeLate1(int Channel, int Value, int CmOrLm);
+  void DecodeEarly2(int Channel, int Value, int CmOrLm);
+  void DecodeMidOrLate2(int Channel, int Value, int CmOrLm);
+  if (early1)
+    return DecodeEarly1(Channel, Value, CmOrLm);
+  else if (late1)
+    return DecodeLate1(Channel, Value, CmOrLm);
+  else if (early2)
+    return DecodeEarly2(Channel, Value, CmOrLm);
+  else if (mid2 || late2)
+    return DecodeMidOrLate2(Channel, Value, CmOrLm);
+}
+
+void
+DecodeMidOrLate2 (int Channel, int Value, int CmOrLm)
 {
   static int WordOrderBit = 0, Any = 0;
   
@@ -1294,21 +1325,8 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
 	      DownlinkListExpected = 260; 
 	      DownlinkListZero = -1;
 	    }
-	  else if (Value == 077772)	// Lunar surface align
-	    DownlinkListExpected = 200;
-	  else if (Value == 077773)	// LM descent/ascent, CM program 22 list
-	    DownlinkListExpected = 200;
-	  else if (Value == 077774)	// LM orbital maneuvers, CM powered list.
-	    DownlinkListExpected = 200;
-	  else if (Value == 077775)	// LM or CM rendezvous/prethrust
-	    DownlinkListExpected = 200;
-	  else if (Value == 077776)	// LM AGS initialization/update, CM entry/update
-	    DownlinkListExpected = 200;
-	  else if (Value == 077777)	// LM or CM coast align
-	    DownlinkListExpected = 200;
 	  else
-	    goto AbortList;
-	  //printf ("Started downlink of type 0%o\n", Value);
+	    DownlinkListExpected = 200;
 	}
       else
         {
@@ -1325,7 +1343,7 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
         goto AbortList;
       if (DownlinkListCount == 1)
         { 
-	  if (Value != 077340)	// sync word
+	  if (Value != 077340 && Value != 0437)	// sync word
             goto AbortList;
 	  if (WordOrderBit)
 	    goto AbortList;
@@ -1346,6 +1364,7 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
   // End of the list!  Do something with the data.
   if (DownlinkListCount >= DownlinkListExpected)
     {
+      int i;
       static char LMdump[] = "LM erasable dump downlinked.";
       static char CMdump[] = "CM erasable dump downlinked.";
       switch (DownlinkListBuffer[0])
@@ -1356,43 +1375,19 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
 	case 01777:
 	  DecodeErasableDump (CMdump);
 	  break;
-	case 077774:
-	  if (CmOrLm)
-	    PrintDownlinkList (DownlinkListSpecs[DL_CM_POWERED_LIST]);
-	  else
-	    PrintDownlinkList (DownlinkListSpecs[DL_LM_ORBITAL_MANEUVERS]);
-	  break;
-	case 077777:
-	  if (CmOrLm)
-	    PrintDownlinkList (DownlinkListSpecs[DL_CM_COAST_ALIGN]);
-	  else
-	    PrintDownlinkList (DownlinkListSpecs[DL_LM_COAST_ALIGN]);
-	  break;
-	case 077775:
-	  if (CmOrLm)
-	    PrintDownlinkList (DownlinkListSpecs[DL_CM_RENDEZVOUS_PRETHRUST]);
-	  else
-	    PrintDownlinkList (DownlinkListSpecs[DL_LM_RENDEZVOUS_PRETHRUST]);
-	  break;
-	case 077773:
-	  if (CmOrLm)
-	    PrintDownlinkList (DownlinkListSpecs[DL_CM_PROGRAM_22]);
-	  else
-	    PrintDownlinkList (DownlinkListSpecs[DL_LM_DESCENT_ASCENT]);
-	  break;
-	case 077772:
-	  PrintDownlinkList (DownlinkListSpecs[DL_LM_LUNAR_SURFACE_ALIGN]);
-	  break;
-	case 077776:
-	  if (CmOrLm)
-	    PrintDownlinkList (DownlinkListSpecs[DL_CM_ENTRY_UPDATE]);
-	  else
-	    PrintDownlinkList (DownlinkListSpecs[DL_LM_AGS_INITIALIZATION_UPDATE]);
-	  break;
 	default:
-	  Sclear ();
-	  sprintf (&Sbuffer[0][0], "Unknown list type downlinked.");
-	  Swrite ();
+	  for (i = 0; i < numDownlists; i++)
+	    if (DownlistSpecifications[i].id == DownlinkListBuffer[0])
+	      {
+		PrintDownlinkList (&DownlistSpecifications[i]);
+		break;
+	      }
+	  if (i >= numDownlists)
+	    {
+	      Sclear ();
+	      sprintf (&Sbuffer[0][0], "Unknown list type (%05o) downlinked.", DownlinkListBuffer[0]);
+	      Swrite ();
+	    }
 	  break;
 	}
       Any = 1;
@@ -1413,4 +1408,165 @@ AbortList:
   return;
 }
 
+// Note that this is based on code from piTelemetry.py rather than on
+// `DecodeMidOrLate2`, because I don't see any longer how `DecodeMidOrLate2`
+// works, particularly in regard to ID 77772 of Zerlina, which has 208
+// downlinks.  Plus, this is tremendously cleaner.
+void
+DecodeEarly2 (int Channel, int Value, int CmOrLm)
+{
+  static int WordOrderBit = 0, pending;
+  int i;
+
+  if (Channel == 034 || Channel == 035)
+    DownlinkListBuffer[DownlinkListCount++] = Value;
+  else if (Channel == 013)
+    {
+      WordOrderBit = Value & 000100;
+      if (WordOrderBit == 0)
+	{
+	  if (DownlinkListCount == 0)
+	    return;
+	  pending = DownlinkListBuffer[--DownlinkListCount];
+
+	  for (i = 0; i < numDownlists; i++)
+	    if (DownlistSpecifications[i].id == DownlinkListBuffer[0])
+	      {
+		PrintDownlinkList (&DownlistSpecifications[i]);
+		break;
+	      }
+	  if (i >= numDownlists)
+	    {
+	      Sclear ();
+	      sprintf (&Sbuffer[0][0],
+		       "Unknown list type (%05o) downlinked.",
+		       DownlinkListBuffer[0]);
+	      Swrite ();
+	    }
+	  DownlinkListBuffer[0] = pending;
+	  DownlinkListCount = 1;
+	}
+    }
+}
+
+// Based on piTelemetry.py.
+void
+DecodeLate1 (int Channel, int Value, int CmOrLm)
+{
+  static int pending = -1, marks[20], numMarks = 0;
+
+  if (Channel == 011) // OUT1
+    {
+      int wordOrder;
+      if (pending == -1)
+        return;
+      wordOrder = Value & 000400;
+      if (wordOrder && pending != 074000 && (pending & 074000) == 074000) // MARK word.
+	{
+	  marks[numMarks++] = pending;
+	  pending = -1;
+	  return;
+	}
+      while (numMarks > 0 && (
+	  DownlinkListCount == 48 ||
+	  DownlinkListCount == 49 ||
+	  DownlinkListCount == 50 ||
+	  DownlinkListCount == 97 ||
+	  DownlinkListCount == 98 ||
+	  DownlinkListCount == 99
+	  ))
+	{
+	  DownlinkListBuffer[DownlinkListCount++] = marks[0];
+	  numMarks--;
+	  for (int i = 0; i < numMarks; i++)
+	    marks[i] = marks[i + 1];
+	}
+      if (!wordOrder) // Data word.
+	DownlinkListBuffer[DownlinkListCount++] = pending;
+      else if (pending == 074000)
+	DownlinkListBuffer[DownlinkListCount++] = pending;
+      else // ID word
+	{
+	  int i;
+	  for (i = 0; i < numDownlists; i++)
+	    if (DownlistSpecifications[i].id == DownlinkListBuffer[0])
+	      {
+		PrintDownlinkList (&DownlistSpecifications[i]);
+		break;
+	      }
+	  if (i >= numDownlists)
+	    {
+	      Sclear ();
+	      sprintf (&Sbuffer[0][0],
+		       "Unknown list type (%05o) downlinked.",
+		       DownlinkListBuffer[0]);
+	      Swrite ();
+	    }
+	  DownlinkListBuffer[0] = pending;
+	  DownlinkListCount = 1;
+	  numMarks = 0;
+	}
+      pending = -1;
+    }
+  else if (Channel == 014) // CPU channel used for downlink data
+    pending = Value;
+
+}
+
+// Based on piTelemetry.py, using the simpler/later of the two algorithms
+// provided there.
+void
+DecodeEarly1 (int Channel, int Value, int CmOrLm)
+{
+#define MAX_MARKS 31
+  static int initialized = 0, pending = -1, numFieldSpecs = 0,
+      marks[MAX_MARKS], numMarks = 0;
+  static FieldSpec_t *tsv;
+  int i, j, k;
+  if (!initialized)
+    {
+      initialized = 1;
+      tsv = DownlistSpecifications[0].FieldSpecs;
+      numFieldSpecs = DownlistSpecifications[0].numFieldSpecs;
+      for (i = 0; i < MAX_DOWNLINK_LIST; DownlinkListBuffer[i++] = -1);
+    }
+  if (Channel == 011 && pending != -1) // OUT1
+    {
+      int wordOrder;
+      wordOrder = Value & 000400;
+      if (wordOrder)
+	DownlinkListBuffer[DownlinkListCount++] = pending;
+      else if ((pending & 074000) != 0)
+	{
+	  if (numMarks < MAX_MARKS) marks[numMarks++] = pending; // relay word
+	}
+      else if ((pending & 076000) == 002000)
+	{
+	  if (numMarks < MAX_MARKS) marks[numMarks++] = pending; // character-indicator word
+	}
+      else
+	{
+	  DownlinkListBuffer[DownlinkListCount++] = pending; // index word
+	  if (pending == 0) // End of downlist.
+	    {
+	      for (i = 0, j = DownlinkListCount - 1; i < j; i++, j--)
+		{
+		  k = DownlinkListBuffer[i];
+		  DownlinkListBuffer[i] = DownlinkListBuffer[j];
+		  DownlinkListBuffer[j] = k;
+		}
+	      for (i = 0; i < numMarks; i++)
+		DownlinkListBuffer[DownlinkListCount++] = marks[i];
+	      numMarks = 0;
+	      PrintDownlinkList (&DownlistSpecifications[0]);
+	      for (i = 0; i < MAX_DOWNLINK_LIST; DownlinkListBuffer[i++] = -1);
+	      DownlinkListCount = 0;
+	    }
+	}
+      pending = -1;
+    }
+  else if (Channel == 014) // OUT4.
+    pending = Value;
+  return;
+}
 

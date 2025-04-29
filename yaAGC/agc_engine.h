@@ -353,12 +353,13 @@ typedef struct {
   char Title[SWIDTH + 1];
   char URL[SWIDTH + 1];
   FieldSpec_t FieldSpecs[MAX_DOWNLINK_LIST];
+  int numFieldSpecs;
 } DownlinkListSpec_t;
 
 extern char *DocumentationURL;
 
 // A type of function for processing downlink lists.
-typedef void ProcessDownlinkList_t (const DownlinkListSpec_t *Spec);
+typedef void ProcessDownlinkList_t (DownlinkListSpec_t *Spec);
 
 //--------------------------------------------------------------------------
 // Each instance of the AGC CPU simulation has a data structure of type agc_t

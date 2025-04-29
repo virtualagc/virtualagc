@@ -149,7 +149,7 @@
 
 # DSPCNT   ERASE                   COUNTER FOR DSPOUT
 # UPLOCK   ERASE                   BIT1 = UPLINK INTERLOCK (ACTIVATED BY
-#                                                                           RECEPTION OF A BAD MESSAGE IN UPLINK)
+#                                  RECEPTION OF A BAD MESSAGE IN UPLINK)
 # END OF ERASABLES RESERVED FOR PINBALL INTERRUPT ACTION
 
 

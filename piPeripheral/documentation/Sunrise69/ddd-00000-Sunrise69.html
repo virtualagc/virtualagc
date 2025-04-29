@@ -1,0 +1,890 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Telemetry Documentation for Sunrise 45 List</title>
+    <link rel="stylesheet" href="./../downlists.css">
+  </head>
+  <body>
+    <b>Note:</b>&nbsp; Refer to "<a moz-do-not-send="true"
+      href="https://www.ibiblio.org/apollo/hrst/archive/1721.pdf#page=66">The
+
+
+
+
+      Compleat Sunrise, Being a Description of Program SUNRISE (SUNRISE
+      33)</a>", Section "DOWNRUPT PROCESSOR" for the surviving
+    Apollo-era documentation.&nbsp; Our summary herein is incomplete and
+    may not be entirely reliable.&nbsp; Feedback providing improved
+    information relevant to the contents is welcome. &nbsp; Examination
+    of SUNRISE source-code files may also provide additional
+    information:
+    <ul>
+      <li>ERASABLE_ASSIGNMENTS.agc</li>
+      <li>DOWN-TELEMETRY_PROGRAM.agc</li>
+    </ul>
+    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
+      href="#30">30</a><br>
+    <h1>1a </h1>
+    <p>ID00. This word always has the octal value 00000.<br>
+    </p>
+    <h1>1b,2a</h1>
+    <p>These are the values of the CPU's 14-bit timer registers TIME1
+      and TIME2 (memory addresses octal 36 and 37).&nbsp; TIME1
+      increments every 10 ms.&nbsp; It will wrap around from 037777 to 0
+      every 163.84 seconds.&nbsp; TIME2 increments whenever wraps from
+      037777 to 0.&nbsp; TIME2 and TIME1 together form a single 28-bit
+      timer counting the number of centiseconds that have elapsed since
+      power-up, and will itself wrap around to zero after just over 31
+      days.<br>
+    </p>
+    <h1><a name="IN0"></a>2b</h1>
+    <p>This is the value of the CPU register IN0 (address 0004), used
+      principally to receive keyboard input from the DSKY, with the
+      following bit assignments:<br>
+    </p>
+    <ul>
+      <li>B1-B5 contains a keycode, if a keypad key is pressed, as
+        follows.&nbsp; Note that not all codes are used:</li>
+      <ul>
+        <li>00 (octal) for "no key pressed".</li>
+        <li>20 (octal) for the digit 0.</li>
+        <li>01-11 (octal) for the digits 0-9.</li>
+        <li>21 for the VERB key.</li>
+        <li>22 for the ERROR RESET key.</li>
+        <li>31 for the KEY RLSE key.</li>
+        <li>32 for the + key.</li>
+        <li>33 for the - key.</li>
+        <li>34 for the ENTER key.</li>
+        <li>36 for the CLEAR key.</li>
+        <li>37 for the NOUN key.</li>
+      </ul>
+      <li>B6 is set when any of the B1-B5 or B15 is active, and is what
+        triggers a "KEYRUPT" (keypad interrupt).&nbsp; <br>
+      </li>
+      <li>B7-B13 are not used.</li>
+      <li>B14 is active when the AGC can be put into
+        partially-powered-down "standby mode", and is, I believe,
+        connected to a control-panel switch that's not on the DSKY.</li>
+      <li>B15 is active when the MARK key, not on the DSKY itself, is
+        pressed, and activates B6 just like the DSKY-keypad keys do. It
+        is used to cause the AGC to "mark" the current IMU data ...
+        i.e., to snapshot it in memory.</li>
+    </ul>
+    <p>It is perhaps worth noting that the KEYRUPT software expects for
+      the entire lower 6 bits, B6-B1 to return to zero after the
+      pushbutton is released, and will refuse to process additional
+      keystrokes until this occurs.&nbsp; At the same time, though, the
+      way Virtual AGC DSKY simulation software works, it will not send a
+      keycode to the AGC until the DSKY button is releases.&nbsp; This
+      means that you can't use this downlink to detect keycodes, and
+      even in the physical AGC/DSKY system you would have been very
+      unlikely to be able to do so.<br>
+    </p>
+    <p>The SUNRISE downlists compensate for this inability by
+      asynchronously emitting a downlink (separate from IN0) whenever a
+      keypress or a MARK is detected.<br>
+    </p>
+    <h1><sup>3a</sup></h1>
+    <p>This is the value of the CPU's IN2 input register (address 0006),
+      which has the following bit positions:<br>
+    </p>
+    <ul>
+      <li>B1: OR CDU <span style="text-decoration: overline">Zero</span></li>
+      <li>B2: OR SXT <span style="text-decoration: overline">Zero</span></li>
+      <li>B3: OR TRACKER <span style="text-decoration: overline">Zero</span></li>
+      <li>B4: Photocell -</li>
+      <li>B5: Photocell +</li>
+      <li>B6-7: Not used</li>
+      <li>B8: Tracker Fail (RUPT)</li>
+      <li>B9: OPTICS Fail (RUPT2)</li>
+      <li>B10: CDU Fail (RUPT2)</li>
+      <li>B11: ACCEL Fail (RUPT2)</li>
+      <li>B12: IMU Fail (RUPT2)</li>
+      <li>B13: ABORT (RUPT2)</li>
+      <li>B14: BAD BOOST (RUPT2)</li>
+      <li>B15: AGC Power Fail (RUPT2)</li>
+    </ul>
+    <h1>3b</h1>
+    <p>ID04. This word always has the octal value 00004.<br>
+    </p>
+    <h1><sup>4a</sup></h1>
+    <sup></sup>
+    <p>This is the value of the CPU's IN3 input register (address 0007),
+      which has the following bit positions:<br>
+    </p>
+    <ul>
+      <li>B1: K1 Zero CDU SW</li>
+      <li>B2: K2</li>
+      <li>B3: K3</li>
+      <li>B4: K4</li>
+      <li>B5: ATTSW</li>
+      <li>B6: TRNSW</li>
+      <li>B7: ZERO OPT</li>
+      <li>B8: MODE SELECT OPT</li>
+      <li>B9: MODE SELECT OPT</li>
+      <li>B10: MODE SELECT OPT</li>
+      <li>B11-12: Not used.</li>
+      <li>B13: MODE SELECT S/C</li>
+      <li>B14: MODE SELECT S/C</li>
+      <li>B15: Lift-off</li>
+    </ul>
+    <h1>4b</h1>
+    <p>This is the value of the CPU's OUT1 output register (address
+      0011).&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <ul>
+      <li>B1:&nbsp; PROG alarm on LM DSKY</li>
+      <li>B2:&nbsp; COMP FAIL and alarm on DSKY</li>
+      <li>B3:&nbsp; KEY RLSE indicator on LM DSKY</li>
+      <li>B4:&nbsp; SCALER FAIL or TM FAIL (not sure which) alarm on LM
+        DSKY</li>
+      <li>B5:&nbsp; CHECK FAIL alarm on DSKY</li>
+      <li>B6:&nbsp; Block UPLINK</li>
+      <li>B7:&nbsp; ERRUPT trap</li>
+      <li>B8:&nbsp; Slow speed, STANDBY</li>
+      <li>B9:&nbsp; Word Order Telem</li>
+      <li>B10:&nbsp; Block Endpulse</li>
+      <li>B11:&nbsp; PIPA SCALE FINE</li>
+      <li>B12:&nbsp; PIPA SCALE EMERG</li>
+      <li>B13:&nbsp; ENG START</li>
+      <li>B14:&nbsp; START CLOCK</li>
+      <li>B15:&nbsp; ENG OUT-OFF</li>
+    </ul>
+    <h1><a name="rrect"></a>5a,5b</h1>
+    <p>RRECT, +1.&nbsp;&nbsp; "Rectification" is the process of
+      computing a corrected conic orbit, given a position vector RRECT
+      and a velocity vector not matching the current conic for the
+      orbit.&nbsp; RRECT and VRECT are thus each 3-vectors of
+      double-precision components X, Y, and Z components.&nbsp; The
+      units and scaling in SUNRISE are TBD.&nbsp; <a
+        moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/hrst/archive/1721.pdf#page=99">See
+
+
+
+        here</a>.<br>
+    </p>
+    <h1>6a</h1>
+    <p>ID10.&nbsp; This word always has the octal value 00010.<br>
+    </p>
+    <h1>6b,7a,7b,8a</h1>
+    <p>RRECT +2, +3, +4, +5.&nbsp; <a moz-do-not-send="true"
+        href="#rrect">See downlink 5a</a>.<br>
+    </p>
+    <h1>8b</h1>
+    <p>ID14.&nbsp; This word always has the octal value 00014.<br>
+    </p>
+    <h1><a name="10"></a>9a,9b,10a,10b</h1>
+    <p>TDELTAV, +1, +2, +3.&nbsp; TDELTAV is a double-precision vector
+      whose value is the deviation of the position vector from current
+      orbital conic.&nbsp; &nbsp; <a moz-do-not-send="true"
+        href="#rrect">See downlink 5a</a>.</p>
+    <h1>11a</h1>
+    <p>ID20.&nbsp; This word always has the octal value 00020.<br>
+    </p>
+    <h1>11b,12a</h1>
+    <p>TDELTAV +4, +5.&nbsp; TDELTAV is a double-precision vector whose
+      value is the deviation of the position vector from current orbital
+      conic.&nbsp; &nbsp; <a moz-do-not-send="true" href="#rrect">See
+        downlink 5a</a>.</p>
+    <h1>12b,13a</h1>
+    <p>VRECT, +1.&nbsp; <a moz-do-not-send="true" href="#rrect">See
+        downlink 5a</a>.<br>
+    </p>
+    <h1>13b</h1>
+    <p>ID24.&nbsp; This word always has the octal value 00024.<br>
+    </p>
+    <p> </p>
+    <h1>14a,14b,15a,15b</h1>
+    <p>VRECT +2, +3, +4, +5.&nbsp; <a moz-do-not-send="true"
+        href="#rrect">See downlink 5a</a>. </p>
+    <h1>16a</h1>
+    <p>ID30.&nbsp; This word always has the octal value 00030.<br>
+    </p>
+    <h1><a name="tnuv"></a>16b,17a,17b,18a</h1>
+    <p>TNUV, +1, +2, +3.&nbsp; TNUV is a double-precision vector whose
+      value is the deviation of the position vector from current orbital
+      conic.</p>
+    <p> </p>
+    <h1>18b</h1>
+    <p>ID34.&nbsp; This word always has the octal value 00034.<br>
+    </p>
+    <h1>19a,19b<br>
+    </h1>
+    <p>TNUV +4, +5.&nbsp; TNUV is a double-precision vector whose value
+      is the deviation of the position vector from current orbital
+      conic.&nbsp; &nbsp; <a moz-do-not-send="true" href="#tnuv">See
+        downlink 16b</a>.</p>
+    <h1><a name="20"></a>20a,20b</h1>
+    <p>GYROD +5, GYROD +3.&nbsp; GYROD is a double-precision 3-vector of
+      pulse-train commands for the x, y, and z gyros, scaled 2π/2<sup>20</sup>
+      radians/bit.&nbsp; Only two of its words appear in the
+      downlist.&nbsp; <a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/hrst/archive/1721.pdf#page=83">See
+
+
+
+        here also</a>.<br>
+    </p>
+    <h1><a name="30"></a>21-35,36a</h1>
+    <p>MARKERs.&nbsp; These refer to the items known as "relay words"
+      and "character-indicator words", neither of which are part of the
+      fixed downlist — i.e., the items always appearing at the same
+      relative position in the downlist, with the same fixed
+      interpretation —, but rather are emitted by the AGC asynchronously
+      on an as-needed basis.&nbsp; For viewing convenience, they have
+      been buffered and are displayed at the end of the fixed
+      downlist.&nbsp; Since these words are mostly <i>not</i> emitted,
+      they are usually shown with a value of <code>None</code> rather
+      than a numerical value.&nbsp; Up to 9 relay words and/or 10
+      character-indicator words can theoretically be emitted per second,
+      and a full downlist is emitted every 1.6 seconds, so in principle,
+      up to 31 relay and character-indicator words may be displayed at
+      the end of any given downlist.<br>
+    </p>
+    <ul>
+      <li>Relay words.&nbsp; These are codes output by the AGC to the
+        DSKY, and reflect the current states of the DSKY's internal
+        relays, which in turn indicate what's displayed by the
+        DSKY.&nbsp; (In AGC versions succeeding SUNRISE, this data is
+        displayed by the array of downlinked items DSPTAB, +1, ...,
+        rather than emitted asynchronously.)&nbsp; Relay words are
+        distinguished by the fact that the most-significant 4 bits are <i>not</i>
+        all zero, and instead indicate the address (1-15 decimal) of the
+        relay-group being addressed.&nbsp; The least-significant 11 bits
+        are written into the 11 relays of the group.</li>
+      <li>Character-indicator words.&nbsp; These indicate that the MARK
+        button on the control panel has been pressed, or else are
+        keycodes sent to the AGC by either the DSKY or via uplink from
+        the ground.&nbsp; They are distinguished by the fact that the
+        most-significant 5 bits have the pattern 00001.&nbsp; Referring
+        to the 10 least-significant bits as bits 10 through 1, then bit
+        7 (if 1) indicates that the MARK button has been pressed;
+        otherwise (if 0), then bit 6 indicates a keypad character (if 0)
+        or an uplink character (if 1) and bits 5-1 contain the keycode.</li>
+    </ul>
+    <p>The following is a diagram of the DSKY face showing positions of
+      the different digits:</p>
+    <pre>                             Program<br>                        ┌───────┬───────┐
+                        │  MD1  │  MD2  │
+                        └───────┴───────┘
+<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
+  │  VD1  │  VD2  │     │  ND1  │  ND2  │
+  └───────┴───────┘     └───────┴───────┘
+<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘
+<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    <br>
+    And here's how the relay words relate to those digit
+    positions.&nbsp; (UPACT refers to the UPTL activity lamp, not shown
+    in the diagram above, while FLASH refers to the flashing of the
+    Verb/Noun digits.)<br>
+    <p> </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom"><u>Bits 15-12</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">0001<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0010</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0011</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0100</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0101</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0110</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0111</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1000</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">UPACT<br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1001</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1010</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">FLASH</td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1011</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The 5-bit codes associated with the digits are as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top">Digit <br>
+          </th>
+          <th valign="top">MSB<br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top">LSB<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Regarding the character-indicator words (<a moz-do-not-send="true"
+      href="#IN0">see also entry 2b</a>), the table below shows the
+    5-bit keycodes associated with the various keys:<br>
+    <br>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top">Key</th>
+          <th valign="top">MSB<br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top">LSB<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">VERB<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">ERROR RESET<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">KEY RLSE<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">+<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">-<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">ENTER<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">CLEAR<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">NOUN<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1><font size="-1"> </font></h1>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
+      2025-04-22</i><br>
+  </body>
+</html>

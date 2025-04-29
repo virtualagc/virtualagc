@@ -49,10 +49,10 @@ scriptPath = os.path.abspath(__file__)
 scriptDirectory = os.path.dirname(scriptPath)
 #print(scriptDirectory, file=sys.stderr)
 
-# `id` is the ID of the current downlist, formatted "%05o", or else "XXXXX" if
+# `id` is the ID of the current downlist, formatted "%05o", or else "00000" if
 # tha particular AGC software version has only a single downlist with no ID
 # number.
-id = "XXXXX"
+id = "00000"
 
 # Parse command-line arguments.
 import argparse
@@ -116,6 +116,7 @@ def tsvRead(filename):
 			}
 		downlistDefinition["items"][offset] = item
 	f.close
+	#print(filename, downlistDefinitions, file=sys.stderr)
 
 # Only single-precision at the moment.  That needs rethinking!
 def formatDownlinkItem(item, tsv, index):
@@ -315,20 +316,24 @@ def printRelayBlockI(address, bit11, bits10to6, bits5to1):
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.
 
-def printBuffer(listNumber, buffer):
+def printBuffer(listNumber, buffer, minListSize=None):
+	if minListSize == None and listNumber in downlistDefinitions:
+		minListSize = len(downlistDefinitions[listNumber]["items"])
+	maxListSize = None
+	if listNumber in downlistDefinitions:
+		maxListSize = len(downlistDefinitions[listNumber]["items"])
 	print('-'*125, file=sys.stderr)
 	print(instructions, file=sys.stderr)
 	print(file=sys.stderr)
 	if listNumber not in downlistDefinitions:
 		print("Unknown list number (%s))" % listNumber, file=sys.stderr)
-	elif len(buffer) != len(downlistDefinitions[listNumber]["items"]):
-		print("Wrong number of items (%d != %d) on list (%s)" % \
+	elif len(buffer) < minListSize or len(buffer) > maxListSize:
+		print("Wrong number of items (%d not in [%d,%d]) on list (%s)" % \
 			(len(buffer), 
-			len(downlistDefinitions[listNumber]["items"]), 
-			listNumber), file=sys.stderr)
+			minListSize, maxListSize, listNumber), file=sys.stderr)
 	else:
 		tsv = downlistDefinitions[listNumber]["items"]
-		for i in range(len(tsv)):
+		for i in range(len(buffer)):
 			buffer[i] = formatDownlinkItem(buffer[i], tsv, i)
 		print(downlistDefinitions[listNumber]["title"], file=sys.stderr)
 		count = 0
@@ -388,49 +393,57 @@ if raw:
 				print(file=sys.stderr)
 				col = 0
 		return
-elif early1:
-	tsv = downlistDefinitions["XXXXX"]["items"]
+elif False and early1:
+	# This was my original implementation of `early`.  It works fine.  But 
+	# in eventually porting it into DecodeDigitalDownlink.c, it seemed to me
+	# to be unnecessarily complicated, when it should instead be a relatively-
+	# minor tweak to `late1`.  Hence there's an alternate implementation shortly
+	# that I hope will work out better for me. 
+	tsv = downlistDefinitions["00000"]["items"]
 	downlistLength = len(tsv)
-	downlistLengthWithoutIDsMinus1 = (4 * downlistLength) // 5 - 1
 	#print("***DEBUG***", downlistLength)
 	lastIndex = downlistLength - 1
+	while tsv[lastIndex]["name"].endswith(" MARKER"):
+		lastIndex -= 1
+	#print("***DEBUG***", lastIndex, tsv, file=sys.stderr)
 	data = [None]*downlistLength
 	fillCount = 0
 	pending = None
 	ready = False
 	index = 0
+	marks = []
+	immediateDisplay = False
 	def outputFromAGx(channel, value):
 		global pending, ready, index, data, id, fillCount
 		import sys
 		
-		if channel == 0o11: # OUT1
-			if pending != None:
-				newline = False
-				dataword = False
-				indexword = False
-				if value & 0o00400: # word-order bit
-					dataword = True
-				else:
-					if pending == None:
-						return
-					if (pending & 0o76000) == 0o00000: # ID word
-						if pending == 0:
-							newline = True
-							ready = True
-						# In this protocol, the ID words have the index of the
-						# previously-transmitted data word, but doesn't account
-						# for the reversed ordering nor the insertion of the 
-						# ID words themselves.  After compensating for those
-						# things, we can double-check that it agrees with the
-						# index we've been calculating internally.
-						i = (pending * 5) // 4
-						if i != index:
-							#print("Readjusting index from %d to %d" % (index, i), file=sys.stderr)
-							index = i
-						indexword = True
-						# Could cross check the index here vs our internal
-						# one, but won't for now.
-					elif (pending & 0o76000) == 0o02000: # character-indicator word
+		if channel == 0o11 and pending != None: # OUT1
+			newline = False
+			dataword = False
+			indexword = False
+			if value & 0o00400: # word-order bit
+				dataword = True
+			else:
+				if (pending & 0o76000) == 0o00000: # ID word
+					if pending == 0:
+						newline = True
+						ready = True
+					# In this protocol, the ID words have the index of the
+					# previously-transmitted data word, but doesn't account
+					# for the reversed ordering nor the insertion of the 
+					# ID words themselves.  After compensating for those
+					# things, we can double-check that it agrees with the
+					# index we've been calculating internally.
+					i = (pending * 5) // 4
+					if i != index:
+						#print("Readjusting index from %d to %d" % (index, i), file=sys.stderr)
+						index = i
+					indexword = True
+					# Could cross check the index here vs our internal
+					# one, but won't for now.
+				elif (pending & 0o76000) == 0o02000: # character-indicator word
+					marks.append(pending)
+					if immediateDisplay:
 						if (pending >> 6) & 1:
 							print("Mark", file=sys.stderr)
 						else:
@@ -443,52 +456,95 @@ elif early1:
 								print(keycodesBlockI[keycode], file=sys.stderr)
 							else:
 								print("unknown (%02o)" % keycode, file=sys.stderr)
-						pending = None
-						return
-					else: # relay word
+					pending = None
+					return
+				else: # relay word
+					marks.append(pending)
+					if immediateDisplay:
 						address = (pending >> 11) & 0o17
 						bit11 = (pending >> 10) & 1
 						bits10to6 = (pending >> 5) & 0o37
 						bits5to1 = pending & 0o37
 						printRelayBlockI(address, bit11, bits10to6, bits5to1)
-						pending = None
-						return
-				if ready and (dataword or indexword):
-					# The following conditional fails in SUNRISE, but it's a 
-					# model for how to detect the downlist ID in other protocols.
-					if tsv[index]["name"][-3:] == " ID":
-						id = "%05o" % pending
-					if data[index] == None:
-						fillCount += 1
-					#data[index] = "%s: %05o" % (tsv[index]["name"], pending)
-					data[index] = formatDownlinkItem(pending, tsv, index)
-					index -= 1
-					if index < 0:
-						if fillCount >= len(data):
-							print('-'*125, file=sys.stderr)
-							print(instructions, file=sys.stderr)
-							print(file=sys.stderr)
-							print(downlistDefinitions["XXXXX"]["title"], 
-								file=sys.stderr)
-							count = 0
-							for item in data:
-								print("%-25s" % item, end="", file=sys.stderr)
-								count += 1
-								if count >= 5:
-									print(file=sys.stderr)
-									count = 0
-							if count > 0:
+					pending = None
+					return
+			if ready and (dataword or indexword):
+				if data[lastIndex - index] == None:
+					fillCount += 1
+				#data[index] = "%s: %05o" % (tsv[index]["name"], pending)
+				data[lastIndex - index] = formatDownlinkItem(pending, tsv, index)
+				index -= 1
+				if index < 0:
+					if fillCount > lastIndex: # len(data):
+						for i in range(lastIndex+1, len(data)):
+							if i - lastIndex + 1 <= len(marks):
+								data[i] = "MARKER: %05o" % marks.pop(0)
+							else:
+								data[i] = "MARKER: None"
+						print('-'*125, file=sys.stderr)
+						print(instructions, file=sys.stderr)
+						print(file=sys.stderr)
+						print(downlistDefinitions["00000"]["title"], 
+							file=sys.stderr)
+						count = 0
+						for item in data:
+							print("%-25s" % item, end="", file=sys.stderr)
+							count += 1
+							if count >= 5:
 								print(file=sys.stderr)
+								count = 0
+						#for item in marks:
+						#	itemString = "MARKER: %05o" % item
+						#	print("%-25s" % itemString, end="", file=sys.stderr)
+						#	count += 1
+						#	if count >= 5:
+						#		print(file=sys.stderr)
+						#		count = 0
+						if count > 0:
 							print(file=sys.stderr)
-						index = lastIndex
-				pending = None
-			return
-		if channel == 0o14: # OUT4
+						print(file=sys.stderr)
+						marks.clear()
+					index = lastIndex
+			pending = None
+		elif channel == 0o14: # OUT4
 			pending = value
 	
 		return
+elif early1:
+	listNumber = "00000"
+	tsv = downlistDefinitions[listNumber]["items"]
+	minListSize = len(tsv)
+	while tsv[minListSize - 1]["name"].endswith(" MARKER"):
+		minListSize -= 1
+	pending = None
+	buffer = []
+	marks = []
+	def outputFromAGx(channel, value):
+		global pending
+		
+		if channel == 0o11 and pending != None: # OUT1
+			wordOrder = value & 0o00400
+			if wordOrder:
+				buffer.append(pending)
+			elif (pending & 0o74000) != 0:
+				marks.append(pending) # relay word
+			elif (pending & 0o76000) == 0o02000:
+				marks.append(pending) # character-indicator word
+			else:
+				buffer.append(pending) # index word
+				if pending == 0: # End of the downlist
+					buffer.reverse()
+					while len(marks) > 0:
+						buffer.append(marks.pop(0))
+					printBuffer(listNumber, buffer, minListSize=minListSize)
+					buffer.clear()
+			pending = None
+		elif channel == 0o14: # CPU channel used for downlink data
+			pending = value
+		
+		return
 elif late1:
-	listNumber = "XXXXX"
+	listNumber = "00000"
 	pending = None
 	buffer = []
 	marks = []
@@ -498,14 +554,17 @@ elif late1:
 		if channel == 0o11: # OUT1
 			if pending == None:
 				return
+			wordOrder = value & 0o00400
+			if wordOrder and pending != 0o74000 and (pending & 0o74000) == 0o74000: # MARK word.
+				marks.append(pending)	
+				pending = None
+				return
 			while len(marks) > 0 and len(buffer) in [48, 49, 50, 97, 98, 99]:
 				buffer.append(marks.pop(0))
-			if 0 == (value & 0o00400): # Data word.
+			if not wordOrder: # Data word.
 				buffer.append(pending)
 			elif pending == 0o74000:
 				buffer.append(pending)
-			elif (pending & 0o74000) == 0o74000: # MARK word.
-				marks.append(pending)	
 			else: # ID word
 				printBuffer(listNumber, buffer)
 				listNumber = "%05o" % pending
@@ -517,10 +576,10 @@ elif late1:
 		
 		return
 elif early2:
-	listNumber = "XXXXX"
+	listNumber = "00000"
 	buffer = []
 	def outputFromAGx(channel, value):
-		global col, pending, lastWordOrder, listNumber
+		global pending, lastWordOrder, listNumber
 		
 		if channel in [0o34, 0o35]:
 			buffer.append(value)
@@ -535,7 +594,7 @@ elif early2:
 				buffer.append(pending)
 		return
 elif mid2:
-	listNumber = "XXXXX"
+	listNumber = "00000"
 	buffer = []
 	wordOrder = 1
 	def outputFromAGx(channel, value):

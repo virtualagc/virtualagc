@@ -189,6 +189,16 @@
  *              2025-01-13 RSB  Added the AGC_WISH environment variable.
  *              2025-03-03 RSB	Added --software switch for yaTelemetry.
  *              2025-04-14 RSB	Enabled command-line debugging for Block I.
+ *              2025-04-20 RSB	Began allowing telemetry for some additional
+ *              		AGC software versions.  (But just Block II/LGC
+ *              		so far.)  Also, allowed other peripherals on
+ *              		several LGC versions that weren't previously
+ *              		enabled.
+ *              2025-04-21 RSB	Missions now automatically enabled/disabled
+ *              		on the basis of the existence of their core
+ *              		ropes.
+ *              2025-04-29 RSB	Apparently, running Borealis has been running
+ *              		Aurora12 instead.  Fixed that.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -204,6 +214,7 @@
 #include "wx/stdpaths.h"
 #include "wx/filefn.h"
 #include "wx/utils.h"
+#include "wx/filename.h"
 
 // Note: Do *not* use persistence for the main window.  It interacts badly with
 // resizable windows, at least on my Linux Mint 21.3 system; the window
@@ -279,37 +290,41 @@ setWidgetColours(wxControl* w, int b=255, int f=0) {
  * versions, although a handful of special behaviors may be hardcoded separately.
  * Also, for newly-added missions, don't forget to add a consistency event for it
  * in the event table appearing later in this file.
+ *
+ * Note that the .enable field will be overridden during initialization, on the
+ * basis of whether or not the associated core-rope file exists, so don't take
+ * the initializer below of that field seriously.
  */
-static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
+static missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
     - ID_FIRSTMISSION] =
       {
           //
-            { "Apollo 1 Command Module", "",
-                "Click this to select the unflown Apollo 1 mission.", DISABLED,
-                CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
-            { "AS-202 (\"Apollo 3\") CM", "Corona261/MAIN.agc.html",
-                "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission. "
+            { "Apollo 1 Command Module", "Sunspot247/MAIN.agc.html",
+                "Click this to select the unflown Apollo 1 mission.", ENABLED,
+                CM, BLOCK1, TELEMETRY_PERIPHERALS, "Sunspot247", "CM0.ini" },
+            { "AS-202 CM", "Corona261/MAIN.agc.html",
+                "Click this to select the AS-202 unmanned CM mission. "
                 "Note that this software is presently tentative.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Corona261", "CM0.ini" },
+		ENABLED, CM, BLOCK1, TELEMETRY_PERIPHERALS, "Corona261", "CM0.ini" },
             { "Apollo 4 Command Module", "Solarium055/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 4 Block 1 CM mission, running software SOLARIUM 55, "
                     "which is believed to be identical to SOLARIUM 54.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
+		    ENABLED, CM, BLOCK1, TELEMETRY_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "Apollo 5 Lunar Module", "Sunburst120/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 5 LM mission, running software SUNBURST 120.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120", "LM0.ini" },
+		ENABLED, LM, BLOCK2, PERIPHERALS, "Sunburst120", "LM0.ini" },
             { "Apollo 6 Command Module", "Solarium055/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 6 Block 1 CM mission, running software SOLARIUM 55.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
+		ENABLED, CM, BLOCK1, TELEMETRY_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "2TV-1 Command Module", "SundialE/MAIN.agc.html",
                 "Click this to select the 2TV-1 mission, running software Sundial E.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "SundialE", "CM.ini" },
-            { "Apollo 7 Command Module", "",
-                "Click this to select the Apollo 7 mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "", "CM.ini" },
+		ENABLED, CM, BLOCK2, PERIPHERALS, "SundialE", "CM.ini" },
+            { "Apollo 7 Command Module", "Sundisk282/MAIN.agc.html",
+                "Click this to select the Apollo 7 mission.", ENABLED, CM,
+                BLOCK2, PERIPHERALS, "Sundisk282", "CM.ini" },
             { "Apollo 8 Command Module", "Colossus237/MAIN.agc.html",
                 "Click this to select the Apollo 8 mission, running software COLOSSUS 237.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237", "CM.ini" },
+		ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237", "CM.ini" },
             { "Apollo 9 Command Module", "Colossus249/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 9 mission, running software COLOSSUS 249.",
                 ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249", "CM.ini" },
@@ -376,9 +391,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 13 Lunar Module", "LM131R1/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 13 mission, running software LM131R1.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "LM131R1", "LM.ini" },
-            { "Apollo 14 Command Module", "",
+            { "Apollo 14 Command Module", "Comanche108/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 14 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche108", "CM.ini" },
             { "LUMINARY 163 (LM)", "Luminary163/MAIN.agc.html",
                 "Click this to select Luminary 163, the 1st software release targeting the Apollo 14 mission.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary163", "LM.ini" },
@@ -408,10 +423,10 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation", "LM.ini" },
             { "SUNRISE 45", "Sunrise45/MAIN.agc.html",
                 "Click this to select the SUNRISE 45 Block I program.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Sunrise45", "CM0.ini" },
+                ENABLED, CM, BLOCK1, TELEMETRY_PERIPHERALS, "Sunrise45", "CM0.ini" },
             { "SUNRISE 69", "Sunrise69/MAIN.agc.html",
                 "Click this to select the SUNRISE 69 Block I program.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Sunrise69", "CM0.ini" },
+                ENABLED, CM, BLOCK1, TELEMETRY_PERIPHERALS, "Sunrise69", "CM0.ini" },
             { "RETREAD 44 (LM)", "Retread44/MAIN.agc.html",
                 "Click this to select the RETREAD 44 software.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
@@ -420,16 +435,16 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread50", "LM0.ini" },
             { "AURORA 88 (LM)", "Aurora88/MAIN.agc.html",
                 "Click this to select the AURORA 88 software.  This was the standard checkout software for the LM guidance system.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora88", "LM0.ini" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Aurora88", "LM0.ini" },
             { "DAP AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
                 "Click this to select the DAP AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Aurora12", "LM0.ini" },
             { "BOREALIS (LM)", "Borealis/MAIN.agc.html",
                 "Click this to select the BOREALIS test-suite software.  BOREALIS is a modernized AGC self-test suite, based on AURORA.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Borealis", "LM0.ini" },
             { "SUNBURST 37 (LM)", "Sunburst37/MAIN.agc.html",
                 "Click this to select the SUNBURST 37 (early non-mission LM) software.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Sunburst37", "LM0.ini" },
             { "ZERLINA 56 (LM)", "Zerlina56/MAIN.agc.html",
                 "Click this to select ZERLINA 56 (next-generation non-mission LM) software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Zerlina56", "LM.ini" },
@@ -598,6 +613,21 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
 
   PathDelimiter = wxT("");
   PathDelimiter += PATH_DELIMITER;
+
+
+  // Enable/disable missions on the basis of whether or not their rope images
+  // are available, overriding whatever settings are in the `missionConstants`
+  // array.
+  for (int mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
+    {
+      wxString basename = wxString::FromUTF8(
+          missionConstants[mission - ID_FIRSTMISSION].basename);
+      wxString filename = wxT("source/") + basename + wxT("/") + basename + wxT(".bin");
+      if (wxFileName::FileExists(filename))
+	missionConstants[mission - ID_FIRSTMISSION].enabled = ENABLED;
+      else
+	missionConstants[mission - ID_FIRSTMISSION].enabled = DISABLED;
+    }
 
   // Find the directory that the executable is in.  Then go up one
   // level and then down into Resources sub-directory.  I envision
@@ -2473,6 +2503,7 @@ VirtualAGC::EnforceConsistency(void)
 {
   bool IsCustom = false;
   bool abnormalCase = false;
+  bool allowTelemetry = true;
   bool hasSource = false;
 
   block1 = false;
@@ -2486,7 +2517,9 @@ VirtualAGC::EnforceConsistency(void)
         block1 = (missionConstants[mission - ID_FIRSTMISSION].Block1 == BLOCK1);
         abnormalCase = block1
             || (missionConstants[mission - ID_FIRSTMISSION].noPeripherals
-                == NO_PERIPHERALS);
+                != PERIPHERALS);
+        allowTelemetry = !abnormalCase ||
+            missionConstants[mission - ID_FIRSTMISSION].noPeripherals == TELEMETRY_PERIPHERALS;
         IsLM = (missionConstants[mission - ID_FIRSTMISSION].lm == LM);
         hasSource = (missionConstants[mission - ID_FIRSTMISSION].html[0] != 0);
         break;
@@ -2537,7 +2570,7 @@ VirtualAGC::EnforceConsistency(void)
   IsCustom = AgcCustomButton->GetValue();
   EnableLM(IsLM && !abnormalCase);
   EnableCustomAGC(IsCustom);
-  DeviceTelemetryCheckbox->Enable(!abnormalCase);
+  DeviceTelemetryCheckbox->Enable(allowTelemetry);
   if (!DeviceTelemetryCheckbox->IsEnabled())
     DeviceTelemetryCheckbox->SetValue(false);
   //if (DeviceTelemetryCheckbox->GetValue () && DskyLiteButton->GetValue ())
@@ -3484,7 +3517,11 @@ VirtualAGC::FormCommands(void)
     {
       yaAGC += wxT(" --initialize-sunburst-37");
     }
-  if (CMorLM.IsSameAs(wxT("CM")))
+  if (block1)
+    {
+      TelemetrySwitches = wxT(" --port=19672 --spacecraft=CM");
+    }
+  else if (CMorLM.IsSameAs(wxT("CM")))
     {
       CmSim = true;
       TelemetrySwitches = wxT(" --port=19700 --spacecraft=CM");
@@ -3494,8 +3531,7 @@ VirtualAGC::FormCommands(void)
       LmSim = true;
       TelemetrySwitches = wxT(" --port=19800 --spacecraft=LM");
     }
-  if (!block1)
-    TelemetrySwitches += wxT(" --software=") + basename;
+  TelemetrySwitches += wxT(" --software=") + basename;
   if (!yaTelemetry.IsSameAs(wxT("")))
     yaTelemetry += TelemetrySwitches;
   if (!yaAGC.IsSameAs(wxT("")))

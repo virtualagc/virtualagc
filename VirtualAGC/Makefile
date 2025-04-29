@@ -93,6 +93,7 @@
 #		2017-12-11 RSB	Added yaDSKY2/*.canned files.
 #		2025-03-03 RSB	Accounted for ddd-*.tsv files in Resources/
 #		2025-04-03 RSB	Same for yaTelemetry/documentation/.
+#		2025-04-20 RSB	And tsv/documentation files in piPeripheral/.
 
 APP=VirtualAGC
 # *** BEWARE! ***  The MISSIONS variable is normally inherited from the 
@@ -272,6 +273,8 @@ endif
 	-rm -rf $@/images-yaDSKYb1/CVS $@/images-yaDSKYb1/.xvpics
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics
+	${CP} ../piPeripheral/ddd-*.tsv $@
+	${CP} ../piPeripheral/documentation $@
 	${CP} ../yaTelemetry/*.jpg ../yaAGC/ddd-*.tsv $@
 	${CP} ../yaTelemetry/documentation $@
 	${CP} ../Contributed/LM_Simulator $@

@@ -229,6 +229,7 @@ enum
 #define BLOCK1 1
 #define NO_PERIPHERALS 0
 #define PERIPHERALS 1
+#define TELEMETRY_PERIPHERALS 2
 // Configuration data for a single "mission".  See missionConstants[] in
 // VirtualAGC.cpp.
 typedef struct
@@ -239,7 +240,11 @@ typedef struct
   int enabled; // Either DISABLED (grayed-out) or ENABLED in the UI.
   int lm; // Either LM or CM.
   int Block1; // Either BLOCK2 or BLOCK1.
-  int noPeripherals; // Either PERIPHERALS or NO_PERIPHERALS (i.e., DSKY only)
+  // For `noPeripherals`:
+  // 	NO_PERIPHERALS = Only DSKY allowed.
+  // 	TELEMETRY_PERIPHERAL = Only DSKY and telemetry allowed.
+  // 	PERIPHERALS = All peripherals allowed.
+  int noPeripherals;
   const char basename[32]; // Fragment of name for locating the rope file.
   const char dsky[16]; // DSKY config file, usually LM.ini or CM.ini. Ignored for Block 1.
 } missionAlloc_t;

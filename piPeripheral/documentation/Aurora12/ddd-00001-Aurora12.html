@@ -1,0 +1,1971 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Telemetry Documentation for DAP Aurora 12 AGS Initialization
+      List</title>
+    <link rel="stylesheet" href="./../downlists.css">
+  </head>
+  <body>
+    There is little known surviving Apollo-era documentation of the
+    AURORA program, nor its closest relatives (SUNDIAL and SUNBURST),
+    other than rare reference cards and meager memos.&nbsp;
+    Consequently, all of the information herein is derived from AURORA
+    source code and analogies to less-closely-related software such as
+    LUMINARY.<br>
+    <br>
+    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
+      href="#30">30</a> <a href="#40">40</a><br>
+    <h1>1a</h1>
+    <p>I.D. word for this list.&nbsp; Will contain 00321<sub>8</sub>.<br>
+    </p>
+    <h1>1b</h1>
+    <p>Sync bits.&nbsp; Will contain 00437<sub>8</sub>.<br>
+    </p>
+    <h1><a name="AGSBUFF"></a>2-5</h1>
+    <p>AGSBUFF, +1, +1, +2, +2, +3, +3, +4 (note the repetition).&nbsp;
+      AGSBUFF is a 28-word buffer that hold data used to initialize the
+      AGS.&nbsp; While only 4 of the words are downlinked here, more are
+      downlinked below at words 7-10, 12-15, and so on.&nbsp; <br>
+    </p>
+    <h1><a name="AGSWORD"></a>6a</h1>
+    <p>AGSWORD. Stores the address of the downlist type that was in
+      effect before emission of the Radar List commenced, and is used to
+      restore that prior downlist type after the Radar List finishes.<br>
+    </p>
+    <h1><a name="RADMODES"></a>6b</h1>
+    <p>RADMODES. The descriptions of the bit positions were adapted from
+      the "<a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/Documents/aurora_sundial_modes.pdf">AURORA
+
+
+
+
+        85 &amp; 86, SUNDIAL Mode Bits</a>" document:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">15<br>
+          </td>
+          <td valign="top">Set 1 for RR continuous designate.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">14<br>
+          </td>
+          <td valign="top">Set 1 for RR antenna being remoded. I.e.,
+            remode requested or in progress. This bit is set whenever
+            RRDESSM or RRDESNB determine that a designate may be
+            performed after a remode has been done. It is cleared at the
+            end of remoding by the REMODE routine.<br>
+            <br>
+            The presence of this inhibits the GIMBAL Limit monitor. If
+            this bit is set during a monitor reposition (see bit 11),
+            the reposition will be interrupted by RR1AXIS and the remode
+            will begin immediately. <br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Set 1 for RR CDUs being zeroed.&nbsp;&nbsp;
+            Set by RR Automode monitor and by RR ZERO. Cleared by RR
+            ZEROSB. Inhibits RR CDU Fail from lighting the tracker fail
+            lamp. <br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">12<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top">Set 1 for RR antenna
+            in mode 2, set 0 for mode 1.&nbsp; Set by RR ZEROSB
+            according to trunnion angle: 0 for mode I (|T|&lt;70); 1 for
+            mode II (|T|&gt;110°). Establishes limits for RR LIMCHK.
+            Determines gimbal angles for remode and reposition
+            sequences. Determines MODE A and MODE B setting in RR ANGLES
+            (MODE A are gimbal angles if target sighted in present mode,
+            etc.). May be inverted and reinverted (with rupt inhibited)
+            by RR DESSM and RR DESNB to use RR LIMCHK to see if sighting
+            possible after remode. Permanently inverted by REMODE. <br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Set 1 for RR antenna out of limit.&nbsp;
+            Monitor Reposition in progress. This bit is set whenever the
+            gimbal limit monitor finds T, S out of limits established
+            for the present mode. It is set by the MONREPOS routine and
+            cleared on completion of the reposition.<br>
+            <br>
+            Its presence inhibits further operation of the gimbal limit
+            monitor. If, during the reposition, the remode bit (14) is
+            set (by a routine requesting a remode-designate operation),
+            the reposition is interrupted (REPOSRPT) and the remode is
+            started immediately. If, then, when a designate is feasible
+            and STARTDES wants to initiate it, the presence of this bit
+            says antenna control is in&nbsp; progress, and the
+            associated tasks will use bits 14, 11, and 10 to begin
+            designation as soon as possible.&nbsp; <br>
+            <br>
+            If, during a designate operation this bit appears, the
+            designate is terminated, since motion of the spacecraft may
+            have driven the antenna out of limits or the antenna failed.
+            The designate supervisor is given an error return
+            (ROBADENO).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Set 1 for RR designate or request in
+            progress. This bit is set at STARTDES and cleared at the end
+            of designation, successful or otherwise. If it is present at
+            the end of a reposition, control is given to BEGDES to begin
+            designation, possibly preceded by a remade operation. It is
+            cleared on receipt of data good by the designate job to tell
+            the designate task to go to RGOODEND. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Set 1 for LR range on high scale, set 0 for
+            low scale. Set each time A LT data is read from the LR. Used
+            to detect scale changes so the sample which was attempted
+            during the scale change may be discarded. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Set 0 for LR velocity data failed. N samples
+            could not be obtained from 2N tries. This bit in conjunction
+            with Bit 5 lights tracker fail. Set and reset by data
+            reading routines. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Set 1 for RR CDU data OK, 0 for RR CDU fail —
+            ignore if bit 2 and/or 13 = 1. Holds last sampled RR CDU
+            fail bit. The absence of this and bits 2, 13 (auto &amp;
+            zeroing) lights tracker fail. Set/ reset by RRCDUCHK.&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Set 0 for LR desired in pos 1, set 1 for pos
+            2. Desired LR Antenna position set by LR POSZ and fresh
+            start. Used to monitor LR for proper position while reading
+            data.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Set 1 for LR alt. data fail. No LR Pas Data
+            (See bit 8). <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Set 1 for RR data fail. No RR Data. N samples
+            could not be taken in 2 N tries. Turns on tracker fail (see
+            bits 8, 5). <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Set 1 for RR on high scale, 0 for RR range on
+            low scale.&nbsp; See bit 9.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Set 1 for RR not in AUTO mode, 0 for RR in
+            AUTO mode. Set/reset by RRAUTCHK in T4. If just off
+            initiates RRTURNON (unless someone using RR). Its presence
+            inhibits gimbal limit check. If just on, and some program
+            using RR, (RRUSE) do a prog alarm.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Set 1 for no monitor reposition alarm.
+            Turn-on RRAUTCHK sequence. Set by RRTURNON and reset 1 sec
+            after CDUs zeroed. Inhibits prog alarm in monitor reposition
+            prog. Tested by RRZERO and if set, depends on RRTURNON to go
+            to ENDRADAR after testing RR USE, which shows someone is
+            waiting. <br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1>7-10</h1>
+    <p>AGSBUFF +4, +5, +5, +6, +6, +7, +7, +8 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>11a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>11b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>12-15</h1>
+    <p>AGSBUFF +8, +9, +9, +10, +10, +11, +11, +12 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>16a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>16b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>17-20</h1>
+    <p>AGSBUFF +12, +13, +13, +14, +14, +15, +15, +16 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>21a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>21b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>22-25</h1>
+    <p>AGSBUFF +16, +17, +17, +18, +18, +19, +19, +20 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>26a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>26b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>27-30</h1>
+    <p>AGSBUFF +20, +21, +21, +22, +22, +23, +23, +24 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>31a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>31b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>32-35</h1>
+    <p>AGSBUFF +24, +25, +25, +26, +26, +27, +27, +28 (note the
+      repetition).&nbsp; <a moz-do-not-send="true" href="#AGSBUFF">See
+        earlier description</a>.<br>
+    </p>
+    <h1>36a</h1>
+    <p>AGSWORD.&nbsp; <a moz-do-not-send="true" href="#AGSWORD">See
+        earlier description</a>.<br>
+    </p>
+    <h1>36b</h1>
+    <p>RADMODES.&nbsp; <a moz-do-not-send="true" href="#RADMODES">See
+        earlier description</a>.<br>
+    </p>
+    <h1>37</h1>
+    <p>TIME2, TIME1. <br>
+    </p>
+    <h1>38a</h1>
+    <p>TIME1.&nbsp; <br>
+    </p>
+    <h1>38b</h1>
+    <p>TIME3.<br>
+    </p>
+    <h1>39a</h1>
+    <p>UPLOCK. This is the uplink lock.&nbsp; Only the least-significant
+      bit is used.&nbsp; When set to 1, further uplink activity is
+      prevented.<br>
+    </p>
+    <h1>39b</h1>
+    <p>T6LOC. This does not appear to be used in SUNDIAL.&nbsp; In AGC
+      programs where it is used, it serves to prevent timer 6 interrupts
+      (T6RUPT), which in turn prevents control of the RCS jets.<br>
+    </p>
+    <h1><a name="40"></a>40a,40b,41a,41b,42a,42b,43a,43b,44a,44b,45a</h1>
+    <p> </p>
+    <p>DSPTABs.&nbsp; The eleven registers, DSPTAB through DSPTAB+10D,
+      indicate the status of the DSKY displays.&nbsp; If bit 15 through
+      12 are 0001, the next 11 bits will indicate the actual status of
+      the DSKY displays; if bits 15 through 12 are 1110, the next 11
+      bits indicate the "ones" complement of the status to which the CMC
+      will command the DSKY display.&nbsp; Bits 11-1 of DSPTAB+0 through
+      DSPTAB+10D are decoded as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom">DSPTAB<br>
+            <u>Register</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">Downlink<br>
+            <u>Word No.</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+0<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+1</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+2</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+3</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+4</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+5</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+6</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+7</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+8D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+9D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+10D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">50a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>R3D1 stands for digit one of the third register and VD1 stand for
+      the first digit of the verb display, etc.&nbsp; For the right
+      character of a pair, bit 5 is the MSB with bit 1 the LSB.&nbsp;
+      For the left character of a pair, the MSB is bit 10 with bit 6 the
+      LSB.&nbsp; Bit 11 of some of the DSPTABs contains discrete
+      information, a one indicating that the discrete is on.&nbsp; For
+      example, a one in bit 11 of DSPTAB+1 indicates that R3 has a plus
+      sign.&nbsp; If the sign bits associated with a given register are
+      both zeros, then the content of that particular register is octal;
+      if either of the bits is set, the register content is decimal
+      data.</p>
+    <p>The five bit codes associated with the digits are as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <br>
+          </td>
+          <td valign="top">MSB<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">LSB<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following is a diagram of the DSKY face showing positions of
+      the different digits:</p>
+    <pre>                             Program<br>                        ┌───────┬───────┐
+                        │  MD1  │  MD2  │
+                        └───────┴───────┘
+<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
+  │  VD1  │  VD2  │     │  ND1  │  ND2  │
+  └───────┴───────┘     └───────┴───────┘
+<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘
+<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    <h1>45b</h1>
+    <p>DSPTAB+11D.&nbsp; This register drives relays for the display
+      lights.&nbsp; The bit assignments are:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="left"><u>Assignment</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">No Attitude<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Gimbal Lock<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Tracker<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Program Caution<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    If bits 15 through 12 of DSPTAB+11D are 1000, the last 11 bits
+    indicate the state to which the CMC will command the relays; if bits
+    15 through 12 are 0000, the last 11 bits indicate the actual state
+    of the relays.&nbsp; A one indicates that the discrete is on.<br>
+    <h1>46</h1>
+    <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
+      elapsed time.&nbsp; Used for all timing while CMC is on.&nbsp;
+      Zeroed at liftoff and incremented by one bit per centisecond.
+      Scaled centiseconds/2<sup>28</sup>.</p>
+    <h1>47a</h1>
+    <p>Channel 11. DSKY "A" relays.&nbsp; Information here came from <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a>.&nbsp; Bit
+      assignments are as follows:</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">15<br>
+          </td>
+          <td valign="top">OT1116.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">14<br>
+          </td>
+          <td valign="top">OT1114.&nbsp; Engine off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">13<br>
+          </td>
+          <td valign="top">OT1113.&nbsp; Engine on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">12<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top">OT1112.&nbsp; Not
+            used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">11<br>
+          </td>
+          <td valign="top">OT1111.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">OT1110.&nbsp; Caution reset.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">OT1109.&nbsp; Test connector outbit.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">OT1108.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">OPEROR.&nbsp; Light operator error lamp
+            (flash).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">VNFLSH.&nbsp; Flash verb and noun lamps.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">KYRLS.&nbsp; Light key release lamp flash.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">TMPOUT.&nbsp; Light temperature caution lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">UPLACT.&nbsp; Light uplink activity lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">COMACT.&nbsp; Light computer activity lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">ISSWAR.&nbsp; ISS Warning lamp.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>47b</h1>
+    <p>Channel 12. GN&amp;C. Information here came from <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=54">Apollo
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+      assignments are as follows (with parenthesized numbers referring
+      to <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+        A and B</a>):</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">ISS turn on delay completed.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">RR enable auto track<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">LR pos command<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12 </td>
+          <td valign="top">-Roll gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">+Roll gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">-Pitch gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">+Pitch gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Display inertial data<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Not used<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Enable IMU error counter<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Zero IMU CDUs<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Coarse align enable<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Horizontal velocity low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Enable RR error counter<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Zero RR CDU<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>48a</h1>
+    <p>Channel 13. Radar and AGC.&nbsp; Information here came from <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=55">Apollo
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+      assignments are as follows:</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Enable T6RUPT.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Reset input trap circuit 32, concerned with
+            bits 10-1 of channel 32. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Reset input trap circuit 31B, concerned with
+            bits 12-7 of channel 31. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Reset input trap circuit 31A, concerned with
+            bits 6-1 of channel 31. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Enable Standby. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Test alarms (DSKY lamps).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Start RHC read<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">RHC counter enable<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Download order bit.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Block inlink.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Inhibit uplink, enable crosslink.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Range unit activity.&nbsp; Transmit a control
+            signal to radar.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top">Radar mode selection
+            <u>a</u>. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Radar mode selection <u>b</u>. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Radar mode selection <u>c</u>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    The radar mode-selection bits are interpreted as follows:<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">&nbsp;<u>a</u>&nbsp; <u>b</u>&nbsp; <u>c</u>&nbsp;
+
+
+            <br>
+          </th>
+          <th valign="top">Radar Selection<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 0&nbsp; 0 <br>
+          </td>
+          <td valign="top">None<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 0&nbsp; 1 <br>
+          </td>
+          <td valign="top">RR Range<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 1&nbsp; 0<br>
+          </td>
+          <td valign="top">RR Range Rate<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 1&nbsp; 1<br>
+          </td>
+          <td valign="top">None<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 0&nbsp; 0<br>
+          </td>
+          <td valign="top">LR X Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 0&nbsp; 1<br>
+          </td>
+          <td valign="top">LR Y Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 1&nbsp; 0<br>
+          </td>
+          <td valign="top">LR Z Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 1&nbsp; 1<br>
+          </td>
+          <td valign="top">LR Range<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1>48b</h1>
+    <p>Channel 14. Gyro and CDU drives.&nbsp; Information here came from
+      <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=56">Apollo
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+      assignments are as follows:</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">15<br>
+          </td>
+          <td valign="top">Drive IMU CDU X<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">14<br>
+          </td>
+          <td valign="top">Drive IMU CDU Y<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">13<br>
+          </td>
+          <td valign="top">Drive IMU CDU Z<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">12<br>
+          </td>
+          <td valign="top">Drive optics CDU T<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">11<br>
+          </td>
+          <td valign="top">Drive optics CDU S<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">10<br>
+          </td>
+          <td valign="top">Drive gyro.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="middle" align="center">9-7<br>
+          </td>
+          <td valign="top">Gyro selection bits:<br>
+            <br>
+            <table cellspacing="2" cellpadding="2">
+              <tbody>
+                <tr>
+                  <th valign="top"><u>Selection Bits</u><u><br>
+                    </u></th>
+                  <th valign="top"><br>
+                  </th>
+                  <th valign="top"><u>Signals Generated by Gyro Drive
+                      Control</u><br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">000<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center">&nbsp;&nbsp;&nbsp;
+                    <br>
+                  </td>
+                  <td valign="middle" align="center">none<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">100<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">none<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">001<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYXP (142), drive X
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">101<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYXM (143), drive X
+                    gyro negative<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">010<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYYP (144), drive Y
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">110<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYYM (145), drive Y
+                    gyro negative<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">011<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYZP (146), drive Z
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">111<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYZM (147), drive Z
+                    gyro negative<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">6<br>
+          </td>
+          <td valign="top">Enable gyro.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">5<br>
+          </td>
+          <td valign="top">Monitor incr drive spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">4<br>
+          </td>
+          <td valign="top">Thrust drive<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">3<br>
+          </td>
+          <td valign="top">Altitude meter activity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">Altitude rate selection<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">1<br>
+          </td>
+          <td valign="top">Transmit one outlink word.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1>49a</h1>
+    Channel 30. GN&amp;C. Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=57">Apollo
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+    assignments are as follows (with parenthesized numbers referring to
+    <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+      A and B</a>):<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Temperature within limits.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">ISS turn-on request.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">IMU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">IMU CDU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">IMU caged.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">G&amp;N control of S/C<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">IMU operates.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Spare.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">RR CDU fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Display inertial data<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Auto throttle<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Abort stage<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Engine armed<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Stage verification<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Abort<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>49b</h1>
+    <p>Channel 31. Translation and rotation. Information here came from
+      <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=58">Apollo
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+      assignments are as follows (with parenthesized numbers referring
+      to <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+        A and B</a>): </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Attitude control out of detent<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Auto stabilization<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Attitude hold<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">TRAN-Z (023).&nbsp; -Z translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">TRAN+Z (022).&nbsp; +Z translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">TRAN-Y (021).&nbsp; -Y translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">TRAN+Y (020).&nbsp; +Y translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">TRAN-X (019).&nbsp; -X translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">TRAN+X (018).&nbsp; +X translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">-AZ(LPD), -RMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">+AZ(LPD), +RMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">-YMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">+YMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">-EL (LPD), -PMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">+EL (LPD), +PMI<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>50a</h1>
+    Channel 32. Impulse.&nbsp; Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=60">Apollo
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+    assignments are as follows (with parenthesized numbers referring to
+    <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+      A and B</a>):<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">15-11<br>
+          </td>
+          <td valign="top">IN3216 (845), IN3214 (844), IN3213 (034),
+            IN3212 (033).&nbsp; Spares.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">10<br>
+          </td>
+          <td valign="top">ROLGOF (843).&nbsp; Roll gimbal off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">9<br>
+          </td>
+          <td valign="top">PCHGOF (842).&nbsp; Pitch gimbal off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">TRST10 (832).&nbsp; Thruster 10-11 fail</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">7<br>
+          </td>
+          <td valign="top">TRST9 (831).&nbsp; Thruster 9-12 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Thruster 13-15 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Thruster 14-16 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Thruster 6-7 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Thruster 1-3 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Thruster 5-8 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Thruster 2-4 fail<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>50b</h1>
+    Channel 33. Optics and AGC. Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=61">Apollo
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+    assignments are as follows (with parenthesized numbers referring to
+    <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+      A and B</a>):
+    <p> </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">OSCALM.&nbsp; Oscillator alarm.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">AGCWAR.&nbsp; AGC warning.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">PIPAFL.&nbsp; PIPA fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Signal supplied by Inlink Control, meaning
+            that downlink is too fast.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Signal supplied by Downlink Converter,
+            meaning that inlink is too fast.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">BLKUPL (083).&nbsp; Accept uplink data.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">9<br>
+          </td>
+          <td valign="top">LRRLSC (061). LR range low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">LVDAGD (039). Landing velocity data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">LR position 2 (hover)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">LR position 1 (descent)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">LR data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">RR data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">RRRLSC (069).&nbsp; RR range low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">RRPONA (064).&nbsp; RR power on/auto<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Spare.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <br>
+    <blockquote>
+      <p> </p>
+    </blockquote>
+    <h1><font size="-1"> </font></h1>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <hr width="100%" size="2"> <i>Last edited by RSB, 2025-04-25</i><br>
+  </body>
+</html>

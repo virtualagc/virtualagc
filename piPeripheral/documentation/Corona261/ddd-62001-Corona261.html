@@ -1,0 +1,1184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Telemetry Documentation for Corona 261 Update List</title>
+    <link rel="stylesheet" href="./../downlists.css">
+  </head>
+  <body>
+    <b>Note:</b>&nbsp; Refer to document R-477, "<a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/R477-AS202-GSOP-Rev2.pdf#page=185">Guidance
+
+
+
+      and Navigation System Operations Plan, Apollo Mission 202</a>",
+    Section 8.1.1 "AGC Digital Downlink", for the surviving Apollo-era
+    documentation.&nbsp; Our summary herein is incomplete and may not be
+    entirely reliable.&nbsp; Feedback providing improved information
+    relevant to the contents is welcome. &nbsp; Examination of CORONA
+    261 source-code files may also provide additional information:
+    <ul>
+      <li>ERASABLE_ASSIGNMENTS.agc</li>
+      <li>DOWN-TELEMETRY_PROGRAM.agc</li>
+    </ul>
+    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
+      href="#30">30</a> <a moz-do-not-send="true" href="#40">40</a><br>
+    <h1>1a </h1>
+    <p>ID. This word always has the octal value 62067, and identified
+      this downlist as the Powered List.<br>
+    </p>
+    <h1><a name="DSPTAB"></a>1b,2a,2b,3a,3b,4a,4b,5a,5b,6a,6b</h1>
+    <p>DSPTAB, +1, ..., +10.&nbsp; Indicate the contents of the DSKY
+      internal relays, thus indicating in turn what the DSKY is
+      currently displaying.&nbsp; See also document <a
+        moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574,
+
+
+
+
+        "Keyboard and Display System Program for AGC (Program SUNRISE)"</a>.<br>
+    </p>
+    <p>The following is a stylized diagram of the face of the <i>main
+        panel</i> DSKY, symbolically labeling the positions of the
+      different displayable digits and indicator lamps:</p>
+    <pre>                ┌───────┬───────┐
+                │ COMP  │ CHECK │
+                │ FAIL  │ FAIL  │
+                └───────┴───────┘<br>    &nbsp;Activity                       Program<br>┌───────┬───────┐              ┌───────┬───────┐
+│ UPTL  │ COMP  │              │  MD1  │  MD2  │
+└───────┴───────┘              └───────┴───────┘<br>      Verb                            Noun<br>┌───────┬───────┐               ┌───────┬───────┐
+│  VD1  │  VD2  │               │  ND1  │  ND2  │
+└───────┴───────┘               └───────┴───────┘<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    Whereas in the <i>navigation panel</i> DSKY, the COMP FAIL and
+    CHECK FAIL indicator lamps at the top are replaced by:<br>
+    <pre>┌───────┬───────┬───────┐<br>│  PROG │       │COUNTER│
+│  ALM  │       │ FAIL  │
+├───────┼───────┼───────┤<br>│  RUPT │   TC  │ SCALER│
+│  LOCK │  TRAP │  FAIL │
+├───────┼───────┼───────┤
+│ PARITY│   TM  │ CHECK │
+│  FAIL │  FAIL │  FAIL │
+├───────┼───────┼───────┤
+│       │  KEY  │       │
+│       │  RLSE │       │
+└───────┴───────┴───────┘<br></pre>
+    The table below shows how the downlinked relay words relate to the
+    digit and UPTL positions.&nbsp; (FLASH refers to the flashing of the
+    Verb/Noun digits.)&nbsp; <br>
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; Regarding the columns
+        titled "Relay Row" and "Relay Word", each of the entries in the
+        table below represents a "row" of 11 relays in the DSKY.&nbsp;
+        These rows are <i>logically</i>&nbsp; numbered 1-13 (though for
+        11-13 you need to see <a moz-do-not-send="true" href="#crelays">words
+
+          7a,7b,8a</a> below) and <i>physically</i> numbered with the
+        4-bit relay words.&nbsp; (Do not be fooled into thinking the two
+        are identical!)&nbsp; It's not normally necessary to know those,
+        but you need it if you want to relate this information to some
+        of the DSKY documentation and schematics discussed with words
+        7a,7b,8a.</font> <br>
+    </blockquote>
+    <p> </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom">DSPTAB<br>
+            <u>Register</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="top">Relay<br>
+            <u>Row</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">Downlink<br>
+            <u>Word No.</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">(Relay Word)<u><br>
+              Bits 15-12</u><u><br>
+            </u></th>
+          <td valign="top">&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+0<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0001<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+1</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">2a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0010<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+2</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">2b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0011<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+3</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">3a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0100<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+4</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">3b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0101<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+5</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">4a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0110<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+6</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">4b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">0111<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+7</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">5a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1000<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">UPTL<br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+8D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">5b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1001<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+9D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">6a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1010<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">FLASH<br>
+          </td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+10D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">6b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">1011<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The 5-bit codes associated with the digits, and used in either
+      bits 10-6 or bits 5-1 in the table above, are as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top">Digit <br>
+          </th>
+          <th valign="top">MSB<br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top"><br>
+          </th>
+          <th valign="top">LSB<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="crelays"></a>7a,7b,8a</h1>
+    <p>DSPTAB +11, +12, +13.&nbsp;&nbsp; States of two — yes, <i>two</i>
+      and not three — additional "rows" of DSKY relays, referred to as
+      "C relays" because they relate collectively to 33 signals
+      symbolized as C1, C2, ..., C33 that mostly are unrelated to the
+      DSKY itself..<br>
+    </p>
+    <p>The C relays associated with word 8a (DSPTAB +13) are alternately
+      referred to as "MCP relays".&nbsp; The unmanned Apollo Command
+      Module missions (AS-202, Apollo 4 &amp; 6) had no astronauts
+      aboard who could participate in controlling the spacecraft.&nbsp;
+      Part of that control was provided instead by the so-called Mission
+      Control Programmer (MCP) device provided by North American
+      Aviation.&nbsp; For our purposes here, what's relevant is that the
+      AGC could command activities in the spacecraft that it could not
+      normally command in a manned mission, by writing to the MCP
+      relays, which would then signal the actual MCP, which would then
+      perform the desired operations in the spacecraft.<br>
+    </p>
+    <p>Each of DSPTAB +11, +12, +13 is partitioned into a 4-bit "relay
+      word" (bits 15-12) and 11 bits of data (bits 11-1).&nbsp; More
+      detail about the C relays can be found in the "Apollo Command
+      Module Block I Series 100 Guidance and Navigation System Manual",
+      Figures <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/apollocommandmodacel_0.pdf#page=198">4-28</a>,
+      <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/apollocommandmodacel_0.pdf#page=205">4-231</a>,
+      <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/apollocommandmodacel_0.pdf#page=215">4-234</a>,
+      <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/apollocommandmodacel_0.pdf#page=208">4-208</a>,
+      and <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/apollocommandmodacel_0.pdf#page=227">4-240</a>,
+      among others, but here's a summary of their relay words and data
+      bits:<br>
+    </p>
+    <ul>
+      <li>7a.&nbsp; Relay Row 7, Relay Word 1100<sub>2</sub>. <br>
+      </li>
+      <ol>
+        <li>C1, Zero encoder (nav-panel DSKY)<br>
+        </li>
+        <li>C2, Coarse align (nav-panel DSKY)<br>
+        </li>
+        <li>C3, Lock CDU (nav-panel DSKY)<br>
+        </li>
+        <li>C4, Fine align (nav-panel DSKY)<br>
+        </li>
+        <li>C5, Encoder zeroing (main-panel and nav-panel DSKYs)<br>
+        </li>
+        <li>C6, CDU fail (main-panel and nav-panel DSKYs)<br>
+        </li>
+        <li>C7, PIPA fail (main-panel and nav-panel DSKYs)</li>
+        <li>C8, IMU fail (main-panel and nav-panel DSKYs)</li>
+        <li>C9, Condition lamp test (nav-panel DSKY)<br>
+        </li>
+        <li>C10, Attitude control lamp common (nav-panel DSKY)<br>
+        </li>
+        <li>C11, Roll reentry (nav-panel DSKY)<br>
+        </li>
+      </ol>
+      <li>7b.&nbsp; (Navigation panel only.)&nbsp; Relay Row 13, Relay
+        Word 1101<sub>2</sub> .</li>
+      <ol>
+        <li>C12, Zero optics CDUs<br>
+        </li>
+        <li>C13, Turn star tracker on<br>
+        </li>
+        <li>C14, Spare</li>
+        <li>C15, Spare</li>
+        <li>C16, Spare</li>
+        <li>C17, Spare</li>
+        <li>C18, Spare</li>
+        <li>C19, Spare</li>
+        <li>C20, Spare</li>
+        <li>C21, Spare</li>
+        <li>C22,<i> </i>Spare<br>
+        </li>
+      </ol>
+      <li>8a.&nbsp; (Main panel only.)&nbsp; Relay Row 13, Relay Word
+        1110<sub>2</sub>.<br>
+      </li>
+      <ol>
+        <li>C23, G&amp;N att. contr. mode select</li>
+        <li>C24, G&amp;N ΔV mode select</li>
+        <li>C25, G&amp;N entry mode select</li>
+        <li>C26, CM/SM separation command</li>
+        <li>C27, +X translation on/off</li>
+        <li>C28, G&amp;N fail indication</li>
+        <li>C29, Auto 0.05g indication</li>
+        <li>C30, Gimbal motor power on/off</li>
+        <li>C31, FDAI align</li>
+        <li>C32, Telecom antenna switch</li>
+        <li>C33, Backup abort command</li>
+      </ol>
+    </ul>
+    <h1>8b,9a</h1>
+    TIME2, TIME1.&nbsp; These are the values of the CPU's 14-bit timer
+    registers TIME1 and TIME2 (memory addresses octal 36 and 37).&nbsp;
+    TIME1 increments every 10 ms.&nbsp; It will wrap around from 037777
+    to 0 every 163.84 seconds.&nbsp; TIME2 increments whenever wraps
+    from 037777 to 0.&nbsp; TIME2 and TIME1 together form a single
+    28-bit timer counting the number of centiseconds that have elapsed
+    since power-up, and will itself wrap around to zero after just over
+    31 days.<br>
+    <h1><a name="IN0"></a>9b</h1>
+    <p>This is the value of the CPU register IN0 (address 0004), used
+      principally to receive keyboard input from the DSKY, with the
+      following bit assignments:<br>
+    </p>
+    <ul>
+      <li>B1-B5 contains a keycode, if a keypad key is pressed, as
+        follows.&nbsp; Note that not all codes are used:</li>
+      <ul>
+        <li>00 (octal) for "no key pressed".</li>
+        <li>20 (octal) for the digit 0.</li>
+        <li>01-11 (octal) for the digits 0-9.</li>
+        <li>21 for the VERB key.</li>
+        <li>22 for the ERROR RESET key.</li>
+        <li>31 for the KEY RLSE key.</li>
+        <li>32 for the + key.</li>
+        <li>33 for the - key.</li>
+        <li>34 for the ENTER key.</li>
+        <li>36 for the CLEAR key.</li>
+        <li>37 for the NOUN key.</li>
+      </ul>
+      <li>B6 is set when any of the B1-B5 or B15 is active, and is what
+        triggers a "KEYRUPT" (keypad interrupt).&nbsp; <br>
+      </li>
+      <li>B7-B13 are not used.</li>
+      <li>B14 is active when the AGC can be put into
+        partially-powered-down "standby mode", and is, I believe,
+        connected to a control-panel switch that's not on the DSKY.</li>
+      <li>B15 is active when the MARK key, not on the DSKY itself, is
+        pressed, and activates B6 just like the DSKY-keypad keys do. It
+        is used to cause the AGC to "mark" the current IMU data ...
+        i.e., to snapshot it in memory.</li>
+    </ul>
+    <p>It is perhaps worth noting that the KEYRUPT software expects for
+      the entire lower 6 bits, B6-B1 to return to zero after the
+      pushbutton is released, and will refuse to process additional
+      keystrokes until this occurs.&nbsp; At the same time, though, the
+      way Virtual AGC DSKY simulation software works, it will not send a
+      keycode to the AGC until the DSKY button is released.&nbsp; This
+      means that you can't use this downlink to detect keycodes, and
+      even in the physical AGC/DSKY system you would have been very
+      unlikely to be able to do so.<br>
+    </p>
+    <h1><sup><a name="10"></a>10a</sup></h1>
+    <p>This is the value of the CPU's IN2 input register (address 0006),
+      which has the following bit positions:<br>
+    </p>
+    <ul>
+      <li>B1: OR CDU <span style="text-decoration: overline">Zero</span></li>
+      <li>B2: OR SXT <span style="text-decoration: overline">Zero</span></li>
+      <li>B3: OR TRACKER <span style="text-decoration: overline">Zero</span></li>
+      <li>B4: Photocell -</li>
+      <li>B5: Photocell +</li>
+      <li>B6-7: Not used</li>
+      <li>B8: Tracker Fail (RUPT)</li>
+      <li>B9: OPTICS Fail (RUPT2)</li>
+      <li>B10: CDU Fail (RUPT2)</li>
+      <li>B11: ACCEL Fail (RUPT2)</li>
+      <li>B12: IMU Fail (RUPT2)</li>
+      <li>B13: ABORT (RUPT2)</li>
+      <li>B14: BAD BOOST (RUPT2)</li>
+      <li>B15: AGC Power Fail (RUPT2)</li>
+    </ul>
+    <h1><sup>10b</sup></h1>
+    <p>This is the value of the CPU's IN3 input register (address 0007),
+      which has the following bit positions:<br>
+    </p>
+    <ul>
+      <li>B1: K1 Zero CDU SW</li>
+      <li>B2: K2</li>
+      <li>B3: K3</li>
+      <li>B4: K4</li>
+      <li>B5: ATTSW</li>
+      <li>B6: TRNSW</li>
+      <li>B7: ZERO OPT</li>
+      <li>B8: MODE SELECT OPT</li>
+      <li>B9: MODE SELECT OPT</li>
+      <li>B10: MODE SELECT OPT</li>
+      <li>B11-12: Not used.</li>
+      <li>B13: MODE SELECT S/C</li>
+      <li>B14: MODE SELECT S/C</li>
+      <li>B15: Lift-off</li>
+    </ul>
+    <h1>11a</h1>
+    <p>This is the value of the CPU's OUT1 output register (address
+      0011).&nbsp; Bit assignments are as follows:<br>
+    </p>
+    <ul>
+      <li>B1:&nbsp; PROG alarm on LM DSKY</li>
+      <li>B2:&nbsp; COMP FAIL and alarm on DSKY</li>
+      <li>B3:&nbsp; KEY RLSE indicator on LM DSKY</li>
+      <li>B4:&nbsp; SCALER FAIL or TM FAIL (not sure which) alarm on LM
+        DSKY</li>
+      <li>B5:&nbsp; CHECK FAIL alarm on DSKY</li>
+      <li>B6:&nbsp; Block UPLINK</li>
+      <li>B7:&nbsp; ERRUPT trap</li>
+      <li>B8:&nbsp; Slow speed, STANDBY</li>
+      <li>B9:&nbsp; Word Order Telem</li>
+      <li>B10:&nbsp; Block Endpulse</li>
+      <li>B11:&nbsp; PIPA SCALE FINE</li>
+      <li>B12:&nbsp; PIPA SCALE EMERG</li>
+      <li>B13:&nbsp; ENG START</li>
+      <li>B14:&nbsp; START CLOCK</li>
+      <li>B15:&nbsp; ENG OUT-OFF</li>
+    </ul>
+    <h1>11b</h1>
+    <p>STATE.&nbsp; A collection of bit-flags uses as switches by
+      interpretive programs.&nbsp; Here are abbreviated descriptions,
+      based on Corona 261's ERASABLE_ASSIGNMENTS.agc source code:<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
+          </td>
+          <td valign="top">JSWITCH.&nbsp; Bit set to 1 within orbital
+            integration routine to indicate that extrapolation of
+            W-matrix is being carried out in orbital integration
+            routine. </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">MIDFLAG.&nbsp; Set to 1 within orbital
+            integration routine at beginning of time step when magnitude
+            of conic position vector is greater than the constants RME
+            (earth-centered) or RMM (moon-centered) and set to 0 if less
+            than these constants. </td>
+        </tr>
+        <tr>
+          <td valign="top">13<br>
+          </td>
+          <td valign="top">MOONFLAG.&nbsp; Set by orbital integration to
+            1 or 0 when integrating the stored CSM and LM state vectors;
+            1 indicates lunar orbit, 0 indicates earth orbit.&nbsp; Also
+            set to 1 or 0 in integration when switching coordinate
+            centers. </td>
+        </tr>
+        <tr>
+          <td valign="top">12<br>
+          </td>
+          <td valign="top">FIRSTFLG.&nbsp; Used in mid-course
+            navigation.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">NBSMBIT.&nbsp; Used in in-flight alignment.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">GONEPAST.&nbsp; Used in re-entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">RELVELSW.&nbsp; Used in re-entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">EGSW.&nbsp; Used in re-entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">HUNTIND.&nbsp; Used in re-entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">HIND.&nbsp; Used in entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">LATSW.&nbsp; Used in entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">DSPLOCK.&nbsp; Keyboard/subroutine call
+            interlock.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">EXTVBACT.&nbsp; Extended verb activity.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">UPLOCK. Uplink interlock (activated by
+            reception of a bad code in uplink).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">INRLSW:&nbsp; PROGSTALL not used during
+            entry; or PRGSW: used by PRGSTALL.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ul>
+    </ul>
+    <h1>12a</h1>
+    <p>FLAGWORD 1.&nbsp; A collection of AS-202 sequence-control flags.<br>
+    </p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
+          </td>
+          <td valign="top">COASTFLG.&nbsp; In coast phase.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">UPDATFLG.&nbsp; Received R, V, T update.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13<br>
+          </td>
+          <td valign="top">VERTFLAG. Local vertical control on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">12<br>
+          </td>
+          <td valign="top">SHTDNFLG.&nbsp; Preparation for free fall
+            commenced.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">ACTIVFLG.&nbsp; <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">INTPFLAG.&nbsp; Free fall interrupt enabled.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">INITFLAG.&nbsp; Initial VR, thrust attitude
+            computation.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">S4BSMFLG.&nbsp; <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">INT1FLAG.&nbsp; TFF &lt; TFF criterion.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">MONITFLG.&nbsp; Saturn pitch monitor on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">DVMONFLG.&nbsp; ΔV monitor on. </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">STEERFLG.&nbsp; TVC steering mode on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">ENTRYFLG.&nbsp; Ready for entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">LIFTFLAG.&nbsp; <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">TUMBFLAG.&nbsp; Tumble state detected.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>12b</h1>
+    <p>FLAGWORD 2. A collection of AS-202 sequence-control flags.</p>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">15<br>
+          </td>
+          <td valign="top">DRIFTFLG.&nbsp; Enables free fall gyro bias
+            compensation.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">14<br>
+          </td>
+          <td valign="top">CDUXFLAG.&nbsp; Enabled when CM/SM separation
+            has been set.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">13<br>
+          </td>
+          <td valign="top">BACKFLAG.&nbsp; Do BACKTEST.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">12<br>
+          </td>
+          <td valign="top">ROLLFLAG.&nbsp; &nbsp; A control flag for
+            CALCMANU routine. </td>
+        </tr>
+        <tr>
+          <td valign="top">11<br>
+          </td>
+          <td valign="top">CALCFLAG.&nbsp; A control flag for CALCMANU
+            routine.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">10<br>
+          </td>
+          <td valign="top">DOMANFLG.&nbsp; Enables MANUJOB (attitude
+            maneuvers).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top">NEGFLAG.&nbsp; A control flag for CALCMANU
+            routine. </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top">BEGINFLG.&nbsp; A control flag for CALCMANU
+            routine. </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top">SPS4FLAG.&nbsp; SPS 4 burn switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top">SPS3FLAG.&nbsp; SPS 3 burn switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top">SPS2FLAG.&nbsp; SPS 2 burn switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top">SPS1FLAG.&nbsp; SPS 1 burn switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top">TABTFLAG.&nbsp; Burn after tumble arrest
+            switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top">ABRTFLAG.&nbsp; Abort burn switch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">ARRSTFLG.&nbsp; Tumble arrest burn switch.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>13a,13b,14a</h1>
+    <p>CDUX, CDUY, CDUZ.&nbsp; Values of the CPU's registers of those
+      names (addresses 47, 50, and 51 octal), which contain angular data
+      from the IMU as digitized by the CDU.<br>
+    </p>
+    <h1><a name="20"></a>14b,15a,15b,16a,16b,17a,17b,18a,18b,19a,19b,20a,20b,21a</h1>
+    <p>STBUFF, +1, ..., +13.&nbsp; 1st through 14th components of an
+      update via V76.<br>
+    </p>
+    <h1>21b,22a,22b,23a,23b,24a</h1>
+    <p>Spares.<br>
+    </p>
+    <h1>24b</h1>
+    <p>STCNTR.&nbsp; Indicates which component of V76 update is
+      presently being loaded.<br>
+    </p>
+    <h1><a name="mark"></a>25a,25b,26a</h1>
+    <p>These are positions in which "MARK words", actually emitted
+      asynchronously with respect to the preceding words in the first
+      half of the downlist, are conveniently displayed as if emitted
+      synchronously.&nbsp; 0-3 MARK words may have been emitted.&nbsp;
+      The possible values are:<br>
+    </p>
+    <ul>
+      <li>74000:&nbsp; A placeholder used when less than 3 MARK words
+        were emitted<br>
+      </li>
+      <li>74001:&nbsp; PIPA/PIPTIME MARK word<br>
+      </li>
+      <li>74002:&nbsp; Position/velocity MARK word<br>
+      </li>
+      <li>74003:&nbsp; CDUs/T<sub>FF</sub> MARK word</li>
+    </ul>
+    <h1><a name="30"></a>26b,27a,27b,28a,28b,29a,29b,30a,30b,31a,31b,32a,32b,33a</h1>
+    <p>DSPTAB, +1, ..., +13.&nbsp; DSKY and MCP relay data, <a
+        moz-do-not-send="true" href="#DSPTAB">as in words 1b-6b,7a-8a
+        earlier</a>, though with values that may have changed in the
+      meantime.<br>
+    </p>
+    <h1>33b,34a </h1>
+    <p>TIME2GR, +1.&nbsp; The AS-202 GSOP indicates that these are
+      spares, but in Corona 261 source code it is the double-precision
+      time at which Guidance Reference Release (GRR) occurred, i.e. the
+      time at which the Saturn's guidance system began actively tracking
+      the state vector.<br>
+    </p>
+    <h1>34b,35a</h1>
+    <p>TCUTOFF, +1.&nbsp; Double precision time of GRR, lift-off, or
+      engine on/off, whichever was the last to occur.<br>
+    </p>
+    <h1><a name="40"></a>35b,36a,36b,37a,37b,38a,38b,39a,39b,40a,40b,41a,41b,42a</h1>
+    <p>RAVEGON, +1, +2, +3, +4, +5, VAVEGON, +1, +2, +3, +4, +5,
+      TAVEGON, +1.&nbsp; Spacecraft state vector — obtained from the
+      orbital-navigation program — to be used for the SPS2 burn.&nbsp;
+      RAVEGON <i>et al.</i> is a double-precision 3-vector containing
+      the X, Y, and Z coordinates of the position, while VAVEGON
+      contains the velocity, and TAVEGON contains the time.<br>
+    </p>
+    <h1>42b,43a,43b,44a,44b,45a,45b,46a,46b,47a,47b,48a,48b,49a</h1>
+    <p>STBUFF, +1, ..., +13.&nbsp; 1st through 14th components of an
+      update via V76.</p>
+    <h1>49b,50a,50b</h1>
+    MARK words emitted asynchronously during the 2nd half of the
+    downlist.&nbsp; <a moz-do-not-send="true" href="#mark">See words
+      25a,25b,26a</a> for a full explanation.<br>
+    <br>
+    <h1><font size="-1"> </font></h1>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <hr width="100%" size="2"> <i>Proofed.&nbsp; Last edited by RSB,
+      2025-04-26</i><br>
+  </body>
+</html>

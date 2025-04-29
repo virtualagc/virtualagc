@@ -64,7 +64,7 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
-YATELEMETRY_SWITCHES=-DSHOW_WORD_NUMBERS
+YATELEMETRY_SWITCHES=-DSHOW_WORD_NUMBERS -g
 
 # This is just so that when I build it, I can insure that it will be statically or
 # dynamically linked in the binary installers, according to my current whims.

@@ -609,7 +609,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
   // default processor is overridden and one of the ProcessMskXXXX()
   // functions from later in this file becomes the callback function
   // instead.
-  if (Channel == 013 || Channel == 034 || Channel == 035)
+  if (true /* Channel == 013 || Channel == 034 || Channel == 035 */)
     DecodeDigitalDownlink (Channel, Value, CmOrLm);
   return;
 Error:
@@ -1311,7 +1311,7 @@ static ParsedDownlinkList_t ParsedDownlinkList;
 #endif // 0
 
 void
-ParseDownlinkList (const DownlinkListSpec_t *Spec)
+ParseDownlinkList (DownlinkListSpec_t *Spec)
 {
 }
 
@@ -1320,7 +1320,7 @@ ParseDownlinkList (const DownlinkListSpec_t *Spec)
 // that has been buffered in memory.
 
 void
-PrintMsk683 (const DownlinkListSpec_t *Spec)
+PrintMsk683 (DownlinkListSpec_t *Spec)
 {
   ParseDownlinkList (Spec);
 
@@ -1336,23 +1336,7 @@ PrintMsk683 (const DownlinkListSpec_t *Spec)
 
 
 void
-PrintMsk966 (const DownlinkListSpec_t *Spec)
-{
-  ParseDownlinkList (Spec);
-  
-  int i;
-  //sprintf (&Sbuffer[0][0], "%s", Spec->Title);
-  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
-    {
-      if (i && !Spec->FieldSpecs[i].IndexIntoList)
-        break;          // End of field-list.
-      //PrintField (&Spec->FieldSpecs[i]);
-    }
-}
-
-
-void
-PrintMsk1123 (const DownlinkListSpec_t *Spec)
+PrintMsk966 (DownlinkListSpec_t *Spec)
 {
   ParseDownlinkList (Spec);
   
@@ -1368,7 +1352,23 @@ PrintMsk1123 (const DownlinkListSpec_t *Spec)
 
 
 void
-PrintMsk1137 (const DownlinkListSpec_t *Spec)
+PrintMsk1123 (DownlinkListSpec_t *Spec)
+{
+  ParseDownlinkList (Spec);
+  
+  int i;
+  //sprintf (&Sbuffer[0][0], "%s", Spec->Title);
+  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+    {
+      if (i && !Spec->FieldSpecs[i].IndexIntoList)
+        break;          // End of field-list.
+      //PrintField (&Spec->FieldSpecs[i]);
+    }
+}
+
+
+void
+PrintMsk1137 (DownlinkListSpec_t *Spec)
 {
   ParseDownlinkList (Spec);
 

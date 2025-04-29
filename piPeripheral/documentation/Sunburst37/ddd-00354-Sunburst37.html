@@ -1,0 +1,2816 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Telemetry Documentation for Sunburst 37 Nominal List</title>
+    <link rel="stylesheet" href="./../downlists.css">
+  </head>
+  <body>
+    I'm unaware of any surviving documentation related specifically to
+    telemetry for the SUNBURST program.&nbsp; Or indeed related to
+    anything else about SUNBURST.&nbsp; Consequently, most of the
+    information herein is derived from SUNBURST source code and
+    analogies to less-closely-related software such as SUNDANCE, AURORA,
+    and LUMINARY, and one mustn't place too much confidence in it.<br>
+    <br>
+    Go directly to word: <a href="#10">10</a> <a href="#20">20</a> <a
+      href="#30">30</a> <a href="#40">40</a> <a moz-do-not-send="true"
+      href="#50">50</a> <a moz-do-not-send="true" href="#60">60</a> <a
+      moz-do-not-send="true" href="#70">70</a> <a
+      moz-do-not-send="true" href="#80">80</a> <a
+      moz-do-not-send="true" href="#90">90</a><br>
+    <h1>1a</h1>
+    <p>I.D. word for this list.&nbsp; Will contain 00354<sub>8</sub>.<br>
+    </p>
+    <h1>1b</h1>
+    <p>Sync bits.&nbsp; Will contain 00437<sub>8</sub>.<br>
+    </p>
+    <h1><a name="RN"></a>2-8</h1>
+    <p>RN, +2, +4, VN, +2, +4, STATIME, +1.&nbsp; LM STATE VECTOR and
+      TIME.&nbsp; The LGC's latest calculated state vector for the LM in
+      reference coordinates.&nbsp; The coordinates may be either
+      earth-centered or moon-centered; a zero in bit 11 of flagword 8
+      (LMOONFLG) indicates earth-centered, a one indicates
+      moon-centered.&nbsp; Words 2-4 contain the position components X,
+      Y, Z scaled meters/2<sup>29</sup>.&nbsp; Words 5-7 contain the
+      velocity components X, Y, Z scaled (meters/centisecond)/2<sup>7</sup>.&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+      Words 8-9 contain the double-precision time associated with the
+      state vector, referenced to the computer clock.&nbsp; The scaling
+      for position, velocity and time is the same whether earth-centered
+      or moon-centered.&nbsp; These parameters are calculated whenever
+      the LM state vector is permanently extrapolated or changed.<br>
+    </p>
+    <h1>9a</h1>
+    <p>Garbage<br>
+    </p>
+    <h1><a name="10"></a>9b,10a,10b</h1>
+    <p>CDUXD, CDUYD, CDUZD. DAP INTERNAL DESIRED CDUs (X, Y, Z).&nbsp;
+      Outer, inner and middle intermediate desired gimbal angles.&nbsp;
+      Steering commands to DAP.&nbsp; Generated during a burn by
+      guidance equations or during an automatic maneuver.&nbsp;
+      Calculated every 2 secs during a PGNCS controlled burn (i.e., P40,
+      P42).&nbsp; Updated every 0.1 sec by the DAP (using DELCDUs)
+      during an automatic maneuver (KALCMANU) and also during powered
+      flight.&nbsp; These registers are unsigned 15-bit fractions.&nbsp;
+      Scaled degrees/360.<br>
+    </p>
+    <h1>11-13</h1>
+    <p>DELVX, DELVY, DELVZ.&nbsp; The accumulated PIPA counts when the
+      servicer is running.&nbsp; At the start of each 2-second cycle the
+      PIPAs are zeroed and the contents of the PIPAs are loaded into
+      DELVs.&nbsp; In stable member coordinates.&nbsp; Scaled
+      (centimeters/second)/2<sup>14</sup>.<br>
+    </p>
+    <h1><a name="LMPCMD"></a>14-17</h1>
+    <p>LMPCMD, +1, ..., +7.&nbsp; This is a circular buffer of up to 8
+      commands to be sent from the AGC to the LEM Mission Programmer
+      (LMP, not to be confused with Lunar Module Pilot).&nbsp; (See also
+      words 18a,18b.)&nbsp; Buffering is needed because physical output
+      to the LMP only takes place upon overflow of timer TIME4, which
+      occurs at 10 ms. intervals.&nbsp; Recall that in unmanned Apollo
+      missions, the LMP performed certain functions within the LEM that
+      the absent astronaut would otherwise have performed in manned
+      missions.&nbsp; Below, there's a list of all <i>known</i> LMP
+      command words, in which in the interest of space I've included
+      only the even-numbered command words.&nbsp; The omitted
+      odd-numbered commands reverse the senses of the even-numbered
+      commands.&nbsp; For example, since command 4 is "ED BATTERY
+      ACTIVATION - ON", then the omitted command 5 would be "ED BATTERY
+      ACTIVATION - OFF". <br>
+    </p>
+    <ul>
+      <li>4&nbsp;&nbsp;&nbsp; ED BATTERY ACTIVATION - ON</li>
+      <li>6&nbsp;&nbsp;&nbsp; RCS PRESSURIZE - FIRE</li>
+      <li>8&nbsp;&nbsp;&nbsp; LANDING GEAR DEPLOY - FIRE</li>
+      <li>22&nbsp;&nbsp;&nbsp; ABORT STAGE - COMMAND</li>
+      <li>26&nbsp;&nbsp;&nbsp; RADAR SELF TEST - ON</li>
+      <li>38&nbsp;&nbsp;&nbsp; ABORT STAGE - ARM</li>
+      <li>58&nbsp;&nbsp;&nbsp; LEM/S4B SEPARATE ARM - ON</li>
+      <li>60&nbsp;&nbsp;&nbsp; RCS ASCENT FEED VALVES, SYS A - OPEN</li>
+      <li>62&nbsp;&nbsp;&nbsp; RCS ASCENT FEED VALVES, SYS B - OPEN</li>
+      <li>76&nbsp;&nbsp;&nbsp; RCS ASCENT FEED VALVES, SYS A - CLOSE</li>
+      <li>78&nbsp;&nbsp;&nbsp; RCS ASCENT FEED VALVES, SYS B - CLOSE</li>
+      <li>86&nbsp;&nbsp;&nbsp; MANUAL THROTTLE - ON (10%)</li>
+      <li>90&nbsp;&nbsp;&nbsp; LEM/S4B SEPARATE - COMMAND</li>
+      <li>94&nbsp;&nbsp;&nbsp; THRUST ISOLATION VALVES, QUADRANT 3,
+        SYSTEM A - CLOSE</li>
+      <li>106&nbsp;&nbsp;&nbsp; C-BAND TRANSPONDER - ON</li>
+      <li>108&nbsp;&nbsp;&nbsp; THRUST ISOLATION VALVES, QUADRANT 1,
+        SYSTEM B - CLOSE</li>
+      <li>110&nbsp;&nbsp;&nbsp; THRUST ISOLATION VALVES, QUADRANT 3,
+        SYSTEM B - CLOSE</li>
+      <li>126&nbsp;&nbsp;&nbsp; RCS ASCENT FEED VALVE - ARM</li>
+      <li>134&nbsp;&nbsp;&nbsp; ENGINE SELECT - ASC ARM</li>
+      <li>138&nbsp;&nbsp;&nbsp; XMTR/RCVR (S-BAND) - PRIM</li>
+      <li>150&nbsp;&nbsp;&nbsp; ENGINE SELECT - DESC ARM</li>
+      <li>172&nbsp;&nbsp;&nbsp; RCS MAIN S/O VALVES, SYS A - CLOSE</li>
+      <li>174&nbsp;&nbsp;&nbsp; RCS MAIN S/O VALVES, SYS B - CLOSE</li>
+      <li>182&nbsp;&nbsp;&nbsp; LANDING RADAR POWER - ON</li>
+      <li>186&nbsp;&nbsp;&nbsp; ECS PRIMARY WATER VALVE OPEN</li>
+      <li>188&nbsp;&nbsp;&nbsp; RCS MAIN S/O VALVES, SYS A - OPEN</li>
+      <li>190&nbsp;&nbsp;&nbsp; RCS MAIN S/O VALVES, SYS B - OPEN</li>
+      <li>196&nbsp;&nbsp;&nbsp; DPS PQGS ARM 2 - ENABLE</li>
+      <li>198&nbsp;&nbsp;&nbsp; MASTER C&amp;W ALARM RESET - COMMAND</li>
+      <li>200&nbsp;&nbsp;&nbsp; THRUST ISOLATION VALVES, QUADRANT 4,
+        SYSTEM B - CLOSE</li>
+      <li>212&nbsp;&nbsp;&nbsp; DPS PQGS 2 - ARM</li>
+      <li>222&nbsp;&nbsp;&nbsp; ECS ASCENT WATER COOLANT VALVE - OPEN</li>
+      <li>228&nbsp;&nbsp;&nbsp; DPS PQGS ARM 1 - ENABLE</li>
+      <li>232&nbsp;&nbsp;&nbsp; THRUST ISOLATION VALVES, QUADRANT 4,
+        SYSTEM A - CLOSE</li>
+      <li>236&nbsp;&nbsp;&nbsp; DFI/TM CALIBRATE - ON</li>
+      <li>244&nbsp;&nbsp;&nbsp; DPS PQGS 1 - ARM</li>
+      <li>252&nbsp;&nbsp;&nbsp; RCS MANIFOLD CROSSFEED VALVE - OPEN</li>
+      <li>254&nbsp;&nbsp;&nbsp; RCS MANIFOLD CROSSFEED VALVE - CLOSE</li>
+    </ul>
+    <h1><a name="LMPIN"></a>18a,18b</h1>
+    <p>LMPIN, LMPOUT.&nbsp; These are indices into the LMPCMD circular
+      buffer.&nbsp; (See words 14-17.)&nbsp; LMPIN is the index (0-7) in
+      LMPCMD at which the next command added to the buffer will be
+      stored, while LMPOUT is the next index from which to remove a
+      command from LMPCMD for actually output the physical LMP.&nbsp; <br>
+    </p>
+    <h1>19a,19b</h1>
+    <p>Spares.<br>
+    </p>
+    <h1><a name="20"></a>20a</h1>
+    <p>UPVERB. The least significant digit of the update verb used to
+      initiate the last LGC update.<br>
+    </p>
+    <h1>20b</h1>
+    <p>COMPNUMB.&nbsp; The number of components the update program
+      expects to receive.<br>
+    </p>
+    <h1>21a</h1>
+    <p>STCOUNT.&nbsp; TBD, but something to do with STBUFF (see words
+      22a-28b).<br>
+    </p>
+    <h1>21b</h1>
+    <p>UPOLDMOD.&nbsp; The number of the LGC program interrupted by the
+      update program.<br>
+    </p>
+    <h1>22a-28b</h1>
+    <p>STBUFF, +1, ..., +13. 1st through 14th components of an update
+      via V76.</p>
+    <h1>29a </h1>
+    <p>IMODES30, a cell whose individual bits are used to control the
+      monitoring of IMU functions.&nbsp; The interpretations were taken
+      from the document "<a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/Documents/aurora_sundial_modes.pdf">AURORA
+
+
+
+
+
+
+
+        85 &amp; 86 — SUNDIAL Mode Bits</a>". The descriptions of Bits
+      7&amp;8 were taken from Luminary 1C.<br>
+    </p>
+    <p> </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Temperature in limits.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">ISS turn-on request.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">IMU fail (ignore if bit 4 is 1).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">IMU CDU fail (ignore if bit 4 is 1).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">IMU cage requested or in process.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">PIPA fail (ignore if bit 1 and/or bit 5 is
+            1).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">IMU operating.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Used to control sequencing of IMU
+            turn-on.&nbsp; Set 1 if bit 7 of this word is 1 and reset
+            zero 0.48 second later, before the IMU turn-on sequencing is
+            started.&nbsp; Used to achieve a 0.48-second wait before
+            acting on IMU turn-on information. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Used to control sequencing of IMU turn-on,
+            set 1 based on values of bits 14, 9 and 2 of this
+            word.&nbsp; Reset zero 0.48 second later.&nbsp; Can be set 1
+            if ISS initialization requested since last fresh start, IMU
+            turn-off, or turn-on delay complete. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">ISS being initialized.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">PIPA fail — do not set PROG ALARM. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Inhibit IMU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Inhibit CDU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Failed ISS turn-on request. Try again after
+            90 seconds. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">If PIPA fail - no ISS warning.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>29b</h1>
+    <p>IMODES33.&nbsp; A flagword which monitors various channel 32,
+      channel 33, and IMU conditions.&nbsp; Also monitors Verb 35 "lamp
+      test".&nbsp; Set to 16040<sub>8</sub> by a fresh start. Set to
+      16000<sub>8</sub> + the contents of bit 6 by a restart.&nbsp; An
+      error reset key code sets bits 13, 12, and 11 to 1 and does not
+      affect other bits.&nbsp; Updated every 0.48 second by T4RUPT
+      program except for bit 14 which is updated every 0.12 second.<br>
+    </p>
+    <p>The information herein was taken from Luminary 1C, which is a
+      much later program than Sunburst, so the accuracy is questionable.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Value of bit 14 of channel 32.&nbsp; A 0
+            indicates Proceed Key depressed.&nbsp; A change from a 1 to
+            a 0 will cause a job to be established that has the same
+            program logic effect as Verb 33.&nbsp; It should be noted
+            that in the case of a response to a V21, V22 and V23, the
+            logic for a Proceed is not the same as for a V33E.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Value of bit 13 of channel 33.&nbsp; A 0
+            indicates a PIPA fail signal.&nbsp; This bit has the same
+            value as bit 10 of IMODES30.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Value of bit 12 of channel 33.&nbsp; A 0
+            indicates downlink end pulse rate greater than 100
+            pps.&nbsp; If this bit changes from 1 to 0, alarm 1105<sub>8</sub>
+            is generated.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Value of bit 11 of channel 33.&nbsp; A 0
+            indicates uplink rate greater than 6.4K pps.&nbsp; If this
+            bit changes from 1 to 0, alarm 1106<sub>8</sub> is
+            generated.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Set to 1 when R10 routine is initialized
+            during the powered descent trajectory.&nbsp; A 1 in this bit
+            causes the display inertial data discrete to be sent to the
+            RR CDUs (bit 8 set in channel 12) and the RR error counter
+            to be enabled (bit 2 set in channel 12).&nbsp; A 0 in this
+            bit causes the display inertial data discrete to be removed
+            from the RR CDUs and the RR error counter to be disabled if
+            R10 was terminated during the descent trajectory.&nbsp;
+            However, if R10 was terminated and/or restarted while in
+            ascent bits 2 and 8 of channel 12 are left unchanged.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">A switch employed in R10 for alternate
+            computations of altitude rate and altitude (bit 2 of channel
+            14 tells which is which).&nbsp; A 0 forces a program branch
+            to compute and display altitude rate; bit is then set to 1
+            to compute and display altitude on next pass thru R10.&nbsp;
+            Bit then set 0, etc.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Set to 1 to indicate that IMU should not be
+            used for vehicle attitude information.&nbsp; Bit checked
+            every 0.1 second by autopilot.&nbsp; Bit set 1 the same time
+            as bit 6 of IMODES30 and also when bit 4 of IMODES30 is set
+            1 (for IMU zeroing external to T4RUPT and for IMU coarse
+            align).&nbsp; Bit set 0 if IMU fine align routine is
+            performed.&nbsp; Bit set 1 if IMU turned off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Set to 1 in IMU zeroing routine external to
+            T4RUPT (by V40N20 or prelaunch or IMU tests).&nbsp; Remains
+            set to 1 for an interval of about 10.56 seconds while
+            zeroing taking place.&nbsp; Bit 6 of this word is set to 1
+            at the same time as bit 5.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Set to 1 when Verb 35 "lamp test" is
+            received.&nbsp; Reset to 0 about 5 seconds later.&nbsp; A 1
+            inhibits resetting of lights to 0 in T4RUPT during lamp
+            test.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="30"></a>30</h1>
+    <p>TEVENT, +1.&nbsp; TIME OF EVENT.&nbsp; Contains the image of
+      TIME2, TIME1 at the time of the last significant event.&nbsp;
+      Loaded in burn programs with time of ignition and time of engine
+      cutoff as they occur.&nbsp; Loaded with abort initiation time in
+      P70 and P71.&nbsp; Scaled centiseconds/2<sup>28</sup>.</p>
+    <h1>31</h1>
+    <p>FC, +1. GUIDANCE THRUST COMMAND (FC).&nbsp; The magnitude of the
+      desired DPS thrust computed by the Lunar Landing Guidance
+      Equations.&nbsp; It does not apply to Ascent or Aborts.&nbsp;
+      Calculated once every 2 seconds during landing.&nbsp; Scaled
+      lbs/(2.817 × 2<sup>14</sup>).<br>
+    </p>
+    <h1>32a,32b</h1>
+    <p>AOSQ, AOSR.&nbsp; These are ascent offset acceleration estimates,
+      estimated every 2 seconds by AOSTASK.<br>
+    </p>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+        It was in writing the blurb above that I realized — after over
+        20 years working with this material! — that I do not know what
+        the P, Q, and R axes are, even though they appear quite
+        often.&nbsp; For example, <a moz-do-not-send="true"
+          href="#OMEGAs">see below</a>.&nbsp; The explanation isn't
+        directly written down in any reference I have been able to
+        discover.&nbsp; The assumption is that everybody just seems to
+        know what they are, and heaven help those who do not.&nbsp; But
+        if you're diligent enough in searching AGC source code, you do
+        find a passing mention that axes P, Q, and R are "pilot axes",
+        which you'd likely presume are somehow related to the pilot's
+        point-of-view concerning front-back, right-left, and up-down,
+        though not necessarily in that order.&nbsp; There's also passing
+        mention that (at least in the command module), "the body axes
+        XB,YB,ZB are normally designated P,Q,R."&nbsp; A variety of
+        "standard" coordinate systems for Apollo, though not any "pilot"
+        coordinate system, are in fact documented:<br>
+      </font>
+      <ul>
+        <li><font size="-1">"<a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Documents/19700076120.pdf">Project
+
+
+              Apollo Coordinate System Standards</a>"</font></li>
+        <li><font size="-1"><a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=51">GSOP
+
+
+              for Colossus 3</a><br>
+          </font></li>
+        <li><a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC5-REV11_text.pdf#page=44"><font
+              size="-1">GSOP for Luminary 1E</font></a></li>
+        <li><font size="-1"><i>etc.</i><br>
+          </font></li>
+      </ul>
+      <font size="-1">The XB,YB,ZB system mentioned above would seem to
+        be the one discussed in 5.1.4.3 ("Vehicle or Body Coordinate
+        System") of the Luminary GSOP, from which we'd tentatively infer
+        that:<br>
+      </font>
+      <ul>
+        <li><font size="-1"><font size="-1">The P (XB) axis points
+              "upward" through the LM-to-CM transfer tunnel.&nbsp; I.e.,
+              it corresponds roughly to pilot up/down ("up" being the
+              positive direction).<br>
+            </font></font></li>
+        <li><font size="-1">The R (ZB) axis points outward through the
+            LM's exit hatch, corresponding to pilot right/left ("left"
+            being the positive direction).<br>
+          </font></li>
+        <li><font size="-1">The Q (YB) axis completes the triad, so that
+            P,Q,R is right-handed ... which, it would appear to me,
+            means that Q is roughly parallel to the pilot's viewline
+            through the window, thus corresponding to front/back
+            ("front" being the positive direction).</font></li>
+      </ul>
+    </blockquote>
+    <h1>33</h1>
+    <p>TINT, +1.&nbsp; Time of intercept.<br>
+    </p>
+    <h1>34a</h1>
+    <p>REDOCTR.&nbsp; Counter for hardware restarts.&nbsp; Set to zero
+      by keyboard freshstart (Verb 36).&nbsp; Incremented once per
+      hardware restart by restart program.<br>
+    </p>
+    <h1>34b</h1>
+    <p>SFAIL. Address of a built-in self-test routine that failed.<br>
+    </p>
+    <h1>35a</h1>
+    <p>Garbage.<br>
+    </p>
+    <h1><a name="CDUs"></a>35b,36a,36b</h1>
+    <p>CDUX (outer gimbal) CDUY (inner gimbal) CDUZ (middle gimbal): The
+      actual values of the IMU CDU angles. Each register is an unsigned
+      15-bit fraction, scaled degrees/360, and is updated by counter
+      interrupts. A middle gimbal angle greater than 70 degrees will
+      light the Gimbal Lock lamp on the DSKY. Whenever the magnitude of
+      the MGA exceeds 85 degrees the ISS stabilization loop will be
+      disabled. As a result, the CDUZ register should maintain values
+      that correspond to middle gimbal angles between -70 degrees and
+      +70 degrees. </p>
+    <h1><a name="OMEGAs"></a>37a,37b,38a,38b<br>
+    </h1>
+    <p>OMEGAP, OMEGAQ, Garbage, OMEGAR.&nbsp; CURRENT BODY RATES (X, Y,
+      Z).&nbsp; Estimated current rates about body axis.&nbsp;
+      Calculated at the beginning of every DAP cycle every 0.1
+      sec.&nbsp; Zeroed at DAP start-up.&nbsp; Scaled
+      (degrees/sec)/45.&nbsp; Expected range of ±10 degrees/sec but ±45
+      degrees/sec possible.<br>
+    </p>
+    <h1><a name="STATE"></a>39a</h1>
+    <p>STATE. In full, STATE an 8-word buffer, representing up to 120
+      (8×15) flagwords, though in actuality SUNBURST 37 uses less than
+      75 of them.&nbsp; The flags of the 1st word are described in the
+      table below, while those of the other 4 words are in the entries
+      that follow.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">WMATFLAG. Enables W-matrix integration.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14 </td>
+          <td valign="top">JSWITCH. Bit set to 1 within orbital
+            integration routine to indicate that extrapolation of
+            W-matrix is being carried out in orbital integration
+            routine. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13 </td>
+          <td valign="top">MIDFLAG.&nbsp; Set to 1 within orbital
+            integration routine at beginning of time step when magnitude
+            of conic position vector is greater than the constants RME
+            (earth-centered) or RMM (moon-centered) and set to 0 if less
+            than these constants.&nbsp; </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12 </td>
+          <td valign="top">MOONFLAG.&nbsp; Set by orbital integration to
+            1 or 0 when integrating the stored CSM and LM state vectors;
+            1 indicates lunar orbit, 0 indicates earth orbit. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">NBSMBIT. Used in in-flight alignment. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">COAROFIN. Used in IMU performance tests. Set
+            1 for fine-alignment marks, set 0 for coarse-alignment
+            marks. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">BODYFLAG. (This flag does not appear to be
+            used.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">IMUSE. Bit set 1 to indicate that "IMU is in
+            use".</td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">RRUSE. Bit set 1 when rendezvous radar is in
+            use, set 0 otherwise.&nbsp; Not used in AURORA.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">RRNBSW. Bit set 1 when radar target is in
+            navigation-base coordinates, set 0 when in stable-member
+            coordinates.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">LOKONSW. Bit set 1 if radar lock-on request,
+            set 0 for no radar lock-on request (locked on 0).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="FLAGWRD1"></a>39b</h1>
+    <p>STATE +1.&nbsp; FLAGWRD1. (Interpretations taken from SUNBURST
+      source code.)<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Tumble-monitor flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Excessive-tumble flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12-9<br>
+          </td>
+          <td valign="top">Not used<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">Gimbal-lock flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7-3<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">Guidance Reference Release (GRR) flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Average-G flag.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="40"></a><a name="FLAGWRD2"></a>40a</h1>
+    <p>STATE +2.&nbsp; FLAGWRD2. (Interpretations taken from SUNBURST
+      source code.)</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Drift flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Gimbal-lock flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Update-process flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">No final yaw<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">KALCMANU attitude-complete flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Abort-stage flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Abort command monitor enabled flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">ACS feed test flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Orbital integration integrating flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">V33 termination of update program flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Timers enabled flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Not used<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">RCS testing inhibit flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">DPS cold soak inhibit flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">RCS testing inhibit flag<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="DAPBOOLS"></a>40b</h1>
+    <p>STATE +3.&nbsp; DAPBOOLS. (Interpretations taken from SUNBURST
+      source code.)</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">SPSBACUP.&nbsp; SPS backup DAP flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">AUTORHLD.&nbsp; Automatic mode rate hold flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">GODAPGO.&nbsp; DAP enabling flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">PULSES.&nbsp; Minimum impulse RHC mode flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">9<br>
+          </td>
+          <td valign="top">VIZPHASE.&nbsp; Descent visibility phase
+            flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">APSGOING.&nbsp; Ascent propulsion system burn
+            flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">DBSELECT.&nbsp; DAP deadband select flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">ULLAGER.&nbsp; Internal ullage request flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">AORBSYST.&nbsp; P-axis rotation jet system (A
+            or B) flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">ACC4OR2X.&nbsp; 2 or 4 jet X-translation mode
+            flag<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">TRYGIMBL.&nbsp; Descent trim gimbal control
+            system flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">OURRCBIT.&nbsp; Internal DAP rate command
+            activity flag.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN11"></a>41a</h1>
+    <p>CHAN11. Channel 11, also known as DSALMOUT. DSKY "A"
+      relays.&nbsp; Information here came from <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a>, but is consistent
+      with SUNBURST source code.&nbsp; Bit assignments are as follows:</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">15<br>
+          </td>
+          <td valign="top">OT1116.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">14<br>
+          </td>
+          <td valign="top">OT1114.&nbsp; Engine off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">13<br>
+          </td>
+          <td valign="top">OT1113.&nbsp; Engine on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">12<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top">OT1112.&nbsp; Not
+            used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">11<br>
+          </td>
+          <td valign="top">OT1111.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">OT1110.&nbsp; Caution reset.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">OT1109.&nbsp; Test connector outbit.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">OT1108.&nbsp; Not used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">OPEROR.&nbsp; Light operator error lamp
+            (flash).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">VNFLSH.&nbsp; Flash verb and noun lamps.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">KYRLS.&nbsp; Light key release lamp flash.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">TMPOUT.&nbsp; Light temperature caution lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">UPLACT.&nbsp; Light uplink activity lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">COMACT.&nbsp; Light computer activity lamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">ISSWAR.&nbsp; ISS Warning lamp.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN12"></a>41b</h1>
+    <p>CHAN12. Channel 12. GN&amp;C. Information here came from <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=54">Apollo
+
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; The
+      information is consistent with SUNBURST source code, but not all
+      of the defined flags are used in source code.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">ISS turn on delay completed.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">RR enable auto track<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">LR pos command<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12 </td>
+          <td valign="top">-Roll gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">+Roll gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">-Pitch gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">+Pitch gimbal trim<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Display inertial data<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Not used<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Enable IMU error counter<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Zero IMU CDUs<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Coarse align enable<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Horizontal velocity low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Enable RR error counter<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Zero RR CDU<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN13"></a>42a</h1>
+    <p>CHAN13. Channel 13. Radar and AGC.&nbsp; Information here came
+      from <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=55">Apollo
+
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; The
+      information is consistent with SUNBURST source code, but only bit
+      10 seems to be used in SUNBURST.&nbsp; Bit assignments are as
+      follows:</p>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Enable T6RUPT.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Reset input trap circuit 32, concerned with
+            bits 10-1 of channel 32. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Reset input trap circuit 31B, concerned with
+            bits 12-7 of channel 31. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Reset input trap circuit 31A, concerned with
+            bits 6-1 of channel 31. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Enable Standby. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">Test alarms (DSKY lamps).<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Start RHC read<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">RHC counter enable<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">Download order bit.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Block inlink.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Inhibit uplink, enable crosslink.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Range unit activity.&nbsp; Transmit a control
+            signal to radar.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td rowspan="1" colspan="1" valign="top">Radar mode selection
+            <u>a</u>. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Radar mode selection <u>b</u>. </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Radar mode selection <u>c</u>.</td>
+        </tr>
+      </tbody>
+    </table>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    The radar mode-selection bits are interpreted as follows:<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">&nbsp;<u>a</u>&nbsp; <u>b</u>&nbsp; <u>c</u>&nbsp;
+
+
+
+            <br>
+          </th>
+          <th valign="top">Radar Selection<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 0&nbsp; 0 <br>
+          </td>
+          <td valign="top">None<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 0&nbsp; 1 <br>
+          </td>
+          <td valign="top">RR Range<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 1&nbsp; 0<br>
+          </td>
+          <td valign="top">RR Range Rate<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;0&nbsp; 1&nbsp; 1<br>
+          </td>
+          <td valign="top">None<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 0&nbsp; 0<br>
+          </td>
+          <td valign="top">LR X Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 0&nbsp; 1<br>
+          </td>
+          <td valign="top">LR Y Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 1&nbsp; 0<br>
+          </td>
+          <td valign="top">LR Z Velocity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;1&nbsp; 1&nbsp; 1<br>
+          </td>
+          <td valign="top">LR Range<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN14"></a>42b</h1>
+    <p>CHAN14. Channel 14. Gyro and CDU drives.&nbsp; Information here
+      came from <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=7">the
+
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=56">Apollo
+
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; The
+      information is consistent with SUNBURST, as far as I can tell, but
+      only bits 15-13 are used in SUNBURST.&nbsp; Bit assignments are as
+      follows:</p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">15<br>
+          </td>
+          <td valign="top">Drive IMU CDU X<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">14<br>
+          </td>
+          <td valign="top">Drive IMU CDU Y<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">13<br>
+          </td>
+          <td valign="top">Drive IMU CDU Z<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">12<br>
+          </td>
+          <td valign="top">Drive optics CDU T<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">11<br>
+          </td>
+          <td valign="top">Drive optics CDU S<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">10<br>
+          </td>
+          <td valign="top">Drive gyro.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="middle" align="center">9-7<br>
+          </td>
+          <td valign="top">Gyro selection bits:<br>
+            <br>
+            <table cellspacing="2" cellpadding="2">
+              <tbody>
+                <tr>
+                  <th valign="top"><u>Selection Bits</u><u><br>
+                    </u></th>
+                  <th valign="top"><br>
+                  </th>
+                  <th valign="top"><u>Signals Generated by Gyro Drive
+                      Control</u><br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">000<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center">&nbsp;&nbsp;&nbsp;
+                    <br>
+                  </td>
+                  <td valign="middle" align="center">none<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">100<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">none<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">001<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYXP (142), drive X
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">101<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYXM (143), drive X
+                    gyro negative<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">010<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYYP (144), drive Y
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">110<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYYM (145), drive Y
+                    gyro negative<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">011<sub>2</sub><br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYZP (146), drive Z
+                    gyro positive<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">111<sub>2</sub></td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                  <td valign="middle" align="center">GYZM (147), drive Z
+                    gyro negative<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">6<br>
+          </td>
+          <td valign="top">Enable gyro.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">5<br>
+          </td>
+          <td valign="top">Monitor incr drive spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">4<br>
+          </td>
+          <td valign="top">Thrust drive<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">3<br>
+          </td>
+          <td valign="top">Altitude meter activity<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">Altitude rate selection<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">1<br>
+          </td>
+          <td valign="top">Transmit one outlink word.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1><a name="CHAN30"></a>43a</h1>
+    CHAN30. Channel 30. GN&amp;C. Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=57">Apollo
+
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+    assignments are as follows (with parenthesized numbers referring to
+    <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+
+      A and B</a>):<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Temperature within limits.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">ISS turn-on request.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">IMU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">IMU CDU fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">IMU caged.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">G&amp;N control of S/C<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">IMU operates.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Spare.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">RR CDU fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Display inertial data<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Auto throttle<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Abort stage<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Engine armed<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Stage verification<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Abort<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN31"></a>43b</h1>
+    <p>CHAN31. Channel 31. Translation and rotation. Information here
+      came from <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+
+        AURORA 88 and SUNDIAL C reference cards</a> and the <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=58">Apollo
+
+
+
+
+
+
+        Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+      assignments are as follows (with parenthesized numbers referring
+      to <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+
+        A and B</a>): </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">Attitude control out of detent<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">Auto stabilization<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">Attitude hold<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">TRAN-Z (023).&nbsp; -Z translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">TRAN+Z (022).&nbsp; +Z translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">TRAN-Y (021).&nbsp; -Y translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">TRAN+Y (020).&nbsp; +Y translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">TRAN-X (019).&nbsp; -X translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">TRAN+X (018).&nbsp; +X translation command
+            from manual translation control.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">-AZ(LPD), -RMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">+AZ(LPD), +RMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">-YMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">+YMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">-EL (LPD), -PMI<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">+EL (LPD), +PMI<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN32"></a>44a</h1>
+    CHAN32. Channel 32. Impulse.&nbsp; Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=60">Apollo
+
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp; Bit
+    assignments are as follows (with parenthesized numbers referring to
+    <a moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=124">Appendices
+
+
+
+
+
+
+      A and B</a>):<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">15-11<br>
+          </td>
+          <td valign="top">IN3216 (845), IN3214 (844), IN3213 (034),
+            IN3212 (033).&nbsp; Spares.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">10<br>
+          </td>
+          <td valign="top">ROLGOF (843).&nbsp; Roll gimbal off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">9<br>
+          </td>
+          <td valign="top">PCHGOF (842).&nbsp; Pitch gimbal off.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">TRST10 (832).&nbsp; Thruster 10-11 fail</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">7<br>
+          </td>
+          <td valign="top">TRST9 (831).&nbsp; Thruster 9-12 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Thruster 13-15 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">Thruster 14-16 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">Thruster 6-7 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">Thruster 1-3 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top">Thruster 5-8 fail<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Thruster 2-4 fail<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="CHAN33"></a>44b</h1>
+    CHAN33. Channel 33. Optics and AGC. Information here came from <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/Aurora88SundialCCards.pdf#page=8">the
+
+
+
+
+
+
+      AURORA 88 and SUNDIAL C reference cards</a> and the <a
+      moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Documents/agcis_30_block_ii_agc.pdf#page=61">Apollo
+
+
+
+
+
+
+      Guidance Computer Information Series Issue 30</a>.&nbsp;
+    Initialized to 16000<sub>8</sub> on fresh start or restart.&nbsp;
+    Bit assignments are shown in the following table.&nbsp; However, as
+    far as I can tell, the only bits used are 13-11 (the same bits as
+    are non-zero in 16000<sub>8</sub>), and they are only used to
+    determine if a fresh start or restart has occurred.<br>
+    <p> </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">OSCALM.&nbsp; Oscillator alarm.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">AGCWAR.&nbsp; AGC warning.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">PIPAFL.&nbsp; PIPA fail.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">Signal supplied by Inlink Control, meaning
+            that downlink is too fast.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">Signal supplied by Downlink Converter,
+            meaning that inlink is too fast.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">BLKUPL (083).&nbsp; Accept uplink data.<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">9<br>
+          </td>
+          <td valign="top">LRRLSC (061). LR range low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="top">LVDAGD (039). Landing velocity data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top">LR position 2 (hover)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">LR position 1 (descent)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top">LR data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">RR data good<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top">RRRLSC (069).&nbsp; RR range low scale<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">2<br>
+          </td>
+          <td valign="top">RRPONA (064).&nbsp; RR power on/auto<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top">Spare.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <h1><a name="50"></a><a name="DSPTAB"></a>45a,45b,46a,46b,47a,47b,48a,48b,49a,49b,50a<br>
+    </h1>
+    <p>DSPTAB, +1, ..., +10.&nbsp; The eleven registers, DSPTAB through
+      DSPTAB+10D, indicate the status of the DSKY displays.&nbsp; If bit
+      15 through 12 are 0001, the next 11 bits will indicate the actual
+      status of the DSKY displays; if bits 15 through 12 are 1110, the
+      next 11 bits indicate the "ones" complement of the status to which
+      the CMC will command the DSKY display.&nbsp; Bits 11-1 of DSPTAB+0
+      through DSPTAB+10D are decoded as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <th rowspan="1" colspan="3" valign="top"><u>Bit Assignments</u><br>
+          </th>
+        </tr>
+        <tr>
+          <th valign="bottom">DSPTAB<br>
+            <u>Register</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom">Downlink<br>
+            <u>Word No.</u><br>
+          </th>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <th valign="bottom"><u>Bit 11</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 10-6</u><u><br>
+            </u></th>
+          <th valign="bottom"><u>Bits 5-1</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+0<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R3S<br>
+          </td>
+          <td valign="top" align="center">R3D4<br>
+          </td>
+          <td valign="top" align="center">R3D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+1</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">45b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R3S<br>
+          </td>
+          <td valign="top" align="center">R3D2<br>
+          </td>
+          <td valign="top" align="center">R3D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+2</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R2D5<br>
+          </td>
+          <td valign="top" align="center">R3D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+3</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">46b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R2S<br>
+          </td>
+          <td valign="top" align="center">R2D3<br>
+          </td>
+          <td valign="top" align="center">R2D4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+4</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R2S<br>
+          </td>
+          <td valign="top" align="center">R2D1<br>
+          </td>
+          <td valign="top" align="center">R2D2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+5</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">47b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">-R1S<br>
+          </td>
+          <td valign="top" align="center">R1D4<br>
+          </td>
+          <td valign="top" align="center">R1D5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+6</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">+R1S<br>
+          </td>
+          <td valign="top" align="center">R1D2<br>
+          </td>
+          <td valign="top" align="center">R1D3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+7</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">48b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">R1D1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+8D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">ND1<br>
+          </td>
+          <td valign="top" align="center">ND2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+9D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">49b<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">VD1<br>
+          </td>
+          <td valign="top" align="center">VD2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSPTAB+10D</td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center">50a<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top" align="center"><br>
+          </td>
+          <td valign="top" align="center">MD1<br>
+          </td>
+          <td valign="top" align="center">MD2<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>R3D1 stands for digit one of the third register and VD1 stand for
+      the first digit of the verb display, etc.&nbsp; For the right
+      character of a pair, bit 5 is the MSB with bit 1 the LSB.&nbsp;
+      For the left character of a pair, the MSB is bit 10 with bit 6 the
+      LSB.&nbsp; Bit 11 of some of the DSPTABs contains discrete
+      information, a one indicating that the discrete is on.&nbsp; For
+      example, a one in bit 11 of DSPTAB+1 indicates that R3 has a plus
+      sign.&nbsp; If the sign bits associated with a given register are
+      both zeros, then the content of that particular register is octal;
+      if either of the bits is set, the register content is decimal
+      data.</p>
+    <p>The five bit codes associated with the digits are as follows:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <br>
+          </td>
+          <td valign="top">MSB<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top"><br>
+          </td>
+          <td valign="top">LSB<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">2<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">3<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">4<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">5<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">6<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">7<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">8<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">9<br>
+          </td>
+          <td valign="top" align="right">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+          <td valign="top">1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Blank<br>
+          </td>
+          <td valign="top" align="right">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+          <td valign="top">0<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following is a diagram of the DSKY face showing positions of
+      the different digits:</p>
+    <pre>                             Program<br>                        ┌───────┬───────┐
+                        │  MD1  │  MD2  │
+                        └───────┴───────┘
+<br>        Verb                  Noun<br>  ┌───────┬───────┐     ┌───────┬───────┐
+  │  VD1  │  VD2  │     │  ND1  │  ND2  │
+  └───────┴───────┘     └───────┴───────┘
+<br>    Register 1<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R1D1  │ R1D2  │ R1D3  │ R1D4  │ R1D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘
+<br>    Register 2<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R2D1  │ R2D2  │ R2D3  │ R2D4  │ R2D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br><br>    Register 3<br>┌───────┬───────┬───────┬───────┬───────┬───────┐
+│   ±   │ R3D1  │ R3D2  │ R3D3  │ R3D4  │ R3D5  │
+└───────┴───────┴───────┴───────┴───────┴───────┘<br></pre>
+    <h1><a name="indicators"></a>50b</h1>
+    <p>DSPTAB+11.&nbsp; This register drives relays for the display
+      lights.&nbsp; The bit assignments are:<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="left"><u>Assignment</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">1<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">2<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">3<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">4<br>
+          </td>
+          <td valign="top">No Attitude<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">5<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">6<br>
+          </td>
+          <td valign="top">Gimbal Lock<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">7<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">8<br>
+          </td>
+          <td valign="top">Tracker<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">9<br>
+          </td>
+          <td valign="top">Program Caution<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    If bits 15 through 12 of DSPTAB+11D are 1000, the last 11 bits
+    indicate the state to which the CMC will command the relays; if bits
+    15 through 12 are 0000, the last 11 bits indicate the actual state
+    of the relays.&nbsp; A one indicates that the discrete is on.<br>
+    <h1>51</h1>
+    <p>TIME2, TIME1.&nbsp; Double precision word indicating ground
+      elapsed time.&nbsp; Used for all timing while CMC is on.&nbsp;
+      Zeroed at liftoff and incremented by one bit per centisecond.
+      Scaled centiseconds/2<sup>28</sup>.<br>
+    </p>
+    <h1>52-54</h1>
+    <p>COMPTORK, +1, ..., +4.&nbsp; V, S, E gyrocompass gyro
+      torques.&nbsp; I.e., value of required number of gyro torquing
+      pulses (before rotation by [X<sub>sm</sub>], and hence in the
+      vertical, south, east system), scale factor B21, units pulses.<br>
+    </p>
+    <h1>55a,55b,56a</h1>
+    <p>FAILREG, +1, +2.&nbsp; A set of three single-precision cells used
+      to retain alarm pattern code information.&nbsp; They are all reset
+      to 0 by a fresh start.&nbsp; FAILREG and FAILREG+1 are also reset
+      to 0 by use of the "ERROR RESET" keycode.&nbsp; FAILREG contains
+      the first alarm code received after the "ERROR RESET", FAILREG+1
+      contains the second, and FAILREG+2 will always contain the most
+      recent alarm code.&nbsp; Octal quantities.</p>
+    <h1>56b</h1>
+    <p>STATE +4.&nbsp; FLAGWRD4. <br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top"><u>Bit</u><u><br>
+            </u></th>
+          <th valign="top" align="center"><u>Meaning</u><u><br>
+            </u></th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">15<br>
+          </td>
+          <td valign="top">CONVSW.&nbsp; Lambert routine convergence
+            flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">14<br>
+          </td>
+          <td valign="top">DONESW.&nbsp; Lambert routine completion
+            flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">13<br>
+          </td>
+          <td valign="top">ITERSW.&nbsp; Lambert iterator flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">12<br>
+          </td>
+          <td valign="top">GUESSW.&nbsp; Iterator-initialization flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">11<br>
+          </td>
+          <td valign="top">PIESW.&nbsp; Lambert quadrant flag.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">10<br>
+          </td>
+          <td valign="top">MOONSW. Outside moonsphere (locked at 0)
+            flag.<br>
+            <br>
+            Also known as ESCPSW (indicates elliptical orbit if set 0)
+            or SMANGLSW (variable scaling switch if set 0).<br>
+          </td>
+        </tr>
+        <tr>
+          <td nowrap="nowrap" valign="top" align="center">9-1<br>
+          </td>
+          <td valign="top">Not used.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1>57a</h1>
+    <p>Garbage.<br>
+    </p>
+    <h1>57b,58a,58b</h1>
+    <p>PIPAX, PIPAY, PIPAZ. These are CPU special registers (addresses
+      37-41 octal).&nbsp; They contain the accumulation of output pulses
+      from the X,Y, and Z accelerometers (a measure of the velocity
+      changes), scaled (centimeters/second)/(5.85 × 2<sup>14</sup>).</p>
+    <h1>59a</h1>
+    <p>Garbage<br>
+    </p>
+    <h1><a name="60"></a>60a,60b,61a,61b,62a,62b,63a,63b</h1>
+    <p>Spares.<br>
+    </p>
+    <h1>64-67</h1>
+    <p>LMPCMD, +1, ..., +7.&nbsp; <a moz-do-not-send="true"
+        href="#LMPCMD">See words 14-17</a>.<br>
+    </p>
+    <h1>68a,68b</h1>
+    <p>LMPIN, LMPOUT.&nbsp; <a moz-do-not-send="true" href="#LMPIN">See
+        words 18a,18b</a>.<br>
+    </p>
+    <h1>69a,69b</h1>
+    <p>Spares.<br>
+    </p>
+    <h1><a name="70"></a>70a,70b,71a,71b,72a,72b,73a,73b</h1>
+    <p>MPHASE4, MPHASE3, MPHASE2, MPHASE1, MTIMER4, MTIMER3, MTIMER2,
+      MTIMER1. This is supposedly documented in Chapter 4 of the AS-206
+      (Apollo 5) GSOP, which we unfortunately do not have.&nbsp; Here's
+      what I think is happening.&nbsp; MTIMER<i>x</i> contains a time at
+      which some mission phase is supposed to start, while MPHASE<i>x</i>
+      holds the associated mission-phase number.&nbsp; When one of the
+      times is hit, the associated phase is initiated, and MPHASE<i>x</i>/MTIMER<i>x</i>
+      are then free to be reused for some other mission phase.&nbsp;
+      (Feel free to wade through the source-code file
+      AS206_MISSION_SCHEDULING_PACKAGE.agc to refine this description.)<br>
+    </p>
+    <h1>74a</h1>
+    <p>PHASENUM.&nbsp; Holds the mission-phase phase number activated
+      when MPHASE<i>x</i>/MTIMER<i>x</i> (see preceding entry) is
+      triggered. </p>
+    <h1>74b</h1>
+    <p>Garbage.&nbsp; <br>
+    </p>
+    <h1>75</h1>
+    <p>TTGO, +1.&nbsp; Time to go.&nbsp; In SUNBURST 37 this applies
+      only to mission phase 9 (DPS burn), and relates to the cut-off
+      time of the descent engine.<br>
+    </p>
+    <h1>76-78</h1>
+    <p>VGVECT, +1, ..., +5.&nbsp; Velocity-to-be-gained vector during
+      mission phase 9 (DPS burn).&nbsp; See the preceding entry.&nbsp; <br>
+    </p>
+    <h1><a name="80"></a>79-81</h1>
+    <p>VDVECT, +1, ..., +5.&nbsp; Desired-velocity vector during mission
+      phase 9 (DPS burn).&nbsp; See the preceding entries.&nbsp; </p>
+    <h1>82-84</h1>
+    <p>RD, +1, ..., +5.&nbsp; Desired-position vector.<br>
+    </p>
+    <h1>85a</h1>
+    <p>Garbage.&nbsp; <br>
+    </p>
+    <h1>85b,86a,86b</h1>
+    <p>CDUX, CDUY, CDUZ.&nbsp; <a moz-do-not-send="true" href="#CDUs">See
+
+
+        words 35a-36b</a>.<br>
+    </p>
+    <h1>87a,87b,88a,88b</h1>
+    <p>OMEGAP, OMEGAQ, Garbage, OMEGAR.&nbsp; <a moz-do-not-send="true"
+        href="#OMEGAs">See words 37a-38b</a>.<br>
+    </p>
+    <h1>89a</h1>
+    <p>STATE.&nbsp; <a moz-do-not-send="true" href="#STATE">See word
+        39a</a>.</p>
+    <h1>89b</h1>
+    <p>STATE +1.&nbsp; FLAGWRD1. <a moz-do-not-send="true"
+        href="#FLAGWRD1">See word 39b</a>.<br>
+    </p>
+    <h1><a name="90"></a>90a</h1>
+    <p>STATE +2.&nbsp; FLAGWRD2.&nbsp; <a moz-do-not-send="true"
+        href="#FLAGWRD2">See word 40a</a>.<br>
+    </p>
+    <h1>90b</h1>
+    <p>STATE +3.&nbsp; DAPBOOLS.&nbsp; <a moz-do-not-send="true"
+        href="#DAPBOOLS">See word 40b</a>.<br>
+    </p>
+    <h1>91a</h1>
+    <p>CHAN11.&nbsp; <a moz-do-not-send="true" href="#CHAN11">See word
+        41a</a>.<br>
+    </p>
+    <h1>91b</h1>
+    <p>CHAN12.&nbsp; <a moz-do-not-send="true" href="#CHAN12">See word
+        41b</a>.<br>
+    </p>
+    <h1>92a</h1>
+    CHAN13.&nbsp; <a moz-do-not-send="true" href="#CHAN13">See word 42a</a>.<br>
+    <h1>92b </h1>
+    <p>CHAN14.&nbsp; <a moz-do-not-send="true" href="#CHAN14">See word
+        42b</a>.<br>
+    </p>
+    <h1>93a</h1>
+    CHAN30.&nbsp; <a moz-do-not-send="true" href="CHAN30">See word 43a</a>.<br>
+    <h1>93b</h1>
+    <p>CHAN31.&nbsp; <a moz-do-not-send="true" href="#CHAN31">See word
+        43b</a>.<br>
+    </p>
+    <h1>94a</h1>
+    CHAN32.&nbsp; <a moz-do-not-send="true" href="#CHAN32">See word 44a</a>.<br>
+    <h1>94b</h1>
+    CHAN33.&nbsp; <a moz-do-not-send="true" href="#CHAN33">See word 44b</a>.
+    <p> </p>
+    <p> </p>
+    <h1>95a,95b,96a,96b,97a,97b,98a,98b,99a,99b,100a</h1>
+    <h1> </h1>
+    <p>DSPTAB, +1, ..., +10.&nbsp; <a moz-do-not-send="true"
+        href="#DSPTAB">See words 45a-50a</a>.</p>
+    <h1>100b</h1>
+    <p>DSPTAB+11.&nbsp; <a moz-do-not-send="true" href="#indicators">See
+
+
+        word 50b</a>.<br>
+      <br>
+    </p>
+    <blockquote>
+      <p> </p>
+    </blockquote>
+    <h1><font size="-1"> </font></h1>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <hr width="100%" size="2"> <i>Last edited by RSB, 2025-04-28</i><br>
+  </body>
+</html>
