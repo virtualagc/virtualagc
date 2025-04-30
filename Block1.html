@@ -136,7 +136,8 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
       people such as Eldon Hall, Albert Hopkins, and Ramón Alonso, whose
       names you will see mentioned elsewhere on this page and this site:</p>
     <center><iframe src="https://www.youtube.com/embed/YIBhPsyYCiM"
-        allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+        allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -150,6 +151,7 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
     </p>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Available_Documentation" id="Available_Documentation"></a>Available
+
 
 
 
@@ -178,6 +180,7 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
 
 
 
+
           and lots of the official MIT/IL electrical-schematic and
           mechanical drawings</a>.&nbsp; I would be lying if I said our
         engineering-drawing collection is 100% complete, but we have a
@@ -190,6 +193,7 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
       <li>AC Electronics document ND-1021041 (<a
           href="Documents/apollocommandmodacel.pdf">volume 1</a> and <a
           href="Documents/apollocommandmodacel_0.pdf">volume 2</a>).&nbsp;
+
 
 
 
@@ -213,10 +217,12 @@ href="http://www.ibiblio.org/apollo/Documents/agcis_2_machine_instructions.pdf">
 
 
 
+
           "Apollo Guidance Computer Information Series, Issue 2: Machine
           Instructions"</a>, 03/10/1963, by Raytheon.</li>
       <li><a moz-do-not-send="true"
           href="http://www.ibiblio.org/apollo/Documents/agcis_6_interpreter.pdf">FR-2-106A,
+
 
 
 
@@ -230,11 +236,13 @@ href="http://www.ibiblio.org/apollo/Documents/agcis_2_machine_instructions.pdf">
 
 
 
+
           "Apollo Guidance Computer Information Series, Issue 6B:
           Interpreter and Interpretive Instructions"</a>, 05/29/1964, by
         Raytheon.</li>
       <li><a moz-do-not-send="true"
           href="http://www.ibiblio.org/apollo/links2.html#ProgrammerManuals">...
+
 
 
 
@@ -291,6 +299,7 @@ While
 
 
 
+
       those are fine schematics, and worked well for John's purposes,
       they are not transcriptions of the original Block I schematics,
       but are rather schematics John designed from scratch, based on the
@@ -307,6 +316,7 @@ While
     </p>
     <hr size="2">
     <h2><a name="Block_1_Computer_System" id="Block_1_Computer_System"></a>Block
+
 
 
 
@@ -479,6 +489,7 @@ While
         <li><a href="1003563-051.html">Main DSKY</a></li>
         <li>Nav DSKY ... we don't actually have the specific top-level
           drawing for this one, but here's <a href="1003706-031.html">the
+
 
 
 
@@ -661,6 +672,7 @@ Hardware
 
 
 
+
       Architecture</h2>
     <h3><a name="Memory_Map" id="Memory_Map"></a>Memory Map<br>
     </h3>
@@ -801,6 +813,7 @@ distinct
 
 
 
+
       positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
       distinct negative numbers (-1 through -16383).&nbsp; Zero actually
       has two distinct representations, +0 and -0, which act the same
@@ -858,6 +871,7 @@ distinct
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
 When
+
 
 
 
@@ -960,6 +974,7 @@ When
 
 
 
+
           B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant original
         bit <tt>B15</tt> is discarded, and then what's left over is
         shifted downward, wrapping the old least-significant bit into
@@ -1026,6 +1041,7 @@ When
         are <i>available</i> for storing the values of other registers
         during <a href="#Interrupt_Processing">interrupt processing</a>.&nbsp;
 However,
+
 
 
 
@@ -1271,9 +1287,11 @@ However,
 
 
 
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [MD1]
+
 
 
 
@@ -1299,10 +1317,12 @@ However,
 
 
 
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [ND1]
+
 
 
 
@@ -1358,6 +1378,7 @@ However,
 
 
 
+
                 occur)</i><br>
             </td>
           </tr>
@@ -1365,6 +1386,7 @@ However,
             <td valign="top">016<br>
             </td>
             <td colspan="3" rowspan="1" valign="top" align="center"> <i>(see
+
 
 
 
@@ -1387,12 +1409,14 @@ However,
 
 
 
+
                 below)</i></td>
           </tr>
           <tr>
             <td valign="top" align="center">014<br>
             </td>
             <td colspan="3" rowspan="1" valign="top" align="center"> <i>(see
+
 
 
 
@@ -1634,6 +1658,7 @@ However,
 
 
 
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
@@ -1659,11 +1684,12 @@ However,
         created by the CDRVE2 function, which program comments indicate
         as pertaining to "OPTICS".&nbsp; TBD.&nbsp;</li>
       <li><tt>WWWW</tt>=017:&nbsp; 017, while a theoretically-possible
-        value for the register, cannot be created by the AGC software
-        (at least not in Solarium).&nbsp;</li>
+        value for the register, is not used in Block I.<br>
+      </li>
     </ul>
     <h3><a name="Counters_and_Timers" id="Counters_and_Timers"></a>Counters
 and
+
 
 
 
@@ -1688,6 +1714,7 @@ and
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
 Conversely,
+
 
 
 
@@ -1742,6 +1769,7 @@ data,
 
 
 
+
           as described earlier</a>.&nbsp; It is included in this section
         because it is implemented in hardware similar to a counter
         register, although the software simulation simply treats it as
@@ -1771,6 +1799,7 @@ data,
       </li>
     </ul>
     <h3><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
+
 
 
 
@@ -1880,6 +1909,7 @@ data,
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
 described
+
 
 
 
@@ -2095,6 +2125,7 @@ described
     extremely rarely.<br>
     <h3><a name="AGC4_Instruction_Set" id="AGC4_Instruction_Set"></a>Basic
 Instruction
+
 
 
 
@@ -2645,6 +2676,7 @@ Instruction
 
 
 
+
               sequences</a> defining the <tt>DV</tt> instruction, but
             R-393 does not define them, and it's impossible to know what
             they might be without following through the control-pulse
@@ -2656,6 +2688,7 @@ Instruction
             <br>
             This instruction envisages that |b(<tt>A</tt>)| &lt; |C(<tt>K</tt>)|
 but
+
 
 
 
@@ -2677,9 +2710,11 @@ but
 
 
 
+
                 037777 and C(<tt>Q</tt>) = -|C(<tt>K</tt>)|.</li>
               <li>If |b(<tt>A</tt>)| &gt; |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
 =
+
 
 
 
@@ -2774,6 +2809,7 @@ but
 
 
 
+
               47777</tt>", so that's what I'd suggest doing:<br>
             <br>
             <blockquote> <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -2786,9 +2822,11 @@ SETLOC&nbsp;&nbsp;
 
 
 
+
                 5777&nbsp; # STANDARD LOCATION FOR EXTENDING BITS</tt><tt><br>
               </tt> <tt>OPOVF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 XCADR&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2811,9 +2849,11 @@ XCADR&nbsp;&nbsp;&nbsp;
 
 
 
+
                 EXTEND<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SU
+
 
 
 
@@ -2833,6 +2873,7 @@ SU
             was in this case, it's removed and 1 is added to the
             number).&nbsp; The top 4 bits of this 16-bit sum are <tt>CCCC</tt>=1011,
 which
+
 
 
 
@@ -3669,6 +3710,7 @@ is
 
 
 
+
             the logical OR<br>
             <blockquote> b(<tt>A</tt>) = <tt>OP</tt> | <tt>K</tt><br>
             </blockquote>
@@ -4073,11 +4115,13 @@ is
 
 
 
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt> <tt><i>.<br>
           .<br>
           . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;<br>
         </i></tt> <tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>MA</sub>&nbsp;
+
 
 
 
@@ -4100,6 +4144,7 @@ is
           </sub></i></tt> <tt><i><tt><i># Pattern 4:<br>
             </i></tt> OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M<br>
         </i></tt> <tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
 
 
 
@@ -4303,6 +4348,7 @@ is
 
 
 
+
               sequences</a><br>
           </td>
           <td valign="middle">Simulates <a
@@ -4381,6 +4427,7 @@ is
 
 
 
+
               055</a>.<br>
           </td>
         </tr>
@@ -4435,6 +4482,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Pultorak-Simulator-1.
 
 
 
+
       GitHub repository</a>.<br>
     <br>
     Donna Polehn has also created <a
@@ -4461,6 +4509,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Pultorak-Simulator-1.
     <br>
     Right now, you can find this ported code <a
 href="https://github.com/virtualagc/virtualagc/tree/master/yaAGC-Block1-Pultorak">in
+
 
 
 
@@ -4714,6 +4763,7 @@ our
 
 
 
+
         GitHub repository</a>.&nbsp; I have only worked with it in
       Linux, but I expect it should probably build in Mac OS X or
       Windows (with MinGW/Msys), as long as you have g++ and pthreads
@@ -4748,6 +4798,7 @@ our
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
 —
+
 
 
 
@@ -4910,6 +4961,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
 
 
 
+
         our GitHub repository</a>. It is a simple command-line program,
       in which you can type (or feed in from a script) ASCII mnemonics
       for DSKY keys, which the program then converts to the proper
@@ -4961,6 +5013,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
     through the DSKY.&nbsp; There is kind of a dilemma, though, in that
     the references for the kinds of things you <i>can</i> do with
     Solarium are pretty sparse, or at least haven't yet reached <i>me</i>.&nbsp;
+
 
 
     You have a few choices, if you want to explore them on your own:<br>
@@ -5174,10 +5227,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
             whereas otherwise it holds the address in AGC memory <i>immediately
 
 
+
               following</i> the point at which the self-test code
             detected the failure.&nbsp; To interpret what that means you
             have to actually look at <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/listings/Solarium055/AGC_SELF-CHECK.agc.html">the
+
 
 
               assembly listing of SOLARIUM's self-test code</a>.&nbsp;
@@ -5239,6 +5294,7 @@ href="https://www.ibiblio.org/apollo/listings/Solarium055/AGC_SELF-CHECK.agc.htm
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
 
