@@ -67,6 +67,7 @@ is
 
 
 
+
                   a DSKY?</big><br>
               </small></h2>
             The DSKY is the "display/keyboard" (DSKY) used by the Apollo
@@ -80,6 +81,7 @@ is
             the movie <span style="font-style: italic;">Apollo 13</span>.
             In the HBO mini-series, <span style="font-style: italic;">From
 the
+
 
 
 
@@ -160,7 +162,10 @@ the
             graphical display.&nbsp; Its design long preceded the notion
             of a useful graphical display.&nbsp; The words shown on the
             DSKY's front panel were actually engraved on there.&nbsp;
-            They couldn't just change at will!&nbsp; <br>
+            They couldn't just change at the whim of software!&nbsp; Not
+            only that, although it may not be obvious in the images
+            above, some of the keyboards differed, in that some of them
+            had a key labeled PRO, while others had a key labeled STBY.<br>
             <br>
             <img src="compareDSKY.png" alt="" width="412" height="218"
               align="left">Perhaps the point still isn't clear even
@@ -213,22 +218,61 @@ the
             </ul>
             <p>Which still leaves my question to Eldon Hall unanswered,
               about where the leftmost arrangement of indicator lamps
-              was used?&nbsp; I should leave that as an exercise for the
-              reader, but I'll take pity and just give you the
-              answer:&nbsp; If you are persistent in working through the
-              engineering drawings, you find this arrangement in the
-              DSKY for <a href="2014999-011.html">the <i>very earliest</i>
-                Block II G&amp;N (Guidance &amp; Navigation) system,
-                which was designated G&amp;N system #201</a>, and
-              specifically in <a href="SCDs/scd_1006316-.pdf">drawing
-                100631</a><a>6</a>, entitled "INDICATOR, ALARM,
-              SPECIFICATION CONTROL DRAWING".&nbsp; This drawing (and
-              others like it for other variations of the G&amp;N system)
-              are also full of other details of interest to those
-              concerned about authenticity of physical appearances, such
-              as that the indicator lamps shall be "aviation white" and
-              "aviation yellow" per <a
-                href="Documents/assist.dla.mil/MIL_C_25050A.pdf">mil-spec
+              was used?&nbsp; So I actually have dug into the
+              engineering drawings a bit.&nbsp; The questionable
+              arrangement of the DSKY's indicator lamps appears in <a
+                href="2014999-011.html">the very earliest Block II
+                G&amp;N (Guidance &amp; Navigation) system, which was
+                designated G&amp;N system #201</a>, and specifically in
+              <a href="SCDs/scd_1006316-.pdf">drawing 100631</a><a>6</a>,
+              entitled "INDICATOR, ALARM, SPECIFICATION CONTROL
+              DRAWING".&nbsp; In fact, it was even used in the unmanned
+              Apollo 5 mission ... sort of.&nbsp; Since Apollo 5 was
+              unmanned, it didn't really have much of a need for a
+              display/keyboard unit, at least not insofar as interfacing
+              to a non-existent astronaut was concerned.&nbsp; MIT/IL
+              drawings (look at the table column labeled "603" in <a
+                moz-do-not-send="true"
+href="https://archive.org/details/apertureCardBox471NARASW_images/page/n1892/mode/1up?view=theater">this
+                drawing of the as-delivered systems</a>) indicate that
+              the G&amp;N system #603 eventually used in Apollo 5's LM-1
+              was delivered to NASA without any DSKY at all.&nbsp;
+              However, that didn't stop the intrepid folks at NASA from
+              installing a DSKY anyway.&nbsp; Interestingly, though, the
+              DSKY NASA installed changed over time.&nbsp; The master
+              drawing (6014999) tabulates NASA's modifications to
+              MIT/IL's as-delivered G&amp;N systems.&nbsp; That master
+              drawing went through a <i>lot</i> of revisions, but what
+              it shows insofar as the DSKY for LM-1 is concerned is
+              this:<br>
+            </p>
+            <ul>
+              <li>60014999 Revs 1, A:&nbsp; DSKY model 2003985-031,
+                which has the mysterious arrangement of indicator lamps
+                we were wondering about!<br>
+              </li>
+              <li>60014999 Revs B through AC:&nbsp; DSKY model
+                2003985-051</li>
+              <li>60014999 Revs AD through AF:&nbsp; DSKY model
+                2003950-011, which begins to have the "modern"
+                arrangement of only 10 indicator lamps.<br>
+              </li>
+              <li>60014999 Revs AG through DP:&nbsp; DSKY model
+                2003994-011<br>
+              </li>
+            </ul>
+            <p>So in the end, the mystery arrangement was never flown
+              after all.&nbsp; Given that it took me roughly 20 years to
+              come up with this answer, I guess I can forgive Eldon for
+              not knowing the answer off the top of his head.<br>
+            </p>
+            <p>These drawings (and others like them for other variations
+              of the G&amp;N system) are also full of other details of
+              interest to those more concerned about authenticity of
+              physical appearances than I am, such as that the indicator
+              lamps shall be "aviation white" and "aviation yellow" per
+              <a href="Documents/assist.dla.mil/MIL_C_25050A.pdf">mil-spec
+
 
 
 
@@ -491,6 +535,7 @@ I
 
 
 
+
       don't really know.&nbsp;<br>
       <br>
     </div>
@@ -559,6 +604,7 @@ uplink
 
 
 
+
       facility</a> to automate various activities.<br>
     <h3><a name="Canned_Pre-recorded_Mission_Segments"></a> Canned,
       Pre-recorded Mission Segments</h3>
@@ -587,12 +633,14 @@ The
 
 
 
+
         recording process is described below.<br>
       </li>
       <li>Obtain a log of i/o-channel activity from a NASSP simulation,
         and convert that log to DSKY format using the program <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/convertNasspLog.py">convertNasspLog.py</a>.&nbsp;
 The
+
 
 
 
@@ -668,6 +716,7 @@ The
     seconds.)&nbsp; DSKYs are always controlled by AGC "output channels"
     010, 011, 013, and 0163 as described on <a href="developer.html">our
 developer
+
 
 
 
@@ -1006,6 +1055,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/humanize
 
 
 
+
         or -003<br>
       </li>
       <li>Apollo 9 CM, DSKY p/n <a
@@ -1022,10 +1072,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/humanize
 
 
 
+
         or -003</li>
       <li>Apollo 10-17 and SKYLAB and ASTP CM, DSKY p/n <a
           href="http://www.ibiblio.org/apollo/2003994-121.html">2003994-121</a>
         → ALARM INDICATOR p/n <a href="SCDs/scd_1006387d.pdf">1006387</a>-002
+
 
 
 
@@ -1058,9 +1110,11 @@ href="https://archive.org/stream/apertureCardBox459NARASW_images/apertureCardBox
 
 
 
+
         or -003</li>
       <li>Apollo 9 LM, DSKY p/n <a href="2003994-031.html">2003994-031</a>
         → ALARM INDICATOR p/n <a href="SCDs/scd_1006387d.pdf">1006387</a>-002
+
 
 
 
@@ -1091,10 +1145,12 @@ href="https://archive.org/stream/apertureCardBox459NARASW_images/apertureCardBox
 
 
 
+
         or -003</li>
       <li>Apollo 11-17 LM, DSKY p/n <a href="2003994-091.html">2003994-091</a>
         → ALARM INDICATOR p/n <a
           href="https://archive.org/stream/AgcApertureCardsBatch3Images#mode/1up">1005025</a>-001
+
 
 
 
@@ -1119,6 +1175,7 @@ href="https://archive.org/stream/apertureCardBox459NARASW_images/apertureCardBox
       years after the fact, and the later revisions showed the
       decals.)&nbsp; The <a
 href="https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC4-REV10_text.pdf#page=30">Luminary
+
         1E Guidance System Operations Plan document</a> describes the
       decals thusly:<br>
     </p>
@@ -1658,10 +1715,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-11-03.<br>
+          2025-04-30.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
