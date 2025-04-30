@@ -885,7 +885,7 @@ bool yaTelemetryApp::OnInit()
 	docPrefixW = wxT("file://") + docPrefixW + wxT("/documentation/");
 	CmOrLm = dddConfigure(agcSoftware, docPrefixW.mb_str());
 #else
-	char docPrefix[32] = "file://documentation/";
+	char docPrefix[32] = "file://./documentation/";
 	CmOrLm = dddConfigure(agcSoftware, docPrefix);
 #endif
       }
