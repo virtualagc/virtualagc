@@ -199,6 +199,7 @@
  *              		ropes.
  *              2025-04-29 RSB	Apparently, running Borealis has been running
  *              		Aurora12 instead.  Fixed that.
+ *              2025-04-30 RSB	Changed method of detecting file existence.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -214,7 +215,6 @@
 #include "wx/stdpaths.h"
 #include "wx/filefn.h"
 #include "wx/utils.h"
-#include "wx/filename.h"
 
 // Note: Do *not* use persistence for the main window.  It interacts badly with
 // resizable windows, at least on my Linux Mint 21.3 system; the window
@@ -614,7 +614,6 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   PathDelimiter = wxT("");
   PathDelimiter += PATH_DELIMITER;
 
-
   // Enable/disable missions on the basis of whether or not their rope images
   // are available, overriding whatever settings are in the `missionConstants`
   // array.
@@ -623,7 +622,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
       wxString basename = wxString::FromUTF8(
           missionConstants[mission - ID_FIRSTMISSION].basename);
       wxString filename = wxT("source/") + basename + wxT("/") + basename + wxT(".bin");
-      if (wxFileName::FileExists(filename))
+      if (wxFile::Exists(filename))
 	missionConstants[mission - ID_FIRSTMISSION].enabled = ENABLED;
       else
 	missionConstants[mission - ID_FIRSTMISSION].enabled = DISABLED;
