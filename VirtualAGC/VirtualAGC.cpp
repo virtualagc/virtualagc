@@ -291,16 +291,18 @@ setWidgetColours(wxControl* w, int b=255, int f=0) {
  * Also, for newly-added missions, don't forget to add a consistency event for it
  * in the event table appearing later in this file.
  *
- * Note that the .enable field will be overridden during initialization, on the
- * basis of whether or not the associated core-rope file exists, so don't take
- * the initializer below of that field seriously.
+ * If AUTO_MISSION_ENABLE is #define'd, then the .enable field will be
+ * overwritten during initialization, on the basis of whether or not the
+ * associated core-rope file exists.  However, I have absolutely failed in
+ * making that file-check work in Mac OS (Monterey), so AUTO_MISSION_ENABLE is
+ * in fact *not* #define'd.
  */
 static missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
     - ID_FIRSTMISSION] =
       {
           //
             { "Apollo 1 Command Module", "Sunspot247/MAIN.agc.html",
-                "Click this to select the unflown Apollo 1 mission.", ENABLED,
+                "Click this to select the unflown Apollo 1 mission.", DISABLED,
                 CM, BLOCK1, TELEMETRY_PERIPHERALS, "Sunspot247", "CM0.ini" },
             { "AS-202 CM", "Corona261/MAIN.agc.html",
                 "Click this to select the AS-202 unmanned CM mission. "
@@ -320,7 +322,7 @@ static missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 "Click this to select the 2TV-1 mission, running software Sundial E.",
 		ENABLED, CM, BLOCK2, PERIPHERALS, "SundialE", "CM.ini" },
             { "Apollo 7 Command Module", "Sundisk282/MAIN.agc.html",
-                "Click this to select the Apollo 7 mission.", ENABLED, CM,
+                "Click this to select the Apollo 7 mission.", DISABLED, CM,
                 BLOCK2, PERIPHERALS, "Sundisk282", "CM.ini" },
             { "Apollo 8 Command Module", "Colossus237/MAIN.agc.html",
                 "Click this to select the Apollo 8 mission, running software COLOSSUS 237.",
@@ -393,7 +395,7 @@ static missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, PERIPHERALS, "LM131R1", "LM.ini" },
             { "Apollo 14 Command Module", "Comanche108/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 14 mission.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche108", "CM.ini" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "Comanche108", "CM.ini" },
             { "LUMINARY 163 (LM)", "Luminary163/MAIN.agc.html",
                 "Click this to select Luminary 163, the 1st software release targeting the Apollo 14 mission.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary163", "LM.ini" },
@@ -614,6 +616,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   PathDelimiter = wxT("");
   PathDelimiter += PATH_DELIMITER;
 
+#ifdef AUTO_MISSION_ENABLE
   // Enable/disable missions on the basis of whether or not their rope images
   // are available, overriding whatever settings are in the `missionConstants`
   // array.
@@ -627,6 +630,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
       else
 	missionConstants[mission - ID_FIRSTMISSION].enabled = DISABLED;
     }
+#endif
 
   // Find the directory that the executable is in.  Then go up one
   // level and then down into Resources sub-directory.  I envision
