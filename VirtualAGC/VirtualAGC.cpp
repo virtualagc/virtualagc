@@ -621,7 +621,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
     {
       wxString basename = wxString::FromUTF8(
           missionConstants[mission - ID_FIRSTMISSION].basename);
-      wxString filename = wxT("source/") + basename + wxT("/") + basename + wxT(".bin");
+      const wxString filename = wxT("source/") + basename + wxT("/") + basename + wxT(".bin");
       if (wxFile::Exists(filename))
 	missionConstants[mission - ID_FIRSTMISSION].enabled = ENABLED;
       else
