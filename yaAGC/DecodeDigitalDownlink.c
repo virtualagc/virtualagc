@@ -74,6 +74,9 @@
 		04/20/25 RSB	Substantial rework in order to support additional
 				downlist protocols.  Just Sunburst 120 added
 				so far.
+		04/30/25 RSB	Had to completely rework globbing over
+				ddd-*-ALIAS.tsv, since Msys2 in Windows had
+				no equivalent for the glob.h `glob` function.
   
 */
 
@@ -81,8 +84,56 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <glob.h>
 #include "agc_engine.h"
+
+// Unfortunately, Msys2 in Windows has no equivalent for the `glob` function
+// or for glob.h.  Our needs are very modest, namely finding all files with
+// names of the form "ddd-*-%s.tsv".  We can put pretty hard ceilings on the
+// total number of these files we'll ever have in the future, and on their
+// string-lengths.  So my workaround is to have an array of filenames that we
+// can use either `glob` or the Windows equivalent to populate.
+#define MAX_TSV_FILES 10 // Per %s, actual limit is 6.
+#define MAX_TSV_STRING_LENGTH 40 // Only 28 at present, and probably no more ever.
+char tsvFiles[MAX_TSV_FILES][MAX_TSV_STRING_LENGTH];
+int numTsvFiles = 0;
+#ifdef WIN32
+#include <windows.h>
+void
+findTsvFiles(char *aliasTsv)
+{
+  char pattern[64];
+  sprintf(pattern, "ddd-*-%s.tsv", aliasTsv);
+  numTsvFiles = 0;
+  // Adapted from what the google AI returned for the search
+  // "windows replacement for linux glob function in C".
+  WIN32_FIND_DATA find_data;
+  HANDLE hFind = INVALID_HANDLE_VALUE;
+  hFind = FindFirstFile(pattern, &find_data);
+  if (hFind == INVALID_HANDLE_VALUE)
+    return; // Nothing found.
+  do
+    strcpy(tsvFiles[numTsvFiles++], find_data.cFileName);
+  while (FindNextFile(hFind, &find_data) != 0 && numTsvFiles < MAX_TSV_FILES);
+  FindClose(hFind);
+}
+#else
+#include <glob.h>
+void
+findTsvFiles(char *aliasTsv)
+{
+  glob_t globResult;
+  char globPattern[64];
+  numTsvFiles = 0;
+  sprintf(globPattern, "ddd-*-%s.tsv", aliasTsv);
+  if (0 != glob(globPattern, 0, NULL, &globResult))
+    return; // Nothing found.
+  for (;
+       numTsvFiles < globResult.gl_pathc && numTsvFiles < MAX_TSV_FILES;
+       numTsvFiles++)
+    strcpy(tsvFiles[numTsvFiles], globResult.gl_pathv[numTsvFiles]);
+  globfree(&globResult);
+}
+#endif
 
 #define DEBUG_DOWNLIST_SPEC_FILES
 
@@ -743,13 +794,13 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       !strncmp(agcSoftware, "Borealis", 8) ||
       !strncmp(agcSoftware, "Sunburst", 7))
     useFallbackDocumentation = 0;
-  sprintf(globPattern, "ddd-*-%s.tsv", aliasTsv);
-  if (0 != glob(globPattern, 0, NULL, &globResult))
+  findTsvFiles(aliasTsv);
+  if (numTsvFiles == 0)
     {
-      fprintf(stderr, "Cannot find any TSV files for %s\n", agcSoftware);
+      fprintf(stderr, "No TSV files found for %s\n", agcSoftware);
       exit(1);
     }
-  for (int j = 0; j < globResult.gl_pathc && j < MAX_DOWNLISTS; j++)
+  for (int j = 0; j < numTsvFiles && j < MAX_DOWNLISTS; j++)
     {
       int id;
       char filename[64];
@@ -757,10 +808,10 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       FieldSpec_t *fieldSpec;
       FILE *fp;
       int i;
-      // At this point, globResult.gl_pathv[i] should be a filename of the form
+      // At this point, tsvFiles[j] should be a filename of the form
       // ddd-%05o-softwarename.tsv.  We need to pick off the middle field and
       // turn it into an integer ID.
-      if (1 != sscanf(globResult.gl_pathv[j], "ddd-%05o", &id))
+      if (1 != sscanf(tsvFiles[j], "ddd-%05o", &id))
 	continue;
       dls = &DownlistSpecifications[numDownlists++];
       if (dls == NULL)
@@ -996,7 +1047,6 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       dddNormalize(dls);
     }
 
-  globfree(&globResult);
   printSpecs("after.txt");
   return CmOrLm;
 }
@@ -1185,7 +1235,7 @@ char *DocumentationURL = (char *) DEFAULT_URL;
 void
 PrintDownlinkList (DownlinkListSpec_t *Spec)
 {
-  // This is a global pointer to a function which can override PrintDownlinkList().
+  // `ProcessDownlinkList` is a pointer to a function which can override PrintDownlinkList().
   // The idea is that PrintDownlinkList() is the default processor, and can be
   // used for printing "raw" downlink data, but it can be overridden if the buffered
   // downlink list needs to be processed differently, for example to be printed on 
