@@ -697,8 +697,6 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
   int i, useFallbackDocumentation = 1;
   FILE *aliases = NULL;
   char aliasDoc[32] = { 0 }, aliasTsv[32] = { 0 };
-  glob_t globResult;
-  char globPattern[64];
 
   /*
    * The downlists vary by AGC software version.  There are three aspects of
