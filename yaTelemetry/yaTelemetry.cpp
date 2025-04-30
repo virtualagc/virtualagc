@@ -90,6 +90,7 @@ SimpleFrameClass *SimpleFrame = NULL;
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
+#include <wx/filefn.h>
 
 using namespace std;
 
@@ -882,12 +883,11 @@ bool yaTelemetryApp::OnInit()
       {
 #ifdef __APPLE__
 	wxString docPrefixW = wxStandardPaths::Get().GetResourcesDir();
+#else
+	wxString docPrefixW = wxGetCwd();
+#endif
 	docPrefixW = wxT("file://") + docPrefixW + wxT("/documentation/");
 	CmOrLm = dddConfigure(agcSoftware, docPrefixW.mb_str());
-#else
-	char docPrefix[32] = "file://./documentation/";
-	CmOrLm = dddConfigure(agcSoftware, docPrefix);
-#endif
       }
 
     printf ("     --delay=%d\n", StartupDelay);
