@@ -11,6 +11,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2023-05-27 MAS  Created from Solarium 55.
 ## 		2023-06-17 MAS  Updated for Corona.
+## 		2025-05-03 MAS  Incorporated original comments found in R-532
+##				Volume I, Reentry Guidance for Apollo.
 
 
 #	ROUTINE CALCRVG INTEGRATES THE EQUATIONS OF MOTION BY AVERAGING THE THRUST AND GRAVITATIONAL ACCELERA-
@@ -215,6 +217,6 @@ MU/RSQ		NOLOD	2
 KPIP		2DEC	0.59904
 DP2(-3)		2DEC	0.125
 DP(5/8)		2DEC	0.625
-MUEARTH		2DEC	.009063188 	# SCALED AT 2(+42)M(+3)/CS(+2)
+MUEARTH		2DEC	.009063188 	# 3.98603223 E14 SCALED 2(+42)M(+3)/CS(+2)
 MUMOON		2DEC	0.007134481	# 4.90277800 E12	2(+36)M(+3)/CS(+2)
-J(RE)SQ		2DEC	.06006663 	# SCALED AT 2(+40)M(+2)
+J(RE)SQ		2DEC	.06006663 	#                       2(+40)M(+2)
