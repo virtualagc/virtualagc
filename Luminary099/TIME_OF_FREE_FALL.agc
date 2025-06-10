@@ -17,6 +17,7 @@
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2025-06-10 ZP	Corrections to whitespace in comments.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
