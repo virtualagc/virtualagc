@@ -1,6 +1,8 @@
 Virtual Apollo Guidance Computer
 ================================
 
+<!---
+Apparently, Travis CI no longer has a build tier that's free for open source, so I'm removing the build-status display for it.
 ### Build status
 
 | Travis CI (Linux) |
@@ -9,6 +11,7 @@ Virtual Apollo Guidance Computer
 
 [travis-image]: https://travis-ci.org/virtualagc/virtualagc.svg?branch=master
 [travis-site]: https://travis-ci.org/virtualagc/virtualagc/branches
+-->
 
 The [Apollo](https://en.wikipedia.org/wiki/Apollo_(spacecraft)) spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the [Command Module (CM)](https://en.wikipedia.org/wiki/Apollo_command_and_service_module) and the [Lunar Module (LM)](https://en.wikipedia.org/wiki/Apollo_Lunar_Module). The CM was used to get the three astronauts to the moon, and back again. The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon.
 
