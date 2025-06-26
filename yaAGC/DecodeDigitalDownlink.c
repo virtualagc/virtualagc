@@ -77,6 +77,8 @@
 		04/30/25 RSB	Had to completely rework globbing over
 				ddd-*-ALIAS.tsv, since Msys2 in Windows had
 				no equivalent for the glob.h `glob` function.
+		05/03/25 RSB	Added FMT_2DECL (little-endian double precision)
+				and double-precision aligned at odd addresses.
   
 */
 
@@ -975,6 +977,8 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 	    fieldSpec->Format = FMT_2DEC;
 	  else if (!strcmp(formatField, "FMT_USP"))
 	    fieldSpec->Format = FMT_USP;
+	  else if (!strcmp(formatField, "FMT_2DECL"))
+	    fieldSpec->Format = FMT_2DECL;
 	  else
 	    fprintf(stderr, "Unrecognized format field in %s: %s\n", filename, formatField);
 	  // Similarly for the formatter field.
@@ -1027,13 +1031,16 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 	    unitField[0] = 0;
 	  strcpy(fieldSpec->Unit, unitField);
 #ifdef SHOW_WORD_NUMBERS
-	  if (fieldSpec->Format == FMT_DP ||
-	      fieldSpec->Format == FMT_2OCT ||
-	      fieldSpec->Format == FMT_2DEC)
-	    sprintf(fieldSpec->Name, "%d ", (offset / 2) + 1);
-	  else
+	  if (fieldSpec->Format == FMT_SP ||
+	      fieldSpec->Format == FMT_OCT ||
+	      fieldSpec->Format == FMT_DEC ||
+	      fieldSpec->Format == FMT_USP) // Single precision
 	    sprintf(fieldSpec->Name, "%d%c ", (offset / 2) + 1,
 		    (offset % 2) ? 'b' : 'a');
+	  else if (0 == (offset & 1)) // Double precision aligned at even address
+	    sprintf(fieldSpec->Name, "%d ", (offset / 2) + 1);
+	  else // Double precision aligned at odd address
+	    sprintf(fieldSpec->Name, "%db,%da ", (offset / 2) + 1, (offset / 2) + 2);
 	  strcat(fieldSpec->Name, varField);
 #else
 	  strcpy(fieldSpec->Name, varField);
@@ -1223,6 +1230,12 @@ PrintField (const FieldSpec_t *FieldSpec)
 	    sprintf (&Sbuffer[row][col], "None");
 	  else
 	    PrintUSP (Ptr, FieldSpec->Scale, row, col);
+	  break;
+	case FMT_2DECL:
+	  if (Ptr[0] == -1 || Ptr[1] == -1)
+	    sprintf (&Sbuffer[row][col], "None");
+	  else
+	    sprintf (&Sbuffer[row][col], "%+d", 0100000 * Ptr[1] + Ptr[0]);
 	  break;
 	}
     }

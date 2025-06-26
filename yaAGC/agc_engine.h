@@ -125,6 +125,7 @@
 				`FieldSpec_t`.
 		03/08/25 RSB	Adjusted displayed line width.
 		03/11/25 RSB	Added SHOW_WORD_NUMBERS.
+		05/03/25 RSB	Added FMT_2DECL.
 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -328,7 +329,7 @@ extern long random (void);
 // Stuff for specifying how to print various fields.
 
 typedef enum {
-  FMT_SP, FMT_DP, FMT_OCT, FMT_2OCT, FMT_DEC, FMT_2DEC, FMT_USP
+  FMT_SP, FMT_DP, FMT_OCT, FMT_2OCT, FMT_DEC, FMT_2DEC, FMT_USP, FMT_2DECL
 } Format_t;
 
 // Function used for writing out telemetry data.

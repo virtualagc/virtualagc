@@ -127,6 +127,12 @@
  *            	2023-05-15 MAS  Added support for the "VXM*" interpretive instruction for Block I.
  *            	2023-05-23 MAS  Added support for the "DOT*" interpretive instruction for Block I.
  *            	2023-06-21 MAS  Added support for the "TSU*" interpretive instruction for Block I.
+ *            	2025-06-12 RSB	Added (but disabled) code that attempts to
+ *            	              	properly align full-line comments with respect
+ *            	              	to end-of line comments.  See `fixCommentAlignment`.
+ *            	              	However, it won't work without a lot of extra
+ *            	              	bookkeeping of end-of-line comment alignment in
+ *            	              	the source code.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -168,6 +174,12 @@
 Line_t CurrentFilename;
 int CurrentLineInFile = 0;
 int thisIsTheLastPass = 0;
+
+// Don't use the following feature.  It's intended to align full-line comments
+// with end-of-line comments, but it fails because the assembler doesn't have
+// any machinery to actually track the columns at which end-of-line comments
+// are supposed to appear.
+int fixCommentAlignment = 0; // Set to 0 to restore old alignment of full-line comments.
 
 // We allow a certain number of levels of include files.  To handle this,
 // we need a stack of input files.
@@ -2690,11 +2702,16 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                     strcat(ParseInputRecord.Operand, Suffix);
                 }
 
-              printf(" %-8s %-8s %c%-8s %-10s %-10s %-8s\t#%s",
-                  ParseInputRecord.Label, ParseInputRecord.FalseLabel,
-                  ParseOutputRecord.Column8, ParseInputRecord.Operator,
-                  ParseInputRecord.Operand, ParseInputRecord.Mod1,
-                  ParseInputRecord.Mod2, ParseInputRecord.Comment);
+              //fprintf(stderr, "***DEBUG*** '%s'\n", ParseInputRecord.Comment);
+              if (fixCommentAlignment && ParseInputRecord.Comment[0] != 0 &&
+        	  ParseInputRecord.commentColumn == 0)
+		printf("    #%s", ParseInputRecord.Comment);
+              else
+		printf(" %-8s %-8s %c%-8s %-10s %-10s %-8s\t#%s",
+		    ParseInputRecord.Label, ParseInputRecord.FalseLabel,
+		    ParseOutputRecord.Column8, ParseInputRecord.Operator,
+		    ParseInputRecord.Operand, ParseInputRecord.Mod1,
+		    ParseInputRecord.Mod2, ParseInputRecord.Comment);
 
               if (HtmlOut)
                 {

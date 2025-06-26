@@ -422,3 +422,41 @@ int ParseVN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     return (0);
 }
 
+#ifdef MAIN_Parse2DEC
+
+// This test program provides a way to easily convert back and forth between
+// the AGC assembly-language representation of an AGC SP or DP number (i.e.,
+// a human-readable representation) and the binary (octal) version thereof.
+// It reads a command line in exactly one of the following forms:
+//
+//	A decimal number with optional characters + - . E B that's the
+//	human-readable form of the number.  When this is ambiguous with the
+//	next case below, a + should be prefixed.
+//
+//	A 5-digit octal number [plus an optional Bn where B is literal and n is
+//	a decimal integer]
+//
+//	Two 5-digit octal numbers [plus an optional Bn]
+//
+// In the first case, the octal is converted to its AGC binary representation
+// and is returned both in SP (a single 5-digit octal) and DP (two 5-digit octals).
+//
+// In the 2nd case, the octal is assumed to represent the binary form of an
+// AGC SP number, and is returned in human-readable form as a floating-point
+// number.
+//
+// In the 3rd case, the octals are assumed to represent the binary form of an
+// AGC DP number, and is returned in human-readable form as a floating-point
+// number.
+//
+// In the 2nd and 3rd cases, the optional Bn is a binary scaling factor
+// applied prior to conversion into human-readable form.
+int
+main(int argc, char *argv[])
+{
+  TBD
+
+  return 0;
+}
+
+#endif // MAIN_Parse2DEC

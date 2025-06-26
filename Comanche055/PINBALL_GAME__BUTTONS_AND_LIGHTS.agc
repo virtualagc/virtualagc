@@ -21,13 +21,14 @@
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 ##		2017-02-23 RSB	CHKP00H -> CHKPOOH.  My 2009 correction the other
 ##				direction had been in error.
-##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
+##		2017-03-08 RSB	Changed DSPOCTWD to DSPOCTWD.
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2025-06-18 ZP	Corrections to whitespace in comments.
 ##		2025-06-19 ZP	Corrections to whitepsace in comments (pg: 318-328).
 ##		2025-06-25 ZP	Corrections to whitespace in comments (pg: 329-349).
+##		2025-06-26 RSB	Recorrected DSPOCTWD.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -951,7 +952,7 @@ INTMCTBS	CA	MPAC	+2	# INTERNAL MACH CADR TO BE SPECIFIED.
 		CAF	R3D1		# VB NOT = 05. DISPLAY CADR.
 		TS	DSPCOUNT
 		CA	NOUNCADR
-		TC	DSPOCTWO
+		TC	DSPOCTWD
 		TC	VERBFAN
 
 		AD	ONE
@@ -1225,7 +1226,7 @@ DSPCOM3		TS	DISTEM		# +0 +1 +2 INTO DISTEM
 		TS	DSPCOUNT
 		INDEX	DISTEM
 		CS	BUF
-		TC	DSPOCTWO
+		TC	DSPOCTWD
 		XCH	DISTEM
 		TC	DSPCOM2 +2
 
