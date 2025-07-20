@@ -53,6 +53,7 @@
                                 but irritating warning messages.
                 2023-08-20 RSB  Fixed OM/D bit in PIO 057.
                 2023-08-22 RSB  Fixed PIO 574 least-significant bits.
+                2025-07-17 RSB  Added HAS_ERRNO_H.
  */
 
 #include <stdio.h>
@@ -67,6 +68,9 @@
 #else
 #include <winsock2.h>
 #include <windows.h>
+#ifdef HAS_ERRNO_H
+#include <errno.h>
+#endif
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__)) || WIN32
