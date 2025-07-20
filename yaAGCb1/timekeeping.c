@@ -42,6 +42,10 @@
  * 				http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
  * 		2017-08-22 RSB	Some versions of Mac OS X apparently now do have clock_gettime(),
  * 				so added a workaround to account for those versions.
+ * 		2025-07-19 RSB	Added `HAS_CLOCK_GETTIME` to work around fact
+ * 				that newer versions of MSYS2 now contain a
+ * 				`clock_gettime` library function, which is
+ * 				incompatible with the versions build-in here.
  */
 
 #include <time.h>
@@ -74,6 +78,7 @@ int clock_gettime (int clock_id, struct timespec *timeSpec)
 #ifdef WIN32
 #include <winbase.h>
 #define CLOCK_REALTIME 0
+#ifndef HAS_CLOCK_GETTIME
 int clock_gettime(int id, struct timespec *spec)      //C-file part
 {
    __int64 wintime;
@@ -83,6 +88,7 @@ int clock_gettime(int id, struct timespec *spec)      //C-file part
    spec->tv_nsec =wintime % 10000000LL * 100;      //nano-seconds
    return 0;
 }
+#endif
 #endif
 
 int64_t
