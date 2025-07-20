@@ -8,6 +8,7 @@
 #				doesn't work for my current gcc setup.
 #				I don't even recall why it had been there.
 #				Also made the Makefile public domain. 
+#		2025-07-19 RSB	Added HAS_ERRNO_H
 #
 # The default is to build using the native gcc. To cross build from 
 # Linux to get Win32 and Mac OS X executables as well (make all-archs), 
@@ -28,6 +29,10 @@ endif
 ifeq "${USER}" "rburkey"
 #OURFLAGS+=-Wall -Werror -O3
 OURFLAGS+=-Wall -Werror -O0 -g
+endif
+
+ifdef HAS_ERRNO_H
+OURFLAGS+=-DHAS_ERRNO_H
 endif
 
 SOURCE:=$(wildcard *.c)
