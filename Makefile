@@ -207,6 +207,7 @@
 #		2024-05-13 RSB	Added Comanche 67
 #		2024-05-21 RSB	Added Comanche 72 and Manche72R3.
 #		2025-01-11 RSB	Added TicTacToe.
+#		2025-07-19 RSB	Added HAS_CLOCK_GETTIME option for WIN32 builds.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -421,6 +422,9 @@ endif
 ifdef WIN32
 export WIN32
 EXT=.exe
+ifdef HAS_CLOCK_GETTIME
+CFLAGS0+=-DHAS_CLOCK_GETTIME
+endif
 CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
