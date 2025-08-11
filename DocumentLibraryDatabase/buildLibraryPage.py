@@ -685,6 +685,11 @@ else:
     to the AGC, such as ground-support equipment.
     """
 
+    blurbDanceMemos = """
+    The "DANCE Memos" are internal memos from the MIT Instrumentation Laboratory 
+    dealing with issues of SUNDANCE software development.  The items are arranged according to their memo numbers.
+    """
+
     blurbLuminaryMemos = """
     The "LUMINARY Memos" are internal memos from the MIT Instrumentation Laboratory 
     dealing with issues of LUMINARY software development, along with 
@@ -1642,13 +1647,14 @@ else:
         { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques and Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"], "keywords" : ["Mission Techniques"] },
         { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
         { "anchor" : "Requirements", "title" : "AGC/AGS Software Requirements", "keywords" : ["Software requirements"]},
+        { "anchor" : "DanceMemos", "title" : "DANCE Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["DANCE Memo"], "blurb" : blurbDanceMemos },
         { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"], "blurb" : blurbLuminaryMemos },
         { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
         { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
         { "anchor" : "PcrsPcns", "title" : "Program Change Requests (PCR) and Notices (PCN)", "sortKey" : myDashSortKey, 
                         "documentNumbers" : [ "PCR-", "PCN-"], "blurb" : blurbPcrsPcns  },
         { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myAnomalySortKey, 
-                        "blurb" : blurbAnomalies, "documentNumbers" : [ "ACB-", "LNY-", "L-", "COL-", "COM-", "A-" ] },
+                        "blurb" : blurbAnomalies, "documentNumbers" : [ "ACB-", "LNY-", "L-", "COL-", "COM-", "A-", "Y-" ] },
         { "anchor" : "SCB", "title" : "Software Control Board (SCB)", "keywords" : ["SCB"]},
         { "anchor" : "SDP", "title" : "Software Development Plans", "keywords" : ["SDP"]},
         { "anchor" : "Block1", "title" : "Block I Specifics", "keywords" : ["Block 1"]},
