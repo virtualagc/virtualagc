@@ -134,6 +134,7 @@
 #		2018-01-06 MAS	Switched the TEMP light to use channel 163 instead
 #				of channel 11.
 #		2018-03-10 RSB	Added --gunmetal option.
+#		2025-09-08 HDE	Started changes for --800x480 resoltion option. Filename updates and added cli argument for parsing.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -228,6 +229,7 @@ cli.add_argument("--lamptest", help="Perform a lamp test and then exit.")
 cli.add_argument("--manual", help="Manually control the display.")
 cli.add_argument("--gunmetal", help="Use gunmetal versions of mounting posts and horizontal separator.")
 cli.add_argument("--backlights", help="Turn on key backlights at startup.")
+cli.add_argument("--800x480", help="Use graphics for 800x480 screen resolution.")
 args = cli.parse_args()
 
 if args.backlights:
@@ -374,33 +376,33 @@ root.configure(background='black')
 #canvas.pack(fill='both', expand=True)
 #canvas = tk.Canvas(parent, bg="black", width=480, height=800)
 #canvas.pack()
-imageDigitBlank = PhotoImage(file="piDSKY2-images/7Seg-0.png")
-imageDigit0 = PhotoImage(file="piDSKY2-images/7Seg-21.png")
-imageDigit1 = PhotoImage(file="piDSKY2-images/7Seg-3.png")
-imageDigit2 = PhotoImage(file="piDSKY2-images/7Seg-25.png")
-imageDigit3 = PhotoImage(file="piDSKY2-images/7Seg-27.png")
-imageDigit4 = PhotoImage(file="piDSKY2-images/7Seg-15.png")
-imageDigit5 = PhotoImage(file="piDSKY2-images/7Seg-30.png")
-imageDigit6 = PhotoImage(file="piDSKY2-images/7Seg-28.png")
-imageDigit7 = PhotoImage(file="piDSKY2-images/7Seg-19.png")
-imageDigit8 = PhotoImage(file="piDSKY2-images/7Seg-29.png")
-imageDigit9 = PhotoImage(file="piDSKY2-images/7Seg-31.png")
-imageCompActyOff = PhotoImage(file="piDSKY2-images/CompActyOff.png")
-imageCompActyOn = PhotoImage(file="piDSKY2-images/CompActyOn.png")
-imageMinusOn = PhotoImage(file="piDSKY2-images/MinusOn.png")
-imagePlusOn = PhotoImage(file="piDSKY2-images/PlusOn.png")
-imagePlusMinusOff = PhotoImage(file="piDSKY2-images/PlusMinusOff.png")
-imageProgOn = PhotoImage(file="piDSKY2-images/ProgOn.png")
-imageVerbOn = PhotoImage(file="piDSKY2-images/VerbOn.png")
-imageNounOn = PhotoImage(file="piDSKY2-images/NounOn.png")
+imageDigitBlank = PhotoImage(file="piDSKY2-images/7Seg-0_800x480.png")
+imageDigit0 = PhotoImage(file="piDSKY2-images/7Seg-21_800x480.png")
+imageDigit1 = PhotoImage(file="piDSKY2-images/7Seg-3_800x480.png")
+imageDigit2 = PhotoImage(file="piDSKY2-images/7Seg-25_800x480.png")
+imageDigit3 = PhotoImage(file="piDSKY2-images/7Seg-27_800x480.png")
+imageDigit4 = PhotoImage(file="piDSKY2-images/7Seg-15_800x480.png")
+imageDigit5 = PhotoImage(file="piDSKY2-images/7Seg-30_800x480.png")
+imageDigit6 = PhotoImage(file="piDSKY2-images/7Seg-28_800x480.png")
+imageDigit7 = PhotoImage(file="piDSKY2-images/7Seg-19_800x480.png")
+imageDigit8 = PhotoImage(file="piDSKY2-images/7Seg-29_800x480.png")
+imageDigit9 = PhotoImage(file="piDSKY2-images/7Seg-31_800x480.png")
+imageCompActyOff = PhotoImage(file="piDSKY2-images/CompActyOff_800x480.png")
+imageCompActyOn = PhotoImage(file="piDSKY2-images/CompActyOn_800x480.png")
+imageMinusOn = PhotoImage(file="piDSKY2-images/MinusOn_800x480.png")
+imagePlusOn = PhotoImage(file="piDSKY2-images/PlusOn_800x480.png")
+imagePlusMinusOff = PhotoImage(file="piDSKY2-images/PlusMinusOff_800x480.png")
+imageProgOn = PhotoImage(file="piDSKY2-images/ProgOn_800x480.png")
+imageVerbOn = PhotoImage(file="piDSKY2-images/VerbOn_800x480.png")
+imageNounOn = PhotoImage(file="piDSKY2-images/NounOn_800x480.png")
 if args.gunmetal:
-	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.png")
-	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOn.png")
-	imageDot = PhotoImage(file="piDSKY2-images/Dot.png")
+	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn_800x480.png")
+	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOn_800x480.png")
+	imageDot = PhotoImage(file="piDSKY2-images/Dot_800x480.png")
 else:
-	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn-gunmetal.png")
-	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOn-gunmetal.png")
-	imageDot = PhotoImage(file="piDSKY2-images/Dot-gunmetal.png")
+	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn-gunmetal_800x480.png")
+	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOn-gunmetal_800x480.png")
+	imageDot = PhotoImage(file="piDSKY2-images/Dot-gunmetal_800x480.png")
 # Initial placement of all graphical objects on LCD panel.
 widgetStates = {}
 widgetLabels = {}
@@ -446,7 +448,7 @@ displayGraphic(0, 664, imageSeparatorOff)
 ###################################################################################
 # Stuff related to control of the lamp board via PIGPIO and SPI on the Pi's GPIO.
 
-# set indicator colours
+# set indicator colours if using neopixels
 yellow =	(255, 102, 0)
 white =		(255, 120, 20)
 black =		(0,0,0)
