@@ -67,7 +67,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include "yaLVDC.h"
 
 // Note the mapping of the individual bits in the interrupt

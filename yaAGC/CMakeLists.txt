@@ -9,7 +9,7 @@ add_library(libyaAGC ${_libagc_src})
 
 add_executable(yaAGC ${_agc_src})
 target_compile_definitions(yaAGC PRIVATE NVER="${NVER}" NOREADLINE="yes" GDBMI)
-target_link_libraries(yaAGC PRIVATE libyaAGC m)
+target_link_libraries(yaAGC PRIVATE libyaAGC $<$<NOT:$<BOOL:${MSVC}>>:m>)
 if(Threads_FOUND)
   target_link_libraries(yaAGC PRIVATE Threads::Threads)
 endif()

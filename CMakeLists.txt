@@ -7,11 +7,21 @@ enable_testing()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-set(NVER \\\"2020-12-24\\\")
+if(MSVC)
+  set(NVER "2020-12-24")
+else()
+  set(NVER \\\"2020-12-24\\\")
+endif()
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 # this avoids issues with compilers defaulting to newer standards with stricter rules
+
+include(CheckSymbolExists)
+
+if(MSVC)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
 
 find_package(Threads)
 
@@ -34,16 +44,21 @@ endif()
 add_subdirectory(Tools)
 add_subdirectory(Luminary099)
 
-add_subdirectory(yaAGC)
-add_subdirectory(yaAGS)
 add_subdirectory(yaASM)
 add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
-add_subdirectory(yaOBC)
-add_subdirectory(yaYUL)
-add_subdirectory(yaUniverse)
 
-add_subdirectory(enet)
+if(NOT MSVC)
+  add_subdirectory(yaYUL)
+endif()
+
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+  add_subdirectory(yaAGC)
+  add_subdirectory(yaUniverse)
+  add_subdirectory(yaAGS)
+  add_subdirectory(yaOBC)
+  add_subdirectory(enet)
+endif()
 
 if(CURSES_FOUND)
   add_subdirectory(yaUplinkBlock1)
@@ -64,4 +79,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   endif()
 
   set(CMAKE_INSTALL_PREFIX "${HOME}/VirtualAGC" CACHE PATH "install prefix" FORCE)
+endif()
+
+if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+  file(GENERATE OUTPUT .gitignore CONTENT "*")
 endif()
