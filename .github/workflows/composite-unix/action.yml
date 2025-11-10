@@ -1,0 +1,15 @@
+runs:
+
+  using: "composite"
+
+  steps:
+
+  - run: cmake --workflow default
+    shell: bash
+
+  - name: upload CMakeConfigureLog.yaml
+    if: failure() && hashFiles('build/CMakeFiles/CMakeConfigureLog.yaml') != ''
+    uses: actions/upload-artifact@v4
+    with:
+      name: ${{ runner.os }}-${{ env.CC }}-${{ env.CXX }}-CMakeConfigureLog.yaml
+      path: build/CMakeFiles/CMakeConfigureLog.yaml

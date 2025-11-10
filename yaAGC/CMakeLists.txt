@@ -16,12 +16,13 @@ endif()
 
 if(WIN32)
   add_library(regex regex.c)
+  target_compile_definitions(regex PRIVATE STDC_HEADERS)
+
   target_sources(yaAGC PRIVATE random.c)
   target_link_libraries(yaAGC PRIVATE regex ${WINSOCK_LIBRARIES})
 endif()
 
 if(APPLE OR WIN32)
-  target_compile_definitions(regex PRIVATE STDC_HEADERS)
   target_compile_definitions(yaAGC PRIVATE STDC_HEADERS)
 endif()
 
