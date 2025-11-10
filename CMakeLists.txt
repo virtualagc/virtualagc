@@ -43,6 +43,7 @@ endif()
 
 add_subdirectory(Tools)
 add_subdirectory(Luminary099)
+add_subdirectory(enet)
 
 add_subdirectory(yaASM)
 add_subdirectory(yaLEMAP)
@@ -52,12 +53,12 @@ if(NOT MSVC)
   add_subdirectory(yaYUL)
 endif()
 
+add_subdirectory(yaAGC)
+add_subdirectory(yaUniverse)
+
 if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  add_subdirectory(yaAGC)
-  add_subdirectory(yaUniverse)
   add_subdirectory(yaAGS)
   add_subdirectory(yaOBC)
-  add_subdirectory(enet)
 endif()
 
 if(CURSES_FOUND)

@@ -1,4 +1,4 @@
-add_executable(yaAGS mainAGS.c symbol_table.c nbfgets.c Backtrace.c
+add_executable(yaAGS mainAGS.c symbol_table.c nbfgets.c
   ${PROJECT_SOURCE_DIR}/yaAGC/NormalizeSourceName.c)
 target_link_libraries(yaAGS PRIVATE libyaAGS libyaAGC Threads::Threads $<$<NOT:$<BOOL:${MSVC}>>:m>)
 target_include_directories(yaAGS PRIVATE ${PROJECT_SOURCE_DIR}/yaAGC)
