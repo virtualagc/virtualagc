@@ -35,6 +35,7 @@ if(WIN32 AND CURSES_FOUND AND NOT CURSES_LIBRARIES MATCHES "ncursesw")
   endif()
 endif()
 
+find_package(SDL2)
 find_package(wxWidgets COMPONENTS gl core base)
 
 if(WIN32)
@@ -54,6 +55,11 @@ if(NOT MSVC)
 endif()
 
 add_subdirectory(yaAGC)
+
+if(SDL2_FOUND)
+  add_subdirectory(yaACA3)
+endif()
+
 add_subdirectory(yaUniverse)
 
 if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
