@@ -66,6 +66,7 @@ if(CURSES_FOUND)
 endif()
 
 if(wxWidgets_FOUND)
+  add_subdirectory(yaDEDA2)
   add_subdirectory(yaPanel)
   add_subdirectory(yaDSKY2)
   add_subdirectory(yaTelemetry)
