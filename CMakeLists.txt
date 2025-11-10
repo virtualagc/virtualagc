@@ -37,21 +37,24 @@ add_subdirectory(Luminary099)
 add_subdirectory(yaAGC)
 add_subdirectory(yaAGS)
 add_subdirectory(yaASM)
-add_subdirectory(yaDSKY2)
 add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
 add_subdirectory(yaOBC)
-add_subdirectory(yaTelemetry)
 add_subdirectory(yaYUL)
 add_subdirectory(yaUniverse)
+
+add_subdirectory(enet)
 
 if(CURSES_FOUND)
   add_subdirectory(yaUplinkBlock1)
 endif()
 
-add_subdirectory(jWiz)
+if(wxWidgets_FOUND)
+  add_subdirectory(yaDSKY2)
+  add_subdirectory(yaTelemetry)
+  add_subdirectory(jWiz)
+endif()
 
-add_subdirectory(enet)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32)
