@@ -9,6 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 set(NVER \\\"2020-12-24\\\")
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 17)
+# this avoids issues with compilers defaulting to newer standards with stricter rules
 
 find_package(Threads)
 
