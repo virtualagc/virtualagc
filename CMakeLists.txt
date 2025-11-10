@@ -11,7 +11,16 @@ set(NVER \\\"2020-12-24\\\")
 
 
 find_package(Threads)
+
 find_package(Curses)
+if(WIN32 AND CURSES_FOUND AND NOT CURSES_LIBRARIES MATCHES "ncursesw")
+  cmake_path(GET CURSES_INCLUDE_DIRS PARENT_PATH _curses_dir)
+  find_library(_ncurses_win NAMES ncursesw cursesw HINT ${_curses_dir})
+  if(_ncurses_win)
+    list(PREPEND CURSES_LIBRARIES ${_ncurses_win})
+    message(STATUS "CURSES_LIBRARIES: ${CURSES_LIBRARIES}")
+  endif()
+endif()
 
 find_package(wxWidgets COMPONENTS gl core base)
 
@@ -32,7 +41,11 @@ add_subdirectory(yaOBC)
 add_subdirectory(yaTelemetry)
 add_subdirectory(yaYUL)
 add_subdirectory(yaUniverse)
-add_subdirectory(yaUplinkBlock1)
+
+if(CURSES_FOUND)
+  add_subdirectory(yaUplinkBlock1)
+endif()
+
 add_subdirectory(jWiz)
 
 add_subdirectory(enet)
