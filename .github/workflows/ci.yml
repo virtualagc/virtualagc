@@ -31,6 +31,7 @@ jobs:
         comp: [{ cc: gcc-14, cxx: g++-14 },
                { cc: clang-18, cxx: clang++-18 }
                ]
+        sdl: [true, false]
 
     env:
       CC: ${{ matrix.comp.cc }}
@@ -39,6 +40,12 @@ jobs:
     steps:
     - &checkout
       uses: actions/checkout@v5
+
+    - name: Install SDL2
+      if: matrix.sdl == true
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsdl2-dev
 
     - uses: ./.github/workflows/composite-unix
 
