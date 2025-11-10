@@ -63,7 +63,7 @@ jobs:
     - uses: ./.github/workflows/composite-unix
 
 
-  windows:
+  windows-gcc-clang:
     runs-on: windows-latest
     timeout-minutes: 10
 
@@ -99,3 +99,13 @@ jobs:
       with:
         name: ${{ runner.os }}-CMakeConfigureLog.yaml
         path: build/CMakeFiles/CMakeConfigureLog.yaml
+
+
+  windows-msvc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+    - *checkout
+
+    - run: cmake --workflow release
