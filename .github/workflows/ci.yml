@@ -52,6 +52,7 @@ jobs:
         comp: [{ cc: gcc-15, cxx: g++-15 },
                { cc: clang, cxx: clang++ }
                ]
+        wxw: [true, false]
 
     env:
       CC: ${{ matrix.comp.cc }}
@@ -59,6 +60,10 @@ jobs:
 
     steps:
     - *checkout
+
+    - name: Install wxWidgets
+      if: matrix.wxw == true
+      run: brew install wxwidgets
 
     - uses: ./.github/workflows/composite-unix
 
