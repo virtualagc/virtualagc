@@ -1,7 +1,3 @@
-if(NOT wxWidgets_FOUND)
-  return()
-endif()
-
 set(SOURCES yaDSKY2.cpp)
 
 set(SOURCESc

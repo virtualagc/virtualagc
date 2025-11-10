@@ -1,6 +1,6 @@
 add_executable(yaLEMAP yaLEMAP.c
 ${PROJECT_SOURCE_DIR}/yaYUL/SymbolTable.c ${PROJECT_SOURCE_DIR}/yaYUL/strcmpEBCDIC.c)
-target_link_libraries(yaLEMAP PRIVATE m)
+target_link_libraries(yaLEMAP PRIVATE $<$<NOT:$<BOOL:${MSVC}>>:m>)
 
 add_executable(binLEMAP binLEMAP.c)
 

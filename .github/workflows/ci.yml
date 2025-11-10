@@ -31,6 +31,7 @@ jobs:
         comp: [{ cc: gcc-14, cxx: g++-14 },
                { cc: clang-18, cxx: clang++-18 }
                ]
+        sdl: [true, false]
 
     env:
       CC: ${{ matrix.comp.cc }}
@@ -39,6 +40,12 @@ jobs:
     steps:
     - &checkout
       uses: actions/checkout@v5
+
+    - name: Install SDL2
+      if: matrix.sdl == true
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsdl2-dev
 
     - uses: ./.github/workflows/composite-unix
 
@@ -52,6 +59,7 @@ jobs:
         comp: [{ cc: gcc-15, cxx: g++-15 },
                { cc: clang, cxx: clang++ }
                ]
+        wxw: [true, false]
 
     env:
       CC: ${{ matrix.comp.cc }}
@@ -60,19 +68,33 @@ jobs:
     steps:
     - *checkout
 
+    - name: Install wxWidgets
+      if: matrix.wxw == true
+      run: brew install wxwidgets
+
     - uses: ./.github/workflows/composite-unix
 
 
-  windows:
+  windows-gcc-clang:
     runs-on: windows-latest
     timeout-minutes: 10
+
+    strategy:
+      matrix:
+        comp: [{pkg: gcc, cxx: g++},
+               {pkg: clang, cxx: clang++}
+               ]
+
+    env:
+      CC: ${{ matrix.comp.pkg }}
+      CXX: ${{ matrix.comp.cxx }}
 
     steps:
     - uses: msys2/setup-msys2@v2
       id: msys2
       with:
         update: true
-        install: mingw-w64-ucrt-x86_64-gcc-fortran
+        install: mingw-w64-ucrt-x86_64-${{ matrix.comp.pkg }}
 
     - name: Put MSYS2_MinGW64 on PATH
       run: echo "${{ steps.msys2.outputs.msys2-location }}/ucrt64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -89,3 +111,13 @@ jobs:
       with:
         name: ${{ runner.os }}-CMakeConfigureLog.yaml
         path: build/CMakeFiles/CMakeConfigureLog.yaml
+
+
+  windows-msvc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+    - *checkout
+
+    - run: cmake --workflow release

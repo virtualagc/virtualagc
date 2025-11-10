@@ -10,7 +10,7 @@ add_compile_options(-Wall)
 # deferring cross-compile for now
 
 add_executable(yaYUL ${CFILES})
-target_link_libraries(yaYUL PRIVATE m)
+target_link_libraries(yaYUL PRIVATE $<$<NOT:$<BOOL:${MSVC}>>:m>)
 target_compile_definitions(yaYUL PRIVATE NVER="${NVER}")
 
 install(TARGETS yaYUL)

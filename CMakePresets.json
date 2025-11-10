@@ -15,6 +15,11 @@
   {
     "name": "default",
     "configurePreset": "default"
+  },
+  {
+    "name": "release",
+    "configurePreset": "default",
+    "configuration": "Release"
   }
 ],
 "testPresets": [
@@ -31,6 +36,11 @@
     "stopOnFailure": false,
     "timeout": 15
   }
+},
+{
+  "name": "release", "inherits": "default",
+  "configurePreset": "default",
+  "configuration": "Release"
 }
 ],
 "workflowPresets": [
@@ -48,6 +58,23 @@
       {
         "type": "test",
         "name": "default"
+      }
+    ]
+  },
+  {
+    "name": "release",
+    "steps": [
+      {
+        "type": "configure",
+        "name": "default"
+      },
+      {
+        "type": "build",
+        "name": "release"
+      },
+      {
+        "type": "test",
+        "name": "release"
       }
     ]
   }
