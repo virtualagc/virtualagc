@@ -67,12 +67,22 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
 
+    strategy:
+      matrix:
+        comp: [{pkg: gcc, cxx: g++},
+               {pkg: clang, cxx: clang++}
+               ]
+
+    env:
+      CC: ${{ matrix.comp.pkg }}
+      CXX: ${{ matrix.comp.cxx }}
+
     steps:
     - uses: msys2/setup-msys2@v2
       id: msys2
       with:
         update: true
-        install: mingw-w64-ucrt-x86_64-gcc-fortran
+        install: mingw-w64-ucrt-x86_64-${{ matrix.comp.pkg }}
 
     - name: Put MSYS2_MinGW64 on PATH
       run: echo "${{ steps.msys2.outputs.msys2-location }}/ucrt64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
