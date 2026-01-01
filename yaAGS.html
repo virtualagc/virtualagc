@@ -1,5 +1,6 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head>
+<html>
+  <head>
     <title>The Abort Guidance System</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="author" content="Ron Burkey">
@@ -23,15 +24,19 @@ document.write(headerTemplate.replace("@TITLE@","Abort Guidance System (AGS)").r
           Flight Software</a></li>
       <li><a href="#Architecture_of_the_Abort_Electronics">Architecture
           of the Abort Electronics Assembly (AEA)</a></li>
-      <li><big><a href="#yaAGS_the_AGS_CPU_Emulation"><small><small><big><small><big><span style="font-weight: bold;"> yaAGS</span>, the
+      <li><big><a href="#yaAGS_the_AGS_CPU_Emulation"><small><small><big><small><big><span
+                        style="font-weight: bold;"> yaAGS</span>, the
                       AGS CPU Emulation</big></small></big></small></small></a></big></li>
-      <li><a href="#yaDEDA_the_AGS_User-Interface"><span style="font-weight: bold;">yaDEDA</span>, the AGS
+      <li><a href="#yaDEDA_the_AGS_User-Interface"><span
+            style="font-weight: bold;">yaDEDA</span>, the AGS
           User-Interface Simulation</a></li>
-      <li><a href="#yaLEMAP_the_AGS_Cross-Assembler"><span style="font-weight: bold;">yaLEMAP</span>, the AGS
+      <li><a href="#yaLEMAP_the_AGS_Cross-Assembler"><span
+            style="font-weight: bold;">yaLEMAP</span>, the AGS
           Cross-Assembler</a></li>
       <li><a href="#Utility_Programs">Utility Programs</a></li>
       <li><big><a href="#AGS_Flight_Software"><small><small><big><small><big>AGS
 Flight
+
 
 
 
@@ -55,7 +60,8 @@ Flight
     </ul>
     <h2><a name="A_Taste_of_Whats_Below"></a>A Taste of What's Below</h2>
     <p>If you don't already know that the Abort Guidance System is,
-      perhaps you'll want to continue on to <a href="#What_is_the_Abort_Guidance_System_AGS_">the next section</a>
+      perhaps you'll want to continue on to <a
+        href="#What_is_the_Abort_Guidance_System_AGS_">the next section</a>
       before before reading this section.&nbsp; But if you do already
       know everything there is to know about the AGS, and simply want to
       know what <i>we</i> are providing, I'll tell you that we provide
@@ -68,6 +74,7 @@ Flight
       fact our AGS simulation has been built into the Orbiter spacecraft
       simulator via <a href="https://sourceforge.net/projects/nassp/">the
 NASSP
+
 
 
 
@@ -108,7 +115,10 @@ NASSP
       "velocity to be gained", with the AGS turning off the engines when
       that gets close enough to zero!<br>
     </p>
-    <center><iframe src="https://www.youtube.com/embed/YelwfOFSYTk" gesture="media" allowfullscreen="" width="1280" height="720" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+    <center><iframe src="https://www.youtube.com/embed/YelwfOFSYTk"
+        gesture="media" allowfullscreen="" width="1280" height="720"
+        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -124,7 +134,10 @@ NASSP
       the ascent rather than using the AGC to do so:<br>
       <br>
     </div>
-    <center><iframe src="https://www.youtube.com/embed/KJiWwAMuPvE" gesture="media" allowfullscreen="" width="1280" height="720" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+    <center><iframe src="https://www.youtube.com/embed/KJiWwAMuPvE"
+        gesture="media" allowfullscreen="" width="1280" height="720"
+        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -135,12 +148,14 @@ NASSP
       </iframe></center>
     <ul>
     </ul>
-    <h2><a name="What_is_the_Abort_Guidance_System_AGS_" id="What_is_the_Abort_Guidance_System_AGS_"></a>What is the
+    <h2><a name="What_is_the_Abort_Guidance_System_AGS_"
+        id="What_is_the_Abort_Guidance_System_AGS_"></a>What is the
       Abort Guidance System (AGS) or Abort Electronics Assembly (AEA)?<br>
     </h2>
     <a href="FlightControlSubsystem.jpg"><img style="border: 2px solid ;
         width: 459px; height: 406px;" alt="LM's Integrated Flight
-        Control subsystem" src="FlightControlSubsystemSmall.jpg" width="459" hspace="12" height="406" align="right"></a>The AGS
+        Control subsystem" src="FlightControlSubsystemSmall.jpg"
+        width="459" hspace="12" height="406" align="right"></a>The AGS
     was a computer system used in the LM.&nbsp; It was a completely
     separate computer system from the LM's AGC, with a different
     architecture, different instruction-set, and different runtime
@@ -175,7 +190,9 @@ NASSP
     swung wildly back and forth as the AGS crudely did its normal thing,
     damping out the rates as it approached its target, and settled
     nicely where it was "supposed" to be with no inputs from
-    Stafford.&nbsp; (See the <a class="moz-txt-link-freetext" href="http://history.nasa.gov/alsj/a410/A10_MissionReport.pdf">mission
+    Stafford.&nbsp; (See the <a class="moz-txt-link-freetext"
+      href="http://history.nasa.gov/alsj/a410/A10_MissionReport.pdf">mission
+
 
 
 
@@ -251,7 +268,8 @@ NASSP
           Electronic Assembly Programming Reference</a>, H. L.
         Stiverson, 7322.3-17, April 1966, 77 pages.&nbsp; This document
         is the principle (and almost complete) reference for
-        understanding the operation of the AEA CPU <span style="font-style: italic;">per se</span>, the AEA assembly
+        understanding the operation of the AEA CPU <span
+          style="font-style: italic;">per se</span>, the AEA assembly
         language and assembler, and the operation of the CPU's i/o
         ports.&nbsp; There are, however, some confusing aspects to the
         document:<br>
@@ -269,6 +287,7 @@ NASSP
           18-bit negative number, namely -131072.&nbsp; (Reader
           "spacex15" has pointed out that 0777777 is how the <i>decimal
             integer</i> -1 would be encoded, but 0400000 is how the <i>fixed
+
             point number</i> -1.0 would be encoded.&nbsp; That sounds
           like the right explanation to me.&nbsp; Kudos!)<br>
         </li>
@@ -296,7 +315,8 @@ NASSP
         Grumman, September 1966, 32 pages.</li>
       <li><a href="Pultorak_files/AEA_registers.pdf"> Notes on AEA
           registers</a>, John Pultorak, January 2005, 3 pages.</li>
-      <li>LTV, "<a href="Documents/LEM%20Emergency%20Abort%20Guidance%20System%20Study.pdf">LEM
+      <li>LTV, "<a
+          href="Documents/LEM%20Emergency%20Abort%20Guidance%20System%20Study.pdf">LEM
 Emergency
 
 
@@ -309,9 +329,12 @@ Emergency
 
 
 
+
           Abort Guidance System Study</a>", May 10, 1963</li>
-      <li>Grumman, LED-540-3, "<a href="Documents/Grumman%20LED-540-3%20Back-up%20Guidance%20Requirements.pdf">Back-up
+      <li>Grumman, LED-540-3, "<a
+href="Documents/Grumman%20LED-540-3%20Back-up%20Guidance%20Requirements.pdf">Back-up
 Guidance
+
 
 
 
@@ -324,7 +347,8 @@ Guidance
 
 
           Requirements</a>", July 9, 1963</li>
-      <li>Grumman, LED-500-4, "<a href="Documents/Grumman%20LEM-500-4%20Abort%20Guidance%20System%20Redefinition%20Studies.pdf">Abort
+      <li>Grumman, LED-500-4, "<a
+href="Documents/Grumman%20LEM-500-4%20Abort%20Guidance%20System%20Redefinition%20Studies.pdf">Abort
 Guidance
 
 
@@ -337,9 +361,12 @@ Guidance
 
 
 
+
           System Redefinition Studies</a>", March 31, 1965</li>
-      <li>Grumman, LSP-300-3B, "<a href="Documents/Specification,%20Abort%20Guidance%20Section.pdf">Design
+      <li>Grumman, LSP-300-3B, "<a
+          href="Documents/Specification,%20Abort%20Guidance%20Section.pdf">Design
 Control
+
 
 
 
@@ -367,7 +394,8 @@ Control
             Body of LM AGS FP6 Programmed Equations document</a>, 220
           pages.<br>
         </li>
-        <li>Appendix A, <a href="Pultorak_files/FP6_AGS_AssemblyListing.pdf"> scanned
+        <li>Appendix A, <a
+            href="Pultorak_files/FP6_AGS_AssemblyListing.pdf"> scanned
             assembly listing of AGS Flight Program 6</a>, 182 pages.</li>
       </ul>
       <li><a href="listings/FP6/FP6.aea.html">Hyperlinked, colorized
@@ -380,10 +408,12 @@ Control
         Revision 1, TRW, July 1969, 194 pages.<br>
       </li>
       <li><a href="Pultorak_files/FP6ComputerProgramSpecification.pdf">
-          LM AGS Computer Program Specification</a><a href="Pultorak_files/FP6ComputerProgramSpecification.pdf">,
+          LM AGS Computer Program Specification</a><a
+          href="Pultorak_files/FP6ComputerProgramSpecification.pdf">,
           Flight Program 6</a>, 11176-6042-T000, TRW, March 1969, 90
         pages.</li>
-      <li><a href="Pultorak_files/FP6_ProgramVerificationTestResults.pdf">
+      <li><a
+          href="Pultorak_files/FP6_ProgramVerificationTestResults.pdf">
           Program Verification Test Results, LM/AGS Flight Program No. 6</a>,
         11176-6050-T000, E. V. Avery, TRW, Redondo Beach CA, May 1969,
         49 pages.</li>
@@ -399,15 +429,18 @@ Control
     </h3>
     <ul>
       <li><span>LM AGS FP8</span> S03 4039, LM Abort Electronics
-        Assembly, 12/18/70, 185 pages. (<a href="Pultorak_files/FP8Listing.pdf">Scanned assembly listing
+        Assembly, 12/18/70, 185 pages. (<a
+          href="Pultorak_files/FP8Listing.pdf">Scanned assembly listing
           of AGS Flight Program 8</a>, 6325 lines.)</li>
       <li><a href="listings/FP8/FP8.aea.html">Hyperlinked, colorized
           HTML assembly listing of AGS Flight Program 8</a>, created by
         assembling the source code with <span style="font-weight:
           bold;">yaLEMAP</span>.&nbsp; (Same thing as the scanned
         assembly listing, but much smaller and nicer!)</li>
-      <li><a href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">LM/AGS
+      <li><a
+href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">LM/AGS
 Operating
+
 
 
 
@@ -434,7 +467,8 @@ Operating
       <ul>
       </ul>
     </ul>
-    <h2><a name="Evolution_of_the_Flight_Software" id="Evolution_of_the_Flight_Software"></a>Evolution of the
+    <h2><a name="Evolution_of_the_Flight_Software"
+        id="Evolution_of_the_Flight_Software"></a>Evolution of the
       Flight Software</h2>
     The known versions of the AGS flight software are as follows.&nbsp;
     Unfortunately, we've never found (so far!) any master document that
@@ -449,18 +483,23 @@ Operating
     documentation.<br>
     <br>
     <table style="width: 95%; text-align: left; margin-left: auto;
-      margin-right: auto;" summary="" width="95%" cellspacing="2" cellpadding="2" border="1">
+      margin-right: auto;" summary="" width="95%" cellspacing="2"
+      cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td style="vertical-align: top; font-weight: bold;" valign="bottom">Program Name<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom">Program Name<br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;" valign="bottom"> Acronym<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Acronym<br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;" valign="bottom"> Description<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Description<br>
           </td>
           <td valign="bottom"><b>Notes</b><br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;" valign="bottom"> Program Listing</td>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Program Listing</td>
         </tr>
         <tr>
           <td style="vertical-align: top;">Design Mission Computer
@@ -486,8 +525,9 @@ Operating
             Apollo 5<br>
           </td>
           <td valign="top"> Apollo 5 was an unmanned LM Earth-orbit test
-            mission.&nbsp; The AGS final software design report associates FP2 with LM-2 (Apollo 5).<br>
-</td>
+            mission.&nbsp; The AGS final software design report
+            associates FP2 with LM-2 (Apollo 5).<br>
+          </td>
           <td style="vertical-align: top;"><br>
           </td>
         </tr>
@@ -498,7 +538,9 @@ Operating
           </td>
           <td style="vertical-align: top;">May 1968, Apollo 9<br>
           </td>
-          <td valign="top">The <a href="https://www.hq.nasa.gov/alsj/a410/A09_MissionReport.pdf#page=202">Apollo
+          <td valign="top">The <a
+              href="https://www.hq.nasa.gov/alsj/a410/A09_MissionReport.pdf#page=202">Apollo
+
 
 
 
@@ -522,13 +564,16 @@ Operating
           </td>
           <td style="vertical-align: top;">(Identical to FP 3)<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="Documents/ags_fp-4_lm-4_verification_testing_plan.pdf">The LM-4 AGS verification test 
-plan</a> speaks of the AGS using FP4, but that turned out not to be the full story.<br>
-<br>
-That's because (as the verification test plan itself states), at testing
- time LM-4 was expected to be used for an E mission.&nbsp; But the E 
-mission was cancelled, so LM-4 was reassigned to an F mission instead, 
-requiring that its AGS use FP5 instead.&nbsp; See below.<br>
+          <td valign="top"><a moz-do-not-send="true"
+              href="Documents/ags_fp-4_lm-4_verification_testing_plan.pdf">The
+              LM-4 AGS verification test plan</a> speaks of the AGS
+            using FP4, but that turned out not to be the full story.<br>
+            <br>
+            That's because (as the verification test plan itself
+            states), at testing time LM-4 was expected to be used for an
+            E mission.&nbsp; But the E mission was cancelled, so LM-4
+            was reassigned to an F mission instead, requiring that its
+            AGS use FP5 instead.&nbsp; See below.<br>
           </td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -540,7 +585,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
           </td>
           <td style="vertical-align: top;">Apollo 10<br>
           </td>
-          <td valign="top">The <a href="https://www.ibiblio.org/apollo/Documents/a10-final-flight-plan-19690417.pdf#page=29">Apollo
+          <td valign="top">The <a
+href="https://www.ibiblio.org/apollo/Documents/a10-final-flight-plan-19690417.pdf#page=29">Apollo
+
 
 
 
@@ -562,7 +609,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
           </td>
           <td style="vertical-align: top;">February 14, 1969, Apollo 11
             and Apollo 12</td>
-          <td valign="top">Regarding Apollo 11:&nbsp; The <a href="http://www.ibiblio.org/apollo/Pultorak_files/FP6ComputerProgramSpecification.pdf#page=8">LM
+          <td valign="top">Regarding Apollo 11:&nbsp; The <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6ComputerProgramSpecification.pdf#page=8">LM
+
 
 
 
@@ -572,7 +621,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
 
 
               AGS Computer Program Specification, Flight Program 6 (page
-              8)</a> and the <a href="http://www.ibiblio.org/apollo/Pultorak_files/FP6FinalDesignReport.pdf#page=2">LM
+              8)</a> and the <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6FinalDesignReport.pdf#page=2">LM
+
 
 
 
@@ -583,7 +634,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
 
               AGS Guidance Software Final Design Report, Flight Program
               6 (page 2)</a> specify that FP6 was designed for "G" type
-            missions.&nbsp; Similarly, the <a href="http://www.ibiblio.org/apollo/Pultorak_files/FP6_ProgramVerificationTestResults.pdf#page=4">Program
+            missions.&nbsp; Similarly, the <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6_ProgramVerificationTestResults.pdf#page=4">Program
+
 
 
 
@@ -595,7 +648,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
               Verification Test Results, LM/AGS Flight Program No. 6
               (page 4)</a> says that "the testing was required to verify
             the program for the manned lunar landing (G) Mission."&nbsp;
-            Apollo 11 was the only G mission.&nbsp; The <a href="http://www.ibiblio.org/apollo/Pultorak_files/FP6MissionConstants.pdf">LM/AGS
+            Apollo 11 was the only G mission.&nbsp; The <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6MissionConstants.pdf">LM/AGS
+
 
 
 
@@ -619,7 +674,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
             texts of these documents as of this writing, the former is
             referenced <a href="Pultorak_files/FP8Flowcharts.pdf">here</a>,
             dated December 1969, and the latter's title page can be seen
-            <a href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up">here</a>,
+            <a
+href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up">here</a>,
             dated January 1970.)&nbsp; Also, see the following entry
             (Apollo 13).<br>
           </td>
@@ -633,7 +689,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
           </td>
           <td style="vertical-align: top;">Apollo 13 and Apollo 14<br>
           </td>
-          <td valign="top">The G&amp;N Dictionaries for the <a href="https://history.nasa.gov/afj/ap12fj/pdf/a12_lm_g+n.pdf#page=83">Apollo
+          <td valign="top">The G&amp;N Dictionaries for the <a
+              href="https://history.nasa.gov/afj/ap12fj/pdf/a12_lm_g+n.pdf#page=83">Apollo
 
 
 
@@ -642,7 +699,10 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
 
 
 
-              12 (page 83)</a> and <a href="https://history.nasa.gov/afj/ap13fj/pdf-hr/76-a13-g+n-dictionary.pdf#page=101">Apollo
+
+              12 (page 83)</a> and <a
+href="https://history.nasa.gov/afj/ap13fj/pdf-hr/76-a13-g+n-dictionary.pdf#page=101">Apollo
+
 
 
 
@@ -667,7 +727,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
             versions of the software, we can conclude that Apollo 13 and
             14 used the same version.&nbsp; We can do this by comparing
             the Apollo 13 G&amp;N Dictionary described above with
-            the&nbsp; <a href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">"LM
+            the&nbsp; <a
+              href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">"LM
               PGNS/AGS Training Card"</a>, because the training card
             also contains a list of AGS memory addresses, and that list
             agrees with the Apollo 13 dictionary.&nbsp; But beyond that,
@@ -693,7 +754,9 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
             <p>By the way, it's tempting to say that it doesn't really
               matter for Apollo 13 which flight program version was
               used, since because of the service-module explosion there
-              was no lunar landing.&nbsp; But in fact, <a href="https://history.nasa.gov/afj/ap13fj/19day5-themanualcoursecorrection.html">the
+              was no lunar landing.&nbsp; But in fact, <a
+href="https://history.nasa.gov/afj/ap13fj/19day5-themanualcoursecorrection.html">the
+
 
 
 
@@ -715,14 +778,18 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
           </td>
           <td style="vertical-align: top;">While we have no program
             listing of FP7, it may be worth considering that the AGS
-            section of the <a href="https://history.nasa.gov/afj/ap13fj/pdf-hr/76-a13-g+n-dictionary.pdf#page=101">Apollo
+            section of the <a
+href="https://history.nasa.gov/afj/ap13fj/pdf-hr/76-a13-g+n-dictionary.pdf#page=101">Apollo
+
 
 
 
 
 
               13 G&amp;N Data Dictionary</a>, when combined with the
-            FP7-to-FP8 change notes in the <a href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">FP8
+            FP7-to-FP8 change notes in the <a
+href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">FP8
+
 
 
 
@@ -742,7 +809,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
             is dated December 18, 1970), Apollo 15-17.<br>
           </td>
           <td valign="top">Apollo 15:&nbsp; That FP8 was used for Apollo
-            15 can be concluded from the document titled <a href="Documents/19750064553.pdf">"Verification of LM AGS
+            15 can be concluded from the document titled <a
+              href="Documents/19750064553.pdf">"Verification of LM AGS
               Rendezvous Navigation Using Automatic Data for Apollo 15"</a>.&nbsp;
 
 
@@ -754,9 +822,11 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
 
 
 
+
             <br>
             <br>
-            Apollo 17:&nbsp; As is pointed out later, <a href="yaAGS.html#Availability_">the release date is
+            Apollo 17:&nbsp; As is pointed out later, <a
+              href="yaAGS.html#Availability_">the release date is
               mentioned in the documentation for the Apollo 17 Flight
               Readiness Review</a> (of which unfortunately we do not
             have a copy), which is how we can conclude FP8 was used for
@@ -773,65 +843,73 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
     </table>
     <br>
     <br>
-    <h2><a name="Architecture_of_the_Abort_Electronics" id="Architecture_of_the_Abort_Electronics"></a>Architecture of
+    <h2><a name="Architecture_of_the_Abort_Electronics"
+        id="Architecture_of_the_Abort_Electronics"></a>Architecture of
       the Abort Electronics Assembly (AEA)</h2>
-    <div style="text-align: center;"> <a href="AbortGuidanceSectionBlockDiagram.jpg"><img style="border:
+    <div style="text-align: center;"> <a
+        href="AbortGuidanceSectionBlockDiagram.jpg"><img style="border:
           2px solid ; width: 556px; height: 432px;" alt="LM Abort
-          Guidance Section block diagram" src="AbortGuidanceSectionBlockDiagramSmall.jpg" width="556" vspace="8" height="432"></a><br>
+          Guidance Section block diagram"
+          src="AbortGuidanceSectionBlockDiagramSmall.jpg" width="556"
+          vspace="8" height="432"></a><br>
     </div>
     <table summary="" style="width: 80%; text-align: left; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2" border="0">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">
             <dl>
-              <dt><font face="Geneva">"As with the PGNCS computer, the
-                  AGS computer went through an evolutionary period in
-                  which designers clarified and settled the
-                  requirements. The first design for the system did not
-                  include a true computer at all but rather a
-                  "programmer," a fairly straightforward sequencer of
-                  about 2,000 words fixed memory, which did not have
-                  navigation functions. Its job was simply to abort the
-                  LEM to a "clear" lunar orbit (one that would be higher
-                  than any mountain ranges) at which point the crew
-                  would wait for rescue from the CM, with its more
-                  sophisticated navigation and maneuvering system</font><b><font face="Geneva">.</font></b> <font face="Geneva">The
-                  requirements changed in the fall of 1964. To, provide
-                  more autonomy and safety, the AGS had to provide
-                  rendezvous capability without outside sources of
-                  information</font><font face="Geneva">. TRW, the
-                  contractor, then decided to include a computer of
-                  about 4,000 words memory. The company considered an
-                  existing Univector accumulation machine but, instead,
-                  chose a custom designed computer</font><font face="Geneva">.</font></dt>
-              <dt><font face="Geneva">&nbsp;</font></dt>
-              <dt><font face="Geneva">"The computer built for the AGS
-                  was the MARCO 4418 (for Man Rated Computer).&nbsp; <span style="font-weight: bold;">...</span></font><span style="font-family: geneva;"><span style="font-weight:
-                    bold;">&nbsp;</span></span> <font face="Geneva">The
-                  computer was 5 by 8 by 23.75 inches, weighed 32.7
-                  pounds, and required 90 watts</font><font face="Geneva">. The memory was bit serial access,
-                  which made it slower than the PGNCS computer, and it
-                  was divided into 2K of fixed cores and 2K of erasable
-                  cores</font><font face="Geneva">. The actual cores
-                  used in the fixed and erasable portions were of the
-                  same construction, unlike those in the PGNCS computer.
-                  Therefore, the ratio of fixed memory to erasable in
-                  the MARCO 4418 was variable</font>.&nbsp; <font face="Geneva">TRW was obviously thinking in terms of
-                  adaptability to later applications."</font></dt>
+              <dt>"As with the PGNCS computer, the AGS computer went
+                through an evolutionary period in which designers
+                clarified and settled the requirements. The first design
+                for the system did not include a true computer at all
+                but rather a "programmer," a fairly straightforward
+                sequencer of about 2,000 words fixed memory, which did
+                not have navigation functions. Its job was simply to
+                abort the LEM to a "clear" lunar orbit (one that would
+                be higher than any mountain ranges) at which point the
+                crew would wait for rescue from the CM, with its more
+                sophisticated navigation and maneuvering system<b>.</b>
+                The requirements changed in the fall of 1964. To,
+                provide more autonomy and safety, the AGS had to provide
+                rendezvous capability without outside sources of
+                information. TRW, the contractor, then decided to
+                include a computer of about 4,000 words memory. The
+                company considered an existing Univector accumulation
+                machine but, instead, chose a custom designed computer.</dt>
+              <dt>&nbsp;</dt>
+              <dt>"The computer built for the AGS was the MARCO 4418
+                (for Man Rated Computer).&nbsp; <span
+                  style="font-weight: bold;">...</span><span
+                  style="font-weight: bold;">&nbsp;</span> The computer
+                was 5 by 8 by 23.75 inches, weighed 32.7 pounds, and
+                required 90 watts. The memory was bit serial access,
+                which made it slower than the PGNCS computer, and it was
+                divided into 2K of fixed cores and 2K of erasable cores.
+                The actual cores used in the fixed and erasable portions
+                were of the same construction, unlike those in the PGNCS
+                computer. Therefore, the ratio of fixed memory to
+                erasable in the MARCO 4418 was variable.&nbsp; TRW was
+                obviously thinking in terms of adaptability to later
+                applications."</dt>
             </dl>
           </td>
         </tr>
         <tr align="right">
-          <td style="vertical-align: top;"><br>
-            -- James Tomayko, <a href="http://www.hq.nasa.gov/office/pao/History/computers/Ch2-8.html">
+          <td style="vertical-align: top;">-- James Tomayko, <a
+              href="http://www.hq.nasa.gov/office/pao/History/computers/Ch2-8.html">
               Computers in Space Flight</a><br>
           </td>
         </tr>
       </tbody>
     </table>
     <dl>
-      <dt><a href="SimplifiedComputerBlockDiagram.jpg"><img style="border: 2px solid ; width: 408px; height: 553px;" alt="AGS block diagram" src="SimplifiedComputerBlockDiagramSmall.jpg" width="408" hspace="12" height="553" align="right"></a>The AEA (the
+      <dt><a href="SimplifiedComputerBlockDiagram.jpg"><img
+            style="border: 2px solid ; width: 408px; height: 553px;"
+            alt="AGS block diagram"
+            src="SimplifiedComputerBlockDiagramSmall.jpg" width="408"
+            hspace="12" height="553" align="right"></a>The AEA (the
         computer) had the following characteristics:<br>
       </dt>
     </dl>
@@ -859,14 +937,16 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
         track the position of the decimal point for each successive
         multiplication or division he or she performs.)</li>
       <li>There were several dedicated registers, outside of the
-        memory-address space.&nbsp; Some of them, like the <span style="font-family: monospace;">M</span> register depicted in
+        memory-address space.&nbsp; Some of them, like the <span
+          style="font-family: monospace;">M</span> register depicted in
         the diagram at right, aren't of real interest to the programmer,
         since they function at the hardware level, transparently to the
         program.&nbsp; The registers of interest to the programmer are:</li>
     </ul>
     <div style="text-align: center;">
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top; font-weight: bold;">
@@ -926,13 +1006,15 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
       </div>
     </div>
     <dl>
-      <dt><font face="Geneva">Much more detail</font>—<font face="Geneva">and indeed, almost everything you'd want to know
-          architecturally</font>—<font face="Geneva">may be found by
-          consulting the <a href="Pultorak_files/AEAProgrammingReference.pdf"> Abort
-            Electronic Assembly Programming Reference</a>.<br>
+      <dt>Much more detail—and indeed, almost everything you'd want to
+        know architecturally—may be found by consulting the <a
+          href="Pultorak_files/AEAProgrammingReference.pdf"> Abort
+          Electronic Assembly Programming Reference</a>.<font
+          face="Geneva"><br>
         </font></dt>
     </dl>
-    <h2><a name="yaAGS_the_AGS_CPU_Emulation" id="yaAGS_the_AGS_CPU_Emulation"></a><small><big>yaAGS, the AGS
+    <h2><a name="yaAGS_the_AGS_CPU_Emulation"
+        id="yaAGS_the_AGS_CPU_Emulation"></a><small><big>yaAGS, the AGS
           CPU Emulation</big></small></h2>
     <span style="font-weight: bold;">yaAGS</span> is the program which
     emulates the AGS CPU.&nbsp; In other words, it loads the binary form
@@ -949,7 +1031,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
     not provided directly by <span style="font-weight: bold;">yaAGS</span>;
     rather, they must be emulated by separately-provided software.&nbsp;
     (Once these peripherals are available for <span style="font-weight:
-      bold;">yaAGC</span>, we'll work to make them available for <span style="font-weight: bold;">yaAGS</span> as well.)&nbsp; This
+      bold;">yaAGC</span>, we'll work to make them available for <span
+      style="font-weight: bold;">yaAGS</span> as well.)&nbsp; This
     technique allows a developer of (for example) a lunar lander
     simulation to use the CPU emulation, but to replace simulated
     peripherals in order to achieve better integration.&nbsp; The
@@ -957,13 +1040,15 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
     <br>
     The command-line syntax is:<br>
     <div style="text-align: center;"> <br>
-      <span style="font-family: monospace;">yaAGS [OPTIONS] --core=<span style="font-style: italic;">Filename<br>
+      <span style="font-family: monospace;">yaAGS [OPTIONS] --core=<span
+          style="font-style: italic;">Filename<br>
         </span></span>
       <div style="text-align: left;"> <span style="font-family:
           monospace;"><br>
         </span> </div>
       <div style="text-align: left;"> The name of the file for the
-        "--core" switch is an executable binary created using the <span style="font-weight: bold;">yaLEMAP</span> cross-assembler or
+        "--core" switch is an executable binary created using the <span
+          style="font-weight: bold;">yaLEMAP</span> cross-assembler or
         the <span style="font-weight: bold;">binLEMAP</span>
         utility.&nbsp; (Typically, "--core=FP6.bin" or "--core=FP8.bin",
         since these are the available AEA flight binaries.)&nbsp; Both
@@ -984,7 +1069,8 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
           executing its first instruction, and activates a debugging
           mode (very primitive) in which you can do things like examine
           AEA CPU registers, single-step through the AGS program,
-          etc.&nbsp; This mode is described further <a href="yaAGC.html#Debugging">below</a>.&nbsp;&nbsp;<br>
+          etc.&nbsp; This mode is described further <a
+            href="yaAGC.html#Debugging">below</a>.&nbsp;&nbsp;<br>
         </div>
         <br>
         --debug-deda<br>
@@ -994,23 +1080,34 @@ requiring that its AGS use FP5 instead.&nbsp; See below.<br>
         </div>
       </div>
     </div>
-    <h2><a name="yaDEDA_the_AGS_User-Interface" id="yaDEDA_the_AGS_User-Interface"></a>yaDEDA, the AGS
+    <h2><a name="yaDEDA_the_AGS_User-Interface"
+        id="yaDEDA_the_AGS_User-Interface"></a>yaDEDA, the AGS
       User-Interface Simulation</h2>
     <br>
-    <table summary="" style="text-align: left; width: 100%;" cellspacing="2" cellpadding="2" border="0">
+    <table summary="" style="text-align: left; width: 100%;"
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
-          <td style="text-align: center; vertical-align: middle;"> <a href="DEDADrawing.jpg"><img style="border: 2px solid ;
+          <td style="text-align: center; vertical-align: middle;"> <a
+              href="DEDADrawing.jpg"><img style="border: 2px solid ;
                 width: 503px; height: 290px;" alt="Line drawing of a
-                DEDA" src="DEDADrawingSmall.jpg" width="503" height="290" align="middle"></a></td>
-          <td style="vertical-align: top; text-align: center;"> <a href="DEDABlockDiagram.jpg"><img style="border: 2px solid
-                ; width: 560px; height: 464px;" alt="DEDA block diagram" src="DEDABlockDiagramSmall.jpg" width="560" height="464" align="middle"></a></td>
+                DEDA" src="DEDADrawingSmall.jpg" width="503"
+                height="290" align="middle"></a></td>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="DEDABlockDiagram.jpg"><img style="border: 2px solid
+                ; width: 560px; height: 464px;" alt="DEDA block diagram"
+                src="DEDABlockDiagramSmall.jpg" width="560" height="464"
+                align="middle"></a></td>
         </tr>
       </tbody>
     </table>
     <br>
     <div style="text-align: center;">
-      <div style="text-align: left;"> <a href="yaDEDAscreenshot.jpg"><img style="border: 2px solid ; width: 200px; height: 227px;" alt="Click for a larger screenshot of yaDEDA" src="yaDEDAscreenshot-thumb.jpg" width="203" height="230" align="right"></a>The term <span style="font-style:
+      <div style="text-align: left;"> <a href="yaDEDAscreenshot.jpg"><img
+            style="border: 2px solid ; width: 200px; height: 227px;"
+            alt="Click for a larger screenshot of yaDEDA"
+            src="yaDEDAscreenshot-thumb.jpg" width="203" height="230"
+            align="right"></a>The term <span style="font-style:
           italic;">DEDA</span> refers to the Data Entry and Display
         Assembly, which is the assembly used by the astronauts to enter
         data into the AGS, or to see data displayed by the AGS.&nbsp;
@@ -1035,6 +1132,7 @@ However,
 
 
 
+
         it is certainly possible for the developer of a LM simulation to
         develop his or her own emulation of the DEDA.&nbsp; Indeed, the
         program <span style="font-weight: bold;">yaDEDA2</span> has now
@@ -1045,7 +1143,8 @@ However,
         "yaDEDA2" unless I state otherwise.&nbsp; For information on
         developing these kinds of alternative implementations, you
         should refer to the <a href="developer.html">developer info
-          page</a>.&nbsp; You'll notice that the screenshot of <span style="font-weight: bold;">yaDEDA</span> to the right is
+          page</a>.&nbsp; You'll notice that the screenshot of <span
+          style="font-weight: bold;">yaDEDA</span> to the right is
         somewhat different from the drawing of the DEDA above,
         particularly as to the HOLD-key; that's because of discrepancies
         in the available documentation, so feedback on this issue is
@@ -1053,9 +1152,11 @@ However,
         <br>
         Unlike the DSKY, which is basically completely useless without
         the AGC, the DEDA has some built-in smarts.&nbsp; Actually, most
-        of the DEDA user-interface is built into the DEDA, and so <span style="font-weight: bold;">yaDEDA</span> can be operated even
+        of the DEDA user-interface is built into the DEDA, and so <span
+          style="font-weight: bold;">yaDEDA</span> can be operated even
         without the presence of <span style="font-weight: bold;">yaAGS</span>.&nbsp;
 Notice
+
 
 
 
@@ -1101,7 +1202,11 @@ Notice
             or data.&nbsp; The interpretation of the data you enter is
             dependent on the address you enter:<br>
             <br>
-            <div style="text-align: center;"> CLR <span style="font-style: italic;">OctalDigit</span> <span style="font-style: italic;">OctalDigit</span> <span style="font-style: italic;">OctalDigit</span> <span style="font-style: italic;">Sign Digit Digit Digit Digit
+            <div style="text-align: center;"> CLR <span
+                style="font-style: italic;">OctalDigit</span> <span
+                style="font-style: italic;">OctalDigit</span> <span
+                style="font-style: italic;">OctalDigit</span> <span
+                style="font-style: italic;">Sign Digit Digit Digit Digit
                 Digit</span> ENTR<br>
             </div>
           </div>
@@ -1142,7 +1247,8 @@ Notice
               running on the same computer or on different computers. In
               order to connect to the <span style="font-weight: bold;">yaAGS</span>
               server, <span style="font-weight: bold;">yaDEDA</span>
-              has to know the IP-address of the machine on which <span style="font-weight: bold;">yaAGS</span> is running. By
+              has to know the IP-address of the machine on which <span
+                style="font-weight: bold;">yaAGS</span> is running. By
               default this is "localhost"---i.e., the two are running on
               the same computer. However, a different IP address may be
               specified using this command-line switch. In Linux, this
@@ -1156,7 +1262,8 @@ Notice
             --port=<span style="font-style: italic;">port</span><br>
             <div style="margin-left: 40px;"> Similarly (see above), in
               addition to an IP address, a port number is needed. This
-              must be in the range of port numbers <span style="font-weight: bold;">yaAGS</span> is scanning
+              must be in the range of port numbers <span
+                style="font-weight: bold;">yaAGS</span> is scanning
               (which by default is 19897-19906).&nbsp; If no port is
               specified, <span style="font-weight: bold;">yaDEDA</span>
               will use 19897, in accordance with the suggested port
@@ -1165,7 +1272,8 @@ Notice
             </div>
             <br>
             --half-size<br>
-            <div style="margin-left: 40px;"> &nbsp;<span style="font-weight: bold;">yaDEDA</span>'s graphical
+            <div style="margin-left: 40px;"> &nbsp;<span
+                style="font-weight: bold;">yaDEDA</span>'s graphical
               interface is simply too big for PCs with lower graphical
               resolution (smaller than 1024×768).&nbsp; If the
               --half-size switch is used, half-size graphics are used,
@@ -1191,7 +1299,8 @@ Notice
             </div>
             <br>
             --relative-pixmaps<br>
-            <div style="margin-left: 40px;"> (Final version of <span style="font-weight: bold;">yaDEDA</span> only; not
+            <div style="margin-left: 40px;"> (Final version of <span
+                style="font-weight: bold;">yaDEDA</span> only; not
               available on <span style="font-weight: bold;">yaDEDA2</span>.)&nbsp;
 Alters
 
@@ -1205,10 +1314,13 @@ Alters
 
 
 
-              the locations of graphics files used by the <span style="font-weight: bold;">yaDEDA</span> program to the
+
+              the locations of graphics files used by the <span
+                style="font-weight: bold;">yaDEDA</span> program to the
               ./pixmaps/yaDEDA/ folder rather than the default system
               folders.&nbsp; This makes the program compatible with the
-              directory structures and runtime assumptions of the <span style="font-weight: bold;">VirtualAGC</span> GUI system
+              directory structures and runtime assumptions of the <span
+                style="font-weight: bold;">VirtualAGC</span> GUI system
               rather than the previously used script-driven runtime
               system.<br>
             </div>
@@ -1216,11 +1328,13 @@ Alters
         </div>
       </div>
     </div>
-    <h2><a name="yaLEMAP_the_AGS_Cross-Assembler" id="yaLEMAP_the_AGS_Cross-Assembler"></a>yaLEMAP, the AGS
+    <h2><a name="yaLEMAP_the_AGS_Cross-Assembler"
+        id="yaLEMAP_the_AGS_Cross-Assembler"></a>yaLEMAP, the AGS
       Cross-Assembler</h2>
     The original cross-assembler for AGS assembly language was known as
     the "LEM Assembly Program", or <span style="font-weight: bold;">LEMAP</span>.&nbsp;
 You
+
 
 
 
@@ -1239,7 +1353,8 @@ You
     a completely new assembler that can assemble the original
     flight-software source code into a binary usable by the AGS CPU
     emulation, <span style="font-weight: bold;">yaAGS</span>.&nbsp;
-    Naturally, we call this new cross-assembler <span style="font-weight: bold;">yaLEMAP</span>.<br>
+    Naturally, we call this new cross-assembler <span
+      style="font-weight: bold;">yaLEMAP</span>.<br>
     <br>
     The command-line syntax for <span style="font-weight: bold;">yaLEMAP</span>
     is:<br>
@@ -1267,6 +1382,7 @@ Presumably,
 
 
 
+
       <span style="font-style: italic;">Filename</span> was produced by
       an earlier run of <span style="font-weight: bold;">yaLEMAP</span>
       or <span style="font-weight: bold;">binLEMAP</span> (see
@@ -1275,6 +1391,7 @@ Presumably,
       regression testing is performed during a normal build.&nbsp; This
       switch also causes a change in <span style="font-weight: bold;">yaLEMAP</span>'s
 return
+
 
 
 
@@ -1350,7 +1467,9 @@ return
     it.)<br>
     <br>
     The syntax of the source code for <span style="font-weight: bold;">yaLEMAP</span>
-    similarly isn't identical to that accepted by <span style="font-weight: bold;">LEMAP</span> as outlined in the <a href="Pultorak_files/AEAProgrammingReference.pdf"> AGS
+    similarly isn't identical to that accepted by <span
+      style="font-weight: bold;">LEMAP</span> as outlined in the <a
+      href="Pultorak_files/AEAProgrammingReference.pdf"> AGS
       programmer's manual</a>, but it's pretty close.&nbsp; The
     principal differences are:<br>
     <ul>
@@ -1393,7 +1512,8 @@ return
         size.<br>
         <br>
         The input file obeys the following simple rules, tailored to
-        match the way the assembled data appears in <span style="font-weight: bold;">LEMAP</span> assembly listings, in
+        match the way the assembled data appears in <span
+          style="font-weight: bold;">LEMAP</span> assembly listings, in
         order to make data entry easy:<br>
         <ul>
           <li>Anything following the '#' character is treated as a
@@ -1427,6 +1547,7 @@ return
     </div>
     <h2><a name="AGS_Flight_Software" id="AGS_Flight_Software"></a><small><big>AGS
 Flight
+
 
 
 
@@ -1485,7 +1606,8 @@ Flight
     anyone wants to volunteer to perform additional proofing—for
     example, of the program comments, which are not checked by the
     process I used—feel free to do so and to report the results to me.<br>
-    <h3><a name="Special_Problems_of_Flight_Program_6_" id="Special_Problems_of_Flight_Program_6_"></a>Special Problems
+    <h3><a name="Special_Problems_of_Flight_Program_6_"
+        id="Special_Problems_of_Flight_Program_6_"></a>Special Problems
       of Flight Program 6<br>
     </h3>
     Unfortunately, the assembly listing we have of Flight Program 6 is
@@ -1520,7 +1642,8 @@ Flight
         pages, is identical for FP6 and FP8, leading us to believe that
         this entire memory block has not changed at all.</li>
       <li><span style="font-style: italic;">Finally</span>, if you refer
-        to page 72 of the TRW <a href="http://klabs.org/history/ntrs_docs/manned/apollo/1969024052.pdf">
+        to page 72 of the TRW <a
+          href="http://klabs.org/history/ntrs_docs/manned/apollo/1969024052.pdf">
           LM/AGS Design Survey</a> document, you'll find the following
         explanation:&nbsp; "The equations programmed into the hardwired
         portion of the memory are identical&nbsp; in all flight
@@ -1537,21 +1660,25 @@ Flight
         feature rather than an accidental characteristic.<br>
       </li>
     </ul>
-    This all seems pretty conclusive, but if you <span style="font-style: italic;">have</span> a listing of FP6, please
+    This all seems pretty conclusive, but if you <span
+      style="font-style: italic;">have</span> a listing of FP6, please
     scan pages 90 and 96 and send them to me and save us this dreadful
     uncertainty!&nbsp; (Of course, if you have other versions of the
     program, scan them and send them to me too!&nbsp; Or send them to me
     via snail-mail, and I'll scan them and return them.)<br>
     <h2><a name="Debug" id="Debug"></a>yaAGS Debugging Mode (--debug)</h2>
     <table summary="" style="text-align: left; width: 60%; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="1">
       <tbody>
         <tr>
-          <td style="text-align: center; vertical-align: top;"> <big><span style="font-weight: bold;">Important Note!</span></big><br>
+          <td style="text-align: center; vertical-align: top;"> <big><span
+                style="font-weight: bold;">Important Note!</span></big><br>
             <div style="text-align: left;"> The description that follows
               covers the "classic" debugging mode for versions prior to
               20090427.&nbsp; I retain this description as-is for the
-              benefit of those using one of those versions of <span style="font-weight: bold;">yaAGS</span>.&nbsp; However,
+              benefit of those using one of those versions of <span
+                style="font-weight: bold;">yaAGS</span>.&nbsp; However,
               for versions 20090427 and later, command-line debugging is
               in the process of changing to a style more closely related
               to that of the widely used <span style="font-weight:
@@ -1559,7 +1686,8 @@ Flight
               described below will gradually disappear.&nbsp; Since
               these changes have been driven by Onno Hommes, we have
               agreed that Onno will maintain documentation for the new
-              debugging mode at <a href="http://code.google.com/p/virtualagc/">his website</a>.<br>
+              debugging mode at <a
+                href="http://code.google.com/p/virtualagc/">his website</a>.<br>
             </div>
           </td>
         </tr>
@@ -1584,7 +1712,8 @@ Flight
     The debugging mode's status display may look something like this:<br>
     <br style="font-family: monospace;">
     <div style="margin-left: 40px;"> <span style="font-family:
-        monospace;">Stopped because program loaded.</span><br style="font-family: monospace;">
+        monospace;">Stopped because program loaded.</span><br
+        style="font-family: monospace;">
       <span style="font-family: monospace;">A=000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Q=000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Overflow=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1600,10 +1729,13 @@ Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
         Halted=0<br>
-        Icount=1&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Cycles=0</span><br style="font-family: monospace;">
+        Icount=1&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Cycles=0</span><br
+        style="font-family: monospace;">
       <span style="font-family: monospace;">6000&nbsp;
-        706177&nbsp;&nbsp;&nbsp; DLY&nbsp;&nbsp;&nbsp;&nbsp; 6177</span><br style="font-family: monospace;">
+        706177&nbsp;&nbsp;&nbsp; DLY&nbsp;&nbsp;&nbsp;&nbsp; 6177</span><br
+        style="font-family: monospace;">
       <span style="font-family: monospace;">&gt;</span><br>
     </div>
     <br>
@@ -1635,7 +1767,8 @@ Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       6177</span>).&nbsp; The debugging mode does not currently
     understand any labels defined within the AGS program itself;
     therefore, understanding code like "<span style="font-family:
-      monospace;">DLY 6177</span>" as something like "<span style="font-family: monospace;">DLY INIT</span>" (involving
+      monospace;">DLY 6177</span>" as something like "<span
+      style="font-family: monospace;">DLY INIT</span>" (involving
     labels) is aided by having a symbol table or assembly listing at
     hand.<br>
     <br>
@@ -1645,9 +1778,11 @@ Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         number, such as 1234.&nbsp; Modifiable memory is in the range
         0000-3777, while non-modifiable memory is in the range
         4000-7777.</li>
-      <li>Addresses within input-channel space (i.e., accessed by the <span style="font-family: monospace;">INP</span> instruction) are
+      <li>Addresses within input-channel space (i.e., accessed by the <span
+          style="font-family: monospace;">INP</span> instruction) are
         prefixed by 'I', such as I2020.</li>
-      <li>Addresses within output-channel space (i.e., accessed by the <span style="font-family: monospace;">OUT</span> instruction) are
+      <li>Addresses within output-channel space (i.e., accessed by the <span
+          style="font-family: monospace;">OUT</span> instruction) are
         prefixed by 'O', such as O2020.&nbsp; There is also a fictional
         output register O0, which is used by <span style="font-weight:
           bold;">yaAGS</span> to combine all of the discrete
@@ -1698,7 +1833,8 @@ Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li>DELETE—without an address, DELETE simply deletes all existing
         breakpoints and watchpoints.</li>
       <li>DELETE <span style="font-style: italic;">A</span>—deletes the
-        breakpoint or watchpoint (if any) currently defined at address <span style="font-style: italic;">A</span>.&nbsp; The address should
+        breakpoint or watchpoint (if any) currently defined at address <span
+          style="font-style: italic;">A</span>.&nbsp; The address should
         be prefixed with 'I' or 'O' for i/o channel addresses.</li>
       <li>DUMP—without arguments (i.e, no <span style="font-style:
           italic;">N</span> and no <span style="font-style: italic;">A</span>),
@@ -1714,28 +1850,35 @@ a
 
 
 
+
         dump is performed using the last <span style="font-style:
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
-      <li>DUMP [<span style="font-style: italic;">N</span>] <span style="font-style: italic;">A</span>—displays the current
+      <li>DUMP [<span style="font-style: italic;">N</span>] <span
+          style="font-style: italic;">A</span>—displays the current
         contents of <span style="font-style: italic;">N</span>
         successive memory locations or i/o channels, starting at address
         <span style="font-style: italic;">A</span>.&nbsp; The formats
         allowed in <span style="font-style: italic;">A</span> are
         described above.&nbsp; <span style="font-style: italic;">N</span>
-        is shown in brackets to indicate that it is optional.&nbsp; If <span style="font-style: italic;">N</span> is omitted, it defaults
+        is shown in brackets to indicate that it is optional.&nbsp; If <span
+          style="font-style: italic;">N</span> is omitted, it defaults
         to 1.&nbsp; Since no i/o channels are at consecutive addresses,
         no <span style="font-style: italic;">N</span> option is allowed
         for i/o-channel addresses.</li>
       <li>QUIT or EXIT—exits <span style="font-weight: bold;">yaAGS</span>.</li>
-      <li>STEP [<span style="font-style: italic;">N</span>] or NEXT [<span style="font-style: italic;">N</span>]—executes the next <span style="font-style: italic;">N</span> assembly-language
+      <li>STEP [<span style="font-style: italic;">N</span>] or NEXT [<span
+          style="font-style: italic;">N</span>]—executes the next <span
+          style="font-style: italic;">N</span> assembly-language
         instructions.&nbsp; If <span style="font-style: italic;">N</span>
         is omitted, then it defaults to 1.&nbsp; Notes that this command
         can be abbreviated as 'S' or as 'N'.<br>
       </li>
       <li>WATCH <span style="font-style: italic;">A</span>—defines a
-        new watchpoint at erasable-memory address <span style="font-style: italic;">A</span> (using one of the address
-        formats described above).&nbsp; The program will halt <span style="font-style: italic;">after</span> executing an
+        new watchpoint at erasable-memory address <span
+          style="font-style: italic;">A</span> (using one of the address
+        formats described above).&nbsp; The program will halt <span
+          style="font-style: italic;">after</span> executing an
         instruction that changes the value stored at the address of the
         watchpoint.<br>
       </li>
@@ -1779,13 +1922,15 @@ the
 
 
 
+
             state of the system (CPU, memory, i/o channels) to backtrace
             point #<span style="font-style: italic;">N</span> (from the
             list displayed by the BACKTRACES command).</li>
           <li>DISASSEMBLE [[<span style="font-style: italic;">N</span>]
             <span style="font-style: italic;">A</span>]—disassembles N
             instructions starting at address <span style="font-style:
-              italic;">A</span>.&nbsp; By default <span style="font-style: italic;">A</span> is the current
+              italic;">A</span>.&nbsp; By default <span
+              style="font-style: italic;">A</span> is the current
             address of the program counter and <span style="font-style:
               italic;">N</span> is its prior value (starting at 24 when
             the program starts).</li>
@@ -1798,8 +1943,10 @@ the
             A pattern is similar to a breakpoint, except that it uses
             the instruction code rather than the program counter.&nbsp;
             In other words, execution is halted upon finding that the
-            instruction code is equal to the value <span style="font-style: italic;">V</span>.&nbsp; The
-            instruction code is logically bitwise-ANDed with the mask <span style="font-style: italic;">M</span> prior to the
+            instruction code is equal to the value <span
+              style="font-style: italic;">V</span>.&nbsp; The
+            instruction code is logically bitwise-ANDed with the mask <span
+              style="font-style: italic;">M</span> prior to the
             comparison, so that only selected fields in the instruction
             code are really used.&nbsp;</li>
         </ul>
@@ -1815,7 +1962,8 @@ the
         text-transform: none; white-space: normal; widows: 1;
         word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
         inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
 
 
@@ -1828,15 +1976,16 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
-      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-11-17.<br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2026-01-01.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
               by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
-  
-
-</body></html>
+  </body>
+</html>
