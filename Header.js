@@ -15,6 +15,14 @@ if (typeof ignoreGcse == 'undefined') {
 	})();
 }
 
+/* Add a new stylesheet, main.css.  This way I don't have to edit every single 
+   HTML file. */
+const linkElement = document.createElement("link");
+linkElement.setAttribute("rel", "stylesheet");
+linkElement.setAttribute("href", "main.css");
+linkElement.setAttribute("type", "text/css");
+document.head.appendChild(linkElement);
+
 /* Get the logo URL. */
 var date = new Date();
 var dayOfMonth = date.getDate();
