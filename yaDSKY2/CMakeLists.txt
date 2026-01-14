@@ -1,7 +1,3 @@
-if(NOT wxWidgets_FOUND)
-  return()
-endif()
-
 set(SOURCES yaDSKY2.cpp)
 
 set(SOURCESc
@@ -15,18 +11,7 @@ ${PROJECT_SOURCE_DIR}/yaAGC/rfopen.c)
 add_executable(yaDSKY2 ${SOURCES} ${SOURCESc})
 target_include_directories(yaDSKY2 PRIVATE ${PROJECT_SOURCE_DIR}/yaAGC)
 target_compile_definitions(yaDSKY2 PRIVATE NVER="${NVER}")
-
-if(WIN32)
-  target_link_libraries(yaDSKY2 PRIVATE ${WINSOCK_LIBRARIES})
-endif()
-
-if(wxWidgets_INCLUDE_DIRS)
-  target_include_directories(yaDSKY2 PRIVATE ${wxWidgets_INCLUDE_DIRS})
-  target_compile_definitions(yaDSKY2 PRIVATE ${wxWidgets_DEFINITIONS})
-else()
-  target_compile_options(yaDSKY2 PRIVATE ${wxWidgets_FLAGS})
-endif()
-target_link_libraries(yaDSKY2 PRIVATE ${wxWidgets_LIBRARIES})
+target_link_libraries(yaDSKY2 PRIVATE wxWidgets::wxWidgets ${WINSOCK_LIBRARIES})
 
 
 # --- install

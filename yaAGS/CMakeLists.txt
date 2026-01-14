@@ -1,11 +1,11 @@
-add_executable(yaAGS mainAGS.c symbol_table.c nbfgets.c Backtrace.c
+add_executable(yaAGS mainAGS.c symbol_table.c nbfgets.c
   ${PROJECT_SOURCE_DIR}/yaAGC/NormalizeSourceName.c)
-target_link_libraries(yaAGS PRIVATE libyaAGS libyaAGC Threads::Threads m)
+target_link_libraries(yaAGS PRIVATE libyaAGS libyaAGC Threads::Threads $<$<NOT:$<BOOL:${MSVC}>>:m>)
 target_include_directories(yaAGS PRIVATE ${PROJECT_SOURCE_DIR}/yaAGC)
 target_compile_definitions(yaAGS PRIVATE NVER="${NVER}")
 if(WIN32)
   target_link_libraries(yaAGS PRIVATE regex ${WINSOCK_LIBRARIES})
-endif(WIN32)
+endif()
 if(APPLE OR WIN32)
   target_compile_definitions(yaAGS PRIVATE STDC_HEADERS)
 endif()

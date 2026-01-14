@@ -1,0 +1,110 @@
+name: ci
+
+env:
+  CTEST_NO_TESTS_ACTION: error
+  CTEST_PARALLEL_LEVEL: 0
+
+on:
+  push:
+    paths:
+      - "**.c"
+      - "**.cpp"
+      - "**.h"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+# avoid wasted runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        comp: [{ cc: gcc-14, cxx: g++-14 },
+               { cc: clang-18, cxx: clang++-18 }
+               ]
+        sdl: [true, false]
+
+    env:
+      CC: ${{ matrix.comp.cc }}
+      CXX: ${{ matrix.comp.cxx }}
+
+    steps:
+    - &checkout
+      uses: actions/checkout@v5
+
+    - name: Install SDL2
+      if: matrix.sdl == true
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsdl2-dev
+
+    - uses: ./.github/workflows/composite-unix
+
+
+  mac:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        comp: [{ cc: gcc-15, cxx: g++-15 },
+               { cc: clang, cxx: clang++ }
+               ]
+        wxw: [true, false]
+
+    env:
+      CC: ${{ matrix.comp.cc }}
+      CXX: ${{ matrix.comp.cxx }}
+
+    steps:
+    - *checkout
+
+    - name: Install wxWidgets
+      if: matrix.wxw == true
+      run: brew install wxwidgets
+
+    - uses: ./.github/workflows/composite-unix
+
+
+  windows-gcc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    # this uses GCC preinstalled in the Windows runner
+    # https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md#tools
+    env:
+      CC: gcc
+      CXX: g++
+
+    steps:
+    - *checkout
+
+    - run: cmake --workflow default
+      env:
+        CMAKE_GENERATOR: Ninja
+
+    - name: upload CMakeConfigureLog.yaml
+      if: failure() && hashFiles('build/CMakeFiles/CMakeConfigureLog.yaml') != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ runner.os }}-CMakeConfigureLog.yaml
+        path: build/CMakeFiles/CMakeConfigureLog.yaml
+
+
+  windows-msvc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+    - *checkout
+
+    - run: cmake --workflow release

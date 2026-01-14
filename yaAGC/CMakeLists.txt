@@ -3,25 +3,31 @@ Backtrace.c SocketAPI.c DecodeDigitalDownlink.c)
 
 set(_agc_src main.c agc_cli.c agc_simulator.c agc_debugger.c
 agc_gdbmi.c agc_disassembler.c agc_help.c nbfgets.c agc_symtab.c
-NormalizeSourceName.c ${PROJECT_SOURCE_DIR}/Tools/checkdec.c Backtrace.c)
+NormalizeSourceName.c ${PROJECT_SOURCE_DIR}/Tools/checkdec.c)
 
-add_library(libyaAGC ${_libagc_src})
+add_library(libyaAGC OBJECT ${_libagc_src})
+# used by targets in other directories
 
-add_executable(yaAGC ${_agc_src})
+if(NOT (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT))
+  return()
+endif()
+
+add_executable(yaAGC ${_agc_src} ${_libagc_src})
 target_compile_definitions(yaAGC PRIVATE NVER="${NVER}" NOREADLINE="yes" GDBMI)
-target_link_libraries(yaAGC PRIVATE libyaAGC m)
+target_link_libraries(yaAGC PRIVATE $<$<NOT:$<BOOL:${MSVC}>>:m>)
 if(Threads_FOUND)
   target_link_libraries(yaAGC PRIVATE Threads::Threads)
 endif()
 
 if(WIN32)
   add_library(regex regex.c)
+  target_compile_definitions(regex PRIVATE STDC_HEADERS)
+
   target_sources(yaAGC PRIVATE random.c)
   target_link_libraries(yaAGC PRIVATE regex ${WINSOCK_LIBRARIES})
 endif()
 
 if(APPLE OR WIN32)
-  target_compile_definitions(regex PRIVATE STDC_HEADERS)
   target_compile_definitions(yaAGC PRIVATE STDC_HEADERS)
 endif()
 
