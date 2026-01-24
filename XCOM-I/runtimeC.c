@@ -995,7 +995,7 @@ parseCommandLine(int argc, char **argv)
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
-          printf("              (Not presently functional in Windows.\n");
+          printf("              (Not presently functional in Windows).\n");
           printf("--trace-inlines If available, trace execution of patched\n");
           printf("              blocks of CALL INLINE statements.\n");
           printf("--detailed-inlines Expanded trace message for CALL INLINE\n");
