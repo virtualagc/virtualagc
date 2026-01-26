@@ -2000,6 +2000,11 @@ INPUT(uint32_t lun) {
           *ss = '~';
           memmove(ss+1, ss+2, strlen(ss+2) + 1);
         }
+      // Convert all tab characters to single spaces.  Yes ... the user
+      // probably expected them to be something like 1-8 spaces, but I'm
+      // afraid to do that.
+      while (NULL != (ss = strstr(s, "\t")))
+	*ss = ' ';
       // Since input is expected to be arriving on punch-cards, we want to
       // pad all input lines to be at least 80 characters.  This isn't
       // normally significant, but for a legacy compiler like XCOM.xpl or
