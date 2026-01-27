@@ -49,6 +49,24 @@ set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt cards monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
+:: Move all generated files to a *.results folder.
+:move_all
+	set results="HALSFC %DATE% %TIME%.results"
+	set results=%results:"=%
+	set results=%results:/=-%
+	set results=%results::=-%
+	mkdir "%results%" >NUL 2>NUL
+	echo "%*" >"%results%\comment.txt"
+	for %%i in ( %FILES_PORTED:"=% %FILES_LOCAL:"=% ) do move %%i "%results%" >NUL 2>NUL
+	copy "%HALS_FILE%" "%results%" >NUL 2>NUL
+	exit /B 0
+
+:: The arguments comprise an error message.
+:error_exit
+	echo "%*"
+	move_all "%*: %CmdCmdLine%"
+	exit /B 1
+
 if not exist "%HALS_FILE%" (
         echo.
         echo. This script compiles a HAL/S file to an AP-101S object-code file.
@@ -106,14 +124,14 @@ if "%TARGET%". == "BFS". (
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass1.rpt
-if errorlevel 1 ( echo Aborted after PASS1 & exit /b 1 )
+if errorlevel 1 ( error_exit "Aborted after PASS1" )
 
 set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CPU TIME FOR^|TODAY IS^|COMPOOL.*VERSION)
 ::echo IGNORE_LINES=%IGNORE_LINES%
 if %TEST%x == TESTx (
 echo ======================================================
-( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || exit /b 1
-python "%HAL_S_FC%" %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || exit /b 1
+( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || error_exit "Utilities egrep/diff unavailable"
+python "%HAL_S_FC%" %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || error_exit "Failed PASS1 cross-comparison test"
 for %%i in ( %FILES_PORTED:"=% ) do copy %ported%..\%%i . >NUL 2>NUL
 egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt
@@ -130,7 +148,7 @@ echo ======================================================
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >flo.rpt
-if errorlevel 1 ( echo Aborted after FLO & exit /b 1 )
+if errorlevel 1 ( error_exit "Aborted after FLO" )
 
 
 %OPT% ^
@@ -141,7 +159,7 @@ if errorlevel 1 ( echo Aborted after FLO & exit /b 1 )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >opt.rpt
-if errorlevel 1 ( echo Aborted after OPT & exit /b 1 )
+if errorlevel 1 ( error_exit "Aborted after OPT" )
 
 %AUXP% ^
         --commoni=COMMON2.out ^
@@ -151,7 +169,7 @@ if errorlevel 1 ( echo Aborted after OPT & exit /b 1 )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >auxp.rpt
-if errorlevel 1 ( echo Aborted after AUXP & exit /b 1 )
+if errorlevel 1 ( error_exit "Aborted after AUXP" )
 
 
 %PASS2% ^
@@ -167,16 +185,9 @@ if errorlevel 1 ( echo Aborted after AUXP & exit /b 1 )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass2.rpt
-if errorlevel 1 ( echo Aborted after PASS2 & exit /b 1 )
+if errorlevel 1 ( error_exit "Aborted after PASS2" )
 
 :: PASS3 and PASS4 aren't ready for use yet.
 
-set results="HALSFC %DATE% %TIME%.results"
-set results=%results:"=%
-set results=%results:/=-%
-set results=%results::=-%
-mkdir "%results%" >NUL 2>NUL
-for %%i in ( %FILES_PORTED:"=% %FILES_LOCAL:"=% ) do move %%i "%results%" >NUL 2>NUL
-copy "%HALS_FILE%" "%results%" >NUL 2>NUL
-
+move_all "Success: %CmdCmdLine%"
 echo Compilation successful. Results in "%results%".

@@ -11,6 +11,7 @@ TEST="$2"
 PARM_STRING="$3"
 TARGET="$4"
 EXT="$5"
+COMMAND_LINE="$@"
 
 FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 FILES_PORTED="$FILES_PORTED &&TEMPLIB.json &&TEMPINC.json SOURCECO.txt"
@@ -24,6 +25,22 @@ FILES_LOCAL="$FILES_LOCAL pass1pA.rpt flo.rpt opt.rpt aux.rpt pass2.rpt"
 FILES_LOCAL="$FILES_LOCAL pass3.rpt pass4.rpt cards monitor13.parms"
 FILES_LOCAL="$FILES_LOCAL auxp.rpt deck.bin extra.txt"
 rm $FILES_PORTED $FILES_LOCAL -rf &>/dev/null
+
+# Move all generated files to a *.results folder.
+function move_all {
+	results="HALSFC `date`.results"
+	mkdir "$results" &>/dev/null
+	echo "$@" >"$results"/comment.txt
+	mv $FILES_PORTED $FILES_LOCAL "$results" &>/dev/null
+	cp "$HALS_FILE" "$results" &>/dev/null
+}
+
+# The arguments comprise an error message.
+function error_exit {
+	echo "$@"
+	move_all "$@: $COMMAND_LINE"
+	exit 1
+}
 
 if [[ ! -f "$HALS_FILE" ]]
 then
@@ -85,7 +102,7 @@ $PASS1 \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,3360,6,vmem.bin \
 	>pass1.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after PASS1" ; exit 1 ; fi
+if [[ $? != 0 ]] ; then error_exit "Aborted after PASS1" ; fi
 
 IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)'
 if [[ "$TEST" != "" ]]
@@ -95,7 +112,7 @@ then
         ported="`dirname -- \"$ported\"`"
         ported="`dirname -- \"$ported\"`"
         ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
-        echo PASS1 cross-comparison test: || exit 1
+        echo PASS1 cross-comparison test: || error_exit "Failed PASS1 cross-comparison test"
         for n in $FILES_PORTED ; do cp "$ported/$n" . ; done &>/dev/null
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
         egrep -v "$IGNORE_LINES" pass1p.rpt >pass1pA.rpt
@@ -115,7 +132,7 @@ $FLO \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,3360,6,vmem.bin \
 	>flo.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after FLO" ; exit 1 ; fi
+if [[ $? != 0 ]] ; then error_exit "Aborted after FLO" ; fi
 
 $OPT \
 	--commoni=COMMON1.out \
@@ -125,7 +142,7 @@ $OPT \
 	--raf=B,7200,4,optmat.bin \
 	--raf=B,3360,6,vmem.bin \
 	>opt.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after OPT" ; exit 1 ; fi
+if [[ $? != 0 ]] ; then error_exit "Aborted after OPT" ; fi
 
 $AUXP \
 	--commoni=COMMON2.out \
@@ -135,7 +152,7 @@ $AUXP \
 	--raf=B,7200,4,optmat.bin \
 	--raf=B,3360,6,vmem.bin \
 	>auxp.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after AUXP" ; exit 1 ; fi
+if [[ $? != 0 ]] ; then error_exit "Aborted after AUXP" ; fi
 
 $PASS2 \
 	$CARDS \
@@ -150,13 +167,9 @@ $PASS2 \
 	--raf=B,7200,4,optmat.bin \
 	--raf=B,3360,6,vmem.bin \
 	>pass2.rpt
-if [[ $? != 0 ]] ; then echo "Aborted after PASS2" ; exit 1 ; fi
+if [[ $? != 0 ]] ; then error_exit "Aborted after PASS2" ; fi
 
 # PASS3 and PASS4 aren't ready for use yet.
 
-results="HALSFC `date`.results"
-mkdir "$results" &>/dev/null
-mv $FILES_PORTED $FILES_LOCAL "$results" &>/dev/null
-cp "$HALS_FILE" "$results" &>/dev/null
-
+move_all "Success: $COMMAND_LINE"
 echo "Compilation successful. Results in \"$results\"."
