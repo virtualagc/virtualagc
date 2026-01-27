@@ -1,6 +1,7 @@
 @echo off >NUL
 :: This Windows batch script compiles a HAL/S program using the HAL/S-FC program,
-:: which is assumed to be in the PATH.  
+:: which is assumed to be in the PATH.  ERRORLIB is assumed to be in the same
+:: folder as HALSFC-PASS1.exe.
 
 :: I've made this batch file as close to functionally identical to the 
 :: BASH script HALSFC as feasible, but there are some differences:
@@ -23,6 +24,7 @@
 ::      other than the default?
 
 for /f "tokens=*" %%i in ('where HAL_S_FC.py') do set HAL_S_FC=%%i
+for /f "tokens=*" %%i in ('where HALSFC-PASS1.exe') do set "ERRORLIB=%%~piERRORLIB"
 for /f "delims=" %%i in ("%HAL_S_FC%") do set ported=%%~dpi
 setlocal enabledelayedexpansion
 
@@ -96,7 +98,7 @@ if "%TARGET%". == "BFS". (
         --ddi=0,"%HALS_FILE%" ^
         --ddo=2,listing2.txt ^
         --pdsi=4,%TEMPLIB%,E ^
-        --pdsi=5,ERRORLIB ^
+        --pdsi=5,"%ERRORLIB%" ^
         --pdsi=6,ACCESS  ^
         --pdso=6,%TEMPLIB%,E ^
         --commono=COMMON0.out ^
@@ -155,7 +157,7 @@ if errorlevel 1 ( echo Aborted after AUXP & exit /b 1 )
 %PASS2% ^
         %CARDS% ^
         --ddo=4,deck.bin,E ^
-        --pdsi=5,ERRORLIB ^
+        --pdsi=5,"%ERRORLIB%" ^
         --ddo=7,extra.txt ^
         --commoni=COMMON3.out ^
         --commono=COMMON4.out ^

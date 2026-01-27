@@ -1,6 +1,7 @@
 #!/bin/bash
 # This Linux/Mac script compiles a HAL/S program using the HAL/S-FC program,
-# which is assumed to be in the PATH.  
+# which is assumed to be in the PATH.  ERRORLIB is assumed to be in the same
+# folder as HALSFC-PASS1.
 
 # Just in case of working with .exe files in WINE.
 export WINEDEBUG=-all
@@ -69,13 +70,14 @@ else
 	TEMPLIB=TEMPLIB
 	CARDS=--ddo=3,cards.bin,E
 fi
+ERRORLIB="`which HALSFC-PASS1 | sed 's/HALSFC-PASS1/ERRORLIB/'`"
 
 $PASS1 \
 	--parm="$PARM_STRING" \
 	--ddi=0,"$HALS_FILE" \
 	--ddo=2,listing2.txt \
 	--pdsi=4,$TEMPLIB,E \
-	--pdsi=5,ERRORLIB \
+	--pdsi=5,"$ERRORLIB" \
 	--pdsi=6,ACCESS  \
 	--pdso=6,$TEMPLIB,E \
 	--commono=COMMON0.out \
@@ -138,7 +140,7 @@ if [[ $? != 0 ]] ; then echo "Aborted after AUXP" ; exit 1 ; fi
 $PASS2 \
 	$CARDS \
 	--ddo=4,deck.bin,E \
-	--pdsi=5,ERRORLIB \
+	--pdsi=5,"$ERRORLIB" \
 	--ddo=7,extra.txt \
 	--commoni=COMMON3.out \
 	--commono=COMMON4.out \
