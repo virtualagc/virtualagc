@@ -51,7 +51,7 @@ del %FILES_PORTED:"=% %FILES_LOCAL:"=% "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>
 
 :: Move all generated files to a *.results folder.
 :move_all
-	set results="HALSFC %DATE% %TIME%.results"
+	set results="HALSFC %HALS_FILE% %DATE% %TIME%.results"
 	set results=%results:"=%
 	set results=%results:/=-%
 	set results=%results::=-%
@@ -65,6 +65,7 @@ del %FILES_PORTED:"=% %FILES_LOCAL:"=% "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>
 :error_exit
 	echo "%*"
 	move_all "%*: %CmdCmdLine%"
+	echo "Results in %results%"
 	exit /B 1
 
 if not exist "%HALS_FILE%" (
