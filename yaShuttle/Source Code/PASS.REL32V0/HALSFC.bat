@@ -56,7 +56,7 @@ del %FILES_PORTED:"=% %FILES_LOCAL:"=% "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>
 	set results=%results:/=-%
 	set results=%results::=-%
 	mkdir "%results%" >NUL 2>NUL
-	echo "%*" >"%results%\comment.txt"
+	echo %* >"%results%\comment.txt"
 	for %%i in ( %FILES_PORTED:"=% %FILES_LOCAL:"=% ) do move %%i "%results%" >NUL 2>NUL
 	copy "%HALS_FILE%" "%results%" >NUL 2>NUL
 	exit /B 0
