@@ -17,15 +17,19 @@ document.write(headerTemplate.replace("@TITLE@","XPL/I and XPL Development Toolc
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
       <li><a moz-do-not-send="true" href="#WhyXPLI">XPL/I Versus
           Standard XPL</a></li>
-      <li><a moz-do-not-send="true" href="#XCOMI">XCOM-I</a></li>
+      <li><b><a moz-do-not-send="true" href="#XCOMI">XCOM-I</a></b></li>
       <li><a moz-do-not-send="true" href="#Installation">Installation of
-          XCOM-I<br>
+          <b>XCOM-I</b><br>
         </a></li>
       <ul>
         <li><a moz-do-not-send="true" href="#Linux">Linux or Mac OS<br>
           </a></li>
         <li><a moz-do-not-send="true" href="#Windows">Windows Specific</a></li>
         <li><a moz-do-not-send="true" href="#testTheInstallation">Testing
+
+
+
+
 
 
 
@@ -69,6 +73,10 @@ document.write(headerTemplate.replace("@TITLE@","XPL/I and XPL Development Toolc
     and David B. Wortman.&nbsp; (Incidentally, there will also be
     frequent references to Intermetrics document IR-182-1, <a
       moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=822">"HAL/S-FC
+
+
+
+
 
 
 
@@ -120,6 +128,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
       do have XPL source code for such a HAL/S compiler</a>.&nbsp; But
     if you want to use that HAL/S compiler, you first need an XPL
     compiler.&nbsp; And preferably, both compilers should work on
@@ -132,6 +144,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     HAL/S compiler, <b>HAL/S-FC</b> (which I'll often refer to as <b>HALSFC</b>
     in order to avoid the issue of having the / character in filenames),
     can be found <a moz-do-not-send="true" href="HAL.html">here</a>.&nbsp;
+
+
+
+
 
 
 
@@ -174,6 +190,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     discussion.&nbsp; When we do need to distinguish, I'll call that
     extended Intermetrics language "XPL/I".<br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+
 
 
 
@@ -364,6 +384,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
     runtime library.<br>
     <h1><a name="installation"></a>Installation of XCOM-I<br>
     </h1>
@@ -476,6 +500,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           href="https://github.com/mstorsjo/llvm-mingw/releases">installing
 
 
+
+
+
+
           llvm-mingw</a> </font><font size="-1">in place of
         mingw-w64.&nbsp; And as for WINE, <a moz-do-not-send="true"
           href="https://wiki.winehq.org/MacOS">its wiki says</a>
@@ -551,7 +579,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         <i>"virtualagc</i>/yaShuttle/ported/PASS1.PROCS", and <i>"virtualagc</i>/yaShuttle/Source
+
+
+
+
 
 
 
@@ -567,6 +603,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       letter, then your "home directory" in MSYS2 will probably be
       something like C:\msys64\home\<i>USERNAME</i>, whereas your home
       directory for a normal command-line would be c:\users\<i>USERNAME</i>.&nbsp;
+
+
+
+
 
 
 
@@ -626,7 +666,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         <i>"virtualagc</i>/yaShuttle/ported/PASS1.PROCS", and <i>"virtualagc</i>/yaShuttle/Source
+
+
+
+
 
 
 
@@ -662,6 +710,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
           This creates the file gnumake.exe in the subdirectory called
           WinRel/.</li>
         <li>Rename gnumake.exe as just make.exe.<br>
@@ -680,7 +732,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       itself by compiling and running the HELLO.xpl program I <a
         moz-do-not-send="true" href="#XCOMI">used as an example earlier</a>.</p>
     Do the following:<br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <td valign="top">
@@ -762,9 +814,17 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         In my experience, <b>clang</b> produces a lot of pointless (and
         incorrect) warning messages, which is why I disable all of the
         warnings by adding <font color="#663300"><code>EXTRA=-w</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -784,7 +844,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     fact, I've cobbled together a much-more-extensive test of <b>XCOM-I</b>
     by using them, and you can run that more-extensive test like so:<br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <td valign="top">
@@ -913,6 +973,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         Virtual AGC software repository</a>, but <a
         moz-do-not-send="true"
         href="https://sourceforge.net/projects/suny-pascal/">the
@@ -923,6 +987,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360-source/
       emulator in there!<br>
     </p>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+
 
 
 
@@ -980,6 +1048,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
             <br>
           </font></li>
       </ul>
@@ -992,7 +1064,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </blockquote>
     <p>Let's build <b>sim360</b>.&nbsp; Do this:<br>
     </p>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <td valign="top">
@@ -1068,6 +1140,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     The command-line switches for <b>sim360</b> probably look
     mysterious, but they're not so bad. You can see a full list of
     command-line options with the command "<font color="#663300"><code>sim360
+
+
+
+
 
 
 
@@ -1151,6 +1227,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
             its printout says that it was built on May 2, 2001, at
             13:40:40.19.&nbsp; I'd suggest it's rare to find files
             created in 2001 on tapes made in 1969.&nbsp; As a separate
@@ -1199,6 +1279,10 @@ href="https://sourceforge.net/projects/suny-pascal/files/suny0005.tar.gz/downloa
 
 
 
+
+
+
+
               Weaver's XPL project</a><br>
           </td>
           <td valign="middle" align="center"><a moz-do-not-send="true"
@@ -1222,7 +1306,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
     (For the legacy binary executables, I'll generically call those <b>XCOM</b><b><i>x-YYYYMMDD</i></b>.)&nbsp;
+
+
+
+
 
 
 
@@ -1262,15 +1354,19 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         To be clear, <b>XCOM-I</b> is not self-compiling.&nbsp; It's
         written in Python, not XPL.&nbsp; Rather, <b>XCOM3</b> and <b>XCOM45</b>
         are what I expect to be self-compiling once they're
         bootstrapped.&nbsp; In the bootstrapping scenario, <b>XCOM-I</b>
         is that <i>other</i> compiler used to compile the initial
-        version of <b>XCOMx</b> before an <b>XCOMx</b> executable
-        exists.&nbsp; Except that unlike the normal bootstrapping
-        scenario, <b>XCOM-I</b>, <b>XCOM3</b>, and <b>XCOM45</b> are
-        full-blown compilers rather than being the initial
+        version of <b>XCOM<i>x</i></b> before an <b>XCOM<i>x</i></b>
+        executable exists.&nbsp; Except that unlike the normal
+        bootstrapping scenario, <b>XCOM-I</b>, <b>XCOM3</b>, and <b>XCOM45</b>
+        are full-blown compilers rather than being the initial
         weak-and-feeble versions thereof.</font><br>
     </blockquote>
     Also to be clear, the use case for <b>XCOM-I</b> I'm personally
@@ -1307,6 +1403,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360A</b>
         should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.<br>
       </li>
@@ -1323,7 +1423,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     straight.&nbsp; Here's a synopsis of the <b>XCOM</b> variants
     relevant to the discussion, color coded for cuteness:<br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <caption><font size="+1"><b>Summary of XPL Compilers in
             Bootstrapping Process</b></font></caption> <tbody>
         <tr>
@@ -1382,6 +1482,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
               XPL.LIBRARY.xpl<br>
             </font></td>
           <td valign="middle" align="center"><b>XCOM-I.py</b><b><br>
@@ -1406,6 +1510,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
               XPLIB4.5.xpl<br>
             </font></td>
           <td valign="middle" align="center"><b>XCOM-I</b><b>.py<br>
@@ -1415,6 +1523,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
           <td valign="middle" align="center"><font color="#cc9933"><b>XCOM3-360</b><b>.obj<br>
               </b></font></td>
           <td valign="middle" align="center"><font color="#cc9933">XCOM.xpl,
+
+
+
+
 
 
 
@@ -1441,6 +1553,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
               XPLIB4.5.xpl</font></td>
           <td valign="middle" align="center"><font color="#009900"><b>XCOM45-native</b></font></td>
         </tr>
@@ -1448,6 +1564,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
           <td valign="middle" align="center"><font color="#000099"><b>XCOM3-360A</b><b>.obj</b><br>
             </font></td>
           <td valign="middle" align="center"><font color="#000099">XCOM.xpl,
+
+
+
+
 
 
 
@@ -1474,6 +1594,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
               XPLIB4.5.xpl</font></td>
           <td valign="middle" align="center"><font color="#cc9933"><b>XCOM45-360.obj</b></font></td>
         </tr>
@@ -1488,8 +1612,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
             under <b>sim360</b> or similar</td>
           <td rowspan="2" colspan="1" valign="middle" align="center">XPL,
+
+
+
+
 
 
 
@@ -1511,6 +1643,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
           <td valign="middle" align="center"><b><font color="#ff0000">XCOM3-360C.obj<br>
               </font></b> </td>
           <td valign="middle" align="center"><font color="#ff0000">XCOM.xpl,
+
+
+
+
 
 
 
@@ -1541,6 +1677,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
               XPLIB4.5.xpl</font></td>
           <td valign="middle" align="center"><b>XCOM45-19760719.obj</b></td>
         </tr>
@@ -1557,7 +1697,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     provided so that you can carry it out in one easy step.&nbsp; If you
     want to see the gory details, just look into the Makefile itself.<br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <td valign="top">
@@ -1638,6 +1778,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
     The compilation report includes the date and time on which <i>the
       compiler generating the report</i> was compiled, which means that
     the compilation date and time must themselves be embedded in the
@@ -1689,6 +1833,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
             and that every speck of XPL source code in <i>A Compiler
               Generator</i> is printed in lower case! <br>
           </font></li>
@@ -1705,7 +1853,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     <blockquote> </blockquote>
     <h1><a name="halsfc"></a>How to Build HAL/S-FC<br>
     </h1>
-    Hopefully you're now convinced that <b>XCOM-I</b> works reasonably
+    Hopefully you're now convinced that <b>XCOM-I</b> works somewhat
     correctly, at least in so far as compiling <i>standard</i> XPL
     programs is concerned.&nbsp; But we'll do one last test, and it's a
     big one! <br>
@@ -1719,20 +1867,21 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     we'll talk about how to compile <b>HALSFC</b> itself here.<br>
     <br>
     Once again, a Makefile has been provided that performs the entire
-    compilation, as well as compiling a short HAL/S test file, and doing
-    a regression test of the HAL/S compiler's outputs vs an earlier
-    build of the same test file on my own Linux box.&nbsp; Admittedly,
-    the regression test only compiles a very simple HAL/S test program,
-    which looks like this:<br>
-    <blockquote>
+    build of <b>HALSFC</b>, as well as using the newly-built <b>HALSFC</b>
+    to compile a short HAL/S test file, and then doing a regression test
+    of <b>HALSFC</b>'s outputs (i.e., object files, reports, and so on)
+    vs an earlier build of the same test file on my own Linux box.&nbsp;
+    Admittedly, this regression test only compiles a very simple HAL/S
+    test program, HELLO.hal, which looks like this:<br>
+    <blockquote style="background-color:lightgray">
       <pre><font color="#663300"><code>DEBUG ¢0¢3¢4¢5¢6¢8¢9¢C¢D¢E¢F H(202)</code><code><br></code><code> </code><code><br></code><code> HELLO: PROGRAM;</code><code><br></code><code>    DECLARE I INTEGER;</code><code><br></code><code>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');</code><code><br></code><code>    DECLARE INTEGER, J;</code><code><br></code><code>    REPLACE PRINTER BY "6";</code><code><br></code><code>    WRITE(PRINTER) 'THE BEGINNING';</code><code><br></code><code>    DO FOR I = 1 TO 5;</code><code><br></code><code>       WRITE(PRINTER) I, 'HELLO, WORLD!';</code><code><br></code><code>       DO FOR J = 2 TO 8 BY 2;</code><code><br></code><code>          WRITE(PRINTER) J, MY_NAME, 'SAYS ISN''T THIS FUN?';</code><code><br></code><code>       END;</code><code><br></code><code>    END;</code><code><br></code><code>    WRITE(6) 'THE END';</code><code><br></code><code> CLOSE HELLO;</code></font><br></pre>
     </blockquote>
     But a test is a test, right?&nbsp; You may notice that HAL/S bears a
     creepy similarity to XPL/I.&nbsp; The similarity is superficial, and
     the two languages are quite different in reality.&nbsp; (But it
-    fooled <i>me</i> at first!)<br>
+    fooled <i>me</i> at first!)&nbsp; Here are the instructions:<br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <tbody>
         <tr>
           <td valign="top">
@@ -1801,7 +1950,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     that terminate with lines similar to these:<br>
     <blockquote>
       <pre>⋮<br>Processing regression/HELLO ==========================================<br>Comparing ...<br>Files cA.rpt and pyA.rpt are identical<br>Files FILE1.bin and halmat.bin are identical<br>Files LISTING2.txt and listing2.txt are identical<br>Files pass1-new.rpt and pass1-old.rpt are identical<br>Files halmat.bin and regression/halmat.bin are identical<br>Files litfile.bin and regression/litfile.bin are identical<br>Files listing2.txt and regression/listing2.txt are identical<br>Files COMMON-PASS1-new.out and COMMON-PASS1-old.out are identical<br>Files optmato.bin and regression/optmato.bin are identical<br>Files auxmata.bin and regression/auxmata.bin are identical<br>Files pass2-new.rpt and pass2-old.rpt are identical<br>Files cards2.bin and regression/cards2.bin match within tolerance (17 &lt;= 18 mismatches)<br>Files cards2.bin and regression/cards2.bin match<br>Files COMMON-PASS2-new.out and COMMON-PASS2-old.out are identical<br>Regression test passed.<br></pre>
-    </blockquote>
+      <b><font size="-1">Warning:</font></b><font size="-1">&nbsp; Yes,
+        this means that the regression test has passed, which is very
+        comforting!&nbsp; But at least as of this writing, in <i>spite</i>
+        of all this testing, there are still <i>some</i> cases in which
+        <b>HALSFC</b>'s behavior is not entirely correct, which probably
+        implies that <b>XCOM-I</b> is still not perfect either.&nbsp;
+        Alas!&nbsp; A work in progress is a work in progress is a work
+        in progress ... by which I mean <b>XCOM-I</b>.&nbsp; You pays
+        your money and you takes your chances.&nbsp; When I think <b>XCOM-I</b>
+        is fully perfected, at least insofar as <b>HALSFC</b> is
+        concerned, I'll let you know.<br>
+      </font></blockquote>
     You should also find 5 new executable files:<br>
     <ol>
       <li><b>PASS1[.exe]</b></li>
@@ -1827,23 +1987,34 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     used when compiling Backup Flight Software, whereas the non-<b>B</b>
     version is used for compiling the Primary Flight Software; if
     there's no <b>B</b> version, then the non-<b>B</b> version is used
-    for both primary and backup.&nbsp; I'd note that there's something
+    for both primary and backup.&nbsp; I'd note that there're something
     like 700K lines of XPL/I code in this compilation, so it's a
     non-negligible test of the XPL/I compiler ... assuming of course,
     that the HAL/S compiler actually works correctly once installed.<br>
     <br>
     But again, there's a dedicated <b>HALSFC</b> page covering these
     topics in more detail, so I'll not discuss them further here.<br>
+    <br>
+    Alas, I can't show you the results of <i>running</i> the compiled
+    form of the HELLO program, since it would only run on an AP-101
+    computer, and even then only in theory since we've made no effort to
+    insure that the program employs i/o devices that are actually
+    available to the computer!&nbsp; <img moz-do-not-send="true"
+      src="smiley.png" alt="" width="16" height="16"><br>
     <h1><a name="xpli"></a>The Peculiarities of Standard XPL and
       Intermetrics XPL/I</h1>
     <p>It is a truth universally acknowledged that there is no
       satisfactory introductory information available concerning
       programming in XPL.&nbsp; Or at least, it <i>would</i> be
       universally acknowledged if anybody had ever heard of XPL and
-      wanted to use it for anything.&nbsp; <br>
+      wanted to create new XPL programs.<br>
     </p>
     <p>The best you can do, generally speaking, is to purchase an
       out-of-print, used copy of the book <i>A Compiler Generator</i>.&nbsp;
+
+
+
+
 
 
 
@@ -2000,6 +2171,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       their upper-case correspondents, but quoted strings are
       case-sensitive.<br>
     </p>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Case-insensitive <i>in
+
+
+          principle</i>, though as I mentioned earlier, the early <b>XCOM3</b>
+        compiler ended up being case-sensitive anyway for some reason,
+        at least insofar as XPL keywords were concerned.</font><br>
+    </blockquote>
+    <p> </p>
     <h2>Source-Code Formatting<br>
     </h2>
     <p>Input to an XPL or XPL/I program (via the <font color="#663300"><code>INPUT</code></font>
@@ -2023,7 +2202,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       believe, in <i>A Compiler Generator</i> text) that <i>some</i>
       contemporary computer systems may have treated column 1 specially,
       perhaps accepting some kind of non-blank control characters there.
-      If so, it was a issue outside <b>XCOMx</b> proper and is
+      If so, it was a issue outside <b>XCOM<i>x</i></b> proper and is
       irrelevant to <b>XCOM-I</b>. However, you do find that legacy XPL
       source code does often begin in column 2 rather than column 1, and
       I suspect that this hypothetical column-sensitivity is the reason
@@ -2034,9 +2213,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       split across multiple cards. (Yes, that <i>does</i>
       happen.)&nbsp; Does column 1 belong to the string or not? In <b>XCOM-I</b>,
       I take my cue from <b>XCOM3</b> source code in this matter: In
-      spite of the fact that <b>XCOMx</b>'s source code generally
-      avoids column 1 in all other cases, column 1 <i>does</i> belong
-      to any multi-line quoted strings.<br>
+      spite of the fact that <b>XCOM<i>x</i></b>'s source code
+      generally avoids column 1 in all other cases, column 1 <i>does</i>
+      belong to any multi-line quoted strings.<br>
     </p>
     <h2>Identifiers</h2>
     <p>Identifiers cannot begin with a digit, but otherwise consist of
@@ -2044,7 +2223,6 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       any of the characters @ _ # $.&nbsp; For example, @_26$8ab# is a
       legal name for a variable. </p>
     <p>Identifiers cannot exceed 256 characters in length. </p>
-    <p></p>
     <h2><a name="datatypes"></a>The Basic XPL Datatypes</h2>
     <p>There are only three basic datatypes:<br>
     </p>
@@ -2067,7 +2245,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       </li>
       <li><font color="#663333"><code>BIT(<i>n</i>)</code></font>, where
         <i><font color="#663333"><code>n</code></font></i> is from 1 to
-        2048, is an <font color="#663333"><code>n</code></font>-bit
+        2048, is an <i><font color="#663333"><code>n</code></font></i>-bit
+
+
+
         object.&nbsp; The amount of storage varies by the precision:</li>
       <ul>
         <li><font color="#663333"><code>BIT(1)</code></font> through <font
@@ -2086,9 +2267,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
           the number of bytes needed to store all of the bits, minus 1,
           and 24 bits area pointer to elsewhere in memory, where the
           bytes themselves are stored. Thus, a long <font
-            color="#663300"><code>BIT(n)</code></font> like this uses up
-          4 bytes for the descriptor, plus ⌊(n+7)/8⌋ bytes (5 for n=33
-          through 256 for n=2048) for the data. </li>
+            color="#663300"><code>BIT(<i>n</i>)</code></font> like this
+          uses up 4 bytes for the descriptor, plus ⌊(<i>n</i>+7)/8⌋
+          bytes (5 for <i>n</i>=33 through 256 for <i>n</i>=2048) for
+          the data. </li>
       </ul>
     </ul>
     Regarding the <font color="#663300"><code>BIT(<i>n</i>)</code></font>
@@ -2116,7 +2298,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     </blockquote>
     <p>Or in other words, first you declare <font color="#663300"><code>COMPILING</code></font>
       to have a single bit, and then later you check it to see what the
-      value of its 8th bit is!&nbsp; This particular bit of hilarity
+      value of its 8th bit is!&nbsp; This particular morsel of hilarity
       caused me months worth of trouble.<br>
     </p>
     <p>The storage formats in memory duplicate those that would have
@@ -2170,6 +2352,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         Another, less-generally-useful method would be to use the
         built-in <font color="#663300"><code>SUBSTR</code></font>
         function to retrieve a specific character position as a new <font
@@ -2189,6 +2375,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
     and automatically converts them back and forth between <font
       color="#663333"><code>FIXED</code></font>.&nbsp; The runtime
     library's built-in logical-shift-left and logical-shift-right
@@ -2198,6 +2388,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     as do the logical operators <font color="#663300"><code>&amp;</code></font>,
     <font color="#663300"><code>|</code></font>, and <font
       color="#663300"><code>¬</code></font> (<font color="#663300"><code>~</code></font>),
+
+
+
+
 
 
 
@@ -2277,7 +2471,6 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
         <b>XCOM3</b> to run properly.&nbsp; The packing scheme I
         describe above is the one that worked.</font><br>
     </blockquote>
-    <font size="-1"></font>
     <blockquote><font size="-1"> <b>Aside:</b> If all that wasn't bad
         enough, there's also a trap waiting for you if you're already
         used to doing bit manipulations with logical operators and
@@ -2287,6 +2480,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
         statements.&nbsp; Conditional tests in these statements depend
         only on the <i>least significant</i> bit; i.e., it as if any
         conditional test involves an extra "<font color="#663300"><code>&amp;
+
+
+
+
 
 
 
@@ -2309,12 +2506,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
     frustrations!<br>
     <br>
     Variables in general are <i>supposedly</i> strictly typed, and
     every variable used must have an associated declaration
     statement.&nbsp; This is a particularly comical assertion when you
     consider the effect that I call <i>subscripting sloppiness</i>.&nbsp;
+
+
+
+
 
 
 
@@ -2417,7 +2622,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
           is not a literal for the number -10, but is instead the
           unary-minus operator followed by the literal for the number
           10. In most cases this is a distinction without significance,
-          because <b>XCOM-I</b> (or the original <b>XCOMx</b>)
+          because <b>XCOM-I</b> (or the original <b>XCOM<i>x</i></b>)
           automatically tries to perform all computations that are
           possible at compile time. Nevertheless, this distinction does
           cause some arithmetically-satisfactory expressions to be
@@ -2615,6 +2820,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
             Vectors"<br>
             <br>
           </font></b></div>
@@ -2661,6 +2870,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
               each <font color="#663300"><code>BASED RECORD</code></font>,
               or 1 if it's a <font color="#663300"><code>BASED
                   CHARACTER</code></font> or <font color="#663300"><code>BASED
+
+
+
+
 
 
 
@@ -2776,6 +2989,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         let's consider various space-management macros and/or procedures
         used:<br>
       </font>
@@ -2795,6 +3012,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
         <li><font size="-1" color="#663300"><code>RECORD_TOP(<i>based</i>)</code></font><font
             size="-1">, as you might expect, simply returns <font
               color="#663300"><code>RECORD_USED(<i>based</i>)-1</code></font>.&nbsp;
+
+
+
+
 
 
             I.e., the highest allowed index into the array.<br>
@@ -2860,6 +3081,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
         + 12;</code></font>".&nbsp; <br>
     <br>
     To actually increase the number of elements later, you'd do
@@ -2874,6 +3099,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     into a larger space, if possible.<br>
     <br>
     In a more-complex case, we might have a <font color="#663300"><code>BASED
+
+
+
+
 
 
 
@@ -2912,6 +3141,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
         there any runtime adjustment to the size, as would be expected
         with a </font><font size="-1"><font size="-1"><font size="-1"><font
               color="#663300"><code>BASED</code></font></font></font>.&nbsp;
+
+
+
+
 
 
 
@@ -2992,6 +3225,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
 
 
 
+
+
+
+
     Thus "<font color="#663300"><code>MYMAC(X, 3 * Y)</code></font>"
     expands to "<font color="#663300"><code>X = 3 * Y</code></font>".<br>
     <blockquote><font size="-1"><b>Warning:</b>&nbsp; As with macros in
@@ -2999,7 +3236,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
         hand.&nbsp; <b>XCOM-I</b>, for example, won't detect recursive,
         endlessly-expanding macros.&nbsp; There's also no guarantee when
         multiple macros are in play that <b>XCOM-I</b> will necessarily
-        expand macros in the same order that <b>XCOMx</b> would
+        expand macros in the same order that <b>XCOM<i>x</i></b> would
         have.&nbsp; Neither <i>A Compiler Generator</i> nor
         Intermetrics documentation makes any mention of what that
         ordering should be.<br>
@@ -3082,14 +3319,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       <pre><font color="#663300">LA	1,2(0,0)	[This gets a 2]<br>STC	1,1346(0,11)	[This sticks it into K]<br>STH	1,1344(0,11)	[This sticks it into J]<br>ST	1,1340(0,11)	[This sticks it into I]</font><br></pre>
     </blockquote>
     <p><i>Vis-à-vis</i> Dan's explanation, it doesn't appear to me to be
-      a reliable design choice in <b>XCOMx</b>:&nbsp; what if there are
-      more than 2 assignments on the left-hand side, and if they don't
-      all use the same index <font color="#663300"><code>I</code></font>?&nbsp;
+      a reliable design choice in <b>XCOM<i>x</i></b>:&nbsp; what if
+      there are more than 2 assignments on the left-hand side, and if
+      they don't all use the same index <font color="#663300"><code>I</code></font>?&nbsp;
 
 
 
 
-      What would the order appear to be then?&nbsp; Well, perhaps <b>XCOMx</b>
+
+
+
+
+      What would the order appear to be then?&nbsp; Well, perhaps <b>XCOM<i>x</i></b>
       does something else in that situation.<br>
     </p>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; When I wrote this,
@@ -3144,9 +3385,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     </p>
     <ul>
       <li>The logical operations are indeed bitwise.</li>
-      <li>The preponderance of evidence is that <b>XCOMx</b> did not
-        short circuit. <b>XCOM-I</b> does not at present attempt any
-        short-circuiting.<br>
+      <li>The preponderance of evidence is that <b>XCOM<i>x</i></b> did
+        not short circuit. <b>XCOM-I</b> does not at present attempt
+        any short-circuiting.<br>
       </li>
     </ul>
     <p>As for how I came up with this "information", there are several
@@ -3157,13 +3398,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
       can look at the source code for <i>A Compiler Generator</i>'s XPL
       compiler (<b>XCOM3</b>) as listed in the book, and see if there
       are any hints there. Or we can even examine the IBM 360 object
-      code that <b>XCOMx</b> generates for these operators. (All the
-      while wondering how things came to this, that we have to resort to
-      lame measures like consulting object code to figure out the basic
-      features of the language?)<br>
+      code that <b>XCOM<i>x</i></b> generates for these operators. (All
+      the while wondering how things came to this, that we have to
+      resort to lame measures like consulting object code to figure out
+      the basic features of the language?)<br>
     </p>
     <p>As far as PL/I is concerned, <a moz-do-not-send="true"
 href="https://www.ibm.com/docs/en/SSY2V3_5.1.0/com.ibm.ent.pl1.zos.doc/lrm.pdf">IBM's
+
+
+
+
 
 
 
@@ -3193,6 +3438,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
         z/Architecture Principles of Operation</a> (p. A-8) does tell us
       that the <font color="#663300"><code>NR</code></font> (and its
       cousins <font color="#663300"><code>N</code></font>, <font
@@ -3202,6 +3451,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
     </p>
     <blockquote><font size="-1"><b>Aside:</b> <a moz-do-not-send="true"
 href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-7832-00.pdf#page=940">Figure
+
+
+
+
 
 
 
@@ -3220,9 +3473,13 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
       operator in that example are evaluated, with no attempt at
       checking the value of the first operation before proceeding to the
       second one. On the other hand, that example of object-code
-      generation by <b>XCOMx</b> happens to be for an assignment
+      generation by <b>XCOM<i>x</i></b> happens to be for an assignment
       statement rather than for the conditional expression of an <font
         color="#663300"><code>IF</code></font>, <font color="#663300"><code>DO
+
+
+
+
 
 
 
@@ -3314,6 +3571,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
     <font color="#663300"><code>--xpl</code></font> switch will disable
     the <font color="#663300"><code>COMMON</code></font> memory
     features described in this sections.<br>
@@ -3321,6 +3582,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
     Thus, a program like <b>HAL/S-FC</b> isn't a single application
     program, but rather a set of them:&nbsp; <b>PASS1</b>, <b>FLO</b>,
     <b>OPT</b>, <b>AUX</b>, <b>PASS2</b>, <b>PASS3</b>, and <b>PASS4</b>.&nbsp;
+
+
+
+
 
 
 
@@ -3367,6 +3632,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
           BASED RECORD</code></font> variables. <br>
     </p>
     <p>Each cooperating application running in succession needs to
@@ -3385,12 +3654,20 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
         If <b>BASED</b> variables were always manipulated by an XPL/I
         program as intended by the original compiler design — i.e.,
         allowing SPACELIB to manipulate them via their dope vectors —
         there would be no reason for these restrictions on
         moveability.&nbsp; However, the "virtual memory" system employed
         by <b>HAL/S-FC</b>, as implemented by the files HALINCL/VMEM<i>x</i>.xpl,
+
+
+
+
 
 
 
@@ -3495,6 +3772,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
               in the XPL source code ... plus those few elements of data
               which the operating system needs to communicate to the
               program, such as run-time program options, and a few other
@@ -3530,6 +3811,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
               and <b>XCOM-I</b> has thus made space for their dope
               vectors (region 4), but considered as arrays their sizes
               are 0. At program start, region 6 is empty. But memory
@@ -3555,6 +3840,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
                 size="-1"><font color="#663300"><code>BASED</code></font>
                 should also proceed downward as well.&nbsp; I mean that
                 if we had a decoration such as <font color="#663300"><code>BASED
+
+
+
+
 
 
 
@@ -3890,6 +4179,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
     This is undoubtedly a good strategy, although it limits the total
     number of <font color="#663300"><code>DECLARE</code></font>'d <font
       color="#663300"><code>CHARACTER</code></font> variables to
@@ -3913,6 +4206,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
     Here is what I understand of the differences between how the XPL/I <font
       color="#663333"><code>COMPACTIFY</code></font> has to operate, as
     compared to the description I just gave of the XPL <font
@@ -3930,6 +4227,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
       <li><font color="#663300"><code>DX_SIZE</code></font> gives the
         number of elements of <font color="#663300"><code>DX</code></font>,
         but as it's nowhere <font color="#663300"><code>DECLARE</code></font>'d
+
+
+
+
 
 
 
@@ -3964,6 +4265,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
       In particular:<br>
     </p>
     <ul>
@@ -3986,7 +4291,6 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
           relaxes this requirement.<br>
         </font></p>
     </blockquote>
-    <font size="-1"></font>
     <p>Each of the sample programs I've encountered in standard XPL so
       far has been contained in a single <i>relatively</i>-small file.
       For example, <b>ANALYZER</b> has a little over 1500 lines of
@@ -4014,7 +4318,7 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
           procedure, but the XPL/I source code for the program won't
           explicitly include the library file. That's the compiler's
           responsibility.<br>
-          <b></b></font></p>
+        </font></p>
       <p><font size="-1"><b>Aside:</b> Due to the lack of relevant
           Intermetrics documentation, what I'm about to describe is not
           only speculative on my part, but also represents certain
@@ -4037,6 +4341,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
     Here, <font color="#663300"><i><code>c</code></i></font> is
     supposed to be an upper-case alphabetical letter that represents the
     particular condition that needs to be "true".&nbsp; All conditions,
@@ -4053,7 +4361,7 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
     possible conditions <font color="#663300"><i><code>c</code></i></font>,
     plus 2 additional ones I invented personally:<br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <caption><font size="+1"><b>Preprocessor Conditionals</b></font></caption>
       <tbody>
         <tr>
@@ -4097,10 +4405,11 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
           <td valign="top">For code specific to the Virtual AGC
             Project.&nbsp; This is my own innovation, and of course was
             not used in any legacy code.&nbsp; It is used in those few
-            cases (2 at the present count) in which legacy code is
-            appropriate for modern usage, or XCOM-I has some bug which
-            cannot be overcome, and thus the legacy code needs to be
-            replaced to make the program that's being compiled usable.<br>
+            cases (2 at the present count) in which legacy code XPL[/I]
+            code is not fully appropriate for modern usage, or <b>XCOM-I</b>
+            has some bug which cannot be overcome, and thus the legacy
+            code needs to be replaced to make the program that's being
+            compiled usable.<br>
           </td>
         </tr>
         <tr>
@@ -4128,6 +4437,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
 
 
 
+
+
+
+
           <i>module</i> %/</code></font></h4>
     This type of compiler directive inserts an entire XPL/I source-code
     file, <i>module</i>.xpl, at the current point.&nbsp; It is used for
@@ -4144,6 +4457,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
         ...comment... %/</code></font> directive, which acts the same
     way, and for which my comments are otherwise the same.<br>
     <h4>Compiler Directive Type:&nbsp; <font color="#663300"><code>/**MERGE
+
+
+
+
 
 
 
@@ -4277,6 +4594,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
       passed to the <font color="#663333"><code>PROCEDURE</code></font>,
       but rather that they are just aliases for some set of global
       variables dedicated to the <font color="#663333"><code>PROCEDURE</code></font>.)&nbsp;
+
+
+
+
 
 
 
@@ -4425,12 +4746,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
         Ryer, p. 5-12</a>.) <code><font color="#663300">EXIT</font></code>
       has the following behavior in HAL/S:<br>
     </p>
     <ul>
       <li><font color="#663300"><code><font color="#663300"><code>EXIT</code></font>;</code></font>
         — Exits from the innermost enclosing <font color="#663300"><code>DO
+
+
+
+
 
 
 
@@ -4463,8 +4792,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
           ...</code><code></code></font><br>
       <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -4475,8 +4812,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
           ...</code><code></code></font><br>
       <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -4487,9 +4832,17 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
           ...</code><code></code></font><br>
       <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp; END;</code><code></code></font><br>
       <font color="#cc0000"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -4528,6 +4881,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             WHILE</code></font> or <font color="#663300"><code>DO UNTIL</code></font>
         or <font color="#663300"><code>DO I = X TO Y</code></font> —
         saying that it "repeats" has a pretty clear meaning: XPL/I <font
@@ -4553,6 +4910,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             ... END</code></font> loop that has the attached <i><font
             color="#663300"><code>LABEL</code></font></i>. <i>That's</i>
         the block that it repeats.</li>
@@ -4567,6 +4928,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           color="#663300"><code>DO UNTIL</code></font> or <font
           color="#663300"><code>DO I = X TO Y</code></font>) rather than
         the innermost enclosing <font color="#663300"><code>DO ... END</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -4733,9 +5098,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
       documentation</a> indicates that control toggles could appear also
     appear in the PARM field.&nbsp; <i><b>XCOM-I</b></i><i> does not
-      support either of these features. </i><br>
+      support either of these features.</i>&nbsp; But <b>XCOM</b><b><i>x</i></b>
+    as compiled by <b>XCOM-I</b> does support these features, and
+    they're encountered in legacy XPL code, which is why I'm covering
+    them here.<br>
     <br>
     Control toggles are two-character strings which normally would be
     embedded in program comments.&nbsp; Generally speaking, program
@@ -4744,13 +5116,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     program, they are used to enable certain program features from the
     point they appear until a countermanding control toggle is
     found.&nbsp; The control toggles I'm aware of that were supported by
-    one or another version of <b>XCOMx</b> are listed below.&nbsp; Not
-    all of them are necessarily suitable for command-line usage anyway;
-    for example, the action of "<font color="#663300"><code>$|</code></font>"
-    depends on its particular punch-card column in which it
-    appears.&nbsp; The list below has been merged from <i>A Compiler
-      Generator</i> (p. 148), IR-182-1 (section 13.4), and <b>XCOM45 </b>
-    source code:<br>
+    one or another version of <b>XCOM<i>x</i></b> are listed
+    below.&nbsp; Not all of them are necessarily suitable for
+    command-line usage anyway; for example, the action of "<font
+      color="#663300"><code>$|</code></font>" depends on its particular
+    punch-card column in which it appears.&nbsp; The list below has been
+    merged from <i>A Compiler Generator</i> (p. 148), IR-182-1 (section
+    13.4), and <b>XCOM45 </b> source code:<br>
     <ul>
       <li><font color="#663300"><code>$B</code></font> — Interlist code
         bytes in hexadecimal.</li>
@@ -4822,6 +5194,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
     So for example, if you wanted to use the control toggle <font
       color="#663300"><code>$E</code></font>, but didn't want to modify
     your XPL source code to add it into a comment, you could use the
@@ -4832,11 +5208,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
-      </font><font size="-1">Again, to be clear, <b>XCOM-I</b> itself
+
+
+
+
+      </font><font size="-1">Again, just to be clear, <b>XCOM-I</b> <i>itself</i>
         has no cognizance whatever of control toggles.&nbsp; Control
         toggles, if available, are provided to and used by legacy
-        versions of <b>XCOMx</b> which <b>XCOM-I</b> may have compiled
-        for you!</font> </blockquote>
+        versions of <b>XCOM<i>x</i></b> which <b>XCOM-I</b> may have
+        compiled for you!</font> </blockquote>
     If you're writing <i>new</i> XPL or XPL/I programs, of course, then
     you still may want your own custom command-line options for
     it.&nbsp; <a moz-do-not-send="true" href="#builtin">The built-in
@@ -4857,7 +5237,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
       like user-defined <font color="#663300"><code>PROCEDURE</code></font>s.
+
+
+
+
 
 
 
@@ -4895,7 +5283,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     </p>
     <ul>
     </ul>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <caption><font size="+1"><b>Built-Ins</b></font></caption> <tbody>
         <tr>
           <th valign="bottom" align="center">Library Function<br>
@@ -4922,6 +5310,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           <td valign="middle">A function with numeric value which is the
             (at most) 24-bit absolute address of the variable
             (subscripted or not) <font color="#663300"><code>V</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -4967,10 +5359,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             In this case, <font color="#663300"><code>ADDR</code></font>
             returns the address immediately following <a
               moz-do-not-send="true" href="#common"><font
                 color="#663300"><code>COMMON</code></font> memory</a>.&nbsp;
+
+
+
+
 
 
 
@@ -5010,6 +5410,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 INLINE</code></font>) wants either to branch to that
             address, or else to somehow use the data in another <font
               color="#663300"><code>CALL INLINE</code></font> at that
@@ -5028,6 +5432,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             address -1, the second has address -2, and so on.&nbsp; The
             addresses are local to the <font color="#663300"><code>PROCEDURE</code></font>,
             and restart at -1 in each <font color="#663300"><code>PROCEDURE</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -5096,6 +5504,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Alas, that's not a theoretical question, because such uses
             of <font color="#663300"><code>BYTE</code></font> really
             appear in legacy XPL code.&nbsp; Given the sloppy
@@ -5106,7 +5518,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code, this would almost certainly be a mistake by the
             programmer, because the location of string data in memory is
             dynamically assigned and liable to change during the course
-            of execution, so the programmer can't really know reliable
+            of execution, so the programmer can't really know reliably
             what lies beyond the bounds of a string.&nbsp; Thus my guess
             is that when <font color="#663300"><code>NE</code></font>
             is out of bounds for the string size, it's probably a
@@ -5128,6 +5540,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 Here, <font color="#663300"><code>BYTE(TEXT,CP)</code></font>
                 is out of bounds on the very first iteration of the
                 loop.&nbsp; In C, if the operands of the <font
@@ -5139,7 +5555,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
                 that's mentioned anywhere to my knowledge, and <b>XCOM-I</b>
                 does not attempt it.</font><br>
             </blockquote>
-            Whether or not that's a true in interpretation, in <b>XCOM-I</b>
+            Whether or not that's a true interpretation, in <b>XCOM-I</b>
             the <font color="#663300"><code>BYTE</code></font> function
             returns a value of 0 (corresponding to an EBCDIC <font
               color="#663300"><code>NUL</code></font>) if <font
@@ -5218,6 +5634,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             <a moz-do-not-send="true" href="#MemoryModel">See the
               earlier discussion of this</a>.<br>
           </td>
@@ -5283,6 +5703,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 of <font color="#663300"><code>COREBYTE(8)</code></font>
                 through <font color="#663300"><code>COREBYTE(11)</code></font>.</li>
               <li>and so on.</li>
@@ -5310,6 +5734,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
               <li><font color="#663300"><code>COREWORD(7)</code></font>
                 is illegal.</li>
               <li><font color="#663300"><code>COREWORD(8) </code></font>consists
+
+
+
+
 
 
 
@@ -5371,7 +5799,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             at least not in the text of the book.&nbsp; <b><br>
             </b><br>
             I have been told that <i>A Compiler Generator</i> would
-            have use local time here.&nbsp; The submonitor function
+            have used local time here.&nbsp; The submonitor function
             supplying this value would appear to be called <font
               color="#663300"><code>GETIME</code></font>, and identical
             versions of <font color="#663300"><code>GETIME</code></font>
@@ -5426,6 +5854,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             becomes an easily-accessible array of all the string
             descriptors.&nbsp; This is useful, for example, for
             memory-management procedures like <font color="#663300"><code>COMPACTIFY</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -5495,9 +5927,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             programs.&nbsp; Originally (back in 1970), they were
             attached at runtime via Job Control Language (JCL) <font
               color="#663300"><code>DD</code></font> cards.&nbsp; But
-            with programs compiled via XCOM-I, files are attached at
-            program startup by using the program's command-line
-            switches.&nbsp; The relevant switch is <font
+            with programs compiled via <b>XCOM-I</b>, files are
+            attached at program startup by using the program's
+            command-line switches.&nbsp; The relevant switch is <font
               color="#663300"><code>--raf</code></font>, and multiple
             instances can be used on the same command line.<br>
             <blockquote><font color="#663300"><code>--raf=<i>I,R,N,F</i></code></font><br>
@@ -5566,6 +5998,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             types, or arrays thereof, or pointers to <font
               color="#663300"><code>BASED</code></font> variables — are
             stored in memory at low addresses determined at compile
@@ -5604,7 +6040,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
               color="#663300"><code>BASED</code></font> variables.&nbsp;
             So for either XPL or XPL/I, the <i>initial</i> value of <font
               color="#663300"><code>FREELIMIT</code></font> is the
-            highest memory location used by the program.&nbsp; XCOM-I
+            highest memory location used by the program.&nbsp; <b>XCOM-I</b>
             sets the initial value of <font color="#663300"><code>FREELIMIT</code></font>
             at <font color="#663300"><code>"FFFC00"</code></font>
             (i.e., 1024 bytes below the top of physical memory), in
@@ -5629,7 +6065,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             available for dynamically-allocating new free memory for <font
               color="#663300"><code>BASED</code></font> variables or <font
               color="#663300"><code>CHARACTER</code></font>
-            variables.&nbsp; as the program continues to execute,
+            variables.&nbsp; As the program continues to execute,
             dynamic memory allocation and subsequent memory-freeing may
             cause <font color="#663300"><code>FREEPOINT</code></font>
             to steadily creep upward, and the area from <font
@@ -5649,8 +6085,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code directly into the instruction stream.<br>
           </td>
           <td valign="middle">The applicability of the original
-            functionality has change drastically in the 55 years (as of
-            this writing) since <i>A Compiler Generator</i> was
+            functionality has changed drastically in the 55+ years (as
+            of this writing) since <i>A Compiler Generator</i> was
             written.&nbsp; <b>XCOM-I</b> provides three different
             mechanisms for supporting direct insertion of inline non-XPL
             code, none of which are identical to those in <i>A Compiler
@@ -5668,11 +6104,19 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                     source code</i>');</code></font><br>
             </blockquote>
             to insert an arbitrary string of C-language source code
             directly into the instruction stream.&nbsp; If the string
             contains newline characters (<font color="#663300"><code>'\n'</code></font>),
+
+
+
+
 
 
 
@@ -5696,12 +6140,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Instructions that are not (yet) supported cause compilation
             to abort.<br>
             <br>
             This feature is not normally enabled.&nbsp; You must use the
             <b>XCOM-I</b> command-line switch <font color="#663300"><code>--auto-inline</code></font>
-            to enable it.<br>
+            to enable it.&nbsp; That's because while it sounds
+            wonderful, this feature must be regarded with great
+            suspicion.&nbsp; A better way to think of it is that it will
+            give you an initial guess of an appropriate C translation
+            that you would be wise to carefully inspect and refine.<br>
             <br>
             <b>Support mechanism 3:&nbsp; other</b><br>
             <br>
@@ -5727,6 +6179,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             rather roundabout description, because I don't find it very
             informative as-is to more-modern readers.<br>
             <br>
@@ -5747,17 +6203,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             cards.&nbsp; As such, it expects lines of input to actually
             be 80 columns wide, even if they need to be padded by spaces
             to do so.&nbsp; Not all XPL programs have problems with
-            lines of other lengths have a problem with lines of a
-            different length, but some do.&nbsp; Notably, the original <b>XCOM</b>
-            is one of the programs that behaves incorrectly unless it
-            gets its way.&nbsp; Because of that, <b>XCOM-I</b>'s
+            lines of a different length, but some do.&nbsp; Notably, the
+            original <b>XCOM</b> is one of the programs that behaves
+            incorrectly unless it gets its way.&nbsp; Because of that, <b>XCOM-I</b>'s
+
+
+
             built-in <font color="#663300"><code>INPUT</code></font>
             function transparently truncates lines to 80 columns or pads
-            them 80 columns as necessary.<br>
+            them to 80 columns as necessary.<br>
             <br>
-            <br>
-            There are up to 9 input files attached to the program,
-            numbered, 0 through 9 — yes, I <i>know</i> that's 10 files,
+            There are up to 9 INPUT files attached to the program,
+            numbered 0 through 9 — yes, I <i>know</i> that's 10 files,
             but just keep reading — and you access them via those
             "device numbers".&nbsp; For example,<br>
             <blockquote><font color="#663300"><code>DECLARE CHARACTER C;</code><code><br>
@@ -5831,6 +6288,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
               Data Set</i> (PDS) files can be attached for use by <font
               color="#663300"><code>INPUT</code></font> instead of
             sequential files. A PDS is partitioned into sections, each
@@ -5869,6 +6330,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             is the device number on which the attachment is to be
             made.&nbsp; However, no specific partition is selected for
             reading until the necessary <font color="#663300"><code>MONITOR(2,
+
+
+
+
 
 
 
@@ -5925,6 +6390,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 DD</code></font> sequence, preserving <font
               color="#663300"><code>COMMON</code></font> data and any
             other dynamically allocated space which has not been
@@ -5950,7 +6419,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
           <td valign="middle">The "submonitor" is a separate program
             from whatever XPL or XPL/I program is being compiled and
-            run, providing some kine of system-specific
+            run, providing some kind of system-specific
             functionality.&nbsp; In so far as <i>A Compiler Generator</i>
             is concerned, the submonitor's functionality and even its
             calling sequence was unknowable, and thus the <i>A Compiler
@@ -6016,6 +6485,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             original <b>XCOM</b> computing environment, in which
             SYSPRINT was an actual printer, in <b>XCOM-I</b> SYSPRINT
             by default refers to <font color="#663300"><code>stdout</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -6096,6 +6569,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 Almost!&nbsp; You see, what these overstruck lines are
                 mostly used for is underlining text.&nbsp; In <b>HAL/S-FC</b>,
                 for example, text which has undergone replacement via
@@ -6153,12 +6630,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                   have</i> a first character; i.e., what if it's
                 empty?&nbsp; Well, the obvious response would be that
                 that would be an illegal use.&nbsp; Unfortunately for
                 us, that obvious fact didn't stop some of the coders of
                 <b>HAL/S-FC</b> from strewing their code — perhaps an
                 exaggeration — with assignments <font color="#663300"><code>OUTPUT(1)
+
+
+
+
 
 
 
@@ -6175,23 +6660,29 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             work as you expect.&nbsp; Or at least, <i>I</i> was very
             confused at first.&nbsp; To get past this confusion, you
             need to grasp the following<br>
-            <blockquote><b>Very important point</b>:&nbsp; For the
-              computer systems most people are familiar with today, when
-              we print a line of text, we expect that line of text to
-              end with an implicit advance to the next line; i.e., with
-              a "newline" character, often signified in programming
-              languages by <font color="#663300"><code>'\n'</code></font>.&nbsp;
+            <blockquote><font size="-1"><b>Very important point</b>:&nbsp;
+
+
+                For the computer systems most people are familiar with
+                today, when we print a line of text, we expect that line
+                of text to end with an implicit advance to the next
+                line; i.e., with a "newline" character, often signified
+                in programming languages by <font color="#663300"><code>'\n'</code></font>.&nbsp;
 
 
 
 
-              Whereas in System/360 (and therefore in XPL or XPL/I), the
-              implicit newline occurs <i>prior</i> to the text being
-              printed by the <font color="#663300"><code>OUTPUT</code></font>
-              command.&nbsp; I.e., today we typically ask ourselves
-              "what happens at the <i>end</i> of the line"", whereas
-              for XPL you need to ask "what happens at the <i>beginning</i>
-              of the line?".<br>
+
+
+
+
+                Whereas in System/360 (and therefore in XPL or XPL/I),
+                the implicit newline occurs <i>prior</i> to the text
+                being printed by the <font color="#663300"><code>OUTPUT</code></font>
+                command.&nbsp; I.e., today we typically ask ourselves
+                "what happens at the <i>end</i> of the line"", whereas
+                for XPL you need to ask "what happens at the <i>beginning</i>
+                of the line?".</font><br>
             </blockquote>
             Similarly to <font color="#663300"><code>INPUT</code></font>,
             you can attach additional sequential output files (<font
@@ -6210,9 +6701,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
                   MONITOR(1, <i>N</i>, <i>NAME</i>);</code></font><br>
             </blockquote>
             <font color="#663300"><code>OUTPUT</code></font> commands
-            targets for a PDS don't immediately write data to the
+            targetting a PDS don't immediately write data to the
             physical PDS.&nbsp; Rather, the data being output is
             buffered in memory until the <font color="#663300"><code>MONITOR(1,
+
+
+
+
 
 
 
@@ -6255,6 +6750,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             have had the value <font color="#663300"><code>'SYTSIZE=1800,REFSIZE=20000,LISTING2,$I,$V,$U,$W'</code></font>
             in such a case.<br>
             <br>
@@ -6289,6 +6788,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                 Alternate tricks to defeating substitution could include
                 using the backslash (<font color="#663300"><code>'\'</code></font>)
                 escape character in front of all dollar signs (<font
@@ -6316,7 +6819,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             I find it used only for a couple of <font color="#663300"><code>BASED
+
+
+
+
 
 
 
@@ -6391,8 +6902,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             descriptor.&nbsp; <font color="#663300"><code>NE</code></font>
             should have the form:<br>
             <br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
+            <table cellspacing="2" cellpadding="2" align="center"
+              border="1">
               <tbody>
                 <tr>
                   <th valign="middle" align="center">Length - 1<br>
@@ -6583,6 +7094,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Nearby code also provides the interesting information that
             the XPL version <i>name</i> is "TITAN--XPL".&nbsp; You may
             recall my <a moz-do-not-send="true" href="#titan">earlier
@@ -6658,6 +7173,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
           --help</code></font> for instructions. This little utility can
       either be run in a stand-alone fashion, or else you can <font
         color="#663300"><code>import</code></font> it as a Python
@@ -6672,6 +7191,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         color="#663300"><code>E</code></font> is the exponent, and <font
         color="#663300"><code>F</code></font> is the fraction. (SP
       floating point is the same, but with 3 <font color="#663300"><code>FFFFFFFF</code></font>-groups
+
+
+
+
 
 
 
@@ -6697,11 +7220,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       library's <font color="#663300"><code>MONITOR</code></font>
       functions work, and not how the original <font color="#663300"><code>MONITOR</code></font>
       functions as confined to an IBM 360 runtime environment worked!</p>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" border="1">
       <caption><font size="+1"><b>MONITOR Functions</b></font></caption>
       <tbody>
         <tr>
-          <th valign="bottom" nowrap="nowrap" align="center">MONITOR
+          <th nowrap="nowrap" valign="bottom" align="center">MONITOR
             Call<br>
           </th>
           <th valign="bottom">Description From Original Documentation<br>
@@ -6710,7 +7233,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </th>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(0,<i>n</i>);<br>
               </font></code></td>
           <td valign="middle">Closes output file <i><font
@@ -6723,11 +7246,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(1,<i>n</i>,<i>name</i>);<br>
               </font></code></td>
           <td valign="middle">Assumes that a PDS is attached to output
             device <font color="#663300"><code><i>n</i></code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -6746,11 +7273,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(2,<i>n</i>,<i>name</i>);<br>
               </font></code></td>
           <td valign="middle">Assumes that a PDS is attached to input
             device <font color="#663300"><code><i>n</i></code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -6773,6 +7304,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             A PDS called "INCLUDE" is normally attached to input device
             4, while either "INCLUDE" or "OUTPUT6" is normally attached
             to input device 7.&nbsp; But member <code><font
@@ -6783,7 +7318,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(3,<i>n</i>);<br>
               </font></code></td>
           <td valign="middle">Closes input file <i><font
@@ -6794,7 +7329,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             use with <font color="#663300"><code>FILE(<i>n</i>)</code></font>.</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(4,<i>n</i>,<i>b</i>);<br>
               </font></code></td>
           <td valign="middle">Changes the record size of random-access
@@ -6806,7 +7341,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(5,ADDR(DW));<br>
               </font></code></td>
           <td valign="middle">Sets the location of the double-word work
@@ -6833,8 +7368,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
                 programs.<br>
                 <br>
                 In legacy HAL/S code, I've found that at least 14 words
-                of memory are needed for this work area.&nbsp; In the
-                XCOM-I implementation, the </font></font><font
+                of memory are needed for this work area.&nbsp; In the <b>
+                  XCOM-I</b> implementation, the </font></font><font
               color="#663300"><font color="#000000"><code><font
                     color="#663300">MONITOR(5)</font></code> call is
                 rejected within 14 words of the end of memory.</font></font><code><font
@@ -6842,7 +7377,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
               </font></code></td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(6,ADDR(<i>basedVariable</i>),<i>n</i>);<br>
               </font></code></td>
           <td valign="middle">Allocates <font color="#663300"><i>n</i></font>
@@ -6926,7 +7461,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(7,ADDR(<i>basedVariable</i>),<i>n</i>);<br>
               </font></code></td>
           <td valign="middle">Frees memory previously allocated via <code><font
@@ -6935,7 +7470,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             However, <code><font color="#663300"><i>basedVariable</i></font></code>'s
+
+
+
+
 
 
 
@@ -6963,7 +7506,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(8, <i>dev</i>, <i>filenum</i>);<br>
               </font></code></td>
           <td valign="middle">Set PDS DDNAME.<br>
@@ -6973,6 +7516,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             changed after the only documentation of it (in IR-182-1) was
             produced, leaving us to try to infer its usage from context
             in the <b>HAL/S-FC</b> and <code><font color="#663300">MONITOR</font></code>'s
+
+
+
+
 
 
 
@@ -7006,6 +7553,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Recall that <font color="#663300"><code>"80000000"</code></font>
             is XPL-speak for 0x80000000.&nbsp; So the <i><font
                 color="#663300"><code>filenum</code></font></i> is
@@ -7032,8 +7583,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             something specifically do with Partitioned Data Sets
             (PDS).&nbsp; It's difficult to see why that would be so; I
             think it merely reflects the specific usage in HAL/S-FC,
-            which indeed relates to PDS.&nbsp; The XCOM-I runtime
-            library allows it to be used for and PDS <i>or</i>
+            which indeed relates to PDS.&nbsp; The <b>XCOM-I</b>
+            runtime library allows it to be used for a PDS <i>or</i> a
             sequential dataset.&nbsp; It is not applicable to
             random-access files.<br>
             <br>
@@ -7044,17 +7595,25 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             The description above has to be applied instead to
             command-line switches in a hopefully-obvious way.<br>
             <blockquote> </blockquote>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(9,<i>op</i>);<br>
               </font></code></td>
           <td valign="middle">Performs floating point evaluation as
             specified by value of <code><font color="#663300"><i>op</i></font></code>.&nbsp;
+
+
+
+
 
 
 
@@ -7069,8 +7628,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             <br>
             The values of <code><font color="#663300"><i>op</i></font></code>
             are:<br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
+            <table cellspacing="2" cellpadding="2" align="center"
+              border="1">
               <tbody>
                 <tr>
                   <th valign="top">OP<br>
@@ -7169,7 +7728,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(10,<i>string</i>);<br>
               </font></code></td>
           <td valign="middle">Performs character to DP floating-point
@@ -7190,7 +7749,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(11);<br>
               </font></code></td>
           <td valign="middle">No-op.<br>
@@ -7199,7 +7758,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>string</i>=MONITOR(12,<i>p</i>);<br>
               </font></code></td>
           <td valign="middle">Converts floating-point number in the
@@ -7232,7 +7791,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>address</i>=MONITOR(13,<i>name</i>);<br>
               </font></code></td>
           <td valign="middle">Performs DELETE of current option
@@ -7320,6 +7879,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
                     is a <font color="#663300"><code>FIXED</code></font>
                     value (called </font></font><font color="#663300"><font
                     color="#000000"><font color="#663300"><code>OPTIONS_CODE</code></font>
@@ -7383,7 +7946,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(14,<i>n</i>,<i>a</i>);<br>
               </font></code></td>
           <td valign="middle">For creating Simulation Data Files.&nbsp;
@@ -7392,8 +7955,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
                 color="#663300"><i>a</i></font></code> supplies
             supplementary data:<br>
             <br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
+            <table cellspacing="2" cellpadding="2" align="center"
+              border="1">
               <tbody>
                 <tr>
                   <th valign="top"><code><font color="#663300"><i>n</i></font></code></th>
@@ -7429,9 +7992,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             </table>
             <br>
           </td>
-          <td valign="middle">Unfortunately, the only documentation of
-            this is from 1976, and it may be somewhat preliminary in
-            nature.<br>
+          <td valign="middle">(Note that simulation data files are not
+            presently supported; they relate to <b>PASS3</b> and <b>PASS4</b>
+            of the HAL/S compiler, and those passes are not yet
+            supported.)<br>
+            <br>
+            Unfortunately, the only documentation of this is from 1976,
+            and it may be somewhat preliminary in nature.<br>
             <br>
             For example, from the source code of <b>HALS/FC</b> (see
             the <font color="#663300"><code>OUTPUT_SDF</code></font>
@@ -7468,7 +8035,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>I</i>=MONITOR(15);<br>
               </font></code></td>
           <td valign="middle">Returns Revision Level and Catenation
@@ -7482,7 +8049,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(16,<i>n</i>);<br>
               </font></code></td>
           <td valign="middle">Sets flags in byte to be returned as high
@@ -7498,7 +8065,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(17,name);<br>
               </font></code></td>
           <td valign="middle">Causes <i><code><font color="#663300">name</font></code></i>
@@ -7510,7 +8077,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>T</i>=MONITOR(18);<br>
               </font></code></td>
           <td valign="middle">Returns elapsed CPU time since beginning
@@ -7520,7 +8087,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(19,<i>addressList</i>,<i>sizeList</i>);<br>
               </font></code></td>
           <td valign="middle">This is an extended form of <font
@@ -7536,7 +8103,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(20,</font></code><code><font
                 color="#663300"><code><font color="#663300"><i>addressList</i>,<i>sizeList</i></font></code>);<br>
               </font></code></td>
@@ -7550,7 +8117,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             function. </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>I</i>=MONITOR(21);<br>
               </font></code></td>
           <td valign="middle">Returns remaining amount of memory (in
@@ -7568,7 +8135,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i><code><font color="#663300"><code><font
                           color="#663300"><i>F</i></font></code></font></code></i><code><font
                     color="#663300"><code><font color="#663300">=MONITOR(22,0,<i>n</i><i><sub>2</sub></i>);</font></code></font></code><i><code><font
@@ -7577,10 +8144,19 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             <code><font color="#663300"><code></code> </font></code></td>
           <td valign="middle">Calls SDF access package.<br>
           </td>
-          <td valign="middle">SDF stands for Simulation Data File.&nbsp;
-            The "SDF access package" (SDFPKG) was a separate program,
-            similar to the submonitor itself, with which the XPL/I
-            program could communicate via <font color="#663300"><code>MONITOR(22)</code></font>.&nbsp;
+          <td valign="middle">(Note that simulation data files are not
+            presently supported; they relate to <b>PASS3</b> and <b>PASS4</b>
+            of the HAL/S compiler, and those passes are not yet
+            supported.)<br>
+            <br>
+            SDF stands for Simulation Data File.&nbsp; The "SDF access
+            package" (SDFPKG) was a separate program, similar to the
+            submonitor itself, with which the XPL/I program could
+            communicate via <font color="#663300"><code>MONITOR(22)</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -7655,7 +8231,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>descriptor</i>=MONITOR(23);<br>
               </font></code></td>
           <td valign="middle">Returns the <code><font color="#663300"><i>descriptor</i></font></code>
@@ -7670,10 +8246,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             version code, printed on each of the report pages printed by
             <b>XCOM</b> (or now, <b>XCOM-I</b>), is given by this ID
             string, and that the ID string is provided to each pass of <b>HAL/S-FC</b>
             via a call to <code><font color="#663300">MONITOR(23)</font></code>.&nbsp;
+
+
+
+
 
 
 
@@ -7695,7 +8279,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(24)<br>
               </font></code></td>
           <td valign="middle">Read a block of a load module.<br>
@@ -7704,7 +8288,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(25)<br>
               </font></code></td>
           <td valign="middle">Read a mass-memory load block.<br>
@@ -7713,7 +8297,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(26)<br>
               </font></code></td>
           <td valign="middle">Read a MAF (memory analysis file) block<br>
@@ -7722,7 +8306,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(27)<br>
               </font></code></td>
           <td valign="middle">Write a MAF block<br>
@@ -7731,7 +8315,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(28)<br>
               </font></code></td>
           <td valign="middle">Link to dump analysis service routine<br>
@@ -7740,7 +8324,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(29)<br>
               </font></code></td>
           <td valign="middle">Return current page number<br>
@@ -7749,7 +8333,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(30)<br>
               </font></code></td>
           <td valign="middle">Return JFCB as string<br>
@@ -7758,7 +8342,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">CALL MONITOR(31</font></code><code><font
                 color="#663300"><code><font color="#663300">,<i>n</i></font></code>,<i>recnum</i>)<br>
               </font></code></td>
@@ -7772,6 +8356,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
               color="#663300"><code>VMEMSRV</code></font> in <a
               moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/MONITOR.ASM/MONITOR.bal">MONITOR.bal</a>),
+
+
+
+
 
 
 
@@ -7791,6 +8379,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
                 The default file number is initially 2.<br>
                 <font color="#663300"><code></code></font></li>
               <li><font color="#663300"><code>MONITOR(31,<i>bufferAddress</i>,<i>recnum</i>)</code></font>
@@ -7799,6 +8391,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                 that reads record <font color="#663300"><code><i>recnum</i></code></font>
                 from the default file, into a memory buffer at address <font
                   color="#663300"><code><i>bufferAddress</i></code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -7832,7 +8428,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300"><i>F</i>=MONITOR(32)<br>
               </font></code></td>
           <td valign="middle">Find out subpool minimum size<br>
@@ -7852,7 +8448,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><code><font
+          <td nowrap="nowrap" valign="middle" align="center"><code><font
                 color="#663300">MONITOR(33)<br>
               </font></code></td>
           <td valign="middle">Find out FILE max REC# and BLKSIZ<br>
@@ -7880,9 +8476,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     used. It is merely necessary when compiling your XPL program to use
     the appropriate command-line switches for incorporating debugging
     information into the executable.&nbsp; There are actually two
-    aspects to this:&nbsp; Including the debugging aids provided by
-    XCOM-I, and including the debugging information appropriate for
-    whatever debugger software you're using.&nbsp; If you're using GNU <b>gdb</b>
+    aspects to this:&nbsp; Including the debugging aids provided by <b>XCOM-I</b>,
+    and including the debugging information appropriate for whatever
+    debugger software you're using.&nbsp; If you're using GNU <b>gdb</b>
     or any debugger than accepts <b>gdb</b>-style data to debug your
     program then, and for the sake of discussion ignoring any other
     options you chose to use (such as <font color="#663300"><code>CC=clang</code></font>),
@@ -7890,34 +8486,61 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
     you'd compile your XPL program like this:<br>
     <blockquote>
       <pre><font color="#663300">XCOM-I.py --xpl --debugging-aid <i>SOURCEFILE</i>.xpl<br>make EXTRA=-ggdb -C <i>SOURCEFILE</i></font></pre>
+      <b><font size="-1">Aside:</font></b><font size="-1">&nbsp; A
+        particular class of XPL/I programs that one might wish to debug
+        — or at any rate that <i>I</i> unsurprisingly find myself
+        debugging — consists of the executables for the individual
+        passes of the HAL/S compiler, <b>HALSFC</b>, such as <b>HALSFC-PASS1</b>
+        and <b>HALSFC-PASS2</b>.&nbsp; <a moz-do-not-send="true"
+          href="#halsfc">Building <b>HALSFC</b> in a "production"
+          configuration has been described earlier</a>.&nbsp; A typical
+        modification of the production build command that accommodates C
+        debugging might be<br>
+      </font>
+      <blockquote>
+        <pre><font size="-1">make -s XEXTRA=--quiet EXTRA=-ggdb all regression</font><br></pre>
+      </blockquote>
     </blockquote>
-    However, the C compiler undoubtedly has other debugging options as
-    well, which you might use in place of <font color="#663300"><code>-ggdb</code></font>.&nbsp;
+    The C compiler undoubtedly has other debugging options as well,
+    which you might use in place of <font color="#663300"><code>-ggdb</code></font>.&nbsp;
+
+
+
+
 
 
 
 
 
     I won't provide advice, since if you want to do this in the first
-    place, it's very likely you know more about it than I do.&nbsp; You
+    place it's very likely you know more about it than I do.&nbsp; You
     can, of course, use graphical-interface front-ends for <b>gdb</b>
     as well, at least in Linux and Mac OS, though I'm at a loss as to
     how to do this in Windows because of probably having to work under
-    MSYS2.&nbsp; There is a primitive but useful interface that works in
-    MSYS2, provided directly by <b>gdb</b> (namely <font
-      color="#663300"><code>gdb --tui</code></font>), that's a step up
-    from its default command-line-style interface.&nbsp; And there are
-    reports of people debugging MSYS2-generated programs is Visual
-    Studio, although the descriptions of how to do it are greek to me.<br>
+    MSYS2.&nbsp; There is a primitive but useful debugging interface
+    that works in MSYS2, provided directly by <b>gdb</b> itself (namely
+    <font color="#663300"><code>gdb --tui</code></font>), that's a step
+    up from its default command-line-style interface.&nbsp; And there
+    are reports of people debugging MSYS2-generated programs is Visual
+    Studio, although the descriptions of how to do it are geek to
+    me.&nbsp; (Ha!&nbsp; See what I did there?)<br>
     <br>
     But debugging XPL code via its C translation is not as convenient as
     using a native XPL debugger would be.&nbsp; The principal difficulty
     in debugging the code in C vs in XPL is that <b>XCOM-I</b> doesn't
     model XPL variables as C variables, but rather as numerical
     locations in a byte-array called <font color="#663300"><code>memory</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -7971,6 +8594,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         But expressions for the subscripts are not understood.<br>
       </li>
       <li><font color="#663300"><code>int ADDR(char *base, int bIndex,
@@ -7995,7 +8622,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
       <br>
+    </p>
+    <p>Mangling?&nbsp; Shmangling!&nbsp; What the heck are mangled XPL
+      names?<br>
     </p>
     <p>First, recall that XPL is case-insensitive in so far as
       identifiers (and keywords are concerned), therefore:<br>
@@ -8106,15 +8740,19 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
     have such inlined code.&nbsp; However good <b>XCOM-I</b> may (or
     may not) be at translating XPL or XPL/I to C, it is not capable of
     inferring the intent of arbitrary assembly language, nor of
-    translating such code into C with the level of reliability required
-    for automating it.&nbsp;&nbsp; While it can <i>help</i> with such
-    translation (as described in the <a moz-do-not-send="true"
-      href="#inlines">next section</a>), some amount of manual
-    intervention is still required on the part of the coder.&nbsp; The
-    basic principles underlying the framework provided for that are
-    discussed in this section.<br>
+    translating such code into C with the full level of reliability
+    required for automating it.&nbsp;&nbsp; While it can <i>help</i>
+    with such translation (as described in the <a
+      moz-do-not-send="true" href="#inlines">next section</a>), some
+    amount of manual intervention is still required on the part of the
+    coder.&nbsp; The basic principles underlying the framework provided
+    for that are discussed in this section.<br>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; In reality, such
         inlined code is numerical in nature, and consists of IBM 360 <i>machine
+
+
+
+
 
 
 
@@ -8137,9 +8775,11 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
     adequate.&nbsp; However, the Virtual AGC Project aims to provide a
     way to work with legacy code — i.e., code from the past, rather than
     newly-written code —, and that implies being able to compile such
-    source code as-is, without syntactical or functional modification to
-    source code.&nbsp; Which means that from our point of view,
-    irreversible modification of legacy source code is unacceptable.<br>
+    source code as-is, without syntactical or functional butchering of
+    the original source code with "fixes" that may or may not be valid
+    from somebody else's point of view.&nbsp; Which means that from <i>our</i>
+    point of view, irreversible modification of legacy source code is
+    unacceptable.<br>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; It is, of course,
         arguable the extent to which modifications are acceptable.&nbsp;
         The Virtual AGC Project allows insertion of modern comments, as
@@ -8199,8 +8839,16 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
 
 
 
+
+
+
+
     Don't do that!<br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+
 
 
 
@@ -8219,6 +8867,10 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
 
 
 
+
+
+
+
             INLINE</code></font> statement in the case I mention even
         comes from the </font><font size="-1"><font size="-1"><font
             color="#663300"><code>INLINE</code></font></font> at all,
@@ -8228,7 +8880,15 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
 
 
 
+
+
+
+
             INLINE</code></font>s terminated by a <font color="#663300"><code>RETURN
+
+
+
+
 
 
 
@@ -8252,6 +8912,10 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
         rather than simply <font color="#663300"><code>return</code></font>,
         or </font><font size="-1"><font size="-1"><font color="#663300"><code>RETURN(<i>something</i>)</code></font></font>
         rather than <font color="#663300"><code>return <i>something</i></code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -8302,11 +8966,15 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
     the <font color="#663300"><code>CALL INLINE</code></font> simply
     remains a comment.&nbsp; In principle, you could have a different
     patch file for each <font color="#663300"><code>CALL INLINE</code></font>,
-    but it's usually more practical and more aesthetically pleasing to
-    have a single patch file for each contiguous block of <font
-      color="#663300"><code>CALL INLINE</code></font> statements.&nbsp;
-    <br>
+    but it's usually more practical, more maintainable, and more
+    aesthetically pleasing to have a single patch file for each
+    contiguous block of <font color="#663300"><code>CALL INLINE</code></font>
+    statements.&nbsp; <br>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
+
+
 
 
 
@@ -8344,7 +9012,15 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
 
 
 
+
+
+
+
         begins to differ, switching to the patch<i>N</i>p.c/patch<i>N</i>b.c
+
+
+
+
 
 
 
@@ -8392,6 +9068,10 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
       assistance in writing patch files for IBM System/360 inline
       code.&nbsp; In brief, if you run <b>XCOM-I</b> with the
       command-line switch <font color="#663300"><code>--guess=-1</code></font>,&nbsp;
+
+
+
+
 
 
 
@@ -8530,16 +9210,20 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
         problems, and that involves the IBM 360 instructions which
         perform "unnormalized" floating-point arithmetic.&nbsp; Recall
         that floating-point numbers have two parts, the <i>exponent</i>
-        and the <i>significand</i>.&nbsp; For example, in 3.14156×<sup><super>10</super></sup>,
+        and the <i>significand</i>.&nbsp; For example, in 3.14156×10<sup><super>10</super></sup>,
         the exponent is 10 and the significand is 3.14156. &nbsp; Almost
         all floating-point arithmetic on the IBM 360 is in "normalized"
         form, which means that the exponent and significant are adjusted
         so as to produce the maximum precision (number of bits) in the
         significand, given the number of bytes of storage allocated for
         the number in memory and the nature of the format used for
-        storage.&nbsp; Thus in principle, 3.14156×<sup><super>10</super></sup>
-        is more precise than 0.03142×<sup><super>12</super></sup>, and
-        is less precise than 314.15654×<sup><super>8</super></sup>.&nbsp;
+        storage.&nbsp; Thus in principle, 3.14156×10<sup><super>10</super></sup>
+        is more precise than 0.03142×10<sup><super>12</super></sup>, and
+        is less precise than 314.15654×10<sup><super>8</super></sup>.&nbsp;
+
+
+
+
 
 
 
@@ -8549,6 +9233,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
         field is 7 bits wide and represents a power of 64 (rather than
         10), and is offset by 64.&nbsp; I.e., if the exponent is (say)
         E, then the powers represented are 64<sup>-64</sup> through 64<sup>+63</sup>.&nbsp;
+
+
+
+
 
 
 
@@ -8672,6 +9360,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
 
 
 
+
+
+
+
           My advice to you is this:&nbsp; If you're writing new XPL
           code, <i>don't</i> try to subvert my hack with perverted
           usage of the </font><font size="-1"><font size="-1"><font
@@ -8689,7 +9381,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
     Let's get the question of IBM 360 calling conventions out of the
     way.&nbsp; The conventional usage of the IBM 360 CPU's general
     registers in calling subroutines, as I understand it, is summarized
-    in the bullet list below.&nbsp; But I've added a couple of
+    in the bullet list below.&nbsp; But I've documented a couple of
     apparently non-traditional extensions or differences (highlighted in
     <font color="#006600">green</font>) that I've inferred from some of
     the <font color="#663300"><code>CALL INLINE</code></font>
@@ -8730,6 +9422,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
 
 
 
+
+
+
+
       Such an inline can be translated into C as:<br>
     </p>
     <blockquote>
@@ -8743,6 +9439,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
     </blockquote>
     <font color="#663300"><font color="#000000">Or </font></font><font
       color="#663300"><font color="#000000"><font color="#663300"><code>CALL
+
+
+
+
 
 
 
@@ -8764,13 +9464,17 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
 
 
 
+
+
+
+
         INLINE</code></font> statements — though unfortunately not <i>all</i>
     of them — can be handled using these simple maneuvers, <b>XCOM-I</b>
     has a built-in tool that can create guessed versions of patch-files
     for you, in which most of the <font color="#663300"><code>INLINE</code></font>s
     have been translated, but with the ones that were too difficult for
     <b>XCOM-I</b> to handle left in the draft files for you to manually
-    perfect.<br>
+    deal with.<br>
     <br>
     To use this tool, simply run <b>XCOM-I</b> as normal, using either
     or neither of the <font color="#663300"><code>--cond=P</code></font>
@@ -8778,6 +9482,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
     the <font color="#663300"><code>--guess=...</code></font> switch as
     I summarized it earlier.&nbsp; When doing so, in addition to the
     normal compilation outputs, files named guess<i>N</i>.c, guess<i>N</i>p.c,
+
+
+
+
 
 
 
@@ -8824,6 +9532,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
         binary representation of that target instruction, which makes
         the task a lot harder for you, but in the XPL I've seen it will
         almost always be represented as a <font color="#663300"><code>CALL
+
+
+
+
 
 
 
@@ -8947,6 +9659,10 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
 
 
 
+
+
+
+
                       INLINE</code></font> statement.&nbsp; The </font></font></font></font></font></font><font
         size="-1"><font size="-1"><font size="-1"><font size="-1"><font
                 size="-1"><font size="-1"><font size="-1"><font
@@ -9050,7 +9766,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-08-18<br>
+          2026-01-27<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
