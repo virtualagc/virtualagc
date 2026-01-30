@@ -14,14 +14,6 @@
 ::      because the character '&' in the filename introduces big problems in 
 ::      Windows that I didn't feel like working around.  And there just seemed 
 ::      to be no point in doing so.  Perhaps at some point I will.
-::   3. The date/time format used in the name of the results folder differs.
-::      That's because obtaining a date/time in a uniform format across
-::      locale's is a nightmare I didn't want to deal with, so in Windows I've
-::      just kept whateve format the system felt like feeding me (although
-::      eliminating the / and : characters).  I can easily produce any format
-::      I like in the BASH script, but if I can't match it to the format
-::      HALSFC.bat is going to produce, then what's the point of using anything
-::      other than the default?
 
 for /f "tokens=*" %%i in ('where HAL_S_FC.py') do set HAL_S_FC=%%i
 for /f "tokens=*" %%i in ('where HALSFC-PASS1.exe') do set "ERRORLIB=%%~piERRORLIB"

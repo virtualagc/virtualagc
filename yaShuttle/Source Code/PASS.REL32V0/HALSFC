@@ -28,6 +28,9 @@ rm $FILES_PORTED $FILES_LOCAL -rf &>/dev/null
 
 # Move all generated files to a *.results folder.
 function move_all {
+	# The format of the timestamp has been chosen to match the format
+	# used by the Windows %DATE% and %TIME% variables, though I didn't
+	# bother trying to calculate fractions of a second.
 	results="HALSFC $HALS_FILE `date '+%a %m-%d-%Y %k-%M-%S.00'`.results"
 	mkdir "$results" &>/dev/null
 	echo "$@" >"$results"/comment.txt
