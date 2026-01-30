@@ -64,13 +64,18 @@ goto :main
 	copy "%HALS_FILE%" "%results%" >NUL 2>NUL
 	exit /B 0
 
-:: The arguments comprise an error message.
+:: The arguments comprise an error message, which is printed, and then the
+:: entire script is exited with an error code of 1.
 :error_exit
-	echo "%*"
+	echo %*
 	call :move_all %*: %COMMAND_LINE%
-	echo "Results in %results%"
-	()
+	echo Results in "%results%"
+	call :__ErrorExit 2>NUL
 	exit /B 1
+:: The actual exit from the script is caused by the syntax error below.
+:__ErrorExit
+	()
+	exit /B 0
 
 :main
 
