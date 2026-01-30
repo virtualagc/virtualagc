@@ -69,6 +69,7 @@ goto :main
 	echo "%*"
 	call :move_all %*: %COMMAND_LINE%
 	echo "Results in %results%"
+	()
 	exit /B 1
 
 :main
@@ -130,14 +131,14 @@ if "%TARGET%". == "BFS". (
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass1.rpt
-if errorlevel 1 ( call :error_exit "Aborted after PASS1" )
+if errorlevel 1 ( call :error_exit Aborted after PASS1 )
 
 set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CPU TIME FOR^|TODAY IS^|COMPOOL.*VERSION)
 ::echo IGNORE_LINES=%IGNORE_LINES%
 if %TEST%x == TESTx (
 echo ======================================================
-( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || call :error_exit "Utilities egrep/diff unavailable"
-python "%HAL_S_FC%" %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit "Failed PASS1 cross-comparison test"
+( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || call :error_exit Utilities egrep/diff unavailable
+python "%HAL_S_FC%" %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
 for %%i in ( %FILES_PORTED:"=% ) do copy %ported%..\%%i . >NUL 2>NUL
 egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt
@@ -154,7 +155,7 @@ echo ======================================================
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >flo.rpt
-if errorlevel 1 ( call :error_exit "Aborted after FLO" )
+if errorlevel 1 ( call :error_exit Aborted after FLO )
 
 
 %OPT% ^
@@ -165,7 +166,7 @@ if errorlevel 1 ( call :error_exit "Aborted after FLO" )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >opt.rpt
-if errorlevel 1 ( call :error_exit "Aborted after OPT" )
+if errorlevel 1 ( call :error_exit Aborted after OPT )
 
 %AUXP% ^
         --commoni=COMMON2.out ^
@@ -175,7 +176,7 @@ if errorlevel 1 ( call :error_exit "Aborted after OPT" )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >auxp.rpt
-if errorlevel 1 ( call :error_exit "Aborted after AUXP" )
+if errorlevel 1 ( call :error_exit Aborted after AUXP )
 
 
 %PASS2% ^
@@ -191,7 +192,7 @@ if errorlevel 1 ( call :error_exit "Aborted after AUXP" )
         --raf=B,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass2.rpt
-if errorlevel 1 ( call :error_exit "Aborted after PASS2" )
+if errorlevel 1 ( call :error_exit Aborted after PASS2 )
 
 :: PASS3 and PASS4 aren't ready for use yet.
 
