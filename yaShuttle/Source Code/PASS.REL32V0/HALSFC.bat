@@ -65,7 +65,14 @@ goto :main
 	exit /B 0
 
 :: The arguments comprise an error message, which is printed, and then the
-:: entire script is exited with an error code of 1.
+:: entire script is exited with an error code of 1.  The trick for aborting
+:: a batch script from within a function came from here:
+:: https://stackoverflow.com/questions/3227796/exit-batch-script-from-inside-a-function.
+:: Note that this particular trick apparently aborts all parent scripts that
+:: run HALSFC.bat as well.  The same hyperlink points out a different trick 
+:: that aborts *only* HALSFC.bat but remains within its parent scripts, but that
+:: trick is pretty incomprehensible in comparison to this one, and I see no
+:: great need for it, so I haven't implemented it here.
 :error_exit
 	echo %*
 	call :move_all %*: %COMMAND_LINE%
