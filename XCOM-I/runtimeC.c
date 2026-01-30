@@ -11,6 +11,7 @@
  *                              bit_t, and lots of char*.
  *              2024-06-19 RSB  Split off some functions not used in "production"
  *                              into debuggingAid.c.
+ *              2026-01-30 RSB  Support for non-zero LINK() exit code.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -3568,6 +3569,7 @@ EXIT(void) {
   exit(10);
 }
 
+int exitCodeLINK = 0;
 void
 LINK(void) {
 #ifndef STANDARD_XPL
@@ -3575,7 +3577,7 @@ LINK(void) {
 #endif
   //OUTPUT(0, nextBuffer());
   //if (LINE_COUNT) printf("\n");
-  exit(0);
+  exit(exitCodeLINK);
 }
 
 descriptor_t *

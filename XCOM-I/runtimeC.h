@@ -8,6 +8,7 @@
  * Mods:        2024-03-28 RSB  Began.
  *              2024-05-23 RSB  Reworked so that descriptor_t replaces string_t,
  *                              bit_t, and lots of char*.
+ *              2026-01-30 RSB  Support for non-zero LINK() exit code.
  */
 
 #ifndef RUNTIMEC_H
@@ -650,6 +651,7 @@ FREEBASE2(int32_t);
 void
 EXIT(void);
 
+extern int exitCodeLINK; // For override of default (0) exit() code for LINK().
 void
 LINK(void);
 

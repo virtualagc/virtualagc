@@ -8,6 +8,10 @@ Purpose:    This is the code generator for XCOM-I.py which targets the
             language C.
 Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-03-27 RSB  Began.
+            2026-01-30 RSB  Fixed the use of `RETURN expression;` outside
+                            of PROCEDUREs.  In particular, HALSFC-PASS1
+                            should now be able to abort with a proper exit
+                            code upon error.
 '''
 
 import sys
@@ -2281,6 +2285,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if standardXPL:
                     print(indent2 + "exit(%s);" % source)
                 else:
+                    print(indent2 + "exitCodeLINK = %s;" % source)
                     print(indent2 + "RECORDuLINK(0);")
                 print(indent + "}")
                 return;
