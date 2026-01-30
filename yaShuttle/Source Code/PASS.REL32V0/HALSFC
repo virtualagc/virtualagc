@@ -28,7 +28,7 @@ rm $FILES_PORTED $FILES_LOCAL -rf &>/dev/null
 
 # Move all generated files to a *.results folder.
 function move_all {
-	results="HALSFC $HALS_FILE `date`.results"
+	results="HALSFC $HALS_FILE `date '+%a %m-%d-%Y %k-%M-%S.00'`.results"
 	mkdir "$results" &>/dev/null
 	echo "$@" >"$results"/comment.txt
 	mv $FILES_PORTED $FILES_LOCAL "$results" &>/dev/null
