@@ -16,15 +16,16 @@ COMMAND_LINE="$@"
 FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 FILES_PORTED="$FILES_PORTED &&TEMPLIB.json &&TEMPINC.json SOURCECO.txt"
 FILES_PORTED="$FILES_PORTED LIT_CHAR.bin SYM_TAB.json LISTING2.txt"
-FILES_PORTED="$FILES_PORTED CROSS_REF.json TEMPLIB.json"
-FILES_LOCAL="listing2.txt TEMPLIB TEMPLIBB cards.bin COMMON0.out halmat.bin"
+FILES_PORTED="$FILES_PORTED CROSS_REF.json"
+FILES_LOCAL="listing2.txt COMMON0.out halmat.bin"
 FILES_LOCAL="$FILES_LOCAL litfile.bin vmem.bin COMMON1.out COMMON2.out"
 FILES_LOCAL="$FILES_LOCAL COMMON3.out COMMON4.out auxmat.bin objcode.bin"
-FILES_LOCAL="$FILES_LOCAL optmat.bin pass1.rpt pass1p.rpt pass1A.rpt"
-FILES_LOCAL="$FILES_LOCAL pass1pA.rpt flo.rpt opt.rpt aux.rpt pass2.rpt"
+FILES_LOCAL="$FILES_LOCAL optmat.bin pass1A.rpt"
+FILES_LOCAL="$FILES_LOCAL pass1pA.rpt flo.rpt opt.rpt aux.rpt"
 FILES_LOCAL="$FILES_LOCAL pass3.rpt pass4.rpt cards monitor13.parms"
 FILES_LOCAL="$FILES_LOCAL auxp.rpt deck.bin extra.txt"
-rm $FILES_PORTED $FILES_LOCAL -rf &>/dev/null
+FILES_PRESERVE="TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt pass2.rpt cards.bin"
+rm $FILES_PORTED $FILES_LOCAL pass*.rpt cards.bin -rf &>/dev/null
 
 # Move all generated files to a *.results folder.
 function move_all {
@@ -34,7 +35,9 @@ function move_all {
 	results="HALSFC $HALS_FILE `date '+%a %m-%d-%Y %k-%M-%S.00'`.results"
 	mkdir "$results" &>/dev/null
 	echo "$@" >"$results"/comment.txt
+	#cp '&&TEMPLIB.json' TEMPLIB.json &>/dev/null
 	mv $FILES_PORTED $FILES_LOCAL "$results" &>/dev/null
+	cp -a $FILES_PRESERVE "$results" &>/dev/null
 	cp "$HALS_FILE" "$results" &>/dev/null
 }
 
@@ -51,23 +54,23 @@ then
         echo ""
         echo This script compiles a HAL/S file to an AP-101S object-code file.
         echo ""
-        echo "     HALSFC SOURCE.hal [ TEST [ PARMFIELD [ TARGET [ EXT ]]]]"
+        echo "     HALSFC SOURCE.hal [ TEST [ PARMS [ TARGET [ EXT ]]]]"
         echo ""
         echo Parameters appear in the indicated order.  Missing parameters
         echo in the middle of the list can use \"\" as place markers for the
         echo defaults.  The parameters are interpreted as follows:
         echo ""
         echo "     SOURCE.hal The HAL/S source-code file."
-        echo "     TEST       If not blank (default), perform all available validity tests."
+        echo "     TEST       Perform all available validity tests if non-blank."
         echo "                (Requires NOTABLES in the PARMFIELD.)"
-        echo "     PARMFIELD  Comma-separated list of HAL/S options.  Default, blank."
+        echo "     PARMS      Comma-separated list of HAL/S options.  Default, blank."
+        echo "                For compatibility with Windows, it is good practice to"
+        echo "                enclose this in double-quotes."
         echo "     TARGET     Either PFS (default) or BFS."
         echo "     EXTENSION  Either blank (native) or .exe (cross compiling for Windows)"
         echo ""
         exit 1
 fi
-
-PARM_LIST=${PARM_STRING//,/ }
 
 if [[ "$TARGET" == "BFS" ]]
 then
@@ -92,6 +95,7 @@ else
 	CARDS=--ddo=3,cards.bin,E
 fi
 ERRORLIB="`which HALSFC-PASS1 | sed 's/HALSFC-PASS1/ERRORLIB/'`"
+PARM_LIST=${PARM_STRING//,/ }
 
 $PASS1 \
 	--parm="$PARM_STRING" \
@@ -115,7 +119,7 @@ then
         ported="`which HAL_S_FC.py`"
         ported="`dirname -- \"$ported\"`"
         ported="`dirname -- \"$ported\"`"
-        ( HAL_S_FC.py $PARM_LIST --hal="$HALS_FILE" >pass1p.rpt ) && \
+        ( HAL_S_FC.py $PARM_LIST --templib --hal="$HALS_FILE" >pass1p.rpt ) && \
         echo PASS1 cross-comparison test: || error_exit "Failed PASS1 cross-comparison test"
         for n in $FILES_PORTED ; do cp "$ported/$n" . ; done &>/dev/null
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt

@@ -24,7 +24,7 @@ set HALS_FILE=%~1
 set TEST=%~2
 set PARM_STRING=%~3
 set TARGET=%~4
-:: No parameter 5
+:: Parameter 5, if any, is ignored.
 set COMMAND_LINE=%*
 
 set PYTHONUTF8=1
@@ -32,15 +32,16 @@ set PYTHONUTF8=1
 set FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 set FILES_PORTED="%FILES_PORTED:"=% SOURCECO.txt"
 set FILES_PORTED="%FILES_PORTED:"=% LIT_CHAR.bin SYM_TAB.json LISTING2.txt"
-set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json TEMPLIB.json"
-set FILES_LOCAL="listing2.txt TEMPLIB TEMPLIBB cards.bin COMMON0.out halmat.bin"
+set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json"
+set FILES_LOCAL="listing2.txt COMMON0.out halmat.bin"
 set FILES_LOCAL="%FILES_LOCAL:"=% litfile.bin vmem.bin COMMON1.out COMMON2.out"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON3.out COMMON4.out auxmat.bin objcode.bin"
-set FILES_LOCAL="%FILES_LOCAL:"=% optmat.bin pass1.rpt pass1p.rpt pass1A.rpt"
-set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt opt.rpt aux.rpt pass2.rpt"
+set FILES_LOCAL="%FILES_LOCAL:"=% optmat.bin pass1A.rpt"
+set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt opt.rpt aux.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt cards monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
-del %FILES_PORTED:"=% %FILES_LOCAL:"=% "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
+set FILES_PRESERVE=TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt pass2.rpt cards.bin
+del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
 goto :main
 
@@ -52,7 +53,9 @@ goto :main
 	set results=%results::=-%
 	mkdir "%results%" >NUL 2>NUL
 	echo %* >"%results%\comment.txt"
+	copy "&&TEMPLIB.json" TEMPLIB.json >NUL 2>NUL
 	for %%i in ( %FILES_PORTED:"=% %FILES_LOCAL:"=% ) do move %%i "%results%" >NUL 2>NUL
+	for %%i in ( %FILES_PRESERVE:"=% ) do copy %%i "%results%" >NUL 2>NUL
 	copy "%HALS_FILE%" "%results%" >NUL 2>NUL
 	exit /B 0
 
@@ -89,16 +92,12 @@ if not exist "%HALS_FILE%" (
         echo. defaults.  The parameters are interpreted as follows:
         echo.
         echo.      SOURCE.hal   The HAL/S source-code file.
-        echo.      TEST         Perform all available validity tests.
+        echo.      TEST         Perform all available validity tests if non-blank.
         echo.      "PARMS"      Quoted list of comma-separated compiler options.
         echo.      TARGET       Use either PFS, the default, or BFS.
         echo.
         exit /B 1
 )
-
-set PARM_LIST=
-if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
-::echo PARM_LIST = %PARM_LIST%
 
 if "%TARGET%". == "BFS". (
     set PASS1=HALSFC-PASS1B
@@ -121,6 +120,8 @@ if "%TARGET%". == "BFS". (
     set TEMPLIB=TEMPLIB
     set CARDS=--ddo=3,cards.bin,E
 )
+set PARM_LIST=
+if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
 
 %PASS1% ^
         --parm="%PARM_STRING%" ^
@@ -142,7 +143,7 @@ set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CP
 if %TEST%x == TESTx (
 echo ======================================================
 ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || call :error_exit Utilities egrep/diff unavailable
-python "%HAL_S_FC%" %PARM_LIST% --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
+python "%HAL_S_FC%" %PARM_LIST% --templib --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
 for %%i in ( %FILES_PORTED:"=% ) do copy %ported%..\%%i . >NUL 2>NUL
 egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt

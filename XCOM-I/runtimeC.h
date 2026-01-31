@@ -9,6 +9,9 @@
  *              2024-05-23 RSB  Reworked so that descriptor_t replaces string_t,
  *                              bit_t, and lots of char*.
  *              2026-01-30 RSB  Support for non-zero LINK() exit code.
+ *              2026-01-31 RSB	PDS record size changed from 1680 to 80.  The
+ *                              max size of a PDS member has remained unchanged
+ *                              at 32*1680, which seems like overkill.
  */
 
 #ifndef RUNTIMEC_H
@@ -75,8 +78,8 @@ extern int outUTF8;
 // to do with IBM 360 DCBs.
 #define DCB_MAX 10
 #define PDS_MEMBER_SIZE 8
-#define MAX_PDS_RECORDS 32
-#define PDS_RECORD_SIZE 1680
+#define MAX_PDS_RECORDS (32 * 21)
+#define PDS_RECORD_SIZE 80 /* 1680 */
 #define PDS_BUFFER_SIZE (MAX_PDS_RECORDS * PDS_RECORD_SIZE)
 typedef char pdsPartname_t[PDS_MEMBER_SIZE + 1];
 typedef struct {
