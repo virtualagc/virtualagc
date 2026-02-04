@@ -31,8 +31,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
         <li><a moz-do-not-send="true" href="#overstrike">Overstruck
             Lines in Reports</a></li>
       </ul>
-      <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In
-          New HAL/S Source Code</a><br>
+      <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In <i>New</i>
+          HAL/S Source Code</a><br>
       </li>
       <ul>
       </ul>
@@ -1319,7 +1319,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       fact that some single printed lines are replaced by dual printed
       lines does affect the vertical alignment and the pagination.<br>
     </p>
-    <h1><a name="dangers"></a>Dangers Lurking in New HAL/S Source Code</h1>
+    <h1><a name="dangers"></a>Dangers Lurking in <i>New</i> HAL/S
+      Source Code</h1>
     Legacy HAL/S source code is, of course, syntactically perfect and
     error-free.&nbsp; By which I mean that if it <i>used</i> to compile
     and work properly in the old days using the old development tools,
@@ -1336,7 +1337,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     Of course, we already heard about some of these traps, such as the
     character set and character encoding, in the preceding
     section.&nbsp; And many others are covered in HAL/S documentation,
-    even if not flagged there as being traps.&nbsp; Still, it's
+    even if not flagged there as being traps.&nbsp; Others are just pure
+    traps that you have way to prepare yourself for.&nbsp; Still, it's
     instructive to observe some of the traps we see naive developers
     innocently falling into easily when trying to write HAL/S source
     code without feedback from working development tools:<br>
@@ -1377,8 +1379,81 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </li>
       <li><b>The symbol </b><b><tt>*</tt></b><b> is </b><b><i>not</i></b><b>
           a multiplication sign.</b>&nbsp; There is no multiplication
-        sign!<br>
-      </li>
+        sign!</li>
+      <li><b>HAL/S documentation is sometimes wrong!</b>&nbsp; Or put
+        differently, the HAL/S language as implemented by the
+        Intermetrics/USA HAL/S-FC compiler sometimes doesn't match the
+        documentation.&nbsp; I'll discuss whatever examples I discover
+        below.</li>
+    </ul>
+    <p>I've actually found only one case so far where HAL/S-FC flat-out
+      does something that contradicts the HAL/S documentation:<br>
+    </p>
+    <p><b>E102 and the illegal event-expression problem</b>.&nbsp; (<a
+        moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-3835567355">See
+        GitHub issue #1270 for more info</a>.)&nbsp; This is a tricky
+      problem to describe, because explaining here what an <i>event
+        expression</i> is would probably take us too far afield, on a
+      top of which you're likely not too interested in them at this
+      moment.&nbsp; Suffice it to say that an event expression is
+      basically any <i>boolean expression</i> — such as <tt>A AND NOT
+        (B OR C)</tt> — in which rather than being boolean variables,
+      the entities <tt>A</tt>, <tt>B</tt>, and <tt>C</tt> are <i>event
+        variables</i> or <i>process variables</i>.&nbsp; Again, don't
+      worry about what those are.&nbsp; Suffice it to know that these
+      things all relate to scheduling <i>tasks</i> to be spontaneously
+      executed when <i>events</i> occur, or to be paused while waiting
+      for events to occur.&nbsp; All available HAL/S documentation
+      agrees that the syntactical forms of <i>event expressions</i> and
+      <i>boolean expressions</i> are the same.&nbsp; Indeed, PASS1 of
+      HAL/S-FC, which is responsible for all parsing of HAL/S source
+      code, compiles event expressions in the form of arbitrary boolean
+      expressions with flying colors.&nbsp; Not so PASS2, which is
+      HAL/S-FC's object-code generator!&nbsp; Certain event expressions
+      move through PASS2 with ease, while others fail PASS2 with an
+      error message that looks like the following (though likely with a
+      different "HAL/S STATEMENT" number):</p>
+    <blockquote>
+      <pre>***** E102     ERROR #1 OF SEVERITY 2 OCCURRED ***** <br>*****  DURING CONVERSION OF HAL/S STATEMENT 6.***** <br>***** INVALID EVENT EXPRESSION                                                        <br>***** CONVERSION ABANDONED<br></pre>
+    </blockquote>
+    <p>For instance, the example of <tt>A AND NOT (B OR C)</tt> that we
+      saw above would trigger an E102 error if used as an event
+      expression, even though it's perfectly fine as a boolean
+      expression, HAL/S documentation be damned!&nbsp; Here's a summary
+      of the event-expression formats that will be okay as far as PASS2
+      is concerned:<br>
+    </p>
+    <ul>
+      <li>Expressions containing no logical operators at all.</li>
+      <li>Expressions containing <i>only</i> <tt>NOT</tt> operators
+        (or the aliases&nbsp; <tt>~</tt> or <tt>¬</tt>)</li>
+      <li>Expressions containing <i>only</i> <tt>AND</tt> operators
+        (or the alias <tt>&amp;</tt>)</li>
+      <li>Expressions containing <i>only</i> <tt>OR</tt> operators (or
+        the alias <tt>|</tt>)</li>
+    </ul>
+    <p>In other words, it's illegal to mix different types of logical
+      operators within a single event expression.&nbsp; That sounds
+      mighty fishy, so it would be fair of you to be suspicious that
+      this is not a real failure in Intermetrics/USA's PASS2, but
+      instead is my failure somehow in my compilation of it into our
+      "modern" HAL/S compiler <b>HALSFC</b>.&nbsp; Indeed, I was
+      suspicious myself.&nbsp; But not so!&nbsp; Tracking down where
+      error E102 is generated in the original PASS2 source code
+      (PASS2.PROCS/GENERATE.xpl), we discover the following program
+      comments:</p>
+    <pre>               /* OR OPERATOR IS BEING PROCESSED. IF THE      /*CR13220*/<br>               /* AND OPERATOR HAS NOT PREVIOUSLY BEEN USED   /*CR13220*/<br>               /* THEN CONTINUE, ELSE EMIT E102 ERROR.        /*CR13220*/<br><br>               /* NOT OPERATOR IS BEING PROCESSED. THE NOT    /*CR13220*/<br>               /* OPERATOR MAY NOT BE USED IN AN EXPRESSION   /*CR13220*/<br>               /* WITH MORE THAN 1 EVENT VARIABLE OR WITH     /*CR13220*/<br>               /* MULTIPLE NOT OPERATOR. IF THE NOT           /*CR13220*/<br>               /* OPERATOR IS USED ILLEGALLY EMIT E102 ERROR. /*CR13220*/<br><br>               /* AND OPERATOR IS BEING PROCESSED. IF THE     /*CR13220*/<br>               /* OR OPERATOR HAS NOT PREVIOUSLY BEEN USED    /*CR13220*/<br>               /* THEN CONTINUE. ELSE EMIT E102 ERROR.        /*CR13220*/<br></pre>
+    So these E102 errors really are due to a deficiency in the original
+    Intermetrics/USA PASS2, insofar as consistency with HAL/S
+    documentation is concerned.&nbsp; In fact, the notation /*CR13220*/,
+    when compared to comments elsewhere in GENERATE.xpl, tells us that
+    generation of E102 was added to HAL/S-FC on 2001-01-15 in release
+    31V0/16V0.&nbsp; Before that, I can only assume that PASS2 would
+    presumably fail in some mysterious way without even a relevant error
+    message as soon as it encountered an event expression it didn't
+    like.&nbsp; Whee!<br>
+    <ul>
     </ul>
     <p> </p>
     <p> </p>
@@ -2320,8 +2395,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               href="Shuttle/19760020796.pdf#page=625">Documentation</a>
             (and <a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=661">here</a>) claims
-            that option X1 disables optimization.&nbsp; I have so far
-            been unable to verify this.<br>
+            that option X1 disables optimization.&nbsp; However, it has
+            no actual effect on the output from the OPT pass, so perhaps
+            it is something that had effect in HAL/S-360 but no longer
+            has an effect in HAL/S-FC.<br>
           </td>
         </tr>
         <tr>
@@ -2357,7 +2434,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             above) during the OPT pass.&nbsp; <a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             describes it as printing program flow and data bases.&nbsp;
-            Here's a an excerpt from OPT's output report from HELLO.hal
+            Here's an excerpt from OPT's output report from HELLO.hal
             that shows the effect:<br>
             <blockquote>
               <pre>⋮<br>PAGE 1<br><br><br><font color="#009900">SYMBOL_SHRINKER(2):   2  I<br>SYMBOL_SHRINKER(3):   3  MY_NAME<br>SYMBOL_SHRINKER(4):   4  J<br>SYMBOL_SHRINKER(5):   5  PRINTER<br></font><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 2<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF AUGUST 9, 2024.  CLOCK TIME = 12:38:48.00<br><br>HAL/S OPTIMIZER ENTERED AUGUST 11, 2024.  CLOCK TIME = 8:28:19.16<br><br><font color="#009900">FINAL_PASS:  0<br>ASSIGNMENT: 27<br>ASSIGNMENT: 45<br><br> NO REL<br>  2   2  I<br>  3   3  MY_NAME<br>  4   4  J<br>  5   5  PRINTER<br>STACK_DUMP:  LEVEL=1, BLOCK#=2, INL#=0, OLD_LEVEL=0, OLD_BLOCK#=0, VAL_SIZE=1<br><br>   LEVEL STACKED_BLOCK# STACK_TAGS PULL_LOOP_HEAD<br>       0              1   00000000        -1<br>       1              2   00000000        -1<br><br>RECORD_TOP(CATALOG_ARRAY)= 1<br>RECORD_TOP(VALIDITY_ARRAY)= 1<br>RECORD_TOP(ZAPS)= 1<br>   ZAP_BASE=1, PULL_LOOP_HEAD(LEVEL)=-1<br>   SYT_SIZE=5, SYT_WORDS=0, SYT_USED=0<br><br>   VALIDITY     ZAPS LOOP_ZAPS<br>   00000000 00000014  00000014<br>ASSIGNMENT: 45</font><br>⋮</pre>
@@ -3513,7 +3590,10 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             describes this as "Optimizer off until next such statement
             encountered. No CSE's recognized across the pair of
-            DEBUG's".&nbsp; A more-understandable explanation is TBD.<br>
+            DEBUG's".&nbsp; A more-understandable explanation is
+            TBD.&nbsp; I can say with confidence that it does <i>not</i>
+            affect the optimized HALMAT output by the OPT pass, other
+            than storing 1 in the location reserved for the value of H(<i>n</i>).<br>
           </td>
         </tr>
         <tr>
@@ -4756,7 +4836,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-01-31<br>
+          2026-02-02<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
