@@ -9,8 +9,10 @@ C/ From PDF p. 241 in "Programming in HAL/S".
   RE_IGNITE:
   TASK;
      DO WHILE TRUE;
-        WAIT FOR ENGINE_OFF & ~ORBIT;
-        
+C       The following is illegal in Intermetrics/USA HAL/S:
+C       WAIT FOR ENGINE_OFF & ~ORBIT;
+C       So here's a replacement for demo purposes only:
+        WAIT FOR ENGINE_OFF & ORBIT;
 C               .
 C               .
 C               .

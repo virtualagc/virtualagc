@@ -3,33 +3,47 @@ C/ From PDF p. 239 of "Programming in HAL/S".
   STARTUP:
   PROGRAM;
      DECLARE ORBIT EVENT LATCHED;
-  GUIDANCE:
-     TASK;
+     DECLARE ORBIT2 EVENT LATCHED;
+     DECLARE ORBIT3 EVENT;
+     DECLARE I INTEGER;
      
-C       ...
-
+  GUIDANCE:
+  TASK;
+        I = 1;
   CLOSE GUIDANCE;
+  
   NAVIGATION:
   TASK;
-  
-C       ...
-
+        I = 2;
   CLOSE NAVIGATION;
+  
   CONTROL:
   TASK;
-  
-C       ...
-
+        I = 3;
   CLOSE CONTROL;
+  
   FREEFALL:
   TASK;
-  
-C       ...
-
+        I = 4;
   CLOSE FREEFALL;
+  
+  FREEFALL2:
+  TASK;
+        I = 5;
+  CLOSE FREEFALL2;
+  
      SCHEDULE NAVIGATION PRIORITY(60), REPEAT EVERY 1.0;
      SCHEDULE GUIDANCE PRIORITY(70), REPEAT EVERY 1 / 6 UNTIL ORBIT;
      SCHEDULE CONTROL PRIORITY(80), REPEAT EVERY 1 / 20 UNTIL ORBIT;
-     SCHEDULE FREEFALL ON (ORBIT & NOT GUIDANCE & NOT CONTROL) 
+C    HAL/S-FC had a bug (relative to HAL/S documentation) and
+C    could not generate object code for an event expression like
+C    the following:
+C    SCHEDULE FREEFALL ON (ORBIT & NOT GUIDANCE & NOT CONTROL) 
+C       PRIORITY(75), REPEAT EVERY 1 / 10;
+C    hence I've arbitrarily replaced it with a different example
+C    below:
+     SCHEDULE FREEFALL ON (ORBIT & (ORBIT2 & ORBIT3)) 
         PRIORITY(75), REPEAT EVERY 1 / 10;
+     SCHEDULE FREEFALL2 ON (ORBIT | (ORBIT2 | ORBIT3)) 
+        PRIORITY(776), REPEAT EVERY 1 / 10;
   CLOSE STARTUP;

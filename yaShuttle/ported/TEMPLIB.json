@@ -8,5 +8,28 @@
         " SHUTTLE_NAV: EXTERNAL PROGRAM ;                                                ",
         " CLOSE ;                                                                        ",
         "D VERSION  1"
+    ],
+    "@@CPL189": [
+        " CPL189: EXTERNAL COMPOOL ; STRUCTURE IMU_DATA RIGID : 1 DELTA_V ARRAY ( 3 ) INT",
+        " EGER DOUBLE , 1 ATTITUDE ARRAY ( 3 ) INTEGER , 1 TIME BIT ( 32 ) , 1 STAT DENSE",
+        "  , 2 F1 BOOLEAN , 2 F2 BOOLEAN , 2 F3 BOOLEAN , 2 UNUSED BIT ( 13 ) , 1 OP_MODE",
+        "  INTEGER ;                                                                     ",
+        " CLOSE ;                                                                        ",
+        "D VERSION  1"
+    ],
+    "@@CPL269": [
+        " CPL269: EXTERNAL COMPOOL ; STRUCTURE PROCESS_CONTROL : 1 SAVE_AREA RIGID , 2 FI",
+        " XED_REGS ARRAY ( 16 ) BIT ( 32 ) , 2 FLOAT_REGS ARRAY ( 8 ) SCALAR DOUBLE , 2 O",
+        " THER BIT ( 32 ) , 1 PRIORITIE INTEGER , 1 STATUS INTEGER , 1 NEXT NAME PROCESS_",
+        " CONTROL - STRUCTURE , 1 LAST NAME PROCESS_CONTROL - STRUCTURE ;                ",
+        " CLOSE ;                                                                        ",
+        "D VERSION  1"
+    ],
+    "@@CPL264": [
+        " CPL264: EXTERNAL COMPOOL ; STRUCTURE TQE : 1 TIME SCALAR , 1 ACTION INTEGER , 1",
+        "  AFFECTED_PROCESS NAME PROCESS_CONTROL - STRUCTURE , 1 NEXT NAME TQE - STRUCTUR",
+        " E ;                                                                            ",
+        " CLOSE ;                                                                        ",
+        "D VERSION  1"
     ]
 }

@@ -12,6 +12,8 @@
  *              2024-06-19 RSB  Split off some functions not used in "production"
  *                              into debuggingAid.c.
  *              2026-01-30 RSB  Support for non-zero LINK() exit code.
+ *              2026-02-03 RSB  `OUTPUT` now pads output record with ASCII or
+ *                              EBCDIC spaces to the exact record size.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -1502,6 +1504,16 @@ fixedToCharacter(int32_t i) {
   return cToDescriptor(NULL, "%d", j);
 }
 
+// Example characterToFixed(mEMITuEXTERNALxNEWBUFF, 10, mEMITuEXTERNALxJ);
+void
+characterToShortInt(int inputAddress, int startIndex, int outputAddress) {
+  descriptor_t *d = getCHARACTER(inputAddress);
+  int n = atoi(d->bytes+startIndex);
+  d = fixedToBit(32, n);
+  putBIT(16, outputAddress, d);
+  d->inUse = 0;
+}
+
 // Convert a BIT(1) through BIT(32) to FIXED.  As near as I can figure (see
 // ps. 137 and 139 of McKeenan), BIT(1) through BIT(15) are treated as unsigned,
 // whereas BIT(16) is sign-extended.  I don't actually see that BIT(17) through
@@ -2039,7 +2051,7 @@ errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
 // From the way SUBSTR() is used in the LITDUMP module, it's clear
 // that if ne2 is specified, then the function always returns exactly
 // ne2 characters, padded with blanks if past the end of the input
-// string.  I.e., ne2 is *not* the max number of characters to return.
+// string.  I.e., ne2 is not merely the max number of characters to return.
 // However, from the behavior in TRUNCATE() of the SYTDUMP module, it
 // does appear that the string is shorter when ne < 0, though it's
 // unclear exactly what the behavior is supposed to be then.
@@ -2049,27 +2061,14 @@ SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   int len = s->numBytes - start, rawLength = length;
   if (start < 0 || len <= 0 || length <= 0) // Return empty string.
     return returnValue;
-  if (start < 0)
-    {
-      start = 0;
-      len = s->numBytes - start;
-    }
-  if (len < 0)
-    len = 0;
   if (length > len)
     length = len;
   if (length > 0)
-    {
-      strncpy(returnValue->bytes, &s->bytes[start], length);
-      returnValue->bytes[length] = 0;
-      returnValue->numBytes = length;
-    }
+    strncpy(returnValue->bytes, &s->bytes[start], length);
   while (length < rawLength) // Pad to the desired length.
-    {
-      returnValue->bytes[length++] = 0x40; // EBCDIC space.
-      returnValue->bytes[length] = 0;
-      returnValue->numBytes = length;
-    }
+    returnValue->bytes[length++] = 0x40; // EBCDIC space.
+  returnValue->bytes[length] = 0;
+  returnValue->numBytes = length;
   return returnValue;
 }
 
@@ -2220,7 +2219,12 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
           dev, DCB_OUTS[dev].filename);
   if (dcb->bufferLength > 0)
     {
+      int8_t fillChar = 0x20;
       int numRecords = (dcb->bufferLength + PDS_RECORD_SIZE - 1) / PDS_RECORD_SIZE;
+      if (DCB_OUTS[dev].ebcdic)
+	fillChar = 0x40;
+      if (dcb->bufferLength != numRecords * PDS_RECORD_SIZE)
+	memset(&dcb->buffer[dcb->bufferLength], fillChar, numRecords * PDS_RECORD_SIZE - dcb->bufferLength);
       if (numRecords != fwrite(dcb->buffer, PDS_RECORD_SIZE, numRecords, DCB_OUTS[dev].fp))
         abend("PDS write error to PDS %s member %s on device %d",
               DCB_OUTS[dev].filename, cname, dev);

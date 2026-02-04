@@ -7,6 +7,8 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
+                2026-02-03 RSB  Eliminated the potentially-unprintable binary
+                                template-version code from the output report.
     Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -106,6 +108,13 @@ PRINT_COMMENT:                                                                  
             C = PAGE;                                                           00000560
          END;                                                                   00000570
          I=100-TEXT_LIMIT;                                                      00000580
+         /?V
+         /* Remove the binary template-version code, leaving the printable
+            form of the version code that follows it. */
+         IF SUBSTR(CURRENT_CARD, 0, 10) = 'D VERSION ' THEN DO;
+            CURRENT_CARD=SUBSTR(CURRENT_CARD, 0, 10)||SUBSTR(CURRENT_CARD, 11);
+         END;
+         ?/
          /*CR12713 - MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF   */
          /*THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.          .   */
          IF SDL_OPTION THEN                                        /*CR12713*/

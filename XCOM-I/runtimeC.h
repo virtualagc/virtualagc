@@ -301,6 +301,10 @@ putCHARACTERp(uint32_t address, descriptor_t *s);
 descriptor_t *
 fixedToCharacter(int32_t i);
 
+// Convert decimal string to BIT(16) (i.e., short integer).
+void
+characterToShortInt(int inputAddress, int startIndex, int outputAddress);
+
 // Convert a BIT(1) through BIT(32) to FIXED.
 int32_t
 bitToFixed(descriptor_t *value);

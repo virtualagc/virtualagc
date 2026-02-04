@@ -13,6 +13,8 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
                             and constants).
             2024-08-15 RSB  Eliminated standard `ebcdic` module in favor of
                             my own `asciiToEbcdic`, for portability reasons.
+            2026-01-31 RSB  `openGenericOutputDevice` now operates in cwd, not
+                            in the script folder.
 '''
 
 import sys
@@ -223,7 +225,8 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
     
 def openGenericOutputDevice(name, isPDS=False):
     outputDevice = {
-        "file": open(scriptParentFolder + "/" + name, "w"),
+        #"file": open(scriptParentFolder + "/" + name, "w"),
+        "file": open(name, "w"),
         "open": True,
         "ptr":-1,
         "buf": []
