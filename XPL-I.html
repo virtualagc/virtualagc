@@ -8180,7 +8180,27 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             the HAL/SDL ICD. The values are returned in the left and
             right halfwords of the result.<br>
           </td>
-          <td valign="middle">TBD<br>
+          <td valign="middle">The function always returns
+            0xF0F00000.&nbsp; <br>
+            <blockquote><font size="-1"><b>Aside:</b>&nbsp; That's not
+                what it's <i>supposed</i> to return, but the
+                description of what it's really supposed to do leaves me
+                in the dark, so that's my compromise.</font><font
+                size="-1"><font size="-1">&nbsp; How I came up with
+                  0xF0F00000 is also now a mystery to me.&nbsp; Formerly
+                  I had <code>MONITOR(15)</code> print "FYI" messages
+                  in the PASS1 report as warnings to the programmer, but
+                  those eventually became annoying to me, not to mention
+                  useless in any practical sense, so the operation no
+                  longer gives any warnings in the output report.</font>
+                <br>
+                <br>
+                There's only one place in PASS/BFS source code where <code>MONITOR(15)</code>
+                is explicitly used, I believe, and that's in the <code>INCLUDE_OK()</code>
+                function of HALINCL/PATCHINC.xpl.&nbsp; If anyone wants
+                to dig into it and figure it out, let me know the
+                results.</font><br>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -9936,7 +9956,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-03<br>
+          2026-02-04<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

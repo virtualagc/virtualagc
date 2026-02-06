@@ -31,6 +31,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
         <li><a moz-do-not-send="true" href="#overstrike">Overstruck
             Lines in Reports</a></li>
       </ul>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In <i>New</i>
           HAL/S Source Code</a><br>
       </li>
@@ -1334,6 +1336,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     so and thus those traps are still lurking for <i>us</i> if we
     choose to write <i>new</i> HAL/S code.<br>
     <br>
+    Oh, and this section is pretty technical, by the way, but the good
+    news is that you can probably <a moz-do-not-send="true"
+      href="#options1">just nod wisely and proceed to the next section</a>
+    rather than reading it!<br>
+    <br>
     Of course, we already heard about some of these traps, such as the
     character set and character encoding, in the preceding
     section.&nbsp; And many others are covered in HAL/S documentation,
@@ -1371,7 +1378,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       <li><b>Don't use the fancy multi-line "mathematical" format when
           writing code.</b>&nbsp; It's great as an automatically-created
         format for generated program listings, but not for source-code
-        input to the compiler.<br>
+        input to the compiler. <br>
       </li>
       <li><b>Column 1 is special.</b>&nbsp; Use it only for C (full-line
         comment), D (compiler directive), or a blank space (normal line
@@ -1386,75 +1393,248 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         documentation.&nbsp; I'll discuss whatever examples I discover
         below.</li>
     </ul>
-    <p>I've actually found only one case so far where HAL/S-FC flat-out
-      does something that contradicts the HAL/S documentation:<br>
-    </p>
-    <p><b>E102 and the illegal event-expression problem</b>.&nbsp; (<a
-        moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-3835567355">See
-        GitHub issue #1270 for more info</a>.)&nbsp; This is a tricky
-      problem to describe, because explaining here what an <i>event
-        expression</i> is would probably take us too far afield, on a
-      top of which you're likely not too interested in them at this
-      moment.&nbsp; Suffice it to say that an event expression is
-      basically any <i>boolean expression</i> — such as <tt>A AND NOT
-        (B OR C)</tt> — in which rather than being boolean variables,
-      the entities <tt>A</tt>, <tt>B</tt>, and <tt>C</tt> are <i>event
-        variables</i> or <i>process variables</i>.&nbsp; Again, don't
-      worry about what those are.&nbsp; Suffice it to know that these
-      things all relate to scheduling <i>tasks</i> to be spontaneously
-      executed when <i>events</i> occur, or to be paused while waiting
-      for events to occur.&nbsp; All available HAL/S documentation
-      agrees that the syntactical forms of <i>event expressions</i> and
-      <i>boolean expressions</i> are the same.&nbsp; Indeed, PASS1 of
-      HAL/S-FC, which is responsible for all parsing of HAL/S source
-      code, compiles event expressions in the form of arbitrary boolean
-      expressions with flying colors.&nbsp; Not so PASS2, which is
-      HAL/S-FC's object-code generator!&nbsp; Certain event expressions
-      move through PASS2 with ease, while others fail PASS2 with an
-      error message that looks like the following (though likely with a
-      different "HAL/S STATEMENT" number):</p>
     <blockquote>
-      <pre>***** E102     ERROR #1 OF SEVERITY 2 OCCURRED ***** <br>*****  DURING CONVERSION OF HAL/S STATEMENT 6.***** <br>***** INVALID EVENT EXPRESSION                                                        <br>***** CONVERSION ABANDONED<br></pre>
+      <p>I've actually found only one case so far where the PFS version
+        of HAL/S-FC flat-out does something that contradicts the HAL/S
+        documentation.&nbsp; That's something we might call "the illegal
+        event-expression problem" (<a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-3835567355">see
+          GitHub issue #1270 for more info</a>), error code E102.&nbsp;
+        (The BFS version of the compiler has this problem too.&nbsp; But
+        as you'll see in the next bullet point, the BFS version does a <i>lot</i>
+        of stuff that contradicts the HAL/S documentation, so it hardly
+        surprises us the way PFS-version problems do!)&nbsp; This is a
+        tricky problem to describe, because explaining here what an <i>event
+          expression</i> is would probably take us too far afield, on a
+        top of which you're likely not too interested in them at this
+        moment.&nbsp; Suffice it to say that an event expression is
+        basically any <i>boolean expression</i> — such as <tt>A AND
+          NOT (B OR C)</tt> — in which rather than being boolean
+        variables, the entities <tt>A</tt>, <tt>B</tt>, and <tt>C</tt>
+        are <i>event variables</i> or <i>process variables</i>.&nbsp;
+        Again, don't worry about what those are.&nbsp; Suffice it to
+        know that these things all relate to scheduling <i>tasks</i> to
+        be spontaneously executed when <i>events</i> occur, or to be
+        paused while waiting for events to occur.&nbsp; All available
+        HAL/S documentation agrees that the syntactical forms of <i>event
+          expressions</i> and <i>boolean expressions</i> are the
+        same.&nbsp; Indeed, PASS1 of HAL/S-FC, which is responsible for
+        all parsing of HAL/S source code, <i>processes</i> event
+        expressions in the form of arbitrary boolean expressions with
+        flying colors.&nbsp; Not so PASS2, which is HAL/S-FC's
+        object-code generator!&nbsp; Certain event expressions move
+        through PASS2 with ease, while others fail PASS2 with an error
+        message that looks like the following (though likely with a
+        different "HAL/S STATEMENT" number):</p>
+      <blockquote>
+        <pre>***** E102     ERROR #1 OF SEVERITY 2 OCCURRED ***** <br>*****  DURING CONVERSION OF HAL/S STATEMENT 6.***** <br>***** INVALID EVENT EXPRESSION                                                        <br>***** CONVERSION ABANDONED<br></pre>
+      </blockquote>
+      <p>For instance, the example of <tt>A AND NOT (B OR C)</tt> that
+        we saw above would trigger an E102 error if used as an event
+        expression, even though it's perfectly fine as a boolean
+        expression, HAL/S documentation be damned!&nbsp; Here's a
+        summary of the event-expression formats that will be okay as far
+        as PASS2 is concerned:<br>
+      </p>
+      <ul>
+        <li>Expressions containing no logical operators at all.</li>
+        <li>Expressions containing <i>only</i> <tt>NOT</tt> operators
+          (or the aliases&nbsp; <tt>~</tt> or <tt>¬</tt>)</li>
+        <li>Expressions containing <i>only</i> <tt>AND</tt> operators
+          (or the alias <tt>&amp;</tt>)</li>
+        <li>Expressions containing <i>only</i> <tt>OR</tt> operators
+          (or the alias <tt>|</tt>)</li>
+      </ul>
+      <p>In other words, it's illegal to mix different types of logical
+        operators within a single event expression.&nbsp; That sounds
+        mighty fishy, so it would be fair of you to be suspicious that
+        this is not a real failure in Intermetrics/USA's PASS2, but
+        instead is my failure somehow in my compilation of it into our
+        "modern" HAL/S compiler <b>HALSFC</b>.&nbsp; Indeed, I was
+        suspicious myself.&nbsp; But I'm innocent!&nbsp; Tracking down
+        where error E102 is generated in the original PASS2 source code
+        (PASS2.PROCS/GENERATE.xpl), we discover the following program
+        comments:</p>
+      <pre>               /* OR OPERATOR IS BEING PROCESSED. IF THE      /*CR13220*/<br>               /* AND OPERATOR HAS NOT PREVIOUSLY BEEN USED   /*CR13220*/<br>               /* THEN CONTINUE, ELSE EMIT E102 ERROR.        /*CR13220*/<br><br>               /* NOT OPERATOR IS BEING PROCESSED. THE NOT    /*CR13220*/<br>               /* OPERATOR MAY NOT BE USED IN AN EXPRESSION   /*CR13220*/<br>               /* WITH MORE THAN 1 EVENT VARIABLE OR WITH     /*CR13220*/<br>               /* MULTIPLE NOT OPERATOR. IF THE NOT           /*CR13220*/<br>               /* OPERATOR IS USED ILLEGALLY EMIT E102 ERROR. /*CR13220*/<br><br>               /* AND OPERATOR IS BEING PROCESSED. IF THE     /*CR13220*/<br>               /* OR OPERATOR HAS NOT PREVIOUSLY BEEN USED    /*CR13220*/<br>               /* THEN CONTINUE. ELSE EMIT E102 ERROR.        /*CR13220*/<br></pre>
+      So these E102 errors really are due to a deficiency in the
+      original Intermetrics/USA PASS2, insofar as consistency with HAL/S
+      documentation is concerned.&nbsp; In fact, the notation
+      /*CR13220*/, when compared to comments elsewhere in GENERATE.xpl,
+      tells us that generation of E102 was added to HAL/S-FC on
+      2001-01-15 in release 31V0/16V0.&nbsp; Before that, I can only
+      assume that PASS2 would presumably fail in some mysterious way
+      without even a relevant error message as soon as it encountered an
+      event expression it didn't like.&nbsp; Whee!<br>
     </blockquote>
-    <p>For instance, the example of <tt>A AND NOT (B OR C)</tt> that we
-      saw above would trigger an E102 error if used as an event
-      expression, even though it's perfectly fine as a boolean
-      expression, HAL/S documentation be damned!&nbsp; Here's a summary
-      of the event-expression formats that will be okay as far as PASS2
-      is concerned:<br>
-    </p>
     <ul>
-      <li>Expressions containing no logical operators at all.</li>
-      <li>Expressions containing <i>only</i> <tt>NOT</tt> operators
-        (or the aliases&nbsp; <tt>~</tt> or <tt>¬</tt>)</li>
-      <li>Expressions containing <i>only</i> <tt>AND</tt> operators
-        (or the alias <tt>&amp;</tt>)</li>
-      <li>Expressions containing <i>only</i> <tt>OR</tt> operators (or
-        the alias <tt>|</tt>)</li>
+      <li><b>The BFS version of the HAL/S language, and the HAL/S
+          compiler, is a second-class citizen!</b>&nbsp; By that I mean
+        that it lacks features that the PFS version of the language has,
+        and there's not even any documentation — or at any rate, not any
+        documentation that has survived to get into my hands — to warn
+        you of what these <i>lacunae</i> may be.&nbsp; The only way
+        I've discovered them myself is to trip over them.&nbsp; Here are
+        my discoveries along those lines:</li>
+      <ul>
+        <li>In almost every compilation unit (or at least in most <code>PROGRAM</code>,
+          <code>PROCEDURE</code>, or <code>FUNCTION</code> units) using
+          the BFS version of the HAL/S compiler, you're expected to have
+          at least one instance of a <code>%SVCI(<i>N</i>)</code>
+          macro.&nbsp; PASS1 of the compiler, which parses your source
+          code, won't care about this, and hence you'll get no warning
+          until PASS2, the object-code generator, that anything's
+          wrong.&nbsp; What is <code>%SVCI(<i>N</i>)</code>, you
+          ask?&nbsp; I don't know, it's undocumented.&nbsp; It's
+          apparently a pre-defined macro understood by the
+          compiler.&nbsp; What are the legal values of <i><code>N</code></i>?&nbsp;
+          I don't know for sure — it's <i>undocumented</i>, folks! —,
+          but -1 and 0 seem to be legal values.&nbsp; The value -1 is
+          associated with a constant called <code>QUIT</code> in BFS,
+          and 0 is associated with a constant called <code>NEXT</code>,
+          so perhaps that tells you something.&nbsp; Oh, and by the way,
+          don't use <code>%SVCI(-1)</code>, because the macro doesn't
+          expect to have an <i>expression</i> as an argument, and in
+          HAL/S -1 is not a literal numeric constant, but rather the
+          minus-operator acting on the constant 1.&nbsp; You can get
+          away with something like this, though:&nbsp; "<code>DECLARE
+            QUIT INTEGER CONSTANT(-1); ...; %SVCI(QUIT);</code>".&nbsp;
+          And <code>%SVCI(0)</code> is okay as-is.&nbsp; My advice
+          would be to just put in <code>%SVCI(0)</code> as the last
+          thing before the <code>CLOSE</code> of each compilation
+          unit.&nbsp; PASS2 will do essentially that anyway if you leave
+          out <code>%SVCI</code> entirely, but it will complain about
+          doing so, and nobody likes a whiny compiler. <br>
+        </li>
+      </ul>
     </ul>
-    <p>In other words, it's illegal to mix different types of logical
-      operators within a single event expression.&nbsp; That sounds
-      mighty fishy, so it would be fair of you to be suspicious that
-      this is not a real failure in Intermetrics/USA's PASS2, but
-      instead is my failure somehow in my compilation of it into our
-      "modern" HAL/S compiler <b>HALSFC</b>.&nbsp; Indeed, I was
-      suspicious myself.&nbsp; But not so!&nbsp; Tracking down where
-      error E102 is generated in the original PASS2 source code
-      (PASS2.PROCS/GENERATE.xpl), we discover the following program
-      comments:</p>
-    <pre>               /* OR OPERATOR IS BEING PROCESSED. IF THE      /*CR13220*/<br>               /* AND OPERATOR HAS NOT PREVIOUSLY BEEN USED   /*CR13220*/<br>               /* THEN CONTINUE, ELSE EMIT E102 ERROR.        /*CR13220*/<br><br>               /* NOT OPERATOR IS BEING PROCESSED. THE NOT    /*CR13220*/<br>               /* OPERATOR MAY NOT BE USED IN AN EXPRESSION   /*CR13220*/<br>               /* WITH MORE THAN 1 EVENT VARIABLE OR WITH     /*CR13220*/<br>               /* MULTIPLE NOT OPERATOR. IF THE NOT           /*CR13220*/<br>               /* OPERATOR IS USED ILLEGALLY EMIT E102 ERROR. /*CR13220*/<br><br>               /* AND OPERATOR IS BEING PROCESSED. IF THE     /*CR13220*/<br>               /* OR OPERATOR HAS NOT PREVIOUSLY BEEN USED    /*CR13220*/<br>               /* THEN CONTINUE. ELSE EMIT E102 ERROR.        /*CR13220*/<br></pre>
-    So these E102 errors really are due to a deficiency in the original
-    Intermetrics/USA PASS2, insofar as consistency with HAL/S
-    documentation is concerned.&nbsp; In fact, the notation /*CR13220*/,
-    when compared to comments elsewhere in GENERATE.xpl, tells us that
-    generation of E102 was added to HAL/S-FC on 2001-01-15 in release
-    31V0/16V0.&nbsp; Before that, I can only assume that PASS2 would
-    presumably fail in some mysterious way without even a relevant error
-    message as soon as it encountered an event expression it didn't
-    like.&nbsp; Whee!<br>
-    <ul>
-    </ul>
+    <blockquote>
+      <blockquote>
+        <blockquote><font size="-1"><b>Aside:</b>&nbsp; And okay, I
+            admit that there may be a <i>little</i> documentation if
+            you have access to some BFS source code, which I know that
+            most of you do not.&nbsp; The documentation is not for <code>%SVCI</code>,
+            but rather for <code>%SVC</code> ... which may or may not
+            be related, but is at least somewhat consistent:<br>
+          </font>
+          <table cellspacing="2" cellpadding="2" border="1">
+            <tbody>
+              <tr>
+                <th valign="top"><font size="-1">Mnemonic</font><br>
+                </th>
+                <th valign="top"><font size="-1">Value<br>
+                  </font></th>
+                <th valign="top"><font size="-1">Description<br>
+                  </font></th>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">QUIT<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0xFFFF<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Return to dispatcher
+                    &amp; detach self, no parameter list<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">NEXT<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0000<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Return to dispatcher,
+                    no parameter list<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">RESTART<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x000F<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Software restart<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">SUBLIBER<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0014<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">HAL/S subroutine
+                    library error recovery<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">APIO<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0015<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Aperiodic I/O request<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">ATTACH<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0016<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Insert module in
+                    schedule &amp;/or set initial entry (carry=1)<br>
+                  </font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">DETACH<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0017<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Remove module from
+                    schedule</font></td>
+              </tr>
+              <tr>
+                <td valign="top"><code><font size="-1">STOP<br>
+                    </font></code></td>
+                <td valign="top"><code><font size="-1">0x0018<br>
+                    </font></code></td>
+                <td valign="top"><font size="-1">Halt module &amp;
+                    detach<br>
+                  </font></td>
+              </tr>
+            </tbody>
+          </table>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+    <blockquote>
+      <ul>
+        <li>BFS apparently does not have any of the "real-time"
+          functionality designed into HAL/S.&nbsp; I'm not sure how far
+          that concept extends, but most or all of what you find in <a
+            moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=229">Ryer's
+            Chapter 12, "Real-Time Statements"</a>, though processed
+          successfully by <i>either</i> the PFS or BFS versions of the
+          HAL/S compiler's PASS1 (the parser), will nevertheless cause
+          the BFS version of PASS2 (the object-code generator) to abort
+          with an error message.&nbsp; Examples of missing goodies are <code>RUNTIME</code>,
+          <code>SCHEDULE</code>, <code>WAIT</code>, <code>SIGNAL</code>,
+          <code>UPDATE</code>, <code>EXCLUSIVE</code>, and so on.</li>
+        <li>The BFS form of the compiler doesn't allow a number of
+          features for the error trap ("<code>ON ERROR</code> ...") that
+          standard HAL/S and the PFS form of the compiler do:</li>
+        <ul>
+          <li>In BFS, the <code>ON ERROR</code> feature supports only
+            the form "<code>ON ERROR <i>statement</i>;</code>", and
+            does not support the forms "<code>ON ERROR$(<i>group</i>:) <i>statement</i>;</code>"
+            or "<code>ON ERROR$(<i>group</i>:<i>number</i>) <i>statement</i>;</code>".</li>
+          <li>In BFS, "<code>ON ERROR SYSTEM;</code>", which means to
+            take the system-default action upon error, is not allowed.</li>
+          <li>In BFS, "<code>ON ERROR IGNORE;</code>", whose meaning is
+            obvious, is not allowed.</li>
+          <li>In BFS, <code>ON ERROR</code> can only be in a <code>PROGRAM</code>
+            or <code>TASK</code> block (and not within <code>PROCEDURE</code>
+            or <code>FUNCTION</code>).<br>
+          </li>
+          <li>In BFS, only one <code>ON ERROR</code> is allowed per <code>PROGRAM</code>
+            or <code>TASK</code>.</li>
+        </ul>
+      </ul>
+    </blockquote>
     <p> </p>
     <p> </p>
     <h1><a name="options1"></a>Compiler Options, Part One</h1>
