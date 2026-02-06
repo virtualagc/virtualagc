@@ -4,6 +4,9 @@ C/ determines the average time required to do so.
 
   EXAMPLE_1:
   PROGRAM;
+Y    DECLARE VRUNTIM SCALAR INITIAL(1000000.0);
+Z    REPLACE VRUNTIM BY "RUNTIME";
+
      DECLARE M MATRIX(5, 5);
      DECLARE N MATRIX(5, 5);
      DECLARE TIME ARRAY(100) SCALAR INITIAL(0);
@@ -19,12 +22,12 @@ S               J,K
 
            END;
         END;
-M       TIME  = RUNTIME;
+M       TIME  = VRUNTIM;
 S           I
 
 E       *   *-1
 M       N = M  ;
-M       TIME  = RUNTIME - TIME ;
+M       TIME  = VRUNTIM - TIME ;
 S           I                 I
 
      END;  
@@ -52,4 +55,5 @@ S                     I
      END;
      TMEAN = TMEAN / 100;
      WRITE(6) 'TMEAN=', TMEAN, ', TMAX=', TMAX, ', TMIN=', TMIN;
+Y %SVCI(0);
   CLOSE EXAMPLE_1;

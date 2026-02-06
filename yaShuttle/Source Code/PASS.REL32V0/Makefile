@@ -201,7 +201,7 @@ test:
 $(TARGETS):
 	@echo Building HAL/S-FC $@ ...
 	@cd $(subst AUXP.,AUX_,$@.PROCS) && \
-	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
+	$(XCOMI) $(XEXTRA) --identifier="REL32V0   " --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
 	mv $@$(EXT) ../HALSFC-$@$(EXT)
 
@@ -209,7 +209,7 @@ $(TARGETS):
 $(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
 	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
-	$(XCOMI) $(XEXTRA) --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
+	$(XCOMI) $(XEXTRA) --identifier="BFC-17.0  " --cond=B --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
 	mv $@$(EXT) ../HALSFC-$@$(EXT)
 

@@ -2,10 +2,14 @@ C/ From PDF p. 234 of "Programming in HAL/S".
 
   X:
   PROGRAM;
+Y    DECLARE VRUNTIM SCALAR INITIAL(1000000.0);
+Z    REPLACE VRUNTIM BY "RUNTIME";
+
   P:
   TASK;
   CLOSE P;
      SCHEDULE P IN 5.4 PRIORITY(49), 
-                        REPEAT EVERY .03 UNTIL RUNTIME + 100;
+                        REPEAT EVERY .03 UNTIL VRUNTIM + 100;
+Y %SVCI(0);
   CLOSE X;
   

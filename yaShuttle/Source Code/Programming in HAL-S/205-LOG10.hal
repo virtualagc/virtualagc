@@ -7,11 +7,10 @@ C/ From PDF p. 205 in "Programming in HAL/S".
         RETURN LOG(X) / LOG(10);
      ELSE
         DO;
-M          SEND ERROR   ;
-S                    9:1
-
+Z          SEND ERROR$(9:1);
            RETURN LOG(ABS(X)) / LOG(10);
            
         END;
+Y %SVCI(0);
   CLOSE LOG10;
   

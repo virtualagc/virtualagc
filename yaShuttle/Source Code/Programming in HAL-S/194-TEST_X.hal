@@ -8,8 +8,8 @@ C/ From PDF p. 194 of "Programming in HAL/S".
 C       .
 C       .
 C       .               
-M    ON ERROR
-S            IO:5
+Y    ON ERROR
+Z    ON ERROR$(IO:5)
 
         DO;
            WRITE(6) 'TEST RESULTS FOLLOW';
@@ -22,5 +22,6 @@ C       .
 C       .
 C       .
      END;
+Y %SVCI(0);
   CLOSE;
   

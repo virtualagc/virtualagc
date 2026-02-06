@@ -2733,7 +2733,7 @@ MONITOR14(uint32_t n, uint32_t a) {
 uint32_t
 MONITOR15(void) {
   fflush(stdout);
-  fprintf(stderr, "FYI: MONITOR(15) only partially implemented\n");
+  //fprintf(stderr, "FYI: REV_CAT for SDL via MONITOR(15) not implemented.\n");
   fflush(stderr);
   return 0xF0F00000;
 }

@@ -3,7 +3,8 @@ C/ have been removed from array variables, since they are not legal
 C/ HAL/S syntax.
 
   MEAN:
-  FUNCTION(A) SCALAR EXCLUSIVE;
+Y FUNCTION(A) SCALAR;
+Z FUNCTION(A) SCALAR EXCLUSIVE;
      DECLARE A ARRAY(*) SCALAR;
      DECLARE TOTAL SCALAR INITIAL(0) AUTOMATIC;
      DO FOR TEMPORARY I = 1 TO SIZE(A);
@@ -12,5 +13,6 @@ S                        I
 
      END;
      RETURN TOTAL / SIZE(A);
+Y %SVCI(0);
   CLOSE MEAN;
   

@@ -6,24 +6,20 @@ C/ From PDF p. 199 in "Programming in HAL/S".
                 A INITIAL(10), B CONSTANT(11), C INITIAL(12);
      DECLARE INTEGER,
                 X CONSTANT(13), Y INITIAL(14), Z CONSTANT(15);
-     ON ERROR
+    ON ERROR
         DO;
            WRITE(6) A, B, C, X, Y, Z;
            RETURN;
         END;
-M    ON ERROR
-S            10:5
-
-        RETURN;
-M    ON ERROR    IGNORE;
-S            10:
-
-M    ON ERROR    SYSTEM;
-S            4:2
+Z    ON ERROR$(10:5) RETURN;
+Z    ON ERROR$(10:)  IGNORE;
+Z    ON ERROR$(4:2)  SYSTEM;
 
 C       .
 C       .
 C       .
 
   LAST_CARD:
+
+Y %SVCI(0);
   CLOSE P;

@@ -16,13 +16,14 @@ M    S = ABVAL(HERE - THERE) / 2;
      T = SQRT(2 A S);
 E       .
 M    ACC_CMD = ON;
-     WAIT T;
+Z    WAIT T;
 E       .
 M    ACC_CMD = OFF;
 E       .
 M    DECC_CMD = ON;
-     WAIT T;
+Z     WAIT T;
 E       .
 M    DECC_CMD = OFF;
+Y %SVCI(0);
   CLOSE P;
   

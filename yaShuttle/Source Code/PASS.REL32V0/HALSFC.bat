@@ -113,6 +113,7 @@ if "%TARGET%". == "BFS". (
     set PASS4=HALSFC-PASS4
     set TEMPLIB=TEMPLIBB
     set CARDS=--pdso=3,cards,E
+    set TARGET=--bfs
 ) else (
     set PASS1=HALSFC-PASS1
     set FLO=HALSFC-FLO
@@ -123,6 +124,7 @@ if "%TARGET%". == "BFS". (
     set PASS4=HALSFC-PASS4
     set TEMPLIB=TEMPLIB
     set CARDS=--ddo=3,cards.bin,E
+    set TARGET=--pfs
 )
 set PARM_LIST=
 if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
@@ -147,7 +149,7 @@ set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CP
 if %TEST%x == TESTx (
 echo ======================================================
 ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || call :error_exit Utilities egrep/diff unavailable
-python "%HAL_S_FC%" %PARM_LIST% --templib --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
+python "%HAL_S_FC%" %PARM_LIST% %TARGET% --templib --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
 for %%i in ( %FILES_PORTED:"=% ) do copy %ported%..\%%i . >NUL 2>NUL
 egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt

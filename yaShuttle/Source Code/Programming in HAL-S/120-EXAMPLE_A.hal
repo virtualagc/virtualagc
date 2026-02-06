@@ -15,6 +15,8 @@ C/ be called repeatedly, and inside of a PROGRAM to do so.
   TEST_EXAMPLE_A: PROGRAM;
   
   DECLARE DATA_VALID ARRAY(4) BOOLEAN, AVERAGE SCALAR;
+Y    DECLARE VRUNTIM SCALAR INITIAL(1000000.0);
+Z    REPLACE VRUNTIM BY "RUNTIME";
   
     EXAMPLE_A:
     PROCEDURE(ALT, TIMETAG) ASSIGN(DATA_VALID, AVERAGE);
@@ -26,7 +28,7 @@ C/ be called repeatedly, and inside of a PROGRAM to do so.
                 TOTAL, NUMBER_GOOD;
      DECLARE AVERAGE SCALAR;
      DO FOR TEMPORARY J = 1 TO 4;
-M       IF RUNTIME - TIMETAG  > .1 OR ALT  <=0 OR ALT  > 50000 THEN
+M       IF VRUNTIM - TIMETAG  > .1 OR ALT  <=0 OR ALT  > 50000 THEN
 S                           J            J           J
 
 E           .
@@ -67,29 +69,29 @@ C  OR TOO LARGE OR TOO OLD OR TOO FAR FROM THE AVERAGE
   
   
   
-  
   CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-                 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, 
-                 RUNTIME-0.04)) 
+                 SCALAR(VRUNTIM-0.01, VRUNTIM-0.02, VRUNTIM-0.03, 
+                 VRUNTIM-0.04)) 
                  ASSIGN(DATA_VALID, AVERAGE);
   WRITE(6) AVERAGE, DATA_VALID;
   
   CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-                 SCALAR(RUNTIME-0.05, RUNTIME-0.06, 
-                 RUNTIME-0.08, RUNTIME-0.10))  
+                 SCALAR(VRUNTIM-0.05, VRUNTIM-0.06, 
+                 VRUNTIM-0.08, VRUNTIM-0.10))  
                  ASSIGN(DATA_VALID, AVERAGE);
   WRITE(6) AVERAGE, DATA_VALID;
   
   CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-                 SCALAR(RUNTIME-0.11, RUNTIME-0.12, 
-                 RUNTIME-0.13, RUNTIME-0.14)) 
+                 SCALAR(VRUNTIM-0.11, VRUNTIM-0.12, 
+                 VRUNTIM-0.13, VRUNTIM-0.14)) 
                 ASSIGN(DATA_VALID, AVERAGE);
   WRITE(6) AVERAGE, DATA_VALID;
   
     CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-                 SCALAR(RUNTIME-0.01, RUNTIME-0.02, 
-                 RUNTIME-0.03, RUNTIME-0.04)) 
+                 SCALAR(VRUNTIM-0.01, VRUNTIM-0.02, 
+                 VRUNTIM-0.03, VRUNTIM-0.04)) 
                 ASSIGN(DATA_VALID, AVERAGE);
   WRITE(6) AVERAGE, DATA_VALID;
   
+Y %SVCI(0);
   CLOSE TEST_EXAMPLE_A;

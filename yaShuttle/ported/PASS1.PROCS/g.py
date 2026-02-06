@@ -12,6 +12,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
             2023-09-07 RSB  Split off xplBuiltins.py to contain just the 
                             functions.
             2024-06-20 RSB  Stuff related to `D DOWNGRADE`
+            2026-02-04 RSB  Wasn't --pfs not recognized.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -101,6 +102,15 @@ for parmNum in range(1, len(sys.argv)):
         pass  # This case is handled by SYNTHESI.py.
     elif parm.startswith("--dummy="):
         pass
+    elif parm == '--pfs':
+        if parmNum > 1:
+            print("It is advised that --pfs be the leading command-line option", \
+                  file=sys.stderr)
+        pfs = True
+        pCON = pCONp
+        pPRO = pPROp
+        pDESC[bfsDESC] = "MFID"
+        pVALS[bfsDESC] = ""
     elif parm == '--bfs':
         if parmNum > 1:
             print("It is advised that --bfs be the leading command-line option", \
@@ -108,7 +118,6 @@ for parmNum in range(1, len(sys.argv)):
         pfs = False
         pCON = pCONb
         pPRO = pPROb
-        index = pDESC.index("MFID")
         pDESC[bfsDESC] = "OLDTPL"
         pVALS[bfsDESC] = 0
     elif parm == '--sanity':

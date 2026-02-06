@@ -86,6 +86,7 @@ then
 	PASS4=HALSFC-PASS4$EXT
 	TEMPLIB=TEMPLIBB$EXT
 	CARDS=--pdso=3,cards,E
+	TARGET=--bfs
 else
 	PASS1=HALSFC-PASS1$EXT
 	FLO=HALSFC-FLO$EXT
@@ -96,6 +97,8 @@ else
 	PASS4=HALSFC-PASS4$EXT
 	TEMPLIB=TEMPLIB
 	CARDS=--ddo=3,cards.bin,E
+	TARGET=--pfs
+	#TARGET=
 fi
 ERRORLIB="`which HALSFC-PASS1 | sed 's/HALSFC-PASS1/ERRORLIB/'`"
 PARM_LIST=${PARM_STRING//,/ }
@@ -122,7 +125,7 @@ then
         ported="`which HAL_S_FC.py`"
         ported="`dirname -- \"$ported\"`"
         ported="`dirname -- \"$ported\"`"
-        ( HAL_S_FC.py $PARM_LIST --templib --hal="$HALS_FILE" >pass1p.rpt ) && \
+        ( HAL_S_FC.py $TARGET $PARM_LIST --templib --hal="$HALS_FILE" >pass1p.rpt ) && \
         echo PASS1 cross-comparison test: || error_exit "Failed PASS1 cross-comparison test"
         for n in $FILES_PORTED ; do cp "$ported/$n" . ; done &>/dev/null
         egrep -v "$IGNORE_LINES" pass1.rpt >pass1A.rpt
