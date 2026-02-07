@@ -15,6 +15,7 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
                             my own `asciiToEbcdic`, for portability reasons.
             2026-01-31 RSB  `openGenericOutputDevice` now operates in cwd, not
                             in the script folder.
+            2026-02-06 RSB  Added support for PAGE_THROWN (for "D EJECT").
 '''
 
 import sys
@@ -656,7 +657,6 @@ class lineCount:
 lc = lineCount() 
 linesPerPage = 59  # Should get this from LINECT parameter.
 
-
 def OUTPUT(fileNumber, string):
     global headingLine, subHeadingLine, pageCount
     if fileNumber > 1:
@@ -683,7 +683,7 @@ def OUTPUT(fileNumber, string):
     if fileNumber == 1:
         ansi = string[:1]
         queue = []
-        if ansi == ' ': 
+        if ansi == ' ' or ansi == "E": 
             queue.append('')
         elif ansi == '0': 
             queue.append('')
@@ -713,7 +713,7 @@ def OUTPUT(fileNumber, string):
         else:
             queue.append(string[1:])
         for i in range(len(queue)):
-            if lc.LINE_COUNT == 0 or lc.LINE_COUNT >= linesPerPage:
+            if lc.LINE_COUNT == 0 or lc.LINE_COUNT >= linesPerPage or ansi == "E":
                 if pageCount > 0:
                     print('\n\f', end='')
                     print('----------------------------------------' \
@@ -730,6 +730,8 @@ def OUTPUT(fileNumber, string):
                 if len(subHeadingLine) > 0:
                     print(subHeadingLine)
                     lc.LINE_COUNT += 1
+                if ansi == "E":
+                    break
                 if lc.LINE_COUNT > 0:
                     print()
                     lc.LINE_COUNT += 1

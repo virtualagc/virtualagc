@@ -542,6 +542,7 @@ def STREAM():
             if (ll.C[0] == ll.EJECT_DIR) or (ll.C[0] == ll.SPACE_DIR):
                 PRINT_COMMENT(g.FALSE, l);
                 if ll.C[0] == ll.EJECT_DIR:
+                    OUTPUT(1, "E")
                     if not g.PAGE_THROWN or g.LOOKED_RECORD_AHEAD != 0:
                         g.LOOKED_RECORD_AHEAD = 0;
                         g.PAGE_THROWN = g.TRUE;
