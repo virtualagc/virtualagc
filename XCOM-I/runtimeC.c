@@ -14,6 +14,7 @@
  *              2026-01-30 RSB  Support for non-zero LINK() exit code.
  *              2026-02-03 RSB  `OUTPUT` now pads output record with ASCII or
  *                              EBCDIC spaces to the exact record size.
+ *              2026-02-09 RSB  Prep for -finstrument-functions.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -153,7 +154,7 @@ static uint8_t asciiToEbcdic[128] = {
   0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x07  /* xyz{|}~      */
 };
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 asciiToDescriptor(char *c) {
   descriptor_t *descriptor = nextBuffer();
   uint8_t *s = descriptor->bytes;
@@ -168,7 +169,7 @@ asciiToDescriptor(char *c) {
 #ifdef __clang__
 __attribute__((__format__ (__printf__, 2, 3)))
 #endif
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
   if (descriptor == NULL)
     descriptor = nextBuffer();
@@ -194,7 +195,7 @@ cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
 // necessary that it be within `memory` rather than in C memory, because we
 // need to be able to form string descriptors to point to it.  It starts
 // at &memory[PRIVATE_MEMORY] and is PRIVATE_MEMORY_SIZE bytes long.
-uint32_t
+uint32_t __attribute__ ((no_instrument_function))
 makeDescriptor(descriptor_t *descriptor) {
   static int nextPrivate = 0; /* 0 to PRIVATE_DATA_SIZE-1 */
   uint32_t returnValue = 0; /* default is NUL string */
@@ -259,7 +260,7 @@ static char ebcdicToAscii[256] = {
   '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , '\\'  , ' '
 };
 
-char *
+char * __attribute__ ((no_instrument_function))
 descriptorToAscii(descriptor_t *descriptor) {
   descriptor_t *returnValue = nextBuffer();
   uint8_t *c = returnValue->bytes, *s = descriptor->bytes;
@@ -514,7 +515,7 @@ optionsProcessor_t *optionsProcessor = NULL;
 
 // The backtrace is available in Linux and (I've read) Mac OS.  It's not
 // available in Windows, at least not with the same execinfo.h mechanism.
-void
+void __attribute__ ((no_instrument_function))
 printBacktrace(void)
 {
 #ifdef _EXECINFO_H
@@ -536,7 +537,7 @@ printBacktrace(void)
 #ifndef _CL_
 __attribute__((noreturn))
 #endif
-void
+void __attribute__ ((no_instrument_function))
 abend(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -551,7 +552,7 @@ abend(const char *fmt, ...) {
 }
 
 // Try to match a string to a Type 1 PARM field.  Returns 1 if found, 0 if not.
-int
+int __attribute__ ((no_instrument_function))
 matchType1(char *parm) {
   int i, len;
   for (i = 0; i < optionsProcessor->numParms1; i++)
@@ -597,7 +598,7 @@ matchType1(char *parm) {
     return 0;
   return 1;
 }
-int
+int __attribute__ ((no_instrument_function))
 matchType2(char *parm) {
   int i, len;
   char *s, *ss, *buffer;
@@ -633,7 +634,7 @@ matchType2(char *parm) {
   return 1;
 }
 
-void
+void __attribute__ ((no_instrument_function))
 parseParmField(int print) {
   sbuf_t parm;
   char *s, *ss;
@@ -718,7 +719,7 @@ parseParmField(int print) {
 
 // Doesn't just parse the command line, but also performs some other
 // initialization.
-int
+int __attribute__ ((no_instrument_function))
 parseCommandLine(int argc, char **argv)
 {
   int i, j, returnValue = 0, numArgs;
@@ -1109,7 +1110,7 @@ parseCommandLine(int argc, char **argv)
  */
 static descriptor_t buffers[MAX_BUFFS];
 static int currentBuffer;
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 nextBuffer(void)
 {
   descriptor_t *returnValue = NULL;
@@ -1134,7 +1135,7 @@ nextBuffer(void)
   return returnValue;
 }
 
-int
+int __attribute__ ((no_instrument_function))
 countBuffers(void) {
   int i, count = 0;
   for (i = 0; i <= MAX_BUFFS; i++)
@@ -1143,7 +1144,7 @@ countBuffers(void) {
   return count;
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 bitToCharacter(descriptor_t *bit) {
   if (bit->bitWidth > 32)
     {
@@ -1155,7 +1156,7 @@ bitToCharacter(descriptor_t *bit) {
 }
 
 // Used only by `lookupAddress`.
-static int
+static int __attribute__ ((no_instrument_function))
 cmpAddresses(const void *e1, const void *e2)
 {
   return ((memoryMapEntry_t *) e1)->address -
@@ -1163,19 +1164,19 @@ cmpAddresses(const void *e1, const void *e2)
 }
 
 // Used only by `lookupVariable` and `ADDR`.
-static int
+static int __attribute__ ((no_instrument_function))
 cmpMapSymbols(const void *e1, const void *e2) {
   return strcasecmp((*(memoryMapEntry_t **) e1)->symbol,
                     (*(memoryMapEntry_t **) e2)->symbol);
 }
-static int
+static int __attribute__ ((no_instrument_function))
 cmpString(const void *e1, const void *e2) {
   return strcasecmp(*(char **) e1, *(char **) e2);
 }
 
 // Look up the `memoryMap` entry associated with a given address.  Returns
 // either a pointer to the record, or else NULL if not found.
-memoryMapEntry_t *
+memoryMapEntry_t * __attribute__ ((no_instrument_function))
 lookupAddress(uint32_t address)
 {
   memoryMapEntry_t key, *found;
@@ -1190,7 +1191,7 @@ lookupAddress(uint32_t address)
 // guaranteed that there are no duplicates.  It's a curious omission, but there
 // seems to be no library function in C for this kind of a commonly-desired
 // search, so we have to roll our own binary search.
-memoryMapEntry_t *
+memoryMapEntry_t * __attribute__ ((no_instrument_function))
 lookupFloor(uint32_t address)
 {
   int start = 0, end = NUM_SYMBOLS, current;
@@ -1211,7 +1212,7 @@ lookupFloor(uint32_t address)
 
 // Look up the `memoryMap` entry associated with a given variable name.
 // Returns either a pointer to the record, or else NULL if not found.
-memoryMapEntry_t *
+memoryMapEntry_t * __attribute__ ((no_instrument_function))
 lookupVariable(char *symbol)
 {
   memoryMapEntry_t **found, key, *keyp = &key;
@@ -1244,7 +1245,7 @@ lookupVariable(char *symbol)
 //---------------------------------------------------------------------------
 // Runtime-library functions.
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 getFIXED(uint32_t address)
 {
   int32_t value;
@@ -1256,7 +1257,7 @@ getFIXED(uint32_t address)
   return value;
 }
 
-void
+void __attribute__ ((no_instrument_function))
 putFIXED(uint32_t address, int32_t value)
 {
   memory[address++] = (value >> 24) & 0xFF;
@@ -1265,7 +1266,7 @@ putFIXED(uint32_t address, int32_t value)
   memory[address] = value & 0xFF;
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 getBIT(uint32_t bitWidth, uint32_t address)
 {
   descriptor_t *value = nextBuffer();
@@ -1299,7 +1300,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
 }
 
 // Like `putBIT`, but for saving values of parameters.  See `putCHARACTERp`.
-void
+void __attribute__ ((no_instrument_function))
 putBITp(uint32_t bitWidth, uint32_t address, descriptor_t *value)
 {
   if (bitWidth > 32 && value->address > 0)
@@ -1308,7 +1309,7 @@ putBITp(uint32_t bitWidth, uint32_t address, descriptor_t *value)
     putBIT(bitWidth, address, value);
 }
 
-void
+void __attribute__ ((no_instrument_function))
 putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
 {
   uint32_t numBytes, destAddress;
@@ -1396,7 +1397,7 @@ STRING_GT(descriptor_t *s1, descriptor_t *s2) {
   return 0;
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 getCHARACTERd(uint32_t descriptor)
 {
   descriptor_t *returnValue = nextBuffer();
@@ -1422,7 +1423,7 @@ getCHARACTERd(uint32_t descriptor)
   return returnValue;
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 getCHARACTER(uint32_t address) {
   return getCHARACTERd(getFIXED(address));
 }
@@ -1430,7 +1431,7 @@ getCHARACTER(uint32_t address) {
 // Like putCHARACTER(), except for saving procedure parameters.  the difference
 // is that if possible it overwrites just the in-memory descriptor, giving
 // the procedure the possibility of using the original string in-place.
-void
+void __attribute__ ((no_instrument_function))
 putCHARACTERp(uint32_t address, descriptor_t *s) {
   if (s->numBytes > 0 && s->address >= 0)
     {
@@ -1442,7 +1443,7 @@ putCHARACTERp(uint32_t address, descriptor_t *s) {
     putCHARACTER(address, s);
 }
 
-void
+void __attribute__ ((no_instrument_function))
 putCHARACTER(uint32_t address, descriptor_t *str)
 {
 #ifdef REENTRY_GUARD
@@ -1498,14 +1499,14 @@ putCHARACTER(uint32_t address, descriptor_t *str)
   return;
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 fixedToCharacter(int32_t i) {
   int j = i;
   return cToDescriptor(NULL, "%d", j);
 }
 
 // Example characterToFixed(mEMITuEXTERNALxNEWBUFF, 10, mEMITuEXTERNALxJ);
-void
+void __attribute__ ((no_instrument_function))
 characterToShortInt(int inputAddress, int startIndex, int outputAddress) {
   descriptor_t *d = getCHARACTER(inputAddress);
   int n = atoi(d->bytes+startIndex);
@@ -1521,7 +1522,7 @@ characterToShortInt(int inputAddress, int startIndex, int outputAddress) {
 // As for BIT(33) and up, it appears to me that what's desired in those cases
 // is the descriptor, but I have no way to supply it from the provided
 // parameters.  That'll have to be handled upstream from here.
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 bitToFixed(descriptor_t *value)
 {
   int32_t numBytes, bitWidth, dirWidth;
@@ -1544,7 +1545,7 @@ bitToFixed(descriptor_t *value)
   return 0; // Can't get to here.
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 fixedToBit(int32_t bitWidth, int32_t value)
 {
   descriptor_t *buffer = nextBuffer();
@@ -1578,31 +1579,31 @@ fixedToBit(int32_t bitWidth, int32_t value)
   return buffer; // Can't get to here.
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xadd(int32_t i1, int32_t i2)
 {
   return i1 + i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsubtract(int32_t i1, int32_t i2)
 {
   return i1 - i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xminus(int32_t i)
 {
   return -i;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xmultiply(int32_t i1, int32_t i2)
 {
   return i1 * i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xdivide(int32_t i1, int32_t i2)
 {
   if (i2 == 0)
@@ -1610,57 +1611,57 @@ xdivide(int32_t i1, int32_t i2)
   return i1 / i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xmod(int32_t i1, int32_t i2)
 {
   return i1 % i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xEQ(int32_t i1, int32_t i2)
 {
   return i1 == i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xLT(int32_t i1, int32_t i2) {
   return i1 < i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xGT(int32_t i1, int32_t i2) {
   return i1 > i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xNEQ(int32_t i1, int32_t i2) {
   return i1 != i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xLE(int32_t i1, int32_t i2) {
   return i1 <= i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xGE(int32_t i1, int32_t i2) {
   return i1 >= i2;
 }
 
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xNOT(int32_t i1) {
   return ~i1;
 }
 
 #ifndef xOR
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xOR(int32_t i1, int32_t i2) {
   return i1 | i2;
 }
 #endif // xOR
 
 #ifndef xAND
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xAND(int32_t i1, int32_t i2){
   return i1 & i2;
 }
@@ -1670,7 +1671,7 @@ xAND(int32_t i1, int32_t i2){
 
 // Used by `xsXXX` functions, and not expected to be called directly.
 enum stringRelation_t { EQ, NEQ, LT, GT, LE, GE };
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 stringRelation(enum stringRelation_t relation,
                descriptor_t *d1,
                descriptor_t *d2) {
@@ -1696,32 +1697,32 @@ stringRelation(enum stringRelation_t relation,
   if (relation == GE) return comparison != -1;
   return 0; // Shouldn't ever get to here.
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(EQ, s1, s2);
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsLT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LT, s1, s2);
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsGT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GT, s1, s2);
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsNEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(NEQ, s1, s2);
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsLE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LE, s1, s2);
 }
-int32_t
+int32_t __attribute__ ((no_instrument_function))
 xsGE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GE, s1, s2);
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 xsCAT(descriptor_t *s1, descriptor_t *s2) {
   int length;
   descriptor_t *returnString = nextBuffer();
@@ -1736,7 +1737,7 @@ xsCAT(descriptor_t *s1, descriptor_t *s2) {
 // characters in them.  I convert those transparently to spaces, since
 // I've found empirically that that's what's needed to not mess up the
 // columnar alignment.  (It's still messed up, but just not so badly.)
-static char *
+static char * __attribute__ ((no_instrument_function))
 uncontrol(char *original) {
   static sbuf_t buf;
   char *s, *ss;
@@ -2456,7 +2457,7 @@ MONITOR8(uint32_t dev, uint32_t filenum) {
 // Convert a integer or floating point to IBM double-precision float.
 // Returns as a pair (msw,lsw), each of which are 32-bit integers,
 // or (0xff000000,0x00000000) on error.
-void
+void __attribute__ ((no_instrument_function))
 toFloatIBM(uint32_t *msw, uint32_t *lsw, double d) {
   int s; // The sign: 1 if negative, 0 if non-negative.
   int e; // Exponent.
@@ -2507,7 +2508,7 @@ toFloatIBM(uint32_t *msw, uint32_t *lsw, double d) {
 
 // Inverse of toFloatIBM(): Converts more-significant and less-significant
 // 32-bit words of an IBM DP float to a C double.
-double
+double __attribute__ ((no_instrument_function))
 fromFloatIBM(uint32_t msw, uint32_t lsw) {
     int s; // sign
     int e; // exponent
@@ -2660,7 +2661,7 @@ MONITOR12(uint32_t precision) {
   return asciiToDescriptor(s);
 }
 
-void
+void __attribute__ ((no_instrument_function))
 stripEol(char *s) {
   for (; *s; s++)
     if (*s == '\r' || *s == '\n')
@@ -2931,7 +2932,7 @@ DATE(void) {
   }
 #endif
 
-uint32_t
+uint32_t __attribute__ ((no_instrument_function))
 COREBYTE(uint32_t address) {
   if (address + 1 <= MEMORY_SIZE)
     return memory[address];
@@ -2939,7 +2940,7 @@ COREBYTE(uint32_t address) {
   return 0;
 }
 
-void
+void __attribute__ ((no_instrument_function))
 COREBYTE2(uint32_t address, uint32_t value) {
   if (address + 1 <= MEMORY_SIZE)
     {
@@ -2949,7 +2950,7 @@ COREBYTE2(uint32_t address, uint32_t value) {
   abend("COREBYTE write address overflows memory");
 }
 
-uint32_t
+uint32_t __attribute__ ((no_instrument_function))
 COREWORD(uint32_t address) {
   if (address + 4 <= MEMORY_SIZE)
     return getFIXED(address);
@@ -2957,7 +2958,7 @@ COREWORD(uint32_t address) {
   return 0;
 }
 
-void
+void __attribute__ ((no_instrument_function))
 COREWORD2(uint32_t address, uint32_t value) {
   if (address + 4 <= MEMORY_SIZE)
     {
@@ -2967,7 +2968,7 @@ COREWORD2(uint32_t address, uint32_t value) {
   abend("COREWORD write address overflows memory");
 }
 
-int16_t
+int16_t __attribute__ ((no_instrument_function))
 COREHALFWORD(uint32_t address) {
   if (address + 2 <= MEMORY_SIZE)
     return (memory[address] << 8) | memory[address + 1];
@@ -2975,7 +2976,7 @@ COREHALFWORD(uint32_t address) {
   return 0;
 }
 
-void
+void __attribute__ ((no_instrument_function))
 COREHALFWORD2(uint32_t address, int32_t value) {
   if (address + 2 <= MEMORY_SIZE)
     {
@@ -2987,7 +2988,7 @@ COREHALFWORD2(uint32_t address, int32_t value) {
 }
 
 // Like `rawADDR` except that it aborts upon error.
-uint32_t
+uint32_t __attribute__ ((no_instrument_function))
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   int address = rawADDR(bVar, bIndex, fVar, fIndex);
   if (address == -1)
@@ -3015,7 +3016,8 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
 }
 
 // Returns the address, or else a negative number upon error.
-int rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
+int __attribute__ ((no_instrument_function))
+rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   if (bVar != NULL) // BASED variable.
     {
       int i, j;
@@ -3186,7 +3188,7 @@ struct allocated_t {
   char *symbol; // Just for debugging.
   int index; // Just for debugging.
 };
-int
+int __attribute__ ((no_instrument_function))
 cmpAllocations(const void *e1, const void *e2)
 {
   struct allocated_t *a1, *a2;
@@ -3253,7 +3255,7 @@ cmpAllocations(const void *e1, const void *e2)
 // the function is recursive in the sense that if the entry being written is
 // from a `BASED` record, the function manufactures memoryMapEntry_t elements
 // (from basedField_t elements) and then calls itself.
-void
+void __attribute__ ((no_instrument_function))
 writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
   char prefix = isField ? '.' : '+', *datatype = entry->datatype,
        *symbol = entry->symbol;
@@ -3361,7 +3363,7 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
 #endif // STANDARD_XPL
 
 // Write entire COMMON file.
-int
+int __attribute__ ((no_instrument_function))
 writeCOMMON(FILE *fp) {
   if (fp == NULL)
     return 1;
@@ -3374,7 +3376,7 @@ writeCOMMON(FILE *fp) {
   return 0;
 }
 
-int
+int __attribute__ ((no_instrument_function))
 readCOMMON(FILE *fp) {
 #ifndef STANDARD_XPL
   int32_t _ALLOCATE_SPACE(int reset);
@@ -3622,7 +3624,7 @@ XPL_COMPILER_VERSION(uint32_t index){
   return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
 
-void
+void __attribute__ ((no_instrument_function))
 debugInline(int inlineCounter) {
   fprintf(stderr, "FYI: CALL INLINE %d\n", inlineCounter);
 }
@@ -3646,7 +3648,7 @@ debugInline(int inlineCounter) {
  */
 sbuf_t lastWatchFunction = "(Initial)";
 int lastWatchValue = -1;
-int
+int __attribute__ ((no_instrument_function))
 guardReentry(int reentryGuard, char *functionName) {
   if (reentryGuard)
     abend("Illegal reentry of function %s", functionName);
@@ -3666,7 +3668,7 @@ guardReentry(int reentryGuard, char *functionName) {
 int traceInlineEnable = 0;
 int detailedInlineEnable = 0;
 #ifdef TRACE_INLINES
-void
+void __attribute__ ((no_instrument_function))
 traceInline(char *msg) {
   if (traceInlineEnable)
     {
@@ -3675,7 +3677,7 @@ traceInline(char *msg) {
     }
 }
 
-void
+void __attribute__ ((no_instrument_function))
 detailedInlineBefore(int inlineCounter, char *instruction) {
   if (detailedInlineEnable)
     {
@@ -3687,7 +3689,7 @@ detailedInlineBefore(int inlineCounter, char *instruction) {
     }
 }
 
-void
+void __attribute__ ((no_instrument_function))
 detailedInlineAfter(void) {
   int i, value;
   if (detailedInlineEnable)

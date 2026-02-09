@@ -7,6 +7,9 @@
  *              XCOM-I itself.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-06-19 RSB  Split off from runtimeC.c.
+ *              2026-02-07 RSB  Added tracing functions (__cyg_profile_func_X)
+ *                              for use with gcc command-line switch
+ *                              -finstrument-functions
  *
  * These functions, many of which were formerly in runtimeC.c, have been
  * segregated here so that: a) I can easily eliminate them from the "production"
@@ -24,7 +27,7 @@
 // The `start` and `end` are addresses, and only variables within the
 // range start<=address<end are printed.  Either can be -1 to prevent it from
 // being used as a criterion.
-void
+void __attribute__ ((no_instrument_function))
 printMemoryMap(char *msg, int start, int end) {
   int i;
   printf("\n%s\n", msg);
@@ -126,7 +129,7 @@ printMemoryMap(char *msg, int start, int end) {
 
 // Convert the data of a BIT to a string in the currently-set radix.
 int bitBits = 4;
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 bitToRadix(descriptor_t *b) {
   descriptor_t *returnValue;
   int offset;
@@ -164,7 +167,7 @@ bitToRadix(descriptor_t *b) {
 }
 
 // Get an integer-like value from memory
-int *
+int * __attribute__ ((no_instrument_function))
 getIntegerFromAddress(char *datatype, int bitWidth, int address) {
   int value;
   int *returnValue = &value;
@@ -191,7 +194,7 @@ getIntegerFromAddress(char *datatype, int bitWidth, int address) {
 
 // Get value of an integer-like non-BASED non-indexed variable or a literal.
 // Returns a pointer to the value, or NULL if failure.
-int *
+int * __attribute__ ((no_instrument_function))
 getIntegerFromString(char *varString) {
   static int value;
   int *returnValue = &value;
@@ -220,7 +223,7 @@ getIntegerFromString(char *varString) {
 // mistake of using brackets rather than parentheses, brackets are accepted
 // in places of parentheses.  Indices may be either literal decimal numbers
 // or non-BASED, non-subscripted identifiers of variables.
-char *
+char * __attribute__ ((no_instrument_function))
 getXPL(char *identifier) {
   static char *errorMessage = "Cannot parse this";
   static sbuf_t returnValue = "Cannot parse this";
@@ -388,14 +391,14 @@ getXPL(char *identifier) {
 
 }
 
-void
+void __attribute__ ((no_instrument_function))
 printXPL(char *identifier) {
   fflush(stdout);
   fprintf(stderr, "\n%s", getXPL(identifier));
   fflush(stderr);
 }
 
-descriptor_t *
+descriptor_t * __attribute__ ((no_instrument_function))
 rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
   int32_t address = rawADDR(base, baseIndex, field, fieldIndex);
   if (foundRawADDR == NULL || address < 0 || \
@@ -421,7 +424,7 @@ rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
 
 // Functions to simplify interactive debugging.  They print out the value of
 // a variable in a human-friendly fashion.
-char *
+char * __attribute__ ((no_instrument_function))
 g0(char *identifier, memoryMapEntry_t *me) {
   static sbuf_t msg;
   uint32_t address = me->address, fixed = getFIXED(address);
@@ -442,7 +445,7 @@ g0(char *identifier, memoryMapEntry_t *me) {
   return msg;
 }
 
-char *
+char * __attribute__ ((no_instrument_function))
 g(char *identifier) {
   memoryMapEntry_t *me = lookupVariable(identifier);
   if (me == NULL)
@@ -460,7 +463,7 @@ g(char *identifier) {
  * This is for trying to check out the objects `LIB_NAMES`, `LIB_NAME_INDEX`,
  * `LIB_START`, etc., and associated functions.
  */
-void
+void __attribute__ ((no_instrument_function))
 checkoutPASS2(void) {
   uint32_t HASHSIZE = 49;
   uint32_t LIB_NUM = 282;
@@ -491,6 +494,133 @@ checkoutPASS2(void) {
     }
 }
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+// The following tracing functions are for use with the gcc switch
+// `-finstrument-functions` to set up a scheme for logging all function
+// entries and exits.
+//
+// As for the details of that log, there are two separate schemes implemented.
+// The most-preferable scheme is selected if `#define USE_DLADDR` is present,
+// or more typically, If the compiler switch `-DUSE_DLADDR` is used.
+// The less-preferable scheme is selected otherwise.  In the USE_DLADDR
+// case, the log human-friendly as-is.
+//
+// Absent USE_DLADDR, the log file contains pointers to functions rather than
+// names of functions; the pointers can be converted to names using the standard
+// utility addr2line, probably in a scripted fashion (using scripts not yet
+// written), or could be crudely viewed (without distinguishing between entries
+// vs exits) with a command like
+//	sed 's/^[ex] //' logfile | addr2line -e exefile -f -p
+//
+// There are a number of environment variables that affect logging if "exported":
+//	XCOMI_TRACE=F   F is the filename of the desired log file. If absent or
+//			blank, no logging is performed.
+//	XCOMI_MAX=N	The program exits once the number of function entries
+//			that are logged (function exits don't count!) exceeds
+//			XCOMI_MAX.  However, if N is negative, then this feature
+//			is disabled.  The default is -1.
+//	XCOMI_FLOOR=N	Logging is disabled unless the number of function
+//	XCOMI_CEILING=N	entries is in the range XCOMI_FLOOR to XCOMI_CEILING.
+//			However, this feature is disabled if XCOMI_CEILING is
+//			less than zero.  The default for both is -1.
+
+#include <stdlib.h>
+#include <stdio.h>
+#ifdef USE_DLADDR
+// Compile with: gcc -DUSE_DLADDR -rdynamic -ggdb -finstrument-functions -ldl
+// The output log contains lines like
+//	%s called from %s
+//	%s exited to %s
+// The man page incorrectly states that `#define _GNU_SOURCE` must be used
+// for dlfcn.h, but it's actually __USE_GNU.
+#define __USE_GNU
+#include <dlfcn.h>
+#else
+// Compile with: gcc --static -ggdb -finstrument-functions
+// The output log will have lines like
+//	e %p %p		(function entry, pointer to function, pointer to caller)
+//	x %p %p		(function exit, pointer to function, pointer to caller)
+// A script, perhaps in Python, could be written to translate each %p
+// to a function name, one at a time.
+#endif
+
+static FILE *fpTrace = NULL;
+static int floorTrace = -1, ceilingTrace = -1, maxTrace = -1;
+int countTrace = -1;  // Don't make this static; may want to see its value in gdb.
+static int indentTrace = 3;
+
+// Function called before main to open the log file
+void __attribute__ ((constructor)) trace_begin (void) {
+  char *s;
+  s = getenv("XCOMI_TRACE");
+  if (s != NULL)
+    fpTrace = fopen(s, "w");
+  s = getenv("XCOMI_FLOOR");
+  if (s != NULL)
+    floorTrace = atoi(s);
+  s = getenv("XCOMI_CEILING");
+  if (s != NULL)
+    ceilingTrace = atoi(s);
+  s = getenv("XCOMI_MAX");
+  if (s != NULL)
+    maxTrace = atoi(s);
+}
+
+// Function called after main to close the log file
+void __attribute__ ((destructor)) trace_end (void) {
+  if (fpTrace != NULL) {
+    fclose(fpTrace);
+    fpTrace = NULL;
+  }
+}
+
+static void __attribute__ ((no_instrument_function))
+loggerTrace(char entryOrExit, void *func, void *caller) {
+  if (fpTrace != NULL) {
+#ifdef USE_DLADDR
+	const char *funcName = "?", *callerName = "?";
+    Dl_info funcInfo, callerInfo;
+    if (dladdr(func, &funcInfo))
+    	funcName = funcInfo.dli_sname;
+    if (dladdr(caller, &callerInfo))
+	callerName = callerInfo.dli_sname;
+    if (entryOrExit == 'e') {
+    	fprintf(fpTrace, "%d: %s called from %s\n", countTrace, funcName, callerName);
+    } else {
+        fprintf(fpTrace, "%*s%s exited to %s\n", indentTrace, "", funcName, callerName);
+    }
+#else
+    fprintf(fpTrace, "%c %p %p\n", entryOrExit, func, caller);
+#endif
+    fflush(fpTrace);
+  }
+}
+
+// Called on function entry
+void __attribute__ ((no_instrument_function)) __cyg_profile_func_enter(void *func, void *caller) {
+  countTrace++;
+  if (countTrace == 10 || countTrace == 100 || countTrace == 1000 ||
+      countTrace == 10000 || countTrace == 100000 || countTrace == 1000000 ||
+      countTrace == 10000000 || countTrace == 100000000 ||
+      countTrace == 1000000000 || countTrace == 10000000000)
+    indentTrace++;
+  if (countTrace > maxTrace && maxTrace >= 0)
+    exit(0);
+  if (countTrace < floorTrace || (countTrace >= ceilingTrace && ceilingTrace >= 0))
+    return;
+  loggerTrace('e', func, caller);
+}
+
+// Called on function exit
+void __attribute__ ((no_instrument_function)) __cyg_profile_func_exit(void *func, void *caller) {
+  if (countTrace < floorTrace || (countTrace >= ceilingTrace && ceilingTrace >= 0))
+    return;
+  loggerTrace('x', func, caller);
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // DEBUGGING_AID
 
