@@ -10,6 +10,7 @@ History:        2022-12-16 RSB  Split off the nascent form from
                                 yaHAL-S-FC.py.
                 2023-02-18 RSB  Added the optimizePALMAT() pass.
                 2025-01-04 RSB  Correction to `help.
+                2026-02-12 RSB  Implicit CARDTYPE=YCZM
 """
 
 #-------------------------------------------------------------------------
@@ -258,6 +259,11 @@ def interpreterLoop(shouldColorize=False, \
                 prompt = prompt + ansiPrefix + "\033[0m" + ansiSuffix
             line = input(prompt)
             print(colorize, end="")
+            if strict:
+                if line[:1] == "Y":
+                    line = "C" + line[1:]
+                elif line[:1] == "Z":
+                    line = "M" + line[1:]
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
