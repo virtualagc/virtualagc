@@ -37,14 +37,14 @@ set FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 set FILES_PORTED="%FILES_PORTED:"=% SOURCECO.txt"
 set FILES_PORTED="%FILES_PORTED:"=% LIT_CHAR.bin SYM_TAB.json"
 set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json"
-set FILES_LOCAL="LISTING2.txt COMMON0.out halmat.bin"
-set FILES_LOCAL="%FILES_LOCAL:"=% litfile.bin vmem.bin COMMON1.out COMMON2.out"
+set FILES_LOCAL="LISTING2.txt COMMON0.out"
+set FILES_LOCAL="%FILES_LOCAL:"=% vmem.bin COMMON1.out COMMON2.out"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON3.out COMMON4.out auxmat.bin objcode.bin"
-set FILES_LOCAL="%FILES_LOCAL:"=% optmat.bin pass1A.rpt"
-set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt opt.rpt aux.rpt"
+set FILES_LOCAL="%FILES_LOCAL:"=% pass1A.rpt"
+set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt aux.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt cards monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
-set FILES_PRESERVE=TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt pass2.rpt cards.bin listing2.txt
+set FILES_PRESERVE=litfile.bin TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin listing2.txt "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
 goto :main
