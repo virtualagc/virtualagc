@@ -12,6 +12,7 @@ References: https://www.ibiblio.org/apollo/hal-s-compiler.html#PALMAT
             [HPG] HAL/S Programmer's Guide.
             [PIH] Programming in HAL/S.
 History:    2023-01-01 RSB  Began.
+            2026-02-12 RSB  Corrected some calls to readItemLUN5().
 
 I think that this code (unlike my normal code), though perhaps not 
 exactly a walk in the park to brows through it, is reasonably clean.  
@@ -1122,7 +1123,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 if semicolon:
                                     break
                                 for j in range(numCols):
-                                    value = readItemLUN5(source)
+                                    value = readItemLUN5(PALMAT, source)
                                     if value == ";":
                                         semicolon = True
                                         break
@@ -1130,7 +1131,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                         continue
                                     attributes["value"][i][j] = float(value)
                         elif "integer" in attributes:
-                            value = readItemLUN5(source)
+                            value = readItemLUN5(PALMAT, source)
                             if value == ";":
                                 semicolon = True
                             elif value == "":
@@ -1138,7 +1139,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             else:
                                 attributes["value"] = int(value)
                         elif "scalar" in attributes:
-                            value = readItemLUN5(source)
+                            value = readItemLUN5(PALMAT, source)
                             if value == ";":
                                 semicolon = True
                             elif value == "":
