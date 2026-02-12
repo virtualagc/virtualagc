@@ -32,6 +32,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
         <li><a moz-do-not-send="true" href="#partial">Partial Linking By
             the Assembler Itself</a></li>
         <li><a moz-do-not-send="true" href="#unknownDatatype">Non-System/360
+
             Datatype 0x84</a></li>
         <li><a moz-do-not-send="true" href="#characterEncoding">Encoding
             of Character Data in Object Decks</a></li>
@@ -88,6 +89,51 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       project.&nbsp; But since we have access to neither of those
       linkers, any intuition of mine about them is without value.<br>
     </p>
+    <blockquote>
+      <p><font size="-1"><b>Important note regarding BFS:</b>&nbsp;
+          Recall that Space Shuttle flight software came in two distinct
+          flavors, namely the <i>Primary Flight Software</i> (referred
+          to as PFS, or loosely but more commonly as PASS) and the <i>Backup
+            Flight Software</i> (BFS).&nbsp; PFS and BFS were developed
+          mostly independently of each other, but more than that, their
+          development tools differed as well.&nbsp; For example, PFS and
+          BFS <i>nominally</i> were compiled using the same HAL/S
+          compiler (HAL/S-FC), in fact there were two incompatible
+          versions of HAL/S-FC, a PFS flavor and a BFS flavor. &nbsp;
+          More importantly for us in the context of the present
+          discussion, PFS and BFS used different linker software.&nbsp;
+          The comments earlier about "the AP-101 link editor",
+          HALLINK-FC, and so on, were written exclusively in references
+          to PFS, and end up having no applicability to BFS.&nbsp;
+          Rather than using the AP-101 link editor, BFS was linked using
+          a program called <b>PILOT</b> (Program Integration and
+          Loading Tool).&nbsp; Furthermore, while object code produced
+          by the PFS version of HAL/S-FC was in a modified System/360
+          format, object code produced by the BFS version of HAL/S-FC
+          was instead in PILOT format.<br>
+        </font></p>
+      <p><font size="-1">Alas! I have no information whatsoever about
+          PILOT, and in particular have no information about its
+          object-file format.&nbsp; The acronym "PILOT" is, of course,
+          quite unfortunate from the point of view of trying to find
+          available information via a search engine like Google, since
+          all you'll discover is information about how to pilot a Space
+          Shuttle.&nbsp; That said, I don't think that (at least at
+          present) there actually is any surviving information about
+          PILOT.&nbsp; If you have any such documentation, send it to
+          me!&nbsp; Or perhaps someone with more time on their hands
+          than I have could reverse engineer the format from the
+          object-code generator in <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">PASS2
+            of the HAL/S-FC source code</a>.&nbsp; Or perhaps not.&nbsp;
+          If you're the kind of person who thinks they can do something
+          like that, then <i>please</i> do, and feed the results to me!<br>
+        </font></p>
+      <p><font size="-1">At any rate, the discussion throughout the
+          remainder of this page relates entirely to PFS/PASS, whereas
+          BFS will not be referred to again.<br>
+        </font> </p>
+    </blockquote>
     On the other hand, we <i>do</i> have a modern port (from the XPL
     programming language into the Python programming language) of the
     original HAL/S compiler.&nbsp; That being the case, we can use the
@@ -116,6 +162,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       actual legacy AP-101S software, so only those features of the
       object-file format relevant to that surviving software are likely
       to be implemented in <b>HALLINK101S</b>; contrariwise, some <i>non</i>-System/360
+
       AP-101S-specific features may appear in the object files.&nbsp;
       For example, "records" in an object file are described as being of
       6 types, known as ESD, TXT, RLD, SYM, XSD, and END, but the XSD
@@ -165,6 +212,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
             Assembler Language - OS Release 21</a>".&nbsp; Manual for
           the System/360 macro assembler upon which <b>ASM101S</b> is
           modeled.</li>
@@ -173,6 +221,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
             collection of notes about the AP-101S/AP-101B</a>.</li>
         <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
 
 
 
@@ -209,10 +258,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
               I and II</a>:&nbsp; :&nbsp; Principles of Operation for
             PCI/PCO and MSC</li>
           <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
 
 
 
@@ -245,11 +296,13 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
 
 
 
+
             Shuttle Advanced System/4 Pi Model AP-101 Central Processor
             Unit Technical Description</a>".&nbsp; Note that this
           predates the AP-101S model and doesn't precisely match it.</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
             HAL/S Programming Course</a><br>
         </li>
       </ul>
@@ -259,15 +312,18 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
             href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">The
 
 
+
             Wikipedia article "OS/360 Object File Format"</a></li>
         <li><a moz-do-not-send="true"
             href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
 
 
             IBM document "MVS Program Management: Advanced Facilities",
             Appendix A</a></li>
         <li><a moz-do-not-send="true"
 href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assembler_Programmers_Guide_Sep82.pdf#page=83">The
+
 
 
             IBM document "OS/VS-VM/370 Assembler Programmer's Guide",
@@ -287,6 +343,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
     by the HAL/S compiler (or by <b>ASM101S</b>).&nbsp; For example,
     consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/140-STATISTICS.hal">this
+
 
 
       HAL/S program</a> 140-STATISTICS from the book <i>Programming in
@@ -336,7 +393,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page=481">the
 
 
+
       "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
 
 
     That course explains that each HAL/S "compilation unit" is
@@ -365,6 +424,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         is a HAL/S compilation unit containing data or code (such our <code>STATISTICS
 
 
+
           PROCEDURE</code>) accessible by other compilation units.&nbsp;
         <code>ZCON</code> code and <code>REMOTE</code> data are "far
         away" in the AP-101S address space from the code accessing them,
@@ -373,6 +433,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         and <code>ESUM</code> are AP-101S assembly-language functions
         from <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
           HAL/S runtime library</a>.</font><br>
@@ -523,6 +584,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       As for condition #2, the only <font color="#663300"><code>USING</code></font>
       pseudo-op follows the instruction rather than precedes it, so
       there is no way for the assembler to make any assumptions about
@@ -562,6 +624,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p>As it happens, there's <a moz-do-not-send="true"
         href="ASM101S.html#literals">discussion on our page about the
         modern AP-101 assembler that concerns the available datatypes</a>.&nbsp;
+
       That discussion points out a single AP-101S-specific datatype, Z,
       that's speculated to be <i>unrelated</i> to the System/360
       datatype also designated as Z ("zoned decimal", 0x34).&nbsp; For
@@ -653,6 +716,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/037-ROOTS.hal">this
 
 
+
       HAL/S program adapted from the book <i>Programming in HAL/S</i></a>,
     with a few of its character-string literals highlighted in various
     colors:<br>
@@ -671,6 +735,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
 
 
+
         There's no easy way, as far as I know, using just information
         within the object decks themselves, to easily locate individual
         unnamed string literals within the TXT records of the object
@@ -680,6 +745,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         invalidate the conclusions in any way.&nbsp; In the next
         section, we'll learn enough to infer that the these strings <i>should</i>
         have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
 
 
         And in portions of the reverse-engineering report that I've
@@ -705,6 +771,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/021-SIMPLE.hal">this
+
 
 
         sample HAL/S source code</a> for a <code>PROGRAM</code> based
@@ -783,7 +850,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-11-29<br>
+          2026-02-08<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

@@ -68,6 +68,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
             the Compiler Itself</a><br>
         </li>
       </ul>
+      <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#glossary">A Glossary and Some
           References</a></li>
       <ul>
@@ -160,16 +162,17 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       flight software, even if only as a self-enrichment pastime, also
       needs appropriate development tools for working with HAL/S.&nbsp;
       The Space Shuttle's flight software came in two very-different
-      flavors, namely the <i>primary</i> flight software (PASS) and the
-      <i>backup</i> flight software (BFS), with the BFS being basically
-      a clean-room implementation of a subset of PASS
-      functionality.&nbsp; By emphasizing PASS and BFS I don't mean to
-      disparage Galileo's software.&nbsp; However, I have seen no
-      Galileo flight software, and as far as I know right now have no
-      prospect for ever getting my hands on it.&nbsp; If you have
-      Galileo flight software source code, or even related
-      documentation, by all means contact me.&nbsp; I'll expand the
-      scope of my HAL/S efforts quicker than you can bat an eyelash.<br>
+      flavors, namely the <i>primary</i> flight software (PFS, but
+      more-commonly even if more-loosely referred to as PASS) and the <i>backup</i>
+      flight software (BFS), with the BFS being basically a clean-room
+      implementation of a subset of PASS functionality.&nbsp; By
+      emphasizing PASS and BFS I don't mean to disparage Galileo's
+      software.&nbsp; However, I have seen no Galileo flight software,
+      and as far as I know right now have no prospect for ever getting
+      my hands on it.&nbsp; If you have Galileo flight software source
+      code, or even related documentation, by all means contact
+      me.&nbsp; I'll expand the scope of my HAL/S efforts quicker than
+      you can bat an eyelash.<br>
     </p>
     <p><a moz-do-not-send="true"
         href="Shuttle/TDA%20Progress%20Report%2042-64.pdf">A 1981
@@ -251,30 +254,39 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
         href="hal-s-interpreter.html">the interpreter</a> alone.&nbsp; I
       will not mention it again here.<br>
     </p>
-    <p>The HAL/S development tools we focus on here are:<br>
+    <p>The HAL/S development tools we focus on <i>here</i> are:<br>
     </p>
     <ol>
       <li>A HAL/S compiler, implementing 100% of HAL/S features,
-        producing IBM AP-101S object code.</li>
-      <li>An IBM AP-101S assembler.</li>
-      <li>An IBM AP-101S linker.</li>
-      <li>An IBM AP-101S emulator.</li>
+        producing IBM AP-101S object code in either PFS or BFS file
+        formats as appropriate.&nbsp; That's the topic of the present
+        page, of course!<br>
+      </li>
+      <li>An <a moz-do-not-send="true" href="ASM101S.html">IBM AP-101S
+          assembler</a>, largely complete (I think), but presently able
+        to produce object code only in the PFS-specific file format (not
+        BFS).</li>
+      <li>An <a moz-do-not-send="true" href="HALLINK101S.html">IBM
+          AP-101S linker for PFS object code</a>, which doesn't
+        presently exist but whose page has significant documentation
+        concerning the PFS object-file format.&nbsp; Several people
+        outside the umbrella of Virtual AGC proper have some form of
+        linker, but I have no information as of yet to report concerning
+        them.<br>
+      </li>
+      <li>A PILOT (Program Integration and Loading Tool) linker for BFS
+        object code, which doesn't presently exist, and for which no
+        documentation whatever is known to have survived.<br>
+      </li>
+      <li>IBM AP-101S emulator (possibly with integrated debugger), on
+        which several people outside the aegis of the Virtual AGC
+        Project proper have worked on their own versions, at one or
+        another stages of development, but concerning which I have no
+        specific information to offer at present.<br>
+      </li>
     </ol>
-    <p>The list above is in some ways a roadmap for future development,
-      because at the present time we have only the compiler and <a
-        moz-do-not-send="true" href="ASM101S.html">the assembler</a>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-      So the bulk of the discussion will concern just the compiler.<br>
+    <p>The list above can be regarded a roadmap for development of the
+      development tools.<br>
     </p>
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
@@ -609,8 +621,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       than the first line, the rest is easily understood by consulting
       Ryer's book.&nbsp; The first line is an example of a compiler
       directive, which in this case is specific to the Intermetrics
-      implementation — so Ryer's won't tell you anything about them —
-      and just affects what items appear in the compiler's
+      implementation — so Ryer's book won't tell you anything about them
+      — and just affects what items appear in the compiler's
       printouts.&nbsp; I've altered the background color of this snippet
       of code to call attention to the fact that compiler directives
       begin in column 1, whereas all code begins or beyond column 2.<br>
@@ -4749,6 +4761,159 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p><a moz-do-not-send="true" href="XPL-I.html#debugging">What little
         else I can say about debugging can be found on the XPL/I page</a>.<br>
     </p>
+    <h1><a name="halmat"></a>The Mystery of HALMAT</h1>
+    <p>All throughout this page, we've seen numerous references to
+      "HALMAT", with nary a suggestion that HALMAT might be of use to us
+      today in our space-shuttling activities, and only minimal
+      explanations as to what HALMAT might be.&nbsp; But the truth is
+      that HALMAT could indeed potentially be of a lot of use, and so it
+      may behoove us to give a little better explanation of what HALMAT
+      is and how it might be of use <i>now</i> as opposed to back in
+      the Space Shuttle era.<br>
+    </p>
+    <p>As you already know, the original compiler used for converting
+      Space Shuttle flight software written in the high-level language
+      known as HAL/S into assembly-language object code for the Space
+      Shuttle's general purpose computers was partitioned into several
+      successive passes as follows:<br>
+    </p>
+    <ul>
+      <li>PASS1 parsed the HAL/S source code and generated a
+        representation of the software in terms of an "intermediate
+        language" called HALMAT.</li>
+      <li>OPT "optimized" the HALMAT produced by PASS1, thus producing
+        another functionally-identical but presumably more-efficient set
+        of HALMAT instructions.</li>
+      <li>PASS2 imported the optimized HALMAT and generated AP-101S
+        assembly-language object code.</li>
+    </ul>
+    If our main interest in compiling the Space Shuttle flight software
+    or indeed any HAL/S program is to actually <i>run</i> that
+    software, two additional items must be available to us once the
+    compilation passes above have completed their work:<br>
+    <ul>
+      <li>We must have a linker program that can combine into a single
+        executable the bits and pieces of AP-101S object code that were
+        derived potentially from many, many original HAL/S source-code
+        files.</li>
+      <li>We must have an emulator for the AP-101S CPU that can run the
+        now-linked object code.<br>
+      </li>
+    </ul>
+    That's a pretty imposing list of things we need to have in order to
+    get it all working!&nbsp; Stepping back a bit from the list, though,
+    so that we can see the forest rather than the trees, we might ask
+    ourselves the following question:&nbsp; If we had a sufficient
+    understanding of HALMAT at the technical level, mightn't we bypass
+    the entire chain of must-haves after OPT by creating a program that
+    ran HALMAT directly?&nbsp; For that matter, while OPT may have been
+    needed for the relatively-slow computers used back in the Shuttle
+    era, with our much faster computers of today do we even need to
+    "optimize" the HALMAT at all?&nbsp; Mightn't we simply run it
+    directly after PASS1, without running OPT?<br>
+    <br>
+    If we could do that, the entire process of moving from HAL/S source
+    code to running it in emulation might reduce just to:<br>
+    <ul>
+      <li>Use PASS1 to compile HAL/S source code to HALMAT.</li>
+      <li>Run the HALMAT in a HALMAT emulator.&nbsp; (Assuming, of
+        course, that the HALMAT emulator had enough of a primitive
+        linking capability to simultaneously deal with multiple HALMAT
+        files derived from different HAL/S source-code files.)<br>
+      </li>
+    </ul>
+    (And even if we decided that OPT is indeed a necessity, the
+    complexity is hardly any greater.)&nbsp; This notion is particularly
+    appealing when we recall from our prior discussions above that we
+    actually have <i>two</i> working versions of PASS1, namely <b>HALSFC-PASS1</b>,
+    which was created by compiling the original source code of
+    Intermetrics's compiler HAL/S-FC, and a 100% compatible version
+    entirely written in Python, namely <b>HAL_S_FC.py</b>.&nbsp; Then
+    too, communication between the CPU and whatever other simulated
+    peripherals exist in the spacecraft might be easier at the HALMAT
+    level than at the AP-101S level.<br>
+    <br>
+    Sounds promising.&nbsp; But alas, not perfect!&nbsp; Where this
+    concept has fallen apart up to now is the inadequacy of surviving
+    documentation <i>about</i> HALMAT.&nbsp; Without a satisfactory
+    definition of the HALMAT language, how might we be expected to
+    create an emulator for it?&nbsp; <i>Some</i> HALMAT documentation
+    has survived:<br>
+    <ol>
+      <li><a moz-do-not-send="true"
+          href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">A
+          complete description was written up in 1971</a>.&nbsp; As the
+        document itself explains, it "is essentially a handbook of an
+        intermediate language HALMAT produced and used during the
+        operation of the HAL360-V1 compiler".&nbsp; In case it isn't
+        obvious, HAL360-V1 was Intermetrics's very first attempt at a
+        HAL compiler — <i>not</i> yet HAL/S —, producing object code
+        running on an IBM System/360 computer rather than an AP-101S
+        computer.&nbsp; Actually, the document says only that HAL360-V1
+        ran on an IBM System/360, and doesn't explicitly say that the
+        compiled form of the HAL software ran on a System/360; but the
+        document nowhere mentions the AP-101 computer, and that seems
+        very telling!&nbsp; Besides which, the document specifically
+        calls HAL360-V1 a "preliminary version", or as we might think of
+        it, a proof of concept.&nbsp; The problem is, that being
+        "preliminary", details changed later!&nbsp; How much was changed
+        or added we don't know, but changes there definitely were.</li>
+      <li>Intermetrics's much later document IR-60, "HAL/S-360 Compiler
+        System Specification", has a very large Appendix A that
+        specifies the HALMAT instructions in detail.&nbsp; We have no
+        assurance that this is the final form of the HALMAT language,
+        but all later documentation refers back to IR-60 as the
+        authoritative source, so I think we should probably recognize it
+        as such as well.&nbsp; <i>Unfortunately</i>, the only copy of
+        IR-60 which has survived to fall into our hands is <a
+          moz-do-not-send="true"
+href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">Revision
+          5 of the document, IR-60-5 from 1977</a>, and this version
+        contains only the pages that changed between Revision 4 and
+        Revision 5.&nbsp; The complete Appendix A, which from the page
+        markings must contain at least 118 pages, has only 20 pages in
+        our surviving copy!&nbsp; Then too, a Revision 6 is known to
+        have been in the JSC library at one time — though not any longer
+        — and so potentially there could have been changes later even in
+        what has survived in our copy.&nbsp; It could be that
+        more-complete copies of IR-60 still exist somewhere, perhaps in
+        the hands of a collector, but for now we have no reason to
+        believe that they weren't all simply thrown away.<br>
+      </li>
+      <li>Though not "documentation" as such, the HAL/S-FC compiler
+        passes PASS1, OPT, and PASS2 all output and/or input HALMAT
+        files, so potentially one could get additional information about
+        HALMAT's individual instructions or groupings of instructions by
+        looking through HAL/S-FC source code.</li>
+      <li>Moreover, PASS1 has the optional capability of interleaving
+        HAL/S statements with the derived HALMAT in the compilation
+        reports it generates.&nbsp; Similarly, PASS2 has the optional
+        capability of interleaving HALMAT with the assembly-language
+        instructions it generates in the compilation reports it
+        generates.&nbsp; (And even OPT, which normally doesn't output
+        much of a report, has an analogous capability.)&nbsp; Therefore,
+        by crafting sample HAL/S source-code files and compiling them,
+        it's possible to deduce more detail about HALMAT instructions as
+        well.</li>
+    </ol>
+    <p>Thus although complete documentation about HALMAT in a
+      nicely-packaged, authoritative document seems to have escaped us,
+      it is not necessarily clear that we couldn't regenerate a complete
+      description of the language through reverse engineering.&nbsp; And
+      if we could do that, perhaps a HALMAT emulator could become a
+      reality.&nbsp; We'll see!<br>
+    </p>
+    <p>Zane Hambly has taken a first step in that direction by
+      collecting all of the information from the first 3 sources
+      mentioned above into <a moz-do-not-send="true" href="Halmat.pdf">a
+        single document describing all that's presently known about
+        HALMAT</a>.&nbsp; As (or if) that document evolves over time,
+      I'll try to keep the most-current one here, but you can also go
+      directly to <a moz-do-not-send="true"
+        href="https://github.com/Zaneham/Halmat/blob/main/Halmat.pdf">Zane's
+        repository</a> to see what advances he may have made.<br>
+    </p>
+    <p> </p>
     <h1><a name="glossary"></a>A Glossary and Some References</h1>
     <ul>
       <li>Organizations:</li>
@@ -5003,7 +5168,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-06<br>
+          2026-02-11<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
