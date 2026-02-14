@@ -42,9 +42,9 @@ set FILES_LOCAL="%FILES_LOCAL:"=% vmem.bin COMMON1.out COMMON2.out"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON3.out COMMON4.out auxmat.bin objcode.bin"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1A.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt aux.rpt"
-set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt cards monitor13.parms"
+set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
-set FILES_PRESERVE=litfile.bin COMMON0.out TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
+set FILES_PRESERVE=litfile.bin cards COMMON0.out TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin listing2.txt "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
 goto :main
