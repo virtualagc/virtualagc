@@ -15,6 +15,10 @@
  *              2026-02-03 RSB  `OUTPUT` now pads output record with ASCII or
  *                              EBCDIC spaces to the exact record size.
  *              2026-02-09 RSB  Prep for -finstrument-functions.
+ *              2026-02-13 RSB  Fixed copying of data into memory
+ *                              buffer for PDS with the "no translation"
+ *                              (i.e., E) option.  Would previously terminate
+ *                              after finding a byte of 0.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -1936,7 +1940,8 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
             abend("Overflow of PDS buffer %d", lun);
           if (DCB_OUTS[lun].ebcdic)
             {
-              strncpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
+              //strncpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
+              memcpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
               dcb->bufferLength += length;
             }
           else
