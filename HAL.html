@@ -68,7 +68,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
             the Compiler Itself</a><br>
         </li>
       </ul>
-      <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a><br>
+      <li><a moz-do-not-send="true" href="#halmat">The Mystery and Magic
+          of HALMAT</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#glossary">A Glossary and Some
           References</a></li>
@@ -4761,7 +4762,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p><a moz-do-not-send="true" href="XPL-I.html#debugging">What little
         else I can say about debugging can be found on the XPL/I page</a>.<br>
     </p>
-    <h1><a name="halmat"></a>The Mystery of HALMAT</h1>
+    <h1><a name="halmat"></a>The Mystery and Magic of HALMAT</h1>
     <p>All throughout this page, we've seen numerous references to
       "HALMAT", with nary a suggestion that HALMAT might be of use to us
       today in our space-shuttling activities, and only minimal
@@ -4901,18 +4902,67 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
       it is not necessarily clear that we couldn't regenerate a complete
       description of the language through reverse engineering.&nbsp; And
       if we could do that, perhaps a HALMAT emulator could become a
-      reality.&nbsp; We'll see!<br>
+      reality.&nbsp; <br>
     </p>
-    <p>Zane Hambly has taken a first step in that direction by
-      collecting all of the information from the first 3 sources
-      mentioned above into <a moz-do-not-send="true" href="Halmat.pdf">a
-        single document describing all that's presently known about
-        HALMAT</a>.&nbsp; As (or if) that document evolves over time,
-      I'll try to keep the most-current one here, but you can also go
-      directly to <a moz-do-not-send="true"
-        href="https://github.com/Zaneham/Halmat/blob/main/Halmat.pdf">Zane's
-        repository</a> to see what advances he may have made.<br>
+    <p>As it turns out, Zane Hambly has gotten us moving in that
+      direction:<br>
     </p>
+    <ul>
+      <li>He has collected data from the sources mentioned above into <a
+          moz-do-not-send="true" href="Halmat.pdf">a single document
+          describing all that's presently known about HALMAT</a>.&nbsp;
+        <br>
+      </li>
+      <li>He has in fact written a HALMAT emulator which he calls <b>yaHALMAT</b>,
+        based on the information he collected.<br>
+      </li>
+    </ul>
+    As of this writing, both are very new.&nbsp; Indeed, they were just
+    finished up today, and today is the first I've seen of the emulator,
+    so we'll be learning about it together even as I'm writing up this
+    description.&nbsp; I'm sure this description will be changing plenty
+    from the initial version I'm writing today!<br>
+    <br>
+    The first thing to know is that <a moz-do-not-send="true"
+      href="https://github.com/Zaneham/Halmat/blob/main/Halmat.pdf">all
+      of Zane's material is in his own GitHub repository</a>, rather
+    than in the Virtual AGC source tree, so to work with it you'll
+    probably want to fetch he source tree onto your local computer, and
+    you'll want to follow his very-simple directions for building the
+    program.&nbsp; As I said, this program is called <b>yaHALMAT</b> —
+    or probably yaHALMAT.exe on Windows, though I haven't tried it there
+    myself — and you'll want to make sure that it gets into your PATH.<br>
+    <br>
+    To run <b>yaHALMAT</b> to simulate an actual HAL/S program, it's
+    best to run it from the same directory in which you've done your
+    compiling, so that all of the files <b>yaHALMAT</b> needs can be
+    easily found.&nbsp; Let's try it!&nbsp; Suppose I have a standard
+    hello-world program, as follows.&nbsp; (Remember, I'm trying this
+    out for the very first time as I'm writing it!)<br>
+    <blockquote>
+      <pre> HELLO: PROGRAM;<br> WRITE(6) 'HELLO, WORLD!';<br> CLOSE HELLO;<br></pre>
+    </blockquote>
+    Compile it:<br>
+    <blockquote>
+      <pre>&gt; HALSFC HELLO.hal<br>Compilation successful. Results in "HALSFC HELLO.hal Thu 02-12-2026 10-31-27.00.results".<br></pre>
+    </blockquote>
+    Run it:<br>
+    <blockquote>
+      <pre>&gt; yaHALMAT optmat.bin<br>halmat_load_litfile: cannot open litfile.bin<br></pre>
+    </blockquote>
+    Oops, my fault!&nbsp; It never occurred to me that litfile.bin was
+    important enough for anyone to look at, so <b>HALSFC</b> shoves it
+    into the results directory rather than keeping it around.&nbsp; [Of
+    course, I could just copy litfile.bin from the results directory,
+    but instead I'll take a short pause here while I fix <b>HALSFC</b>
+    <i>not</i> to move litfile.bin, and push the change to the
+    repository.]<br>
+    <br>
+    Try it again:<br>
+    <blockquote>
+      <pre>&gt; HALSFC HELLO.hal<br>Compilation successful. Results in "HALSFC HELLO.hal Thu 02-12-2026 10-40-53.00.results".<br>&gt; yaHALMAT optmat.bin<br>��<br></pre>
+    </blockquote>
+    &lt; ... description paused whilst this is figured out ... &gt;<br>
     <p> </p>
     <h1><a name="glossary"></a>A Glossary and Some References</h1>
     <ul>

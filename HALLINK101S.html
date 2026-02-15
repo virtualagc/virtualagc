@@ -20,6 +20,9 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
     <h1>Table of Contents </h1>
     <ul>
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#bfs">Backup vs Primary Flight
+          Software (BFS vs PFS)</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#installation">Installation of
           <b>HALLINK101S</b></a></li>
@@ -89,51 +92,6 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       project.&nbsp; But since we have access to neither of those
       linkers, any intuition of mine about them is without value.<br>
     </p>
-    <blockquote>
-      <p><font size="-1"><b>Important note regarding BFS:</b>&nbsp;
-          Recall that Space Shuttle flight software came in two distinct
-          flavors, namely the <i>Primary Flight Software</i> (referred
-          to as PFS, or loosely but more commonly as PASS) and the <i>Backup
-            Flight Software</i> (BFS).&nbsp; PFS and BFS were developed
-          mostly independently of each other, but more than that, their
-          development tools differed as well.&nbsp; For example, PFS and
-          BFS <i>nominally</i> were compiled using the same HAL/S
-          compiler (HAL/S-FC), in fact there were two incompatible
-          versions of HAL/S-FC, a PFS flavor and a BFS flavor. &nbsp;
-          More importantly for us in the context of the present
-          discussion, PFS and BFS used different linker software.&nbsp;
-          The comments earlier about "the AP-101 link editor",
-          HALLINK-FC, and so on, were written exclusively in references
-          to PFS, and end up having no applicability to BFS.&nbsp;
-          Rather than using the AP-101 link editor, BFS was linked using
-          a program called <b>PILOT</b> (Program Integration and
-          Loading Tool).&nbsp; Furthermore, while object code produced
-          by the PFS version of HAL/S-FC was in a modified System/360
-          format, object code produced by the BFS version of HAL/S-FC
-          was instead in PILOT format.<br>
-        </font></p>
-      <p><font size="-1">Alas! I have no information whatsoever about
-          PILOT, and in particular have no information about its
-          object-file format.&nbsp; The acronym "PILOT" is, of course,
-          quite unfortunate from the point of view of trying to find
-          available information via a search engine like Google, since
-          all you'll discover is information about how to pilot a Space
-          Shuttle.&nbsp; That said, I don't think that (at least at
-          present) there actually is any surviving information about
-          PILOT.&nbsp; If you have any such documentation, send it to
-          me!&nbsp; Or perhaps someone with more time on their hands
-          than I have could reverse engineer the format from the
-          object-code generator in <a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">PASS2
-            of the HAL/S-FC source code</a>.&nbsp; Or perhaps not.&nbsp;
-          If you're the kind of person who thinks they can do something
-          like that, then <i>please</i> do, and feed the results to me!<br>
-        </font></p>
-      <p><font size="-1">At any rate, the discussion throughout the
-          remainder of this page relates entirely to PFS/PASS, whereas
-          BFS will not be referred to again.<br>
-        </font> </p>
-    </blockquote>
     On the other hand, we <i>do</i> have a modern port (from the XPL
     programming language into the Python programming language) of the
     original HAL/S compiler.&nbsp; That being the case, we can use the
@@ -175,6 +133,96 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     a Python 3 program that can parse the object files produced by the
     HAL/S compiler (or by <b>ASM101S</b>) and report on all of the data
     found within them.&nbsp; This will be covered in more detail later.<br>
+    <h1><a name="bfs"></a>Backup vs Primary Flight Software (BFS vs PFS)</h1>
+    <blockquote> </blockquote>
+    <p>Let's get a clarification to my comments above out of the way.</p>
+    <p>Recall that Space Shuttle flight software came in two distinct
+      flavors, namely the <i>Primary Flight Software</i> (referred to
+      as PFS, or loosely but more commonly as PASS) and the <i>Backup
+        Flight Software</i> (BFS).&nbsp; PFS and BFS were developed
+      mostly independently of each other, but more than that, their
+      development tools differed as well.&nbsp; For example, although
+      PFS and BFS <i>nominally</i> were compiled using the same HAL/S
+      compiler (HAL/S-FC), in fact there were two incompatible versions
+      of HAL/S-FC (for PFS) and HAL/S-BFC (for BFS). &nbsp; And the fact
+      that there are two separate compilers doesn't affect just PFS and
+      BFS code, but <i>any</i> HAL/S program we may write:&nbsp; We
+      always have a choice of which of the two flavors of the compiler
+      to use!<br>
+    </p>
+    <p>More importantly for us in the context of the present discussion,
+      PFS and BFS used different linker programs.&nbsp; Outside of this
+      one section you're reading now, both this entire page and
+      specifically the <b>HALLINK101S</b> linker program described on
+      this page are for object code generated by the PASS/PFS flavor the
+      HAL/S compiler.&nbsp; Object code generated by the BFS version of
+      the compiler won't even be mentioned outside of this one section
+      you're reading right now ... well, with one brief return when <a
+        moz-do-not-send="true" href="#reverse">reverse engineering</a>
+      is discussed later.&nbsp; <br>
+    </p>
+    <p>Why?&nbsp; Well, back in the day, rather than using the AP-101
+      link editor, BFS was linked using a different program called <b>PILOT</b>
+      (Program Integration and Loading Tool).&nbsp; Furthermore, while
+      object code produced by the PFS version of HAL/S-FC was in a
+      modified System/360 format, object code produced by HAL/S-BFC was
+      instead in <b>PILOT</b> format.&nbsp; The two object-code formats
+      are completely incompatible.&nbsp; In other words, neither the
+      AP-101 link editor nor its intended replacement <b>HALLINK101S</b>
+      are compatible with <b>PILOT</b> object files.<br>
+    </p>
+    <p>That said, I hope that someday there will be a modern version of
+      <b>PILOT</b> that can be used to link BFS-style object code ...
+      perhaps it can be called <b>yaPILOT</b>?&nbsp; Maybe?&nbsp; <i>Yes</i>,
+      that has a nice ring to it!<br>
+    </p>
+    <p>One hurdle is that as far as I know, there is no surviving
+      information whatsoever <i>about</i> <b>PILOT</b>, and in
+      particular we have no documentary information about its
+      object-file format.&nbsp; To be frank, I'm proud of myself for
+      even figuring out that it was <i>called</i> <b>PILOT</b> to
+      begin with.&nbsp;
+      The acronym "PILOT" is, of course, quite unfortunate from the
+      point of view of trying to find available information via a search
+      engine like Google, since all you'll discover is information about
+      how to pilot a Space Shuttle.&nbsp; I'm afraid this reveals a
+      certain weakness in today's treatment of knowledge, in that we
+      don't have many knowledgeable people any longer, but rather we
+      have people with borrowed knowledge attained via search
+      engines.&nbsp; And A.I., of course, for those of us who can't use
+      search engines very effectively.&nbsp; But what about when the
+      search engines fail because the search terms are too common?&nbsp;
+      Well, that's a good way to lose knowledge, even if it's sitting in
+      plain view.&nbsp; But I doubt it would have helped if <b>PILOT</b>
+      had a less-common name or if we had more native experts on <b>PILOT</b>
+      to consult, since I doubt that there's any surviving information
+      about <b>PILOT</b> online anyway.&nbsp; If you have any such
+      documentation, send it to me!&nbsp; <br>
+    </p>
+    <p>But don't lose all hope.&nbsp; Since the object-code generator in
+      <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">PASS2
+        of the HAL/S-BFC source code</a> can produce <b>PILOT</b>-compatible
+      output, it's still possible to attain <i>some</i> understanding
+      of the <b>PILOT</b> format via reverse engineering it, and indeed
+      perhaps a sufficient amount to implement a linker!&nbsp; I have
+      done at least some of the reverse engineering, and have embedded
+      my findings in a program I call <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/coPILOT.py">coPILOT.py</a>.&nbsp;
+      Catchy, eh?&nbsp; This script can read object files created by the
+      HAL/S-BFC, and parse them into a human readable form.&nbsp;
+      Moreover, there's additional commentary embedded within
+      coPILOT.py's source code to document some aspects of the format
+      that aren't evident in the reports it outputs.&nbsp; If you want
+      to read more about coPILOT.py, I'd suggest referring to <a
+        moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-3897924815">the
+        discussion in issue #1273 in our Virtual AGC GitHub repository</a>.<br>
+    </p>
+    <p>And now we leave the topic of BFS in order to resume our
+      discussion of PASS/PFS-style object code and its linker. </p>
+    <blockquote>
+    </blockquote>
     <h1> <a name="References"></a>References</h1>
     <ul>
       <li>Documentation for related development-chain tools provided by
@@ -492,6 +540,38 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <br>
     See the source code for readObject101S.py for further documentation,
     if any.<br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        Earlier when I mentioned <a moz-do-not-send="true" href="#bfs">the
+          topic of reverse engineering the <b>PILOT</b> format used for
+          BFS object files</a>, and in particular the possible
+        assistance offered by the tool coPILOT.py, I threatened to
+        briefly return to the topic of BFS later on.&nbsp; It's now
+        later!&nbsp; You may find the comparison of the BFS object code
+        to the PFS object code interesting. When 140-STATISTICS is
+        compiled by the BFS compiler rather than the PFS compiler, <i>two</i>
+        object files are produced:&nbsp; cards/#CSTATIS and
+        cards/#ZSTATIS.&nbsp; The assembly language produced is also
+        slightly different, but only in that an extra instruction "<code>SVC
+          0()</code>" is inserted at the very end, so I won't bore you
+        with yet another printout of the generated assembly
+        language.&nbsp; The following is how coPILOT.py parses the two
+        object files.&nbsp; I don't think that a symbol table for local
+        symbols is included in the object files, even when the
+        compiler's <code>VARSYM</code> option is selected.&nbsp;
+        Another thing to note is that coPILOT.py reports all addresses
+        and sizes or lengths using <i>halfword</i> addressing, whereas
+        readObject101S.py does so by <i>byte</i> addressing.&nbsp; Thus
+        addresses and sizes or lengths reported by coPILOT.py are
+        roughly half of the corresponding ones reported by
+        readObject101S.py.&nbsp; Oh well, a different day (or year!), a
+        different design choice!&nbsp; And there are some obvious bugs
+        due to coPILOT.py being a work in progress, so please ignore
+        them if you can.<br>
+      </font>
+      <blockquote>
+        <pre><font size="-1">Member cards/#CSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: CSD (CSECT Definition)<br>		esdid=1 #CSTATIS length=001F stacksize=0018 flags=800A HAL=STATISTICS<br>	001E: CSD (CSECT Definition)<br>		esdid=2 #DSTATIS length=0002 stacksize=0000 flags=4000 <br>	002E: EXR (External Reference Definition)<br>		esdid=3 #QEMIN   version=0003 tbd=8000 <br>	003C: EXR (External Reference Definition)<br>		esdid=4 #QEMAX   version=0003 tbd=8000 <br>	004A: EXR (External Reference Definition)<br>		esdid=5 #QESUM   version=0003 tbd=8000 <br>	0058: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 <br>	0060: PTX (Protected text)<br>		offset=0000 csect=1 #CSTATIS  <br>		E9F3 0000 B914 E0FB 0018 EB01 BB24 <br>	0074: PTX (Protected text)<br>		offset=0007 csect=1 #CSTATIS  <br>		9A30 1D1C E4F7 3800 9B40 3803 9A30 1D1C E4F7 3800 9B48 3803 9A30 1D1C E4F7 3800 <br>		1E1C 3AEE 68E2 9B50 3803 C9FB 0000 97E8 <br>	00AA: RLD (Relocation data)<br>		rel.id=2 #DSTATIS  pos.id=1 #CSTATIS  flags=0010 address=0001<br>		rel.id=3 #QEMIN    pos.id=1 #CSTATIS  flags=0020 address=000A<br>		rel.id=4 #QEMAX    pos.id=1 #CSTATIS  flags=0020 address=0010<br>		rel.id=5 #QESUM    pos.id=1 #CSTATIS  flags=0020 address=0016<br>	00CC: END<br>		cards=10<br>		hal compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		hal version=***FIXME*** 1B58 <br>		timestamp=2026-02-14 17:56:04<br>		xpl compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		xpl version=***FIXME*** 005A <br>Member cards/#ZSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: EXR (External Reference Definition)<br>		esdid=6 #CSTATIS version=0000 tbd=800A HAL=STATISTICS<br>	001C: CSD (CSECT Definition)<br>		esdid=7 #ZSTATIS length=0002 stacksize=0001 flags=400A HAL=STATISTICS<br>	0036: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 0E00 <br>	0040: RLD (Relocation data)<br>		rel.id=1 #CSTATIS  pos.id=2 #DSTATIS  flags=002C address=0000<br>	004A: END<br>		cards=5<br>		hal compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		hal version=***FIXME*** 1B58 <br>		timestamp=2026-02-14 17:56:04<br>		xpl compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		xpl version=***FIXME*** 005A <br></font><br></pre>
+      </blockquote>
+    </blockquote>
     <ul>
     </ul>
     <ul>
@@ -850,7 +930,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-08<br>
+          2026-02-14<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
