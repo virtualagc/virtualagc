@@ -40,12 +40,18 @@ set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json"
 set FILES_LOCAL="LISTING2.txt"
 set FILES_LOCAL="%FILES_LOCAL:"=% vmem.bin COMMON1.out COMMON2.out"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON3.out COMMON4.out auxmat.bin objcode.bin"
+set FILES_LOCAL="%FILES_LOCAL:"=% COMMON1.gz COMMON2.gz COMMON3.gz COMMON4.gz"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1A.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt aux.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
-set FILES_PRESERVE=litfile.bin cards COMMON0.out TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
+set FILES_PRESERVE="litfile.bin cards COMMON0.out COMMON0.gz TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin listing2.txt "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
+
+::if "%COMMON_EXT%"=="" (
+::	set COMMON_EXT=out
+::)
+set COMMON_EXT=out
 
 goto :main
 
@@ -137,7 +143,7 @@ if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
         --pdsi=5,"%ERRORLIB%" ^
         --pdsi=6,ACCESS  ^
         --pdso=6,%TEMPLIB%,E ^
-        --commono=COMMON0.out ^
+        --commono=COMMON0.%COMMON_EXT% ^
         --raf=B,7200,1,halmat.bin ^
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
@@ -160,8 +166,8 @@ echo ======================================================
 )
 
 %FLO% ^
-        --commoni=COMMON0.out ^
-        --commono=COMMON1.out ^
+        --commoni=COMMON0.%COMMON_EXT% ^
+        --commono=COMMON1.%COMMON_EXT% ^
         --raf=B,7200,1,halmat.bin ^
         --raf=B,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
@@ -170,8 +176,8 @@ if errorlevel 1 ( call :error_exit Aborted after FLO )
 
 
 %OPT% ^
-        --commoni=COMMON1.out ^
-        --commono=COMMON2.out ^
+        --commoni=COMMON1.%COMMON_EXT% ^
+        --commono=COMMON2.%COMMON_EXT% ^
         --raf=B,7200,1,halmat.bin ^
         --raf=B,1560,2,litfile.bin ^
         --raf=B,7200,4,optmat.bin ^
@@ -180,8 +186,8 @@ if errorlevel 1 ( call :error_exit Aborted after FLO )
 if errorlevel 1 ( call :error_exit Aborted after OPT )
 
 %AUXP% ^
-        --commoni=COMMON2.out ^
-        --commono=COMMON3.out ^
+        --commoni=COMMON2.%COMMON_EXT% ^
+        --commono=COMMON3.%COMMON_EXT% ^
         --raf=B,7200,1,auxmat.bin ^
         --raf=B,1560,2,litfile.bin ^
         --raf=B,7200,4,optmat.bin ^
@@ -195,8 +201,8 @@ if errorlevel 1 ( call :error_exit Aborted after AUXP )
         --ddo=4,deck.bin,E ^
         --pdsi=5,"%ERRORLIB%" ^
         --ddo=7,extra.txt ^
-        --commoni=COMMON3.out ^
-        --commono=COMMON4.out ^
+        --commoni=COMMON3.%COMMON_EXT% ^
+        --commono=COMMON4.%COMMON_EXT% ^
         --raf=B,7200,1,auxmat.bin ^
         --raf=B,1560,2,litfile.bin ^
         --raf=B,1600,3,objcode.bin ^

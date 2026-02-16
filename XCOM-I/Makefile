@@ -65,7 +65,7 @@ ifeq ($(CC), cl)
         OUT = /Fe:
         CMP = fc /B
         EXT = .exe
-        LIBS = 
+        LIBS =
         export PYTHONUTF8 := 1
 else
 	CL =

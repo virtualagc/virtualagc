@@ -19,6 +19,17 @@
  *                              buffer for PDS with the "no translation"
  *                              (i.e., E) option.  Would previously terminate
  *                              after finding a byte of 0.
+ *              2026-02-15 RSB  Implemented COMMON.gz alternative to COMMON.out.
+ *                              however, while the reading/writing those
+ *                              COMMON.gz files work fine, the resulting
+ *                              HALSFC doesn't work, aborting after OPT with a
+ *                              BI002 error.  It seems that variables aren't
+ *                              at the same addresses in memory, defeating the
+ *                              whole concept.  I'll leave the code in place
+ *                              for now, but it should not be used!  I corrected
+ *                              the original COMMON.out files to incorporate
+ *                              low memory where parameters and suchlike are
+ *                              stored.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -100,6 +111,29 @@
 
 #endif
 
+#include <stdio.h>
+#include <string.h>
+#include "zlib.h"
+
+// Stuff related to writing/reading zipfiles that I adapted from Google AI.
+#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
+#include <fcntl.h>
+#include <io.h>
+#define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
+#else
+#define SET_BINARY_MODE(file)
+#endif
+
+void writeZipfile(gzFile dest) {
+    // Set binary mode for standard I/O on Windows if needed (best practice)
+    SET_BINARY_MODE(source);
+    if (gzwrite(dest, memory, MEMORY_SIZE) != MEMORY_SIZE) {
+        fprintf(stderr, "Error writing COMMON file\n");
+        exit(1);
+    }
+    gzclose(dest);
+}
+
 //---------------------------------------------------------------------------
 // Global variables.
 
@@ -108,6 +142,9 @@ int outUTF8 = 0;
 DCB_t DCB_INS[DCB_MAX];
 DCB_t DCB_OUTS[DCB_MAX];
 FILE *COMMON_OUT = NULL;
+gzFile COMMON_OUTz = NULL;
+FILE *COMMON_IN = NULL;
+gzFile COMMON_INz = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
 // Starting time of the program run, more or less.
@@ -728,12 +765,13 @@ parseCommandLine(int argc, char **argv)
 {
   int i, j, returnValue = 0, numArgs;
   char translation;
-  FILE *COMMON_IN = NULL;
   gettimeofday(&startTime, NULL);
 
 #ifdef NUM_INITIALIZED
-  extern uint8_t memoryInitializer[NUM_INITIALIZED];
   memcpy(memory, memoryInitializer, NUM_INITIALIZED);
+#endif
+#ifdef SIZE_RESERVED
+  memcpy(&memory[BOTTOM_RESERVED], reservedMemory, SIZE_RESERVED);
 #endif
 
   // Default setup of INPUT/OUTPUT DCBs.
@@ -895,15 +933,33 @@ parseCommandLine(int argc, char **argv)
         }
       else if (1 == sscanf(argv[i], "--commoni=%s", filename))
         {
-          COMMON_IN = fopen(filename, "r");
-          if (COMMON_IN == NULL)
-            abend("Unable to open COMMON input file");
+          if (NULL != strstr(filename, ".gz"))
+            {
+	      COMMON_INz = gzopen(filename, "rb");
+	      if (COMMON_INz == NULL)
+		abend("Unable to open COMMON input zipfile");
+            }
+          else
+            {
+	      COMMON_IN = fopen(filename, "r");
+	      if (COMMON_IN == NULL)
+		abend("Unable to open COMMON input file");
+            }
         }
       else if (1 == sscanf(argv[i], "--commono=%s", filename))
         {
-          COMMON_OUT = fopen(filename, "w");
-          if (COMMON_OUT == NULL)
-            abend("Unable to open COMMON output file");
+          if (NULL != strstr(filename, ".gz"))
+            {
+	      COMMON_OUTz = gzopen(filename, "wb");
+	      if (COMMON_OUTz == NULL)
+		abend("Unable to open COMMON output zipfile");
+            }
+          else
+            {
+	      COMMON_OUT = fopen(filename, "w");
+	      if (COMMON_OUT == NULL)
+		abend("Unable to open COMMON output file");
+            }
         }
       else if (!strncmp(argv[i], "--parm=", 7))
         {
@@ -1041,25 +1097,23 @@ parseCommandLine(int argc, char **argv)
         }
     }
   //parseParmField(0); // Parse the PARM-field string.
-  if (COMMON_IN != NULL)
+  if (COMMON_IN != NULL || COMMON_INz != NULL)
     {
       if (NON_COMMON_BASE > COMMON_BASE)
         {
-          int status = readCOMMON(COMMON_IN);
-          if (status < 0)
-            abend("Severe error reading COMMON.");
-          else if (status == 1)
-            fprintf(stderr, "COMMON file smaller than expected.\n");
-          else if (status == 2)
-            fprintf(stderr, "COMMON file was larger than expected.\n");
+	  int status = readCOMMON();
+	  if (status < 0)
+	    abend("Severe error reading COMMON.");
+	  else if (status == 1)
+	    fprintf(stderr, "COMMON file smaller than expected.\n");
+	  else if (status == 2)
+	    fprintf(stderr, "COMMON file was larger than expected.\n");
         }
       else
         fprintf(stderr, "This program has no COMMON block.\n");
-      fclose(COMMON_IN);
-      COMMON_IN = NULL;
     }
 #ifndef STANDARD_XPL
-  if (COMMON_OUT == NULL)
+  if (COMMON_OUT == NULL && COMMON_OUTz == NULL)
     { FILE *fp;
       COMMON_OUT = fopen("COMMON.out", "w");
       // My intention is that COMMON_OUT won't be written to until the program
@@ -3369,20 +3423,36 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
 
 // Write entire COMMON file.
 int __attribute__ ((no_instrument_function))
-writeCOMMON(FILE *fp) {
-  if (fp == NULL)
+writeCOMMON(void) {
+  if (COMMON_OUT == NULL && COMMON_OUTz == NULL)
     return 1;
 #ifndef STANDARD_XPL
-  int i;
-  fprintf(fp, ":\t%d\n", dwAddress);
-  for (i = 0; i < NUM_SYMBOLS; i++)
-    writeEntryCOMMON(fp, &memoryMap[i], 0, "(root)");
+  if (COMMON_OUTz != NULL)
+    {
+      if (gzwrite(COMMON_OUTz, memory, MEMORY_SIZE) != MEMORY_SIZE ||
+	  gzwrite(COMMON_OUTz, &dwAddress, sizeof(dwAddress)) != sizeof(dwAddress))
+	{
+	  abend("Error writing to COMMON zipfile");
+	  exit(1);
+	}
+      gzclose(COMMON_OUTz);
+      COMMON_OUTz = NULL;
+    }
+  else
+    {
+      int i;
+      fprintf(COMMON_OUT, ":\t%d\n", dwAddress);
+      for (i = 0; i < ROOT_BASED; i++)
+	fprintf(COMMON_OUT, "@\t%06X\t%02X\n", i, memory[i]);
+      for (i = 0; i < NUM_SYMBOLS; i++)
+	writeEntryCOMMON(COMMON_OUT, &memoryMap[i], 0, "(root)");
+    }
 #endif
   return 0;
 }
 
 int __attribute__ ((no_instrument_function))
-readCOMMON(FILE *fp) {
+readCOMMON(void) {
 #ifndef STANDARD_XPL
   int32_t _ALLOCATE_SPACE(int reset);
   char line[1024], prefix, svalue[sizeof(sbuf_t) + 100], *bVar;
@@ -3392,8 +3462,18 @@ readCOMMON(FILE *fp) {
   memoryMapEntry_t *basedMemoryMapEntry;
   descriptor_t *descriptor;
 
+  if (COMMON_INz != NULL)
+    {
+      if (MEMORY_SIZE != gzread(COMMON_INz, memory, MEMORY_SIZE) ||
+	  sizeof(dwAddress) != gzread(COMMON_INz, &dwAddress, sizeof(dwAddress)))
+	abend("Error reading COMMON zipfile");
+      gzclose(COMMON_INz);
+      COMMON_INz = NULL;
+      return 0;
+    }
+
   // Read the COMMON file and process it line by line.
-  while (NULL != fgets(line, sizeof(line), fp))
+  while (NULL != fgets(line, sizeof(line), COMMON_IN))
     {
       if (line[0] == ';') // A comment?
         continue;
@@ -3404,6 +3484,14 @@ readCOMMON(FILE *fp) {
           else
             abend("Unrecognized line in COMMON: %s", line);
         }
+      if (line[0] == '@') // Raw bytes
+	{
+	  int address, value;
+	  if (2 != sscanf(line, "@\t%X\t%X", &address, &value))
+	    abend("Corrupt raw byte data in COMMON: %s", line);
+	  memory[address] = value;
+	  continue;
+	}
       if (3 == sscanf(line, "/\t%s\t%d\tBASED\t%[^\n\r]",
                       field, &fieldIndex, svalue))
         {
@@ -3524,6 +3612,8 @@ readCOMMON(FILE *fp) {
           putBIT(descriptor->bitWidth, address, descriptor);
         }
     }
+  fclose(COMMON_IN);
+  COMMON_IN = NULL;
 #endif // STANDARD_XPL
   return 0;
 }
@@ -3584,7 +3674,7 @@ int exitCodeLINK = 0;
 void
 LINK(void) {
 #ifndef STANDARD_XPL
-  writeCOMMON(COMMON_OUT);
+  writeCOMMON();
 #endif
   //OUTPUT(0, nextBuffer());
   //if (LINE_COUNT) printf("\n");

@@ -183,9 +183,7 @@ for memberName in sys.argv[1:]:
             '''
             print("\t%04X: END" % (offset))
             print("\t\tcards=%d" % fetchHalfword(byteContents, offset + 2))
-            print("\t\thal compiler=***FIXME*** ", end="")
-            dumpRangeRaw(byteContents, offset+4, 10)
-            print()
+            print('\t\thal compiler="%s"' % fetchString(byteContents, offset+4, 10))
             print("\t\thal version=***FIXME*** ", end="")
             dumpRangeRaw(byteContents, offset+14, 2)
             print()
@@ -194,12 +192,11 @@ for memberName in sys.argv[1:]:
                    byteContents[offset+17], byteContents[offset+18],
                    byteContents[offset+19], byteContents[offset+20],
                    byteContents[offset+21]))
-            print("\t\txpl compiler=***FIXME*** ", end="")
-            dumpRangeRaw(byteContents, offset+22, 10)
-            print()
-            print("\t\txpl version=***FIXME*** ", end="")
-            dumpRangeRaw(byteContents, offset+32, 2)
-            print()
+            print('\t\txpl compiler="%s"' % fetchString(byteContents, offset+22, 10))
+            print("\t\txpl version=%d.%02d" % (byteContents[offset+32], byteContents[offset+33]))
+            #print("\t\txpl version=***FIXME*** ", end="")
+            #dumpRangeRaw(byteContents, offset+32, 2)
+            #print()
             offset = 2 * type2
             break
         elif type == 0x40:

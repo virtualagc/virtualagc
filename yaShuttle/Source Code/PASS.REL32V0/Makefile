@@ -94,7 +94,7 @@ ifeq ($(strip $(CC)),)
 endif
 ifeq ($(CC), cl)
         OUT = /Fe:
-        LIBS =
+        LIBS = -lz
         EXT = .exe
         RDYNAMIC = 
         NULL = NUL
@@ -104,7 +104,7 @@ ifeq ($(CC), cl)
 else ifeq ($(findstring mingw,$(CC)),mingw)
         SHELL = /bin/bash
         OUT = -o
-        LIBS = -lm
+        LIBS = -lm -lz
         EXT = .exe
         RDYNAMIC =
         NULL = /dev/null
@@ -113,7 +113,7 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
 else
         SHELL = /bin/bash
         OUT = -o
-        LIBS = -lm
+        LIBS = -lm -lz
         RDYNAMIC = -rdynamic
         EXT = 
         NULL = /dev/null

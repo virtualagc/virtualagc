@@ -12,6 +12,8 @@
  *              2026-01-31 RSB	PDS record size changed from 1680 to 80.  The
  *                              max size of a PDS member has remained unchanged
  *                              at 32*1680, which seems like overkill.
+ *              2026-02-15 RSB  Eliminated arguments for `writeCOMMON()` and
+ *                              `readCOMMON()`, since they never vary.
  */
 
 #ifndef RUNTIMEC_H
@@ -118,7 +120,7 @@ typedef struct {
 } PDS_BUF_t;
 extern PDS_BUF_t PDS_OUTS_BUFFERS[DCB_MAX];
 */
-extern FILE *COMMON_OUT;
+//extern FILE *COMMON_OUT;
 
 typedef struct {
   uint32_t optionsCode;
@@ -614,7 +616,7 @@ COMPACTIFY(int reset);
 
 // Returns 0 on success or 1 on failure.
 int
-writeCOMMON(FILE *fp);
+writeCOMMON(void);
 
 // Returns:
 //     -1       Failure.
@@ -625,7 +627,7 @@ writeCOMMON(FILE *fp);
 // with the latter two cases, so the 3rd case always returns 0 and the 4th
 // case aborts.
 int
-readCOMMON(FILE *fp);
+readCOMMON(void);
 
 uint32_t
 FREEPOINT(void);

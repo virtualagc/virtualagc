@@ -22,13 +22,23 @@ FILES_PORTED="$FILES_PORTED LIT_CHAR.bin SYM_TAB.json"
 FILES_PORTED="$FILES_PORTED CROSS_REF.json"
 FILES_LOCAL="LISTING2.txt"
 FILES_LOCAL="$FILES_LOCAL vmem.bin COMMON1.out COMMON2.out"
+FILES_LOCAL="$FILES_LOCAL COMMON1.gz COMMON2.gz COMMON3.gz COMMON4.gz"
 FILES_LOCAL="$FILES_LOCAL COMMON3.out COMMON4.out auxmat.bin objcode.bin"
 FILES_LOCAL="$FILES_LOCAL pass1A.rpt"
 FILES_LOCAL="$FILES_LOCAL pass1pA.rpt flo.rpt aux.rpt"
 FILES_LOCAL="$FILES_LOCAL pass3.rpt pass4.rpt monitor13.parms"
 FILES_LOCAL="$FILES_LOCAL auxp.rpt deck.bin extra.txt"
-FILES_PRESERVE="litfile.bin cards COMMON0.out TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin"
+FILES_PRESERVE="litfile.bin cards COMMON0.out COMMON0.gz TEMPLIB.json"
+FILES_PRESERVE="$FILES_PRESERVE TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt"
+FILES_PRESERVE="$FILES_PRESERVE pass1p.rpt opt.rpt pass2.rpt cards.bin"
+FILES_PRESERVE="$FILES_PRESERVE listing2.txt optmat.bin halmat.bin"
 rm $FILES_PORTED $FILES_LOCAL pass*.rpt cards.bin listing2.txt -rf &>/dev/null
+
+#if [[ "$COMMON_EXT" == "" ]]
+#then
+#	COMMON_EXT=out
+#fi
+COMMON_EXT=out
 
 # Move all generated files to a *.results folder.
 function move_all {
@@ -111,7 +121,7 @@ $PASS1 \
 	--pdsi=5,"$ERRORLIB" \
 	--pdsi=6,ACCESS  \
 	--pdso=6,$TEMPLIB,E \
-	--commono=COMMON0.out \
+	--commono=COMMON0.$COMMON_EXT \
 	--raf=B,7200,1,halmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,3360,6,vmem.bin \
@@ -140,8 +150,8 @@ then
 fi
 
 $FLO \
-	--commoni=COMMON0.out \
-	--commono=COMMON1.out \
+	--commoni=COMMON0.$COMMON_EXT \
+	--commono=COMMON1.$COMMON_EXT \
 	--raf=B,7200,1,halmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,3360,6,vmem.bin \
@@ -149,8 +159,8 @@ $FLO \
 if [[ $? != 0 ]] ; then error_exit "Aborted after FLO" ; fi
 
 $OPT \
-	--commoni=COMMON1.out \
-	--commono=COMMON2.out \
+	--commoni=COMMON1.$COMMON_EXT \
+	--commono=COMMON2.$COMMON_EXT \
 	--raf=B,7200,1,halmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,7200,4,optmat.bin \
@@ -159,8 +169,8 @@ $OPT \
 if [[ $? != 0 ]] ; then error_exit "Aborted after OPT" ; fi
 
 $AUXP \
-	--commoni=COMMON2.out \
-	--commono=COMMON3.out \
+	--commoni=COMMON2.$COMMON_EXT \
+	--commono=COMMON3.$COMMON_EXT \
 	--raf=B,7200,1,auxmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,7200,4,optmat.bin \
@@ -173,8 +183,8 @@ $PASS2 \
 	--ddo=4,deck.bin,E \
 	--pdsi=5,"$ERRORLIB" \
 	--ddo=7,extra.txt \
-	--commoni=COMMON3.out \
-	--commono=COMMON4.out \
+	--commoni=COMMON3.$COMMON_EXT \
+	--commono=COMMON4.$COMMON_EXT \
 	--raf=B,7200,1,auxmat.bin \
 	--raf=B,1560,2,litfile.bin \
 	--raf=B,1600,3,objcode.bin \

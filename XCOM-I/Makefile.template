@@ -9,6 +9,7 @@
 # Mod history:	2024-03-30 RSB	Wrote
 #		2024-06-09 RSB	Specialized from the general-purpose XCOM-I
 #				Makefile.
+#		2026-02-15 RSB	Added -lz to the C compiler libraries needed.
 #
 # Compiling C-language Source-Code Files Created by XCOM-I
 # --------------------------------------------------------
@@ -84,7 +85,7 @@ ifeq ($(strip $(CC)),)
 endif
 ifeq ($(CC), cl)
         OUT = /Fe:
-        LIBS =
+        LIBS = -lz
         EXT = .exe
         RDYNAMIC = 
         CP = copy
@@ -94,7 +95,7 @@ ifeq ($(CC), cl)
         QUIET = /nologo >NUL
 else ifeq ($(findstring mingw,$(CC)),mingw)
         OUT = -o
-        LIBS = -lm
+        LIBS = -lm -lz
         EXT = .exe
         RDYNAMIC =
         CP = cp
@@ -103,7 +104,7 @@ else ifeq ($(findstring mingw,$(CC)),mingw)
         RM = rm
 else
         OUT = -o
-        LIBS = -lm
+        LIBS = -lm -lz
         RDYNAMIC = -rdynamic
         EXT = 
         CP = cp
