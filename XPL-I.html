@@ -3747,7 +3747,7 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
           color="#663300"><code>BASED</code></font>.</li>
     </ul>
     <p>Another distinction is that <font color="#663300"><code>CHARACTER</code></font>
-      variables cannot declared in <font color="#663300"><code>COMMON</code></font>,
+      variables cannot be declared in <font color="#663300"><code>COMMON</code></font>,
       though <font color="#663300"><code>CHARACTER</code></font>
       variables can appear as fields in <font color="#663300"><code>COMMON
 
@@ -3870,7 +3870,10 @@ href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-78
         color="#663300"><code>writeEntryCommon</code></font> function in
       the runtime-library file runtimeC.c if you have any interest in
       the file format.&nbsp; It's actually pretty useful for debugging
-      certain kinds of problems.<br>
+      certain kinds of problems.&nbsp; In case you're wondering, the
+      very-elegant , seemingly no-brainer approach of saving and
+      restoring actual images of memory in between compiler passes
+      (perhaps as compressed files) does not in fact work.<br>
     </p>
     <blockquote> </blockquote>
     <h2><a name="MemoryModel"></a>Memory Model for a Compiled XPL
@@ -9076,6 +9079,7 @@ href="https://learn.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-1
         color="#663300"><code>Z</code></font>, their mangled names are
       all distinct. <br>
     </blockquote>
+    <blockquote> </blockquote>
     <h1> <a name="hooks"></a>Patches for Insertion of Arbitrary Inline
       Code</h1>
     A serious difficulty in working with XPL or XPL/I code is that they
@@ -10152,7 +10156,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-07<br>
+          2026-02-15<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
