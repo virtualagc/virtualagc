@@ -30,6 +30,8 @@
  *                              the original COMMON.out files to incorporate
  *                              low memory where parameters and suchlike are
  *                              stored.
+ *              2026-02-17 RSB  Now always writes a gzipped memory image, even
+ *                              if the COMMON.out isn't gzipped.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -758,6 +760,28 @@ parseParmField(int print) {
     putCHARACTER(address + 4 * i, &type1Actual[i]);
 }
 
+static void
+openCommonOutFile(char *filename)
+{
+  if (NULL != strstr(filename, ".gz"))
+    {
+      COMMON_OUTz = gzopen(filename, "wb");
+      if (COMMON_OUTz == NULL)
+	  abend("Unable to open memory-image output zipfile");
+    }
+  else
+    {
+      char s[1000];
+      COMMON_OUT = fopen(filename, "w");
+      if (COMMON_OUT == NULL)
+	    abend("Unable to open COMMON output file");
+      sprintf(s, "%s.bin.gz", filename);
+      COMMON_OUTz = gzopen(s, "wb");
+      if (COMMON_OUTz == NULL)
+	    abend("Unable to open memory-image output zipfile");
+    }
+}
+
 // Doesn't just parse the command line, but also performs some other
 // initialization.
 int __attribute__ ((no_instrument_function))
@@ -947,20 +971,7 @@ parseCommandLine(int argc, char **argv)
             }
         }
       else if (1 == sscanf(argv[i], "--commono=%s", filename))
-        {
-          if (NULL != strstr(filename, ".gz"))
-            {
-	      COMMON_OUTz = gzopen(filename, "wb");
-	      if (COMMON_OUTz == NULL)
-		abend("Unable to open COMMON output zipfile");
-            }
-          else
-            {
-	      COMMON_OUT = fopen(filename, "w");
-	      if (COMMON_OUT == NULL)
-		abend("Unable to open COMMON output file");
-            }
-        }
+        openCommonOutFile(filename);
       else if (!strncmp(argv[i], "--parm=", 7))
         {
           char *s;
@@ -1114,8 +1125,8 @@ parseCommandLine(int argc, char **argv)
     }
 #ifndef STANDARD_XPL
   if (COMMON_OUT == NULL && COMMON_OUTz == NULL)
-    { FILE *fp;
-      COMMON_OUT = fopen("COMMON.out", "w");
+    {
+      openCommonOutFile("COMMON.out");
       // My intention is that COMMON_OUT won't be written to until the program
       // terminates.  But there seems to be a bug in glibc (or somewhere), so
       // that if I delay writing to COMMON_OUT until then, there's an error
@@ -3438,7 +3449,7 @@ writeCOMMON(void) {
       gzclose(COMMON_OUTz);
       COMMON_OUTz = NULL;
     }
-  else
+  if (COMMON_OUT != NULL)
     {
       int i;
       fprintf(COMMON_OUT, ":\t%d\n", dwAddress);

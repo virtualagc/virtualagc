@@ -424,7 +424,7 @@ if identifierString == None:
     if "P" in ifdefs:
         identifierString = 'REL32V0   '
     elif "B" in ifdefs:
-        identifierString = 'BFS-17.0  '
+        identifierString = 'BFC V17.0 '
     else:
         identifierString = "(TBD)     "
 

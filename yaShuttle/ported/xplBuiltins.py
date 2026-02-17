@@ -578,7 +578,7 @@ def MONITOR(function, arg2=None, arg3=None):
         if pfs:
             return "REL32V0   "
         elif bfs:
-            return "BFC-17.0  "
+            return "BFC V17.0 "
     
     # Read a block of a load module.
     elif function == 24:

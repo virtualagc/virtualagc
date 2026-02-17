@@ -184,9 +184,7 @@ for memberName in sys.argv[1:]:
             print("\t%04X: END" % (offset))
             print("\t\tcards=%d" % fetchHalfword(byteContents, offset + 2))
             print('\t\thal compiler="%s"' % fetchString(byteContents, offset+4, 10))
-            print("\t\thal version=***FIXME*** ", end="")
-            dumpRangeRaw(byteContents, offset+14, 2)
-            print()
+            print("\t\thal version=%d" % fetchHalfword(byteContents, offset + 14))
             print("\t\ttimestamp=%04d-%02d-%02d %02d:%02d:%02d" % \
                   (byteContents[offset+16] + 1900,
                    byteContents[offset+17], byteContents[offset+18],

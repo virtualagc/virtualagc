@@ -47,7 +47,7 @@
 #				transparently as needed, but the physical 
 #				filename must have that extension regardless
 #				of whether or not it's present in RTARGET.
-#	BFS=yes			By default, the `compile` target usses the 
+#	BFS=yes			By default, the `compile` target uses the 
 #				PASS version of the compiler to comile HAL/S
 #				files.  If BFS=yes is present, it instead uses
 #				the BFS version of the compiler.
@@ -209,7 +209,7 @@ $(TARGETS):
 $(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
 	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
-	$(XCOMI) $(XEXTRA) --identifier="BFC-17.0  " --cond=B --cond=V --output=$@ "##DRIVER.xpl" && \
+	$(XCOMI) $(XEXTRA) --identifier="BFC V17.0 " --cond=B --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
 	mv $@$(EXT) ../HALSFC-$@$(EXT)
 
