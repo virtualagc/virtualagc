@@ -36,6 +36,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
             the Assembler Itself</a></li>
         <li><a moz-do-not-send="true" href="#unknownDatatype">Non-System/360
 
+
             Datatype 0x84</a></li>
         <li><a moz-do-not-send="true" href="#characterEncoding">Encoding
             of Character Data in Object Decks</a></li>
@@ -50,15 +51,15 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
     </ul>
     <a moz-do-not-send="true" href="#unexpected"> </a>
     <h1><a name="Introduction"></a>Introduction</h1>
-    <b>HALLINK101S</b> is our "modern" version of the link editor used
-    to combine IBM AP-101 object files created by the HAL/S language
-    compiler and AP-101S assembler into "load files" which can be
-    directly executed on an IBM AP-101 computer or emulator
-    thereof.&nbsp; To the best of my knowledge, the original linker
-    actually used for Shuttle software development has not survived, so
-    <b>HALLINK101S</b> is an entirely-new creation.&nbsp; It is a Python
-    3 program that should work on any computer having the Python 3
-    language installed. <br>
+    <b>HALLINK101S</b> (if anyone ever writes it) would be our "modern"
+    version of the link editor used to combine IBM AP-101 object files
+    created by the HAL/S language compiler and AP-101S assembler into
+    "load files" which can be directly executed on an IBM AP-101
+    computer or emulator thereof.&nbsp; To the best of my knowledge, the
+    original linker actually used for Shuttle software development has
+    not survived, so <b>HALLINK101S</b> will be an entirely-new
+    creation.&nbsp; It'll be a Python 3 program that should work on any
+    computer having the Python 3 language installed. <br>
     <br>
     Regarding the IBM AP-101B vs AP-101S computers, the AP-101B was used
     in earlier Shuttle flights, while the AP-101S was used in later
@@ -121,6 +122,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       object-file format relevant to that surviving software are likely
       to be implemented in <b>HALLINK101S</b>; contrariwise, some <i>non</i>-System/360
 
+
       AP-101S-specific features may appear in the object files.&nbsp;
       For example, "records" in an object file are described as being of
       6 types, known as ESD, TXT, RLD, SYM, XSD, and END, but the XSD
@@ -181,34 +183,36 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       particular we have no documentary information about its
       object-file format.&nbsp; To be frank, I'm proud of myself for
       even figuring out that it was <i>called</i> <b>PILOT</b> to
-      begin with.&nbsp;
-      The acronym "PILOT" is, of course, quite unfortunate from the
-      point of view of trying to find available information via a search
-      engine like Google, since all you'll discover is information about
-      how to pilot a Space Shuttle.&nbsp; I'm afraid this reveals a
-      certain weakness in today's treatment of knowledge, in that we
-      don't have many knowledgeable people any longer, but rather we
-      have people with borrowed knowledge attained via search
-      engines.&nbsp; And A.I., of course, for those of us who can't use
-      search engines very effectively.&nbsp; But what about when the
-      search engines fail because the search terms are too common?&nbsp;
-      Well, that's a good way to lose knowledge, even if it's sitting in
-      plain view.&nbsp; But I doubt it would have helped if <b>PILOT</b>
-      had a less-common name or if we had more native experts on <b>PILOT</b>
-      to consult, since I doubt that there's any surviving information
-      about <b>PILOT</b> online anyway.&nbsp; If you have any such
-      documentation, send it to me!&nbsp; <br>
+      begin with.&nbsp; The acronym "PILOT" is, of course, quite
+      unfortunate from the point of view of trying to find available
+      information via a search engine like Google, since all you'll
+      discover is information about how to pilot a Space Shuttle.&nbsp;
+      I'm afraid this reveals a certain weakness in today's treatment of
+      knowledge, in that we don't have many knowledgeable people any
+      longer, but rather we have people with borrowed knowledge attained
+      via search engines.&nbsp; And A.I., of course, for those of us who
+      can't use search engines very effectively.&nbsp; But what about
+      when the search engines fail because the search terms are too
+      common?&nbsp; Well, that's a good way to lose knowledge, even if
+      it's sitting in plain view.&nbsp; But I doubt it would have helped
+      if <b>PILOT</b> had a less-common name or if we had more native
+      experts on <b>PILOT</b> to consult, since I doubt that there's
+      any surviving information about <b>PILOT</b> online anyway.&nbsp;
+      If you have any such documentation, send it to me!&nbsp; <br>
     </p>
     <p>But don't lose all hope.&nbsp; Since the object-code generator in
       <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">PASS2
+
         of the HAL/S-BFC source code</a> can produce <b>PILOT</b>-compatible
+
       output, it's still possible to attain <i>some</i> understanding
       of the <b>PILOT</b> format via reverse engineering it, and indeed
       perhaps a sufficient amount to implement a linker!&nbsp; I have
       done at least some of the reverse engineering, and have embedded
       my findings in a program I call <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/coPILOT.py">coPILOT.py</a>.&nbsp;
+
       Catchy, eh?&nbsp; This script can read object files created by the
       HAL/S-BFC, and parse them into a human readable form.&nbsp;
       Moreover, there's additional commentary embedded within
@@ -217,12 +221,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       to read more about coPILOT.py, I'd suggest referring to <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-3897924815">the
+
         discussion in issue #1273 in our Virtual AGC GitHub repository</a>.<br>
     </p>
     <p>And now we leave the topic of BFS in order to resume our
       discussion of PASS/PFS-style object code and its linker. </p>
-    <blockquote>
-    </blockquote>
+    <blockquote> </blockquote>
     <h1> <a name="References"></a>References</h1>
     <ul>
       <li>Documentation for related development-chain tools provided by
@@ -244,6 +248,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-38979248
         </li>
         <li>"<a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231">OS
+
 
 
 
@@ -286,12 +291,14 @@ href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf"
 
 
 
+
             101S Assembly Language Introduction</a>".</li>
         <li>"Space Shuttle Advanced System/4 Pi Input/Output Processor
           (IOP)":</li>
         <ul>
           <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf">Parts
+
 
 
 
@@ -326,10 +333,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
               III</a>:&nbsp; Principles of Operation for BCE.</li>
         </ul>
         <li>"<a moz-do-not-send="true"
 href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+
 
 
 
@@ -351,6 +360,7 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
         <li><a moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
 
+
             HAL/S Programming Course</a><br>
         </li>
       </ul>
@@ -361,9 +371,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             Wikipedia article "OS/360 Object File Format"</a></li>
         <li><a moz-do-not-send="true"
             href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
 
 
 
@@ -371,6 +383,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
             Appendix A</a></li>
         <li><a moz-do-not-send="true"
 href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assembler_Programmers_Guide_Sep82.pdf#page=83">The
+
 
 
 
@@ -391,6 +404,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
     by the HAL/S compiler (or by <b>ASM101S</b>).&nbsp; For example,
     consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/140-STATISTICS.hal">this
+
 
 
 
@@ -442,7 +456,9 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
       "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
 
 
 
@@ -473,6 +489,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
           PROCEDURE</code>) accessible by other compilation units.&nbsp;
         <code>ZCON</code> code and <code>REMOTE</code> data are "far
         away" in the AP-101S address space from the code accessing them,
@@ -481,6 +498,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         and <code>ESUM</code> are AP-101S assembly-language functions
         from <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
 
@@ -541,7 +559,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     See the source code for readObject101S.py for further documentation,
     if any.<br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
         Earlier when I mentioned <a moz-do-not-send="true" href="#bfs">the
+
           topic of reverse engineering the <b>PILOT</b> format used for
           BFS object files</a>, and in particular the possible
         assistance offered by the tool coPILOT.py, I threatened to
@@ -552,6 +572,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         object files are produced:&nbsp; cards/#CSTATIS and
         cards/#ZSTATIS.&nbsp; The assembly language produced is also
         slightly different, but only in that an extra instruction "<code>SVC
+
           0()</code>" is inserted at the very end, so I won't bore you
         with yet another printout of the generated assembly
         language.&nbsp; The following is how coPILOT.py parses the two
@@ -564,12 +585,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         addresses and sizes or lengths reported by coPILOT.py are
         roughly half of the corresponding ones reported by
         readObject101S.py.&nbsp; Oh well, a different day (or year!), a
-        different design choice!&nbsp; And there are some obvious bugs
-        due to coPILOT.py being a work in progress, so please ignore
-        them if you can.<br>
+        different design choice!&nbsp; <br>
       </font>
       <blockquote>
-        <pre><font size="-1">Member cards/#CSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: CSD (CSECT Definition)<br>		esdid=1 #CSTATIS length=001F stacksize=0018 flags=800A HAL=STATISTICS<br>	001E: CSD (CSECT Definition)<br>		esdid=2 #DSTATIS length=0002 stacksize=0000 flags=4000 <br>	002E: EXR (External Reference Definition)<br>		esdid=3 #QEMIN   version=0003 tbd=8000 <br>	003C: EXR (External Reference Definition)<br>		esdid=4 #QEMAX   version=0003 tbd=8000 <br>	004A: EXR (External Reference Definition)<br>		esdid=5 #QESUM   version=0003 tbd=8000 <br>	0058: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 <br>	0060: PTX (Protected text)<br>		offset=0000 csect=1 #CSTATIS  <br>		E9F3 0000 B914 E0FB 0018 EB01 BB24 <br>	0074: PTX (Protected text)<br>		offset=0007 csect=1 #CSTATIS  <br>		9A30 1D1C E4F7 3800 9B40 3803 9A30 1D1C E4F7 3800 9B48 3803 9A30 1D1C E4F7 3800 <br>		1E1C 3AEE 68E2 9B50 3803 C9FB 0000 97E8 <br>	00AA: RLD (Relocation data)<br>		rel.id=2 #DSTATIS  pos.id=1 #CSTATIS  flags=0010 address=0001<br>		rel.id=3 #QEMIN    pos.id=1 #CSTATIS  flags=0020 address=000A<br>		rel.id=4 #QEMAX    pos.id=1 #CSTATIS  flags=0020 address=0010<br>		rel.id=5 #QESUM    pos.id=1 #CSTATIS  flags=0020 address=0016<br>	00CC: END<br>		cards=10<br>		hal compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		hal version=***FIXME*** 1B58 <br>		timestamp=2026-02-14 17:56:04<br>		xpl compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		xpl version=***FIXME*** 005A <br>Member cards/#ZSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: EXR (External Reference Definition)<br>		esdid=6 #CSTATIS version=0000 tbd=800A HAL=STATISTICS<br>	001C: CSD (CSECT Definition)<br>		esdid=7 #ZSTATIS length=0002 stacksize=0001 flags=400A HAL=STATISTICS<br>	0036: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 0E00 <br>	0040: RLD (Relocation data)<br>		rel.id=1 #CSTATIS  pos.id=2 #DSTATIS  flags=002C address=0000<br>	004A: END<br>		cards=5<br>		hal compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		hal version=***FIXME*** 1B58 <br>		timestamp=2026-02-14 17:56:04<br>		xpl compiler=***FIXME*** 0000 0000 0000 0000 0000 <br>		xpl version=***FIXME*** 005A <br></font><br></pre>
+        <pre><font size="-1">Member cards/#CSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: CSD (CSECT Definition)<br>		esdid=1 #CSTATIS length=001F stacksize=0018 flags=800A HAL=STATISTICS<br>	001E: CSD (CSECT Definition)<br>		esdid=2 #DSTATIS length=0002 stacksize=0000 flags=4000 <br>	002E: EXR (External Reference Definition)<br>		esdid=3 #QEMIN   version=0003 tbd=8000 <br>	003C: EXR (External Reference Definition)<br>		esdid=4 #QEMAX   version=0003 tbd=8000 <br>	004A: EXR (External Reference Definition)<br>		esdid=5 #QESUM   version=0003 tbd=8000 <br>	0058: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 <br>	0060: PTX (Protected text)<br>		offset=0000 csect=1 #CSTATIS  <br>		E9F3 0000 B914 E0FB 0018 EB01 BB24 <br>	0074: PTX (Protected text)<br>		offset=0007 csect=1 #CSTATIS  <br>		9A30 1D1C E4F7 3800 9B40 3803 9A30 1D1C E4F7 3800 9B48 3803 9A30 1D1C E4F7 3800 <br>		1E1C 3AEE 68E2 9B50 3803 C9FB 0000 97E8 <br>	00AA: RLD (Relocation data)<br>		rel.id=2 #DSTATIS  pos.id=1 #CSTATIS  flags=0010 address=0001<br>		rel.id=3 #QEMIN    pos.id=1 #CSTATIS  flags=0020 address=000A<br>		rel.id=4 #QEMAX    pos.id=1 #CSTATIS  flags=0020 address=0010<br>		rel.id=5 #QESUM    pos.id=1 #CSTATIS  flags=0020 address=0016<br>	00CC: END<br>		cards=10<br>		hal compiler="HAL/S BFC-"<br>		hal version=1700<br>		timestamp=2026-02-16 06:53:10<br>		xpl compiler="RSB-XCOM-I"<br>		xpl version=0.90<br>Member cards/#ZSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: EXR (External Reference Definition)<br>		esdid=6 #CSTATIS version=0000 tbd=800A HAL=STATISTICS<br>	001C: CSD (CSECT Definition)<br>		esdid=7 #ZSTATIS length=0002 stacksize=0001 flags=400A HAL=STATISTICS<br>	0036: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 0E00 <br>	0040: RLD (Relocation data)<br>		rel.id=1 #CSTATIS  pos.id=2 #DSTATIS  flags=002C address=0000<br>	004A: END<br>		cards=5<br>		hal compiler="HAL/S BFC-"<br>		hal version=1700<br>		timestamp=2026-02-16 06:53:10<br>		xpl compiler="RSB-XCOM-I"<br>		xpl version=0.90</font><br></pre>
       </blockquote>
     </blockquote>
     <ul>
@@ -581,7 +600,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <h1><a name="unexpected"></a>Unexpected Hurdles</h1>
     <p>Here are some things I find that differ between AP-101 object
       files and System/360 object files, or at least which are
-      unexpected from reading the System/360 documentation.<br>
+      unexpected from reading the System/360 documentation.&nbsp; Some
+      of these things you'll already have seen above (but without
+      explanation) in the reports produced by reverse-engineering
+      software developed partially using the inferences drawn
+      below.&nbsp; But reverse engineering is a messy, iterative
+      process, so it's seldom easy to give a clean end-to-end narrative.<br>
     </p>
     <h2><a name="partial"></a>Partial Linking By the Assembler Itself</h2>
     <p>The expected:&nbsp; In System/360 assembly language, code and
@@ -665,6 +689,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       As for condition #2, the only <font color="#663300"><code>USING</code></font>
       pseudo-op follows the instruction rather than precedes it, so
       there is no way for the assembler to make any assumptions about
@@ -704,6 +729,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p>As it happens, there's <a moz-do-not-send="true"
         href="ASM101S.html#literals">discussion on our page about the
         modern AP-101 assembler that concerns the available datatypes</a>.&nbsp;
+
 
       That discussion points out a single AP-101S-specific datatype, Z,
       that's speculated to be <i>unrelated</i> to the System/360
@@ -797,6 +823,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       HAL/S program adapted from the book <i>Programming in HAL/S</i></a>,
     with a few of its character-string literals highlighted in various
     colors:<br>
@@ -816,6 +843,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         There's no easy way, as far as I know, using just information
         within the object decks themselves, to easily locate individual
         unnamed string literals within the TXT records of the object
@@ -825,6 +853,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         invalidate the conclusions in any way.&nbsp; In the next
         section, we'll learn enough to infer that the these strings <i>should</i>
         have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
 
 
 
@@ -845,12 +874,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     engineering above.<br>
     <p>Such an object file <i>begins</i> with a block of records in the
       almost-System/360 format we've already described, but differs
-      after an END record is encountered.&nbsp; After an END record, we
-      enter undocumented <i>terra incognita</i>, in which we can only
-      rely upon whatever reverse engineering we can apply.<br>
+      <i> after</i> an END record is encountered.&nbsp; After an END
+      record, we enter undocumented <i>terra incognita</i>, in which we
+      can only rely upon whatever reverse engineering we can apply.<br>
     </p>
     <p>Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/021-SIMPLE.hal">this
+
 
 
 
@@ -930,7 +960,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-14<br>
+          2026-02-16<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
