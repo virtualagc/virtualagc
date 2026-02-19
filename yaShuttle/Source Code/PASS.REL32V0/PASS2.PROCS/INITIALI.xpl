@@ -1532,12 +1532,20 @@ FORMALS:       TEMPSPACE, TMP = 1;                                              
                   SYT_PARM(OP1), TASK# = TASK# + 1;                             01413500
  /?P  /* CR11114 -- BFS/PASS INTERFACE; NAMING CONVENTIONS */
                   CALL ENTER_ESD(PROGNAME(SELFNAMELOC, 0, TASK#), PROCPOINT, 0);01414000
-                  TASKPOINT, SYT_LINK1(TASKPOINT) = OP1;                        01414500
+                  /?W TASKPOINT, SYT_LINK1(TASKPOINT) = OP1; ?/                 01414500
+                  /?V
+                  SYT_LINK1(TASKPOINT) = OP1;
+                  TASKPOINT = OP1;
+                  ?/
  ?/
  /?B  /* CR11114 -- BFS/PASS INTERFACE; NAMING CONVENTIONS */
                   CALL ENTER_ESD(PROGNAME(OP1, 0), PROCPOINT, 0,
                      CODE_CSECT_TYPE);
-                  TASKPOINT, SYT_LINK1(TASKPOINT) = OP1;                        01414500
+                  /?W TASKPOINT, SYT_LINK1(TASKPOINT) = OP1; ?/                 01414500
+                  /?V
+                  SYT_LINK1(TASKPOINT) = OP1;
+                  TASKPOINT = OP1;
+                  ?/
       /*            DUPLICATE TASK CSECT NAMES                        */
                   TEMP_OP = SELFNAMELOC;
                   WORK_STRING = ESD_TABLE(PROCPOINT);

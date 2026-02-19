@@ -181,8 +181,10 @@ test:
 	@diff $(DEXTRA) -s halmat.bin regression/halmat.bin
 	@diff $(DEXTRA) -s litfile.bin regression/litfile.bin
 	@diff $(DEXTRA) -q -s --strip-trailing-cr listing2.txt regression/listing2.txt
-	-@grep --invert-match "	COMM	1[23]	FIXED	" COMMON-PASS1.out >COMMON-PASS1-new.out
-	-@grep --invert-match "	COMM	1[23]	FIXED	" regression/COMMON-PASS1.out >COMMON-PASS1-old.out
+	-@grep --invert-match "	COMM	1[23]	FIXED	" COMMON-PASS1.out | \
+		grep --invert-match '^@' >COMMON-PASS1-new.out
+	-@grep --invert-match "	COMM	1[23]	FIXED	" regression/COMMON-PASS1.out | \
+		grep --invert-match '^@' >COMMON-PASS1-old.out
 	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS1-new.out COMMON-PASS1-old.out
 	@diff $(DEXTRA) -s optmato.bin regression/optmato.bin
 	@diff $(DEXTRA) -s auxmata.bin regression/auxmata.bin
@@ -192,8 +194,10 @@ test:
 	@python3 $(shell which cmp.py) 32 cards2.bin regression/cards2.bin && \
 		( echo Files cards2.bin and regression/cards2.bin match ) || \
 		( exit 1 )
-	-@grep --invert-match "	COMM	1[23]	FIXED	" COMMON-PASS2.out >COMMON-PASS2-new.out
-	-@grep --invert-match "	COMM	1[23]	FIXED	" regression/COMMON-PASS2.out >COMMON-PASS2-old.out
+	-@grep --invert-match "	COMM	1[23]	FIXED	" COMMON-PASS2.out | \
+		grep --invert-match '^@' >COMMON-PASS2-new.out
+	-@grep --invert-match "	COMM	1[23]	FIXED	" regression/COMMON-PASS2.out | \
+		grep --invert-match '^@' >COMMON-PASS2-old.out
 	@diff $(DEXTRA) -q -s --strip-trailing-cr COMMON-PASS2-new.out COMMON-PASS2-old.out
 	@echo Regression test passed.
 

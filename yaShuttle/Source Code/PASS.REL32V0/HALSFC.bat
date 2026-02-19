@@ -46,6 +46,7 @@ set FILES_LOCAL="%FILES_LOCAL:"=% pass1A.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt aux.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
+set FILES_LOCAL="%FILES_LOCAL:"=% litfile0.bin litfile1.bin litfile2.bin litfile3.bin litfile4.bin"
 set FILES_PRESERVE="litfile.bin cards COMMON0.out COMMON0.gz COMMON0.out.bin.gz TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin listing2.txt "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
@@ -145,11 +146,12 @@ if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
         --pdsi=6,ACCESS  ^
         --pdso=6,%TEMPLIB%,E ^
         --commono=COMMON0.%COMMON_EXT% ^
-        --raf=B,7200,1,halmat.bin ^
-        --raf=B,1560,2,litfile.bin ^
+        --raf=O,7200,1,halmat.bin ^
+        --raf=O,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass1.rpt
 if errorlevel 1 ( call :error_exit Aborted after PASS1 )
+copy litfile.bin litfile0.bin
 
 set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CPU TIME FOR^|TODAY IS^|COMPOOL.*VERSION)
 ::echo IGNORE_LINES=%IGNORE_LINES%
@@ -169,33 +171,34 @@ echo ======================================================
 %FLO% ^
         --commoni=COMMON0.%COMMON_EXT% ^
         --commono=COMMON1.%COMMON_EXT% ^
-        --raf=B,7200,1,halmat.bin ^
-        --raf=B,1560,2,litfile.bin ^
+        --raf=I,7200,1,halmat.bin ^
+        --raf=I,1560,2,litfile.bin ^
         --raf=B,3360,6,vmem.bin ^
         >flo.rpt
 if errorlevel 1 ( call :error_exit Aborted after FLO )
-
+copy litfile.bin litfile1.bin
 
 %OPT% ^
         --commoni=COMMON1.%COMMON_EXT% ^
         --commono=COMMON2.%COMMON_EXT% ^
-        --raf=B,7200,1,halmat.bin ^
-        --raf=B,1560,2,litfile.bin ^
-        --raf=B,7200,4,optmat.bin ^
+        --raf=I,7200,1,halmat.bin ^
+        --raf=I,1560,2,litfile.bin ^
+        --raf=O,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >opt.rpt
 if errorlevel 1 ( call :error_exit Aborted after OPT )
+copy litfile.bin litfile2.bin
 
 %AUXP% ^
         --commoni=COMMON2.%COMMON_EXT% ^
         --commono=COMMON3.%COMMON_EXT% ^
-        --raf=B,7200,1,auxmat.bin ^
-        --raf=B,1560,2,litfile.bin ^
-        --raf=B,7200,4,optmat.bin ^
+        --raf=O,7200,1,auxmat.bin ^
+        --raf=I,1560,2,litfile.bin ^
+        --raf=I,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >auxp.rpt
 if errorlevel 1 ( call :error_exit Aborted after AUXP )
-
+copy litfile.bin litfile3.bin
 
 %PASS2% ^
         %CARDS% ^
@@ -204,13 +207,14 @@ if errorlevel 1 ( call :error_exit Aborted after AUXP )
         --ddo=7,extra.txt ^
         --commoni=COMMON3.%COMMON_EXT% ^
         --commono=COMMON4.%COMMON_EXT% ^
-        --raf=B,7200,1,auxmat.bin ^
-        --raf=B,1560,2,litfile.bin ^
-        --raf=B,1600,3,objcode.bin ^
-        --raf=B,7200,4,optmat.bin ^
+        --raf=I,7200,1,auxmat.bin ^
+        --raf=I,1560,2,litfile.bin ^
+        --raf=O,1600,3,objcode.bin ^
+        --raf=I,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass2.rpt
 if errorlevel 1 ( call :error_exit Aborted after PASS2 )
+copy litfile.bin litfile4.bin
 
 :: PASS3 and PASS4 aren't ready for use yet.
 

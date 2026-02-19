@@ -32,6 +32,11 @@
  *                              stored.
  *              2026-02-17 RSB  Now always writes a gzipped memory image, even
  *                              if the COMMON.out isn't gzipped.
+ *              2026-02-18 RSB  Changed the `fopen` modes for `--raf=O,...`
+ *                              and `--raf=I,...` which have been unused so far.
+ *                              Also, input random access files were using the
+ *                              wrong file pointers, and so could not have
+ *                              worked in read-only mode.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -927,7 +932,7 @@ parseCommandLine(int argc, char **argv)
               ro = &randomAccessFiles[OUTPUT_RANDOM_ACCESS][lun];
               if (ro->fp != NULL)
                 abend("Output file already attached");
-              ro->fp = fopen(filename, "ab");
+              ro->fp = fopen(filename, "wb+");
               if (ro->fp == NULL)
                 abend("Cannot open output file for writing");
               ro->recordSize = recordSize;
@@ -3186,8 +3191,8 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
     abend("Bad FILE number (%d)", fileNumber);
-  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
-  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
+  fp = randomAccessFiles[INPUT_RANDOM_ACCESS][fileNumber].fp;
+  recordSize = randomAccessFiles[INPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
     abend("FILE %d not open for reading", fileNumber);

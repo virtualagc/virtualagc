@@ -9,7 +9,8 @@
  * Mods:        2024-06-19 RSB  Split off from runtimeC.c.
  *              2026-02-07 RSB  Added tracing functions (__cyg_profile_func_X)
  *                              for use with gcc command-line switch
- *                              -finstrument-functions
+ *                              -finstrument-functions.
+ *              2026-02-18 RSB  Made `getXPL` slightly friendlier.
  *
  * These functions, many of which were formerly in runtimeC.c, have been
  * segregated here so that: a) I can easily eliminate them from the "production"
@@ -215,6 +216,29 @@ getIntegerFromString(char *varString) {
   return returnValue;
 }
 
+// I have a habit of forgetting to mangle identifiers, and use the actual XPL
+// names, or portions thereof rather than the mangled versions of them.
+// Specifically, I often forget to do:
+// 	[ -> (
+//	] -> )
+//	$ -> d
+//	@ -> a
+//	# -> p
+//	_ -> u
+// So here's a function that does that for me, noting that mangling does
+// not extend to field names of `RECORD`s.
+static void
+unmangle(char *identifier) {
+  for (; *identifier; identifier++)
+    if (*identifier == '.') break;
+    else if (*identifier == '[') *identifier = '(';
+    else if (*identifier == ']') *identifier = ')';
+    else if (*identifier == '$') *identifier = 'd';
+    else if (*identifier == '@') *identifier = 'a';
+    else if (*identifier == '#') *identifier = 'p';
+    else if (*identifier == '_') *identifier = 'u';
+}
+
 // This function could be used within a debugger to fetch the current value
 // of an identifier, perhaps subscripted.  Useful because XPL variables are
 // not modeled as C variables (easily accessed by the debugger) but rather
@@ -233,6 +257,8 @@ getXPL(char *identifier) {
   int isBase = 1, isBaseIndex = 0, isField = 0, isFieldIndex = 0;
   int baseIndex = 0, fieldIndex = 0;
   int i, *value, address;
+
+  unmangle(identifier);
 
   // First, parse the input string into BASED name, BASED index, field name,
   // and field index.

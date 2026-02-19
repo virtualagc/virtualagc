@@ -13,6 +13,9 @@ Purpose:    This is an attempt to create a program that can translate
 Requires:   Python 3.6 or later.
 Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-03-07 RSB  Began experimenting with this concept.
+            2026-02-18 RSB  Nested conditionals (/?c ... /?d ... ?/ ... ?/)
+                            now supported.  Needed for workarounds in 
+                            HALSFC-PASS2[B].
 
 This particular file is just the top level of the program, tasked with
 reading in the XPL source code and gently massaging it to remove 
@@ -168,7 +171,12 @@ baseRadix = ''
 baseStart = 0
 #inPfs = False
 #inBfs = False
-inConditional = ''
+nestedConditionalsAllowed = True # Don't use False.
+if nestedConditionalsAllowed:
+    inConditionals = []
+    inConditionalSet = set()
+else:
+    inConditional = ''
 conditionalTrue = False
 pseudoStatement = ''
 skipQuote = 0
@@ -190,31 +198,62 @@ while True:
     c = source[i]
     
     if not inQuote:
-        # Take care of /?c conditionals.  Note that embedded conditionals
-        # aren't supported or detected.  However, because I've found some
-        # of these inside of quoted strings, I do evaluate them within such
-        # strings.
-        if inConditional == '' and len(c) == 1 and c.isupper() \
-                and lastC == '?' and lastLastC == '/':
-            inConditional = c
-            conditionalTrue = (c in ifdefs)
-            inStartedRef = lineRef
-            pseudoStatement = pseudoStatement[:-2]
-            lastLastC = lastC
-            lastC = c
-            continue
-        elif inConditional != '' and c == '/' and lastC == '?':
-            if conditionalTrue: # Remove the ?
-                pseudoStatement = pseudoStatement[:-1]
-            inConditional = ''
-            conditionalTrue = False
-            lastLastC = lastC
-            lastC = c
-            continue
-        elif inConditional != "" and not conditionalTrue:
-            lastLastC = lastC
-            lastC = c
-            continue
+        if nestedConditionalsAllowed:
+            # Take care of /?c conditionals.  Nested conditionals are allowed,
+            # to any depth.
+            if lastC == '?' and lastLastC == '/' and len(c) == 1 and c.isupper():
+                inConditionals.append(c)
+                inConditionalSet = set(inConditionals)
+                conditionalTrue = inConditionalSet.issubset(ifdefs)
+                inStartedRef = lineRef
+                pseudoStatement = pseudoStatement[:-2]
+                lastLastC = lastC
+                lastC = c
+                continue
+            elif c == '/' and lastC == '?' and len(inConditionals) != 0:
+                if conditionalTrue: # Remove the ?
+                    pseudoStatement = pseudoStatement[:-1]
+                inConditionals.pop()
+                inConditionalSet = set(inConditionals)
+                conditionalTrue = inConditionalSet.issubset(ifdefs)
+                lastLastC = lastC
+                lastC = c
+                continue
+            elif len(inConditionals) != 0 and not conditionalTrue:
+                lastLastC = lastC
+                lastC = c
+                continue
+            elif c == '/' and lastC == '?' and len(inConditionals) == 0:
+                error("Mismatched end of conditional compilation", None)
+                if winKeep:
+                    input()
+                sys.exit(1)
+        else:
+            # Take care of /?c conditionals.  Note that embedded conditionals
+            # aren't supported or detected.  However, because I've found some
+            # of these inside of quoted strings, I do evaluate them within such
+            # strings.
+            if inConditional == '' and len(c) == 1 and c.isupper() \
+                    and lastC == '?' and lastLastC == '/':
+                inConditional = c
+                conditionalTrue = (c in ifdefs)
+                inStartedRef = lineRef
+                pseudoStatement = pseudoStatement[:-2]
+                lastLastC = lastC
+                lastC = c
+                continue
+            elif inConditional != '' and c == '/' and lastC == '?':
+                if conditionalTrue: # Remove the ?
+                    pseudoStatement = pseudoStatement[:-1]
+                inConditional = ''
+                conditionalTrue = False
+                lastLastC = lastC
+                lastC = c
+                continue
+            elif inConditional != "" and not conditionalTrue:
+                lastLastC = lastC
+                lastC = c
+                continue
         
     # Just count the number of single-quotes in succession.  
     quoteCount = 0
@@ -374,8 +413,12 @@ if inHex:
     error("Unterminated hexadecimal number", None)
 if inBase:
     error("Unterminated base %s number" % baseRadix, None)
-if inConditional:
-    error("Unterminated conditional directive", None)
+if nestedConditionalsAllowed:
+    if len(inConditionals) != 0:
+        error("Unterminated conditional directive(s) %s" % string(inConditionals), None)
+else:
+    if inConditional:
+        error("Unterminated conditional directive %s" % inConditional, None)
 if inRecord:
     error("Unterminated BASED RECORD", None)
 
