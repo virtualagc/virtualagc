@@ -12,6 +12,8 @@ Mods:       2024-03-27 RSB  Began.
                             of PROCEDUREs.  In particular, HALSFC-PASS1
                             should now be able to abort with a proper exit
                             code upon error.
+            2026-02-19 RSB  Switched from left-to-right processing order in
+                            in multipl assignments to right-to-left.
 '''
 
 import sys
@@ -1732,14 +1734,17 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         indent += indentationQuantum
         # Note that McKeeman p. 137 specifies that multiple assignments are done
         # right to left.  The order is important if you had an assignment like
-        # X(I),I = J since the value X(I) gets assigned is different if the 
-        # order is different.  But if I do it the way McKeeman specifies, I get
-        # infinite loops not only in HAL/S-FC PASS1, but also in HAL_S_FC.py.
-        # I think that the Intermetrics XPL compiler did it in left-to-right
-        # order.  Whether McKeeman mispoke or not is hard to say, since none
-        # of the legacy standard XPL code I've encountered has any problematic
-        # multiple assignments affected by the order. 
-        #LHSs = list(reversed(line["LHS"]))
+        # X(I),I = J or I,X(I)=J, for obvious reasons.  But here's the thing:
+        # doing in right-to-left order as specified results in infinite loops 
+        # not only in HAL/S-FC PASS1, but also in HAL_S_FC.py.  On the other 
+        # hand, doing it in left-to-right order sometimes results in endless
+        # loops in PASS2B (for any code involving a TASK).  The plain fact is
+        # that neither ordering is sufficient for all HAL/S-FC source code, and
+        # so it's best to avoid ambiguity by simply not allowing XPL code to
+        # have any multi-assignments of the problematic forms mentioned above.
+        # Here, we're going to comply with McKeeman et al.'s specification,
+        # even if it doesn't agree with their code all the time.
+        LHSs = list(reversed(line["LHS"]))
         LHSs = line["LHS"]
         RHS = line["RHS"]
         # Assignments involving `FILE` are special, in my current 

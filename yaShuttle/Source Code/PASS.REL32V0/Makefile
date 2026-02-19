@@ -207,7 +207,8 @@ $(TARGETS):
 	@cd $(subst AUXP.,AUX_,$@.PROCS) && \
 	$(XCOMI) $(XEXTRA) --identifier="REL32V0   " --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
-	mv $@$(EXT) ../HALSFC-$@$(EXT)
+	mv $@$(EXT) ../HALSFC-$@$(EXT) && \
+	mv xcomiMultiAssignments.txt xcomiMultiAssignments-$@.txt 2>/dev/null
 
 .PHONY: $(TARGETSB)
 $(TARGETSB):
@@ -215,7 +216,8 @@ $(TARGETSB):
 	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
 	$(XCOMI) $(XEXTRA) --identifier="BFC V17.0 " --cond=B --cond=V --output=$@ "##DRIVER.xpl" && \
 	make -C $@.build && \
-	mv $@$(EXT) ../HALSFC-$@$(EXT)
+	mv $@$(EXT) ../HALSFC-$@$(EXT) && \
+	mv xcomiMultiAssignments.txt xcomiMultiAssignments-$@.txt 2>/dev/null
 
 # Note that `clean` doesn't clean everything that was built:  The executables
 # from TARGETS remain in place in the current folder, and the build-folders

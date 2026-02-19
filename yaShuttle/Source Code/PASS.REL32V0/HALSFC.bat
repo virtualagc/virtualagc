@@ -182,7 +182,7 @@ copy litfile.bin litfile1.bin
         --commoni=COMMON1.%COMMON_EXT% ^
         --commono=COMMON2.%COMMON_EXT% ^
         --raf=I,7200,1,halmat.bin ^
-        --raf=I,1560,2,litfile.bin ^
+        --raf=B,1560,2,litfile.bin ^
         --raf=O,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >opt.rpt
@@ -208,8 +208,8 @@ copy litfile.bin litfile3.bin
         --commoni=COMMON3.%COMMON_EXT% ^
         --commono=COMMON4.%COMMON_EXT% ^
         --raf=I,7200,1,auxmat.bin ^
-        --raf=I,1560,2,litfile.bin ^
-        --raf=O,1600,3,objcode.bin ^
+        --raf=B,1560,2,litfile.bin ^
+        --raf=B,1600,3,objcode.bin ^
         --raf=I,7200,4,optmat.bin ^
         --raf=B,3360,6,vmem.bin ^
         >pass2.rpt

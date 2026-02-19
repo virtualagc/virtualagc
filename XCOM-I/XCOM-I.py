@@ -16,6 +16,7 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
             2026-02-18 RSB  Nested conditionals (/?c ... /?d ... ?/ ... ?/)
                             now supported.  Needed for workarounds in 
                             HALSFC-PASS2[B].
+            2026-02-19 RSB  Now outputs xcomiMultiAssignments.txt.
 
 This particular file is just the top level of the program, tasked with
 reading in the XPL source code and gently massaging it to remove 
@@ -426,6 +427,7 @@ if inRecord:
 # Note that because of macro expansion, the number of pseudo-statments
 # can increase during the loop.
 lineNumber = -1
+multiAssignmentReport = None
 while True:
     lineNumber += 1
     if lineNumber >= len(pseudoStatements):
@@ -567,6 +569,13 @@ while True:
         # statement.
         if ASSIGNMENT(tokenized, scope):
             error("Problem in ASSIGNMENT", scope)
+        #print("@@@ %d" % len(scope["code"][-1]["LHS"]), file=sys.stderr)
+        if len(scope["code"][-1]["LHS"]) > 1:
+            # This is a multi-assignment.  Let's report it.
+            if multiAssignmentReport == None:
+                multiAssignmentReport = open("xcomiMultiAssignments.txt", "w")
+            print(pseudoStatements[lineNumber], file=multiAssignmentReport)
+            multiAssignmentReport.flush()
     elif reserved0 == "DO":
         # We must now create a new scope and descend into it.
         scope["blockCount"] += 1
