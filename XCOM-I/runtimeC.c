@@ -820,7 +820,7 @@ parseCommandLine(int argc, char **argv)
   for (i = 1; i < argc; i++)
     {
       int n, lun, recordSize;
-      char c, c1, c2, filename[1024];
+      char c, c1='?', c2='?', filename[1024]="?";
       n = 0;
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
@@ -858,7 +858,8 @@ parseCommandLine(int argc, char **argv)
                 }
               if ((n >= 4 && c2 != 'U' && c2 != 'E') ||
                   (n >= 3 && c1 != 'U' && c1 != 'E'))
-                abend("Unknown --ddi/pdsi option");
+                abend("Unknown --ddi/pdsi option: n=%d lun=%d filename='%s' c1=%c c2=%c",
+		      n, lun, filename, c1, c2);
               strcpy(pfilename, filename);
               if (argv[i][2] == 'd')
                 {
