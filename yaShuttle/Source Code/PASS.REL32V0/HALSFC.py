@@ -246,8 +246,6 @@ if test:
         except:
             pass
     IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)'
-    if isWindows:
-        IGNORE_LINES = IGNORE_LINES.replace("|", "^|")
     os.system('egrep -v "%s" pass1.rpt >pass1A.rpt' % IGNORE_LINES)
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
     os.system('diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt')
