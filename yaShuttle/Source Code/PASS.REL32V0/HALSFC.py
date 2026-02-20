@@ -10,6 +10,11 @@ equivalent Windows batch file HALSFC.bat.  The only difference, other than
 possibly increased functionality, is that command-line parameters are no longer
 positional.
 
+(There's just one little problem that I discovered belatedly -- i.e., after 
+writing this entire thing.  Namely, it's so insanely difficult in Windows to
+run any Python script that isn't in the current working directory, that it's 
+completely useless!  Yay!)
+
 This Linux/Mac script compiles a HAL/S program using the HAL/S-FC program,
 which is assumed to be in the PATH.  ERRORLIB is assumed to be in the same
 folder as HALSFC-PASS1.
@@ -28,8 +33,11 @@ from pathlib import Path
 # which is just what we want.
 isWindows = (platform.system() == "Windows")
 # Just in case of working with .exe files in WINE.
-if not isWindows:
+if isWindows:
+    cont = "^\n"
+else:
     os.environ['WINEDEBUG'] = '-all'
+    cont = "\\\n"
 
 helpMessage = '''
 This script compiles a HAL/S source-code file to a HALMAT "intermediate 
@@ -95,7 +103,7 @@ normFile = Path(halsFile).name
 commandLine = " ".join(sys.argv)
 
 now = datetime.now()
-now = now.strftime("%Y-%m-%d %H:%M:%S")
+now = now.strftime("%Y-%m-%d %H-%M-%S")
 
 filesPorted = ["FILE1.bin", "FILE2.bin", "FILE3.bin", "FILE4.bin", "FILE5.bin", 
                "FILE6.bin", "&&TEMPLIB.json", "&&TEMPINC.json", "SOURCECO.txt",
@@ -189,21 +197,22 @@ ERRORLIB = appDir + os.sep + "ERRORLIB" + os.sep
 parmList = parmString.split(",")
 
 # Run PASS1.
-exitCode = os.system('''
-%s \\
-    --parm="%s" \\
-    --ddi=0,"%s" \\
-    --ddo=2,listing2.txt \\
-    --pdsi=4,%s,E \\
-    --pdsi=5,"%s" \\
-    --pdsi=6,ACCESS  \\
-    --pdso=6,%s,E \\
-    --commono=COMMON0%s \\
-    --raf=O,7200,1,halmat.bin \\
-    --raf=O,1560,2,litfile.bin \\
-    --raf=B,3360,6,vmem.bin \\
+command ='''
+%s 
+    --parm="%s" 
+    --ddi=0,"%s" 
+    --ddo=2,listing2.txt 
+    --pdsi=4,%s,E 
+    --pdsi=5,"%s" 
+    --pdsi=6,ACCESS  
+    --pdso=6,%s,E 
+    --commono=COMMON0%s 
+    --raf=O,7200,1,halmat.bin 
+    --raf=O,1560,2,litfile.bin 
+    --raf=B,3360,6,vmem.bin 
     >pass1.rpt
-''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON))
+''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON)
+exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after PASS1")
 shutil.copy("litfile.bin", "litfile0.bin")
@@ -248,65 +257,69 @@ if test:
     print("======================================================")
 
 # Run FLO.
-exitCode = os.system('''
-%s \\
-    --commoni=COMMON0%s \
-    --commono=COMMON1%s \
-    --raf=I,7200,1,halmat.bin \
-    --raf=I,1560,2,litfile.bin \
-    --raf=B,3360,6,vmem.bin \
+command = '''
+%s 
+    --commoni=COMMON0%s 
+    --commono=COMMON1%s 
+    --raf=I,7200,1,halmat.bin 
+    --raf=I,1560,2,litfile.bin 
+    --raf=B,3360,6,vmem.bin 
     >flo.rpt
-''' % (FLO, extCOMMON, extCOMMON))
+''' % (FLO, extCOMMON, extCOMMON)
+exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after FLO")
 shutil.copy("litfile.bin", "litfile1.bin")
 
 # Run OPT.
-exitCode = os.system('''
-%s \\
-    --commoni=COMMON1%s \
-    --commono=COMMON2%s \
-    --raf=I,7200,1,halmat.bin \
-    --raf=B,1560,2,litfile.bin \
-    --raf=O,7200,4,optmat.bin \
-    --raf=B,3360,6,vmem.bin \
+command = '''
+%s 
+    --commoni=COMMON1%s 
+    --commono=COMMON2%s 
+    --raf=I,7200,1,halmat.bin 
+    --raf=B,1560,2,litfile.bin 
+    --raf=O,7200,4,optmat.bin 
+    --raf=B,3360,6,vmem.bin 
     >opt.rpt
-''' % (OPT, extCOMMON, extCOMMON))
+''' % (OPT, extCOMMON, extCOMMON)
+exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after OPT")
 shutil.copy("litfile.bin", "litfile2.bin")
 
 # Run AUX.
-exitCode = os.system('''
-%s \\
-    --commoni=COMMON2%s \
-    --commono=COMMON3%s \
-    --raf=O,7200,1,auxmat.bin \
-    --raf=I,1560,2,litfile.bin \
-    --raf=I,7200,4,optmat.bin \
-    --raf=B,3360,6,vmem.bin \
+command = '''
+%s 
+    --commoni=COMMON2%s 
+    --commono=COMMON3%s 
+    --raf=O,7200,1,auxmat.bin 
+    --raf=I,1560,2,litfile.bin 
+    --raf=I,7200,4,optmat.bin 
+    --raf=B,3360,6,vmem.bin 
     >auxp.rpt
-''' % (AUXP, extCOMMON, extCOMMON))
+''' % (AUXP, extCOMMON, extCOMMON)
+exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after AUX")
 shutil.copy("litfile.bin", "litfile3.bin")
 
 # Run PASS2
-exitCode = os.system('''
-%s \\
-    %s \
-    --ddo=4,deck.bin,E \
-    --pdsi=5,"%s" \
-    --ddo=7,extra.txt \
-    --commoni=COMMON3%s \
-    --commono=COMMON4%s \
-    --raf=I,7200,1,auxmat.bin \
-    --raf=B,1560,2,litfile.bin \
-    --raf=B,1600,3,objcode.bin \
-    --raf=I,7200,4,optmat.bin \
-    --raf=B,3360,6,vmem.bin \
+command = '''
+%s 
+    %s 
+    --ddo=4,deck.bin,E 
+    --pdsi=5,"%s" 
+    --ddo=7,extra.txt 
+    --commoni=COMMON3%s 
+    --commono=COMMON4%s 
+    --raf=I,7200,1,auxmat.bin 
+    --raf=B,1560,2,litfile.bin 
+    --raf=B,1600,3,objcode.bin 
+    --raf=I,7200,4,optmat.bin 
+    --raf=B,3360,6,vmem.bin 
     >pass2.rpt
-''' % (PASS2, CARDS, ERRORLIB, extCOMMON, extCOMMON))
+''' % (PASS2, CARDS, ERRORLIB, extCOMMON, extCOMMON)
+exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after PASS2")
 shutil.copy("litfile.bin", "litfile4.bin")
