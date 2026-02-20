@@ -220,11 +220,12 @@ if test:
     ported=findFileUsingPATH("HAL_S_FC.py")
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
+    fullPath = os.path.join(ported, "HAL_S_FC.py")
     ported=Path(ported).parent
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
-    command = 'HAL_S_FC.py %s %s --templib --hal="%s" >pass1p.rpt' \
-                         % (TARGET, parmString.replace(",", " "), halsFile)
+    command = 'python "%s" %s %s --templib --hal="%s" >pass1p.rpt' \
+                         % (fullPath, TARGET, parmString.replace(",", " "), halsFile)
     #print(command)
     exitCode = os.system(command)
     if exitCode:
