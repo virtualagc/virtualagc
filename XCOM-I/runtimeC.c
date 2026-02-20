@@ -1054,8 +1054,8 @@ parseCommandLine(int argc, char **argv)
           printf("              N can range from 0 through 9.  The optional\n");
           printf("              literal E indicates that the output is EBCDIC\n");
           printf("              or binary.\n");
-          printf("--pdsi=N,F[,E] Same as --ddi, but for a PDS file.\n");
-          printf("--pdso=N,F[,E] Same as --ddo, but for a PDS file.\n");
+          printf("--pdsi=N,F[,E] Same as --ddi, but for a PDS.\n");
+          printf("--pdso=N,F[,E] Same as --ddo, but for a PDS.\n");
           printf("--raf=I,R,N,F Attach filename F to device number N, for use\n");
           printf("              with the FILE(N) XPL built-in.  R is the\n");
           printf("              record size associated with the random-access\n");
@@ -2265,7 +2265,7 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
       DCB_OUTS[dev].fp = NULL;
     }
   if (strlen(DCB_OUTS[dev].filename) == 0)
-    abend("Attempt to use unassigned PDS file for output: Device number = %d", dev);
+    abend("Attempt to use unassigned PDS for output: Device number = %d", dev);
   lenFile = strlen(DCB_OUTS[dev].filename);
   //if (mkdir(DCB_OUTS[dev].filename, 0777) < 0)
   //  abend("Unable to create PDS; note that PDS is implemented as a folder: "
@@ -2326,7 +2326,7 @@ MONITOR2(uint32_t dev, descriptor_t *name) {
       DCB_INS[dev].fp = NULL;
     }
   if (strlen(DCB_INS[dev].filename) == 0)
-    abend("Attempt to use unassigned PDS file for input: Device number %d", dev);
+    abend("Attempt to use unassigned PDS for input: Device number %d", dev);
   lenFile = strlen(DCB_INS[dev].filename);
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
