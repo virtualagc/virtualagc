@@ -123,17 +123,18 @@
 #include "zlib.h"
 
 // Stuff related to writing/reading zipfiles that I adapted from Google AI.
+// Its advice to use `SET_BINARY_MODE` seems to be the bunk.
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #include <fcntl.h>
 #include <io.h>
-#define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
+//#define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
 #else
-#define SET_BINARY_MODE(file)
+//#define SET_BINARY_MODE(file)
 #endif
 
 void writeZipfile(gzFile dest) {
     // Set binary mode for standard I/O on Windows if needed (best practice)
-    SET_BINARY_MODE(dest);
+    //SET_BINARY_MODE(dest);
     if (gzwrite(dest, memory, MEMORY_SIZE) != MEMORY_SIZE) {
         fprintf(stderr, "Error writing COMMON file\n");
         exit(1);
