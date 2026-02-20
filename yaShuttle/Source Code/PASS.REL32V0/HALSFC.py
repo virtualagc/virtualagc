@@ -197,8 +197,7 @@ ERRORLIB = appDir + os.sep + "ERRORLIB" + os.sep
 parmList = parmString.split(",")
 
 # Run PASS1.
-command ='''
-%s 
+command ='''%s 
     --parm="%s" 
     --ddi=0,"%s" 
     --ddo=2,listing2.txt 
@@ -210,8 +209,7 @@ command ='''
     --raf=O,7200,1,halmat.bin 
     --raf=O,1560,2,litfile.bin 
     --raf=B,3360,6,vmem.bin 
-    >pass1.rpt
-''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON)
+    >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON)
 exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after PASS1")
@@ -255,55 +253,48 @@ if test:
     print("======================================================")
 
 # Run FLO.
-command = '''
-%s 
+command = '''%s 
     --commoni=COMMON0%s 
     --commono=COMMON1%s 
     --raf=I,7200,1,halmat.bin 
     --raf=I,1560,2,litfile.bin 
     --raf=B,3360,6,vmem.bin 
-    >flo.rpt
-''' % (FLO, extCOMMON, extCOMMON)
+    >flo.rpt''' % (FLO, extCOMMON, extCOMMON)
 exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after FLO")
 shutil.copy("litfile.bin", "litfile1.bin")
 
 # Run OPT.
-command = '''
-%s 
+command = '''%s 
     --commoni=COMMON1%s 
     --commono=COMMON2%s 
     --raf=I,7200,1,halmat.bin 
     --raf=B,1560,2,litfile.bin 
     --raf=O,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
-    >opt.rpt
-''' % (OPT, extCOMMON, extCOMMON)
+    >opt.rpt''' % (OPT, extCOMMON, extCOMMON)
 exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after OPT")
 shutil.copy("litfile.bin", "litfile2.bin")
 
 # Run AUX.
-command = '''
-%s 
+command = '''%s 
     --commoni=COMMON2%s 
     --commono=COMMON3%s 
     --raf=O,7200,1,auxmat.bin 
     --raf=I,1560,2,litfile.bin 
     --raf=I,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
-    >auxp.rpt
-''' % (AUXP, extCOMMON, extCOMMON)
+    >auxp.rpt''' % (AUXP, extCOMMON, extCOMMON)
 exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after AUX")
 shutil.copy("litfile.bin", "litfile3.bin")
 
 # Run PASS2
-command = '''
-%s 
+command = '''%s 
     %s 
     --ddo=4,deck.bin,E 
     --pdsi=5,"%s" 
@@ -315,8 +306,7 @@ command = '''
     --raf=B,1600,3,objcode.bin 
     --raf=I,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
-    >pass2.rpt
-''' % (PASS2, CARDS, ERRORLIB, extCOMMON, extCOMMON)
+    >pass2.rpt''' % (PASS2, CARDS, ERRORLIB, extCOMMON, extCOMMON)
 exitCode = os.system(command.replace("\n", cont))
 if exitCode != 0:
     errorExit("Aborted after PASS2")
