@@ -2697,7 +2697,30 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     same trick to access them as if they were <font color="#663333"><code>FIXED</code></font>.<br>
     <br>
     Subscripting sloppiness indeed!<br>
-    <br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        Somebody who wanted to go out of their way to be fair about
+        this, rather than haughty and dismissive about it as I have been
+        above — and why not? Civility costs us nothing! —, might point
+        out that the C language does the same thing, albeit only with
+        pointer variables such as those declared as "<code>int *</code>",
+        "<code>char *</code>", and so on, and not with non-pointer
+        variables declared as "<code>int</code>", "<code>cha</code>r",
+        etc.&nbsp; Fair enough!&nbsp; It means that instead of thinking
+        of XPL variables declared as (say) <code>FIXED</code> the way
+        we'd think about a C-language <code>int</code>, we should
+        really just think of it as an <code>int*</code> to begin
+        with.&nbsp; Or to put it differently, all XPL variables are
+        really pointers.&nbsp; In some IBM languages, even literal
+        constants are pointers.&nbsp; Many years ago, a friend pointed
+        out to me that if you used a literal constant such as 5 as a
+        parameter to a mainframe IBM Fortran routine, and if that
+        Fortran routine changed the value of that parameter internally,
+        perhaps to 6, then it would in fact change the value of the
+        constant 5 to 6 globally within the entire program.&nbsp; So I
+        guess that XPL is par for the course in that respect, however
+        odd it is vs my expectations of what constitute safe programming
+        practices.</font><br>
+    </blockquote>
     Here are a few examples of declarations of variables, both scalar
     and array:<br>
     <blockquote>
@@ -3437,12 +3460,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     <p>In most cases, the ordering of these assignments is of no
       significance, and in fact I've found no legacy <i>standard</i>
       XPL programs in which the ordering matters.&nbsp; However, there
-      are instances in XPL/I code, specifically in <b>PASS1</b> of <b>HAL/S-FC</b>
-      in which the order matters a lot.&nbsp; That's when you have
-      assignments of the form:<br>
+      are instances in XPL/I code, specifically in <b>HAL/S-FC</b> in
+      which the order matters a lot.&nbsp; An example is when you have
+      assignments of the forms:<br>
     </p>
     <blockquote>
-      <pre><font color="#663300">Y(I), I = J;</font><br></pre>
+      <pre><font color="#663300">Y(I), I = J;<br>I, Y(I) = J;<br></font></pre>
     </blockquote>
     <p>because obviously<br>
     </p>
@@ -3454,103 +3477,60 @@ href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/
     <blockquote>
       <pre><font color="#663300">Y(I) = J;<br>I = J;</font><br></pre>
     </blockquote>
-    <p><i>Unfortunately</i>, in the cases I've encountered, the XPL/I
-      code seems to rely on the latter interpretation.&nbsp; I.e., it
-      seems to believe that the assignments are performed in
-      left-to-right order, in direct contradiction to <i>A Compiler
-        Generator</i>.&nbsp; What's going on here?<br>
+    <p>HAL/S-FC source code contains multi-assignments of both of the
+      forms shown above, but unfortunately <i>sometimes</i> seem to be
+      performed in left-to-right order, in direct contradiction to <i>A
+        Compiler Generator</i>.&nbsp; What's going on here?<br>
     </p>
-    <p>Of course, we have no way of knowing what Intermetrics <b>XCOM</b>
-      did with this, but as far as <i>A Compiler Generator</i>'s <b>XCOM3</b>,
-      it appears (thanks to Dan Weaver for this explanation) that while
-      the assignments are indeed performed in a right-to-left manner as
-      documented, the peculiarities of the IBM 360 object-code
-      generation in <b>XCOM3</b> shove the index <font color="#663300"><code>I</code></font>
-      into a CPU register and reuse it without change throughout both
-      assignments.&nbsp; So seemingly by accident, the net result is
-      that the assignments <i>appear</i> to have been done in a
-      left-to-right order.&nbsp; I would also note that there is an
-      example in <i>A Compiler Generator</i> (Fig. 6.18.1) that shows
-      assembly code generated for the XPL expression<br>
-    </p>
-    <blockquote>
-      <pre><font color="#663300">I, J, K = 2;</font><br></pre>
-    </blockquote>
+    <p>Of course, lacking its source code we have no way of knowing what
+      Intermetrics <b>XCOM</b> did with this, but as far as <i>A
+        Compiler Generator</i>'s <b>XCOM3</b> is concerned, Dan Weaver
+      (thanks Dan!) has analyzed the generated object code and provided
+      an answer.&nbsp; He has found that while the assignments are
+      indeed done in a right-to-left order, an array index on the
+      left-hand side of the assignment is shoved into a CPU register
+      prior to any of the assignments taking place.&nbsp; So in an
+      assignment like <code>Y(I),I=J</code>, by the time the assignment
+      <code>Y(I)=J</code> occurs, it is still using the unmodified value
+      of <code>I</code> from the CPU register rather than the
+      now-modified current value <code>I=J</code>.&nbsp; Thus <code>Y(I),I=J</code>
+      behaves as if it were done in left-to-right order, whereas <code>I,Y(I)=J</code>
+      would behave exactly as documented in right-to-left order.&nbsp;
+      Or to be more blunt, it's a bug in the original XPL compiler(s)
+      that to use properly involves detailed, undocumented knowledge of
+      the peculiarities of register assignments by the compiler in
+      System/360 object code, which I suppose some of the original
+      HAL/S-FC may have had.<code><br>
+      </code></p>
     <p> </p>
-    <p>which supports the documented right-to-left order, namely,<br>
-    </p>
-    <blockquote>
-      <pre><font color="#663300">LA	1,2(0,0)	[This gets a 2]<br>STC	1,1346(0,11)	[This sticks it into K]<br>STH	1,1344(0,11)	[This sticks it into J]<br>ST	1,1340(0,11)	[This sticks it into I]</font><br></pre>
-    </blockquote>
-    <p><i>Vis-à-vis</i> Dan's explanation, it doesn't appear to me to be
-      a reliable design choice in <b>XCOM<i>x</i></b>:&nbsp; what if
-      there are more than 2 assignments on the left-hand side, and if
-      they don't all use the same index <font color="#663300"><code>I</code></font>?&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-      What would the order appear to be then?&nbsp; Well, perhaps <b>XCOM<i>x</i></b>
-      does something else in that situation.<br>
-    </p>
-    <blockquote><font size="-1"><b>Aside:</b>&nbsp; When I wrote this,
-        perhaps I didn't have a working <b>XCOM3</b> yet, or perhaps it
-        did not occur to me that I could just use <b>XCOM3</b> and
-        compile any test cases I like, so that I could see what the
-        assembly code did.&nbsp; Well, I realize it now.&nbsp; I still
-        haven't done it, but perhaps I should.&nbsp; Some day.</font><br>
-    </blockquote>
-    <p> </p>
-    <p>To sum it all up:<br>
-    </p>
-    <blockquote><font size="-1"><b>Important Note</b>:&nbsp; <b>XCOM-I</b>
-        <i>ignores</i> the statement in <i>A Compiler Generator</i>
-        that assignments are performed in a right-to-left manner.&nbsp;
-        Rather, it performs them in a left-to-right manner, and any
-        indices of arrays are computed at the moment the assignment is
-        performed.&nbsp; I'm keeping my fingers crossed that this
-        doesn't explode in my face.&nbsp; If it does, I would be tempted
-        to just fix the XPL source code that was doing it, rather than
-        to fix <b>XCOM-I</b>.&nbsp; We'll see.<br>
-      </font></blockquote>
-    <i>But wait, there's more; explode it has!</i>&nbsp; While I didn't
-    know it until a couple of years after I wrote the above, there are <i>also</i>
-    places in HAL/S-FC source code that are <i>very similar</i> to the
-    pathological case described above, in which the order of processing
-    really does have to be from right to left after all!&nbsp; In <b>PASS2</b>
-    of <b>HAL/S-FC</b>, one finds the following delightful example:<br>
-    <blockquote>
-      <pre>TASKPOINT, SYT_LINK1(TASKPOINT) = OP1;<br></pre>
-    </blockquote>
-    In this example, the code is trying to create a linked list, and the
-    technique is first to set the link from the current list element to
-    the next one (that's the <code>SYT_LINK1(TASKPOINT)=OP1</code>
-    thing), and then after that to advance to the next link (that's the
-    <code>TASKPOINT = OP1</code> thing).&nbsp; So any specific approach
-    our modern XPL/I compiler takes that doesn't account for how
-    Intermetrics's old XPL/I compiler's inconsistent (or at least
-    undocumented) CPU-register assignments worked is simply going to
-    have the wrong behavior in some cases.&nbsp; Right-to-left?
-    Wrong!&nbsp; Left-to-right?&nbsp; Wrong!&nbsp; Isn't that just
-    super?<br>
+    How does <b>XCOM-I</b> handle all of this?&nbsp; Obviously, it does
+    not try to duplicate the absolutely nonsensical behavior described
+    in the preceding paragraph!&nbsp; The approach actually employed has
+    changed over time, but as far as recent versions are concerned, <b>XCOM-I</b>
+    adheres to <i>A Compiler Generator</i>:&nbsp; right-to-left
+    evaluation.&nbsp; In those cases where that doesn't work as
+    expected, you simply have to fix the multi-assignments directly in
+    the XPL source code.&nbsp; My recommendation would be to do it as a
+    sequence of single assignments rather than as an improved
+    multi-assignment.<br>
     <br>
-    I suppose the most-correct choice (if there is such a thing) in
-    these circumstances would be to implement a right-to-left order just
-    as <i>A Compiler Generator</i> tells us to, and then to provide
-    workarounds in XPL source code for when it really turned out that a
-    left-to-right order produces the correct result.&nbsp; But I've
-    already written <b>XCOM-I</b> the other way, in which a
-    left-to-right order is implemented and workarounds must be added
-    when a right-to-left order is needed, and I say <i>enough is enough</i>!&nbsp;
-    Here we rest.&nbsp; It'll stay the way I wrote it.&nbsp; If you
-    don't like it, use your own XPL compiler instead of mine.<br>
+    To help you negotiate this swamp when dealing with legacy XPL code
+    that may contain bad multi-assignments, <b>XCOM-I</b> automatically
+    produces a report called "xcomiMultiAssignments.txt" of all the
+    multiple assignments in the program that it's compiling.&nbsp;
+    Therefore, you should at least be able to examine this file and thus
+    determine which multi-assignments may need some attention.&nbsp; The
+    file itself just presents all multi-assignments without attempting
+    to determine which (if any) of them are problematic.&nbsp; But as
+    the examples above have shown, the culprits are those which try to
+    set the values both of an array element and of the index of that
+    array element at the same time.&nbsp; Here's a helpful filter using
+    the GNU utilities <b>sed</b> and <b>grep</b> to eliminate a lot of
+    clutter from the files by getting rid of the right-hand sides of the
+    assignments and showing just left-hand sides having parentheses:<br>
+    <blockquote>
+      <pre>sed 's/=.*//' xcomiMultiAssignments-<i>PROGNAME</i>.txt | grep '('<br></pre>
+    </blockquote>
     <blockquote> </blockquote>
     <h2>Logical Expressions</h2>
     <p>XPL's logical operators are <font color="#663300"><code>&amp;</code></font>,
@@ -5265,7 +5245,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       counter for an equivalent loop would have the value 100 rather
       than 101 after normal termination of the loop.<br>
     </blockquote>
-    <h2>Order of Evaluation of Procedure Operands</h2>
+    <h2><a name="multiAssignments"></a>Order of Evaluation of Procedure
+      Operands</h2>
     <p>In an XPL string-concatenation expression like this one,<br>
     </p>
     <blockquote>
@@ -8945,39 +8926,72 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <br>
     <h1><a name="debugging"></a>Debugging XPL Programs</h1>
     <p>It is admittedly unlikely that many people will be writing new
-      XPL or XPL/I programs nowadays, and will instead be compiling only
-      legacy XPL or XPL/I programs ... assuming that I haven't already
-      compiled all of them first! (Which is a distinct possibility.)
-      Since such legacy programs will presumably all have been debugged
-      decades before, there's not as much need for a debugger as there
-      is for computer languages in which there are many active
-      developers. Nevertheless, XPL or XPL/I programs can be run under a
-      debugger to a certain extent.<br>
+      XPL programs nowadays, and will instead be compiling only legacy
+      XPL or XPL/I programs ... assuming that I haven't already compiled
+      all of them first! (Which is a distinct possibility.) Since such
+      legacy programs will presumably all have been debugged decades
+      before, there's not as much need for a debugger as there is for
+      computer languages in which there are many active developers.
+      Nevertheless, XPL or XPL/I programs can be run under a debugger to
+      a certain extent.<br>
     </p>
-    The trick is to realize that while we have no debugger for the XPL
-    language, we do have debuggers for C, and once <b>XCOM-I</b> has
-    translated XPL or XPL-I software into C, such C debuggers can be
-    used. It is merely necessary when compiling your XPL program to use
-    the appropriate command-line switches for incorporating debugging
-    information into the executable.&nbsp; There are actually two
-    aspects to this:&nbsp; Including the debugging aids provided by <b>XCOM-I</b>,
-    and including the debugging information appropriate for whatever
-    debugger software you're using.&nbsp; If you're using GNU <b>gdb</b>
-    or any debugger that accepts <b>gdb</b>-style data to debug your
-    program then, and for the sake of discussion ignoring any other
-    options you chose to use (such as <font color="#663300"><code>CC=clang</code></font>),
-
-
-
-
-
-
-
-
-
-
-
-    you'd compile your XPL program like this:<br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+        That said, there are perhaps a few particularly dangerous areas
+        to look at before just assuming that the legacy XPL source code
+        and <b>XCOM-I</b> itself are automatically "good":<br>
+      </font>
+      <ul>
+        <li><font size="-1">The original XPL compilers were not always
+            fully compliant with <i>A Compiler Generator</i>'s claims
+            about how multi-assignments were handled.&nbsp; A
+            "multi-assignment" is a statement of the form "<code>A, B,
+              ... = Z;</code>", which means that several different
+            variables (<code>A</code>, <code>B</code>, ...) are all
+            assigned the same value <code>Z</code>.&nbsp; <i>Usually</i>
+            the order in which these assignments are performed doesn't
+            matter, but in the case of assignments like "<code>A(I), I =
+              N;</code>" or "<code>I, A(I) = N;</code>" the order
+            very-definitely matters.&nbsp; <i>A Compiler Generator</i>
+            blithely says that these assignments are performed in
+            right-to-left order.&nbsp; But the reality is that the way
+            in which the original XPL compilers chose to allocate
+            System/360 registers in the object code they produce <i>sometimes</i>
+            resulted in the assignments being performed as if with a
+            left-to-right ordering.&nbsp; Naturally, XCOM-I does not
+            attempt to duplicate this — and let's just call it what it
+            is, friends — <i>bug</i> in the original XPL compilers, so
+            it cannot always process multi-assignments identically to
+            the original compilers.&nbsp; Therefore, it's sometimes
+            useful to look for problematic multi-assignments in sections
+            of code that are misbehaving.&nbsp; <a
+              moz-do-not-send="true" href="#multiAssignments">We've
+              already devoted a whole section to this problem</a>.<br>
+          </font></li>
+        <li><font size="-1">Not all of the source code in XPL programs
+            is written in XPL.&nbsp; Sometimes it's inlined System/360
+            machine code which has been inserted into it.&nbsp; This
+            inlined 360 code must be "patched" with C-language
+            equivalent code, and that patching is a rich source of
+            error.&nbsp; <a moz-do-not-send="true" href="#hooks">There's
+              a whole section devoted to this below</a>.<br>
+          </font></li>
+      </ul>
+    </blockquote>
+    <p> </p>
+    The trick to using a debugger is to realize that while we have no
+    debugger for the XPL language, we do have debuggers for C, and once
+    <b>XCOM-I</b> has translated XPL or XPL-I software into C, such C
+    debuggers can be used. It is merely necessary when compiling your
+    XPL program to use the appropriate command-line switches for
+    incorporating debugging information into the executable.&nbsp; There
+    are actually two aspects to this:&nbsp; Including the debugging aids
+    provided by <b>XCOM-I</b>, and including the debugging information
+    appropriate for whatever debugger software you're using.&nbsp; If
+    you're using GNU <b>gdb</b> or any debugger that accepts <b>gdb</b>-style
+    data to debug your program then, and for the sake of discussion
+    ignoring any other options you chose to use (such as <font
+      color="#663300"><code>CC=clang</code></font>), you'd compile your
+    XPL program like this:<br>
     <blockquote>
       <pre><font color="#663300">XCOM-I.py --xpl --debugging-aid <i>SOURCEFILE</i>.xpl<br>make EXTRA=-ggdb -C <i>SOURCEFILE</i></font></pre>
       <b><font size="-1">Aside:</font></b><font size="-1">&nbsp; A
@@ -10369,7 +10383,7 @@ double epsilon360; // A small number, used for tolerance in some floating-point 
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-18<br>
+          2026-02-19<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

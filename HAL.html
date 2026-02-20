@@ -1636,7 +1636,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           <code>SIGNAL</code>, <code>SET</code>, <code>RESET</code>, <code>SEND</code>,
           <strike><code>ERROR</code></strike> (see next bullet point), <code>RUNTIME</code>,
           <code>CLOCKTIME</code>, <code>DATE</code>, <code>PRIO</code>,
-          <code>ERRGRP</code>, and <code>ERRNUM</code>, and <code>EXCLUSIVE</code>.<br>
+          <code>ERRGRP</code>, <code>ERRNUM</code>, and <code>EXCLUSIVE</code>.<br>
         </li>
         <li>The BFS form of the compiler doesn't allow a number of
           features for the error trap ("<code>ON ERROR</code> ...") that
@@ -4232,7 +4232,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         <tr>
           <td valign="middle" align="center">Output report<br>
           </td>
-          <td valign="top" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass1.rpt</i></code></font></b><b>
+          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass1.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b><b><br>
             </b> </td>
           <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>flo.rpt</i></code></font></b><b>
@@ -4323,12 +4323,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             </b></td>
           <td valign="middle" align="center"><b>TBD<br>
             </b></td>
-          <td valign="top">Generated object code, in a format similar to
-            the IBM 360 object-code format.&nbsp; The PASS and BFS
-            versions of the compiler differ, in that the PASS version
-            outputs a single object file per HAL/S input file, whereas
-            the BFS version output a number of output files as members
-            of a partitioned data set in a manner that's TBD.<br>
+          <td valign="top">Generated object code.&nbsp; The file
+            cards.bin is in a format similar to the IBM 360 object-code
+            format.&nbsp; The PASS and BFS versions of the compiler
+            differ, in that the PASS version outputs a single object
+            file per HAL/S input file, whereas the BFS version output a
+            number of output files as members of a partitioned data set
+            in a format called PILOT.&nbsp; While contemporary
+            documentation is lacking, <a moz-do-not-send="true"
+              href="HALLINK101S.html">these formats can be understood
+              from our page</a> describing our hypothetical but
+            currently non-existent linker program.<br>
           </td>
         </tr>
         <tr>
@@ -4458,7 +4463,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             which HAL/S code is converted prior to generation of machine
             code.&nbsp; Various versions are created by the several
             compiler passes; see also <font color="#663300"><code><i>optmat.bin</i></code></font>,
-            below.<br>
+            below.&nbsp; Contemporary documentation for <a
+              moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/Halmat.pdf">the
+              format of halmat.bin and optmat.bin has not survived, but
+              our reconstructed documentation is available</a>.&nbsp; I
+            don't know the format of auxmat.bin.<br>
           </td>
         </tr>
         <tr>
@@ -4469,16 +4479,22 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td nowrap="nowrap" valign="middle" align="center"
             bgcolor="#cc33cc"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td nowrap="nowrap" valign="middle" align="center"
-            bgcolor="#cc33cc"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+            bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td nowrap="nowrap" valign="middle" align="center"
             bgcolor="cc33cc"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td nowrap="nowrap" valign="middle" align="center"
-            bgcolor="#cc33cc"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+            bgcolor="#cc33cc"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td valign="middle" align="center"><b><font color="#663300">TBD</font></b></td>
           <td valign="middle" align="center"><b>TBD</b></td>
           <td valign="middle">This is a "random-access file" that the
             compiler uses to store the values of string, floating-point,
-            and bit-string literals.</td>
+            and bit-string literals.&nbsp; I'm not sure the format of it
+            is documented anywhere, but <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+              provided a little Python script whose comments describe
+              the format, and whose actions produce a human-readable
+              dump of the file</a>.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">Workfiles<br>
@@ -4491,7 +4507,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             </b> </td>
           <td valign="middle" align="center"><b>n/a</b></td>
           <td valign="middle" align="center"><b><code><font
-                  color="#663300">--raf=O,1600,3,<i>objcode.bin</i><br>
+                  color="#663300">--raf=B,1600,3,<i>objcode.bin</i><br>
                 </font></code></b></td>
           <td valign="middle" align="center"><b>TBD</b></td>
           <td valign="middle" align="center"><b>TBD</b></td>
@@ -4618,8 +4634,42 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </tr>
       </tbody>
     </table>
-    <p><br>
+    <p>In addition to this miscellany of files, the compiler also
+      automatically outputs many other files without any user directive
+      to do so.&nbsp; Note that for the purpose of file-naming, the
+      compiler often refers to its passes by number rather than
+      name:&nbsp; 0 for PASS1, 1 for FLO, 2 for OPT, 3 for AUX, 4 for
+      PASS2, 5 for PASS3, and 6 for PASS4.&nbsp; (Why?&nbsp; Stupidity,
+      I guess.&nbsp; Mine, I mean.)<br>
     </p>
+    <p>Among the more-significant files produced in this way are:<br>
+    </p>
+    <ul>
+      <li>Each pass of the compiler creates a snapshot of the literal
+        file (see the table above), renamed as litfile0.bin,
+        litfile1.bin, etc., according to the compiler pass.&nbsp; Only
+        passes 0, 2, and 4 are capable of modifying the file.</li>
+      <li>Upon exit, each pass of the compiler creates a gzipped
+        snapshot of the System/360 memory space in which it thinks it's
+        running, called COMMON0.out.bin.gz, COMMON1.out.bin.gz, etc.,
+        according to the compiler pass.&nbsp; These files are <i>not</i>
+        forms of COMMON<i>x</i>.out, by the way, in spite of the
+        confusing naming, but they do fill the similar role of
+        preserving the contents of memory between compiler passes.&nbsp;
+        Typically, litfile<i>x</i>.bin requires the assistance of COMMON<i>x</i>.out.bin.gz
+        for a full interpretation, because litfile<i>x</i>.bin usually
+        contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+        &nbsp; (By "gzipped", I mean that it's compressed and can be
+        uncompressed via the GNU <b>gunzip</b> utility, or via the
+        standard <b>zlib</b>/<b>libz</b> library available for most
+        programming languages.)</li>
+      <li>comment.txt preserves the HALSFC HAL/S compiler's command-line
+        parameters.&nbsp; This is convenient for later rerunning a
+        compilation using identical parameters.</li>
+      <li>monitor13.parm is used by compiler PASS1 to communicate its
+        so-called PARM list to later compiler passes.<br>
+      </li>
+    </ul>
     <h1><a name="validation"></a>Validating the Compiler<br>
     </h1>
     <h2><a name="mindReader"></a>My Mind-Reading Trick<br>
@@ -5314,7 +5364,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-18<br>
+          2026-02-19<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
