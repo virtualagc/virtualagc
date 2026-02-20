@@ -21,7 +21,7 @@ for /f "delims=" %%i in ("%HAL_S_FC%") do set ported=%%~dpi
 setlocal enabledelayedexpansion
 
 set HALS_FILE=%~1
-for %%f in ("%HALS_FILE%) do (
+for %%f in ("%HALS_FILE%") do (
 	set "NORM_FILE=%%~nxf"
 )
 set TEST=%~2
@@ -151,14 +151,14 @@ if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
         --raf=B,3360,6,vmem.bin ^
         >pass1.rpt
 if errorlevel 1 ( call :error_exit Aborted after PASS1 )
-copy litfile.bin litfile0.bin
+copy litfile.bin litfile0.bin >NUL 2>NUL
 
 set IGNORE_LINES=(HAL/S^|FREE STRING AREA^|NUMBER OF FILE 6^|PROCESSING RATE^|CPU TIME FOR^|TODAY IS^|COMPOOL.*VERSION)
 ::echo IGNORE_LINES=%IGNORE_LINES%
 if %TEST%x == TESTx (
 echo ======================================================
 ( egrep -V >NUL 2>NUL && diff -v >NUL 2>NUL ) && echo Utilities egrep/diff available || call :error_exit Utilities egrep/diff unavailable
-python "%HAL_S_FC%" %PARM_LIST% %TARGET% --templib --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
+python "%HAL_S_FC%" %TARGET% %PARM_LIST% --templib --hal="%HALS_FILE%" >pass1p.rpt && echo PASS1 cross-comparison test ... || call :error_exit Failed PASS1 cross-comparison test
 for %%i in ( %FILES_PORTED:"=% ) do copy %ported%..\%%i . >NUL 2>NUL
 egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt
@@ -176,7 +176,7 @@ echo ======================================================
         --raf=B,3360,6,vmem.bin ^
         >flo.rpt
 if errorlevel 1 ( call :error_exit Aborted after FLO )
-copy litfile.bin litfile1.bin
+copy litfile.bin litfile1.bin >NUL 2>NUL
 
 %OPT% ^
         --commoni=COMMON1.%COMMON_EXT% ^
@@ -187,7 +187,7 @@ copy litfile.bin litfile1.bin
         --raf=B,3360,6,vmem.bin ^
         >opt.rpt
 if errorlevel 1 ( call :error_exit Aborted after OPT )
-copy litfile.bin litfile2.bin
+copy litfile.bin litfile2.bin >NUL 2>NUL
 
 %AUXP% ^
         --commoni=COMMON2.%COMMON_EXT% ^
@@ -198,7 +198,7 @@ copy litfile.bin litfile2.bin
         --raf=B,3360,6,vmem.bin ^
         >auxp.rpt
 if errorlevel 1 ( call :error_exit Aborted after AUXP )
-copy litfile.bin litfile3.bin
+copy litfile.bin litfile3.bin >NUL 2>NUL
 
 %PASS2% ^
         %CARDS% ^
@@ -214,7 +214,7 @@ copy litfile.bin litfile3.bin
         --raf=B,3360,6,vmem.bin ^
         >pass2.rpt
 if errorlevel 1 ( call :error_exit Aborted after PASS2 )
-copy litfile.bin litfile4.bin
+copy litfile.bin litfile4.bin >NUL 2>NUL
 
 :: PASS3 and PASS4 aren't ready for use yet.
 
