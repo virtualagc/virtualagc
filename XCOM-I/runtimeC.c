@@ -133,7 +133,7 @@
 
 void writeZipfile(gzFile dest) {
     // Set binary mode for standard I/O on Windows if needed (best practice)
-    SET_BINARY_MODE(source);
+    SET_BINARY_MODE(dest);
     if (gzwrite(dest, memory, MEMORY_SIZE) != MEMORY_SIZE) {
         fprintf(stderr, "Error writing COMMON file\n");
         exit(1);
