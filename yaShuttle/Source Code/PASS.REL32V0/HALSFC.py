@@ -33,11 +33,8 @@ from pathlib import Path
 # which is just what we want.
 isWindows = (platform.system() == "Windows")
 # Just in case of working with .exe files in WINE.
-if isWindows:
-    cont = "^\n"
-else:
+if not isWindows:
     os.environ['WINEDEBUG'] = '-all'
-    cont = "\\\n"
 
 helpMessage = '''
 This script compiles a HAL/S source-code file to a HALMAT "intermediate 
@@ -193,7 +190,7 @@ appDir = findFileUsingPATH(PASS1)
 if appDir == None:
     print("Directory containing the compiler is not in the PATH")
     sys.exit(1)
-ERRORLIB = appDir + os.sep + "ERRORLIB" + os.sep
+ERRORLIB = appDir + os.sep + "ERRORLIB"
 parmList = parmString.split(",")
 
 # Run PASS1.
@@ -210,7 +207,7 @@ command ='''%s
     --raf=O,1560,2,litfile.bin 
     --raf=B,3360,6,vmem.bin 
     >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON)
-exitCode = os.system(command.replace("\n", cont))
+exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after PASS1")
 shutil.copy("litfile.bin", "litfile0.bin")
@@ -260,7 +257,7 @@ command = '''%s
     --raf=I,1560,2,litfile.bin 
     --raf=B,3360,6,vmem.bin 
     >flo.rpt''' % (FLO, extCOMMON, extCOMMON)
-exitCode = os.system(command.replace("\n", cont))
+exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after FLO")
 shutil.copy("litfile.bin", "litfile1.bin")
@@ -274,7 +271,7 @@ command = '''%s
     --raf=O,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
     >opt.rpt''' % (OPT, extCOMMON, extCOMMON)
-exitCode = os.system(command.replace("\n", cont))
+exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after OPT")
 shutil.copy("litfile.bin", "litfile2.bin")
@@ -288,7 +285,7 @@ command = '''%s
     --raf=I,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
     >auxp.rpt''' % (AUXP, extCOMMON, extCOMMON)
-exitCode = os.system(command.replace("\n", cont))
+exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after AUX")
 shutil.copy("litfile.bin", "litfile3.bin")
@@ -307,7 +304,7 @@ command = '''%s
     --raf=I,7200,4,optmat.bin 
     --raf=B,3360,6,vmem.bin 
     >pass2.rpt''' % (PASS2, CARDS, ERRORLIB, extCOMMON, extCOMMON)
-exitCode = os.system(command.replace("\n", cont))
+exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after PASS2")
 shutil.copy("litfile.bin", "litfile4.bin")
