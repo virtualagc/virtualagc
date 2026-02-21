@@ -5,6 +5,6 @@ REM HALSFCp itself by replacing all \ by /.  This script is needed because it's
 REM so phenominally difficult in Windows to directly run a Python script from 
 REM the command line that isn't in the current working directory.
 
-for /f "tokens=*" %%i in ('where HALSFCp') do set HALSFCp=%%i
+for /f "tokens=*" %%i in ('where HALSFCp.') do set HALSFCp=%%i
 python "%HALSFCp:\=/%" %*
 
