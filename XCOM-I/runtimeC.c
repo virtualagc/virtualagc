@@ -678,7 +678,10 @@ matchType2(char *parm) {
   if (ss == NULL)
     strcpy(buffer, s);
   else
-    strncpy(buffer, s, ss - s);
+    {
+      strncpy(buffer, s, ss - s);
+      buffer[ss - s] = 0;
+    }
   cToDescriptor(&type2Actual[i], "%s", buffer);
   return 1;
 }
