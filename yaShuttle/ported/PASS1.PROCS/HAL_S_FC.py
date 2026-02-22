@@ -137,7 +137,7 @@ if "--help" not in sys.argv:
     # The rest of the files can be handled a bit more systematically.
     if listing2:
         # Secondary output listing.
-        outputDevices[2] = openGenericOutputDevice("LISTING2.txt")
+        outputDevices[2] = openGenericOutputDevice("LISTING2p.txt")
     # Template library.
     if g.pfs:
         inputDevices[4] = openGenericInputDevice("TEMPLIB.json", True, templib)

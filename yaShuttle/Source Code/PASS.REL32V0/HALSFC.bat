@@ -37,7 +37,7 @@ set FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 set FILES_PORTED="%FILES_PORTED:"=% SOURCECO.txt"
 set FILES_PORTED="%FILES_PORTED:"=% LIT_CHAR.bin SYM_TAB.json"
 set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json"
-set FILES_LOCAL="LISTING2.txt"
+set FILES_LOCAL="LISTING2p.txt"
 set FILES_LOCAL="%FILES_LOCAL:"=% vmem.bin COMMON1.out COMMON2.out"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON3.out COMMON4.out auxmat.bin objcode.bin"
 set FILES_LOCAL="%FILES_LOCAL:"=% COMMON1.gz COMMON2.gz COMMON3.gz COMMON4.gz"
@@ -164,7 +164,7 @@ egrep -v "%IGNORE_LINES%" pass1.rpt  >pass1A.rpt
 egrep -v "%IGNORE_LINES%" pass1p.rpt >pass1pA.rpt
 diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt
 diff --strip-trailing-cr -s FILE1.bin halmat.bin
-if not "%PARM_LIST%" == "%PARM_LIST:LISTING2=%" diff -q -s LISTING2.txt listing2.txt
+if not "%PARM_LIST%" == "%PARM_LIST:LISTING2=%" diff -q -s LISTING2p.txt listing2.txt
 echo ======================================================
 )
 

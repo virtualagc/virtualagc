@@ -20,7 +20,7 @@ FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 FILES_PORTED="$FILES_PORTED &&TEMPLIB.json &&TEMPINC.json SOURCECO.txt"
 FILES_PORTED="$FILES_PORTED LIT_CHAR.bin SYM_TAB.json"
 FILES_PORTED="$FILES_PORTED CROSS_REF.json"
-FILES_LOCAL="LISTING2.txt"
+FILES_LOCAL="LISTING2p.txt"
 FILES_LOCAL="$FILES_LOCAL vmem.bin COMMON1.out COMMON2.out"
 FILES_LOCAL="$FILES_LOCAL COMMON1.gz COMMON2.gz COMMON3.gz COMMON4.gz"
 FILES_LOCAL="$FILES_LOCAL COMMON3.out COMMON4.out auxmat.bin objcode.bin"
@@ -147,7 +147,7 @@ then
         diff -s FILE1.bin halmat.bin
         if [[ "$PARM_LIST" == *LISTING2* ]]
         then
-                diff --strip-trailing-cr -q -s LISTING2.txt listing2.txt
+                diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt
         fi
         echo ======================================================
 fi

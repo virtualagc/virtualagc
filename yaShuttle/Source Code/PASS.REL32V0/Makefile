@@ -289,7 +289,7 @@ compile: clean
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
 	@diff $(DEXTRA) --strip-trailing-cr -q -s cA.rpt pyA.rpt
 	@diff $(DEXTRA) --strip-trailing-cr -s $(PORTED)/FILE1.bin halmat.bin
-	@diff $(DEXTRA) --strip-trailing-cr -q -s $(PORTED)/LISTING2.txt listing2.txt
+	@diff $(DEXTRA) --strip-trailing-cr -q -s LISTING2p.txt listing2.txt
 	
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
