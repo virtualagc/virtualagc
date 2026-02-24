@@ -56,6 +56,7 @@
 				agc_engine.h.
 		2025-04-02 RSB	No longer uses the "generic" ddd-ID-LM.tsv and
 				ddd-ID-CM.tsv files.
+		2026-02-24 RSB	Fixed a typo in the `--help` message.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -766,7 +767,7 @@ bool yaTelemetryApp::OnInit()
             printf ("     --port=P        The port number on which to try and set up a\n");
             printf ("                     socket to the listening yaAGC server.  By\n");
             printf ("                     convention, the virtual CM uses ports 19697\n");
-            printf ("                     through 19706, whilst the virutal LM uses\n");
+            printf ("                     through 19706, whilst the virtual LM uses\n");
             printf ("                     ports 19797-19806.  By default, yaTelemetry\n");
             printf ("                     uses 19800.\n");
             printf ("     --ip=H          The hostname or IP address of the yaAGC server\n");
