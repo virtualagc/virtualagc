@@ -140,13 +140,13 @@ if "--help" not in sys.argv:
         outputDevices[2] = openGenericOutputDevice("LISTING2p.txt")
     # Template library.
     if g.pfs:
-        inputDevices[4] = openGenericInputDevice("TEMPLIB.json", True, templib)
+        inputDevices[4] = openGenericInputDevice("TEMPLIB.json", isPDS=True, rw=templib)
     else:
-        inputDevices[4] = openGenericInputDevice("TEMPLIBB.json", True, templib)
+        inputDevices[4] = openGenericInputDevice("TEMPLIBB.json", isPDS=True, rw=templib)
     # Error-message library.
-    inputDevices[5] = openGenericInputDevice("ERRORLIB.json", True)
+    inputDevices[5] = openGenericInputDevice("ERRORLIB.json", isPDS=True, inParent=True)
     # File of module access rights.
-    inputDevices[6] = openGenericInputDevice("ACCESS.json", True)
+    inputDevices[6] = openGenericInputDevice("ACCESS.json", isPDS=True, inParent=True)
     # Where to stow output templates.
     if templib: # In permanent template library.
         outputDevices[6] = inputDevices[4]

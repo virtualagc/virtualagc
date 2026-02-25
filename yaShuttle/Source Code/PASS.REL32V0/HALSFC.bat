@@ -33,9 +33,9 @@ set COMMAND_LINE=%*
 set PYTHONUTF8=1
 set NOW=%DATE% %TIME%
 
-set FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
+set FILES_PORTED="FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 set FILES_PORTED="%FILES_PORTED:"=% SOURCECO.txt"
-set FILES_PORTED="%FILES_PORTED:"=% LIT_CHAR.bin SYM_TAB.json"
+set FILES_PORTED="%FILES_PORTED:"=% SYM_TAB.json"
 set FILES_PORTED="%FILES_PORTED:"=% CROSS_REF.json"
 set FILES_LOCAL="LISTING2p.txt"
 set FILES_LOCAL="%FILES_LOCAL:"=% vmem.bin COMMON1.out"
@@ -47,7 +47,7 @@ set FILES_LOCAL="%FILES_LOCAL:"=% pass1pA.rpt flo.rpt aux.rpt"
 set FILES_LOCAL="%FILES_LOCAL:"=% pass3.rpt pass4.rpt monitor13.parms"
 set FILES_LOCAL="%FILES_LOCAL:"=% auxp.rpt deck.bin extra.txt"
 set FILES_LOCAL="%FILES_LOCAL:"=% litfile1.bin litfile3.bin litfile4.bin"
-set FILES_PRESERVE="litfile.bin litfile0.bin litfile2.bin cards COMMON0.out COMMON0.out.bin.gz COMMON2.out.bin.gz TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
+set FILES_PRESERVE="FILE1.bin FILE2.bin LIT_CHAR.bin litfile.bin litfile0.bin litfile2.bin cards COMMON0.out COMMON0.out.bin.gz COMMON2.out.bin.gz TEMPLIB.json TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt pass1p.rpt opt.rpt pass2.rpt cards.bin listing2.txt optmat.bin halmat.bin
 del %FILES_PORTED:"=% %FILES_LOCAL:"=% pass*.rpt cards.bin listing2.txt "&&TEMPLIB.json" "&&TEMPINC.json" >NUL 2>NUL
 
 ::if "%COMMON_EXT%"=="" (

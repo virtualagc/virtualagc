@@ -59,7 +59,10 @@ litfile = f.read()
 f.close()
 
 # Read the memory image.
-f = gzip.open(sys.argv[2], "rb")
+if sys.argv[2].endswith(".gz"):
+    f = gzip.open(sys.argv[2], "rb")
+else:
+    f = open(sys.argv[2], "rb")
 memory = f.read()
 f.close()
 

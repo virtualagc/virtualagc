@@ -3071,7 +3071,8 @@ def OUTER_REF_FLAGS(n, value=None):
     OUTER_REF_TABLE[n].OUT_REF_FLAGS = value
 
 
-litCharFile = open(scriptParentFolder + "/LIT_CHAR.bin", "wb")
+#litCharFile = open(scriptParentFolder + "/LIT_CHAR.bin", "wb")
+litCharFile = open("LIT_CHAR.bin", "wb")
 def LIT_CHAR(n, value=None):
     while len(h.lit_char) <= n:
         h.lit_char.append(0)

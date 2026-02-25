@@ -16,9 +16,9 @@ COMMAND_LINE="$@"
 
 NOW=`date '+%a %m-%d-%Y %k-%M-%S.00'`
 
-FILES_PORTED="FILE1.bin FILE2.bin FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
+FILES_PORTED="FILE3.bin FILE4.bin FILE5.bin FILE6.bin"
 FILES_PORTED="$FILES_PORTED &&TEMPLIB.json &&TEMPINC.json SOURCECO.txt"
-FILES_PORTED="$FILES_PORTED LIT_CHAR.bin SYM_TAB.json"
+FILES_PORTED="$FILES_PORTED SYM_TAB.json"
 FILES_PORTED="$FILES_PORTED CROSS_REF.json"
 FILES_LOCAL="LISTING2p.txt"
 FILES_LOCAL="$FILES_LOCAL vmem.bin COMMON1.out"
@@ -33,7 +33,7 @@ FILES_LOCAL="$FILES_LOCAL litfile1.bin litfile3.bin litfile4.bin"
 FILES_PRESERVE="litfile.bin litfile0.bin litfile2.bin cards COMMON0.out COMMON2.out.bin.gz COMMON0.out.bin.gz TEMPLIB.json"
 FILES_PRESERVE="$FILES_PRESERVE TEMPLIB TEMPLIBB.json TEMPLIBB pass1.rpt"
 FILES_PRESERVE="$FILES_PRESERVE pass1p.rpt opt.rpt pass2.rpt cards.bin"
-FILES_PRESERVE="$FILES_PRESERVE listing2.txt optmat.bin halmat.bin"
+FILES_PRESERVE="$FILES_PRESERVE LIT_CHAR.bin FILE1.bin FILE2.bin listing2.txt optmat.bin halmat.bin"
 rm $FILES_PORTED $FILES_LOCAL pass*.rpt cards.bin listing2.txt -rf &>/dev/null
 
 #if [[ "$COMMON_EXT" == "" ]]

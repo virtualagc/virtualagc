@@ -197,7 +197,7 @@ inputDevices = [None] * maxDevices
 outputDevices = [None] * maxDevices
 
 
-def openGenericInputDevice(name, isPDS=False, rw=False):
+def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False):
     if rw:
         mode = "r+"
     else:
@@ -206,7 +206,10 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
         f = open(name, mode)
     except:
         try:
-            f = open(scriptParentFolder + "/" + name, mode)
+            if inParent:
+                f = open(scriptParentFolder + "/" + name, mode)
+            else:
+                f = open(name, mode)
         except:
             f = open(name, "w+")
     inputDevice = {
@@ -248,7 +251,8 @@ if "--help" not in sys.argv:
     # and the current file size (in bytes).
     files = [None]
     for i in range(1, 7):
-        f = open(scriptParentFolder + "/FILE%d.bin" % i, "w+b")
+        #f = open(scriptParentFolder + "/FILE%d.bin" % i, "w+b")
+        f = open("FILE%d.bin" % i, "w+b")
         f.seek(2, 0)
         files.append([f, 7200, f.tell()])
     
@@ -1066,13 +1070,15 @@ def saveClassArray(classArray, filename):
     a = []
     for entry in classArray:
         a.append(entry.__dict__)
-    f = open(scriptParentFolder + "/" + filename, "w")
+    #f = open(scriptParentFolder + "/" + filename, "w")
+    f = open(filename, "w")
     json.dump(a, f, indent=4)
     f.close()
 
 
 def loadClassArray(classType, filename):
-    f = open(scriptParentFolder + "/" + filename, "r")
+    #f = open(scriptParentFolder + "/" + filename, "r")
+    f = open(filename, "r")
     j = json.load(f)
     f.close()
     a = []
