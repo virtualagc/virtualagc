@@ -148,6 +148,7 @@ if not "%PARM_STRING%." == "." set PARM_LIST=%PARM_STRING:,= %
         --commono=COMMON0.%COMMON_EXT% ^
         --raf=O,7200,1,halmat.bin ^
         --raf=O,1560,2,litfile.bin ^
+        --raf=B,1600,3,icfile.bin
         --raf=B,3360,6,vmem.bin ^
         >pass1.rpt
 if errorlevel 1 ( call :error_exit Aborted after PASS1 )

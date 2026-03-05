@@ -862,7 +862,7 @@ def STREAM():
                         ERRORS(d.CLASS_XR, 1);
                     # PART2 -- CHECK FOR ILLEGAL LOCATION OF
                     # THE DIRECTIVE INSIDE AN EXTERNAL BLOCK.
-                    if ((SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & EXTERNAL_FLAG) != 0):
+                    if ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.EXTERNAL_FLAG) != 0):
                         ERRORS(d.CLASS_XR, 1);
             # END DATA_REMOTE
             

@@ -102,7 +102,7 @@ commandLine = " ".join(sys.argv)
 now = datetime.now()
 now = now.strftime("%Y-%m-%d %H-%M-%S")
 
-filesPorted = ["FILE3.bin", "FILE4.bin", "FILE5.bin", 
+filesPorted = ["FILE4.bin", "FILE5.bin", 
                "FILE6.bin", "&&TEMPLIB.json", "&&TEMPINC.json", "SOURCECO.txt",
                "$FILES_PORTED", "SYM_TAB.json", "$FILES_PORTED", 
                "CROSS_REF.json"]
@@ -112,14 +112,14 @@ filesLocal = ["LISTING2p.txt", "vmem.bin", "COMMON1.out", "COMMON2.out",
               "COMMON1.out.bin.gz", "COMMON3.out.bin.gz", 
               "COMMON4.out.bin.gz", "pass1A.rpt", "pass1pA.rpt", "flo.rpt", 
               "aux.rpt", "pass3.rpt", "pass4.rpt", "monitor13.parms",
-              "auxp.rpt", "deck.bin", "extra.txt", 
+              "auxp.rpt", "deck.bin", "extra.txt",
               "litfile1.bin", "litfile3.bin", "litfile4.bin"]
 filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz", 
                  "litfile0.bin", "litfile2.bin", "COMMON2.out.bin.gzt",
                  "TEMPLIB.json", "TEMPLIB", "FILE1.bin", "FILE2.bin", "LIT_CHAR.bin",
                  "TEMPLIBB.json", "TEMPLIBB", "pass1.rpt", "pass1p.rpt", 
                  "opt.rpt", "pass2.rpt", "cards.bin", "listing2.txt", 
-                 "optmat.bin", "halmat.bin"]
+                 "optmat.bin", "halmat.bin", "FILE3.bin", "icfile.bin"]
 for f in filesPorted+filesLocal:
     try:
         os.remove(f)
@@ -206,6 +206,7 @@ command ='''%s
     --commono=COMMON0%s 
     --raf=O,7200,1,halmat.bin 
     --raf=O,1560,2,litfile.bin 
+    --raf=B,1600,3,icfile.bin
     --raf=B,3360,6,vmem.bin 
     >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, extCOMMON)
 exitCode = os.system(command.replace("\n", ""))
@@ -246,6 +247,7 @@ if test:
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
     os.system('diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt')
     os.system('diff -s FILE1.bin halmat.bin')
+    os.system('diff -s FILE3.bin icfile.bin')
     if "LISTING2" in parmList:
             os.system('diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt')
     print("======================================================")

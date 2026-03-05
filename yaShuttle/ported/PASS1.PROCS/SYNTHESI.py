@@ -4429,7 +4429,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_LB, 2);
                     g.L = 1;
                 g.TEMP2 = 0;  #  INDICATE START FROM 1ST CHAR
-                if SUBSTR(g.S, g.TEMP2) > '2147483647':
+                # if SUBSTR(g.S, g.TEMP2) > '2147483647':
+                try:
+                    testValue = int(SUBSTR(g.S, g.TEMP2))
+                except:
+                    testValue = 9999999999
+                if testValue > 2147483647:
                     ERROR(d.CLASS_LB, 1);
                     goto = "DO_BIT_CONSTANT_END"
                 else:
@@ -5277,7 +5282,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     if g.SYT_TYPE(g.ID_LOC) == g.EVENT_TYPE:
                         ERROR(d.CLASS_DA, 9);
                     g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.REMOTE_FLAG);
-                elif SDL_OPTION and \
+                elif g.SDL_OPTION and \
                         ((g.SYT_FLAGS(g.ID_LOC) & g.NAME_FLAG) == 0) and \
                         ((g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) == 0) and \
                         ((g.SYT_FLAGS(g.ID_LOC) & g.REMOTE_FLAG) != 0):
