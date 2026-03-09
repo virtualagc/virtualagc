@@ -16,6 +16,7 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
                             turns out that "HAL-S-FC" is not a valid
                             name for a Python module (and all Python
                             scripts are Python modules).
+            2026-03-07 RSB  Added the inclusion library as INPUT(8).
 
  /***************************************************************************/
  /* PROCEDURE NAME:  MAIN PROGRAM                                           */
@@ -116,17 +117,7 @@ if "--help" not in sys.argv:
             sys.exit(1)
     dummy = []
     for line in f:
-        # Regarding the "\xef\xbb\xbf" replacement ... *apparently*,
-        # in Windows, if you make the mistake of editing a HAL/S source
-        # file containing a UTF-8 character ("¬", "¢"), Windows will
-        # thoughtfully stick the UTF-8 character encoded as 
-        # "\xef\xbb\xbf" at the beginning of the file when you save it.
-        # Of course, for us, that's pure garbage, so we remove it if
-        # it's there ... or anywhere!
-        line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
-                   .replace("¢", "`").replace("\xef\xbb\xbf", "")\
-                   .expandtabs(8).ljust(80)
-        dummy.append(line)
+        dummy.append(normalizeInputText(line))
     inputDevices[0] = {
         "file": f,
         "open": True,
@@ -141,8 +132,10 @@ if "--help" not in sys.argv:
     # Template library.
     if g.pfs:
         inputDevices[4] = openGenericInputDevice("TEMPLIB.json", isPDS=True, rw=templib)
+        inputDevices[8] = openGenericInputDevice("INCLIB.json", isPDS=True)
     else:
         inputDevices[4] = openGenericInputDevice("TEMPLIBB.json", isPDS=True, rw=templib)
+        inputDevices[8] = openGenericInputDevice("INCLIBB.json", isPDS=True)
     # Error-message library.
     inputDevices[5] = openGenericInputDevice("ERRORLIB.json", isPDS=True, inParent=True)
     # File of module access rights.

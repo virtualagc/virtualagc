@@ -364,6 +364,18 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         l.PTR_END = PTR_END
     onEntry = True # Used only by debug() function.
 
+    def RESET():
+        # No locals
+        EXPAND(0);
+        if l.M_CHAR_PTR == 0:
+            l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
+        else:
+        # DO;
+            l.M_PTR = 0;
+            l.LINE_CONTINUED = g.TRUE;
+        # END
+    # END RESET;
+
     # Workaround-variable for spaghetti GO TO's and their target labels.
     goto = None
 
@@ -1527,18 +1539,6 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         # END
                         if l.M_CHAR_PTR < l.M_CHAR_PTR_MAX:
                         # DO;
-
-                            def RESET():
-                                # No locals
-                                EXPAND(0);
-                                if l.M_CHAR_PTR == 0:
-                                    l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
-                                else:
-                                # DO;
-                                    l.M_PTR = 0;
-                                    l.LINE_CONTINUED = g.TRUE;
-                                # END
-                            # END RESET;
 
                             RESET();
                             if g.SQUEEZING:  # DO;

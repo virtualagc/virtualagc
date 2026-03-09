@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+'''
+The purpose of this script is to "prepare" a HAL/S "template library" for 
+compilers HALSFC and HAL_S_FC.py.  The preparation involves one or both of the
+following three steps:
+    1.  Create the library if it doesn't already exist.
+    2.  Clear the contents of an existing library.
+    3.  Fill the library with an inventory of "inclusion files" from a directory.
+'''
+
+import sys
+import shutil
+import os
+import json
+from pathlib import Path
+from asciiToEbcdic import asciiToEbcdic
+
+# Process the command-line parameters.
+helpMessage = '''
+Prepare (or clear) a HAL/S "template library" for usage by the compiler:
+    prepareTEMPLIB [OPTIONS]
+    
+The available options are:
+    
+    --help      Show this message.
+    --bfs       Prepare the library called TEMPLIBB, for use with the
+                BFS version of the HAL/S compiler.  (The default is to 
+                prepare TEMPLIB, for use with the PASS HAL/S compiler.)
+    --clear     Clear the selected library, if it already exists.
+'''
+clear = False
+templibName = "TEMPLIB"
+for parm in sys.argv[1:]:
+    if parm == "--help":
+        print(helpMessage)
+        sys.exit(0)
+    elif parm == "--clear":
+        clear = True
+    else:
+        print(f"Unrecognized command-line parameter '{parm}.")
+        sys.exit(1)
+
+# Clear or create the template library as needed.
+jsonName = templibName + ".json"
+if clear or not Path(jsonName).is_file():
+    f = open(jsonName, "w")
+    print("{}", file=f)
+    f.close()
+if clear or not Path(templibName).is_dir():
+    try:
+        shutil.rmtree(templibName)
+    except:
+        pass
+    os.mkdir(templibName)

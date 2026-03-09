@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-11 RSB  Began porting from XPL
+            2026-03-08 RSB  Namespace of PTR_TOP fixed per issue #`1270.
 '''
 
 from xplBuiltins import *
@@ -139,7 +140,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
             g.ELSEIF_PTR = -1;
         else:
             g.ELSEIF_PTR = g.ELSEIF_PTR - PTR;
-        for g.I in range(2, PTR_TOP + 1):
+        for g.I in range(2, g.PTR_TOP + 1):
             if g.EXT_P[g.I] != 0:
                 g.EXT_P[g.I] = g.EXT_P[g.I] - PTR;
     

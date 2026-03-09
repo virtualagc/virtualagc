@@ -16,6 +16,9 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
             2026-01-31 RSB  `openGenericOutputDevice` now operates in cwd, not
                             in the script folder.
             2026-02-06 RSB  Added support for PAGE_THROWN (for "D EJECT").
+            2026-03-08 RSB  "Normalize" INPUT(8) the same way the top-level
+                            program HAL_S_FC.ppy normalizes the main source
+                            code nominally corresponding to INPUT(0).
 '''
 
 import sys
@@ -51,6 +54,18 @@ outUTF8 = ("--utf8" in sys.argv[1:])
 bfs = ("--bfs" in sys.argv[1:])
 pfs = not bfs
 
+# Convert lines of text read from files or stdin to a normalized form.
+# Regarding the "\xef\xbb\xbf" replacement ... *apparently*,
+# in Windows, if you make the mistake of editing a HAL/S source
+# file containing a UTF-8 character ("¬", "¢"), Windows will
+# thoughtfully stick an invisible UTF-8 character encoded as 
+# "\xef\xbb\xbf" at the beginning of the file when you save it.
+# Of course, for us, that's pure garbage, so we remove it if
+# it's there ... or anywhere!
+def normalizeInputText(line):
+    return line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
+           .replace("¢", "`").replace("\xef\xbb\xbf", "")\
+           .expandtabs(8).ljust(80)
 
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's
@@ -751,6 +766,7 @@ def OUTPUT(fileNumber, string):
     fileNumber 5    Error library (a PDS).
     fileNumber 6    An access-control PDS, providing acceptable language subsets
     fileNumber 7    For reading in structure templates from PDS.
+    fileNumber 8    For reading in "include-files" via "D INCLUDE name"
 
 There are cases for certain PDS files where output is both written to the 
 file and read back from it as well.  In those cases ... TBD.
@@ -794,9 +810,14 @@ def INPUT(fileNumber):
         if index < len(data):
             file['ptr'] = index
             line = "%-80s" % data[index]
+            #if fileNumber == 4:
+            #    print(f"Here '{line[:]}'", file=sys.stderr)
             #if len(line) == 0:
             #    line = ' '
-            return line[:]
+            if fileNumber == 8:
+                return normalizeInputText(line)
+            else:
+                return line[:]
         else:
             return ''
     except:

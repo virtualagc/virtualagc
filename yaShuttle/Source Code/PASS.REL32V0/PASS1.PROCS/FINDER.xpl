@@ -6,6 +6,8 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
+                2026-03-07 RSB  Conditionally added a 4th device in the search
+                                list to account for file-inclusion libraries.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.
@@ -39,8 +41,14 @@
 FINDER:                                                                         00399505
    PROCEDURE(FILENO, NAME, START) BIT(1);                                       00399510
       DECLARE (FILENO, START, I, RETCODE) BIT(16), NAME CHARACTER;              00399515
+      /?W
       DECLARE MAXLIBFILES LITERALLY '2';                                        00399520
       DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008", "4", "80000006"),  00399525
+      ?/
+      /?V
+      DECLARE MAXLIBFILES LITERALLY '3';                                        00399520
+      DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008", 4, "80000006", 8), 00399525
+      ?/
  /* SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES */                     00399530
          FILENODD(MAXLIBFILES) BIT(1); /* TRUE IF DD STATEMENT MISSING */       00399535
       DO I = START TO MAXLIBFILES;                                              00399540

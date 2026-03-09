@@ -11,10 +11,12 @@ History:    2023-09-12 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
+import HALINCL.CERRDECL as d
 from BLANK    import BLANK
 from DESCORE  import DESCORE
 from FINDER   import FINDER
 from PAD      import PAD
+from ERROR    import ERROR
 
 '''
  /***************************************************************************/

@@ -37,6 +37,16 @@
  *                              Also, input random access files were using the
  *                              wrong file pointers, and so could not have
  *                              worked in read-only mode.
+ *              2026-03-07 RSB  When redirected devices are closed, now resets
+ *                              their redirection.
+ *              2026-03-08 RSB  When selecting a new PDS member, `MONITOR2` was
+ *                              always closing any existing open member even
+ *                              before searching for the new member.  This
+ *                              behavior ignored the fact that `MONITOR2` could
+ *                              be used (as in `FINDER`) just to check if the
+ *                              a member existed or not.  This has been fixed
+ *                              to close the now-open member only after it had
+ *                              been verified that the new member existed.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -2241,14 +2251,16 @@ SHR(uint32_t value, uint32_t shift) {
 
 void
 MONITOR0(uint32_t dev) {
+  uint32_t ndev;
   if (dev >= DCB_MAX)
     return;
-  dev = DCB_OUTS[dev].redirection;
-  if (DCB_OUTS[dev].fp == NULL)
+  ndev = DCB_OUTS[dev].redirection;
+  DCB_OUTS[dev].redirection = dev;
+  if (DCB_OUTS[ndev].fp == NULL)
     return;
-  fflush(DCB_OUTS[dev].fp);
-  fclose(DCB_OUTS[dev].fp);
-  DCB_OUTS[dev].fp = NULL;
+  fflush(DCB_OUTS[ndev].fp);
+  fclose(DCB_OUTS[ndev].fp);
+  DCB_OUTS[ndev].fp = NULL;
 }
 
 uint32_t
@@ -2319,16 +2331,12 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
 
 uint32_t
 MONITOR2(uint32_t dev, descriptor_t *name) {
+  FILE *f;
   int lenFile, lenPart, i;
   char *path = NULL, *cname;
   if (dev >= DCB_MAX)
     abend("Input device number out of range: Device number %d >= %d", dev, DCB_MAX);
   dev = DCB_INS[dev].redirection;
-  if (DCB_INS[dev].fp != NULL)
-    {
-      fclose(DCB_INS[dev].fp);
-      DCB_INS[dev].fp = NULL;
-    }
   if (strlen(DCB_INS[dev].filename) == 0)
     abend("Attempt to use unassigned PDS for input: Device number %d", dev);
   lenFile = strlen(DCB_INS[dev].filename);
@@ -2344,24 +2352,28 @@ MONITOR2(uint32_t dev, descriptor_t *name) {
     abend("Out of memory in MONITOR(2)");
   sprintf(path, "%s/%s", DCB_INS[dev].filename, cname);
   strcpy(DCB_INS[dev].member, cname);
-  DCB_INS[dev].fp = fopen(path, DCB_INS[dev].fileFlags);
+  f = fopen(path, DCB_INS[dev].fileFlags);  // Specified file exists?
   free(path);
-  if (DCB_INS[dev].fp == NULL)
-    {
-      return 1;
-    }
+  if (f == NULL) // No, doesn't exist.
+    return 1;
+  if (DCB_INS[dev].fp != NULL)
+    fclose(DCB_INS[dev].fp);
+  DCB_INS[dev].fp = f;
   return 0;
 }
 
 void
 MONITOR3(uint32_t dev) {
+  uint32_t ndev;
   if (dev >= DCB_MAX)
     return;
-  dev = DCB_INS[dev].redirection;
-  if (DCB_INS[dev].fp == NULL)
+  ndev = DCB_INS[dev].redirection;
+  DCB_INS[dev].redirection = dev;
+  if (DCB_INS[ndev].fp == NULL)
     return;
-  fclose(DCB_INS[dev].fp);
-  DCB_INS[dev].fp = NULL;
+  fclose(DCB_INS[ndev].fp);
+  DCB_INS[ndev].fp = NULL;
+
 }
 
 void

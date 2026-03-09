@@ -1,0 +1,285 @@
+#!/usr/bin/env python
+# For compiling the HAL/S source-code files in OI340600 or OI301700.  Run this 
+# from one of those directories.  It neither assembles the AP-101S assembly
+# language files, nor links any of this stuff, so look elsewhere for that
+# functionality.
+
+'''
+A note on naming:  Like T. S. Eliot's cats, any given template for the template
+library has three separate names:
+    1) The name of the file in which its source-code resides.
+    2) The member name within the template-library PDS.
+    3) The name used in compiler directives "D INCLUDE TEMPLATE name".
+Now that I think of it, there may actually be more than 3 names, since sometimes 
+multiple distinct spellings are used in the "D INCLUDE TEMPLATE name" 
+directives.  And besides that, there's the name of the object (COMPOOL, PROGRAM,
+PROCEDURE, or FUNCTION) used within the source-code file.
+
+In fact, though, all of these names reduce to just the first two.  That's
+because the name within the source-code file and the name in 
+"D INCLUDE TEMPLATE name" are all normalized ("descored") to produce the PDS
+name, as follows:
+    - Remove all underscore characters.
+    - Truncate to 6 characters.
+    - Right-pad to 6 characters.
+    - Prefix by "@@".
+Therefore, any two strings that "descore" to the same 8-character string are
+treated as identical.  For our purposes internally in compilePASS, we neither
+right-pad nor use the prefix @@, since they don't affect the uniqueness of the
+symbols.  For our purposes, I call these descored names "halnames".
+'''
+
+import subprocess
+import sys
+import shutil
+import os
+from datetime import datetime
+from pathlib import Path
+
+if not Path("SSSRC").is_dir():
+    print("SSSRC/ not found.")
+    sys.exit(1)
+if not Path("APPLSRC").is_dir():
+    print("APPLSRC/ not found.")
+    sys.exit(1)
+
+def descore(s):
+    return s.strip().replace("_", "")[:6]
+
+defaultSubdirectory = "."
+compilationCount = 0
+def compile(filename, parms):
+    global compilationCount
+    compilationCount += 1
+    fields = filename.split("/")
+    if len(fields) == 2:
+        subfolder = fields[0]
+        filename = fields[1]
+    elif len(fields) == 1:
+        subfolder = defaultSubdirectory
+    else:
+        print(f"Specified source-code filename {subfolder}/{filename} is illegal.")
+        os._exit(1)
+    try:
+        print("%3d: Compiling %s/%s ..." % \
+              (compilationCount, subfolder, filename))
+        result = subprocess.run(
+            ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
+             f"--parms={parms}"],
+            capture_output = True,
+            text = True,
+            check = True
+            )
+        #print(f"     Compilation successful.", file=sys.stderr)
+        return result
+    except subprocess.CalledProcessError as e:
+        print(f"Failed with exit code {e.returncode}.", 
+              file=sys.stderr)
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        os._exit(1)
+
+# First we have to determine all template dependencies, so we can compile the
+# templates in the correct order.  Assume that all of the template files are in
+# APPLSRC/ and SSSRC/, and get a list of them.
+SSSRC = Path("SSSRC")
+APPLSRC = Path("APPLSRC")
+templateFiles = list(SSSRC.glob("*.hal")) + list(APPLSRC.glob("*.hal"))
+for i in range(len(templateFiles)):
+    templateFiles[i] = str(templateFiles[i])
+#print(templateFiles)
+#sys.exit(1)
+# Read each of the template files.  Determine the full HAL name (not just the
+# normalized version of it use for the filename and all of the templates (by
+# their HAL names) that the file imports.
+
+debugging = False
+def debug(msg):
+    if debugging:
+        print(msg, file=sys.stderr)
+
+templatesByFilename = {}
+templatesByHalname = {}
+templatesByStem = {}
+for filename in templateFiles:
+    debugging = False
+    debug("A")
+    f = open(filename, "r")
+    lines = []
+    for line in f.readlines():
+        if line[:1] == "C":
+            continue
+        lines.append(line[:72])
+    f.close()
+    entry = { "filename": filename, "halname": None, "includedFilenames": [],
+             "includedHalnames": [] }
+    debug("B " + str(entry))
+    halname = None
+    for i in range(len(lines)):
+        line = lines[i]
+        if line.startswith("D"):
+            fields = line[1:].strip().split()
+            if len(fields) < 3:
+                continue
+            if fields[0] == "INCLUDE" and fields[1] == "TEMPLATE":
+                if fields[2].endswith(";"):
+                    fields[2] = fields[2][:-1]
+                entry["includedHalnames"].append(descore(fields[2]))
+                debug("C " + str(entry))
+            continue
+        if halname != None:
+            continue
+        nLines = "".join(lines[i:i+3])
+        fields = nLines[1:].split(":")
+        if len(fields) < 2:
+            continue
+        h = fields[0].strip()
+        if " " in h:
+            continue
+        fields = fields[1].strip().split()
+        if len(fields) < 1:
+            continue
+        if not fields[0].startswith("PROGRAM") and \
+           not fields[0].startswith("PROCEDURE") and \
+           not fields[0].startswith("FUNCTION") and \
+           not fields[0].startswith("COMPOOL"):
+            continue
+        halname = descore(h)
+        entry["halname"] = halname
+        debug("D " + str(entry))
+        continue
+    if halname == None:
+        continue
+    entry["stem"] = Path(filename).stem
+    templatesByFilename[filename] = entry
+    templatesByHalname[halname] = entry
+    templatesByStem[entry["stem"]] = entry
+#for stem in templatesByStem:
+#    print(stem, templatesByStem[stem])
+
+# Now determine which filenames each file includes via D INCLUDE TEMPLATE ....
+# Note that since the values in `templatesByFilename` are aliases (vs copies)
+# of those in `templatesByHalname`, we only need to make our changes in one
+# of those dictionaries.
+print(f"{datetime.now()}: Determining file dependencies ...")
+nonexistentTemplates = {}
+for filename in templateFiles:
+    template = templatesByFilename[filename]
+    for halname in template["includedHalnames"]:
+        if halname in templatesByHalname:
+            template["includedFilenames"].append(templatesByHalname[halname]["filename"])
+        else:
+            if False:
+                # There are cases (the only one of which I'm aware right now is
+                # CDAP02) in which "D INCLUDE TEMPLATE CDAP02 ..." gives the name of
+                # the PDS member instead of the actual name of the COMPOOL (which
+                # in this case is CDA_P02_AMT).  That being the case, we
+                # have to search for it.  Unfortunately, these strings aren't
+                # always truncated in the same way, so we have to find out
+                # whether there's consistency.
+                okay = False
+                if False:
+                    for length in [8, 7, 6]:
+                        if True:
+                            halname = halname.replace("_", "")[:length]
+                        testname1 = "APPLSRC/" + halname + ".hal"
+                        testname2 = "SSSRC/" + halname + ".hal"
+                        if testname1 in templatesByFilename:
+                            template["includedFilenames"].append(testname1)
+                            okay = True
+                            break
+                        elif testname2 in templatesByFilename:
+                            template["includedFilenames"].append(testname2)
+                            okay = True
+                            break
+                else:
+                    halname = halname.replace("_", "")[:8]
+                    maxLength = 0
+                    maxStem = None
+                    maxFilename = None
+                    dupes = 0
+                    for stem in templatesByStem:
+                        match = os.path.commonprefix([halname, stem])
+                        if len(match) > maxLength:
+                            maxLength = len(match)
+                            maxStem = match
+                            maxFilename = templatesByStem[stem]["filename"]
+                            dupes = 0
+                        elif len(match) == maxLength:
+                            dupes += 1
+                    if dupes == 0 and maxLength in [len(maxStem), len(halname)]:
+                        template["includedFilenames"].append(maxFilename)
+                        okay = True
+                if not okay:
+                    if halname not in nonexistentTemplates:
+                        nonexistentTemplates[halname] = []
+                    nonexistentTemplates[halname].append(Path(filename).stem)
+print("FYI: Non-existent templates appearing in D INCLUDE TEMPLATE:")
+for halname in sorted(nonexistentTemplates):
+    msg = f"\t{halname} called by:"
+    for filename in sorted(nonexistentTemplates[halname]):
+        msg += f" {filename}"
+    print(msg)
+print(f"{len(nonexistentTemplates)} non-existent templates referenced")
+print(f"{len(templatesByFilename)} templates in all")
+#for filename in templatesByFilename:
+#    print(filename, templatesByFilename[filename])
+#sys.exit(1)
+
+# Now determine an optimum order for the templates to be compiled, so that 
+# for any given file, all of the templates it needs to import will already have
+# been compiled and hence will be in the template library already.  Here's my
+# dumb brute-force technique.  First, all files that have no INCLUDE TEMPLATE
+# directives are compiled.  We loop through all of the remaining files to see
+# which of them can be compiled using just the templates that already exist.
+# keep doing that until either all of the files are compiled, or else no new
+# compilable files are identified.
+print(f"{datetime.now()}: Compiling independent files ...")
+parmBase = "LIST,NOTABLES,SRN,TEMPLATE,CARDTYPE="
+cardtypesBySourceFile = {
+    "default": "FCRM",
+    "CS2INI" : "ACFCRM",
+    "CS4INI" : "ACFCRM",
+    "CPTOSV" : "ACBDFCRM",
+    "CPUSLS" : "ACBDFCRM",
+    "GKDASC": "AMOCNCRMFDGCHC",
+    "GKRORB": "ACOMNCRCFCGDHC",
+    "GKGMNV": "ACOCNMRMFCGCHD"
+    
+    }
+removed = set()
+remove = []
+for filename in templatesByFilename:
+    template = templatesByFilename[filename]
+    stem = template["stem"]
+    if stem in cardtypesBySourceFile:
+        parms = parmBase + cardtypesBySourceFile[stem]
+    else:
+        parms = parmBase + cardtypesBySourceFile["default"]
+    if len(template["includedFilenames"]) == 0:
+        result = compile(filename, parms)
+        remove.append(filename)
+for filename in remove:
+    removed.add(filename)
+    templatesByFilename.pop(filename)
+    
+print(f"{datetime.now()}: Compiling dependent files ...")
+remove = [0]
+while len(remove) > 0:
+    remove = []
+    for filename in templatesByFilename:
+        template = templatesByFilename[filename]
+        includedFilenames = set(template["includedFilenames"])
+        if includedFilenames.issubset(removed):
+            result = compile(filename, parms)
+            remove.append(filename)
+    for filename in remove:
+        removed.add(filename)
+        templatesByFilename.pop(filename)
+print(f"Uncompiled files ({len(templatesByFilename)}:")
+print(removed)
+for filename in templatesByFilename:
+    print(f"\t{filename}:", templatesByFilename)
+print(f"{datetime.now()}: Done.")
+
+

@@ -551,18 +551,18 @@ def STREAM():
                     if LENGTH(ll.C[0]) == 0:
                         g.J = 1;  # 1 SPACE
                     else:
-                        g.J = BYTE(ll.C[1]);
-                        if CHARTYPE(g.J) != 1:
+                        g.J = BYTE(ll.C[0]);
+                        if g.CHARTYPE[g.J] != 1:
                             g.J = 1;  # ASSUME ONE SPACE
                         else:
                             g.J = g.J & 0xF;
                         if g.J > 3:
                             g.J = 3;
-                    if g.LOOKED_RECORD_AHEAD == 0:
-                        g.LOOKED_RECORD_AHEAD = LINE_LIM;
-                        EJECT_PAGE();
-                    if lc.LINE_COUNT + g.J > g.LOOKED_RECORD_AHEAD:
-                        g.LOOKED_RECORD_AHEAD = 0;
+                    if g.LINE_MAX == 0:
+                        g.LINE_MAX = g.LINE_LIM;
+                        g.EJECT_PAGE();
+                    if lc.LINE_COUNT + g.J > g.LINE_MAX:
+                        g.LINE_MAX = 0;
                     else:
                         for ll.I in range(1, g.J + 1):
                             OUTPUT(0, g.X1);
@@ -621,7 +621,7 @@ def STREAM():
                     ll.I = 8
                     for ll.I in range(8, LENGTH(ll.C[0])):
                         g.K = BYTE(ll.C[0], ll.I);
-                        if CHARTYPE(g.K) != 1:
+                        if g.CHARTYPE[g.K] != 1:
                             goto_NO_CHAN = True;
                             continue;
                         g.J = g.J * 10 + (g.K & 0xF);
@@ -975,7 +975,7 @@ def STREAM():
             g.INCREMENT_DOWN_STMT = (g.LAST_WRITE <= g.STMT_PTR);
         OUTPUT_GROUP();
         if g.INCLUDE_END:
-            OUTPUT_WRITER(LAST_WRITE, STMT_PTR);
+            OUTPUT_WRITER(g.LAST_WRITE, g.STMT_PTR);
             OUTPUT(0, g.X8 + g.STARS + 'END' + g.INCLUDE_MSG + g.STARS);
             g.NEXT_CC = g.DOUBLE;
             g.INCLUDE_LIST = g.TRUE;

@@ -14,6 +14,8 @@
  *                              at 32*1680, which seems like overkill.
  *              2026-02-15 RSB  Eliminated arguments for `writeCOMMON()` and
  *                              `readCOMMON()`, since they never vary.
+ *              2026-03-08 RSB  Increased PDS buffer size from 672 lines to
+ *                              20000 lines.
  */
 
 #ifndef RUNTIMEC_H
@@ -80,7 +82,7 @@ extern int outUTF8;
 // to do with IBM 360 DCBs.
 #define DCB_MAX 10
 #define PDS_MEMBER_SIZE 8
-#define MAX_PDS_RECORDS (32 * 21)
+#define MAX_PDS_RECORDS 20000 /* (32 * 21) */
 #define PDS_RECORD_SIZE 80 /* 1680 */
 #define PDS_BUFFER_SIZE (MAX_PDS_RECORDS * PDS_RECORD_SIZE)
 typedef char pdsPartname_t[PDS_MEMBER_SIZE + 1];

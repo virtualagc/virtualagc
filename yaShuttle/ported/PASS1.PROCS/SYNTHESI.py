@@ -8,6 +8,7 @@ Purpose:    This is part of the port of the original XPL source code for
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-12 RSB  Began porting from XPL
             2023-10-15 RSB  Changed the spaghetti-code workaround mechanism.
+            2026-03-08 RSB  Fixed SBIT_NDX namespace bug.
 
 I realized belatedly that the method I use for handling spaghetti code in all
 of the modules so far -- namely, the use of goto_XXXX variables, one for each
@@ -1475,7 +1476,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 89:  # reference 890
         #  <BIT PRIM>  ::=  <SUBBIT HEAD>  <EXPRESSION>  )
         END_SUBBIT_FCN();
-        SET_BI_XREF(SBIT_NDX);
+        SET_BI_XREF(g.SBIT_NDX);
         goto = "NON_EVENT"
     elif PRODUCTION_NUMBER == 90:  # reference 900
         #  <BIT PRIM>  ::=  <BIT FUNC HEAD>  (  <CALL LIST>  )

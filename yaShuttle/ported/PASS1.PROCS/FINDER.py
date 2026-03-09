@@ -38,9 +38,9 @@ from ERROR import ERROR
 #          EMIT_EXTERNAL
 #*************************************************************************
 
-MAXLIBFILES = 2
+MAXLIBFILES = 3
 # SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES
-FILENUM = (0x80000008, 0x4, 0x80000006)
+FILENUM = (0x80000008, 0x4, 0x80000006, 0x8)
 # TRUE IF DD STATEMENT MISSING
 # In other words, PDS files that can actually be opened whould be g.FALSE in the 
 # following list.

@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+'''
+The purpose of this script is to "prepare" a HAL/S "inclusion library" for 
+compilers HALSFC and HAL_S_FC.py.  The preparation involves one or both of the
+following three steps:
+    1.  Create the library if it doesn't already exist.
+    2.  Clear the contents of an existing library.
+    3.  Fill the library with an inventory of "inclusion files" from a directory.
+'''
+
+import sys
+import shutil
+import os
+import json
+from pathlib import Path
+from asciiToEbcdic import asciiToEbcdic
+
+# Process the command-line parameters.
+helpMessage = '''
+Prepare (or clear) a HAL/S "inclusion library" for usage by the compiler:
+    prepareINCLIB [OPTIONS]
+    
+The available options are:
+    
+    --help      Show this message.
+    --bfs       Prepare the library called INCLIBB, for use with the
+                BFS version of the HAL/S compiler.  (The default is to 
+                prepare INCLIB, for use with the PASS HAL/S compiler.)
+    --clear     Clear the selected library, if it already exists.
+    --include=D Specifies a directory name D whose HAL/S files are suitable 
+                for use with the compiler directive "D INCLUDE name".  These
+                files are added directly to the inclusion library.  For Space 
+                Shuttle PASS, the suitable option would be --include=INCL80, 
+                however this command-line option can be used multiple times for 
+                selecting
+                multiple directories to be processed.
+    --srn       Remove the card-sequence number in columns 73-80 of included
+                files.  Only the files indicated by --include are affected;
+                other already existing entries in the library are unchanged.
+'''
+clear = False
+inclusionDirectories = []
+inclibName = "INCLIB"
+srn = 80
+for parm in sys.argv[1:]:
+    if parm == "--help":
+        print(helpMessage)
+        sys.exit(0)
+    elif parm == "--clear":
+        clear = True
+    elif parm == "--bfs":
+        inclibName = "INCLIBB"
+    elif parm.startswith("--include="):
+        directory = parm[10:]
+        if not Path(directory).is_dir():
+            print(f"Inclusion directory '{directory}' not found.")
+            sys.exit(1)
+        inclusionDirectories.append(directory)
+    elif parm == "--srn":
+        srn = 72
+    else:
+        print(f"Unrecognized command-line parameter '{parm}.")
+        sys.exit(1)
+
+# Clear or create the inclusion library as needed.
+jsonName = inclibName + ".json"
+if clear or not Path(jsonName).is_file():
+    f = open(jsonName, "w")
+    print("{}", file=f)
+    f.close()
+if clear or not Path(inclibName).is_dir():
+    try:
+        shutil.rmtree(inclibName)
+    except:
+        pass
+    os.mkdir(inclibName)
+
+if len(inclusionDirectories) == 0:
+    sys.exit(0)
+
+# Get the json version of the library: i.e., the HAL_S_FC.py version.  We don't
+# need to have the HALSFC version of the library in memory.
+with open(jsonName, "r") as f:
+    jsonLibrary = json.load(f)
+
+# Process each of the inclusion directories.
+record = bytearray(80)
+for dir in inclusionDirectories:
+    # Process each HAL/S file in the directory.
+    for file in Path(dir).glob("*.hal"):
+        name = file.stem
+        # Read the entire contents of the file:
+        with open(file, "r") as f:
+            lines = f.readlines()
+        for i in range(len(lines)):
+            lines[i] = lines[i].rstrip("\r\n")[:srn].ljust(80)
+        # What we do with the contents of the file differs for HAL_S_FC.py 
+        # vs HALSFC.  For HAL_S_FC.py, we simply stash the entire contents into
+        # `jsonLibrary`, which is a dictionary that will eventually be written
+        # out to a file.
+        jsonLibrary[name.ljust(8)] = lines
+        # For HALSFC, we convert the entire thing to EBCDIC and immediately 
+        # write it out to a file in the directory representing the inclusion
+        # library's PDS, as a sequence of 80-byte records.
+        f = open(inclibName + os.sep + name, "wb")
+        for line in lines:
+            for i in range(len(record)):
+                record[i] = asciiToEbcdic[ord(line[i])]
+            f.write(record)
+        f.close()
+
+# Finally, write out the HAL_S_FC.py version of the library.  We've already 
+# written out the HALSFC version above.
+with open(jsonName, "w") as f:
+    json.dump(jsonLibrary, f, indent=2)
