@@ -15,127 +15,123 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
 </script><br>
     <h1>Table of Contents </h1>
     <ul>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#HALSFC">HALSFC</a></li>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#Installation">Installation of
           HALSFC</a></li>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#wildThings">Where the Wild
           HAL/S Files Are</a><br>
       </li>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#differences">Some Differences
-          Between the Old and the New</a></li>
+          Between the Old and the New</a><br>
+      </li>
       <ul>
         <li><a moz-do-not-send="true" href="#ebcdic">EBCDIC vs ASCII</a></li>
         <li><a moz-do-not-send="true" href="#common2">COMMON Memory</a></li>
         <li><a moz-do-not-send="true" href="#overstrike">Overstruck
             Lines in Reports</a></li>
       </ul>
-      <ul>
-      </ul>
       <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In <i>New</i>
           HAL/S Source Code</a></li>
+      <ul>
+      </ul>
       <li><a moz-do-not-send="true" href="#templib">Template Library and
-          Inclusion Library<br>
-        </a></li>
+          Inclusion Library</a><br>
+      </li>
       <ul>
         <li><a moz-do-not-send="true" href="#DINCLUDETEMPLATE">The
             Template Library and the "<code>D INCLUDE TEMPLATE</code>"
-            Compiler Directive <br>
-          </a>
-          <h1>Table of Contents </h1>
+            Compiler Directive</a></li>
+        <li><a moz-do-not-send="true" href="#DINCLUDE">The Inclusion
+            Library and the "<code>D INCLUDE</code>" Compiler Directive</a><br>
         </li>
-        <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
-        <li><a moz-do-not-send="true" href="#HALSFC">HALSFC</a></li>
-        <li><a moz-do-not-send="true" href="#Installation">Installation
-            of HALSFC</a></li>
-        <li><a moz-do-not-send="true" href="#wildThings">Where the Wild
-            HAL/S Files Are</a><br>
+      </ul>
+      <li><a moz-do-not-send="true" href="#options1">Compiler Options,
+          Part One</a><br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#moron">More on the Compiler
+          Options</a></li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#debuggingAids">Debugging-Aid
+          Options</a><br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#filesUsed">Files Used or
+          Created by the HAL/S Compiler</a></li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#validation">Validating the
+          Compiler</a><br>
+      </li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#mindReader">My Mind-Reading
+            Trick</a></li>
+        <li><a moz-do-not-send="true" href="valPASS1">Validating Phase 1</a></li>
+        <li><a moz-do-not-send="true" href="valPASS2">Validating Phase
+            1.5 and Phase 2</a></li>
+        <li><a moz-do-not-send="true" href="#DebuggingCompiler">Debugging
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            the Compiler Itself</a><br>
         </li>
-        <li><a moz-do-not-send="true" href="#differences">Some
-            Differences Between the Old and the New</a></li>
-        <ul>
-          <li><a moz-do-not-send="true" href="#ebcdic">EBCDIC vs ASCII</a></li>
-          <li><a moz-do-not-send="true" href="#common2">COMMON Memory</a></li>
-          <li><a moz-do-not-send="true" href="#overstrike">Overstruck
-              Lines in Reports</a></li>
-        </ul>
-        <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In
-            <i>New</i> HAL/S Source Code</a></li>
-        <li><a moz-do-not-send="true" href="#templib">Template Library
-            and Inclusion Library<br>
-          </a></li>
-        <ul>
-          <li><a moz-do-not-send="true" href="#DINCLUDETEMPLATE">The
-              Template Library and the "<code>D INCLUDE TEMPLATE</code>"
-              Compiler Directive</a></li>
-          <li><a moz-do-not-send="true" href="#DINCLUDE">The Inclusion
-              Library and the "<code>D INCLUDE</code>" Compiler
-              Directive</a><br>
-          </li>
-        </ul>
-        <li><a moz-do-not-send="true" href="#options1">Compiler Options,
-            Part One</a><br>
-        </li>
-        <li><a moz-do-not-send="true" href="#moron">More on the Compiler
-            Options</a></li>
-        <li><a moz-do-not-send="true" href="#debuggingAids">Debugging-Aid
-
-
-            Options</a><br>
-        </li>
-        <li><a moz-do-not-send="true" href="#filesUsed">Files Used or
-            Created by the HAL/S Compiler</a></li>
-        <li><a moz-do-not-send="true" href="#validation">Validating the
-            Compiler</a></li>
-        <ul>
-          <li><a moz-do-not-send="true" href="#mindReader">My
-              Mind-Reading Trick</a></li>
-          <li><a moz-do-not-send="true" href="valPASS1">Validating Phase
-              1</a></li>
-          <li><a moz-do-not-send="true" href="valPASS2">Validating Phase
-              1.5 and Phase 2</a></li>
-          <li><a moz-do-not-send="true" href="#DebuggingCompiler">Debugging
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              the Compiler Itself</a><br>
-          </li>
-        </ul>
-        <li><a moz-do-not-send="true" href="#halmat">The Mystery of
-            HALMAT</a></li>
-        <li><a moz-do-not-send="true" href="#emulatingHALMAT">Emulating
-            HALMAT</a></li>
-        <li><a moz-do-not-send="true" href="#compilePASS">Compiling the
-            Space Shuttle Primary Flight Software</a><br>
-        </li>
-        <li><a moz-do-not-send="true" href="#glossary">A Glossary and
-            Some References</a></li>
+      </ul>
+      <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a></li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#emulatingHALMAT">Emulating
+          HALMAT</a></li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#compilePASS">Compiling the
+          Space Shuttle Primary Flight Software</a><br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#glossary">A Glossary and Some
+          References</a></li>
+      <ul>
       </ul>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
@@ -148,6 +144,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
 
 
 
@@ -218,6 +215,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
 
 
 
@@ -347,6 +345,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -356,6 +355,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
 
 
 
@@ -446,6 +446,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
+
 
 
 
@@ -684,6 +685,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         At present, modern implementations of PASS3/PASS3B/PASS4 have
         not yet been created, though as you can see from the table
         above, they're not needed merely for compilation of object code.<br>
@@ -788,10 +790,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
       decision to create <b>XCOM-I</b>, I had made a similarly-painful
       decision to manually port the source code for PASS1/PASS1B of
       HAL/S-FC into the Python 3 language.&nbsp; The result was a
       working version of PASS1/PASS1B that I call <b>HAL_S_FC</b>.&nbsp;
+
 
 
 
@@ -905,6 +909,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
           href="#testHal">as mentioned above</a>), and then to
         extensively compare the results.&nbsp; We have no means at
         present to test subsequent passes of the compiler.&nbsp; <b>Note:</b>&nbsp;
+
         The test requires the <font color="#996633"><code> NOTABLES</code></font>
         compiler option (see the next item).<br>
       </li>
@@ -913,6 +918,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         specifies the "PARM field" covered in <a moz-do-not-send="true"
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>--parms="SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
+
 
 
 
@@ -973,6 +979,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
             <font color="#996633"><code>--test</code></font>.<br>
           </font> </li>
         <font size="-1"> </font>
@@ -991,6 +998,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         <li><font size="-1" color="#663300"><code><i>EXTENSION</i></code></font><font
             size="-1"> is either the literal .exe or else an empty
             string ("").&nbsp; It is functionally the same as <b>HALSFC</b>'s
+
 
 
 
@@ -1045,6 +1053,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       </font></blockquote>
     <p> </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -1131,43 +1140,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
       though the extent to which the result is informative is
       questionable.&nbsp; But there will be more discussion of HALMAT
       later on, if that's something that seems interesting to you.<br>
     </p>
     <p>After phase 1, the compiler then proceeded to further process
       halmat.bin, using the "phase 1.5" programs (FLO, OPT, and
-      AUXP).&nbsp; Those programs don't produce useful reports, at least
-      not by default, so we don't need to look at their reports.&nbsp;
-      However, what they do is to "optimize" the HALMAT, producing new
-      HALMAT-related files called optmat.bin and auxmat.bin.&nbsp; <b>Note:</b>&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      AUXP).&nbsp; Those programs don't <i>usually</i> produce useful
+      reports, at least not by default.&nbsp; However, what they do is
+      to "optimize" the HALMAT, producing new HALMAT-related files
+      called optmat.bin and auxmat.bin.&nbsp; <b>Note:</b>&nbsp;
       optmat.bin is a valid HALMAT file, and can be parsed with
       unHALMAT.py; auxmat.bin is not, and cannot.<br>
     </p>
@@ -1228,6 +1211,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
         Shuttle Model AP-101S Principles of Operation, with Shuttle
         Instruction Set</a>". </p>
     <p>But <i>useful</i> object code is emitted by the PASS/PFS version
@@ -1238,6 +1222,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       AP-101S PASS/PFS object code, it is in the <a
         moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">OS/360
+
 
 
 
@@ -1260,22 +1245,19 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     but fortunately <a moz-do-not-send="true" href="HALLINK101S.html">its
 
 
+
       format has in fact been decoded</a>, or at least mostly so.<br>
     <p>Rather than compiling HELLO.hal using the command given earlier,
       I'd personally be more likely to compile it using the command</p>
     <font size="+1"> </font>
     <blockquote>
-      <pre><font size="+1" color="#663300">HALSFC HELLO.hal --test --parms="LIST</font><font size="+1"><font color="#663300">,NOTABLES,LISTING2"</font><br></font></pre>
+      <pre><font size="+1" color="#663300">HALSFC HELLO.hal --test --parms="LIST</font><font size="+1"><font color="#663300">,LISTING2"</font><br></font></pre>
     </blockquote>
     <p>The difference, you'll recall, is that <font color="#996633"><code>--test</code></font>
-      additionally performs some verification of the compiler results,
-      and that <font color="#996633"><code>--test</code></font>
-      requires <font color="#996633"><code>NOTABLES</code></font>. (<font
-        color="#996633"><code>NOTABLES</code></font> simply means not to
-      run the compiler's PASS3 and PASS4, which we weren't even looking
-      at in this example anyway.&nbsp; <font color="#996633"><code>LISTING2</code></font>
-      means to produce a secondary, "unformatted" source-code
-      listing.)&nbsp; In fact, here are the messages we get,<br>
+      additionally performs some verification of the compiler results.&nbsp;
+      <font color="#996633"><code>LISTING2</code></font> means to
+      produce a secondary, "unformatted" source-code listing. &nbsp; In
+      fact, here are the messages we get,<br>
     </p>
     <blockquote>
       <pre>======================================================<br>PASS1 cross-comparison test:<br>Files pass1A.rpt and pass1pA.rpt are identical<br>Files FILE1.bin and halmat.bin are identical<br>Files LISTING2p.txt and listing2.txt are identical<br>======================================================<br>Compilation successful. Results in "HALSFC Wed 08-21-2024  7-39-24.00.results".<br></pre>
@@ -1312,6 +1294,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     </p>
     <ol start="1">
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
 
 
 
@@ -1402,6 +1385,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -1413,6 +1397,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
 
 
 
@@ -1492,9 +1477,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
           book <i>Programming in HAL/S</i> 2nd edition</a> (or <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20in%20HAL-S.pdf">first
+
 
 
 
@@ -1529,6 +1516,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         but contemporary (though alas undocumented) <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/BENCH">source-code
+
 
 
 
@@ -1596,6 +1584,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           HAL-S-360 Users Manual</a> provides <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-360%20Users%20Manual">a
           source-code file called DEMO.hal</a>.&nbsp; <br>
@@ -1623,6 +1612,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     an IBM System/360 computer as it did, expected that the underlying
     encoding of textual characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
 
     EBCDIC, to put it mildly, is no longer a common encoding for
     character sets.&nbsp; The current common practice, which I'll stick
@@ -1784,6 +1774,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>, or <tt>COMPOOL</tt>.&nbsp;
 
 
+
         Separate compilation units are in separate files.&nbsp; Of
         course, definitions of blocks like <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>,
         etc., can be local to another block, so in that sense there can
@@ -1835,6 +1826,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -1848,6 +1840,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
 
 
           variables</i>.&nbsp; Again, don't worry about what those
@@ -1933,10 +1926,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
 
 
 
@@ -1996,6 +1991,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
             assembly language instruction</a> <code>SVC</code>
           (Supervisor Call) wherever it appears. &nbsp; What are the
           legal values of <i><code>N</code></i>?&nbsp; Table 8-1 in the
@@ -2013,6 +2009,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           functionality designed into HAL/S.&nbsp; In other words, most
           or all of what you find in <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=229">Ryer's
+
 
 
 
@@ -2119,6 +2116,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       named <font color="#996633"><code>SOME_PROCEDURE</code></font>.&nbsp;
 
 
+
       It might look something like this in your HAL/S source code:<br>
     </p>
     <blockquote>
@@ -2127,6 +2125,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     <p> </p>
     <p>The line "<font color="#996633"><code>D INCLUDE TEMPLATE
           SOME_PROCEDURE</code></font>" is not a line of HAL/S code <i>per
+
 
 
         se</i>, but is rather a "compiler directive" that tells the
@@ -2144,6 +2143,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
 
 
       internals.<br>
@@ -2219,6 +2219,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     maintained by and for the full version of the HAL/S compiler (<b>HALSFC</b>),
 
 
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -2244,8 +2245,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     whenever you use the compiler <font color="#996633"><code> TEMPLATE</code></font>
     option, so that the libraries never get the chance to become
     unsynchronized.<br>
-    <h2><a name="DINCLUDE"></a>Include-Files and the "<code>D INCLUDE</code>"
-      Compiler Directive</h2>
+    <h2><a name="DINCLUDE"></a>The Inclusion Library and the "<code>D
+        INCLUDE</code>" Compiler Directive</h2>
     <p>In addition to the template library, which is something that the
       original compiler HAL/S-FC explicitly provided for, in the
       "modern" ports <b>HALSFC</b> and <b>HAL_S_FC.py</b> we
@@ -2259,6 +2260,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           INCLUDE TEMPLATE <i>name</i></code></font>" discussed above,
       the inclusion library exists to serve the compiler directive "<font
         color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
 
 
       This directive instructs the compiler to insert the entirety of
@@ -2291,6 +2293,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       the files INCLIB.json or INCLIBB.json.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
         Filenames for inclusion files are limited to 8 characters.&nbsp;
@@ -2417,6 +2420,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -2443,6 +2447,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
 
 
 
@@ -2575,6 +2580,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -2598,6 +2604,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
 
 
 
@@ -2682,6 +2689,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
 
 
 
@@ -2865,6 +2873,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -2879,6 +2888,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
 
 
 
@@ -3055,6 +3065,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -3104,9 +3115,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
 
 
 
@@ -3211,6 +3224,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
             data with the <font color="#663300"><code>REMOTE</code></font>
             attribute, which has caused me quite a lot of confusion
             personally, so I'll say a few words about it here.&nbsp;
@@ -3266,6 +3280,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
 
 
 
@@ -3497,6 +3512,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
               1, Unprintable</i><br>
           </td>
         </tr>
@@ -3585,15 +3601,16 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           <td nowrap="nowrap" valign="middle" align="center">X5 (off)</td>
           <td nowrap="nowrap" valign="middle" align="center">X5 (off)</td>
           <td nowrap="nowrap" valign="middle" align="center">X5 (off)</td>
-          <td valign="top">The X5 option enables a TRACE functionality
-            (not to be confused with the IBM 360 TRACE option described
-            above) during the OPT pass.&nbsp; <a moz-do-not-send="true"
+          <td valign="top"><a name="X5"></a>The X5 option enables a
+            TRACE functionality (not to be confused with the IBM 360
+            TRACE option described above) during the OPT pass.&nbsp; <a
+              moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             describes it as printing program flow and data bases.&nbsp;
             Here's an excerpt from OPT's output report from HELLO.hal
             that shows the effect:<br>
             <blockquote>
-              <pre>⋮<br>PAGE 1<br><br><br><font color="#009900">SYMBOL_SHRINKER(2):   2  I<br>SYMBOL_SHRINKER(3):   3  MY_NAME<br>SYMBOL_SHRINKER(4):   4  J<br>SYMBOL_SHRINKER(5):   5  PRINTER<br></font><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 2<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF AUGUST 9, 2024.  CLOCK TIME = 12:38:48.00<br><br>HAL/S OPTIMIZER ENTERED AUGUST 11, 2024.  CLOCK TIME = 8:28:19.16<br><br><font color="#009900">FINAL_PASS:  0<br>ASSIGNMENT: 27<br>ASSIGNMENT: 45<br><br> NO REL<br>  2   2  I<br>  3   3  MY_NAME<br>  4   4  J<br>  5   5  PRINTER<br>STACK_DUMP:  LEVEL=1, BLOCK#=2, INL#=0, OLD_LEVEL=0, OLD_BLOCK#=0, VAL_SIZE=1<br><br>   LEVEL STACKED_BLOCK# STACK_TAGS PULL_LOOP_HEAD<br>       0              1   00000000        -1<br>       1              2   00000000        -1<br><br>RECORD_TOP(CATALOG_ARRAY)= 1<br>RECORD_TOP(VALIDITY_ARRAY)= 1<br>RECORD_TOP(ZAPS)= 1<br>   ZAP_BASE=1, PULL_LOOP_HEAD(LEVEL)=-1<br>   SYT_SIZE=5, SYT_WORDS=0, SYT_USED=0<br><br>   VALIDITY     ZAPS LOOP_ZAPS<br>   00000000 00000014  00000014<br>ASSIGNMENT: 45</font><br>⋮</pre>
+              <pre>PAGE 1<br><br><br><font color="#009900">SYMBOL_SHRINKER(2):   2  I<br>SYMBOL_SHRINKER(3):   3  MY_NAME<br>SYMBOL_SHRINKER(4):   4  J<br>SYMBOL_SHRINKER(5):   5  PRINTER<br></font><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 2<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF AUGUST 9, 2024.  CLOCK TIME = 12:38:48.00<br><br>HAL/S OPTIMIZER ENTERED AUGUST 11, 2024.  CLOCK TIME = 8:28:19.16<br><br><font color="#009900">FINAL_PASS:  0<br>ASSIGNMENT: 27<br>ASSIGNMENT: 45<br><br> NO REL<br>  2   2  I<br>  3   3  MY_NAME<br>  4   4  J<br>  5   5  PRINTER<br>STACK_DUMP:  LEVEL=1, BLOCK#=2, INL#=0, OLD_LEVEL=0, OLD_BLOCK#=0, VAL_SIZE=1<br><br>   LEVEL STACKED_BLOCK# STACK_TAGS PULL_LOOP_HEAD<br>       0              1   00000000        -1<br>       1              2   00000000        -1<br><br>RECORD_TOP(CATALOG_ARRAY)= 1<br>RECORD_TOP(VALIDITY_ARRAY)= 1<br>RECORD_TOP(ZAPS)= 1<br>   ZAP_BASE=1, PULL_LOOP_HEAD(LEVEL)=-1<br>   SYT_SIZE=5, SYT_WORDS=0, SYT_USED=0<br><br>   VALIDITY     ZAPS LOOP_ZAPS<br>   00000000 00000014  00000014<br>ASSIGNMENT: 45</font><br>⋮</pre>
             </blockquote>
           </td>
         </tr>
@@ -3805,6 +3822,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -3854,6 +3872,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
 
 
 
@@ -4113,6 +4132,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             STRPDT we found that 'R' should be replaced by a blank (or '<code>M</code>'),
 
 
+
             whereas in GKPMNV we find that it is instead replaced by '<code>C</code>'
             in some configurations; although admittedly, in the case of
             STRPDT it's difficult to have as much confidence in my
@@ -4140,6 +4160,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
                 words, GKGMNV is compiled with CARDTYPE=ACOCNMRMFCGCHD</li>
             </ul>
             Regarding these extra column-1 characters like '<code>F</code>',
+
 
 
 
@@ -4233,12 +4254,14 @@ href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL
 
 
 
+
                       Language Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
                       href="Shuttle/19760007755.pdf">HAL/SM System
                       Functional Design Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%20Specification.pdf">HAL/SM
+
 
 
 
@@ -4401,7 +4424,19 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
     </blockquote>
     <p>This example turns on debugging-aid options D, E, and F.<br>
     </p>
+    <blockquote><font size="-1"><b>Important reminder!</b>&nbsp; If
+        you're in the U.S., you probably have no way to easily produce
+        the cent character (¢) from your keyboard.&nbsp; But our HAL/S
+        compiler(s) internally use the back-tick (`) instead of the
+        cent, so you can (and probably should) use that instead.&nbsp;
+        Nevertheless, </font><font size="-1"><font size="-1">¢ is what
+          the Shuttle developers would have used back in the day on
+          their IBM System/360 based development systems, so it's nice
+          to remember that.<br>
+        </font></font></blockquote>
+    <p> </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
 
 
 
@@ -4578,7 +4613,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
               color="#663300"><code>DEBUG</code></font> compiler
             directive at the top of HELLO.hal:<br>
             <blockquote>
-              <pre>⋮<br>&nbsp;HAL/S REL32V0                T I T A N  S Y S T E M S  C O R P .                 AUGUST 10, 2024    20:5:9.54     PAGE 3<br>STMT                                                  SOURCE                                                  CURRENT SCOPE<br><br>   1 M| HELLO:                                                                                              |HELLO<br>   1 M| PROGRAM;                                                                                            |HELLO<br><font color="#009900">I :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 2, CONTEXT = 5</font><br>   2 M|   DECLARE I INTEGER;                                                                                |HELLO<br><font color="#009900">MY_NAME :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 3, CONTEXT = 5</font><br>   3 M|   DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');                                              |HELLO<br><font color="#009900">J :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 4, CONTEXT = 5</font><br>   4 M|   DECLARE INTEGER, J;                                                                               |HELLO<br><font color="#009900">PRINTER :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 5, CONTEXT = 10</font><br>   5 M|   REPLACE PRINTER BY "6";                                                                           |HELLO<br><font color="#009900">PRINTER :  TOKEN = -1, IMPLIED_TYPE = 0, SYT_INDEX = 5, CONTEXT = 0<br>AT 3  NEXT_CHAR=246  MACRO_EXPAN_LEVEL=1  MACRO_TEXT(1)=239  PARM_REPLACE_PTR(0)=0<br>AT 4  NEXT_CHAR=64  MACRO_EXPAN_LEVEL=1  MACRO_TEXT(1)=239  PARM_REPLACE_PTR(0)=0<br>AT 5  NEXT_CHAR=93  MACRO_EXPAN_LEVEL=0  MACRO_TEXT(-1)=0  PARM_REPLACE_PTR(0)=0<br></font>   6 M|   WRITE(PRINTER) 'THE BEGINNING';                                                                   |HELLO<br>                ^^^^^^^                                                                                     <br><font color="#009900">I :  TOKEN = &lt;ARITH ID&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 2, CONTEXT = 0<br><font color="#000000">⋮<br></font></font></pre>
+              <pre>&nbsp;HAL/S REL32V0                T I T A N  S Y S T E M S  C O R P .                 AUGUST 10, 2024    20:5:9.54     PAGE 3<br>STMT                                                  SOURCE                                                  CURRENT SCOPE<br><br>   1 M| HELLO:                                                                                              |HELLO<br>   1 M| PROGRAM;                                                                                            |HELLO<br><font color="#009900">I :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 2, CONTEXT = 5</font><br>   2 M|   DECLARE I INTEGER;                                                                                |HELLO<br><font color="#009900">MY_NAME :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 3, CONTEXT = 5</font><br>   3 M|   DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');                                              |HELLO<br><font color="#009900">J :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 4, CONTEXT = 5</font><br>   4 M|   DECLARE INTEGER, J;                                                                               |HELLO<br><font color="#009900">PRINTER :  TOKEN = &lt;IDENTIFIER&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 5, CONTEXT = 10</font><br>   5 M|   REPLACE PRINTER BY "6";                                                                           |HELLO<br><font color="#009900">PRINTER :  TOKEN = -1, IMPLIED_TYPE = 0, SYT_INDEX = 5, CONTEXT = 0<br>AT 3  NEXT_CHAR=246  MACRO_EXPAN_LEVEL=1  MACRO_TEXT(1)=239  PARM_REPLACE_PTR(0)=0<br>AT 4  NEXT_CHAR=64  MACRO_EXPAN_LEVEL=1  MACRO_TEXT(1)=239  PARM_REPLACE_PTR(0)=0<br>AT 5  NEXT_CHAR=93  MACRO_EXPAN_LEVEL=0  MACRO_TEXT(-1)=0  PARM_REPLACE_PTR(0)=0<br></font>   6 M|   WRITE(PRINTER) 'THE BEGINNING';                                                                   |HELLO<br>                ^^^^^^^                                                                                     <br><font color="#009900">I :  TOKEN = &lt;ARITH ID&gt;, IMPLIED_TYPE = 0, SYT_INDEX = 2, CONTEXT = 0<br><font color="#000000">⋮<br></font></font></pre>
             </blockquote>
           </td>
         </tr>
@@ -4615,11 +4650,11 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
-          <td valign="top">This option adds HALMAT intermediate-language
-            to PASS2's output report.&nbsp; Recall that optimization
-            (FLO, OPT, and AUX) may have altered the HALMAT so that it's
-            no longer quite the same as what was output by PASS1 (see ¢0
-            above).<br>
+          <td valign="top"><a name="cent5"></a>This option adds HALMAT
+            intermediate-language to PASS2's output report.&nbsp; Recall
+            that optimization (FLO, OPT, and AUX) may have altered the
+            HALMAT so that it's no longer quite the same as what was
+            output by PASS1 (see ¢0 above).<br>
             <blockquote>
               <pre>PAGE 1<br><br><br>   HAL/S COMPILER PHASE 2  --  VERSION OF AUGUST 9, 2024.  CLOCK TIME = 12:39:23.00<br><br>HAL/S PHASE 2 ENTERED AUGUST 11, 2024.  CLOCK TIME = 5:39:17.69<br><br><font color="#009900">         HALMAT: 005(  1),  0,0:0.0<br>         HALMAT: 02B(  1),  0,0:0.2<br>                   1( 1),  0,0 :0.3<br>         HALMAT: 004(  1),  0,0:0.4<br>                   1( 0),  0,1 :0.5<br>         HALMAT: 004(  1),  0,0:0.6<br>                   2( 0),  0,0 :0.7<br>         HALMAT: 841(  2),  2,0:0.8<br>                   3( 1),  0,0 :0.9<br>                   2( 5),  0,0 :0.10<br>         HALMAT: 004(  1),  0,0:0.11<br>                   3( 0),  0,0 :0.12<br>         HALMAT: 004(  1),  0,0:0.13<br>                   4( 0),  0,0 :0.14<br>         HALMAT: 004(  1),  0,0:0.15<br>                   5( 0),  0,0 :0.16<br>         HALMAT: 031(  0),  1,0:0.17<br>         HALMAT: 025(  1),  0,0:0.18<br>                   2( 6),  0,0 :0.19<br>                   6( 6),  0,0 :0.23<br>         HALMAT: 027(  1),  0,0:0.20<br>                   4( 5),  2,0 :0.21<br>         HALMAT: 021(  1),  0,0:0.22<br>         HALMAT: 026(  0),  0,0:0.24<br>         HALMAT: 004(  1),  0,0:0.25<br>                   6( 0),  0,1 :0.26<br>         HALMAT: 010(  4),  1,0:0.27<br>                   2( 1),  0,0 :0.29<br>                                        AUX:  29  1     2(1)    0,0<br>                   1( 2),  0,1 :0.28<br>                   6( 5),  0,0 :0.31<br>                   5( 5),  0,0 :0.30<br></font>⋮<br></pre>
             </blockquote>
@@ -4711,6 +4746,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               production numbers are related to the BNF rules in
               comments in the compiler's source code</a>.&nbsp; For
             example, production number 1 is the <code>&lt;COMPILATION&gt;</code>
@@ -4729,7 +4765,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="top">¢9</td>
+          <td valign="top"><a name="cent9"></a>¢9</td>
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">No</td>
@@ -4785,6 +4821,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">Print Phase 1 state trace.&nbsp; The compiler
             is a kind of <a moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/Finite-state_machine">state
+
 
 
 
@@ -4883,6 +4920,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
 
 
 
@@ -5099,9 +5137,49 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             describes this as "WATCH status changed", which appears to
             mean that printing of HALMAT changes is toggled on or
-            off.&nbsp; Whether this option is available in HAL/S-FC
-            versus whether it is confined to HAL/S-360 is TBD.&nbsp; A
-            more-understandable explanation is TBD. </td>
+            off.&nbsp; In my few experiments with it, I've seen no
+            changes due to it in OPT's output report.&nbsp; Whether this
+            option is available in HAL/S-FC versus whether it is
+            confined to HAL/S-360 is TBD.&nbsp; A more-understandable
+            explanation is TBD. </td>
+        </tr>
+        <tr>
+          <td valign="top">H(4)<br>
+          </td>
+          <td valign="top">No</td>
+          <td valign="top">No</td>
+          <td valign="top"><font color="#009900">Yes</font></td>
+          <td valign="top">No</td>
+          <td valign="top">No</td>
+          <td valign="top">I'm not aware of any documentation, but
+            comments in OPT source code call this "TEST PUSH
+            HALMAT".&nbsp; It institutes an immediate action, and is not
+            a toggle.&nbsp; Here's an example of the changes to OPT's
+            output report when using it, when I've positioned the
+            directive "<font color="#996633"><code>DEBUG H(4)</code></font>"
+            just prior to our example HELLO.hal's final "<font
+              color="#996633"><code>CLOSE HELLO</code>;</font>"
+            statement:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 5:47:58.95<br><br><font color="#009900">85 PUSHED BY 1716</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 5:47:58.95<br><br></pre>
+            </blockquote>
+            I believe that what this addition to the report represents
+            is the number HALMAT statements which have been output by
+            whatever point in the program that the compiler directive
+            has been placed.<br>
+            <br>
+            But using this aid is quite an adventure.&nbsp; For one
+            thing, using it anywhere in the source code <i>other</i>
+            than just prior to the compilation unit's close tends to
+            cause OPT to abort, and the AUX pass following it to
+            fail.&nbsp; Using more than one of the directives in the
+            same file seems to cause an infinite loop from which OPT
+            never exits.&nbsp; Of course, either or both of these
+            unpleasant side-effects could be due to bugs introduced in
+            my porting of OPT and/or AUX to the modern age, but given
+            the seemingly-limited utility of H(4) I have little
+            inclination to figure it out.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(5)<br>
@@ -5115,9 +5193,18 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           </td>
           <td valign="top">No<br>
           </td>
-          <td valign="top">Toggles tracing that's similar (but
-            apparently not identical) to that of the X5 compiler
-            option.&nbsp; See X5 in the preceding section for a sample.<br>
+          <td valign="top">Toggles tracing that's similar to that of <a
+              moz-do-not-send="true" href="#X5">the X5 compiler option</a>,
+            so I won't take up space by showing a near-duplicate
+            here.&nbsp; This aid is positional, though, so the output
+            you get does depend on where the compiler directive that
+            activates it is positioned in the source code.&nbsp; <br>
+            <br>
+            In my experiments, I've found that positioning the compiler
+            directive prior to the compilation unit causes OPT to crash,
+            while positioning it after the compilation unit causes no
+            additions to OPT's output report.&nbsp; The former would
+            appear to be a bug, but I've not investigated it.<br>
           </td>
         </tr>
         <tr>
@@ -5132,12 +5219,17 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No<br>
           </td>
           <td valign="top">The H(6) option embeds HALMAT into OPT's
-            output report.&nbsp; Put another way, it does for OPT what
-            ¢5 does for PASS2.&nbsp; (See ¢5 above.)<br>
+            output report.&nbsp; Put another way, it does for OPT what <a
+              moz-do-not-send="true" href="#cent5"> ¢5</a> does for
+            PASS2.&nbsp; Here's a sample from OPT's output report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 6:32:42.39<br><br><font color="#009900">         HALMAT: 005(  1),  0,0:0.0<br>         HALMAT: 02B(  1),  0,0:0.2<br>         HALMAT: 004(  1),  0,0:0.4<br>                                        STATEMENT# 1<br>         HALMAT: 004(  1),  0,0:0.4<br>                                        STATEMENT# 1<br>         HALMAT: 004(  1),  0,0:0.6<br>                                        STATEMENT# 2<br>         HALMAT: 004(  1),  0,0:0.6<br>                                        STATEMENT# 2<br>         HALMAT: 841(  2),  2,0:0.8<br>         HALMAT: 004(  1),  0,0:0.11<br>         .<br>         .<br>         .
+                                       &nbsp;STATEMENT# 14<br>         HALMAT: 004(  1),  0,0:0.85<br>                                        STATEMENT# 14<br>         HALMAT: 002(  0),  1,0:0.87</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 6:32:42.39<br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
-          <td valign="top">H(7)<br>
+          <td valign="top"><a name="H7"></a>H(7)<br>
           </td>
           <td valign="top">No<br>
           </td>
@@ -5149,9 +5241,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             describes this as "HALMAT_BLAB status changed", by which it
-            means that HALMAT_BLAB is toggled.&nbsp; A
-            more-understandable explanation is TBD.&nbsp; I do not
-            observe any effect on the output reports.<br>
+            means that it is toggled.&nbsp; The following illustrates
+            the kind of effect on OPT's output report.&nbsp; As you can
+            see, it's similar to H(6), but with a bit extra.&nbsp; (I
+            guess that's the "blabbing".)<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 6:27:1.83<br><br><font color="#009900">         HALMAT: 005(  1),  0,0:0.0<br>                  87( 0),  0,0 :0.1<br>         HALMAT: 02B(  1),  0,0:0.2<br>                   1( 1),  0,0 :0.3<br>         HALMAT: 004(  1),  0,0:0.4<br>                                        STATEMENT# 1<br>                   1( 0),  7,1 :0.5<br>         HALMAT: 004(  1),  0,0:0.6<br>                                        STATEMENT# 2<br>                   2( 0),  0,0 :0.7<br>         HALMAT: 841(  2),  2,0:0.8<br>                   3( 1),  0,0 :0.9<br>                   2( 5),  0,0 :0.10<br>         HALMAT: 004(  1),  0,0:0.11<br>         .<br>         .<br>         .<br>                                        STATEMENT# 14<br>                  14( 0),  0,1 :0.86<br>         HALMAT: 002(  0),  1,0:0.87</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 6:27:1.84<br><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5166,7 +5262,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "NO PHASE 2".&nbsp; It
-            is a setting, not a toggle.<br>
+            is a setting, not a toggle.&nbsp; Its purpose would seem to
+            be allowing OPT to complete its normal optimization, but
+            upon exit to inhibit subsequent compiler passes (FLO, PASS2)
+            even if there has been no error.&nbsp; However, the
+            architecture of <b>HALSFC</b> (vs <b>HAL/S-FC</b>) is such
+            that no such action with OPT will disable subsequent
+            compiler passes.<br>
           </td>
         </tr>
         <tr>
@@ -5178,9 +5280,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">No</td>
-          <td valign="top">I'm not aware of any documentation, but
-            comments in OPT source code call this "DUMP".&nbsp; It is
-            not a toggle.<br>
+          <td valign="top">Causes an immediate termination (with error
+            code 1) of OPT.<br>
           </td>
         </tr>
         <tr>
@@ -5193,7 +5294,9 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "SUB EXPANSION
-            TRACE".&nbsp; It is a toggle.<br>
+            TRACE".&nbsp; It is a toggle.&nbsp; But so far, I've been
+            unable to generate any examples in which OPT's output report
+            differs.<br>
           </td>
         </tr>
         <tr>
@@ -5206,7 +5309,11 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "LOOP COMBINE
-            TRACE".&nbsp; It is a toggle.<br>
+            TRACE".&nbsp; It is a toggle.&nbsp; Here's an example of
+            changes to OPT's output report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:8:12.14<br><br><font color="#009900">INIT_ARCONFS<br>**********STATEMENT 1<br>**********STATEMENT 2<br>**********STATEMENT 3<br>**********STATEMENT 4<br>**********STATEMENT 5<br>**********STATEMENT 6<br>**********STATEMENT 7<br>**********STATEMENT 8<br>**********STATEMENT 9<br>**********STATEMENT 10<br>**********STATEMENT 11<br>**********STATEMENT 12<br>**********STATEMENT 13<br>CHECK_LIST(0,0):<br>INIT_ARCONFS<br>**********STATEMENT 14<br>CHECK_LIST(0,0):<br>INIT_ARCONFS<br>CHECK_LIST(0,0):</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:8:12.14<br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5219,7 +5326,15 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "STACK TRACE".&nbsp;
-            It is a toggle.<br>
+            It is a toggle.&nbsp; The effect is similar but not
+            identical to that of <a moz-do-not-send="true" href="#X5">compiler
+
+              option X5</a>.&nbsp; Note that to produce any change to
+            OPT's report, <font color="#996633"><code>DEBUG H(12);</code></font>
+            has to be within the compilation unit (i.e., <font
+              color="#996633"><code>PROGRAM HELLO</code></font> in this
+            case).&nbsp; Placing it prior to the compilation unit causes
+            OPT to terminate abnormally.<br>
           </td>
         </tr>
         <tr>
@@ -5232,8 +5347,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "NODE DUMP".&nbsp; It
-            is a toggle.<br>
-          </td>
+            is a toggle.&nbsp; But so far, I've been unable to generate
+            any examples in which OPT's output report differs. </td>
         </tr>
         <tr>
           <td valign="top">H(14)<br>
@@ -5245,7 +5360,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "CROSS STATEMENTS". It
-            is a toggle.</td>
+            is a toggle, appearing to effect whether one type of
+            optimization is enabled or disabled.&nbsp; Here's an example
+            of change to OPT's output report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:20:19.94<br><br><font color="#009900">CROSS STATEMENT LOOP COMBINING AND INVARIANT PULLING DISABLED AT HAL/S STATEMENT 1</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:20:19.94<br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(15)<br>
@@ -5257,7 +5378,9 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "CSE_TAB_DUMP OF
-            CATALOG AND ENTRY NODES". It is a toggle.</td>
+            CATALOG AND ENTRY NODES". It is a toggle.&nbsp; But so far,
+            I've been unable to generate any examples in which OPT's
+            output report differs.</td>
         </tr>
         <tr>
           <td valign="top">H(16)<br>
@@ -5269,7 +5392,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "STACK DUMP".&nbsp; It
-            is a setting, not a toggle.<br>
+            triggers an immediate action, and is not a toggle.&nbsp;
+            Using H(16) multiple times will trigger multiple stack
+            dumps.&nbsp; Here's an example of changes to OPT's output
+            report with a single use of H(16):<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:23:47.53<br><br><br><font color="#009900"> NO REL<br>  2   2  I<br>  3   3  MY_NAME<br>  4   4  J<br>  5   5  PRINTER<br>STACK_DUMP:  LEVEL=0, BLOCK#=1, INL#=0, OLD_LEVEL=0, OLD_BLOCK#=0, VAL_SIZE=1<br><br>   LEVEL STACKED_BLOCK# STACK_TAGS PULL_LOOP_HEAD<br>       0              1   00000000        -1<br><br>RECORD_TOP(CATALOG_ARRAY)= 0<br>RECORD_TOP(VALIDITY_ARRAY)= 0<br>RECORD_TOP(ZAPS)= 0<br>   ZAP_BASE=0, PULL_LOOP_HEAD(LEVEL)=-1<br>   SYT_SIZE=5, SYT_WORDS=0, SYT_USED=0<br><br>   VALIDITY     ZAPS LOOP_ZAPS<br>   00000000 00000000  00000000</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:23:47.53<br><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5282,7 +5411,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "EXTRA HALMAT DUMPS".
-            It is a toggle.</td>
+            It is a toggle.&nbsp; But so far, I've been unable to
+            generate any examples in which OPT's output report differs.</td>
         </tr>
         <tr>
           <td valign="top">H(18)<br>
@@ -5307,7 +5437,14 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "DUMP VALIDS".&nbsp;
-            It is a setting, not a toggle.<br>
+            It triggers an immediate action, and is not a toggle.&nbsp;
+            Multiple <font color="#996633"><code>DEBUG H(19);</code></font>
+            directives can be used, at different HAL/S statements, each
+            triggering a separate message in the output report.&nbsp;
+            Here's an sample in which I used four of them:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:30:43.26<br><br><br><font color="#009900">SYT# REL# CATALOG_PTR    VARIABLE NAME FOR VALID VARS, LEVEL =0, BLOCK# =1<br><br>SYT# REL# CATALOG_PTR    VARIABLE NAME FOR VALID VARS, LEVEL =0, BLOCK# =1<br><br>SYT# REL# CATALOG_PTR    VARIABLE NAME FOR VALID VARS, LEVEL =0, BLOCK# =1<br><br>SYT# REL# CATALOG_PTR    VARIABLE NAME FOR VALID VARS, LEVEL =1, BLOCK# =2<br></font><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:30:43.26<br><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5320,7 +5457,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "STATISTICS". It is a
-            toggle.</td>
+            toggle.&nbsp; Here's an example of changes to OPT's output
+            report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:33:39.36<br><br><br><font color="#009900">CSE'S FOUND                   = 0<br><br><br>COMPARE CALLS                 = 0<br>SCANS                         = 0<br>MAX_NODE_LIST                 = 0<br>MAX_CSE_TAB                   = 1<br>MINOR COMPACTIFIES            = 0<br>MAJOR COMPACTIFIES            = 0<br>FREE STRING AREA              = 16637946<br><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:33:39.36<br><br><br>TOTAL CPU TIME FOR OPTIMIZER     0:0:0.00<br>CPU TIME FOR OPTIMIZER SETUP     0:0:0.00<br>CPU TIME FOR OPTIMIZER CRUNCHING 0:0:0.00<br>CPU TIME FOR OPTIMIZER CLEAN UP  0:0:0.00</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:33:39.36<br><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(21)<br>
@@ -5332,7 +5474,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "MOVE HALMAT TRACE".
-            It is a toggle.</td>
+            It is a toggle.&nbsp; But so far, I've been unable to
+            connive any examples in which OPT's output report differs.</td>
         </tr>
         <tr>
           <td valign="top">H(22)<br>
@@ -5344,7 +5487,10 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "BLAB FIRST HALMAT
-            BLOCK".&nbsp; It is a setting, not a toggle.</td>
+            BLOCK".&nbsp; It is a setting, not a toggle.&nbsp; It's
+            seemingly identical in effect to <a moz-do-not-send="true"
+              href="#H7">H(7)</a>.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(23)<br>
@@ -5356,7 +5502,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "BLAB SECOND HALMAT
-            BLOCK".&nbsp; It is a setting, not a toggle.</td>
+            BLOCK".&nbsp; It is a setting, not a toggle.&nbsp; Here's a
+            sample of OPT's output report (34 pages of it, if shown in
+            full!):<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:42:39.78<br><br><font color="#009900">         HALMAT: 000(  0),  0,0:0.1800<br>         HALMAT: 000(  0),  0,0:0.1801<br>         HALMAT: 000(  0),  0,0:0.1802<br>         HALMAT: 000(  0),  0,0:0.1803<br>         HALMAT: 000(  0),  0,0:0.1804<br>         .<br>         .<br>         .<br>         HALMAT: 000(  0),  0,0:0.3599<br>         HALMAT: 000(  1),  0,1:0.3600<br>         HALMAT: 000(  5),  0,3:0.3602<br>         HALMAT: 001( 17),  0,1:0.3608<br>                  19( 1),  0,2 :0.3609<br>                  21( 1),  0,3 :0.3610<br>                  23( 1),  0,4 :0.3611<br>                  25( 1),  0,5 :0.3612<br>         .<br>         .<br>         .<br>                  51( 3),  0,2 :0.3625<br>         HALMAT: 003( 53),  0,3:0.3626<br>                  55( 3),  0,4 :0.3627<br>                  57( 3),  0,5 :0.3628<br>         .<br>         .<br>         .<br>                   0( 1),  0,0 :0.3678<br>                   0( 1),  0,0 :0.3679<br>         HALMAT: 001(  0),  0,1:0.3680<br>         HALMAT: 001(  0),  0,1:0.3681<br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 34<br><br>         HALMAT: 001(  0),  0,2:0.3682<br>         HALMAT: 001(  0),  0,2:0.3683<br>         HALMAT: 001(  0),  0,3:0.3684<br>         HALMAT: 001(  0),  0,3:0.3685<br>         HALMAT: 001(  0),  0,4:0.3686<br>         HALMAT: 001(  0),  0,4:0.3687<br>         HALMAT: 001(  0),  0,5:0.3688<br>         HALMAT: 001(  0),  0,5:0.3689<br>         HALMAT: 001(  0),  0,6:0.3690<br>         HALMAT: 001(  0),  0,6:0.3691<br>         HALMAT: 001(  0),  0,7:0.3692<br>         HALMAT: 001(  0),  0,7:0.3693<br>         HALMAT: 002(  0),  0,0:0.3694</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:42:39.80<br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(24)<br>
@@ -5368,21 +5520,22 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but
             comments in OPT source code call this "BLAB BOTH HALMAT
-            BLOCKS".&nbsp; It is a setting, not a toggle.</td>
+            BLOCKS".&nbsp; In other words, a combination of H(22) and
+            H(23).</td>
         </tr>
         <tr>
-          <td valign="top">H(25)-H(30)<br>
+          <td valign="top">H(25)-H(40)<br>
           </td>
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">No</td>
-          <td valign="top">Future expansion, I believe.<br>
+          <td valign="top">Future expansion, I believe. <br>
           </td>
         </tr>
         <tr>
-          <td nowrap="nowrap" valign="middle">H(31)-H(99)<br>
+          <td nowrap="nowrap" valign="middle">H(41)-H(99)<br>
           </td>
           <td valign="middle">No<br>
           </td>
@@ -5390,15 +5543,17 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="middle"><font color="#009900">Yes</font></td>
           <td valign="middle">No</td>
           <td valign="middle">No</td>
-          <td valign="middle">Toggles a setting called <font
-              color="#996633"><code>TEST</code></font>.&nbsp; <a
-              moz-do-not-send="true"
+          <td valign="middle"><a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=661">Documentation</a>
             for H(64) describes this as "Set VALIDITY TRACE status
-            changed".&nbsp; A more-understandable explanation is
-            TBD.&nbsp; I do not observe any effect on the output
-            reports, although if <font color="#996633"><code>TEST</code></font>
-            is true there is in fact code that prints a message. </td>
+            changed"; in fact, H(40) through H(99) are all identical in
+            OPT source code to H(64).&nbsp; A more-understandable
+            explanation is TBD.&nbsp; Here's an example of its effect on
+            OPT's output report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S OPTIMIZER  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:46:46.00<br><br>HAL/S OPTIMIZER ENTERED MARCH 9, 2026.  CLOCK TIME = 7:48:50.12<br><br><font color="#009900">                          SET_VALIDITY(2,0)<br>                          SET_VALIDITY(4,0)<br>                          SET_VALIDITY(4,0)</font><br><br>END OF HAL/S OPTIMIZER MARCH 9, 2026.  CLOCK TIME = 7:48:50.12<br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(100)<br>
@@ -5409,8 +5564,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            FLO source code I'd say that this triggers a "VMEM
-            DUMP".&nbsp; It is not a toggle.<br>
+            FLO source code I'd say that this triggers a "VMEM DUMP",
+            which is a report on VMEM.&nbsp; It is not a toggle.&nbsp;
+            Note that FLO's output report is normally empty.<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br>INCLUDE LIST HEAD: FFFFFFFF<br>STMT DATA HEAD: 7FC<br> <br>SYT VPTRS(0):<br> <br><br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 2<br><br><br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 3<br><br><br>PAGE 000     ..00     ..04     ..08        ..0C     ..10     ..14        ..18     ..1C     ..20        ..24     ..28     ..2C<br> <br>    0000   00000001 00000001 FE691970    00000000 00000000 00000000    00000000 00000000 00000000    00000000 00000000 00000000 <br>    07E0   00000000 00000000 00000000    00000000 00000000 00000000    00000000 00000820 FFFFFFFF    0000081C FFFFFFFF 00000000 <br>    0810   00000000 00000016 00010001    00010001 00000840 000007FC    FFFFFFFF FFFFFFFF 00000000    00000000 00000015 00020001 <br>    0840   00000860 00000820 FFFFFFFF    FFFFFFFF 00000000 00000000    00000015 00030001 00000890    00000840 FFFFFFFF FFFFFFFF <br>    0870   00000000 00000000 00000015    00040001 FFFFFFFF 0001F600    00000880 FFFF0000 000008B0    00000860 FFFFFFFF FFFFFFFF <br>    08A0   00000000 00000000 00000019    00050001 000008D0 00000890    FFFFFFFF FFFFFFFF 00000000    00000000 00001003 00060001 <br>    08D0   000008F4 000008B0 FFFFFFFF    000008F0 00000000 00000000    00000013 00070001 00018002    00000914 000008D0 FFFFFFFF <br>    0900   FFFFFFFF 00000000 000009DC    00001003 00080001 00000938    000008F4 FFFFFFFF 00000934    00000000 00000000 00000013 <br>    0930   00090001 00018004 00000958    00000914 FFFFFFFF FFFFFFFF    00000000 000009E4 00001003    000A0001 00000978 00000938 <br>    0960   FFFFFFFF FFFFFFFF 00000000    00000000 00000008 000B0001    00000998 00000958 FFFFFFFF    FFFFFFFF 00000000 00000000 <br>    0990   00000008 000C0001 000009B8    00000978 FFFFFFFF FFFFFFFF    00000000 00000000 00001003    000D0001 FFFFFFFF 00000998 <br>    09C0   FFFFFFFF FFFFFFFF 00000000    00000000 00000006 000E0001    00000000 00080001 00020000    00080002 00040003 00000000</font><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5423,8 +5582,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
             FLO source code I'd say that this triggers a "FORMATTED
-            DUMP".&nbsp; It is not a toggle.<br>
-          </td>
+            DUMP".&nbsp; It is not a toggle.&nbsp; However, I notice no
+            effect on FLO's output report when using it.</td>
         </tr>
         <tr>
           <td valign="top">H(102)<br>
@@ -5435,7 +5594,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            FLO source code I'd say that this sets "DON'T LINK".</td>
+            FLO source code I'd say that this sets "DON'T LINK".&nbsp;
+            The intent seems to be to allow FLO to complete processing
+            and exit normally but <i>without</i> chaining to the next
+            pass of the compiler (namely OPT).&nbsp; In the architecture
+            of <b>HALSFC</b> (vs <b>HAL/S-FC</b>), individual programs
+            don't control this chaining anyway, so H(102) has no effect.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(103)<br>
@@ -5446,7 +5611,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            FLO source code I'd say that this toggles "PROCEDURE TRACE".</td>
+            FLO source code I'd say that this toggles "PROCEDURE
+            TRACE".&nbsp; <br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br>GET_STMT_VARS(6,24)<br>GET_EXP_VARS_CELL<br>GET_STMT_VARS(7,27)<br>GET_EXP_VARS_CELL<br>GET_STMT_VARS(8,42)<br>GET_EXP_VARS_CELL<br>GET_STMT_VARS(9,45)<br>GET_EXP_VARS_CELL<br>GET_STMT_VARS(10,63)<br>GET_EXP_VARS_CELL<br>GET_STMT_VARS(13,80)<br>GET_EXP_VARS_CELL</font><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(104)<br>
@@ -5457,10 +5627,14 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            FLO source code I'd say that this toggles "WALK TRACE".</td>
+            FLO source code I'd say that this toggles "WALK
+            TRACE".&nbsp; I notice no effect on FLO's output report when
+            using it, but perhaps I'm not using appropriate HAL/S sample
+            code for testing it.<br>
+          </td>
         </tr>
         <tr>
-          <td valign="top">H(105)<br>
+          <td valign="top"><a name="H105"></a>H(105)<br>
           </td>
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
@@ -5468,8 +5642,13 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            FLO source code I'd say that this triggers a "HALMAT DUMP".
-            It is not a toggle.<br>
+            FLO source code I'd say that this sets "HALMAT DUMP", which
+            takes effect at the end of processing. It is not a
+            toggle.&nbsp; Note that it requires the HALMAT compiler
+            option as well.<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br><br>STATEMENT 1<br>20001<br>102B0<br>10011<br><br>STATEMENT 2<br><br>STATEMENT 3<br>30001<br>2028410<br>30011<br>20051<br><br>.<br>.<br>.<br><br>STATEMENT 14<br>20001<br>10300<br>10011</font><br><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5492,7 +5671,11 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
             AUX source code I'd say that this toggles
-            "AUXMAT_REQUESTED".</td>
+            "AUXMAT_REQUESTED".&nbsp; AUX's report:<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br>  0.   0 :    29,1(00),    0,    2(01)<br>  0.   2 :    47,1(00),    0,    4(01)<br>  0.   4 : 32767,6(00),    0,    0(00)</font><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(129)<br>
@@ -5503,7 +5686,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "PRETTY_PRINT".</td>
+            AUX source code I'd say that this toggles
+            "PRETTY_PRINT".&nbsp; AUX's report:
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br><br><br>           HALMAT:   005(  1),  0,0:  0.   0 <br>                      87(  0),  0,0:  0.   1 <br>           HALMAT:   02B(  1),  0,0:  0.   2 <br>                       1(  1),  0,0:  0.   3 <br>           HALMAT:   004(  1),  0,0:  0.   4 <br><br><br>                       1(  0),129,1:  0.   5 <br>           HALMAT:   004(  1),  0,0:  0.   6 <br><br>           .<br>           .<br>           .<br><br>                      13(  0),  0,1:  0.  82 <br>           HALMAT:   030(  1),  0,0:  0.  83 <br>                       1(  1),  0,0:  0.  84 <br><br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 3<br><br>           HALMAT:   004(  1),  0,0:  0.  85 <br><br><br>                      14(  0),  0,1:  0.  86 <br>           HALMAT:   002(  0),  1,0:  0.  87      AUXMAT:   0.   4 : 32767,6(00),    0,    0(00)<br></font><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(130)<br>
@@ -5514,7 +5702,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "STACK_DUMP".</td>
+            AUX source code I'd say that this toggles "STACK_DUMP".&nbsp;
+            AUX's report:<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br><br><br>HALMAT_PTR = 83<br>STACK_PTR = 1<br>MAX_CASE_LENGTH = 0<br>FRAME_START = 2<br>FRAME_TYPE = 1<br>FRAME_FLAGS = 0<br>FRAME_INL = 1<br>FRAME_BUMP_FACTOR = 0<br>FRAME_BLOCK_PTR = 1<br>FRAME_CB_NEST_LEVEL = 0<br>FRAME_SYT_REF (1) = <br>50000000    <br>FRAME_VAC_REF (113) = <br>00000000    00000000    00000000    <br>FRAME_SYT_PREV_REF (0) = <br>00000000    <br>FRAME_VAC_PREV_REF (0) = <br>00000000    00000000    00000000    <br>FRAME_UVCS (3) = <br>01     4 00    47     2  --&gt;  01     2 00    29     0  --&gt;  0<br>FRAME_CASE_LIST (0) = <br>0<br>FRAME_MAP_SAVE (0) = <br>0<br>CASE_LIST_PTRS (0) = <br>0<br>VAC_BOUNDS = (1) = <br>00     2 00    17     0  --&gt;  0<br><br><br>HALMAT_PTR = 83<br>STACK_PTR = 0<br>MAX_CASE_LENGTH = 0<br>FRAME_START = 0<br>FRAME_TYPE = 0<br>FRAME_FLAGS = 0<br>FRAME_INL = -1<br>FRAME_BUMP_FACTOR = 0<br>FRAME_BLOCK_PTR = 0<br>FRAME_CB_NEST_LEVEL = 0<br>FRAME_SYT_REF (0) = <br>00000000    <br>FRAME_VAC_REF (0) = <br>00000000    00000000    00000000    <br>FRAME_SYT_PREV_REF (0) = <br>00000000    <br>FRAME_VAC_PREV_REF (0) = <br>00000000    00000000    00000000    <br>FRAME_UVCS (0) = <br>0<br>FRAME_CASE_LIST (0) = <br>0<br>FRAME_MAP_SAVE (0) = <br>0<br><br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 2<br><br>CASE_LIST_PTRS (0) = <br>0<br>VAC_BOUNDS = (4) = <br>00     2 00    84     0  --&gt;  0</font><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(131)<br>
@@ -5525,7 +5718,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "OPCODE_TRACE".</td>
+            AUX source code I'd say that this toggles
+            "OPCODE_TRACE".&nbsp; AUX's report:<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br>HALRATOR =004 (0,6)<br>HALRATOR =841 (0,8)<br>HALRATOR =004 (0,11)<br>HALRATOR =004 (0,13)<br>HALRATOR =004 (0,15)<br>HALRATOR =031 (0,17)<br>HALRATOR =025 (0,18)<br>HALRATOR =027 (0,20)<br>HALRATOR =021 (0,22)<br>HALRATOR =026 (0,24)<br>HALRATOR =004 (0,25)<br>HALRATOR =010 (0,27)<br>HALRATOR =004 (0,32)<br>HALRATOR =025 (0,34)<br>HALRATOR =027 (0,36)<br>HALRATOR =027 (0,38)<br>HALRATOR =021 (0,40)<br>HALRATOR =026 (0,42)<br>HALRATOR =004 (0,43)<br>HALRATOR =010 (0,45)<br>HALRATOR =004 (0,51)<br>HALRATOR =025 (0,53)<br>HALRATOR =027 (0,55)<br>HALRATOR =027 (0,57)<br>HALRATOR =027 (0,59)<br>HALRATOR =021 (0,61)<br>HALRATOR =026 (0,63)<br>HALRATOR =004 (0,64)<br>HALRATOR =011 (0,66)<br>HALRATOR =004 (0,68)<br>HALRATOR =011 (0,70)<br>HALRATOR =004 (0,72)<br>HALRATOR =025 (0,74)<br>HALRATOR =027 (0,76)<br>HALRATOR =021 (0,78)<br>HALRATOR =026 (0,80)<br>HALRATOR =004 (0,81)<br>HALRATOR =030 (0,83)<br>HALRATOR =004 (0,85)<br>HALRATOR =002 (0,87)</font><br></pre>
+            </blockquote>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(132)<br>
@@ -5536,7 +5734,11 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "TARGET_TRACE".</td>
+            AUX source code I'd say that this toggles
+            "TARGET_TRACE".&nbsp; But this appears to have no effect
+            within AUX source code, and I see no effect on AUX's output
+            report.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(133)<br>
@@ -5547,7 +5749,9 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "NOOSE_TRACE".</td>
+            AUX source code I'd say that this toggles "NOOSE_TRACE".&nbsp;
+            But this appears to have no effect within AUX source code,
+            and I see no effect on AUX's output report.</td>
         </tr>
         <tr>
           <td valign="top">H(134)<br>
@@ -5558,7 +5762,14 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
-            AUX source code I'd say that this toggles "TIME_EXIT".</td>
+            AUX source code I'd say that this toggles "TIME_EXIT".&nbsp;
+            By design, this simply triggers an error exit from AUX of
+            type BI412, "COMPILATION ENDED IN AUXMATTER PHASE DUE TO
+            DEBUG TOGGLE 134 BEING SET".&nbsp; It's apparently one of
+            those "don't push this button!" kind of things.&nbsp; More
+            seriously, I suspect that once upon a time H(134) did
+            something useful but was eventually discontinued.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top">H(135)<br>
@@ -5570,7 +5781,11 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
           <td valign="top">No</td>
           <td valign="top">I'm not aware of any documentation, but from
             AUX source code I'd say that this sets "SHRUNKEN SYMBOL
-            TABLE INDEX DUMP".&nbsp; It is not a toggle.<br>
+            TABLE INDEX DUMP".&nbsp; It is not a toggle.&nbsp; AUX's
+            report:<br>
+            <blockquote>
+              <pre><font color="#009900">PAGE 1<br><br><br> HAL/S AUXILIARY HALMAT GENERATOR -- VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:47:10.00<br><br> HAL/S AUXILIARY HALMAT GENERATOR ENTERED MARCH 9, 2026.  CLOCK TIME = 9:48:23.27<br><br><br><br> <br>SYMBOL(    2) =    1<br>SYMBOL(    3) =    2<br>SYMBOL(    4) =    3<br>SYMBOL(    5) =    4</font><br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5645,6 +5860,7 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
                 numeric codes for datatypes can be found beginning at
                 punchcard 00150900 in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS1.PROCS/%23%23DRIVER.xpl">HAL/S-FC
+
 
 
 
@@ -5784,8 +6000,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
 
 
 
@@ -5844,10 +6062,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">No </td>
           <td valign="top">No </td>
           <td valign="top"><font color="#009900">Yes</font> </td>
-          <td valign="top">According to documentation, in PASS2's output
-            report this supposedly toggles stack trace (¢9).&nbsp;
-            Whereas PASS2 source code refers to this as toggling
-            "DIAGNOSTICS" but does not explicitly mention the stack.<br>
+          <td valign="top">Same effect as <a moz-do-not-send="true"
+              href="#cent9">¢9</a>. <br>
           </td>
         </tr>
         <tr>
@@ -5859,7 +6075,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">I'm aware of no documentation, but in PASS2
-            source code this toggles "STACK_DUMP"<br>
+            source code this toggles "STACK_DUMP".&nbsp; Here are some
+            differences in PASS2's output report:<br>
+            <blockquote>
+              <pre>PAGE 1<br><br><br>   HAL/S COMPILER PHASE 2  --  VERSION OF MARCH 8, 2026.  CLOCK TIME = 10:47:22.00<br><br>HAL/S PHASE 2 ENTERED MARCH 9, 2026.  CLOCK TIME = 9:58:55.71<br><br><font color="#009900"> N FM  LOC LOC2 TP  B DISP RG IX XS  XC RW CL DL CY VM BR  NX NXI  SC SX S XM<br> 1 18    1    1  1  0    0 -1  0  0   0  1  0  0  0  0 -1   0   0   0  0 0  1<br> N FM  LOC LOC2 TP  B DISP RG IX XS  XC RW CL DL CY VM BR  NX NXI  SC SX S XM<br> 2  5    2    0  2  0    0 -1  0  0   0 10  0  0  0  0 -1   0   0   0  0 0  1<br> 1  1    3    3  2  0    0 -1  0  0   0 20  0  0  0  0 -1   0   0   0  0 0  1,MY_NAME<br>.<br>.<br>.<br>N FM  LOC LOC2 TP  B DISP RG IX XS  XC RW CL DL CY VM BR  NX NXI  SC SX S XM<br> 2  5   -1   -1  6  0    0 -1  0  0   0  1  0  0  0  0 -1   0   0   0  0 0  1<br> 2  5   -1   -1  6  0    0 -1  0  0   0  1  0  0  0  0 -1   0   0   0  0 0  1<br> 1  5   -1    2  6  0    0 -1  0  0   0  1  0  0  0  0 -1   0   0   0  0 0  1<br> 2  3   -1   -1 14  0    0  2  0  0   0  1  0  0  0  0  2   0   0   0  0 0  1<br> 1  8    4    2  2  0    0  2  0  0   0  7  0  0  0  0 -1   0   0   0  0 0  1</font><br><br>.<br>.<br>.<br> <br>END OF HAL/S PHASE 2 MARCH 9, 2026.  CLOCK TIME = 9:58:55.71<br>TOTAL CPU TIME FOR PHASE 2       0:0:0.01<br>CPU TIME FOR PHASE 2 SET UP      0:0:0.00<br>CPU TIME FOR PHASE 2 GENERATION  0:0:0.01<br>CPU TIME FOR PHASE 2 CLEAN UP    0:0:0.00<br></pre>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -5871,7 +6091,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">I'm aware of no documentation, but in PASS2
-            source code this toggles "LITTRACE"<br>
+            source code this toggles "LITTRACE".&nbsp;&nbsp; But
+            LITTRACE seems to have no effect in PASS2 source code, and
+            there are no differences in PASS2's output report.<br>
           </td>
         </tr>
         <tr>
@@ -5883,8 +6105,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="top">No</td>
           <td valign="top"><font color="#009900">Yes</font></td>
           <td valign="top">I'm aware of no documentation, but in PASS2
-            source code this toggles "LITTRACE2"<br>
-          </td>
+            source code this toggles "LITTRACE2".&nbsp;&nbsp; But
+            LITTRACE2 seems to have no effect in PASS2 source code, and
+            there are no differences in PASS2's output report. </td>
         </tr>
         <tr>
           <td valign="top">H(222)<br>
@@ -6007,6 +6230,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass3.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass4.rpt
+
 
 
 
@@ -6269,8 +6493,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               file SOURCECO.xpl of the HAL/S compiler's original source
               code</a>.&nbsp; The lines reading "<font color="#663300"><code>OUTPUT(9)
+
 
 
 
@@ -6339,6 +6565,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
 
 
 
@@ -6548,8 +6775,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         for a full interpretation, because litfile<i>x</i>.bin usually
         contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+
 
 
 
@@ -6755,6 +6984,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -6770,6 +7000,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
 
 
 
@@ -6848,6 +7079,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         Basic assembly-language source code has been ported to the C
         language have bugs that must be fixed.&nbsp; The source code for
         those patch files (patch*.c) are found in the subfolders PASS<i>X</i>.PROCS/,
+
 
 
 
@@ -7017,6 +7249,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -7079,6 +7312,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     the sooner it will be 100% working.<br>
     <br>
     <a moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
+
 
 
 
@@ -7208,8 +7442,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
       litfile0.bin --common COMMON0.out.bin.gz</code> on the <b>yaHALMAT</b>
     command line.&nbsp; Why not?&nbsp; Well, as it happens, those are <b>yaHALMAT</b>'s
+
 
 
 
@@ -7220,6 +7456,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     defaults, so if you're actually emulating halmat.bin they're not
     strictly necessary.&nbsp; <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -7313,6 +7550,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             litfile2.bin --common COMMON2.out.bin.gz</code> is omitted
           when emulating optmat.bin, it'll probably be fine.&nbsp; How
           come?&nbsp; Well, either the OPT or PASS2 passes of the
@@ -7378,6 +7616,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
 
 
+
         They typically contain just fragments of HAL/S code, such as
         macro definitions (HAL/S <font color="#996633"><code>REPLACE</code></font>
         statements) and structure-type definitions (HAL/S <font
@@ -7427,6 +7666,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
 
 
         template and inclusion libraries</a> into known useful states,
@@ -7510,6 +7750,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -7517,6 +7758,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
 
 
 
@@ -7553,6 +7795,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
 
 
 
@@ -7638,6 +7881,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -7655,6 +7899,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
 
 
 
@@ -7803,12 +8048,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
 
 
 
@@ -7943,6 +8190,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             the Compiler Itself</a><br>
         </li>
       </ul>
@@ -7967,6 +8215,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
 
 
 
@@ -8037,6 +8286,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
 
 
 
@@ -8166,6 +8416,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -8175,6 +8426,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
 
 
 
@@ -8265,6 +8517,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
+
 
 
 
@@ -8503,6 +8756,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         At present, modern implementations of PASS3/PASS3B/PASS4 have
         not yet been created, though as you can see from the table
         above, they're not needed merely for compilation of object code.<br>
@@ -8607,10 +8861,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
       decision to create <b>XCOM-I</b>, I had made a similarly-painful
       decision to manually port the source code for PASS1/PASS1B of
       HAL/S-FC into the Python 3 language.&nbsp; The result was a
       working version of PASS1/PASS1B that I call <b>HAL_S_FC</b>.&nbsp;
+
 
 
 
@@ -8724,6 +8980,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
           href="#testHal">as mentioned above</a>), and then to
         extensively compare the results.&nbsp; We have no means at
         present to test subsequent passes of the compiler.&nbsp; <b>Note:</b>&nbsp;
+
         The test requires the <font color="#996633"><code> NOTABLES</code></font>
         compiler option (see the next item).<br>
       </li>
@@ -8732,6 +8989,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         specifies the "PARM field" covered in <a moz-do-not-send="true"
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>--parms="SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
+
 
 
 
@@ -8792,6 +9050,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
             <font color="#996633"><code>--test</code></font>.<br>
           </font> </li>
         <font size="-1"> </font>
@@ -8810,6 +9069,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         <li><font size="-1" color="#663300"><code><i>EXTENSION</i></code></font><font
             size="-1"> is either the literal .exe or else an empty
             string ("").&nbsp; It is functionally the same as <b>HALSFC</b>'s
+
 
 
 
@@ -8864,6 +9124,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       </font></blockquote>
     <p> </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -8950,6 +9211,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
       though the extent to which the result is informative is
       questionable.&nbsp; But there will be more discussion of HALMAT
       later on, if that's something that seems interesting to you.<br>
@@ -8960,6 +9222,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       not by default, so we don't need to look at their reports.&nbsp;
       However, what they do is to "optimize" the HALMAT, producing new
       HALMAT-related files called optmat.bin and auxmat.bin.&nbsp; <b>Note:</b>&nbsp;
+
 
 
 
@@ -9047,6 +9310,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
         Shuttle Model AP-101S Principles of Operation, with Shuttle
         Instruction Set</a>". </p>
     <p>But <i>useful</i> object code is emitted by the PASS/PFS version
@@ -9057,6 +9321,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       AP-101S PASS/PFS object code, it is in the <a
         moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">OS/360
+
 
 
 
@@ -9077,6 +9342,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     Data Set), cards/, which is in PILOT-compatible format.&nbsp; There
     is no surviving information available about PILOT that I'm aware of,
     but fortunately <a moz-do-not-send="true" href="HALLINK101S.html">its
+
 
 
       format has in fact been decoded</a>, or at least mostly so.<br>
@@ -9169,6 +9435,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
           <b>XCOM-I</b>, per the instructions on the XPL/I page</a>.</li>
       <li>(Optional but recommended.)&nbsp; Verify that <b>XCOM-I</b>
         works, by following the instructions appropriate to your
@@ -9221,6 +9488,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -9232,6 +9500,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
 
 
 
@@ -9313,9 +9582,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
           book <i>Programming in HAL/S</i> 2nd edition</a> (or <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20in%20HAL-S.pdf">first
+
 
 
 
@@ -9375,10 +9646,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           files intended to demonstrate capabilities of HAL/S</a>.<br>
       </li>
       <li><a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/Shuttle/19740017615.pdf#page=35">The
+
 
 
 
@@ -9448,6 +9721,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     an IBM System/360 computer as it did, expected that the underlying
     encoding of textual characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
 
 
 
@@ -9645,6 +9919,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>, or <tt>COMPOOL</tt>.&nbsp;
 
 
+
         Separate compilation units are in separate files.&nbsp; Of
         course, definitions of blocks like <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>,
         etc., can be local to another block, so in that sense there can
@@ -9696,6 +9971,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -9709,6 +9985,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
 
 
           variables</i>.&nbsp; Again, don't worry about what those
@@ -9794,10 +10071,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
 
 
 
@@ -9857,6 +10136,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
             assembly language instruction</a> <code>SVC</code>
           (Supervisor Call) wherever it appears. &nbsp; What are the
           legal values of <i><code>N</code></i>?&nbsp; Table 8-1 in the
@@ -9874,6 +10154,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           functionality designed into HAL/S.&nbsp; In other words, most
           or all of what you find in <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=229">Ryer's
+
 
 
 
@@ -9980,6 +10261,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       named <font color="#996633"><code>SOME_PROCEDURE</code></font>.&nbsp;
 
 
+
       It might look something like this in your HAL/S source code:<br>
     </p>
     <blockquote>
@@ -9988,6 +10270,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     <p> </p>
     <p>The line "<font color="#996633"><code>D INCLUDE TEMPLATE
           SOME_PROCEDURE</code></font>" is not a line of HAL/S code <i>per
+
 
 
         se</i>, but is rather a "compiler directive" that tells the
@@ -10005,6 +10288,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
 
 
       internals.<br>
@@ -10080,6 +10364,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     maintained by and for the full version of the HAL/S compiler (<b>HALSFC</b>),
 
 
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -10122,6 +10407,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
 
 
+
       This directive instructs the compiler to insert the entirety of
       the HAL/S source-code file <i><font color="#996633"><code>name</code></font></i>
       at the current point.&nbsp; The distinction, in case it isn't
@@ -10152,6 +10438,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       the files INCLIB.json or INCLIBB.json.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
         Filenames for inclusion files are limited to 8 characters.&nbsp;
@@ -10284,6 +10571,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -10310,6 +10598,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
 
 
 
@@ -10442,6 +10731,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -10465,6 +10755,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
 
 
 
@@ -10549,6 +10840,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
 
 
 
@@ -10732,6 +11024,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -10746,6 +11039,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
 
 
 
@@ -10922,6 +11216,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -10971,9 +11266,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
 
 
 
@@ -11078,6 +11375,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
             data with the <font color="#663300"><code>REMOTE</code></font>
             attribute, which has caused me quite a lot of confusion
             personally, so I'll say a few words about it here.&nbsp;
@@ -11133,6 +11431,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
 
 
 
@@ -11326,6 +11625,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
 
 
 
@@ -11672,6 +11972,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -11721,6 +12022,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
 
 
 
@@ -11980,6 +12282,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             STRPDT we found that 'R' should be replaced by a blank (or '<code>M</code>'),
 
 
+
             whereas in GKPMNV we find that it is instead replaced by '<code>C</code>'
             in some configurations; although admittedly, in the case of
             STRPDT it's difficult to have as much confidence in my
@@ -12007,6 +12310,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
                 words, GKGMNV is compiled with CARDTYPE=ACOCNMRMFCGCHD</li>
             </ul>
             Regarding these extra column-1 characters like '<code>F</code>',
+
 
 
 
@@ -12100,12 +12404,14 @@ href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL
 
 
 
+
                       Language Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
                       href="Shuttle/19760007755.pdf">HAL/SM System
                       Functional Design Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%20Specification.pdf">HAL/SM
+
 
 
 
@@ -12269,6 +12575,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
     <p>This example turns on debugging-aid options D, E, and F.<br>
     </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
 
 
 
@@ -12566,6 +12873,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               production numbers are related to the BNF rules in
               comments in the compiler's source code</a>.&nbsp; For
             example, production number 1 is the <code>&lt;COMPILATION&gt;</code>
@@ -12678,6 +12986,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -12738,6 +13047,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
 
 
 
@@ -13529,6 +13839,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -13630,8 +13941,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
 
 
 
@@ -13773,6 +14086,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass3.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass4.rpt
+
 
 
 
@@ -14035,8 +14349,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               file SOURCECO.xpl of the HAL/S compiler's original source
               code</a>.&nbsp; The lines reading "<font color="#663300"><code>OUTPUT(9)
+
 
 
 
@@ -14105,6 +14421,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
 
 
 
@@ -14314,8 +14631,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         for a full interpretation, because litfile<i>x</i>.bin usually
         contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+
 
 
 
@@ -14521,6 +14840,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -14536,6 +14856,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
 
 
 
@@ -14614,6 +14935,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         Basic assembly-language source code has been ported to the C
         language have bugs that must be fixed.&nbsp; The source code for
         those patch files (patch*.c) are found in the subfolders PASS<i>X</i>.PROCS/,
+
 
 
 
@@ -14783,6 +15105,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -14847,6 +15170,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     the sooner it will be 100% working.<br>
     <br>
     <a moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
+
 
 
 
@@ -14976,8 +15300,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
       litfile0.bin --common COMMON0.out.bin.gz</code> on the <b>yaHALMAT</b>
     command line.&nbsp; Why not?&nbsp; Well, as it happens, those are <b>yaHALMAT</b>'s
+
 
 
 
@@ -14988,6 +15314,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     defaults, so if you're actually emulating halmat.bin they're not
     strictly necessary.&nbsp; <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -15081,6 +15408,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             litfile2.bin --common COMMON2.out.bin.gz</code> is omitted
           when emulating optmat.bin, it'll probably be fine.&nbsp; How
           come?&nbsp; Well, either the OPT or PASS2 passes of the
@@ -15146,6 +15474,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
 
 
+
         They typically contain just fragments of HAL/S code, such as
         macro definitions (HAL/S <font color="#996633"><code>REPLACE</code></font>
         statements) and structure-type definitions (HAL/S <font
@@ -15195,6 +15524,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
 
 
         template and inclusion libraries</a> into known useful states,
@@ -15278,6 +15608,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -15285,6 +15616,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
 
 
 
@@ -15321,6 +15653,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
 
 
 
@@ -15406,6 +15739,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -15423,6 +15757,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
 
 
 
@@ -15571,12 +15906,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
 
 
 
@@ -15647,7 +15984,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-03-08<br>
+          2026-03-09<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
