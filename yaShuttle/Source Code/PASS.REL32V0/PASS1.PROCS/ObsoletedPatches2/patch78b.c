@@ -25,7 +25,7 @@ p78_4: ;
   address360B = (4840) & 0xFFFFFF;
   // Type RX, p. 7-12:		A	1,4840(0,0)
   detailedInlineBefore(79, "A	1,4840(0,0)");
-  scratchd = GR[1] + COREWORD(address360B);
+  scratch = GR[1] + COREWORD(address360B);
   setCC();
   GR[1] = scratch;
   detailedInlineAfter();

@@ -13,6 +13,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
                             functions.
             2024-06-20 RSB  Stuff related to `D DOWNGRADE`
             2026-02-04 RSB  Wasn't --pfs not recognized.
+            2026-03-09 RSB  Allow TABLES compiler option but ignore it.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -238,11 +239,14 @@ for parmNum in range(1, len(sys.argv)):
 # other stuf) that I didn't manage to implement while I was originally 
 # developing HAL_S_FC.
 if "TABLES" in pCON:
+    '''
     print("HAL_S_FC does not presently support the TABLES parameter.", \
           file = sys.stderr)
     print("Please specify NOTABLES in the command-line parameters.", \
           file = sys.stderr)
     sys.exit(1)
+    '''
+    pass # We don't want to abort on TABLES; we want to just ignore it.
 
 '''
 The following code relates to determining and printing out the compiler

@@ -293,7 +293,8 @@ def INITIALIZATION():
     g.LINE_LIM = int(VALS[1]);
     g.LISTING2_COUNT = g.LINE_LIM
     g.LINE_MAX = g.LINE_LIM
-    g.SIMULATING = (g.OPTIONS_CODE() & 0x800) != 0;
+    #g.SIMULATING = (g.OPTIONS_CODE() & 0x800) != 0;
+    g.SIMULATING = 0
     if (g.OPTIONS_CODE() & 0x10) == 0x10:
         g.TPL_FLAG = 0;
     g.SRN_PRESENT = (g.OPTIONS_CODE() & 0x80000) != 0;

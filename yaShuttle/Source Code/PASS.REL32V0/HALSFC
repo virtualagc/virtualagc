@@ -115,16 +115,17 @@ filesLocal = ["LISTING2p.txt", "vmem.bin", "COMMON1.out", "COMMON2.out",
               "COMMON1.gz", "COMMON3.gz", "COMMON4.gz", 
               "COMMON3.out", "COMMON4.out", "auxmat.bin", "objcode.bin",
               "COMMON1.out.bin.gz", "COMMON3.out.bin.gz", 
-              "COMMON4.out.bin.gz", "pass1A.rpt", "pass1pA.rpt", "flo.rpt", 
+              "COMMON4.out.bin.gz", "pass1A.rpt", "pass1pA.rpt", 
               "aux.rpt", "pass3.rpt", "pass4.rpt", "monitor13.parms",
-              "auxp.rpt", "deck.bin", "extra.txt",
+              "deck.bin", "extra.txt",
               "litfile1.bin", "litfile3.bin", "litfile4.bin"]
 filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz", 
                  "litfile0.bin", "litfile2.bin", "COMMON2.out.bin.gzt",
                  "TEMPLIB.json", "TEMPLIB", "FILE1.bin", "FILE2.bin", "LIT_CHAR.bin",
                  "TEMPLIBB.json", "TEMPLIBB", "pass1.rpt", "pass1p.rpt", 
                  "opt.rpt", "pass2.rpt", "cards.bin", "listing2.txt", 
-                 "optmat.bin", "halmat.bin", "FILE3.bin", "icfile.bin"]
+                 "optmat.bin", "halmat.bin", "FILE3.bin", "icfile.bin",
+                 "auxp.rpt", "flo.rpt"]
 for f in filesPorted+filesLocal+filesPreserve:
     if f.startswith("TEMPLIB"):
         continue
@@ -229,6 +230,11 @@ if exitCode != 0:
     else:
         errorExit("Aborted after PASS1")
 shutil.copy("litfile.bin", "litfile0.bin")
+if False:
+    shutil.copy("COMMON0.out", "temp")
+    shutil.copy("halmat.bin", "temp")
+    shutil.copy("litfile.bin", "temp")
+    shutil.copy("vmem.bin", "temp")
 
 # Maybe run PASS1 tests. 
 if test:
@@ -287,6 +293,7 @@ command = '''%s
     --raf=I,1560,2,litfile.bin 
     --raf=B,3360,6,vmem.bin 
     >flo.rpt''' % (FLO, extCOMMON, extCOMMON, ERRORLIB)
+#print(command, file=sys.stderr)
 exitCode = os.system(command.replace("\n", ""))
 if exitCode != 0:
     errorExit("Aborted after FLO")

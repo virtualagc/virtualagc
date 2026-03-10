@@ -9,6 +9,8 @@ Purpose:    This is a module that I hope will be useful to somebody (me!)
             consisting of IBM 360 machine code in XPL source files.
 Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-06-24 RSB  Began.
+            2026-03-10 RSB  Corrected `scratchd` to `scratch` in the `A`
+                            instruction.
 '''
 
 import sys
@@ -505,7 +507,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     elif opcode == 0x58: # L p. 7-77
         thisLine.append(indent + "GR[%d] = COREWORD(address360B);" % R1)
     elif opcode == 0x5A: # A p. 7-12
-        thisLine.append(indent + "scratchd = GR[%d] + COREWORD(address360B);" % R1)
+        thisLine.append(indent + "scratch = GR[%d] + COREWORD(address360B);" % R1)
         thisLine.append(indent + "setCC();")
         thisLine.append(indent + "GR[%d] = scratch;" % R1)
     elif opcode == 0x60: # STD p. 9-11

@@ -23,7 +23,7 @@ p78_4: ;
   // (79)          CALL INLINE("5A",1,0,NODE_H);                                          
   address360B = 4840;
   // Type RX, p. 7-12:		A	1,4840(0,0)
-  scratchd = GR[1] + COREWORD(address360B);
+  scratch = GR[1] + COREWORD(address360B);
   setCC();
   GR[1] = scratch;
 

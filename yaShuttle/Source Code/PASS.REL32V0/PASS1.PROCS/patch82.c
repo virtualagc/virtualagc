@@ -25,7 +25,7 @@ p82_4: ;
   address360B = (mSTABuHDRxNODEuH) & 0xFFFFFF;
   // Type RX, p. 7-12:		A	1,mSTABuHDRxNODEuH(0,0)
   detailedInlineBefore(83, "A	1,mSTABuHDRxNODEuH(0,0)");
-  scratchd = GR[1] + COREWORD(address360B);
+  scratch = GR[1] + COREWORD(address360B);
   setCC();
   GR[1] = scratch;
   detailedInlineAfter();
