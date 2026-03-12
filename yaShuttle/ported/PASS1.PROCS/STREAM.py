@@ -9,6 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Created a stub.
             2023-09-04 RSB  Began porting.
             2024-06-20 RSB  Stuff related to `D DOWNGRADE`
+            2026-03-11 RSB  Fixed namespace of `TOKEN`.
             
 Note that the original of this file was pretty spaghetti-like.  Refer to the
 notes concerning goto_XXXX in SCAN.xpl for an explanation of the workaround
@@ -723,7 +724,7 @@ def STREAM():
                         if ll.NEXT_DIR != 'DOWNGRADE' and ll.NEXT_DIR != 'OWNGRADE':
                             g.INCREMENT_DOWN_STMT = g.FALSE;
                     # ATTACH DOWNGRADE TO CORRECT STATEMENT
-                    if g.INCREMENT_DOWN_STMT and TOKEN == SEMI_COLON:
+                    if g.INCREMENT_DOWN_STMT and g.TOKEN == g.SEMI_COLON:
                         g.DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + str(g.STMT_NUM() + 1), 1));
                     else:
                         g.DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + str(g.STMT_NUM()), 1));

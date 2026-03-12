@@ -13,6 +13,8 @@ History:    2022-12-07 RSB  Suffixed the filename with ".xpl".  Before this
                             This has been repaired.
             2022-12-14 RSB  Changed encoding from ISO 8859-15 (or -1)
                             to UTF-8.
+            2026-03-11 RSB  Imported OUTPUT_WRITER.  Fixed an illegal attempt
+                            at multi-assignment.
 """
 
 from xplBuiltins import *
@@ -25,6 +27,7 @@ from SAVETOKE import SAVE_TOKEN
 from PREPLITE import PREP_LITERAL
 from HALINCL.FINISHMA import FINISH_MACRO_TEXT
 from HALINCL.SPACELIB import NEXT_ELEMENT
+from OUTPUTWR import OUTPUT_WRITER
 
 from STREAM import STREAM
 
@@ -990,7 +993,8 @@ def SCAN():
                         if g.PARM_EXPAN_LEVEL > g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:
                             if g.OLD_PR_PTR < g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]:
                                 g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = g.OLD_PR_PTR;
-                        g.NEW_MEL, g.MACRO_EXPAN_LEVEL = g.OLD_MEL;
+                        g.NEW_MEL = g.OLD_MEL;
+                        g.MACRO_EXPAN_LEVEL = g.OLD_MEL;
                         g.MACRO_FOUND = g.TRUE;
                         g.WAIT = g.FALSE;
                         g.MACRO_POINT = g.OLD_MP;

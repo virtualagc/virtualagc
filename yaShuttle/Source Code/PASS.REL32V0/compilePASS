@@ -36,6 +36,10 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+skip = False
+if "--skip" in sys.argv[1:]:
+    skip = True
+
 if not Path("SSSRC").is_dir():
     print("SSSRC/ not found.")
     sys.exit(1)
@@ -46,10 +50,57 @@ if not Path("APPLSRC").is_dir():
 def descore(s):
     return s.strip().replace("_", "")[:6]
 
+def getParms(template):
+    parmBase = "LIST,SRN,TEMPLATE,CARDTYPE="
+    cardtypesBySourceFile = {
+        "default": "FCRM",
+        "CS2INI" : "ACFCRM",
+        "CS4INI" : "ACFCRM",
+        "CPTOSV" : "ACBDFCRM",
+        "CPUSLS" : "ACBDFCRM",
+        "GKDASC": "AMOCNCRMFDGCHC",
+        "GKRORB": "ACOMNCRCFCGDHC",
+        "GKGMNV": "ACOCNMRMFCGCHD"
+        }
+    stem = template["stem"]
+    if stem in cardtypesBySourceFile:
+        parms = parmBase + cardtypesBySourceFile[stem]
+    else:
+        parms = parmBase + cardtypesBySourceFile["default"]
+    return parms
+
+# Return True if there's a delayable error.
+errorsDelayed = set()
+def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorList):
+    global errorsDelayed
+    returnValue = False
+    try:
+        f = open(passRptFilename, "r")
+        for line in f:
+            for errorType in candidateErrorList:
+                if errorType in line:
+                    stem = template["stem"]
+                    if stem not in errorsDelayed:
+                        errorsDelayed.add(stem)
+                        print(f"     {nameOfPass} {errorType} error in {stem}, compilation delayed.")
+                        returnValue = True
+                        break
+            if returnValue:
+                break
+        f.close()
+    except:
+        try:
+            f.close()
+        except:
+            pass
+    return returnValue
+
 defaultSubdirectory = "."
 compilationCount = 0
-def compile(filename, parms):
+def compile(template):
     global compilationCount
+    filename = template["filename"]
+    parms = getParms(template)
     compilationCount += 1
     fields = filename.split("/")
     if len(fields) == 2:
@@ -60,6 +111,7 @@ def compile(filename, parms):
     else:
         print(f"Specified source-code filename {subfolder}/{filename} is illegal.")
         os._exit(1)
+    result = None
     try:
         print("%3d: Compiling %s/%s ..." % \
               (compilationCount, subfolder, filename))
@@ -70,14 +122,13 @@ def compile(filename, parms):
             text = True,
             check = True
             )
-        #print(f"     Compilation successful.", file=sys.stderr)
-        return result
     except subprocess.CalledProcessError as e:
-        print(f"Failed with exit code {e.returncode}.", 
-              file=sys.stderr)
-        print("STDOUT:", e.stdout)
-        print("STDERR:", e.stderr)
-        os._exit(1)
+        if not checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]) and \
+           not checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
+            print(f"Failed with exit code {e.returncode}.")
+            print("STDOUT:", e.stdout)
+            print("STDERR:", e.stderr)
+            os._exit(1)
 
 # First we have to determine all template dependencies, so we can compile the
 # templates in the correct order.  Assume that all of the template files are in
@@ -234,48 +285,47 @@ print(f"{len(templatesByFilename)} templates in all")
 # which of them can be compiled using just the templates that already exist.
 # keep doing that until either all of the files are compiled, or else no new
 # compilable files are identified.
-print(f"{datetime.now()}: Compiling independent files ...")
-parmBase = "LIST,SRN,TEMPLATE,CARDTYPE="
-cardtypesBySourceFile = {
-    "default": "FCRM",
-    "CS2INI" : "ACFCRM",
-    "CS4INI" : "ACFCRM",
-    "CPTOSV" : "ACBDFCRM",
-    "CPUSLS" : "ACBDFCRM",
-    "GKDASC": "AMOCNCRMFDGCHC",
-    "GKRORB": "ACOMNCRCFCGDHC",
-    "GKGMNV": "ACOCNMRMFCGCHD"
-    
-    }
 removed = set()
-remove = []
-for filename in templatesByFilename:
-    template = templatesByFilename[filename]
-    stem = template["stem"]
-    if stem in cardtypesBySourceFile:
-        parms = parmBase + cardtypesBySourceFile[stem]
-    else:
-        parms = parmBase + cardtypesBySourceFile["default"]
+
+if skip:
+    print(f"{datetime.now()}: Skipping compilation of independent files.")
+else:
+    print(f"{datetime.now()}: Compiling independent files ...")
+    for filename in templatesByFilename:
+        template = templatesByFilename[filename]
+        if len(template["includedFilenames"]) == 0:
+            compile(template)
+for stem in templatesByStem:
+    template = templatesByStem[stem]
     if len(template["includedFilenames"]) == 0:
-        result = compile(filename, parms)
-        remove.append(filename)
-for filename in remove:
-    removed.add(filename)
-    templatesByFilename.pop(filename)
-    
+        templatesByFilename.pop(template["filename"])
+
 print(f"{datetime.now()}: Compiling dependent files ...")
 remove = [0]
 while len(remove) > 0:
     remove = []
+    filesLeft = set(templatesByFilename)
     for filename in templatesByFilename:
         template = templatesByFilename[filename]
+        if template["stem"] in errorsDelayed:
+            continue
         includedFilenames = set(template["includedFilenames"])
-        if includedFilenames.issubset(removed):
-            result = compile(filename, parms)
+        if len(includedFilenames & filesLeft) == 0:
+            compile(template)
             remove.append(filename)
     for filename in remove:
         removed.add(filename)
         templatesByFilename.pop(filename)
+
+print(f"Compilation of {len(errorsDelayed)} files delayed due to ZO3 or PM2 errors:")
+print("     ", errorsDelayed)
+print(f"{datetime.now()}: Compiling delayed files ...")
+for stem in errorsDelayed:
+    template = templatesByStem[stem]
+    filename = template["filename"]
+    compile(template)
+    templatesByFilename.pop(filename)
+
 print(f"Uncompiled files ({len(templatesByFilename)}:")
 print(removed)
 for filename in templatesByFilename:

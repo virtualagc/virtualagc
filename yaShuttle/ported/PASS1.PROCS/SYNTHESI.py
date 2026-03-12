@@ -9,6 +9,10 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-12 RSB  Began porting from XPL
             2023-10-15 RSB  Changed the spaghetti-code workaround mechanism.
             2026-03-08 RSB  Fixed SBIT_NDX namespace bug.
+            2026-03-11 RSB  Fixed loop-variable update outside of loop in 
+                            production 295.  Provided for reading past the
+                            end of the `PCARGBITS[]` array in production 80.
+                            Imported PREC_SCALE.
 
 I realized belatedly that the method I use for handling spaghetti code in all
 of the modules so far -- namely, the use of goto_XXXX variables, one for each
@@ -95,6 +99,7 @@ from MULTIPLY import MULTIPLY_SYNTHESIZE
 from NAMEARRA import NAME_ARRAYNESS
 from NAMECOMP import NAME_COMPARE
 from OUTPUTWR import OUTPUT_WRITER
+from PRECSCAL import PREC_SCALE
 from PROCESS2 import PROCESS_CHECK
 from PUSHFCNS import PUSH_FCN_STACK
 from PUSHINDI import PUSH_INDIRECT
@@ -1435,8 +1440,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 # CHECK PCARGBITS OF THE %MACRO ARGUMENT TO
                 # SEE IF IT REQUIRES NAME CONTEXT CHECKING.
                 # IF SO, SET NAMING FLAG.
-                if ((g.PCARGBITS[g.PCARGOFF[0]] & 0x80) != 0):
-                   g.NAMING = g.TRUE;
+                # Note that g.PCARGOFF[0] will indeed go past the end of 
+                # end of g.PCARGBITS[] sometimes, so we have to provide for 
+                # that.  In the one case I've traced through, it reads 256
+                # past the end of the array.
+                if g.PCARGOFF[0] < len(g.PCARGBITS):
+                    if ((g.PCARGBITS[g.PCARGOFF[0]] & 0x80) != 0):
+                       g.NAMING = g.TRUE;
                 
             g.PCARGp[0] = g.PCARGp[0] - 1;
             g.ALT_PCARGp[0] = g.ALT_PCARGp[0] - 1;
@@ -1503,9 +1513,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <BIT CAT> ::= <NOT> <BIT PRIM>
         if BIT_LITERAL(g.SP, 0): 
             g.TEMP = g.PSEUDO_LENGTH[g.PTR[g.SP]];
-            g.TEMP2 = SHL(g.FIXV[g.SP], HOST_BIT_LENGTH_LIM - g.TEMP);
+            g.TEMP2 = SHL(g.FIXV[g.SP], g.HOST_BIT_LENGTH_LIM - g.TEMP);
             g.TEMP2 = not g.TEMP2;
-            g.TEMP2 = SHR(g.TEMP2, HOST_BIT_LENGTH_LIM - g.TEMP);
+            g.TEMP2 = SHR(g.TEMP2, g.HOST_BIT_LENGTH_LIM - g.TEMP);
             g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(2, g.TEMP2, g.TEMP);
         else:
             HALMAT_TUPLE(g.XBNOT, 0, g.SP, 0, g.INX[g.PTR[g.SP]]);
@@ -3290,11 +3300,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.VAR[g.MP] = g.VAR[g.SP];
     elif PRODUCTION_NUMBER == 433:  # reference 4330
         # <TERMINATOR>::= TERMINATE
-        g.FIXL[g.MP] = XTERM;
+        g.FIXL[g.MP] = g.XTERM;
         g.FIXV[g.MP] = 0xE000;
     elif PRODUCTION_NUMBER == 434:  # reference 4340
         # <TERMINATOR>::= CANCEL
-        g.FIXL[g.MP] = XCANC;
+        g.FIXL[g.MP] = g.XCANC;
         g.FIXV[g.MP] = 0xA000;
     elif PRODUCTION_NUMBER == 435:  # reference 4350
         #  <TERMINATE LIST>  ::=  <LABEL VAR>
@@ -4812,7 +4822,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         if g.SYT_CLASS(g.J) < g.REPL_ARG_CLASS:
                             ERROR(d.CLASS_DU, 3, g.SYT_NAME(g.J));
                             g.SYT_FLAGS(g.J, g.SYT_FLAGS(g.J) | g.DUMMY_FLAG);
-                    g.J = g.J + 1;
+                        g.J = g.J + 1;
         if g.EXTERNALIZE & 1: 
             g.EXTERNALIZE = 4;
         g.PTR[g.MP] = 0;
