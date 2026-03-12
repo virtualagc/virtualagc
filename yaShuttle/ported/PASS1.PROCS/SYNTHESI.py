@@ -2067,7 +2067,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.TEMP = 0;
             else:
                 g.TEMP = MAKE_FIXED_LIT(g.LOC_P[g.PTR[g.MP]]);
-            if (g.TEMP < 1) or (g.TEMP > LIST_EXP_LIM): 
+            if (g.TEMP < 1) or (g.TEMP > g.LIST_EXP_LIM): 
                 g.TEMP = 1;
                 ERROR(d.CLASS_EL, 2);
             g.INX[g.PTR[g.MP]] = g.TEMP;

@@ -6,6 +6,7 @@
    Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-22 RSB  Ported from XPL.
+               2026-03-12 RSB  Imported HALMAT_PIP
 """
 
 from xplBuiltins import *
@@ -16,6 +17,7 @@ from ERROR    import ERROR
 from GETFCNPA import GET_FCN_PARM
 from EMITARRA import EMIT_ARRAYNESS
 from HALMATF3 import HALMAT_FIX_PIPTAGS
+from HALMATPI import HALMAT_PIP
 from HALMATTU import HALMAT_TUPLE
 from KILLNAME import KILL_NAME
 from RESETARR import RESET_ARRAYNESS
