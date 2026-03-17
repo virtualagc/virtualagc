@@ -5,6 +5,9 @@
    Purpose:    This is a part of the HAL/S-FC compiler program.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-30 RSB  Ported from XPL.
+               2026-03-12 RSB  Fixed namespace of SYT_LOCKp.
+               2026-03-13 RSB  Changed implementation of `G` persistence, but
+                               it shouldn't make any difference.
 """
 
 from xplBuiltins import *
@@ -79,10 +82,15 @@ from STRUCTUR import STRUCTURE_COMPARE
 #          SYNTHESIZE
 #*************************************************************************
 
+class cNAME_COMPARE:
+    def __init__(self):
+        self.G = g.TRUE
+l = cNAME_COMPARE()
+
 NAME_MASK = 0x00C20000;
 
 
-def NAME_COMPARE(LOC1, LOC2, R_CLASS, R_NO, G=g.TRUE):
+def NAME_COMPARE(LOC1, LOC2, R_CLASS, R_NO, G=l.G):
     # Note that although TRUE by default, G is BIT(16) not BIT(1).
     # Locals: QQ, C1, C2, F1, F2, NAME_MASK, VAR_1_FLAGS, VAR_2_FLAGS, ST_R_NO.
     
@@ -140,8 +148,8 @@ def NAME_COMPARE(LOC1, LOC2, R_CLASS, R_NO, G=g.TRUE):
         if g.FIXV[LOC1] != 0: C1 = g.FIXV[LOC1];
         if g.FIXV[LOC2] != 0: C2 = g.FIXV[LOC2];
         if (g.SYT_FLAGS(C1) & g.LOCK_FLAG) != (g.SYT_FLAGS(C2) & g.LOCK_FLAG): R_NO = 0;
-        elif (g.SYT_FLAGS(C1) & g.LOCK_FLAG) != 0:  # DO
-            if SYT_LOCKp(C1) != SYT_LOCKp(C2): 
+        elif (g.SYT_FLAGS(C1) & g.LOCK_FLAG) != 0:  # DO  Note LOCK_FLAG = 1.
+            if g.SYT_LOCKp(C1) != g.SYT_LOCKp(C2): 
                 R_NO = 0;
         # END
         if R_NO == 0: ERROR(R_CLASS, 0);
@@ -149,5 +157,5 @@ def NAME_COMPARE(LOC1, LOC2, R_CLASS, R_NO, G=g.TRUE):
     for QQ in range(1, QQ + 1):
         RESET_ARRAYNESS();
     # END
-    G = g.TRUE;
+    l.G = g.TRUE;
 # END NAME_COMPARE;

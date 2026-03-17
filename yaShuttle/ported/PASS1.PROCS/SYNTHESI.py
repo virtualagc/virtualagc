@@ -13,6 +13,8 @@ History:    2023-09-12 RSB  Began porting from XPL
                             production 295.  Provided for reading past the
                             end of the `PCARGBITS[]` array in production 80.
                             Imported PREC_SCALE.
+            2026-03-11 RSB  Corrected some porting errors in productions 136
+                            and 137.
 
 I realized belatedly that the method I use for handling spaghetti code in all
 of the modules so far -- namely, the use of goto_XXXX variables, one for each
@@ -586,9 +588,25 @@ class cSYNTHESIZE:
 
 lSYNTHESIZE = cSYNTHESIZE()
 
+productionCount = 0
+def productionTrace(PRODUCTION_NUMBER):
+    global productionCount
+    productionCount += 1
+    #print(f"productionTrace {'%5d' % productionCount}: {'%3d' % PRODUCTION_NUMBER}|{'%04X' % g.STMT_TYPE}|{g.AS_PTR}|", end="")
+    print(f"productionTrace {'%5d' % productionCount}: {'%3d' % PRODUCTION_NUMBER}|{g.AS_PTR}|", end="")
+    print(f"{g.ARRAYNESS_STACK[0]},{g.ARRAYNESS_STACK[1]},{g.ARRAYNESS_STACK[2]},{g.ARRAYNESS_STACK[3]},{g.ARRAYNESS_STACK[4]},{g.ARRAYNESS_STACK[5]},{g.ARRAYNESS_STACK[6]},{g.ARRAYNESS_STACK[7]},{g.ARRAYNESS_STACK[8]},{g.ARRAYNESS_STACK[9]}|", end="")
+    print(f"{g.CURRENT_ARRAYNESS[0]},{g.CURRENT_ARRAYNESS[1]},{g.CURRENT_ARRAYNESS[2]},{g.CURRENT_ARRAYNESS[3]},{g.CURRENT_ARRAYNESS[4]}|", end="")
+    print(f"{g.VAR_ARRAYNESS[0]},{g.VAR_ARRAYNESS[1]},{g.VAR_ARRAYNESS[2]},{g.VAR_ARRAYNESS[3]},{g.VAR_ARRAYNESS[4]}", end="")
+    print()
+    if productionCount == g.productionTrigger:
+        pass
+        pass
 
 def SYNTHESIZE(PRODUCTION_NUMBER):
     l = lSYNTHESIZE  # Local variables.
+    
+    if g.rsbTrace:
+        productionTrace(PRODUCTION_NUMBER)
         
     def SET_INIT(A, B, C, D, E):
         # Local Q doesn't need to be persistent
@@ -1698,7 +1716,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <ASSIGNMENT>::=<VARIABLE>,<ASSIGNMENT>
         HALMAT_PIP(g.LOC_P[g.PTR[g.MP]], g.PSEUDO_FORM[g.PTR[g.MP]], 0, 0);
         g.INX[g.PTR[g.SP]] = g.INX[g.PTR[g.SP]] + 1;
-        if g.NAME_PSEUDOS: 
+        if (g.NAME_PSEUDOS & 1) != 0: 
             NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5, 0);
             if COPINESS(g.MP, g.SP) > 0: 
                 ERROR(d.CLASS_AA, 2, g.VAR[g.MP]);
@@ -2371,7 +2389,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "SHARP_EXP"
     elif PRODUCTION_NUMBER == 248:  # reference 2480
         # <=1> ::= =
-        if g.ARRAYNESS_FLAG: 
+        if (g.ARRAYNESS_FLAG & 1) != 0: 
             SAVE_ARRAYNESS();
         g.ARRAYNESS_FLAG = 0;
     # reference 2490 relocated.
@@ -2852,7 +2870,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 342:  # reference 3420
         #  <TEMPORARY STMT>  ::=  TEMPORARY  <DECLARE BODY>  ;
         if 0 != (g.SIMULATING & 1): 
-            g.STMT_TYPE = TEMP_TYPE;
+            g.STMT_TYPE = c19.TEMP_TYPE;
         STAB_HDR();
         goto = "DECL_STAT"
     # reference 3430 relocated
@@ -3903,7 +3921,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 if COPINESS(g.MP, g.SP) > 2: 
                     ERROR(d.CLASS_AA, 1);
                 goto = "END_ASSIGN"
-            else:
+            if goto == None:
                 if RESET_ARRAYNESS() > 2: 
                     ERROR(d.CLASS_AA, 1);
                 HALMAT_TUPLE(g.XXASN[g.PSEUDO_TYPE[g.PTR[g.SP]]], \
@@ -4397,7 +4415,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             HALMAT_PIP(g.FIXL[g.MP - 1], g.XSYT, 0, 0);
         g.NAMING = g.FALSE;
         if g.SUBSCRIPT_LEVEL == 0:
-            if g.ARRAYNESS_FLAG: 
+            if (g.ARRAYNESS_FLAG & 1) != 0: 
                 SAVE_ARRAYNESS();
             g.SAVE_ARRAYNESS_FLAG = g.ARRAYNESS_FLAG;
             g.ARRAYNESS_FLAG = 0;

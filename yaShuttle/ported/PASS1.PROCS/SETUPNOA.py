@@ -6,6 +6,8 @@ Purpose:    This is a part of the HAL/g.S-FC compiler program.
 Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-10-10 RSB  Ported.
+            2026-03-12 RSB  Imported `SAVE_LITERAL`.  Added qualifier `& 1`
+                            for test of CLASS_XS type 1 error.
 '''
 
 from xplBuiltins import *
@@ -21,6 +23,7 @@ from SETUPVAC import SETUP_VAC
 from SETXREFR import SET_XREF_RORS
 from STRUCTU2 import STRUCTURE_FCN
 from UPDATEBL import UPDATE_BLOCK_CHECK
+from HALINCL.SAVELITE import SAVE_LITERAL
 
 #*************************************************************************
 # PROCEDURE NAME:  SETUP_NO_ARG_FCN
@@ -123,7 +126,7 @@ def SETUP_NO_ARG_FCN(optional_PSEUDO_PREC=None):
             g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
         else: 
-            if g.BI_FLAGS[0]: 
+            if g.BI_FLAGS[0] & 1: 
                 ERROR(d.CLASS_XS, 1, \
                       SUBSTR(g.BI_NAME[g.BI_INDX[g.FIXL[g.MP]]], \
                              g.BI_LOC[g.FIXL[g.MP]], 10));

@@ -6,7 +6,11 @@ Purpose:    This is a part of the HAL/g.S-FC compiler program.
 Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-10-10 RSB  Ported
+            2026-03-12 RSB  Wasn't importing g.py; was using non-existent
+                            `double()` function.
 '''
+
+import g
 
 #*************************************************************************
 # PROCEDURE NAME:  FLOATING
@@ -38,5 +42,5 @@ We have no use for that nonsense, as our implementation of MONITOR(9,...)
 expects simply to find a full floating-point value in DW[0] (ignoring DW[1]).
 '''
 def FLOATING(VAL):
-    g.DW[0] = double(VAL)
+    g.DW[0] = float(VAL)
 # END FLOATING;

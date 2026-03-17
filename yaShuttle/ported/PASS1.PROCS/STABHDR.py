@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-16 RSB  Ported from XPL
+            2026-03-15 RSB  Now sets STMT_TYPE to 0.
 '''
 
 from xplBuiltins import *
@@ -158,4 +159,4 @@ def STAB_HDR():
     STMT_TYPE=0;
 
     '''
-    
+    g.STMT_TYPE = 0;

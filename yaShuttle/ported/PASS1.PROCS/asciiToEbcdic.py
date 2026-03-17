@@ -12,6 +12,8 @@ Mods:       2024-04-27 RSB  Began
             2024-05-02 RSB  Added standalone mode for interconverting *.xpl, 
                             *.bal, and *.hal files among the encodings 
                             ASCII, UTF-8, and EBCDIC. 
+            2026-03-12 RSB  os.makedirs() returns no value, but we were trying
+                            to capture one anyway.
 
 I had perfectly satisfactorily (I thought!) been using the string method
 `encode` for this conversion, a la
@@ -336,7 +338,7 @@ if __name__ == "__main__":
             convert(file, to=sys.stdout)
         sys.exit(0)
     try:
-        outf = os.makedirs(folder)
+        os.makedirs(folder)
     except:
         print("The output folder %s already exists. Remove it first." % folder)
         print("Aborting ...")

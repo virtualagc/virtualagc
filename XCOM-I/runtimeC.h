@@ -182,6 +182,11 @@ checkoutPASS2(void);
 
 #endif // DEBUGGING_AID
 
+extern int productionTrigger;
+extern int productionCount;
+void
+productionTrace(int PRODUCTION_NUMBER);
+
 int
 guardReentry(int reentryGuard, char *functionName);
 

@@ -5,6 +5,7 @@
    Purpose:    This is a part of the HAL/S-FC compiler program.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-28 RSB  Ported from XPL.
+               2026-03-13 RSB  Added input devices 8 and 9 to search list.
 """
 
 from xplBuiltins import *
@@ -40,7 +41,7 @@ from ERROR import ERROR
 
 MAXLIBFILES = 3
 # SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES
-FILENUM = (0x80000008, 0x4, 0x80000006, 0x8)
+FILENUM = (0x80000008, 0x4, 0x80000006, 0x8, 0x9)
 # TRUE IF DD STATEMENT MISSING
 # In other words, PDS files that can actually be opened whould be g.FALSE in the 
 # following list.

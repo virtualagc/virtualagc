@@ -6,6 +6,7 @@
    Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2024-06-05 RSB  Ported to XPL
+               2026-03-12 RSB  Fixed d.TEMP -> g.TEMP.
 """
 
 from xplBuiltins import *
@@ -84,7 +85,7 @@ def END_SUBBIT_FCN(T = 0):
       g.NEXT_SUB = g.PTR[g.MP];
       if (SHL(1,g.PSEUDO_TYPE[g.TEMP]) & g.STRING_MASK) == 0: #  DO;
           ERROR(d.CLASS_QX,8);
-          g.PSEUDO_TYPE[d.TEMP] = g.INT_TYPE;
+          g.PSEUDO_TYPE[g.TEMP] = g.INT_TYPE;
       # END;
       g.IND_LINK = 0
       g.PSEUDO_LENGTH[0] = 0;

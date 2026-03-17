@@ -92,14 +92,17 @@ def PRINT_COMMENT(PRINT, l, CURRENT_DIR=''):
             g.LINE_MAX = g.LINE_LIM;
             C = g.PAGE;
         l.I = 100 - g.TEXT_LIMIT[0];
+        currentCard = g.CURRENT_CARD
+        if currentCard.startswith("D VERSION "):
+            currentCard = currentCard[:10] + " " + currentCard[10:]
         # MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF
         # THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.
         if 0 != (1 & g.SDL_OPTION):
             g.S = FORMAT_CHAR + SUBSTR(T, 0, 2) + FORMAT_CHAR + g.SAVE_SCOPE;
         else:
             g.S = FORMAT_CHAR + g.SAVE_SCOPE;
-        g.S = SUBSTR(g.CURRENT_CARD, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, l.I) + g.S;
-        OUTPUT(1, C + R + g.INCLUDE_CHAR + SUBSTR(g.CURRENT_CARD, 0, 1) + g.VBAR + g.S);
+        g.S = SUBSTR(currentCard, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, l.I) + g.S;
+        OUTPUT(1, C + R + g.INCLUDE_CHAR + SUBSTR(currentCard, 0, 1) + g.VBAR + g.S);
     g.NEXT_CC = ' ';
     '''
     Since CURRENT_DIR is a parameter of the procedure, the commented-out line 

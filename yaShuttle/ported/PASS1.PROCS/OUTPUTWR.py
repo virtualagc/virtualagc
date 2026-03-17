@@ -21,6 +21,8 @@ History:    2023-08-25 RSB  Created place-holder file.
                                     2   -
                                 D= C  + V ;
                                          2
+            2026-03-12 RSB  Widened scope of `COMMENT_BRACKET()`.  Fixed usage
+                            of `g.TX[...]`, from `TX(...)`.
 '''
 
 from xplBuiltins import *
@@ -554,9 +556,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                     ADD(SUBSTR(g.S, g.J, g.I - g.J));
                                 for g.L in range(0, (SHR(g.TRANS_OUT[BYTE(g.S, g.I)], 8) \
                                                     & 0xFF) + 1):
-                                    ADD(STRING[ADDR(g.ESCP)]);
+                                    ADD(STRING(ADDR(g.ESCP)));
                                 # END
-                                ADD(STRING[ADDR(g.TRANS_OUT[BYTE(g.S, g.I)]) + 1]);
+                                ADD(STRING(ADDR(g.TRANS_OUT[BYTE(g.S, g.I)]) + 1));
                                 g.I = g.I + 1;
                                 g.J = g.I
                             # END
@@ -602,51 +604,56 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         nonlocal onEntry # Used only by debug() function.
         ll = lEXPAND
         
+        '''
+        Something goofy is going on with PTR in the following
+        procedure.  The original XPL (within COMMENT_BRACKET) for PTR
+        reads:
+            DECLARE STRING CHARACTER, (LOC, I, J, PTR) BIT(16);
+        However, in its first use,
+            DO I = PTR TO MIN(PTR + NUM, COMMENT_COUNT);
+        it has not yet been assigned a value.  Due to persistence, it
+        is assigned a value later on in COMMENT_BRACKET, and will 
+        retain that value on the next call to COMMENT_BRACKET, but is
+        definitely unassigned in the first call.  There doesn't seem to
+        be any choice other than to initialize it to *some* value,
+        and the likely candidate would be 0.
+        
+        And there's another peculiar thing:  The loop just mentioned is 
+        sometimes empty.  So what's the index I suppose to be afterward?
+        My assumption is that it's just the starting value.
+        '''
+        def COMMENT_BRACKET(STRING, LOC):
+            # Take care with LOC and locals I, J for potential 
+            # namespace conflicts.
+            lll = lCOMMENT_BRACKET
+            
+            STRING = BYTE(STRING, LOC, BYTE('/'));
+            STRING = BYTE(STRING, LOC + 1, BYTE('*'));
+            LOC = LOC + 2;
+            I = lll.PTR - 1
+            for I in range(lll.PTR, MIN(lll.PTR + ll.NUM, g.COMMENT_COUNT) + 1):
+                J = BYTE(g.SAVE_COMMENT, I);
+                STRING = BYTE(STRING, LOC, J);
+                LOC = LOC + 1;
+            # END
+            I += 1  # Terminal value of for-loop differs for XPL vs Python.
+            STRING = BYTE(STRING, LOC, BYTE('*'));
+            STRING = BYTE(STRING, LOC + 1, BYTE('/'));
+            lll.PTR = I;
+            ll.NUM = MIN(ll.NUM, g.COMMENT_COUNT - lll.PTR + 1);
+            if ll.NUM <= 0:
+            # DO;
+                lll.PTR = 0;
+                g.COMMENT_COUNT = -1;
+            # END
+            return STRING
+        # END COMMENT_BRACKET;
+                
         if (g.GRAMMAR_FLAGS(PTR) & g.STMT_END_FLAG) != 0:
             if g.COMMENT_COUNT >= 0:
             # DO;
                 g.COMMENT_COUNT = MIN(g.COMMENT_COUNT, 255);
     
-                '''
-                Something goofy is going on with PTR in the following
-                procedure.  The original XPL (within COMMENT_BRACKET) for PTR
-                reads:
-                    DECLARE STRING CHARACTER, (LOC, I, J, PTR) BIT(16);
-                However, in its first use,
-                    DO I = PTR TO MIN(PTR + NUM, COMMENT_COUNT);
-                it has not yet been assigned a value.  Due to persistence, it
-                is assigned a value later on in COMMENT_BRACKET, and will 
-                retain that value on the next call to COMMENT_BRACKET, but is
-                definitely unassigned in the first call.  There doesn't seem to
-                be any choice other than to initialize it to *some* value,
-                and the likely candidate would be 0.
-                '''
-                def COMMENT_BRACKET(STRING, LOC):
-                    # Take care with LOC and locals I, J for potential 
-                    # namespace conflicts.
-                    lll = lCOMMENT_BRACKET
-                    
-                    STRING = BYTE(STRING, LOC, BYTE('/'));
-                    STRING = BYTE(STRING, LOC + 1, BYTE('*'));
-                    LOC = LOC + 2;
-                    for I in range(lll.PTR, MIN(lll.PTR + ll.NUM, g.COMMENT_COUNT) + 1):
-                        J = BYTE(g.SAVE_COMMENT, I);
-                        STRING = BYTE(STRING, LOC, J);
-                        LOC = LOC + 1;
-                    # END
-                    I += 1  # Terminal value of for-loop differs for XPL vs Python.
-                    STRING = BYTE(STRING, LOC, BYTE('*'));
-                    STRING = BYTE(STRING, LOC + 1, BYTE('/'));
-                    lll.PTR = I;
-                    ll.NUM = MIN(ll.NUM, g.COMMENT_COUNT - lll.PTR + 1);
-                    if ll.NUM <= 0:
-                    # DO;
-                        lll.PTR = 0;
-                        g.COMMENT_COUNT = -1;
-                    # END
-                    return STRING
-                # END COMMENT_BRACKET;
-                
                 g.COMMENT_COUNT = MIN(g.COMMENT_COUNT, 255);
                 g.I = g.COMMENT_COUNT;
                 while BYTE(g.SAVE_COMMENT, g.COMMENT_COUNT) == BYTE(g.X1):
@@ -1063,8 +1070,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 if g.STMT_STACK[l.SUB_END[0] + 1] == g.DOLLAR:
                                     if (l.SUB_END[0] - l.SUB_START[0]) > 2:
                                     # DO;
-                                        g.STMT_STACK[l.SUB_START[0]] = TX(BYTE('('));
-                                        g.STMT_STACK[l.SUB_END[0]] = TX(BYTE(')'));
+                                        g.STMT_STACK[l.SUB_START[0]] = g.TX[BYTE('(')];
+                                        g.STMT_STACK[l.SUB_END[0]] = g.TX[BYTE(')')];
                                     # END
                         # END
                         else:
@@ -1097,8 +1104,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 if g.STMT_STACK[l.EXP_END[0] + 1] == g.EXPONENTIATE:
                                     if (l.EXP_END[0] - l.EXP_START[0]) > 2:
                                     # DO;
-                                        g.STMT_STACK[l.EXP_START[0]] = TX(BYTE('('));
-                                        g.STMT_STACK[l.EXP_END[0]] = TX(BYTE(')'));
+                                        g.STMT_STACK[l.EXP_START[0]] = g.TX[BYTE('(')];
+                                        g.STMT_STACK[l.EXP_END[0]] = g.TX[BYTE(')')];
                                     # END
                         # END
                         else:
@@ -1178,9 +1185,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     if (l.SUB_END[l.S_LEVEL] - l.SUB_START[l.S_LEVEL]) > 2:
                                                     # DO;
                                                         g.STMT_STACK[l.SUB_START[l.S_LEVEL]] = \
-                                                            TX(BYTE('('));
+                                                            g.TX[BYTE('(')];
                                                         g.STMT_STACK[l.SUB_END[l.S_LEVEL]] = \
-                                                            TX(BYTE(')'));
+                                                            g.TX[BYTE(')')];
                                                     # END
                                         # END
                                         else:
@@ -1328,9 +1335,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                             l.EXP_START[l.E_LEVEL]) > 2:
                                                     # DO;
                                                         g.STMT_STACK[l.EXP_START[l.E_LEVEL]] = \
-                                                            TX(BYTE('('));
+                                                            g.TX[BYTE('(')];
                                                         g.STMT_STACK[l.EXP_END[l.E_LEVEL]] = \
-                                                            TX(BYTE(')'));
+                                                            g.TX[BYTE(')')];
                                                     # END
                                         # END
                                         else:

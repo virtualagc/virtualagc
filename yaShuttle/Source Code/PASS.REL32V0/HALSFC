@@ -61,6 +61,7 @@ The available OPTIONS are:
                     Windows, but it can be done on Linux or MacOS as well if
                     the Windows version of HAL/S-FC is installed and if the
                     WINE package is installed for running Windows executables.
+    --rsb-trace=N   Activate my production trace, if available.
 
 '''
 
@@ -71,6 +72,7 @@ force = False
 parmString = ""
 bfs = False
 ext = ""
+rsbTrace = ""
 extCOMMON = ".out"
 if isWindows:
     ext = ".exe"
@@ -85,6 +87,8 @@ for parm in sys.argv[1:]:
         bfs = True
     elif parm == "--exe":
         ext = ".exe"
+    elif parm.startswith("--rsb-trace="):
+        rsbTrace = parm
     elif not parm.startswith("-"):
         if halsFile != None:
             print("Multiple HAL/S files specified")
@@ -117,7 +121,7 @@ filesLocal = ["LISTING2p.txt", "vmem.bin", "COMMON1.out", "COMMON2.out",
               "COMMON1.out.bin.gz", "COMMON3.out.bin.gz", 
               "COMMON4.out.bin.gz", "pass1A.rpt", "pass1pA.rpt", 
               "aux.rpt", "pass3.rpt", "pass4.rpt", "monitor13.parms",
-              "deck.bin", "extra.txt",
+              "deck.bin", "extra.txt", "&&TEMPINC",
               "litfile1.bin", "litfile3.bin", "litfile4.bin"]
 filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz", 
                  "litfile0.bin", "litfile2.bin", "COMMON2.out.bin.gzt",
@@ -182,6 +186,7 @@ if bfs:
     PASS4 = "HALSFC-PASS4" + ext
     TEMPLIB = "TEMPLIBB"
     INCLIB = "INCLIBB"
+    INCLIB2 = "&&TEMPINC"
     CARDS = "--pdso=3,cards,E"
     TARGET = "--bfs"
 else:
@@ -194,6 +199,7 @@ else:
     PASS4 = "HALSFC-PASS4" + ext
     TEMPLIB = "TEMPLIB"
     INCLIB = "INCLIB"
+    INCLIB2 = "&&TEMPINC"
     CARDS = "--ddo=3,cards.bin,E"
     TARGET = "--pfs"
 
@@ -214,12 +220,16 @@ command ='''%s
     --pdsi=6,ACCESS  
     --pdso=6,%s,E 
     --pdsi=8,%s,E
+    --pdso=8,"%s",E
+    --pdsi=9,"%s",E
     --commono=COMMON0%s 
     --raf=O,7200,1,halmat.bin 
     --raf=B,1560,2,litfile.bin 
     --raf=B,1600,3,icfile.bin
     --raf=B,3360,6,vmem.bin 
-    >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, INCLIB, extCOMMON)
+    %s
+    >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, 
+                     INCLIB, INCLIB2, INCLIB2, extCOMMON, rsbTrace)
 #print(f"Here {command}", file=sys.stderr)
 exitCode = os.system(command.replace("\n", ""))
 pendingFailure = None
@@ -252,19 +262,26 @@ if test:
     ported=Path(ported).parent
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
-    command = 'python "%s" %s %s --templib --hal="%s" >pass1p.rpt' \
-                         % (fullPath, TARGET, parmString.replace(",", " "), halsFile)
+    command = 'python "%s" %s %s %s --templib --hal="%s" >pass1p.rpt' \
+                         % (fullPath, TARGET, parmString.replace(",", " "), rsbTrace, halsFile)
     #print(command)
     exitCode = os.system(command)
     if exitCode:
-        errorExit("Failed PASS1 cross-comparison test")
+        if force:
+            if pendingFailure == None:
+                pendingFailure = ""
+            else:
+                pendingFailure += ", "
+            pendingFailure += "HAL_S_FC.py failure"
+        else:
+            errorExit("Failed PASS1 cross-comparison test")
     print("PASS1 cross-comparison test:")
     for n in filesPorted:
         try:
             shutil.copy(os.path.join(ported, n), n)
         except:
             pass
-    IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION|^REALLOCATIONS)'
+    IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION|^REALLOCATIONS|^ *$|SRN STMT|^.[-]+$)'
     os.system('egrep -v "%s" pass1.rpt >pass1A.rpt' % IGNORE_LINES)
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
     os.system('diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt')

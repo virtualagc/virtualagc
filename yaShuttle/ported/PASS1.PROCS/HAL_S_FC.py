@@ -17,6 +17,7 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
                             name for a Python module (and all Python
                             scripts are Python modules).
             2026-03-07 RSB  Added the inclusion library as INPUT(8).
+            2026-03-13 RSB  Added temporary inclusion library as INPUT(9)
 
  /***************************************************************************/
  /* PROCEDURE NAME:  MAIN PROGRAM                                           */
@@ -144,9 +145,10 @@ if "--help" not in sys.argv:
     if templib: # In permanent template library.
         outputDevices[6] = inputDevices[4]
     else:       # In temporary template library.
-        outputDevices[6] = openGenericOutputDevice("&&TEMPLIB.json", True)
+        outputDevices[6] = openGenericOutputDevice("&&TEMPLIB.json", isPDS=True)
     # Temporary includes.
-    outputDevices[8] = openGenericOutputDevice("&&TEMPINC.json", True)
+    outputDevices[8] = openGenericOutputDevice("&&TEMPINC.json", isPDS=True)
+    inputDevices[9] = openGenericInputDevice("&&TEMPINC.json", isPDS=True)
     # Source-comparision output.
     outputDevices[9] = openGenericOutputDevice("SOURCECO.txt")
 ####################################################################

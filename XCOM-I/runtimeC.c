@@ -47,6 +47,11 @@
  *                              a member existed or not.  This has been fixed
  *                              to close the now-open member only after it had
  *                              been verified that the new member existed.
+ *              2026-03-13 RSB  The change of 2026-02-03 above claims to pad
+ *                              `OUTPUT` records to the exact record size.
+ *                              If so, I see no hint of it in either the code
+ *                              or the actual behavior.  At any rate, it's
+ *                              more subtle than I thought.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -141,6 +146,49 @@
 #else
 //#define SET_BINARY_MODE(file)
 #endif
+
+// The idea of `productionTrace()` is that it can be conditionally inserted at
+// entry to `SYNTHESIZE()` and can be used to print out any useful messages.
+// If there's an identically-matching function in HAL_S_FC.py's SYNTHESIZE.py,
+// then messages can be compare to see where HALSFC-PASS1 and HAL_S_FC.py are
+// disagree.
+int productionTrigger = -1;
+int productionCount = 0;
+void __attribute__ ((no_instrument_function))
+productionTrace(int PRODUCTION_NUMBER) {
+#if defined(RSB_TRACE) && defined(mSTMTuTYPE) && defined(mASuPTR) && \
+  defined(mARRAYNESSuSTACK) && defined(mVARuARRAYNESS) && \
+  defined(mCURRENTuARRAYNESS) && defined(mSYNTHESIZExPRODUCTIONuNUMBER)
+  int i;
+  if (productionTrigger < 0)
+    return;
+  productionCount++;
+  printf("productionTrace %5d: %3d|", productionCount, PRODUCTION_NUMBER);
+  //printf("%04X|", COREHALFWORD(mSTMTuTYPE));
+  printf("%d|", COREHALFWORD(mASuPTR));
+  for (i = 0; i < 10; i++)
+    {
+      if (i != 0) printf(",");
+      printf("%d", COREHALFWORD(mARRAYNESSuSTACK + 2 * i));
+    }
+  printf("|");
+  for (i = 0; i < 5; i++)
+    {
+      if (i != 0) printf(",");
+      printf("%d", COREHALFWORD(mCURRENTuARRAYNESS + 2 * i));
+    }
+  printf("|");
+  for (i = 0; i < 5; i++)
+    {
+      if (i != 0) printf(",");
+      printf("%d", COREHALFWORD(mVARuARRAYNESS + 2 * i));
+    }
+  printf("\n");
+  fflush(stdout);
+  if (productionCount == productionTrigger)
+    i = 5;
+#endif
+}
 
 void writeZipfile(gzFile dest) {
     // Set binary mode for standard I/O on Windows if needed (best practice)
@@ -837,6 +885,10 @@ parseCommandLine(int argc, char **argv)
       n = 0;
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
+#ifdef RSB_TRACE
+      else if (1 == sscanf(argv[i], "--rsb-trace=%d", &j))
+	productionTrigger = j;
+#endif
       else if (1 == sscanf(argv[i], "--watch=%d", &j))
         watchpoint = j;
       else if (2 == sscanf(argv[i], "--extra=%d,%c", &lun, &c))
@@ -1118,6 +1170,13 @@ parseCommandLine(int argc, char **argv)
           printf("              XPL compilers.\n");
           printf("--watch=A     (Default none.)  Causes a message to be printed\n");
           printf("              whenever the value of memory[A] changes.\n");
+#ifdef RSB_TRACE
+          printf("--rsb-trace=N Set trigger trace number in my customized\n");
+          printf("              production-trace function.  If N<0 (the default)\n");
+          printf("              then the trace is disabled.  N=0 means to\n");
+          printf("              activate the trace reports, but not to trap\n");
+          printf("              at any particular count.  N>0 traps at count N.\n");
+#endif
           printf("\n");
           returnValue = 1;
         }
@@ -2016,27 +2075,49 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     }
   else
     {
-      if (DCB_OUTS[lun].pds)
+      DCB_t *dcb = &DCB_OUTS[lun];
+      uint8_t b[PDS_RECORD_SIZE];
+      int length;
+      if (dcb->ebcdic)
+        {
+	  length = string->numBytes;
+	  if (length > PDS_RECORD_SIZE)
+	    length = PDS_RECORD_SIZE;
+	  memcpy(b, string->bytes, length);
+	  for (; length < PDS_RECORD_SIZE; b[length++] = 0x40);
+        }
+      if (dcb->pds)
         {
           // Output to a PDS is buffered until the stow operation by MONITOR(1).
-          DCB_t *dcb = &DCB_OUTS[lun];
-          int length = string->numBytes;
-          if (dcb->bufferLength + length > PDS_BUFFER_SIZE)
-            abend("Overflow of PDS buffer %d", lun);
-          if (DCB_OUTS[lun].ebcdic)
+	  // Records are truncated/padded as needed.
+          if (dcb->ebcdic)
             {
+	      if (dcb->bufferLength + length > PDS_BUFFER_SIZE)
+		abend("Overflow of PDS buffer %d", lun);
               //strncpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
-              memcpy(&dcb->buffer[dcb->bufferLength], string->bytes, length);
+              memcpy(&dcb->buffer[dcb->bufferLength], b, PDS_RECORD_SIZE);
               dcb->bufferLength += length;
             }
           else
-            dcb->bufferLength += sprintf(&dcb->buffer[dcb->bufferLength], "%s\n", s);
+            {
+              length = strlen(s);
+              if (length > PDS_RECORD_SIZE)
+        	{
+        	  length = PDS_RECORD_SIZE;
+        	  s[length] = 0;
+        	}
+              if (length + 1 > PDS_BUFFER_SIZE)
+		abend("Overflow of PDS buffer %d", lun);
+	      dcb->bufferLength += sprintf(&dcb->buffer[dcb->bufferLength],
+					   "%*s\n", PDS_RECORD_SIZE, s);
+            }
         }
       else
         {
-          // Output to a sequential file is immediate.
-          if (DCB_OUTS[lun].ebcdic)
-            fwrite(string->bytes, string->numBytes, 1, fp);
+          // Output to a sequential file is immediate and lengths aren't
+	  // adjusted.
+          if (dcb->ebcdic)
+            fwrite(b, length, 1, fp);
           else
             fprintf(fp, "%s\n", uncontrol(s));
         }

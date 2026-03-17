@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-   Access:     Public Domain, no restrictions believed to exist.
-   Filename:   INCSDF.py
-   Purpose:    Part of the HAL/S-FC compiler.
-   Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
-   History:    2023-10-28 RSB  Created just a stub, which at present will never
-                               be called.
+   Access:      Public Domain, no restrictions believed to exist.
+   Filename:    INCSDF.py
+   Purpose:     Part of the HAL/S-FC compiler.
+   Contact:     The Virtual AGC Project (www.ibiblio.org/apollo).
+   History:     2023-10-28 RSB  Created just a stub, which at present will never
+                                be called.
+                2026-03-12 RSB  Imported `SAVE_LITERAL`.
 """
 
 from xplBuiltins import *
@@ -13,6 +14,7 @@ import g
 import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
 from ERROR import ERROR
+from HALINCL.SAVELITE import SAVE_LITERAL
 
 # ROUTINE TO INCLUDE VARIABLES FROM AN EXTERNAL UNIT'S SDF
 

@@ -108,7 +108,8 @@ PRINT_COMMENT:                                                                  
             C = PAGE;                                                           00000560
          END;                                                                   00000570
          I=100-TEXT_LIMIT;                                                      00000580
-         /?V
+         /?Q
+         /* NO! DON'T DO THE FOLLOWING! */
          /* Remove the binary template-version code, leaving the printable
             form of the version code that follows it. */
          IF SUBSTR(CURRENT_CARD, 0, 10) = 'D VERSION ' THEN DO;

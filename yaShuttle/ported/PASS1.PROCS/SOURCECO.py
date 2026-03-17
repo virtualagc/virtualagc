@@ -8,10 +8,12 @@ Purpose:    This is part of the port of the original XPL source code for
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Created a stub.
             2023-09-18 RSB  Ported.
+            2026-03-12 RSB  Fixed various issues reported by pylint.
 '''
 
 from xplBuiltins import *
 import g
+from SRNCMP import SRNCMP
 
 '''
  *************************************************************************
@@ -163,7 +165,7 @@ def SOURCE_COMPARE():
                 g.UPDATING = g.TRUE;
                 g.REPLACING = g.TRUE;
                 if g.INCLUDING and g.PRINT_INCL_HEAD:
-                    OUTPUT(9, g.X1 + PATCH_INCL_HEAD);
+                    OUTPUT(9, g.X1 + g.PATCH_INCL_HEAD);
                     OUTPUT(9, 'I' + g.STARS + ' START ' + g.INCL_LOG_MSG);
                     OUTPUT(9, g.X1);
                     g.PRINT_INCL_HEAD = g.FALSE;
@@ -176,8 +178,8 @@ def SOURCE_COMPARE():
                 g.PATCHSAVE(REPLCNT, 'R' + g.PATCH_SRN + g.X1 + PATCH_INCL_NUM \
                     +g.PAT_CARD + SUBSTR(g.X109, DELTA_LEN) + g.ADDED);
                 REPLCNT = REPLCNT + 1;
-                while RECORD_USED(g.SAVE_PATCH) <= REPLCNT:
-                    NEXT_ELEMENT(g.SAVE_PATCH);
+                #while RECORD_USED(g.SAVE_PATCH) <= REPLCNT:
+                #    NEXT_ELEMENT(g.SAVE_PATCH);
             else:
                 if g.UPDATING:
                     if g.REPLACING:
@@ -206,7 +208,7 @@ def SOURCE_COMPARE():
             g.REPLACING = g.FALSE
             g.ADDING = g.FALSE = g.FALSE;
             if g.INCLUDING and g.PRINT_INCL_HEAD:
-                OUTPUT(9, g.X1 + PATCH_INCL_HEAD);
+                OUTPUT(9, g.X1 + g.PATCH_INCL_HEAD);
                 OUTPUT(9, 'I' + g.STARS + ' START ' + g.INCL_LOG_MSG);
                 OUTPUT(9, g.X1);
                 g.PRINT_INCL_HEAD = g.FALSE;
@@ -233,7 +235,7 @@ def SOURCE_COMPARE():
                     g.DELETING = g.FALSE;
                     OUTPUT(9, g.X70);
             if g.INCLUDING and g.PRINT_INCL_HEAD:
-                OUTPUT(9, g.X1 + PATCH_INCL_HEAD);
+                OUTPUT(9, g.X1 + g.PATCH_INCL_HEAD);
                 OUTPUT(9, 'I' + g.STARS + ' START ' + g.INCL_LOG_MSG);
                 OUTPUT(9, g.X1);
                 g.PRINT_INCL_HEAD = g.FALSE;

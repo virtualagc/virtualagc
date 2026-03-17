@@ -40,10 +40,13 @@ for parm in sys.argv[1:]:
         print("--fix       Applies a lot more heuristic fixes.")
         print("--sanity    Check array limits in g.py.")
         print("--help      Print this help message.")
+        sys.exit(0)
     elif parm == "--sanity":
         pass
     else:
         print("Unknown parameter:", parm, file=sys.stderr)
+        sys.exit(1)
+sys.argv.append("--suppress")  # Supporesses some automatic behavior of g.py.
 
 #----------------------------------------------------------------------
 # First, read files like g.py, HALINCL/COMMON.py, etc., which contain
@@ -341,7 +344,7 @@ if fix:
             # same name as globals, so those have to be fixed up separately.
             for var in arrayVariables:
                 if var in line:
-                    line = re.sub("\\b" + var + " *\\(([^)]+) *\)",  \
+                    line = re.sub("\\b" + var + " *\\(([^)]+) *\\)",  \
                                   "g." + var + "[\\1]", line)
             for var in simpleVariables:
                 if var in line:

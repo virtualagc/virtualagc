@@ -292,7 +292,7 @@ def SHR(a, b):
 # provide a little more insight than provided by the non-comments in the 
 # IR-182.1, so I've brought those comments over into the code below.
 compilerStartTime = time_ns()
-dwArea = None
+dwArea = [None, None]
 compilationReturnBits = 0
 namePassedToCompiler = ""
 
@@ -300,6 +300,7 @@ redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # For MONITOR(8).
 
 
 def MONITOR(function, arg2=None, arg3=None):
+    from g import FR
     global inputDevices, outputDevices, dwArea, compilationReturnBits, \
             namePassedToCompiler, files, redirections, FR
     
@@ -343,7 +344,7 @@ def MONITOR(function, arg2=None, arg3=None):
         pds[member] = device["buf"]
         device["buf"] = []
         file.seek(0)
-        j = json.dump(pds, file, indent=4)
+        json.dump(pds, file, indent=4)
         file.flush()
         file.truncate()
         file.flush()
@@ -439,7 +440,7 @@ def MONITOR(function, arg2=None, arg3=None):
         specified by MONITOR(5) comprise operand0 (and the result), while the 
         second two entries comprise operand1 (if needed). 
         '''
-        if dwArea == None:
+        if dwArea == [None, None]:
             print("\nNo MONITOR(5) prior to MONITOR(9)", file=sys.stderr)
             exit(1)
         op = arg2
@@ -485,12 +486,11 @@ def MONITOR(function, arg2=None, arg3=None):
     
     # Character to floating-point conversion.
     elif function == 10:
-        if dwArea == None:
+        if dwArea == [None, None]:
             print("\nNo MONITOR(5) prior to MONITOR(10)", file=sys.stderr)
             exit(1)
         s = arg2
         try:
-            from g import FR
             FR[0] = float(s)
             dwArea[0], dwArea[1] = toFloatIBM(FR[0])
             return 0
@@ -688,7 +688,7 @@ def OUTPUT(fileNumber, string):
             print("\nOUTPUT to closed device %d" % fileNumber, \
                   file=sys.stderr)
             return
-        file["buf"].append(string)
+        file["buf"].append(string[:80].ljust(80))
         if "pds" not in file:
             f = file["file"]
             if outUTF8:
@@ -846,12 +846,14 @@ def FILE(arg1, arg2, arg3):
     if isinstance(arg1, bytearray):
         isInput = True
         inputArray = arg1
+        outputArray = [] # Just to eliminate a pylint warning.
         fileNumber = arg2
         recordNumber = arg3
     else:
         isInput = False
         fileNumber = arg1
         recordNumber = arg2
+        inputArray = [] # Just to eliminate a pylint warning.
         outputArray = arg3
     
     f = files[fileNumber][0]

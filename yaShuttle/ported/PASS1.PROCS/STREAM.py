@@ -9,7 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Created a stub.
             2023-09-04 RSB  Began porting.
             2024-06-20 RSB  Stuff related to `D DOWNGRADE`
-            2026-03-11 RSB  Fixed namespace of `TOKEN`.
+            2026-03-11 RSB  Fixed namespace of `TOKEN`.  Fixes of issues 
+                            identified by pylint.
             
 Note that the original of this file was pretty spaghetti-like.  Refer to the
 notes concerning goto_XXXX in SCAN.xpl for an explanation of the workaround
@@ -25,6 +26,7 @@ import HALINCL.DWNTABLE as t
 from CHARINDE import CHAR_INDEX
 from ERROR    import ERROR
 from ERRORS   import ERRORS
+from INTERPRE import INTERPRET_ACCESS_FILE
 from NEXTRECO import NEXT_RECORD
 from ORDEROK  import ORDER_OK
 from OUTPUTGR import OUTPUT_GROUP
@@ -822,7 +824,7 @@ def STREAM():
                         else:
                             g.CREATING = g.FALSE;
                             g.END_OF_INPUT = g.TRUE;
-                            g.CURRENT_CARD = l.INPUT_PAD + X70;
+                            g.CURRENT_CARD = l.INPUT_PAD + g.X70;
                             pass
                     else:
                         g.CARD_COUNT = g.CARD_COUNT + 1;

@@ -8,6 +8,7 @@ Purpose:    This is part of the port of the original XPL source code for
             include all program comments that were present in the original code.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-28 RSB  Began porting
+            2026-03-12 RSB  Fixed namespace of `SYT_TYPE`.
 '''
 
 from xplBuiltins import *
@@ -63,7 +64,7 @@ def STAB_VAR(LOC):
         STAB_STACKER((g.FIXV[LOC] & 0x7FFF) | 0x8000);
         for I in range(g.PTR[LOC]+1, g.FIXF[LOC] + 1):
             STAB_STACKER(g.LOC_P[I] & 0x7FFF);
-        if SYT_TYPE(g.FIXL[LOC])==g.TEMPL_NAME: 
+        if g.SYT_TYPE(g.FIXL[LOC])==g.TEMPL_NAME: 
             return;
         I=0;
     else: 

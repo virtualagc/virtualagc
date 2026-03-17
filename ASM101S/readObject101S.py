@@ -219,15 +219,19 @@ def readObject101S(filename):
             object[i] = oi
             deckOffset += 80
         else:
+            '''
             try:
                 nextCard = fullData.index(0x02, deckOffset)
             except:
                 nextCard = len(fullData)
             data = fullData[deckOffset:nextCard]
+            '''
+            data = fullData[deckOffset:deckOffset+80]
             oi = { "errors": [], "lineData": data,  "deckOffset": deckOffset,
                   "type": "HDR", "text": bytearrayToAscii(data), "ident": " "*8 }
             object[i] = oi
-            deckOffset = nextCard
+            #deckOffset = nextCard
+            deckOffset += 80
             continue
         d = oi["lineData"]
         #if afterEND:

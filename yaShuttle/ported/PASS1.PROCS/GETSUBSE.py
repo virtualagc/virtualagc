@@ -7,6 +7,9 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-30 RSB  Ported from XPL
+            2026-03-12 RSB  Added a default value (0) for `T` in 
+                            `SUBSET_ERROR()`.  Fixed namespaces for `BIp`
+                            and `Pp`.
 '''
 
 from xplBuiltins import *
@@ -112,6 +115,8 @@ def GET_SUBSET(SUBSET, FLAGS):
             T = A_TOKEN;
         elif NUM == 4:
             T = A_TOKEN;
+        else:
+            T = 0 # Shouldn't ever happen!
         OUTPUT(0, S_PREFIX + S_MSG[NUM] + T);
 
     '''
@@ -147,7 +152,7 @@ def GET_SUBSET(SUBSET, FLAGS):
                     elif gt2 == 1:
                         SUBSET_ERROR(1);
                     elif gt2 == 2 or gt2 == 3:
-                        L = BIp;
+                        L = g.BIp;
                         while L > 0:
                             if SUBSTR(g.BI_NAME[g.BI_INDX[L]], g.BI_LOC[L], 10) \
                                     == PAD(A_TOKEN, 10):
@@ -166,7 +171,7 @@ def GET_SUBSET(SUBSET, FLAGS):
                        SUBSET_ERROR(1);
                     elif gt2 == 2 or gt2 == 3:
                         L = VALUE;
-                        if (L > 0)and(L <= Pp):
+                        if (L > 0)and(L <= g.Pp):
                             g.pPRODUCE_NAME[L] = g.pPRODUCE_NAME[L] | SHL(FLAGS, 12);
                         else:
                             SUBSET_ERROR(3);

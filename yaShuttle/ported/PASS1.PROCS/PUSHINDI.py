@@ -8,6 +8,7 @@ Purpose:    This is part of the port of the original XPL source code for
             include all program comments that were present in the original code.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-27 RSB  Ported
+            2026-03-12 RSB  Fixed `d.CLASS_BS` (from `dCLASS_BS`).
 '''
 
 from xplBuiltins import OUTPUT
@@ -42,7 +43,7 @@ from ERROR import ERROR
 
 def PUSH_INDIRECT(I):
     g.PTR_TOP = g.PTR_TOP + I;
-    if g.PTR_TOP > g.PTR_MAX: ERROR(dCLASS_BS, 2);
+    if g.PTR_TOP > g.PTR_MAX: ERROR(d.CLASS_BS, 2);
     elif g.PTR_TOP > g.MAX_PTR_TOP:g.MAX_PTR_TOP = g.PTR_TOP;
     g.VAL_P[g.PTR_TOP] = 0
     g.EXT_P[g.PTR_TOP] = 0;

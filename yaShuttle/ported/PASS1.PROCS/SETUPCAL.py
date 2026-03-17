@@ -6,20 +6,23 @@
    Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-22 RSB  Ported from XPL.
-               2026-03-12 RSB  Imported HALMAT_PIP
+               2026-03-12 RSB  Fixed a variety of issues pointed out by pylint.
 """
 
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
+from CHECKARR import CHECK_ARRAYNESS
 from ERROR    import ERROR
 from GETFCNPA import GET_FCN_PARM
 from EMITARRA import EMIT_ARRAYNESS
 from HALMATF3 import HALMAT_FIX_PIPTAGS
+from HALMATFI import HALMAT_FIX_PIPp
 from HALMATPI import HALMAT_PIP
 from HALMATTU import HALMAT_TUPLE
 from KILLNAME import KILL_NAME
+from NAMEARRA import NAME_ARRAYNESS
 from RESETARR import RESET_ARRAYNESS
 from SAVEARRA import SAVE_ARRAYNESS
 
@@ -144,7 +147,7 @@ def SETUP_CALL_ARG():
                             h.EXT_ARRAY[g.SYT_ARRAY(g.LOC_P[0])];
                         for J in range(1, g.CURRENT_ARRAYNESS[0] + 1):
                             g.CURRENT_ARRAYNESS[J] = \
-                                EXT_ARRAY(g.SYT_ARRAY(g.LOC_P[0]) + J);
+                                h.EXT_ARRAY[g.SYT_ARRAY(g.LOC_P[0]) + J];
                         # END
                     # END
                     g.PSEUDO_TYPE[0] = g.SYT_TYPE(g.LOC_P[0]);
@@ -154,7 +157,7 @@ def SETUP_CALL_ARG():
                     for J in range(1, J + 1): 
                         RESET_ARRAYNESS(); 
                     # END; 
-                    NAME_ARRAYNESS(SP);
+                    NAME_ARRAYNESS(g.SP);
                     goto = "ARR_CHECKOUT";
                 # END;
                 if (not np and goto == None) or goto == "ARR_CHECKOUT": # ELSE

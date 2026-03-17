@@ -7,6 +7,10 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-28 RSB  Ported from XPL
+            2026-03-12 RSB  pylint warned that `T1` and `T2` might be used 
+                            before assignment.  It's no longer clear to me at
+                            a glance that they don't need persistence, so I 
+                            added that as well.
 '''
 
 from xplBuiltins import *
@@ -55,6 +59,12 @@ from CHECKSUB import CHECK_SUBSCRIPT
  /***************************************************************************/
 '''
 
+class cREDUCE_SUBSCRIPT:
+
+    def __init__(self):
+        self.T1 = 0
+        self.T2 = 0
+ll = cREDUCE_SUBSCRIPT()
 
 def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
     # Locals: T1, T2, IND_LINK_SAVE
@@ -94,16 +104,16 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
         elif (st == 2 and goto == None) or goto != None:
             #  TO-PARTITION
             if goto == None:
-                T1 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
+                ll.T1 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
                 g.VAL_P[g.NEXT_SUB] = 1;
                 STEPPER();
-                T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
+                ll.T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
             if (not 0 != (1 & FLAG) and goto == None) or goto != None:
-                if ((T1 < 0 or T2 < 0) and goto == None) or goto == "SR_ERR1":
+                if ((ll.T1 < 0 or ll.T2 < 0) and goto == None) or goto == "SR_ERR1":
                     if goto == "SR_ERR1": goto = None
-                    ERROR(CLASS_SR, 1, g.VAR[g.MP]);
+                    ERROR(d.CLASS_SR, 1, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
-                elif T2 == T1 and goto == None:
+                elif ll.T2 == ll.T1 and goto == None:
                     if FLAG == 2: 
                         goto = "SR_ERR2"
                         continue
@@ -112,50 +122,50 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
                     g.VAL_P[g.IND_LINK] = 0
                     g.PSEUDO_LENGTH[g.IND_LINK] = 0;
                     g.INX[g.IND_LINK] = MODE | 0x1;
-                elif (T2 < T1 and goto == None) or goto == "SR_ERR2":
+                elif (ll.T2 < ll.T1 and goto == None) or goto == "SR_ERR2":
                     if goto == "SR_ERR2": goto = None
                     ERROR(d.CLASS_SR, 2, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
                 else: 
-                    g.FIX_DIM = T2 - T1 + 1;
-            elif (T2 > 0 and T2 < T1): 
+                    g.FIX_DIM = ll.T2 - ll.T1 + 1;
+            elif (ll.T2 > 0 and ll.T2 < ll.T1): 
                 goto = "SR_ERR2"
                 continue
         elif st == 3 and goto == None:
             #  AT-PARTITION
-            T1 = CHECK_SUBSCRIPT(MODE, SIZE, 1);
+            ll.T1 = CHECK_SUBSCRIPT(MODE, SIZE, 1);
             g.VAL_P[g.NEXT_SUB] = 1;
             STEPPER();
-            T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
+            ll.T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
             if not (FLAG & 1):
-                if T1 < 0: 
+                if ll.T1 < 0: 
                     goto = "SR_ERR1"
                     continue
-                if T2 < 0: 
-                    T2 = T1;
+                if ll.T2 < 0: 
+                    ll.T2 = ll.T1;
                 else: 
-                    T2 = T1 + T2 - 1;
-                if (T2 > SIZE and SIZE > 0) or T1 == 0: 
+                    ll.T2 = ll.T1 + ll.T2 - 1;
+                if (ll.T2 > SIZE and SIZE > 0) or ll.T1 == 0: 
                     goto = "SR_ERR2"
                     continue
-                if T1 == 1:
+                if ll.T1 == 1:
                     if FLAG == 2: 
                         goto = "SR_ERR2"
                         continue
                     g.INX[g.NEXT_SUB] = MODE | 0x1;
                     g.PSEUDO_LENGTH[IND_LINK_SAVE] = g.NEXT_SUB;
-                g.FIX_DIM = T1;
+                g.FIX_DIM = ll.T1;
             #************ GENERATE SR1 & SR2 ERRORS FOR CHARACTER VARIABLES*****
             else:  # FLAG=1*/
-                if T1 < -1: 
+                if ll.T1 < -1: 
                     goto = "SR_ERR1"
                     continue
-                if (T1 > SIZE and SIZE > 0): 
+                if (ll.T1 > SIZE and SIZE > 0): 
                     goto = "SR_ERR2"
                     continue
                 else: 
-                    T2 = T1 + T2 - 1;
-                if (T2 > SIZE and SIZE > 0): 
+                    ll.T2 = ll.T1 + ll.T2 - 1;
+                if (ll.T2 > SIZE and SIZE > 0): 
                     goto = "SR_ERR2"
                     continue
             #*******************************************************************

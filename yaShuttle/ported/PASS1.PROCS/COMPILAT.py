@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Created place-holder file.
+            2026-03-12 RSB  Removed bogus `SCAN1` and `SCAN2`.
 '''
 
 from xplBuiltins import *
@@ -14,12 +15,7 @@ import g
 import HALINCL.CERRDECL as d
 import HALINCL.COMMON   as h
 from ERROR import ERROR
-if g.scan1:
-    from SCAN1 import SCAN
-elif g.scan2:
-    from SCAN2 import SCAN
-else:
-    from SCAN import SCAN
+from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from SAVETOKE import SAVE_TOKEN
 from POPMACRO import POP_MACRO_XREF

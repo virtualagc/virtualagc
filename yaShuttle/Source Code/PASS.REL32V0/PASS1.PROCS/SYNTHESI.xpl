@@ -1008,6 +1008,11 @@ SYNTHESIZE:                                                                     
       DECLARE (NAME_SET,REMOTE_SET,CURRENT_LIVES_REMOTE) BIT(16);   /*DR109031*/
       DECLARE CHANGED_STMT_NUM BIT(1);                               /*CR12713*/
       DECLARE ELSE_TOKEN FIXED INITIAL(48);                         /*DR111342*/
+      
+  /?V 
+  CALL INLINE('productionTrace(getFIXED(mSYNTHESIZExPRODUCTIONuNUMBER));'); 
+  ?/
+      
 SET_INIT:                                                                       01102200
       PROCEDURE (A,B,C,D,E);                                                    01102300
          DECLARE (A,C,E) BIT(16), (B,D) BIT(8);                                 01102400

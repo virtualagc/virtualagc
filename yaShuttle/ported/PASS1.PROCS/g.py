@@ -14,6 +14,14 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
             2024-06-20 RSB  Stuff related to `D DOWNGRADE`
             2026-02-04 RSB  Wasn't --pfs not recognized.
             2026-03-09 RSB  Allow TABLES compiler option but ignore it.
+            2026-03-12 RSB  It turns out that `pPRODUCE_NAME[]` *sometimes*
+                            (though rarely) needs to be writable.  Moved
+                            global initializations of `FACTORED_xxx` around
+                            to avoid messages from pylint, though no actual
+                            functionality change has occurred.  Similarly for
+                            removal of all traces of the discontinued 
+                            "--scan1" and "--scan2" options.  Added some
+                            stuff to facilitate indentXPL.py.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -37,13 +45,13 @@ import HALINCL.COMMON as h
 
 SANITY_CHECK = False
 pfs = True
-scan1 = False
-scan2 = False
 intersection = False
 extraTrace = False
 debugwr = False
 templib = False
 traceInlines = False
+rsbTrace = False
+productionTrigger = 0
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -93,146 +101,147 @@ def traceInline(msg):
     if traceInlines:
         print("\nTrace INLINE:", msg, end="")
 
-for parmNum in range(1, len(sys.argv)):
-    parm = sys.argv[parmNum]
-    if parm.startswith("--hal="):
-        pass  # This case is handled in xplBuiltins.py.
-    elif parm == "--trace-inlines":
-        traceInlines = True
-    elif parm == "--no-syn":
-        pass  # This case is handled by SYNTHESI.py.
-    elif parm.startswith("--dummy="):
-        pass
-    elif parm == '--pfs':
-        if parmNum > 1:
-            print("It is advised that --pfs be the leading command-line option", \
-                  file=sys.stderr)
-        pfs = True
-        pCON = pCONp
-        pPRO = pPROp
-        pDESC[bfsDESC] = "MFID"
-        pVALS[bfsDESC] = ""
-    elif parm == '--bfs':
-        if parmNum > 1:
-            print("It is advised that --bfs be the leading command-line option", \
-                  file=sys.stderr)
-        pfs = False
-        pCON = pCONb
-        pPRO = pPROb
-        pDESC[bfsDESC] = "OLDTPL"
-        pVALS[bfsDESC] = 0
-    elif parm == '--sanity':
-        SANITY_CHECK = True
-    # elif parm == "--scan1":
-    #    scan1 = True
-    # elif parm == "--scan2":
-    #    scan2 = True
-    elif parm == "--extra":
-        extraTrace = True
-    elif parm == "--intersection":
-        intersection = True
-    elif parm == "--utf8":
-        pass
-    elif parm == "--ascii":
-        pass
-    elif parm == "--templib":
-        templib = True
-    elif parm == "--debugwr":
-        debugwr = True
-    elif parm in pCON or ("NO" + parm) in pCON or \
-            (parm.startswith("NO") and parm[2:] in pCON):
-        # Type 1 option:
-        if len(PARM_STRING) != 0:
-            PARM_STRING = PARM_STRING + "," + parm
+suppress = "--suppress" in sys.argv[1:]
+if not suppress:
+    for parmNum in range(1, len(sys.argv)):
+        parm = sys.argv[parmNum]
+        if parm.startswith("--hal="):
+            pass  # This case is handled in xplBuiltins.py.
+        elif parm == "--trace-inlines":
+            traceInlines = True
+        elif parm.startswith("--rsb-trace="):
+            rsbTrace = True
+            productionTrigger = int(parm[12:])
+        elif parm == "--no-syn":
+            pass  # This case is handled by SYNTHESI.py.
+        elif parm.startswith("--dummy="):
+            pass
+        elif parm == '--pfs':
+            if parmNum > 1:
+                print("It is advised that --pfs be the leading command-line option", \
+                      file=sys.stderr)
+            pfs = True
+            pCON = pCONp
+            pPRO = pPROp
+            pDESC[bfsDESC] = "MFID"
+            pVALS[bfsDESC] = ""
+        elif parm == '--bfs':
+            if parmNum > 1:
+                print("It is advised that --bfs be the leading command-line option", \
+                      file=sys.stderr)
+            pfs = False
+            pCON = pCONb
+            pPRO = pPROb
+            pDESC[bfsDESC] = "OLDTPL"
+            pVALS[bfsDESC] = 0
+        elif parm == '--sanity':
+            SANITY_CHECK = True
+        elif parm == "--extra":
+            extraTrace = True
+        elif parm == "--intersection":
+            intersection = True
+        elif parm == "--utf8":
+            pass
+        elif parm == "--ascii":
+            pass
+        elif parm == "--templib":
+            templib = True
+        elif parm == "--debugwr":
+            debugwr = True
+        elif parm in pCON or ("NO" + parm) in pCON or \
+                (parm.startswith("NO") and parm[2:] in pCON):
+            # Type 1 option:
+            if len(PARM_STRING) != 0:
+                PARM_STRING = PARM_STRING + "," + parm
+            else:
+                PARM_STRING = parm
+            if parm in pCON:
+                index = pCON.index(parm)
+            elif parm.startswith("NO") and parm[2:] in pCON:
+                index = pCON.index(parm[2:])
+            else:
+                index = pCON.index("NO" + parm)
+            pCON[index] = parm
+        elif "=" in parm and parm.split("=")[0] in (pDESC + ["MFID", "OLDTPL"]):
+            # Type 2 option:
+            if len(PARM_STRING) != 0:
+                PARM_STRING = PARM_STRING + "," + parm
+            else:
+                PARM_STRING = parm
+            fields = parm.split("=")
+            if fields[0] in ["MFID", "OLDTPL"]:
+                index = bfsDESC
+            else:
+                index = pDESC.index(fields[0])
+            value = fields[1]
+            if index not in [0, 8]:  # I.e., not TITLE or CARDTYPE
+                pVALS[index] = int(value)
+            else:
+                pVALS[index] = value
+        elif parm == '--help':
+            print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
+            print('Usage:')
+            print('\tHAL_S_FC.py [OPTIONS] [<SOURCE.hal]')
+            print('The allowed "modern" OPTIONS are:')
+            print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
+            print('                 Note that an extension of .hal is')
+            print('                 automatically added if missing.')
+            print('--pfs            Compile for PFS (PASS).')
+            print('--bfs            Compile for BFS. (Default is --pfs.)')
+            print('                 Note that if --bfs is used, place it first.')
+            print('--templib        Identify &&TEMPLIB with TEMPLIB.')
+            print('--utf8           Use UTF-8 in program listings.')
+            print('--ascii          (Default.) Use ASCII in program listings.')
+            print('--extra          Enhances messages for some ¢-toggles.')
+            print('--no-syn         Do not synthesize HALMAT.')
+            print('--sanity         Perform a sanity check on the Python port.')
+            print('--help           Show this explanation.')
+            print('--dummy=X        This option is ignored. (It is useful for')
+            print('                 commenting out --hal switches.)')
+            print('--debugwr        Print debugging messages for OUTPUTWR.')
+            print('--trace-inlines  Print messages for CALL INLINE.  HAL_S_FC')
+            print('                 has no CALL INLINE statements, but the')
+            print('                 messages are at the points where CALL INLINES')
+            print('                 would be, to facilitate comparisons to other')
+            print('                 implementations of the compiler.')
+            print('--rsb-trace=N    Activate and set trigger count (default 0)')
+            print('                 for my own production trace.')
+            print('--intersection   Helps test overlap between globals/locals.')
+            print('Additionally, many of the options from the original JCL')
+            print('PARMLISTs can be used.  For "type 1" options (i.e., those')
+            print('without values), you can use either the form XXXX or NOXXXX,')
+            print('where XXXX is among these: ADDRS, DECK, DUMP, HALMAT, HIGHOPT,')
+            print('LFXI, LIST, LISTING2, LSTALL, MICROCODE, PARSE, REGOPT, SCAL,')
+            print('SDL, SREF, SRN, TABDMP, TABLES, TABLST, TEMPLATE, VARSYM, ZCON.')
+            print('If neither XXXX nor NOXXXX is specified, the following defaults')
+            print('are used:')
+            chunks = 5
+            chunk = (len(pCON) + chunks - 1) // chunks
+            for i in range(0, len(pCON), chunk):
+                for j in range(i, min(i + chunk, len(pCON))):
+                    print("    %-10s" % pCON[j], end="")
+                print()
+            print('As for "type 2" options, i.e. those with values, they can be')
+            print('specified in the form XXXX=value, where the defaults for PFS')
+            print('are the following:')
+            chunks = 4
+            chunk = (len(pDESC) + chunks - 1) // chunks
+            for i in range(0, len(pDESC), chunk):
+                for j in range(i, min(i + chunk, len(pDESC))):
+                    s = "%s=%s" % (pDESC[j], str(pVALS[j]))
+                    print("    %-14s" % s, end="")
+                print()
+            print("For --bfs, OLDTPL=None is the default and MFID is unavailable.")
+            print("TITLE and CARDTYPE are strings; all others are integers.")
+            print('While these original options are syntactically allowed on the')
+            print('command line, this does not necessarily imply that they are all')
+            print('applicable to PHASE 1, nor that they are fully ported, nor that')
+            print('this comprises the complete list of all original options.')
+            sys.exit(0)
         else:
-            PARM_STRING = parm
-        if parm in pCON:
-            index = pCON.index(parm)
-        elif parm.startswith("NO") and parm[2:] in pCON:
-            index = pCON.index(parm[2:])
-        else:
-            index = pCON.index("NO" + parm)
-        pCON[index] = parm
-    elif "=" in parm and parm.split("=")[0] in (pDESC + ["MFID", "OLDTPL"]):
-        # Type 2 option:
-        if len(PARM_STRING) != 0:
-            PARM_STRING = PARM_STRING + "," + parm
-        else:
-            PARM_STRING = parm
-        fields = parm.split("=")
-        if fields[0] in ["MFID", "OLDTPL"]:
-            index = bfsDESC
-        else:
-            index = pDESC.index(fields[0])
-        value = fields[1]
-        if index not in [0, 8]:  # I.e., not TITLE or CARDTYPE
-            pVALS[index] = int(value)
-        else:
-            pVALS[index] = value
-    elif parm == '--help':
-        print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
-        print('Usage:')
-        print('\tHAL_S_FC.py [OPTIONS] [<SOURCE.hal]')
-        print('The allowed "modern" OPTIONS are:')
-        print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
-        print('                 Note that an extension of .hal is')
-        print('                 automatically added if missing.')
-        print('--pfs            Compile for PFS (PASS).')
-        print('--bfs            Compile for BFS. (Default is --pfs.)')
-        print('                 Note that if --bfs is used, place it first.')
-        print('--templib        Identify &&TEMPLIB with TEMPLIB.')
-        print('--utf8           Use UTF-8 in program listings.')
-        print('--ascii          (Default.) Use ASCII in program listings.')
-        print('--extra          Enhances messages for some ¢-toggles.')
-        print('--no-syn         Do not synthesize HALMAT.')
-        print('--sanity         Perform a sanity check on the Python port.')
-        print('--help           Show this explanation.')
-        print('--dummy=X        This option is ignored. (It is useful for')
-        print('                 commenting out --hal switches.)')
-        # print('--scan1          Use SCAN1 rather than SCAN')
-        # print('--scan2          Use SCAN2 rather than SCAN')
-        print('--debugwr        Print debugging messages for OUTPUTWR.')
-        print('--trace-inlines  Print messages for CALL INLINE.  HAL_S_FC')
-        print('                 has no CALL INLINE statements, but the')
-        print('                 messages are at the points where CALL INLINES')
-        print('                 would be, to facilitate comparisons to other')
-        print('                 implementations of the compiler.')
-        print('--intersection   Helps test overlap between globals/locals.')
-        print('Additionally, many of the options from the original JCL')
-        print('PARMLISTs can be used.  For "type 1" options (i.e., those')
-        print('without values), you can use either the form XXXX or NOXXXX,')
-        print('where XXXX is among these: ADDRS, DECK, DUMP, HALMAT, HIGHOPT,')
-        print('LFXI, LIST, LISTING2, LSTALL, MICROCODE, PARSE, REGOPT, SCAL,')
-        print('SDL, SREF, SRN, TABDMP, TABLES, TABLST, TEMPLATE, VARSYM, ZCON.')
-        print('If neither XXXX nor NOXXXX is specified, the following defaults')
-        print('are used:')
-        chunks = 5
-        chunk = (len(pCON) + chunks - 1) // chunks
-        for i in range(0, len(pCON), chunk):
-            for j in range(i, min(i + chunk, len(pCON))):
-                print("    %-10s" % pCON[j], end="")
-            print()
-        print('As for "type 2" options, i.e. those with values, they can be')
-        print('specified in the form XXXX=value, where the defaults for PFS')
-        print('are the following:')
-        chunks = 4
-        chunk = (len(pDESC) + chunks - 1) // chunks
-        for i in range(0, len(pDESC), chunk):
-            for j in range(i, min(i + chunk, len(pDESC))):
-                s = "%s=%s" % (pDESC[j], str(pVALS[j]))
-                print("    %-14s" % s, end="")
-            print()
-        print("For --bfs, OLDTPL=None is the default and MFID is unavailable.")
-        print("TITLE and CARDTYPE are strings; all others are integers.")
-        print('While these original options are syntactically allowed on the')
-        print('command line, this does not necessarily imply that they are all')
-        print('applicable to PHASE 1, nor that they are fully ported, nor that')
-        print('this comprises the complete list of all original options.')
-        sys.exit(0)
-    else:
-        print("Unrecognized command-line options:", parm)
-        print("Use --help for more information.")
-        sys.exit(1)
+            print("Unrecognized command-line options:", parm)
+            print("Use --help for more information.")
+            sys.exit(1)
 
 # Catch some compiler parameters that aren't (yet?) supported. TABLES isn't
 # supported because it requires virtual-memory features (and possibly lots of
@@ -313,6 +322,8 @@ def fixParm(option):
         NO = True
         parm = "NO" + option
         index = pCON.index(parm)
+    else:
+        index = 0 # Just to eliminate a pylint message.
     # Overrides for defaults
     inArgs = False
     if option in sys.argv[1:]:
@@ -554,7 +565,7 @@ if SANITY_CHECK and len(STATE_NAME) != MAXRp + 1:
     print('Bad STATE_NAME', file=sys.stderr)
     sys.exit(1)
 
-pPRODUCE_NAME = (
+pPRODUCE_NAME = [
    0, 233, 243, 243, 190, 190, 190, 190, 190, 152,  #     0
  152, 168, 168, 168, 168, 156, 156, 144, 235, 235,  #    10
  235, 277, 277, 213, 213, 213, 213, 167, 235, 167,  #    20
@@ -601,7 +612,7 @@ pPRODUCE_NAME = (
  164, 164, 164, 230, 230, 276, 276, 189, 258, 258,  #   430
  258, 258, 286, 286, 286, 293, 293, 293, 160, 160,  #   440
  160, 159, 186, 186  #   450
-)
+]
 if SANITY_CHECK and len(pPRODUCE_NAME) != Pp + 1:
     print('Bad #PRODUCE_NAME', file=sys.stderr)
     sys.exit(1)
@@ -1588,7 +1599,7 @@ if SANITY_CHECK and len(TX) != 255 + 1:
     print('Bad TX', file=sys.stderr)
     sys.exit(1)
 
-LETTER_OR_DIGIT = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+LETTER_OR_DIGIT = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1598,7 +1609,7 @@ LETTER_OR_DIGIT = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
       1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-      0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0)
+      0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
 if SANITY_CHECK and len(LETTER_OR_DIGIT) != 255 + 1:
     print('Bad LETTER_OR_DIGIT', file=sys.stderr)
     sys.exit(1)
@@ -2139,6 +2150,23 @@ IC_FND = 0
 N_DIM = 0
 S_ARRAY = [0] * (N_DIM_LIM + 1)
 
+FACTORED_TYPE = 0
+FACTORED_BIT_LENGTH = 0
+FACTORED_CHAR_LENGTH = 0
+FACTORED_MAT_LENGTH = 0
+FACTORED_VEC_LENGTH = 0
+FACTORED_ATTRIBUTES = 0
+FACTORED_ATTRIBUTES2 = 0
+FACTORED_ATTR_MASK = 0
+FACTORED_STRUC_PTR = 0
+FACTORED_STRUC_DIM = 0
+FACTORED_CLASS = 0
+FACTORED_NONHAL = 0
+FACTORED_LOCKp = 0
+FACTORED_IC_PTR = 0
+FACTORED_IC_FND = 0
+FACTORED_N_DIM = 0
+FACTORED_S_ARRAY = [0] * (N_DIM_LIM + 1)
 
 def TYPEf(t, value=None):
     global TYPE, BIT_LENGTH, CHAR_LENGTH, MAT_LENGTH, VEC_LENGTH, ATTRIBUTES, \
@@ -2223,25 +2251,6 @@ def TYPEf(t, value=None):
     elif t == 34: FACTORED_IC_FND = value;
     elif t == 35: FACTORED_N_DIM = value;
     elif t <= 39: FACTORED_S_ARRAY[t - 36] = value;
-
-
-FACTORED_TYPE = 0
-FACTORED_BIT_LENGTH = 0
-FACTORED_CHAR_LENGTH = 0
-FACTORED_MAT_LENGTH = 0
-FACTORED_VEC_LENGTH = 0
-FACTORED_ATTRIBUTES = 0
-FACTORED_ATTRIBUTES2 = 0
-FACTORED_ATTR_MASK = 0
-FACTORED_STRUC_PTR = 0
-FACTORED_STRUC_DIM = 0
-FACTORED_CLASS = 0
-FACTORED_NONHAL = 0
-FACTORED_LOCKp = 0
-FACTORED_IC_PTR = 0
-FACTORED_IC_FND = 0
-FACTORED_N_DIM = 0
-FACTORED_S_ARRAY = [0] * (N_DIM_LIM + 1)
 
 LOCK_LIM = 15
 ASSIGN_ARG_LIST = 0

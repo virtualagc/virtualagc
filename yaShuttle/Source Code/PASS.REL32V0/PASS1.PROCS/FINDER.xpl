@@ -8,6 +8,8 @@
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
                 2026-03-07 RSB  Conditionally added a 4th device in the search
                                 list to account for file-inclusion libraries.
+                2026-03-13 RSB  Conditionally added 5th device in the search
+                                list to account for temporary include-library.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.
@@ -46,8 +48,8 @@ FINDER:                                                                         
       DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008", "4", "80000006"),  00399525
       ?/
       /?V
-      DECLARE MAXLIBFILES LITERALLY '3';                                        00399520
-      DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008", 4, "80000006", 8), 00399525
+      DECLARE MAXLIBFILES LITERALLY '4';                                        00399520
+      DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008",4,"80000006",8,9),  00399525
       ?/
  /* SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES */                     00399530
          FILENODD(MAXLIBFILES) BIT(1); /* TRUE IF DD STATEMENT MISSING */       00399535

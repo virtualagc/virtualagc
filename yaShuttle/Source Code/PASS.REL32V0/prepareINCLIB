@@ -41,6 +41,7 @@ The available options are:
 clear = False
 inclusionDirectories = []
 inclibName = "INCLIB"
+tempincName = "&&TEMPINC"
 srn = 80
 for parm in sys.argv[1:]:
     if parm == "--help":
@@ -63,6 +64,11 @@ for parm in sys.argv[1:]:
         sys.exit(1)
 
 # Clear or create the inclusion library as needed.
+jsonName = tempincName + ".json"
+if clear or not Path(jsonName).is_file():
+    f = open(jsonName, "w")
+    print("{}", file=f)
+    f.close()
 jsonName = inclibName + ".json"
 if clear or not Path(jsonName).is_file():
     f = open(jsonName, "w")
@@ -74,6 +80,11 @@ if clear or not Path(inclibName).is_dir():
     except:
         pass
     os.mkdir(inclibName)
+    try:
+        shutil.rmtree(tempincName)
+    except:
+        pass
+    os.mkdir(tempincName)
 
 if len(inclusionDirectories) == 0:
     sys.exit(0)

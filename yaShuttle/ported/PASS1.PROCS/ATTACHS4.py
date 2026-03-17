@@ -8,6 +8,7 @@ Purpose:    This is part of the port of the original XPL source code for
             include all program comments that were present in the original code.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-28 RSB  Ported
+            2026-03-17 RSB  `ESCAPE` was ported wrong!
 '''
 
 from xplBuiltins import *
@@ -88,23 +89,6 @@ Note that the ATTACH_SUBSCRIPT() function was originally a PROCEDURE  with no
 defined type (i.e., seemingly it should not have returned anything), and yet it 
 *does* return a value.  This is actually legal in XPL, and a PROCEDURE always
 returns *something* whether or not it's anything explicit.  Swell!
-
-Another oddity is that ESCAPE is used several times.  As I've noted elsewhere
-in comments (see HALINCL/PATCHINC), there is no source code for an ESCAPE 
-function, so presumably it's a keyword or built-in function of XPL.  But if so, 
-there's no documentation for it.  My inference was that it was like the HAL/S
-keyword EXIT, which breaks out of the innermost enclosing loop, optionally to
-a label.  But here in ATTACH_SUBSCRIPT(), there are no loops to break out of,
-nor any labels ... so what is ESCAPE supposed to *do*?  Break out of the 
-enclosing loop in the calling code?  If so, yuck!
-
-ATTACH_SUBSCRIPT() is called from only one spot, in SYNTHESIZE(), and is not
-within a loop there.  Meanwhile, SYNTHESIZE() is called only from 
-COMPILATION_LOOP(), from within the main loop, and breaking out of that is 
-an error abort from the compiler.  Which seems very odd, to say the least.
-
-Since I'm at a loss, I'm treating ESCAPE here simply as RETURN (with the value
-it normally returns).  This may have to be revisited.
 '''
 
 def ATTACH_SUBSCRIPT():
@@ -132,14 +116,18 @@ def ATTACH_SUBSCRIPT():
         if g.PSEUDO_TYPE[g.PTR[g.MP]] < g.SCALAR_TYPE and goto == None: 
             if I & 1: I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (J & 1) and (g.INX[g.INX[0]] == 0): 
-                return (I != 2) # ESCAPE
-            if J & 1: ATTACH_SUB_ARRAY(0);
-            ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
+                #return (I != 2) # ESCAPE
+                pass
+            else:
+                if J & 1: ATTACH_SUB_ARRAY(0);
+                ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
         elif (J & 1) != 0 and (g.SYT_ARRAY(g.FIXL[g.MP]) > 0) and goto == None:
             if I & 1: I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (g.INX[g.INX[0]] == 0): 
-                return (I != 2) # ESCAPE
-            ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
+                #return (I != 2) # ESCAPE
+                pass
+            else:
+                ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
         else:
             if goto == "SS_FUNNIES": goto = None
             if (I & 1) != 0 and (g.SYT_ARRAY(g.FIXV[g.MP]) != 0):

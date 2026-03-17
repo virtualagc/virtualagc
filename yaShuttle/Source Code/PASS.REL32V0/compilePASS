@@ -123,7 +123,7 @@ def compile(template):
             check = True
             )
     except subprocess.CalledProcessError as e:
-        if not checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]) and \
+        if not checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2", "DI11"]) and \
            not checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
             print(f"Failed with exit code {e.returncode}.")
             print("STDOUT:", e.stdout)
@@ -271,7 +271,7 @@ for halname in sorted(nonexistentTemplates):
     for filename in sorted(nonexistentTemplates[halname]):
         msg += f" {filename}"
     print(msg)
-print(f"{len(nonexistentTemplates)} non-existent templates referenced")
+print(f"     {len(nonexistentTemplates)} non-existent templates referenced")
 print(f"{len(templatesByFilename)} templates in all")
 #for filename in templatesByFilename:
 #    print(filename, templatesByFilename[filename])
@@ -312,19 +312,21 @@ while len(remove) > 0:
         includedFilenames = set(template["includedFilenames"])
         if len(includedFilenames & filesLeft) == 0:
             compile(template)
-            remove.append(filename)
+            if template["stem"] not in errorsDelayed:
+                remove.append(filename)
     for filename in remove:
         removed.add(filename)
         templatesByFilename.pop(filename)
 
-print(f"Compilation of {len(errorsDelayed)} files delayed due to ZO3 or PM2 errors:")
-print("     ", errorsDelayed)
-print(f"{datetime.now()}: Compiling delayed files ...")
-for stem in errorsDelayed:
-    template = templatesByStem[stem]
-    filename = template["filename"]
-    compile(template)
-    templatesByFilename.pop(filename)
+if False:
+    print(f"Compilation of {len(errorsDelayed)} files delayed due to ZO3 or PM2 errors:")
+    print("     ", errorsDelayed)
+    print(f"{datetime.now()}: Compiling delayed files ...")
+    for stem in errorsDelayed:
+        template = templatesByStem[stem]
+        filename = template["filename"]
+        compile(template)
+        templatesByFilename.pop(filename)
 
 print(f"Uncompiled files ({len(templatesByFilename)}:")
 print(removed)

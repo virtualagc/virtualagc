@@ -7,17 +7,22 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Began porting from INITIALI.xpl.
+            2026-03-12 RSB  Removed bogus `SCAN1` and `SCAN2`.  Imported
+                            `ERROR()` and `NEXT_RECORD`.
 '''
 
 from xplBuiltins import *  # Built-in functions
 from HALINCL.VMEM3 import *
 import g  # Get global variables.
+import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
 from CHARTIME import CHARTIME
 from CHARDATE import CHARDATE
 from EMITARRA import EMIT_ARRAYNESS
+from ERROR import ERROR
 from PRINTDAT import PRINT_DATE_AND_TIME
 from ERRORS import ERRORS
+from NEXTRECO import NEXT_RECORD
 from GETSUBSE import GET_SUBSET
 from UNSPEC import UNSPEC
 from SETTLIMI import SET_T_LIMIT
@@ -25,12 +30,7 @@ from ORDEROK import ORDER_OK
 from PAD import PAD
 from SOURCECO import SOURCE_COMPARE
 from STREAM import STREAM
-if g.scan1:
-    from SCAN1 import SCAN
-elif g.scan2:
-    from SCAN2 import SCAN
-else:
-    from SCAN import SCAN
+from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from HALINCL.CERRDECL import CLASS_BI
 from HALINCL.SPACELIB import RECORD_USED, RECORD_CONSTANT, RECORD_ALLOC, \
@@ -471,7 +471,7 @@ def INITIALIZATION():
         g.INPUT_REC[0] = g.CURRENT_CARD[:];
         NEXT_RECORD();  # GET FIRST REAL RECORD 
     while not ORDER_OK(BYTE('C')):
-        ERROR(CLASS_M, 2);
+        ERROR(d.CLASS_M, 2);
         NEXT_RECORD();
     if LENGTH(g.CURRENT_CARD) > 88:
         g.CURRENT_CARD = SUBSTR(g.CURRENT_CARD, 0, 88);
