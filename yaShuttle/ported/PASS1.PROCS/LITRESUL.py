@@ -52,7 +52,7 @@ def LIT_RESULT_TYPE(LOC1, LOC2):
         INLINE("6B", 0, 0, 2, 0);  # SD  0,0(0,2)
         INLINE("60", 0, 0, 1, 8);  # STD 0,8(0,1)
         '''
-        d = fromFloatIBM(g.DW[0], g.DW[1])
+        d = g.fromFloatDW01()
         if d > 0x7FFFFFFF or d < -0x80000000:
             g.DW[2] = 1
         else:
@@ -60,7 +60,7 @@ def LIT_RESULT_TYPE(LOC1, LOC2):
     else:
         # My replacement implementation, based on C-language patchfile
         # GR[1] loaded with `DW_AD @p86_0
-        g.FR[0] = fromFloatIBM(g.DW[0], g.DW[1]) # p86_4
+        g.FR[0] = g.fromFloatDW01() # p86_4
         g.FR[0] = abs(g.FR[0]) # p86_8
         # GR[2] loaded with `ADDR_FIXED_LIMIT` @p86_10
         g.FR[0] -= fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p86_14

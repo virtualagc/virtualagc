@@ -523,9 +523,9 @@ def MONITOR(function, arg2=None, arg3=None):
         if value == 0.0:
             return " 0.0"
         if p == 0:
-            fpFormat = "%+2.6e"
+            fpFormat = "%+2.7e"
         else:
-            fpFormat = "%+2.15e"
+            fpFormat = "%+2.16e"
         value = fpFormat % value
         if value[:1] == "+":
             value = " " + value[1:]

@@ -588,25 +588,11 @@ class cSYNTHESIZE:
 
 lSYNTHESIZE = cSYNTHESIZE()
 
-productionCount = 0
-def productionTrace(PRODUCTION_NUMBER):
-    global productionCount
-    productionCount += 1
-    #print(f"productionTrace {'%5d' % productionCount}: {'%3d' % PRODUCTION_NUMBER}|{'%04X' % g.STMT_TYPE}|{g.AS_PTR}|", end="")
-    print(f"productionTrace {'%5d' % productionCount}: {'%3d' % PRODUCTION_NUMBER}|{g.AS_PTR}|", end="")
-    print(f"{g.ARRAYNESS_STACK[0]},{g.ARRAYNESS_STACK[1]},{g.ARRAYNESS_STACK[2]},{g.ARRAYNESS_STACK[3]},{g.ARRAYNESS_STACK[4]},{g.ARRAYNESS_STACK[5]},{g.ARRAYNESS_STACK[6]},{g.ARRAYNESS_STACK[7]},{g.ARRAYNESS_STACK[8]},{g.ARRAYNESS_STACK[9]}|", end="")
-    print(f"{g.CURRENT_ARRAYNESS[0]},{g.CURRENT_ARRAYNESS[1]},{g.CURRENT_ARRAYNESS[2]},{g.CURRENT_ARRAYNESS[3]},{g.CURRENT_ARRAYNESS[4]}|", end="")
-    print(f"{g.VAR_ARRAYNESS[0]},{g.VAR_ARRAYNESS[1]},{g.VAR_ARRAYNESS[2]},{g.VAR_ARRAYNESS[3]},{g.VAR_ARRAYNESS[4]}", end="")
-    print()
-    if productionCount == g.productionTrigger:
-        pass
-        pass
-
 def SYNTHESIZE(PRODUCTION_NUMBER):
     l = lSYNTHESIZE  # Local variables.
     
     if g.rsbTrace:
-        productionTrace(PRODUCTION_NUMBER)
+        g.productionTrace(PRODUCTION_NUMBER)
         
     def SET_INIT(A, B, C, D, E):
         # Local Q doesn't need to be persistent
@@ -802,14 +788,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 # My guess is that INLINE code is being used here, unnecessarily,
                 # as an optimization for quickly negating a numeric literal
                 # previously stored as an IBM DP float in DW[0] and DW[1].  
-                negatedValue = -fromFloatIBM(g.DW[0], g.DW[1])
+                negatedValue = -g.fromFloatDW01()
                 g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, negatedValue);
             else:
                 # Replacement implementation
                 g.traceInline("SYNTHESIZE p125")
                 g.DW[0] = 0x80000000 ^ g.DW[0] # p125_0, 4
                 g.LOC_P[g.PTR[g.SP]] = \
-                        SAVE_LITERAL(1, fromFloatIBM(g.DW[0], g.DW[1]));
+                        SAVE_LITERAL(1, g.fromFloatDW01());
         else:
             g.TEMP = g.PSEUDO_TYPE[g.PTR[g.SP]];
             HALMAT_TUPLE(g.XMNEG[g.TEMP - g.MAT_TYPE], 0, g.SP, 0, 0);
@@ -834,7 +820,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 goto = "DIV_FAIL";
             else:
                 g.LOC_P[g.PTR[g.MP]] = \
-                    SAVE_LITERAL(1, g.DW_AD());
+                    SAVE_LITERAL(1, g.fromFloatDW01());
                 g.PSEUDO_TYPE[g.PTR[g.MP]] = g.SCALAR_TYPE;
         if goto == "DIV_FAIL" or (goto == None and not al):
             if goto == "DIV_FAIL": goto = None
@@ -910,7 +896,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_VA, 5);
                     goto = "POWER_FAIL"
                 else:
-                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
+                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
                     g.TEMP = LIT_RESULT_TYPE(g.MP, g.SP);
                     if g.TEMP == g.INT_TYPE: 
                         if MAKE_FIXED_LIT(g.LOC_P[g.I]) < 0:
@@ -5374,6 +5360,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.K = 2;  # A DEFAULT
             g.I = g.FIXV[g.MPP1];
             if not ((g.I > 1 and g.I <= g.ARRAY_DIM_LIM) or g.I == -1):
+                g.productionTrace(373, increment=False)
                 ERROR(d.CLASS_DD, 1);
             else:
                 g.K = g.I;
@@ -5484,7 +5471,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             SET_INIT(g.LOC_P[g.TEMP], 2, g.PSEUDO_FORM[g.TEMP], g.PSEUDO_TYPE[g.TEMP], g.NUM_ELEMENTS);
             g.NUM_ELEMENTS = g.NUM_ELEMENTS + 1;
             g.NUM_STACKS = g.NUM_STACKS + 1;
-        if (goto == None and g.TEMP_SYN) or goto == "END_REPEAT_INIT":
+        if (goto == None and (1 & g.TEMP_SYN) != 0) or goto == "END_REPEAT_INIT":
             if goto == "END_REPEAT_INIT": goto = None
             SET_INIT(0, 3, 0, 0, g.NUM_FL_NO);
             g.NUM_FL_NO = g.NUM_FL_NO - 1;

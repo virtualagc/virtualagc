@@ -36,7 +36,7 @@ As far as the arguments are concerned:
                 bit-string or character-string length of the converted value.
                 Otherwise ignored.
 '''
-def convertSimple(value, datatype, datalength):
+def convertSimple(value, datatype, datalength, double=False):
     if value == None:
         return None
     elif isinstance(value, int):
@@ -47,7 +47,7 @@ def convertSimple(value, datatype, datalength):
         elif datatype == "bit":
             return formBitArray(value, datalength)
         elif datatype == "character":
-            s = formatNumberAsString(value)
+            s = formatNumberAsString(value, double)
             if len(s) > datalength:
                 return NaN
             return s
@@ -60,7 +60,7 @@ def convertSimple(value, datatype, datalength):
             # HAL/S doesn't allow SCALAR -> BIT(...).  I do.
             return formBitArray(hround(value), datalength)
         elif datatype == "character":
-            s = formatNumberAsString(value)
+            s = formatNumberAsString(value, double)
             if len(s) > datalength:
                 return NaN
             return s
@@ -101,10 +101,11 @@ def convertSimple(value, datatype, datalength):
 def convertSimpleAttributes(value, attributes):
     if value == None:
         return None
+    double = "double" in attributes
     if "integer" in attributes:
-        return convertSimple(value, "integer", -1)
+        return convertSimple(value, "integer", -1, double=double)
     if "scalar" in attributes or "vector" in attributes or "matrix" in attributes:
-        return convertSimple(value, "scalar", -1)
+        return convertSimple(value, "scalar", -1, double=double)
     if "character" in attributes:
         return convertSimple(value, "character", attributes["character"])
     if "bit" in attributes:

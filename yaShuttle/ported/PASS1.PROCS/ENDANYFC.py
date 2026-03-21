@@ -151,7 +151,7 @@ def END_ANY_FCN():
                 ERROR(d.CLASS_VF, 1, g.VAR[g.MP]);
                 return;
             # END
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
             goto = "BI_FUNCS_EXIT";
 

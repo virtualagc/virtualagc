@@ -154,41 +154,64 @@
 // disagree.
 int productionTrigger = -1;
 int productionCount = 0;
-void __attribute__ ((no_instrument_function))
-productionTrace(int PRODUCTION_NUMBER) {
 #if defined(RSB_TRACE) && defined(mSTMTuTYPE) && defined(mASuPTR) && \
   defined(mARRAYNESSuSTACK) && defined(mVARuARRAYNESS) && \
   defined(mCURRENTuARRAYNESS) && defined(mSYNTHESIZExPRODUCTIONuNUMBER)
+
+static void __attribute__ ((no_instrument_function))
+printHalfwordArray(int n, int a, const char *f) {
+  char msg[2048];
+  int offset = 0, i;
+  offset += sprintf(&msg[offset], "|");
+  for (i = 0; i < n; i++)
+    {
+      if (i > 0)
+	offset += sprintf(&msg[offset], ",");
+      offset += sprintf(&msg[offset], f, COREHALFWORD(a + 2 * i));
+    }
+  printf("%s", msg);
+}
+
+static void __attribute__ ((no_instrument_function))
+printWordArray(int n, int a, const char *f) {
+  char msg[2048];
+  int offset = 0, i;
+  offset += sprintf(&msg[offset], "|");
+  for (i = 0; i < n; i++)
+    {
+      if (i > 0)
+	offset += sprintf(&msg[offset], ",");
+      offset += sprintf(&msg[offset], f, getFIXED(a + 4 * i));
+    }
+  printf("%s", msg);
+}
+
+void __attribute__ ((no_instrument_function))
+productionTrace(int PRODUCTION_NUMBER) {
   int i;
   if (productionTrigger < 0)
     return;
   productionCount++;
-  printf("productionTrace %5d: %3d|", productionCount, PRODUCTION_NUMBER);
-  //printf("%04X|", COREHALFWORD(mSTMTuTYPE));
-  printf("%d|", COREHALFWORD(mASuPTR));
-  for (i = 0; i < 10; i++)
-    {
-      if (i != 0) printf(",");
-      printf("%d", COREHALFWORD(mARRAYNESSuSTACK + 2 * i));
-    }
-  printf("|");
-  for (i = 0; i < 5; i++)
-    {
-      if (i != 0) printf(",");
-      printf("%d", COREHALFWORD(mCURRENTuARRAYNESS + 2 * i));
-    }
-  printf("|");
-  for (i = 0; i < 5; i++)
-    {
-      if (i != 0) printf(",");
-      printf("%d", COREHALFWORD(mVARuARRAYNESS + 2 * i));
-    }
+  printf("productionTrace %5d: %3d", productionCount, PRODUCTION_NUMBER);
+#if 0
+  //printf("|%04X", COREHALFWORD(mSTMTuTYPE));
+  printf("|%d", COREHALFWORD(mASuPTR));
+  printHalfwordArray(10, mARRAYNESSuSTACK, "%d");
+  printHalfwordArray(5, mCURRENT_ARRAYNESS, "%d");
+  printHalfwordArray(6, mVARuARRAYNESS, "%d");
+#elif 1
+  printf("|%2d", getFIXED(mMPP1));
+  printWordArray(12, mFIXV, "%08X");
+#endif
   printf("\n");
   fflush(stdout);
   if (productionCount == productionTrigger)
     i = 5;
+  }
+#else
+void __attribute__ ((no_instrument_function))
+productionTrace(int PRODUCTION_NUMBER) { }
 #endif
-}
 
 void writeZipfile(gzFile dest) {
     // Set binary mode for standard I/O on Windows if needed (best practice)

@@ -170,7 +170,8 @@ def COMPILATION_LOOP():
                                 if g.CONTROL[7] & 1:
                                     SYT_DUMP();
                         g.VAR[g.SP] = g.BCD[:];
-                        g.FIXV[g.SP] = hround(g.VALUE) & 0xFFFFFFFF;
+                        #g.FIXV[g.SP] = hround(g.VALUE) & 0xFFFFFFFF;
+                        g.FIXV[g.SP] = g.VALUE;
                         g.FIXF[g.SP] = g.FIXING;
                         g.FIXL[g.SP] = g.SYT_INDEX;
                         g.PARSE_STACK[g.SP] = g.TOKEN;
@@ -197,7 +198,7 @@ def COMPILATION_LOOP():
                 g.MPP1 = g.MP + 1;
                 SYNTHESIZE (g.STATE - g.MAXPp);  #   APPLY PRODUCTION
                 g.SP = g.MP;  #   RESET STACK POINTER
-                g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0xFFF;
+                g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0x1FF;
                 I = g.INDEX1[g.STATE];
                 #   COMPARE TOP OF STATE STACK WITH TABLES
                 J = g.STATE_STACK[g.SP];

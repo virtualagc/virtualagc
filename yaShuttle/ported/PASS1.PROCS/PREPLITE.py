@@ -7,8 +7,11 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-22 RSB  Ported from XPL
+            2026-03-18 RSB  Now truncates floating-point to integer for `VALUE`
+                            rather than rounding.
 '''
 
+import math
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
@@ -42,7 +45,7 @@ from HALINCL.SAVELITE import SAVE_LITERAL
 '''
 IR-182-1 describes PREP_LITERAL like so:
     "PREP_LITERAL takes a floating point number fresh from
-    creation by a MONITOR(lO) call, checks it for proper limits,
+    creation by a MONITOR(10) call, checks it for proper limits,
     enters it in the literal table via SAVE LITERAL and sets
     SYT_INDEX to the absoulute index of the literal."
 
@@ -83,7 +86,7 @@ def PREP_LITERAL():
         g.FR[4] = 0.0 # p59_18
         g.FR[2] = g.FR[0] # p59_20
         g.DW[6] = 0 # p59_22, 26, 30, 34
-        g.DW[7] = int(hround(g.FR[0]))
+        g.DW[7] = int(math.trunc(g.FR[0]))
         g.FR[0] += g.FR[4] # p59_38
         g.FR[2] -= g.FR[0] # p 59_40
         if g.FR[2] != 0: # p59_42
@@ -96,5 +99,5 @@ def PREP_LITERAL():
     g.DW[6], g.DW[7] = toFloatIBM(g.FR[6]) # p76_0, 4
 
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
-    g.SYT_INDEX = SAVE_LITERAL(1, g.DW_AD());
+    g.SYT_INDEX = SAVE_LITERAL(1, g.fromFloatDW01());
     return

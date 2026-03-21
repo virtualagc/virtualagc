@@ -150,15 +150,10 @@ account for rounding that's closer to what's needed.  I think!
 def hround(x):
     return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
 
-'''
-The following code is intended to determine the precision (number of 
-significant digits allowable to the right of the decimal point)
-of floating-point values.  The precision may actually be slightly
-higher than what I compute, because I subtract 1 decimal place, but 
-subtracting the 1 gets rid of a lot of nasty-looking printouts.
-'''
-precision = len(str(math.pi).split(".")[1]) - 1
-fpFormat = "%+2." + ("%d" % precision) + "e"
+#precision = len(str(math.pi).split(".")[1]) - 1
+#fpFormat = "%+2." + ("%d" % precision) + "e"
+fpFormatSP = "%+2.7e"
+fpFormatDP = "%+2.16e"
 
 '''
 The POUND constant replaces the # symbol in subscripts during code 
@@ -179,13 +174,16 @@ def unpound(subscript, width):
 
 # Format a number (INTEGER, SCALAR) as a string, as in WRITE statements, and
 # return it.  Or else None on failure.
-def formatNumberAsString(value):
+def formatNumberAsString(value, double=False):
     if isinstance(value, int):
-        return "%d" % value
+        return "%11d" % value
     elif value == 0.0:
         return " 0.0"
     elif isinstance(value, float):
-        value = fpFormat % value
+        if double:
+            value = fpFormatDP % value
+        else:
+            value = fpFormatSP % value
         if value[:1] == "+":
             value = " " + value[1:]
         value = value.replace("e", "E")

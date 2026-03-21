@@ -32,6 +32,37 @@ import sys
 from xplBuiltins import OUTPUT, BYTE, fromFloatIBM, scriptParentFolder
 import HALINCL.COMMON as h
 
+productionTrigger = -1
+productionCount = 0
+def productionTrace(PRODUCTION_NUMBER, increment=True):
+    global productionCount
+    if productionTrigger < 0:
+        return
+    
+    def printArray(n, a, f="%d"):
+        msg = "|"
+        for i in range(n):
+            if i > 0:
+                msg += ","
+            msg += f % a[i]
+        return msg
+    
+    if increment:
+        productionCount += 1
+    msg = f"productionTrace {'%5d' % productionCount}: {'%3d' % PRODUCTION_NUMBER}"
+    if False:
+        msg += f"|{AS_PTR}"
+        msg += printArray(10, ARRAYNESS_STACK)
+        msg += printArray(5, CURRENT_ARRAYNESS)
+        msg += printArray(5, VAR_ARRAYNESS)
+    elif True:
+        msg += f"|{'%2d' % MPP1}"
+        msg += printArray(12, FIXV, "%08X")
+    print(msg)
+    if productionCount == productionTrigger:
+        pass
+        pass
+
 #------------------------------------------------------------------------------
 # Command-line parameters.
 
@@ -51,7 +82,6 @@ debugwr = False
 templib = False
 traceInlines = False
 rsbTrace = False
-productionTrigger = 0
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -2825,9 +2855,9 @@ LITLIM = LIT_BUF_SIZE
 '''
 DW_AD, in principle, is the address of the DW[] array.  Now, DW[0] through
 DW_AD[3] is the floating-point working area, so DW[0] and DW[1] are typically
-loaded with the most-significant and least-significan 32-words of an IBM DP
+loaded with the most-significant and least-significant 32-words of an IBM DP
 floating-point number, so what you're almost always trying to do if you use
-DW_AD is to pass a "pointer", without otherwise wouldn't exist in HAL/S, to
+DW_AD is to pass a "pointer", which otherwise wouldn't exist in HAL/S, to
 whatever DP value is stored in DW[0],DW[1].  Typically, this will be used by
 some INLINE code that does something perverted to that value, and of course, we
 have to replace that inline code by some Python code, for which a "pointer"
@@ -2836,12 +2866,12 @@ we really want is the Python float for that value.
 
 Most of these dreadful INLINEs are in the function SAVE_LITERAL(), whose 2nd
 parameter is often DW_AD in XPL.  But the Python version of SAVE_LITERAL()
-expects the value of the literal in that parameter, so using DW_AD() in place
-of DW_AD would be exactly what's wanted.
+expects the value of the literal in that parameter, so using fromFloatDW01() in
+place of DW_AD would be exactly what's wanted.
 '''
 
-
-def DW_AD():
+# Was `DW_AD()`.
+def fromFloatDW01():
     return fromFloatIBM(DW[0], DW[1])
 
 

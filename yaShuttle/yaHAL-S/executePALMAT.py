@@ -13,6 +13,10 @@ References: https://www.ibiblio.org/apollo/hal-s-compiler.html#PALMAT
             [PIH] Programming in HAL/S.
 History:    2023-01-01 RSB  Began.
             2026-02-12 RSB  Corrected some calls to readItemLUN5().
+            2026-03-20 RSB  Altered field spacing in `WRITE` statements to 
+                            5 spaces, to conform to the HAL/S-FC Programmer's
+                            Guide, p. 12-4.  Fixed `INTEGER [DOUBLE]` format
+                            per HAL/S-FC User's Guide, p. 6-2.
 
 I think that this code (unlike my normal code), though perhaps not 
 exactly a walk in the park to brows through it, is reasonably clean.  
@@ -42,6 +46,8 @@ from unaryFunctions import arrayableUnaryRTL, unaryRTL
 from binaryFunctions import arrayableBinaryRTL, binaryRTL
 from accumulableFunctions import accumulate, accumulableFunctions
 from saveValueToVariable import *
+
+fieldPrintSpacing = "     " # see p. 12-4 of HAL/S Programmers' Guide.
 
 '''
 Categorization of the HAL/S built-in functions by the number of arguments
@@ -156,10 +162,10 @@ def printVectorOrMatrix(vOrM):
             printVectorOrMatrix(v)
         return
     elif vOrM == None:
-        value = "X.X"
+        value = "X.X" + fieldPrintSpacing
     elif isinstance(vOrM, (int, float)):
-        value = formatNumberAsString(vOrM)
-    print(" " + value + " ", end="")
+        value = formatNumberAsString(vOrM) + fieldPrintSpacing
+    print(value, end="")
 
 # For WRITE statements.
 def printArray(array):
@@ -168,26 +174,19 @@ def printArray(array):
             printArray(a)
         return
     elif array == None:
-        value = 'None'
-    elif isinstance(array, int):
-        value = "%d" % array
-    elif array == 0.0:
-        value = " 0.0"
-    elif isinstance(array, float):
-        value = fpFormat % array
-        if value[:1] == "+":
-            value = " " + value[1:]
-        value = value.replace("e", "E")
+        value = 'None' + fieldPrintSpacing
+    elif isinstance(array, (int,float)):
+        value = formatNumberAsString(array) + fieldPrintSpacing
     elif isBitArray(array):
-        value = bin(parseBitArray(array)[0])[2:]
+        value = bin(parseBitArray(array)[0])[2:] + fieldPrintSpacing
     elif isinstance(array, str):
-        value = '"' + array + '"'
+        value = '"' + array + '"' + fieldPrintSpacing
     elif isVector(array) or isMatrix(array):
         printVectorOrMatrix(array)
         return
     else:
-        value = "(unimplemented)"
-    print(" " + value + " ", end="")
+        value = "(unimplemented)" + fieldPrintSpacing
+    print(value, end="")
 
 '''
 For READ statements.  Read next value (in string form) from LUN 5 ... i.e., 
@@ -1164,17 +1163,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 print("%*s" % (indent, ""), end="")
                 for value in computationStack:
                     if value == None:
-                        print(" None ", end="")
+                        print("None" + fieldPrintSpacing, end="")
                     elif isArrayQuick(value):
                         printArray(value)
                     elif isBitArray(value):
-                        print(" " + bin(parseBitArray(value)[0])[2:], end="")
+                        print(bin(parseBitArray(value)[0])[2:] + fieldPrintSpacing, end="")
                     elif isinstance(value, (int, float, list)):
                         printVectorOrMatrix(value)
                     elif isinstance(value, str):
-                        print(value.replace("''", "'"), end="")
+                        print(value.replace("''", "'") + fieldPrintSpacing, end="")
                     else:
-                        print(value, end="")
+                        print(str(value) + fieldPrintSpacing, end="")
                 computationStack.clear()
                 print()
         elif "iocontrol" in instruction:

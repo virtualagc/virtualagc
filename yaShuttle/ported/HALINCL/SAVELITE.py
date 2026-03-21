@@ -17,18 +17,11 @@ import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
 from ERROR import ERROR
 from GETLITER import GET_LITERAL
+#from asciiToEbcdic import *
 
-
-'''
-Note that for literals of TYPE==1, the original SAVE_LITERAL() would have 
-expected the literal to be loaded into DW[0],DW[1] as an IBM DP float, and
-would have expected the 2nd parameter to be DW_AD ... i.e., it would have
-expected a *pointer* to the literal's value rather than the value itself.
-This is accomplished in Python by using DW_AD() as the 2nd parameter, because
-DW_AD() actually provides the desired value rather than a pointer to it.
-'''
 def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     g.LIT_TOP(g.LIT_TOP() + 1);
+    #print("@@@", g.LIT_TOP(), TYPE, VAL, SIZE, CMPOOL)
     if g.LIT_TOP() == g.LIT_TOP_MAX: ERROR(d.CLASS_BT, 3);
     g.LIT_PTR = GET_LITERAL(g.LIT_TOP());
     g.LIT1(g.LIT_PTR, TYPE);
@@ -66,7 +59,7 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
         # the extra space it will eventually need.  I don't find any code for
         # it elsewhere, though.  Perhaps it was just a boo-boo.
         g.LIT_CHAR_USED(g.LIT_CHAR_USED() + length + 1);
-        g.LIT_CHAR_AD(g.LIT_CHAR_AD() + length);
+        g.LIT_CHAR_AD(a);
     # END
     elif TYPE == 1:
     # ARITHMETIC

@@ -134,7 +134,7 @@ def HALMAT_INIT_CONST ():
             while True: 
                 # start of patch92p.c
                 g.traceInline("ROUND_SCALAR p92")
-                g.FR[0] = fromFloatIBM(g.DW[0], g.DW[1]) # p92_2, _4.
+                g.FR[0] = g.fromFloatDW01() # p92_2, _4.
                 g.FR[0] = abs(g.FR[0]) # p92_8
                 g.FR[0] += fromFloatIBM(0x407FFFFF, 0xFFFFFFFF) # 0.5 p92_10, 14
                 scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p92_18, 22, 26
@@ -144,7 +144,7 @@ def HALMAT_INIT_CONST ():
                 if 0 != (NEG & 1):
                     # start of patch101p.c
                     g.traceInline("ROUND_SCALAR p101")
-                    g.FR[4] = fromFloatIBM(g.DW[0], g.DW[1]) # p101_0
+                    g.FR[4] = g.fromFloatDW01() # p101_0
                     g.FR[4] = abs(g.FR[4]) # p101_4
                     g.FR[2] = 0.0 # p101_6
                     g.FR[2] = fromFloatIBM(ADJ_NEG, 0) # 1.0 p101_8
@@ -172,7 +172,7 @@ def HALMAT_INIT_CONST ():
             # start of patch117p.c
             g.traceInline("ROUND_SCALAR p117")
             g.FR[0] = 0.0 # p117_0, 4
-            g.FR[0] += fromFloatIBM(g.DW[0], g.DW[1]) # p117_6
+            g.FR[0] += g.DW[1] #g.fromFloatDW01() # p117_6
             g.DW[0], g.DW[1] = toFloatIBM(g.FR[0]) # p117_10
             # end of patch117p.c
             return g.TRUE
@@ -227,7 +227,7 @@ def HALMAT_INIT_CONST ():
                         if g.SYT_TYPE(g.ID_LOC) == g.INT_TYPE:
                             if ROUND_SCALAR(g.IC_LOC[I]) & 1:
                                 if g.IC_TYPE[I] == g.SCALAR_TYPE:
-                                    g.IC_LOC[I] = SAVE_LITERAL(1, g.DW_AD());
+                                    g.IC_LOC[I] = SAVE_LITERAL(1, g.fromFloatDW01());
                             else: 
                                 ERRORS(d.CLASS_DI, 17);
                         if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \

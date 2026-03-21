@@ -36,9 +36,83 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-skip = False
-if "--skip" in sys.argv[1:]:
-    skip = True
+helpMsg = '''
+Compiles HAL/S source-code files for the PASS version stored in the current 
+working directory's sub-hierarchy (i.e., subdirectories like APPLSRC/, SSSRC/,
+and INCL80/).  Usage:
+
+    compilePASS [OPTIONS]
+    
+The only OPTIONS available are:
+
+    --help          Show this message.
+    --skip-to=F     Skip all source-code files prior to F.  F must be the 
+                    relative path of a file, such as APPLSRC/RDDDDI.hal.
+                    Note the presence of the subdirectory name and the .hal
+                    filename extension.  If the selected filename is never 
+                    encountered, then nothing at all will be compiled.
+    --rsb-trace=N   Supplies an --rsb-trace=N option to pass 1 of the HAL/S
+                    compilers.  Applies only to the first HAL/S file compiled,
+                    and is discarded for subsequent HAL/S files.  It's typically
+                    used in conjunction with a preceding --skip-to=F.
+                    Note that this requires a HALSFC-PASS1 compiled with the
+                    -DRSB_TRACE switch, and HALSFC-PASS1 will abort if not.
+                    This can be checked by running `HALSFC-PASS1 --help` to 
+                    see if --rsb-trace is listed among HALSFC-PASS1's available 
+                    options.
+                    
+In Linux, a typical usage would be to *begin* a clean compilation like so:
+    rm *.results -rf
+    prepareTEMPLIB --clear
+    prepareINCLIB --clear --include=INCL80
+    unbuffer compilePASS  2>&1 | tee compilePASS.log
+Whereas you'd subsequently *resume* compilation previously aborted due to 
+failure of a clean compilation, presumably after fixing the problem that caused
+the failure, like so:
+    unbuffer compilePASS --skip-to=FILENAME 2>&1 | tee -a compilePASS.log
+where FILENAME was the file at which the clean compilation had failed. 
+
+But not all of these things (namely rm, unbuffer, 2>&1, tee) necessarily work 
+identically, or even at all, on other platforms like Mac OS or Windows.  The 
+simplest variant of these commands guaranteed to work the same way on all 
+platforms would be clean-compile commands of
+    prepareTEMPLIB --clear
+    prepareINCLIB --clear --include=INCL80
+    compilePASS  >compilePASS.log
+versus a resumption-compile command of
+    compilePASS --skip-to=FILENAME >>compilePASS.log
+
+Presumably the reason for piping the output reports into a log file 
+(compilePASS.log) is self-evident:  Production of the log file is optional, but 
+since over a thousand HAL/S files are compiled in any given PASS version, a log
+of what actually happened during the full compilation process is likely a useful
+thing to have.  
+
+As for the rest of the complexity of some of the "typical" commands listed 
+above, here's the explanation:  The "2>&1" is to insure that error messages 
+emitted on stderr are included in the log.  The "tee" is to insure that you can 
+actually see the messages (and thus have a progress gauge) rather than having 
+to wait until the compilation process is complete in order to view the full log
+file. The "-a"  in the tee command means that the messages are appended to the 
+end of the log rather than overwriting it.  The "unbuffer" means that you can 
+see the messages more-or-less at the time they're emitted, rather than having 
+the operating system buffer them in large blocks and only emitting them when 
+full blocks become available.
+'''
+skipTo = None
+rsbTrace = ""
+for parm in sys.argv[1:]:
+    if parm == "--help":
+        print(helpMsg)
+        sys.exit(0)
+    elif parm.startswith("--skip-to="):
+        skipTo = parm[10:]
+    elif parm.startswith("--rsb-trace="):
+        rsbTrace = parm
+    else:
+        print("Unrecognized parameter:", parm)
+        print(helpMsg)
+        sys.exit(1)
 
 if not Path("SSSRC").is_dir():
     print("SSSRC/ not found.")
@@ -97,11 +171,12 @@ def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorLi
 
 defaultSubdirectory = "."
 compilationCount = 0
+skipping = (skipTo != None)
 def compile(template):
-    global compilationCount
+    global compilationCount, skipping, rsbTrace
+    compilationCount += 1
     filename = template["filename"]
     parms = getParms(template)
-    compilationCount += 1
     fields = filename.split("/")
     if len(fields) == 2:
         subfolder = fields[0]
@@ -111,17 +186,23 @@ def compile(template):
     else:
         print(f"Specified source-code filename {subfolder}/{filename} is illegal.")
         os._exit(1)
+    if skipping:
+        if subfolder + "/" + filename == skipTo:
+            skipping = False
+        else:
+            #print("%3d: Skipping past %s/%s." % \
+            #  (compilationCount, subfolder, filename))
+            return None
     result = None
     try:
         print("%3d: Compiling %s/%s ..." % \
               (compilationCount, subfolder, filename))
-        result = subprocess.run(
-            ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
-             f"--parms={parms}"],
-            capture_output = True,
-            text = True,
-            check = True
-            )
+        command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
+             f"--parms={parms}"]
+        if rsbTrace != "":
+            command.append(rsbTrace)
+            rsbTrace = ""
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
     except subprocess.CalledProcessError as e:
         if not checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2", "DI11"]) and \
            not checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
@@ -287,14 +368,11 @@ print(f"{len(templatesByFilename)} templates in all")
 # compilable files are identified.
 removed = set()
 
-if skip:
-    print(f"{datetime.now()}: Skipping compilation of independent files.")
-else:
-    print(f"{datetime.now()}: Compiling independent files ...")
-    for filename in templatesByFilename:
-        template = templatesByFilename[filename]
-        if len(template["includedFilenames"]) == 0:
-            compile(template)
+print(f"{datetime.now()}: Compiling independent files ...")
+for filename in templatesByFilename:
+    template = templatesByFilename[filename]
+    if len(template["includedFilenames"]) == 0:
+        compile(template)
 for stem in templatesByStem:
     template = templatesByStem[stem]
     if len(template["includedFilenames"]) == 0:
@@ -328,10 +406,11 @@ if False:
         compile(template)
         templatesByFilename.pop(filename)
 
-print(f"Uncompiled files ({len(templatesByFilename)}:")
-print(removed)
+print(f"Uncompiled files ({len(templatesByFilename)}):")
 for filename in templatesByFilename:
-    print(f"\t{filename}:", templatesByFilename)
+    compilationCount += 1
+    print("%3d: Did not compile %s." % (compilationCount, filename))
+
 print(f"{datetime.now()}: Done.")
 
 
