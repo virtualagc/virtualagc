@@ -6,6 +6,7 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
+                2026-03-23 RSB  Fixed exit code for `RECORD_LINK` exit.
     Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -1075,6 +1076,9 @@ MAIN_PROGRAM:                                                                   
    OUTPUT = '';                                                                 04307213
    CALL PRINT_DATE_AND_TIME('END OF HAL/S OPTIMIZER ',DATE,TIME);               04307233
    OUTPUT = '';                                                                 04307253
+   /?V
+   CALL INLINE('exitCodeLINK = COREHALFWORD(mCOMMONuRETURNuCODE);');
+   ?/
    IF ^ELEGANT_BUGOUT THEN CALL RECORD_LINK;                                    04307273
                                                                                 04307313
 DISASTER:

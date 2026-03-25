@@ -46,12 +46,12 @@ FINDER:                                                                         
       /?W
       DECLARE MAXLIBFILES LITERALLY '2';                                        00399520
       DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008", "4", "80000006"),  00399525
+ /* SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES */                     00399530
       ?/
       /?V
       DECLARE MAXLIBFILES LITERALLY '4';                                        00399520
       DECLARE FILENUM(MAXLIBFILES) FIXED INITIAL("80000008",4,"80000006",8,9),  00399525
       ?/
- /* SPECIFIES OUTPUT(8), INPUT(4), AND OUTPUT(6) ENTRIES */                     00399530
          FILENODD(MAXLIBFILES) BIT(1); /* TRUE IF DD STATEMENT MISSING */       00399535
       DO I = START TO MAXLIBFILES;                                              00399540
          IF ^FILENODD(I) THEN DO;                                               00399545

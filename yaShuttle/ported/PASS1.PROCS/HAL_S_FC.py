@@ -120,6 +120,7 @@ if "--help" not in sys.argv:
     for line in f:
         dummy.append(normalizeInputText(line))
     inputDevices[0] = {
+        "name": sourceFile,
         "file": f,
         "open": True,
         "ptr":-1,

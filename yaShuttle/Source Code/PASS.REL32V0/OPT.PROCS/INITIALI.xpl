@@ -6,6 +6,7 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
+                2026-03-23 RSB  Conditioned `OPTIMIZER_OFF` with X1 option.
     Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -105,7 +106,12 @@ SHRINK_SYMBOLS:                                                                 
                                                                                 00880180
                                                                                 00880190
       TRACE = (OPTION_BITS & "200") ^= 0;            /*X5*/                     00881000
+      /?W
       OPTIMIZER_OFF = FALSE;                                        /*CR13832*/ 00883000
+      ?/
+      /?V
+      OPTIMIZER_OFF = (OPTION_BITS & "20") ^= 0;
+      ?/
       HALMAT_REQUESTED = ((TOGGLE & "40") ^= 0) & (OPTIMIZER_OFF = FALSE);      00884000
       HALMAT_REQUESTED = HALMAT_REQUESTED & TRACE;                              00885000
       STATISTICS = (OPTION_BITS & "0100 0000") ^= 0;                 /* X6 */   00886000

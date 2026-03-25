@@ -46,6 +46,9 @@ compiler passes (HALSFC-PASS1[.exe], etc.) be in the PATH.
 
 The available OPTIONS are:
 
+    -o F            Saves generated object file with file- or folder-name F 
+                    rather than just as the default cards.bin (for PFS/PASS) or 
+                    cards/ (for BFS).
     --test          In addition to compiling, perform all available validity
                     tests. Requires NOTABLES in --parms (see below).  Also
                     requires that the following be installed and be in the PATH: 
@@ -55,6 +58,8 @@ The available OPTIONS are:
     --parms="..."   Comma-separated list of HAL/S-FC options.  By default: none.
                     For compatibility with Windows, it is good practice to
                     enclose this in double-quotes.
+    --no-opt        Do not run optimization passes, and try to generate object
+                    code from unoptimized HALMAT.
     --bfs           Use BFS version of HAL/S-FC.  The default is the PASS/PFS 
                     version of HAL/S-FC.
     --exe           Use Windows port of HAL/S-FC.  This is the default on
@@ -73,11 +78,24 @@ parmString = ""
 bfs = False
 ext = ""
 rsbTrace = ""
+objectFilename = None
+oWasLast = False
 extCOMMON = ".out"
 if isWindows:
     ext = ".exe"
 for parm in sys.argv[1:]:
-    if parm == "--test":
+    if oWasLast:
+        oWasLast = False
+        if parm.startswith("-"):
+            print("-o followed by aswitch rather than an object-code filename")
+            sys.exit(1)
+        elif parm.endswith(".hal"):
+            print("-o followed by a source-code filename rather than an object-code filename")
+            sys.exit(1)
+        objectFilename = parm
+    elif parm == "-o":
+        oWasLast = True
+    elif parm == "--test":
         test = True
     elif parm == "--force":
         force = True
@@ -105,8 +123,16 @@ for parm in sys.argv[1:]:
 if halsFile == None:
     print(helpMessage)
     sys.exit(1)
+if oWasLast:
+    print("-o followed by end of line rather than an object-code filename")
+    sys.exit(1)
 normFile = Path(halsFile).name
 commandLine = " ".join(sys.argv)
+if objectFilename == None:
+    if bfs:
+        objectFilename = "cards"
+    else:
+        objectFilename = "cards.bin"
 
 now = datetime.now()
 now = now.strftime("%Y-%m-%d %H-%M-%S")
@@ -147,6 +173,19 @@ def moveAll(message):
     f = open("%s%scomment.txt" % (results, os.sep), "w")
     print(message, file=f)
     f.close()
+    try:
+        if bfs:
+            if objectFilename != "cards":
+                try:
+                    shutil.rmtree(objectFilename)
+                except:
+                    pass
+                shutil.copytree("cards", objectFilename)
+        else:
+            if objectFilename != "cards.bin":
+                shutil.copy("cards.bin", objectFilename)
+    except:
+        print(f"FYI: Unable to copy object file(s) to {objectFilename}")
     for f in filesPorted+filesLocal:
         try:
             shutil.move(f, "%s%s%s" % (results, os.sep, f))
@@ -157,12 +196,21 @@ def moveAll(message):
             shutil.copy(f, "%s%s%s" % (results, os.sep, f))
         except:
             pass
+    print(f"Results stored in the folder \"{results}\".")
+    try:
+        os.remove("current.results")
+    except:
+        pass
+    try:
+        os.symlink(results, "current.results", target_is_directory=True)
+        print("Accessible also as \"current.results\" until next HALSFC run.")
+    except:
+        pass
 
 # The arguments comprise an error message.
 def errorExit(message):
     print(message)
     moveAll("%s: %s" % (message, commandLine))
-    print("Results in \"%s\"" % results)
     sys.exit(1)
 
 # Adapted this from google AI.
@@ -293,14 +341,6 @@ if test:
 if pendingFailure != None:
     errorExit(f"Aborting due to deferred {pendingFailure}.")
 
-if False:   # Don't do this!  It's true that it might be reasonable for 
-            # COMPOOLs, but it's not reasonable for PROGRAMs, PROCEDUREs,
-            # or FUNCTIONs!
-    if "TEMPLATE" in parmString:
-        moveAll("Success: $COMMAND_LINE")
-        print("Compilation successful. Results in \"%s\"." % results)
-        sys.exit(0)
-
 # Run FLO.
 command = '''%s 
     --commoni=COMMON0%s 
@@ -368,4 +408,4 @@ shutil.copy("litfile.bin", "litfile4.bin")
 # PASS3 and PASS4 aren't ready for use yet.
 
 moveAll("Success: $COMMAND_LINE")
-print("Compilation successful. Results in \"%s\"." % results)
+print("Compilation successful.")

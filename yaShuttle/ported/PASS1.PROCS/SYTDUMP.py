@@ -940,7 +940,8 @@ def SYT_DUMP():
                                     l.JL = l.JL | 6;
                                 l.JL = SHR(l.JL, 1);
                                 l.R = TRUNCATE(SUBSTR(l.CUSS, l.JL * 23, 23));
-                                if 0 != (1 & ((l.JL == 1) & l.KI)): 
+                                #if 0 != (1 & ((l.JL == 1) & l.KI)): 
+                                if l.JL == 1 and 0 != (l.KI & 1):
                                     g.NOT_ASSIGNED_FLAG = 0xFF;
                                     l.R = '***** ERROR ***** REFERENCED BUT ' + l.R;
                                     OUTPUT(0, l.S + l.T);

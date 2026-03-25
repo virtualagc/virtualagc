@@ -5,6 +5,7 @@
    Purpose:    This is a part of the HAL/S-FC compiler program.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-24 RSB  Imported from XPL
+               2026-03-22 RSB  Fixed a bug in an `IF` condition.
 """
 
 from xplBuiltins import *
@@ -116,7 +117,7 @@ def CHECK_NAMING(VALUE, LOC):
                 # CHECK IF VAL_P 0x4000 BIT IS SET. IF IT IS, THERE
                 # IS A NAME VARIABLE IN THE STRUCTURE REFERENCE LIST;
                 # THIS STRUCTURE CANNOT HAVE ITS MISC_NAME_FLAG SET.
-                elif not (SHR(H2, 14 & 1)): 
+                elif not (SHR(H2, 14) & 1): 
                     g.SYT_FLAGS(g.FIXL[LOC], H1 | g.MISC_NAME_FLAG);
                 if not (SHR(H2, 14) & 1):  # DO
                     if (H1 & g.TEMPORARY_FLAG) != 0: ERROR(d.CLASS_EN, 10, g.VAR[g.MP]);

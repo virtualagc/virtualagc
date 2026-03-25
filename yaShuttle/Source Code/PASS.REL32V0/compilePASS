@@ -36,6 +36,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+autoX1 = False
 helpMsg = '''
 Compiles HAL/S source-code files for the PASS version stored in the current 
 working directory's sub-hierarchy (i.e., subdirectories like APPLSRC/, SSSRC/,
@@ -46,6 +47,7 @@ and INCL80/).  Usage:
 The only OPTIONS available are:
 
     --help          Show this message.
+    --auto-x1       Automatically disable OPT and retry for ZO3 errors.
     --skip-to=F     Skip all source-code files prior to F.  F must be the 
                     relative path of a file, such as APPLSRC/RDDDDI.hal.
                     Note the presence of the subdirectory name and the .hal
@@ -109,6 +111,8 @@ for parm in sys.argv[1:]:
         skipTo = parm[10:]
     elif parm.startswith("--rsb-trace="):
         rsbTrace = parm
+    elif parm == "--auto-x1":
+        autoX1 = True
     else:
         print("Unrecognized parameter:", parm)
         print(helpMsg)
@@ -124,8 +128,26 @@ if not Path("APPLSRC").is_dir():
 def descore(s):
     return s.strip().replace("_", "")[:6]
 
+'''
+Regarding the compiler parameters:
+    LIST        Not necessary in "production".  But for debugging I need to
+                be able to look at the assembly language in the PASS2 report
+                to compare against MAFGEN.
+    SRN         Necessary, since the PASS source code mostly has SRNs.
+    TEMPLATE    Necessary to generate templates for external compilation units
+                for the template library.
+    NOLFXI      Empirically necessary from comparison to MAFGEN.
+    REGOPT      Empirically necessary from comparison to MAFGEN.
+    CARDTYPE    Necessary, though I got the exact values from comments in 
+                source code, so perhaps needing adjustments.
+    X1          Upon finding a ZO3 error in the OPT pass, recompilation is done
+                by prefixing the X1 parameter, since otherwise object-code
+                generation does not occur.  There are other potential 
+                workarounds, though much more expensive to implement.  So far,
+                this approach agrees with MAFGEN.
+'''
 def getParms(template):
-    parmBase = "LIST,SRN,TEMPLATE,CARDTYPE="
+    parmBase = "LIST,SRN,TEMPLATE,NOLFXI,REGOPT,CARDTYPE="
     cardtypesBySourceFile = {
         "default": "FCRM",
         "CS2INI" : "ACFCRM",
@@ -144,9 +166,9 @@ def getParms(template):
     return parms
 
 # Return True if there's a delayable error.
-errorsDelayed = set()
+errorsSkipped = set()
 def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorList):
-    global errorsDelayed
+    global errorsSkipped
     returnValue = False
     try:
         f = open(passRptFilename, "r")
@@ -154,9 +176,8 @@ def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorLi
             for errorType in candidateErrorList:
                 if errorType in line:
                     stem = template["stem"]
-                    if stem not in errorsDelayed:
-                        errorsDelayed.add(stem)
-                        print(f"     {nameOfPass} {errorType} error in {stem}, compilation delayed.")
+                    if stem not in errorsSkipped:
+                        errorsSkipped.add(stem)
                         returnValue = True
                         break
             if returnValue:
@@ -172,6 +193,7 @@ def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorLi
 defaultSubdirectory = "."
 compilationCount = 0
 skipping = (skipTo != None)
+# Return True on success, False on skipped compilation.
 def compile(template):
     global compilationCount, skipping, rsbTrace
     compilationCount += 1
@@ -194,22 +216,43 @@ def compile(template):
             #  (compilationCount, subfolder, filename))
             return None
     result = None
-    try:
-        print("%3d: Compiling %s/%s ..." % \
-              (compilationCount, subfolder, filename))
-        command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
-             f"--parms={parms}"]
-        if rsbTrace != "":
-            command.append(rsbTrace)
-            rsbTrace = ""
-        result = subprocess.run(command, capture_output = True, text = True, check = True)
-    except subprocess.CalledProcessError as e:
-        if not checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2", "DI11"]) and \
-           not checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
+    firstTry = True
+    retryX1 = False
+    while firstTry or retryX1:
+        firstTry = False
+        try:
+            if retryX1:
+                parmsFull = parms + ",X1"
+                print("      Recompiling %s/%s with X1 due to OPT ZO3 error" % \
+                      (subfolder, filename))
+            else:
+                parmsFull = parms
+                print("%4d: Compiling %s/%s" % \
+                      (compilationCount, subfolder, filename))
+            command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
+                 f"--parms={parmsFull}"]
+            if rsbTrace != "":
+                command.append(rsbTrace)
+            result = subprocess.run(command, capture_output = True, text = True, check = True)
+            retryX1 = False
+        except subprocess.CalledProcessError as e:
+            if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
+                if autoX1 and not retryX1:
+                    retryX1 = True
+                    continue
+                print(f"      ZO3 error in OPT, compilation skipped.")
+                rsbTrace = ""
+                return False
+            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2", "DI11"]):
+                print(f"      PM2 or DI11 error in PASS1, compilation skipped.")
+                rsbTrace = ""
+                return False
             print(f"Failed with exit code {e.returncode}.")
             print("STDOUT:", e.stdout)
             print("STDERR:", e.stderr)
             os._exit(1)
+    rsbTrace = ""
+    return True
 
 # First we have to determine all template dependencies, so we can compile the
 # templates in the correct order.  Assume that all of the template files are in
@@ -367,12 +410,14 @@ print(f"{len(templatesByFilename)} templates in all")
 # keep doing that until either all of the files are compiled, or else no new
 # compilable files are identified.
 removed = set()
+skipped = set()
 
 print(f"{datetime.now()}: Compiling independent files ...")
 for filename in templatesByFilename:
     template = templatesByFilename[filename]
     if len(template["includedFilenames"]) == 0:
-        compile(template)
+        if not compile(template):
+            skipped.add(filename)
 for stem in templatesByStem:
     template = templatesByStem[stem]
     if len(template["includedFilenames"]) == 0:
@@ -384,32 +429,41 @@ while len(remove) > 0:
     remove = []
     filesLeft = set(templatesByFilename)
     for filename in templatesByFilename:
+        if filename in skipped:
+            continue
         template = templatesByFilename[filename]
-        if template["stem"] in errorsDelayed:
+        if template["stem"] in errorsSkipped:
             continue
         includedFilenames = set(template["includedFilenames"])
         if len(includedFilenames & filesLeft) == 0:
-            compile(template)
-            if template["stem"] not in errorsDelayed:
+            if not compile(template):
+                skipped.add(filename)
+            if template["stem"] not in errorsSkipped:
                 remove.append(filename)
     for filename in remove:
         removed.add(filename)
         templatesByFilename.pop(filename)
 
 if False:
-    print(f"Compilation of {len(errorsDelayed)} files delayed due to ZO3 or PM2 errors:")
-    print("     ", errorsDelayed)
+    print(f"Compilation of {len(errorsSkipped)} files skipped due to ZO3 or PM2 errors:")
+    print("     ", errorsSkipped)
     print(f"{datetime.now()}: Compiling delayed files ...")
-    for stem in errorsDelayed:
+    for stem in errorsSkipped:
         template = templatesByStem[stem]
         filename = template["filename"]
         compile(template)
         templatesByFilename.pop(filename)
 
-print(f"Uncompiled files ({len(templatesByFilename)}):")
-for filename in templatesByFilename:
-    compilationCount += 1
-    print("%3d: Did not compile %s." % (compilationCount, filename))
+print(f"{len(skipped)} skipped files due to DI11, PM2, or ZO3 errors")
+print(f"Uncompiled files due to dependence ({len(templatesByFilename)-len(skipped)}):")
+if len(templatesByFilename) == len(skipped):
+    print("(None)")
+else:
+    for filename in templatesByFilename:
+        if filename in skipped:
+            continue
+        compilationCount += 1
+        print("%3d: Did not compile %s." % (compilationCount, filename))
 
 print(f"{datetime.now()}: Done.")
 

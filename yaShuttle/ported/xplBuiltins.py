@@ -181,6 +181,7 @@ for s in range(-1, 2, 2):
 # When there is Python file associated with the device, the value will be a
 # Python dictionary structured as follows:
 #    {
+#        "name":     The name of the PDS or sequential file.
 #        "file":     The associated Python file object,
 #        "open":     Boolean (True if open, False if closed),
 #        "pds":      For PDS datasets only.  If "pds" isn't present, then the 
@@ -228,6 +229,7 @@ def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False):
         except:
             f = open(name, "w+")
     inputDevice = {
+        "name": name,
         "file": f,
         "open": True,
         "ptr":-1,
@@ -244,6 +246,7 @@ def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False):
     
 def openGenericOutputDevice(name, isPDS=False):
     outputDevice = {
+        "name": name,
         #"file": open(scriptParentFolder + "/" + name, "w"),
         "file": open(name, "w"),
         "open": True,
@@ -801,14 +804,14 @@ def INPUT(fileNumber):
             file = outputDevices[fileNumber]
         else:
             file = inputDevices[fileNumber]
-        index = file['ptr'] + 1
+        index = file["ptr"] + 1
         if "pds" not in file:
             data = file['buf']
         else:
             mem = file["mem"]
             data = file['pds'][mem]
         if index < len(data):
-            file['ptr'] = index
+            file["ptr"] = index
             line = "%-80s" % data[index]
             #if fileNumber == 4:
             #    print(f"Here '{line[:]}'", file=sys.stderr)

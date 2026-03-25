@@ -217,7 +217,7 @@ def COMPILATION_LOOP():
                     # h.CROSS_REF = loadClassArray(h.cross_ref, "CROSS_REF.json")
                     # h.ADVISE = loadClassArray(h.advise, "ADVISE.json")
                     # I hope!
-                    return
+                    break # return
                 g.STATE = g.APPLY2[I];  #   PICK UP THE NEXT STATE
                 g.LOOK = 0;
             elif g.STATE <= g.MAXLp:
@@ -242,4 +242,6 @@ def COMPILATION_LOOP():
                 g.LOOK_STACK[g.SP] = 0
                 g.LOOK = 0;
         # END OF COMPILE LOOP
-            
+    g.litCharFile.write(bytearray(1))
+    g.litCharFile.flush()
+    
