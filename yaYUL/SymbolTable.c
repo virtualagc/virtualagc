@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2009-2010,2016,2020-2021 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2026 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -103,6 +103,8 @@
  *                              the plain text. And in retrospect, I don't see any way for
  *                              it to really be confused with a comment.
  *              2021-04-20 RSB  Added --ebcdic.
+ *              2026-03-26 RSB  Changed computation of `SortSymbols()` slightly,
+ *                              per issue #1283.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -786,6 +788,34 @@ CompareSymbolName(const void *Raw1, const void *Raw2)
 
 //-------------------------------------------------------------------------
 // Sort the symbol table.  Returns the number of duplicated symbols.
+
+#if 0
+static void
+addressPrint(Address_t *a) {
+  printf("\t%04X %04X %04X %04X %04X %04X %04X %04X %04X %04X\n",
+	 a->Address, a->Banked, a->Constant, a->EB, a->Erasable, a->FB,
+	 a->Fixed, a->Invalid, a->Overflow, a->SReg);
+}
+
+static int
+addressMismatch(Address_t *a1, Address_t *a2) {
+  if (a1->Address != a2->Address ||
+      a1->Banked != a2->Banked ||
+      a1->Constant != a2->Constant ||
+      a1->EB != a2->EB ||
+      a1->Erasable != a2->Erasable ||
+      a1->FB != a2->FB ||
+      a1->Fixed != a2->Fixed ||
+      a1->Invalid != a2->Invalid ||
+      a1->Overflow != a2->Overflow ||
+      a1->SReg != a2->SReg)
+    {
+      return 1;
+    }
+  return 0;
+}
+#endif
+
 int
 SortSymbols(void)
 {
@@ -793,16 +823,16 @@ SortSymbols(void)
 
   qsort(SymbolTable, SymbolTableSize, sizeof(Symbol_t), CompareSymbolName);
 
-  // If a symbol is duplicated (in the same namespace), be remove the
+  // If a symbol is duplicated (in the same namespace), then remove the
   // duplicates.
   for (i = 1; i < SymbolTableSize;)
     {
       if (SymbolTable[i - 1].Namespace == SymbolTable[i].Namespace
           && !strcmp(SymbolTable[i - 1].Name, SymbolTable[i].Name))
-        {
-          printf("Symbol \"%s\" (%d) is duplicated.\n", SymbolTable[i].Name,
-              SymbolTable[i].Namespace);
-          ErrorCount++;
+	{
+	  printf("Symbol \"%s\" (namespace %d) is multiply-defined.\n",
+	       SymbolTable[i].Name, SymbolTable[i].Namespace);
+	  ErrorCount++;
 
           for (j = i; j < SymbolTableSize; j++)
             SymbolTable[j - 1] = SymbolTable[j];

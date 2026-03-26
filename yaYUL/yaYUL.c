@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2026 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -109,6 +109,8 @@
  *             	2021-01-24 RSB  Added --reconstruction.
  *             	2021-04-20 RSB  Added stuff associated with --ebcdic.
  *             	2025-01-11 RSB	Corrected some spacing in the --help menu.
+ *             	2026-03-26 RSB  Improved handling of multiply-defined symbols,
+ *             	                per issue #1283.
  */
 
 #include "yaYUL.h"
@@ -209,7 +211,8 @@ int
 main(int argc, char *argv[])
 {
   int MaxPasses = 10;
-  int RetVal = 1, i, j, k, LastUnresolved, Fatals = 0, Warnings = 0;
+  int RetVal = 1, i, j, k, LastUnresolved, Fatals = 0, Warnings = 0,
+      DuplicatedSymbols;
   extern int UnpoundPage;
 
   // JMS: OutputSymbols = 1 to output a symbol table to SymbolFile.
@@ -343,7 +346,7 @@ main(int argc, char *argv[])
 
   printf("Apollo Guidance Computer (AGC) assembler, version " NVER
   ", built " __DATE__ ", target %s\n", assemblyTarget);
-  printf("(c)2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey\n");
+  printf("(c)2026 Ronald S. Burkey\n");
   printf(
       "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 
@@ -377,7 +380,7 @@ main(int argc, char *argv[])
 
   // Sort the symbol table, or else we won't be able to locate the
   // symbols later.
-  Fatals += SortSymbols();
+  DuplicatedSymbols = SortSymbols();
 
   // Assign the registers their proper addresses.
   if (!Block1)
@@ -477,7 +480,8 @@ main(int argc, char *argv[])
   // might not have been able to use it.  Now, however, we need to resort it to whatever collation
   // the user selected from the yaYUL command line.
   forceAscii = 0;
-  SortSymbols ();
+  DuplicatedSymbols += SortSymbols();
+  Fatals += DuplicatedSymbols;
   printf("\n\n");
   PrintBankCounts();
   printf("\n\n");
@@ -485,6 +489,7 @@ main(int argc, char *argv[])
   printf("\nUnresolved symbols:  %d\n", UnresolvedSymbols());
   printf("Fatal errors:  %d\n", Fatals);
   printf("Warnings:  %d\n", Warnings);
+  printf("Multiply-defined symbols:  %d\n", DuplicatedSymbols);
   if (HtmlOut != NULL)
     {
       fprintf(HtmlOut, "\n");
@@ -492,6 +497,7 @@ main(int argc, char *argv[])
       fprintf(HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols());
       fprintf(HtmlOut, "Fatal errors:  %d\n", Fatals);
       fprintf(HtmlOut, "Warnings:  %d\n", Warnings);
+      fprintf(HtmlOut, "Multiply-defined symbols:  %d\n", DuplicatedSymbols);
       fprintf(HtmlOut, "\n");
       fprintf(HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
     }

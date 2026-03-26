@@ -13,6 +13,11 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2023-09-04 MAS  Created from Artemis 072.
 ##		2024-03-05 MAS  Updated for Skylark 48.
+##		2026-03-26 RSB  Commented out multiply-defined symbols
+##				(3P5SPT1, 6P3SPT1), which older versions of 
+##				yaYUL would have allowed, but which the current 
+##				version does not.  This relates to issue
+##				#1283.
 
 
 # NAME		P40 - TVC (SPS BURN)
@@ -157,7 +162,10 @@ P40S/F		STODL	F		# P41 ENTERS HERE
 		TC	2PHSCHNG
 		OCT	40036
 		OCT	04024
-6P3SPT1		=	6.3SPOT
+## 2026-03-26 RSB: The following line has been commented out because 6P3SPT1
+## is also defined (albeit the same way) in P30,P38.agc, and would trigger
+## a multiply-defined-symbol error.
+#6P3SPT1		=	6.3SPOT
 
  +2		TC	BANKCALL
 		CADR	R02BOTH		# IMU STATUS CHECK
@@ -2142,7 +2150,10 @@ ENGOFF		TS	ITEMP1
 		CS	FIVE
 		TC	NEWPHASE
 		OCT	3
-3P5SPT1		=	3.5SPOT
+## 2026-03-26 RSB: The following line has been commented out because 3P5SPT1
+## is also defined (albeit the same way) above, and would trigger
+## a multiply-defined-symbol error.
+#3P5SPT1		=	3.5SPOT
 		TC	TASKOVER
 
 SQRTTASK	CAF	ZERO
