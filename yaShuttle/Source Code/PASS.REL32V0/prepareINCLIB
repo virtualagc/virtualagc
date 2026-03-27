@@ -105,6 +105,13 @@ for dir in inclusionDirectories:
             lines = f.readlines()
         for i in range(len(lines)):
             lines[i] = lines[i].rstrip("\r\n")[:srn].ljust(80)
+            if False:
+                # Comment out every "D INCLUDE TEMPLATE ..." line.
+                if lines[i][:1] == "D":
+                    fields = lines[i].split()
+                    if fields[:2] == ["DINCLUDE", "TEMPLATE"] or \
+                            fields[:3] == ["D", "INCLUDE", "TEMPLATE"]:
+                        lines[i] = "C" + lines[i][:71] + lines[i][72:]
         # What we do with the contents of the file differs for HAL_S_FC.py 
         # vs HALSFC.  For HAL_S_FC.py, we simply stash the entire contents into
         # `jsonLibrary`, which is a dictionary that will eventually be written
