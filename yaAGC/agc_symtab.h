@@ -3,7 +3,7 @@
  *
  *  Created on: Dec 21, 2008
  *      Author: O. Hommes
- *  Mods:  2026-03-30 RSB  Increased `MAX_LINE_LENGTH` from 132 to 256, per
+ *  Mods:  2026-03-30 RSB  Increased `MAX_LINE_LENGTH` from 132 to 1024, per
  *                         issue #1284.
  */
 
