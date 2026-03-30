@@ -243,8 +243,12 @@ def compile(template):
                 print(f"      ZO3 error in OPT, compilation skipped.")
                 rsbTrace = ""
                 return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2", "DI11"]):
-                print(f"      PM2 or DI11 error in PASS1, compilation skipped.")
+            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]):
+                print(f"      PM2 error in PASS1, compilation skipped.")
+                rsbTrace = ""
+                return False
+            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["DI11"]):
+                print(f"      DI11 error in PASS1, compilation skipped.")
                 rsbTrace = ""
                 return False
             print(f"Failed with exit code {e.returncode}.")

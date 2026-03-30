@@ -76,6 +76,7 @@
  *                2021-05-24 RSB Workaround for bad cygwin pow() function.
  *                2021-05-24 RSB ... and apparently, for MINGW as well.
  *                2021-05-24 RSB My workarounds were bogus.  I've rolled them back.
+ *                2026-03-30 RSB Changed `MAX_LINE_LENGTH` to 1024.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -143,7 +144,7 @@ enum OpType_t
 #define HTML_TABLE_END "</td>\n</tr>\n</tbody>\n</table>\n"
 
 #define MAX_LABEL_LENGTH 10    // Max length of symbols (8 + optional ,1 or ,2).
-#define MAX_LINE_LENGTH 256    // Was 132, but it's easy to accidentally make
+#define MAX_LINE_LENGTH 1024   // Was 132, but it's easy to accidentally make
                                // the lines longer by poorly estimating the
                                // amount of space in comments, and so on.
 #define COMMENT_SEPARATOR '#'

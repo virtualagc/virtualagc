@@ -3,6 +3,8 @@
  *
  *  Created on: Dec 21, 2008
  *      Author: O. Hommes
+ *  Mods:  2026-03-30 RSB  Increased `MAX_LINE_LENGTH` from 132 to 256, per
+ *                         issue #1284.
  */
 
 #ifndef AGC_SYMTAB_H_
@@ -22,7 +24,7 @@
 #define MAX_PATH_LENGTH  (1024)        // Maximum directory length of source
 #define MAX_FILE_LENGTH  (256)         // Maximum length of sourc file name
 #define MAX_LABEL_LENGTH (10)          // Maximum length of label
-#define MAX_LINE_LENGTH  (132)         // Maximum length of source line
+#define MAX_LINE_LENGTH  (1024)        // Maximum length of source line
 #define MAX_LIST_LENGTH  (10)          // # of source lines to display
 
 // The maximum number of source files. This is a generous estimate based
