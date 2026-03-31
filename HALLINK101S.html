@@ -9,13 +9,9 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-    <div align="center">
+    <div align="left">
       <script type="text/javascript">
-document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace("@SUBTITLE@","Link Editor"))
-</script><br>
-      <font size="+2"><i>(<b>HALLINK101S</b> does not exist at present.<br>
-          This page collects my preliminary thoughts<br>
-          &nbsp;about it, but particularly about object files.)</i></font><br>
+document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace("@SUBTITLE@","Link Editor")</script><br>
     </div>
     <h1>Table of Contents </h1>
     <ul>
@@ -25,8 +21,17 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       </li>
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#installation">Installation of
-          <b>HALLINK101S</b></a></li>
-      <li><a moz-do-not-send="true" href="#usage">Use of <b>HALLINK101S</b></a></li>
+          <b>lnk101</b></a></li>
+      <li><a moz-do-not-send="true" href="#usage">Use of <b>lnk101</b></a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#scenario1">Scenario
+            1:&nbsp; Fully Linking a Complete Program, and Running It<br>
+          </a></li>
+        <li><a moz-do-not-send="true" href="#scenario2">Scenario
+            2:&nbsp; Linking a Single Object File That Is Not a Complete
+            Program</a><br>
+        </li>
+      </ul>
       <li><a moz-do-not-send="true" href="#reverse">Reverse-Engineering
           Assistance</a></li>
       <li><a moz-do-not-send="true" href="#unexpected">Unexpected
@@ -35,6 +40,8 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
         <li><a moz-do-not-send="true" href="#partial">Partial Linking By
             the Assembler Itself</a></li>
         <li><a moz-do-not-send="true" href="#unknownDatatype">Non-System/360
+
+
 
 
 
@@ -52,29 +59,67 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
     </ul>
     <a moz-do-not-send="true" href="#unexpected"> </a>
     <h1><a name="Introduction"></a>Introduction</h1>
-    <b>HALLINK101S</b> (if anyone ever writes it) would be our "modern"
-    version of the link editor used to combine IBM AP-101 object files
-    created by the HAL/S language compiler and AP-101S assembler into
-    "load files" which can be directly executed on an IBM AP-101
-    computer or emulator thereof.&nbsp; To the best of my knowledge, the
-    original linker actually used for Shuttle software development has
-    not survived, so <b>HALLINK101S</b> will be an entirely-new
-    creation.&nbsp; It'll be a Python 3 program that should work on any
-    computer having the Python 3 language installed. <br>
+    A "link editor" (or just "linker") is a program used to combine a
+    set of "object files" created by compilers and assemblers generated
+    from separate source code files into a single executable "load file"
+    that can be directly run on a computer after being loaded into the
+    computer's memory.&nbsp; In the specific case of Space Shuttle
+    flight software under the umbrella of the Virtual AGC Project, the
+    roughly 1500 source-code files are from the flight software known as
+    PFS or PASS and (potentially) BFS.&nbsp; They're written in the
+    HAL/S high-level language and the AP-101 assembly language, and
+    compiled/assembled by the <b>HALSFC</b> compiler or <b>ASM101S</b>
+    assembler, thus leaving us with around 1500 object-code files that
+    need to be linked into a single load file.&nbsp; But even if (say)
+    you had written your own custom HAL/S program, and you did so using
+    a single source-code file, thus creating a single object file, that
+    object file would still need to be "linked" to produce an AP-101S
+    load file.&nbsp; That's because what distinguishes an object file
+    from a load file is that a load file inhabits a <i>specific</i>
+    area of computer memory at <i>explicit</i><i></i> memory addresses,
+    whereas an object file leaves all questions of the specific memory
+    addresses it occupies open; it is the linking process which turns
+    the open-questions of addressing in the object files into the
+    specific memory addresses a program needs if it's going to run
+    properly.<br>
+    <br>
+    Don Schmidt (thanks, Don!) has been kind enough to write a program
+    he calls <b>lnk101</b> that we can use for this purpose.&nbsp; <br>
+    <blockquote><font size="-1"><b>Disclaimer:</b>&nbsp; I shouldn't
+        imply that <b>lnk101</b> was written <i>by</i> or <i>for</i>
+        Virtual AGC.&nbsp; It was at least begun for Don's own purposes,
+        and thus existed in some form when I first heard mention of it,
+        but Don was kind enough to pay attention to my many ideas on the
+        subject as his development proceeded, so <b>lnk101</b> is
+        indeed fit for our use within the Virtual AGC suite of Space
+        Shuttle development tools.&nbsp; But note that it does not
+        reside within Virtual AGC software repositories, nor is Virtual
+        AGC in control of it, nor is anything I say about it
+        official.&nbsp; <a moz-do-not-send="true"
+          href="https://github.com/ColanderCombo/nsts-sdl-dps">It is in
+          Don's own repository, as is public commentary of his own about
+          its use</a>.</font><br>
+    </blockquote>
+    Regarding the contemporary linker used for the original Space
+    Shuttle software development, to my knowledge it has not survived,
+    either in source code or otherwise.&nbsp; Thus <b>lnk101</b> is an
+    entirely-new creation.&nbsp; It is a Python 3 program that should
+    work on any computer having the Python 3 language installed. <br>
     <br>
     Regarding the IBM AP-101B vs AP-101S computers, the AP-101B was used
     in earlier Shuttle flights, while the AP-101S was used in later
-    flights.&nbsp; <b>HALLINK101S</b> is completely agnostic on the
-    question of AP-101B vs AP-101S.<br>
+    flights.&nbsp; I think that <b>lnk101</b> is agnostic on the
+    question of AP-101B vs AP-101S, since the choice of instruction sets
+    is the province of the HAL/S compiler rather than of the linkder.<br>
     <p>I am not aware of surviving documentation describing the format
       of AP-101S object files specifically, nor of any surviving AP-101
       object-code files from the Shuttle era.&nbsp; In any case, I think
       that such object code would have been produced not as "files" in a
       mass-storage system, but rather as decks of computer punch-cards
-      punched directly by the original HAL/S compiler (HAL/S-FC) or
-      AP-101 assembler.&nbsp; So it is possible that the decks of punch
-      cards could still exist, hidden away somewhere, even if not as
-      online files.&nbsp; In any case, I have no access to them, and
+      punched directly by the original HAL/S compiler (<b>HAL/S-FC</b>)
+      or AP-101 assembler.&nbsp; So it is possible that the decks of
+      punch cards could still exist, hidden away somewhere, even if not
+      as online files.&nbsp; In any case, I have no access to them, and
       have heard nary a hint of their existence, and I could be mistaken
       in my inferences about them anyway.<br>
     </p>
@@ -82,7 +127,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       documentation simply as "the AP-101 link editor", and the
       contemporary documentation goes on to say that "until the final
       version of the linkage editor is available to support all features
-      of the HAL/S-FC compiler, an interim program, known as HALLINK-FC,
+      of the <b>HAL/S-FC</b> compiler, an interim program, known as <b>HALLINK-FC</b>,
       will be supplied to perform the link edit functions".&nbsp; As
       usual, satisfactory documentation for neither "the AP-101 link
       editor" nor for <b>HALLINK-FC</b> (nor for its System/360-target
@@ -94,18 +139,18 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       project.&nbsp; But since we have access to neither of those
       linkers, any intuition of mine about them is without value.<br>
     </p>
-    On the other hand, we <i>do</i> have a modern port (from the XPL
-    programming language into the Python programming language) of the
-    original HAL/S compiler.&nbsp; That being the case, we can use the
-    compiler to convert HAL/S source code into AP-101S object files, and
-    in principle we might be able to do whatever reverse engineering is
-    required on those object files to clarify issues regarding the
+    On the other hand, in the Virtual AGC Project we have created a
+    modern port (from the XPL/I programming language into the Python
+    programming language) of the original HAL/S compiler.&nbsp; That
+    being the case, we can in principle use the compiler to convert
+    HAL/S source code into AP-101S object files and apply reverse
+    engineering on those object files to clarify issues regarding the
     object-file format.&nbsp; In attempting that kind of reverse
     engineering, it quickly becomes apparent that the AP-101S
     object-file format is based upon the format of early object files
     for the IBM System/360, if not strictly identical to it.&nbsp; In
-    other words, we can use the early System/360 format as our guide,
-    and occasionally depart from it as needed on an <i>ad hoc</i>
+    other words, we can use the well-documented System/360 format as our
+    guide, and occasionally depart from it as needed on an <i>ad hoc</i>
     basis.&nbsp; Some relevant references are listed in the next
     section.<br>
     <blockquote><font size="-1"><b>Aside:</b>&nbsp; It appears to me
@@ -119,24 +164,23 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       </font></blockquote>
     <p> </p>
     <p>As usual, not all of the System/360 features are needed for
-      actual legacy AP-101S software, so only those features of the
-      object-file format relevant to that surviving software are likely
-      to be implemented in <b>HALLINK101S</b>; contrariwise, some <i>non</i>-System/360
-
-
-
-      AP-101S-specific features may appear in the object files.&nbsp;
-      For example, "records" in an object file are described as being of
-      6 types, known as ESD, TXT, RLD, SYM, XSD, and END, but the XSD
-      type wasn't introduced until the 1990's in order to deal with the
-      needs of C compilers, and hence XSD records don't appear at all in
-      HAL/S or AP-101S object files.&nbsp; But I won't trouble myself or
-      bore you with an exhaustive list of such differences here.&nbsp; <br>
+      actual legacy AP-101S software, so I won't claim that every
+      feature provided by a full System/360 linker is necessarily
+      implemented in <b>lnk101</b>; that's up to Don anyway.&nbsp;
+      Contrariwise, some <i>non</i>-System/360 AP-101S-specific
+      features appear in the object files.&nbsp; For example, "records"
+      in a System/360 object file are described as being of 6 types,
+      known as ESD, TXT, RLD, SYM, XSD, and END, but the XSD type wasn't
+      introduced until the 1990's in order to deal with the needs of C
+      compilers, and hence XSD records don't appear at all in HAL/S or
+      AP-101S object files.&nbsp; But I won't trouble myself or bore you
+      with an exhaustive list of such differences here.&nbsp; <br>
     </p>
     To facilitate whatever reverse engineering is needed, I've provided
     a Python 3 program that can parse the object files produced by the
     HAL/S compiler (or by <b>ASM101S</b>) and report on all of the data
-    found within them.&nbsp; This will be covered in more detail later.<br>
+    found within them; and Don does similarly.&nbsp; This will be
+    covered in more detail later.<br>
     <h1><a name="bfs"></a>Backup vs Primary Flight Software (BFS vs PFS)</h1>
     <blockquote> </blockquote>
     <p>Let's get a clarification to my comments above out of the way.</p>
@@ -144,41 +188,45 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       flavors, namely the <i>Primary Flight Software</i> (referred to
       as PFS, or loosely but more commonly as PASS) and the <i>Backup
         Flight Software</i> (BFS).&nbsp; PFS and BFS were developed
-      mostly independently of each other, but more than that, their
+      mostly independently of each other — by different companies even,
+      namely Intermetrics vs Rockwell —, but more than that, their
       development tools differed as well.&nbsp; For example, although
-      PFS and BFS <i>nominally</i> were compiled using the same HAL/S
-      compiler (HAL/S-FC), in fact there were two incompatible versions
-      of HAL/S-FC (for PFS) and HAL/S-BFC (for BFS). &nbsp; And the fact
-      that there are two separate compilers doesn't affect just PFS and
-      BFS code, but <i>any</i> HAL/S program we may write:&nbsp; We
-      always have a choice of which of the two flavors of the compiler
-      to use!<br>
+      PFS and BFS <i>nominally</i> were eventually compiled using the
+      same HAL/S compiler (<b>HAL/S-FC</b>), in fact there were two
+      incompatible versions:&nbsp; <b>HAL/S-FC</b> (for PFS) and <b>HAL/S-BFC</b>
+      (for BFS). &nbsp; And the fact that there are two separate
+      compilers doesn't affect just PFS and BFS code, but <i>any</i>
+      HAL/S program we may write:&nbsp; We always have a choice of which
+      of the two flavors of the compiler to use!<br>
     </p>
     <p>More importantly for us in the context of the present discussion,
-      PFS and BFS used different linker programs.&nbsp; Outside of this
-      one section you're reading now, both this entire page and
-      specifically the <b>HALLINK101S</b> linker program described on
-      this page are for object code generated by the PASS/PFS flavor the
-      HAL/S compiler.&nbsp; Object code generated by the BFS version of
-      the compiler won't even be mentioned outside of this one section
-      you're reading right now ... well, with one brief return when <a
+      back in the day, PFS and BFS used completely different
+      contemporary linker programs.&nbsp; Outside of this one section
+      you're reading now, both this entire page and specifically the <b>lnk101</b>
+      linker program described on this page, are presently for object
+      code generated by the PASS/PFS flavor the HAL/S compiler.&nbsp;
+      Object code generated by the BFS version of the compiler won't
+      even be mentioned outside of this one section you're reading right
+      now ... well, with one brief return when <a
         moz-do-not-send="true" href="#reverse">reverse engineering</a>
       is discussed later.&nbsp; <br>
     </p>
     <p>Why?&nbsp; Well, back in the day, rather than using the AP-101
       link editor, BFS was linked using a different program called <b>PILOT</b>
       (Program Integration and Loading Tool).&nbsp; Furthermore, while
-      object code produced by the PFS version of HAL/S-FC was in a
-      modified System/360 format, object code produced by HAL/S-BFC was
-      instead in <b>PILOT</b> format.&nbsp; The two object-code formats
-      are completely incompatible.&nbsp; In other words, neither the
-      AP-101 link editor nor its intended replacement <b>HALLINK101S</b>
-      are compatible with <b>PILOT</b> object files.<br>
+      object code produced by the PFS version of <b>HAL/S-FC</b> was in
+      a modified System/360 format, object code produced by <b>HAL/S-BFC</b>
+      was instead in <b>PILOT</b> format.&nbsp; The two object-code
+      formats are incompatible.&nbsp; In other words, neither the AP-101
+      link editor nor its intended replacement <b>lnk101</b> are
+      compatible with <b>PILOT</b> object files.&nbsp; At least, not at
+      present.<br>
     </p>
     <p>That said, I hope that someday there will be a modern version of
       <b>PILOT</b> that can be used to link BFS-style object code ...
       perhaps it can be called <b>yaPILOT</b>?&nbsp; Maybe?&nbsp; <i>Yes</i>,
-      that has a nice ring to it!<br>
+      that has a nice ring to it!&nbsp; But better, I'd prefer that <b>lnk101</b>
+      be extended in that direction.<br>
     </p>
     <p>One hurdle is that as far as I know, there is no surviving
       information whatsoever <i>about</i> <b>PILOT</b>, and in
@@ -193,39 +241,48 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
       knowledge, in that we don't have many knowledgeable people any
       longer, but rather we have people with borrowed knowledge attained
       via search engines.&nbsp; And A.I., of course, for those of us who
-      can't use search engines very effectively.&nbsp; But what about
-      when the search engines fail because the search terms are too
-      common?&nbsp; Well, that's a good way to lose knowledge, even if
-      it's sitting in plain view.&nbsp; But I doubt it would have helped
-      if <b>PILOT</b> had a less-common name or if we had more native
-      experts on <b>PILOT</b> to consult, since I doubt that there's
-      any surviving information about <b>PILOT</b> online anyway.&nbsp;
-      If you have any such documentation, send it to me!&nbsp; <br>
+      can't even use search engines very effectively.&nbsp; But what
+      about when the search engines fail because the search terms are
+      too common?&nbsp; Well, that's a good way to lose knowledge, even
+      if it's sitting in plain view.&nbsp; But I doubt it would have
+      helped if <b>PILOT</b> had a less-common name or if we had more
+      native experts on <b>PILOT</b> to consult, since I doubt that
+      there's any surviving information about <b>PILOT</b> online
+      anyway.&nbsp; If you have any such documentation, send it to
+      me!&nbsp; <br>
     </p>
     <p>But don't lose all hope.&nbsp; Since the object-code generator in
       <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">PASS2
 
 
-        of the HAL/S-BFC source code</a> can produce <b>PILOT</b>-compatible
+
+
+        of the <b>HAL/S-BFC</b> source code</a> can produce <b>PILOT</b>-compatible
+
+
 
 
       output, it's still possible to attain <i>some</i> understanding
       of the <b>PILOT</b> format via reverse engineering it, and indeed
       perhaps a sufficient amount to implement a linker!&nbsp; I have
       done at least some of the reverse engineering, and have embedded
-      my findings in a program I call <a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/coPILOT.py">coPILOT.py</a>.&nbsp;
+      my findings in a program I call <b><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/coPILOT.py">coPILOT.py</a></b>.&nbsp;
+
+
 
 
       Catchy, eh?&nbsp; This script can read object files created by the
-      HAL/S-BFC, and parse them into a human readable form.&nbsp;
-      Moreover, there's additional commentary embedded within
-      coPILOT.py's source code to document some aspects of the format
-      that aren't evident in the reports it outputs.&nbsp; If you want
-      to read more about coPILOT.py, I'd suggest referring to <a
+      <b>HAL/S-BFC</b>, and parse them into a human readable form.&nbsp;
+      Moreover, there's additional commentary embedded within <b>coPILOT.py</b>'s
+      source code to document some aspects of the format that aren't
+      evident in the reports it outputs.&nbsp; If you want to read more
+      about <b>coPILOT.py</b>, I'd suggest referring to <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-3897924815">the
+
+
 
 
         discussion in issue #1273 in our Virtual AGC GitHub repository</a>.<br>
@@ -273,6 +330,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
             Assembler Language - OS Release 21</a>".&nbsp; Manual for
           the System/360 macro assembler upon which <b>ASM101S</b> is
           modeled.</li>
@@ -281,6 +340,8 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
             collection of notes about the AP-101S/AP-101B</a>.</li>
         <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
+
 
 
 
@@ -323,10 +384,14 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
+
               I and II</a>:&nbsp; :&nbsp; Principles of Operation for
             PCI/PCO and MSC</li>
           <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
+
 
 
 
@@ -365,11 +430,15 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
 
 
 
+
+
             Shuttle Advanced System/4 Pi Model AP-101 Central Processor
             Unit Technical Description</a>".&nbsp; Note that this
           predates the AP-101S model and doesn't precisely match it.</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
+
 
 
 
@@ -385,9 +454,13 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
             Wikipedia article "OS/360 Object File Format"</a></li>
         <li><a moz-do-not-send="true"
             href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
+
 
 
 
@@ -402,23 +475,490 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
 
 
 
+
+
             IBM document "OS/VS-VM/370 Assembler Programmer's Guide",
             Appendix C</a></li>
       </ul>
     </ul>
-    <h1><a name="installation"></a>Installation of HALLINK101S</h1>
-    TBD<br>
+    <h1><a name="installation"></a>Installation of lnk101</h1>
+    As mentioned earlier, the AP-101S linker we have is called <b>lnk101</b>,
+    by Don Schmidt.&nbsp; To install it, and a variety of useful
+    programs that come with it, I would suggest this:<br>
+    <ul>
+      <li><a moz-do-not-send="true"
+          href="https://github.com/ColanderCombo/nsts-sdl-dps">Use the
+          build instructions given by Don Schmidt's software repository</a>.</li>
+      <li>Get the directory nsts-sdl-dps/build/bin into your PATH, or at
+        least copy or (as I have done) symbolically link all of the
+        program in nsts-sdl-dps/build/bin/ into some directory that's
+        already in your PATH.<br>
+      </li>
+    </ul>
+    <p>I know this works on the versions of Linux I personally
+      use.&nbsp; Concerning Mac OS or Windows I have no knowledge.<br>
+    </p>
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; At the present
+        writing, the software in Don's repository is under development,
+        hence the installation process still has what I consider
+        inconveniences that I hope won't persist into a production
+        version.&nbsp; Inconveniences?&nbsp; If you are reading this
+        page at all, it's likely you will already have installed all of
+        the Shuttle-related development tools (<b>HALSFC</b>, <b>ASM101S</b>,
+        <b>XCOM-I</b>) on your own computer.&nbsp; But installing <b>lnk101</b>
+        using the instructions above will at the moment install
+        duplicates of all of these Virtual AGC development tools,
+        sometimes modified, sometimes behind in features, sometimes
+        ahead in features (which will hopefully be merged back upstream
+        to Virtual AGC sometime soon), all of which will be
+        time-consuming for you, and <i>none of which</i> you will
+        personally use.&nbsp; But as long as none of as any of these
+        duplications work their way into your PATH, having them there
+        doesn't do you any particular harm.</font><br>
+    </blockquote>
+    <h1><a name="usage"></a>Use of lnk101</h1>
+    There are a couple of scenarios in which I would envisage using the
+    linker.&nbsp; I'll cover them both in the subsections below.&nbsp; <br>
     <br>
-    <h1><a name="usage"></a>Use of HALLINK101S</h1>
-    TBD<br>
+    Most commonly, I'd think that you'd want to take an object file or
+    set of object files comprising a complete program, and link them to
+    create a load file that you could run in an AP-101S emulator.&nbsp;
+    At present, I'm still working towards full compilation/assembly of
+    all PASS/PFS source-code files, so it's not actually possible to do
+    this yet with PASS.&nbsp; But it's certainly possible to do so with
+    a HAL/S program you've written yourself.&nbsp; The other potential
+    use is something that I need to do myself, which is to take a single
+    object file that <i>doesn't</i> represent a complete program
+    itself, but to nevertheless link it <i>as if</i> it (and all of the
+    not-actually-present <i>other</i> object files upon which it
+    relies) reside at some specific locations in memory of my own
+    choosing.&nbsp; That's capability is vital for testing the compiler
+    and assembler.<br>
+    <br>
+    By the way, if you were immersed in the IBM mainframe world, as you
+    would be if you were one of the original developers of Space Shuttle
+    flight software, you would expect that since the linker intakes IBM
+    System/360-like object files it would also emit IBM System/360-like
+    load files.&nbsp; That's certainly what the contemporary linked
+    editor did and as the contemporary AP-101S loader would
+    expect.&nbsp; But <b>lnk101</b> does not do that.&nbsp; Instead, it
+    emits what it refers to as an "FCM" file.&nbsp; (I'm not sure what
+    that stands for.&nbsp; Perhaps Flight Computer Memory.)&nbsp; At any
+    rate, it's simply a binary file that's an image of the entire
+    AP-101S memory.&nbsp; Not coincidentally, this is also the format
+    expected by the available AP-101S emulators, <b>gpc-batch</b> and <b>gpc-gui</b>.<br>
+    <h2><a name="scenario1"></a>Scenario 1:&nbsp; Fully Linking a
+      Complete Program, and Running It<br>
+    </h2>
+    <p>Suppose for the sake of discussion that you have a HAL/S program
+      residing in a single source-code file, perhaps HELLO_WORLD.hal:<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663333">C A TEST PROGAM<br>&nbsp; HELLO_WORLD: PROGRAM;<br>    WRITE(6) 'Hello, world!';<br>    WRITE(6) '';<br>  CLOSE HELLO_WORLD;</font><br></pre>
+    </blockquote>
+    <p>In the simplest manner available right now, you might compile it,
+      link it, and run it as the following table describes:</p>
+    <table width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th valign="top">Command-Line Instruction<br>
+          </th>
+          <th valign="top">Explanation<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" nowrap="nowrap">
+            <pre><font color="#663333">HALSFC -o HELLO_WORLD.obj HELLO_WORLD.hal</font></pre>
+          </td>
+          <td valign="top"><b>HALSFC</b> is, of course, our HAL/S
+            compiler, <a moz-do-not-send="true"
+              href="https://www.ibiblio.org/apollo/HAL.html#HALSFC">whose
+              more-complete usage instructions are found here</a>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" nowrap="nowrap">
+            <pre><font color="#663333">lnk101 -o HELLO_WORLD.fcm --json-symbols HELLO_WORLD.sym.json -L <i>path/to/ZCON</i> -L <i>path/to/RUN</i> HELLO_WORLD.obj</font></pre>
+          </td>
+          <td valign="top">If our program had consisted of several
+            object files that we had compiled separately, rather than
+            just a single file, then we could have listed all of them on
+            the command line.&nbsp; The option "<font color="#663333"><code>--json-symbols
+                <i>FILENAME</i>.json</code></font>" tells the linker to
+            output a symbol table that will be used below by the
+            emuator(s); without it, the emulator(s) will complain.&nbsp;
+            The "<font color="#663333"><code>-L <i>LIBRARY</i></code></font>"
+            options give the names of "libraries" that will be searched
+            during the linking process when unresolved symbol names for
+            external procedures or variables are encountered.&nbsp; A
+            "library" is a directory containing AP-101S object
+            files.&nbsp; The two libraries you almost-definitely need
+            for any linking are the RUN library and the ZCON library,
+            which provide the PASS runtime library and the pointers
+            (ZCON's, discussed later) for them.&nbsp; Those libraries
+            are built during the <b>lnk101</b>-installation procedure
+            discussed earlier, as built from AP-101 assembly-language
+            source code <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">here</a>
+            and <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">here</a>,
+            and reside in the build directories
+            nsts-sdl-dps/build/runtime/RUN/ and
+            nsts-sdl-dps/build/runtime/ZCON/ respectively.&nbsp; Typing
+            <i>that</i> every time you want to link something is not
+            very convenient, so personally I just copy them (or symlink
+            to them) in whatever my working directory is, so that I can
+            just use "<font color="#663333"><code>-L RUN -L ZCON</code></font>".
+            <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" nowrap="nowrap">
+            <pre><font color="#663333">gpc-batch --no-trace --outfile6 HELLO_WORLD.txt HELLO_WORLD.fcm</font></pre>
+          </td>
+          <td valign="top">The program <b>gpc-batch</b> is an AP-101S
+            emulator and debugger that operates from a command line. It
+            will be available as part of the <b>lnk101</b>
+            installation. We just want to run our program without a lot
+            of messages from <b>gpc-batch</b>, so we use the <font
+              color="#663333"><code>--no-trace</code></font> switch to
+            turn most of its running commentary about what instructions
+            it's executing, what the CPU register values are, and so
+            on.&nbsp; The option "<font color="#663333"><code>--outfile6
+              </code><code><i>FILENAME</i></code><code>.txt</code></font>"
+            tells it the name if the file into which output from the
+            HAL/S <font color="#663333"><code>WRITE(6)</code></font>
+            statements should go.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" nowrap="nowrap">
+            <pre><font color="#663333">cat HELLO_WORLD.txt</font></pre>
+          </td>
+          <td valign="top">Among other things, the <b>cat</b> program
+            is used in Linux or Mac OS to print a file to the
+            display.&nbsp; In Windows, the equivalent command (for our
+            immediate purposes) is <b>type</b>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Each of these programs has additional alternatives that could be
+      explored using their <font color="#663333"><code>--help</code></font>
+      command-line switches.&nbsp; For example, if we ran <b>gpc-batch</b>
+      instead as <br>
+    </p>
+    <blockquote>
+      <pre><font color="#663333">gpc-batch --no-trace --interactive HELLO_WORLD.fcm</font><br></pre>
+    </blockquote>
+    <p>then we could have seen messages immediately as they were
+      emitted, or input directly from the keyboard (if the HAL/S program
+      allowed for it), rather than having to deal with all of the i/o
+      through files.<br>
+    </p>
+    <p>Another possibility would be to use the graphical (GUI) form of
+      the emulator:</p>
+    <blockquote>
+      <pre><font color="#663333"><code>gpc-gui HELLO_WORLD.fcm</code></font><br></pre>
+    </blockquote>
+    <p>That opens up a window that looks something like the following:<br>
+    </p>
+    <p><img moz-do-not-send="true" src="gpc-gui-hello-before.png" alt=""
+        height="1056" width="1810"><br>
+    </p>
+    <p>Just hit the Run hot-button and you'll see it change (look at the
+      TERMINAL pane near the bottom of the window) to <br>
+    </p>
+    <p><img moz-do-not-send="true" src="gpc-gui-hello-after.png" alt=""
+        height="1056" width="1810"><br>
+    </p>
+    <p>Curiously, there's no obvious way to <i>exit</i> the GUI
+      emulator — the <i>un</i>obvious way is to hit ctrl-Q on the
+      keyboard —, but I'm assured that'll be corrected by the time
+      you're likely to be reading this.<br>
+    </p>
+    <p>If HELLO_WORLD.hal had been a more-interactive program, in which
+      it not only used <font color="#663333"><code>WRITE(6)</code></font>
+      to display messages but also <font color="#663333"><code>READ(5)</code></font>
+      to get keyboard input from you, you could have typed your input
+      into the pane at the bottom of the window, where it now shows the
+      message "(waiting for program input...)".<br>
+    </p>
+    <h2><a name="scenario2"></a>Scenario 2:&nbsp; Linking a Single
+      Object File That Is Not a Complete Program</h2>
+    <p>In this scenario, you have one (or a few) object file(s) that
+      form part of a program, but you don't have 100% of the files that
+      comprise a complete program.&nbsp; Or you have them but just want
+      to focus our attention on a few of them.&nbsp; You could still try
+      to link such object files using the technique described in the
+      preceding section, but the code in those files would undoubtedly
+      reference external symbols.&nbsp; The linker wouldn't know how to
+      resolve those external references, so there wouldn't be much point
+      to the exercise of running the linker in the first place.<br>
+    </p>
+    <p>But wait!&nbsp; Perhaps you could provide the linker with a list
+      of all the CSECTs it will encounter, and the memory addresses at
+      which you want those CSECTs to reside.&nbsp; If the linker had
+      that information, then it could do its job. &nbsp; <br>
+    </p>
+    <p>How would a need to do this arise?&nbsp; Well, imagine the
+      following situation.&nbsp; Suppose you have a lot of HAL/S and
+      AP-101S assembly-language source code files, comprising some
+      program.&nbsp; In my case, that happens to be the source code for
+      version OI340600 of the Space Shuttle's PASS.&nbsp; If I were in a
+      position to compile/assemble every single source-code file in
+      OI340600 with 100% accuracy, and could figure out such details as
+      the order in which the object files needed to be linked, then in
+      principle I could use the preceding section to link that entirety
+      of OI340600 in a single operation.&nbsp; But even if the HAL/S
+      compiler and the linker works 100% perfectly, that's still a big
+      task, and very time-consuming as well — not to mention that at
+      this writing I've only been able to compile about 2/3 of the HAL/S
+      source code files, and need to resolve some issues to compile the
+      rest of them.&nbsp; So as a first step, I'd prefer to see the
+      development tools do their thing piecemeal rather than in one huge
+      lump.&nbsp; In other words, I very much want to deal with just one
+      HAL/S source-code file at a time, and resolve any issues I
+      encounter in that simplified scenario before moving onward and
+      upward to combining 1000+ oebject files.<br>
+    </p>
+    <p>But how would I know where all of the CSECTs were "supposed to"
+      go in memory?&nbsp;&nbsp; I have an additional thing, a
+      disassembly of GPC
+      memory contents for OI340600, made during the Shuttle era by a
+      program called <b>MAFGEN</b>.&nbsp; Such a disassembly can be
+      parsed to obtain a list of all CSECTs and their locations in
+      memory, using a utility I've written called <b>unlinkMAFGEN2.py</b>.&nbsp;
+      Of course, in a project of your own devising, using your <i>own</i>
+      source-code files, you could produce such a file of
+      CSECTs/addresses of your own, and we'll come back to the subject
+      of the format of that file shortly.&nbsp; I face that problem
+      myself, in that while I have a MAFGEN disassembly of OI340600, I
+      do not have one for OI301700, which is another PASS version for
+      which I have source code.<br>
+    </p>
+    Actually, I've ignored an important detail in what I just said,
+    which is that there are multiple possible memory loads of PASS
+    executables.&nbsp; What I mean by that is that these different
+    memory loads involve different selections of PASS source code, and
+    involve different levels of functionality.&nbsp; Any given one of
+    the five GPCs may be loaded with any one of these memory loads at
+    any given time, according to the flight phase.&nbsp; Perhaps the
+    following illustration that represents how the Space Shuttle's
+    flight phases are represented in a software model will make the idea
+    clearer; the different memory loads correspond to the <span
+      style="background-color:pink">pink boxes</span> in the graphic:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+src="file:///home/rburkey/git/virtualagc-web/Shuttle%20flight%20computer%20software-colorized.png"
+        alt="" height="538" width="626"><br>
+    </div>
+    <br>
+    Thus, there is not just one MAFGEN disassembly for OI340600, but
+    rather 8 of them, with naming like "DASS_<i>XXX</i>":<br>
+    <ul>
+      <li>For OPS 000, system software:&nbsp; DASS_SSW_(PostIPL)<br>
+      </li>
+      <li>For OPS 1, Ascent:&nbsp; DASS_G16</li>
+      <li>For OPS 2, On orbit:&nbsp; DASS_G2</li>
+      <li>For OPS 2, Orbit/doors:&nbsp; DASS_S2<br>
+      </li>
+      <li>For OPS 3, Entry:&nbsp; DASS_G3</li>
+      <li>For OPS 8, On-orbit checkout:&nbsp; DASS_G8</li>
+      <li>For OPS 9, Precount/post-landing:&nbsp; DASS_G9</li>
+      <li>For OPS 9, Mass memory utility:&nbsp; DASS_P9</li>
+    </ul>
+    Similarly, there is not just one list of CSECTs and their memory
+    addresses as produced by <b>unlinkMAFGEN2.py</b>, but rather 8 of
+    them with names of the form "csects-<i>XXX</i>.json":&nbsp;
+    csects-SSW_(PostIPL).json, csects-G16.json, and so on.<br>
+    <br>
+    To illustrate the linking process, let's consider just a single
+    HAL/S source-code file from OI340600 that I've chosen basically at
+    random, namely APPLSRC/GV7RTL.hal.&nbsp; Incidentally, GV7RTL
+    appears <i>only</i> in memory load G16.&nbsp; The steps to compile
+    and link this file might look like this:<br>
+    <blockquote>
+      <pre><font color="#663333">HALSFC APPLSRC/GV7RTL.hal --test --force --parms=LIST,SRN,TEMPLATE,NOLFXI,REGOPT,CARDTYPE=FCRM -o GV7RTL.obj<br>lnk101 GV7RTL.obj -o GV7RTL.fcm -L RUN -L ZCON --json-symbols GV7RTL.json --external-syms csects-G16.json</font><br></pre>
+    </blockquote>
+    In other words, from the HAL/S source GV7RTL.hal, produce an object
+    file GV7RTL.obj, and then link GV7RTL.obj to produce an AP-101S
+    memory image file GV7RTL.fcm.&nbsp; These operations succeed, but
+    ... so what?&nbsp; Now we've got GV7RTL linked and ready as a memory
+    image, but what can we do with it?&nbsp; We certainly couldn't run
+    it in isolation, without the rest of PASS, even if we happened to
+    know what GV7RTL is supposed to do!&nbsp; (At least <i>I</i> don't,
+    and forgive me for projecting, but I carelessly assume that you
+    don't either.)&nbsp; If this were your own HAL/S project rather than
+    mine, you might just be pleased that it had succeeded at all, and
+    leave it at that.<br>
+    <br>
+    In the case of OI340600, though, I've left out a crucial detail of
+    significance, which is that beyond just providing us with CSECT
+    addresses, the MAFGEN disassemblies also contain the complete
+    contents of GPC memory in hexadecimal form ... though admittedly
+    it's a bit of a chore to extract it.&nbsp; But extracting the memory
+    image is valuable in and of itself, since in principle you could run
+    that dumped GPC memory in an AP-101S emulator as-is, without even
+    compiling anything in the first place!&nbsp; <br>
+    <br>
+    Did I bury the lede on that?&nbsp; Should I have revealed earlier
+    that compiling, assembling, and linking PASS source code is an
+    unnecessary waste of time?&nbsp; No, because it's not!&nbsp; While
+    we have MAFGEN disassemblies for OI340600, we don't have them for
+    any other PASS or BFS version, and in particular don't have them for
+    OI301700.&nbsp; So while having the MAFGEN disassemblies is
+    certainly very valuable in the sense of making sure our entire
+    system of Virtual AGC development tools is working fine, it's not a
+    solution for getting an executable version of BFS or for any version
+    of PASS other than OI340600.&nbsp; If we ever expect OI301700 to
+    run, we'd need all the compilation, assembly, and linking we can
+    get, and it better be 100% exact.&nbsp; Hopefully after perfecting
+    it with OI340600, it will be!<br>
+    <br>
+    But I digress!&nbsp; An additional feature of unlinkMAFGEN.py is
+    that beyond just extracting lists of CSECTs vs addresses, at the
+    same time it also extracts the complete memory dumps (G16.fcm,
+    G2.fcm, and so on), in the form of files compatible with Don
+    Schmidt's emulator.&nbsp; And not only that, among the tools we can
+    find in Don Schmidt's repository is one he calls <b>fcmcmp</b>.&nbsp;
+    Given a list of CSECTs, <b>fcmcmp</b> will compare two memory-image
+    files, but <i>only</i> the contents of the CSECTs that are
+    relevant.&nbsp; In our example of GV7RTL, the memory dump for load
+    G16 as a whole is huge, while that for GV7RTL is small in
+    comparison, but only the 11 CSECTs that end up being included in
+    GV7RTL are actually compared, while the remainder of G16 is simply
+    ignored.<br>
+    <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+        There are other subtleties that <b>fcmcmp</b> helps us to deal
+        with as well.&nbsp; In principle, before any programs are loaded
+        into it — i.e., prior to the Initial Program Load (IPL) —, every
+        (halfword) location in AP-101S memory at (halfword) addresses
+        less than 0x20000 is loaded with the default value 0xC9FB, while
+        each location at a higher address is loaded with the default
+        value 0xC6C6.&nbsp; When a program is loaded into the AP-101S
+        memory, by design it's kind of like a swiss cheese, in that not
+        every memory location in every CSECT is necessarily loaded with
+        a specific value: some locations might simply be left open, and
+        whatever value had been preloaded at the location still "shines
+        through" the opening.&nbsp; Then too, the IPL process may
+        involve moving around chunks of memory from one location to
+        another.&nbsp; The net effect is that sometimes an
+        otherwise-uninitialized location in memory may contain a value
+        of 0xC9FB, or it may contain a value of 0xC6C6, or frequently
+        may even have become initialized by the IPL to 0x0000.&nbsp; But
+        <b>fcmcmp</b> sees through this little trick, and so during the
+        comparison process it will match 0x0000 against either of 0xC6C6
+        or 0xC9FB without treating them as errors.</font><br>
+    </blockquote>
+    What does such a comparison look like?&nbsp; Well, for GV7RTL, the
+    invocation is like so:<br>
+    <blockquote>
+      <pre><font color="#663333">fcmcmp --csect-table csect-G16.json GV7RTL.json GV7RTL.fcm G16.fcm</font><br></pre>
+    </blockquote>
+    And the results of the comparison?&nbsp; Like so:<br>
+    <blockquote>
+      <pre><font color="#663333">Note: images differ in size (147478 vs 330394 halfwords)<br>  OK:   #QVV6D3  @ 003CA (2 halfwords)<br>  OK:   #QMM1DNP @ 004EE (2 halfwords)<br>  OK:   #ZGV7RTL @ 00516 (2 halfwords)<br>  OK:   #QMV6DN  @ 00518 (2 halfwords)<br>  OK:   #QVO6DN  @ 0051A (2 halfwords)<br>  OK:   #DGV7RTL @ 0B4EC (28 halfwords)<br>  OK:   VO6DN    @ 100F8 (20 halfwords)<br>  OK:   MV6DN    @ 1010C (24 halfwords)<br>  OK:   #CGV7RTL @ 1016A (176 halfwords)<br>  OK:   MM1DNP   @ 120B6 (18 halfwords)<br>  OK:   VV6D3    @ 24006 (16 halfwords)<br><br>PASS: all 11 sections match</font><br></pre>
+    </blockquote>
+    And our conclusions?&nbsp; At least for GV7RTL.hal and for flight
+    phase OPS 1 (load G16), the HAL/S compiler, the linker, and the
+    extracted memory dump from the GPC via the MAFGEN disassembly and
+    unlinkMAFGEN2.py, all agree perfectly.&nbsp; The system works!&nbsp;
+    It only remains to check the other ~1500 or so source-code files vs
+    all 8 memory loads, and our confidence for OI340600 will be
+    complete.<br>
+    <br>
+    I promised earlier to describe the format of the CSECT/address
+    files, so that you might form one of your own if you wanted to use
+    the partial-linking technique in this section on a project of your
+    own.&nbsp; This information is in the form of a so-called <a
+      moz-do-not-send="true" href="https://en.wikipedia.org/wiki/JSON">JSON</a>
+    file that's laid out as<br>
+    <blockquote>
+      <pre><font color="#663333">{<br>  "<i>CSECT1</i>": { ... },<br>  "<i>CSECT2</i>": { ... },<br>  "<i>CSECT3</i>": { ... },<br>  ...<br>}</font><br></pre>
+    </blockquote>
+    <p>where <font color="#663333"><i><code>CSECT1</code></i></font>, <font
+        color="#663333"><i><code>CSECT1</code></i></font>, and so on,
+      are the names of the CSECTs.&nbsp; And not just the CSECTs in the
+      object files you're <i>not</i> supplying, but in the ones you <i>are</i>
+      supplying the linker as well.&nbsp; As far as the entry for any
+      given CSECT is concerned, it'll be laid out like this:<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663333">{<br>  "start": <i>N1</i>,<br>  "end": <i>N2</i>,<br>  "hal": "<i>NAME</i>",<br>  "type": "<i>TYPE</i>",<br>  "invariant": <i>B</i>,<br>  "contents": {<br>    "SYMBOL1": <i>M1</i>,<br>    "SYMBOL2": <i>M2</i>,</font><font color="#663333">
+   &nbsp;"SYMBOL3": <i>M3</i>,</font><font color="#663333">
+    ...<br>  }<br>}</font><br></pre>
+    </blockquote>
+    <p>It's valuable to note that the fields in these objects were
+      originally determined by whatever information I thought it was
+      feasible for <b>unlinkMAFGEN2.py</b> to extract from a MAFGEN
+      disassembly, and not necessarily by the minimum amount of
+      information I thought would be needed for linking purposes.&nbsp;
+      In other words, there's extra stuff here that <i>you</i> wouldn't
+      need for linking, and therefore wouldn't need to add to your own
+      CSECT/address file.&nbsp; Fields not needed by the linker will be
+      ignored, and not all of the fields shown here will necessarily be
+      present or used by the linker.&nbsp; Provide what you can, and
+      then react to whatever complaints the linker throws at you!&nbsp;
+      But any symbol that's referenced by your object code will
+      definitely have to be available within the CSECT/address file or
+      else <b>lnk101</b> will fail.<br>
+    </p>
+    <ul>
+      <li><font color="#663333"><font color="#000000">The </font><code>"start"</code></font>
+        field is definitely essential.&nbsp; <font color="#663333"><i><code>N1</code></i></font>
+        and <font color="#663333"><i><code>N2</code></i></font> are
+        decimal numbers giving the halfword memory addresses at which
+        the CSECT begins and ends.&nbsp; By "halfword address", I mean
+        that when the address increases by 1, that refers to a location
+        2 bytes later in memory.&nbsp; And by "ends" I mean the last
+        halfword address in the CSECT, <i>not</i> the address
+        immediately following the CSECT.</li>
+      <li>Regarding the <font color="#663333"><code>"hal"</code></font>
+        field, CSECT names are invariably given as 8-character strings
+        which may be accurate reflections of names used in
+        assembly-language source-code files, but are often inadequate
+        for objects such as <font color="#663333"><code>PROCEDURE</code></font>s
+        or variables defined in HAL/S source-code files.&nbsp; When
+        available, the <font color="#663333"><code>"hal"</code></font>
+        field lists the full HAL/S name of the object the CSECT
+        represents.<br>
+      </li>
+      <li><font color="#663333"><i><code>TYPE</code></i></font> is one
+        of "", "BCE", "DATA", "EXCLUSIVE", "HAL_LIBRARY_CODE",
+        "HAL_LIBRARY_DATA", "HAL_LIBRARY_ZCON", "MSC", "NONHAL",
+        "PATCH", "PDE", "PROCEDURE", "PROGRAM", "STACK", "ZCON".&nbsp;
+        Some of these are probably obvious, while some of them are
+        mysteries to me.</li>
+      <li><font color="#663333"><i><code>B</code></i></font> is a
+        boolean, i.e. having either of the values true or false.&nbsp;
+        It is unclear to me what it means for a CSECT type to be variant
+        vs invariant.<br>
+      </li>
+      <li>The subfields of the <font color="#663333"><code>"contents"</code></font>
+        field represent the <i>publically-accessible</i> symbols in the
+        CSECT.&nbsp; But for example, if the CSECT represented a
+        PROCEDURE, then variables, labels, or embedded definitions of
+        PROCEDUREs local to that PROCEDURE wouldn't be provided. &nbsp;
+        <font color="#663333"><i><code>M1</code></i></font>, <font
+          color="#663333"><i><code>M2</code></i></font>, etc., are
+        decimal-number halfword offsets into the CSECT, beginning at 0
+        for the start of the CSECT; i.e., they tell us where in the
+        CSECT the data associated with the symbol can be found.<br>
+      </li>
+    </ul>
     <h1><a name="reverse"></a>Reverse-Engineering Assistance<br>
     </h1>
     To facilitate reverse engineering of the AP-101 object-file format,
-    I've provided a Python 3 module (readObject101S.py), which also can
-    be used as a stand-alone program, to parse the object files produced
-    by the HAL/S compiler (or by <b>ASM101S</b>).&nbsp; For example,
-    consider <a moz-do-not-send="true"
+    I've provided a Python 3 module (<b>readObject101S.py</b>), which
+    also can be used as a stand-alone program, to parse the object files
+    produced by the HAL/S compiler (or by <b>ASM101S</b>).&nbsp; And
+    Don has provided an alternative called <b>ibmobjdump</b>.<br>
+    <br>
+    For example, consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/140-STATISTICS.hal">this
+
+
 
 
 
@@ -427,27 +967,33 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       HAL/S program</a> 140-STATISTICS from the book <i>Programming in
       HAL/S</i>:<br>
     <blockquote>
-      <pre>  STATISTICS:<br>  PROCEDURE(DATA) ASSIGN(LO_VAL, HI_VAL, MEAN);<br>     DECLARE DATA ARRAY(*) SCALAR;<br>     DECLARE SCALAR,<br>                LO_VAL, HI_VAL, MEAN;<br>     LO_VAL = MIN(DATA);<br>     HI_VAL = MAX(DATA);<br>     MEAN = SUM(DATA) / SIZE(DATA);<br>  CLOSE STATISTICS;<br></pre>
+      <pre><font color="#663333">  STATISTICS:<br>  PROCEDURE(DATA) ASSIGN(LO_VAL, HI_VAL, MEAN);<br>     DECLARE DATA ARRAY(*) SCALAR;<br>     DECLARE SCALAR,<br>                LO_VAL, HI_VAL, MEAN;<br>     LO_VAL = MIN(DATA);<br>     HI_VAL = MAX(DATA);<br>     MEAN = SUM(DATA) / SIZE(DATA);<br>  CLOSE STATISTICS;</font><br></pre>
     </blockquote>
     <p>Upon compiling this file with the modern HAL/S compiler (<b>HALSFC</b>),<br>
     </p>
     <blockquote>
-      <pre>HALSFC 140-STATISTICS.hal "" "LIST,VARSYM,DECK"<br></pre>
+      <pre><font color="#663333">HALSFC 140-STATISTICS.hal --parms="LIST,VARSYM,DECK,CARDTYPE=YC"</font><br></pre>
     </blockquote>
     <p>we get not only a code-generation report (pass2.rpt), which in
       abridged form looks like the following,<br>
     </p>
-    <pre>PAGE 2<br>SYMBOL   TYPE  ID  ADDR  LEN(HEX)  LEN(DEC)         BLOCK NAME<br><br><br>#CSTATIS  SD 0001 000000 00001D          29         STATISTICS<br>#ZSTATIS  SD 0002 000000 000002           2<br>#DSTATIS  SD 0003 000000 000002           2<br>#QEMIN    ER 0004                          <br>#QEMAX    ER 0005                          <br>#QESUM    ER 0006                          <br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 3<br>  LOC    CODE        EFFAD           LABEL   INSN   OPERANDS            SYMBOLIC OPERAND<br><br><br>0000000                             ST#1     EQU    *<br>00000                               #ZSTATIS CSECT        ESDID= 0002<br>00000 00000E00                               DC     A'00000E00'         STATISTICS<br>00000                               #CSTATIS CSECT        ESDID= 0001<br>0000000                             STATISTI EQU    *                   STATISTICS<br>00000 E9F3 0000                              LHI    R1,0()              TIME: 0.25; #DSTATIS<br>00002 B914           0005                    STH    R1,5(R0)            TIME: 0.5<br>00003 E0FB 0018                              IAL    R0,24()             TIME: 0.5<br>00005 EB01           0000                    LA     R3,0(R1)            TIME: 0.25<br>00006 BB24           0009                    STH    R3,9(R0)            TIME: 0.5<br>0000007                             ST#2     EQU    *<br>0000007                             ST#3     EQU    *<br>0000007                             ST#4     EQU    *<br>00007 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00008 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00009 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMIN<br>0000B 9B40           0010                    LH     R3,16(R0)           TIME: 0.25; LO_VAL<br>0000C 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000000D                             ST#5     EQU    *<br>0000D 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>0000E 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>0000F E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMAX<br>00011 9B48           0012                    LH     R3,18(R0)           TIME: 0.25; HI_VAL<br>00012 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>0000013                             ST#6     EQU    *<br>00013 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00014 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00015 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QESUM<br>00017 1E1C           000E                    L      R6,14(R0)           TIME: 0.25; DATA+2<br>00018 3AEE                                   CVFL   F2,R6               TIME: 1.75<br>00019 68E2                                   DER    F0,F2               TIME: 7.25<br>0001A 9B50           0014                    LH     R3,20(R0)           TIME: 0.25; MEAN<br>0001B 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000001C                             ST#7     EQU    *<br>000001C                             LBL#2    EQU    *<br>0001C 97E8                                   SRET   7,R0                TIME: 17.5<br>00002                               #DSTATIS CSECT        ESDID= 0003<br>00002 000000                                 ORG    *-2<br>00000 000002                                 ORG    *+2<br>                                             END<br></pre>
+    <pre><font color="#663333">PAGE 2<br>SYMBOL   TYPE  ID  ADDR  LEN(HEX)  LEN(DEC)         BLOCK NAME<br><br><br>#CSTATIS  SD 0001 000000 00001D          29         STATISTICS<br>#ZSTATIS  SD 0002 000000 000002           2<br>#DSTATIS  SD 0003 000000 000002           2<br>#QEMIN    ER 0004                          <br>#QEMAX    ER 0005                          <br>#QESUM    ER 0006                          <br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>PAGE 3<br>  LOC    CODE        EFFAD           LABEL   INSN   OPERANDS            SYMBOLIC OPERAND<br><br><br>0000000                             ST#1     EQU    *<br>00000                               #ZSTATIS CSECT        ESDID= 0002<br>00000 00000E00                               DC     A'00000E00'         STATISTICS<br>00000                               #CSTATIS CSECT        ESDID= 0001<br>0000000                             STATISTI EQU    *                   STATISTICS<br>00000 E9F3 0000                              LHI    R1,0()              TIME: 0.25; #DSTATIS<br>00002 B914           0005                    STH    R1,5(R0)            TIME: 0.5<br>00003 E0FB 0018                              IAL    R0,24()             TIME: 0.5<br>00005 EB01           0000                    LA     R3,0(R1)            TIME: 0.25<br>00006 BB24           0009                    STH    R3,9(R0)            TIME: 0.5<br>0000007                             ST#2     EQU    *<br>0000007                             ST#3     EQU    *<br>0000007                             ST#4     EQU    *<br>00007 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00008 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00009 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMIN<br>0000B 9B40           0010                    LH     R3,16(R0)           TIME: 0.25; LO_VAL<br>0000C 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000000D                             ST#5     EQU    *<br>0000D 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>0000E 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>0000F E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QEMAX<br>00011 9B48           0012                    LH     R3,18(R0)           TIME: 0.25; HI_VAL<br>00012 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>0000013                             ST#6     EQU    *<br>00013 9A30           000C                    LH     R2,12(R0)           TIME: 0.25; DATA<br>00014 1D1C           000E                    L      R5,14(R0)           TIME: 0.25; DATA+2<br>00015 E4F7 3800                              BAL@#  R4,0(R1,R3)         TIME: 10.0 (SEE POO); #QESUM<br>00017 1E1C           000E                    L      R6,14(R0)           TIME: 0.25; DATA+2<br>00018 3AEE                                   CVFL   F2,R6               TIME: 1.75<br>00019 68E2                                   DER    F0,F2               TIME: 7.25<br>0001A 9B50           0014                    LH     R3,20(R0)           TIME: 0.25; MEAN<br>0001B 3803           0000                    STE    F0,0(R3)            TIME: 0.5<br>000001C                             ST#7     EQU    *<br>000001C                             LBL#2    EQU    *<br>0001C 97E8                                   SRET   7,R0                TIME: 17.5<br>00002                               #DSTATIS CSECT        ESDID= 0003<br>00002 000000                                 ORG    *-2<br>00000 000002                                 ORG    *+2<br>                                             END</font><br></pre>
     <p>but also an object file (cards.bin).&nbsp; Parsing that object
-      file using the reverse-engineering program,<br>
+      file using <b>readObject101S.py</b>,<br>
     </p>
     <blockquote>
-      <pre>readObject101S.py cards.bin<br></pre>
+      <pre><font color="#663333">readObject101S.py cards.bin</font><br></pre>
     </blockquote>
     <p><a name="exampleReverseEngineering"></a>we obtain something
       similar to the following report:<br>
     </p>
-    <pre>0000: 	type=SYM ident="I**20001" size=002E<br>0050: 	type=SYM ident="I**20002" size=002E<br>00A0: 	type=SYM ident="I**20003" size=0022<br>00F0: 	type=ESD ident="I**20004" size=0030 esdid=0001<br>	symbol1: name="#CSTATIS" type=SD address=000000 length=003A AMODE24 RMODE24 RW<br>	symbol2: name="#ZSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>	symbol3: name="#DSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>0140: 	type=ESD ident="I**20005" size=0030 esdid=0004<br>	symbol1: name="#QEMIN  " type=ER<br>	symbol2: name="#QEMAX  " type=ER<br>	symbol3: name="#QESUM  " type=ER<br>0190: 	type=TXT ident="I**20006" offset=000000 size=0004 esdid=0002<br>	data: 00 00 0E 00<br>01E0: 	type=TXT ident="I**20007" offset=000000 size=0004 esdid=0003<br>	data: 00 00 00 16<br>0230: 	type=TXT ident="I**20008" offset=000000 size=0038 esdid=0001<br>	data: E9 F3 00 00 B9 14 E0 FB 00 18 EB 01 BB 24 9A 30<br>	      1D 1C E4 F7 38 00 9B 40 38 03 9A 30 1D 1C E4 F7<br>	      38 00 9B 48 38 03 9A 30 1D 1C E4 F7 38 00 1E 1C<br>	      3A EE 68 E2 9B 50 38 03<br>0280: 	type=TXT ident="I**20009" offset=000038 size=0002 esdid=0001<br>	data: 97 E8<br>02D0: 	type=RLD ident="I**20010" size=0028<br>	relocation=0003 position=0001 flags=(0,0,A,1,0,0) address=000002<br>	relocation=0004 position=0001 flags=(0,0,A,1,0,0) address=000014<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=000020<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=00002C<br>	relocation=0001 position=0002 flags=(0,0,V,1,0,0) address=000000<br>0320: 	type=END ident="I**20011" idrType="2" <br>	translator="HAL/SREL3 V0  24331" <br>	processor="RSB-XCOM-I000924239"<br>--------------------------------------------------------------------------------<br>SYM-Record Summary:<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	DUMMY       offset=000000 name="STACK"<br>	DATA        offset=000030 name="STACKEND" datatype=H<br>	DUMMY       offset=000000 name="HALS/FC"<br>	DUMMY       offset=000000 name="HALS/END"<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	INSTRUCTION offset=000002 name="D24331"<br>	INSTRUCTION offset=000002 name="T2883796"<br>	CONTROL     offset=000000 name="#ZSTATIS"<br>	DATA        offset=000000 datatype=Z<br>	CONTROL     offset=000000 name="#DSTATIS"<br>	DATA        offset=000000 datatype=Z<br></pre>
+    <pre><font color="#663333">0000: 	type=SYM ident="I**20001" size=002E<br>0050: 	type=SYM ident="I**20002" size=002E<br>00A0: 	type=SYM ident="I**20003" size=0022<br>00F0: 	type=ESD ident="I**20004" size=0030 esdid=0001<br>	symbol1: name="#CSTATIS" type=SD address=000000 length=003A AMODE24 RMODE24 RW<br>	symbol2: name="#ZSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>	symbol3: name="#DSTATIS" type=SD address=000000 length=0004 AMODE24 RMODE24 RW<br>0140: 	type=ESD ident="I**20005" size=0030 esdid=0004<br>	symbol1: name="#QEMIN  " type=ER<br>	symbol2: name="#QEMAX  " type=ER<br>	symbol3: name="#QESUM  " type=ER<br>0190: 	type=TXT ident="I**20006" offset=000000 size=0004 esdid=0002<br>	data: 00 00 0E 00<br>01E0: 	type=TXT ident="I**20007" offset=000000 size=0004 esdid=0003<br>	data: 00 00 00 16<br>0230: 	type=TXT ident="I**20008" offset=000000 size=0038 esdid=0001<br>	data: E9 F3 00 00 B9 14 E0 FB 00 18 EB 01 BB 24 9A 30<br>	      1D 1C E4 F7 38 00 9B 40 38 03 9A 30 1D 1C E4 F7<br>	      38 00 9B 48 38 03 9A 30 1D 1C E4 F7 38 00 1E 1C<br>	      3A EE 68 E2 9B 50 38 03<br>0280: 	type=TXT ident="I**20009" offset=000038 size=0002 esdid=0001<br>	data: 97 E8<br>02D0: 	type=RLD ident="I**20010" size=0028<br>	relocation=0003 position=0001 flags=(0,0,A,1,0,0) address=000002<br>	relocation=0004 position=0001 flags=(0,0,A,1,0,0) address=000014<br>	relocation=0005 position=0001 flags=(0,0,A,1,0,0) address=000020<br>	relocation=0006 position=0001 flags=(0,0,A,1,0,0) address=00002C<br>	relocation=0001 position=0002 flags=(0,0,V,1,0,0) address=000000<br>0320: 	type=END ident="I**20011" idrType="2" <br>	translator="HAL/SREL3 V0  24331" <br>	processor="RSB-XCOM-I000924239"<br>--------------------------------------------------------------------------------<br>SYM-Record Summary:<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	DUMMY       offset=000000 name="STACK"<br>	DATA        offset=000030 name="STACKEND" datatype=H<br>	DUMMY       offset=000000 name="HALS/FC"<br>	DUMMY       offset=000000 name="HALS/END"<br>	CONTROL     offset=000000 name="#CSTATIS"<br>	INSTRUCTION offset=000002 name="D24331"<br>	INSTRUCTION offset=000002 name="T2883796"<br>	CONTROL     offset=000000 name="#ZSTATIS"<br>	DATA        offset=000000 datatype=Z<br>	CONTROL     offset=000000 name="#DSTATIS"<br>	DATA        offset=000000 datatype=Z</font><br></pre>
+    Whereas <b>ibmobjdump</b>,<br>
+    <blockquote>
+      <pre><font color="#663333">ibmobjdump -x cards.bin</font><br></pre>
+    </blockquote>
+    instead produces the report<br>
+    <pre><font color="#663333">SYM  46 bytes of packed symbol data<br>SYM  46 bytes of packed symbol data<br>SYM  34 bytes of packed symbol data<br>ESD  [  1] SD #CSTATIS  addr=00000  len=29 hw<br>ESD  [  2] SD #ZSTATIS  addr=00000  len=2 hw<br>ESD  [  3] SD #DSTATIS  addr=00000  len=2 hw<br>ESD  [  4] ER #QEMIN  <br>ESD  [  5] ER #QEMAX  <br>ESD  [  6] ER #QESUM  <br>TXT  [  2] #ZSTATIS  addr=00000  4 bytes<br>       00000: 00 00 0E 00<br>TXT  [  3] #DSTATIS  addr=00000  4 bytes<br>       00000: 00 00 00 16<br>TXT  [  1] #CSTATIS  addr=00000  56 bytes<br>       00000: E9 F3 00 00 B9 14 E0 FB 00 18 EB 01 BB 24 9A 30<br>       00008: 1D 1C E4 F7 38 00 9B 40 38 03 9A 30 1D 1C E4 F7<br>       00010: 38 00 9B 48 38 03 9A 30 1D 1C E4 F7 38 00 1E 1C<br>       00018: 3A EE 68 E2 9B 50 38 03<br>TXT  [  1] #CSTATIS  addr=0001C  2 bytes<br>       0001C: 97 E8<br>RLD  YCON(+)       #DSTATIS -&gt; #CSTATIS  addr=00001  flags=00<br>RLD  YCON(+)       #QEMIN   -&gt; #CSTATIS  addr=0000A  flags=00<br>RLD  YCON(+)       #QEMAX   -&gt; #CSTATIS  addr=00010  flags=00<br>RLD  YCON(+)       #QESUM   -&gt; #CSTATIS  addr=00016  flags=00<br>RLD  ZCON/addr(+)  #CSTATIS -&gt; #ZSTATIS  addr=00000  flags=10<br>END</font><br></pre>
     Of course, the documentation needs to be consulted even to
     understand the parsed information in the report in any detail.&nbsp;
     Nevertheless, even on a superficial reading, this report tells us
@@ -474,7 +1020,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
+
       "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
+
 
 
 
@@ -509,6 +1059,8 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
+
           PROCEDURE</code>) accessible by other compilation units.&nbsp;
         <code>ZCON</code> code and <code>REMOTE</code> data are "far
         away" in the AP-101S address space from the code accessing them,
@@ -517,6 +1069,8 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         and <code>ESUM</code> are AP-101S assembly-language functions
         from <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
+
 
 
 
@@ -576,39 +1130,43 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     object-file formats were easy, those formats would be included as
     free bonus items in boxes of breakfast cereal.<br>
     <br>
-    See the source code for readObject101S.py for further documentation,
-    if any.<br>
+    See the source code for <b>readObject101S.py</b> for further
+    documentation, if any.<br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
 
 
         Earlier when I mentioned <a moz-do-not-send="true" href="#bfs">the
 
 
+
+
           topic of reverse engineering the <b>PILOT</b> format used for
           BFS object files</a>, and in particular the possible
-        assistance offered by the tool coPILOT.py, I threatened to
-        briefly return to the topic of BFS later on.&nbsp; It's now
-        later!&nbsp; You may find the comparison of the BFS object code
-        to the PFS object code interesting. When 140-STATISTICS is
-        compiled by the BFS compiler rather than the PFS compiler, <i>two</i>
-        object files are produced:&nbsp; cards/#CSTATIS and
-        cards/#ZSTATIS.&nbsp; The assembly language produced is also
-        slightly different, but only in that an extra instruction "<code>SVC
-
-
-          0()</code>" is inserted at the very end, so I won't bore you
-        with yet another printout of the generated assembly
-        language.&nbsp; The following is how coPILOT.py parses the two
-        object files.&nbsp; I don't think that a symbol table for local
-        symbols is included in the object files, even when the
-        compiler's <code>VARSYM</code> option is selected.&nbsp;
-        Another thing to note is that coPILOT.py reports all addresses
-        and sizes or lengths using <i>halfword</i> addressing, whereas
-        readObject101S.py does so by <i>byte</i> addressing.&nbsp; Thus
-        addresses and sizes or lengths reported by coPILOT.py are
-        roughly half of the corresponding ones reported by
-        readObject101S.py.&nbsp; Oh well, a different day (or year!), a
-        different design choice!&nbsp; <br>
+        assistance offered by the tool <b>coPILOT.py</b>, I threatened
+        to
+        <i> briefly</i> return to the topic of BFS later on.&nbsp; It's
+        now later on!&nbsp; You may find the comparison of the BFS
+        object code to the PFS object code interesting. When
+        140-STATISTICS is compiled by the BFS compiler rather than the
+        PFS compiler, <i>two</i> object files are produced:&nbsp;
+        cards/#CSTATIS and cards/#ZSTATIS.&nbsp; The assembly language
+        produced is also slightly different, but only in that an extra
+        instruction "<code>SVC 0()</code>" is inserted at the very end,
+        so I won't bore you with yet another printout of the generated
+        assembly language.&nbsp; The following is how <b>coPILOT.py</b>
+        parses the two object files.&nbsp; I don't think that a symbol
+        table for local symbols is included in the object files, even
+        when the compiler's <code>VARSYM</code> option is
+        selected.&nbsp; Another thing to note is that <b>coPILOT.py</b>
+        reports all addresses and sizes or lengths using <i>halfword</i>
+        addressing, whereas <b>readObject101S.py</b> does so by <i>byte</i>
+        addressing.&nbsp; Thus addresses and sizes or lengths reported
+        by <b>coPILOT.py</b> are roughly half of the corresponding ones
+        reported by <b>readObject101S.py</b>.&nbsp; Oh well, a
+        different day (or year! (or decade!)), a different design
+        choice!&nbsp; <br>
       </font>
       <blockquote>
         <pre><font size="-1">Member cards/#CSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: CSD (CSECT Definition)<br>		esdid=1 #CSTATIS length=001F stacksize=0018 flags=800A HAL=STATISTICS<br>	001E: CSD (CSECT Definition)<br>		esdid=2 #DSTATIS length=0002 stacksize=0000 flags=4000 <br>	002E: EXR (External Reference Definition)<br>		esdid=3 #QEMIN   version=0003 tbd=8000 <br>	003C: EXR (External Reference Definition)<br>		esdid=4 #QEMAX   version=0003 tbd=8000 <br>	004A: EXR (External Reference Definition)<br>		esdid=5 #QESUM   version=0003 tbd=8000 <br>	0058: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 <br>	0060: PTX (Protected text)<br>		offset=0000 csect=1 #CSTATIS  <br>		E9F3 0000 B914 E0FB 0018 EB01 BB24 <br>	0074: PTX (Protected text)<br>		offset=0007 csect=1 #CSTATIS  <br>		9A30 1D1C E4F7 3800 9B40 3803 9A30 1D1C E4F7 3800 9B48 3803 9A30 1D1C E4F7 3800 <br>		1E1C 3AEE 68E2 9B50 3803 C9FB 0000 97E8 <br>	00AA: RLD (Relocation data)<br>		rel.id=2 #DSTATIS  pos.id=1 #CSTATIS  flags=0010 address=0001<br>		rel.id=3 #QEMIN    pos.id=1 #CSTATIS  flags=0020 address=000A<br>		rel.id=4 #QEMAX    pos.id=1 #CSTATIS  flags=0020 address=0010<br>		rel.id=5 #QESUM    pos.id=1 #CSTATIS  flags=0020 address=0016<br>	00CC: END<br>		cards=10<br>		hal compiler="HAL/S BFC-"<br>		hal version=1700<br>		timestamp=2026-02-16 06:53:10<br>		xpl compiler="RSB-XCOM-I"<br>		xpl version=0.90<br>Member cards/#ZSTATIS<br>	0000: Start<br>		origin=0000<br>	0004: EXR (External Reference Definition)<br>		esdid=6 #CSTATIS version=0000 tbd=800A HAL=STATISTICS<br>	001C: CSD (CSECT Definition)<br>		esdid=7 #ZSTATIS length=0002 stacksize=0001 flags=400A HAL=STATISTICS<br>	0036: PTX (Protected text)<br>		offset=0000 csect=2 #DSTATIS  <br>		0000 0E00 <br>	0040: RLD (Relocation data)<br>		rel.id=1 #CSTATIS  pos.id=2 #DSTATIS  flags=002C address=0000<br>	004A: END<br>		cards=5<br>		hal compiler="HAL/S BFC-"<br>		hal version=1700<br>		timestamp=2026-02-16 06:53:10<br>		xpl compiler="RSB-XCOM-I"<br>		xpl version=0.90</font><br></pre>
@@ -643,8 +1201,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     The unexpected:&nbsp; However, it is clear from the surviving legacy
     AP-101S assembly listings that there are departures from these
     principles.&nbsp; Consider the following excerpt of the legacy
-    assembly listing for the SQRT function of the HAL/S-FC runtime
-    library:<br>
+    assembly listing for the SQRT function of the <b>HAL/S-FC</b>
+    runtime library:<br>
     <pre><font color="#663300">                                 18 SQRT     AMAIN INTSIC=YES                                               00001300<br>                                 19+***********************************************************************<br>                                 20+*<br>                                 21+*        PRIMARY ENTRY POINT<br>                                 22+*<br>                                 23+***********************************************************************<br><font color="#ff0000">00000                            24+SQRT     CSECT                                                          01-AMAIN</font><br>                                 26 * COMPUTES SQUARE ROOT IN SINGLE PRECISION                              00001400<br>                                 27          INPUT F0             SCALAR SP                                 00001500<br>0000000                          28+F0       EQU   0                                                        01-INPUT<br>                                 30          OUTPUT F0            SCALAR SP                                 00001600<br>                                 32          WORK  R1,R5,R6,R7,F1,F2,F3                                     00001700<br>0000001                          33+R1       EQU   1                                                        01-WORK<br>0000005                          34+R5       EQU   5                                                        01-WORK<br>0000006                          35+R6       EQU   6                                                        01-WORK<br>0000007                          36+R7       EQU   7                                                        01-WORK<br>0000001                          37+F1       EQU   1                                                        01-WORK<br>0000002                          38+F2       EQU   2                                                        01-WORK<br>0000003                          39+F3       EQU   3                                                        01-WORK<br><font color="#009900">00000 E9F3 0032      0032        41          LA    R1,A                                                     00001800<br>0000032                          42          USING A,R1                                                     00001900<br></font>00002 7AE0                       43 START    LER   F2,F0                                                    00002000<br>00003 DE88           0026 0022   44          BNP   ERROR          ARGUMENT NEGATIVE OR ZERO                 00002100<br>                                 45 *                                                                       00002200<br>00004 27E8                       46          LFXR  R7,F0          TRANSFER TO GENERAL REGISTER              00002300<br>00005 76E6                       47          XR    R6,R6                                                    00002400<br>00006 FE1C                0007   48          SLDL  R6,7           Q &amp; MANTISSA IN R7                        00002500<br>00007 F660                0018   49          SLL   R6,24          CHAR OF ANSWER - (Q+32) IN R6             00002600<br>00008 1FE7                       50          LR    R7,R7          CHECK FOR Q=1                             00002700<br>00009 DD0C           000D 0003   51          BCF   5,GORP                                                   00002800<br>                                 52 *                                                                       00002900<br>0000A B0E6 0100           0100   53          AHI   R6,X'0100'     ADD 1 TO CHAR FOR Q=1                     00003000<br>0000C E909           0002        54          LA    R1,2(R1)       FULLWORD INDEX                            00003100<br>                                 55 *                                                                       00003200<br>0000D 1DE6                       56 GORP     LR    R5,R6          CHARACTERISTIC OF ANSWER IN R5            00003300<br>0000E F705                0001   57          SRA   R7,1            FIXED M/2 + 'QQ' IN TOP BITS             00003400<br>0000F 0711           003A        58          A     R7,C           ADD C/2, AND ELIMINATE 'QQ'               00003500<br>00010 1E09           0036        59          L     R6,B           -B/2 OR -B/8 AT BIT 7(MANTISSA POS.)      00003600<br>00011 4EE7                       60          DR    R6,R7          (R6) = (4**(-Q))(-B/(C+M)) AT BIT 7       00003700<br>00012 0601           0032        61          A     R6,A           A OR A/4 AT BIT 7 + CHAR=32               00003800<br>00013 06E5                       62          AR    R6,R5          RESTORE CHARACTERISTIC OF ANSWER          00003900<br>00014 29EE                       63          LFLR  F1,R6                                                    00004000<br>                                 64 *                                                                       00004100<br>                                 65          DROP  R1                                                       00004200<br>                                 66 *                                                                       00004300<br>                                 67 *  TWO PASSES OF THE NEWTON-RAPHSON ITERATION                           00004400<br>                                 68 *                                                                       00004500<br>00015 68E1                       69          DER   F0,F1                                                    00004600<br>00016 50E1                       70          AER   F0,F1                                                    00004700<br>00017 7BF7 0013      002C 0013   71          LE    F3,FHALF                                                 00004800<br>00019 60E3                       72          MER   F0,F3                                                    00004900<br>0001A 6AE0                       73          DER   F2,F0                                                    00005000<br>                                 74 *                                                                       00005100<br>0001B B6E6 FF00           FF00   75          NHI   R6,X'FF00'     PUT CHARACTERISTIC OF                     00005200<br>0001D 06F7 000F      002E 000F   76          A     R6,ROUND       ANSWER IN ROUND                           00005300<br>0001F 29EE                       77          LFLR  F1,R6          DIGIT, AND ADD                            00005400<br>00020 50E1                       78          AER   F0,F1          TO INTERMEDIATE RESULT                    00005500<br>                                 79 *                                                                       00005600<br>00021 58E2                       80          SER   F0,F2                                                    00005700<br>00022 60E3                       81          MER   F0,F3                                                    00005800<br>         SQRT -- SINGLE PRECISION SQUARE ROOT FUNCTION                                                         PAGE    3<br>  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05<br>00023 50E2                       82          AER   F0,F2          ANSWER IN F0                              00005900<br>                                 83 *                                                                       00006000<br>                                 84 EXIT     AEXIT                AND RETURN                                00006100<br>                                 85+*********RETURN TO CALLER**********************************************<br>00024                            86+EXIT     DS    0H                                                       01-AEXIT<br>00024 9914           0005        87+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT<br>00025 C7EC                       88+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT<br>                                 89+***********************************************************************<br>                                 91 *                                                                       00006200<br>00026 DC0E           0024 0003   92 ERROR    BCB   4,EXIT         EXIT IF ARG=0                             00006300<br>                                 93          AERROR 5             ARGUMENT&lt;0                                00006400<br>                                 94+*********ISSUE SEND ERROR SVC******************************************<br>00027 C9FB 0030      0030        95+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO<br>                                 96+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************<br>00029 78E8                       97          LECR  F0,F0          FIXUP: GET |ARG|                          00006500<br>0002A DFA6           0002 0029   98          B     START          AND TRY AGAIN                             00006600<br>                                 99 *                                                                       00006700<br>0002B C9FB<br>0002C 40800000                  100 FHALF    DC    E'0.5'                                                   00006800<br>0002E 00000001                  101 ROUND    DC    X'00000001'                                              00006900<br>                                102 *                                                                       00007000<br>                                103          ADATA                                                          00007100<br>                                104+*********DATA CSECT****************************************************<br>00030                           105+         LTORG                                                          02-ERRPA<br>                                106+****************ERROR PARAMETER AREA***********************************<br><font color="#ff0000">00030                           107+#LSQRT   CSECT                                                          02-ERRPA</font><br>                                108+***  SQRT SENDS THE FOLLOWING ERROR                                     02-ERRPA<br>                                110+***  ERROR NUMBER 5 IN GROUP 4                                          02-ERRPA<br>00030 0014                      112+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA<br>00031 0405                      113+         DC    Y(4*256+5)                       8 BIT GROUP AND NUMBER  02-ERRPA<br>                                114+****************END OF ERROR PARAMETER AREA****************************<br><font color="#ff0000">00032                           115+#LSQRT   CSECT                                                          01-ADATA</font><br><font color="#009900">00032 21AE7D00                  116 A        DC    X'21AE7D00'    1.6815948=A + X'20'                       00007200<br></font>00034 206B9F40                  117          DC    X'206B9F40'    0.4203987=A/4 + X'20'                     00007300<br>00036 FF5B02F1                  118 B        DC    X'FF5B02F1'    -1.2889728=B                              00007400<br>00038 FFD6C0BD                  119          DC    X'FFD6C0BD'    -0.3222432=B/4                            00007500<br>0003A 35CFC610                  120 C        DC    X'35CFC610'    0.8408065=C/2                             00007600<br>0003C 75CFC610                  121          DC    X'75CFC610'    0.8408065=C/2 + X'40'                     00007700<br>                                122          ACLOSE                                                         00007800<br>                                123+         END                                                            01-ACLOS</font><br></pre>
     <p>As I've highlighted in <font color="#ff0000">red</font>, there
       are two CSECTs in this excerpt, and they are called "<font
@@ -714,6 +1272,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
       As for condition #2, the only <font color="#663300"><code>USING</code></font>
       pseudo-op follows the instruction rather than precedes it, so
       there is no way for the assembler to make any assumptions about
@@ -756,6 +1316,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
       That discussion points out a single AP-101S-specific datatype, Z,
       that's speculated to be <i>unrelated</i> to the System/360
       datatype also designated as Z ("zoned decimal", 0x34).&nbsp; For
@@ -792,11 +1354,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     characters or control codes, the numerical encoding matches ASCII as
     well. <br>
     <p align="center"><img moz-do-not-send="true" src="encodingDEU.png"
-        alt="" width="638" height="468" align="top"></p>
+        alt="" height="468" align="top" width="638"></p>
     Reverse engineering reveals at least some of the cases in which DEU
     encoding is used in place of EBCDIC in the object files:<br>
     <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table border="1" width="100%" cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <th valign="top">Classification of Textual Data<br>
@@ -820,7 +1382,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
               </li>
             </ul>
           </td>
-          <td valign="middle" align="center">EBCDIC<br>
+          <td align="center" valign="middle">EBCDIC<br>
           </td>
         </tr>
         <tr>
@@ -828,7 +1390,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             source code, such as <code>DECLARE CHARACTER CONSTANT</code>
             statements, <code>DECLARE CHARACTER INITIAL</code>
             constants, or character literals.</td>
-          <td valign="middle" align="center">DEU<br>
+          <td align="center" valign="middle">DEU<br>
           </td>
         </tr>
         <tr>
@@ -836,7 +1398,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             assembly-language source code, such as <code>DC</code>
             pseudo-ops or so-called "literals" like "<code>=C'...'</code>".<br>
           </td>
-          <td valign="middle" align="center">TBD (currently, assumed
+          <td align="center" valign="middle">TBD (currently, assumed
             EBCDIC)<br>
           </td>
         </tr>
@@ -845,6 +1407,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <br>
     Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/037-ROOTS.hal">this
+
+
 
 
 
@@ -871,6 +1435,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         There's no easy way, as far as I know, using just information
         within the object decks themselves, to easily locate individual
         unnamed string literals within the TXT records of the object
@@ -880,6 +1446,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         invalidate the conclusions in any way.&nbsp; In the next
         section, we'll learn enough to infer that the these strings <i>should</i>
         have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
+
 
 
 
@@ -913,11 +1481,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         sample HAL/S source code</a> for a <code>PROGRAM</code> based
       on one found in the book <i>Programming in HAL/S</i>:<br>
     </p>
     <blockquote>
-      <pre>  SIMPLE: PROGRAM;<br>          DECLARE PI CONSTANT (3.14159266);<br>          DECLARE R SCALAR;<br>          WRITE(6) 'Input R to compute PI R**2, or -1 to quit.';<br>          DO WHILE TRUE;<br>                  READ(5) R;<br>                  IF R &lt; 0 THEN EXIT;<br>                  WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;<br>          END;<br>  CLOSE SIMPLE;<br></pre>
+      <pre><font color="#663333">  SIMPLE: PROGRAM;<br>          DECLARE PI CONSTANT (3.14159266);<br>          DECLARE R SCALAR;<br>          WRITE(6) 'Input R to compute PI R**2, or -1 to quit.';<br>          DO WHILE TRUE;<br>                  READ(5) R;<br>                  IF R &lt; 0 THEN EXIT;<br>                  WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;<br>          END;<br>  CLOSE SIMPLE;</font><br></pre>
     </blockquote>
     <p>After compiling this file and parsing the object file, we find
       extraneous material following the END record.&nbsp; If we pretend
@@ -926,7 +1496,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       essentially as follows:<br>
     </p>
     <blockquote>
-      <pre>" STACK $0SIMPLE"<br>"cSYM      a      aaaSTART                                               I**20018"<br>"cESD      a   abSTART   aaaa aa $0SIMPLEcaaa                            I**20019"<br>"cTXT aaa  a   abU3aa                                                    I**20020"<br>"cRLD      a     acabaaac                                                I**20021"<br>"cEND aaa      ab                2HAL/SREL3 V0  24329RSB-XCOM-I000924239 I**20022"<br></pre>
+      <pre>" STACK $0SIMPLE                                                                 "<br>"cSYM      a      aaaSTART                                               I**20018"<br>"cESD      a   abSTART   aaaa aa $0SIMPLEcaaa                            I**20019"<br>"cTXT aaa  a   abU3aa                                                    I**20020"<br>"cRLD      a     acabaaac                                                I**20021"<br>"cEND aaa      ab                2HAL/SREL3 V0  24329RSB-XCOM-I000924239 I**20022"<br></pre>
     </blockquote>
     <blockquote>
       <p><font size="-1"><b>Aside:</b>&nbsp; Strictly speaking, this
@@ -989,12 +1559,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-02-16<br>
+          2026-03-31<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
-              hosted by ibiblio.org" src="hosted.png" width="300"
-              height="100"></a><br>
+              hosted by ibiblio.org" src="hosted.png" height="100"
+              width="300"></a><br>
         </font></i></center>
     <br>
   </body>
