@@ -45,6 +45,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
 
 
 
+
             Datatype 0x84</a></li>
         <li><a moz-do-not-send="true" href="#characterEncoding">Encoding
             of Character Data in Object Decks</a></li>
@@ -258,7 +259,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         of the <b>HAL/S-BFC</b> source code</a> can produce <b>PILOT</b>-compatible
+
 
 
 
@@ -273,14 +276,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       Catchy, eh?&nbsp; This script can read object files created by the
       <b>HAL/S-BFC</b>, and parse them into a human readable form.&nbsp;
       Moreover, there's additional commentary embedded within <b>coPILOT.py</b>'s
+
       source code to document some aspects of the format that aren't
       evident in the reports it outputs.&nbsp; If you want to read more
       about <b>coPILOT.py</b>, I'd suggest referring to <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-3897924815">the
+
 
 
 
@@ -332,6 +338,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
             Assembler Language - OS Release 21</a>".&nbsp; Manual for
           the System/360 macro assembler upon which <b>ASM101S</b> is
           modeled.</li>
@@ -340,6 +347,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
             collection of notes about the AP-101S/AP-101B</a>.</li>
         <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
 
 
 
@@ -386,10 +394,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
               I and II</a>:&nbsp; :&nbsp; Principles of Operation for
             PCI/PCO and MSC</li>
           <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
 
 
 
@@ -432,11 +442,13 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
 
 
 
+
             Shuttle Advanced System/4 Pi Model AP-101 Central Processor
             Unit Technical Description</a>".&nbsp; Note that this
           predates the AP-101S model and doesn't precisely match it.</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
 
 
 
@@ -456,9 +468,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             Wikipedia article "OS/360 Object File Format"</a></li>
         <li><a moz-do-not-send="true"
             href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
 
 
 
@@ -470,6 +484,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
             Appendix A</a></li>
         <li><a moz-do-not-send="true"
 href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assembler_Programmers_Guide_Sep82.pdf#page=83">The
+
 
 
 
@@ -573,6 +588,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
           <td valign="top"><b>HALSFC</b> is, of course, our HAL/S
             compiler, <a moz-do-not-send="true"
               href="https://www.ibiblio.org/apollo/HAL.html#HALSFC">whose
+
               more-complete usage instructions are found here</a>.<br>
           </td>
         </tr>
@@ -584,6 +600,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
             object files that we had compiled separately, rather than
             just a single file, then we could have listed all of them on
             the command line.&nbsp; The option "<font color="#663333"><code>--json-symbols
+
                 <i>FILENAME</i>.json</code></font>" tells the linker to
             output a symbol table that will be used below by the
             emuator(s); without it, the emulator(s) will complain.&nbsp;
@@ -609,6 +626,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             very convenient, so personally I just copy them (or symlink
             to them) in whatever my working directory is, so that I can
             just use "<font color="#663333"><code>-L RUN -L ZCON</code></font>".
+
             <br>
           </td>
         </tr>
@@ -724,11 +742,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </p>
     <p>But how would I know where all of the CSECTs were "supposed to"
       go in memory?&nbsp;&nbsp; I have an additional thing, a
-      disassembly of GPC
-      memory contents for OI340600, made during the Shuttle era by a
-      program called <b>MAFGEN</b>.&nbsp; Such a disassembly can be
-      parsed to obtain a list of all CSECTs and their locations in
-      memory, using a utility I've written called <b>unlinkMAFGEN2.py</b>.&nbsp;
+      disassembly of GPC memory contents for OI340600, made during the
+      Shuttle era by a program called <b>MAFGEN</b>.&nbsp; Such a
+      disassembly can be parsed to obtain a list of all CSECTs and their
+      locations in memory, using a utility I've written called <b>unlinkMAFGEN2.py</b>.&nbsp;
+
       Of course, in a project of your own devising, using your <i>own</i>
       source-code files, you could produce such a file of
       CSECTs/addresses of your own, and we'll come back to the subject
@@ -750,7 +768,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       style="background-color:pink">pink boxes</span> in the graphic:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
-src="file:///home/rburkey/git/virtualagc-web/Shuttle%20flight%20computer%20software-colorized.png"
+        src="Shuttle%20flight%20computer%20software-colorized.png"
         alt="" height="538" width="626"><br>
     </div>
     <br>
@@ -822,6 +840,7 @@ src="file:///home/rburkey/git/virtualagc-web/Shuttle%20flight%20computer%20softw
     G2.fcm, and so on), in the form of files compatible with Don
     Schmidt's emulator.&nbsp; And not only that, among the tools we can
     find in Don Schmidt's repository is one he calls <b>fcmcmp</b>.&nbsp;
+
     Given a list of CSECTs, <b>fcmcmp</b> will compare two memory-image
     files, but <i>only</i> the contents of the CSECTs that are
     relevant.&nbsp; In our example of GV7RTL, the memory dump for load
@@ -830,6 +849,7 @@ src="file:///home/rburkey/git/virtualagc-web/Shuttle%20flight%20computer%20softw
     GV7RTL are actually compared, while the remainder of G16 is simply
     ignored.<br>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
         There are other subtleties that <b>fcmcmp</b> helps us to deal
         with as well.&nbsp; In principle, before any programs are loaded
         into it — i.e., prior to the Initial Program Load (IPL) —, every
@@ -964,6 +984,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       HAL/S program</a> 140-STATISTICS from the book <i>Programming in
       HAL/S</i>:<br>
     <blockquote>
@@ -1022,7 +1043,9 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
       "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
 
 
 
@@ -1061,6 +1084,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
           PROCEDURE</code>) accessible by other compilation units.&nbsp;
         <code>ZCON</code> code and <code>REMOTE</code> data are "far
         away" in the AP-101S address space from the code accessing them,
@@ -1069,6 +1093,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         and <code>ESUM</code> are AP-101S assembly-language functions
         from <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
 
@@ -1137,7 +1162,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         Earlier when I mentioned <a moz-do-not-send="true" href="#bfs">the
+
 
 
 
@@ -1145,9 +1172,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           topic of reverse engineering the <b>PILOT</b> format used for
           BFS object files</a>, and in particular the possible
         assistance offered by the tool <b>coPILOT.py</b>, I threatened
-        to
-        <i> briefly</i> return to the topic of BFS later on.&nbsp; It's
-        now later on!&nbsp; You may find the comparison of the BFS
+        to <i> briefly</i> return to the topic of BFS later on.&nbsp;
+        It's now later on!&nbsp; You may find the comparison of the BFS
         object code to the PFS object code interesting. When
         140-STATISTICS is compiled by the BFS compiler rather than the
         PFS compiler, <i>two</i> object files are produced:&nbsp;
@@ -1274,6 +1300,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       As for condition #2, the only <font color="#663300"><code>USING</code></font>
       pseudo-op follows the instruction rather than precedes it, so
       there is no way for the assembler to make any assumptions about
@@ -1313,6 +1340,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p>As it happens, there's <a moz-do-not-send="true"
         href="ASM101S.html#literals">discussion on our page about the
         modern AP-101 assembler that concerns the available datatypes</a>.&nbsp;
+
 
 
 
@@ -1414,6 +1442,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       HAL/S program adapted from the book <i>Programming in HAL/S</i></a>,
     with a few of its character-string literals highlighted in various
     colors:<br>
@@ -1437,6 +1466,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         There's no easy way, as far as I know, using just information
         within the object decks themselves, to easily locate individual
         unnamed string literals within the TXT records of the object
@@ -1446,6 +1476,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         invalidate the conclusions in any way.&nbsp; In the next
         section, we'll learn enough to infer that the these strings <i>should</i>
         have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
 
 
 
@@ -1476,6 +1507,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/021-SIMPLE.hal">this
+
 
 
 
