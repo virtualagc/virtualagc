@@ -5,14 +5,14 @@ C/ polynomial using the roots, and to allow complex roots.
 
   ROOTS: PROGRAM;
     DECLARE SCALAR, A, B, C, D, ROOT1, ROOT2;
-    DO WHILE TRUE;
+    ROOTLOOP: DO WHILE TRUE;
         WRITE(6) ;
         WRITE(6) 'Enter A, B, C (0,0,0 to quit):';
         READ(5) A, B, C;
         IF A = 0 AND B = 0 AND C = 0 THEN
             DO;
                 WRITE(6) 'Quitting ...';
-                EXIT;
+                EXIT ROOTLOOP;
             END;
         D = B**2 - 4 A C;
         IF D >= 0 THEN 
