@@ -1,5 +1,7 @@
 C/ Adapted from PDF p. 211 of "Programming in HAL/S".
 
+  TEST_LIMIT: PROGRAM;
+
      LIMIT:
      FUNCTION(VALUE, BOUND) SCALAR;
         DECLARE SCALAR,
@@ -9,5 +11,12 @@ C/ Adapted from PDF p. 211 of "Programming in HAL/S".
         IF VALUE < -BOUND THEN
            RETURN -BOUND;
         RETURN VALUE;
-Y %SVCI(0);
      CLOSE LIMIT;
+
+    WRITE(6) 'LIMIT(5,10)=', LIMIT(5.0, 10.0);
+    WRITE(6) 'LIMIT(15,10)=', LIMIT(15.0, 10.0);
+    WRITE(6) 'LIMIT(-15,10)=', LIMIT(-15.0, 10.0);
+    WRITE(6) 'LIMIT(0,1)=', LIMIT(0.0, 1.0);
+
+Y %SVCI(0);
+  CLOSE TEST_LIMIT;

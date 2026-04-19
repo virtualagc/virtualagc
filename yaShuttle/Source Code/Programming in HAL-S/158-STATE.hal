@@ -1,12 +1,14 @@
 C/ From PDF p. 158 of "Programming in HAL/S".
 
+  TEST_STATE: PROGRAM;
+
   STATE:
   FUNCTION(B, TYPE) CHARACTER(5);
      DECLARE B BOOLEAN,
                 TYPE INTEGER;
-     DECLARE YES ARRAY(4) CHARACTER(5) 
+     DECLARE YES ARRAY(4) CHARACTER(5)
                          INITIAL('TRUE', 'ON', 'OPEN', 'VALID');
-     DECLARE NO ARRAY(4) CHARACTER(5) 
+     DECLARE NO ARRAY(4) CHARACTER(5)
                          INITIAL('FALSE', 'OFF', 'SHUT', 'ERROR');
 E       .
 M    IF B THEN
@@ -19,6 +21,12 @@ E              ,
 M       RETURN NO     ;
 S                TYPE:
 
-Y %SVCI(0);
   CLOSE STATE;
-  
+
+    WRITE(6) STATE(TRUE, 1), STATE(FALSE, 1);
+    WRITE(6) STATE(TRUE, 2), STATE(FALSE, 2);
+    WRITE(6) STATE(TRUE, 3), STATE(FALSE, 3);
+    WRITE(6) STATE(TRUE, 4), STATE(FALSE, 4);
+
+Y %SVCI(0);
+  CLOSE TEST_STATE;

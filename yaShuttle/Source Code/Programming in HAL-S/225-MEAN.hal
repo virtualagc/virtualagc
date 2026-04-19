@@ -1,6 +1,10 @@
 C/ From PDF p. 225 in "Programming in HAL/S".  Surrounding brackets
-C/ have been removed from array variables, since they are not legal 
+C/ have been removed from array variables, since they are not legal
 C/ HAL/S syntax.
+
+  TEST_MEAN: PROGRAM;
+
+     DECLARE DATA ARRAY(5) SCALAR INITIAL(1.0, 2.0, 3.0, 4.0, 5.0);
 
   MEAN:
 Y FUNCTION(A) SCALAR;
@@ -13,6 +17,9 @@ S                        I
 
      END;
      RETURN TOTAL / SIZE(A);
-Y %SVCI(0);
   CLOSE MEAN;
-  
+
+    WRITE(6) 'MEAN(1..5)=', MEAN(DATA);
+
+Y %SVCI(0);
+  CLOSE TEST_MEAN;

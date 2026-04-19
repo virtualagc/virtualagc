@@ -1,6 +1,12 @@
-C/ From PDF p. 140 of "Programming in HAL/S".  Surrounding brackets 
-C/ have been removed from array variables, since they are not legal 
+C/ From PDF p. 140 of "Programming in HAL/S".  Surrounding brackets
+C/ have been removed from array variables, since they are not legal
 C/ HAL/S syntax.
+C/ Same as 137 but with ARRAY(*) for variable-length arrays.
+
+  TEST_STATS: PROGRAM;
+    DECLARE DATA ARRAY(5) SCALAR
+        INITIAL(10, 20, 30, 40, 50);
+    DECLARE SCALAR, LO, HI, MN;
 
   STATISTICS:
   PROCEDURE(DATA) ASSIGN(LO_VAL, HI_VAL, MEAN);
@@ -10,5 +16,10 @@ C/ HAL/S syntax.
      LO_VAL = MIN(DATA);
      HI_VAL = MAX(DATA);
      MEAN = SUM(DATA) / SIZE(DATA);
-Y %SVCI(0);
   CLOSE STATISTICS;
+
+    CALL STATISTICS(DATA) ASSIGN(LO, HI, MN);
+    WRITE(6) 'LO=', LO, 'HI=', HI, 'MEAN=', MN;
+
+Y %SVCI(0);
+  CLOSE TEST_STATS;

@@ -1,0 +1,14 @@
+C/ External function for 176-P: simulates an accelerometer reading.
+C/ Returns a SUPER_VECTOR-STRUCTURE with a sample acceleration
+C/ vector, STATUS=TRUE, and a timetag derived from the selector N.
+D INCLUDE TEMPLATE DUMMY_COMPOOL
+
+  READ_ACC:
+  FUNCTION(N) SUPER_VECTOR-STRUCTURE;
+     DECLARE N INTEGER;
+     DECLARE RESULT SUPER_VECTOR-STRUCTURE;
+     RESULT.V = VECTOR(0.1, -0.2, 9.8);
+     RESULT.STATUS = TRUE;
+     RESULT.TIMETAG = N;
+     RETURN RESULT;
+  CLOSE READ_ACC;

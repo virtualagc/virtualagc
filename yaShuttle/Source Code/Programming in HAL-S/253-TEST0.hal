@@ -1,19 +1,27 @@
 C/ Adapted from PDF p. 253 of "Programming in HAL/S".
 
+  TEST_TEST: PROGRAM;
+
   TEST:
   FUNCTION(I) BOOLEAN;
      DECLARE I INTEGER;
      DECLARE INTEGER,
                 WORD, BITNUM;
-     DECLARE INFO ARRAY(1 + 1000 / 16) BIT(16) 
+     DECLARE INFO ARRAY(1 + 1000 / 16) BIT(16)
                                         INITIAL(BIN'11010111101');
-     
+
      WORD = DIV(I, 16);
      BITNUM = I - 16 WORD;
 E            .
 M    RETURN INFO               ;
 S               WORD+1:BITNUM+1
- 
-Y %SVCI(0);
+
   CLOSE TEST;
-  
+
+    WRITE(6) 'TEST(0)=', TEST(0);
+    WRITE(6) 'TEST(1)=', TEST(1);
+    WRITE(6) 'TEST(2)=', TEST(2);
+    WRITE(6) 'TEST(5)=', TEST(5);
+
+Y %SVCI(0);
+  CLOSE TEST_TEST;

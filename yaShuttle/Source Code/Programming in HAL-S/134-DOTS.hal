@@ -1,4 +1,14 @@
 C/ From PDF p. 134 of "Programming in HAL/S".
+C/ DOTS computes a 10x10 matrix of dot products from two
+C/ arrays of 10 3-vectors each: RESULT(I,J) = A1(I) . A2(J).
+
+  TEST_DOTS: PROGRAM;
+C  V1(I)=(I,0,0), V2(J)=(1,0,0) => RESULT(I,J)=I
+    DECLARE ARRAY(10) VECTOR(3),
+        V1 INITIAL(1,0,0, 2,0,0, 3,0,0, 4,0,0, 5,0,0,
+                   6,0,0, 7,0,0, 8,0,0, 9,0,0, 10,0,0),
+        V2 INITIAL(1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0,
+                   1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0);
 
   DOTS:
   FUNCTION(A1, A2) MATRIX(10, 10);
@@ -15,5 +25,9 @@ S               I,J     I:     J:
      END;
 E             *
 M    RETURN RESULT;
-Y %SVCI(0);
   CLOSE DOTS;
+
+    WRITE(6) 'DOTS:', DOTS(V1, V2);
+
+Y %SVCI(0);
+  CLOSE TEST_DOTS;

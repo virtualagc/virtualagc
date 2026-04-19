@@ -1,4 +1,13 @@
 C/ From PDF p. 136 of "Programming in HAL/S".
+C/ Same as 134-DOTS but as a PROCEDURE with ASSIGN.
+
+  TEST_DOTS: PROGRAM;
+    DECLARE ARRAY(10) VECTOR(3),
+        V1 INITIAL(1,0,0, 2,0,0, 3,0,0, 4,0,0, 5,0,0,
+                   6,0,0, 7,0,0, 8,0,0, 9,0,0, 10,0,0),
+        V2 INITIAL(1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0,
+                   1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0);
+    DECLARE R MATRIX(10, 10);
 
   DOTS:
   PROCEDURE(A1, A2) ASSIGN(RESULT);
@@ -14,4 +23,9 @@ S               I,J     I:     J:
         END;
      END;
   CLOSE DOTS;
-  
+
+    CALL DOTS(V1, V2) ASSIGN(R);
+    WRITE(6) 'DOTS:', R;
+
+Y %SVCI(0);
+  CLOSE TEST_DOTS;

@@ -1,6 +1,10 @@
 C/ From PDF p. 141 of "Programming in HAL/S".  Surrounding brackets
-C/ have been removed from array variables, since they are not legal 
+C/ have been removed from array variables, since they are not legal
 C/ HAL/S syntax.
+
+  TEST_VSUM: PROGRAM;
+    DECLARE ARRAY(3) VECTOR(3),
+        V INITIAL(1,0,0, 0,2,0, 0,0,3);
 
   VSUM:
   FUNCTION(V) VECTOR;
@@ -15,6 +19,9 @@ S                        N:
      END;
 E             -
 M    RETURN TOTAL;
-Y %SVCI(0);
   CLOSE VSUM;
-  
+
+    WRITE(6) 'SUM=', VSUM(V);
+
+Y %SVCI(0);
+  CLOSE TEST_VSUM;

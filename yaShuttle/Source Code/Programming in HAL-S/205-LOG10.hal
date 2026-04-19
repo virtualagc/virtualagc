@@ -1,5 +1,7 @@
 C/ From PDF p. 205 in "Programming in HAL/S".
 
+  TEST_LOG10: PROGRAM;
+
   LOG10:
   FUNCTION(X) SCALAR;
      DECLARE X SCALAR;
@@ -9,8 +11,14 @@ C/ From PDF p. 205 in "Programming in HAL/S".
         DO;
 Z          SEND ERROR$(9:1);
            RETURN LOG(ABS(X)) / LOG(10);
-           
+
         END;
-Y %SVCI(0);
   CLOSE LOG10;
-  
+
+    WRITE(6) 'LOG10(1)=', LOG10(1.0);
+    WRITE(6) 'LOG10(10)=', LOG10(10.0);
+    WRITE(6) 'LOG10(100)=', LOG10(100.0);
+    WRITE(6) 'LOG10(0.5)=', LOG10(0.5);
+
+Y %SVCI(0);
+  CLOSE TEST_LOG10;
