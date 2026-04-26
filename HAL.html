@@ -59,12 +59,23 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
             1.5 and Phase 2</a></li>
         <li><a moz-do-not-send="true" href="#DebuggingCompiler">Debugging
 
+
+
+
+
+
+
             the Compiler Itself</a><br>
         </li>
       </ul>
       <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a></li>
       <li><a moz-do-not-send="true" href="#emulatingHALMAT">Emulating
           HALMAT</a></li>
+      <li><a moz-do-not-send="true" href="#imponderable">Other
+          Imponderable Mysteries: The Demonic Triad</a></li>
+      <li><a moz-do-not-send="true" href="#morePreprocessors">More About
+          Preprocessors</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#compilePASS">Compiling the
           Space Shuttle Primary Flight Software</a><br>
       </li>
@@ -83,6 +94,12 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
+
+
+
+
+
 
 
 
@@ -161,6 +178,12 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
+
+
+
+
+
 
 
 
@@ -306,6 +329,12 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
+
+
+
+
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -315,6 +344,12 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
+
+
+
+
+
 
 
 
@@ -402,6 +437,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
+
+
+
+
+
+
 
 
 
@@ -656,6 +697,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
         At present, modern implementations of PASS3/PASS3B/PASS4 have
         not yet been created, though as you can see from the table
         above, they're not needed merely for compilation of object code.<br>
@@ -768,10 +815,22 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
       decision to create <b>XCOM-I</b>, I had made a similarly-painful
       decision to manually port the source code for PASS1/PASS1B of
       HAL/S-FC into the Python 3 language.&nbsp; The result was a
       working version of PASS1/PASS1B that I call <b>HAL_S_FC</b>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -901,6 +960,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
+
+
+
+
         The test requires the <font color="#996633"><code> NOTABLES</code></font>
         compiler option (see the next item).<br>
       </li>
@@ -909,6 +974,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         specifies the "PARM field" covered in <a moz-do-not-send="true"
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>--parms="SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
+
+
+
+
+
+
 
 
         <br>
@@ -981,6 +1052,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
+
+
+
+
             <font color="#996633"><code>--test</code></font>.<br>
           </font> </li>
         <font size="-1"> </font>
@@ -999,6 +1076,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         <li><font size="-1" color="#663300"><code><i>EXTENSION</i></code></font><font
             size="-1"> is either the literal .exe or else an empty
             string ("").&nbsp; It is functionally the same as <b>HALSFC</b>'s
+
+
+
+
+
+
 
 
 
@@ -1091,6 +1174,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
+
+
+
+
         Moreover, the results sub-directory just mentioned is created
         only at the <i>end</i> of the compilation process, so if you <i>manually</i>
         abort <b>HALSFC</b> prior to completion, you will find the
@@ -1128,6 +1217,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHALMAT.py">unHALMAT.py</a>
       that parse a HALMAT file, <i>à la</i> "<tt>unHALMAT.py halmat.bin</tt>",
+
+
+
+
+
+
 
 
 
@@ -1241,6 +1336,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
+
+
         Shuttle Model AP-101S Principles of Operation, with Shuttle
         Instruction Set</a>". </p>
     <p>But <i>useful</i> object code is emitted by the PASS/PFS version
@@ -1251,6 +1352,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       AP-101S PASS/PFS object code, it is in the <a
         moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">OS/360
+
+
+
+
+
+
 
 
 
@@ -1279,6 +1386,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     Data Set), cards/, which is in PILOT-compatible format.&nbsp; There
     is no surviving information available about PILOT that I'm aware of,
     but fortunately <a moz-do-not-send="true" href="HALLINK101S.html">its
+
+
+
+
+
+
 
 
 
@@ -1337,6 +1450,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     </p>
     <ol start="1">
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
+
+
+
+
+
 
 
 
@@ -1443,6 +1562,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
+
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -1454,6 +1579,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
+
+
+
+
+
 
 
 
@@ -1549,9 +1680,21 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
           book <i>Programming in HAL/S</i> 2nd edition</a> (or <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20in%20HAL-S.pdf">first
+
+
+
+
+
+
 
 
 
@@ -1594,6 +1737,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         but contemporary (though alas undocumented) <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/BENCH">source-code
+
+
+
+
+
+
 
 
 
@@ -1677,6 +1826,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
           HAL-S-360 Users Manual</a> provides <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-360%20Users%20Manual">a
           source-code file called DEMO.hal</a>.&nbsp; <br>
@@ -1704,6 +1859,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     an IBM System/360 computer as it did, expected that the underlying
     encoding of textual characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
+
+
+
+
+
 
 
     EBCDIC, to put it mildly, is no longer a common encoding for
@@ -1874,6 +2035,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
         Separate compilation units are in separate files.&nbsp; Of
         course, definitions of blocks like <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>,
         etc., can be local to another block, so in that sense there can
@@ -1933,6 +2100,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
+
+
+
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -1946,6 +2119,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
+
+
+
+
+
 
 
 
@@ -2047,10 +2226,22 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
+
+
+
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
+
+
+
+
+
 
 
 
@@ -2126,6 +2317,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
+
+
+
+
             assembly language instruction</a> <code>SVC</code>
           (Supervisor Call) wherever it appears. &nbsp; What are the
           legal values of <i><code>N</code></i>?&nbsp; Table 8-1 in the
@@ -2143,6 +2340,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           functionality designed into HAL/S.&nbsp; In other words, most
           or all of what you find in <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=229">Ryer's
+
+
+
+
+
+
 
 
 
@@ -2265,6 +2468,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
       It might look something like this in your HAL/S source code:<br>
     </p>
     <blockquote>
@@ -2273,6 +2482,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     <p> </p>
     <p>The line "<font color="#996633"><code>D INCLUDE TEMPLATE
           SOME_PROCEDURE</code></font>" is not a line of HAL/S code <i>per
+
+
+
+
+
+
 
 
 
@@ -2298,6 +2513,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
+
+
+
+
+
 
 
 
@@ -2389,6 +2610,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -2439,6 +2666,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
       This directive instructs the compiler to insert the entirety of
       the HAL/S source-code file <i><font color="#996633"><code>name</code></font></i>
       at the current point.&nbsp; The distinction, in case it isn't
@@ -2469,6 +2702,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       the files INCLIB.json or INCLIBB.json.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
+
+
+
+
 
 
 
@@ -2611,6 +2850,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -2637,6 +2882,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -2785,6 +3036,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -2808,6 +3065,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
+
+
+
+
+
 
 
 
@@ -2900,6 +3163,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
+
+
+
+
+
 
 
 
@@ -3099,6 +3368,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -3113,6 +3388,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
+
+
+
+
+
 
 
 
@@ -3305,6 +3586,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -3362,9 +3649,21 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
+
+
+
+
+
 
 
 
@@ -3485,6 +3784,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
+
+
             data with the <font color="#663300"><code>REMOTE</code></font>
             attribute, which has caused me quite a lot of confusion
             personally, so I'll say a few words about it here.&nbsp;
@@ -3540,6 +3845,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
+
+
+
+
+
 
 
 
@@ -3787,6 +4098,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
+
+
               1, Unprintable</i><br>
           </td>
         </tr>
@@ -3881,8 +4198,20 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
+
+
               8-28</a> and on <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=197">page
+
+
+
+
+
+
 
 
 
@@ -4192,6 +4521,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
+
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -4241,6 +4576,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
+
+
+
+
+
 
 
 
@@ -4414,8 +4755,9 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             (M).<br>
             <blockquote> <font size="-1"><b>Aside:</b>&nbsp; If you
                 experience difficulty using a literal blank as a
-                replacement character, it may be worth trying to use M
-                instead.<br>
+                replacement character, use M as the replacement
+                character instead.&nbsp; M is completely equivalent to a
+                blank space, insofar as column 1 is concerned.<br>
               </font></blockquote>
             You may be puzzled why such a thing would be needed, or how
             it might be used.&nbsp; Generally speaking, it is used only
@@ -4424,181 +4766,185 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             code which you may or may not want to include in your
             program, and want a convenient way of enabling it or
             disabling it at compile time, you might put a special
-            character in column 1, say "N".&nbsp; At compile time, you
-            could specify the option CT=NM if you wanted to include the
-            code, or CT=NC if you wanted to comment it out.&nbsp; This
-            could be used for debugging, for compiling different
-            configurations, as hints for software other than the
-            compiler itself, etc.<br>
+            character in column 1, say "G".&nbsp; At compile time, you
+            could specify the option CARDTYPE=GM if you wanted to
+            include the code, or CARDTYPE=GC if you wanted to comment it
+            out.&nbsp; This could be used for debugging, for compiling
+            different configurations, as hints for software other than
+            the compiler itself, etc.<br>
             <br>
-            Regarding the use of this option in compiling actual
-            surviving Space Shuttle flight software, the answer as to
-            how to do so (to the extent that it's known) is quite
-            tricky.&nbsp; The short answer is that we don't know for
-            sure, but can provide a little bit of guidance on a
-            version-by-version basis.<br>
+            As of this writing, the following list describes all of the
+            characters you could find in column 1 of HAL/S files (in
+            PASS, BFS, our adaptation of sample code from <i>Programming
+
+
+              in HAL/S</i>, etc.), and some which you will not (even
+            though a theoretical interpretation is assigned to them):<br>
             <ul>
-              <li>PASS OI-30.17:&nbsp; We have no original HAL/S source
-                code for this release, but merely reprinted compiler
-                reports.&nbsp; Consequently, we don't know what
-                characters originally appeared in column 1 of the
-                source-code punch-cards, and instead only know how the
-                compiler replaced those characters according to whatever
-                <code>CARDTYPE</code> options were in effect at
-                compile-time.&nbsp; In other words, as far as we can
-                determine at this remove, only standard HAL/S characters
-                (blank, '<code>C</code>', and '<code>D</code>') appeared
-                in column 1.<br>
+              <li>The following column-1 characters are standard in
+                HAL/S, thus requiring no <code>CARDTYPE</code>
+                parameter for correct processing:<br>
               </li>
-              <li> PASS OI-34.06:&nbsp; In addition to standard HAL/S
-                characters (blank, '<code>C</code>', '<code>D</code>',
-                and '<code>M</code>'), the following characters are
-                found in column 1:</li>
               <ul>
-                <li>'<code>F</code>' — These appear in many source-code
-                  files.&nbsp; It appears to me that the only sensible
-                  interpretation, upon analysis of possible replacement
-                  chracters as well as comparison to the corresponding
-                  files in PASS OI-30.17, is that '<code>F</code>' is
-                  always replaced by '<code>C</code>'.&nbsp; I.e., the
-                  compiler option <code>CARDTYPE=FC</code> is always
-                  appropriate.&nbsp; It has been suggested to me that '<code>F</code>'
-                  is likely present as a marker for the purposes of some
-                  independent analysis by yet some other software not
-                  known to us.<br>
+                <li>␢ (i.e., ' ', a blank space): normal source code.<br>
                 </li>
-                <li>'<code>R</code>' — These appear in the module
-                  STRPDT, where comparison to the corresponding PASS
-                  OI-30.17 code tentatively suggests that '<code>R</code>'
-                  should be replaced by a blank.&nbsp; But see below.</li>
+                <li>C: full-line comments.<br>
+                </li>
+                <li>D: compiler directives.</li>
+                <li>E: exponent lines.<br>
+                </li>
+                <li>M:&nbsp; normal source code.</li>
+                <li>S: subscript lines.</li>
               </ul>
-              <li>BFS OI-34:&nbsp; See the comments for PASS OI-30.17.<br>
+              <li>The following characters have no currently-known
+                column-1 use in existing code, and are therefore
+                available for your own programming pleasure as a
+                burgeoning HAL/S developer.&nbsp; Unfortunately, we have
+                no way of knowing if some of these may perhaps have been
+                used in PASS versions not available to us, in BFS (very
+                little of which is available to us), or in legacy
+                non-PASS/BFS code (which is out there somewhere in the
+                world, even if it's hidden away somewhere out of public
+                view).<br>
               </li>
+              <ul>
+                <li>I, J, K, L, P, Q, and (possibly, but I don't know
+                  for sure) all non-alphabetic characters.<br>
+                </li>
+              </ul>
+              <li>The following column-1 character interpretations were
+                invented by Intermetrics or by the United Space Alliance
+                (USA) for use in the original PASS source code.&nbsp;
+                I'll give a short summary here, but a more-complete
+                explanation follows later on.&nbsp; Other than the
+                explicit exceptions noted below, all of the following
+                column-1 characters are generally be equated to C
+                (full-line comments) when compiling PASS source code:<br>
+              </li>
+              <ul>
+                <li>A: Use <code>CARDTYPE=AM</code> for module GKDASC.<br>
+                </li>
+                <li>B: Use <code>CARDTYPE=BD</code> for modules CPTOSV
+                  and CPUSLS.<br>
+                </li>
+                <li>F: Use <code>CARDTYPE=FD</code> for module GKDASC.</li>
+                <li>G: Use <code>CARDTYPE=GD</code> for module GKRORB.</li>
+                <li>H: Use <code>CARDTYPE=HD</code> for module GKGMNV.</li>
+                <li>N: Use <code>CARDTYPE=NM</code> for module GKGMNV.</li>
+                <li>O: Use <code>CARDTYPE=OM</code> for module GKRORB.</li>
+                <li>R: <strike>Use </strike><strike><code>CARDTYPE=RM</code></strike><strike>
+                    for modules GKDASC and GKGMNV.</strike>&nbsp;&nbsp;
+                  Use <code>CARDTYPE=RC</code> for modules GKRORB, but
+                  <code>CARDTYPE=RM</code> otherwise.</li>
+                <li>T: Use <code>CARDTYPE=TM</code> for OI301700 (<i>not</i>
+                  for OI340600) module GKFHOR.<br>
+                </li>
+              </ul>
+              <li>The following column-1 character interpretations were
+                invented the Virtual AGC Project:</li>
+              <ul>
+                <li>For "modern" compilation (by <b>HALSFC</b> or <b>HAL_S_FC.py</b>),
+
+
+
+                  for the <i>very</i> rare cases in which the original
+                  PASS source code needed tweaking to be compiled using
+                  the modern compilers.&nbsp; (At the present writing, "<i>very</i>
+                  rare" means "none at all".)<br>
+                </li>
+                <ul>
+                  <li>U: Use <code>CARDTYPE=UD</code> for modern
+                    compilation, but <code>CARDTYPE=UC</code> for
+                    contemporary compilation.&nbsp; (Opposite of X.)<br>
+                  </li>
+                  <li>V: Use <code>CARDTYPE=VM</code> for modern
+                    compilation, but <code>CARDTYPE=VC</code> for
+                    contemporary compilation.&nbsp; (Opposite of W.)<br>
+                  </li>
+                  <li>W: Use <code>CARDTYPE=WC</code> for modern
+                    compilation, but <code>CARDTYPE=WM</code> for
+                    contemporary compilation. (Opposite of V.)<br>
+                  </li>
+                  <li>X: Use <code>CARDTYPE=XC</code> for modern
+                    compilation, but <code>CARDTYPE=XD</code> for
+                    contemporary compilation.&nbsp; (Opposite of U.)<br>
+                  </li>
+                </ul>
+                <li>For HAL/S source-code files intended to compile with
+                  both the BFS flavor of the HAL/S compiler and the PASS
+                  flavor as well, such as newly-written HAL/S programs
+                  or the sample programs from the book <i>Programming
+                    in HAL/S</i>.&nbsp; Example:&nbsp; For the BFS
+                  flavor of the compiler, each <code>PROGRAM</code>, <code>PROCEDURE</code>,
+                  or <code>FUNCTION</code> <i>must</i> end with the
+                  statement "<code>%SVCI(<i>N</i>);</code>" (for some
+                  integer <i><code>N</code></i>) to avoid compile-time
+                  errors.&nbsp; Whereas "<code>%SVCI(</code><code><code><i>N</i></code>)</code>"
+                  is not even supported by the PASS compiler and would
+                  thus trigger a compile-time error if present.<br>
+                </li>
+              </ul>
+              <ul>
+                <ul>
+                  <li>Y: <code>CARDTYPE=YM</code> for BFS version of
+                    the HAL/S compiler versus <code>CARDTYPE=YC</code>
+                    for the PASS version of the HAL/S compiler.&nbsp;
+                    (Opposite of Z.)<br>
+                  </li>
+                  <li>Z: <code>CARDTYPE=ZC</code> for BFS version of
+                    the HAL/S compiler versus <code>CARDTYPE=ZM</code>
+                    for the PASS version of the HAL/S compiler.&nbsp;
+                    (Opposite of Y.)<br>
+                  </li>
+                </ul>
+              </ul>
             </ul>
-            <p>In addition to the relatively comprehensible column-1
-              characters mentioned above, there's the
-              much-more-elaborate use of column 1 in module GKPMNV in
-              flight software PASS OI-34.06, for which simple
-              replacement of the character in column 1 <font
-                color="#ff0000">does not suffice</font>.&nbsp; Here's a
-              short excerpt from the source code of that module:<br>
-            </p>
+            Now regarding the use of conditional compilation in actual
+            surviving PASS source code, finding the answer as to how to
+            do so involved picking through the PASS source code to find
+            any relevant comments ... and sometimes using some guesswork
+            and trial-and-error.&nbsp; The most-informative (and at the
+            same time most-troublesome) uses and comments are found in
+            the PASS file GKPMNV.hal.&nbsp; This file is not actually a
+            HAL/S compilation unit of itself, but rather a file that is
+            "included" via the compiler directive "D INCLUDE GKPMNV"
+            into one or the other of the PASS modules GKDASC, GKRORB, or
+            GKGMNV.&nbsp; Below is a short excerpt from the source code
+            of GKPMNV.hal, showing how some of these column-1 characters
+            are used in it.&nbsp; Notice that the baleful effects of
+            column 1 extend to columns 2, 3, and 4 as well!<br>
             <blockquote>
               <pre>	.<br>	.<br>	.<br>&nbsp;DECLARE GKP_ERR_MSG_REQ BOOLEAN AUTOMATIC INITIAL(OFF);                009900AA<br> DECLARE GKP_ITEM                BIT(16) AUTOMATIC INITIAL (HEX'0000'); 010000AI<br> DECLARE GKP_ITEM_NO             BIT(16) AUTOMATIC INITIAL (HEX'0000'); 010100AI<br> DECLARE GKP_CASE_ARRAY_NO       INTEGER AUTOMATIC INITIAL (0);         010200AI<br> DECLARE GKP_ITEM_DATA_SC        SCALAR DOUBLE AUTOMATIC INITIAL (0.0); 010300AI<br> DECLARE GKP_ITEM_DATA_INT       INTEGER DOUBLE AUTOMATIC INITIAL (0.0);010400AI<br><font color="#ff0000">RG13</font> DECLARE GKP_TGT_CASE ARRAY(19) INTEGER                             010500AA<br><font color="#ff0000">RG13</font>      CONSTANT(3,1,1,1,1,6,6,6,4,4,7,8,9,10,11,5,2,2,2);            010600AA<br><font color="#ff0000">OG2</font>  DECLARE GKP_TGT_CASE ARRAY(20) INTEGER                             010700AA<br><font color="#ff0000">OG2</font>       CONSTANT(3,1,1,1,1,6,6,6,4,4,7,0,0,0,0,5,2,2,2,8);            010800AA<br><font color="#ff0000">AG1</font>  DECLARE GKP_NON_TGT_CASE                                           010900AA<br><font color="#ff0000">AG1</font> ARRAY(14) INTEGER CONSTANT(0,0,0,2,3,1,5,0,4,4,4,4,4,4);            011000AA<br><font color="#ff0000">OG2</font>  DECLARE GKP_NON_TGT_CASE                                           011100AA<br><font color="#ff0000">OG2</font>  ARRAY(14) INTEGER CONSTANT(0,0,0,2,3,1,0,0,4,4,4,4,4,4);           011200AA<br><font color="#ff0000">NG3</font>  DECLARE GKP_NON_TGT_CASE                                           011300AA<br><font color="#ff0000">NG3</font>  ARRAY(19)                                                          011400AA<br><font color="#ff0000">NG3</font>   INTEGER CONSTANT(5,5,5,2,3,1,0,8,4,4,4,4,4,4,9,10,6,11,7);        011500AA<br> DECLARE GKP_GMBL_L_R_Y_COORD ARRAY(3) INTEGER CONSTANT(-67,-94,-121);  011600AA<br>	.<br>	.<br>	.<br></pre>
             </blockquote>
-            <p>But we're fortunate in this case, because the comments at
+            <p>Yikes!&nbsp; But we're fortunate, because the comments at
               the top of the source-code file do explain what's going
               on.&nbsp; I quote the entire explanation:<br>
             </p>
             <blockquote>
-              <pre>C*******************************************************************    000100AA<br>C*       THE SAME SOURCE MODULE, GKPMNV, IS USED FOR MANEUVER KIPS      000200AA<br>C*       IN OPS 1,2 AND 3.                                              000300AA<br>C*                                                                      000400AA<br>C*       IN GKPMNV:                                                     000500AA<br>C*                EXECUTABLE CODE UNIQUE TO OPS 1 HAS AN 'A' IN COL 1.  000600AA<br>C*                INCLUDE CARDS  UNIQUE TO OPS 1 HAVE AN 'F' IN COL 1.  000700AA<br>C*                EXECUTABLE CODE UNIQUE TO OPS 2 HAS AN 'O' IN COL 1.  000800AA<br>C*                INCLUDE CARDS  UNIQUE TO OPS 2 HAVE A  'G' IN COL 1.  000900AA<br>C*                EXECUTABLE CODE UNIQUE TO OPS 3 HAS AN 'N' IN COL 1.  001000AA<br>C*                INCLUDE CARDS  UNIQUE TO OPS 3 HAVE AN 'H' IN COL 1.  001100AA<br>C*                EXECUTABLE CODE COMMON TO OPS 1&amp;3 HAS AN 'R' IN COL 1.001200AA<br>C*                INCLUDE CARDS COMMON TO ALL OPS HAVE A 'D' IN COL 1.  001250AG<br>C*                                                                      001300AA<br>C*       FOR OPS 1, GKPMNV IS COMPILED WITH PARAMETER                   001400AA<br>C*       'CARDTYPE=AMOCNCRMFDGCHC' IN THE HAL COMPILE CARD.             001500AA<br>C*       THIS CREATES PROCEDURE GKD_ASC_MNVR_KIP BY TREATING            001600AA<br>C*       AS COMMENTS SOURCE STATEMENTS HAVING  'R' OR 'O' IN COL 1.     001700AA<br>C*                                                                      001800AA<br>C*       FOR OPS 2, 'CARDTYPE=ACOMNCRCFCGDHC' TO CREATE GKR_ORB_MNVR_KIP001900AA<br>C*                                                                      002000AA<br>C*       FOR OPS 3, 'CARDTYPE=ACOCNMRMFCGCHD' TO CREATE GKG_MNVR_KIP.   002100AA<br>C*                                                                      002200AA<br>C*       IN ADDITION, LINES UNIQUE TO A GIVEN OPS HAVE THE              002300AA<br>C*       FOLLOWING SPECIFIC CODES AS THE FIRST 2 OR 3 CHARACTERS:       002400AA<br>C*         'G1' FOR OPS 1 UNIQUE LINES                                  002500AA<br>C*         'G2' FOR OPS 2 UNIQUE LINES                                  002600AA<br>C*         'G3' FOR OPS 3 UNIQUE LINES                                  002700AA<br>C*         'G13' FOR OPS 1&amp;3 COMMON LINES                               002800AA<br>C*         '   ' FOR OPS 1,2&amp;3 COMMON LINES (I.E. CODE COMMON TO ALL OPS002900AA<br>C*               HAS NO SPECIAL CHARACTERS).                            003000AA<br>C*                                                                      003100AA<br>C*       THE VARIOUS CODES ARE REPLACE NAMES FOR BLANKS AND AT          003200AA<br>C*       COMPILE TIME THEY HAVE NO EFFECT IN THE COMPILATION OTHER THAN 003300AA<br>C*       IDENTIFYING  THE OPS TO WHICH A STATEMENT BELONGS.             003400AA<br>C*                                                                      003500AA<br>C********************************************************************   003600AA<br>      REPLACE G1 BY "  ";                                               003700AA<br>      REPLACE G2 BY "  ";                                               003800AA<br>      REPLACE G3 BY "  ";                                               003900AA<br>      REPLACE G13 BY "   ";                                             004000AA<br>C********************************************************************** 004100AA<br></pre>
+              <pre>C*******************************************************************    000100AA<br>C*       THE SAME SOURCE MODULE, GKPMNV, IS USED FOR MANEUVER KIPS      000200AA<br>C*       IN OPS 1,2 AND 3.                                              000300AA<br>C*                                                                      000400AA<br>C*       IN GKPMNV:                                                     000500AA<br>C*                EXECUTABLE CODE UNIQUE TO OPS 1 HAS AN 'A' IN COL 1.  000600AA<br>C*                INCLUDE CARDS  UNIQUE TO OPS 1 HAVE AN 'F' IN COL 1.  000700AA<br>C*                EXECUTABLE CODE UNIQUE TO OPS 2 HAS AN 'O' IN COL 1.  000800AA [and OPS 8, I think]<br>C*                INCLUDE CARDS  UNIQUE TO OPS 2 HAVE A  'G' IN COL 1.  000900AA [and OPS 8, I think]<br>C*                EXECUTABLE CODE UNIQUE TO OPS 3 HAS AN 'N' IN COL 1.  001000AA<br>C*                INCLUDE CARDS  UNIQUE TO OPS 3 HAVE AN 'H' IN COL 1.  001100AA<br>C*                EXECUTABLE CODE COMMON TO OPS 1&amp;3 HAS AN 'R' IN COL 1.001200AA<br>C*                INCLUDE CARDS COMMON TO ALL OPS HAVE A 'D' IN COL 1.  001250AG<br>C*                                                                      001300AA<br>C*       FOR OPS 1, GKPMNV IS COMPILED WITH PARAMETER                   001400AA<br>C*       'CARDTYPE=AMOCNCRMFDGCHC' IN THE HAL COMPILE CARD.             001500AA<br>C*       THIS CREATES PROCEDURE GKD_ASC_MNVR_KIP BY TREATING            001600AA<br>C*       AS COMMENTS SOURCE STATEMENTS HAVING  'R' OR 'O' IN COL 1.     001700AA<br>C*                                                                      001800AA<br>C*       FOR OPS 2, 'CARDTYPE=ACOMNCRCFCGDHC' TO CREATE GKR_ORB_MNVR_KIP001900AA<br>C*                                                                      002000AA<br>C*       FOR OPS 3, 'CARDTYPE=ACOCNMRMFCGCHD' TO CREATE GKG_MNVR_KIP.   002100AA<br>C*                                                                      002200AA<br>C*       IN ADDITION, LINES UNIQUE TO A GIVEN OPS HAVE THE              002300AA<br>C*       FOLLOWING SPECIFIC CODES AS THE FIRST 2 OR 3 CHARACTERS:       002400AA<br>C*         'G1' FOR OPS 1 UNIQUE LINES                                  002500AA<br>C*         'G2' FOR OPS 2 UNIQUE LINES                                  002600AA [and OPS 8, I think]<br>C*         'G3' FOR OPS 3 UNIQUE LINES                                  002700AA<br>C*         'G13' FOR OPS 1&amp;3 COMMON LINES                               002800AA<br>C*         '   ' FOR OPS 1,2&amp;3 COMMON LINES (I.E. CODE COMMON TO ALL OPS002900AA<br>C*               HAS NO SPECIAL CHARACTERS).                            003000AA<br>C*                                                                      003100AA<br>C*       THE VARIOUS CODES ARE REPLACE NAMES FOR BLANKS AND AT          003200AA<br>C*       COMPILE TIME THEY HAVE NO EFFECT IN THE COMPILATION OTHER THAN 003300AA<br>C*       IDENTIFYING  THE OPS TO WHICH A STATEMENT BELONGS.             003400AA<br>C*                                                                      003500AA<br>C********************************************************************   003600AA<br>      REPLACE G1 BY "  ";                                               003700AA<br>      REPLACE G2 BY "  ";                                               003800AA<br>      REPLACE G3 BY "  ";                                               003900AA<br>      REPLACE G13 BY "   ";                                             004000AA<br>C********************************************************************** 004100AA<br></pre>
             </blockquote>
-            <blockquote><font size="-1"><b>Aside:</b> Notice the
-                implication that column 1 replacements via <code>CARDTYPE</code>
-                are performed by the compiler prior to any macro
-                expansions via <code>REPLACE</code>.<br>
-              </font></blockquote>
-            One perhaps-unobvious lesson to take away from the above is
-            that we <i>cannot</i> assume that it's okay to use the
-            identical <code>CARDTYPE</code> option for all modules
-            comprising any given release of the flight software.&nbsp;
-            Consider the '<code>F</code>' character in column 1.&nbsp; I
-            mentioned earlier the inference that where '<code>F</code>'
-            appears in column in modules <i>other than</i> GKPMNV, it
-            must always be replaced by '<code>C</code>'.&nbsp; And yet
-            from the explanation specific to module GKPMNV, we see that
-            depending on the overall runtime configuration, in GKPMNV it
-            must sometimes be replaced '<code>C</code>' and sometimes
-            instead by '<code>D</code>'.&nbsp; Similarly, in module
-            STRPDT we found that 'R' should be replaced by a blank (or '<code>M</code>'),
-
-
-
-
-
-
-
-
-
-
-            whereas in GKPMNV we find that it is instead replaced by '<code>C</code>'
-            in some configurations; although admittedly, in the case of
-            STRPDT it's difficult to have as much confidence in my
-            inferences, so possibly the replacement could vary by
-            configuration there as well, even though undocumented.&nbsp;
+            I've added the notes about OPS 8 above because PASS module
+            GKRORB, to which the specified settings apply, appears in
+            both OPS 2 and OPS 8 GPC memory images.<br>
             <br>
-            <br>
-            Managing all of these CARDTYPE options seems like a real
-            pain, right?&nbsp; But we're fortunate in the case of
-            GKPMNV, because as it turns out, GKPMNV is not in itself a
-            "compilation unit" that can be compiled in a stand-alone
-            fashion with multiple CARDTYPE settings.&nbsp; Rather, it's
-            a file that is imported into other HAL/S files, and only
-            compiled within the context of those other files.&nbsp; So
-            yes, we may have to use different CARDTYPE options on some
-            HAL/S files, but we don't have to compile with multiple
-            different CARDTYPE settings on the same file.&nbsp;
-            Specifically, GKPMNV is included only in:<br>
-            <ul>
-              <li>GKDASC.hal for OPS 1 ("ascent").&nbsp; In other words,
-                GKDASC is compiled with CARDTYPE=AMOCNCRMFDGCHC</li>
-              <li>GKRORB.hal for OPS 2 ("orbit"). In other words, GKRORB
-                is compiled with CARDTYPE=ACOMNCRCFCGDHC</li>
-              <li>GKGMNV.hal for OPS 3 ("maneuver").&nbsp; In other
-                words, GKGMNV is compiled with CARDTYPE=ACOCNMRMFCGCHD</li>
-            </ul>
-            Regarding these extra column-1 characters like '<code>F</code>',
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            '<code>A</code>', and '<code>B</code>', it's perhaps worth
-            noting also that several flight-software modules have
-            comments similar to this one we find in the module CPUSLS,<br>
+            It's perhaps worth noting also that several flight-software
+            modules have comments similar to this one we find in the
+            module CPUSLS,<br>
             <blockquote>
               <pre>C********************************************************************** 000005AG<br>C************************                           ******************* 000010AG<br>C          THIS MODULE IS SET UP FOR THE SM PREPROCEESOR TO             000015AG<br>C          GENERATE THIS COMPOOL FOR S2 ONLY OR S4 ONLY OR              000020AG<br>C          BOTH OPS.                                                    000025AG<br>C          THIS MODULE MAY CONTAIN F,A AND B CARDS TO BE                000030AG<br>C          USED BY THE PREPROCESSOR TO GENERATE THIS TABLE.             000035AG<br>C          THE PROCEDURE ON HOW TO UPDATE THIS MODULE WILL BE           000040AI<br>C          CONTAINED IN THE SAMS.                                       000045AG<br>C************************                           ******************* 000050AG<br>C********************************************************************** 000055AG<br></pre>
             </blockquote>
             which tells us that HAL/S source code was at least sometimes
             coded with the expectation of being preprocessed in some
-            manner no longer possible for us now.<br>
+            manner no longer possible for us now.&nbsp; The term "SAM"
+            used in the note above (as "SAMS") may refer to the
+            so-called Software Awareness Memos, as described in the <i><a
+                moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avionics%20Software%20-%20Programming%20Standards%20Document%20-%20Shuttle%20Flight%20Software.pdf">Space
+
+
+                Shuttle Programs Orbiter Avionics Software Programming
+                Standard Document</a></i>.&nbsp; Alas, as of this
+            writing we have not a single SAM in our possession.<br>
             <blockquote><font size="-1"><b>Aside:</b>&nbsp; Regarding
                 the "SM PREPROCEESOR" mentioned in the program comments
                 quoted above, there are several documents in our library
@@ -4657,12 +5003,24 @@ href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL
 
 
 
+
+
+
+
+
+
                       Language Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
                       href="Shuttle/19760007755.pdf">HAL/SM System
                       Functional Design Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%20Specification.pdf">HAL/SM
+
+
+
+
+
+
 
 
 
@@ -4845,6 +5203,12 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
         </font></font></blockquote>
     <p> </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
+
+
+
+
+
 
 
 
@@ -5170,9 +5534,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
-              production numbers are related to the BNF rules in
-              comments in the compiler's source code</a>.&nbsp; For
-            example, production number 1 is the <code>&lt;COMPILATION&gt;</code>
+
+
+
+
+
+
+              production numbers are related to the BNF rules according
+              to comments in the compiler's source code</a>.&nbsp; As
+            they used to say, "You could look it up!"<br>
+            <br>
+            For example, production number 1 is the <code>&lt;COMPILATION&gt;</code>
             rule, number 2 is the <code>&lt;COMPILE LIST&gt;</code>
             rule, and so on:<br>
             <blockquote>
@@ -5184,6 +5556,33 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             PASS1 output file of each BNF rule processed:<br>
             <blockquote>
               <pre>⋮<br>     D| EBUG `8`D`E`F                                                                                       |<br><font color="#009900">-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 308<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 309<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 311<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 305<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 302<br></font><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>  HAL/S REL32V0                T I T A N  S Y S T E M S  C O R P .                 AUGUST 11, 2024    6:17:20.50     PAGE 3<br>STMT                                                  SOURCE                                                  CURRENT SCOPE<br><br>   1 M| HELLO:                                                                                              |HELLO<br>   1 M| PROGRAM;                                                                                            |HELLO<br><font color="#009900">-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 362<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 389<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 386<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 380<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 374<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 366<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 361<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 346<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 344<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 343<br></font>   2 M|   DECLARE I INTEGER;                                                                                |HELLO<br><font color="#009900">-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 333<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 349<br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 362<br></font>⋮<br></pre>
+            </blockquote>
+            <blockquote><font size="-1"><b>Note:</b>&nbsp; In using a
+                "modern" version of the HAL/S compiler, i.e., <b>HALSFC</b>
+                or <b>HAL_S_FC.py</b>, there's an improved form of the
+                production trace available, though at present it applies
+                to the entire HAL/S source-code file, and cannot
+                selectively </font><font size="-1"><font size="-1">be </font>activated
+
+
+
+
+
+                or deactivated on a statement-by-statement basis like ¢8</font>.<font
+                size="-1">&nbsp; Simply add the option <code>--pretty-bnf</code>
+                to the compiler command line.&nbsp; This feature is
+                always available in <b>HAL_S_FC.py</b>, but for <b>HALSFC</b>
+                requires <b>HALSFC-PASS1</b> to have been built with
+                the option <code>-DALLOW_PRETTY_BNF</code>.&nbsp;
+                That's not the default, however.&nbsp; <a
+                  moz-do-not-send="true" href="XPL-I.html#debugging">See
+                  the section on debugging XPL/I programs in on the
+                  XPL/I page</a>.&nbsp; The improvement is that you
+                automatically see the full text of the BNF rule for each
+                "production", without the ultimately rather tedious
+                effort of looking anything up:<br>
+              </font>
+              <pre><font size="-1">-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 230: &lt;SUBSCRIPT&gt; ::=  <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 216: &lt;ARITH VAR&gt; ::= &lt;PREFIX&gt; &lt;ARITH ID&gt; &lt;SUBSCRIPT&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 27: &lt;PRIMARY&gt; ::= &lt;ARITH VAR&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 15: &lt;FACTOR&gt; ::= &lt;PRIMARY&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 11: &lt;PRODUCT&gt; ::= &lt;FACTOR&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 9: &lt;TERM&gt; ::= &lt;PRODUCT&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 4: &lt;ARITH EXP&gt; ::= &lt;TERM&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 181: &lt;EXPRESSION&gt; ::= &lt;ARITH EXP&gt; <br>-&gt;-&gt;-&gt;-&gt;-&gt;-&gt;PRODUCTION NUMBER 288: &lt;WRITE ARG&gt; ::= &lt;EXPRESSION&gt; </font><br></pre>
             </blockquote>
           </td>
         </tr>
@@ -5290,6 +5689,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -5350,6 +5755,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
+
+
+
+
+
 
 
 
@@ -5546,6 +5957,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
             it identifies and computes is concerned.&nbsp; Note that the
             positioning of "<font color="#996633"><code>DEBUG H(2)</code></font>"
             is constrained similarly to that of "<font color="#996633"><code>DEBUG
+
+
+
+
+
+
 
 
 
@@ -5761,6 +6178,12 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
             comments in OPT source code call this "STACK TRACE".&nbsp;
             It is a toggle.&nbsp; The effect is similar but not
             identical to that of <a moz-do-not-send="true" href="#X5">compiler
+
+
+
+
+
+
 
 
 
@@ -6347,6 +6770,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -6400,6 +6829,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS2.PROCS">HAL/S-FC's
 
+
+
+
+
+
+
               PASS2 source code</a>.&nbsp; Which is not anything I'd
             normally suggest, since I'd like to thoroughly digest all of
             this subject matter and spit it out explicitly for you, so
@@ -6420,6 +6855,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
                 `PROCEDURE`.&nbsp; These are of the format "<font
                   color="#663333"><code>%06X:%6d,&nbsp;&nbsp; %04X</code></font>",
 
+
+
+
+
+
+
                 where the fields are a "current location counter", a
                 "type" and an "instruction".&nbsp; What those mean is
                 unclear to me right now, but even from the short sample
@@ -6431,12 +6872,24 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
                 `PROCEDURE`, which have the format "<font
                   color="#663333"><code>%06X: &nbsp; %08X</code></font>",
 
+
+
+
+
+
+
                 where the fields are the current "location counter" and
                 a "data word".<br>
               </li>
               <li>Finally, there are the messages emitted by the
                 `SAVE_LITERAL` `PROCEDURE` in GENERATE.xpl.&nbsp; These
                 messages are of the format "<font color="#663333"><code>%6d:%08X
+
+
+
+
+
+
 
                     %8X</code></font>", where the fields are a
                 "pointer", a "value", and (optionally) an
@@ -6513,8 +6966,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
+
+
+
+
+
 
 
 
@@ -6795,6 +7260,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
                   </i></code></font></b><b>or </b><b><font
                 color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle"><br>
@@ -6937,6 +7408,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
             followed by subsequent use (with the <i>same</i>
             source-code file) of "<code>D INCLUDE <i>name</i></code>".</td>
         </tr>
@@ -7064,8 +7541,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
               file SOURCECO.xpl of the HAL/S compiler's original source
               code</a>.&nbsp; The lines reading "<font color="#663300"><code>OUTPUT(9)
+
+
+
+
+
+
 
 
 
@@ -7142,6 +7631,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
+
+
+
+
+
 
 
 
@@ -7367,8 +7862,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
         for a full interpretation, because litfile<i>x</i>.bin usually
         contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+
+
+
+
+
+
 
 
 
@@ -7590,6 +8097,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -7605,6 +8118,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
+
+
+
+
+
 
 
 
@@ -7691,6 +8210,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         Basic assembly-language source code has been ported to the C
         language have bugs that must be fixed.&nbsp; The source code for
         those patch files (patch*.c) are found in the subfolders PASS<i>X</i>.PROCS/,
+
+
+
+
+
+
 
 
 
@@ -7879,6 +8404,12 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
+
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -7941,6 +8472,12 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     the sooner it will be 100% working.<br>
     <br>
     <a moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
+
+
+
+
+
+
 
 
 
@@ -8086,8 +8623,20 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
+
+
       litfile0.bin --common COMMON0.out.bin.gz</code> on the <b>yaHALMAT</b>
     command line.&nbsp; Why not?&nbsp; Well, as it happens, those are <b>yaHALMAT</b>'s
+
+
+
+
+
+
 
 
 
@@ -8106,6 +8655,12 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     defaults, so if you're actually emulating halmat.bin they're not
     strictly necessary.&nbsp; <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+
+
+
 
 
 
@@ -8215,6 +8770,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
             litfile2.bin --common COMMON2.out.bin.gz</code> is omitted
           when emulating optmat.bin, it'll probably be fine.&nbsp; How
           come?&nbsp; Well, either the OPT or PASS2 passes of the
@@ -8243,23 +8804,237 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     extreme as -2<sup>31</sup>=-2147483648).&nbsp; To get an integer to
     print in a field less than 11 characters wide, you actually have to
     make a non-trivial effort.<br>
+    <h1><a name="imponderable"></a>Other Imponderable Mysteries:&nbsp;
+      The Demonic Triad<br>
+    </h1>
+    <p>Perhaps this is as salubrious time as any to dispose of an
+      otherwise-unpleasant topic.&nbsp; The next section covers
+      compilation of the PASS source code.&nbsp; For authenticity
+      purposes, in doing so we should be insistent upon compiling all of
+      the contemporary PASS source code <i>as-is</i>, without
+      modifications of any kind other than translation from EBCDIC
+      encoding to ASCII encoding ... or in the absolute worst case, with
+      minimal, easy-to-justify, instantly-reversible modifications to
+      the PASS source code.&nbsp; Moreover, and even more importantly,
+      we want the AP-101S object code produced in that process to be
+      identical to the original object code actually flown.<br>
+    </p>
+    <p>This turns out to be impossible, for reasons I have yet to fully
+      understand.&nbsp; Consequently, we modern folk will have to
+      compromise somewhat.&nbsp; But what about the contemporary
+      developers?&nbsp; How is it that they succeeded where we (I)
+      cannot?&nbsp; I can only infer that the contemporary developers
+      did <i>not</i> in fact compile precisely the now-available PASS
+      HAL/S source code.&nbsp; Or at least, that that they did not do so
+      using <i>only</i> their HAL/S compiler, <b>HAL/S-FC</b>.&nbsp;
+      Why do I say that?&nbsp; Well, it's because there are three
+      intractable problems in PASS source code which <b>HAL/S-FC</b>
+      cannot handle in its modern incarnation(s) as <b>HALSFC</b> and <b>HAL_S_FC.py</b>,
+      and I've expended enough effort on tracking down bugs in <b>HALSFC</b>'s
+
+
+      and <b>HAL_S_FC.py</b>'s independent ports of <b>HAL/S-FC</b> to
+      reluctantly conclude that they accurately reflect the behavior of
+      <b>HAL/S-FC</b>.&nbsp; In other words, the original PASS source
+      code was not entirely compatible with the original <b>HAL/S-FC</b>
+      compiler, and such incompatibilities were contemporary rather than
+      introduced by me.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; At this point, I'd normally
+          say, <i>Prove me wrong, folks!</i>&nbsp; Boy, do I
+          wish!&nbsp; But since at present I can't show you the PASS
+          source code, that's somewhat problematic.&nbsp; If anyone is
+          sufficiently interested in scoring a few points by following
+          up on it to prove how clever they are, versus what a dummy I
+          am, I'd be happy to throw together some minimal HAL/S source
+          code that exhibits the problems.&nbsp; Perhaps I'll do that
+          anyway.&nbsp; But in lieu of anyone else exposing my idiocy
+          for me, I suppose there's little option other than to just
+          accept my judgement on the matter.</font><br>
+      </p>
+    </blockquote>
+    <p>To be clear, I think that the majority of HAL/S source-code files
+      for PASS do compile correctly without changes, just as we'd
+      hope!&nbsp; But not 100% of them.<br>
+    </p>
+    <p>The three intractable problems the demonic triad of DI11, PM2,
+      and ZO3:<br>
+    </p>
+    <ul>
+      <li><u>DI11</u>:&nbsp; When compiling some PASS HAL/S source-code
+        files, compilation fails with compiler error DI11, "THE VARIABLE
+        <i>variable</i> USED IN A COMPILE-TIME EXPRESSION OR AS THE
+        TARGET OF AN EQUATE STATEMENT HAS NOT BEEN PREVIOUSLY
+        DEFINED".&nbsp; I.e., use of an undefined variable.&nbsp;
+        Digging into the HAL/S source-code, we find that the variables
+        to which these errors relate, <i>really are</i> undefined at
+        the points in the code where the compiler(s) complain about
+        them.&nbsp; There is a common characteristic of all these
+        complaints, in that such a variable will have been defined in
+        some <code>COMPOOL</code>, but that the relevant <code>COMPOOL</code>
+        will not have been included via a compiler directive ("<code>D
+          INCLUDE TEMPLATE ...</code>").&nbsp; If you are familiar with
+        the C or Python languages, it's as if a variable had been
+        defined in a C header file or Python module, but the header file
+        had not been <code>#include</code>'d or the module <code>import</code>'ed.&nbsp;
+
+
+        To avoid a digression that's probably not of interest to you at
+        this point, I'll just say that this problem is dissected <i>ad
+          nauseam</i> in repository <a moz-do-not-send="true"
+          href="https://github.com/virtualagc/virtualagc/issues/1280">issue
+
+
+          #1280</a>, so feel free to read about it there.&nbsp; The good
+        news is that it's possible to devise a preprocessor that
+        corrects the inclusions of <code>COMPOOL</code>s in a HAL/S
+        source-code file before <b>HALSFC</b> or <b>HAL_S_FC.py</b>
+        (or <b>HAL/S-FC</b> for that matter) has a chance to compile
+        the file.&nbsp; This preprocessor (<b><a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC">preprocessHALSFC</a></b>[.<a
+          moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC.bat">bat</a>])
+
+
+        has been integrated into our build system for PASS, so that the
+        DI11 problem will be largely transparent to you; its effects are
+        generally visible to you only if you pore in a
+        mentally-unhealthy manner over the reports generated by
+        compiler.&nbsp; But it doesn't alter the fact that the problem
+        cannot be dealt with by the contemporary HAL/S compiler in the
+        contemporary PASS source code, so I can only infer that the
+        contemporary developers also had some heretofore unknown
+        preprocessing system to deal with the DI11 problem.</li>
+      <li><u>PM2</u>:&nbsp; Similarly, some PASS HAL/S source-code files
+        exhibit compiler error PM2, "DUPLICATE DEFINITION OF STRUCTURE
+        TEMPLATE <i>name</i>".&nbsp; Once again, examination of the
+        offending source code reveals that there really are duplicate
+        definitions.&nbsp; The mechanism by which this occurs is that
+        two separate <code>COMPOOL</code>s (which, recall, are like C
+        header files or Python modules) contain identical definitions of
+        the same structure template, and both of the <code>COMPOOL</code>s
+        have been included in the same source-code module.&nbsp; It
+        would be great if the compiler were easy-going enough to say,
+        Yes there are multiple definitions of the thing, but the
+        definitions are the same, so it's okay!&nbsp; Alas, that does
+        not happen.&nbsp; If you're interested, you can read about this
+        in repository <a moz-do-not-send="true"
+          href="https://github.com/virtualagc/virtualagc/issues/1281">issue
+
+
+          #1281</a>, but there's presently no workaround available for
+        it, short of modifying the PASS source code to avoid it.</li>
+      <li><u>ZO3</u>:&nbsp; Finally, we have some PASS HAL/S source-code
+        files which exhibit error ZO3, "LOOP INVARIANT PULLED FROM
+        IF-THEN GROUP AT STATEMENT <i>number</i> COULD RESULT IN
+        UNINTENTIONAL GPC ERROR...DR103032".&nbsp; This error is unlike
+        the other two mentioned above, in that while DI11 and PM2 errors
+        are triggered in the first pass (the parsing pass) of the
+        compiler, ZO3 errors are triggered in the compiler's <i>optimization</i>
+        pass ... an entirely separate program (<b>HALSFC-OPT</b>, versus
+        <b>HALSFC-PASS1</b>/<b>HAL_S_FC.py</b>).&nbsp; Since the error
+        is detected by a separate program, we might content ourselves
+        with the notion that there are bugs in <b>HALSFC-OPT</b>, but
+        that the original <b>HAL/S-FC</b>'s OPT pass might have handled
+        this code with ease and never emitted ZO3 errors.&nbsp;
+        Maybe.&nbsp; One fly in the ointment with that wish is that the
+        contemporary documentation (the <i>HAL/S-FC User's Manual</i>,
+        in three separate places) describes this problem, and offers
+        suggestions of workarounds by modifying the HAL/S source
+        code!&nbsp; While that doesn't eliminate the possibility that
+        the specific ZO3 <i>we</i> see are due to bugs in <b>HALSFC-OPT</b>,
+        it certainly raise substantial doubt.&nbsp; At any rate, you can
+        read about this in repository <a moz-do-not-send="true"
+          href="https://github.com/virtualagc/virtualagc/issues/1282">issue
+
+
+          #1282</a>.&nbsp; There is presently no available
+        workaround.&nbsp; Why do I say that, given that I also said that
+        the <i>HAL/S-FC User's Manual</i> does offer a
+        workaround?&nbsp; It's that there are <i>several</i> known
+        workarounds which allow the HAL/S source-code files to compile
+        without error.&nbsp; But so far I've found no workaround in
+        which the AP-101S object code produced is identical to the
+        contemporary object code.&nbsp; And while object code that is
+        functionally correct but not identical to the original is not
+        without value, producing inaccurate object code is not our
+        objective other than as a last resort.</li>
+    </ul>
+    <h1><a name="morePreprocessors"></a>More About Preprocessors</h1>
+    <p>I've mentioned "preprocessors" a number of times already, in a
+      variety of different contexts:</p>
+    <ul>
+      <li>If said that he HAL/S statement <code>REPLACE</code>, which
+        is used to replace selected identifiers arbitrary strings,
+        possibly with parameter replacement, is not actually a HAL/S
+        statement after all, but rather a preprocessor command.&nbsp;
+        This is true, in a sense, since this kind of replacement occurs
+        prior to any true evaluation of HAL/S statements.&nbsp;
+        Nevertheless, the replacement process takes place entirely
+        within the HAL/S compiler itself, so there's not actually any
+        standalone "preprocessor" program that performs this
+        replacements.</li>
+      <li>Similarly, I've stated that all <code>COMPOOL</code>s must be
+        processed for inclusion in a "template library" prior to
+        compiling any source-code files that depend on those <code>COMPOOL</code>s.&nbsp;
+        But again, this preprocessing is done by the compiler itself
+        rather than by a program dedicated to that purpose, just by
+        managing the order in which we compile HAL/S source-code files.</li>
+      <li>And I've said that "inclusion files" must be processed prior
+        to their use, by means of a program I call <b>prepareINCLIB</b>.&nbsp;
+        But this so-called processing is really nothing more than
+        recoding the files from ASCII to EBCDIC.</li>
+    </ul>
+    <p>So as these things go, it's a stretch even to distinguish these
+      kind of activities as preprocessing.&nbsp; Too fancy!<br>
+    </p>
+    <p>But there are true preprocessors which come into play.&nbsp; In
+      the preceding section, it was pointed out that required <code>COMPOOL</code>s
+      are often found to be omitted legacy PASS HAL/S source code, or to
+      be included in the wrong order, resulting in compile-time
+      errors.&nbsp; How the original development team handled this isn't
+      known, but one way it could have been handled is to have
+      preprocessing software that corrected the <code>COMPOOL</code>
+      inclusions.&nbsp; And that's what we've implemented here at
+      Virtual AGC, with a true stand-alone preprocessing program called
+      <b>preprocessHALSFC</b>.<br>
+    </p>
+    <p>On the other hand, there are preprocessors we <i>know</i> were
+      used by the original developers, even though our visibility into
+      how those preprocessors worked is limited, and the source for them
+      is non-existent as far as we know.&nbsp; But to fully compile
+      PASS, those preprocessors are needed, and hence we must recreate
+      them ourselves.<br>
+    </p>
+    <p><i>(Work in progress.)</i>&nbsp; One preprocessor relates to the
+      display formats used in the Multifunction Display Units (MDU).<br>
+    </p>
+    <ul>
+    </ul>
     <h1><a name="compilePASS"></a>Compiling the Space Shuttle Primary
       Flight Software</h1>
-    <p>Yes, I know that very few of you have access to the Space
-      Shuttle's Primary Flight Software (PFS, or PASS) at present.&nbsp;
-      I'm sorry about that!&nbsp; But I'm an optimist, so I hope that
-      someday you will, and I'll pretend that you do, in which case
-      you'll want to know how to compile that software.&nbsp; If that
-      seems tone-deaf you you, feel free to flip me the bird and skip
-      this section entirely!<br>
+    <p>Now, for the reasons mentioned in the preceding section, among
+      others, it's not yet feasible to entirely compile any version of
+      PASS.&nbsp; But we can make a mighty good start of it.&nbsp; Yes,
+      I know that very few of you have access to the Space Shuttle's
+      Primary Flight Software (PFS, or PASS) at present.&nbsp; I'm sorry
+      about that!&nbsp; But I'm an optimist, so I hope that someday you
+      will, and I'll pretend that you do, in which case you'll want to
+      know how to compile that software.&nbsp; If that seems tone-deaf
+      you you, feel free to flip me the bird and skip this section
+      entirely!<br>
     </p>
-    <p>Space Shuttle flight-software source-code is, of course, not kept
-      in Virtual AGC's GitHub repository, but rather in a git repository
-      I call PFS, located ... somewhere.&nbsp; And encrypted ...
-      somehow.&nbsp; But let's posit that you've somehow cloned this git
-      repository on your local computer system, and hence have a
-      directory called <i>PFS</i>/.&nbsp; For the purpose of this
-      discussion, there are two sub-directories of significance, namely:<br>
+    <p>Space Shuttle flight-software source-code is, of course since
+      it's secret right now, not kept in Virtual AGC's GitHub
+      repository, but rather in a git repository I call PFS, located ...
+      somewhere.&nbsp; And encrypted ... somehow.&nbsp; But let's posit
+      that you've somehow cloned this git repository on your local
+      computer system, and hence have a directory called <i>PFS</i>/.&nbsp;
+
+
+      For the purpose of this discussion, there are two sub-directories
+      of significance, namely:<br>
     </p>
     <ul>
       <li><i>PFS</i>/OI301700/, which contains the source code for PASS
@@ -8278,6 +9053,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>INCL80/ contains HAL/S source-code files that are intended
         only for importation into other HAL/S files via the HAL/S
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
+
+
+
+
+
 
 
 
@@ -8337,6 +9118,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
+
+
+
+
+
 
 
 
@@ -8471,6 +9258,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -8478,6 +9271,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
+
+
+
+
+
 
 
 
@@ -8522,6 +9321,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
+
+
+
+
+
 
 
 
@@ -8623,6 +9428,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -8640,6 +9451,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
+
+
+
+
+
 
 
 
@@ -8804,12 +9621,24 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
+
+
+
+
+
 
 
 
@@ -8888,7 +9717,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-04-11<br>
+          2026-04-23<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
