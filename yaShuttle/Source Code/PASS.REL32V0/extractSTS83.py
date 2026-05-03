@@ -6,6 +6,8 @@ but maybe from similar documents too.  The code is adapted from here:
 https://stackoverflow.com/questions/22898145/how-to-extract-text-and-text-coordinates-from-a-pdf-file
 '''
 
+import math
+
 from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTChar
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager
@@ -19,6 +21,9 @@ def extract(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
         right = crop[1]
         top = crop[2]
         bottom = crop[3]
+        # Conversion factors from PDF pixels to display-screen pixels:
+        scaleHorizontal = 1024.0 / (right - left)
+        scaleVertical = 730.0 / (bottom - top)
     
     fp = open(filename, 'rb')
     rsrcmgr = PDFResourceManager()
@@ -78,17 +83,25 @@ def extract(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
                                         not entirely clear how to do that, but
                                         here's how I'm doing it, which I'm 
                                         certain needs tweaks once the use of
-                                        *.dfg files is fully understood.  I use
-                                        a screen pixel geometry of 1024x730.  
-                                        Rows 0-25 are at y=13+28*row.  Columns
-                                        0-50 are at x=27+19*column.
+                                        *.dfg files is fully understood.  We 
+                                        need to convert PDF page pixel geometry to
+                                        Shuttle display-screen pixel geometry.
+                                        And from there, convert to text 
+                                        row,column geometry. It appears to me that
+                                        character rows are spaced at 27 screen
+                                        pixel rows, and character columns are
+                                        spaced at 19 screen pixel columns.
+                                        Also:
+                                            Character row 1 is at y=27
+                                            Character column 2 is at x=57
                                         '''
-                                        scaleHorizontal = 1024.0 / (right - left)
-                                        scaleVertical = 730.0 / (bottom - top)
-                                        x = (x0 + x1) / 2.0
-                                        y = (y0 + y1) / 2.0
-                                        row = int(round(scaleVertical * (y - 13) / 28.0))
-                                        col = int(round(scaleHorizontal * (x - 27) / 19.0))
+                                        x = scaleHorizontal * (x0 + x1) / 2.0
+                                        y = scaleVertical * (y0 + y1) / 2.0
+                                        # Note: Don't use `round()` here, 
+                                        # because of daffy Python behavior of
+                                        # using "banker's rounding".
+                                        row = math.floor(0.5 + 1 + (y - 27) / 27)
+                                        col = math.floor(0.5 + 2 + (x - 57) / 19)
                                     print(f"{round(x0)},{round(y0)}, {round(x1)},{round(y1)}, {row},{col}")
                                     print(char_text)
 
