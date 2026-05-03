@@ -64,5 +64,6 @@ if __name__ == "__main__":
     pageNumber = int(sys.argv[2])
     sizeX = float(sys.argv[3])
     sizeY = float(sys.argv[4])
-    extract(filename, pageNumber, sizeX, sizeY)
+    textBoxes = "--text-boxes" in sys.argv
+    extract(filename, pageNumber, sizeX, sizeY, textBoxes)
     
