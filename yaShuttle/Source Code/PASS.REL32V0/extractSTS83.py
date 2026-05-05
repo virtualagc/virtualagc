@@ -3,7 +3,7 @@
 Experimental code for extracting STS display templates specifically from
 https://www.ibiblio.org/apollo/Shuttle/sts83-0020v1-34%20-%20Displays%20and%20Controls%20-%20GNC.pdf,
 but maybe from similar documents too.  The code is adapted from here:
-https://stackoverflow.com/questions/22898145/how-to-extract-text-and-text-coordinates-from-a-pdf-file
+https://stackoverflow.com/questions/22898145/how-to-extractDisplayText-text-and-text-coordinates-from-a-pdf-file
 '''
 
 import math
@@ -14,7 +14,64 @@ from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
 
-def extract(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
+import cv2
+import numpy as np
+from pdf2image import convert_from_path
+
+def getCropFromPDF(filename, pageNumber=0, dpi=192, debug=False):
+    L = 1000000
+    R = -1000000
+    T = 1000000
+    B = -1000000
+    thresh = 0.2
+    
+    # Convert PDF to list of PIL images
+    pages = convert_from_path(filename, dpi=192)
+    
+    for n, page in enumerate(pages):
+        if n < pageNumber:
+            continue
+        elif n == pageNumber:
+            pass
+        else:
+            break 
+        
+        # Convert PIL image to numpy array (OpenCV format)
+        img = np.array(page)
+    
+        # Convert RGB to BGR (OpenCV uses BGR)
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    
+        sizeY = gray.shape[0]
+        threshSizeY = sizeY * thresh
+        sizeX = gray.shape[1]
+        threshSizeX = sizeX * thresh
+        edges = cv2.Canny(gray, 50, 150)
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=200, minLineLength=100, maxLineGap=10)
+        tolerance = 5
+        if lines is not None:
+            for line in lines:
+                if debug:
+                    print("Line:", line[0])
+                x1, y1, x2, y2 = line[0]
+                yLen = abs(y1 - y2)
+                xLen = abs(x1 - x2)
+                if yLen < tolerance and xLen > threshSizeX:
+                    y = (y1 + y2) / 2
+                    if y < T:
+                        T = y
+                    if y > B:
+                        B = y
+                elif xLen < tolerance and yLen > threshSizeY:
+                    x = (x1 + x2) / 2
+                    if x < L:
+                        L = x
+                    if x > R:
+                        R = x
+    
+    return L, R, T, B, sizeX, sizeY
+
+def extractDisplayText(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
     
     if crop != None:
         left = crop[0]
@@ -32,7 +89,7 @@ def extract(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
     interpreter = PDFPageInterpreter(rsrcmgr, device)
     pages = PDFPage.get_pages(fp)
     
-    pageNumber -= 1
+    pageNumber
     for n, page in enumerate(pages):
         if n < pageNumber:
             continue
@@ -102,29 +159,27 @@ def extract(filename, pageNumber, sizeX, sizeY, textBoxes = False, crop=None):
                                         # using "banker's rounding".
                                         row = math.floor(0.5 + 1 + (y - 27) / 27)
                                         col = math.floor(0.5 + 2 + (x - 57) / 19)
-                                    print(f"{round(x0)},{round(y0)}, {round(x1)},{round(y1)}, {row},{col}")
-                                    print(char_text)
+                                    if False:
+                                        print(f"{round(x0)},{round(y0)}, {round(x1)},{round(y1)}, {row},{col}")
+                                        print(char_text)
+                                    else:
+                                        print(f"{char_text}\t{row}\t{col}")
 
 if __name__ == "__main__":
     
     helpMsg = '''
 Usage:
-     extractSTS83.py FILE.pdf PAGENUMBER XSIZE YSIZE [OPTIONS]
-where XSIZE,YSIZE are the width and height of the selected page, in pixels
-(if the PDF page were extracted as an image).  All coordinates are in pixels
+     extractSTS83.py FILE.pdf [OPTIONS]
+The PDF file should contain a single page.  All coordinates are in pixels 
 relative to the upper left.
 
 The available OPTIONS are:
 
-     --help          Show this message.
-     --text-boxes    Extract "blocks" of text rather than individual characters
-                     (the default).
-     --crop=L,R,T,B  Remove all objects not intersecting the specified crop
-                     area, which is specified by the page pixel coordinates
-                     of its left, right, top, and bottom borders.  In the 
-                     output, the coordinates are relative to the upper left
-                     of the crop area rather than to the page, but row,column
-                     (26,51) coordinates are given as well.
+     --help               Show this message.
+     --crop=L,R,T,B,X,Y   Override autocrop with locations of display-screen 
+                          edges (L,R,T,B) measured from upper-left corner, and
+                          page size (X,Y).  All are in PDF page pixels.
+     --debug              Enable some debugging messages.
 '''
     import sys
     import os
@@ -133,27 +188,33 @@ The available OPTIONS are:
         print(helpMsg)
         os._exit(level)
     
+    crop = None
     try:
         filename = sys.argv[1]
-        pageNumber = int(sys.argv[2])
-        sizeX = float(sys.argv[3])
-        sizeY = float(sys.argv[4])
-        textBoxes = False
-        crop = None
-        for parm in sys.argv[5:]:
+        
+        pageNumber = 0
+        debug = False
+        for parm in sys.argv[2:]:
             fields = parm.partition("=")
             if fields[0] == "--help":
                 outtaHere(0)
-            elif fields[0] == "--text-boxes":
-                textBoxes = True
+            elif fields[0] == "--debug":
+                debug = True
             elif fields[0] == "--crop":
                 fields = fields[2].split(",")
-                crop = (int(fields[0]), int(fields[1]),
-                        int(fields[2]), int(fields[3]))
+                crop = (int(fields[0]), int(fields[1]), int(fields[2]),
+                        int(fields[3]), int(fields[4]), int(fields[5]))
             else:
                 print("Unrecognized parameter", parm)
                 outtaHere()
+        
+        if crop == None:
+            crop = getCropFromPDF(filename, debug=debug)
+        aspect = (crop[1] - crop[0]) / (crop[3] - crop[2])
+        if aspect < 1.4 or aspect > 1.5:
+            print(f"Edge detection for {filename} may have failed.", file=sys.stderr)
+        print(f"# Geometry={crop[4]}x{crop[5]}, crop UL={crop[0]},{crop[2]} LR={crop[1]},{crop[3]}, aspect={aspect}")
     except:
         outtaHere()
-    extract(filename, pageNumber, sizeX, sizeY, textBoxes=textBoxes, crop=crop)
+    extractDisplayText(filename, pageNumber, crop[4], crop[5], crop=crop)
     
