@@ -174,13 +174,13 @@ Regarding the compiler parameters:
                 workarounds, though much more expensive to implement.  So far,
                 this approach agrees with MAFGEN.
 '''
-defaultR = "C"
+defaultR = "M"
 def getParms(template):
     # Note: LITSTRINGS increased from default (2000) for 
     # OI301700/APPLSRC/CGBIH2.hal (uses 2646).
     modern = "UDXCVMWC"
     contemporary = "UCXDVCWM"
-    parmBase = "LIST,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
+    parmBase = "SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
     cardtypesBySourceFile = {
         "default": f"FCR{defaultR}",
         "CS2INI" : f"ACFCR{defaultR}",
@@ -286,6 +286,10 @@ def compile(template):
                 command.append(rsbTrace)
             result = subprocess.run(command, capture_output = True, text = True, check = True)
             retryX1 = False
+            if len(result.stdout):
+                print("STDOUT:", result.stdout)
+            if len(result.stderr):
+                print("STDERR:", result.stderr)
         except subprocess.CalledProcessError as e:
             if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
                 if autoX1 and not retryX1:

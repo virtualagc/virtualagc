@@ -360,7 +360,8 @@ if test:
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
     os.system('diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt')
     os.system('diff -s FILE1.bin halmat.bin')
-    os.system('diff -s FILE3.bin icfile.bin')
+    if Path("icfile.bin").is_file():
+        os.system('diff -s FILE3.bin icfile.bin')
     if "LISTING2" in parmList:
             os.system('diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt')
     print("======================================================")

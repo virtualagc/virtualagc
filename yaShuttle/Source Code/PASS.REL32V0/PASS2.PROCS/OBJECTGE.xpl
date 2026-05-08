@@ -267,6 +267,7 @@
                                                                                 07253600
                                                                                 07273000
 OBJECT_GENERATOR:PROCEDURE;                                                     07273500
+ /?V  DECLARE MAX_SEVERITY FIXED INITIAL(0); ?/
       DECLARE                                                                   07274000
          ADDRESS_MOD FIXED INITIAL (0),                                         07275000
  /?B     /* CR11114 -- BFS/PASS INTERFACE; CHANGE #Z TO SEPARATE OBJ. */
