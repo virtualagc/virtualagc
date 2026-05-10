@@ -711,6 +711,7 @@ if targetLanguage == "C":
         except:
             pass
         for name in ["runtimeC.c", "runtimeC.h", "inline360.c", "inline360.h",
+                  "ibmFloat.c", "ibmFloat.h",
                   "debuggingAid.c", "Makefile.template"]:
             shutil.copy(basePath + name, outputFolder + os.sep + \
                         name.replace(".template", ""))

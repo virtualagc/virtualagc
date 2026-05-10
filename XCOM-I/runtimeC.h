@@ -504,6 +504,11 @@ toFloatIBM(uint32_t *msw, uint32_t *lsw, double d);
 double
 fromFloatIBM(uint32_t msw, uint32_t lsw);
 
+// Direct IBM hex DP arithmetic and bit-exact decimal conversion routines.
+// Used by MONITOR(10) (string -> hex parsing) and MONITOR(12) (hex -> string
+// formatting):
+#include "ibmFloat.h"
+
 uint32_t
 MONITOR9(uint32_t op);
 
