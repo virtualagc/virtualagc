@@ -4,7 +4,7 @@
  *              modified for any purpose whatever without licensing.
  * Filename:    ibmFloat.h
  * Purpose:     Header for ibmFloat.c — IBM hex floating-point helpers
- *              Based on the floating point logic in the 
+ *              Based on the floating point logic in the
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-// NOTE: 
+// NOTE:
 //       IBM floating point exponents are base-16 (hex).  Standard IEEE754
 //       implementations (like C's float/double types) use base-2.  Because
 //       it's hex, you'll see a lot of 4-bit ops to handle hexadecimal digits.
@@ -108,5 +108,8 @@ uint64_t ibm_dp_mul(uint64_t a, uint64_t b);
 uint64_t ibm_dp_div(uint64_t a, uint64_t b);
 uint64_t ibm_dp_addsub(uint64_t a, uint64_t b,
                        int subtract_b, int normalize);
+
+// Returns the IEEE 754 double-precision hexadecimal representation of a number.
+char *ieee754(double f);
 
 #endif // IBM_FLOAT_H

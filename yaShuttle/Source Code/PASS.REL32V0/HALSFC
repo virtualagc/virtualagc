@@ -164,7 +164,7 @@ filesLocal = ["LISTING2p.txt", "vmem.bin", "COMMON1.out", "COMMON2.out",
               "pass1A.rpt", "pass1pA.rpt", 
               "aux.rpt", "pass3.rpt", "pass4.rpt", "monitor13.parms",
               "deck.bin", "extra.txt", "&&TEMPINC",
-              "litfile1.bin", "litfile3.bin"]
+              "litfile1.bin", "litfile3.bin", "literals1.txt", "literals1p.txt"]
 filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz", 
                  "litfile0.bin", "litfile2.bin", "COMMON2.out.bin.gz",
                  "TEMPLIB.json", "TEMPLIB", "FILE1.bin", "FILE2.bin", "LIT_CHAR.bin",
@@ -360,7 +360,13 @@ if test:
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
     os.system('diff --strip-trailing-cr -q -s pass1A.rpt pass1pA.rpt')
     os.system('diff -s FILE1.bin halmat.bin')
-    os.system('diff -s FILE3.bin icfile.bin')
+    if Path("FILE3.bin").is_file() and Path("icfile.bin").is_file():
+        os.system('diff -s FILE3.bin icfile.bin')
+    else:
+        print("FYI: No IC file produced for testing")
+    os.system('unLitfile FILE2.bin >literals1p.txt')
+    os.system('unLitfile litfile0.bin >literals1.txt')
+    os.system('diff --strip-trailing-cr -q -s literals1.txt literals1p.txt')
     if "LISTING2" in parmList:
             os.system('diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt')
     print("======================================================")

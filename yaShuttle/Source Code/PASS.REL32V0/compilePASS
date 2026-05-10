@@ -55,8 +55,13 @@ and INCL80/).  Usage:
 The only OPTIONS available are:
 
     --help          Show this message.
-    --preprocess    Preprocess the HAL/S source code prior to compilation to
-                    help eliminate DI11 and PM2 compile-time errors.
+    --preprocess    (Default.)  Preprocess the HAL/S source code prior to
+                    compilation to eliminate DI11 compile-time errors.
+    --no-preprocess Opposite of --preprocess.
+    --dfg           (Not yet available.)  Run the DFG preprocessor to convert
+                    display-format files to HAL/S source code.
+    --no-dfg        Do not run the DFG preprocessor to convert display-format 
+                    files to HAL/S source code.
     --ops=C         (Default G16.)  Select a GPC configuration.  The choices
                     are G16, G2, G3, G8, G9, S2, P9, and SSW.  These correspond
                     to the various operational modes of PASS, and each would
@@ -117,7 +122,8 @@ the operating system buffer them in large blocks and only emitting them when
 full blocks become available.
 '''
 autoX1 = False
-preprocess = False
+preprocess = True
+dfg = True
 skipTo = None
 rsbTrace = ""
 ops = "G16"
@@ -127,6 +133,12 @@ for parm in sys.argv[1:]:
         outtaHere(0)
     elif parm == "--preprocess":
         preprocess = True
+    elif parm == "--no-preprocess":
+        preprocess = False
+    elif parm == "--dfg":
+        dfg = True
+    elif parm == "--no-dfg":
+        dfg = False
     elif parm.startswith("--ops="):
         ops = parm[6:]
         if ops not in ["G16", "G2", "G3", "G8", "G9", "S2", "P9", "SSW"]:
@@ -174,13 +186,16 @@ Regarding the compiler parameters:
                 workarounds, though much more expensive to implement.  So far,
                 this approach agrees with MAFGEN.
 '''
-defaultR = "C"
+extraParms = ""
+defaultR = "M"
 def getParms(template):
     # Note: LITSTRINGS increased from default (2000) for 
     # OI301700/APPLSRC/CGBIH2.hal (uses 2646).
     modern = "UDXCVMWC"
     contemporary = "UCXDVCWM"
-    parmBase = "LIST,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
+    # Just to be clear, there *are* LFXI instructions in the MAFGEN memory 
+    # dumps, but just not any in HAL/S code.
+    parmBase = extraParms + "SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
     cardtypesBySourceFile = {
         "default": f"FCR{defaultR}",
         "CS2INI" : f"ACFCR{defaultR}",
@@ -285,6 +300,10 @@ def compile(template):
             if rsbTrace != "":
                 command.append(rsbTrace)
             result = subprocess.run(command, capture_output = True, text = True, check = True)
+            if len(result.stdout):
+                print(result.stdout)
+            if len(result.stderr):
+                print(result.stderr)
             retryX1 = False
         except subprocess.CalledProcessError as e:
             if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
@@ -307,8 +326,10 @@ def compile(template):
                 rsbTrace = ""
                 return False
             print(f"Failed with exit code {e.returncode}.")
-            print("STDOUT:", e.stdout)
-            print("STDERR:", e.stderr)
+            if len(e.stdout):
+                print(e.stdout)
+            if len(e.stderr):
+                print(e.stderr)
             if preprocess:
                 extra = "--preprocess"
             else:

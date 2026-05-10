@@ -4,7 +4,7 @@
  *              modified for any purpose whatever without licensing.
  * Filename:    ibmFloat.c
  * Purpose:     IBM hex floating-point arithmetic and conversions.
- *              Based on the floating point logic in the 
+ *              Based on the floating point logic in the
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
@@ -22,7 +22,7 @@
 static uint64_t ibm_dp_from_uint(uint64_t v);
 
 // Convert a C double to IBM double-precision float, returning the (msw, lsw)
-// pair.  On overflow returns (IBM_DP_OVERFLOW_MSW, 0). 
+// pair.  On overflow returns (IBM_DP_OVERFLOW_MSW, 0).
 // NOTE: IBM float has 56 bit mantissa, IEEE754 double is 53 bits,
 //       so this loses precision.
 void __attribute__ ((no_instrument_function))
@@ -43,16 +43,20 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
     } else
         s = 0;
     // Shift left by 24 bits.
+    //printf("A %s\n", ieee754(d));
     d *= twoTo56;
+    //printf("B %s\n", ieee754(d));
     // Find the exponent (biased by IBM_DP_EXP_BIAS) as a power of 16:
     e = IBM_DP_EXP_BIAS;
     while (d < twoTo52) {
         e -= 1;
         d *= 16;
+        //printf("C %s\n", ieee754(d));
     }
     while (d >= twoTo56) {
         e += 1;
         d /= 16;
+        //printf("D %s\n", ieee754(d));
     }
     if (e < 0)
         e = 0;
@@ -61,7 +65,8 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
         *lsw = 0x00000000;
         return;
     }
-    f = llround(d);
+    //f = llround(d);
+    f = (long long)(d + 0.5);
     *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
     *lsw = f & 0xffffffff;
 }
@@ -83,7 +88,7 @@ ibm_dp_to_double(uint32_t msw, uint32_t lsw) {
 }
 
 
-// Convert a small unsigned integer to IBM DP packed format.  
+// Convert a small unsigned integer to IBM DP packed format.
 static uint64_t
 ibm_dp_from_uint(uint64_t v) {
     if (v == 0) return 0;
@@ -334,7 +339,7 @@ uint64_t ibm_dp_sub(uint64_t a, uint64_t b) {
     return ibm_dp_addsub(a, b, /*subtract_b=*/1, 1);
 }
 
-// IBM hex DP multiply 
+// IBM hex DP multiply
 // based on Hyperion's mul_lf:
 // https://github.com/hercules-390/hyperion/blob/bec74e3a3dc26acb251eb820b3aeafcee0576b88/float.c#L2082
 //
@@ -479,7 +484,10 @@ ibm_dp_to_string(uint32_t msw, uint32_t lsw, int sig_digits,
     assert(pad_to_digits >= sig_digits && pad_to_digits <= 30);
 
     if (((msw & 0x7FFFFFFFu) | lsw) == 0) {
-        snprintf(out, out_len, "0.0");
+	if (pad_to_digits == 16)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
         return;
     }
 
@@ -560,7 +568,10 @@ ibm_dp_to_hal_string(uint32_t msw, uint32_t lsw, int precision,
                      char *out, size_t out_len)
 {
     if ((msw & 0x00FFFFFFu) == 0 && lsw == 0) {
-        snprintf(out, out_len, " 0.0");
+	if (precision)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
         return;
     }
     int sig = (precision == 0) ? 7 : 16;
@@ -571,4 +582,3 @@ ibm_dp_to_hal_string(uint32_t msw, uint32_t lsw, int precision,
     else
         snprintf(out, out_len, " %s", body);
 }
-
