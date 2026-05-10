@@ -532,7 +532,7 @@ if __name__ == "__main__":
     import sys
     
     def printHuman(msw, lsw, parm):
-        print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP ='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP ='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
+        print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
     
     for parm in sys.argv[1:]:
         parm = parm.replace(" ", "")
