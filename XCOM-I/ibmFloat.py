@@ -13,6 +13,7 @@ Mod history:    2026-05-06 RSB  Initial conversion by CodeConvert, and changes
                                 but I've added a section for stand-alone 
                                 execution too, adapted from my ibmHex.py,
                                 for testing purposes.
+                2026-05-10 RSB  Fleshed out the stand-alone executable.
 '''
 
 '''
