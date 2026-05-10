@@ -67,7 +67,13 @@ int main(int argc, char *argv[]) {
             printf("\tresult is not normalized.\n");
             printf("hcNUMBER\nchNUMBER\n");
             printf("\tConvert HAL/S floating-point to native C floating\n");
-            printf("\tpoint or vice versa, respectively.\n\n");
+            printf("\tpoint or vice versa, respectively.\n");
+            printf("iNUMBER\n");
+            printf("\tPrints the IEEE 754 hexadecimal representation of a\n");
+            printf("\tnumber.  This is not directly relevant to ibmFloat\n");
+            printf("\tfunctionality but can be used for diagnosis of cross-test\n");
+            printf("\tdiscrepancies.\n");
+	    printf("\n");
             free(parm);
             break;
         } else if (strchr(parm, ',')) {
@@ -135,6 +141,11 @@ int main(int argc, char *argv[]) {
             ibm_dp_from_double(&msw, &lsw, f);
             if (msw == IBM_DP_OVERFLOW_MSW) printf("Overflow   (%s)\n", argv[i]);
             else printHuman(msw, lsw, argv[i]);
+        } else if (strncmp(parm, "i", 1) == 0) {
+            double f = atof(parm + 1);
+            uint64_t bits;
+            memcpy(&bits, &f, sizeof(bits));
+            printf("%016LX   (%s)\n", (unsigned long long) bits, parm);
         } else {
             uint32_t msw, lsw;
             ibm_dp_from_string(parm, &msw, &lsw);

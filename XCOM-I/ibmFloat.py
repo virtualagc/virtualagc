@@ -530,6 +530,7 @@ def ibm_dp_to_hal_string(msw, lsw, precision):
 
 if __name__ == "__main__":
     import sys
+    import struct
     
     def printHuman(msw, lsw, parm):
         print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
@@ -572,7 +573,41 @@ if __name__ == "__main__":
             print("chNUMBER")
             print("\tConvert HAL/S floating-point to native C/Python floating")
             print("\tpoint or vice versa, respectively.")
+            print("--make-test")
+            print("\tOutputs a large test dataset that can be used with ")
+            print("\tibmFloat.py and ibmFloat.c+ibmFloatRig.c in parallel")
+            print("\tcross-check that they produce the same results.  An")
+            print("\texample usage (in Linux) would be:")
+            print("\t    ibmFloat.py --make-test >ibmFloat.txt")
+            print("\t    while IFS= read -r line ;")
+            print("\t    do ")
+            print("\t        ibmFloat.py $line")
+            print("\t    done <ibmFloat.tst >resultsPy.txt")
+            print("\t    while IFS= read -r line ;")
+            print("\t    do ")
+            print("\t        ibmFloat $line")
+            print("\t    done <ibmFloat.tst >resultsC.txt")
+            print("\t    diff resultsPy.txt resultsC.txt")
+            print("iNUMBER")
+            print("\tPrints the IEEE 754 hexadecimal representation of a ")
+            print("\tnumber.  This is not directly relevant to ibmFloat")
+            print("\tfunctionality but can be used for diagnosis of cross-test")
+            print("\tdiscrepancies.")
             print("")
+            break
+        elif parm == "--make-test":
+            print(f"0 0.0")
+            for i in range(-10, 11):
+                x = 10.0 ** i
+                print(f"{x} {-x} hc{x} hc{-x} ch{x} ch{-x}")
+                for j in range(-10, 11):
+                    y = 10.0 ** j
+                    print(f"{x}+{y} {x}s{y} {x}*{y} {x}/{y} {x}p{y} {x}m{y}")
+            f1 = 1
+            f2 = 1
+            for i in range(1000):
+                print(f"{'%08X'%f1},{'%08X'%f2}")
+                f1, f2 = (f1+f2) & 0xFFFFFFFF, f1
             break
         elif "," in parm:
             try:
@@ -667,6 +702,13 @@ if __name__ == "__main__":
                     print(f"Overflow   ({parm})")
                 else:
                     printHuman(msw, lsw, parm)
+            except:
+                print(f"Not a valid Python floating-point number   ({parm})")
+        elif parm.startswith("i"):
+            try:
+                f = float(parm[1:])
+                rep = struct.pack('>d', f).hex().upper()
+                print(f"{rep}   ({parm})")
             except:
                 print(f"Not a valid Python floating-point number   ({parm})")
         else:
