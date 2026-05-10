@@ -6,6 +6,8 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
+                2026-04-23 RSB  Now conditionaly (/?V...?/) ignores
+                                `MAX_SEVERITY` in object-file generation.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.

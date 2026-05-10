@@ -1206,8 +1206,6 @@ class asmParser(Parser):
                 self._define(
                     [],
                     ['d', 'h', 'l', 't'],
-<<<<<<< HEAD
-=======
                 )
             with self._option():
                 with self._optional():
@@ -1232,7 +1230,6 @@ class asmParser(Parser):
                 self._define(
                     ['f', 'z'],
                     ['d', 't'],
->>>>>>> branch 'master' of https://github.com/virtualagc/virtualagc.git
                 )
             self._error(
                 'expecting one of: '

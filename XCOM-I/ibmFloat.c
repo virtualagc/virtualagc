@@ -4,7 +4,7 @@
  *              modified for any purpose whatever without licensing.
  * Filename:    ibmFloat.c
  * Purpose:     IBM hex floating-point arithmetic and conversions.
- *              Based on the floating point logic in the 
+ *              Based on the floating point logic in the
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
@@ -19,12 +19,10 @@
 #define twoTo56 (1LL << IBM_DP_MANT_BITS)
 #define twoTo52 (1LL << 52)
 
-static uint64_t ibm_dp_mul(uint64_t a, uint64_t b);
-static uint64_t ibm_dp_div(uint64_t a, uint64_t b);
 static uint64_t ibm_dp_from_uint(uint64_t v);
 
 // Convert a C double to IBM double-precision float, returning the (msw, lsw)
-// pair.  On overflow returns (IBM_DP_OVERFLOW_MSW, 0). 
+// pair.  On overflow returns (IBM_DP_OVERFLOW_MSW, 0).
 // NOTE: IBM float has 56 bit mantissa, IEEE754 double is 53 bits,
 //       so this loses precision.
 void __attribute__ ((no_instrument_function))
@@ -45,16 +43,20 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
     } else
         s = 0;
     // Shift left by 24 bits.
+    //printf("A %s\n", ieee754(d));
     d *= twoTo56;
+    //printf("B %s\n", ieee754(d));
     // Find the exponent (biased by IBM_DP_EXP_BIAS) as a power of 16:
     e = IBM_DP_EXP_BIAS;
     while (d < twoTo52) {
         e -= 1;
         d *= 16;
+        //printf("C %s\n", ieee754(d));
     }
     while (d >= twoTo56) {
         e += 1;
         d /= 16;
+        //printf("D %s\n", ieee754(d));
     }
     if (e < 0)
         e = 0;
@@ -63,7 +65,8 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
         *lsw = 0x00000000;
         return;
     }
-    f = llround(d);
+    //f = llround(d);
+    f = (long long)(d + 0.5);
     *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
     *lsw = f & 0xffffffff;
 }
@@ -85,7 +88,7 @@ ibm_dp_to_double(uint32_t msw, uint32_t lsw) {
 }
 
 
-// Convert a small unsigned integer to IBM DP packed format.  
+// Convert a small unsigned integer to IBM DP packed format.
 static uint64_t
 ibm_dp_from_uint(uint64_t v) {
     if (v == 0) return 0;
@@ -98,9 +101,24 @@ ibm_dp_from_uint(uint64_t v) {
 }
 
 
-// ibm_dp_from_string(): 
-// convert a HAL/S decimal-literal string to IBM DP hex, matching the
-// truncating S/360 hex floating-point behavior of MONITOR.ASM/XXXTOD.bal. 
+// ibm_dp_from_string():
+// convert a HAL/S decimal-literal string to IBM DP hex.  Faithful
+// reproduction of MONITOR.ASM/XXXTOD.bal — the routine the HAL/S-FC
+// compiler invokes via MONITOR(10) at PASS1.PROCS/SCAN.xpl:690 to
+// parse every numeric literal into the literal table.
+//
+// Final scaling follows XXXTOD.bal:1530-1700:
+//   TIMES10A  while |dec_exp| >= 23: MD/DD F0,=D'1E23'
+//   TIMES10B  build F4 = 10^(0..22 remainder) via repeated squaring
+//   TIMES10C  MDR/DDR F0,F4
+//
+// =D'1E23' is IBM Assembler-H's evaluation of the literal `1E23`.
+// True 10^23 × 16^14 / 16^20 = 5,960,464,477,539,062.5 — exactly
+// halfway between two DP mantissas — and Assembler-H rounds half-up,
+// so the constant lives at 0x54152D02C7E14AF7
+//
+static const uint64_t IBM_DP_1E23 = 0x54152D02C7E14AF7ULL;
+
 void __attribute__ ((no_instrument_function))
 ibm_dp_from_string(const char *s, uint32_t *msw, uint32_t *lsw) {
     assert(s != NULL && msw != NULL && lsw != NULL);
@@ -110,14 +128,29 @@ ibm_dp_from_string(const char *s, uint32_t *msw, uint32_t *lsw) {
 
     uint64_t F0 = 0;
     uint64_t TEN = ibm_dp_from_uint(10);
-    int frac_digits = 0, seen_dot = 0;
+    int frac_digits = 0, seen_dot = 0, ignore = 0;
     while (*s) {
         if (*s >= '0' && *s <= '9') {
-            F0 = ibm_dp_mul(F0, TEN);
-            if (*s != '0') {
-                F0 = ibm_dp_addsub(F0, ibm_dp_from_uint((uint64_t)(*s - '0')), 0, 1);
+            if (!ignore) {
+                F0 = ibm_dp_mul(F0, TEN);
+                if (*s != '0') {
+                    F0 = ibm_dp_addsub(F0, ibm_dp_from_uint((uint64_t)(*s - '0')), 0, 1);
+                }
+                if (seen_dot) frac_digits++;
+                // XXXTOD precision guard (MONITOR.ASM/XXXTOD.bal lines
+                // 26-32): once F0 reaches the SP equivalent of ~7.2e15
+                // (=X'4E19999A') and we're past the decimal point,
+                // ignore all remaining digits.  Without this, every
+                // additional digit costs another truncating *=10
+                // multiply, accumulating LSB error past the 56-bit
+                // mantissa's natural ~17-decimal-digit precision.  Note
+                // pre-decimal digits never trigger ignore — they affect
+                // magnitude and must always be processed.
+                if (seen_dot
+                    && ((uint32_t)(F0 >> 32)) >= 0x4E19999AU) {
+                    ignore = 1;
+                }
             }
-            if (seen_dot) frac_digits++;
             s++;
         } else if (*s == '.' && !seen_dot) {
             seen_dot = 1;
@@ -144,14 +177,25 @@ ibm_dp_from_string(const char *s, uint32_t *msw, uint32_t *lsw) {
 
     if (dec_exp != 0) {
         int absexp = dec_exp < 0 ? -dec_exp : dec_exp;
-        uint64_t F4 = ibm_dp_from_uint(1);
-        uint64_t F2 = TEN;
-        while (absexp > 0) {
-            if (absexp & 1) F4 = ibm_dp_mul(F4, F2);
-            absexp >>= 1;
-            if (absexp) F2 = ibm_dp_mul(F2, F2);
+        // TIMES10A: chunk by 23 using the Assembler-H 1E23 constant.
+        while (absexp >= 23) {
+            F0 = (dec_exp > 0)
+                 ? ibm_dp_mul(F0, IBM_DP_1E23)
+                 : ibm_dp_div(F0, IBM_DP_1E23);
+            absexp -= 23;
         }
-        F0 = (dec_exp > 0) ? ibm_dp_mul(F0, F4) : ibm_dp_div(F0, F4);
+        // TIMES10B / TIMES10C: build F4 = 10^(0..22) via squaring,
+        // then MDR/DDR.
+        if (absexp > 0) {
+            uint64_t F4 = ibm_dp_from_uint(1);
+            uint64_t F2 = TEN;
+            while (absexp > 0) {
+                if (absexp & 1) F4 = ibm_dp_mul(F4, F2);
+                absexp >>= 1;
+                if (absexp) F2 = ibm_dp_mul(F2, F2);
+            }
+            F0 = (dec_exp > 0) ? ibm_dp_mul(F0, F4) : ibm_dp_div(F0, F4);
+        }
     }
 
     if (F0 == IBM_DP_OVERFLOW_PACKED) { *msw = IBM_DP_OVERFLOW_MSW; *lsw = 0; return; }
@@ -295,11 +339,11 @@ uint64_t ibm_dp_sub(uint64_t a, uint64_t b) {
     return ibm_dp_addsub(a, b, /*subtract_b=*/1, 1);
 }
 
-// IBM hex DP multiply 
+// IBM hex DP multiply
 // based on Hyperion's mul_lf:
 // https://github.com/hercules-390/hyperion/blob/bec74e3a3dc26acb251eb820b3aeafcee0576b88/float.c#L2082
 //
-static uint64_t
+uint64_t
 ibm_dp_mul(uint64_t a, uint64_t b) {
     uint64_t a_mant = IBM_DP_MANT(a);
     uint64_t b_mant = IBM_DP_MANT(b);
@@ -347,7 +391,7 @@ ibm_dp_mul(uint64_t a, uint64_t b) {
 // based on Hyperion's div_lf:
 // https://github.com/hercules-390/hyperion/blob/bec74e3a3dc26acb251eb820b3aeafcee0576b88/float.c#L2298
 //
-static uint64_t
+uint64_t
 ibm_dp_div(uint64_t a, uint64_t b) {
     uint64_t a_mant = IBM_DP_MANT(a);
     uint64_t b_mant = IBM_DP_MANT(b);
@@ -384,7 +428,12 @@ ibm_dp_div(uint64_t a, uint64_t b) {
     return IBM_DP_PACK(r_sign, r_exp, r_mant);
 }
 
-// data from TENSTBL.bal, used by XXDTOC
+// data from TENSTBL.bal, used by XXDTOC.
+//
+// Each entry is the IBM Assemblerevaluation of the literal `=D'10^N'`
+//  NOTE: `=D` literals use a round-up rule, not the truncate rule
+//        used elsewhere in this code.
+//
 static const uint64_t TENSTBL[17] = {
     /* 10^0  */  0x4110000000000000ULL,
     /* 10^1  */  0x41A0000000000000ULL,
@@ -398,11 +447,11 @@ static const uint64_t TENSTBL[17] = {
     /* 10^9  */  0x483B9ACA00000000ULL,
     /* 10^10 */  0x492540BE40000000ULL,
     /* 10^20 */  0x5156BC75E2D63100ULL,
-    /* 10^30 */  0x59C9F2C9CD04674EULL,
-    /* 10^40 */  0x621D6329F1C35CA4ULL,
-    /* 10^50 */  0x6A446C3B15F99265ULL,
-    /* 10^60 */  0x729F4F2726179A1EULL,
-    /* 10^70 */  0x7B172EBAD6DDC73BULL,
+    /* 10^30 */  0x59C9F2C9CD04674FULL,
+    /* 10^40 */  0x621D6329F1C35CA5ULL,
+    /* 10^50 */  0x6A446C3B15F99267ULL,
+    /* 10^60 */  0x729F4F2726179A22ULL,
+    /* 10^70 */  0x7B172EBAD6DDC73DULL,
 };
 
 // ibm_dp_to_string — direct IBM hex DP -> decimal string
@@ -435,7 +484,10 @@ ibm_dp_to_string(uint32_t msw, uint32_t lsw, int sig_digits,
     assert(pad_to_digits >= sig_digits && pad_to_digits <= 30);
 
     if (((msw & 0x7FFFFFFFu) | lsw) == 0) {
-        snprintf(out, out_len, "0.0");
+	if (pad_to_digits == 16)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
         return;
     }
 
@@ -500,3 +552,33 @@ ibm_dp_to_string(uint32_t msw, uint32_t lsw, int sig_digits,
                                              abs_E10);
 }
 
+// ibm_dp_to_hal_string — HAL/S MONITOR(12)-style formatting.
+//
+//     0.0:        Printed as " 0.0"   (notice the leading space)
+//     Positive:   Printed as " d.ddd...E±ee"
+//     Negative:   Printed as "-d.ddd...E±ee"
+// SP gets 7 sig digits (6 fractional); DP gets 16 (15 fractional);
+// precision==0 selects SP, anything else selects DP.
+//
+// Zero detection treats any all-zero-mantissa packed value as zero,
+// which also folds the IBM overflow sentinel (0xFF000000_00000000)
+// into "0.0" the same way the previous IEEE-roundtrip path did.
+void
+ibm_dp_to_hal_string(uint32_t msw, uint32_t lsw, int precision,
+                     char *out, size_t out_len)
+{
+    if ((msw & 0x00FFFFFFu) == 0 && lsw == 0) {
+	if (precision)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
+        return;
+    }
+    int sig = (precision == 0) ? 7 : 16;
+    char body[64];
+    ibm_dp_to_string(msw, lsw, sig, sig, body, sizeof(body));
+    if (body[0] == '-')
+        snprintf(out, out_len, "%s", body);
+    else
+        snprintf(out, out_len, " %s", body);
+}

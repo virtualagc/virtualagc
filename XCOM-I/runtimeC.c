@@ -2695,58 +2695,59 @@ MONITOR9(uint32_t op) {
    * Although the result of the operation is placed in DW[0],DW[1], I believe
    * that a side effect is that it's also left in IBM 360 CPU floating-point
    * register FR0.
+   *
+   * op 1..5 are binary arithmetic on IBM-DP operands; op 6..11 are unary
+   * transcendentals.  The binary ops use ibm_dp_add/sub/mul/div directly
+   * so the result is bit-identical to S/360 hex FP truncating arithmetic.
+   * Transcendentals still go through the libm functions.
    */
-  double operand0, operand1;
   uint32_t msw, lsw, address;
+  uint64_t op0, op1;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
   address = dwAddress;
-  // Get operands from the defined working area, and convert them
-  // from IBM floating point to Python floats.
-  operand0 = ibm_dp_to_double(getFIXED(address), getFIXED(address + 4));
+  op0 = ((uint64_t)getFIXED(address) << 32) | getFIXED(address + 4);
   if (op < 6)
-    operand1 = ibm_dp_to_double(getFIXED(address + 8), getFIXED(address + 12));
-  // Perform the binary operations.
-  if (op == 1)
-    operand0 += operand1;
-  else if (op == 2)
-    operand0 -= operand1;
-  else if (op == 3)
-    operand0 *= operand1;
-  else if (op == 4)
-    {
-      if (operand1 == 0)
-        abend("Floating-point divide by zero");
-      operand0 /= operand1;
-    }
-  else if (op == 5)
-    {
-      if (operand0 == 0 && operand1 == 0)
-        abend("Zero to the power zero");
-      operand0 = pow(operand0, operand1);
-    }
-  /*
-   * Or perform the unary operations, which are all trig functions.
-   * Unfortunately, the documentation doesn't specify the angular
-   * units.  I assume they're radians.
-   */
-  else if (op == 6)
-    operand0 = sin(operand0);
-  else if (op == 7)
-    operand0 = cos(operand0);
-  else if (op == 8)
-    operand0 = tan(operand0);
-  else if (op == 9)
-    operand0 = exp(operand0);
-  else if (op == 10)
-    operand0 = log(operand0);
-  else if (op == 11)
-    operand0 = sqrt(operand0);
-  else
+    op1 = ((uint64_t)getFIXED(address + 8) << 32) | getFIXED(address + 12);
+
+  uint64_t r;
+  if (op == 1)        r = ibm_dp_add(op0, op1);
+  else if (op == 2)   r = ibm_dp_sub(op0, op1);
+  else if (op == 3)   r = ibm_dp_mul(op0, op1);
+  else if (op == 4) {
+    if ((op1 & IBM_DP_MANT_MASK) == 0)
+      abend("Floating-point divide by zero");
+    r = ibm_dp_div(op0, op1);
+  }
+  else if (op == 5) {
+    /* a**b — fall back to libm. Convert IBM->IEEE, pow, IEEE->IBM. */
+    double a = ibm_dp_to_double(op0 >> 32, (uint32_t)op0);
+    double b = ibm_dp_to_double(op1 >> 32, (uint32_t)op1);
+    if (a == 0 && b == 0)
+      abend("Zero to the power zero");
+    ibm_dp_from_double(&msw, &lsw, pow(a, b));
+    r = ((uint64_t)msw << 32) | lsw;
+  }
+  else if (op >= 6 && op <= 11) {
+    /* Unary transcendentals — same IEEE round-trip as before. */
+    double a = ibm_dp_to_double(op0 >> 32, (uint32_t)op0);
+    double v;
+    if      (op == 6)  v = sin(a);
+    else if (op == 7)  v = cos(a);
+    else if (op == 8)  v = tan(a);
+    else if (op == 9)  v = exp(a);
+    else if (op == 10) v = log(a);
+    else /* op == 11 */ v = sqrt(a);
+    ibm_dp_from_double(&msw, &lsw, v);
+    r = ((uint64_t)msw << 32) | lsw;
+  }
+  else {
     return 1;
-  // Convert the result back to IBM floats, and store in working area.
-  ibm_dp_from_double(&msw, &lsw, operand0);
-  FR_setbits(0, msw, lsw);
+  }
+
+  msw = (uint32_t)(r >> 32);
+  lsw = (uint32_t)r;
+  FR[0] = ibm_dp_to_double(msw, lsw);
   putFIXED(address, msw);
   putFIXED(address + 4, lsw);
   return 0;
@@ -2779,15 +2780,11 @@ MONITOR11(void) {
 
 descriptor_t *
 MONITOR12(uint32_t precision) {
-  double value;
-  char *fpFormat;
   sbuf_t s;
-  char *ss;
   uint32_t address;
   if (dwAddress == -1)
     abend("CALL MONITOR(5) must precede CALL MONITOR(12)");
   address = dwAddress;
-  value = ibm_dp_to_double(getFIXED(address), getFIXED(address + 4));
   /*
    * The "standard" HAL format for floating-point numbers is described on
    * p. 8-3 of "Programming in HAL/S", though unfortunately the number of
@@ -2802,19 +2799,12 @@ MONITOR12(uint32_t precision) {
    * exactly 1 digit (non-zero) to the left of the decimal point.  Therefore,
    * for SP and DP, it would be reasonable to have 6 and 15 digits to the
    * right of the decimal point respectively.
+   *
+   * Render directly from the IBM-DP bytes via a port of MONITOR.ASM/XXDTOC.bal
+   * The leading-' '-or-'-' and  " 0.0" case are handled in the call:
    */
-  if (value == 0.0)
-    return cToDescriptor(NULL, " 0.0");
-  if (precision == 0)
-    fpFormat = "%+2.6e";
-  else
-    fpFormat = "%+2.15e";
-  sprintf(s, fpFormat, value);
-  if (s[0] == '+')
-    s[0] = ' ';
-  ss = strstr(s, "e");
-  if (ss != NULL)
-    *ss = 'E';
+  ibm_dp_to_hal_string(getFIXED(address), getFIXED(address + 4),
+                       precision, s, sizeof(s));
   return asciiToDescriptor(s);
 }
 

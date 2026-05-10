@@ -4,7 +4,7 @@
  *              modified for any purpose whatever without licensing.
  * Filename:    ibmFloat.h
  * Purpose:     Header for ibmFloat.c — IBM hex floating-point helpers
- *              Based on the floating point logic in the 
+ *              Based on the floating point logic in the
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-// NOTE: 
+// NOTE:
 //       IBM floating point exponents are base-16 (hex).  Standard IEEE754
 //       implementations (like C's float/double types) use base-2.  Because
 //       it's hex, you'll see a lot of 4-bit ops to handle hexadecimal digits.
@@ -93,9 +93,23 @@ void ibm_dp_to_string(uint32_t msw, uint32_t lsw,
                       int sig_digits, int pad_to_digits,
                       char *out, size_t out_len);
 
+// HAL/S MONITOR(12)-style formatting:
+//   zero (mantissa==0, including IBM overflow sentinel) -> " 0.0"
+//   positive -> " D.DDD...DDE±NN"   (leading space)
+//   negative -> "-D.DDD...DDE±NN"
+// precision==0 selects SP layout (7 sig digits, 6 frac).
+// Anything else selects DP (16 sig digits, 15 frac).
+void ibm_dp_to_hal_string(uint32_t msw, uint32_t lsw, int precision,
+                          char *out, size_t out_len);
+
 uint64_t ibm_dp_add(uint64_t a, uint64_t b);
 uint64_t ibm_dp_sub(uint64_t a, uint64_t b);
+uint64_t ibm_dp_mul(uint64_t a, uint64_t b);
+uint64_t ibm_dp_div(uint64_t a, uint64_t b);
 uint64_t ibm_dp_addsub(uint64_t a, uint64_t b,
                        int subtract_b, int normalize);
+
+// Returns the IEEE 754 double-precision hexadecimal representation of a number.
+char *ieee754(double f);
 
 #endif // IBM_FLOAT_H
