@@ -658,7 +658,7 @@ if __name__ == "__main__":
         elif parm.startswith("hc"):
             msw, lsw = ibm_dp_from_string(parm[2:])
             f = ibm_dp_to_double(msw, lsw)
-            print(f"{f}   ({parm})")
+            print(f"{'%.14E'%f}   ({parm})")
         elif parm.startswith("ch"):
             try:
                 f = float(parm[2:])

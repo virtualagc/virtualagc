@@ -479,7 +479,10 @@ ibm_dp_to_string(uint32_t msw, uint32_t lsw, int sig_digits,
     assert(pad_to_digits >= sig_digits && pad_to_digits <= 30);
 
     if (((msw & 0x7FFFFFFFu) | lsw) == 0) {
-        snprintf(out, out_len, "0.0");
+	if (pad_to_digits == 16)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
         return;
     }
 
@@ -560,7 +563,10 @@ ibm_dp_to_hal_string(uint32_t msw, uint32_t lsw, int precision,
                      char *out, size_t out_len)
 {
     if ((msw & 0x00FFFFFFu) == 0 && lsw == 0) {
-        snprintf(out, out_len, " 0.0");
+	if (precision)
+	  snprintf(out, out_len, " 0.0                  ");
+	else
+	  snprintf(out, out_len, " 0.0         ");
         return;
     }
     int sig = (precision == 0) ? 7 : 16;

@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
             uint32_t msw, lsw;
             ibm_dp_from_string(parm + 2, &msw, &lsw);
             double f = ibm_dp_to_double(msw, lsw);
-            printf("%g   (%s)\n", f, argv[i]);
+            printf("%.14E   (%s)\n", f, argv[i]);
         } else if (strncmp(parm, "ch", 2) == 0) {
             double f = atof(parm + 2);
             uint32_t msw, lsw;
