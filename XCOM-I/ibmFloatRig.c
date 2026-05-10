@@ -143,9 +143,10 @@ int main(int argc, char *argv[]) {
             else printHuman(msw, lsw, argv[i]);
         } else if (strncmp(parm, "i", 1) == 0) {
             double f = atof(parm + 1);
+            char *rep = ieee754(f);
             uint64_t bits;
             memcpy(&bits, &f, sizeof(bits));
-            printf("%016LX   (%s)\n", (unsigned long long) bits, parm);
+            printf("%s   (%s)\n", rep, parm);
         } else {
             uint32_t msw, lsw;
             ibm_dp_from_string(parm, &msw, &lsw);
@@ -154,4 +155,14 @@ int main(int argc, char *argv[]) {
         free(parm);
     }
     return 0;
+}
+
+// Returns IEEE 754 hex representation as a string.
+char *
+ieee754(double f) {
+  static char msg[64];
+  uint64_t bits;
+  memcpy(&bits, &f, sizeof(bits));
+  sprintf(msg, "%016LX", (unsigned long long) bits);
+  return (msg);
 }

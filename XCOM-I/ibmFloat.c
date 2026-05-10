@@ -43,16 +43,20 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
     } else
         s = 0;
     // Shift left by 24 bits.
+    //printf("A %s\n", ieee754(d));
     d *= twoTo56;
+    //printf("B %s\n", ieee754(d));
     // Find the exponent (biased by IBM_DP_EXP_BIAS) as a power of 16:
     e = IBM_DP_EXP_BIAS;
     while (d < twoTo52) {
         e -= 1;
         d *= 16;
+        //printf("C %s\n", ieee754(d));
     }
     while (d >= twoTo56) {
         e += 1;
         d /= 16;
+        //printf("D %s\n", ieee754(d));
     }
     if (e < 0)
         e = 0;
@@ -61,7 +65,8 @@ ibm_dp_from_double(uint32_t *msw, uint32_t *lsw, double d) {
         *lsw = 0x00000000;
         return;
     }
-    f = llround(d);
+    //f = llround(d);
+    f = (long long)(d + 0.5);
     *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
     *lsw = f & 0xffffffff;
 }

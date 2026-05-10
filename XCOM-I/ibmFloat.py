@@ -58,6 +58,11 @@ conversion:
 '''
 
 import math
+import struct
+
+# Returns IEEE 754 hex representation as a string.
+def ieee754(f):
+     return struct.pack('>d', f).hex().upper()
 
 # Constants and Masks (derived from the original logic)
 IBM_DP_MANT_BITS = 56
@@ -117,16 +122,20 @@ def ibm_dp_from_double(d):
         s = 0
         
     # Shift left by 56 bits.
+    #print("A", ieee754(d))
     d *= TWO_TO_56
+    #print("B", ieee754(d))
     
     # Find the exponent (biased by IBM_DP_EXP_BIAS) as a power of 16:
     e = IBM_DP_EXP_BIAS
     while d < TWO_TO_52:
         e -= 1
         d *= 16
+        #print("C", ieee754(d))
     while d >= TWO_TO_56:
         e += 1
         d /= 16
+        #print("D", ieee754(d))
         
     if e < 0:
         e = 0
@@ -530,7 +539,6 @@ def ibm_dp_to_hal_string(msw, lsw, precision):
 
 if __name__ == "__main__":
     import sys
-    import struct
     
     def printHuman(msw, lsw, parm):
         print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
@@ -707,7 +715,7 @@ if __name__ == "__main__":
         elif parm.startswith("i"):
             try:
                 f = float(parm[1:])
-                rep = struct.pack('>d', f).hex().upper()
+                rep = ieee754(f)
                 print(f"{rep}   ({parm})")
             except:
                 print(f"Not a valid Python floating-point number   ({parm})")

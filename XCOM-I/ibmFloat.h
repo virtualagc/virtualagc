@@ -109,4 +109,7 @@ uint64_t ibm_dp_div(uint64_t a, uint64_t b);
 uint64_t ibm_dp_addsub(uint64_t a, uint64_t b,
                        int subtract_b, int normalize);
 
+// Returns the IEEE 754 double-precision hexadecimal representation of a number.
+char *ieee754(double f);
+
 #endif // IBM_FLOAT_H
