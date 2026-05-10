@@ -454,7 +454,10 @@ TENSTBL = [
 # direct IBM hex DP -> decimal string
 def ibm_dp_to_string(msw, lsw, sig_digits, pad_to_digits):
     if ((msw & 0x7FFFFFFF) | lsw) == 0:
-        return "0.0"
+        if pad_to_digits == 16:
+            return " 0.0                  "
+        else:
+            return " 0.0         "
 
     sign = (msw >> 31) & 1
     value = (((msw & 0x7FFFFFFF) << 32) | (lsw & U32_MASK)) & U64_MASK
