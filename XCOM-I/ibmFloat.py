@@ -565,21 +565,25 @@ if __name__ == "__main__":
             print("NUMBERmNUMBER")
             print("\tSame as number+number and number-number, except that the")
             print("\tresult is not normalized.")
+            print("hcNUMBER")
+            print("chNUMBER")
+            print("\tConvert HAL/S floating-point to native C/Python floating")
+            print("\tpoint or vice versa, respectively.")
             print("")
             break
         elif "," in parm:
             try:
                 fields = parm.split(",")
                 if len(fields) != 2:
-                    printf("Illegal IBM Hex:", parm)
+                    printf(f"Illegal IBM Hex   ({parm})")
                 else:
                     printHuman(int(fields[0], 16), int(fields[1], 16), parm)
             except:
-                print("Illegal IBM Hex:", parm)
+                print(f"Illegal IBM Hex   ({parm})")
         elif "+" in parm:
             fields = parm.split("+")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm}):")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -587,11 +591,11 @@ if __name__ == "__main__":
                 result = ibm_dp_add((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
         elif "s" in parm:
             fields = parm.split("s")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -599,11 +603,11 @@ if __name__ == "__main__":
                 result = ibm_dp_sub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
         elif "*" in parm:
             fields = parm.split("*")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -611,11 +615,11 @@ if __name__ == "__main__":
                 result = ibm_dp_mul((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
         elif "/" in parm:
             fields = parm.split("/")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -623,11 +627,11 @@ if __name__ == "__main__":
                 result = ibm_dp_div((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
         elif "p" in parm:
             fields = parm.split("p")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -635,11 +639,11 @@ if __name__ == "__main__":
                 result = ibm_dp_addsub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1, 0, 0)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
         elif "m" in parm:
             fields = parm.split("m")
             if len(fields) != 2:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
                 msw0, lsw0 = ibm_dp_from_string(fields[0])
@@ -647,11 +651,25 @@ if __name__ == "__main__":
                 result = ibm_dp_addsub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1, 1, 0)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
-                print("Cannot interpret number(s):", parm)
+                print(f"Cannot interpret number(s)   ({parm})")
+        elif parm.startswith("hc"):
+            msw, lsw = ibm_dp_from_string(parm[2:])
+            f = ibm_dp_to_double(msw, lsw)
+            print(f"{f}   ({parm})")
+        elif parm.startswith("ch"):
+            try:
+                f = float(parm[2:])
+                msw, lsw = ibm_dp_from_double(f)
+                if msw == IBM_DP_OVERFLOW_MSW:
+                    print(f"Overflow   ({parm})")
+                else:
+                    printHuman(msw, lsw, parm)
+            except:
+                print(f"Not a valid Python floating-point number   ({parm})")
         else:
             try:
                 msw, lsw = ibm_dp_from_string(parm)
                 printHuman(msw, lsw, parm)
             except:
-                print("Cannot interpret number:", parm)
+                print(f"Cannot interpret number   ({parm})")
 
