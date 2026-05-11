@@ -305,10 +305,6 @@ def compile(template):
             if len(result.stderr):
                 print(result.stderr)
             retryX1 = False
-            if len(result.stdout):
-                print("STDOUT:", result.stdout)
-            if len(result.stderr):
-                print("STDERR:", result.stderr)
         except subprocess.CalledProcessError as e:
             if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
                 if autoX1 and not retryX1:
