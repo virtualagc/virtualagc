@@ -15,6 +15,7 @@
   //                            subroutine linkage.  Find the original,
   //                            manually-generated patch that this replaces
   //                            in ObsoletedPatches/patch0.c.
+  //            2026-05-12 RSB  Corrected page number for `L` instruction.
 
   int i;
   GR[12] = 60;  // Address of end of the procedure's code.
@@ -22,7 +23,7 @@
 p0_0: ;
   // (0)       CALL INLINE("58", 3, 0, TEXT);     /* LOAD STRING DESCRIPTOR */           
   address360B = (45684) & 0xFFFFFF;
-  // Type RX, p. 7-7:           L       45684(0,0)
+  // Type RX, p. 7-77:           L       45684(0,0)
   detailedInlineBefore(0, "L    3,45684(0,0)");
   GR[3] = COREWORD(address360B);
   detailedInlineAfter();
@@ -108,7 +109,7 @@ p0_14: ;
 p0_18: ;
   // (6)       CALL INLINE("58", 1, 0, TABLE);    /* LOAD BASE ADDRESS OF TRANS_TABLE */ 
   address360B = 43180;
-  // Type RX, p. 7-7:		L	43180(0,0)
+  // Type RX, p. 7-77:		L	43180(0,0)
   detailedInlineBefore(6, "L    1,43180(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();

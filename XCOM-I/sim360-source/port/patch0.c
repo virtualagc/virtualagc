@@ -16,6 +16,7 @@
    *                            herein they were repaired manually.  Moreover,
    *                            due to the unusual nature of this patch, other
    *                            manual repairs were made pre-p0_0 and in p0_60.
+  //            2026-05-12 RSB  Corrected page number for `L` instruction.
    */
 
 GR[12] = 60;  // Address of end of the procedure's code.
@@ -23,7 +24,7 @@ GR[12] = 60;  // Address of end of the procedure's code.
 p0_0: ;
   // (0)       CALL INLINE ("58", 3, 0,TEXT); /*LOAD STRING DESCRIPTOR */                
   address360B = (mTEXT) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	3,mTEXT(0,0)
+  // Type RX, p. 7-77:		L	3,mTEXT(0,0)
   detailedInlineBefore(0, "L	3,mTEXT(0,0)");
   GR[3] = COREWORD(address360B);
   detailedInlineAfter();
@@ -102,7 +103,7 @@ p0_14: ;
 p0_18: ;
   // (6)       CALL INLINE ("58", 1, 0,TABLE);/* LOAD BASE ADDRESS OF TRANSuTABLE */
   address360B = (mSCANxSCANuFINDSuENDuOFxTABLE) & 0xFFFFFF;
-  // Type RX, p. 7-7:		L	1,mSCANxSCANuFINDSuENDuOFxTABLE(0,0)
+  // Type RX, p. 7-77:		L	1,mSCANxSCANuFINDSuENDuOFxTABLE(0,0)
   detailedInlineBefore(6, "L	1,mSCANxSCANuFINDSuENDuOFxTABLE(0,0)");
   GR[1] = COREWORD(address360B);
   detailedInlineAfter();

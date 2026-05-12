@@ -8,6 +8,8 @@
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
+ * Mod history: 2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
+ *                              unnormalized arithmetic on unnormalized 0.
  */
 
 #include <assert.h>
@@ -221,8 +223,15 @@ ibm_dp_addsub(uint64_t a_packed, uint64_t b_packed,
     uint64_t b_mant = IBM_DP_MANT(b_packed);
     if (subtract_b) b_sign ^= 1;
 
-    int a_iszero = IBM_DP_IS_TRUE_ZERO(a_packed);
-    int b_iszero = IBM_DP_IS_TRUE_ZERO(b_packed);
+    int a_iszero;
+    int b_iszero;
+    if (normalize) {
+	a_iszero = (a_packed & IBM_DP_MANT_MASK) == 0;
+	b_iszero = (b_packed & IBM_DP_MANT_MASK) == 0;
+    } else {
+        a_iszero = (a_packed & 0x7FFFFFFFFFFFFFFFULL) == 0;
+        b_iszero = (b_packed & 0x7FFFFFFFFFFFFFFFULL) == 0;
+    }
 
     if (!b_iszero && !a_iszero) {
         // Both not zero — align with guard digit, then signed add.

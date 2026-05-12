@@ -11,6 +11,7 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-06-24 RSB  Began.
             2026-03-10 RSB  Corrected `scratchd` to `scratch` in the `A`
                             instruction.
+            2026-05-11 RSB  Corrected page number of "L" instruction.
 '''
 
 import sys
@@ -97,7 +98,7 @@ makeInstruction("BC", 0x47, "RX", "7-17")
 makeInstruction("LH", 0x48, "RX", "7-80")
 makeInstruction("AH", 0x4A, "RX", "7-12")
 makeInstruction("ST", 0x50, "RX", "7-122")
-makeInstruction("L", 0x58, "RX", "7-7")
+makeInstruction("L", 0x58, "RX", "7-77")
 makeInstruction("A", 0x5A, "RX", "7-12")
 makeInstruction("STD", 0x60, "RX", "9-11")
 makeInstruction("LD", 0x68, "RX", "9-10")
