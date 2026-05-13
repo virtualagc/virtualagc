@@ -8,7 +8,8 @@
  *              Hyperion/Hercules IBM 390 & z/Series emulator:
  *                  https://github.com/hercules-390/hyperion/blob/master/float.c
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
- * Mod history: 2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
+ * Mod history: 2026-05-01 DS   Initial version.
+ *              2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
  *                              unnormalized arithmetic on unnormalized 0.
  */
 
@@ -292,7 +293,13 @@ ibm_dp_addsub(uint64_t a_packed, uint64_t b_packed,
             a_exp += 1;
         } else if (!normalize) {
             // UNNORMAL: just drop guard.
-            r_mant >>= 4;
+            //r_mant >>= 4;
+            // No!  Round!
+            int rounder = 0;
+            if ((r_mant & 0xF) >= 8) {
+                rounder = 1;
+            }
+            r_mant = (r_mant >> 4) + rounder;
         } else if (r_mant & IBM_DP_TOP_HEX_60) {
             // NORMAL, top guard-hex set: drop guard, already normalized.
             r_mant >>= 4;

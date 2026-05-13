@@ -338,7 +338,10 @@ def ibm_dp_addsub(a_packed, b_packed, subtract_b, normalize):
             r_mant >>= 8
             a_exp += 1
         elif not normalize:
-            r_mant >>= 4
+            rounder = 0
+            if (r_mant & 0xF) >= 8:
+                rounder = 1
+            r_mant = (r_mant >> 4) + rounder
         elif r_mant & IBM_DP_TOP_HEX_60:
             r_mant >>= 4
         else:
@@ -547,6 +550,37 @@ def ibm_dp_to_hal_string(msw, lsw, precision):
 
 if __name__ == "__main__":
     import sys
+    import os
+    
+    # Perform unnormalized addition of an HFP value with 4E000000,00000000.
+    # The algorithm slavishly follows that on pp. 18-8 and -9 of the ESA/390 
+    # Principles of Operation for normalized addition, and then extending to
+    # the discusson on p. 18-10 for unnormalized.  The attempt is intended to 
+    # be verifiable and idiot-proof, *not* to be efficient.  We depart only
+    # at the very end, when I believe the published description to be in error.
+    def addUnnormalizedToFixer(operand):
+        signMask = 0x8000000000000000
+        expMask =  0x7F00000000000000
+        expInc =   0x0100000000000000
+        mantMask = 0x00FFFFFFFFFFFFFF
+        fixer =    0x4E00000000000000
+        sign = operand & signMask
+        exp = operand & expMask
+        mant = operand & mantMask
+        if exp > fixer:
+            return operand
+        # Shift the operand rightward as necessary.
+        guard = 0
+        while exp < fixer:
+            guard = mant & 0xF
+            mant = mant >> 4
+            exp += expInc
+        # This is the part I think is missing from the published description
+        # and from `ibm_dp_addsub`: Round according to the guard digit, rather 
+        # than truncate.
+        if guard >= 8:
+            mant += 1
+        return sign | exp | mant
     
     def printHuman(msw, lsw, parm):
         print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
@@ -554,6 +588,16 @@ if __name__ == "__main__":
     def dpFromString(s):
         if s == "FIXER":
             return 0x4E000000, 0x00000000
+        elif "," in s:
+            fields = s.split(",")
+            if len(fields) != 2 or len(fields[0]) != 8 or len(fields[1]) != 8:
+                printf(f"Illegal IBM Hex   ({s})")
+                os._exit(1)
+            try:
+                return int(fields[0], 16), int(fields[1], 16)
+            except:
+                printf(f"Illegal IBM Hex   ({s})")
+                os._exit(1)
         return ibm_dp_from_string(s)
     
     # Apply the operation FLOATpFIXER to a native Python floating-point number.
@@ -570,21 +614,27 @@ if __name__ == "__main__":
         parm = parm.replace(" ", "")
         if "--help" == parm:
             print()
-            print("Utility for exercising the ibmFloat Python module Usage:")
+            print("Utility for exercising the ibmFloat Python module.")
+            print()
+            print("Usage:")
             print()
             print("\tibmFloat.py arg1 arg2 arg3 ...")
             print()
-            print("The arguments can take any of the forms listed below.")
-            print("In the explanation below, NUMBER can be any integer or")
-            print("floating-point number, as normally expressed:  1, .6,")
-            print("1., -1.2345, 4.67E-52, and so on.  It can also be the")
-            print("literal FIXER, which is equivalent to the IBM hexadecimal")
-            print("floating-point value 4E000000,0000000.")
+            print("In what follows, NUMBER can be any of the following:")
+            print()
+            print("\tAn integer such as 1, -23, 1061, etc.")
+            print()
+            print("\tA floating-point number such as .6, 1., -1.2345,") 
+            print("\t4.67E-52, etc.")
+            print()
+            print("\tA comma-delimited pair of 8-digit hexadecimals,")
+            print("\trepresenting a already-encoded double-precision IBM ")
+            print("\thexadecimal floating-point number.")
+            print()
+            print("\tThe literal FIXER, shorthand for 4E000000,00000000.")
             print();
-            print("HEX,HEX")
-            print("\tConverts an IBM DP floating-point number, expressed")
-            print("\tas a pair of comma-delimited 8-digit hexadecimals, to a")
-            print("\thuman-readable, floating-point number.")
+            print("The arguments can take any of the forms listed below:")
+            print()
             print("NUMBER")
             print("NUMBERaNUMBER")
             print("NUMBERsNUMBER")
@@ -660,15 +710,6 @@ if __name__ == "__main__":
                 print(f"{'%08X'%f1},{'%08X'%f2}")
                 f1, f2 = (f1+f2) & 0xFFFFFFFF, f1
             break
-        elif "," in parm:
-            try:
-                fields = parm.split(",")
-                if len(fields) != 2:
-                    printf(f"Illegal IBM Hex   ({parm})")
-                else:
-                    printHuman(int(fields[0], 16), int(fields[1], 16), parm)
-            except:
-                print(f"Illegal IBM Hex   ({parm})")
         elif "a" in parm:
             fields = parm.split("a")
             if len(fields) != 2:
@@ -753,6 +794,13 @@ if __name__ == "__main__":
                     print(f"Overflow   ({parm})")
                 else:
                     printHuman(msw, lsw, parm)
+            except:
+                print(f"Not a valid Python floating-point number   ({parm})")
+        elif parm.startswith("t"):
+            try:
+                msw, lsw = dpFromString(parm[1:])
+                result = addUnnormalizedToFixer((msw << 32) | lsw)
+                printHuman(result >> 32, result & 0xFFFFFFFF, parm)
             except:
                 print(f"Not a valid Python floating-point number   ({parm})")
         elif parm.startswith("i"):

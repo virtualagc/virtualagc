@@ -54,6 +54,8 @@
  *                              more subtle than I thought.
  *              2026-04-08 RSB  Added `debugX`.
  *              2026-04-14 RSB  Added "pretty BNF".
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-05-13 RSB  Fixed the mod to `MONITOR9`.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -2706,9 +2708,9 @@ MONITOR9(uint32_t op) {
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
   address = dwAddress;
-  op0 = ((uint64_t)getFIXED(address) << 32) | getFIXED(address + 4);
+  op0 = ((uint64_t)getFIXED(address) << 32) | (uint32_t) getFIXED(address + 4);
   if (op < 6)
-    op1 = ((uint64_t)getFIXED(address + 8) << 32) | getFIXED(address + 12);
+    op1 = ((uint64_t)getFIXED(address + 8) << 32) | (uint32_t) getFIXED(address + 12);
 
   uint64_t r;
   if (op == 1)        r = ibm_dp_add(op0, op1);

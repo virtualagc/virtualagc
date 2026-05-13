@@ -126,7 +126,7 @@ p59_40: ;
   // (72)       CALL INLINE("2B", 2, 0);                         /* SDR 2,0          */   
   // Type RR, p. 18-23:		SDR	2,0
   detailedInlineBefore(72, "SDR	2,0");
-  sdr(2, 0);
+  swr(2, 0); // RSB - Changed due to issue #1304.
   detailedInlineAfter();
 
 p59_42: ;

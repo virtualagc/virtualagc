@@ -16,7 +16,8 @@
    *                            herein they were repaired manually.  Moreover,
    *                            due to the unusual nature of this patch, other
    *                            manual repairs were made pre-p0_0 and in p0_60.
-  //            2026-05-12 RSB  Corrected page number for `L` instruction.
+   *            2026-05-01 DS   Alterations related to HFP-native arithmetic.
+   *            2026-05-12 RSB  Corrected page number for `L` instruction.
    */
 
 GR[12] = 60;  // Address of end of the procedure's code.

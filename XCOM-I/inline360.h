@@ -6,6 +6,8 @@
  * Purpose:     Header for inline360.c.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-06-30 RSB  Split off from runtimeC.h.
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-05-12 RSB  Added `swr` function.
  */
 
 #ifndef INLINE360_H
@@ -82,6 +84,7 @@ void sd  (int r1, uint32_t address);    // SD   - Sub (mem): FR[r1] -= mem; CC.
 void std (int r1, uint32_t address);    // STD  - Store DP: mem = FR[r1].
 void ste (int r1, uint32_t address);    // STE  - Store SP: mem = msw(FR[r1]).
                                         //        with FIXER to extract integer part.
+void swr (int r1, int r2);
 
 // Non-FP block ops.
 void mvc(uint32_t dest, uint32_t src, int32_t countMinus1);

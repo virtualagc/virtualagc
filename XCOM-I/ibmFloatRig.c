@@ -1,13 +1,15 @@
 /*
- * License:  Public Domain in the U.S.
- *
- * I (RSB) wrote a stand-alone mode for the Python module ibmFloat.py, which
- * itself had been created by CodeConvert by porting of the library function
- * ibmFloat.c.  I wanted an identical stand-alone mode for ibmFloat.c, so I
- * ran ibmFloat.py (now with its main program) back through CodeConvert in the
- * opposite direction (Python-to-C rather than C-to-Python) so that I could
- * extract just the C code for the main program.  Here it is, along with the
- * remainder of the conversion, stripped out.
+ * License:   Public Domain in the U.S.
+ * Filename:  ibmFloatRig.c
+ * Purpose:   I wrote a stand-alone mode for the Python module ibmFloat.py,
+ *            which itself had been created by CodeConvert by porting of the
+ *            library function ibmFloat.c.  I wanted an identical stand-alone
+ *            mode for ibmFloat.c, so I ran ibmFloat.py (now with its main
+ *            program) back through CodeConvert in the opposite direction
+ *            (Python-to-C rather than C-to-Python) so that I could extract
+ *            just the C code for the main program.  Here it is, along with the
+ *            remainder of the conversion, stripped out.
+ * History:   2026-05-13 RSB  "Final" version.
  *
  * Compile the whole mess with:
  * 	gcc -o ibmFloat ibmFloat.c ibmFloatRig.c -lm
@@ -42,6 +44,8 @@ void dpFromString(const char *parm, uint32_t *msw, uint32_t *lsw) {
         *lsw = 0x00000000;
         return;
     }
+    if (2 == sscanf(parm, "%08X,%08X", msw, lsw))
+      return;
     ibm_dp_from_string(parm, msw, lsw);
 }
 
@@ -67,17 +71,18 @@ int main(int argc, char *argv[]) {
         strip_spaces(parm);
 
         if (strcmp(parm, "--help") == 0) {
-            printf("\nUtility for exercising the ibmFloat C module Usage:\n\n");
+            printf("\nUtility for exercising the ibmFloat C module.\n\n");
+            printf("Usage:\n\n");
             printf("\tibmFloat arg1 arg2 arg3 ...\n\n");
-            printf("The arguments can take any of the forms listed below.\n");
-            printf("In the explanation below, NUMBER can be any integer or\n");
-            printf("floating-point number, as normally expressed:  1, .6,\n");
-            printf("1., -1.2345, 4.67E-52, and so on.  It can also be the\n");
-            printf("literal FIXER, which is equivalent to the IBM hexadecimal\n");
-            printf("floating-point value 4E000000,0000000.\n\n");
-            printf("HEX,HEX\n\tConverts an IBM DP floating-point number, expressed\n");
-            printf("\tas a pair of comma-delimited 8-digit hexadecimals, to a\n");
-            printf("\thuman-readable, floating-point number.\n");
+            printf("In what follows, NUMBER can be any of the following:\n\n");
+            printf("\tAn integer such as 1, -23, 1061, etc.\n\n");
+            printf("\tA floating-point number such as .6, 1., -1.2345,\n");
+            printf("\t4.67E-52, etc.\n\n");
+            printf("\tA comma-delimited pair of 8-digit hexadecimals,\n");
+            printf("\trepresenting a already-encoded double-precision IBM \n");
+            printf("\thexadecimal floating-point number.\n\n");
+            printf("\tThe literal FIXER, shorthand for 4E000000,00000000.\n\n");
+            printf("The arguments can take any of the forms listed below:\n\n");
             printf("NUMBER\nNUMBERaNUMBER\nNUMBERsNUMBER\nNUMBER*NUMBER\nNUMBER/NUMBER\n");
             printf("\tAny integer or floating-point number or simple expression\n");
             printf("\tis converted to an IBM DP floating-point number.  Note\n");
@@ -124,12 +129,6 @@ int main(int argc, char *argv[]) {
 	    }
 	    printf("%d total errors out of %d tests.\n",
 		   errors, tests*numOffsets);
-        } else if (strchr(parm, ',')) {
-            char *comma = strchr(parm, ',');
-            *comma = '\0';
-            uint32_t msw = (uint32_t)strtoul(parm, NULL, 16);
-            uint32_t lsw = (uint32_t)strtoul(comma + 1, NULL, 16);
-            printHuman(msw, lsw, argv[i]);
         } else if (strchr(parm, 'a')) {
             char *op = strchr(parm, 'a');
             *op = '\0';

@@ -11,6 +11,7 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-06-24 RSB  Began.
             2026-03-10 RSB  Corrected `scratchd` to `scratch` in the `A`
                             instruction.
+            2026-05-01 DS   Alterations related to HFP-native arithmetic.
             2026-05-11 RSB  Corrected page number of "L" instruction.
 '''
 

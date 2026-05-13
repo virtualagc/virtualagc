@@ -7,6 +7,8 @@
  *              CALL INLINE statements in XCOM-I framework.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-06-30 RSB  Split off from runtimeC.c.
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-05-12 RSB  Added `swr` function.
  */
 
 #include "runtimeC.h"
@@ -74,6 +76,12 @@ adr(int r1, int r2) {
 void
 sdr(int r1, int r2) {
   FR[r1] = ibm_dp_sub(FR[r1], FR[r2]);
+  setCCi(FR[r1]);
+}
+
+void
+swr(int r1, int r2) {
+  FR[r1] = ibm_dp_addsub(FR[r1], FR[r2], 1, 0);
   setCCi(FR[r1]);
 }
 
