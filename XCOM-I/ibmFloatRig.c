@@ -1,13 +1,15 @@
 /*
- * License:  Public Domain in the U.S.
- *
- * I (RSB) wrote a stand-alone mode for the Python module ibmFloat.py, which
- * itself had been created by CodeConvert by porting of the library function
- * ibmFloat.c.  I wanted an identical stand-alone mode for ibmFloat.c, so I
- * ran ibmFloat.py (now with its main program) back through CodeConvert in the
- * opposite direction (Python-to-C rather than C-to-Python) so that I could
- * extract just the C code for the main program.  Here it is, along with the
- * remainder of the conversion, stripped out.
+ * License:   Public Domain in the U.S.
+ * Filename:  ibmFloatRig.c
+ * Purpose:   I wrote a stand-alone mode for the Python module ibmFloat.py,
+ *            which itself had been created by CodeConvert by porting of the
+ *            library function ibmFloat.c.  I wanted an identical stand-alone
+ *            mode for ibmFloat.c, so I ran ibmFloat.py (now with its main
+ *            program) back through CodeConvert in the opposite direction
+ *            (Python-to-C rather than C-to-Python) so that I could extract
+ *            just the C code for the main program.  Here it is, along with the
+ *            remainder of the conversion, stripped out.
+ * History:   2026-05-13 RSB  "Final" version.
  *
  * Compile the whole mess with:
  * 	gcc -o ibmFloat ibmFloat.c ibmFloatRig.c -lm
@@ -36,6 +38,30 @@ void printHuman(uint32_t msw, uint32_t lsw, const char *parm) {
     printf("%08X,%08X   <->   DP='%s'   SP='%s'   (%s)\n", msw, lsw, dp_str, sp_str, parm);
 }
 
+void dpFromString(const char *parm, uint32_t *msw, uint32_t *lsw) {
+    if (!strcmp(parm, "FIXER")) {
+        *msw = 0x4E000000;
+        *lsw = 0x00000000;
+        return;
+    }
+    if (2 == sscanf(parm, "%08X,%08X", msw, lsw))
+      return;
+    ibm_dp_from_string(parm, msw, lsw);
+}
+
+// Apply the operation FLOATpFIXER to a native C double.
+uint64_t fix(double d) {
+    uint32_t msw, lsw, mant, sign;
+    uint64_t result;
+    ibm_dp_from_double(&msw, &lsw, d);
+    result = ibm_dp_addsub(((uint64_t) msw << 32) | lsw, 0x4E00000000000000ULL, 0, 0);
+    mant = IBM_DP_MANT_MASK & result;
+    sign = IBM_DP_SIGN_BIT & result;
+    if (sign)
+        return -mant;
+    return mant;
+}
+
 /* Main function for stand-alone execution */
 int main(int argc, char *argv[]) {
     if (argc < 2) return 0;
@@ -45,23 +71,25 @@ int main(int argc, char *argv[]) {
         strip_spaces(parm);
 
         if (strcmp(parm, "--help") == 0) {
-            printf("\nUtility for exercising the ibmFloat C module Usage:\n\n");
+            printf("\nUtility for exercising the ibmFloat C module.\n\n");
+            printf("Usage:\n\n");
             printf("\tibmFloat arg1 arg2 arg3 ...\n\n");
-            printf("The arguments can take any of the forms listed below.\n\n");
-            printf("--help\n\tPrints this message and exits.\n");
-            printf("HEX,HEX\n\tConverts an IBM DP floating-point number, expressed\n");
-            printf("\tas a pair of comma-delimited 8-digit hexadecimals, to a\n");
-            printf("\thuman-readable, floating-point number.\n");
-            printf("NUMBER\nNUMBER+NUMBER\nNUMBERsNUMBER\nNUMBER*NUMBER\nNUMBER/NUMBER\n");
+            printf("In what follows, NUMBER can be any of the following:\n\n");
+            printf("\tAn integer such as 1, -23, 1061, etc.\n\n");
+            printf("\tA floating-point number such as .6, 1., -1.2345,\n");
+            printf("\t4.67E-52, etc.\n\n");
+            printf("\tA comma-delimited pair of 8-digit hexadecimals,\n");
+            printf("\trepresenting a already-encoded double-precision IBM \n");
+            printf("\thexadecimal floating-point number.\n\n");
+            printf("\tThe literal FIXER, shorthand for 4E000000,00000000.\n\n");
+            printf("The arguments can take any of the forms listed below:\n\n");
+            printf("NUMBER\nNUMBERaNUMBER\nNUMBERsNUMBER\nNUMBER*NUMBER\nNUMBER/NUMBER\n");
             printf("\tAny integer or floating-point number or simple expression\n");
             printf("\tis converted to an IBM DP floating-point number.  Note\n");
-            printf("\tthat NUMBERsNUMBER is used in place of NUMBER-NUMBER,\n");
-            printf("\twhich is not accepted.  The reason for that is that in\n");
-            printf("\tHAL/S, -NUMBER is not a numeric literal, but rather an\n");
-            printf("\texpression in which the operator '-' operates on NUMBER,\n");
-            printf("\ttherefore a HAL/S parser could not accept expressions like\n");
-            printf("\t-3+12 or 5+-2.  Using 's' in place of '-' is a workaround\n");
-            printf("\tfor that.\n");
+            printf("\tthat NUMBERaNUMBER and NUMBERsNUMBER are used in place of\n");
+            printf("\tNUMBER+NUMBER and NUMBER-NUMBER to simplify parsing the\n");
+            printf("\targuments, and because + and - are not allowed as leading\n");
+            printf("\tcharacters in HAL/S literals but are allowed here.\n");
             printf("NUMBERpNUMBER\nNUMBERmNUMBER\n");
             printf("\tSame as number+number and number-number, except that the\n");
             printf("\tresult is not normalized.\n");
@@ -73,66 +101,85 @@ int main(int argc, char *argv[]) {
             printf("\tnumber.  This is not directly relevant to ibmFloat\n");
             printf("\tfunctionality but can be used for diagnosis of cross-test\n");
             printf("\tdiscrepancies.\n");
+            printf("--help\n\tPrints this message and exits.\n");
+            printf("--test-fixer\n");
+            printf("\tPerforms tests of the NpFIXER operation.\n");
 	    printf("\n");
             free(parm);
             break;
-        } else if (strchr(parm, ',')) {
-            char *comma = strchr(parm, ',');
-            *comma = '\0';
-            uint32_t msw = (uint32_t)strtoul(parm, NULL, 16);
-            uint32_t lsw = (uint32_t)strtoul(comma + 1, NULL, 16);
-            printHuman(msw, lsw, argv[i]);
-        } else if (strchr(parm, '+')) {
-            char *op = strchr(parm, '+');
+        } else if (!strcmp(parm, "--test-fixer")) {
+            double offsets[] = {
+        	0, 0.94, 0.76, 0.49, 0.21, 0.1, 0.01, 0.001, 0.0001, 0.00001
+            };
+            int numOffsets = sizeof(offsets) / sizeof(offsets[0]);
+            int n, tests = 100000, errors = 0;
+            uint64_t result;
+	    for (n = 0; n < tests; n++) {
+		int i;
+		for (i = 0; i < numOffsets; i++) {
+		    result = fix(n + offsets[i]);
+		    if (result != n) {
+			if (errors < 10)
+			    printf("Error: %lgpFIXER gave %lu, wanted %d\n", n+offsets[i], result, n);
+			errors += 1;
+			if (errors == 10)
+			    printf("Additional errors will not be listed individually.\n");
+		    }
+		}
+	    }
+	    printf("%d total errors out of %d tests.\n",
+		   errors, tests*numOffsets);
+        } else if (strchr(parm, 'a')) {
+            char *op = strchr(parm, 'a');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_add((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strchr(parm, 's')) {
             char *op = strchr(parm, 's');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_sub((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strchr(parm, '*')) {
             char *op = strchr(parm, '*');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_mul((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strchr(parm, '/')) {
             char *op = strchr(parm, '/');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_div((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strchr(parm, 'p')) {
             char *op = strchr(parm, 'p');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_addsub((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1, 0, 0);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strchr(parm, 'm')) {
             char *op = strchr(parm, 'm');
             *op = '\0';
             uint32_t msw0, lsw0, msw1, lsw1;
-            ibm_dp_from_string(parm, &msw0, &lsw0);
-            ibm_dp_from_string(op + 1, &msw1, &lsw1);
+            dpFromString(parm, &msw0, &lsw0);
+            dpFromString(op + 1, &msw1, &lsw1);
             uint64_t result = ibm_dp_addsub((((uint64_t)msw0) << 32) | lsw0, (((uint64_t)msw1) << 32) | lsw1, 1, 0);
             printHuman((uint32_t)(result >> 32), (uint32_t)(result & 0xFFFFFFFFU), argv[i]);
         } else if (strncmp(parm, "hc", 2) == 0) {
             uint32_t msw, lsw;
-            ibm_dp_from_string(parm + 2, &msw, &lsw);
+            dpFromString(parm + 2, &msw, &lsw);
             double f = ibm_dp_to_double(msw, lsw);
             printf("%.14E   (%s)\n", f, argv[i]);
         } else if (strncmp(parm, "ch", 2) == 0) {
@@ -149,7 +196,7 @@ int main(int argc, char *argv[]) {
             printf("%s   (%s)\n", rep, parm);
         } else {
             uint32_t msw, lsw;
-            ibm_dp_from_string(parm, &msw, &lsw);
+            dpFromString(parm, &msw, &lsw);
             printHuman(msw, lsw, argv[i]);
         }
         free(parm);

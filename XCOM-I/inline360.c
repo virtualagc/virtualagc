@@ -7,15 +7,18 @@
  *              CALL INLINE statements in XCOM-I framework.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-06-30 RSB  Split off from runtimeC.c.
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-05-12 RSB  Added `swr` function.
  */
 
 #include "runtimeC.h"
 
 int32_t GR[16] = { 0 }; // General registers.
-double FR[16] = { 0.0 };   // Floating-point registers.
-uint8_t unnormFR[16] = { 0 };  // Tracks whether to unnormalize FR[n].
+// Floating-point registers, holding IBM hex DP packed (msw<<32 | lsw).
+// See inline360.h for rationale.
+uint64_t FR[16] = { 0 };
 uint8_t CC;      // Condition codes.
-int64_t scratch, dummy360; // Holds temporary results of IBM 360 operations.
+int64_t scratch; // Holds temporary results of IBM 360 operations.
 double scratchd, dummy360d, epsilon360 = 1.0e-6;
 int32_t address360A, address360B, mask360, i360, i360A;
 uint32_t msw360, lsw360;
@@ -35,39 +38,122 @@ setCCd(void) {
   else CC = 0;
 }
 
+// ---------------------------------------------------------------------------
+// Floating point instructions
+
+// LPDR — Load Positive (Double)
+// FR[r1] := |FR[r2]|; CC := 0 if zero else 2.
+void
+lpdr(int r1, int r2) {
+  FR[r1] = FR[r2] & IBM_DP_MAGNITUDE_MASK;
+  setCCi(FR[r1]);
+}
+
+// LDR — Load (Double)
+//  FR[r1] := FR[r2]; No CC
+void
+ldr(int r1, int r2) {
+  FR[r1] = FR[r2];
+}
+
+// CDR — Compare (Double)
+//  CC := sign(FR[r1] - FR[r2])
+void
+cdr(int r1, int r2) {
+  setCCi(ibm_dp_sub(FR[r1], FR[r2]));
+}
+
+// ADR — Add (Double)
+//  FR[r1] := FR[r1] + FR[r2]; CC.
+void
+adr(int r1, int r2) {
+  FR[r1] = ibm_dp_add(FR[r1], FR[r2]);
+  setCCi(FR[r1]);
+}
+
+// SDR — Subtract (Double)
+//  FR[r1] := FR[r1] - FR[r2]; CC.
+void
+sdr(int r1, int r2) {
+  FR[r1] = ibm_dp_sub(FR[r1], FR[r2]);
+  setCCi(FR[r1]);
+}
+
+void
+swr(int r1, int r2) {
+  FR[r1] = ibm_dp_addsub(FR[r1], FR[r2], 1, 0);
+  setCCi(FR[r1]);
+}
+
+// LD — Load (Double) (Memory).  
+//  FR[r1] := mem[address]; No CC.
+void
+ld(int r1, uint32_t address) {
+  FR_setbits(r1, COREWORD(address), COREWORD(address + 4));
+}
+
+// LE — Load (Single).  
+// FR[r1] = (mem[address] << 32 | 0); No CC.
+void
+le(int r1, uint32_t address) {
+  FR_setbits(r1, COREWORD(address), 0);
+}
+
+// CD — Compare (Double) (memory).  
+//  CC := sign(FR[r1] - mem).
+void
+cd(int r1, uint32_t address) {
+  setCCi(ibm_dp_sub(FR[r1], ibm_dp_load(address)));
+}
+
+// AD — Add Double (memory).  FR[r1] := FR[r1] + mem; CC.
+void
+ad(int r1, uint32_t address) {
+  FR[r1] = ibm_dp_add(FR[r1], ibm_dp_load(address));
+  setCCi(FR[r1]);
+}
+
+// SD — Subtract Double (memory).  FR[r1] := FR[r1] - mem; CC.
+void
+sd(int r1, uint32_t address) {
+  FR[r1] = ibm_dp_sub(FR[r1], ibm_dp_load(address));
+  setCCi(FR[r1]);
+}
+
+// STD — Store Double.  Memory := FR[r1] (8 bytes, byte-exact).
+void
+std(int r1, uint32_t address) {
+  COREWORD2(address,     FR_msw(r1));
+  COREWORD2(address + 4, FR_lsw(r1));
+}
+
+// STE — Store Single (msw of FR[r1] only).
+void
+ste(int r1, uint32_t address) {
+  COREWORD2(address, FR_msw(r1));
+}
+
+// AW — Add Unnormalized.  Adds two IBM DP floats without normalizing the
+// result; the result's exponent is the larger input exponent regardless of
+// leading zeros in the result mantissa.  Delegates to ibm_dp_addsub with
+// normalize=0 (a direct port of Hyperion's add_lf, including the 4-bit
+// guard digit through alignment).
+//
+// HAL/S-FC's PREP_LITERAL/MAKE_FIXED_LIT/INTEGERIZABLE/ROUND_SCALAR/
+// HALMAT_INIT_CONST all use AW with the FIXER constant
+// (0x4E000000_00000000): aligning a normalized value to exp 0x4E shifts
+// its fractional bits past the right edge, leaving lsw = trunc(|v|).  STD
+// then writes those bytes (the integer is read back as the lsw); a
+// subsequent ADR with FR[zero] normalizes the bit pattern into a real IBM
+// DP float for the SDR residual check.
 void
 aw(int regnum, uint32_t address) {
-  /*
-   * Note that this is a real hack.  Since XCOM-I does its runtime floating-
-   * point computations in C floating-point rather than IBM hexadecimal
-   * floating point, it has no way to do actual "unnormalized" floating-point
-   * computations as the AW function demands.  Rather, it just sets
-   * `unnormFR` to tell downstream consumers of the register that the data
-   * is unnormalized.  This lets a later STD instruction know that it's
-   * supposed to save a binary integer rather than a floating-point number.
-   * But it's highly-dependent on the usage pattern I've see in actual CALL
-   * INLINE statements.  So it works for all of the XPL code I know about
-   * right now, but there's no guarantee that it will be an adequate hack if
-   * different usage patterns for unnormalized floating-point values are
-   * observed in the future.
-   */
-  scratchd = FR[regnum];
-  scratchd += fromFloatIBM(COREWORD(address), COREWORD(address + 4));
-  setCCd();
-  if (fabs(modf(scratchd, &dummy360d)) <= epsilon360)
-    CC = 0;
-  /*
-   * The real IBM AW instruction adds in unnormalized hex float, which when
-   * used with the FIXER constant (4E000000 00000000) forces mantissa
-   * alignment to characteristic 14, effectively truncating any fractional
-   * part.  We must emulate this truncation so that subsequent instructions
-   * (ADR, SDR) that compare the AW result against the original value can
-   * detect whether the number had a fractional part.  Without this, e.g.
-   * literal 0.5 would be classified as integer by PREP_LITERAL.
-   */
-  FR[regnum] = trunc(scratchd);
-  unnormFR[regnum] = 1;
+  FR[regnum] = ibm_dp_addsub(FR[regnum], ibm_dp_load(address), 0, 0);
+  setCCi(FR[regnum]);
 }
+
+// ---------------------------------------------------------------------------
+// Non-FP block ops.
 
 void
 mvc(uint32_t dest, uint32_t src, int32_t countMinus1) {
@@ -83,33 +169,6 @@ mvc(uint32_t dest, uint32_t src, int32_t countMinus1) {
   src = src & 0xFFFFFF;
   for (i = 0; i <= countMinus1; i++)
     memory[dest + i] = memory[src + i];
-}
-
-void
-std(int regnum, uint32_t address) {
-  // Mimics the operation of the IBM 360 STD instruction, with the additional
-  // hack of tracking "unnormalized" values representing integers produced
-  // by the IBM 360 AW instruction.
-  if (regnum < 0 || regnum > 15)
-    abend("Bad register number %d in STD", regnum);
-  if (unnormFR[regnum])
-    {
-      int sign = 0;
-      unnormFR[regnum] = 0;
-      dummy360d = FR[regnum];
-      if (dummy360d < 0)
-        {
-          sign = 0x80000000;
-          dummy360d = -dummy360d;
-        }
-      dummy360 = dummy360d;
-      msw360 = ((dummy360 >> 32) & 0x00FFFFFF) | 0x4E000000 | sign;
-      lsw360 = dummy360 & 0xFFFFFFFF;
-    }
-  else
-    toFloatIBM(&msw360, &lsw360, FR[regnum]);
-  COREWORD2(address360B, msw360);
-  COREWORD2(address360B + 4, lsw360);
 }
 
 void

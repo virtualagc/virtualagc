@@ -14,6 +14,10 @@ Mod history:    2026-05-06 RSB  Initial conversion by CodeConvert, and changes
                                 execution too, adapted from my ibmHex.py,
                                 for testing purposes.
                 2026-05-10 RSB  Fleshed out the stand-alone executable.
+ *              2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
+ *                              unnormalized arithmetic on unnormalized 0.
+ *                              Changed syntax of addition from NUMBER+NUMBER
+ *                              to NUMBERaNUMBER.  Introduced --test-fixer.
 '''
 
 '''
@@ -276,8 +280,12 @@ def ibm_dp_addsub(a_packed, b_packed, subtract_b, normalize):
     if subtract_b:
         b_sign ^= 1
 
-    a_iszero = IBM_DP_IS_TRUE_ZERO(a_packed)
-    b_iszero = IBM_DP_IS_TRUE_ZERO(b_packed)
+    if normalize:
+        a_iszero = IBM_DP_IS_TRUE_ZERO(a_packed)
+        b_iszero = IBM_DP_IS_TRUE_ZERO(b_packed)
+    else:
+        a_iszero = (a_packed & 0x7FFFFFFFFFFFFFFF) == 0
+        b_iszero = (b_packed & 0x7FFFFFFFFFFFFFFF) == 0
 
     if not b_iszero and not a_iszero:
         # Both not zero - align with guard digit, then signed add.
@@ -330,7 +338,10 @@ def ibm_dp_addsub(a_packed, b_packed, subtract_b, normalize):
             r_mant >>= 8
             a_exp += 1
         elif not normalize:
-            r_mant >>= 4
+            rounder = 0
+            if (r_mant & 0xF) >= 8:
+                rounder = 1
+            r_mant = (r_mant >> 4) + rounder
         elif r_mant & IBM_DP_TOP_HEX_60:
             r_mant >>= 4
         else:
@@ -539,101 +550,174 @@ def ibm_dp_to_hal_string(msw, lsw, precision):
 
 if __name__ == "__main__":
     import sys
+    import os
+    
+    # Perform unnormalized addition of an HFP value with 4E000000,00000000.
+    # The algorithm slavishly follows that on pp. 18-8 and -9 of the ESA/390 
+    # Principles of Operation for normalized addition, and then extending to
+    # the discusson on p. 18-10 for unnormalized.  The attempt is intended to 
+    # be verifiable and idiot-proof, *not* to be efficient.  We depart only
+    # at the very end, when I believe the published description to be in error.
+    def addUnnormalizedToFixer(operand):
+        signMask = 0x8000000000000000
+        expMask =  0x7F00000000000000
+        expInc =   0x0100000000000000
+        mantMask = 0x00FFFFFFFFFFFFFF
+        fixer =    0x4E00000000000000
+        sign = operand & signMask
+        exp = operand & expMask
+        mant = operand & mantMask
+        if exp > fixer:
+            return operand
+        # Shift the operand rightward as necessary.
+        guard = 0
+        while exp < fixer:
+            guard = mant & 0xF
+            mant = mant >> 4
+            exp += expInc
+        # This is the part I think is missing from the published description
+        # and from `ibm_dp_addsub`: Round according to the guard digit, rather 
+        # than truncate.
+        if guard >= 8:
+            mant += 1
+        return sign | exp | mant
     
     def printHuman(msw, lsw, parm):
         print(f"{'%08X'%msw},{'%08X'%lsw}   <->   DP='{ibm_dp_to_hal_string(msw,lsw,1)}'   SP='{ibm_dp_to_hal_string(msw,lsw,0)}'   ({parm})")
+    
+    def dpFromString(s):
+        if s == "FIXER":
+            return 0x4E000000, 0x00000000
+        elif "," in s:
+            fields = s.split(",")
+            if len(fields) != 2 or len(fields[0]) != 8 or len(fields[1]) != 8:
+                printf(f"Illegal IBM Hex   ({s})")
+                os._exit(1)
+            try:
+                return int(fields[0], 16), int(fields[1], 16)
+            except:
+                printf(f"Illegal IBM Hex   ({s})")
+                os._exit(1)
+        return ibm_dp_from_string(s)
+    
+    # Apply the operation FLOATpFIXER to a native Python floating-point number.
+    def fix(d):
+        msw, lsw = ibm_dp_from_double(d)
+        result = ibm_dp_addsub((msw << 32) | lsw, 0x4E00000000000000, 0, 0)
+        mant = IBM_DP_MANT_MASK & result
+        sign = IBM_DP_SIGN_BIT & result
+        if sign:
+            return -mant
+        return mant
     
     for parm in sys.argv[1:]:
         parm = parm.replace(" ", "")
         if "--help" == parm:
             print()
-            print("Utility for exercising the ibmFloat Python module Usage:")
+            print("Utility for exercising the ibmFloat Python module.")
+            print()
+            print("Usage:")
             print()
             print("\tibmFloat.py arg1 arg2 arg3 ...")
             print()
-            print("The arguments can take any of the forms listed below.")
+            print("In what follows, NUMBER can be any of the following:")
+            print()
+            print("\tAn integer such as 1, -23, 1061, etc.")
+            print()
+            print("\tA floating-point number such as .6, 1., -1.2345,") 
+            print("\t4.67E-52, etc.")
+            print()
+            print("\tA comma-delimited pair of 8-digit hexadecimals,")
+            print("\trepresenting a already-encoded double-precision IBM ")
+            print("\thexadecimal floating-point number.")
+            print()
+            print("\tThe literal FIXER, shorthand for 4E000000,00000000.")
             print();
-            print("--help")
-            print("\tPrints this message and exits.")
-            print("HEX,HEX")
-            print("\tConverts an IBM DP floating-point number, expressed")
-            print("\tas a pair of comma-delimited 8-digit hexadecimals, to a")
-            print("\thuman-readable, floating-point number.")
+            print("The arguments can take any of the forms listed below:")
+            print()
             print("NUMBER")
-            print("NUMBER+NUMBER")
+            print("NUMBERaNUMBER")
             print("NUMBERsNUMBER")
             print("NUMBER*NUMBER")
             print("NUMBER/NUMBER")
             print("\tAny integer or floating-point number or simple expression")
             print("\tis converted to an IBM DP floating-point number.  Note")
-            print("\tthat NUMBERsNUMBER is used in place of NUMBER-NUMBER,")
-            print("\twhich is not accepted.  The reason for that is that in")
-            print("\tHAL/S, -NUMBER is not a numeric literal, but rather an")
-            print("\texpression in which the operator '-' operates on NUMBER,")
-            print("\ttherefore a HAL/S parser could not accept expressions like")
-            print("\t-3+12 or 5+-2.  Using 's' in place of '-' is a workaround")
-            print("\tfor that.")
+            print("\tthat NUMBERaNUMBER and NUMBERsNUMBER are used in place of")
+            print("\tNUMBER+NUMBER and NUMBER-NUMBER to simplify parsing the")
+            print("\targuments, and because + and - are not allowed as leading")
+            print("\tcharacters in HAL/S literals but are allowed here.")
             print("NUMBERpNUMBER")
             print("NUMBERmNUMBER")
-            print("\tSame as number+number and number-number, except that the")
+            print("\tSame as NUMBERaNUMBER and NUMBERsNUMBER, except that the")
             print("\tresult is not normalized.")
             print("hcNUMBER")
             print("chNUMBER")
             print("\tConvert HAL/S floating-point to native C/Python floating")
             print("\tpoint or vice versa, respectively.")
-            print("--make-test")
-            print("\tOutputs a large test dataset that can be used with ")
-            print("\tibmFloat.py and ibmFloat.c+ibmFloatRig.c in parallel")
-            print("\tcross-check that they produce the same results.  An")
-            print("\texample usage (in Linux) would be:")
-            print("\t    ibmFloat.py --make-test >ibmFloat.txt")
-            print("\t    while IFS= read -r line ;")
-            print("\t    do ")
-            print("\t        ibmFloat.py $line")
-            print("\t    done <ibmFloat.tst >resultsPy.txt")
-            print("\t    while IFS= read -r line ;")
-            print("\t    do ")
-            print("\t        ibmFloat $line")
-            print("\t    done <ibmFloat.tst >resultsC.txt")
-            print("\t    diff resultsPy.txt resultsC.txt")
             print("iNUMBER")
             print("\tPrints the IEEE 754 hexadecimal representation of a ")
             print("\tnumber.  This is not directly relevant to ibmFloat")
             print("\tfunctionality but can be used for diagnosis of cross-test")
             print("\tdiscrepancies.")
+            print("--help")
+            print("\tPrints this message and exits.")
+            print("--test-fixer")
+            print("\tPerforms tests of the NpFIXER operation.")
+            print("--make-test")
+            print("\tOutputs a large test dataset that can be used with ")
+            print("\tibmFloat.py and ibmFloat.c+ibmFloatRig.c in parallel")
+            print("\tto cross-check that they produce the same results.")
+            print("\tRecommended usage (in Linux) would be:")
+            print("\t    ibmFloat.py --make-test >ibmFloat.tst")
+            print("\t    while read -r line ; do ibmFloat.py $line ; done <ibmFloat.tst >resultsPy.txt")
+            print("\t    while read -r line ; do  ibmFloat $line ; done <ibmFloat.tst >resultsC.txt")
+            print("\t    diff resultsPy.txt resultsC.txt")
             print("")
             break
+        elif parm == "--test-fixer":
+            tests = 100000
+            errors = 0
+            offsets = (0, 0.94, 0.76, 0.49, 0.21, 0.1, 0.01, 0.001, 0.0001, 0.00001)
+            for n in range(tests):
+                for offset in offsets:
+                    result = fix(n + offset)
+                    if result != n:
+                        if errors < 10:
+                            print(f"Error: {n+offset}pFIXER gave {result}, wanted {n}")
+                        errors += 1
+                        if errors == 10:
+                            print("Additional errors will not be listed individually.")
+            print(f"{errors} total errors out of {tests*len(offsets)} tests.")
         elif parm == "--make-test":
             print(f"0 0.0")
-            for i in range(-10, 11):
-                x = 10.0 ** i
-                print(f"{x} {-x} hc{x} hc{-x} ch{x} ch{-x}")
-                for j in range(-10, 11):
-                    y = 10.0 ** j
-                    print(f"{x}+{y} {x}s{y} {x}*{y} {x}/{y} {x}p{y} {x}m{y}")
+            for i in range(-11, 11):
+                if i == -11:
+                    x = "FIXER"
+                    print(x)
+                else:
+                    x = 10.0 ** i
+                    print(f"{x} {-x} hc{x} hc{-x} ch{x} ch{-x}")
+                for j in range(-11, 11):
+                    if j == -11:
+                        y = "FIXER"
+                        print(f"{x}a{y} {x}s{y} {x}*{y} {x}p{y} {x}m{y}")
+                    else:
+                        y = 10.0 ** j
+                        print(f"{x}a{y} {x}s{y} {x}*{y} {x}/{y} {x}p{y} {x}m{y}")
             f1 = 1
             f2 = 1
             for i in range(1000):
                 print(f"{'%08X'%f1},{'%08X'%f2}")
                 f1, f2 = (f1+f2) & 0xFFFFFFFF, f1
             break
-        elif "," in parm:
-            try:
-                fields = parm.split(",")
-                if len(fields) != 2:
-                    printf(f"Illegal IBM Hex   ({parm})")
-                else:
-                    printHuman(int(fields[0], 16), int(fields[1], 16), parm)
-            except:
-                print(f"Illegal IBM Hex   ({parm})")
-        elif "+" in parm:
-            fields = parm.split("+")
+        elif "a" in parm:
+            fields = parm.split("a")
             if len(fields) != 2:
                 print(f"Cannot interpret number(s)   ({parm}):")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_add((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
@@ -644,8 +728,8 @@ if __name__ == "__main__":
                 print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_sub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
@@ -656,8 +740,8 @@ if __name__ == "__main__":
                 print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_mul((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
@@ -668,8 +752,8 @@ if __name__ == "__main__":
                 print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_div((msw0 << 32) | lsw0, (msw1 << 32) | lsw1)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
@@ -680,8 +764,8 @@ if __name__ == "__main__":
                 print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_addsub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1, 0, 0)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
@@ -692,14 +776,14 @@ if __name__ == "__main__":
                 print(f"Cannot interpret number(s)   ({parm})")
                 continue
             try:
-                msw0, lsw0 = ibm_dp_from_string(fields[0])
-                msw1, lsw1 = ibm_dp_from_string(fields[1])
+                msw0, lsw0 = dpFromString(fields[0])
+                msw1, lsw1 = dpFromString(fields[1])
                 result = ibm_dp_addsub((msw0 << 32) | lsw0, (msw1 << 32) | lsw1, 1, 0)
                 printHuman((result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF, parm)
             except:
                 print(f"Cannot interpret number(s)   ({parm})")
         elif parm.startswith("hc"):
-            msw, lsw = ibm_dp_from_string(parm[2:])
+            msw, lsw = dpFromString(parm[2:])
             f = ibm_dp_to_double(msw, lsw)
             print(f"{'%.14E'%f}   ({parm})")
         elif parm.startswith("ch"):
@@ -712,6 +796,13 @@ if __name__ == "__main__":
                     printHuman(msw, lsw, parm)
             except:
                 print(f"Not a valid Python floating-point number   ({parm})")
+        elif parm.startswith("t"):
+            try:
+                msw, lsw = dpFromString(parm[1:])
+                result = addUnnormalizedToFixer((msw << 32) | lsw)
+                printHuman(result >> 32, result & 0xFFFFFFFF, parm)
+            except:
+                print(f"Not a valid Python floating-point number   ({parm})")
         elif parm.startswith("i"):
             try:
                 f = float(parm[1:])
@@ -721,7 +812,7 @@ if __name__ == "__main__":
                 print(f"Not a valid Python floating-point number   ({parm})")
         else:
             try:
-                msw, lsw = ibm_dp_from_string(parm)
+                msw, lsw = dpFromString(parm)
                 printHuman(msw, lsw, parm)
             except:
                 print(f"Cannot interpret number   ({parm})")

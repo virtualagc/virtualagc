@@ -54,6 +54,8 @@
  *                              more subtle than I thought.
  *              2026-04-08 RSB  Added `debugX`.
  *              2026-04-14 RSB  Added "pretty BNF".
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-05-13 RSB  Fixed the mod to `MONITOR9`.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -1089,7 +1091,7 @@ parseCommandLine(int argc, char **argv)
       else if (!strcmp("--eng=fp", argv[i]))
         {
           // Test of the IBM float conversions.  Note that aside from showing that
-          // toFloatIBM() and fromFloatIBM() are inverses, it also reproduces the
+          // ibm_dp_from_double() and ibm_dp_to_double() are inverses, it also reproduces the
           // known value 100 -> 0x42640000,0x00000000.
           int32_t s, e;
           uint32_t msw, lsw;
@@ -1099,8 +1101,8 @@ parseCommandLine(int argc, char **argv)
               for (e = -10; e <= 10; e++)
                 {
                   x = s * pow(10, e);
-                  toFloatIBM(&msw, &lsw, x);
-                  y = fromFloatIBM(msw, lsw);
+                  ibm_dp_from_double(&msw, &lsw, x);
+                  y = ibm_dp_to_double(msw, lsw);
                   printf("%24.10lf 0x%08x,0x%08x %.10lf\n", x, msw, lsw, y);
                 }
             }
@@ -2673,80 +2675,9 @@ MONITOR8(uint32_t dev, uint32_t filenum) {
 }
 
 //----------------------------------------------------------------------------
-// For conversion to/from IBM hexadecimal floating point
-
-#define twoTo56 (1LL << 56)
-#define twoTo52 (1LL << 52)
-
-// Convert a integer or floating point to IBM double-precision float.
-// Returns as a pair (msw,lsw), each of which are 32-bit integers,
-// or (0xff000000,0x00000000) on error.
-void __attribute__ ((no_instrument_function))
-toFloatIBM(uint32_t *msw, uint32_t *lsw, double d) {
-  int s; // The sign: 1 if negative, 0 if non-negative.
-  int e; // Exponent.
-  uint64_t f;
-  if (d == 0)
-    {
-      *msw = 0x00000000;
-      *lsw = 0x00000000;
-      return;
-    }
-  // Make x positive but preserve the sign as a bit flag.
-  if (d < 0)
-    {
-      s = 1;
-      d = -d;
-    }
-  else
-      s = 0;
-  // Shift left by 24 bits.
-  d *= twoTo56;
-  // Find the exponent (biased by 64) as a power of 16:
-  e = 64;
-  while (d < twoTo52)
-    {
-      e -= 1;
-      d *= 16;
-    }
-  while (d >= twoTo56)
-    {
-      e += 1;
-      d /= 16;
-    }
-  if (e < 0)
-      e = 0;
-  if (e > 127)
-    {
-      *msw = 0xff000000;
-      *lsw = 0x00000000;
-      return;
-    }
-  // x should now be in the right range, so lets just turn it into an integer.
-  f = llround(d);
-  // Convert to a more-significant and less-significant 32-word:
-  *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
-  *lsw = f & 0xffffffff;
-  return;
-}
-
-// Inverse of toFloatIBM(): Converts more-significant and less-significant
-// 32-bit words of an IBM DP float to a C double.
-double __attribute__ ((no_instrument_function))
-fromFloatIBM(uint32_t msw, uint32_t lsw) {
-    int s; // sign
-    int e; // exponent
-    long long int f;
-    double x;
-    s = (msw >> 31) & 1;
-    e = ((msw >> 24) & 0x7f) - 64;
-    f = ((msw & 0x00ffffffLL) << 32) | (lsw & 0xffffffff);
-    x = f * pow(16, e) / twoTo56;
-    if (s != 0)
-        x = -x;
-    return x;
-}
-
+// IBM hex DP arithmetic and conversion live in ibmFloat.c (split out
+// 2026-04-28).  The ibm_dp_* declarations are pulled in via runtimeC.h's
+// `#include "ibmFloat.h"`.
 //----------------------------------------------------------------------------
 
 uint32_t
@@ -2777,9 +2708,9 @@ MONITOR9(uint32_t op) {
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
   address = dwAddress;
-  op0 = ((uint64_t)getFIXED(address) << 32) | getFIXED(address + 4);
+  op0 = ((uint64_t)getFIXED(address) << 32) | (uint32_t) getFIXED(address + 4);
   if (op < 6)
-    op1 = ((uint64_t)getFIXED(address + 8) << 32) | getFIXED(address + 12);
+    op1 = ((uint64_t)getFIXED(address + 8) << 32) | (uint32_t) getFIXED(address + 12);
 
   uint64_t r;
   if (op == 1)        r = ibm_dp_add(op0, op1);
@@ -2832,12 +2763,12 @@ MONITOR10(descriptor_t *fpstring) {
     abend("Needed CALL MONITOR(5) prior to CALL MONITOR(10)");
   address = dwAddress;
   s = descriptorToAscii(fpstring);
-  // Convert the literal directly to IBM hex DP using a port
-  // of MONITOR.ASM/XXXTOD.bal
-  // FR[0] = atof(s);
+  // Convert the literal directly to IBM hex (truncating S/360-style),
+  // bypassing atof()'s IEEE-754 precision loss (issue #1296).  FR[0]
+  // gets the IBM bytes; downstream PREP_LITERAL's LD/STD round-trip
+  // is now byte-exact since FR[] holds IBM bytes natively.
   ibm_dp_from_string(s, &msw, &lsw);
-  // FR[0] gets the IEEE view of the parsed hex:
-  FR[0] = ibm_dp_to_double(msw, lsw);
+  FR_setbits(0, msw, lsw);
   putFIXED(address, msw);
   putFIXED(address + 4, lsw);
   return 0;
@@ -3958,7 +3889,7 @@ detailedInlineAfter(void) {
         {
           if (0 == i % 4)
             fprintf(stdout, "\n");
-          fprintf(stdout, "  FR%02d=%-21F", i, FR[i]);
+          fprintf(stdout, "  FR%02d=%-21F", i, FR_d(i));
         }
       fprintf(stdout, "\n");
       if (address360A >=0 && address360A <= 0x1000000-4)

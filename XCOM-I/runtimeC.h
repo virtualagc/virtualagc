@@ -18,6 +18,7 @@
  *                              20000 lines.
  *              2026-04-08 RSB  Added `debugX`.
  *              2026-04-14 RSB  Added "pretty BNF".
+ *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
  */
 
 #ifndef RUNTIMEC_H
@@ -498,11 +499,8 @@ MONITOR7(uint32_t based, uint32_t n);
 void
 MONITOR8(uint32_t dev, uint32_t filenum);
 
-void
-toFloatIBM(uint32_t *msw, uint32_t *lsw, double d);
-
-double
-fromFloatIBM(uint32_t msw, uint32_t lsw);
+// IBM hex DP arithmetic primitives and double/string conversions.
+#include "ibmFloat.h"
 
 // Direct IBM hex DP arithmetic and bit-exact decimal conversion routines.
 // Used by MONITOR(10) (string -> hex parsing) and MONITOR(12) (hex -> string

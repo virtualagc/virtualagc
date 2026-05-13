@@ -11,6 +11,8 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-06-24 RSB  Began.
             2026-03-10 RSB  Corrected `scratchd` to `scratch` in the `A`
                             instruction.
+            2026-05-01 DS   Alterations related to HFP-native arithmetic.
+            2026-05-11 RSB  Corrected page number of "L" instruction.
 '''
 
 import sys
@@ -97,7 +99,7 @@ makeInstruction("BC", 0x47, "RX", "7-17")
 makeInstruction("LH", 0x48, "RX", "7-80")
 makeInstruction("AH", 0x4A, "RX", "7-12")
 makeInstruction("ST", 0x50, "RX", "7-122")
-makeInstruction("L", 0x58, "RX", "7-7")
+makeInstruction("L", 0x58, "RX", "7-77")
 makeInstruction("A", 0x5A, "RX", "7-12")
 makeInstruction("STD", 0x60, "RX", "9-11")
 makeInstruction("LD", 0x68, "RX", "9-10")
@@ -454,23 +456,15 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "setCC();")
         thisLine.append(indent + "GR[%d] = (int32_t) scratch;" % R1)
     elif opcode == 0x20: # LPDR p. 18-17
-        thisLine.append(indent + "scratchd = fabs(FR[%d]);" % R2)
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "lpdr(%d, %d);" % (R1, R2))
     elif opcode == 0x28: # LDR p. 9-10
-        thisLine.append(indent + "FR[%d] = FR[%d];" % (R1, R2))
-        # Note: No CC effect.
+        thisLine.append(indent + "ldr(%d, %d);" % (R1, R2))
     elif opcode == 0x29: # CDR p. 18-10
-        thisLine.append(indent + "scratchd = FR[%d] - FR[%d];" % (R1, R2))
-        thisLine.append(indent + "setCCd();")
+        thisLine.append(indent + "cdr(%d, %d);" % (R1, R2))
     elif opcode == 0x2A: # ADR p. 18-8
-        thisLine.append(indent + "scratchd = FR[%d] + FR[%d];" % (R1, R2))
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "adr(%d, %d);" % (R1, R2))
     elif opcode == 0x2B: # SDR p. 18-23
-        thisLine.append(indent + "scratchd = FR[%d] - FR[%d];" % (R1, R2))
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "sdr(%d, %d);" % (R1, R2))
     elif opcode == 0x41: # LA p. 7-78
         thisLine.append(indent + "GR[%d] = address360B & 0xFFFFFF;" % R1)
     elif opcode == 0x43: # IC p. 7-76
@@ -513,33 +507,19 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
     elif opcode == 0x60: # STD p. 9-11
         thisLine.append(indent + "std(%d, address360B);" % R1)
     elif opcode == 0x68: # LD p. 9-10
-        thisLine.append(indent + \
-            "FR[%d] = fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));"\
-            % R1)
+        thisLine.append(indent + "ld(%d, address360B);" % R1)
     elif opcode == 0x69: # CD p. 18-10
-        thisLine.append(indent + "scratchd = FR[%d];" % R1)
-        thisLine.append(indent + \
-              "scratchd -= fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
-        thisLine.append(indent + "setCCd();")
+        thisLine.append(indent + "cd(%d, address360B);" % R1)
     elif opcode == 0x6A: # AD p. 18-8
-        thisLine.append(indent + "scratchd = FR[%d];" % R1)
-        thisLine.append(indent + \
-              "scratchd += fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "ad(%d, address360B);" % R1)
     elif opcode == 0x6B: # SD p. 18-23
-        thisLine.append(indent + "scratchd = FR[%d];" % R1)
-        thisLine.append(indent + \
-              "scratchd -= fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
-        thisLine.append(indent + "setCCd();")
-        thisLine.append(indent + "FR[%d] = scratchd;" % R1)
+        thisLine.append(indent + "sd(%d, address360B);" % R1)
     elif opcode == 0x6E: # AW p. 18-10
         thisLine.append(indent + "aw(%d, address360B);" % R1)
     elif opcode == 0x70: # STE p. 9-11
-        thisLine.append(indent + "toFloatIBM(&msw360, &lsw360, FR[%d]);" % R1)
-        thisLine.append(indent + "COREWORD2(address360B, msw360);")
+        thisLine.append(indent + "ste(%d, address360B);" % R1)
     elif opcode == 0x78: # LE p. 9-10
-        thisLine.append(indent + "FR[%d] = fromFloatIBM(COREWORD(address360B), 0);" % R1)
+        thisLine.append(indent + "le(%d, address360B);" % R1)
     elif opcode == 0xD2: # MVC p. 7-83
         thisLine.append(indent + "mvc(address360A, address360B, %d);" % L)
     elif opcode == 0xDC: # TR p. 7-131

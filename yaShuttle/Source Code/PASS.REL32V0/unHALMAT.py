@@ -32,7 +32,7 @@ from unLitfile import getLiteralsFromFile
 
 helpMsg = '''
 Usage:
-     unHALMAT [OPTIONS] HALMAT_FILE
+     unHALMAT.py [OPTIONS] HALMAT_FILE
      
 The available OPTIONs are:
     --help          Displays this message.
@@ -53,11 +53,11 @@ The available OPTIONs are:
                     from the HALMAT file being analyzed.  (I.e., all information
                     taken from --listing2, --litfile, --memory, or --common.)
                     
-Note that if HALMAT_FILE is one of "halmat.bin" or "optmat.bin", then defaults
-appropriate for the file-naming conventions of the HAL/S compiler (HALSFC) will
-be supplied for any missing --listing2, --litfile, --memory, or --common
-options.  If HALMAT_FILE is neither of these, then there are no supplied 
-defaults.
+Note that if HALMAT_FILE is one of "halmat.bin", "optmat.bin", or "FILE1.bin", 
+then defaults appropriate for the file-naming conventions of the HAL/S compiler
+(HALSFC or HAL_S_FC.py) will be supplied for any missing --listing2, --litfile, 
+--memory, or --common options.  If HALMAT_FILE is none of these, then there are 
+no supplied defaults.
 '''
 
 # Create some sensible defaults.
@@ -82,6 +82,14 @@ elif "optmat.bin" in argvSkeleton:
         sys.argv.append("--memory=COMMON2.out.bin.gz")
     if "--common" not in argvSkeleton:
         sys.argv.append("--common=COMMON3.out")
+elif "FILE1.bin" in argvSkeleton:
+    if "--listing2" not in argvSkeleton:
+        sys.argv.append("--listing2=pass1.rpt")
+    if "--litfile" not in argvSkeleton:
+        sys.argv.append("--litfile=FILE2.bin")
+    if "--memory" not in argvSkeleton:
+        sys.argv.append("--memory=LIT_CHAR.bin")
+    # HAL_S_FC.py produces no file appropriate for --common.
 
 colorize = ""
 uncolorize = ""
