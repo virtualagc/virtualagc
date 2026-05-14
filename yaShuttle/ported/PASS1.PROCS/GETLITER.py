@@ -7,6 +7,8 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-16 RSB  Ported from XPL
+            2026-05-13 RSB  Altered the initialization of the memory buffer
+                            (`b`) per issue #1305.
 '''
 
 from xplBuiltins import *
@@ -81,7 +83,7 @@ def GET_LITERAL(PTR):
     g.CURLBLK = PTR // g.LIT_BUF_SIZE;
     g.LITORG = g.CURLBLK * g.LIT_BUF_SIZE;
     g.LITLIM = g.LITORG + g.LIT_BUF_SIZE;
-    b = bytearray([0] * (12 * g.LIT_BUF_SIZE))
+    #b = bytearray([0] * (12 * g.LIT_BUF_SIZE))
     if g.CURLBLK <= g.LITMAX:
         FILE(b, g.LITFILE, g.CURLBLK);
     else:

@@ -19,6 +19,7 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
             2026-03-08 RSB  "Normalize" INPUT(8) the same way the top-level
                             program HAL_S_FC.ppy normalizes the main source
                             code nominally corresponding to INPUT(0).
+            2026-05-13 RSB  Added a .flush() for the `FILE` function.
 '''
 
 import sys
@@ -875,6 +876,7 @@ def FILE(arg1, arg2, arg3):
                 sys.exit(1)
         return
     f.write(outputArray)
+    f.flush()
     if f.tell() > size:
         files[fileNumber][2] = f.tell()
 
