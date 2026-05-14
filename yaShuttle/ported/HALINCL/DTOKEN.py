@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.  
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported
+            2026-05-14 RSB  Adjusted format of "D VERSION ..." per issue #1308.
 '''
 
 from xplBuiltins import *
@@ -57,6 +58,19 @@ lD_TOKEN = cD_TOKEN()
 def D_TOKEN():
     global D_INDEX, D_CONTINUATION_OK
     l = lD_TOKEN
+    
+    '''
+    If CURRENT_CARD is "D VERSION n", where n is a version code, then per 
+    issue #1308 we have to adjust this so that there are two spaces before the
+    version code rather than one.  But we have to be careful, since the 
+    columnar alignments are otherwise determined by source code and mustn't be 
+    changed.
+    '''
+    if g.CURRENT_CARD[1:].lstrip().startswith("VERSION "):
+        fields = g.CURRENT_CARD.partition("VERSION ")
+        if not fields[2].startswith(" "):
+            g.CURRENT_CARD = fields[0] + fields[1] + " " + fields[2][:-1]
+    # End of addition for issue #1308.
     
     while True:
         while (BYTE(g.CURRENT_CARD, D_INDEX) == BYTE(' ')) and \
