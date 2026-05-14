@@ -95,7 +95,8 @@ import sys
 import os
 import gzip
 from asciiToEbcdic import *
-from ibmHex import *
+#from ibmHex import *
+from ibmFloat import ibm_dp_to_hal_string
 
 def getLiteralsFromFile(litfileName, memoryName):
     literals = []
@@ -139,7 +140,11 @@ def getLiteralsFromFile(litfileName, memoryName):
                         value += ebcdicToAscii[memory[i]]
                 #print("Literal %d: STRING '%s'" % (literalNumber, value))
             elif type == 1:
-                value = fromFloatIBM(formWord(page2, offset), formWord(page3, offset))
+                #value = fromFloatIBM(formWord(page2, offset), formWord(page3, offset))
+                msw = formWord(page2, offset)
+                lsw = formWord(page3, offset)
+                value = f"{'%08X'%msw},{'%08X'%lsw} '" + \
+                        ibm_dp_to_hal_string(msw, lsw, 1) + "'"
                 #print("Literal %d: FIXED  %lf" % (literalNumber, value))
             elif type == 2:
                 value = formWord(page2, offset)
@@ -179,9 +184,9 @@ if __name__ == "__main__":
             if value != "":
                 print("Literal %4d: STRING '%s'" % (literalNumber, value))
         elif type == 1:
-            print("Literal %4d: FIXED  %lf" % (literalNumber, value))
+            print("Literal %4d: FIXED  %s" % (literalNumber, value))
         elif type == 2:
-            print("Literal %4d: BIT    %d" % (literalNumber, value))
+            print("Literal %4d: BIT    %08X '%11d'" % (literalNumber, value, value))
         else:
             print("Literal %4d: %-2d     %08X,%08X" % (literalNumber, type, 
                                                       (value >> 32) & 0xFFFFFFFF, 
