@@ -9,6 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Began porting from INITIALI.xpl.
             2026-03-12 RSB  Removed bogus `SCAN1` and `SCAN2`.  Imported
                             `ERROR()` and `NEXT_RECORD`.
+            2026-05-15 RSB  Fixes related to issue #1306.
 '''
 
 from xplBuiltins import *  # Built-in functions
@@ -400,14 +401,14 @@ def INITIALIZATION():
     MONITOR(5, g.DW)
     #TABLE_ADDR = DW_AD + 24;
     #ADDR_FIXER = TABLE_ADDR + 8;
-    #DW(8) = "4E000000";
-    #DW(9) = 0;
+    g.DW[8] = 0x4E000000
+    g.DW[9] = 0x00000000
     #ADDR_FIXED_LIMIT = ADDR_FIXER + 8;
-    #DW(10) = "487FFFFF";
-    #DW(11) = "FFFFFFFF";
+    g.DW[10] = 0x487FFFFF
+    g.DW[11] = 0xFFFFFFFF
     #ADDR_ROUNDER = ADDR_FIXED_LIMIT + 8;
-    #DW(12) = "407FFFFF";
-    #DW(13) = "FFFFFFFF";
+    g.DW[12] = 0x407FFFFF
+    g.DW[13] = 0xFFFFFFFF
     
     ALLOCATE_SPACE(h.SYM_TAB,g.SYTSIZE+1);
     NEXT_ELEMENT(h.SYM_TAB);

@@ -23,6 +23,8 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
                             "--scan1" and "--scan2" options.  Added some
                             stuff to facilitate indentXPL.py.
             2026-04-14 RSB  Added "pretty BNF".
+            2026-05-15 RSB  FR[] now contains DP IBM HFP rather than
+                            native python float.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -4284,4 +4286,4 @@ NEWSIZE = None
 # that you could think of as rigorous, and am only doing so in the very 
 # tail-end of development, so these variables are only used in dealing with
 # a handful of patches for the inlines.
-FR = [ 0.0 ] * 16
+FR = [ 0 ] * 16

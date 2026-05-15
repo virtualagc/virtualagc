@@ -15,12 +15,14 @@ History:    2023-09-28 RSB  Made a stub.
                             in this function.  But I've kept the 2nd version in
                             reserve since I still think that there may be bugs
                             here that may need to be addressed at some point.
+            2026-05-14 RSB  Changes related to issue #1309.
 '''
 
 import math
 from xplBuiltins import *
 import g
 from GETLITER import GET_LITERAL
+from ibmFloat import ibm_dp_addsub
 
 '''
  /***************************************************************************/
@@ -55,98 +57,48 @@ from GETLITER import GET_LITERAL
  /***************************************************************************/
 '''
 
-if True:
-    '''
-    MAKE_FIXED_LIT() is called from SYNTHESI to do various things, which I believe
-    includes handling the numeric literals (say, 2 and 3) in declarations 
-    such as:
-     
-        DECLARE V VECTOR(2);
-        DECLARE M MATRIX(2,3);
-        DECLARE B BIT(2);
-        DECLARE C CHARACTER(3);
-        
-    and (probably) lots more of a similar nature
+'''
+MAKE_FIXED_LIT() is called from SYNTHESI to do various things, which I believe
+includes handling the numeric literals (say, 2 and 3) in declarations 
+such as:
+ 
+    DECLARE V VECTOR(2);
+    DECLARE M MATRIX(2,3);
+    DECLARE B BIT(2);
+    DECLARE C CHARACTER(3);
     
-    Unfortunately, the XPL source is an indecipherable (to me!) mess of INLINEs,
-    and the documentation in IR-182-1 is useless: MAKE_FIXED_LIT, it tells us,
-    is a "procedure". Which is a factoid I had managed to deduce for myself.
-    However, it appears to me that what the INLINEs are probably trying to do is
-    to detect that N can be interpreted as an integer, and to perform whatever
-    processing (such as rounding) that's needed to do that, probably with range
-    checking.  
+and (probably) lots more of a similar nature
+
+Unfortunately, the XPL source is a mess of INLINEs, and the documentation in 
+IR-182-1 merely tells us that `MAKE_FIXED_LIT` is a "procedure". Which is a 
+factoid I had managed to deduce for myself.  The assumption is seemingly that 
+the value of the literal has been loaded as an IBM DP HFP 
+into the floating-point working area at DW[0] and DW[1].  We apparently need
+to convert it to an integer, if possible.
+'''
+
+def MAKE_FIXED_LIT(PTR):
+    PTR=GET_LITERAL(PTR);
+    g.DW[0]=g.LIT2(PTR);
+    g.DW[1]=g.LIT3(PTR);
+    print(f"^ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {ibm_dp_to_hal_string(g.DW[0], g.DW[1], 16)}", file=sys.stderr)
+    g.traceInline("MAKE_FIXED_LIT p33")
+    #PTR = ADDR(LIMIT_OK);
+    g.FR[0] = (g.DW[0] << 32) | g.DW[1] # p33_0, 4
+    g.FR[0] &= 0x7FFFFFFFFFFFFFFF # p33_8
+    g.FR[0] = ibm_dp_addsub(g.FR[0], 0x407FFFFFFFFFFFFF, 0, 1) # p33_10,14
+    scratch = ibm_dp_addsub(g.FR[0], 0x487FFFFFFFFFFFFF, 1, 1) # p33_18,22,26
+    if (scratch & 0x8000000000000000) != 0 or (scratch & 0x00FFFFFFFFFFFFFF) == 0: # p33_30
+        pass # branch to LIMIT_OK
+    else:
+        g.FR[0] = 0x487FFFFFFFFFFFFF # p33_32
+    #LIMIT_OK:
+    g.traceInline("MAKE_FIXED_LIT p43")
+    result = ibm_dp_addsub(g.FR[0], 0x4E00000000000000, 0, 0) # p43_0, 4
+    g.DW[2] = (result >> 32) & 0xFFFFFFFF # p43_0, 4
+    g.DW[3] = result & 0xFFFFFFFF # p43_8
     
-    The assumption is seemingly that the literal has been loaded as an IBM DP float, 
-    into the floating-point working area at DW[0] and DW[1].  Therefore, perhaps, 
-    all we really need to do, is to convert that value to a python float and round 
-    it correctly to an integer.
-    '''
-    
-    def MAKE_FIXED_LIT(PTR):
-        PTR=GET_LITERAL(PTR);
-        g.DW[0]=g.LIT2(PTR);
-        g.DW[1]=g.LIT3(PTR);
-        if False:
-            # Original implementation
-            i = hround(g.fromFloatDW01())
-            if i < 0:
-                i = -i
-            return i
-        else:
-            # Replacement implementation
-            g.traceInline("MAKE_FIXED_LIT p33")
-            #PTR = ADDR(LIMIT_OK);
-            g.FR[0] = g.fromFloatDW01() # p33_0, 4
-            g.FR[0] = abs(g.FR[0]) # p33_8
-            g.FR[0] += fromFloatIBM(0x407FFFFF, 0xFFFFFFFF) # p33_10,14
-            scratch = g.FR[0] - fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p33_18,22,26
-            if scratch <= 0: # p33_30
-                pass # branch to LIMIT_OK
-            else:
-                g.FR[0] = fromFloatIBM(0x487FFFFF, 0xFFFFFFFF) # p33_32
-            #LIMIT_OK:
-            g.traceInline("MAKE_FIXED_LIT p43")
-            g.DW[2] = 0 # p43 (all)
-            g.DW[3] = int(g.FR[0])
-            
-            if 0 != (1 & SHR(g.DW[0], 31)):
-                return -g.DW[3]
-            return g.DW[3]
-    # END MAKE_FIXED_LIT;
-else:
-    # The stuff above must have worked to a certain extent, since I didn't 
-    # discover problems until deep into the process of productionizing HALSFC.
-    # Nevertheless, it does fail eventually, resulting in DD1 errors when 
-    # compiling an OI340600 source-code file RDDDDI.xpl.  Rather than trying to
-    # do a detailed analysis of the `INLINE` code, I'm going to give you here
-    # a port into Python of the C translation of the `INLINE` code.
-    def MAKE_FIXED_LIT(PTR):
-        PTR=GET_LITERAL(PTR);
-        g.DW[0]=g.LIT2(PTR);
-        g.DW[1]=g.LIT3(PTR);
-        # Port of patch33.c into Python:
-        g.FR[0] = abs(g.fromFloatDW01()) + fromFloatIBM(0x407FFFFF, 0xFFFFFFFF)
-        limit = fromFloatIBM(0x487FFFFF, 0xFFFFFFFF)
-        if g.FR[0] - limit <= 0:
-            # goto LIMIT_OK
-            pass
-        else:
-            g.FR[0] = limit
-        # LIMIT_OK:
-        # Port of patch43.c into Python
-        mswFixer = 0x4e000000
-        lswFixer = 0x00000000
-        g.FR[0] += fromFloatIBM(mswFixer, lswFixer) # Unnormalize
-        # call to std:
-        sign = 0
-        dummy = math.trunc(g.FR[0])
-        if dummy < 0:
-            sign = 0x80000000
-            dummy = - g.FR[0]
-        g.DW[2] = ((dummy >> 32) & 0x00FFFFFF) | mswFixer | sign
-        g.DW[3] = dummy & 0xFFFFFFFF
-        # Back to the pure XPL!
-        if 0 != (1 & SHR(g.DW[0], 31)):
-            return -g.DW[3]
-        return g.DW[3]
-    # END MAKE_FIXED_LIT;
+    if 0 != (1 & SHR(g.DW[0], 31)):
+        return -g.DW[3]
+    return g.DW[3]
+# END MAKE_FIXED_LIT;

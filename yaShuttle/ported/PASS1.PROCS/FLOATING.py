@@ -8,9 +8,12 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-10-10 RSB  Ported
             2026-03-12 RSB  Wasn't importing g.py; was using non-existent
                             `double()` function.
+            2026-05-14 RSB  Changes per issue #1306, and other changes
+                            for conformance to original FLOATING.xpl.
 '''
 
 import g
+from ibmFloat import ibm_dp_from_double
 
 #*************************************************************************
 # PROCEDURE NAME:  FLOATING
@@ -28,19 +31,13 @@ import g
 #          SETUP_NO_ARG_FCN
 #*************************************************************************
 
-'''
-I believe that what this function (which originally was all assembly language)
-is trying to do is:
-    a) Convert the input VAL (an integer) into a double-precision floating-
-       point value; and
-    b) Store that floating-point value in the floating-point working-area array
-       as DW[0] and DW[1].
-The point of this is to make the value available for subsequent floating-point
-operations via calls to MONITOR(9,...).
-
-We have no use for that nonsense, as our implementation of MONITOR(9,...) 
-expects simply to find a full floating-point value in DW[0] (ignoring DW[1]).
-'''
 def FLOATING(VAL):
-    g.DW[0] = float(VAL)
+    g.DW[0] = g.DW[8] # MSW of the FIXER
+    if VAL < 0:
+        VAL = -VAL
+        DW[0] = DW[0] ^ 0x80000000 # p46_0, 4
+    g.DW[1] = VAL # DW(0),DW(1) now contains an unnormalized HFP of the VAL (an integer)
+    g.FR[0] = ibm_dp_addsub(0, (DW[0] << 32) + DW[1], 0, 1) # p48_4, 6.  Normalize it
+    g.DW[0], g.DW[1] = (g.FR[0] >> 32) & 0xFFFFFFFF, g.FR[0] & 0xFFFFFFFF # p48_10.  And save it.
+    
 # END FLOATING;
