@@ -14,10 +14,12 @@ Mod history:    2026-05-06 RSB  Initial conversion by CodeConvert, and changes
                                 execution too, adapted from my ibmHex.py,
                                 for testing purposes.
                 2026-05-10 RSB  Fleshed out the stand-alone executable.
- *              2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
- *                              unnormalized arithmetic on unnormalized 0.
- *                              Changed syntax of addition from NUMBER+NUMBER
- *                              to NUMBERaNUMBER.  Introduced --test-fixer.
+                2026-05-12 RSB  Corrected behavior of `ibm_dp_addsub` when doing
+                                unnormalized arithmetic on unnormalized 0.
+                                Changed syntax of addition from NUMBER+NUMBER
+                                to NUMBERaNUMBER.  Introduced --test-fixer.
+                2026-05-15 RSB  Reverted change to `ibm_dp_addsub` that rounded
+                                results of unnormalized addition/subtraction.
 '''
 
 '''
@@ -338,10 +340,7 @@ def ibm_dp_addsub(a_packed, b_packed, subtract_b, normalize):
             r_mant >>= 8
             a_exp += 1
         elif not normalize:
-            rounder = 0
-            if (r_mant & 0xF) >= 8:
-                rounder = 1
-            r_mant = (r_mant >> 4) + rounder
+            r_mant >>= 4
         elif r_mant & IBM_DP_TOP_HEX_60:
             r_mant >>= 4
         else:
@@ -474,10 +473,7 @@ TENSTBL = [
 # direct IBM hex DP -> decimal string
 def ibm_dp_to_string(msw, lsw, sig_digits, pad_to_digits):
     if ((msw & 0x7FFFFFFF) | lsw) == 0:
-        if pad_to_digits == 16:
-            return " 0.0                  "
-        else:
-            return " 0.0         "
+        return "0.0"
 
     sign = (msw >> 31) & 1
     value = (((msw & 0x7FFFFFFF) << 32) | (lsw & U32_MASK)) & U64_MASK
