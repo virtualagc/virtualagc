@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-16 RSB  Ported from XPL
+            2026-05-16 RSB  Changes related to issue #1306.
 '''
 
 from xplBuiltins import *
@@ -19,6 +20,7 @@ from LITRESUL import LIT_RESULT_TYPE
 from MATCHARI import MATCH_ARITH
 from SETUPVAC import SETUP_VAC
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 
 '''
  /***************************************************************************/
@@ -65,7 +67,7 @@ def ADD_AND_SUBTRACT(MODE):
             ERROR(d.CLASS_VA, MODE + 1);
             goto_AS_FAIL = True
         else:
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
             g.PSEUDO_TYPE[g.PTR[g.MP]] = LIT_RESULT_TYPE(g.MP, g.SP);
     if goto_AS_FAIL or not al:
         goto_AS_FAIL = False

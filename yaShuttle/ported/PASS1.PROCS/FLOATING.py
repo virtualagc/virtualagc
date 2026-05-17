@@ -13,7 +13,7 @@ History:    2023-10-10 RSB  Ported
 '''
 
 import g
-from ibmFloat import ibm_dp_from_double
+from ibmFloat import ibm_dp_from_double, hfpJoin, hfpSplit, IBM_SP_SIGN_BIT
 
 #*************************************************************************
 # PROCEDURE NAME:  FLOATING
@@ -35,9 +35,9 @@ def FLOATING(VAL):
     g.DW[0] = g.DW[8] # MSW of the FIXER
     if VAL < 0:
         VAL = -VAL
-        DW[0] = DW[0] ^ 0x80000000 # p46_0, 4
+        DW[0] = DW[0] ^ IBM_SP_SIGN_BIT # p46_0, 4
     g.DW[1] = VAL # DW(0),DW(1) now contains an unnormalized HFP of the VAL (an integer)
-    g.FR[0] = ibm_dp_addsub(0, (DW[0] << 32) + DW[1], 0, 1) # p48_4, 6.  Normalize it
-    g.DW[0], g.DW[1] = (g.FR[0] >> 32) & 0xFFFFFFFF, g.FR[0] & 0xFFFFFFFF # p48_10.  And save it.
+    g.FR[0] = ibm_dp_addsub(0, hfpJoin(DW[0], DW[1]), 0, 1) # p48_4, 6.  Normalize it
+    g.DW[0], g.DW[1] = hfpSplit(g.FR[0]) # p48_10.  And save it.
     
 # END FLOATING;

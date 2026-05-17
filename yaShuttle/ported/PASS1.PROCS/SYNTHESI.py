@@ -16,6 +16,7 @@ History:    2023-09-12 RSB  Began porting from XPL
             2026-03-11 RSB  Corrected some porting errors in productions 136
                             and 137.
             2026-04-14 RSB  Added "pretty BNF".
+            2026-05-16 RSB  Changes related to issue #1306.
 
 I realized belatedly that the method I use for handling spaghetti code in all
 of the modules so far -- namely, the use of goto_XXXX variables, one for each
@@ -138,6 +139,7 @@ from HALINCL.ENTERLAY import ENTER_LAYOUT
 from HALINCL.ICQARRAY import ICQ_ARRAYp
 from HALINCL.ICQTERMp import ICQ_TERMp
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 
 # I've created a file listing the rules associated with specific production
 # numbers, and read it into memory so that those names can be printed for
@@ -786,19 +788,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 6:  # reference 60
         #  <ARITH EXP> ::= -1 <TERM>
         if ARITH_LITERAL(g.SP, 0):
-            if False:
-                # Original implementation
-                # My guess is that INLINE code is being used here, unnecessarily,
-                # as an optimization for quickly negating a numeric literal
-                # previously stored as an IBM DP float in DW[0] and DW[1].  
-                negatedValue = -g.fromFloatDW01()
-                g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, negatedValue);
-            else:
-                # Replacement implementation
-                g.traceInline("SYNTHESIZE p125")
-                g.DW[0] = 0x80000000 ^ g.DW[0] # p125_0, 4
-                g.LOC_P[g.PTR[g.SP]] = \
-                        SAVE_LITERAL(1, g.fromFloatDW01());
+            # Replacement implementation
+            g.traceInline("SYNTHESIZE p125")
+            g.DW[0] = 0x80000000 ^ g.DW[0] # p125_0, 4
+            g.LOC_P[g.PTR[g.SP]] = \
+                    SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
         else:
             g.TEMP = g.PSEUDO_TYPE[g.PTR[g.SP]];
             HALMAT_TUPLE(g.XMNEG[g.TEMP - g.MAT_TYPE], 0, g.SP, 0, 0);
@@ -823,7 +817,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 goto = "DIV_FAIL";
             else:
                 g.LOC_P[g.PTR[g.MP]] = \
-                    SAVE_LITERAL(1, g.fromFloatDW01());
+                    SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
                 g.PSEUDO_TYPE[g.PTR[g.MP]] = g.SCALAR_TYPE;
         if goto == "DIV_FAIL" or (goto == None and not al):
             if goto == "DIV_FAIL": goto = None
@@ -899,7 +893,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_VA, 5);
                     goto = "POWER_FAIL"
                 else:
-                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
+                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
                     g.TEMP = LIT_RESULT_TYPE(g.MP, g.SP);
                     if g.TEMP == g.INT_TYPE: 
                         if MAKE_FIXED_LIT(g.LOC_P[g.I]) < 0:
@@ -1521,7 +1515,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if BIT_LITERAL(g.SP, 0): 
             g.TEMP = g.PSEUDO_LENGTH[g.PTR[g.SP]];
             g.TEMP2 = SHL(g.FIXV[g.SP], g.HOST_BIT_LENGTH_LIM - g.TEMP);
-            g.TEMP2 = not g.TEMP2;
+            g.TEMP2 = 0xFFFFFFFF ^ g.TEMP2
             g.TEMP2 = SHR(g.TEMP2, g.HOST_BIT_LENGTH_LIM - g.TEMP);
             g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(2, g.TEMP2, g.TEMP);
         else:

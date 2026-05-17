@@ -16,13 +16,16 @@ History:    2023-09-28 RSB  Made a stub.
                             reserve since I still think that there may be bugs
                             here that may need to be addressed at some point.
             2026-05-14 RSB  Changes related to issue #1309.
+            2026-05-16 RSB  Cleanup of HFP code for clarity.
 '''
 
 import math
 from xplBuiltins import *
 import g
 from GETLITER import GET_LITERAL
-from ibmFloat import ibm_dp_addsub
+from ibmFloat import ibm_dp_addsub, IBM_DP_OVERFLOW_PACKED, IBM_DP_ROUNDER, \
+                     IBM_DP_FIXED_LIMIT, IBM_DP_SIGN_BIT, IBM_DP_MANT_MASK, \
+                     IBM_DP_FIXER, hfpSplit, hfpJoin
 
 '''
  /***************************************************************************/
@@ -81,22 +84,21 @@ def MAKE_FIXED_LIT(PTR):
     PTR=GET_LITERAL(PTR);
     g.DW[0]=g.LIT2(PTR);
     g.DW[1]=g.LIT3(PTR);
-    print(f"^ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {ibm_dp_to_hal_string(g.DW[0], g.DW[1], 16)}", file=sys.stderr)
+    #print(f"^ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {ibm_dp_to_hal_string(g.DW[0], g.DW[1], 16)}", file=sys.stderr)
     g.traceInline("MAKE_FIXED_LIT p33")
     #PTR = ADDR(LIMIT_OK);
-    g.FR[0] = (g.DW[0] << 32) | g.DW[1] # p33_0, 4
-    g.FR[0] &= 0x7FFFFFFFFFFFFFFF # p33_8
-    g.FR[0] = ibm_dp_addsub(g.FR[0], 0x407FFFFFFFFFFFFF, 0, 1) # p33_10,14
-    scratch = ibm_dp_addsub(g.FR[0], 0x487FFFFFFFFFFFFF, 1, 1) # p33_18,22,26
-    if (scratch & 0x8000000000000000) != 0 or (scratch & 0x00FFFFFFFFFFFFFF) == 0: # p33_30
+    g.FR[0] = hfpJoin(g.DW[0], g.DW[1]) # p33_0, 4
+    g.FR[0] &= IBM_DP_OVERFLOW_PACKED # p33_8
+    g.FR[0] = ibm_dp_addsub(g.FR[0], IBM_DP_ROUNDER, 0, 1) # p33_10,14
+    scratch = ibm_dp_addsub(g.FR[0], IBM_DP_FIXED_LIMIT, 1, 1) # p33_18,22,26
+    if (scratch & IBM_DP_FIXED_LIMIT) != 0 or (scratch & IBM_DP_MANT_MASK) == 0: # p33_30
         pass # branch to LIMIT_OK
     else:
-        g.FR[0] = 0x487FFFFFFFFFFFFF # p33_32
+        g.FR[0] = IBM_DP_FIXED_LIMIT # p33_32
     #LIMIT_OK:
     g.traceInline("MAKE_FIXED_LIT p43")
-    result = ibm_dp_addsub(g.FR[0], 0x4E00000000000000, 0, 0) # p43_0, 4
-    g.DW[2] = (result >> 32) & 0xFFFFFFFF # p43_0, 4
-    g.DW[3] = result & 0xFFFFFFFF # p43_8
+    result = ibm_dp_addsub(g.FR[0], IBM_DP_FIXER, 0, 0) # p43_0, 4
+    g.DW[2], g.DW[3] = hfpSplit(result) # p43_8
     
     if 0 != (1 & SHR(g.DW[0], 31)):
         return -g.DW[3]

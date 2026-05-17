@@ -9,6 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-16 RSB  Made a stub for this.
             2023-11-14 RSB  Save string constants in EBCDIC rather than
                             ASCII.
+            2026-05-16 RSB  Accounted for HFP input VAL.
+            2026-05-17 RSB  Accounted for --debug-literals.
 '''
 
 from xplBuiltins import *
@@ -18,6 +20,7 @@ import HALINCL.COMMON as h
 from ERROR import ERROR
 from GETLITER import GET_LITERAL
 #from asciiToEbcdic import *
+from ibmFloat import hfpSplit
 
 def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     g.LIT_TOP(g.LIT_TOP() + 1);
@@ -60,13 +63,21 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
         # it elsewhere, though.  Perhaps it was just a boo-boo.
         g.LIT_CHAR_USED(g.LIT_CHAR_USED() + length + 1);
         g.LIT_CHAR_AD(a);
+        if g.debugLiterals:
+            sys.stdout.flush()
+            print(f"\nLITERAL:  #{g.LIT_TOP()}, type {TYPE}, length {top+1}", end="")
+            sys.stdout.flush()
     # END
     elif TYPE == 1:
     # ARITHMETIC
     # DO
-        if not isinstance(VAL, (int, float)):
-            pass
-        msw, lsw = toFloatIBM(VAL)
+        #print(f"@ {'%016X' % VAL}", file=sys.stderr)
+        if not isinstance(VAL, int):
+            sys.stdout.flush()
+            print(f"\nInternal error: VAL argument to SAVE_LITERAL not HFP", end="")
+            sys.stdout.flush()
+        #msw, lsw = toFloatIBM(VAL)
+        msw, lsw = hfpSplit(VAL)
         g.LIT2(g.LIT_PTR, msw);
         g.LIT3(g.LIT_PTR, lsw);
         # WHEN INSERTING CONSTANTS FROM A COMPOOL INTO THE 
@@ -75,12 +86,21 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
         if CMPOOL:
             if ((g.SYT_FLAGS(g.ID_LOC) & g.DOUBLE_FLAG) != 0): 
                 g.LIT1(g.LIT_PTR, 5); 
+                TYPE = 5
+        if g.debugLiterals:
+            sys.stdout.flush()
+            print(f"\nLITERAL:  #{g.LIT_TOP()}, type {TYPE}, value {'%08X'%msw},{'%08X'%lsw}", end="")
+            sys.stdout.flush()
     # END;
     elif TYPE == 2:
     #  BIT
     # DO
         g.LIT2(g.LIT_PTR, VAL);
         g.LIT3(g.LIT_PTR, SIZE);
+        if g.debugLiterals:
+            sys.stdout.flush()
+            print(f"\nLITERAL: #{g.LIT_TOP()}, type {TYPE}, value {'%08X'%VAL}, size {SIZE}", end="")
+            sys.stdout.flush()
     # END
     # END DO CASE
     CMPOOL = 0;

@@ -25,6 +25,10 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
             2026-04-14 RSB  Added "pretty BNF".
             2026-05-15 RSB  FR[] now contains DP IBM HFP rather than
                             native python float.
+            2026-05-17 RSB  Accounted for preventing storage of literal
+                            string character data at address 0.  See issue #1306.
+                            Changed pretty BNF for <NOT> to print '~' rather
+                            than '^', to match HALSFC.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -321,7 +325,7 @@ prettyBNF = [
     "251: <AND> ::= AND",
     "252: <OR> ::= |",
     "253: <OR> ::= OR",
-    "254: <NOT> ::= ^",
+    "254: <NOT> ::= ~",
     "255: <NOT> ::= NOT",
     "256: <CAT> ::= ||",
     "257: <CAT> ::= CAT",
@@ -546,6 +550,7 @@ debugwr = False
 templib = False
 traceInlines = False
 rsbTrace = False
+debugLiterals = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -608,6 +613,8 @@ if not suppress:
         elif parm.startswith("--rsb-trace="):
             rsbTrace = True
             productionTrigger = int(parm[12:])
+        elif parm == "--debug-literals":
+            debugLiterals = True
         elif parm == "--no-syn":
             pass  # This case is handled by SYNTHESI.py.
         elif parm.startswith("--dummy="):
@@ -704,6 +711,8 @@ if not suppress:
             print('                 compiler directive "DEBUG `8".')
             print('--rsb-trace=N    Activate and set trigger count (default 0)')
             print('                 for my own production trace.')
+            print('--debug-literals Print extra messages in the output report')
+            print('                 whever new literals are defined.')
             print('--intersection   Helps test overlap between globals/locals.')
             print('Additionally, many of the options from the original JCL')
             print('PARMLISTs can be used.  For "type 1" options (i.e., those')
@@ -2383,7 +2392,7 @@ def PATCHSAVE(n, value=None):
     SAVE_PATCH[n].SAVE_LINE = value[:]
 
 
-# COMM EQUAIVALENCES
+# COMM EQUIVALENCES
 def LIT_CHAR_AD(value=None):
     addr = 0
     if value == None:
@@ -2907,9 +2916,10 @@ BIp = 63
 
 
 def BI_XREF_CELL(value=None):
+    addr = 29
     if value == None:
-        return h.COMM[29]
-    h.COMM[29] = value
+        return h.COMM[addr]
+    h.COMM[addr] = value
 
 
 # LITERALS FOR SHAPING FUNCTION INDEXES INTO BI_XREF AND BI_XREF#
@@ -3323,7 +3333,7 @@ LITLIM = LIT_BUF_SIZE
 '''
 DW_AD, in principle, is the address of the DW[] array.  Now, DW[0] through
 DW_AD[3] is the floating-point working area, so DW[0] and DW[1] are typically
-loaded with the most-significant and least-significant 32-words of an IBM DP
+loaded with the most-significant and least-significant 32-bit words of an IBM DP
 floating-point number, so what you're almost always trying to do if you use
 DW_AD is to pass a "pointer", which otherwise wouldn't exist in HAL/S, to
 whatever DP value is stored in DW[0],DW[1].  Typically, this will be used by
@@ -3584,6 +3594,13 @@ def OUTER_REF_FLAGS(n, value=None):
 
 #litCharFile = open(scriptParentFolder + "/LIT_CHAR.bin", "wb")
 litCharFile = open("LIT_CHAR.bin", "wb")
+INITIAL_LIT_CHAR_AD = 1
+if INITIAL_LIT_CHAR_AD > 0:
+    for i in range(INITIAL_LIT_CHAR_AD):
+        h.lit_char.append(0)
+    litCharFile.write(bytearray([0]*INITIAL_LIT_CHAR_AD))
+    litCharFile.flush()
+
 def LIT_CHAR(n, value=None):
     while len(h.lit_char) <= n:
         h.lit_char.append(0)

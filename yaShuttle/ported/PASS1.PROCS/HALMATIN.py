@@ -10,6 +10,9 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-25 RSB  Ported.
             2023-11-14 RSB  Imported SAVE_LITERAL.
             2026-05-15 RSB  Changes in `ROUND_SCALAR` related to issue #1306.
+            2026-05-16 RSB  Cleanup of HFP code for clarity ... including a
+                            bug fix for it a p117_10 in which DW(1) was given
+                            a wrong value.
 '''
 
 from xplBuiltins import *
@@ -29,7 +32,10 @@ from ICQOUTPU import ICQ_OUTPUT
 from HALINCL.SAVELITE import SAVE_LITERAL
 
 import sys
-from ibmFloat import ibm_dp_addsub, ibm_dp_to_hal_string
+from ibmFloat import ibm_dp_addsub, ibm_dp_to_hal_string, hfpSplit, hfpJoin, \
+                     IBM_DP_MANT_MASK, IBM_DP_SIGN_BIT, IBM_DP_OVERFLOW_PACKED, \
+                     IBM_DP_ROUNDER, IBM_DP_FIXED_LIMIT, IBM_DP_FIXER, \
+                     IBM_SP_SIGN_BIT
 '''
  /***************************************************************************/
  /* PROCEDURE NAME:  HALMAT_INIT_CONST                                      */
@@ -94,7 +100,7 @@ maxFIXED = (1 << 31) - 1
 minFIXED = -(1 << 31)
 def HALMAT_INIT_CONST ():
     # Locals: I, TEMP, CONSTLIT
-    print("@ Here", file=sys.stderr)
+    #print("@ Here", file=sys.stderr)
 
     def MULTI_VALUED():
         g.MONO_VAL = 0b110000011000;
@@ -117,7 +123,7 @@ def HALMAT_INIT_CONST ():
         ADJ_NEG = 0x41100000
         g.DW[0] = g.LIT2(PTR)
         g.DW[1] = g.LIT3(PTR)
-        print(f"@ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {ibm_dp_to_hal_string(g.DW[0], g.DW[1], 16)}", file=sys.stderr)
+        #print(f"@ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {ibm_dp_to_hal_string(g.DW[0], g.DW[1], 16)}", file=sys.stderr)
         #PTR = ADDR(LIMIT_OK) for branches to LIMIT_OK.
         NEG = SHR(g.DW[0], 31)
         # The `while` is so that `GOTO LIMIT_OK` can be `break`. The `while`
@@ -125,24 +131,24 @@ def HALMAT_INIT_CONST ():
         while True: 
             # start of patch92.c
             g.traceInline("ROUND_SCALAR p92")
-            g.FR[0] = (g.DW[0] << 32) | g.DW[1] # p92_0, _4.
-            g.FR[0] &= 0x7FFFFFFFFFFFFFFF  # p92_8
-            g.FR[0] = ibm_dp_addsub(g.FR[0], 0x407FFFFFFFFFFFFF, 0, 1) # 0.5 p92_10, 14
-            scratch = ibm_dp_addsub(g.FR[0], 0x487FFFFFFFFFFFFF, 1, 1) # p92_18, 22, 26
-            if (scratch & 0x8000000000000000) != 0 or (scratch & 0x00FFFFFFFFFFFFFF) == 0: # <= max integer p92_30
+            g.FR[0] = hfpJoin(g.DW[0], g.DW[1]) # p92_0, _4.
+            g.FR[0] &= IBM_DP_OVERFLOW_PACKED  # p92_8
+            g.FR[0] = ibm_dp_addsub(g.FR[0], IBM_DP_ROUNDER, 0, 1) # 0.5 p92_10, 14
+            scratch = ibm_dp_addsub(g.FR[0], IBM_DP_FIXED_LIMIT, 1, 1) # p92_18, 22, 26
+            if (scratch & IBM_DP_SIGN_BIT) != 0 or (scratch & IBM_DP_MANT_MASK) == 0: # <= max integer p92_30
                 break # go to LIMIT_OK
             # end of patch92.c
             if 0 != (NEG & 1):
                 # start of patch101.c
                 g.traceInline("ROUND_SCALAR p101")
-                g.FR[4] = (g.DW[0] << 32) | g.DW[1] # p101_0
-                g.FR[4] &= 0x7FFFFFFFFFFFFFFF # p101_4
+                g.FR[4] = hfpJoin(g.DW[0], g.DW[1]) # p101_0
+                g.FR[4] &= IBM_DP_OVERFLOW_PACKED # p101_4
                 g.FR[2] = 0 # p101_6
-                g.FR[2] = (ADJ_NEG << 32) | 0 # 1.0 p101_8
+                g.FR[2] = hfpJoin(ADJ_NEG, 0) # 1.0 p101_8
                 g.FR[4] = ibm_dp_addsub(g.FR[4], g.FR[2], 1, 1) # p101_12
-                g.FR[4] = ibm_dp_addsub(g.FR[4], 0x407FFFFFFFFFFFFF, 0, 1) # 0.5 p101_14, 18
-                scratch = ibm_dp_addsub(g.FR[4], 0x487FFFFFFFFFFFFF, 1, 1) # max int p101_22, 26, 30
-                if (scratch & 0x8000000000000000) != 0 or (scratch & 0x00FFFFFFFFFFFFFF) == 0: # p101_34
+                g.FR[4] = ibm_dp_addsub(g.FR[4], IBM_DP_ROUNDER, 0, 1) # 0.5 p101_14, 18
+                scratch = ibm_dp_addsub(g.FR[4], IBM_DP_FIXED_LIMIT, 1, 1) # max int p101_22, 26, 30
+                if (scratch & IBM_DP_SIGN_BIT) != 0 or (scratch & IBM_DP_MANT_MASK) == 0: # p101_34
                     break # goto LIMIT_OK
                 # end of patch101.c
             return g.FALSE
@@ -150,22 +156,21 @@ def HALMAT_INIT_CONST ():
         # start of patch112.c.  Note that in principle, GR[3] would have
         # been loaded by prior CALL INLINEs with `DW_AD`.
         g.traceInline("ROUND_SCALAR p112")
-        g.FR[0] = ibm_dp_addsub(g.FR[0], 0x4E00000000000000, 0, 0) # p112_0, 4
-        g.DW[2] = (g.FR[0] >> 32) & 0xFFFFFFFF # p112_8
-        g.DW[3] = g.FR[0] & 0xFFFFFFFF
+        g.FR[0] = ibm_dp_addsub(g.FR[0], IBM_DP_FIXER, 0, 0) # p112_0, 4
+        g.DW[2], g.DW[3] = hfpSplit(g.FR[0]) # p112_8
         # end of patch112.c
         g.DW[0] = g.DW[8]
         if 0 != (NEG & 1):
             # start of patch115.c
             g.traceInline("ROUND_SCALAR p115")
-            g.DW[0] = g.DW[0] ^ 0x80000000
+            g.DW[0] = g.DW[0] ^ IBM_SP_SIGN_BIT
             # end of patch115.c
         g.DW[1] = g.DW[3]
         # start of patch117.c
         g.traceInline("ROUND_SCALAR p117")
         g.FR[0] = 0 # p117_0, 4
-        g.FR[0] = ibm_dp_addsub(g.FR[0], (g.DW[0] << 32) | g.DW[1], 0, 1)  # p117_6
-        g.DW[0], g.DW[1] = (g.FR[0] >> 32) & 0xFFFFFFFF, g.DW[1] & 0xFFFFFFFF # p117_10
+        g.FR[0] = ibm_dp_addsub(0, hfpJoin(g.DW[0], g.DW[1]), 0, 1)  # p117_0, 6
+        g.DW[0], g.DW[1] = hfpSplit(g.FR[0]) # p117_10
         # end of patch117.c
         return g.TRUE
     # END ROUND_SCALAR;
@@ -219,7 +224,7 @@ def HALMAT_INIT_CONST ():
                         if g.SYT_TYPE(g.ID_LOC) == g.INT_TYPE:
                             if ROUND_SCALAR(g.IC_LOC[I]) & 1:
                                 if g.IC_TYPE[I] == g.SCALAR_TYPE:
-                                    g.IC_LOC[I] = SAVE_LITERAL(1, g.fromFloatDW01());
+                                    g.IC_LOC[I] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
                             else: 
                                 ERRORS(d.CLASS_DI, 17);
                         if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \

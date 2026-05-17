@@ -38,7 +38,7 @@ from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 #from virtualenv.create.via_global_ref.builtin import via_global_self_do
 from ibmFloat import ibm_dp_to_double, ibm_dp_from_double, ibm_dp_mul, \
                      ibm_dp_div, ibm_dp_addsub, ibm_dp_to_hal_string, \
-                     ibm_dp_from_string
+                     ibm_dp_from_string, hfpJoin
 
 # McKeeman p. 137 specifies that in mulit-assignments like
 #    X1, X2, ..., XN = Y;
@@ -442,7 +442,7 @@ def MONITOR(function, arg2=None, arg3=None):
             else:
                 msw, lsw = ibm_dp_from_double(value0)
             # Convert the result back to IBM floats, and store in working area.
-            FR[0] = (msw << 32) | lsw
+            FR[0] = hfpJoin(msw, lsw)
             dwArea[0], dwArea[1] = msw, lsw
             return 0
         except:
@@ -456,7 +456,7 @@ def MONITOR(function, arg2=None, arg3=None):
         s = arg2
         try:
             dwArea[0], dwArea[1] = ibm_dp_from_string(s)
-            FR[0] = (dwArea[0] << 32) | dwArea[1]
+            FR[0] = hfpJoin(dwArea[0], dwArea[1])
             return 0
         except:
             return 1
