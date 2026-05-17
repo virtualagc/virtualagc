@@ -56,6 +56,9 @@
  *              2026-04-14 RSB  Added "pretty BNF".
  *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
  *              2026-05-13 RSB  Fixed the mod to `MONITOR9`.
+ *              2026-05-17 RSB  Corrected `SUBSTR` behavior when the starting
+ *                              position is past the end of the string.  See
+ *                              issue #1306.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -2284,12 +2287,15 @@ descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
   int len = s->numBytes - start, rawLength = length;
-  if (start < 0 || len <= 0 || length <= 0) // Return empty string.
-    return returnValue;
-  if (length > len)
-    length = len;
-  if (length > 0)
-    strncpy(returnValue->bytes, &s->bytes[start], length);
+  if (len <= 0) length = 0; // Starting position past end of string.
+  else {
+    if (start < 0 || length <= 0) // Return empty string.
+      return returnValue;
+    if (length > len)
+      length = len;
+    if (length > 0)
+      strncpy(returnValue->bytes, &s->bytes[start], length);
+  }
   while (length < rawLength) // Pad to the desired length.
     returnValue->bytes[length++] = 0x40; // EBCDIC space.
   returnValue->bytes[length] = 0;

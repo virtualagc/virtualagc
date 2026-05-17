@@ -44,8 +44,6 @@ The available OPTIONs are:
                     separated by spaces, and should not themselves contain 
                     spaces (even if quoted).  Example: 
                             --extra-pass1="--pretty-bnf --verbose"
-'''
-'''
     --interactive   In running the compiled program, it is assumed by default
                     that the program does not require interactive user input
                     (via READ(5)), so output (from WRITE(6)) is captured and
@@ -56,12 +54,14 @@ The available OPTIONs are:
                     to work around deficiencies in the emulator that are
                     hopefully temporary in nature while development of it
                     proceeds.
+    --no-test       Do not use HALSFC's --test option.
 '''
 
 filename = None
 parmList = None
 interactive = True
 extraPass1 = []
+noTest = False
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):
         parmList = parameter[8:]
@@ -73,6 +73,8 @@ for parameter in sys.argv[1:]:
         filename = parameter[11:]
     elif parameter == "--interactive":
         interactive = True
+    elif parameter == "--no-test":
+        noTest = True
     else:
         print(helpMsg)
         sys.exit(1)
@@ -85,7 +87,9 @@ symfile = f"{basename}.json"
 print(f"For file {basename}.hal, producing {objfile}, {fcmfile}, {symfile}")
 
 # First step, compile.
-command = ["HALSFC", filename, "--test", "--force", f"--parms={parmList}", "-o", objfile]
+command = ["HALSFC", filename, f"--parms={parmList}", "-o", objfile]
+if not noTest:
+    command += ["--test", "--force"]
 command += extraPass1
 print(" ".join(command))
 try:

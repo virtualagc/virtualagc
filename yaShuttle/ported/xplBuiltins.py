@@ -20,6 +20,9 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
                             program HAL_S_FC.ppy normalizes the main source
                             code nominally corresponding to INPUT(0).
             2026-05-13 RSB  Added a .flush() for the `FILE` function.
+            2026-05-14 RSB  Converted MONITOR 9, 10, and 12 from ibmHex module
+                            to ibmFloat module for native HFP calculations.
+                            Other changes also related to issue #1306.
 '''
 
 import sys
@@ -33,6 +36,9 @@ import math
 #import ebcdic
 from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 #from virtualenv.create.via_global_ref.builtin import via_global_self_do
+from ibmFloat import ibm_dp_to_double, ibm_dp_from_double, ibm_dp_mul, \
+                     ibm_dp_div, ibm_dp_addsub, ibm_dp_to_hal_string, \
+                     ibm_dp_from_string, hfpJoin
 
 # McKeeman p. 137 specifies that in mulit-assignments like
 #    X1, X2, ..., XN = Y;
@@ -82,92 +88,37 @@ def hround(x):
         return None
     return i
 
-'''
-The following stuff is for converting back and forth from Python
-numerical values to System/360 double-precision (64-bit) floating 
-point.
-
-The IBM documentation I've seen for the floating-point format
-is pure garbage.  Fortunately, wikipedia ("IBM hexadecimal 
-floating-point") explains it very simply.  Here's what it looks 
-like in terms of 8 groups of 8 bits each:
-    SEEEEEEE FFFFFFFF FFFFFFFF ... FFFFFFFF
-where S is the sign, E is the exponent, and F is the fraction.
-Single precision (32-bit) is the same, but with only 3 F-groups. 
-The exponent is a power of 16, biased by 64, and thus represents
-16**-64 through 16**63. The fraction is an unsigned number, of
-which the leftmost bit represents 1/2, the next bit represents
-1/4, and so on. 
-
-As a special case, 0 is encoded as all zeroes.
-
-E.g., the 64-bit hexadecimal pair 0x42640000 0x00000000 parses as:
-    S = 0 (i.e., positive)
-    Exponent = 16**(0x42-0x40) = 16**2 = 2**8.
-    Fraction = 0.0110 0100 ...
-or in total, 1100100 (binary), or 100 decimal.
-'''
-twoTo56 = 2 ** 56
-twoTo52 = 2 ** 52
-
-
 # Convert a Python integer or float to IBM double-precision float.  
 # Returns as a pair (msw,lsw), each of which are 32-bit integers,
-# or (0xff000000,0x00000000) on error.
-def toFloatIBM(x):
-    d = float(x)
-    if d == 0:
-        return 0x00000000, 0x00000000
-    # Make x positive but preserve the sign as a bit flag.
-    if d < 0:
-        s = 1
-        d = -d
-    else:
-        s = 0
-    # Shift left by 24 bits.
-    d *= twoTo56
-    # Find the exponent (biased by 64) as a power of 16:
-    e = 64
-    while d < twoTo52:
-        e -= 1
-        d *= 16
-    while d >= twoTo56:
-        e += 1
-        d /= 16
-    if e < 0:
-        e = 0
-    if e > 127:
-        return 0xff000000, 0x00000000
-    # x should now be in the right range, so lets just turn it into an integer.
-    f = hround(d)
-    # Convert to a more-significant and less-significant 32-word:
-    msw = (s << 31) | (e << 24) | (f >> 32)
-    lsw = f & 0xffffffff
-    return msw, lsw
-
+# or (0xff000000,0x00000000) on error.  Note that `x` and `scale` can
+# be either numbers or string representations of numbers.  But the 
+# string representation is better, because if the value has already been
+# converted to a Python `float`, it may no longer be able to correctly match 
+# all significant digits.
+def toFloatIBM(x, scale=1):
+    try:
+        if isinstance(x, str):
+            msw, lsw = ibm_dp_from_string(x)
+        else:
+            msw, lsw = ibm_dp_from_double(x)
+        if scale == 1:
+            return msw, lsw
+        else:
+            if isinstance(scale, str):
+                mswScale, lswScale = ibm_dp_from_string(scale)
+            else:
+                mswScale, lswScale = ibm_dp_from_double(scale)
+            operand0 = (msw << 32) | lsw
+            operand1 = (mswScale << 32) | lswScale
+            result = ibm_dp_mul(operand0, operand1)
+            return (result >> 32) & 0xFFFFFFFF, result & 0xFFFFFFFF
+    except:
+        return 0xFF000000,0x00000000
 
 # Inverse of toFloatIBM(): Converts more-significant and less-significant 
 # 32-bit words of an IBM DP float to a Python float.
 def fromFloatIBM(msw, lsw):
-    s = (msw >> 31) & 1
-    e = ((msw >> 24) & 0x7f) - 64
-    f = ((msw & 0x00ffffff) << 32) | (lsw & 0xffffffff)
-    x = f * (16 ** e) / twoTo56
-    if s != 0:
-        x = -x
-    return x
-
-'''
-# Test of the IBM float conversions.  Note that aside from showing that
-# toFloatIBM() and fromFloatIBM() are inverses, it also reproduces the 
-# known value 100 -> 0x42640000,0x00000000.
-for s in range(-1, 2, 2):
-    for e in range(-10, 11):
-        x = s * 10 ** e
-        msw, lsw = toFloatIBM(x)
-        y = fromFloatIBM(msw, lsw)
-        print(x, "0x%08x,0x%08x" % (msw, lsw), y)
-'''
+    return ibm_dp_to_double(msw, lsw)
 
 #------------------------------------------------------------------------------
 # Here's some stuff intended to functionally replace some of XPL's 'implicitly
@@ -449,19 +400,22 @@ def MONITOR(function, arg2=None, arg3=None):
             exit(1)
         op = arg2
         try:
-            # Get operands from the defined working area, and convert them
-            # from IBM floating point to Python floats.
-            value0 = fromFloatIBM(dwArea[0], dwArea[1])
-            value1 = fromFloatIBM(dwArea[2], dwArea[3])
+            if op <= 4:
+                operand0 = (dwArea[0] << 32) | dwArea[1]
+                operand1 = (dwArea[2] << 32) | dwArea[3]
+            else:
+                value0 = ibm_dp_to_double(dwArea[0], dwArea[1])
+                if op == 5:
+                    value1 = ibm_dp_to_double(dwArea[2], dwArea[3])
             # Perform the binary operations.
             if op == 1:
-                value0 += value1
+                operand0 = ibm_dp_addsub(operand0, operand1, 0, 1)
             elif op == 2:
-                value0 -= value1
+                operand0 = ibm_dp_addsub(operand0, operand1, 1, 1)
             elif op == 3:
-                value0 *= value1
+                operand0 = ibm_dp_mul(operand0, operand1)
             elif op == 4:
-                value0 /= value1
+                operand0 = ibm_dp_div(operand0, operand1)
             elif op == 5:
                 value0 = pow(value0, value1)
             # Or perform the unary operations, which are all trig functions.
@@ -481,9 +435,15 @@ def MONITOR(function, arg2=None, arg3=None):
                 value0 = math.sqrt(value0)
             else:
                 return 1
+            if op <= 4:
+                msw = (operand0 >> 32) & 0xFFFFFFFF
+                lsw = operand0 & 0xFFFFFFFF
+                #value0 = ibm_dp_to_double(msw, lsw)
+            else:
+                msw, lsw = ibm_dp_from_double(value0)
             # Convert the result back to IBM floats, and store in working area.
-            FR[0] = value0
-            dwArea[0], dwArea[1] = toFloatIBM(value0)
+            FR[0] = hfpJoin(msw, lsw)
+            dwArea[0], dwArea[1] = msw, lsw
             return 0
         except:
             return 1
@@ -495,8 +455,8 @@ def MONITOR(function, arg2=None, arg3=None):
             exit(1)
         s = arg2
         try:
-            FR[0] = float(s)
-            dwArea[0], dwArea[1] = toFloatIBM(FR[0])
+            dwArea[0], dwArea[1] = ibm_dp_from_string(s)
+            FR[0] = hfpJoin(dwArea[0], dwArea[1])
             return 0
         except:
             return 1
@@ -508,33 +468,11 @@ def MONITOR(function, arg2=None, arg3=None):
     # Floating-point to character conversion.
     elif function == 12:
         p = arg2  # 0 for SP, 8 for DP
-        value = fromFloatIBM(dwArea[0], dwArea[1])
-        '''
-        The "standard" HAL format for floating-point numbers is described on 
-        p. 8-3 of "Programming in HAL/S", though unfortunately the number of
-        significant digits provided for SP vs DP is not specified and is simply
-        said to be implementation dependent.  To summarize the format:
-            0.0:        Printed as " 0.0" (notice the leading space.
-            Positive:   Printed as " d.ddd...E±ee"
-            Negative:   Printed as "-d.ddd...E±ee"
-        Given that 2**24 = 16777216 (8 digits) and 2**56 = 72057594037927936
-        (17 digits), it should be the case that SP and DP are *fully* accurate
-        only to 7 digits and 16 digits respectively.  Moreover, there is always
-        exactly 1 digit (non-zero) to the left of the decimal point.  Therefore,
-        for SP and DP, it would be reasonable to have 6 and 15 digits to the
-        right of the decimal point respectively. (See also yaHAL-S/palmatAux.py.)
-        '''
-        if value == 0.0:
-            return " 0.0"
         if p == 0:
-            fpFormat = "%+2.7e"
+            pad = 7
         else:
-            fpFormat = "%+2.16e"
-        value = fpFormat % value
-        if value[:1] == "+":
-            value = " " + value[1:]
-        value = value.replace("e", "E")
-        return value
+            pad = 16
+        return ibm_dp_to_hal_string(dwArea[0], dwArea[1], pad, pad)
     
     # For options passing.
     elif function == 13:

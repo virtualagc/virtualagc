@@ -73,6 +73,7 @@ The available OPTIONS are:
                         Other:  Ignored.
     --pretty-bnf    Use improved alternate production trace to "DEBUG `8".
     --rsb-trace=N   Activate my production trace, if available.
+    --debug-literals Show extra messages in HAL_S_FC.py report for literals.
     --verbose       Show the command lines for HALSFC-xxx and HAL_S_FC.py.
     
 '''
@@ -91,6 +92,7 @@ extCOMMON = ".out"
 debugX = ''
 prettyBNF = ""
 verbose = False
+debugLiterals = ""
 if isWindows:
     ext = ".exe"
 for parm in sys.argv[1:]:
@@ -104,9 +106,11 @@ for parm in sys.argv[1:]:
             sys.exit(1)
         objectFilename = parm
     elif parm == "--pretty-bnf":
-        prettyBNF = "--pretty-bnf"
+        prettyBNF = parm
     elif parm == "--verbose":
         verbose = True
+    elif parm == "--debug-literals":
+        debugLiterals = parm
     elif parm == "-o":
         oWasLast = True
     elif parm == "--test":
@@ -319,7 +323,9 @@ if False:
 
 # Maybe run PASS1 tests. 
 if test:
+    sys.stdout.flush()
     print("======================================================")
+    sys.stdout.flush()
     diff = "diff" + ext
     egrep = "egrep" + ext
     if None == findFileUsingPATH(diff):
@@ -333,9 +339,9 @@ if test:
     ported=Path(ported).parent
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
-    command = 'python "%s" %s %s %s %s --templib --hal="%s" >pass1p.rpt' \
+    command = 'python "%s" %s %s %s %s %s --templib --hal="%s" >pass1p.rpt' \
                          % (fullPath, TARGET, parmString.replace(",", " "), 
-                            rsbTrace, prettyBNF, halsFile)
+                            rsbTrace, prettyBNF, debugLiterals, halsFile)
     #print(command)
     if verbose:
         print(command)
@@ -349,7 +355,9 @@ if test:
             pendingFailure += "HAL_S_FC.py failure"
         else:
             errorExit("Failed PASS1 cross-comparison test")
+    sys.stdout.flush()
     print("PASS1 cross-comparison test:")
+    sys.stdout.flush()
     for n in filesPorted:
         try:
             shutil.copy(os.path.join(ported, n), n)
@@ -369,7 +377,9 @@ if test:
     os.system('diff --strip-trailing-cr -q -s literals1.txt literals1p.txt')
     if "LISTING2" in parmList:
             os.system('diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt')
+    sys.stdout.flush()
     print("======================================================")
+    sys.stdout.flush()
 if pendingFailure != None:
     errorExit(f"Aborting due to deferred {pendingFailure}.")
 

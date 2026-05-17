@@ -9,6 +9,9 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Began porting from INITIALI.xpl.
             2026-03-12 RSB  Removed bogus `SCAN1` and `SCAN2`.  Imported
                             `ERROR()` and `NEXT_RECORD`.
+            2026-05-15 RSB  Fixes related to issue #1306.
+            2026-05-17 RSB  Accounted for preventing storage of literal
+                            string character data at address 0.  See issue #1306.
 '''
 
 from xplBuiltins import *  # Built-in functions
@@ -341,7 +344,7 @@ def INITIALIZATION():
     g.SYTSIZE = int(VALS[3]);
     g.MACRO_TEXT_LIM = int(VALS[4]);
     g.LIT_CHAR_SIZE = int(VALS[5]);
-    h.LIT_CHAR = bytearray([0] * g.LIT_CHAR_SIZE)
+    h.LIT_CHAR = bytearray([0] * (g.LIT_CHAR_SIZE + g.INITIAL_LIT_CHAR_AD))
     g.XREF_LIM = int(VALS[7]);
     g.OUTER_REF_LIM = int(VALS[11]);
     #g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
@@ -396,18 +399,19 @@ def INITIALIZATION():
     #CALL INLINE("50",1,0,LIT_CHAR_AD);           /* ST  1,LIT_CHAR_AD */
     #CALL INLINE("58",1,0,FOR_DW);
     #CALL INLINE("50",1,0,DW_AD);                   /* ST  1,DW_AD       */
-    g.LIT_CHAR_AD(0)
+    g.LIT_CHAR_AD(g.INITIAL_LIT_CHAR_AD)
+    #g.LIT_CHAR_USED(g.INITIAL_LIT_CHAR_AD)
     MONITOR(5, g.DW)
     #TABLE_ADDR = DW_AD + 24;
     #ADDR_FIXER = TABLE_ADDR + 8;
-    #DW(8) = "4E000000";
-    #DW(9) = 0;
+    g.DW[8] = 0x4E000000
+    g.DW[9] = 0x00000000
     #ADDR_FIXED_LIMIT = ADDR_FIXER + 8;
-    #DW(10) = "487FFFFF";
-    #DW(11) = "FFFFFFFF";
+    g.DW[10] = 0x487FFFFF
+    g.DW[11] = 0xFFFFFFFF
     #ADDR_ROUNDER = ADDR_FIXED_LIMIT + 8;
-    #DW(12) = "407FFFFF";
-    #DW(13) = "FFFFFFFF";
+    g.DW[12] = 0x407FFFFF
+    g.DW[13] = 0xFFFFFFFF
     
     ALLOCATE_SPACE(h.SYM_TAB,g.SYTSIZE+1);
     NEXT_ELEMENT(h.SYM_TAB);

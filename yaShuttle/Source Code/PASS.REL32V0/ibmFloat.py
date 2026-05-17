@@ -20,6 +20,8 @@ Mod history:    2026-05-06 RSB  Initial conversion by CodeConvert, and changes
                                 to NUMBERaNUMBER.  Introduced --test-fixer.
                 2026-05-15 RSB  Reverted change to `ibm_dp_addsub` that rounded
                                 results of unnormalized addition/subtraction.
+                2026-05-16 RSB  Added various conveniences such as 
+                                `IBM_DP_FIXER`, `hfpJoin`, and so on.
 '''
 
 '''
@@ -77,8 +79,13 @@ IBM_DP_EXP_MAX = 0x7F
 IBM_DP_MANT_HEXDIGITS = 14
 IBM_DP_MANT_MASK = 0x00FFFFFFFFFFFFFF
 IBM_DP_SIGN_BIT = 0x8000000000000000
+IBM_SP_SIGN_BIT = 0x80000000
+IBM_DP_ROUNDER = 0x407FFFFFFFFFFFFF # 0.5-
+IBM_DP_FIXED_LIMIT = 0x487FFFFFFFFFFFFF # 2**31-1
+IBM_DP_FIXER = 0x4E00000000000000 # 0E+56, unnormalized
 IBM_DP_OVERFLOW_PACKED = 0x7FFFFFFFFFFFFFFF
 IBM_DP_OVERFLOW_MSW = 0x7FFFFFFF
+IBM_SP_MANT_MASK = 0x00FFFFFF
 
 TWO_TO_56 = 1 << 56
 TWO_TO_52 = 1 << 52
@@ -90,6 +97,12 @@ IBM_DP_TOP_HEX_60 = 0x0F00000000000000   # Bits 56-59
 # Simulation masks
 U32_MASK = 0xFFFFFFFF
 U64_MASK = 0xFFFFFFFFFFFFFFFF
+
+def hfpSplit(hfpDP):
+    return (hfpDP >> 32) & 0xFFFFFFFF, hfpDP & 0xFFFFFFFF
+
+def hfpJoin(msw, lsw):
+    return (msw << 32) | lsw
 
 # Internal helper "Macros"
 def IBM_DP_SIGN(v):

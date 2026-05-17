@@ -6,6 +6,7 @@
    Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
    History:    2023-10-22 RSB  Ported to XPL
+               2026-05-16 RSB  Changes related to issue #1306.
 """
 
 from xplBuiltins import *
@@ -26,6 +27,7 @@ from REDUCESU import REDUCE_SUBSCRIPT
 from RESETARR import RESET_ARRAYNESS
 from SETUPVAC import SETUP_VAC
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 
 #*************************************************************************
 # PROCEDURE NAME:  END_ANY_FCN
@@ -151,7 +153,7 @@ def END_ANY_FCN():
                 ERROR(d.CLASS_VF, 1, g.VAR[g.MP]);
                 return;
             # END
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
             goto = "BI_FUNCS_EXIT";
 

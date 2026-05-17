@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.  
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported
+            2026-05-14 RSB  Fix for issue #1311.
 '''
 
 from xplBuiltins import *
@@ -94,7 +95,7 @@ def PRINT_COMMENT(PRINT, l, CURRENT_DIR=''):
         l.I = 100 - g.TEXT_LIMIT[0];
         currentCard = g.CURRENT_CARD
         if currentCard.startswith("D VERSION "):
-            currentCard = currentCard[:10] + " " + currentCard[10:]
+            currentCard = "%80s" % (currentCard[:10] + " " + currentCard[10:].lstrip())
         # MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF
         # THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.
         if 0 != (1 & g.SDL_OPTION):

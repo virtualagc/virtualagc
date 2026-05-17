@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-29 RSB  Ported from XPL
+            2026-05-16 RSB  Changed related to #1306.
 '''
 
 from xplBuiltins import *
@@ -20,6 +21,7 @@ from MATCHSIM import MATCH_SIMPLES
 from SETUPVAC import SETUP_VAC
 from VECTORCO import VECTOR_COMPARE
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 
 '''
  /***************************************************************************/
@@ -87,7 +89,7 @@ def MULTIPLY_SYNTHESIZE(I, J, K, DOCASE):
                 ERROR(d.CLASS_VA, 3);
                 goto_MUL_FAIL = True
             else:
-                g.LOC_P[g.PTR[K]] = SAVE_LITERAL(1, g.fromFloatDW01());
+                g.LOC_P[g.PTR[K]] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
                 g.PSEUDO_TYPE[g.PTR[K]] = LIT_RESULT_TYPE(I, J);
         if not al or goto_MUL_FAIL:  # Was just ELSE
             goto_MUL_FAIL = False

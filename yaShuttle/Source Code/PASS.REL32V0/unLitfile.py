@@ -132,14 +132,14 @@ def getLiteralsFromFile(litfileName, memoryName):
             type = page1[offset+3]
             if type == 0:
                 length = page2[offset]
-                pointer = (page2[offset+1] << 16) + (page2[offset+2] << 8) + page2[offset+3]
+                pointer = (page2[offset+1] << 16) | (page2[offset+2] << 8) | page2[offset+3]
                 value = ""
                 if length > 0 or pointer > 0:
                     length += 1
                     for i in range(pointer, pointer+length):
                         value += ebcdicToAscii[memory[i]]
-                #print("Literal %d: STRING '%s'" % (literalNumber, value))
-            elif type == 1:
+                #print("Literal %d: STRING '%s' POINTER %06X" % (literalNumber, value, pointer), file=sys.stderr)
+            elif type in [1, 5]:
                 #value = fromFloatIBM(formWord(page2, offset), formWord(page3, offset))
                 msw = formWord(page2, offset)
                 lsw = formWord(page3, offset)
@@ -185,6 +185,9 @@ if __name__ == "__main__":
                 print("Literal %4d: STRING '%s'" % (literalNumber, value))
         elif type == 1:
             print("Literal %4d: FIXED  %s" % (literalNumber, value))
+        elif type == 5:
+            # DOUBLE found in a COMPOOL
+            print("Literal %4d: DOUBLE %s" % (literalNumber, value))
         elif type == 2:
             print("Literal %4d: BIT    %08X '%11d'" % (literalNumber, value, value))
         else:

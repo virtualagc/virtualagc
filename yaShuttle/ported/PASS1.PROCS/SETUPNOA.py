@@ -8,6 +8,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-10-10 RSB  Ported.
             2026-03-12 RSB  Imported `SAVE_LITERAL`.  Added qualifier `& 1`
                             for test of CLASS_XS type 1 error.
+            2026-05-16 RSB  Changes related to issue #1306.
 '''
 
 from xplBuiltins import *
@@ -24,6 +25,7 @@ from SETXREFR import SET_XREF_RORS
 from STRUCTU2 import STRUCTURE_FCN
 from UPDATEBL import UPDATE_BLOCK_CHECK
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 
 #*************************************************************************
 # PROCEDURE NAME:  SETUP_NO_ARG_FCN
@@ -123,7 +125,7 @@ def SETUP_NO_ARG_FCN(optional_PSEUDO_PREC=None):
                 g.DW[3] = 0x00000000
                 MONITOR(9, 4);  # CHANGE TO SECONDS
             # END of DO CASE
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.fromFloatDW01());
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]));
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
         else: 
             if g.BI_FLAGS[0] & 1: 

@@ -10,14 +10,8 @@ History:    2023-09-22 RSB  Ported from XPL
             2026-03-18 RSB  Now truncates floating-point to integer for `VALUE`
                             rather than rounding.
             2026-04-15 RSB  Wasn't detecting fractional parts correctly.
-            2026-05-14 RSB  Eliminated heuristic determination of 
-                            integer vs non-integer by introducing ibmFloat
-                            module for native HFP calculations, and matching the
-                            logic of PREPLITE.xpl if not the detail.  The ibmHex
-                            module is eliminated completely.  But note that this
-                            is *not* an implementation of issue #1306, because
-                            the virtual registers FR[n] remain native-Python
-                            floats rather than IBM HFP.
+            2026-05-14 RSB  Changes related to issue #1306.
+            2026-05-16 RSB  Fixed location where result is stored.
 '''
 
 import math
@@ -25,7 +19,9 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 from HALINCL.SAVELITE import SAVE_LITERAL
-from ibmFloat import ibm_dp_to_double, ibm_dp_from_double, ibm_dp_addsub
+from ibmFloat import ibm_dp_addsub, hfpJoin, hfpSplit, IBM_DP_FIXED_LIMIT, \
+                     IBM_DP_OVERFLOW_PACKED, IBM_DP_FIXER, IBM_DP_MANT_MASK, \
+                     IBM_DP_SIGN_BIT
 
 '''
  /***************************************************************************/
@@ -59,13 +55,9 @@ IR-182-1 describes PREP_LITERAL like so:
     enters it in the literal table via SAVE LITERAL and sets
     SYT_INDEX to the absoulute index of the literal."
 
-*I* think it also stores the converted value in the global variable VALUE.
-
 MONITOR(10,string) converts a stringified representation of a number to IBM
-DP floating point, and stores the most-significant word in DW[0] and the 
-less-significant word in DW[1], return TRUE on error and FALSE on success; this
-boolean is the value we expect to find in EXP_OVERFLOW.  So presumably, 
-PREP_LITERAL() expects to find DW[0] and DW[1] filled with the data.
+DP HFP, and stores it in DW[0],DW[1]. 
+PREP_LITERAL() expects to find this data in FR[0].
 '''
 def PREP_LITERAL():
     
@@ -78,7 +70,7 @@ def PREP_LITERAL():
     
         if g.EXP_OVERFLOW or goto == "NOT_EXACT":
             if goto == None:
-                g.FR[6] = ibm_dp_to_double(0x487FFFFF, 0xFFFFFFFF);
+                g.FR[6] = IBM_DP_FIXED_LIMIT;
             if goto == "NOT_EXACT":
                 goto = None
             g.VALUE = -1
@@ -88,44 +80,34 @@ def PREP_LITERAL():
         g.traceInline("PREP_LITERAL p59")
         # TEMP1 = ADDR(NOT_EXACT)
         g.FR[6] = g.FR[0]  # p59_8 FR[0] was loaded by MONITOR(10)
-        g.FR[0] = abs(g.FR[0]) # p59_10
-        scratch = g.FR[0] - ibm_dp_to_double(0x487FFFFF, 0xFFFFFFFF) # p59_12
-        if scratch > 0: # p59_16
+        g.FR[0] &= IBM_DP_OVERFLOW_PACKED # p59_10
+        scratch = ibm_dp_addsub(g.FR[0], IBM_DP_FIXED_LIMIT, 1, 1) # p59_12
+        if 0 == (scratch & IBM_DP_SIGN_BIT): # p59_16
             goto = "NOT_EXACT"
             continue
-        if False:
-            g.FR[4] = 0.0 # p59_18
-            g.FR[2] = g.FR[0] # p59_20
-            g.DW[6] = 0 # p59_22, 26, 30, 34
-            g.DW[7] = int(math.trunc(g.FR[0]))
-            g.FR[0] += g.FR[4] # p59_38
-            g.FR[2] -= g.FR[0] # p 59_40
-            if g.FR[2] != 0: # p59_42
-                goto = "NOT_EXACT"
-                continue
-        elif False:
-            g.DW[6] = 0 
-            g.DW[7] = int(math.trunc(g.FR[0]))
-            if abs(g.FR[0]-g.DW[7]) > 1E-10:
-                goto = "NOT_EXACT"
-                continue
-        else:
-            msw, lsw = ibm_dp_from_double(g.FR[0])
-            value = (msw << 32) | lsw
-            awresult = ibm_dp_addsub(value, 0x4E00000000000000, 0, 0)
-            adrresult = ibm_dp_addsub(awresult, 0, 0, 1)
-            sdrresult = ibm_dp_addsub(value, adrresult, 1, 1)
-            if (sdrresult & 0x00FFFFFFFFFFFFFF) != 0:
-                goto = "NOT_EXACT"
-                continue
-            g.DW[6] = 0 
-            g.DW[7] = awresult & 0xFFFFFFFF
-        g.VALUE = g.DW[7] # p59_44, 48
+        g.FR[4] = 0 # p59_18
+        g.FR[2] = g.FR[0] # p59_20
+        g.FR[0] = ibm_dp_addsub(g.FR[0], IBM_DP_FIXER, 0, 0) # p59_22, 26
+        g.DW[0], g.DW[1] = hfpSplit(g.FR[0]) # p59_30, 34
+        #print(f"@1 {'%016X' % g.FR[0]}", file=sys.stderr)
+        g.FR[0] = ibm_dp_addsub(g.FR[0], g.FR[4], 0, 1) # p59_38
+        #print(f"@2 {'%016X' % g.FR[0]}", file=sys.stderr)
+        g.FR[2] = ibm_dp_addsub(g.FR[2], g.FR[0], 1, 1) # p59_40
+        if (IBM_DP_MANT_MASK & g.FR[2]) != 0: # p59_42
+            goto = "NOT_EXACT"
+            continue
+        g.VALUE = g.DW[1] # p59_44, 48
     
     #SAVE_NUMBER:    
     g.traceInline("PREP_LITERAL p76")
-    g.DW[6], g.DW[7] = ibm_dp_from_double(g.FR[6]) # p76_0, 4
+    g.DW[0], g.DW[1] = hfpSplit(g.FR[6]) # p76_0, 4
+    #print(f"@ {'%08X'%g.DW[0]},{'%08X'%g.DW[1]} {'%016X'%g.FR[0]}", file=sys.stderr)
+    
+    # The following line is a hack that I can't justify other than that it 
+    # makes it work.  See my ramblings in issue #1306.  Perhaps it can be fixed
+    # correctly some day.
+    g.DW[6], g.DW[7] = g.DW[0], g.DW[1]
 
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
-    g.SYT_INDEX = SAVE_LITERAL(1, ibm_dp_to_double(g.DW[0], g.DW[1]))
+    g.SYT_INDEX = SAVE_LITERAL(1, hfpJoin(g.DW[0], g.DW[1]))
     return
