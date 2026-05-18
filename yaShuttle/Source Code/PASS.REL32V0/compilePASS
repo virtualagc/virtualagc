@@ -58,6 +58,7 @@ The only OPTIONS available are:
     --preprocess    (Default.)  Preprocess the HAL/S source code prior to
                     compilation to eliminate DI11 compile-time errors.
     --no-preprocess Opposite of --preprocess.
+    --clean         Use HALSFC's --clean switch.
     --dfg           (Not yet available.)  Run the DFG preprocessor to convert
                     display-format files to HAL/S source code.
     --no-dfg        Do not run the DFG preprocessor to convert display-format 
@@ -127,6 +128,7 @@ dfg = True
 skipTo = None
 rsbTrace = ""
 ops = "G16"
+clean = False
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -135,6 +137,8 @@ for parm in sys.argv[1:]:
         preprocess = True
     elif parm == "--no-preprocess":
         preprocess = False
+    elif parm == "--clean":
+        clean = True
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -298,6 +302,8 @@ def compile(template):
                       (compilationCount, rawFilename))
             command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
                  f"--parms={parmsFull}", "-o", f"objects/{template['stem']}.obj"]
+            if clean:
+                command.append("--clean")
             if rsbTrace != "":
                 command.append(rsbTrace)
             result = subprocess.run(command, capture_output = True, text = True, check = True)
