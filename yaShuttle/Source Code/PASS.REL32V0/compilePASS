@@ -204,7 +204,8 @@ def getParms(template):
         "CPUSLS" : f"ACBDFCR{defaultR}",
         "GKDASC": f"AMOCNCRMFDGCHC",
         "GKRORB": f"ACOMNCRCFCGDHC",
-        "GKGMNV": f"ACOCNMRMFCGCHD"
+        "GKGMNV": f"ACOCNMRMFCGCHD",
+        "CV5SLCOM": f"DC"
         }
     stem = template["stem"]
     if stem in cardtypesBySourceFile:
@@ -315,6 +316,10 @@ def compile(template):
                 return False
             elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]):
                 print(f"      PM2 error in PASS1, compilation of {rawFilename} skipped.")
+                rsbTrace = ""
+                return False
+            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["IR1"]):
+                print(f"      IR1 error in PASS1, compilation of {rawFilename} skipped.")
                 rsbTrace = ""
                 return False
             elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["DI11"]):
