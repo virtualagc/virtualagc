@@ -8,13 +8,14 @@ Purpose:    The purpose of this program is to preprocess a HAL/S source-code
             receiving source-code files not encoded in EBCDIC).
 Contact:    Ron Burkey <info@sandroid.org>
 History:    2026-04-22 RSB  Created.
+            2026-05-19 RSB  See issue #1316.
 
 Potentially, there are several problems that could be addressed.
 
 The DI11 Problem
 ----------------
 
-This is discussed in a length manner in GitHub issue #1280.  The executive
+This is discussed in a lengthy manner in GitHub issue #1280.  The executive
 summary is this:  Compiler directives of the form `D INCLUDE TEMPLATE name`
 act essentially like the C language `#INCLUDE "name.h"`, but with several 
 horrible deficiencies relative to the C approach:
@@ -51,7 +52,7 @@ The DI11 problem is dealt with here as follows:
         a)  The `name` is renormalized.
         b)  If the template for `name` has already been included,then the
             `D INCLUDE TEMPLATE name` is removed.
-        b)  Otherwise, the template file associated with the renormalized `name`
+        c)  Otherwise, the template file associated with the renormalized `name`
             is read, and a list of its own `D INCLUDE TEMPLATE name2` directives
             is made. *If* the template associated with `name2` has not already
             been included in the top-level file, a `D INCLUDE TEMPLATE name2`
@@ -63,9 +64,11 @@ The DI11 problem is dealt with here as follows:
             matches the normalized `name`, so there's no *efficient* way to 
             find the source-code files.
 
-The principal difficulty is that `D INCLUDE name` is not processed, and it's
-possible for a file included with that kind of directive may hide additional
-horror.
+Regarding the recursion just mentioned, though, it's necessary only for a file
+containing a `COMPOOL`.  For a file instead containing a `PROGRAM`, `PROCEDURE`,
+or `FUNCTION`, any templates it includes will be needed only for the internals
+of the compilation unit, and not by code calling the compilation unit, so only
+`COMPOOL`'s are subject to recursion.
 
 Other Problems
 --------------
@@ -109,6 +112,8 @@ else:
 
 pattern = re.compile(r"^D\s*INCLUDE\s+TEMPLATE\s+([#_0-9A-Z]+)(.*)")
 pattern2 = re.compile(r"^D\s*INCLUDE\s+([#_0-9A-Z]+)(.*)")
+pattern3 = re.compile(r"[#_0-9A-Z]\s*:\s*(COMPOOL|PROGRAM|PROCEDURE|FUNCTION)")
+pattern4 = re.compile(r"/[*].*[*]/")
 
 includedSoFar = []
 
@@ -130,18 +135,48 @@ for dir in ["INCL80"]:
 comment = " ; Inserted by preprocessor"
 def processFile(basename=None, top=False):
     if basename == None:
-        f = sys.stdin
+        fp = sys.stdin
     else:
         if basename in candidates:
-            f = open(candidates[basename], "r")
+            fp = open(candidates[basename], "r")
         else:
             # Not a base name, so assume it's a full path.
             try:
-                f = open(basename, "r")
+                fp = open(basename, "r")
             except:
                 print(f"Selected file {basename} does not exist")
                 os._exit(1)
+    f = fp.readlines()
+    if basename != None:
+        fp.close()
     
+    # First pass:  Determine what type of compilation unit we have here.
+    # That's not a trivial thing to do without fully parsing the thing,
+    # so we do it half-a$$ed. 
+    if not top:
+        stripped = ""
+        for line in f:
+            if line[0] not in [" ", "M"]:
+                continue
+            stripped += line[1:72]
+            while True:  # Look for inline comments.
+                match = pattern4.search(stripped)
+                if match:
+                    start, end = match.span()
+                    stripped = stripped[:start] + stripped[end+1:]
+                    continue
+                break
+            if "/*" in stripped: # Start of multiline comment
+                continue
+            #print(f"@@ {stripped}", file=sys.stderr)
+            match = pattern3.search(stripped)
+            if match:
+                #print(f"@ {basename} {match.group()}", file=sys.stderr)
+                if "COMPOOL" not in match.group():
+                    return
+                break
+    
+    # Final pass
     for line in f:
         line = line.rstrip()
         match = pattern.match(line[:72])
@@ -174,7 +209,4 @@ def processFile(basename=None, top=False):
         if top:
             print(line, file=outFile)
    
-    if basename != None:
-        f.close()
-
 processFile(inFilename, True)
