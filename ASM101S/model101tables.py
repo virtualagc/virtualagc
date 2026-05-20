@@ -7,6 +7,7 @@ Purpose:    Tables used by module model101.py and others.
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-10-28 RSB  Split off from model101.py.
+            2026-05-19 RSB  Fixed `PC` instruction per issue #1317.
 '''
 
 # First, the CPU instructions, categorized by instruction types, accompanied
@@ -34,7 +35,7 @@ argsRR = {   "AR": 0b000000,   "CR": 0b000100,   "CBL": 0b000011,
             "SER": 0b010110,  "MVH": 0b011011,   "SPM": 0b110011, 
            "SRET": 0b100101, "LXAR": 0b010001, "STXAR": 0b101001, 
             "ICR": 0b110110,   "BR": 0b110000,  "NOPR": 0b110000,  
-           "LACR": 0b111011,   "PC": 0b011011 }
+           "LACR": 0b111011,   "PC": 0b110111 }
 
 # The 10-bit numerical codes are the codes in encoded positions 0-4 (in both
 # the RS and SRS forms of the instructin) suffixed by the bits in positions
