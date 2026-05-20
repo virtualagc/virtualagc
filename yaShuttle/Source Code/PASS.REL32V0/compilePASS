@@ -189,7 +189,6 @@ Regarding the compiler parameters:
                 this approach agrees with MAFGEN.
 '''
 extraParms = ""
-defaultR = "M"
 def getParms(template):
     # Note: LITSTRINGS increased from default (2000) for 
     # OI301700/APPLSRC/CGBIH2.hal (uses 2646).
@@ -199,17 +198,19 @@ def getParms(template):
     # dumps, but just not any in HAL/S code.
     parmBase = extraParms + "SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
     cardtypesBySourceFile = {
-        "default": f"FCR{defaultR}",
-        "CS2INI" : f"ACFCR{defaultR}",
-        "CS4INI" : f"ACFCR{defaultR}",
-        "CPTOSV" : f"ACBDFCR{defaultR}",
-        "CPUSLS" : f"ACBDFCR{defaultR}",
+        "default": f"FCRM",
+        "CS2INI" : f"ACFCRM",
+        "CS4INI" : f"ACFCRM",
+        "CPTOSV" : f"ACBDFCRM",
+        "CPUSLS" : f"ACBDFCRM",
         "GKDASC": f"AMOCNCRMFDGCHC",
         "GKRORB": f"ACOMNCRCFCGDHC",
         "GKGMNV": f"ACOCNMRMFCGCHD",
         "CV5SLCOM": f"DC"
         }
     stem = template["stem"]
+    if stem.startswith("_"):
+        stem = stem[1:]
     if stem in cardtypesBySourceFile:
         parms = parmBase + cardtypesBySourceFile[stem] + modern
     else:
@@ -271,7 +272,7 @@ def compile(template):
             #print("%3d: Skipping past %s/%s." % \
             #  (compilationCount, subfolder, filename))
             return None
-    if preprocess:
+    if False and preprocess:
         subfolder = "."
         filename = "_" + template["stem"] + ".hal"
         command = ["preprocessHALSFC", f"--in={rawFilename}", f"--out={filename}"]
@@ -362,13 +363,28 @@ unbuffer compilePASS %s --skip-to=%s  2>&1 | tee -a compilePASS.log
 # First we have to determine all template dependencies, so we can compile the
 # templates in the correct order.  Assume that all of the template files are in
 # APPLSRC/ and SSSRC/, and get a list of them.
+if preprocess:
+    print(f"{datetime.now()}: Preprocessing all source-code files ...")
 SSSRC = Path("SSSRC")
 APPLSRC = Path("APPLSRC")
 templateFiles = list(SSSRC.glob("*.hal")) + list(APPLSRC.glob("*.hal"))
 for i in range(len(templateFiles)):
-    templateFiles[i] = str(templateFiles[i])
+    rawFilename = str(templateFiles[i])
+    if preprocess:
+        filename = f".{os.sep}_{Path(rawFilename).name}"
+        command = ["preprocessHALSFC", f"--in={rawFilename}", f"--out={filename}"]
+        try:
+            result = subprocess.run(command, capture_output = True, text = True, check = True)
+        except subprocess.CalledProcessError as e:
+            print(f"The preprocessor failed to create {filename}, exit code {e.returncode}.")
+            print("STDERR:", e.stderr)
+            outtaHere(1)
+        templateFiles[i] = filename
+    else:
+        templateFiles[i] = rawFilename
 #print(templateFiles)
 #sys.exit(1)
+
 # Read each of the template files.  Determine the full HAL name (not just the
 # normalized version of it use for the filename and all of the templates (by
 # their HAL names) that the file imports.
@@ -570,7 +586,14 @@ else:
         if filename in skipped:
             continue
         compilationCount += 1
-        print("%3d: Did not compile %s." % (compilationCount, filename))
+        if preprocess and Path(filename).name.startswith("_"):
+            print("%3d: Did not compile %s, removing it." % (compilationCount, filename))
+            try:
+                os.remove(filename)
+            except:
+                pass
+        else:
+            print("%3d: Did not compile %s." % (compilationCount, filename))
 
 print(f"{datetime.now()}: Done.")
 
