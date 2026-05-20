@@ -9,6 +9,7 @@ Purpose:    The purpose of this program is to preprocess a HAL/S source-code
 Contact:    Ron Burkey <info@sandroid.org>
 History:    2026-04-22 RSB  Created.
             2026-05-19 RSB  See issue #1316.
+            2026-05-20 RSB  See issue #1313.
 
 Potentially, there are several problems that could be addressed.
 
@@ -149,6 +150,17 @@ def processFile(basename=None, top=False):
     f = fp.readlines()
     if basename != None:
         fp.close()
+    
+    # Let's apply CARDTYPE=UDXCVMWC for "modern" compilation.
+    if False:
+        # Do *not* do any of this, because it will arm the preprocessor
+        # with tools to undo any good we did by using these CARDTYPE
+        # characters in column 1 to begin with.
+        cardtype = { "U": "D", "X": "C", "V": "M", "W": "C" }
+        for i in range(len(f)):
+            c = f[i][:1]
+            if c in cardtype:
+                f[i] = cardtype[c] + f[i][1:]
     
     # First pass:  Determine what type of compilation unit we have here.
     # That's not a trivial thing to do without fully parsing the thing,
