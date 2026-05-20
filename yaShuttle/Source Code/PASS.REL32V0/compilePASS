@@ -314,6 +314,8 @@ def compile(template):
             if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
                 if autoX1 and not retryX1:
                     retryX1 = True
+                    if filename.startswith("_") and not Path(filename).is_file():
+                        shutil.copy(f"current.results{os.sep}{filename}", filename)
                     continue
                 print(f"      ZO3 error in OPT, compilation of {rawFilename} skipped.")
                 rsbTrace = ""
