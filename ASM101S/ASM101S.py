@@ -9,6 +9,7 @@ Purpose:    This is an assembler for the assembly language of the IBM AP-101S
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-08-21 RSB  Began.
+            2024-05-20 RSB  Added --library (vs --library=F).
 '''
 
 program = "ASM101S"
@@ -717,7 +718,13 @@ comparisonFile = None
 sourceFileNames = []
 
 for parm in sys.argv[1:]:
-    if parm.startswith("--library="):
+    if parm == "--library":
+        scriptDir = Path(__file__).resolve().parent
+        runmacDir = f"{scriptDir}{os.sep}..{os.sep}yaShuttle{os.sep}Source Code{os.sep}PASS.REL32V0{os.sep}RUNMAC"
+        #print(f"Reading macros from {runmacDir}")
+        readMacroLibrary(runmacDir)
+        endLibraries = len(source)
+    elif parm.startswith("--library="):
         readMacroLibrary(parm[10:])
         endLibraries = len(source)
     elif parm.startswith("--object="):
@@ -759,8 +766,11 @@ for parm in sys.argv[1:]:
         print("                    file.  The default is SOURCEn.obj, where")
         print("                    SOURCEn.asm is the *last* source-code file")
         print("                    specified on the command line.")
-        print("--library=L         L specifies a path to a macro library.")
-        print("                    This option can appear multiple times.")
+        print("--library           Load the default macro library.  Without")
+        print("                    --library or --library=L (see below), no")
+        print("                    macro library at all is loaded.")
+        print("--library=L         Load a macro library by name, L.  This")
+        print("                    option can appear multiple times.")
         print("--sysparm=T         (Default PASS.) Sets the global SET symbol")
         print("                    &SYSPARM. For Space Shuttle flight software,")
         print("                    the allowed choices are BFS and PASS.")
@@ -778,7 +788,8 @@ for parm in sys.argv[1:]:
         print("                    assembly-listing file whose generated code")
         print("                    is compared to the current assembly.")
         print("--fill=XXXX         Set the fill pattern for uninitialized")
-        print("                    locations. 0x0000 by default. (alt. 0xc6c6 or 0xc9fb)")
+        print("                    locations. 0x0000 by default. (alt. 0xc6c6")
+        print("                    or 0xc9fb)")
         print()
         sys.exit(1)
     else:
