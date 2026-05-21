@@ -8,6 +8,7 @@ Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-10-28 RSB  Split off from model101.py.
             2026-05-19 RSB  Fixed `PC` instruction per issue #1317.
+            2026-05-21 RSB  Per issue #1320:  Added `BVC[@][#]`
 '''
 
 # First, the CPU instructions, categorized by instruction types, accompanied
@@ -38,7 +39,7 @@ argsRR = {   "AR": 0b000000,   "CR": 0b000100,   "CBL": 0b000011,
            "LACR": 0b111011,   "PC": 0b110111 }
 
 # The 10-bit numerical codes are the codes in encoded positions 0-4 (in both
-# the RS and SRS forms of the instructin) suffixed by the bits in positions
+# the RS and SRS forms of the instruction) suffixed by the bits in positions
 # 8-12 (of the RS form, but are unused in the SRS forms.
 argsSRSandRS = {
    "A": 0b0000011110, "AH": 0b1000011110,   "C": 0b0001011110, 
@@ -59,7 +60,8 @@ argsSRSandRS = {
  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNN": 0b1100000000,
  "BNZ": 0b1100000000,  "BNO": 0b1100000000,  "BLE": 0b1100000000,   
   "BN": 0b1100000000,  "BHE": 0b1100000000,  "BNC": 0b1101100000,
- }
+ "BVC": 0b1100111110, 
+}
 
 argsSRSonly = {
   "BCB": 0b1101100000,  "BCF": 0b1101100000, "BCTB": 0b1101100000, 
@@ -116,7 +118,9 @@ argsRSonly = {
   "BNP#": 0b1100000000,   "BNZ@": 0b1100000000,  "BNZ@#": 0b1100000000, 
   "BNZ#": 0b1100000000,    "BO@": 0b1100000000,   "BO@#": 0b1100000000, 
    "BO#": 0b1100000000,    "BP@": 0b1100000000,   "BP@#": 0b1100000000, 
-   "BP#": 0b1100000000,    "BZ@": 0b1100000000,   "BZ@#": 0b1100000000, 
+   "BP#": 0b1100000000,   
+   "BVC@": 0b1100111110,  "BVC@#": 0b1100111110,  "BVC#": 0b1100111110,
+   "BZ@": 0b1100000000,   "BZ@#": 0b1100000000, 
    "BZ#": 0b1100000000,     "C@": 0b0001011110,    "C@#": 0b0001011110, 
     "C#": 0b0001011110,    "CE@": 0b0100111111,   "CE@#": 0b0100111111, 
    "CE#": 0b0100111111,   "CED@": 0b0001111111,  "CED@#": 0b0001111111, 

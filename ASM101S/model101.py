@@ -8,6 +8,8 @@ Purpose:    Object-code generation for ASM101S, specific to the assembly
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.
+            2026-05-21 RSB  Per issue #1320, fixed processing order of RS/SRS
+                            instructions.
 '''
 
 import copy
@@ -681,6 +683,27 @@ The `unhash` function can be used to return any "value"-type integer into
 its constituent "section"/"address", or to determine that it's just an integer
 value rather than an address at all.
 '''
+
+# Fixed value of the R1 field (which is omitted) for certain RS/SRS instructions.
+impliedR1 = {
+    "SSM":  0x0,
+    "LM":   0x4,
+    "STM":  0x0,
+    "LPS":  0x5,
+    "SVC":  0x1,
+    "TS":   0x0,
+    "STDM": 0x0,
+    "LDM":  0x0,
+    "SHW":  0x2,
+    "TD":   0x0,
+    "TH":   0x3,
+    "ZH":   0x1
+    }
+for n in list(impliedR1):
+    value = impliedR1[n]
+    impliedR1[n+"@"] = value
+    impliedR1[n+"@#"] = value
+    impliedR1[n+"#"] = value
 
 # `dcBuffer` is used for assembling a single `DC` pseudo-op.  I don't know the
 # maximum amount of data a single `DC` can generate ... but it's a *lot*.
@@ -1651,19 +1674,16 @@ def generateObjectCode(source, macros):
                     pass # ***DEBUG*** ***TRAP compile***
                 data = bytearray(dataSize)
                 if ast != None:
-                    err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
-                    if r1 == None:
-                        # R1 is syntatically omitted for various instructions,
-                        # and an implied R1 is used instead.
-                        if operation in branchAliases:
-                            r1 = branchAliases[operation]
-                        elif operation in ["SHW", "SHW@", "SHW#", "SHW@#"]:
-                            r1 = 2
-                        elif operation in ["SVC", "ZH"]:
-                            r1 = 1
-                        elif operation in ["SSM", "TS", "LDM", "STDM"]:
-                            r1 = 0
-                        else:
+                    # R1 is syntactically omitted for various instructions,
+                    # and an implied R1 is used instead.
+                    if operation in branchAliases:
+                        r1 = branchAliases[operation]
+                    elif operation in impliedR1:
+                        r1 = impliedR1[operation]
+                        err = False
+                    else:
+                        err, r1 = evalInstructionSubfield(properties, "R1", ast, symtab)
+                        if r1 == None:
                             # No matches, fall through to other types of instsructions.
                             pass
                     if r1 != None:
