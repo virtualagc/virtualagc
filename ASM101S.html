@@ -173,6 +173,8 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
     <blockquote><font size="-1"><b>Important note regarding BFS:</b>&nbsp;
 
 
+
+
         Recall that the Space Shuttle flight software came in two
         distinct flavors, Primary Flight Software (PFS, or loosely but
         more commonly PASS) and Backup Flight Software (BFS).&nbsp;
@@ -220,6 +222,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
           Assembler Language - OS Release 21</a>".&nbsp; Manual for the
         System/360 macro assembler upon which <b>ASM101S</b> is
         modeled.</li>
@@ -228,6 +232,8 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
           collection of notes about the AP-101S/AP-101B</a>.</li>
       <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
+
 
 
 
@@ -270,10 +276,14 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
+
             I and II</a>:&nbsp; :&nbsp; Principles of Operation for
           PCI/PCO and MSC</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
+
 
 
 
@@ -312,6 +322,8 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
 
 
 
+
+
           Shuttle Advanced System/4 Pi Model AP-101 Central Processor
           Unit Technical Description</a>".&nbsp; Note that this predates
         the AP-101S model and doesn't precisely match it.<br>
@@ -327,6 +339,8 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
     indiscriminately in AP-101 assembly-language source code and sharing
     memory.&nbsp; <a moz-do-not-send="true"
 href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
+
+
 
 
 
@@ -379,9 +393,13 @@ href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
 
 
 
+
+
       II of the AP-101S POO</a> or the seemingly-identical <a
       moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf#page=68">Part
+
+
 
 
 
@@ -438,9 +456,13 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
+
         III of the AP-101S POO</a> or the seemingly-identical <a
         moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
+
 
 
 
@@ -463,13 +485,6 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     <ul>
     </ul>
     <h1><a name="ASM101S"></a>ASM101S</h1>
-    <p><i>(To be clear, </i><i><b>ASM101S</b></i><i> is not entirely
-        functional</i><i>.&nbsp; I am simply documenting it as I proceed
-        with development.&nbsp; Therefore, some of what's described
-        might not be available yet, though of course where I show
-        specific examples of output from the assembler, it is functional
-        enough to produce the results shown.)</i><br>
-    </p>
     The modern assembler is invoked as<br>
     <blockquote>
       <pre><font color="#663300">ASM101S.py [<i>OPTIONS</i>] <i>SOURCE1</i>.asm <i>SOURCE2</i>.asm ...</font><br></pre>
@@ -477,12 +492,32 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     Some of the more-significant available <i><font color="#663300"><code>OPTIONS</code></font></i>
     are:<br>
     <ul>
-      <li><font color="#663300"><code>--library=<i>LIBRARY</i></code></font>
+      <li><font color="#663300"><code>--library</code></font> tells the
+        assembler to load <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC">the
+          default macro library</a> before processing any of your own
+        source-code files.&nbsp; This default macro library is the one
+        provided by the HAL/S-FC source code for use in assembling <a
+          moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+          AP-101S runtime-library source code</a>.&nbsp; The assembler
+        finds the default library relative to the location of ASM101S.py
+        within the file-system, so if you've had the clever idea to move
+        ASM101S.py someplace else ... well, perhaps it wasn't all that
+        clever after all.&nbsp; A variant option,<font color="#663300"><code><font
+              color="#000000"> </font></code></font><font
+          color="#663300"><code>--library=<i>LIBRARY</i></code></font>,&nbsp;
         specifies a path to a folder containing files of macro
-        definitions needed for processing the source-code files.&nbsp;
-        You'll see more on this topic later on.&nbsp; Though "optional",
-        there are very few (if any) legacy assembly-language programs
-        that you'll be able to assemble without it.&nbsp; <b>Note:</b>&nbsp;
+        definitions by name.&nbsp; You'd use it, for example, to load
+        Space Shuttle flight-software macros.&nbsp; You'll see more on
+        this topic later on.&nbsp; If you write your own AP-101S
+        assembly-language files, they may not use any of the original
+        macros, so you mightn't need these command-line options.&nbsp;
+        But there are very few (if any) legacy assembly-language
+        programs that you'll be able to assemble without using <font
+          color="#663333"><code>--library</code></font>.&nbsp; <b>Note:</b>&nbsp;
+
+
 
 
         PFS used a different runtime library than BFS.&nbsp; The former
@@ -491,28 +526,20 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
       <li><font color="#663300"><code>--sysparm=BFS</code></font> tells
         the assembler that the a portion of the Space Shuttle's "backup
         flight software" is being assembled.&nbsp; By default, the
-        assembler assumes instead that you're assembly a portion of the
-        primary flight software.&nbsp; If you're assembling non-Shuttle
-        software, it doesn't really matter which is which.&nbsp; The
-        "BFS" here is literal.&nbsp; <b>Note:</b>&nbsp; At present,
-        there is no known surviving information about the BFS
-        object-code file format, which differs from the (reasonably
-        well-understood) PFS/PASS object-code file format.&nbsp;
-        Therefore, <b>ASM101S</b> cannot at present output
-        BFS-compatible object-code files.<br>
+        assembler assumes instead that you're assembling a portion of
+        the primary flight software.&nbsp; If you're assembling
+        non-Shuttle software, it doesn't really matter which is
+        which.&nbsp; The "BFS" here is literal.&nbsp; <b>Note:</b>&nbsp;
+        BFS object-code files are in a different format than PFS
+        object-code files, and <b>ASM101S</b> doesn't presently support
+        the BFS file format anyway.<br>
       </li>
       <li><font color="#663300"><code>--object=<i>OBJECT</i>.obj</code></font>
         specifies the name of the object-code file generated by the
-        assembler.&nbsp; This this option isn't present, <i><font
+        assembler.&nbsp; If this option isn't present, <i><font
             color="#663300"><code>OBJECT</code></font></i> will match
         the name of the last source-code file specified on the command
-        line.&nbsp; <b>Note:</b>&nbsp; Were <b>ASM101S</b> capable of
-        producing BFS object-code files, they would <i>not</i> be in
-        the form of single files, but rather directories of files.&nbsp;
-        Thus if the switch <font color="#663300"><code>--sysparm=BFS</code></font>
-        were used, then the switch <font color="#663300"><code>--object=<i>OBJECT</i></code></font>
-        would be used, where <i><font color="#663300"><code>OBJECT</code></font></i>
-        is the name of a directory rather than of a single file.<br>
+        line.<br>
       </li>
       <li><font color="#663300"><code>--compare=<i>FILENAME</i></code></font>
         specifies the name of an existing assembly-listing file against
@@ -521,8 +548,11 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
         code is performed, and mismatches are noted directly in the
         assembly-listing produced by the assembler.&nbsp; This feature
         is most-useful when contemporary assembly listings are
-        available, as is the case (for example) for all of the modules
-        in the AP-101S runtime library for PFS of the HAL/S compiler (<b>HAL/S-FC</b>).<br>
+        available, as is the case (for example) for all of <a
+          moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">the
+          modules in the AP-101S runtime library for PFS</a> of the
+        HAL/S compiler (<b>HAL/S-FC</b>).<br>
       </li>
     </ul>
     Since you are allowed to specify multiple assembly-language
@@ -568,13 +598,14 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     this particular jargon — but rather just one of many object files
     which need to be <i>linked</i> by an AP-101 linker utility before
     becoming an executable program.<br>
-    <blockquote><font size="-1"><b>Troubleshooting:</b>&nbsp; I once
-        found that <b>ASM101S.py</b> has ceased to function for me, and
-        thereafter began instead to generate mysterious, meaningless
-        error messages talking about stuff like "fieldParser.py",
-        "parser_asm.py", and "tatsu".&nbsp; I fixed the problem from the
-        command line by cd'ing into <i>virtualagc</i>/ASM101S/ and
-        running the command "<code>fieldParser.py --generate</code>";
+    <blockquote><font size="-1"><b>Troubleshooting:</b>&nbsp; Once upon
+        a time, I found that <b>ASM101S.py</b> had ceased to function
+        for me, and thereafter began instead to generate mysterious,
+        meaningless error messages talking about stuff like
+        "fieldParser.py", "parser_asm.py", and "tatsu".&nbsp; I fixed
+        the problem from the command line by cd'ing into <i>virtualagc</i>/ASM101S/
+        and running the command "<code>fieldParser.py --generate</code>";
+
         after this cranked for a while, it prompted me to enter a
         string, and just hitting the return key took me back to the
         command-line prompt.&nbsp; <b>ASM101S.py</b> worked again for
@@ -596,6 +627,8 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
       assembly-language source-code files</a> for which a contemporary
     assembly listing made by the original AP-101S assembler has
     survived, and performing a byte-by-byte comparison of <b>ASM101S</b>'s
+
+
 
 
 
@@ -627,13 +660,17 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
       assembling it in the sections that follow.&nbsp; For our purposes
       at the moment, I'll content myself by saying that if you follow
       the installation instructions (given later) you can perform this
-      assembly with these steps:<br>
+      assembly with the following steps in Linux or Mac OS:<br>
     </p>
     <blockquote>
-      <pre>cd "virtualagc/yaShuttle/Source Code/PASS.REL32V0/RUNASM"<br>ASM101S.py --library=../RUNMAC ACOS.asm<br></pre>
+      <pre># Work in a nice, clean directory.  Perhaps it's called "temp":<br>mkdir temp<br>cd temp<br># Copy in the source code for ACOS.  Be sure to replace  <font color="#ff9900"><i>virtualagc</i></font> <br># by the actual path to your local copy of the Virtual AGC <br># source-code tree.  Don't leave out the period at the end of the line!<br>cp <font color="#ff9900"><i>virtualagc</i></font>/yaShuttle/"Source Code"/PASS.REL32V0/RUNASM/ACOS.asm .<br># Assemble it:<br>ASM101S.py --library ACOS.asm<br></pre>
     </blockquote>
-    <p>(Or at least, that's how you'd do it in Linux or Mac OS.&nbsp; In
-      Windows you'd have to use '\' in place of '/'.)<br>
+    <p>In Windows it would be a little different, since in Windows, '#'
+      doesn't mark comments, 'cp' is not a copy operation, '/' is not a
+      separator in paths, and so on, but I trust you can figure out the
+      necessary changes easier than I can if you're a Windows
+      user.&nbsp; At the very least, the ASM101S.py command won't
+      change.<br>
     </p>
     <p>Here's what the AP-101S assembly-language source code for the
       ACOS module looks like prior to assembly:<br>
@@ -739,6 +776,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
       discussion of macros fully occupies the entire 2nd half of that
       document</a>.&nbsp; Learning the syntax and other usage details of
     macros is as important for understanding the flight software, or
@@ -801,6 +840,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
     <font color="#663300"><code><i>LIBRARY</i></code></font> is just a
     path to a macro-library folder.&nbsp; Macro definitions in any
     libraries specified in this manner are loaded by the assembler along
@@ -808,18 +849,21 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     automatically making <i>all</i> of the macro definitions in that
     library available during the assembly process.<br>
     <br>
-    Relative to where AP-101 assembly-language source code is stored in
-    the source-code tree, <b>ASM101S</b> would typically be used with
-    either the option <font color="#663300"><code>--library=../RUNMAC</code></font>
-    or <font color="#663300"><code>--library=../MLIB80</code></font>,
-    assuming the current working directory was the one storing the
-    source-code files being assembled.<br>
+    <b>ASM101S</b> would typically be used with either the option <font
+      color="#663300"><code>--library</code></font> (without any
+    directory name, which means to use RUNMAC) or else <font
+      color="#663300"><code>--library=<i>Path</i>/<i>To</i>/MLIB80</code></font>.&nbsp;
+    Unfortunately, Shuttle flight software (including MLIB80) cannot be
+    included in the Virtual AGC repository at this time, so there's no
+    alternative other than specifying a full path to it.<br>
     <br>
     There's a slight problem, though, in that for some reason, all of
     the assembly-language files included via <font color="#663300"><code>COPY</code></font>
     pseudo-ops are <i>also</i> located within the macro libraries,
     intermixed with the files intended to contain only macros.&nbsp; But
     we do not want any of the code from these <font color="#663300"><code>COPY</code></font>'able
+
+
 
 
 
@@ -886,27 +930,23 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         </font></p>
     </blockquote>
     <h1><a name="Installation"></a>Installation of ASM101S</h1>
-    <p>For Linux, Mac OS, or Windows.&nbsp; If the HAL/S compiler (<b>HALSFC</b>)
+    <p>For Linux, Mac OS, or Windows, if the HAL/S compiler (<b>HALSFC</b>)
       has been installed <a moz-do-not-send="true"
         href="HAL.html#Installation">per the instructions</a>, then <b>ASM101S</b>
-      will automatically be available as well.<br>
+      will automatically be present as well.<br>
     </p>
-    <p>If for some inexplicable reason you want to have <b>ASM101S</b>
-      just for itself, without the HAL/S assembler (or any of the AP-101
-      source-code files) provided by the normal installation, you could
-      instead just download the file <a moz-do-not-send="true"
-        href="https://github.com/virtualagc/virtualagc/tree/master/ASM101S">ASM101S.py</a>.<br>
-    </p>
-    <blockquote>
-      <p><font size="-1"><b>Aside:</b>&nbsp; If you choose the latter
-          installation method, I can only assume that you already have
-          some AP-101 source-code files that you want to assemble.&nbsp;
-          You might consider sending them to me.<br>
-        </font></p>
-    </blockquote>
     Whichever method you choose, you need Python 3.12 or later to run
-    it.&nbsp; You'll also need to install the standard Python module
+    it.&nbsp; And you'll need the program called <b>pip</b> that's used
+    to install standard Python modules.&nbsp; On some platforms this
+    will be called <b>pip3</b> instead.&nbsp; Or there may be other
+    alternatives, such as <b>pipx</b>, or even just installing modules
+    directly using whatever package system your operating system has.<br>
+    <br>
+    But whatever the best native method for installing Python modules on
+    your system, you'll need to install the standard Python module
     TatSu.&nbsp; Normally this would be done via a command like "<code>pip
+
+
 
 
       install tatsu</code>", but there's unfortunately a catch!&nbsp;
@@ -917,14 +957,15 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     complete functionality, for now we'd recommend sticking with version
     <strike>5.13.1</strike> 5.12.2, for which the installation command
     is <strike>"</strike><strike><code>pip install tatsu==5.13.1</code></strike><strike>"</strike>
-    "<code>pip install tatsu==5.12.2</code>".&nbsp; Additionally, after
-    any new version of TatSu has been installed, you'll want to <code>cd</code>
+    "<code>pip install tatsu==5.12.2</code>" (or whatever variant is
+    natural in your operating system).&nbsp; Additionally, after any new
+    version of TatSu has been installed, you'll want to <code>cd</code>
     into the folder ASM101S/ in the Virtual AGC source tree and run the
     command "<code>./fieldParser.py --generate</code>"; then just hit
     the return key when you're eventually prompted for interactive
-    input.&nbsp; We're likely also to eventually have a workaround where
-    you don't have to manually do this final <code>fieldParser</code>
-    step, but that's not ready as of this writing either.
+    input.&nbsp; We're likely to eventually have a workaround where you
+    don't have to manually do this final <code>fieldParser</code> step,
+    I hope, but that's not ready as of this writing either.
     <blockquote>
       <p> </p>
     </blockquote>
@@ -946,10 +987,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             files</a><br>
         </li>
         <li><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">"Assembly
+
+
 
 
 
@@ -977,9 +1022,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             library</a></li>
         <li><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">Interface
+
+
 
 
 
@@ -1104,10 +1153,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         folder called RUNLST in our source-code repository</a>, which
       naively appears to be assembly listings generated by assembling
       the files in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
+
 
 
 
@@ -1134,9 +1187,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         macro library folder RUNMAC</a>, and assisted by <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">the
+
+
 
 
 
@@ -1176,6 +1233,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       and <font color="#663300"><code>INPUT</code></font> macros
       respectively.&nbsp; <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/52/mode/1up?view=theater">According
+
+
 
 
 
@@ -1242,6 +1301,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         discussion of character encoding on the <b>HALLINK101S</b> page</a>.<br>
     </p>
     But wait, there's more!&nbsp; Any Space Shuttle flight-software
@@ -1268,6 +1329,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         color="#663300"><code></code></font>.&nbsp; These are described
       in <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/33/mode/1up?view=theater">Figure
+
+
 
 
 
@@ -1353,6 +1416,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         in analogy to System/360, that's not exactly what's going on</font><font
         size="-1"> in AP-101S.&nbsp; </font><font size="-1">In fact, in
         AP-101S each of these branching instructions (except <font
@@ -1379,6 +1444,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       corresponding to it.&nbsp; There is such an instruction in IBM 360
       assembly language.&nbsp; <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=79">The
+
+
 
 
 
@@ -1436,6 +1503,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
       Consider this example:<br>
     </p>
     <blockquote>
@@ -1462,7 +1531,11 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         Halfword Immediate</a> instruction (<font color="#663300"><code>AHI</code></font>),
+
+
 
 
 
@@ -1506,6 +1579,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       assembly-language.&nbsp; Admittedly, that inference is probably
       wrong in the case of certain of the pseudo-ops.&nbsp;
       Nevertheless, they have not been implemented in <b>ASM101S</b>.&nbsp;
+
+
 
 
 
@@ -1606,6 +1681,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         System/360 assembler manual tells us</a> that assembly-language
       files included in other assembly-language files via the <font
         color="#663300"><code>COPY</code></font> pseudo-op cannot
@@ -1626,6 +1703,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <h2>Macro-Definition Prototypes</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/65/mode/1up?view=theater">The
+
+
 
 
 
@@ -1683,12 +1762,16 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         I don't know if anybody will read these words, ever, but my
         sixth sense tells me that some folks who do might be smugly
         saying to themselves right now that "<i>of course</i> full-line
         comments are not 'statements' in any language, so what's this
         fool on about?"&nbsp; As it happens, <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/69/mode/1up?view=theater">on
+
+
 
 
 
@@ -1753,6 +1836,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         AP-101S POO tells us</a> that <br>
     </p>
     <blockquote>
@@ -1791,6 +1876,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         because one of the special addressing modes I alluded to earlier
         is <a moz-do-not-send="true"
           href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=41">the
+
+
 
 
 
@@ -1879,9 +1966,13 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
           form</a>.&nbsp; Technically, the grammars are actually written
         in the modified EBNF (<a moz-do-not-send="true"
           href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended
+
+
 
 
 
@@ -1972,12 +2063,16 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
     similar to the ones above, for the general registers and
     floating-point registers.&nbsp; And indeed, for the macro libraries
     used for the Space Shuttle primary flight software (PASS), and
     backup flight software (BFS), we find exactly such declarations in
     the PASS module MLIB80/MACSMITH or the BFS module MLIB80/EQU, along
     with numerous other <font color="#663300"><code>EQU</code></font>ates
+
+
 
 
 
@@ -2032,10 +2127,14 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
     if such are encountered.<br>
     <h2>Type Attributes, <code>T'</code></h2>
     <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/77/mode/1up">The
+
+
 
 
 
@@ -2124,6 +2223,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
       System/360 assembly-language manual</a> makes it clear that these
     "goto" operations can operate only with the same macro depth, and
     further, if within a macro, only within the <i>same</i>
@@ -2177,6 +2278,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         expression.&nbsp; (Nor would <font color="#663300"><code>+5</code></font>
         be legal.)&nbsp; <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/16/mode/1up">The
+
+
 
 
 
@@ -2334,6 +2437,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
       assembly language</a> shares the obnoxious (in my opinion!)
     property of string comparisons in <a moz-do-not-send="true"
       href="XPL-I.html">the XPL language</a> that a shorter string is
@@ -2380,6 +2485,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </p>
     One flourish which must be mentioned is <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/84/mode/1up">the
+
+
 
 
 
@@ -2516,6 +2623,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
       INPUT macro</a>, provided as part of the AP-101S runtime library
     by the original source code of the HAL/S compiler HAL/S-FC.&nbsp; It
     has four SET symbols that are used without declarations, highlighted
@@ -2547,11 +2656,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         it is declared automatically by the assembler as if via </i><i><font
           color="#663300"><code></code></font></i><i><font
           color="#663300"><code>LCLx</code></font></i><i>.</i><br>
     </blockquote>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
 
 
 
@@ -2588,6 +2701,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             convenience feature would not require it.&nbsp; For example,
             consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC/AERROR.asm">this
+
+
 
 
 
@@ -2655,6 +2770,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
         System/360 assembly-language manual</a> describes a
       quite-complex format for the operands of the <font
         color="#663300"><code>DS</code></font> and <font
@@ -2686,6 +2803,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       be considered "literals":&nbsp; <font color="#663300"><code>=F'1234'</code></font>,
       <font color="#663300"><code>=C'HELLO WORLD'</code></font>, or <font
         color="#663300"><code>=</code></font><font color="#663300"><code>X'3F7C'</code></font>.&nbsp;
+
+
 
 
 
@@ -2783,6 +2902,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
     So the value it assembles to is instead approximately
     0.013969839.&nbsp; But that still doesn't mean that everything is
     exactly as in System/360.&nbsp; In AP-101S, the fixed-point literals
@@ -2823,6 +2944,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     the HAL/S compiler (<b>HAL/S-FC</b>), in the words of the "<a
       moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=68">HAL/S-FC
+
+
 
 
 
@@ -2896,6 +3019,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%20
     hex").&nbsp; Regarding this conversion of decimal to IBM Hex, <a
       moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/44/mode/1up?view=theater">the
+
+
 
 
 
@@ -2986,6 +3111,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
+
     Consequently, even if the compiler reports a 100%-successful
     automated comparison, generated data not printed in the assembly
     listings has not been checked and may not match.<br>
@@ -3001,6 +3128,8 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       some are not.&nbsp; I won't bore you with the details, as you can
       read about them in <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=34">the
+
+
 
 
 
@@ -3074,6 +3203,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
           2-2 of the AP-101S Principles of Operation</a> tells us about
         one difference.&nbsp; When an SRS-type instruction specifies a
         base register (<font color="#663300"><code>B2</code></font>)
@@ -3085,6 +3216,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
         What does it mean to use "no" base register?&nbsp; <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=40">Several
+
+
 
 
 
@@ -3148,6 +3281,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
       As well, the latter (indexed) of the two cases allows the syntax</p>
     <blockquote>
       <pre><font color="#663300"><i>OPCODE</i>	</font><font color="#663300">	R1,D2(X2)</font></pre>
@@ -3177,6 +3312,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
       card game known as Fizzbin</a> which was developed at roughly the
     same time.<br>
     <h2>Uninitialized Memory</h2>
@@ -3187,6 +3324,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
       which as the AP-101S POO explains (p. 9-16), "causes an
       interruption and a program status word switch".&nbsp; (The second
       halfword is the operand for <font color="#663300"><code>SVC</code></font>.)&nbsp;
+
+
 
 
 
@@ -3344,6 +3483,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
       discarding the fractional portion, and representing the remaining
       integer in 2's-complement form.<br>
     </p>
@@ -3385,6 +3526,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
         ASM101S/ folder of the Virtual AGC software tree</a>, and the
       top-level source-code file is itself called ASM101S.py.&nbsp;
       There are also a number of additional Python files in that folder
@@ -3418,6 +3561,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
+
         In AP-101S (or System/360) assembly language, it is a difficult
         technical feat to deal with lists of macro parameters (both for
         macro definitions and macro invocations) that are split across
@@ -3426,7 +3571,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
         field (see below), so that later passes basically ignore all
         continuation cards.&nbsp; The acquisition pass is integrated
         into the way ASM101S.py parses command-line options, and occurs
-        whenever an option like <code>--library=<i>SOMETHING</i></code>
+        whenever an option like <code>--library</code> or <code>--library=<i>SOMETHING</i></code>
         or the name of a source-code file is encountered on the
         command-line.&nbsp; It is not marked in any way as being a
         "pass".&nbsp; Some of the important fields in the <code>source</code>
@@ -3618,7 +3763,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-05-19<br>
+          2026-05-20<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
