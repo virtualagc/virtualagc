@@ -549,16 +549,59 @@ main(int argc, char *argv[])
               Value = GetBankCount(Bank);
               if (Value > 0)
                 {
+                  // Before placing any auto-generated checksum infrastructure
+                  // (bank-id tags or bugger word), verify the target slot is
+                  // genuinely unused.  yaYUL initialises unused fixed memory
+                  // to data 0 with parity 0 — an invalid parity combination
+                  // (CalculateParity(0) == 1).  A user-written constant of
+                  // value zero, by contrast, gets parity 1 from the normal
+                  // emit path.  So (data==0 && parity==0) uniquely identifies
+                  // an untouched slot, distinguishing it from "user wrote 0".
+                  //
+                  // If the slot is already occupied, the bank is too full to
+                  // accept its bugger infrastructure.  This is a fatal error:
+                  // overwriting user data with the checksum would silently
+                  // corrupt the rope.  Until 2026 yaYUL did exactly that and
+                  // it caused some very hard-to-diagnose bugs.
+#define BUGGER_SLOT_FREE(b, v) \
+    (ObjectCode[(b)][(v)] == 0 && Parities[(b)][(v)] == 0)
+#define REPORT_BANK_FULL(b, v) do { \
+    int addr = (Block1 ? 06000 : 02000) + (v); \
+    printf("Fatal error: bank %02o is full; cannot insert " \
+           "automatic bugger-word infrastructure\n" \
+           "             at offset %04o without overwriting user data.\n", \
+           (b), addr); \
+    printf("             Either free at least one word in the bank, " \
+           "or assemble with --no-checksums\n" \
+           "             to disable bugger-word emission entirely.\n"); \
+    fprintf(stderr, "Fatal: bank %02o full at offset %04o; bugger word " \
+            "would overwrite user data.\n", (b), addr); \
+    if (HtmlOut != NULL) \
+        fprintf(HtmlOut, "Fatal error: bank %02o is full at offset %04o; " \
+                "no room for bugger word.\n", (b), addr); \
+    Fatals++; \
+} while (0)
+
                   if (!Block1 && !blk2)
                     {
                       if (Value < 01776)
                         {
+                          if (!BUGGER_SLOT_FREE(Bank, Value))
+                            {
+                              REPORT_BANK_FULL(Bank, Value);
+                              goto SkipBugger;
+                            }
                           ObjectCode[Bank][Value] = Value + Offset;
                           Parities[Bank][Value] = CalculateParity(Value + Offset);
                           Value++;
                         }
                       if (Value < 01777)
                         {
+                          if (!BUGGER_SLOT_FREE(Bank, Value))
+                            {
+                              REPORT_BANK_FULL(Bank, Value);
+                              goto SkipBugger;
+                            }
                           ObjectCode[Bank][Value] = Value + Offset;
                           Parities[Bank][Value] = CalculateParity(Value + Offset);
                           Value++;
@@ -566,6 +609,11 @@ main(int argc, char *argv[])
                     }
                   if (Value < 02000)
                     {
+                      if (!BUGGER_SLOT_FREE(Bank, Value))
+                        {
+                          REPORT_BANK_FULL(Bank, Value);
+                          goto SkipBugger;
+                        }
                       for (Bugger = Offset = 0; Offset < Value; Offset++) {
                         Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
                       }
@@ -581,6 +629,9 @@ main(int argc, char *argv[])
                         fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
                             GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
                     }
+                SkipBugger: ;
+#undef BUGGER_SLOT_FREE
+#undef REPORT_BANK_FULL
                 }
             }
           // Output the binary data.
@@ -602,6 +653,18 @@ main(int argc, char *argv[])
               fputc(Value, OutputFile);
             }
         }
+      // If the bugger-word inserter raised any fatal errors above, the
+      // earlier "Fatal errors:" line is stale.  Re-emit a corrected total
+      // so the listing reflects reality (and the .bin will be removed
+      // below at the existing post-output cleanup).
+      static int StaleFatalsReported = 0;
+      if (Fatals > StaleFatalsReported)
+        {
+          printf("Fatal errors (final):  %d\n", Fatals);
+          if (HtmlOut != NULL)
+            fprintf(HtmlOut, "Fatal errors (final):  %d\n", Fatals);
+        }
+      StaleFatalsReported = Fatals;
     }
 
   // All done!
