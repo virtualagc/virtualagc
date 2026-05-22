@@ -1,4 +1,6 @@
-C/ From PDF p. 129 of "Progamming in HAL/S".
+C/ From PDF p. 129 of "Programming in HAL/S".
+
+  TEST_ALMOST_EQUAL: PROGRAM;
 
   ALMOST_EQUAL:
   FUNCTION(A, B) BOOLEAN;
@@ -13,6 +15,16 @@ C/ From PDF p. 129 of "Progamming in HAL/S".
         RETURN FALSE;
      ELSE
         RETURN TRUE;
-Y %SVCI(0);
   CLOSE ALMOST_EQUAL;
-  
+
+    WRITE(6) 'AE(1,1)=', ALMOST_EQUAL(1.0, 1.0);
+    WRITE(6) 'AE(1,1+1E-7)=', ALMOST_EQUAL(1.0, 1.0000001);
+    WRITE(6) 'AE(1,1.01)=', ALMOST_EQUAL(1.0, 1.01);
+    WRITE(6) 'AE(0,0)=', ALMOST_EQUAL(0.0, 0.0);
+    WRITE(6) 'AE(0,1E-7)=', ALMOST_EQUAL(0.0, 0.0000001);
+    WRITE(6) 'AE(1E6,1E6+.5)=', ALMOST_EQUAL(1E6, 1000000.5);
+    WRITE(6) 'AE(-5,-5)=', ALMOST_EQUAL(-5.0, -5.0);
+    WRITE(6) 'AE(1,-1)=', ALMOST_EQUAL(1.0, -1.0);
+
+Y %SVCI(0);
+  CLOSE TEST_ALMOST_EQUAL;

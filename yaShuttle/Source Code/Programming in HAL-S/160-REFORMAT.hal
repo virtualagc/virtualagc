@@ -1,11 +1,13 @@
 C/ From PDF p. 160 of "Programming in HAL/S".
 
+  TEST_REFORMAT: PROGRAM;
+
   REFORMAT:
   FUNCTION(X, DECIMALS, WIDTH) CHARACTER(20);
      DECLARE X SCALAR,
              DECIMALS INTEGER,
              WIDTH INTEGER;
-             
+
 C  X IS THE NUMBER TO BE CONVERTED, DECIMALS IS THE NUMBER OF
 C  DIGITS TO BE PRINTED AFTER THE DECIMAL POINT, AND WIDTH IS
 C  THE TOTAL LENGTH OF THE STRING RETURNED
@@ -40,6 +42,11 @@ E              ,    ,                        ,
 M RETURN RJUST(S || C                || '.'||C                 , WIDTH);
 S                    1 TO #-DECIMALS          #-DECIMALS-1 TO #
 
-Y %SVCI(0);
   CLOSE REFORMAT;
-  
+
+    WRITE(6) REFORMAT(3.14159, 2, 10);
+    WRITE(6) REFORMAT(-42.5, 1, 10);
+    WRITE(6) REFORMAT(0.007, 3, 10);
+
+Y %SVCI(0);
+  CLOSE TEST_REFORMAT;
