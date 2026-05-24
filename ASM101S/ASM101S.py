@@ -9,7 +9,8 @@ Purpose:    This is an assembler for the assembly language of the IBM AP-101S
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-08-21 RSB  Began.
-            2024-05-20 RSB  Added --library (vs --library=F).
+            2026-05-20 RSB  Added --library (vs --library=F).
+            2026-05-23 RSB  Allowed for --force-d and --no-force-d.
 '''
 
 program = "ASM101S"
@@ -755,6 +756,8 @@ for parm in sys.argv[1:]:
         readSourceFile(parm, svGlobalLocals, sequenceGlobalLocals, \
                        copy=False, printable=True, depth=0)
         sourceFileCount += 1
+    elif parm in ["--force-d", "--no-force-d"]:
+        pass
     elif parm == "--help":
         print("Usage:")
         print("     ASM101S.py [OPTIONS] SOURCE1.asm ...")
@@ -790,6 +793,10 @@ for parm in sys.argv[1:]:
         print("--fill=XXXX         Set the fill pattern for uninitialized")
         print("                    locations. 0x0000 by default. (alt. 0xc6c6")
         print("                    or 0xc9fb)")
+        print("--force-d           An experimental option that forces a")
+        print("                    particular use of displacements in")
+        print("                    RS-type instructions.")
+        print("--no-force-d        (Default) Opposite of --force-d.")
         print()
         sys.exit(1)
     else:

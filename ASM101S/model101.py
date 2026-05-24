@@ -10,14 +10,22 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.
             2026-05-21 RSB  Per issue #1320, fixed processing order of RS/SRS
                             instructions.
+            2026-05-23 RSB  Allowed for --force-d and --no-force-d.
 '''
 
+import sys
 import copy
 import random
 from expressions import error, unroll, astFlattenList, \
     evalArithmeticExpression, svGlobals
 from fieldParser import parserASM
 from ibmHex import *
+
+forceDisplacement = False
+if "--force-d" in sys.argv:
+    forceDisplacement = True
+if "--no-force-d" in sys.argv:
+    forceDisplacement = False
 
 '''
 ******************************************************************************
@@ -575,6 +583,7 @@ def optimizeScratch():
                 continue
             section, value = unhash(d2)
             if section == None:
+                #print(f"@{section} {value} {d2} {operation} {ast}", file=sys.stderr)
                 if "B2" in ast and value >= srsFloor and value < srsCeiling \
                         and operation != "BCT":
                     adjust(scratch, properties, i)
@@ -928,7 +937,7 @@ def generateObjectCode(source, macros):
     sect = None
     using = [None]*8
         
-    # Process shource code, line-by-line
+    # Process source code, line-by-line
     for properties in source:
         #******** Should this line be processed or discarded? ********
         if "skip" in properties:
@@ -1835,8 +1844,8 @@ def generateObjectCode(source, macros):
                                         dSRS = (dSRSa + dUnitizer - 1) // dUnitizer
                                         forbiddenSRS = (dSRSa % dUnitizer) != 0
                                         uUnhashedValue = (dUnitizer - 1 + unhashedValue) // dUnitizer
-                                        ia = "@" in operation
-                                        i =  "#" in operation
+                                        ia = int("@" in operation)
+                                        i =  int("#" in operation)
                                         if b2 == None:
                                             ib2 = 3
                                         else:
@@ -1850,7 +1859,59 @@ def generateObjectCode(source, macros):
                                             
                                         #uhSect, uhD2 = unhash(d2)
                                         #uuB2, uuD2 = unUsing(using, d2)
-                                        if operation in shiftOperations:
+                                        # `forceDisplacement` is an experimental
+                                        # thing right now that tries to use
+                                        # displacements (D2) directly in the 
+                                        # encoded instruction, versus somehow
+                                        # computing them relative to something.
+                                        # See issues #1324, #1325, #1326.
+                                        # Note that `unhashedValue` is 
+                                        # `d2&0xFFFFFF`.  We already know that
+                                        # `d2` is not `None`.  And possibly
+                                        # other stuff I'm rechecking here.
+                                        if forceDisplacement and \
+                                                not extrnD2 and \
+                                                not forceAM1 and \
+                                                not forceRS and \
+                                                x2 == None and \
+                                                r1 != None and \
+                                                "b2" in ast and \
+                                                b2 < 4 and \
+                                                i == 0 and ia == 0 and \
+                                                unhashedValue >= 0 and \
+                                                unhashedValue < 0x38:
+                                            # For SRS-type instructions.
+                                            data = generateSRS(properties, operation, r1, d2, b2)
+                                            if "adr1" in properties:
+                                                properties.pop("adr1")
+                                        elif forceDisplacement and \
+                                                not extrnD2 and \
+                                                not forceAM0 and \
+                                                x2 == None and \
+                                                r1 != None and \
+                                                "b2" in ast and \
+                                                b2 < 4 and \
+                                                i == 0 and ia == 0 and \
+                                                unhashedValue >= 0 and \
+                                                unhashedValue < 0x10000:
+                                            # For extended RS-type instructions.
+                                            data = generateRS0(properties, operation, r1, d2, b2)
+                                            if "adr1" in properties:
+                                                properties.pop("adr1")
+                                        elif forceDisplacement and \
+                                                not extrnD2 and \
+                                                not forceAM0 and \
+                                                x2 != None and \
+                                                r1 != None and \
+                                                "b2" in ast and \
+                                                b2 < 4 and \
+                                                unhashedValue >= 0 and \
+                                                unhashedValue < 0x800:
+                                            # For indexed RS-type instructions.
+                                            data = generateRS1(properties, operation, ia, i, r1, d2, x2, b2)
+                                            if "adr1" in properties:
+                                                properties.pop("adr1")
+                                        elif operation in shiftOperations:
                                             if b2 == None:
                                                 d = d2
                                             else:

@@ -179,18 +179,6 @@ argsRSonly = {
 
 argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
 
-'''
-i = 0
-for key in argsRSonly:
-    i += 1
-    value = format(argsSRSorRS[key.replace("@","").replace("#","")], "#012b")
-    print('%8s: %s, ' % ('"'+key+'"', value), end="")
-    if i % 3 == 0:
-            print()
-print()
-sys.exit(1)
-'''
-
 # The 14-bit numerical codes are what's encoded in bits 0-12
 # LHI and SHI are special and must be specially handled.
 argsRI = { "AHI": 0b1011000011100, "CHI": 0b1011010111100, 
