@@ -10,7 +10,9 @@ Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-08-21 RSB  Began.
             2026-05-20 RSB  Added --library (vs --library=F).
-            2026-05-23 RSB  Allowed for --force-d and --no-force-d.
+            2026-05-23 RSB  Allowed for --force-d and --no-force-d.  Allowed
+                            printing error messages even when --tolerable is
+                            used.
 '''
 
 program = "ASM101S"
@@ -944,6 +946,12 @@ literalPoolNumber = 0
 continuation = False
 for i in range(endLibraries, len(source)):
     properties = source[i]
+    anyErrors = False
+    if "errors" in properties and len(properties["errors"]) > 0:
+        print("=====================================================")
+        for msg in properties["errors"]:
+            print(msg)
+        print("=====================================================")
     skip = False
     if properties["empty"]:
         continue
