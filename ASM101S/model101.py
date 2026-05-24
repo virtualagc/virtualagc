@@ -10,7 +10,8 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-05 RSB  Began.
             2026-05-21 RSB  Per issue #1320, fixed processing order of RS/SRS
                             instructions.
-            2026-05-23 RSB  Allowed for --force-d and --no-force-d.
+            2026-05-23 RSB  Allowed for --force-d and --no-force-d.  Fixed
+                            issue #1329.
 '''
 
 import sys
@@ -1930,11 +1931,11 @@ def generateObjectCode(source, macros):
                                                 # generate an RS AM=1 instruction,
                                                 # but we set the I bit-field to 1
                                                 # to cause d2 to be subtracted from
-                                                # the updateed IC.
+                                                # the updated IC.
                                                 data = generateRS1(properties, operation, 0, 1, r1, icRS - d2, 0, 3)
                                             else: # d2 >= ic + 2
                                                 data = generateRS1(properties, operation, 0, 0, r1, d2 - icRS, 0, 3)
-                                        elif len(data) == 2  or \
+                                        elif (len(data) == 2 and d < srsCeiling) or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
                                                 not forceRS and x2 == None and \
