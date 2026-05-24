@@ -1095,7 +1095,7 @@ for i in range(endLibraries, len(source)):
             printedLineNumber += 1
             properties["printedLineNumber"] = printedLineNumber
             linesThisPage += 1
-            mid = "%-30s%5d%s%-8s %-5s %s" % (
+            mid = "%-30s%5d%s%-8s %-7s %s" % (
                 prefix,
                 printedLineNumber,
                 depthStar,
