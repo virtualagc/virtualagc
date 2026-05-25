@@ -1918,6 +1918,7 @@ def generateObjectCode(source, macros):
                                                 b2 < 4 and \
                                                 i == 0 and ia == 0 and \
                                                 unhashedValue >= 0 and \
+                                                (unhashedValue % dUnitizer) == 0 and \
                                                 unhashedValue < 0x38 * dUnitizer:
                                             # For SRS-type instructions.
                                             ud2 = (d2 & 0xFFFFFFFF00000000) | ((d2 & 0xFFFFFFFF) // dUnitizer)
