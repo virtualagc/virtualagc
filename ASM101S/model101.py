@@ -12,6 +12,10 @@ History:    2024-09-05 RSB  Began.
                             instructions.
             2026-05-23 RSB  Allowed for --force-d and --no-force-d.  Fixed
                             issue #1329.
+            2026-05-25 RSB  Added check for `currentHash` to cover case of 
+                            `EQU` prior to all `CSECT`s.  Added default `EQU`s
+                            for `R0` through `R7` to `symtab`.  Other fixes
+                            related to issue #1328.
 '''
 
 import sys
@@ -281,6 +285,17 @@ entries = set() # For `ENTRY`.
 extrns = set() # For `EXTRN`.
 rextrns = {} # For `EXTRN`
 symtab = {}
+for i in range(8):
+    symtab[f"R{i}"] = {
+        'type': 'EQU', 
+        'value': i, 
+        'properties': {
+            'section': None, 
+            'pos1': None, 
+            'length': None, 
+            'alignment': None, 
+            'text': f"R{i}       EQU     {1}"}
+        }
 relocations = [] # RLD entries
 metadata = {
     "sects": sects,
@@ -879,7 +894,10 @@ def generateObjectCode(source, macros):
     
     # Gets the hashed address of the current program counter.
     def currentHash():
-        return symtab[sect]["value"] + sects[sect]["pos1"] // 2
+        try:
+            return symtab[sect]["value"] + sects[sect]["pos1"] // 2
+        except:
+            return 0
     
     # Evaluate a single suboperand of the operand of an instruction like 
     # RR, RS, SRS, SI, RI.  Returns a pair (err,value).  The `err` is 
@@ -895,7 +913,7 @@ def generateObjectCode(source, macros):
                                          currentHash(), severity=0)
         if value == None:
             error(properties, "Could not evaluate %s subfield" % subfield, \
-                  severity=0)
+                  severity=255)
             return True, None
         return False, value
     
@@ -1607,29 +1625,48 @@ def generateObjectCode(source, macros):
                 ast = properties["ast"]
                 if ast != None:
                     # Make sure we trap some special mnemonics:
-                    if operation in ["SPM", "NOPR"]:
-                        err = len(ast["R1"]) > 0
+                    if operation in ["SPM"]:
+                        if "r1" in ast and len(ast["r1"]) != 0:
+                            error(properties, f"Cannot specify register R1.")
                         r1 = 0
-                    elif operation == "BR":
-                        err = len(ast["R1"]) > 0
+                    elif operation in ["NOPR"]: # Alias for NOP.
+                        if "r1" in ast and len(ast["r1"]) != 0:
+                            error(properties, f"Cannot specify condition.")
+                        r1 = 0
+                    elif operation == "BR": # Alias for unconditional branch.
+                        if "r1" in ast and len(ast["r1"]) != 0:
+                            error(properties, f"Cannot specify condition.")
                         r1 = 7
                     else:
                         err, r1 = evalInstructionSubfield(properties, "R1", \
                                                           ast, symtab)
-                    if not err and r1 >= 0 and r1 <= 7:
-                        err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
-                        lolim = 0
-                        uplim = 7
-                        if operation in ["LFXI", "LFLI"]:
-                            lolim = 0
-                            uplim = 15
-                            if operation == "LFXI":
-                                r2 += 2
-                                properties["adr2"] = r2
-                        if not err and r2 >= lolim and r2 <= uplim:
-                            op = argsRR[operation]
-                            data[0] = ((op & 0b111110) << 2) | r1
-                            data[1] = 0b11100000 | ((op & 1) << 3) | r2
+                    if err or r1 < 0 or r1 > 7:
+                        error(properties, 
+                              f"Invalid register R1; must be 0-7")
+                        r1 = 0
+                    err, r2 = evalInstructionSubfield(properties, "R2", ast, symtab)
+                    if operation == "LFXI":
+                        if err or r2 < -2 or r2 > 13:
+                            error(properties, 
+                                  f"Invalid immediate value; must be -2 through 13")
+                            r2 = -2
+                            err = False
+                        r2 = (r2 + 2) & 0x0F
+                        properties["adr2"] = r2
+                    elif operation == "LFLI":
+                        if err or r2 < 0 or r2 > 15:
+                            error(properties, 
+                                  f"Invalid immediate value; must be 0-15")
+                            r2 = 0
+                            err = False
+                        r2 &= 0x0F
+                    elif err or r2 < 0 or r2 > 7:
+                        error(properties, 
+                              f"Invalid register R2; must be 0-7")
+                        r2 = 0
+                    op = argsRR[operation]
+                    data[0] = ((op & 0b111110) << 2) | r1
+                    data[1] = 0b11100000 | ((op & 1) << 3) | r2
                 toMemory(data)
                 continue
                 
