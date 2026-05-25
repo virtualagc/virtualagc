@@ -1908,26 +1908,29 @@ def generateObjectCode(source, macros):
                                         # `d2` is not `None`.  And possibly
                                         # other stuff I'm rechecking here.
                                         if forceDisplacement and \
+                                                operation not in shiftOperations and \
                                                 not extrnD2 and \
                                                 not forceAM1 and \
                                                 not forceRS and \
                                                 x2 == None and \
                                                 r1 != None and \
-                                                "b2" in ast and \
+                                                "B2" in ast and \
                                                 b2 < 4 and \
                                                 i == 0 and ia == 0 and \
                                                 unhashedValue >= 0 and \
-                                                unhashedValue < 0x38:
+                                                unhashedValue < 0x38 * dUnitizer:
                                             # For SRS-type instructions.
-                                            data = generateSRS(properties, operation, r1, d2, b2)
-                                            if "adr1" in properties:
-                                                properties.pop("adr1")
+                                            ud2 = (d2 & 0xFFFFFFFF00000000) | ((d2 & 0xFFFFFFFF) // dUnitizer)
+                                            data = generateSRS(properties, operation, r1, ud2, b2)
+                                            #if "adr1" in properties:
+                                            #    properties.pop("adr1")
                                         elif forceDisplacement and \
+                                                operation not in shiftOperations and \
                                                 not extrnD2 and \
                                                 not forceAM0 and \
                                                 x2 == None and \
                                                 r1 != None and \
-                                                "b2" in ast and \
+                                                "B2" in ast and \
                                                 b2 < 4 and \
                                                 i == 0 and ia == 0 and \
                                                 unhashedValue >= 0 and \
@@ -1937,11 +1940,12 @@ def generateObjectCode(source, macros):
                                             if "adr1" in properties:
                                                 properties.pop("adr1")
                                         elif forceDisplacement and \
+                                                operation not in shiftOperations and \
                                                 not extrnD2 and \
                                                 not forceAM0 and \
                                                 x2 != None and \
                                                 r1 != None and \
-                                                "b2" in ast and \
+                                                "B2" in ast and \
                                                 b2 < 4 and \
                                                 unhashedValue >= 0 and \
                                                 unhashedValue < 0x800:

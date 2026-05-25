@@ -1050,9 +1050,9 @@ for i in range(endLibraries, len(source)):
                     prefix += " "
                 prefix += "%02X" % b
         if "adr1" in properties:
-            prefix = "%-21s%04X" % (prefix, properties["adr1"])
+            prefix = "%-21s%04X" % (prefix, properties["adr1"]&0xFFFF)
         if "adr2" in properties:
-            prefix = "%-26s%04X" % (prefix, properties["adr2"])
+            prefix = "%-26s%04X" % (prefix, properties["adr2"]&0xFFFF)
         # For whatever reason, a macro-invocation line is printed only under
         # some circumstances, and is omitted in others.
         if properties["operation"] == "INPUT": ###DEBUG###TRAP###
