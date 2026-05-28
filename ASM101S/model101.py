@@ -16,6 +16,8 @@ History:    2024-09-05 RSB  Began.
                             `EQU` prior to all `CSECT`s.  Added default `EQU`s
                             for `R0` through `R7` to `symtab`.  Other fixes
                             related to issue #1328.
+            2026-05-28 RSB  Removed the defaults for `R0` through `R7` again,
+                            per issue #1332.
 '''
 
 import sys
