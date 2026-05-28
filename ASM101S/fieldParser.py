@@ -10,6 +10,10 @@ Requires:   TatSu (see https://github.com/neogeny/TatSu)
 Contact:    info@sandroid.org
 Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-12 RSB  Began.
+            2026-05-26 RSB  Fixed quoted-string value bug in `operandInvocation`
+                            rule (i.e., macro named parameters of the form
+                            KEY='STRING'.)
+            2026-06-28 RSB  Repair for `mnote` rule, allowing ",'...'".
 
 There is a stand-alone mode that can be used for testing and certain setups
 (search for `standAlone`), but mainly this file is a module to be imported into 
@@ -86,7 +90,7 @@ operandPrototype0 =
     | end3+: ( / */ ) $
     ;
 
-# Used by `joinOperand` for elimination continuation lines in 
+# Used by `joinOperand` for elimination of continuation lines in 
 # macro invocations
 operandInvocation0 = 
     | end0+: ( replacement { ',' replacement } / / )
@@ -332,7 +336,7 @@ listItem =
     ;
 
 replacement = 
-    | identifier "=" "'" /[^']*/ { "''" /[^;]*/ } "'"
+    | identifier "=" "'" /[^']*/ { "''" /[^']*/ } "'"
     | identifier "=" ( /[0-9]+/ | identifier ) "(" ( /[0-9]+/ | identifier ) ")"
     | identifier '=' '(' list ')'
     | identifier '=' /[^, ()]*/
@@ -344,6 +348,7 @@ replacement =
 
 mnote = 
     | sev+: /[0-9]+/ ',' msg+: quotedString
+    | ',' msg+: quotedString
     | com+: '*' ',' msg+: quotedString
     | msg+: quotedString
     ;

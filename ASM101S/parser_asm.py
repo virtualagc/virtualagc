@@ -1803,7 +1803,7 @@ class asmParser(Parser):
 
                 def block0():
                     self._token("''")
-                    self._pattern('[^;]*')
+                    self._pattern("[^']*")
                 self._closure(block0)
                 self._token("'")
             with self._option():
@@ -1894,6 +1894,14 @@ class asmParser(Parser):
                     ['msg', 'sev'],
                 )
             with self._option():
+                self._token(',')
+                self._quotedString_()
+                self.add_last_node_to_name('msg')
+                self._define(
+                    [],
+                    ['msg'],
+                )
+            with self._option():
                 self._token('*')
                 self.add_last_node_to_name('com')
                 self._token(',')
@@ -1908,7 +1916,7 @@ class asmParser(Parser):
                 self.add_last_node_to_name('msg')
             self._error(
                 'expecting one of: '
-                '"\'" \'*\' <quotedString> [0-9]+'
+                '"\'" \'*\' \',\' <quotedString> [0-9]+'
             )
 
     @tatsumasu()

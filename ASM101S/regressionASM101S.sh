@@ -1,18 +1,13 @@
 #!/bin/bash
 
 COPY=no
-FORCED=
+EXTRAS=
 for arg in "$@"
 do
     if [[ "$arg" == "--copy" ]]
     then
         COPY=yes
-    fi
-    if [[ "$arg" == "--force-d" ]]
-    then
-        FORCED=--force-d
-    fi
-    if [[ "$arg" == "--help" ]]
+    elif [[ "$arg" == "--help" ]]
     then
         echo ""
         echo "Perform a regression test on ASM101S, in which the AP-101S"
@@ -25,9 +20,11 @@ do
         echo "Available OPTIONS:"
         echo "    --help    Show this message."
         echo "    --copy    Preserve the generated assembly listings as *.lst."
-        echo "    --force-d Use ASM101S's --force-d command line options."
+        echo "Unrecognized OPTIONS are passed directly to ASM101S."
         echo ""
         exit
+    else
+        EXTRAS="$EXTRAS $arg"
     fi
 done
 
@@ -36,7 +33,8 @@ for f in *.asm
 do 
     n=${f%.*}
     echo -n -e "\033[0;33m$n\033[0m "
-    ASM101S $FORCED --library=../RUNMAC --tolerable=4 --compare=../RUNLST/$n.txt $n.asm &>temp.lst
+    ASM101S $EXTRAS --library --tolerable=4 --compare=../RUNLST/$n.txt $n.asm &>temp.lst
+    #echo ASM101S $EXTRAS --library --tolerable=4 --compare=../RUNLST/$n.txt $n.asm
     if [[ $COPY == yes ]]
     then
         cp temp.lst $n.lst

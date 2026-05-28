@@ -19,8 +19,13 @@ Note that in all cases within this module, an "expression" is a so-called AST
 (Abstract Syntax Tree) in the form returned by a TatSu parser.
 '''
 
+import sys
 import re
 from fieldParser import parserASM
+from asciiToEbcdic import *
+
+# Which `evaluateRelation` function to use.
+OLD_EVALUATE_RELATION = "--new" not in sys.argv
 
 # Already-defined normal program labels (such as `MYSYM`), vs symbolic variables
 # for the macro language or sequence symbols.  At the moment this is just for
@@ -147,7 +152,9 @@ def svReplace(properties, text, svLocals):
                 replacement = str(len(replacement))
             else:
                 if True: ###DEBUG###
-                    replacement = str(replacement).replace(",)", ")")
+                    if "TPCTPRI" in replacement:
+                        pass
+                    replacement = stringifyTuple(replacement, svLocals, properties)
                 else:
                     error(properties, "Cannot use list as a replacement: %s=%s" % \
                           (sv, str(replacement)))
@@ -425,6 +432,215 @@ def evalArithmeticExpression(expression, \
     error(properties, "Eval error type 3", severity)
     return None
 
+# For debugging ...
+def printMultiLevelTuple(tin, depth=0):
+    def indent(n): return '    '*n
+    print(f"{indent(depth)}(")
+    for t in tin:
+        if not isinstance(t, (tuple, list)):
+            print(f"{indent(depth+1)}{t}")
+        else:
+            printMultiLevelTuple(t, depth+1)
+    print(f"{indent(depth)})")
+    
+# Recursively stringify a tuple.
+rawTuple = ()
+def stringifyTuple(tin, svLocals, properties, depth=0):
+    global rawTuple
+    
+    if depth == 0:
+        rawTuple = tin
+        #printMultiLevelTuple(tin)
+        
+    if len(tin) > 1 and tin[0] == "'" and tin[-1] == "'":
+        tin = tin[1:-1]
+    
+    #print(f"@ {depth} {tin}", file=sys.stderr)
+    tout = []
+    for t in tin:
+        if isinstance(t, str):
+            tout.append(t)
+            continue
+        if isinstance(t, (tuple,list)):
+            if len(t) != 0:
+                tout.append(stringifyTuple(t, svLocals, properties, depth+1))
+            continue
+        if isinstance(t, int):
+            tout.append(str(t))
+            continue
+        value = evalArithmeticExpression(unroll(t), svLocals, properties)
+        if value != None:
+            tout.append(str(value))
+            continue
+        error(properties, f"Cannot stringify tuple element {t}")
+        return ""
+    try:
+        if len(tout) == 0:
+            return ""
+        elif len(tout) == 1:
+            return tout[0]
+        return '(' + ','.join(tout) + ')'
+    except:
+        print(f"Failure of `stringifyTuple`:", file=sys.stderr)
+        printMultiLevelTuple(tout)
+        printMultiLevelTuple(rawTuple)
+    sys.exit(1)
+
+# Evaluate the relations EQ, NE, LT, LE, GT, and GE.
+if OLD_EVALUATE_RELATION:  # My original.  But see issue #1331 for deficiencies.
+    def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
+        left = unroll(rawLeft)
+        right = unroll(rawRight)
+        # Should we do a string comparison or an arithmetical one?  We can
+        # recognise string expressions since the first token is always "'".
+        def isString(expression):
+            e = unroll(expression)
+            if isinstance(e, str):
+                return e in ["'", "T'"]
+            if isinstance(e, (tuple,list)) and len(e) > 0:
+                return isString(e[0])
+            return False
+        leftIsString = isString(left)
+        rightIsString = isString(right)
+        if leftIsString != rightIsString:
+            error(properties, "Cannot determine int vs char for comparison")
+            return None
+        # Arithmetical
+        if not leftIsString and not rightIsString:
+            valLeft = evalArithmeticExpression(left, svLocals, properties)
+            if valLeft != None:
+                if '&ERRNUMS' in right: ###DEBUG###
+                    pass
+                    pass
+                valRight = evalArithmeticExpression(right, svLocals, properties)
+                if valRight != None:
+                    if op == "EQ":
+                        return valLeft == valRight
+                    if op == "NE":
+                        return valLeft != valRight
+                    if op == "LT":
+                        return valLeft < valRight
+                    if op == "LE":
+                        return valLeft <= valRight
+                    if op == "GT":
+                        return valLeft > valRight
+                    if op == "GE":
+                        return valLeft >= valRight
+                    # Can't get here.
+                error(properties, \
+                      "Cannot evaluate relational expression %s" \
+                      % str(expression))
+                return None
+        # Character
+        if leftIsString and rightIsString:
+            valLeft = evalCharacterExpression(left, svLocals, properties)
+            if valLeft != None:
+                valRight = evalCharacterExpression(right, svLocals, properties)
+                if valRight != None:
+                    # Recall string comparisons prioritize string length, and
+                    # only compare actual character differences when the 
+                    # lengths of the strings are identical.
+                    if len(valLeft) < len(valRight):
+                        cmp = -1
+                    elif len(valLeft) > len(valRight):
+                        cmp = 1
+                    elif valLeft < valRight: # Lengths are the same.
+                        cmp = -1
+                    elif valLeft > valRight:
+                        cmp = 1
+                    else:
+                        cmp = 0
+                    if op == "EQ":
+                        return cmp == 0
+                    if op == "NE":
+                        return cmp != 0
+                    if op == "LT":
+                        return cmp < 0
+                    if op == "LE":
+                        return cmp <= 0
+                    if op == "GT":
+                        return cmp > 0
+                    if op == "GE":
+                        return cmp >= 0
+                    # Can't get here.
+        error(properties, \
+              "Cannot evaluate relational expression %s" \
+              % str(expression))
+        return None
+else:  # Hopefully a fix for issue #1331.
+    def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
+        left = unroll(rawLeft)
+        right = unroll(rawRight)
+        valLeft = evalArithmeticExpression(left, svLocals, properties)
+        valRight = evalArithmeticExpression(right, svLocals, properties)
+        if valRight != None and valLeft != None:
+            if op == "EQ":
+                return valLeft == valRight
+            if op == "NE":
+                return valLeft != valRight
+            if op == "LT":
+                return valLeft < valRight
+            if op == "LE":
+                return valLeft <= valRight
+            if op == "GT":
+                return valLeft > valRight
+            if op == "GE":
+                return valLeft >= valRight
+            # Can't get to here:
+            return None
+        # If we've gotten here, at least one of the two operands cannot be 
+        # represented as a number.  We'll have to do a string comparison, which
+        # means that unless they're both strings already, at least one of the
+        # two operands will have to be stringified.
+        def stringify(value, numeric):
+            if isinstance(numeric, int):
+                return str(numeric)
+            elif isinstance(value, str):
+                rvalue = evalCharacterExpression(value, svLocals, properties)
+                if rvalue == None:
+                    error(properties, f"Cannot evaluate {value}")
+                    return ""
+                return rvalue
+            elif isinstance(value, (list,tuple)):
+                if len(value) == 0:
+                    return ""
+                return stringifyTuple(value, svLocals, properties)
+            error(properties, f"Cannot stringify {value}")
+            return None
+        valLeft = stringify(left, valLeft)
+        valRight = stringify(right, valRight)
+        if valLeft == None or valRight == None:
+            return None
+        if len(valLeft) < len(valRight):
+            cmp = -1
+        elif len(valLeft) > len(valRight):
+            cmp = 1
+        else:
+            cmp = 0
+            for i in range(len(valLeft)):
+                cLeft = asciiToEbcdic[valLeft[i]]
+                cRight = asciiToEbcdic[valRight[i]]
+                if cLeft < cRight:
+                    cmp = -1
+                    break
+                elif cLeft > cRight:
+                    cmp = 1
+                    break
+        if op == "EQ":
+            return cmp == 0
+        if op == "NE":
+            return cmp != 0
+        if op == "LT":
+            return cmp < 0
+        if op == "LE":
+            return cmp <= 0
+        if op == "GT":
+            return cmp > 0
+        if op == "GE":
+            return cmp >= 0
+        # Can't get to here
+        return None
+    
 # Evaluate a boolean expression, returning True, False, or None (error).
 def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
     global svGlobals
@@ -525,85 +741,8 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
     # Relational expressions:
     if len(expression) == 5 and \
             expression[2] in ["EQ", "NE", "LT", "LE", "GT", "GE"]:
-        op = expression[2]
-        left = unroll(expression[0])
-        right = unroll(expression[4])
-        # Should we do a string comparison or an arithmetical one?  We can
-        # recognise string expressions since the first token is always "'".
-        def isString(expression):
-            e = unroll(expression)
-            if isinstance(e, str):
-                return e in ["'", "T'"]
-            if isinstance(e, (tuple,list)) and len(e) > 0:
-                return isString(e[0])
-            return False
-        leftIsString = isString(left)
-        rightIsString = isString(right)
-        if leftIsString != rightIsString:
-            error(properties, "Cannot determine int vs char for comparison")
-            return None
-        # Arithmetical
-        if not leftIsString and not rightIsString:
-            valLeft = evalArithmeticExpression(left, svLocals, properties)
-            if valLeft != None:
-                if '&ERRNUMS' in right: ###DEBUG###
-                    pass
-                    pass
-                valRight = evalArithmeticExpression(right, svLocals, properties)
-                if valRight != None:
-                    if op == "EQ":
-                        return valLeft == valRight
-                    if op == "NE":
-                        return valLeft != valRight
-                    if op == "LT":
-                        return valLeft < valRight
-                    if op == "LE":
-                        return valLeft <= valRight
-                    if op == "GT":
-                        return valLeft > valRight
-                    if op == "GE":
-                        return valLeft >= valRight
-                    # Can't get here.
-                error(properties, \
-                      "Cannot evaluate relational expression %s" \
-                      % str(expression))
-                return None
-        # Character
-        if leftIsString and rightIsString:
-            valLeft = evalCharacterExpression(left, svLocals, properties)
-            if valLeft != None:
-                valRight = evalCharacterExpression(right, svLocals, properties)
-                if valRight != None:
-                    # Recall string comparisons prioritize string length, and
-                    # only compare actual character differences when the 
-                    # lengths of the strings are identical.
-                    if len(valLeft) < len(valRight):
-                        cmp = -1
-                    elif len(valLeft) > len(valRight):
-                        cmp = 1
-                    elif valLeft < valRight: # Lengths are the same.
-                        cmp = -1
-                    elif valLeft > valRight:
-                        cmp = 1
-                    else:
-                        cmp = 0
-                    if op == "EQ":
-                        return cmp == 0
-                    if op == "NE":
-                        return cmp != 0
-                    if op == "LT":
-                        return cmp < 0
-                    if op == "LE":
-                        return cmp <= 0
-                    if op == "GT":
-                        return cmp > 0
-                    if op == "GE":
-                        return cmp >= 0
-                    # Can't get here.
-        error(properties, \
-              "Cannot evaluate relational expression %s" \
-              % str(expression))
-        return None
+        return evaluateRelation(expression[0], expression[2], expression[4],
+                                svLocals, properties)
     error(properties, \
           "Cannot evaluate boolean expression %s" \
           % str(expression))

@@ -13,6 +13,11 @@ History:    2024-08-21 RSB  Began.
             2026-05-23 RSB  Allowed for --force-d and --no-force-d.  Allowed
                             printing error messages even when --tolerable is
                             used.
+            2026-05-26 RSB  Added --trace.  Was counting the number of 
+                            parameters (positional and non-positional) within
+                            MACRO/MEND completely wrong.  Other fixes related 
+                            to issue #1331.
+            2026-06-28 RSB  Repair for `MNOTE` severity.
 '''
 
 program = "ASM101S"
@@ -29,6 +34,8 @@ from objectWriter import writeObjectModule
 
 currentDate = datetime.today().strftime('%m/%d/%y')
 svGlobals["_passCount"] = -1
+
+trace = "--trace" in sys.argv
 
 # Specifics for the type of assembly language.
 if "--390" in sys.argv[1:]:
@@ -79,7 +86,7 @@ pseudoOps = {
     "MACRO": [0,0],
     "MEND": [0,0],
     "MEXIT": [0,0],
-    "MNOTE": [2,2],
+    "MNOTE": [1,2],
     "ORG": [0,1],
     "PRINT": [1,3],
     "PUNCH": [1,1],
@@ -159,6 +166,8 @@ sequenceGlobalLocals = { }
 # done only during expansion.
 def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto):
     global source
+    if "IFPROC" in lines[lineNumber] and not inMacroDefinition and not inMacroProto:
+        pass
     alternate = inMacroProto
     skipped = 0
     properties = source[-1]
@@ -234,6 +243,15 @@ def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto):
     
     return skipped
 
+def printTraceMessage(depth, name, operation, operand, extra=""):
+    if trace:
+        msg = f"Trace: {'%04d'%sysndx} {'%02d'%depth}    {'%-16s'%name} {'%-8s'%operation} {operand}"
+        if len(extra) > 0:
+            print(msg + " " + extra)
+        else:
+            print(msg)
+        sys.stdout.flush()
+
 # Tries to evaluate suboperand in a macro invocation, as returned by
 # `parserASM(...,"operandInvocation")`.  I don't have any full theory as to
 # what the parser should return for these, so I'm just adding cases into the
@@ -255,6 +273,14 @@ def evalMacroArgument(properties, suboperand):
             and suboperand[1] == "=" and \
             isinstance(suboperand[2], str):
         return ("&" + suboperand[0]),suboperand[2]
+    # This is the case of a non-positional parameter that's a quoted string.
+    elif isinstance(suboperand, tuple) and \
+            len(suboperand) == 6 and \
+            suboperand[1] == "=" and \
+            suboperand[2] == "'" and suboperand[5] == "'" and \
+            suboperand[4] == [] and \
+            isinstance(suboperand[3], str):
+        return ("&" + suboperand[0]),("'" + suboperand[3] + "'")
     # Non-positional parameter that's a list.
     elif isinstance(suboperand, (list, tuple)) and len(suboperand) == 5 and \
             suboperand[1] == "=" and suboperand[2] == "(" and \
@@ -307,7 +333,7 @@ def evalMacroArgument(properties, suboperand):
 # `COPY` pseudo-op or invocation of a macro.  The parameters:
 #    fromWhere   Either a filename or the name of a macro.  The latter lets 
 #                us read in all of the macro definitions at startup, and then 
-#                reuse the definitionas as many times as we like without 
+#                reuse the definitions as many times as we like without 
 #                rereading the file that contained them.
 #    svLocals    See below.
 #    sequence    A dictionary of sequence symbols encountered, and the 
@@ -461,11 +487,15 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             # and the number of nonpositional parameters.
             positional = 0
             nonpositional = 0
-            for sub in operand:
-                if "=" in sub:
-                    nonpositional += 1
-                else:
-                    positional += 1
+            pformals = parserASM(operand, "operandPrototype")
+            if pformals != None and "pi" in pformals:
+                for sub in pformals["pi"]:
+                    if "=" in sub:
+                        nonpositional += 1
+                    else:
+                        positional += 1
+            else:
+                pass
             macroName = operation
             macros[macroName] = [positional, positional + nonpositional, 
                                  macroStart, len(source)-1]
@@ -504,9 +534,11 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             continue
         # Take care of pseudo-ops like `SETA`, `SETB`, `SETC`
         if operation in { "SETA", "SETB", "SETC" }:
+            printTraceMessage(depth, name, operation, operand)
             svSet(operation, name, operand, svLocals, properties)
             continue
         if  operation == "AGO":
+            printTraceMessage(depth, name, operation, operand)
             target = operand.rstrip()
             if target in sequence:
                 if fromWhere != sequence[target][0]:
@@ -517,6 +549,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 skipToSeq = target
             continue
         if operation == "AIF":
+            printTraceMessage(depth, name, operation, operand)
             operand = operand.rstrip()
             ast = parserASM(operand, "aifAll")
             if isinstance(ast, tuple) and len(ast) == 4 and \
@@ -544,6 +577,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 error(properties, "Unrecognized AIF operand: " + operand)
             continue
         if operation == "ANOP":
+            printTraceMessage(depth, name, operation, operand)
             continue
         if operation == "MNOTE":
             ast = parserASM(operand, "mnote")
@@ -557,7 +591,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 elif "sev" in ast:
                     error(properties, msg, severity = int(ast["sev"][0]))
                 else: 
-                    error(properties, msg, severity = 1)
+                    pass
                 properties["fullComment"] = True
                 properties["text"] = msg
                 properties["name"] = ""
@@ -610,6 +644,8 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             if operand.strip() == "":
                 poperands = []
             else:
+                if operation == "IFPROC":
+                    pass
                 poperands = parserASM(operand, "operandInvocation")
             if isinstance(poperands, dict) and "pi" in poperands:
                 poperands = poperands["pi"]
@@ -633,6 +669,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             # First fill in all default values.
             syslist0 = name
             syslist = []
+            removals = []
             for i in range(len(pformals) - 1, -1, -1):
                 pformal = pformals[i]
                 if isinstance(pformal, str):
@@ -648,14 +685,17 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                         continue
                     newLocals[pformal[0]] = pformal[2]
                     newLocals["_" + pformal[0]] = { "omitted": True }
-                    del pformals[i]
+                    removals.append(i)
                 else:
                     error(properties, \
                            "Implementation error in formal parameter " + \
                            str(pformal))
                     continue
+            for i in removals:
+                del pformals[i]
             # Now do the replacements:
             i = 0
+            keyFormals = []
             for suboperand in poperands:
                 key, value = evalMacroArgument(properties, suboperand)
                 if key == None:
@@ -671,11 +711,17 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                     newLocals["_" + pformals[i]]["omitted"] = False
                     i += 1
                 else:
+                    keyFormals.append(key)
                     newLocals[key] = value
                     newLocals["_" + key]["omitted"] = False
             newLocals["&SYSLIST"] = syslist
             newLocals["&SYSLIST0"] = syslist0
             newLocals["&SYSNDX"] = sysndx
+            if trace:
+                extra = ""
+                for key in keyFormals:
+                    extra = f"{extra} {key}={newLocals[key]}"
+                printTraceMessage(depth, name, operation, syslist, extra)
             readSourceFile(operation, newLocals, sequence, copy=copy, \
                            printable=printable, depth=depth+1)
         continue
@@ -728,25 +774,25 @@ for parm in sys.argv[1:]:
         readMacroLibrary(runmacDir)
         endLibraries = len(source)
     elif parm.startswith("--library="):
-        readMacroLibrary(parm[10:])
+        readMacroLibrary(parm.partition("=")[2])
         endLibraries = len(source)
     elif parm.startswith("--object="):
         if not parm.endswith(".obj"):
             print("Object-code filenames must end in .obj", file=sys.stderr)
             sys.exit(1)
-        objectFileName = parm[9:]
+        objectFileName = parm.partition("=")[2]
     elif parm.startswith("--sysparm="):
-        svGlobals["&SYSPARM"] = parm[10:]
+        svGlobals["&SYSPARM"] = parm.partition("=")[2]
     elif parm.startswith("--tolerable="):
-        tolerableSeverity = int(parm[12:])
+        tolerableSeverity = int(parm.partition("=")[2])
     elif parm.startswith("--fill="):
-        val = int(parm[7:], 16)
+        val = int(parm.partition("=")[2], 16)
         fillPattern[:] = [(val >> 8) & 0xFF, val & 0xFF]
     elif parm.startswith("--compare="):
-        comparisonFile = parm[10:]
+        comparisonFile = parm.partition("=")[2]
         comparisonSects = readListing(comparisonFile)
         if comparisonSects == None:
-            print("Could not load comparison file %s" % parm[10:], file=sys.stderr)
+            print("Could not load comparison file %s" % parm.partition("=")[2], file=sys.stderr)
             sys.exit(1)
     elif not parm.startswith("--"):
         if not parm.endswith(".asm"):
@@ -759,6 +805,8 @@ for parm in sys.argv[1:]:
                        copy=False, printable=True, depth=0)
         sourceFileCount += 1
     elif parm in ["--force-d", "--no-force-d"]:
+        pass
+    elif parm in ["--trace", "--old", "--new"]:
         pass
     elif parm == "--help":
         print("Usage:")
@@ -793,12 +841,17 @@ for parm in sys.argv[1:]:
         print("                    assembly-listing file whose generated code")
         print("                    is compared to the current assembly.")
         print("--fill=XXXX         Set the fill pattern for uninitialized")
-        print("                    locations. 0x0000 by default. (alt. 0xc6c6")
-        print("                    or 0xc9fb)")
+        print("                    locations, in hexadecimal. 0000 by default,")
+        print("                    with the common alternatives being C6C6 and")
+        print("                    C9FB.")
         print("--force-d           An experimental option that forces a")
         print("                    particular use of displacements in")
         print("                    RS-type instructions.")
         print("--no-force-d        (Default) Opposite of --force-d.")
+        print("--trace             Enable tracing mode for debugging assembler")
+        print("                    operation.")
+        print("--old               (Debugging) Use old `evaluateRelation`.")
+        print("--new               (Debugging) Use new `evaluateRelation`.")
         print()
         sys.exit(1)
     else:

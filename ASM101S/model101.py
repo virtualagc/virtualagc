@@ -285,17 +285,18 @@ entries = set() # For `ENTRY`.
 extrns = set() # For `EXTRN`.
 rextrns = {} # For `EXTRN`
 symtab = {}
-for i in range(8):
-    symtab[f"R{i}"] = {
-        'type': 'EQU', 
-        'value': i, 
-        'properties': {
-            'section': None, 
-            'pos1': None, 
-            'length': None, 
-            'alignment': None, 
-            'text': f"R{i}       EQU     {1}"}
-        }
+if False:
+    for i in range(8):
+        symtab[f"R{i}"] = {
+            'type': 'EQU', 
+            'value': i, 
+            'properties': {
+                'section': None, 
+                'pos1': None, 
+                'length': None, 
+                'alignment': None, 
+                'text': f"R{i}       EQU     {1}"}
+            }
 relocations = [] # RLD entries
 metadata = {
     "sects": sects,
