@@ -13,7 +13,8 @@ History:    2024-09-12 RSB  Began.
             2026-05-26 RSB  Fixed quoted-string value bug in `operandInvocation`
                             rule (i.e., macro named parameters of the form
                             KEY='STRING'.)
-            2026-06-28 RSB  Repair for `mnote` rule, allowing ",'...'".
+            2026-05-28 RSB  Repair for `mnote` rule, allowing ",'...'".
+            2026-05-19 RSB  Added rule `orgAll`.
 
 There is a stand-alone mode that can be used for testing and certain setups
 (search for `standAlone`), but mainly this file is a module to be imported into 
@@ -181,8 +182,14 @@ bceAll =
     | arithmeticExpression  ( / / | $ )
     ;
 
-# Opeand field of an AIF.
+# Operand field of an AIF.
 aifAll = '(' booleanExpression ')' sequenceSymbol ;
+
+# Operand field of an ORG.
+orgAll = 
+    | plus: '*+' dec: decimal
+    | minus: '*-' dec: decimal
+    | here:  '*' ;
 
 #---------------------------------------------------------------------
 # Now a bunch of rules used by the rules above, but not usually used
@@ -254,6 +261,7 @@ dsOperand =
     | [ d+: number ] t+: /[AY]/ [ l+: len ] [ v+: addresses ]
     ;
 addresses = '(' arithmeticExpression { ',' arithmeticExpression } ')' ;
+decimal = /[0-9]+/ ;
 len = 'L' [ '.' ] [ '+' | '-' ] number ;
 scale = 'S' [ '+' | '-' ] number;
 exp = 'E' [ '+' | '-' ] number;
@@ -765,4 +773,5 @@ if __name__ == "__main__":
         exercise("floatNumber")
         exercise("quotedFloatList")
         exercise("lfxiAll")
+        exercise("orgAll")
         

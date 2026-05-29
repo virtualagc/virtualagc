@@ -18,6 +18,7 @@ History:    2024-09-05 RSB  Began.
                             related to issue #1328.
             2026-05-28 RSB  Removed the defaults for `R0` through `R7` again,
                             per issue #1332.
+            2026-05-29 RSB  `ORG` implementation (issue #1333).
 '''
 
 import sys
@@ -28,7 +29,7 @@ from expressions import error, unroll, astFlattenList, \
 from fieldParser import parserASM
 from ibmHex import *
 
-forceDisplacement = False
+forceDisplacement = True
 if "--force-d" in sys.argv:
     forceDisplacement = True
 if "--no-force-d" in sys.argv:
@@ -1320,7 +1321,32 @@ def generateObjectCode(source, macros):
             if operation == "DC": #name == "TENSTBL": ###DEBUG###TRAP###
                 pass
             startingPos1 = sects[sect]["pos1"]
-            if operation in ["DC", "DS"]:
+            if operation == "ORG":
+                ast = properties["ast"]
+                try:
+                    if "here" in ast:
+                        offset = 0
+                    elif "plus" in ast:
+                        offset = int(ast["dec"])
+                    else:
+                        offset = -int(ast["dec"])
+                except:
+                    error(properties, "Cannot parse %s operand" % operation)
+                    continue
+                newPos = startingPos1 + 2 * offset
+                if newPos < 0:
+                    error(properties, "ORG out of range")
+                    continue
+                sects[sect]["pos1"] = newPos
+                if newPos > sects[sect]["used"]:
+                    sects[sect]["used"] = newPos
+                if name != "":
+                    if False and offset != 0:
+                        error(properties, "Labels can be applied only for ORG *" % operation)
+                    symtab[name]["value"] = (symtab[name]["value"] & 0xFFFFFFFF00000000) | (newPos // 2)
+                continue
+                
+            elif operation in ["DC", "DS"]:
                 ast = properties["ast"]
                 if ast == None:
                     error(properties, "Cannot parse %s operand" % operation)

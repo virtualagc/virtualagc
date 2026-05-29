@@ -9,6 +9,7 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-10-28 RSB  Split off from model101.py.
             2026-05-19 RSB  Fixed `PC` instruction per issue #1317.
             2026-05-21 RSB  Per issue #1320:  Added `BVC[@][#]`
+            2026-05-29 RSB  Implemented `ORG` for issue #1333.
 '''
 
 # First, the CPU instructions, categorized by instruction types, accompanied
@@ -234,7 +235,7 @@ literalDatatypeAlignments = { "B": 2, "C": 2, "X": 2, "H": 2, "Y": 2, "Z": 2,
 appropriateRules = {
     "ENTRY": "identifierList", "EXTRN": "identifierList",
     "EQU": "equOperand", "USING": "expressions", "DROP": "expressions",
-    "DC": "dcOperands", "DS": "dsOperands", 
+    "DC": "dcOperands", "DS": "dsOperands", "ORG": "orgAll"
     }
 for operation in argsRR:
     appropriateRules[operation] = "rrAll"

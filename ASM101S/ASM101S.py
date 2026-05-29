@@ -88,7 +88,7 @@ pseudoOps = {
     "MEND": [0,0],
     "MEXIT": [0,0],
     "MNOTE": [1,2],
-    "ORG": [0,1],
+    "ORG": [1,1],
     "PRINT": [1,3],
     "PUNCH": [1,1],
     "REPRO": [0,0],
@@ -807,7 +807,7 @@ for parm in sys.argv[1:]:
         sourceFileCount += 1
     elif parm in ["--force-d", "--no-force-d"]:
         pass
-    elif parm in ["--trace", "--old", "--new"]:
+    elif parm in ["--trace"]:
         pass
     elif parm == "--help":
         print("Usage:")
@@ -845,14 +845,12 @@ for parm in sys.argv[1:]:
         print("                    locations, in hexadecimal. 0000 by default,")
         print("                    with the common alternatives being C6C6 and")
         print("                    C9FB.")
-        print("--force-d           An experimental option that forces a")
+        print("--force-d           (Default) An option that forces a")
         print("                    particular use of displacements in")
         print("                    RS-type instructions.")
-        print("--no-force-d        (Default) Opposite of --force-d.")
+        print("--no-force-d        Opposite of --force-d.")
         print("--trace             Enable tracing mode for debugging assembler")
         print("                    operation.")
-        print("--old               (Debugging) Use old `evaluateRelation`.")
-        print("--new               (Debugging) Use new `evaluateRelation`.")
         print()
         sys.exit(1)
     else:

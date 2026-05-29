@@ -766,6 +766,29 @@ class asmParser(Parser):
         self._sequenceSymbol_()
 
     @tatsumasu()
+    def _orgAll_(self):
+        with self._choice():
+            with self._option():
+                self._token('*+')
+                self.name_last_node('plus')
+                self._decimal_()
+                self.name_last_node('dec')
+                self._define(['dec', 'plus'], [])
+            with self._option():
+                self._token('*-')
+                self.name_last_node('minus')
+                self._decimal_()
+                self.name_last_node('dec')
+                self._define(['dec', 'minus'], [])
+            with self._option():
+                self._token('*')
+                self.name_last_node('here')
+            self._error(
+                'expecting one of: '
+                "'*' '*+' '*-'"
+            )
+
+    @tatsumasu()
     def _quotedString_(self):
         self._token("'")
         self._pattern("[^']*")
@@ -1354,6 +1377,10 @@ class asmParser(Parser):
             self._arithmeticExpression_()
         self._closure(block0)
         self._token(')')
+
+    @tatsumasu()
+    def _decimal_(self):
+        self._pattern('[0-9]+')
 
     @tatsumasu()
     def _len_(self):
