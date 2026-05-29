@@ -17,8 +17,9 @@ History:    2024-08-21 RSB  Began.
                             parameters (positional and non-positional) within
                             MACRO/MEND completely wrong.  Other fixes related 
                             to issue #1331.
-            2026-06-28 RSB  Repair for `MNOTE` severity.  Possible fixes for
+            2026-05-28 RSB  Repair for `MNOTE` severity.  Possible fixes for
                             issue #1332.
+            2026-05-29 RSB  Implemented `ORG` for issue #1333.
 '''
 
 program = "ASM101S"

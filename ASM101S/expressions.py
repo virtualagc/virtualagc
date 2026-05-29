@@ -13,6 +13,7 @@ Refer to:   https://www.ibiblio.org/apollo/ASM101S.html
 History:    2024-09-25 RSB  Began.
             2026-05-28 RSB  Implemented EBCDIC collation for macro-language
                             string comparisons.
+            2026-05-29 RSB  Implemented `ORG` for issue #1333.
 
 There is a stand-alone mode that can be used for testing and certain setups,
 but mainly this file is a module to be imported into ASM101S.  

@@ -15,6 +15,7 @@ History:    2024-09-12 RSB  Began.
                             KEY='STRING'.)
             2026-05-28 RSB  Repair for `mnote` rule, allowing ",'...'".
             2026-05-19 RSB  Added rule `orgAll`.
+            2026-05-29 RSB  Implemented `ORG` for issue #1333.
 
 There is a stand-alone mode that can be used for testing and certain setups
 (search for `standAlone`), but mainly this file is a module to be imported into 
