@@ -19,6 +19,7 @@ History:    2024-09-05 RSB  Began.
             2026-05-28 RSB  Removed the defaults for `R0` through `R7` again,
                             per issue #1332.
             2026-05-29 RSB  `ORG` implementation (issue #1333).
+            2026-05-31 RSB  Added "PRINT" to the `ignore` list.
 '''
 
 import sys
@@ -669,7 +670,8 @@ Note that addresses are in units of bytes.
 ignore = { "TITLE", 
            "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
            "LCLC", "SETA", "SETB", "SETC", "AIF",
-           "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE", "SPON", "SPOFF" }
+           "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE", "SPON", "SPOFF",
+           "PRINT" }
 hexDigits = "0123456789ABCDEF"
 
 '''

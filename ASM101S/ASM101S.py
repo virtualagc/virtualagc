@@ -20,6 +20,7 @@ History:    2024-08-21 RSB  Began.
             2026-05-28 RSB  Repair for `MNOTE` severity.  Possible fixes for
                             issue #1332.
             2026-05-29 RSB  Implemented `ORG` for issue #1333.
+            2026-05-31 RSB  Added `PRINT OFF`, `PRINT ON`.
 '''
 
 program = "ASM101S"
@@ -36,8 +37,8 @@ from objectWriter import writeObjectModule
 
 currentDate = datetime.today().strftime('%m/%d/%y')
 svGlobals["_passCount"] = -1
-
 trace = "--trace" in sys.argv
+listOn = True
 
 # Specifics for the type of assembly language.
 if "--390" in sys.argv[1:]:
@@ -359,7 +360,7 @@ metadata = {} # Metadata for the assembly, such as the TTILE.
 sysndx = -1
 def readSourceFile(fromWhere, svLocals, sequence, \
                    copy=False, printable=True, depth=0):
-    global source, macros, svGlobals, metadata, sysndx
+    global source, macros, svGlobals, metadata, sysndx, listOn
     lineNumber = -1
     firstIndexOfFile = len(source)
     inMacroProto = False
@@ -447,6 +448,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             "inMacroDefinition": inMacroDefinition,
             "copy": copy,
             "printable": printable,
+            "listOn": listOn,
             "depth": depth,
             "n": len(source)
             }
@@ -475,6 +477,16 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             sequence[name] = (fromWhere, lineNumber)
         operation = properties["operation"]
         operand = properties["operand"]
+        
+        if operation == "PRINT":
+            if not inMacroDefinition:
+                if operand == "ON":
+                    listOn = True
+                    properties["listOn"] = False
+                elif operand == "OFF":
+                    listOn = False
+                    properties["listOn"] = False
+                continue
         
         if operation == "MACRO":
             
@@ -1046,19 +1058,19 @@ for i in range(endLibraries, len(source)):
     if properties["copy"]:
         if not inCopy:
             memberName = Path(properties["file"]).stem
-            if properties["printable"]:
+            if properties["printable"] and properties["listOn"]:
                 linesThisPage += 1
                 print("         START OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
                       % (memberName, rvl, concat, nest))
             inCopy = True
     else:
         if inCopy:
-            if properties["printable"]:
+            if properties["printable"] and properties["listOn"]:
                 linesThisPage += 1
                 print("           END OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
                       % (memberName, rvl, concat, nest))
             inCopy = False
-    if properties["printable"]:
+    if properties["printable"] and properties["listOn"]:
         address = None
         section = None
         comparisonMemory = None
