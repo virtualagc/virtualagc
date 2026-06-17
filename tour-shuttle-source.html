@@ -1,0 +1,292 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>A Tour of Shuttle Source Code</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <link rel="stylesheet" href="Header.css">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <h1>
+      <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software").replace("@SUBTITLE@","A Tour of Source Material"))
+</script>Disclaimer</h1>
+    <p>This page is a tour of the various kinds of files we've received
+      that comprise the source code of Space Shuttle flight software
+      like PASS and BFS, the&nbsp; supporting analyses and reports
+      concerning it, and the hierarchical folder structure in which that
+      material resides.&nbsp; This tour is <i>not</i> a theory of
+      operation as to how that software functions, other than
+      incidentally.&nbsp; <br>
+    </p>
+    <p>Unfortunately, at present, I'm not only treating the original
+      material as export-restricted by the U.S. <a
+        moz-do-not-send="true"
+href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">International
+        Traffic in Firearms Regulations</a> (ITAR), but also am obliged
+      to comply with private agreements about access restrictions that I
+      had to make to obtain the material in the first place.&nbsp; The
+      privately-agreed restrictions are much more restrictive than
+      ITAR:&nbsp; Roughly speaking, if you are a U.S. citizen, residing
+      in the U.S., are <i>in the process</i> of creating HAL/S or
+      AP-101S development tools (compiler, assemblers, linkers,
+      emulators, emulators for peripheral devices, and so on) or
+      performing other preservation activity for which access to source
+      material would facilitate the process, and are willing to comply
+      with my demands for secrecy, then you may qualify for
+      access.&nbsp; Mere interest in the topic or speculation as to
+      something you might like to do in the future if it tickles your
+      fancy is not sufficient.&nbsp; Sorry.&nbsp; (I really am, you
+      know!)<br>
+    </p>
+    <p>This means that I'm giving you a "tour" of material to which
+      very, very few of you have any current current access.&nbsp; Why
+      am I wasting my own efforts on such a silly activity?&nbsp; Well,
+      most importantly, it remains my fervent wish that the access
+      restrictions we're laboring under may be gradually reduced or even
+      eliminated over time, in which case many more people will be able
+      to see the material, at which point you'll want to see our
+      hard-won conclusions about how this material is structured.&nbsp;
+      But in the meantime, having the explanations available may prove
+      worthwhile for those lucky(?) few who do have access.<br>
+    </p>
+    <h1>Table of Contents</h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#intro">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#layout">Layout of
+          Flight-Software Folders</a></li>
+      <li><a moz-do-not-send="true" href="#filetypes">File Types</a></li>
+      <li><a moz-do-not-send="true" href="#memory_configurations">Memory
+          Configurations</a></li>
+      <li><a moz-do-not-send="true" href="#bfs">BFS.SRC/, "BFS.SRC as
+          received"/, and BFS.rpts/</a></li>
+      <li><a moz-do-not-send="true" href="#oi301700">OI301700/ and
+          "OI301700 as received"/</a></li>
+      <li><a moz-do-not-send="true" href="#oi340600">OI340600/ and
+          "OI340600 as received"/</a></li>
+      <li><a moz-do-not-send="true" href="#mafgen">mafgen/</a></li>
+      <li><a moz-do-not-send="true" href="#halstat">HALSTAT.ASC</a></li>
+      <li><a moz-do-not-send="true" href="#linker">Link Editor Command
+          Cards</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#misc">Miscellaneous</a></li>
+    </ul>
+    <h1><a name="intro"></a>Introduction</h1>
+    <p>At this writing, all of the material is contained in a single
+      folder I call PFS/, which stands for Primary Flight Software, but
+      that's a misnomer since <i>all</i> available PFS, FCOS, BFS, and
+      BOS source materials are contained in this single folder.&nbsp;
+      This folder comprises a local-only <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/Git">git</a> repository that
+      for privacy reasons has no online version (at, say, GitHub).&nbsp;
+      Therefore, if you have access, you can make local changes to your
+      copy of PFS/, but cannot directly push any changes back upstream
+      to me.&nbsp;&nbsp; Methods for approaching this indirectly can be
+      discussed privately.<br>
+    </p>
+    <p>Material in PFS/ was received piecemeal, over the course of
+      several years, before which it was apparently passed around in
+      private hands, and is reportedly still in the hands of multiple
+      unknown individuals.&nbsp; I'm not privy to the provenance, or
+      have knowledge of that prior access, so don't bother to ask me.<br>
+    </p>
+    <p>In so far as flight-software source code is concerned, it was all
+      originally encoded in <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>, but when
+      received by me had at some time previously been re-encoded in
+      7-bit <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/ASCII">ASCII</a>, in a
+      generally-human-readable but not 100% perfect manner.&nbsp; For
+      example, EBCDIC characters not available in ASCII (¬ ¢) were
+      sometimes encoded using other ASCII-based 8-bit "code pages" (but
+      were garbage otherwise), and there were seemingly-random
+      incursions of non-ASCII characters such as the numeric code
+      0x00.&nbsp; To the best of my knowledge, all of those
+      EBCDIC-to-ASCII errors have now been corrected in PFS/.<br>
+    </p>
+    <p>Additionally, one provision of the private agreement I made to
+      obtain the material is that the source code would be anonymized by
+      removal of all personally-identifying information.&nbsp; The
+      anonymization technique replaces all programmer names (or
+      initials) with random-appearing strings like "^<i>n</i>", "\<i>n</i>",
+      "^<i>nn</i>" (padded with blanks), or "\<i>nn</i>" (padded with
+      blanks).&nbsp; This desire for anonymization is related to
+      requirements of the U.S. <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/Digital_Millennium_Copyright_Act">Digital
+        Millennium Copyright Act</a> (DMCIA), but appears to me to be a
+      misguided application of the law ... after all, knowing that
+      someone named (say) H. Potter did something to some file in June
+      of 1985 is not revealing anything personal (such as an address,
+      telephone number, etc.) about any individual person named H.
+      Potter.&nbsp; Files in some subdirectories of PFS/ have been
+      anonymized, but not others (as explained below), and the databases
+      for reversing the anonymization are contained in PFS/ as
+      well.&nbsp; Therefore, if the source material ever were to be
+      released more generally, beyond the core need-to-know group — say,
+      to any U.S. citizen qualifying under ITAR —, it might be
+      impossible to do it by direct distribution of PFS/.&nbsp; Rather:<br>
+    </p>
+    <ul>
+      <li><i>If</i> the current requirement for anonymization is still
+        in force, then the distributed version would have to remove the
+        anonymization databases, and the git history would have to be
+        scrubbed of all non-anonymized source-code files.</li>
+      <li><i>If</i> anonymization could be relaxed, then the source-code
+        files could be de-anonymized (my preference!) before
+        distribution, although PFS/ could be distributed as-is in that
+        situation.&nbsp; The file PFS/README.md explains the
+        anonymization process.&nbsp; The de-anonymization process has
+        not been developed, but should be reliable if implemented
+        properly.</li>
+    </ul>
+    <h1><a name="layout"></a>Layout of Flight-Software Folders</h1>
+    <p>Folders containing flight-software source code are laid out with
+      the following subdirectories:<br>
+    </p>
+    <ul>
+      <li>SSSRC/ contains "system software" such as FCOS and possibly
+        additional software that's always present regardless of the
+        memory configuration.&nbsp; Typically AP-101S assembly language
+        and HAL/S source-code files.<br>
+      </li>
+      <li>APPLSRC/ contains "application software" that runs atop the
+        system software.&nbsp; Such software may be present for some
+        flight phases and not others, and could potentially reside at
+        different memory addresses in different memory
+        configurations.&nbsp; Typically HAL/S source-code files and
+        input files for the Display Format Generator (DFG) preprocessor,
+        which converts these files to HAL/S.</li>
+      <li>INCL80/ contains fragmentary HAL/S source-code files — i.e.,
+        files which which don't by themselves comprise a complete
+        "compilation unit" and therefore cannot themselves to compiled
+        as-is by a HAL/S compiler —, but which can be included in other
+        HAL/S source-code files via the compiler directive "<code>D
+          INCLUDE filename</code>".&nbsp; Such files typically contain <code>STRUCTURE</code>
+        templates and <code>REPLACE</code> (macro-definition)
+        statements.</li>
+      <li>MLIB80/ contains assembly-language files of two types:&nbsp;
+        those includable in other assembly-language files explicitly via
+        the assembly-language <code>COPY</code> pseudo-op, and those
+        containing macro definitions expected always to be available to
+        the assembler.&nbsp; A file (MACROFILES.txt) is present in the
+        folder to specify which of these two categories each source-code
+        file falls into.</li>
+      <li>CON80/ contains files of "linkage-editor command cards", which
+        are basically sets of complex instructions to the linker,
+        telling it how to handle each object-code files created by the
+        HAL/S compiler or AP-101S assembler.&nbsp; <a
+          moz-do-not-send="true" href="#linker">This is discussed in
+          more detail later</a>.</li>
+      <li>PDTIN/ is TBD.&nbsp; May stand for Parameter Data Tape
+        INstructions, and seem to be associated with specific <code>COMPOOL</code>s.&nbsp;
+        Perhaps this relates to how telemetry downlists were stored on
+        tape?<br>
+      </li>
+      <li>PSFIN/ is TBD.&nbsp; I merely note that these files are very
+        similar in nature to the files in PDTIN/, and hence may relate
+        to some similar use.&nbsp; Perhaps this relates to how
+        downlisted data was formatted for viewing?<br>
+      </li>
+      <li>TOOLIN/ seems to relate (at least partially) to the "language
+        subset" feature of the HAL/S language.&nbsp; Apparently, it
+        works something like this:&nbsp; The so-called Software
+        Architecture Review Board (SARB) established a set of <a
+          moz-do-not-send="true"
+href="Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avionics%20Software%20-%20Programming%20Standards%20Document%20-%20Shuttle%20Flight%20Software.pdf">software-programming
+          standards</a> to which the flight software was required to
+        comply unless SARB granted exceptions for them.&nbsp; Compliance
+        was enforced via code reviews.&nbsp; The language-subset feature
+        facilitated the compliance reviews by causing the HAL/S compiler
+        to reject disallowed features.&nbsp; In so far as language
+        subsets are concerned, TOOLIN/ folder essentially is a library
+        of constraints on the HAL/S compiler.&nbsp; I don't actually
+        understand much more than I've just said — if even that much —,
+        and I'd recommend reading TOOLIN/$$SUBSET and/or the
+        software-programming standards document for more
+        information.&nbsp; As of this writing, no attempt has been made
+        to exercise the language-subset feature, so it may not even be
+        implemented correctly in the HAL/S compilers as ported for
+        modern use.&nbsp; But for all I know, TOOLIN/ may have
+        additional files unrelated to language subsets.</li>
+    </ul>
+    <h1><a name="filetypes"></a>File Types</h1>
+    <ul>
+      <li>*.hal:&nbsp; HAL/S source code</li>
+      <li>*.asm:&nbsp; AP-101S assembly-language source code</li>
+      <li>*.dfg:&nbsp; Display Format Generator (DFG) source code.&nbsp;
+        The display format generator is a preprocessor that converts
+        *.dfg to *.hal</li>
+      <li>*.con:&nbsp; Linkage-editor control-card files.&nbsp; <a
+          moz-do-not-send="true" href="#linker">They provide
+          instructions to the AP-101S linker</a>.<br>
+      </li>
+      <li>*.fcm:&nbsp; An image of AP-101S memory, typically comprising
+        a complete, executable array of software.</li>
+      <li>*.ASC, *.SRC, or no filename extension:&nbsp; Usually, source
+        material exactly as received, often as reports that need to be
+        processed in order to extract actual source code or executable
+        code.<br>
+      </li>
+    </ul>
+    <h1><a name="memory_configurations"></a>Memory Configurations</h1>
+    <h1><a name="bfs"></a>BFS.SRC/, "BFS.SRC as received"/, and
+      BFS.rpts/</h1>
+    <p>The contents of these directories are believed to provide perhaps
+      10% of the source code for the Backup Flight Software (BFS) and
+      Backup Operating System (BOS) associated with release OI-34.1, <a
+        moz-do-not-send="true" href="HAL.html#wildThings">for the
+        reasons described here</a>., and to be compatible with compiler
+      HAL/S-BFC 16.1.&nbsp; Since the version of the HAL/S compiler
+      available to use is 17.0, there should be compatibility between
+      the code and the compiler.<br>
+    </p>
+    <p>It is unclear, though, how much of BFS source code is available
+      versus how much of BOS source code is available, given that one of
+      the source-code files (in BFS.SRC/SSSRC/) is actually <i>called</i>
+      /BOS.asm, and that all of BOS.asm's direct dependencies
+      (ENTRYS.asm, EQU.asm, and so on) are actually available (in
+      BFS.SRC/MLIB80/).&nbsp; ENTRYS.asm does list many <code>EXTRN</code>
+      symbols, but at least upon superficial examination these appear to
+      be variables rather than subroutines.&nbsp; <br>
+    </p>
+    <p>In summary, it remains possible at this writing that the entirety
+      of BOS source code, other than allocations of <code>EXTRN</code>'d
+      variables, may indeed be present.&nbsp; This is something that
+      should be investigated.<br>
+    </p>
+    <h1><a name="oi301700"></a>OI301700/ and "OI301700 as received"/</h1>
+    <h1><a name="oi340600"></a>OI340600/ and "OI340600 as received"/</h1>
+    <h1><a name="mafgen"></a>mafgen/<br>
+    </h1>
+    <h1><a name="halstat"></a>HALSTAT.ASC</h1>
+    <h1><a name="linker"></a>Link Editor Command Cards<br>
+    </h1>
+    <h1><a name="misc"></a>Miscellaneous<br>
+    </h1>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2026-06-17<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
