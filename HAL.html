@@ -39,14 +39,17 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       </ul>
       <li><a moz-do-not-send="true" href="#dangers">Dangers Lurking In <i>New</i>
           HAL/S Source Code</a></li>
-      <li><a moz-do-not-send="true" href="#templib">Template Library and
-          Inclusion Library</a> </li>
+      <li><a moz-do-not-send="true" href="#templib">Template Library,
+          the Inclusion Library, and the SDF Library</a> </li>
       <ul>
         <li><a moz-do-not-send="true" href="#DINCLUDETEMPLATE">The
             Template Library and the "<code>D INCLUDE TEMPLATE</code>"
             Compiler Directive</a></li>
         <li><a moz-do-not-send="true" href="#DINCLUDE">The Inclusion
-            Library and the "<code>D INCLUDE</code>" Compiler Directive</a><br>
+            Library and the "<code>D INCLUDE</code>" Compiler Directive</a></li>
+        <li><a moz-do-not-send="true" href="#sdfLibrary">The Template
+            Library Part 2:&nbsp; The SDF Library and the "<code>D
+              INCLUDE SDF</code>" Compiler Directive</a><br>
         </li>
       </ul>
       <li><a moz-do-not-send="true" href="#options1">Compiler Options,
@@ -66,6 +69,10 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
         <li><a moz-do-not-send="true" href="valPASS2">Validating Phase
             1.5 and Phase 2</a></li>
         <li><a moz-do-not-send="true" href="#DebuggingCompiler">Debugging
+
+
+
+
 
 
 
@@ -176,6 +183,10 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
 
 
 
+
+
+
+
         probe</a>, though in that case the onboard computers were based
       on <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/RCA_1802">RCA 1802 COSMAC
@@ -208,6 +219,10 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
+
+
+
 
 
 
@@ -387,6 +402,10 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
+
+
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -396,6 +415,10 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
+
+
+
 
 
 
@@ -500,6 +523,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
       based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
+
+
+
+
 
 
 
@@ -788,6 +815,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         At present, modern implementations of PASS3/PASS3B/PASS4 have
         not yet been created, though as you can see from the table
         above, they're not needed merely for compilation of object code.<br>
@@ -917,10 +948,18 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
       decision to create <b>XCOM-I</b>, I had made a similarly-painful
       decision to manually port the source code for PASS1/PASS1B of
       HAL/S-FC into the Python 3 language.&nbsp; The result was a
       working version of PASS1/PASS1B that I call <b>HAL_S_FC</b>.&nbsp;
+
+
+
+
 
 
 
@@ -1067,6 +1106,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         specifies the "PARM field" covered in <a moz-do-not-send="true"
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>--parms="SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -1258,6 +1301,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
       though the extent to which the result is informative is
       questionable.&nbsp; But there will be more discussion of HALMAT
       later on, if that's something that seems interesting to you.<br>
@@ -1290,6 +1337,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       the report as eye candy!&nbsp; You can read more about it in the
       document "<a moz-do-not-send="true"
         href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+
+
+
+
 
 
 
@@ -1391,6 +1442,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
         Object File Format</a> ... or at least, <a
         moz-do-not-send="true" href="HALLINK101S.html">according to my
         write-up of it</a>, very close to that format!&nbsp; If you're
@@ -1408,6 +1463,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     Data Set), cards/, which is in PILOT-compatible format.&nbsp; There
     is no surviving information available about PILOT that I'm aware of,
     but fortunately <a moz-do-not-send="true" href="HALLINK101S.html">its
+
+
+
+
 
 
 
@@ -1501,6 +1560,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
           note:</b>&nbsp; Since the VM is a large download, it's not
         updated too often on our download page.&nbsp; Whereas all HAL/S
         and AP-101S related material is currently undergoing
@@ -1517,6 +1580,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     </p>
     <ol start="1">
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
+
+
+
 
 
 
@@ -1657,6 +1724,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
+
+
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -1672,6 +1743,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
+
+
+
 
 
 
@@ -1760,6 +1835,10 @@ href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">e
     <p>Rather than providing a comprehensive write-up here of
       installation steps, I'd refer you <a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/issues/1298">issue
+
+
+
+
 
 
 
@@ -1866,9 +1945,17 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
           book <i>Programming in HAL/S</i> 2nd edition</a> (or <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20in%20HAL-S.pdf">first
+
+
+
+
 
 
 
@@ -1978,10 +2065,18 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
           files intended to demonstrate capabilities of HAL/S</a>.<br>
       </li>
       <li><a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/Shuttle/19740017615.pdf#page=35">The
+
+
+
+
 
 
 
@@ -2112,16 +2207,17 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           </th>
           <th valign="bottom">HAL/S Compiler<br>
           </th>
-          <th valign="bottom" nowrap="nowrap">Flight<br>
+          <th valign="bottom" nowrap="nowrap">Possible<br>
+            First Flight<br>
           </th>
           <th valign="bottom">Notes<br>
           </th>
         </tr>
         <tr>
-          <td valign="top">PASS (PFS+FCOS)</td>
-          <td valign="top"> OI-34.07 (OI340700)</td>
-          <td valign="top">HAL/S-FC v32.0</td>
-          <td valign="top" nowrap="nowrap">STS-134<br>
+          <td valign="middle" align="center">PASS (PFS+FCOS)</td>
+          <td valign="middle" align="center"> OI-34.07 (OI340700)</td>
+          <td valign="middle" align="center"><b>HAL/S-FC</b> v32.0</td>
+          <td valign="middle" nowrap="nowrap" align="center">STS-134<br>
             FRR 31 Mar 2011<br>
             Launch 16 May 2011<br>
           </td>
@@ -2129,38 +2225,33 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             We have no source code, but rather have memory dumps from
             the onboard computers, accompanied by contemporary
             disassemblies of those memory dumps, made at the time by a
-            program called MAFGEN.&nbsp; MAFGEN disassemblies are quite
-            complete, because they draw not only upon the memory data
-            from the computers, but also a lot of additional metadata
-            (such as symbol tables) generated by the HAL/S
-            compiler.&nbsp; Why do I say it's OI-34.07?&nbsp; The
+            program called <b>MAFGEN</b>.&nbsp; <b>MAFGEN</b>
+            disassemblies are quite complete, because they draw not only
+            upon the memory data from the computers, but also a lot of
+            additional metadata (such as symbol tables) generated by the
+            HAL/S compiler.&nbsp; Why do I say it's OI-34.07?&nbsp; The
             reports explicitly say "AT RELEASE 034 VERSION 070" right on
-            them.<br>
+            them. <br>
             <br>
             <b>Regarding the compiler</b>:&nbsp; For STS-134, we have an
-            extensive report by a contemporary program called
-            HALSTAT.&nbsp; The HALSTAT report explicitly states that the
-            compiler used was "FC-32.0", which I'd interpret as
-            referring to HAL/S-FC release 32.0.<br>
+            extensive report by a contemporary program called <b>
+              HALSTAT</b>.&nbsp; The HALSTAT report explicitly states
+            that the compiler used was "FC-32.0", which I'd interpret as
+            referring to <b>HAL/S-FC</b> release 32.0.<br>
             <br>
-            <b>Regarding the flight number</b>:&nbsp; The MAFGEN reports
-            explicitly say "STS134". <br>
-            <br>
-            <b>Note</b>:&nbsp; STS-134 was the <b>7</b>th flight using
-            OI-34, and it specifically used OI-34.<b>07</b>.&nbsp; I'm
-            going to assume below that in general, OI-34.0<i><b>X</b></i>
-            was used on the <i><b>X</b></i>th flight using OI-34. <br>
+            <b>Regarding the flight number</b>:&nbsp; The <b>MAFGEN</b>
+            reports explicitly say "STS134", though as far as we can
+            tell, the software could have been flown earlier as well. <br>
           </td>
         </tr>
         <tr>
-          <td valign="top">PASS (PFS+FCOS)<br>
+          <td valign="middle" align="center">PASS (PFS+FCOS)<br>
           </td>
-          <td valign="top">OI-34.06 (OI340600)</td>
-          <td valign="top">HAL/S-FC v32.0</td>
-          <td valign="top" nowrap="nowrap">STS-133<br>
-            FRR 6 Oct 2010<br>
-            Launch 24 Feb 2011<br>
-          </td>
+          <td valign="middle" align="center">OI-34.06 (OI340600)</td>
+          <td valign="middle" align="center"><b>HAL/S-FC</b> v32.0</td>
+          <td valign="middle" nowrap="nowrap" align="center">STS-128<br>
+            FRR 18 Aug 2009<br>
+            Launch 28 Aug 2009 </td>
           <td valign="top"><b>Regarding the flight software</b>:&nbsp;
             As far as I know right now, this is a complete source-code
             tree.&nbsp; Why do I say it's OI-34.06?&nbsp; For one thing,
@@ -2169,47 +2260,38 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             PASS version mentioned in the software change logs is
             OI-34.06, and dates are consistent as well. <br>
             <br>
-            <b>Regarding the compiler</b>:&nbsp; The OI-34.07 HALSTAT
+            <b>Regarding the compiler</b>:&nbsp; The OI-34.07 <b>HALSTAT</b>
             report lists the compilation dates for various of the
             modules comprising OI340700 (see above), and those
             compilation dates are often years earlier.&nbsp; The
             earliest compilation date for OI340700 is listed as 31 Jul
-            2006.&nbsp; If HAL/S-FC 32.0 was being used in 2006, that
-            strongly suggests that it was used for <i>all</i> OI-34
-            flight-software versions, and hence it would have been used
-            specifically for OI-34.06.<br>
+            2006.&nbsp; If <b>HAL/S-FC</b> 32.0 was being used in 2006,
+            that strongly suggests that it was used for <i>all</i>
+            OI-34 flight-software versions, and hence it would have been
+            used specifically for OI-34.06.<br>
             <br>
-            <b>Regarding the flight</b>:&nbsp; STS-133 was the 6th
-            flight using OI-34, and as the notes for OI-34.07 above say,
-            this strongly suggests that OI-34.06 was used for it.<br>
-            <blockquote><font size="-1"><b>Aside:</b>&nbsp; It has been
-                suggested to me that it is perhaps likely that there is
-                no difference in the software source code for PFS
-                versions OI-34.06 and OI-34.07, but rather that the
-                differences lie in that different "patches" were
-                subsequently applied to the executable load.&nbsp; This
-                idea can be tested by examining the compilation dates
-                listed in the OI-34.07 HALSTAT report to see if any of
-                them seem to be too late for incorporation into
-                OI-34.06.&nbsp; The latest compilation date listed
-                therein is 15 Dec 2009, whereas the latest date
-                mentioned in the source code, I believe, is Apr 2008,
-                which is consistent with the proposal.&nbsp; However,
-                the source code change logs are replete with comments
-                about changes specific to OI-34.01, 02, 03, 04, 05, or
-                06.&nbsp; For example, there are 4 source-code files
-                with changes stated to be specific to OI-34.06, so I can
-                only assume that there really are source-code
-                differences other than patches among these versions.</font><br>
-            </blockquote>
+            <b>Regarding the flight</b>:&nbsp; I've gone through this
+            source code and extracted all of the internal references to
+            problem reports (CR's and DR's) that are cross-referenced to
+            OI-34.<i>xx</i> version numbers.&nbsp; Cooper Lushbaugh
+            (thanks, Cooper!) then found that all of the OI-34.06
+            modifications were explicitly listed in the <a
+              moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#page=15">STS-128
+
+
+              MOD FRR</a> as having been implemented already in flight
+            STS-128, as well as almost all of the OI-34.05 and OI-34.04
+            modifications as well.&nbsp; It's difficult to avoid the
+            inference that this software version was flown on STS-128.<br>
           </td>
         </tr>
         <tr>
-          <td valign="top">BFS<br>
+          <td valign="middle" align="center">BFS+BOS<br>
           </td>
-          <td valign="top">OI-34.01</td>
-          <td valign="top">HAL/S-BFC v16.1</td>
-          <td valign="top" nowrap="nowrap">STS-128<br>
+          <td valign="middle" align="center">OI-34.01</td>
+          <td valign="middle" align="center"><b>HAL/S-BFC</b> v16.1</td>
+          <td valign="middle" nowrap="nowrap" align="center">STS-128<br>
             FRR 18 Aug 2009<br>
             Launch 28 Aug 2009<br>
           </td>
@@ -2218,33 +2300,45 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             estimate that we have perhaps 10% of it or less.&nbsp; It is
             not extensive enough to provide many internal clues.&nbsp;
             The latest date and OI I've found mentioned in the code
-            itself are 12 Feb 2008 (file ENTRYS.asm), and OI-32.0,
-            respectively.&nbsp; However, the source code was extracted
-            from a report identified as "BFS341XXABT_CNTL(ABTCNTL)
-            VERSION 1" of 17 March 2008, which suggests that it is a
-            part of OI-34.1<br>
+            itself are 12 Feb 2008 (file ENTRYS.asm), and "OI341",
+            respectively.&nbsp; The source code itself was extracted
+            from a report whose page headings say BFS341XX&nbsp;
+            LISTINGS", both of which suggest to my mind that the
+            software is a part of OI-34.01.&nbsp; Separately, the report
+            strongly suggests compilation/assembly entirely on 17 Mar
+            2008.<br>
+            <br>
+            <b>Regarding the Backup Operating System (BOS)</b>:&nbsp;
+            This has yet to be proven, but my spidey-sense is tingling
+            that the BOS source code may be 100% complete, or close to
+            it.<br>
             <br>
             <b>Regarding the compiler</b>: The report from which the
             source code was extracted references "BFC-16.1", from which
-            I'd infer that it was compiled with HAL/S-BFC version
-            16.1.&nbsp; Note that the source code for the compilers
-            HAL/S-FC and HAL/S-BFC available to us are integrated, and
-            are for HAL/S-FC 32.0 and HAL/S-BFC 17.0&nbsp; Thus
-            HAL/S-BFC 16.1 is an earlier version of the compiler than
-            available to us.<br>
+            I'd infer that it was compiled with <b>HAL/S-BFC</b>
+            version 16.1.&nbsp; Note that the source code for the
+            compilers <b>HAL/S-FC</b> and <b>HAL/S-BFC</b> available
+            to us are integrated, and are for <b>HAL/S-FC</b> 32.0 and
+            <b>HAL/S-BFC</b> 17.0&nbsp; Thus <b> HAL/S-BFC</b> 16.1 is
+            an earlier version of the compiler than available to us.<br>
             <br>
-            <b>Regarding the flight</b>:&nbsp; STS-128 was the 1st
-            flight using OI-34, and as the notes for OI-34.07 above say,
-            this strongly suggests that OI-34.01 was used for it.</td>
+            <b>Regarding the flight</b>:&nbsp; If OI-34.06 was flown in
+            STS-128, as inferred previously, then by process of
+            elimination, since STS-128 was the 1st flight using OI-34,
+            if this software has been flown it must have first been
+            flown in STS-128.<br>
+          </td>
         </tr>
         <tr>
-          <td valign="top">PFS<br>
+          <td valign="middle" align="center">PASS<br>
+            (PFS+FCOS)<br>
           </td>
-          <td valign="top">OI-30.17 (OI301700)<br>
+          <td valign="middle" align="center">OI-30.17 (OI301700)<br>
           </td>
-          <td valign="top">HAL/S-FC prior to 32.0<br>
+          <td valign="middle" align="center"><b>HAL/S-FC</b> prior to
+            32.0<br>
           </td>
-          <td valign="top" nowrap="nowrap">STS-114<br>
+          <td valign="middle" nowrap="nowrap" align="center">STS-114<br>
             FRR 29 Jun 2005<br>
             Launch 26 Jul 2005<br>
           </td>
@@ -2252,27 +2346,24 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             This is a mostly-complete version of the Primary Flight
             Software (PFS) source code, I think, with gaps that can
             mostly be filled in without difficulty from other available
-            code.&nbsp; The source code for FCOS is absent.&nbsp; What
-            is my reason for believing that this is in fact version
-            OI-30.17?&nbsp; For whatever it's worth, it was labeled
-            "oi301700" when I received it, so somebody in the chain of
-            custody, whatever that may have been, believed it to be
-            so.&nbsp; But as far as evidence verifiable by me is
+            code.&nbsp; What is my reason for believing that this is in
+            fact version OI-30.17?&nbsp; For whatever it's worth, it was
+            labeled "oi301700" when I received it, so somebody in the
+            chain of custody, whatever that may have been, believed it
+            to be so.&nbsp; But as far as evidence verifiable by me is
             concerned, I note that OI-30.17 is the highest version
             mentioned in the change-logs provided by the comments within
             the source code.&nbsp; Further, the latest date found on
-            those change logs is consistent with OI-30, though we don't
-            know enough about OI-30.<i>x</i> in general to distinguish
-            between them by dates alone.<br>
+            those change logs is consistent with OI-30.<br>
             <br>
-            <b>Regarding the compiler</b>:&nbsp; The latest date in
-            HAL/S-FC 32.0 source-code program comments is 10 Jun 2005;
-            that indeed is prior to the launch of STS-114, but as
+            <b>Regarding the compiler</b>:&nbsp; The latest date in <b>
+              HAL/S-FC</b> 32.0 source-code program comments is 10 Jun
+            2005; that indeed is prior to the launch of STS-114, but as
             mentioned above, the compilation of the flight-software
-            modules may be years prior to the flight launch.&nbsp; The
-            interval between June 10 and the launch date seems too brief
-            to support the notion of HAL/S-FC 32.0 having been used for
-            STS-114 flight software. <br>
+            modules may be years prior to the flight launch.&nbsp; While
+            not impossible, the interval between June 10 and the launch
+            date seems too brief to support the notion of <b>HAL/S-FC</b>
+            32.0 having been used for STS-114 flight software. <br>
             <br>
             <b>Regarding the flight</b>:&nbsp; What is my reason for
             believing that this may have been flown on STS-114?&nbsp;
@@ -2281,8 +2372,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             flight numbers, but comments in the OI340600 code base (see
             above) mention STS-115, whereas the corresponding
             source-code file OI301700 code base doesn't mention it, so I
-            think we can infer that if this version was flown, it could
-            only have been on STS-114.</td>
+            think we can infer that this software was not flown on
+            STS-115.&nbsp; By process of elimination, if this version
+            was flown its first flight could only have been STS-114.</td>
         </tr>
       </tbody>
     </table>
@@ -2292,11 +2384,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       the New</h1>
     <h2><a name="ebcdic"></a>EBCDIC vs ASCII<br>
     </h2>
-    <img moz-do-not-send="true" src="encodingDEU.png" alt="" width="638"
-      height="468" align="right">The original HAL/S compiler, running on
-    an IBM System/360 computer as it did, expected that the underlying
-    encoding of textual characters such as letters and numbers was <a
+    The original HAL/S compiler, running on an IBM System/360 computer
+    as it did, expected that the underlying encoding of textual
+    characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
+
+
+
 
 
 
@@ -2361,19 +2456,72 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       <li>Uses '\' in place of end-of-file character, though this is
         very, very rare indeed.</li>
     </ul>
-    <p>These restrictions apply only to HAL/S source code.&nbsp; Any
-      human-readable reports generated by the compiler are pure 7-bit
-      ASCII with the substitutions mentioned, and may contain tab
-      characters.&nbsp; This should <i>not</i> be taken to imply that
-      character data is maintained internally by the compiler in ASCII
-      encoding, nor that all files output by the compiler have text
-      encoded in ASCII.&nbsp; In fact, that's not true:&nbsp;
-      Internally, the compiler uses mostly EBCDIC, and other than files
-      which are human-readable, characters are encoded in the same
-      manner as the original compiler encoded them.&nbsp; For example,
-      textual data in AP-101S object-code files uses Display Electronics
-      Unit (DEU) encoding (seen in the figure to the right), which is
-      neither EBCDIC nor ASCII, though in some ways being ASCII-like.<br>
+    <p><a
+href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
+          moz-do-not-send="true" src="encodingDEU.png" alt=""
+          title="Click to enlarge" width="638" height="468"
+          align="right" border="2"></a>These restrictions apply only to
+      HAL/S source code.&nbsp; Any human-readable reports generated by
+      our modern ports of the HAL/S compiler are pure 7-bit ASCII with
+      the substitutions mentioned, and may contain tab characters.&nbsp;
+      This should <i>not</i> be taken to imply that character data is
+      maintained internally by the modern compiler(s) in ASCII encoding,
+      nor that all files output by the compiler have text encoded in
+      ASCII.&nbsp; In fact, that's not true:&nbsp; Internally, the
+      modern compiler, just like the original compiler, continues to use
+      mostly EBCDIC, only translating to ASCII as needed.<br>
+    </p>
+    <p>But in passing it's worth mentioning the following difference in
+      behavior between the Intermetrics HAL/S compiler and "standard"
+      HAL/S compilers, even though it's <i>not</i> a difference in
+      behavior between the original Intermetrics compiler and our modern
+      ports of it:&nbsp; The peripheral device in the Shuttle that
+      displayed textual data, namely the Display Electronics Unit (DEU),
+      did <i>not</i> encode that textual data in EBCDIC, but rather in
+      encoding peculiar to the DEU, seen in the figure to the
+      right.&nbsp; While the DEU encoding is neither EBCDIC nor ASCII,
+      it is ASCII-like in some ways.&nbsp; The HAL/S compiler, <i>both</i>
+      in the original and the modern ports, caters to the needs of the
+      DEU like so:<br>
+    </p>
+    <ul>
+      <li>All quoted character strings are encoded (internally to the
+        compiler) using DEU</li>
+      <li>All other text (such a symbol names) are encoded using EBCDIC</li>
+    </ul>
+    <p>For example, if you had a HAL/S statement such as "<code>DECLARE
+        HELLO CHARACTER(20) INITIAL('HELLO');</code>", the compiler
+      would encode the <i>symbol</i> <code>HELLO</code> in EBCDIC as
+      the hexadecimal C8 C5 D3 D3 D6, but encode the <i>string</i>
+      'HELLO' in hexadecimal as 48 45 4C 4C 4F (which just happens to be
+      identical to the ASCII encoding as well). <br>
+    </p>
+    <p>What happens, you ask, if you needed a quoted string containing
+      one of the DEU character set's weird non-textual glyphs, such as
+      the division symbol or a right-arrow?&nbsp; That's where the red
+      notations in the figure to the right (click to enlarge) come into
+      play.&nbsp; Those are <i>escape sequences</i> that can be used in
+      quoted strings to get the "weird" characters.&nbsp; For example,
+      if you wanted a HAL/S statement to print the string "A ÷ B → C",
+      you might use<br>
+    </p>
+    <blockquote>
+      <pre>WRITE(6) 'A ¢/ B ¢3 C';</pre>
+    </blockquote>
+    <p>or more likely, as explained above,<br>
+    </p>
+    <blockquote>
+      <pre>WRITE(6) 'A `/ B `3 C';</pre>
+    </blockquote>
+    <p>See the <a moz-do-not-send="true"
+        href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=102">HAL/S-FC
+
+
+
+        User's Manual</a> for more info on this, though the table you'd
+      see there has a couple of errors in it that are corrected in our
+      representation of it here.&nbsp; (Thanks to Dan Weaver for the
+      info and the corrections!) <br>
     </p>
     <h2><a name="common2"></a>COMMON Memory</h2>
     <p>Much of the data transferred from one compiler pass to the next
@@ -2501,6 +2649,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         Separate compilation units are in separate files.&nbsp; Of
         course, definitions of blocks like <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>,
         etc., can be local to another block, so in that sense there can
@@ -2577,6 +2729,10 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
+
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -2590,6 +2746,10 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
+
+
+
 
 
 
@@ -2725,10 +2885,18 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
+
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
+
+
+
 
 
 
@@ -2792,6 +2960,10 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           of the <code>%SVC</code> macro, which inserts an <a
             moz-do-not-send="true"
             href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">AP-101S
+
+
+
+
 
 
 
@@ -2902,6 +3074,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Chapter 12, "Real-Time Statements"</a> isn't supported by
           the BFS version of the HAL/S compiler.&nbsp; This includes the
           keywords <code>SCHEDULE</code>, <code>TERMINATE</code>, <code>CANCEL</code>,
@@ -2930,7 +3106,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </ul>
       </ul>
     </ul>
-    <h1><a name="templib"></a>Template Library and Inclusion Library<br>
+    <h1><a name="templib"></a>Template Library, the Inclusion Library,
+      and the SDF Library<br>
     </h1>
     <h2><a name="DINCLUDETEMPLATE"></a>The Template Library and the "<code>D
         INCLUDE TEMPLATE</code>" Compiler Directive</h2>
@@ -3011,6 +3188,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
       It might look something like this in your HAL/S source code:<br>
     </p>
     <blockquote>
@@ -3019,6 +3200,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     <p> </p>
     <p>The line "<font color="#996633"><code>D INCLUDE TEMPLATE
           SOME_PROCEDURE</code></font>" is not a line of HAL/S code <i>per
+
+
+
+
 
 
 
@@ -3061,6 +3246,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
+
+
+
 
 
 
@@ -3186,6 +3375,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -3211,6 +3404,14 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     whenever you use the compiler <font color="#996633"><code> TEMPLATE</code></font>
     option, so that the libraries never get the chance to become
     unsynchronized.<br>
+    <br>
+    And <i>finally</i> finally, I'll let you in on a very fun little
+    secret.&nbsp; Or perhaps a "pro tip".&nbsp; Everything I just told
+    you is 100% right and exactly per the book.&nbsp; All the
+    documentation agrees!&nbsp; Plus, it seems to works when you try
+    it.&nbsp; You definitely needed to know about it. &nbsp; And yet ...
+    it's also misleadingly wrong.&nbsp; I'll eventually explain that
+    below when we arrive at a discussion of the SDF library.<br>
     <h2><a name="DINCLUDE"></a>The Inclusion Library and the "<code>D
         INCLUDE</code>" Compiler Directive</h2>
     <p>In addition to the template library, which is something that the
@@ -3226,6 +3427,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           INCLUDE TEMPLATE <i>name</i></code></font>" discussed above,
       the inclusion library exists to serve the compiler directive "<font
         color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
+
+
+
 
 
 
@@ -3310,6 +3515,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
         Filenames for inclusion files are limited to 8 characters.&nbsp;
         Furthermore, I think that the compiler will "descore" any
         filename you specify in "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>"
@@ -3352,6 +3561,163 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       add new files to an existing library, as long as you don't use the
       <font color="#996633"><code>--clear</code></font> switch.<br>
     </p>
+    <h2><a name="sdfLibrary"></a>The Template Library Part 2:&nbsp; The
+      SDF Library and the "<code>D INCLUDE SDF</code>" Compiler
+      Directive</h2>
+    <p><a moz-do-not-send="true" href="#DINCLUDETEMPLATE">Earlier we had
+        an extensive discussion of the so-called "template library"</a>,
+      and indeed it was perhaps a discussion that was more in-depth than
+      desired, for many folks' tastes.&nbsp; Well, it only gets worse,
+      and before proceeding I'd advise you to refresh your memory about
+      templates if you need to.<br>
+    </p>
+    <p>The melodramatic cliffhanger at the end of the earlier discussion
+      was that the explanation of the template library was both 100%
+      correct and yet misleadingly wrong.&nbsp; What's up with that?<br>
+    </p>
+    <p>One notable feature of the Intermetrics HAL/S development stack
+      was its eventual reliance of the very large amount of metadata
+      (beyond just the usual object code) generated by the
+      software-compilation process.&nbsp; This metadata was embodied in
+      something known as a Simulation Data File (SDF).&nbsp; As you may
+      imagine from the name, the SDF is produced by the HAL/S compiler
+      for the purpose of facilitating simulation of the compiled
+      code.&nbsp; You can think of it as a souped-up symbol table, which
+      I think it may have been all it was originally, but over the
+      course of time as its use expanded, a lot more metadata about the
+      code was piled into it.&nbsp; As you may recall, the HAL/S
+      compiler is partitioned into several "phases", of which phase 1
+      parses HAL/S source code, phase 2 produces object code that can be
+      separately linked and run, while phase 3 produces an SDF.&nbsp; So
+      in that sense, the SDF file is nice to have, optionally, but it's
+      not needed for producing an object file, and if you have no
+      intention (or means) of running simulations then there's really no
+      need for the SDF (or for phase 3 of the compiler) at all.&nbsp; As
+      I understand it, the problem with that mode of thinking is that
+      eventually <i>so much</i> data was piled into the SDF that the
+      SDF and software associated with it — like the <b>MAFGEN</b> and
+      <b>HALSTAT</b> report generators — became indispensable parts of
+      the development process rather than occasionally-useful
+      tools.&nbsp; In other words, at some point both phase 3 and the
+      SDF were no longer truly "optional".<br>
+    </p>
+    <p>What does that mean for us?&nbsp; Well, it has an implication
+      that's nowhere mentioned in any of the "standard" documentation
+      about HAL/S and HAL/S compilation, nor in the
+      Intermetrics/USA-specific documentation.&nbsp; Or if it is
+      mentioned, it's so subtle and obscure that you can only find it
+      mentioned if you already know about it.&nbsp; <br>
+    </p>
+    <p>At some point over the decades in which Space Shuttle
+      flight-software development took place, it occurred to somebody to
+      wonder why compilation of the flight software took so long.&nbsp;
+      One culprit was the templates being loaded via the "<code>D
+        INCLUDE TEMPLATE <i>file</i></code>" directives.&nbsp; While
+      it's true that many flight-software source-code files don't
+      include any templates, the average is nevertheless about 6
+      template inclusions per source file, with the champion being a
+      whopping 103 inclusions.&nbsp; Realize that a template for a
+      source-code file, in spite of having been produced by the
+      compiler, remains a HAL/S source code file; it hasn't been parsed,
+      but has merely been "compressed" by removal of multiple blank
+      spaces.&nbsp; So <i>every</i> time a template is included by
+      another source-code file, it is recompiled.&nbsp; If it is
+      included in 100 files, it is compiled 100 times.&nbsp; Somebody
+      then had the bright observation that the SDF for a <code>COMPOOL</code>
+      contained all of the information in the <code>COMPOOL</code>'s
+      template, but had already been precompiled!&nbsp; Therefore, if
+      the HAL/S compiler's first pass had means of including an SDF in
+      place of a template, for example via a compiler directive like "<code>D
+        INCLUDE SDF <i>file</i></code>", then compilation could be <i>a
+        lot faster</i>, since the already-compiled symbol-table info in
+      the SDF's could be used directly, without the time-wasting
+      recompilation there would have been with a template.<br>
+    </p>
+    <p>Good catch!&nbsp; On the other hand (they must have thought to
+      themselves) ... well, I don't know, going into all of the existing
+      source code and replacing all of the "<code>D INCLUDE TEMPLATE <i>file</i></code>"
+      directives by "<code>D INCLUDE SDF <i>file</i></code>" directives
+      sounds boring and time-consuming.&nbsp; Sigh!&nbsp; What to do,
+      what to do?&nbsp; Oh, oh, I know!&nbsp; Let's get them to change
+      the HAL/S compiler itself, so that when it finds a "<code>D
+        INCLUDE TEMPLATE <i>file</i></code>" directive in a source code
+      file, it's silently replaces it with an "<code>D INCLUDE SDF <i>file</i></code>"
+      directive, and only falls back on "<code>D INCLUDE TEMPLATE <i>file</i></code>"
+      if the "<code>D INCLUDE SDF <i>file</i></code>" didn't
+      work.&nbsp; Swell, everybody happy, work minimized!<br>
+    </p>
+    And there's an additional advantage, beyond just compilation
+    speed-up, from using SDF's in place of templates.&nbsp; Since they
+    are precompiled, inclusion of SDF's is no longer as order-sensitive
+    as inclusions of templates is.&nbsp; For example, if <code>COMPOOL</code>
+    A defines a <code>STRUCTURE</code> needed by <code>COMPOOL</code>
+    B, then <i>template</i> A must be included prior to template B or
+    else there will be an undefined-symbol error.&nbsp; But there's no
+    such dependence in the SDF's, so SDF A could be included either
+    before or after SDF B without any error.&nbsp; That allows the HAL/S
+    developer to become much sloppier in terms of verifying the
+    dependencies in their inclusions.<br>
+    <br>
+    In a perfect world, of course, it would have been nice if they had <i>documented</i>
+    that they were doing this so that hapless chumps such as ourselves
+    would have known not to trust the now-misleading documentation about
+    "<code>D INCLUDE TEMPLATE</code>" and the entirely-absent
+    documentation about "<code>D INCLUDE SDF</code>", but ... oh well,
+    that's life, isn't it?<br>
+    <p>Unfortunately, that "advantage" for the original developers
+      becomes a <i>dis</i>advantage if you have only templates and
+      don't have the SDF's, because you will experience mysterious
+      undefined-symbol errors that should not exist in flight software
+      that's known to compile correctly.&nbsp; Well, now you know
+      why!&nbsp; There happens to be a workaround for this particular
+      problem, which you can read about in <a moz-do-not-send="true"
+        href="#morePreprocessors">the section on preprocessors</a>.<br>
+    </p>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+
+
+        At this writing, phase 3 (PASS3) of the HAL/S compiler has not
+        yet been implemented, we have no means of generating SDF's, and
+        phase 1 (PASS1) of the compiler really does load only templates
+        and not SDF's.&nbsp; So my remarks below will be forward-looking
+        rather than describing what actually exists in the modern HAL/S
+        development system.</font><br>
+    </blockquote>
+    <p>Or similarly, with SDF's you can have symbols that are defined in
+      multiple <code>COMPOOL</code>'s, and as long as they are always
+      defined in the same way, there will be no problem.&nbsp; Whereas
+      with templates, you would experience multiply-defined-symbol
+      errors at compile time.&nbsp; As far as I know, there is no
+      workaround for this problem if you have only templates available
+      for inclusion.&nbsp; You need either transparent inclusion of
+      SDF's or else transparent inclusion of something very similar to
+      an SDF.<br>
+    </p>
+    <p>Like templates and include-files, SDF's are collected in a
+      "library" after they're created, and when the compiler seeks to
+      load an SDF, it does so from such a library.&nbsp; For us, for
+      PASS, this library will be a directory called SDFLIB/, and I don't
+      yet perceive there to be any need for a BFS equivalent.&nbsp;
+      Moreover, unlike with the template library and file-inclusion
+      library, the same SDFLIB/ is used for both the HALSFC and for
+      HAL_S_FC.py ports of the HAL/S compiler.&nbsp; SDFLIB/ models an
+      IBM System/360 <a moz-do-not-send="true"
+        href="https://www.ibm.com/docs/en/zos/3.2.0?topic=pds-structure">Partitioned
+
+
+
+        Data Set (PDS)</a>, but unlike the cases of the template library
+      and file-inclusion library, in which the PDS model was a simple,
+      flat model in which the only metadata for members of the PDS was
+      their member name, for SDFLIB/ the model is more accurate,
+      including other PDS metadata like so-called TTRN's, aliases, and
+      revision levels, but is not a model of so-called Partitioned Data
+      Set Extended (PDSE).<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <p> </p>
     <blockquote> </blockquote>
     <p> </p>
     <p> </p>
@@ -3459,6 +3825,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -3485,6 +3855,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -3667,6 +4041,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -3690,6 +4068,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
+
+
+
 
 
 
@@ -3799,6 +4181,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
+
+
+
 
 
 
@@ -4032,6 +4418,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -4046,6 +4436,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
+
+
+
 
 
 
@@ -4272,6 +4666,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -4346,9 +4744,17 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
+
+
+
 
 
 
@@ -4503,6 +4909,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
+
+
             data with the <font color="#663300"><code>REMOTE</code></font>
             attribute, which has caused me quite a lot of confusion
             personally, so I'll say a few words about it here.&nbsp;
@@ -4558,6 +4968,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
+
+
+
 
 
 
@@ -4839,6 +5253,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
               1, Unprintable</i><br>
           </td>
         </tr>
@@ -4950,8 +5368,16 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
               8-28</a> and on <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=197">page
+
+
+
+
 
 
 
@@ -5295,6 +5721,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -5344,6 +5774,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
+
+
+
 
 
 
@@ -5568,6 +6002,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
+
+
               in HAL/S</i>, etc.), and some which you will not (even
             though a theoretical interpretation is assigned to them):<br>
             <ul>
@@ -5634,6 +6072,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
                 invented the Virtual AGC Project:</li>
               <ul>
                 <li>For "modern" compilation (by <b>HALSFC</b> or <b>HAL_S_FC.py</b>),
+
+
+
+
 
 
 
@@ -5767,6 +6209,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
 
 
 
+
+
+
+
                 Shuttle Programs Orbiter Avionics Software Programming
                 Standard Document</a></i>.&nbsp; Alas, as of this
             writing we have not a single SAM in our possession.<br>
@@ -5845,12 +6291,20 @@ href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL
 
 
 
+
+
+
+
                       Language Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
                       href="Shuttle/19760007755.pdf">HAL/SM System
                       Functional Design Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%20Specification.pdf">HAL/SM
+
+
+
+
 
 
 
@@ -6050,6 +6504,10 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
         </font></font></blockquote>
     <p> </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
+
+
+
 
 
 
@@ -6409,6 +6867,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               production numbers are related to the BNF rules according
               to comments in the compiler's source code</a>.&nbsp; As
             they used to say, "You could look it up!"<br>
@@ -6432,6 +6894,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                 production trace available, though at present it applies
                 to the entire HAL/S source-code file, and cannot
                 selectively </font><font size="-1"><font size="-1">be </font>activated
+
+
+
+
 
 
 
@@ -6586,6 +7052,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -6646,6 +7116,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
+
+
+
 
 
 
@@ -6883,6 +7357,10 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
 
 
 
+
+
+
+
                 H(1)</code></font>" as described above.<br>
           </td>
         </tr>
@@ -7091,6 +7569,10 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
             comments in OPT source code call this "STACK TRACE".&nbsp;
             It is a toggle.&nbsp; The effect is similar but not
             identical to that of <a moz-do-not-send="true" href="#X5">compiler
+
+
+
+
 
 
 
@@ -7711,6 +8193,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -7781,6 +8267,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               PASS2 source code</a>.&nbsp; Which is not anything I'd
             normally suggest, since I'd like to thoroughly digest all of
             this subject matter and spit it out explicitly for you, so
@@ -7800,6 +8290,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
               <li>The most-common messages are emitted by the `EMITC`
                 `PROCEDURE`.&nbsp; These are of the format "<font
                   color="#663333"><code>%06X:%6d,&nbsp;&nbsp; %04X</code></font>",
+
+
+
+
 
 
 
@@ -7846,12 +8340,20 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
                 where the fields are the current "location counter" and
                 a "data word".<br>
               </li>
               <li>Finally, there are the messages emitted by the
                 `SAVE_LITERAL` `PROCEDURE` in GENERATE.xpl.&nbsp; These
                 messages are of the format "<font color="#663333"><code>%6d:%08X
+
+
+
+
 
 
 
@@ -7962,8 +8464,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
+
+
+
 
 
 
@@ -8289,6 +8799,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
                   </i></code></font></b><b>or </b><b><font
                 color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle"><br>
@@ -8438,6 +8952,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="middle" align="center"><b>n/a</b></td>
           <td valign="top">For use with the compiler directives "<code>D
               DEFINE <i>name</i></code>" and "<code>D CLOSE <i>name</i></code>",
+
+
+
+
 
 
 
@@ -8614,8 +9132,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               file SOURCECO.xpl of the HAL/S compiler's original source
               code</a>.&nbsp; The lines reading "<font color="#663300"><code>OUTPUT(9)
+
+
+
+
 
 
 
@@ -8717,6 +9243,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
+
+
+
 
 
 
@@ -8978,8 +9508,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         for a full interpretation, because litfile<i>x</i>.bin usually
         contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+
+
+
+
 
 
 
@@ -9235,6 +9773,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -9250,6 +9792,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
+
+
+
 
 
 
@@ -9353,6 +9899,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         Basic assembly-language source code has been ported to the C
         language have bugs that must be fixed.&nbsp; The source code for
         those patch files (patch*.c) are found in the subfolders PASS<i>X</i>.PROCS/,
+
+
+
+
 
 
 
@@ -9575,6 +10125,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -9655,6 +10209,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
         That information is just to help out the reader, though.&nbsp;
         HALMAT only cares that it's "Symbol #1", and not what it's
         particular name is in your imagination.<br>
@@ -9671,6 +10229,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
         reports.&nbsp; In this particular example, the pass 1 report
         says <font color="#663333"><code>1 M| HELLO:</code></font>
         followed by <font color="#663333"><code>1 M| PROGRAM;</code></font>.&nbsp;
+
+
+
+
 
 
 
@@ -9712,6 +10274,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     the sooner it will be 100% working.<br>
     <br>
     <a moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
+
+
+
+
 
 
 
@@ -9891,8 +10457,16 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
       litfile0.bin --common COMMON0.out.bin.gz</code> on the <b>yaHALMAT</b>
     command line.&nbsp; Why not?&nbsp; Well, as it happens, those are <b>yaHALMAT</b>'s
+
+
+
+
 
 
 
@@ -9935,6 +10509,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     the parser; <i>X</i>=2 refers to <b>HALSFC-OPT</b>, the optimizer;
     <i>X</i>=4 refers to <b>HALSFC-PASS2</b>, the code generator.&nbsp;
     So you can see why <i>X</i>=0 is appropriate for halmat.bin and <i>X</i>=2
+
+
+
+
 
 
 
@@ -10048,8 +10626,26 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     extreme as -2<sup>31</sup>=-2147483648).&nbsp; To get an integer to
     print in a field less than 11 characters wide, you actually have to
     make a non-trivial effort.<br>
-    <h1><a name="imponderable"></a>Other Imponderable Mysteries<br>
-    </h1>
+    <h1><a name="imponderable"></a>Other Imponderable Mysteries</h1>
+    <blockquote>
+      <p><b><font size="-1">Important note:</font></b><font size="-1">&nbsp;
+
+
+          Of the "mysteries" discussed below, it now appears that the
+          so-called PM2 mystery is entirely due to <a
+            moz-do-not-send="true" href="#sdfLibrary">the HAL/S
+            compiler's transparent SDF-inclusion feature</a> described
+          in an earlier section, and that the DI11 error is likely due
+          to it as well.&nbsp; I therefore should update the description
+          below.&nbsp; But as of this writing, an implementation of the
+          SDF-inclusion feature in the HAL/S compiler seems to be far in
+          the future, so I'm leaving the discussion as-is for now, since
+          I'd hate to change the discussion now only to find out far in
+          the future that I was right to begin with!&nbsp; But in the
+          meantime, just be aware that some of the "mysteries" may not
+          be quite as mysterious as suggested below.</font><br>
+      </p>
+    </blockquote>
     <p>Perhaps this is as salubrious time as any to dispose of an
       otherwise-unpleasant topic.&nbsp; The next section covers
       compilation of the PASS source code.&nbsp; For authenticity
@@ -10074,6 +10670,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       intractable problems in PASS source code which <b>HAL/S-FC</b>
       cannot handle in its modern incarnation(s) as <b>HALSFC</b> and <b>HAL_S_FC.py</b>,
       and I've expended enough effort on tracking down bugs in <b>HALSFC</b>'s
+
+
+
+
 
 
 
@@ -10147,10 +10747,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         To avoid a digression that's probably not of interest to you at
         this point, I'll just say that this problem is dissected <i>ad
           nauseam</i> in repository <a moz-do-not-send="true"
           href="https://github.com/virtualagc/virtualagc/issues/1280">issue
+
+
+
+
 
 
 
@@ -10173,6 +10781,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC">preprocessHALSFC</a></b>[.<a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC.bat">bat</a>])
+
+
+
+
 
 
 
@@ -10223,6 +10835,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
           #1281</a>, but there's presently no workaround available for
         it, short of modifying the PASS source code to avoid it.</li>
       <li><u>ZO3</u>:&nbsp; Some (many!) PASS HAL/S source-code files
@@ -10233,6 +10849,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         in the first pass (the parsing pass) of the compiler, ZO3 errors
         are triggered in the compiler's <i>optimization</i> pass ... an
         entirely separate program (<b>HALSFC-OPT</b>, versus <b>HALSFC-PASS1</b>/<b>HAL_S_FC.py</b>).&nbsp;
+
+
+
+
 
 
 
@@ -10256,6 +10876,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         it certainly raise substantial doubt.&nbsp; At any rate, you can
         read about this in repository <a moz-do-not-send="true"
           href="https://github.com/virtualagc/virtualagc/issues/1282">issue
+
+
+
+
 
 
 
@@ -10299,6 +10923,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         Most compilation units are not fully independent, and need to
         refer to some other compilation units.&nbsp; For example, a
         compilation unit might need to access a variable in a different
@@ -10320,7 +10948,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         combines the "object files" for each of the compilation units
         the compiler generates handles this, among other tasks.&nbsp;
         Now, the responsibility of the linker as I just described it
-        correspond to our "modern" linker program (<b>lnk101</b>), but
+        corresponds to our "modern" linker program (<b>lnk101</b>), but
         it must be admitted that we do not have the code for the
         contemporary linker <b>HALLINK</b>, and therefore cannot
         guarantee of our own knowledge that that's what it did.&nbsp; In
@@ -10348,6 +10976,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
           a discussion here</a>.&nbsp; Even though these pointers are
         (supposedly) never used, this is not regarded as a "good"
         feature in high-reliability software. ( I am saying this in an
@@ -10355,93 +10987,6 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         with the nickname "Tiny".)&nbsp; Our "modern" workaround for
         this is simply that the linker (<b>lnk101</b>) won't abort when
         it finds that some of the referenced object modules are missing.<br>
-      </li>
-      <li><u>Numeric literals</u>:&nbsp; When dealing with
-        floating-point numbers, modern computers tend to encode these
-        numbers using a standard known as <a moz-do-not-send="true"
-          href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>,
-        whereas HAL/S encoded floating point numbers using what's known
-        as <a moz-do-not-send="true"
-          href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
-
-
-
-
-
-
-
-
-
-
-          hexadecimal floating-point (HFP)</a>.&nbsp; It is certainly <i>possible</i>
-        for our Virtual AGC tools (<b>XPL-I</b>, <b>HALSFC</b>, <b>HAL_S_FC.py</b>,
-        etc.) to be refactored to use HFP throughout, but at present
-        they use the native floating-point systems in Python or C, and
-        translate back-and-forth between them and HFP only as
-        needed.&nbsp; This is both more efficient and more-accurate
-        numerically, but does have the potential for slight
-        incompatibilities between <b>HALSFC</b>/<b>HAL_S_FC.py</b> and
-        the original <b>HAL/S-FC</b> compiler.&nbsp; Where the
-        incompatibility is most notable is when numeric literals are
-        used in HAL/S source code, and we are attempting to validate
-        compiler behavior.&nbsp; Numeric literals, such as 1, 5, 34532,
-        or 1.23456E-12, are all converted to and store as
-        double-precision HFP. &nbsp; Validation of the HAL/S compiler,
-        or more accurately compiler+linker, refers to the process of
-        creating an executable load of PASS software and comparing that
-        load file in exhaustive detail to actual memory dumps from the
-        original Space Shuttle onboard computers.&nbsp; Consider the
-        example of the PASS variable with the declaration "<code>DECLARE
-          CGYS_TAC_BEARLO INITIAL(3.0979585)</code>".&nbsp; The software
-        has to deal with the literal 3.0979585 by encoding it (IEEE 754
-        or HFP).&nbsp; Encoding it into IEEE 754 and then back into
-        human-readable form we get 3.0979585 back again, so the encoding
-        in this case happens to be exact.&nbsp; Encoding as HFP (<code>SCALAR
-
-
-
-
-
-
-
-
-
-
-          DOUBLE</code> 0x4131913CEE9DD7ED, or <code>SCALAR SINGLE</code>
-        0x4131913C or 0x4131913D depending on rounding) and then back
-        into human-readable form again gives 3.0979585 or 3.0979576 or
-        3.0979586, depending on precision and rounding.&nbsp; So yes,
-        just due to the differing encoding there will possibly be some
-        discrepancy in the last decimal place or two, particularly with
-        <code>SCALAR SINGLE</code> as for <code>CGYS_TAC_BEARLO</code>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-        Presumably, determining the appropriate rounding scheme will
-        take care of the problem, no?&nbsp; No!&nbsp; Because it turns
-        out that the original <b>HAL/S-FC</b> <i>did not</i> always
-        convert floating-point literals into the <i>most-accurate</i>
-        HFP, and in those cases, even adopting full HFP computations
-        throughout, whatever rounding scheme we settle upon <i>cannot</i>
-        produce the same result in <b>HALSFC</b>/<b>HAL_S_FC.py</b> as
-        were produced by <b>HAL/S-FC</b>.&nbsp; Admittedly, those cases
-        are rare, but not non-existent.&nbsp; <a moz-do-not-send="true"
-          href="https://github.com/virtualagc/virtualagc/issues/1296">There's
-
-
-
-
-
-
-
-          a lengthy discussion here</a>.<br>
       </li>
     </ul>
     <h1><a name="morePreprocessors"></a>More About Preprocessors</h1>
@@ -10472,11 +11017,19 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
         But again, this preprocessing is done by the compiler itself
         rather than by a program dedicated to that purpose, just by
         managing the order in which we compile HAL/S source-code files.</li>
       <li>And I've said that "inclusion files" must be processed prior
         to their use, by means of a program I call <b>prepareINCLIB</b>.&nbsp;
+
+
+
+
 
 
 
@@ -10507,6 +11060,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       what we've implemented here at Virtual AGC, with a true
       stand-alone preprocessing program called <b>preprocessHALSFC</b>.<br>
     </p>
+    <blockquote>
+      <p><b><font size="-1">Note:</font></b><font size="-1">&nbsp; It <i>now</i>
+          seems likely that there was originally no preprocessor like <b>preprocessHALSFC</b>,
+          but rather that the HAL/S compiler's transparent SDF-inclusion
+          feature eliminated the <code>COMPOOL</code>-ordering
+          problem.&nbsp; But we won't know that for sure until the SDF
+          creation and SDF inclusion have actually been implemented in <b>HALSFC</b>
+          and/or <b>HAL_S_FC.py</b></font><br>
+      </p>
+    </blockquote>
     <p>On the other hand, there are preprocessors we <i>know</i> were
       used by the original developers, even though our visibility into
       how those preprocessors worked is limited, and the source for them
@@ -10665,6 +11228,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
       For the purpose of this discussion, there are two sub-directories
       of significance, namely:<br>
     </p>
@@ -10685,6 +11252,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>INCL80/ contains HAL/S source-code files that are intended
         only for importation into other HAL/S files via the HAL/S
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
+
+
+
 
 
 
@@ -10761,6 +11332,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
+
+
+
 
 
 
@@ -10929,6 +11504,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -10936,6 +11515,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
+
+
+
 
 
 
@@ -10997,6 +11580,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
+
+
+
 
 
 
@@ -11132,6 +11719,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -11149,6 +11740,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
+
+
+
 
 
 
@@ -11347,12 +11942,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
+
+
+
 
 
 
@@ -11448,7 +12051,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-05-20<br>
+          2026-06-23<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

@@ -10,22 +10,23 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-    <h1>
-      <script type="text/javascript">
+    <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software").replace("@SUBTITLE@","A Tour of Source Material"))
-</script>Disclaimer</h1>
+</script>
+    <h1>Disclaimer</h1>
     <p>This page is a tour of the various kinds of files we've received
       that comprise the source code of Space Shuttle flight software
       like PASS and BFS, the&nbsp; supporting analyses and reports
-      concerning it, and the hierarchical folder structure in which that
-      material resides.&nbsp; This tour is <i>not</i> a theory of
+      concerning them, and the hierarchical folder structure in which
+      that material resides.&nbsp; This tour is <i>not</i> a theory of
       operation as to how that software functions, other than
-      incidentally.&nbsp; <br>
+      incidentally and very minimally.&nbsp; <br>
     </p>
     <p>Unfortunately, at present, I'm not only treating the original
       material as export-restricted by the U.S. <a
         moz-do-not-send="true"
 href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">International
+
         Traffic in Firearms Regulations</a> (ITAR), but also am obliged
       to comply with private agreements about access restrictions that I
       had to make to obtain the material in the first place.&nbsp; The
@@ -37,10 +38,15 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
       performing other preservation activity for which access to source
       material would facilitate the process, and are willing to comply
       with my demands for secrecy, then you may qualify for
-      access.&nbsp; Mere interest in the topic or speculation as to
-      something you might like to do in the future if it tickles your
-      fancy is not sufficient.&nbsp; Sorry.&nbsp; (I really am, you
-      know!)<br>
+      access.&nbsp; Oh, and you'd better have been funneling the stuff
+      to me so that I can have formed an opinion of you and the
+      significance of the work you've been doing <i>vis-</i><i>à-vis</i>
+      Space Shuttling in Virtual AGC.&nbsp; Mere interest in the topic,
+      or speculation as to something you might like to do in the future
+      if it tickles your fancy, or even work done on the sly without
+      letting anyone know about it, is not sufficient.&nbsp;
+      Sorry.&nbsp; (I really am, you know!&nbsp; I'd release it all
+      freely, if I weren't constrained.)<br>
     </p>
     <p>This means that I'm giving you a "tour" of material to which
       very, very few of you have any current current access.&nbsp; Why
@@ -51,24 +57,28 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
       to see the material, at which point you'll want to see our
       hard-won conclusions about how this material is structured.&nbsp;
       But in the meantime, having the explanations available may prove
-      worthwhile for those lucky(?) few who do have access.<br>
+      worthwhile for those lucky(?) few who do have access.&nbsp; And it
+      doesn't hurt in refreshing my own memory either!<br>
     </p>
     <h1>Table of Contents</h1>
     <ul>
       <li><a moz-do-not-send="true" href="#intro">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#versioning">Flight Software
+          Versioning</a></li>
       <li><a moz-do-not-send="true" href="#layout">Layout of
           Flight-Software Folders</a></li>
       <li><a moz-do-not-send="true" href="#filetypes">File Types</a></li>
       <li><a moz-do-not-send="true" href="#memory_configurations">Memory
           Configurations</a></li>
-      <li><a moz-do-not-send="true" href="#bfs">BFS.SRC/, "BFS.SRC as
-          received"/, and BFS.rpts/</a></li>
+      <li><a moz-do-not-send="true" href="#halstat">(OI340100?)
+          HALSTAT.ASC</a></li>
+      <li><a moz-do-not-send="true" href="#bfs">(OI340100) BFS.SRC/,
+          "BFS.SRC as received"/, and BFS.rpts/</a></li>
       <li><a moz-do-not-send="true" href="#oi301700">OI301700/ and
           "OI301700 as received"/</a></li>
       <li><a moz-do-not-send="true" href="#oi340600">OI340600/ and
           "OI340600 as received"/</a></li>
-      <li><a moz-do-not-send="true" href="#mafgen">mafgen/</a></li>
-      <li><a moz-do-not-send="true" href="#halstat">HALSTAT.ASC</a></li>
+      <li><a moz-do-not-send="true" href="#mafgen">(OI340700) mafgen/</a></li>
       <li><a moz-do-not-send="true" href="#linker">Link Editor Command
           Cards</a><br>
       </li>
@@ -107,27 +117,29 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
       0x00.&nbsp; To the best of my knowledge, all of those
       EBCDIC-to-ASCII errors have now been corrected in PFS/.<br>
     </p>
-    <p>Additionally, one provision of the private agreement I made to
-      obtain the material is that the source code would be anonymized by
-      removal of all personally-identifying information.&nbsp; The
-      anonymization technique replaces all programmer names (or
-      initials) with random-appearing strings like "^<i>n</i>", "\<i>n</i>",
-      "^<i>nn</i>" (padded with blanks), or "\<i>nn</i>" (padded with
-      blanks).&nbsp; This desire for anonymization is related to
-      requirements of the U.S. <a moz-do-not-send="true"
+    <p><a name="anonymization"></a>Additionally, one provision of the
+      private agreement I made to obtain the material is that the source
+      code would be anonymized by removal of all personally-identifying
+      information.&nbsp; The anonymization technique replaces all
+      programmer names (or initials) with random-appearing strings like
+      "^<i>n</i>", "\<i>n</i>", "^<i>nn</i>" (padded with blanks), or "\<i>nn</i>"
+      (padded with blanks).&nbsp; This desire for anonymization is
+      related to requirements of the U.S. <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Digital_Millennium_Copyright_Act">Digital
+
         Millennium Copyright Act</a> (DMCIA), but appears to me to be a
       misguided application of the law ... after all, knowing that
       someone named (say) H. Potter did something to some file in June
       of 1985 is not revealing anything personal (such as an address,
-      telephone number, etc.) about any individual person named H.
-      Potter.&nbsp; Files in some subdirectories of PFS/ have been
-      anonymized, but not others (as explained below), and the databases
-      for reversing the anonymization are contained in PFS/ as
-      well.&nbsp; Therefore, if the source material ever were to be
-      released more generally, beyond the core need-to-know group — say,
-      to any U.S. citizen qualifying under ITAR —, it might be
-      impossible to do it by direct distribution of PFS/.&nbsp; Rather:<br>
+      telephone number, a lightning bolt on the forehead, etc.) about
+      any individual person named H. Potter.&nbsp; Files in some
+      subdirectories of PFS/ have been anonymized, but not others (as
+      explained below), and the databases for reversing the
+      anonymization are contained in PFS/ as well.&nbsp; Therefore, if
+      the source material ever were to be released more generally,
+      beyond the core need-to-know group — say, to any U.S. citizen
+      qualifying under ITAR —, it might be impossible to do it by direct
+      distribution of PFS/.&nbsp; Rather:<br>
     </p>
     <ul>
       <li><i>If</i> the current requirement for anonymization is still
@@ -138,30 +150,42 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
         files could be de-anonymized (my preference!) before
         distribution, although PFS/ could be distributed as-is in that
         situation.&nbsp; The file PFS/README.md explains the
-        anonymization process.&nbsp; The de-anonymization process has
+        anonymization process.&nbsp; The de-anonymization software has
         not been developed, but should be reliable if implemented
         properly.</li>
     </ul>
+    <h1><a name="versioning"></a>Flight Software Versioning</h1>
+    <p><a moz-do-not-send="true" href="Shuttle.html#Versioning">Space
+        Shuttle flight-software versioning is explained here</a>.&nbsp;
+      Suffice it to say that for our purposes the software versions are
+      of the form OI<i>mm</i>nn00, where <i>mm</i> is a major version
+      number such as 30 or 34 and <i>nn</i> is a minor version number
+      such as 01, 06, or 17.&nbsp; As for the 00 at the end?&nbsp; Who
+      knows?<br>
+    </p>
     <h1><a name="layout"></a>Layout of Flight-Software Folders</h1>
-    <p>Folders containing flight-software source code are laid out with
-      the following subdirectories:<br>
+    <p>Folders containing flight-software source code such as versions
+      OI340600 or OI301700 are laid out with the following
+      subdirectories:<br>
     </p>
     <ul>
-      <li>SSSRC/ contains "system software" such as FCOS and possibly
-        additional software that's always present regardless of the
-        memory configuration.&nbsp; Typically AP-101S assembly language
-        and HAL/S source-code files.<br>
+      <li>SSSRC/ contains "system software" such as FCOS (Flight
+        Computer Operating System) or BOS (Backup Operating System) and
+        possibly additional software that's always present regardless of
+        the memory configuration.&nbsp; Typically these are all AP-101S
+        assembly language and HAL/S source-code files.<br>
       </li>
       <li>APPLSRC/ contains "application software" that runs atop the
         system software.&nbsp; Such software may be present for some
         flight phases and not others, and could potentially reside at
         different memory addresses in different memory
-        configurations.&nbsp; Typically HAL/S source-code files and
-        input files for the Display Format Generator (DFG) preprocessor,
-        which converts these files to HAL/S.</li>
+        configurations.&nbsp; Typically these are all (or mostly) HAL/S
+        source-code files and input files for the Display Format
+        Generator (DFG) preprocessor, which converts these files to
+        HAL/S.</li>
       <li>INCL80/ contains fragmentary HAL/S source-code files — i.e.,
-        files which which don't by themselves comprise a complete
-        "compilation unit" and therefore cannot themselves to compiled
+        files which which don't by themselves comprise complete
+        "compilation units" and therefore cannot themselves be compiled
         as-is by a HAL/S compiler —, but which can be included in other
         HAL/S source-code files via the compiler directive "<code>D
           INCLUDE filename</code>".&nbsp; Such files typically contain <code>STRUCTURE</code>
@@ -181,14 +205,14 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
           moz-do-not-send="true" href="#linker">This is discussed in
           more detail later</a>.</li>
       <li>PDTIN/ is TBD.&nbsp; May stand for Parameter Data Tape
-        INstructions, and seem to be associated with specific <code>COMPOOL</code>s.&nbsp;
-        Perhaps this relates to how telemetry downlists were stored on
-        tape?<br>
+        INstructions, and individual files seem to be associated with
+        specific <code>COMPOOL</code>s.&nbsp; Perhaps this relates to
+        how telemetry downlists were stored on tape?<br>
       </li>
       <li>PSFIN/ is TBD.&nbsp; I merely note that these files are very
-        similar in nature to the files in PDTIN/, and hence may relate
-        to some similar use.&nbsp; Perhaps this relates to how
-        downlisted data was formatted for viewing?<br>
+        similar in nature to the files in PDTIN/, and hence may have
+        some related use.&nbsp; Perhaps they determine how downlisted
+        data was expected to be formatted for viewing?<br>
       </li>
       <li>TOOLIN/ seems to relate (at least partially) to the "language
         subset" feature of the HAL/S language.&nbsp; Apparently, it
@@ -196,10 +220,11 @@ href="https://en.wikipedia.org/wiki/International_Traffic_in_Arms_Regulations">I
         Architecture Review Board (SARB) established a set of <a
           moz-do-not-send="true"
 href="Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avionics%20Software%20-%20Programming%20Standards%20Document%20-%20Shuttle%20Flight%20Software.pdf">software-programming
+
           standards</a> to which the flight software was required to
         comply unless SARB granted exceptions for them.&nbsp; Compliance
-        was enforced via code reviews.&nbsp; The language-subset feature
-        facilitated the compliance reviews by causing the HAL/S compiler
+        was enforced via code audits.&nbsp; The language-subset feature
+        facilitated the compliance audits by causing the HAL/S compiler
         to reject disallowed features.&nbsp; In so far as language
         subsets are concerned, TOOLIN/ folder essentially is a library
         of constraints on the HAL/S compiler.&nbsp; I don't actually
@@ -212,6 +237,12 @@ href="Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avi
         modern use.&nbsp; But for all I know, TOOLIN/ may have
         additional files unrelated to language subsets.</li>
     </ul>
+    <p>I'd note that FCOS seems to be written entirely in assembly
+      language, with filenames of the form FC<i>xxxxxx</i>.asm, but also
+      that there are so very many source-code files, you should be
+      cautious of any blanket categorizations like this prior to
+      successfully building and running the software they concern.<br>
+    </p>
     <h1><a name="filetypes"></a>File Types</h1>
     <ul>
       <li>*.hal:&nbsp; HAL/S source code</li>
@@ -225,47 +256,516 @@ href="Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avi
       </li>
       <li>*.fcm:&nbsp; An image of AP-101S memory, typically comprising
         a complete, executable array of software.</li>
-      <li>*.ASC, *.SRC, or no filename extension:&nbsp; Usually, source
-        material exactly as received, often as reports that need to be
-        processed in order to extract actual source code or executable
-        code.<br>
+      <li>*.ASC or else no filename extension at all:&nbsp; Usually,
+        source material exactly as received, often as reports that need
+        to be processed in order to extract actual source code or
+        executable code.<br>
       </li>
     </ul>
     <h1><a name="memory_configurations"></a>Memory Configurations</h1>
-    <h1><a name="bfs"></a>BFS.SRC/, "BFS.SRC as received"/, and
-      BFS.rpts/</h1>
+    <p><a href="shuttle-memory-configurations.png"><img
+          moz-do-not-send="true" src="shuttle-memory-configurations.png"
+          alt="" title="Click to enlarge" width="400" height="301"
+          align="right" border="2"></a>To understand some of the files
+      found in PFS/, it's necessary to understand the concept of PASS
+      "memory configurations" first.&nbsp; This concept applies <i>only</i>
+      to PASS, as far as I know, and not to BFS.<br>
+    </p>
+    <p>PASS executable code is built from the source-code files
+      comprising it, but not all of the executable code is loaded into
+      any given GPC (of which there are 5 in the Shuttle) at any
+      time.&nbsp; Rather, only those portions of the executable code
+      needed for the operational role currently being served by the GPC
+      are loaded into it.&nbsp; Those executable-code sets consist of 9
+      distinct predefined <i>memory configurations</i>, though not all
+      of the predefined configurations are applicable to all of the
+      Shuttle flights, so for some flights, some of the predefined
+      memory configurations may be unavailable.&nbsp; In general, the
+      memory configurations can be related to the applicable "major
+      functions" — Guidance/Navigation/Control (GNC), System Maintenance
+      (SM), or Payload (PL) —, and to the mission phases, also known as
+      Operational Sequences (OPS).&nbsp; <br>
+    </p>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
+        The use of the PL acronym is curious, since the PL major mode
+        turns out to have little or nothing to do with the
+        payload.&nbsp; As late as 2006, the <a moz-do-not-send="true"
+          href="Shuttle/Crew%20Software%20Interface.pdf#page=8"><i>Crew
+            Software Interface</i></a> document described it as:</font><font
+        size="-1">&nbsp; "Payloads (PL): This major function contains
+        utility software that is used only in the</font><font size="-1">
+        event of a malfunction. Future flights may include some payload
+        support software</font><font size="-1"> in PL; however, PL is
+        generally unsupported. An unsupported major function is</font><font
+        size="-1"> defined as any major function that, at a given time,
+        is not being processed by any of</font><font size="-1"> the
+        GPCs." </font><br>
+    </blockquote>
+    <p>This is neatly summed up graphically in the figure to the right,
+      and can be summarized in words as:<br>
+    </p>
+    <ol start="0">
+      <li>OPS 0 ("SSW"), in which the memory configuration consists <i>just</i>
+        of System Software, such as the Flight Computer Operating System
+        (FCOS) and a selection of application software that's always
+        present in every memory configuration.&nbsp; The other memory
+        configurations listed below contain the entirety of OPS 0 plus
+        other application code.<br>
+      </li>
+      <li>GNC OPS 1 and OPS 6 (sometimes OPS 1/6 for short, or "G16"),
+        which is the ascent or abort phase of the flight.&nbsp; The
+        software for OPS 1 and OPS 6 is the same, because there's no
+        time to load different software if an abort is suddenly needed.</li>
+      <li>GNC OPS 2 ("G2"), for the on-orbit flight phase.</li>
+      <li>GNC OPS 3 ("G3"), for the entry flight phase.</li>
+      <li>SM OPS 2 ("S2"), for the on-orbit flight phase.</li>
+      <li>SM OPS 4 ("S4"), also for the on-orbit flight phase ... and
+        no, I don't know how that differs from "S2".</li>
+      <li>PL OPS 9 ("P9"), for Mass Memory Unit (MMU) utility
+        operations.</li>
+      <li>(intentionally blank)<br>
+      </li>
+      <li>GNC OPS 8 ("G8"), also for the on-orbit flight phase.</li>
+      <li>GNC OPS 9 ("G9"), for the pre-launch or post-landing flight
+        phases.</li>
+    </ol>
+    <p>For example, for flight STS-134, the memory configurations SSW,
+      G9, G16, G2, G8, G3, S2, and P9 were available, but S4 was not, I
+      believe, and any of them other than S4 could in principle be
+      downloaded from the Mass Memory Unit into any of the 5 GPC's at
+      any time.<br>
+    </p>
+    <h1><a name="halstat"></a>(OI340100?) HALSTAT.ASC</h1>
+    <p><b>HALSTAT</b> was a general-purpose tool to report on the
+      characteristics of an already-compiled HAL/S program, such as the
+      PASS software itself.&nbsp; <b>HALSTAT</b>'s speciality was
+      giving a global cross-reference of all HAL/S symbols (variables,
+      compilation units, functions, procedures, etc.), together with
+      top-level memory maps.
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Recall that the HAL/S
+          compiler came in two flavors, one of which was used for
+          compiling PASS, and one of which was used for compiling
+          BFS)&nbsp; HALSTAT is specific to compilations performed by
+          the PASS version of the HAL/S compiler.&nbsp; For compilations
+          by the BFS version of the compiler, there was a different
+          tool, from which no remnants are currently known to have
+          survived.&nbsp; <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/MISCELLANEOUS/HALSTAT.xpl">As
+
+            for <b>HALSTAT</b> itself, we actually have original XPL/I
+            source code for it</a>, though for technical and pragmatic
+          reasons no attempt has yet been made at this writing to
+          actually build a modern executable for it.&nbsp; <br>
+        </font></p>
+      <p><font size="-1">The "technical reason" is that some auxiliary
+          source files seem to be missing — STND, CONV, TRACE, EXPAND,
+          VMEM1X, VMEM2X, VMEM3X, and VMEM4X</font><font size="-1"><font
+            size="-1"> — and that it seems to require SDFPKG (an IBM BAL
+            program not yet ported into the modern world), while the
+            "pragmatic reason" is that the <b>HALSTAT</b> uses as input
+            some files that are produced by HAL/S-compiler passes that
+            are not yet implemented. &nbsp; </font> </font></p>
+    </blockquote>
+    Which leads me to the file HALSTAT.ASC.&nbsp; This is a report
+    produced by the <b>HALSTAT</b> program, for PASS software OI340100
+    ... <i>maybe</i>.&nbsp; The report indicates that both STS-134,
+    which would be OI340700, and "OI034/R1", which could be OI340100.
+    The answer remains TBD at this point, but can probably be discovered
+    if enough diligence is applied to it.<br>
+    <br>
+    The report has many interesting features, of which here are some:<br>
+    <ul>
+      <li>It reports on <a moz-do-not-send="true"
+          href="#memory_configurations">memory configurations</a> BOOT,
+        SSW, G16, G2, G3, G8, G9, S2, S4, P9, and SSLS.<br>
+      </li>
+      <li> Lists each HAL/S source-code file that had been compiled,
+        including the date and time of compilation, the compiler
+        switches used by the HAL/S compiler, and various statistics
+        about the compilation process.&nbsp; [<b>Note</b>:&nbsp; I don't
+        think the listed compiler options are actually complete.]&nbsp;
+        The date/time of compilation is instructive, because in some
+        cases it had been years earlier, indicating that when HAL/S
+        files were compiled, their object code was stored in a library
+        for later retrieval, and thus they were not necessarily build at
+        the time the memory configuration containing them was.</li>
+      <li>Lists external objects (like called procedures and <code>COMPOOL</code>s)
+
+        used by each source-code file.</li>
+      <li>Lists HAL/S statement counts.</li>
+      <li>Lists CSECTs (by name, size, and <i>address</i>) for each
+        memory configuration in which the HAL/S file appears.&nbsp; Note
+        that addresses may differ from one memory configuration to the
+        next.</li>
+      <li>Has extensive symbol tables, including usage inconsistencies
+        across memory configurations.<br>
+      </li>
+    </ul>
+    <h1><a name="bfs"></a>(OI340100) BFS.SRC/, "BFS.SRC as received"/,
+      and BFS.rpts/</h1>
     <p>The contents of these directories are believed to provide perhaps
       10% of the source code for the Backup Flight Software (BFS) and
       Backup Operating System (BOS) associated with release OI-34.1, <a
         moz-do-not-send="true" href="HAL.html#wildThings">for the
-        reasons described here</a>., and to be compatible with compiler
-      HAL/S-BFC 16.1.&nbsp; Since the version of the HAL/S compiler
-      available to use is 17.0, there should be compatibility between
-      the code and the compiler.<br>
+        reasons described here</a>, and to have been compiled with
+      compiler HAL/S-BFC 16.1.&nbsp; Since the version of the HAL/S
+      compiler available to <i>us</i> is 17.0, there should be backward
+      compatibility between the code and the compiler.<br>
     </p>
-    <p>It is unclear, though, how much of BFS source code is available
-      versus how much of BOS source code is available, given that one of
-      the source-code files (in BFS.SRC/SSSRC/) is actually <i>called</i>
-      /BOS.asm, and that all of BOS.asm's direct dependencies
-      (ENTRYS.asm, EQU.asm, and so on) are actually available (in
-      BFS.SRC/MLIB80/).&nbsp; ENTRYS.asm does list many <code>EXTRN</code>
-      symbols, but at least upon superficial examination these appear to
-      be variables rather than subroutines.&nbsp; <br>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; It is unclear, though, how
+          much of BFS source code is available versus how much of BOS
+          source code is available.&nbsp; One of the source-code files
+          (in BFS.SRC/SSSRC/) is actually <i>called</i> BOS.asm, and
+          all of BOS.asm's direct dependencies (ENTRYS.asm, EQU.asm, and
+          so on) are actually available (in BFS.SRC/MLIB80/).&nbsp;
+          ENTRYS.asm does list many <code>EXTRN</code> symbols, but at
+          least upon superficial examination these appear to be
+          variables rather than subroutines, and the assembler assigns
+          actual addresses to these as if they were non-<code>EXTRN</code>.&nbsp;
+
+          In summary, it remains possible at this writing that the
+          entirety of BOS source code may indeed be present.&nbsp; This
+          is something that should be investigated.</font><br>
+      </p>
+    </blockquote>
+    <p>As far as the specific subfolders are concerned:<br>
     </p>
-    <p>In summary, it remains possible at this writing that the entirety
-      of BOS source code, other than allocations of <code>EXTRN</code>'d
-      variables, may indeed be present.&nbsp; This is something that
-      should be investigated.<br>
-    </p>
+    <ul>
+      <li>"BFS.SRC as received"/ is, as it sounds, the material just as
+        I received it.&nbsp; Specifically, the file&nbsp; "BFS.SRC as
+        received"/BFS_OI_BUILD.ASC is what I received.&nbsp; This file
+        is not source code as such.&nbsp; Rather, it is a <i>report</i>
+        that was made by a program perhaps called "RELIST" out of
+        various reports previously created separately by the HAL/S
+        compiler and the AP-101S assembler.&nbsp; The file
+        BFS_OI_BUILD.ASC has further been processed (by me) to create
+        hopefully-correct (non-anonymized) source-code files in the
+        subfolders SSSRC/, APPLSRC/, and MLIB80/.</li>
+      <li>BFS.rpts/ contains files obtained by splitting the file
+        BFS_OI_BUILD.ASC along compiler-report and assembler-report
+        boundaries, but without extraction of source code.&nbsp; In
+        other words, the hope is that if the available BFS source-code
+        files were compiled/assembled, the compiler/assembler would
+        produce the reports found in this directory.&nbsp; These files
+        have not been anonymized, and therefore should not be
+        redistributed as-is.&nbsp; Note that some of these reports
+        contain object code which in principle should be directly
+        comparable to reports generated by PASS 2 of the modern port of
+        the HAL/S compiler, but this comparison has not yet been
+        performed as of this writing.<br>
+      </li>
+      <li>BFS.SRC/ contains the anonymized source-code files obtained by
+        splitting BFS_OI_BUILD.ASC, as outfitted with standard Virtual
+        AGC source-code file header.&nbsp; In other words, <i>these</i>
+        are the files that would be redistributed to the
+        non-need-to-know group, were it possible to do so, as well as
+        being the files we would compile/assemble using the modern ports
+        of the HAL/S compiler and assembler.<br>
+      </li>
+    </ul>
     <h1><a name="oi301700"></a>OI301700/ and "OI301700 as received"/</h1>
+    <p>PASS version OI30.17 source code, including both the Flight
+      Computer Operating System (FCOS) and the Primary Flight Software
+      (PFS).</p>
+    <p>As might be suspected from the names, "OI301700 as received"/
+      contains the files "just as I received them", but that's not quite
+      true.&nbsp; A number of adjustments have in fact been made to
+      them.&nbsp; Those adjustments are described well in the file
+      README.md in that directory, so I'd recommend reading it.&nbsp;
+      I'd merely reiterate (from that README) that these files are not
+      source code as such, but rather are similar to the reports
+      generated by pass 1 of the HAL/S compiler (for HAL/S files) or by
+      the AP-101S assembler (for AP-101S assembly-language files).&nbsp;
+      As a result, these files <i>contain</i> most of the source code,
+      but cannot themselves be directly compiled or
+      assembled.&nbsp;&nbsp; When I say they are "similar" to compiler
+      reports, I mean just that:&nbsp; They are formatted similarly but
+      not identically to compiler reports, but do not contain the full
+      complement of information found in compiler reports, such as the
+      list of compiler options used, date of compilation, compiler
+      version used, symbol table, etc.&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Note:</b>&nbsp; the files in "OI301700 as
+          received"/ have not been <a moz-do-not-send="true"
+            href="#anonymization">anonymized</a>, and therefore will not
+          be candidates for distribution as-is (if that ever is allowed)
+          to the non-core group.</font><br>
+      </p>
+    </blockquote>
+    <p>Therefore, in all cases, the source code had to be extracted via
+      software from the files in "OI301700 as received"/.&nbsp; This
+      extraction was performed by the Python script
+      PFS/unprint.py.&nbsp; Extracted files — anonymized and with
+      Virtual AGC file headers — are what can be found in the folder
+      OI301700/.<br>
+    </p>
+    <p>Some facts to take note of:<br>
+    </p>
+    <ul>
+      <li>The "as received" assembly-language files contain the object
+        code (or at least a human-readable form of it) as produced by
+        the Shuttle-era assembler, but the extracted source-code files
+        do not.</li>
+      <li>Because the as-received files were <i>reports</i> rather than
+        source code, the source-code had been prettified and converted
+        to the "mathematical" format (Exponent/Main/Subscript lines,
+        better indentation and whitespace distribution, numerical
+        indication of indentation depth, and so on), as well as having
+        been formatted for 100+ character "cards" vs the 80-character
+        punchcards of actual source code.&nbsp; As such, even in cases
+        where OI301700 contains source code precisely identical to
+        OI340600 (see next section), differences in formatting will
+        generally make them <i>appear</i> to be different.&nbsp; The
+        only real way to know if a source file in OI301700 is "the same"
+        as one in OI340600 is to compile both of them with the modern
+        HAL/S compiler and see if they produce identical reports.</li>
+      <li>I said above that "most" of the source code for OI301700 is
+        present.&nbsp; Why only "most" rather than "all"?&nbsp; HAL/S
+        files use compiler directives like <code>D INCLUDE <i>file</i></code>
+        or <code>D INCLUDE TEMPLATE <i>file</i></code> to import code
+        from other HAL/S files.&nbsp; By default, it then lists the code
+        from those other files (which themselves are usually not
+        compiled separately) in the output report, from which the the
+        extraction software can extract it.&nbsp; But <i>sometimes</i>,
+        the compiler directives I just mentioned are used with an option
+        called <code>NOLIST</code>.&nbsp; If that option is present,
+        then the imported code will <i>not</i> be shown in the
+        report.&nbsp; If the imported file is never itself compiled, and
+        if all of the compiler directives used to import it into another
+        HAL/S file have used <code>NOLIST</code>, then we are left with
+        no information about the file's contents.&nbsp; It will often
+        happen that even if that's the case, there will be a similar or
+        identical file (of the same name) in OI340600 that we can use
+        instead.&nbsp; Are there still source files for OI301700 missing
+        after all of those options have been exhausted?&nbsp; At this
+        writing, I don't yet know.</li>
+      <li>HAL/S macros defined via the <code>REPLACE</code> statement
+        are by default <i>not</i> visibly expanded in the output
+        reports.&nbsp; However, HAL/S has an an optional way to do so,
+        by enclosing the name of the macro within paired characters ¢
+        (or conventionally, a backtick ` in our modern port of the HAL/S
+        compiler).&nbsp; For example, if you had a macro called <code>MYMACRO</code>,
+        and invoked it as just <code>MYMACRO</code>, then the compiler
+        would expand it just fine, but all that would show up in the
+        output report is just <code>MYMACRO</code>.&nbsp; Whereas if it
+        were instead invoked as <code>¢MYMACRO</code><code>¢</code> (or
+        <code>`MYMACRO`</code>) then the full expanded form of the macro
+        would show up in the output report.&nbsp; Functionally, of
+        course, this is fine and will produce the same result after
+        compilation.&nbsp; But it is one more way in which the extracted
+        source code will differ from the original source code.</li>
+      <li>Any slight changes for facilitating modern compilation will
+        have been made <i>only</i> to OI301700/.<br>
+      </li>
+    </ul>
     <h1><a name="oi340600"></a>OI340600/ and "OI340600 as received"/</h1>
-    <h1><a name="mafgen"></a>mafgen/<br>
-    </h1>
-    <h1><a name="halstat"></a>HALSTAT.ASC</h1>
-    <h1><a name="linker"></a>Link Editor Command Cards<br>
-    </h1>
-    <h1><a name="misc"></a>Miscellaneous<br>
-    </h1>
+    <p>PASS version OI34.06 source code, including both the Flight
+      Computer Operating System (FCOS) and the Primary Flight Software
+      (PFS).<br>
+    </p>
+    <p>As might be suspected from the names, "OI340600 as received"/
+      contains the files "just as I received them".&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Note:</b>&nbsp; the files in "OI340600 as
+          received"/ have not been <a moz-do-not-send="true"
+            href="tour-shuttle-source.html#anonymization">anonymized</a>,
+          and therefore will not be candidates for distribution as-is
+          (if that ever is allowed) to the non-core group.</font><br>
+      </p>
+    </blockquote>
+    <p>The contents of OI340600/ differ in that the files have been
+      anonymized and Virtual AGC file-headers added to them.&nbsp;
+      Slight changes in the form of conditional compilation (via the
+      CARDTYPE compiler option) will have been made <i>only</i> in
+      OI340600/<br>
+    </p>
+    <h1><a name="mafgen"></a>(OI340700) mafgen/</h1>
+    <p><a moz-do-not-send="true" href="#halstat">The <b>HALSTAT</b>
+        report-generation program</a> was described earlier.&nbsp; That
+      program had a successor program, <b>MAFGEN</b>.&nbsp; The two
+      programs had different emphases, in that <b>HALSTAT</b> tried to
+      provide a good top-level horizontal view of how the PASS software
+      fit together, in all of its memory configurations; whereas <b>MAFGEN</b>
+      tried to provide a very-detailed vertical deep dive down the
+      nitty-gritty level.<br>
+    </p>
+    <p>In this directory, we find reports generated by <b>MAFGEN</b>
+      for PASS version OI340700.&nbsp; There is one file for each memory
+      configuration, having the names DASS_G16.ASC, DASS_G2.ASC, ...,
+      DASS_S2.ASC, DASS_P9.ASC, DASS_SSW_(PostIPL).ASC.&nbsp; (IPL
+      stands for Initial Program Load).&nbsp; They are disassemblies —
+      i.e., conversions of AP-101S machine code into a semblance of
+      AP-101S assembly language — of memory images extracted from the
+      GPC's, with much supporting detail besides.&nbsp; <br>
+    </p>
+    <p>From my perspective, though you may think of other novel things
+      to do with them, these files have two principal uses:<br>
+    </p>
+    <ul>
+      <li>Images of GPC memory can be extracted from them.&nbsp; Thus
+        you will also find files with names like G16.fcm, G2.fcm, ...,
+        P9.fcm, and SSW.fcm. In principle, these images could be loaded
+        into a GPC (or a sufficiently-accurate AP-101S emulator) and
+        executed directly.</li>
+      <li>An index of every CSECT (i.e., CSECT name versus address) can
+        be extracted, and can be used to guide linkage of HAL/S or
+        AP-101S object files created by the modern compilers and
+        assemblers.&nbsp; You'll find those indexes as files in this
+        directory with names like csects-G16.json, csect-G2.json, ...,
+        csects-SSW.json.</li>
+    </ul>
+    <p>The extraction was performed by my Python script
+      PFS/unMAFGEN2.py.<br>
+    </p>
+    <p>The combined effect of these extractions — <i>eventually</i>,
+      when everything is working right — is hopefully that we'll be able
+      (say) to compile a HAL/S file from OI340600, link the object file
+      using the CSECT-address guidance from the index files, and then
+      byte-by-byte compare the resulting file dumped OI340700 memory
+      images.&nbsp; Indeed, we can do this right now, but not 100%.<br>
+    </p>
+    <blockquote>
+      <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; As
+          just described, we'd be comparing OI340600 to OI340700.&nbsp;
+          I have been assured that the core code for the various OI34.<i>x</i>
+          versions was identical, and that the difference was merely the
+          application <i>after</i> compilation/assembly/linking of
+          "patches" that varied on a flight-by-flight basis.&nbsp; I
+          know that this is not literally true, though, as I have
+          accidentally found a source-code file in OI340600 that differs
+          from the disassembly of OI340700 memory images.&nbsp;
+          Nevertheless, I expect it <i>mostly</i> to be true, and
+          therefore for the comparison process to mostly be a valid one.</font><br>
+      </p>
+    </blockquote>
+    <h1><a name="linker"></a>Link Editor Command Cards</h1>
+    <p>Aside from the PASS (or BFS) source code itself, successfully
+      reproducing a PASS build requires additional information.&nbsp;
+      For example:<br>
+    </p>
+    <ul>
+      <li>The correct HAL/S compiler options</li>
+      <li>The specific list of source files going into each of the
+        memory configurations</li>
+      <li>The order in which the object files are linked</li>
+    </ul>
+    <p>Getting any of these wrong may result in a build that behaves
+      correctly when you execute the code, but which differs on a
+      byte-for-byte level from the original build (as extracted from <a
+        moz-do-not-send="true" href="#mafgen">MAFGEN reports</a>), and
+      thus cannot be compared to it for validation purposes.&nbsp;
+      Regarding the latter two items, it is believed that the files in
+      the folder PFS/OI340600/CON80/*.con provide this information, at
+      least for PASS OI34.06.&nbsp; These are mostly files of what are
+      called "linkage-editor control statements".&nbsp; This is a kind
+      of language used in IBM System/360 and beyond for passing commands
+      to linkers, and you can read about it in IBM linkage-editor
+      documents ... which we don't provide in Virtual AGC libraries due
+      to the fact that these documents are still legally
+      copyright-protected.&nbsp; With that said, at this writing <a
+        moz-do-not-send="true"
+href="https://bitsavers.org/pdf/ibm/370/MVS/GC26-4061-1_MVS_370_Linkage_Editor_Users_Guide_Dec85.pdf#page=82">you
+
+        can find those documents on non-Virtual-AGC sites, such as here
+        at bitsavers.org</a>.<br>
+    </p>
+    <p><a href="pass-phase-table.png"><img moz-do-not-send="true"
+          src="pass-phase-table.png" title="Click to enlarge" alt=""
+          width="390" height="498" align="right" border="2"></a>However,
+      since AP-101S programs are linked using a linker based on IBM's
+      System/360 linker but not exactly the same as it, not all of the
+      commands described in IBM linkage-editor documentation are used in
+      AP-101S files, and some commands used in AP-101S linker files are
+      not described in IBM's linkage-editor documentation.&nbsp; By my
+      reckoning, here's a list of all the commands used in these linker
+      control files in CON80/, with the ones actually described in IBM
+      documents being <b>boldfaced</b>:<br>
+    </p>
+    <pre><meta http-equiv="content-type" content="text/html; charset=UTF-8"><pre>ADDRMAX<br>BANK
+<b>CHANGE</b>
+CLEAR
+<b>INCLUDE</b>
+<b>INSERT</b>
+<b>LIBRARY</b>
+MAP
+NOCALLER
+<b>OVERLAY</b>
+PHASE
+REMOTE
+RESERVE
+SET
+STACK</pre></pre>
+    <p>Fortunately, the most-commonly-found commands used are the ones
+      in bold.&nbsp; And some of the unbolded ones do make some
+      sense.&nbsp; Still, as far as the documentation is concerned,
+      we're left with 10 commands in these files whose use is completely
+      unknown.&nbsp; Hopefully over time, they can be documented
+      here.&nbsp; For now, though, they're TBD.<br>
+    </p>
+    <p>However, let's look past that at the moment and consider the
+      linker-control files themselves.&nbsp; The place to start looking
+      would appear to be the files called PHASE01.con through
+      PHASE22.con.&nbsp; It's not entirely clear why the term "PHASE" is
+      used for them, but what they are is instructions for building
+      various useful software sets.&nbsp; <a moz-do-not-send="true"
+        href="#halstat">HALSTAT</a> also seems to apply this same
+      "phase" terminology.&nbsp; For example, it tells us that the <code>VJ1_LS_RESPONSE</code>
+      <code>PROGRAM</code> (the self-described "G1 LAUNCH SEQUENCE
+      RESPONSE PROCESSOR") is built in PHASE04.con, which makes sense if
+      PHASE04.con happens to have something to do with memory
+      configuration G16.<br>
+    </p>
+    <p>And guess what?&nbsp; To the right, you'll see a table describing
+      those phases, plus a few more besides.&nbsp; I would read this
+      table as saying, for example, that to get memory configuration G16
+      (ascent/abort), you'd build PHASE03.con to get a base, and you'd
+      build PHASE04.con to get an overlay of the specific application
+      code you needed to add to the base.<br>
+    </p>
+    <p>I won't go through a fully-worked-out example here, because I
+      haven't taken the time to move up the learning curve on this and
+      am lazy, but consider the file PHASE01.con, which should build the
+      boot loader:<br>
+    </p>
+    <blockquote>
+      <pre>*@ PCR=57888;(OI06.02)-DEL STPSTUB-                             PHASE01 000100AI<br>*************************************************************** PHASE01 000200AI<br>**             *** THIS PHASE CONTAINS THE IPL BOOTSTRAP    *** PHASE01 000300AI<br>**             *** LOADER AND A DUMMY (BUT ACTUAL CODE)     *** PHASE01 000400AI<br>**             *** COPY OF THE SSL SO IT WILL STILL MAP     *** PHASE01 000500AI<br>**             *** INTO PHASE TWO                           *** PHASE01 000600AI<br>*************************************************************** PHASE01 000700AI<br>         NOCALLER                  DO NOT ALLOW AUTO-CALL       PHASE01 000800AI<br>********                           IPL ONLY                     PHASE01 000900AI<br>         INCLUDE SYSLIBL1(FCMBOOT,LOADTBL)                      PHASE01 001000AI<br>00000    OVERLAY BOOT     ------ ORIGIN OF IPL BOOTSTRAP LOADER PHASE01 001100AI<br>         INSERT  FCMBOOT           *IPL BOOTSTRAP LOADER        PHASE01 001200AI<br>********                                                        PHASE01 001300AI<br>06FBC    OVERLAY SSL      -------- DUMMY ( NOT EXECUTED ) COPY  PHASE01 001400AI<br>         INCLUDE CONCARDS(SSL)                                  PHASE01 001500AI<br>07C00    OVERLAY BRSSLPT           SSL PHASE TABLE              PHASE01 001600AI<br>         INSERT FCMSSLPT           SSL PHASE TABLE              PHASE01 001700AI<br>********                           TO MAP INTO PHASE 2.  THE    PHASE01 001800AI<br>********                           REAL SSL IS IN PHASE 26      PHASE01 001900AI<br>****************************************************************PHASE01 002000AI<br>*              *** END OF PHASE 1 DEFINITION                *** PHASE01 002100AI<br>****************************************************************PHASE01 002200AI<br>* END PHASE01                                                   PHASE01 002300AI<br><br></pre>
+    </blockquote>
+    <ol>
+      <li>It starts out by adding the object file for FCMBOOT.asm, the
+        FCOS assembly-language file describing itself as "IPL BOOTSTRAP
+        LOADER".&nbsp; Makes sense!</li>
+      <li>It then moves on to a linker-control file SSL.con.&nbsp;
+        SSL.con (System Software Loader), which I won't bother to show
+        here, itself inserts the FCOS files FCMINSSL ("SYSTEM SOFTWARE
+        LOADER"), FCMINBCE ("M/M BCE PROGRAM USED BY SSL"), FCMINMSC
+        ("MSC PROGRAM USED BY SSL"), LOADTBL (not actually from FCOS, I
+        think, but calling itself "PRIMARY/BACKUP SYSTEM MMU
+        ADDRESSES"), and FCMCKSUM ("SSL LENGTH &amp; SSL CHECKSUM").</li>
+      <li>Finally, it adds the FCOS file FCMSSLPT ("SSL PHASE TABLE").</li>
+      <li><i>Et voil</i><i>à</i>!</li>
+    </ol>
+    <p>Makes sense, but is it correct?&nbsp; HALSTAT.ASC shows us the
+      following:<br>
+    </p>
+    <blockquote>
+      <pre>0                                                M E M O R Y   M A P  ---  BOOT                                                      <br>                                                                                                                                     <br> FCMBOOT  000000   FCMCKSUM 007398   FCMINBCE 007362   FCMINMSC 007374   FCMINSSL 006FBC   FCMSSLPT 007C00   LOADTBLE 007378         <br>1H A L S T A T                                     H A L S T A T                           16 DEC 09    85013 AM             PAGE2402<br>0                                                M E M O R Y   M A P  ---  BOOT                                                      <br>                                                                                                                                     <br> 000000-000747  FCMBOOT  ****   000748( 1864)  N O N H A L                                                                           <br> 000748-006FBB             INTER_CSECT GAP # 1  (26740 HW)                                                                           <br> 006FBC-007361  FCMINSSL ****   0003A6(  934)  N O N H A L                                                                           <br> 007362-007373  FCMINBCE ****   000012(   18)  N O N H A L                                                                           <br> 007374-007377  FCMINMSC ****   000004(    4)  N O N H A L                                                                           <br> 007378-007397  LOADTBLE ****   000020(   32)  N O N H A L                                                                           <br> 007398-00739B  FCMCKSUM ****   000004(    4)  N O N H A L                                                                           <br> 00739C-007BFF             INTER_CSECT GAP # 2  (2148 HW)  LAST GAP IS AT ADDR 000748                                                <br> 007C00-007EFF  FCMSSLPT ****   000300(  768)  N O N H A L                                                                           <br>1H A L S T A T                                     H A L S T A T                           16 DEC 09    85013 AM             PAGE2403<br>0                                                M E M O R Y   M A P  ---  BOOT                                                      <br>                                                                                                                                     <br>                                                                                                                                     <br>           M A P   S U M M A R Y                                                                                                     <br>                                                                                                                                     <br>     CSECT CATEGORY      #      TOTAL SIZE                                                                                           <br>                                                                                                                                     <br>     NON-HAL             7       3624 HALFWORDS                                                                                      <br>0                                                                                                                                    <br>     TOTAL HAL CODE                 0 HALFWORDS      0.00%                                                                           <br>     TOTAL HAL DATA                 0 HALFWORDS      0.00%   (INCLUDING #Z,#E,#X)                                                    <br>     TOTAL LIBRARY CODE             0 HALFWORDS      0.00%                                                                           <br>     TOTAL LIBRARY DATA             0 HALFWORDS      0.00%   (INCLUDING #Q)                                                          <br>     TOTAL STACK SPACE              0 HALFWORDS      0.00%                                                                           <br>           TOTAL HAL                0 HALFWORDS      0.00%                                                                           <br>     TOTAL NON-HAL CODE/DATA     3624 HALFWORDS    100.00%   (INCLUDING BCE,MSC &amp; PATCH AREAS)                                       <br>           GRAND TOTAL           3624 HALFWORDS                                                                                      <br>                                                                                                                                     <br> 2 INTER-CSECT GAPS FOR A TOTAL SIZE OF 28888 HALFWORDS                                                                              <br> LAST GAP OCCURRED AT ADDRESS 00739C                                                                                                 <br></pre>
+    </blockquote>
+    Looks mighty similar to me!&nbsp; I'd note finally that you won't
+    find this information in the <a moz-do-not-send="true"
+      href="#mafgen">MAFGEN disassemblies</a>, because the boot loader
+    isn't present in any of the 9 OPS memory configurations; it does its
+    job and disappears before any of the OPS configurations are loaded.<br>
+    <h1><a name="misc"></a>Miscellaneous</h1>
+    <p>TBD<br>
+      <br>
+    </p>
     <hr style="width: 100%; height: 2px;">
     <center><br>
       <span style="color: rgb(84, 89, 93); font-family: sans-serif;
@@ -280,7 +780,7 @@ href="Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avi
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-06-17<br>
+          2026-06-23<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
