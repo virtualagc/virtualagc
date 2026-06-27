@@ -391,14 +391,19 @@ names such as parser_XXXXX.py.  This behavior is modified by the OPTIONS.  The
 --generate option causes the parser_XXXXX.py to be created (or overwritten)
 before being imported.  The --local option causes the parser_XXXXX.py files to
 be ignored completely, and for the parsers instead to be generated and used by
-fieldParser.py, but not to be saved.
+fieldParser.py, but not to be saved.  The --generate-only option is like 
+--generate, but terminates after generation with no interactive mode.
 """
 
+noInteractive = False
 if standAlone:
     import sys
     for parm in sys.argv[1:]:
         if parm == "--generate":
             generateModules = True
+        elif parm == "--generate-only":
+            generateModules = True
+            noInteractive = True
         elif parm == "--local":
             generateLocal = True
         elif parm == "--help":
@@ -525,7 +530,7 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
 # the --generate command-line switch to pre-compile the parsers for all of the
 # grammars as Python modules that can be `import`ed later by ASM101S.
 
-if __name__ == "__main__":
+if __name__ == "__main__" and not noInteractive:
     import sys
     import pprint
     
@@ -724,6 +729,18 @@ if __name__ == "__main__":
     # An interactive mode for inputting arbitrary "operand" fields (confined to
     # a single card) and testing them against the defined operand grammars.
     
+    def collapse(var):
+        if not isinstance(var, (list, tuple)):
+            return var
+        ret = []
+        for e in var:
+            if e == []:
+                continue
+            ret.append(collapse(e))
+        if len(ret) == 1:
+            return ret[0]
+        return tuple(ret)
+    
     def exercise(rule):
         ast = parserASM(line, rule)
         if ast == None:
@@ -731,7 +748,7 @@ if __name__ == "__main__":
             return
         print("%s:" % rule)
         print(ast)
-        pprint.pprint(ast, indent=2, width=20)
+        pprint.pprint(collapse(ast), indent=2, width=20)
     
     print("Interactive input loop ------------------------------------------")
     while True:

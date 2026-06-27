@@ -125,7 +125,8 @@ except subprocess.CalledProcessError as e:
 
 # Next, run it in the emulator.
 command = ["gpc", "run", "--interactive", 
-	   "--no-trace", "--no-verbose", "--symbols", symfile, 
+	   "--no-trace", "--no-verbose", 
+	   "--symbols", symfile, 
 	   "--line-width", "240", fcmfile]
 print(" ".join(command))
 if interactive:

@@ -29,6 +29,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
                             string character data at address 0.  See issue #1306.
                             Changed pretty BNF for <NOT> to print '~' rather
                             than '^', to match HALSFC.
+            2026-06-27 RSB  Now imports sdfpkg.py.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -38,6 +39,18 @@ import sys
 
 from xplBuiltins import OUTPUT, BYTE, fromFloatIBM, scriptParentFolder
 import HALINCL.COMMON as h
+# I chose the same stuff to import as demo_sdfpkg.py does.
+from sdfpkg import (
+    SdfContext, SdfWriter, SdfError,
+    WBlock, WSymbol, WStmt,
+    BCLASS_PROGRAM,
+    SCLASS_VARIABLE,
+    STYPE_SCALAR, STYPE_INTEGER, STYPE_BOOLEAN, STYPE_CHARACTER,
+    STYPE_BIT, STYPE_VECTOR, STYPE_MATRIX,
+    STTYPE_ASSIGN, STTYPE_IF,
+    WFLAG_HAS_SRNS,
+    RC_NOT_EXEC, DISP_NONE,
+)
 
 productionTrigger = -1
 productionCount = 0

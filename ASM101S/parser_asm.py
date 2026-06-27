@@ -1761,6 +1761,9 @@ class asmParser(Parser):
                 self._closure(block0)
             with self._option():
                 self._token("T'")
+                self._arithmeticExpressionOnly_()
+            with self._option():
+                self._token("T'")
                 self._identifier_()
             with self._option():
                 self._token("T'")

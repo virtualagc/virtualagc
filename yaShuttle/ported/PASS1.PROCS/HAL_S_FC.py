@@ -17,7 +17,8 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
                             name for a Python module (and all Python
                             scripts are Python modules).
             2026-03-07 RSB  Added the inclusion library as INPUT(8).
-            2026-03-13 RSB  Added temporary inclusion library as INPUT(9)
+            2026-03-13 RSB  Added temporary inclusion library as INPUT(9).
+            2026-06-27 RSB  Now fetches sdfpkg.py at start.
 
  /***************************************************************************/
  /* PROCEDURE NAME:  MAIN PROGRAM                                           */
@@ -45,6 +46,8 @@ shutil.copyfile(scriptParentFolder + "/xplBuiltins.py", \
 shutil.rmtree(scriptFolder + "/HALINCL", ignore_errors=True)
 shutil.copytree(scriptParentFolder + "/HALINCL", \
                 scriptFolder + "/HALINCL")
+shutil.copyfile(scriptParentFolder + "/sdfpkg/sdfpkg.py", \
+                scriptFolder + "/sdfpkg.py")
 #####################################################################
 
 from xplBuiltins import *
