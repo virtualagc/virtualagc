@@ -95,6 +95,10 @@ typedef struct {
      * array_ndims = 0 means this symbol is not an ARRAY variable. */
     uint16_t  array_ndims;      /* number of dimensions (0, 1, 2, or 3)   */
     uint16_t  array_range[3];   /* size of each dimension; unused = 0      */
+    /* STRCDATA: copy_blk_no != 0 when this symbol's SDC carries a STRCDATA
+     * block, indicating that this STRUCTURE template COPYs the members of
+     * another template.  copy_blk_no is the block number of that source. */
+    uint16_t  copy_blk_no;     /* blk_no of COPYed template (0 = no COPY) */
     void     *raw_cell;    /* pointer into paged memory (SYMBDC)      */
 } sdf_symbol_result_t;
 

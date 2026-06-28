@@ -482,6 +482,324 @@ def t29_context_manager():
     CHECK('blk returned', blk.blk_no == 1)
     CHECK('ctx closed',   not ctx._go_flag)
 
+
+def t30_copy_write_roundtrip():
+    """T30: write a STRUCTURE with COPY link; read back copy_blk_no."""
+    print('T30: STRUCTURE COPY -- write and read back copy_blk_no')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol, WStmt,
+        BCLASS_PROGRAM, BCLASS_PROCEDURE,
+        SCLASS_VARIABLE, SCLASS_TEMPLATE,
+        STYPE_SCALAR, STYPE_INTEGER, STYPE_STRUCTURE,
+        STTYPE_ASSIGN, WFLAG_HAS_SRNS,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        # Write
+        w = SdfWriter.create(path2, 'COPYMEM', flags=WFLAG_HAS_SRNS)
+        b_prog = w.add_block(WBlock(csect_name='COPYCS', blk_name='COPYMAIN',
+                                    blk_class=BCLASS_PROGRAM, blk_id=1))
+        b_base = w.add_block(WBlock(csect_name='COPYCS', blk_name='BASE_S',
+                                    blk_class=BCLASS_PROCEDURE, blk_id=2))
+        b_ext  = w.add_block(WBlock(csect_name='COPYCS', blk_name='EXT_S',
+                                    blk_class=BCLASS_PROCEDURE, blk_id=3))
+
+        # BASE_S template header (no COPY)
+        w.add_symbol(WSymbol(blk_no=b_base, symb_name='BASE_S',
+                             sym_class=SCLASS_TEMPLATE, sym_type=STYPE_STRUCTURE))
+        w.add_symbol(WSymbol(blk_no=b_base, symb_name='BASE_FIELD',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+
+        # EXT_S template header with COPY link to BASE_S
+        w.add_symbol(WSymbol(blk_no=b_ext, symb_name='EXT_S',
+                             sym_class=SCLASS_TEMPLATE, sym_type=STYPE_STRUCTURE,
+                             copy_blk_no=b_base))
+        w.add_symbol(WSymbol(blk_no=b_ext, symb_name='EXTRA_FIELD',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_INTEGER))
+
+        # Instance in PROGRAM block
+        w.add_symbol(WSymbol(blk_no=b_prog, symb_name='MY_EXT',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_STRUCTURE))
+
+        w.add_stmt(WStmt(blk_no=b_prog, srn=b'C0001 ',
+                         stmt_type=STTYPE_ASSIGN, is_exec=True, num_lhs=1))
+        w.commit()
+
+        # Read back
+        ctx = SdfContext.open(path2)
+        ctx.select('COPYMEM')
+
+        base_blk  = ctx.find_block_by_name('BASE_S')
+        ext_blk   = ctx.find_block_by_name('EXT_S')
+        base_blk_no = base_blk.blk_no
+        ext_blk_no  = ext_blk.blk_no
+
+        # Find template headers
+        total = max(base_blk.lsymb_no, ext_blk.lsymb_no)
+        base_copy = None
+        ext_copy  = None
+        for sn in range(1, total + 1):
+            try:
+                sr = ctx.find_symbol_by_number(sn)
+            except SdfError:
+                continue
+            if sr.blk_no == base_blk_no and sr.sym_class == SCLASS_TEMPLATE:
+                base_copy = sr.copy_blk_no
+            if sr.blk_no == ext_blk_no and sr.sym_class == SCLASS_TEMPLATE:
+                ext_copy = sr.copy_blk_no
+
+        CHECK('T30: EXT_S copy_blk_no == base_blk_no', ext_copy == base_blk_no)
+        CHECK('T30: EXT_S copy_blk_no != 0',           ext_copy != 0)
+        CHECK('T30: BASE_S copy_blk_no == 0',          base_copy == 0)
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
+
+def t31_copy_no_array_no_cont():
+    """T31: symbol with only STRCDATA (no ARRADATA, short name) -- offset check."""
+    print('T31: STRUCTURE COPY -- struct_of offset with short name, no array')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol,
+        BCLASS_PROCEDURE, SCLASS_TEMPLATE, STYPE_STRUCTURE, WFLAG_HAS_SRNS,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        w = SdfWriter.create(path2, 'T31MEM', flags=0)
+        b1 = w.add_block(WBlock(csect_name='T31CS', blk_name='BLK1',
+                                blk_class=BCLASS_PROCEDURE, blk_id=1))
+        b2 = w.add_block(WBlock(csect_name='T31CS', blk_name='BLK2',
+                                blk_class=BCLASS_PROCEDURE, blk_id=2))
+        # BLK2 template header COPYs BLK1; short name (≤ 8 chars), no array
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='BLK1',
+                             sym_class=SCLASS_TEMPLATE, sym_type=STYPE_STRUCTURE))
+        w.add_symbol(WSymbol(blk_no=b2, symb_name='BLK2',
+                             sym_class=SCLASS_TEMPLATE, sym_type=STYPE_STRUCTURE,
+                             copy_blk_no=b1))
+        w.commit()
+
+        ctx = SdfContext.open(path2)
+        ctx.select('T31MEM')
+        blk1 = ctx.find_block_by_name('BLK1')
+        blk2 = ctx.find_block_by_name('BLK2')
+        for sn in range(1, blk2.lsymb_no + 1):
+            try:
+                sr = ctx.find_symbol_by_number(sn)
+            except SdfError:
+                continue
+            if sr.blk_no == blk2.blk_no and sr.sym_class == SCLASS_TEMPLATE:
+                CHECK('T31: BLK2 copy_blk_no == blk1.blk_no',
+                      sr.copy_blk_no == blk1.blk_no)
+            if sr.blk_no == blk1.blk_no and sr.sym_class == SCLASS_TEMPLATE:
+                CHECK('T31: BLK1 copy_blk_no == 0', sr.copy_blk_no == 0)
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
+def t32_event_roundtrip():
+    """T32: write an EVENT symbol; read back type, rows=0, columns=0."""
+    print('T32: EVENT datatype -- write and read back')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol,
+        BCLASS_PROGRAM, SCLASS_VARIABLE, STYPE_EVENT, STYPE_SCALAR,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        w = SdfWriter.create(path2, 'EVTMEM', flags=0)
+        b1 = w.add_block(WBlock(csect_name='EVTCS', blk_name='EVTPROG',
+                                blk_class=BCLASS_PROGRAM, blk_id=1))
+        # Add several types including EVENT to test sort position
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='ZCOUNT',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='ARMED',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='LAUNCH_ENABLE',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_EVENT))
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='BEACON',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_EVENT))
+        w.commit()
+
+        ctx = SdfContext.open(path2)
+        ctx.select('EVTMEM')
+
+        # After sort: ARMED(1), BEACON(2), LAUNCH_ENABLE(3), ZCOUNT(4)
+        blk = ctx.find_block_by_number(1)
+        CHECK('T32: blk has 4 symbols', blk.lsymb_no == 4)
+
+        armed = ctx.find_symbol_by_number(1)
+        CHECK('T32: symb 1 = ARMED',       armed.symb_name == 'ARMED')
+        CHECK('T32: ARMED type=SCALAR',     armed.sym_type == STYPE_SCALAR)
+
+        beacon = ctx.find_symbol_by_number(2)
+        CHECK('T32: symb 2 = BEACON',       beacon.symb_name == 'BEACON')
+        CHECK('T32: BEACON type=EVENT',     beacon.sym_type == STYPE_EVENT)
+        CHECK('T32: BEACON rows=0',         beacon.rows == 0)
+        CHECK('T32: BEACON columns=0',      beacon.columns == 0)
+        CHECK('T32: BEACON array_dims=0',   beacon.array_dims[0] == 0)
+        CHECK('T32: BEACON copy_blk_no=0',  beacon.copy_blk_no == 0)
+
+        launch = ctx.find_symbol_by_number(3)
+        CHECK('T32: symb 3 = LAUNCH_ENABLE', launch.symb_name == 'LAUNCH_ENABLE')
+        CHECK('T32: LAUNCH_ENABLE type=EVENT', launch.sym_type == STYPE_EVENT)
+        CHECK('T32: LAUNCH_ENABLE rows=0',     launch.rows == 0)
+        CHECK('T32: LAUNCH_ENABLE columns=0',  launch.columns == 0)
+
+        zcount = ctx.find_symbol_by_number(4)
+        CHECK('T32: symb 4 = ZCOUNT',       zcount.symb_name == 'ZCOUNT')
+        CHECK('T32: ZCOUNT type=SCALAR',     zcount.sym_type == STYPE_SCALAR)
+
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
+def t33_name_roundtrip():
+    """T33: write a NAME variable (sym_class=LABEL); read back class and referent type."""
+    print('T33: NAME variable -- write and read back')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol,
+        BCLASS_PROGRAM, SCLASS_VARIABLE, SCLASS_LABEL,
+        STYPE_SCALAR, STYPE_VECTOR,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        w = SdfWriter.create(path2, 'NAMMEM', flags=0)
+        b1 = w.add_block(WBlock(csect_name='NCS', blk_name='NAMPROG',
+                                blk_class=BCLASS_PROGRAM, blk_id=1))
+        # NAME to a SCALAR
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='ALT_PTR',
+                             sym_class=SCLASS_LABEL, sym_type=STYPE_SCALAR))
+        # NAME to a VECTOR
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='VEL_PTR',
+                             sym_class=SCLASS_LABEL, sym_type=STYPE_VECTOR,
+                             rows=3))
+        # Ordinary variable to confirm class=1 still works alongside
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='ZVAR',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        w.commit()
+
+        ctx = SdfContext.open(path2)
+        ctx.select('NAMMEM')
+        # After sort: ALT_PTR(1), VEL_PTR(2), ZVAR(3)
+        a = ctx.find_symbol_by_number(1)
+        CHECK('T33: ALT_PTR name',         a.symb_name == 'ALT_PTR')
+        CHECK('T33: ALT_PTR class=LABEL',  a.sym_class == SCLASS_LABEL)
+        CHECK('T33: ALT_PTR type=SCALAR',  a.sym_type  == STYPE_SCALAR)
+        CHECK('T33: ALT_PTR rows=0',       a.rows == 0)
+
+        v = ctx.find_symbol_by_number(2)
+        CHECK('T33: VEL_PTR name',         v.symb_name == 'VEL_PTR')
+        CHECK('T33: VEL_PTR class=LABEL',  v.sym_class == SCLASS_LABEL)
+        CHECK('T33: VEL_PTR type=VECTOR',  v.sym_type  == STYPE_VECTOR)
+        CHECK('T33: VEL_PTR rows=3',       v.rows == 3)
+
+        z = ctx.find_symbol_by_number(3)
+        CHECK('T33: ZVAR class=VARIABLE',  z.sym_class == SCLASS_VARIABLE)
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
+
+def t34_equate_ext_roundtrip():
+    """T34: write an EQUATE_EXT symbol; read back class=2 and type=8."""
+    print('T34: EQUATE_EXT -- write and read back')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol,
+        BCLASS_PROGRAM, SCLASS_VARIABLE, SCLASS_EQUATE_EXT, STYPE_EQUATE_EXT,
+        STYPE_SCALAR,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        w = SdfWriter.create(path2, 'EQMEM', flags=0)
+        b1 = w.add_block(WBlock(csect_name='ECS', blk_name='EQPROG',
+                                blk_class=BCLASS_PROGRAM, blk_id=1))
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='EXT_CONST',
+                             sym_class=SCLASS_EQUATE_EXT, sym_type=STYPE_EQUATE_EXT))
+        w.add_symbol(WSymbol(blk_no=b1, symb_name='LOCAL_VAR',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        w.commit()
+
+        ctx = SdfContext.open(path2)
+        ctx.select('EQMEM')
+        # After sort: EXT_CONST(1), LOCAL_VAR(2)
+        e = ctx.find_symbol_by_number(1)
+        CHECK('T34: EXT_CONST name',              e.symb_name == 'EXT_CONST')
+        CHECK('T34: EXT_CONST class=EQUATE_EXT',  e.sym_class == SCLASS_EQUATE_EXT)
+        CHECK('T34: EXT_CONST type=EQUATE_EXT',   e.sym_type  == STYPE_EQUATE_EXT)
+        CHECK('T34: EXT_CONST rows=0',            e.rows == 0)
+        CHECK('T34: EXT_CONST copy_blk_no=0',     e.copy_blk_no == 0)
+
+        lv = ctx.find_symbol_by_number(2)
+        CHECK('T34: LOCAL_VAR class=VARIABLE', lv.sym_class == SCLASS_VARIABLE)
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
+
+def t35_task_block_roundtrip():
+    """T35: write a TASK block with TASK entry-point symbol; read back blk_class and sym_type."""
+    print('T35: TASK block -- write and read back')
+    from sdfpkg import (
+        SdfWriter, WBlock, WSymbol,
+        BCLASS_PROGRAM, BCLASS_TASK, SCLASS_VARIABLE, STYPE_SCALAR, STYPE_TASK,
+    )
+    import tempfile, os
+    fd2, path2 = tempfile.mkstemp(suffix='.sdf')
+    os.close(fd2)
+    try:
+        w = SdfWriter.create(path2, 'TSKMEM', flags=0)
+        b_prog = w.add_block(WBlock(csect_name='TCS', blk_name='TPROG',
+                                    blk_class=BCLASS_PROGRAM, blk_id=1))
+        b_task = w.add_block(WBlock(csect_name='TCS', blk_name='BURN_TASK',
+                                    blk_class=BCLASS_TASK, blk_id=2))
+        # TASK entry-point symbol
+        w.add_symbol(WSymbol(blk_no=b_task, symb_name='BURN_TASK',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_TASK))
+        # TASK local variable
+        w.add_symbol(WSymbol(blk_no=b_task, symb_name='THRUST_LEVEL',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        # Program variable
+        w.add_symbol(WSymbol(blk_no=b_prog, symb_name='PROG_VAR',
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
+        w.commit()
+
+        ctx = SdfContext.open(path2)
+        ctx.select('TSKMEM')
+
+        # After block sort: BURN_TASK(1) < TPROG(2)
+        tb = ctx.find_block_by_number(1)
+        CHECK('T35: blk1 name=BURN_TASK',      tb.blk_name == 'BURN_TASK')
+        CHECK('T35: blk1 class=TASK',          tb.blk_class == BCLASS_TASK)
+        CHECK('T35: BURN_TASK 2 symbols',      tb.lsymb_no - tb.fsymb_no + 1 == 2)
+
+        pb = ctx.find_block_by_number(2)
+        CHECK('T35: blk2 name=TPROG',          pb.blk_name == 'TPROG')
+        CHECK('T35: blk2 class=PROGRAM',        pb.blk_class == BCLASS_PROGRAM)
+
+        # BURN_TASK entry-point symbol (first in BURN_TASK block)
+        ts = ctx.find_symbol_by_number(tb.fsymb_no)
+        CHECK('T35: entry name=BURN_TASK',     ts.symb_name == 'BURN_TASK')
+        CHECK('T35: entry type=TASK',          ts.sym_type == STYPE_TASK)
+        CHECK('T35: entry class=VARIABLE',     ts.sym_class == SCLASS_VARIABLE)
+
+        # THRUST_LEVEL is second in BURN_TASK block
+        tl = ctx.find_symbol_by_number(tb.fsymb_no + 1)
+        CHECK('T35: THRUST_LEVEL name',        tl.symb_name == 'THRUST_LEVEL')
+        CHECK('T35: THRUST_LEVEL type=SCALAR', tl.sym_type == STYPE_SCALAR)
+
+        ctx.close()
+    finally:
+        os.unlink(path2)
+
 # =====================================================================
 # Main
 # =====================================================================
@@ -510,7 +828,10 @@ def main():
             t21_bad_block_zero, t22_bad_block_overflow,
             t23_locate_counter_wrap, t24_find_stmt_by_srn, t25_no_srns,
             t26_flat_info, t27_pds_round_trip, t28_sdfcheck,
-            t29_context_manager,
+            t29_context_manager, t30_copy_write_roundtrip,
+            t31_copy_no_array_no_cont, t32_event_roundtrip,
+            t33_name_roundtrip, t34_equate_ext_roundtrip,
+            t35_task_block_roundtrip,
         ]
         for t in tests:
             t()

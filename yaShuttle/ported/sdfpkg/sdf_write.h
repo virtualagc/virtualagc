@@ -213,6 +213,11 @@ typedef struct {
     uint8_t  lock_num;
     uint32_t byte_size;
     uint16_t array_dims[4];  /* [0]=ndims, [1..3]=dim sizes; 0=not array */
+    /* STRCDATA: if copy_blk_no != 0, a STRCDATA block is appended to the
+     * SDC recording that this STRUCTURE template COPYs the members of
+     * the named template block.  struct_of in the SDC is set to the byte
+     * offset of this STRCDATA block from the start of the SDC.           */
+    uint16_t copy_blk_no;   /* blk_no of COPYed template (0 = no COPY)   */
 } sdf_wsymbol_t;
 
 /*

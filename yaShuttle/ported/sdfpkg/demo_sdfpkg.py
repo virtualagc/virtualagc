@@ -23,10 +23,11 @@ import tempfile
 from sdfpkg import (
     SdfContext, SdfWriter, SdfError,
     WBlock, WSymbol, WStmt,
-    BCLASS_PROGRAM, BCLASS_PROCEDURE,
-    SCLASS_VARIABLE, SCLASS_TEMPLATE,
+    BCLASS_PROGRAM, BCLASS_PROCEDURE, BCLASS_TASK,
+    SCLASS_VARIABLE, SCLASS_TEMPLATE, SCLASS_LABEL, SCLASS_EQUATE_EXT,
     STYPE_SCALAR, STYPE_INTEGER, STYPE_BOOLEAN, STYPE_CHARACTER,
-    STYPE_BIT, STYPE_VECTOR, STYPE_MATRIX, STYPE_STRUCTURE,
+    STYPE_BIT, STYPE_VECTOR, STYPE_MATRIX, STYPE_STRUCTURE, STYPE_EVENT,
+    STYPE_TASK, STYPE_EQUATE_EXT,
     STTYPE_ASSIGN, STTYPE_IF,
     WFLAG_HAS_SRNS,
     RC_NOT_EXEC, DISP_NONE,
@@ -62,6 +63,7 @@ def sym_type_detail(sym, template_map=None):
     Return a descriptive type string including dimensions and, for
     STRUCTURE instance variables, the name of the template type.
     ARRAY variables are prefixed with ARRAY(d1) or ARRAY(d1,d2).
+    NAME variables show the type of their referent.
 
     template_map: optional dict mapping symb_no -> template name,
                   used to resolve STRUCTURE instances.
@@ -72,6 +74,15 @@ def sym_type_detail(sym, template_map=None):
         ndims = sym.array_dims[0]
         dims  = sym.array_dims[1:1+ndims]
         array_prefix = 'ARRAY(' + ','.join(str(d) for d in dims) + ') '
+
+    # NAME variables: class=4 (LABEL), sym_type = type of the referent
+    if sym.sym_class == SCLASS_LABEL:
+        referent = SYM_TYPE.get(sym.sym_type, f'type={sym.sym_type}')
+        return f'NAME({referent})'
+
+    # EQUATE_EXT: class=2, type=8 -- external equate reference
+    if sym.sym_class == SCLASS_EQUATE_EXT and sym.sym_type == STYPE_EQUATE_EXT:
+        return 'EQUATE EXT'
 
     t = sym.sym_type
     if t == STYPE_VECTOR:
@@ -84,6 +95,10 @@ def sym_type_detail(sym, template_map=None):
         return array_prefix + (f'CHARACTER({sym.columns})' if sym.columns else 'CHARACTER')
     if t == STYPE_BIT:
         return array_prefix + (f'BIT({sym.rows})' if sym.rows else 'BIT')
+    if t == STYPE_EVENT:
+        return 'EVENT'
+    if t == STYPE_TASK:
+        return 'TASK'
     if t == STYPE_STRUCTURE:
         # sym.rows holds the symbol number of the template header symbol
         if template_map and sym.rows in template_map:
@@ -100,7 +115,7 @@ def sym_type_detail(sym, template_map=None):
 
 def demo_write(sdf_path, member='NAVCOMP'):
     print('=' * 62)
-    print('Part 1 -- Write: creating SDF member with STRUCTURE')
+    print('Part 1 -- Write: creating SDF member with STRUCTURE + COPY')
     print('=' * 62)
     print(f'  Output file : {sdf_path}')
     print(f'  Member name : {member}')
@@ -115,12 +130,15 @@ def demo_write(sdf_path, member='NAVCOMP'):
     # ------------------------------------------------------------------
     # Step W2: Add blocks
     # ------------------------------------------------------------------
-    # We add two blocks:
-    #   Block 1: NAVCOMP  -- the main PROGRAM block
-    #   Block 2: SENSOR_DATA -- a STRUCTURE template block
+    # We add four blocks:
+    #   Block 1: NAVCOMP     -- the main PROGRAM block
+    #   Block 2: SENSOR_DATA -- a STRUCTURE template block (base)
+    #   Block 3: EXT_SENSOR  -- a STRUCTURE template that COPYs SENSOR_DATA
+    #   Block 4: BURN_TASK   -- a TASK block (blk_class=BCLASS_TASK=4)
     #
-    # In HAL/S-FC, STRUCTURE template blocks use blk_class=BCLASS_PROCEDURE
-    # (value 3).  The template block contains the structure member symbols.
+    # STRUCTURE template blocks use blk_class=BCLASS_PROCEDURE (3).
+    # TASK blocks use blk_class=BCLASS_TASK (4).
+    # The COPY link is encoded via STRCDATA in the template header SDC.
 
     print('Step W2: add blocks')
     blk1 = w.add_block(WBlock(
@@ -134,39 +152,40 @@ def demo_write(sdf_path, member='NAVCOMP'):
     blk2 = w.add_block(WBlock(
         csect_name = 'STRCSECT',
         blk_name   = 'SENSOR_DATA',
-        blk_class  = BCLASS_PROCEDURE,   # = 3: STRUCTURE template
+        blk_class  = BCLASS_PROCEDURE,
         blk_id     = 2,
     ))
-    print(f'  Block {blk2}: SENSOR_DATA (STRUCTURE template)')
+    print(f'  Block {blk2}: SENSOR_DATA (STRUCTURE template, base)')
+
+    blk3 = w.add_block(WBlock(
+        csect_name = 'STRCSECT',
+        blk_name   = 'EXT_SENSOR',
+        blk_class  = BCLASS_PROCEDURE,
+        blk_id     = 3,
+    ))
+    print(f'  Block {blk3}: EXT_SENSOR (STRUCTURE template, COPYs SENSOR_DATA)')
+
+    blk4 = w.add_block(WBlock(
+        csect_name = 'NAVSECT',
+        blk_name   = 'BURN_TASK',
+        blk_class  = BCLASS_TASK,            # = 4: TASK block
+        blk_id     = 4,
+    ))
+    print(f'  Block {blk4}: BURN_TASK (TASK)')
     print()
 
     # ------------------------------------------------------------------
-    # Step W3: Add STRUCTURE template symbols (block 2)
+    # Step W3: Add SENSOR_DATA template symbols (block 2)
     # ------------------------------------------------------------------
-    # The template block contains:
-    #   - A template header symbol (CLASS=SCLASS_TEMPLATE=3, TYPE=STYPE_STRUCTURE=10)
-    #     whose rows field will be set to its own symbol number (self-referential).
-    #     We add it first so we can obtain its symbol number, then fix up rows.
-    #   - Member symbols (CLASS=SCLASS_VARIABLE, various types).
-    #
-    # All are sorted alphabetically at commit time.  After sorting, the
-    # template header's symbol number is used to fill in the 'rows' field
-    # of the STRUCTURE instance variable in block 1.
-    #
-    # NOTE: Because sdf_commit() sorts symbols before assigning final numbers,
-    # the provisional symbol number returned by add_symbol() may change.
-    # For the demo we track the template header by name and resolve it after
-    # commit via find_symbol_by_name().
-
-    print('Step W3: add STRUCTURE template symbols (block 2: SENSOR_DATA)')
+    print('Step W3: add SENSOR_DATA template symbols (block 2)')
     templ_hdr_no = w.add_symbol(WSymbol(
         blk_no    = blk2,
         symb_name = 'SENSOR_DATA',
-        sym_class = SCLASS_TEMPLATE,     # = 3
-        sym_type  = STYPE_STRUCTURE,     # = 10
-        # rows = self (filled in after commit via SDF read-back)
+        sym_class = SCLASS_TEMPLATE,
+        sym_type  = STYPE_STRUCTURE,
+        # copy_blk_no = 0: this is the base template; it does not COPY anything
     ))
-    print(f'  Symbol {templ_hdr_no}: SENSOR_DATA (template header, CLASS=TEMPLATE)')
+    print(f'  Symbol {templ_hdr_no}: SENSOR_DATA (template header, no COPY)')
 
     mem_alt = w.add_symbol(WSymbol(
         blk_no    = blk2,
@@ -174,7 +193,7 @@ def demo_write(sdf_path, member='NAVCOMP'):
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_SCALAR,
     ))
-    print(f'  Symbol {mem_alt}: ALT_READING  SCALAR  (structure member)')
+    print(f'  Symbol {mem_alt}: ALT_READING  SCALAR')
 
     mem_stat = w.add_symbol(WSymbol(
         blk_no    = blk2,
@@ -182,7 +201,7 @@ def demo_write(sdf_path, member='NAVCOMP'):
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_INTEGER,
     ))
-    print(f'  Symbol {mem_stat}: STATUS_CODE  INTEGER  (structure member)')
+    print(f'  Symbol {mem_stat}: STATUS_CODE  INTEGER')
 
     mem_vel = w.add_symbol(WSymbol(
         blk_no    = blk2,
@@ -191,21 +210,46 @@ def demo_write(sdf_path, member='NAVCOMP'):
         sym_type  = STYPE_VECTOR,
         rows      = 3,
     ))
-    print(f'  Symbol {mem_vel}: VEL_READING  VECTOR(3)  (structure member)')
+    print(f'  Symbol {mem_vel}: VEL_READING  VECTOR(3)')
     print()
 
     # ------------------------------------------------------------------
-    # Step W4: Add program symbols (block 1)
+    # Step W3b: Add EXT_SENSOR template symbols (block 3)
     # ------------------------------------------------------------------
-    # The SENSOR instance variable has TYPE=STYPE_STRUCTURE and its rows
-    # field should hold the final symbol number of the SENSOR_DATA template
-    # header.  Since commit() sorts and renumbers, we don't know that number
-    # yet.  We set rows=0 here as a placeholder and update it via the HAL/S
-    # convention: after commit the reader finds it by name and reads the
-    # self-referential symb_no from the template header's rows field.
-    # (PASS3 in HALSFC would fill this in during its second pass over the
-    # symbol table, once all symbol numbers are finalised.)
+    # EXT_SENSOR COPYs SENSOR_DATA.  Its template header symbol carries
+    # copy_blk_no = blk2 (the block number of SENSOR_DATA).  At SDF write
+    # time this is stored in a STRCDATA block appended to the SDC, and the
+    # SDC's struct_of byte is set to the byte offset of that STRCDATA block.
+    #
+    # EXT_SENSOR also adds one new own member (RANGE_KM) beyond those
+    # inherited via COPY.
 
+    print('Step W3b: add EXT_SENSOR template symbols (block 3, COPYs SENSOR_DATA)')
+    ext_hdr_no = w.add_symbol(WSymbol(
+        blk_no      = blk3,
+        symb_name   = 'EXT_SENSOR',
+        sym_class   = SCLASS_TEMPLATE,
+        sym_type    = STYPE_STRUCTURE,
+        copy_blk_no = blk2,   # <-- COPY link: inherits SENSOR_DATA members
+    ))
+    print(f'  Symbol {ext_hdr_no}: EXT_SENSOR (template header, copy_blk_no={blk2})')
+
+    mem_range = w.add_symbol(WSymbol(
+        blk_no    = blk3,
+        symb_name = 'RANGE_KM',
+        sym_class = SCLASS_VARIABLE,
+        sym_type  = STYPE_SCALAR,
+    ))
+    print(f'  Symbol {mem_range}: RANGE_KM  SCALAR  (own member of EXT_SENSOR)')
+    print()
+
+    # ------------------------------------------------------------------
+    # Step W4: Add program symbols (block 1: NAVCOMP)
+    # ------------------------------------------------------------------
+    # Demonstrates all supported symbol classes:
+    #   SCLASS_VARIABLE   (1) -- ordinary variables
+    #   SCLASS_EQUATE_EXT (2) -- external equate reference (compiler-internal)
+    #   SCLASS_LABEL      (4) -- NAME variable; sym_type = type of referent
     print('Step W4: add program symbols (block 1: NAVCOMP)')
     prog_syms = [
         # (name,           type,            rows, cols, array_dims)
@@ -214,6 +258,7 @@ def demo_write(sdf_path, member='NAVCOMP'):
         ('BITS',           STYPE_BIT,      16,  0, (0,0,0,0)),
         ('COUNT',          STYPE_INTEGER,   0,  0, (0,0,0,0)),
         ('INERTIA',        STYPE_MATRIX,    3,  3, (0,0,0,0)),
+        ('LAUNCH_ENABLE',  STYPE_EVENT,     0,  0, (0,0,0,0)),
         ('LONGSYMBOLNAME', STYPE_SCALAR,    0,  0, (0,0,0,0)),
         ('MESSAGE',        STYPE_CHARACTER, 0, 20, (0,0,0,0)),
         ('READINGS',       STYPE_SCALAR,    0,  0, (1,10,0,0)),  # ARRAY(10) SCALAR
@@ -244,9 +289,52 @@ def demo_write(sdf_path, member='NAVCOMP'):
         symb_name = 'SENSOR',
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_STRUCTURE,
-        rows      = 0,   # PASS3 would fill this in; see note above
+        rows      = 0,   # PASS3 would fill this in
     ))
     print(f'  Symbol {sensor_no}: SENSOR             STRUCTURE instance (rows=TBD)')
+
+    # NAME variable (sym_class=SCLASS_LABEL=4): refers to a SCALAR
+    # In HAL/S: DECLARE ALT_PTR NAME;  -- a NAME to an unspecified type
+    # sym_type holds the type of the referent (STYPE_SCALAR here)
+    name_no = w.add_symbol(WSymbol(
+        blk_no    = blk1,
+        symb_name = 'ALT_PTR',
+        sym_class = SCLASS_LABEL,        # = 4: NAME variable
+        sym_type  = STYPE_SCALAR,        # type of the thing it names
+    ))
+    print(f'  Symbol {name_no}: ALT_PTR            NAME(SCALAR)  (sym_class=LABEL)')
+
+    # EQUATE_EXT (sym_class=2, sym_type=8): external equate reference
+    # Compiler-internal; used when a COMPOOL symbol is referenced externally
+    eq_no = w.add_symbol(WSymbol(
+        blk_no    = blk1,
+        symb_name = 'EXT_CONST',
+        sym_class = SCLASS_EQUATE_EXT,   # = 2
+        sym_type  = STYPE_EQUATE_EXT,    # = 8
+    ))
+    print(f'  Symbol {eq_no}: EXT_CONST          EQUATE EXT  (sym_class=2, sym_type=8)')
+    print()
+
+    # ------------------------------------------------------------------
+    # Step W4b: Add TASK block symbols (block 4: BURN_TASK)
+    # ------------------------------------------------------------------
+    # A TASK block is a parallel HAL/S task.  Its entry-point symbol has
+    # sym_type=STYPE_TASK (11).  Other symbols (locals) use normal types.
+    print('Step W4b: add BURN_TASK symbols (block 4: TASK)')
+    task_sym_no = w.add_symbol(WSymbol(
+        blk_no    = blk4,
+        symb_name = 'BURN_TASK',
+        sym_class = SCLASS_VARIABLE,
+        sym_type  = STYPE_TASK,          # = 11: task entry-point symbol
+    ))
+    print(f'  Symbol {task_sym_no}: BURN_TASK          TASK  (entry-point symbol)')
+    task_local_no = w.add_symbol(WSymbol(
+        blk_no    = blk4,
+        symb_name = 'THRUST_LEVEL',
+        sym_class = SCLASS_VARIABLE,
+        sym_type  = STYPE_SCALAR,
+    ))
+    print(f'  Symbol {task_local_no}: THRUST_LEVEL       SCALAR  (TASK local variable)')
     print()
 
     # ------------------------------------------------------------------
@@ -321,7 +409,7 @@ def demo_read(sdf_path, member='NAVCOMP'):
     for blk_no in range(1, blk_nodes + 1):
         blk = ctx.find_block_by_number(blk_no)
         cls = BLK_CLASS.get(blk.blk_class, f'class={blk.blk_class}')
-        if blk.blk_class == 3:          # PROCEDURE = STRUCTURE template
+        if blk.blk_class == 3:
             structure_blocks.add(blk_no)
         sr  = (f'{blk.fsymb_no}..{blk.lsymb_no}' if blk.fsymb_no else '—')
         tr  = (f'{blk.fstmt_no}..{blk.lstm_no}'  if blk.fstmt_no else '—')
@@ -331,61 +419,128 @@ def demo_read(sdf_path, member='NAVCOMP'):
     print()
 
     # ------------------------------------------------------------------
-    # Step R3: Build template map (symb_no -> template name)
+    # Step R3: Build template map (symb_no -> (name, copy_blk_no))
     # ------------------------------------------------------------------
-    # For each symbol with TYPE=STRUCTURE (type 10) and CLASS=TEMPLATE (3),
-    # record its symbol number -> name mapping.  The rows field of a template
-    # header symbol is self-referential (rows = own symb_no), but we just
-    # use the name directly here.
-    #
-    # For STRUCTURE instance variables (CLASS=VARIABLE, TYPE=STRUCTURE),
-    # sym.rows holds the symbol number of the template header symbol.
+    # For each template header (CLASS=3, TYPE=10) record:
+    #   template_map[symb_no] = name
+    #   copy_map[blk_no]      = copy_blk_no (0 if no COPY)
+    # copy_blk_no is decoded from the STRCDATA block appended to the SDC
+    # when the template header was written with copy_blk_no != 0.
 
-    template_map = {}   # symb_no -> template name string
+    template_map = {}   # symb_no -> template name
+    copy_map     = {}   # blk_no  -> copy_blk_no (the block it COPYs; 0 = none)
     for sno in range(1, sym_nodes + 1):
         sym = ctx.find_symbol_by_number(sno)
-        if sym.sym_class == 3 and sym.sym_type == 10:  # TEMPLATE header
+        if sym.sym_class == 3 and sym.sym_type == 10:   # TEMPLATE header
             template_map[sno] = sym.symb_name
+            copy_map[sym.blk_no] = sym.copy_blk_no
 
     # ------------------------------------------------------------------
-    # Step R4: Enumerate symbols -- annotate STRUCTURE types
+    # Step R4: Enumerate symbols -- annotate STRUCTURE types and COPY links
     # ------------------------------------------------------------------
     print('Step R4: symbols')
     print(f'  {"#":>3}  {"NAME":<18}  {"CLASS":<16}  {"TYPE":<28}  BLK  NOTE')
-    print(f'  {"-"*3}  {"-"*18}  {"-"*16}  {"-"*28}  {"-"*3}  {"-"*22}')
+    print(f'  {"-"*3}  {"-"*18}  {"-"*16}  {"-"*28}  {"-"*3}  {"-"*30}')
     for sno in range(1, sym_nodes + 1):
         sym  = ctx.find_symbol_by_number(sno)
         cls  = SYM_CLASS.get(sym.sym_class, f'class={sym.sym_class}')
         typ  = sym_type_detail(sym, template_map)
         note = ''
         if sym.sym_class == 3 and sym.sym_type == 10:
-            note = '← template header'
+            if sym.copy_blk_no:
+                try:
+                    src_blk = ctx.find_block_by_number(sym.copy_blk_no)
+                    note = f'← template hdr, COPY {src_blk.blk_name}'
+                except SdfError:
+                    note = f'← template hdr, COPY blk#{sym.copy_blk_no}'
+            else:
+                note = '← template header'
         elif sym.sym_type == 10 and sym.sym_class == 1:
             tmpl_name = template_map.get(sym.rows, f'symb#{sym.rows}')
             note = f'instance of {tmpl_name}'
         elif sym.sym_class == 1 and sym.blk_no in structure_blocks:
             note = '← structure member'
+        elif sym.sym_class == SCLASS_LABEL:
+            note = '← NAME variable'
+        elif sym.sym_class == SCLASS_EQUATE_EXT:
+            note = '← equate-ext (compiler-internal)'
+        elif sym.sym_type == STYPE_TASK:
+            note = '← task entry-point'
         print(f'  {sym.symb_no:>3}  {sym.symb_name:<18}  {cls:<16}  '
               f'{typ:<28}  {sym.blk_no:>3}  {note}')
     print()
 
     # ------------------------------------------------------------------
-    # Step R5: Drill into a STRUCTURE template block by name
+    # Step R5: Drill into SENSOR_DATA template block
     # ------------------------------------------------------------------
-    print('Step R5: find STRUCTURE template block by name')
+    print('Step R5: find SENSOR_DATA template block by name')
     try:
         blk = ctx.find_block_by_name('SENSOR_DATA')
+        copy_tag = ''
+        cb = copy_map.get(blk.blk_no, 0)
+        if cb:
+            try:
+                src = ctx.find_block_by_number(cb)
+                copy_tag = f'  COPYs: {src.blk_name}'
+            except SdfError:
+                copy_tag = f'  COPYs: blk#{cb}'
         print(f'  Block found: #{blk.blk_no} {blk.blk_name}  '
-              f'class={BLK_CLASS.get(blk.blk_class, blk.blk_class)}')
+              f'class={BLK_CLASS.get(blk.blk_class, blk.blk_class)}{copy_tag}')
         print(f'  Member symbol range: {blk.fsymb_no}..{blk.lsymb_no}')
         print(f'  Members:')
         for sno in range(blk.fsymb_no, blk.lsymb_no + 1):
             sym = ctx.find_symbol_by_number(sno)
             typ = sym_type_detail(sym, template_map)
-            role = ('template header'
-                    if sym.sym_class == 3 else 'member')
-            print(f'    {sym.symb_no:>3}  {sym.symb_name:<16}  '
-                  f'{typ:<16}  ({role})')
+            role = ('template header' if sym.sym_class == 3 else 'member')
+            print(f'    {sym.symb_no:>3}  {sym.symb_name:<16}  {typ:<16}  ({role})')
+    except SdfError as e:
+        print(f'  Not found: {e}')
+    print()
+
+    # ------------------------------------------------------------------
+    # Step R5b: Drill into EXT_SENSOR template block (shows COPY link)
+    # ------------------------------------------------------------------
+    print('Step R5b: find EXT_SENSOR template block by name (COPY demo)')
+    try:
+        blk = ctx.find_block_by_name('EXT_SENSOR')
+        cb = copy_map.get(blk.blk_no, 0)
+        copy_tag = ''
+        if cb:
+            try:
+                src = ctx.find_block_by_number(cb)
+                copy_tag = f'  COPYs: {src.blk_name} (blk#{cb})'
+            except SdfError:
+                copy_tag = f'  COPYs: blk#{cb}'
+        print(f'  Block found: #{blk.blk_no} {blk.blk_name}  '
+              f'class={BLK_CLASS.get(blk.blk_class, blk.blk_class)}{copy_tag}')
+        print(f'  Member symbol range: {blk.fsymb_no}..{blk.lsymb_no}')
+        print(f'  Own members (COPYed members live in the source block):')
+        for sno in range(blk.fsymb_no, blk.lsymb_no + 1):
+            sym = ctx.find_symbol_by_number(sno)
+            typ = sym_type_detail(sym, template_map)
+            if sym.sym_class == 3:
+                role = f'template hdr (copy_blk_no={sym.copy_blk_no})'
+            else:
+                role = 'own member'
+            print(f'    {sym.symb_no:>3}  {sym.symb_name:<16}  {typ:<16}  ({role})')
+    except SdfError as e:
+        print(f'  Not found (file may have been written without EXT_SENSOR): {e}')
+    print()
+
+    # ------------------------------------------------------------------
+    # Step R5c: Drill into BURN_TASK block (TASK block demo)
+    # ------------------------------------------------------------------
+    print('Step R5c: find BURN_TASK block by name (TASK block demo)')
+    try:
+        blk = ctx.find_block_by_name('BURN_TASK')
+        print(f'  Block found: #{blk.blk_no} {blk.blk_name}  '
+              f'class={BLK_CLASS.get(blk.blk_class, blk.blk_class)}')
+        print(f'  Symbol range: {blk.fsymb_no}..{blk.lsymb_no}')
+        for sno in range(blk.fsymb_no, blk.lsymb_no + 1):
+            sym = ctx.find_symbol_by_number(sno)
+            typ = sym_type_detail(sym, template_map)
+            role = 'task entry-point' if sym.sym_type == STYPE_TASK else 'local'
+            print(f'    {sym.symb_no:>3}  {sym.symb_name:<16}  {typ:<12}  ({role})')
     except SdfError as e:
         print(f'  Not found: {e}')
     print()

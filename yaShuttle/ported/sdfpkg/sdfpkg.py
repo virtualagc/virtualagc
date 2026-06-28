@@ -313,25 +313,26 @@ class _SymbDC:
     # symb_len(1) rel_addr(3) sblk_id(2) rows(1) columns(1) lock_num(1)
     # byte_size(3) name_cont[0..24)   [ARRADATA follows if array_off != 0]
     SIZE = 47   # minimum fixed size
-    __slots__ = ('block_num','array_off','sym_class','sym_type','flag1','flag2',
+    __slots__ = ('block_num','array_off','struct_of','sym_class','sym_type','flag1','flag2',
                  'flag3','flag4','symb_len','rel_addr','rows','columns',
-                 'name_cont','array_dims')
+                 'name_cont','array_dims','copy_blk_no')
     def __init__(self, data, off: int = 0):
         o = off
-        self.block_num = _be16(data, o)
-        self.array_off = data[o+4]    # byte offset from SDC start to ARRADATA
-        self.sym_class = data[o+6]
-        self.sym_type  = data[o+7]
-        self.flag1     = data[o+8]
-        self.flag2     = data[o+9]
-        self.flag3     = data[o+10]
-        self.flag4     = data[o+11]
-        self.symb_len  = data[o+12]
-        self.rel_addr  = (data[o+13] << 16) | (data[o+14] << 8) | data[o+15]
-        self.rows      = data[o+18]
-        self.columns   = data[o+19]
-        cont_len       = max(0, min(self.symb_len, LONG_NAME_LEN) - NAME_LEN)
-        self.name_cont = bytes(data[o+24 : o+24+cont_len])
+        self.block_num  = _be16(data, o)
+        self.array_off  = data[o+4]    # byte offset from SDC start to ARRADATA
+        self.struct_of  = data[o+5]    # byte offset from SDC start to STRCDATA
+        self.sym_class  = data[o+6]
+        self.sym_type   = data[o+7]
+        self.flag1      = data[o+8]
+        self.flag2      = data[o+9]
+        self.flag3      = data[o+10]
+        self.flag4      = data[o+11]
+        self.symb_len   = data[o+12]
+        self.rel_addr   = (data[o+13] << 16) | (data[o+14] << 8) | data[o+15]
+        self.rows       = data[o+18]
+        self.columns    = data[o+19]
+        cont_len        = max(0, min(self.symb_len, LONG_NAME_LEN) - NAME_LEN)
+        self.name_cont  = bytes(data[o+24 : o+24+cont_len])
         # Parse ARRADATA if present
         if self.array_off:
             ao = off + self.array_off  # offset within full page buffer
@@ -343,6 +344,12 @@ class _SymbDC:
             self.array_dims = (ndims, r1, r2, r3)
         else:
             self.array_dims = (0, 0, 0, 0)
+        # Parse STRCDATA if present
+        if self.struct_of:
+            so = off + self.struct_of
+            self.copy_blk_no = _be16(data, so)
+        else:
+            self.copy_blk_no = 0
 
 class _StmtNod0:
     SIZE = 4
@@ -436,6 +443,9 @@ class SymbolResult:
     symb_len:   int = 0
     raw_offset: int = 0
     array_dims: tuple = (0, 0, 0, 0)  # (ndims, d1, d2, d3); ndims=0 = not array
+    # copy_blk_no != 0 when this symbol's SDC has a STRCDATA block, meaning
+    # this STRUCTURE template COPYs another template's members.
+    copy_blk_no: int = 0              # blk_no of COPYed template (0 = no COPY)
 
 @dataclass
 class StmtResult:
@@ -1406,6 +1416,7 @@ class SdfContext:
             columns    = sdc.columns,
             symb_len   = total_len,
             array_dims = sdc.array_dims,
+            copy_blk_no = sdc.copy_blk_no,
         )
         self._set_disps(disp)
         return result
@@ -1432,13 +1443,22 @@ class SdfContext:
         if self._first_sym:
             return 0
 
-        # Skip equate externals
+        # Skip equate externals (class=2, type=8)
         if sdc.sym_class == CLASS_EQUATE_EXT and sdc.sym_type == TYPE_EQUATE_EXT:
             return 0
 
+        # Accept classes 1-3 directly (mirrors BAL: CLI CLASS,3 / BNH SYMFOUND)
         if sdc.sym_class <= 3:
-            if (sdc.flag1 & FLAG1_UNQUAL_STRUC) == 0:
-                return 0
+            pass  # fall through to full name comparison
+
+        else:
+            # Classes > 3 (NAME=4, COMPOOL=6, etc.):
+            # accept only if FLAG1 has exactly one UNQUAL_STRUC bit set
+            # (template header).  Both or neither → skip.
+            # Mirrors BAL: TM FLAG1,X'03' / BC 5,SYMFOUND
+            f = sdc.flag1 & FLAG1_UNQUAL_STRUC
+            if f == 0 or f == FLAG1_UNQUAL_STRUC:
+                return 0   # skip
 
         # Full name comparison
         sought  = srcharg8.rstrip(b' ')
@@ -1475,50 +1495,85 @@ class SdfContext:
                     if ev.lst_symb >= srcharg8:
                         delta = (ev.lst_off - ev.fst_off) // 12
                         hi    = lo + delta
-                        # Cap hi at the block's own last symbol number.
-                        if hi > self._sav_lsymb:
-                            hi = self._sav_lsymb
+                        if lo < self._sav_fsymb: lo = self._sav_fsymb
+                        if hi > self._sav_lsymb: hi = self._sav_lsymb
                         break
                     cnt = (ev.lst_off - ev.fst_off) // 12 + 1
                     lo += cnt
                     voff += _SymExtV.SIZE
                 ext_ptr = ef.succ_ptr
 
-        # Binary search
+        # Binary search using 8-char name comparison only (mirrors BAL BINSRCH
+        # which does CLC SRCHARG(8),SYMBNAME without calling CHKMATCH).
         while lo <= hi:
             mid = (lo + hi) // 2
-            d   = self._chk_match(srcharg8, mid)
-            if d == 0:
-                # Scan backward for first occurrence
+            try:
+                sn_ptr = self._ndx2ptr(4, mid)
+                sn_mv  = self._locate_vptr(sn_ptr)
+            except SdfError:
+                break
+            sn   = _SymbNode(sn_mv)
+            cmp8 = (srcharg8 > sn.symb_name[:NAME_LEN]) - \
+                   (srcharg8 < sn.symb_name[:NAME_LEN])
+            if cmp8 < 0:
+                if mid == 0: break
+                hi = mid - 1
+            elif cmp8 > 0:
+                lo = mid + 1
+            else:
+                # 8-char match -- enter linear scan (mirrors BAL LINSRCH).
+                # Step 1: scan backward while 8-char still matches and
+                #         _chk_match doesn't say "go forward" (+1).
                 candidate = mid
                 while candidate > self._sav_fsymb:
-                    if self._chk_match(srcharg8, candidate - 1) != 0:
+                    prev = candidate - 1
+                    try:
+                        p_ptr = self._ndx2ptr(4, prev)
+                        p_mv  = self._locate_vptr(p_ptr)
+                    except SdfError:
                         break
-                    candidate -= 1
-                # Scan forward for best match
+                    p_sn = _SymbNode(p_mv)
+                    if srcharg8 != p_sn.symb_name[:NAME_LEN]:
+                        break
+                    d = self._chk_match(srcharg8, prev)
+                    if d > 0:
+                        break   # chk_match says go forward: stop back-scan
+                    candidate = prev
+
+                # Step 2: scan forward calling _chk_match on each 8-char match.
                 while candidate <= self._sav_lsymb:
                     try:
-                        sn_ptr = self._ndx2ptr(4, candidate)
-                        sn_mv  = self._locate_vptr(sn_ptr)
+                        c_ptr = self._ndx2ptr(4, candidate)
+                        c_mv  = self._locate_vptr(c_ptr)
                     except SdfError:
                         break
-                    sn = _SymbNode(sn_mv)
-                    if srcharg8 != sn.symb_name[:NAME_LEN]:
+                    c_sn = _SymbNode(c_mv)
+                    if srcharg8 != c_sn.symb_name[:NAME_LEN]:
                         break
                     try:
-                        sdc_mv = self._locate_vptr(sn.sdc_ptr)
+                        c_sdc_mv = self._locate_vptr(c_sn.sdc_ptr)
                     except SdfError:
                         break
-                    if self._chk_match(srcharg8, candidate) == 0:
-                        return candidate, sn, sdc_mv
+                    d2 = self._chk_match(srcharg8, candidate)
+                    if d2 < 0:
+                        break   # gone past -- not found
+                    if d2 == 0:
+                        # _chk_match returns 0 for both "skip" and "match".
+                        # Re-examine the SDC to distinguish.
+                        c_sdc = _SymbDC(c_sdc_mv)
+                        skip = False
+                        if not self._first_sym:
+                            if (c_sdc.sym_class == CLASS_EQUATE_EXT and
+                                    c_sdc.sym_type == TYPE_EQUATE_EXT):
+                                skip = True
+                            elif c_sdc.sym_class > 3:
+                                f = c_sdc.flag1 & FLAG1_UNQUAL_STRUC
+                                if f == 0 or f == FLAG1_UNQUAL_STRUC:
+                                    skip = True
+                        if not skip:
+                            return candidate, c_sn, c_sdc_mv
                     candidate += 1
                 raise SdfError(RC_SYM_NOT_FOUND)
-            elif d < 0:
-                if mid == 0:
-                    break
-                hi = mid - 1
-            else:
-                lo = mid + 1
 
         raise SdfError(RC_SYM_NOT_FOUND)
 
@@ -2040,6 +2095,9 @@ class WSymbol:
     #   ARRAY(10) SCALAR     -> (1, 10, 0, 0)
     #   ARRAY(3, 4) INTEGER  -> (2,  3, 4, 0)
     #   ARRAY(5) VECTOR(3)   -> (1,  5, 0, 0)  (rows=3 for the VECTOR)
+    # copy_blk_no: if non-zero, a STRCDATA block is appended to the SDC
+    # recording that this STRUCTURE template COPYs the named template block.
+    copy_blk_no: int = 0   # blk_no of COPYed template (0 = no COPY)
 
 
 @dataclass
@@ -2203,9 +2261,28 @@ class SdfWriter:
         node_sz  = 12 if has_srns else 4
 
         # ---- 1. Sort blocks by name; reassign numbers ----
+        # First build a remap: old blk_no -> new blk_no (before overwriting).
+        blk_remap = {b['blk_no']: (i + 1)
+                     for i, b in enumerate(sorted(self._blocks,
+                                                   key=lambda b: b['desc'].blk_name))}
         self._blocks.sort(key=lambda b: b['desc'].blk_name)
         for i, b in enumerate(self._blocks):
             b['blk_no'] = i + 1
+
+        # Remap blk_no and copy_blk_no in all symbol descriptors,
+        # and blk_no in statement descriptors.
+        for s in self._symbols:
+            d = s['desc']
+            ob = d.blk_no
+            if ob in blk_remap:
+                d.blk_no = blk_remap[ob]
+            if d.copy_blk_no and d.copy_blk_no in blk_remap:
+                d.copy_blk_no = blk_remap[d.copy_blk_no]
+        for st in self._stmts:
+            d = st['desc']
+            ob = d.blk_no
+            if ob in blk_remap:
+                d.blk_no = blk_remap[ob]
 
         # ---- 2. Sort symbols: alphabetically within each block,
         #         then concatenate in block order.
@@ -2369,7 +2446,8 @@ class SdfWriter:
             nlen  = min(len(name), LONG_NAME_LEN)
             cont  = max(0, nlen - NAME_LEN)
             has_array = (d.array_dims[0] > 0)
-            sz    = 24 + cont + (8 if has_array else 0)
+            has_copy  = (d.copy_blk_no != 0)
+            sz    = 24 + cont + (8 if has_array else 0) + (2 if has_copy else 0)
             vp    = alloc(sz)
             sdc_vptrs.append(vp)
             ra    = (self._init_reladdrs.get(sym['symb_no'], d.rel_addr))
@@ -2378,6 +2456,8 @@ class SdfWriter:
             struct.pack_into('>H', b, o, d.blk_no)
             # array_off: byte offset from SDC start to ARRADATA (0 if none)
             b[o+4]  = (24 + cont) if has_array else 0
+            # struct_of: byte offset from SDC start to STRCDATA (0 if none)
+            b[o+5]  = (24 + cont + (8 if has_array else 0)) if has_copy else 0
             b[o+6]  = d.sym_class
             b[o+7]  = d.sym_type
             b[o+8]  = d.flag1
@@ -2402,6 +2482,9 @@ class SdfWriter:
                 struct.pack_into('>HHHH', b, ao,
                     d.array_dims[0], d.array_dims[1],
                     d.array_dims[2], d.array_dims[3])
+            if has_copy:
+                so = o + 24 + cont + (8 if has_array else 0)
+                struct.pack_into('>H', b, so, d.copy_blk_no)
 
         # Write symbol nodes
         for i, sym in enumerate(self._symbols):

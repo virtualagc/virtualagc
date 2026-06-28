@@ -74,6 +74,14 @@ def _sym_class_str(v):
 def _sym_type_str(sym):
     base = SYM_TYPE.get(sym.sym_type, f'type={sym.sym_type}')
     t = sym.sym_type
+    c = sym.sym_class
+    # NAME variable: sym_class=4 (LABEL), sym_type = type of referent
+    if c == 4:
+        referent = SYM_TYPE.get(t, f'type={t}')
+        return f'NAME({referent})'
+    # EQUATE_EXT: class=2, type=8
+    if c == 2 and t == 8:
+        return 'EQUATE EXT'
     if t == 6:   # VECTOR
         return f'VECTOR({sym.rows})' if sym.rows else 'VECTOR'
     if t == 7:   # MATRIX
@@ -84,6 +92,10 @@ def _sym_type_str(sym):
         return f'CHARACTER({sym.columns})' if sym.columns else 'CHARACTER'
     if t == 5:   # BIT
         return f'BIT({sym.rows})' if sym.rows else 'BIT'
+    if t == 9:   # EVENT
+        return 'EVENT'
+    if t == 11:  # TASK
+        return 'TASK'
     return base
 
 def _stmt_type_str(v):

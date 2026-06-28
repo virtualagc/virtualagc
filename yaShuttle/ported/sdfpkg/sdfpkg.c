@@ -210,6 +210,14 @@ static sdf_rc_t do_symbol_fill(sdf_ctx_t *ctx,
             result->array_range[1] = sdf_be16(&arr->range2);
             result->array_range[2] = sdf_be16(&arr->range3);
         }
+        /* Parse STRCDATA if struct_of != 0 */
+        result->copy_blk_no = 0;
+        if (sdc->struct_of != 0) {
+            const sdf_strcdata_disk_t *sc =
+                (const sdf_strcdata_disk_t *)((const uint8_t *)sdc_raw
+                                              + sdc->struct_of);
+            result->copy_blk_no = sdf_be16(&sc->copy_blk_no);
+        }
     }
 
     return sdf_set_disps(ctx, disp_flags);
@@ -252,23 +260,28 @@ static int chk_match(sdf_ctx_t *ctx,
     if (first_mode)
         return 0;   /* take the first match unconditionally */
 
-    /* Skip equate externals */
+    /* Skip equate externals (class=2, type=8) */
     if (sdc->sym_class == SDF_CLASS_EQUATE_EXT &&
         sdc->sym_type  == SDF_TYPE_EQUATE_EXT)
         return 0;   /* signal "no direction change" → caller will skip */
 
-    /* Accept classes 1–3 directly */
-    if (sdc->sym_class <= 3) {
-        /* But reject unqualified structure terminals */
-        if ((sdc->flag1 & SDF_FLAG1_UNQUAL_STRUC) == 0)
+    /* Class filter (mirrors BAL CHKTYPE logic):
+     * - Classes 1–3: accepted directly.
+     * - Classes > 3 (NAME=4, COMPOOL=6, etc.): accepted only when FLAG1
+     *   has exactly one of the UNQUAL_STRUC bits set (template header).
+     *   Both or neither bits → skip (ordinary higher-class symbol). */
+    if (sdc->sym_class > 3) {
+        uint8_t f = sdc->flag1 & SDF_FLAG1_UNQUAL_STRUC;
+        if (f == 0 || f == SDF_FLAG1_UNQUAL_STRUC)
             return 0;
     }
 
-    /* Full name comparison */
-    uint8_t sought_len = (uint8_t)strlen(srcharg8);
-    /* strip spaces from srcharg8 */
-    while (sought_len > 0 && srcharg8[sought_len-1] == ' ')
-        sought_len--;
+    /* Full name comparison.
+     * srcharg8 is a blank-padded 8-char prefix (not null-terminated).
+     * For long names (>8 chars), use ctx->comm.symb_nam which holds the
+     * complete null-terminated search name. */
+    uint8_t sought_len = ctx->comm.symbn_len;
+    if (sought_len > SDF_LONG_NAME_LEN) sought_len = SDF_LONG_NAME_LEN;
 
     uint8_t found_len  = sdc->symb_len;
     if (found_len > SDF_LONG_NAME_LEN) found_len = SDF_LONG_NAME_LEN;
@@ -281,10 +294,10 @@ static int chk_match(sdf_ctx_t *ctx,
                found_len - SDF_NAME_LEN);
 
     uint8_t cmp_len = (sought_len < found_len) ? sought_len : found_len;
-    /* We already matched the first 8 chars; compare the rest */
+    /* For the continuation beyond 8 chars, use the full search name */
     if (found_len > SDF_NAME_LEN && sought_len > SDF_NAME_LEN) {
-        int cmp_rest = memcmp(srcharg8 + SDF_NAME_LEN,
-                              full     + SDF_NAME_LEN,
+        int cmp_rest = memcmp(ctx->comm.symb_nam + SDF_NAME_LEN,
+                              full               + SDF_NAME_LEN,
                               cmp_len  - SDF_NAME_LEN);
         if (cmp_rest != 0)
             return (cmp_rest < 0) ? -1 : 1;
@@ -327,81 +340,136 @@ static sdf_rc_t symbol_binary_search(sdf_ctx_t *ctx,
             uint32_t succ     = sdf_be32(&ef->succ_ptr);
             uint8_t *vp       = (uint8_t *)(ef + 1);
 
+            /* Track the running symbol number for each extent page.
+             * We start from symbol 1 (the first symbol in the member)
+             * and advance as we walk through extent entries. */
+            uint16_t page_lo = 1;
             bool found_page = false;
             for (uint16_t i = 0; i < nentries; i++) {
                 sdf_symextv_disk_t *ev = (sdf_symextv_disk_t *)vp;
-                if (memcmp(ev->fst_symb, srcharg8, SDF_NAME_LEN) > 0) {
-                    /* All remaining pages are alphabetically after our key */
-                    return SDF_SYM_NOT_FOUND;
-                }
-                if (memcmp(ev->lst_symb, srcharg8, SDF_NAME_LEN) >= 0) {
-                    /* Symbol, if present, is on this page -- refine lo/hi */
-                    lo = ctx->sav_fsymb;  /* recalculate from page offset */
-                    /* Derive symbol numbers from offsets */
-                    uint16_t fst_off = sdf_be16(&ev->fst_off);
-                    uint16_t lst_off = sdf_be16(&ev->lst_off);
-                    uint16_t delta   = (lst_off - fst_off) / 12;
-                    lo = ctx->sav_fsymb; /* base that increments per page */
-                    hi = (uint16_t)(lo + delta);
-            
-                    break;
-                }
-                /* Advance base symbol number */
                 uint16_t fst_off = sdf_be16(&ev->fst_off);
                 uint16_t lst_off = sdf_be16(&ev->lst_off);
                 uint16_t cnt     = (uint16_t)((lst_off - fst_off) / 12 + 1);
-                lo = (uint16_t)(lo + cnt);
+                uint16_t page_hi = (uint16_t)(page_lo + cnt - 1);
+
+                /* Check if this page overlaps with the block's symbol range */
+                uint16_t overlap_lo = (page_lo > ctx->sav_fsymb) ? page_lo : ctx->sav_fsymb;
+                uint16_t overlap_hi = (page_hi < ctx->sav_lsymb) ? page_hi : ctx->sav_lsymb;
+                if (overlap_lo <= overlap_hi) {
+                    /* The block has symbols on this page.
+                     * Use fst_symb/lst_symb to check if key might be here.
+                     * But fst/lst may be from other blocks, so only use
+                     * lst_symb as an upper bound: if key > lst_symb of this
+                     * page, key cannot be on this page. */
+                    if (memcmp(srcharg8, ev->lst_symb, SDF_NAME_LEN) > 0) {
+                        /* Key is beyond this page; advance */
+                        page_lo = (uint16_t)(page_hi + 1);
+                        vp += sizeof(sdf_symextv_disk_t);
+                        continue;
+                    }
+                    /* Key may be on this page; narrow to overlap range */
+                    lo = overlap_lo;
+                    hi = overlap_hi;
+                    found_page = true;
+                    break;
+                }
+                page_lo = (uint16_t)(page_hi + 1);
                 vp += sizeof(sdf_symextv_disk_t);
             }
             if (found_page)
                 break;
+            if (!found_page && nentries > 0) {
+                /* All pages exhausted without finding the block's range;
+                 * leave lo/hi as sav_fsymb/sav_lsymb for safety */
+            }
             ext_ptr = (sdf_vptr_t)succ;
         }
     }
 
-    /* Binary search over [lo, hi] */
+    /* Binary search over [lo, hi] using 8-char name comparison only.
+     * This mirrors the BAL BINSRCH which does CLC SRCHARG(8),SYMBNAME
+     * without calling CHKMATCH -- class/type filtering is deferred to
+     * the linear scan (LINSRCH). */
     while (lo <= hi) {
         uint16_t mid = (uint16_t)((lo + hi) / 2);
-        int dir = chk_match(ctx, srcharg8, mid, first);
-        if (dir == 0) {
-            /* Hit -- linear scan backward to find the first occurrence */
+        sdf_vptr_t sn_ptr;
+        if (sdf_ndx2ptr(ctx, 4, mid, &sn_ptr) != SDF_OK) break;
+        void *sn_raw;
+        if (sdf_locate_vptr(ctx, sn_ptr, NULL, &sn_raw) != SDF_OK) break;
+        sdf_symbnode_disk_t *sn = (sdf_symbnode_disk_t *)sn_raw;
+
+        int cmp8 = memcmp(srcharg8, sn->symb_name, SDF_NAME_LEN);
+        if (cmp8 < 0) {
+            if (mid == 0) break;
+            hi = (uint16_t)(mid - 1);
+        } else if (cmp8 > 0) {
+            lo = (uint16_t)(mid + 1);
+        } else {
+            /* 8-char match -- enter linear scan (LINSRCH):
+             *
+             * 1. Scan backward from mid while 8-char name still matches
+             *    and CHKMATCH says skip (0) or match (≤0).  Stop when
+             *    name no longer matches or CHKMATCH says go forward (+1).
+             * 2. Scan forward: for each candidate that 8-char-matches,
+             *    call CHKMATCH.  Return on first match (≤0 but name ok).
+             */
+            /* Step 1: back-scan */
             uint16_t candidate = mid;
             while (candidate > ctx->sav_fsymb) {
                 uint16_t prev = (uint16_t)(candidate - 1);
+                sdf_vptr_t prev_ptr;
+                if (sdf_ndx2ptr(ctx, 4, prev, &prev_ptr) != SDF_OK) break;
+                void *prev_raw;
+                if (sdf_locate_vptr(ctx, prev_ptr, NULL, &prev_raw) != SDF_OK) break;
+                sdf_symbnode_disk_t *prev_sn = (sdf_symbnode_disk_t *)prev_raw;
+                if (memcmp(srcharg8, prev_sn->symb_name, SDF_NAME_LEN) != 0) break;
                 int d = chk_match(ctx, srcharg8, prev, first);
-                if (d != 0) break;
+                if (d > 0) break;  /* CHKMATCH says go forward: stop back-scan */
                 candidate = prev;
             }
-            /* Now scan forward to find the best match */
+            /* Step 2: forward scan -- call CHKMATCH on each 8-char match */
             while (candidate <= ctx->sav_lsymb) {
-                sdf_vptr_t sn_ptr;
-                if (sdf_ndx2ptr(ctx, 4, candidate, &sn_ptr) != SDF_OK)
-                    break;
-                void *sn_raw;
-                if (sdf_locate_vptr(ctx, sn_ptr, NULL, &sn_raw) != SDF_OK)
-                    break;
-                sdf_symbnode_disk_t *sn = (sdf_symbnode_disk_t *)sn_raw;
-                if (memcmp(srcharg8, sn->symb_name, SDF_NAME_LEN) != 0)
-                    break;
-                sdf_vptr_t sdc_ptr = sdf_be32(&sn->sdc_ptr);
-                void *sdc_raw;
-                if (sdf_locate_vptr(ctx, sdc_ptr, NULL, &sdc_raw) != SDF_OK)
-                    break;
+                sdf_vptr_t c_ptr;
+                if (sdf_ndx2ptr(ctx, 4, candidate, &c_ptr) != SDF_OK) break;
+                void *c_sn_raw;
+                if (sdf_locate_vptr(ctx, c_ptr, NULL, &c_sn_raw) != SDF_OK) break;
+                sdf_symbnode_disk_t *c_sn = (sdf_symbnode_disk_t *)c_sn_raw;
+                if (memcmp(srcharg8, c_sn->symb_name, SDF_NAME_LEN) != 0) break;
+                sdf_vptr_t c_sdc_ptr = sdf_be32(&c_sn->sdc_ptr);
+                void *c_sdc_raw;
+                if (sdf_locate_vptr(ctx, c_sdc_ptr, NULL, &c_sdc_raw) != SDF_OK) break;
                 int d2 = chk_match(ctx, srcharg8, candidate, first);
+                if (d2 < 0) break;  /* gone past -- not found */
                 if (d2 == 0) {
-                    *found_symb_no = candidate;
-                    *found_sn_raw  = sn_raw;
-                    *found_sdc_raw = sdc_raw;
-                    return SDF_OK;
+                    /* chk_match returns 0 for both "skip" AND "name match".
+                     * Distinguish: if the full name comparison passed
+                     * (chk_match reached the name-cmp code), it's a match.
+                     * But chk_match returns 0 for skip too.
+                     * Re-check: if class/type filter would skip, chk_match
+                     * returns 0 without storing symb_no; the forward scan
+                     * should continue.  To distinguish, re-examine the SDC. */
+                    sdf_symbdc_disk_t *c_sdc = (sdf_symbdc_disk_t *)c_sdc_raw;
+                    bool skip = false;
+                    if (!first) {
+                        if (c_sdc->sym_class == SDF_CLASS_EQUATE_EXT &&
+                            c_sdc->sym_type  == SDF_TYPE_EQUATE_EXT)
+                            skip = true;
+                        else if (c_sdc->sym_class > 3) {
+                            uint8_t f = c_sdc->flag1 & SDF_FLAG1_UNQUAL_STRUC;
+                            if (f == 0 || f == SDF_FLAG1_UNQUAL_STRUC)
+                                skip = true;
+                        }
+                    }
+                    if (!skip) {
+                        *found_symb_no = candidate;
+                        *found_sn_raw  = c_sn_raw;
+                        *found_sdc_raw = c_sdc_raw;
+                        return SDF_OK;
+                    }
                 }
                 candidate++;
             }
             return SDF_SYM_NOT_FOUND;
-        } else if (dir < 0) {
-            if (mid == 0) break;
-            hi = (uint16_t)(mid - 1);
-        } else {
-            lo = (uint16_t)(mid + 1);
         }
     }
     return SDF_SYM_NOT_FOUND;
@@ -752,9 +820,14 @@ sdf_rc_t sdf_find_symbol_by_name(sdf_ctx_t *ctx, const char *symb_name,
     if (ctx->sav_fsymb == 0)
         return SDF_ERR_BLK_NOSPEC;
 
-    /* Prepare blank-padded 8-char search argument */
+    /* Prepare blank-padded 8-char search argument and full name in comm area */
     char srcharg8[SDF_NAME_LEN];
     sdf_str_to_field(symb_name, srcharg8, SDF_NAME_LEN);
+    strncpy(ctx->comm.symb_nam, symb_name, SDF_LONG_NAME_LEN);
+    ctx->comm.symb_nam[SDF_LONG_NAME_LEN] = '\0';
+    ctx->comm.symbn_len = (uint8_t)strlen(symb_name);
+    if (ctx->comm.symbn_len > SDF_LONG_NAME_LEN)
+        ctx->comm.symbn_len = SDF_LONG_NAME_LEN;
 
     ctx->comm.symb_no = 0;
 

@@ -55,19 +55,24 @@ static sdf_rc_t build_navcomp(const char *path)
     rc = sdf_write_block(w, &blk, &blk_no);
     if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
 
-    /* Eight symbols (in any order; sdf_commit sorts alphabetically) */
+    /* Nine symbols (in any order; sdf_commit sorts alphabetically) */
     struct { const char *name; uint8_t cls; uint8_t typ;
              uint8_t rows; uint8_t cols; } syms[] = {
-        { "VELOCITY",       SDF_SCLASS_VARIABLE, SDF_STYPE_VECTOR,    3,  0 },
-        { "ALTITUDE",       SDF_SCLASS_VARIABLE, SDF_STYPE_SCALAR,    0,  0 },
-        { "MESSAGE",        SDF_SCLASS_VARIABLE, SDF_STYPE_CHARACTER, 0, 20 },
-        { "BITS",           SDF_SCLASS_VARIABLE, SDF_STYPE_BIT,      16,  0 },
-        { "COUNT",          SDF_SCLASS_VARIABLE, SDF_STYPE_INTEGER,   0,  0 },
-        { "ARMED",          SDF_SCLASS_VARIABLE, SDF_STYPE_BOOLEAN,   0,  0 },
-        { "INERTIA",        SDF_SCLASS_VARIABLE, SDF_STYPE_MATRIX,    3,  3 },
-        { "LONGSYMBOLNAME", SDF_SCLASS_VARIABLE, SDF_STYPE_SCALAR,    0,  0 },
+        { "VELOCITY",       SDF_SCLASS_VARIABLE,   SDF_STYPE_VECTOR,    3,  0 },
+        { "ALTITUDE",       SDF_SCLASS_VARIABLE,   SDF_STYPE_SCALAR,    0,  0 },
+        { "MESSAGE",        SDF_SCLASS_VARIABLE,   SDF_STYPE_CHARACTER, 0, 20 },
+        { "BITS",           SDF_SCLASS_VARIABLE,   SDF_STYPE_BIT,      16,  0 },
+        { "COUNT",          SDF_SCLASS_VARIABLE,   SDF_STYPE_INTEGER,   0,  0 },
+        { "ARMED",          SDF_SCLASS_VARIABLE,   SDF_STYPE_BOOLEAN,   0,  0 },
+        { "INERTIA",        SDF_SCLASS_VARIABLE,   SDF_STYPE_MATRIX,    3,  3 },
+        { "LAUNCH_ENABLE",  SDF_SCLASS_VARIABLE,   SDF_STYPE_EVENT,     0,  0 },
+        { "LONGSYMBOLNAME", SDF_SCLASS_VARIABLE,   SDF_STYPE_SCALAR,    0,  0 },
+        /* NAME variable: sym_class=LABEL(4), sym_type=type of referent */
+        { "ALT_PTR",        SDF_SCLASS_LABEL,      SDF_STYPE_SCALAR,    0,  0 },
+        /* EQUATE_EXT: sym_class=2, sym_type=8 */
+        { "EXT_CONST",      SDF_SCLASS_EQUATE_EXT, SDF_STYPE_EQUATE_EXT,0, 0 },
     };
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 11; i++) {
         sdf_wsymbol_t sym = {
             .blk_no    = blk_no,
             .sym_class = syms[i].cls,
@@ -80,6 +85,33 @@ static sdf_rc_t build_navcomp(const char *path)
         rc = sdf_write_symbol(w, &sym, &symb_no);
         if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
     }
+
+    /* TASK block: BURN_TASK */
+    uint16_t task_blk_no;
+    sdf_wblock_t task_blk = {
+        .csect_name = "NAVSECT",
+        .blk_name   = "BURN_TASK",
+        .blk_class  = SDF_BCLASS_TASK,   /* = 4 */
+        .blk_id     = 2,
+    };
+    rc = sdf_write_block(w, &task_blk, &task_blk_no);
+    if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
+
+    /* TASK entry-point symbol */
+    sdf_wsymbol_t task_sym = { .blk_no = task_blk_no,
+                                .sym_class = SDF_SCLASS_VARIABLE,
+                                .sym_type  = SDF_STYPE_TASK };
+    strncpy(task_sym.symb_name, "BURN_TASK", SDF_LONG_NAME_LEN);
+    rc = sdf_write_symbol(w, &task_sym, NULL);
+    if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
+
+    /* TASK local variable */
+    sdf_wsymbol_t task_loc = { .blk_no = task_blk_no,
+                                .sym_class = SDF_SCLASS_VARIABLE,
+                                .sym_type  = SDF_STYPE_SCALAR };
+    strncpy(task_loc.symb_name, "THRUST_LEVEL", SDF_LONG_NAME_LEN);
+    rc = sdf_write_symbol(w, &task_loc, NULL);
+    if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
 
     /* Four statements */
     struct { const char *srn; uint16_t typ; bool exec;
@@ -103,7 +135,8 @@ static sdf_rc_t build_navcomp(const char *path)
         if (rc != SDF_OK) { sdf_wcancel(&w); return rc; }
     }
 
-    return sdf_commit(&w);
+    rc = sdf_commit(&w);
+    return rc;
 }
 
 /* ------------------------------------------------------------------ */
@@ -131,69 +164,117 @@ static void run_tests(const char *path)
     CHECK("root non-null", root != NULL);
 
     /* T03: block count and metadata */
+    /* After block sort: BURN_TASK(1) < NAVCOMP(2).
+     * Symbol numbering:
+     *   1: BURN_TASK (task entry-point, BURN_TASK block)
+     *   2: THRUST_LEVEL (scalar, BURN_TASK block)
+     *   NAVCOMP block (symbs 3..13), alphabetical:
+     *   3:ALTITUDE  4:ALT_PTR  5:ARMED  6:BITS  7:COUNT  8:EXT_CONST
+     *   9:INERTIA  10:LAUNCH_ENABLE  11:LONGSYMBOLNAME  12:MESSAGE  13:VELOCITY
+     * Note: ALTITUDE < ALT_PTR because 'I'(73) < '_'(95) */
     puts("T03: block metadata");
     sdf_block_result_t blk;
-    CHECK_RC("find block 1", sdf_find_block_by_number(ctx, 1, SDF_DISP_NONE, &blk), SDF_OK);
+    CHECK_RC("find block 2 (NAVCOMP)", sdf_find_block_by_number(ctx, 2, SDF_DISP_NONE, &blk), SDF_OK);
     CHECK("csect=NAVSECT",  strncmp(blk.csect_name, "NAVSECT", 7) == 0);
     CHECK("name=NAVCOMP",   strcmp(blk.blk_name, "NAVCOMP") == 0);
     CHECK("blk_class=1",    blk.blk_class == SDF_BCLASS_PROGRAM);
-    CHECK("fsymb=1",        blk.fsymb_no == 1);
-    CHECK("lsymb=8",        blk.lsymb_no == 8);
+    CHECK("fsymb=3",        blk.fsymb_no == 3);
+    CHECK("lsymb=13",       blk.lsymb_no == 13);
     CHECK("fstmt=1",        blk.fstmt_no == 1);
     CHECK("lstm=4",         blk.lstm_no  == 4);
 
-    /* T04: symbol sort order (alphabetical) */
+    sdf_block_result_t tblk;
+    CHECK_RC("find block 1 (BURN_TASK)", sdf_find_block_by_number(ctx, 1, SDF_DISP_NONE, &tblk), SDF_OK);
+    CHECK("BURN_TASK blk_class=TASK", tblk.blk_class == SDF_BCLASS_TASK);
+    CHECK("BURN_TASK fsymb=1",        tblk.fsymb_no == 1);
+    CHECK("BURN_TASK lsymb=2",        tblk.lsymb_no == 2);
+
+    /* T04: full symbol order check */
     puts("T04: symbol alphabetical order");
-    const char *expected_order[] = {
-        "ALTITUDE", "ARMED", "BITS", "COUNT",
-        "INERTIA", "LONGSYMBOLNAME", "MESSAGE", "VELOCITY"
+    const char *all_order[] = {
+        "BURN_TASK", "THRUST_LEVEL",                    /* symbs 1-2: BURN_TASK block */
+        "ALTITUDE", "ALT_PTR", "ARMED", "BITS", "COUNT",
+        "EXT_CONST", "INERTIA", "LAUNCH_ENABLE", "LONGSYMBOLNAME",
+        "MESSAGE", "VELOCITY"                            /* symbs 3-13: NAVCOMP block */
     };
     bool order_ok = true;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 13; i++) {
         sdf_symbol_result_t sym;
         sdf_rc_t src = sdf_find_symbol_by_number(ctx, (uint16_t)(i+1),
                                                   SDF_DISP_NONE, &sym);
-        if (src != SDF_OK || strcmp(sym.symb_name, expected_order[i]) != 0) {
+        if (src != SDF_OK || strcmp(sym.symb_name, all_order[i]) != 0) {
             order_ok = false;
             printf("    symb %d: got '%s', want '%s'\n",
-                   i+1, sym.symb_name, expected_order[i]);
+                   i+1, sym.symb_name, all_order[i]);
         }
     }
     CHECK("symbols alphabetical", order_ok);
 
     /* T05: symbol type fields */
     puts("T05: symbol type fields");
-    /* VELOCITY is symbol 8 (last alphabetically) */
+
+    /* BURN_TASK entry-point: symb 1, type=TASK */
+    sdf_symbol_result_t bts;
+    CHECK_RC("find BURN_TASK sym", sdf_find_symbol_by_number(ctx, 1, SDF_DISP_NONE, &bts),
+             SDF_OK);
+    CHECK("BURN_TASK sym type=TASK", bts.sym_type == SDF_STYPE_TASK);
+
+    /* ALT_PTR: symb 4, NAME variable (class=LABEL, type=SCALAR) */
+    sdf_symbol_result_t nv;
+    CHECK_RC("find ALT_PTR", sdf_find_symbol_by_number(ctx, 4, SDF_DISP_NONE, &nv),
+             SDF_OK);
+    CHECK("ALT_PTR name",        strcmp(nv.symb_name, "ALT_PTR") == 0);
+    CHECK("ALT_PTR class=LABEL", nv.sym_class == SDF_SCLASS_LABEL);
+    CHECK("ALT_PTR type=SCALAR", nv.sym_type  == SDF_STYPE_SCALAR);
+
+    /* EXT_CONST: symb 8, EQUATE_EXT (class=2, type=8) */
+    sdf_symbol_result_t eq;
+    CHECK_RC("find EXT_CONST", sdf_find_symbol_by_number(ctx, 8, SDF_DISP_NONE, &eq),
+             SDF_OK);
+    CHECK("EXT_CONST name",             strcmp(eq.symb_name, "EXT_CONST") == 0);
+    CHECK("EXT_CONST class=EQUATE_EXT", eq.sym_class == SDF_SCLASS_EQUATE_EXT);
+    CHECK("EXT_CONST type=EQUATE_EXT",  eq.sym_type  == SDF_STYPE_EQUATE_EXT);
+
+    /* VELOCITY is symbol 13 */
     sdf_symbol_result_t vel;
-    CHECK_RC("find VELOCITY", sdf_find_symbol_by_number(ctx, 8, SDF_DISP_NONE, &vel),
+    CHECK_RC("find VELOCITY", sdf_find_symbol_by_number(ctx, 13, SDF_DISP_NONE, &vel),
              SDF_OK);
     CHECK("VELOCITY type=VECTOR", vel.sym_type == SDF_STYPE_VECTOR);
     CHECK("VELOCITY rows=3",      vel.rows == 3);
 
-    /* INERTIA */
+    /* INERTIA is symbol 9 */
     sdf_symbol_result_t ine;
-    CHECK_RC("find INERTIA", sdf_find_symbol_by_number(ctx, 5, SDF_DISP_NONE, &ine),
+    CHECK_RC("find INERTIA", sdf_find_symbol_by_number(ctx, 9, SDF_DISP_NONE, &ine),
              SDF_OK);
     CHECK("INERTIA type=MATRIX",  ine.sym_type == SDF_STYPE_MATRIX);
     CHECK("INERTIA rows=3",        ine.rows == 3);
     CHECK("INERTIA cols=3",        ine.columns == 3);
 
-    /* MESSAGE */
+    /* LAUNCH_ENABLE is symbol 10 */
+    sdf_symbol_result_t lev;
+    CHECK_RC("find LAUNCH_ENABLE", sdf_find_symbol_by_number(ctx, 10, SDF_DISP_NONE, &lev),
+             SDF_OK);
+    CHECK("LAUNCH_ENABLE name",       strcmp(lev.symb_name, "LAUNCH_ENABLE") == 0);
+    CHECK("LAUNCH_ENABLE type=EVENT", lev.sym_type == SDF_STYPE_EVENT);
+    CHECK("LAUNCH_ENABLE rows=0",     lev.rows == 0);
+    CHECK("LAUNCH_ENABLE columns=0",  lev.columns == 0);
+
+    /* MESSAGE is symbol 12 */
     sdf_symbol_result_t msg;
-    CHECK_RC("find MESSAGE", sdf_find_symbol_by_number(ctx, 7, SDF_DISP_NONE, &msg),
+    CHECK_RC("find MESSAGE", sdf_find_symbol_by_number(ctx, 12, SDF_DISP_NONE, &msg),
              SDF_OK);
     CHECK("MESSAGE type=CHARACTER", msg.sym_type == SDF_STYPE_CHARACTER);
     CHECK("MESSAGE columns=20",     msg.columns == 20);
 
     /* T06: find symbol by name */
     puts("T06: find symbol by name");
-    sdf_find_block_by_number(ctx, 1, SDF_DISP_NONE, NULL);  /* set block ctx */
+    sdf_find_block_by_number(ctx, 2, SDF_DISP_NONE, NULL);  /* set NAVCOMP block ctx */
     sdf_symbol_result_t alt;
     CHECK_RC("find ALTITUDE by name",
              sdf_find_symbol_by_name(ctx, "ALTITUDE", SDF_DISP_NONE, &alt),
              SDF_OK);
-    CHECK("ALTITUDE symb_no=1", alt.symb_no == 1);
-    CHECK("ALTITUDE type=SCALAR", alt.sym_type == SDF_STYPE_SCALAR);
+    CHECK("ALTITUDE symb_no=3",    alt.symb_no == 3);
+    CHECK("ALTITUDE type=SCALAR",  alt.sym_type == SDF_STYPE_SCALAR);
 
     /* T07: find block by name */
     puts("T07: find block by name");
@@ -201,7 +282,7 @@ static void run_tests(const char *path)
     CHECK_RC("find NAVCOMP by name",
              sdf_find_block_by_name(ctx, "NAVCOMP", SDF_DISP_NONE, &blk2),
              SDF_OK);
-    CHECK("blk_no=1", blk2.blk_no == 1);
+    CHECK("blk_no=2", blk2.blk_no == 2);
 
     /* T08: statements */
     puts("T08: statement data");
@@ -230,7 +311,7 @@ static void run_tests(const char *path)
 
     /* T10: LONGSYMBOLNAME (name > 8 chars, exercises name continuation) */
     puts("T10: long symbol name");
-    sdf_find_block_by_number(ctx, 1, SDF_DISP_NONE, NULL);
+    sdf_find_block_by_number(ctx, 2, SDF_DISP_NONE, NULL);  /* NAVCOMP = block 2 */
     sdf_symbol_result_t lsn;
     CHECK_RC("find LONGSYMBOLNAME",
              sdf_find_symbol_by_name(ctx, "LONGSYMBOLNAME", SDF_DISP_NONE, &lsn),
@@ -306,6 +387,192 @@ static void run_tests(const char *path)
     CHECK("wstats stmts=0", nst == 0);
     sdf_wcancel(&wd);
     unlink("/tmp/sdf_stats_test.sdf");
+
+    /* ------------------------------------------------------------------
+     * T15: write STRUCTURE with COPY link (struct_of / STRCDATA)
+     *
+     * Scenario (mirrors HAL/S):
+     *   STRUCTURE BASE_S;
+     *     DECLARE BASE_FIELD SCALAR;
+     *   CLOSE BASE_S;
+     *
+     *   STRUCTURE EXT_S COPY BASE_S;   <- copy_blk_no = blk_no(BASE_S)
+     *     DECLARE EXTRA_FIELD INTEGER;
+     *   CLOSE EXT_S;
+     *
+     * Both templates are blk_class=PROCEDURE (3).
+     * The EXT_S template header symbol carries copy_blk_no pointing to
+     * the BASE_S block.
+     * ------------------------------------------------------------------ */
+    puts("T15: write STRUCTURE-COPY member");
+    sdf_wctx_t *wc = NULL;
+    rc = sdf_create("/tmp/sdf_copy_test.sdf", "COPYMEM",
+                    SDF_VER_DEFAULT, SDF_WFLAG_HAS_SRNS, &wc);
+    CHECK_RC("copy: create", rc, SDF_OK);
+
+    /* Block 1: main PROGRAM */
+    uint16_t c_prog;
+    sdf_wblock_t c_progblk = {
+        .csect_name = "COPYCS", .blk_name = "COPYMAIN",
+        .blk_class  = SDF_BCLASS_PROGRAM, .blk_id = 1,
+    };
+    rc = sdf_write_block(wc, &c_progblk, &c_prog);
+    CHECK_RC("copy: add COPYMAIN block", rc, SDF_OK);
+
+    /* Block 2: BASE_S template */
+    uint16_t c_base;
+    sdf_wblock_t c_baseblk = {
+        .csect_name = "COPYCS", .blk_name = "BASE_S",
+        .blk_class  = SDF_BCLASS_PROCEDURE, .blk_id = 2,
+    };
+    rc = sdf_write_block(wc, &c_baseblk, &c_base);
+    CHECK_RC("copy: add BASE_S block", rc, SDF_OK);
+
+    /* Block 3: EXT_S template (COPYs BASE_S) */
+    uint16_t c_ext;
+    sdf_wblock_t c_extblk = {
+        .csect_name = "COPYCS", .blk_name = "EXT_S",
+        .blk_class  = SDF_BCLASS_PROCEDURE, .blk_id = 3,
+    };
+    rc = sdf_write_block(wc, &c_extblk, &c_ext);
+    CHECK_RC("copy: add EXT_S block", rc, SDF_OK);
+
+    /* BASE_S template header symbol */
+    sdf_wsymbol_t c_base_hdr = {
+        .blk_no    = c_base,
+        .sym_class = SDF_SCLASS_TEMPLATE,
+        .sym_type  = SDF_STYPE_STRUCTURE,
+    };
+    strncpy(c_base_hdr.symb_name, "BASE_S", SDF_LONG_NAME_LEN);
+    uint16_t c_base_hdr_no;
+    rc = sdf_write_symbol(wc, &c_base_hdr, &c_base_hdr_no);
+    CHECK_RC("copy: BASE_S hdr symbol", rc, SDF_OK);
+
+    /* BASE_S member */
+    sdf_wsymbol_t c_base_mem = {
+        .blk_no    = c_base,
+        .sym_class = SDF_SCLASS_VARIABLE,
+        .sym_type  = SDF_STYPE_SCALAR,
+    };
+    strncpy(c_base_mem.symb_name, "BASE_FIELD", SDF_LONG_NAME_LEN);
+    rc = sdf_write_symbol(wc, &c_base_mem, NULL);
+    CHECK_RC("copy: BASE_FIELD symbol", rc, SDF_OK);
+
+    /* EXT_S template header symbol -- copy_blk_no points to BASE_S */
+    sdf_wsymbol_t c_ext_hdr = {
+        .blk_no      = c_ext,
+        .sym_class   = SDF_SCLASS_TEMPLATE,
+        .sym_type    = SDF_STYPE_STRUCTURE,
+        .copy_blk_no = c_base,   /* <-- the COPY link */
+    };
+    strncpy(c_ext_hdr.symb_name, "EXT_S", SDF_LONG_NAME_LEN);
+    uint16_t c_ext_hdr_no;
+    rc = sdf_write_symbol(wc, &c_ext_hdr, &c_ext_hdr_no);
+    CHECK_RC("copy: EXT_S hdr symbol (with copy_blk_no)", rc, SDF_OK);
+
+    /* EXT_S extra member */
+    sdf_wsymbol_t c_ext_mem = {
+        .blk_no    = c_ext,
+        .sym_class = SDF_SCLASS_VARIABLE,
+        .sym_type  = SDF_STYPE_INTEGER,
+    };
+    strncpy(c_ext_mem.symb_name, "EXTRA_FIELD", SDF_LONG_NAME_LEN);
+    rc = sdf_write_symbol(wc, &c_ext_mem, NULL);
+    CHECK_RC("copy: EXTRA_FIELD symbol", rc, SDF_OK);
+
+    /* Instance of EXT_S in the PROGRAM block */
+    sdf_wsymbol_t c_inst = {
+        .blk_no    = c_prog,
+        .sym_class = SDF_SCLASS_VARIABLE,
+        .sym_type  = SDF_STYPE_STRUCTURE,
+        .rows      = 0,   /* filled after commit in real compiler */
+    };
+    strncpy(c_inst.symb_name, "MY_EXT", SDF_LONG_NAME_LEN);
+    rc = sdf_write_symbol(wc, &c_inst, NULL);
+    CHECK_RC("copy: MY_EXT instance symbol", rc, SDF_OK);
+
+    /* One statement */
+    sdf_wstmt_t c_st = {
+        .blk_no    = c_prog,
+        .stmt_type = SDF_STTYPE_ASSIGN,
+        .is_exec   = true,
+        .num_lhs   = 1,
+    };
+    memcpy(c_st.srn, "C0001 ", SDF_SRN_LEN);
+    rc = sdf_write_stmt(wc, &c_st, NULL);
+    CHECK_RC("copy: write stmt", rc, SDF_OK);
+
+    rc = sdf_commit(&wc);
+    CHECK_RC("copy: commit", rc, SDF_OK);
+
+    /* T16: read back and verify STRCDATA / copy_blk_no */
+    puts("T16: read back COPY member -- verify copy_blk_no in EXT_S header");
+    sdf_ctx_t *cctx = NULL;
+    rc = sdf_open("/tmp/sdf_copy_test.sdf", SDF_OPEN_RDONLY, 0, &cctx);
+    CHECK_RC("copy: open", rc, SDF_OK);
+    rc = sdf_select(cctx, "COPYMEM");
+    CHECK_RC("copy: select", rc, SDF_OK);
+
+    /* Find the EXT_S block by name */
+    sdf_block_result_t c_extblk_r;
+    rc = sdf_find_block_by_name(cctx, "EXT_S", SDF_DISP_NONE, &c_extblk_r);
+    CHECK_RC("copy: find EXT_S block", rc, SDF_OK);
+    uint16_t ext_blk_no = c_extblk_r.blk_no;
+
+    /* Find BASE_S block by name */
+    sdf_block_result_t c_baseblk_r;
+    rc = sdf_find_block_by_name(cctx, "BASE_S", SDF_DISP_NONE, &c_baseblk_r);
+    CHECK_RC("copy: find BASE_S block", rc, SDF_OK);
+    uint16_t base_blk_no = c_baseblk_r.blk_no;
+
+    /* Walk symbols to find EXT_S template header (class=TEMPLATE in EXT_S block) */
+    sdf_block_result_t drootblk;
+    rc = sdf_find_block_by_number(cctx, 1, SDF_DISP_NONE, &drootblk);
+    /* total sym count from DROOTCEL -- use find_symbol_by_number loop */
+    bool found_copy = false;
+    uint16_t total_syms = 0;
+    /* determine sym range from all blocks */
+    for (uint16_t bn = 1; bn <= 3; bn++) {
+        sdf_block_result_t br;
+        if (sdf_find_block_by_number(cctx, bn, SDF_DISP_NONE, &br) == SDF_OK)
+            if (br.lsymb_no > total_syms) total_syms = br.lsymb_no;
+    }
+    for (uint16_t sn = 1; sn <= total_syms; sn++) {
+        sdf_symbol_result_t sr;
+        if (sdf_find_symbol_by_number(cctx, sn, SDF_DISP_NONE, &sr) != SDF_OK)
+            continue;
+        if (sr.blk_no == ext_blk_no &&
+            sr.sym_class == SDF_SCLASS_TEMPLATE &&
+            sr.sym_type  == SDF_STYPE_STRUCTURE) {
+            /* Found the EXT_S template header */
+            CHECK("EXT_S hdr: copy_blk_no == base_blk_no",
+                  sr.copy_blk_no == base_blk_no);
+            CHECK("EXT_S hdr: copy_blk_no != 0",
+                  sr.copy_blk_no != 0);
+            found_copy = true;
+            break;
+        }
+    }
+    CHECK("EXT_S template header found", found_copy);
+
+    /* BASE_S template header must have copy_blk_no == 0 */
+    bool found_base_hdr = false;
+    for (uint16_t sn = 1; sn <= total_syms; sn++) {
+        sdf_symbol_result_t sr;
+        if (sdf_find_symbol_by_number(cctx, sn, SDF_DISP_NONE, &sr) != SDF_OK)
+            continue;
+        if (sr.blk_no == base_blk_no &&
+            sr.sym_class == SDF_SCLASS_TEMPLATE &&
+            sr.sym_type  == SDF_STYPE_STRUCTURE) {
+            CHECK("BASE_S hdr: copy_blk_no == 0", sr.copy_blk_no == 0);
+            found_base_hdr = true;
+            break;
+        }
+    }
+    CHECK("BASE_S template header found", found_base_hdr);
+
+    sdf_close(&cctx);
+    unlink("/tmp/sdf_copy_test.sdf");
 }
 
 /* ------------------------------------------------------------------ */

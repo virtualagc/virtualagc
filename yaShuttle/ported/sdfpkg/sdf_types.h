@@ -339,6 +339,29 @@ typedef struct {
     uint16_t range3;     /* size of dimension 3 (0 if <= 2-D)  */
 } SDF_PACKED sdf_arradata_disk_t;
 
+/*
+ * STRCDATA (Section 6.12 of SDFPKG Users Guide)
+ *
+ * Located at (SDC_base + struct_of) when struct_of != 0.
+ * Records the block number of the STRUCTURE template whose members
+ * are COPYed into this block.  Used when a HAL/S STRUCTURE declaration
+ * uses the COPY keyword to inherit another template's members.
+ *
+ * Example:
+ *   STRUCTURE SENSOR_DATA;
+ *     DECLARE ALT_READING SCALAR;
+ *   CLOSE SENSOR_DATA;
+ *
+ *   STRUCTURE SENSOR_PLUS COPY SENSOR_DATA;    <- struct_of != 0 here
+ *     DECLARE EXTRA_FIELD INTEGER;
+ *   CLOSE SENSOR_PLUS;
+ *
+ * copy_blk_no: block number of the template being COPYed (1-based).
+ */
+typedef struct {
+    uint16_t copy_blk_no;   /* blk_no of the COPYed template block */
+} SDF_PACKED sdf_strcdata_disk_t;
+
 /* Symbol class / type flags */
 #define SDF_CLASS_EQUATE_EXT  2
 #define SDF_TYPE_EQUATE_EXT   8

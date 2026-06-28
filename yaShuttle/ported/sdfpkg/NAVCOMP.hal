@@ -11,10 +11,11 @@ C      ARMED           BOOLEAN
 C      BITS            BIT(16)
 C      COUNT           INTEGER
 C      INERTIA         MATRIX(3,3)
+C      LAUNCH_ENABLE   EVENT
 C      LONGSYMBOLNAME  SCALAR
 C      MESSAGE         CHARACTER(20)
 C      READINGS        ARRAY(10) SCALAR
-C      SENSOR          SENSOR_DATA    (STRUCTURE instance)
+C      SENSOR          SENSOR_DATA-STRUCTURE  (STRUCTURE instance)
 C      TABLE           ARRAY(3,4) INTEGER
 C      VELOCITY        VECTOR(3)
 C
@@ -32,10 +33,13 @@ C    S0004  DECLARE ...;   (non-executable)
 C
 C  HAL/S STRUCTURE notes
 C  ---------------------
-C  A STRUCTURE declaration defines a named composite type.  Each
-C  field (member) is introduced with a level number (1 for top-level
-C  members).  Variables of a structure type are declared using the
-C  structure name as the type keyword.  Member access uses dot notation:
+C  A STRUCTURE statement may only appear inside a compilation unit
+C  (COMPOOL, PROCEDURE, FUNCTION, or PROGRAM).  It defines a named
+C  composite type whose members are each introduced with a level
+C  number (1 for top-level members).
+C
+C  Variables of a structure type are declared using the template name
+C  suffixed with "-STRUCTURE".  Member access uses dot notation:
 C    SENSOR.ALT_READING  or  SENSOR.VEL_READING$(2)
 C
 C  In the SDF, a STRUCTURE type occupies its own block (blk_class=3).
@@ -61,6 +65,7 @@ C ========================================================================
       INERTIA         MATRIX(3, 3)  INITIAL(1.0, 0.0, 0.0,
                                             0.0, 1.0, 0.0,
                                             0.0, 0.0, 1.0),
+      LAUNCH_ENABLE   EVENT,
       LONGSYMBOLNAME  SCALAR        INITIAL(0.0),
       MESSAGE         CHARACTER(20) INITIAL('NAVIGATION NOMINAL'),
       READINGS        ARRAY(10)     SCALAR,

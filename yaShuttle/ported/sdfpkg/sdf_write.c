@@ -740,11 +740,13 @@ static int cmp_symbol_name(const void *a, const void *b)
 {
     const wsymbol_t *sa = (const wsymbol_t *)a;
     const wsymbol_t *sb = (const wsymbol_t *)b;
-    /* Primary: alphabetical by name */
-    int c = strcmp(sa->desc.symb_name, sb->desc.symb_name);
-    if (c) return c;
-    /* Secondary: block number (stable within same name) */
-    return (int)sa->desc.blk_no - (int)sb->desc.blk_no;
+    /* Primary: block number (symbols must be contiguous within their block
+     * for fsymb_no..lsymb_no ranges in BLKTCELL to be meaningful).
+     * blk_no has already been remapped to the post-sort block order. */
+    if (sa->desc.blk_no != sb->desc.blk_no)
+        return (int)sa->desc.blk_no - (int)sb->desc.blk_no;
+    /* Secondary: alphabetical by name within the block */
+    return strcmp(sa->desc.symb_name, sb->desc.symb_name);
 }
 
 static int cmp_block_name(const void *a, const void *b)
@@ -986,21 +988,52 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
     if (!wp || !*wp) return SDF_ERR_NOT_WCTX;
     sdf_wctx_t *w = *wp;
 
-    /* ---- 1. Sort symbols alphabetically ---- */
+    /* ---- 1. Sort blocks by name; build blk_no remap ---- */
+    if (w->num_blks > 0)
+        qsort(w->blocks, w->num_blks, sizeof(wblock_t), cmp_block_name);
+
+    /* Build a remapping table: orig_blk_no -> new_blk_no.
+     * Before reassigning blk_no, record the original values. */
+    uint16_t *blk_remap = malloc((w->num_blks + 1) * sizeof(uint16_t));
+    if (!blk_remap) return SDF_ERR_GETMAIN;
+    /* blk_remap[orig] = new; indices are 1-based */
+    for (uint16_t i = 0; i < w->num_blks; i++) {
+        uint16_t orig = w->blocks[i].blk_no;   /* still original at this point */
+        uint16_t newn = (uint16_t)(i + 1);
+        if (orig <= w->num_blks)
+            blk_remap[orig] = newn;
+    }
+
+    /* Reassign block numbers after sort */
+    for (uint16_t i = 0; i < w->num_blks; i++)
+        w->blocks[i].blk_no = (uint16_t)(i + 1);
+
+    /* Remap desc.blk_no and copy_blk_no in symbols; blk_no in statements */
+    for (uint16_t i = 0; i < w->num_symbs; i++) {
+        uint16_t ob = w->symbols[i].desc.blk_no;
+        if (ob != 0 && ob <= w->num_blks)
+            w->symbols[i].desc.blk_no = blk_remap[ob];
+        uint16_t cb = w->symbols[i].desc.copy_blk_no;
+        if (cb != 0 && cb <= w->num_blks)
+            w->symbols[i].desc.copy_blk_no = blk_remap[cb];
+    }
+    for (uint16_t i = 0; i < w->num_stmts; i++) {
+        uint16_t ob = w->stmts[i].desc.blk_no;
+        if (ob != 0 && ob <= w->num_blks)
+            w->stmts[i].desc.blk_no = blk_remap[ob];
+    }
+    free(blk_remap);
+
+    /* ---- 2. Sort symbols: block-first, then alphabetically within block ----
+     * desc.blk_no has been remapped to final block order, so sorting by
+     * blk_no first keeps each block's symbols contiguous (required for
+     * fsymb_no..lsymb_no ranges in BLKTCELL to be meaningful). */
     if (w->num_symbs > 0)
         qsort(w->symbols, w->num_symbs, sizeof(wsymbol_t), cmp_symbol_name);
 
     /* Reassign symbol numbers after sort */
     for (uint16_t i = 0; i < w->num_symbs; i++)
         w->symbols[i].symb_no = (uint16_t)(i + 1);
-
-    /* ---- 2. Sort blocks by name ---- */
-    if (w->num_blks > 0)
-        qsort(w->blocks, w->num_blks, sizeof(wblock_t), cmp_block_name);
-
-    /* Reassign block numbers after sort */
-    for (uint16_t i = 0; i < w->num_blks; i++)
-        w->blocks[i].blk_no = (uint16_t)(i + 1);
 
     /* ---- 3. Compute per-block symbol and statement ranges ---- */
     /* Initialise ranges to "not set" */
@@ -1113,9 +1146,11 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
                  *   [24..24+cont)  name continuation (cont bytes)
                  *   [24+cont..]    ARRADATA block (8 bytes, if array) */
                 const sdf_wsymbol_t *sd = &w->symbols[i].desc;
-                bool     has_array = (sd->array_dims[0] > 0);
+                bool     has_array  = (sd->array_dims[0] > 0);
+                bool     has_copy   = (sd->copy_blk_no != 0);
                 uint16_t sdc_sz    = (uint16_t)(24 + cont +
-                                                (has_array ? 8 : 0));
+                                                (has_array ? 8 : 0) +
+                                                (has_copy  ? 2 : 0));
 
                 rc = bump_alloc(w, sdc_sz, &sdc_vptrs[i]);
                 if (rc != SDF_OK) goto sym_err;
@@ -1126,6 +1161,9 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
                 /* array_off: byte offset from SDC start to ARRADATA (0=none) */
                 if (has_array)
                     pw8(p, 4, (uint8_t)(24 + cont));
+                /* struct_of: byte offset from SDC start to STRCDATA (0=none) */
+                if (has_copy)
+                    pw8(p, 5, (uint8_t)(24 + cont + (has_array ? 8 : 0)));
                 pw8 (p, 6, sd->sym_class);
                 pw8 (p, 7, sd->sym_type);
                 pw8 (p, 8, sd->flag1);
@@ -1156,6 +1194,11 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
                     pw16(arr, 2, sd->array_dims[1]);  /* range1   */
                     pw16(arr, 4, sd->array_dims[2]);  /* range2   */
                     pw16(arr, 6, sd->array_dims[3]);  /* range3   */
+                }
+                /* STRCDATA block (2 bytes: copy_blk_no) */
+                if (has_copy) {
+                    uint8_t *sc = p + 24 + cont + (has_array ? 8 : 0);
+                    pw16(sc, 0, sd->copy_blk_no);
                 }
             }
 
