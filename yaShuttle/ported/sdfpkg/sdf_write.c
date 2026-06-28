@@ -47,7 +47,7 @@
  * (structures never span pages in the original SDF format).
  */
 
-#define _POSIX_C_SOURCE 200809L
+#include "sdf_compat.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1108,16 +1108,24 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
                 if (nlen > SDF_LONG_NAME_LEN) nlen = SDF_LONG_NAME_LEN;
                 uint8_t     cont   = (nlen > SDF_NAME_LEN)
                                      ? (uint8_t)(nlen - SDF_NAME_LEN) : 0;
-                /* Fixed part is 23 bytes; add continuation bytes */
-                uint16_t sdc_sz = (uint16_t)(24 + cont);
+                /* SDC layout:
+                 *   [0..23]        fixed fields (24 bytes)
+                 *   [24..24+cont)  name continuation (cont bytes)
+                 *   [24+cont..]    ARRADATA block (8 bytes, if array) */
+                const sdf_wsymbol_t *sd = &w->symbols[i].desc;
+                bool     has_array = (sd->array_dims[0] > 0);
+                uint16_t sdc_sz    = (uint16_t)(24 + cont +
+                                                (has_array ? 8 : 0));
 
                 rc = bump_alloc(w, sdc_sz, &sdc_vptrs[i]);
                 if (rc != SDF_OK) goto sym_err;
 
-                uint8_t *p  = vptr_buf(w, sdc_vptrs[i]);
-                const sdf_wsymbol_t *sd = &w->symbols[i].desc;
+                uint8_t *p = vptr_buf(w, sdc_vptrs[i]);
                 memset(p, 0, sdc_sz);
                 pw16(p, 0, sd->blk_no);
+                /* array_off: byte offset from SDC start to ARRADATA (0=none) */
+                if (has_array)
+                    pw8(p, 4, (uint8_t)(24 + cont));
                 pw8 (p, 6, sd->sym_class);
                 pw8 (p, 7, sd->sym_type);
                 pw8 (p, 8, sd->flag1);
@@ -1135,12 +1143,20 @@ sdf_rc_t sdf_commit(sdf_wctx_t **wp)
                 pw8 (p, 19, sd->columns);
                 pw8 (p, 20, sd->lock_num);
                 /* byte_size (3 bytes) */
-                pw8(p, 20, (sd->byte_size >> 16) & 0xFF);
-                pw8(p, 21, (sd->byte_size >>  8) & 0xFF);
-                pw8(p, 22,  sd->byte_size        & 0xFF);
+                pw8(p, 21, (sd->byte_size >> 16) & 0xFF);
+                pw8(p, 22, (sd->byte_size >>  8) & 0xFF);
+                pw8(p, 23,  sd->byte_size        & 0xFF);
                 /* name continuation */
                 if (cont > 0)
                     memcpy(p + 24, name + SDF_NAME_LEN, cont);
+                /* ARRADATA block */
+                if (has_array) {
+                    uint8_t *arr = p + 24 + cont;
+                    pw16(arr, 0, sd->array_dims[0]);  /* arraynum */
+                    pw16(arr, 2, sd->array_dims[1]);  /* range1   */
+                    pw16(arr, 4, sd->array_dims[2]);  /* range2   */
+                    pw16(arr, 6, sd->array_dims[3]);  /* range3   */
+                }
             }
 
             /* Write symbol nodes (now that sdc_vptrs are known) */

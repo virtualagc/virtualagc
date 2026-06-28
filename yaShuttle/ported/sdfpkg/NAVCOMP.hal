@@ -2,50 +2,56 @@ C ========================================================================
 C  NAVCOMP.hal
 C
 C  Sample HAL/S program corresponding to the SDF member NAVCOMP in
-C  sample.sdf.  This source illustrates one variable of each major
-C  HAL/S data type and a small set of executable statements.
+C  sample.sdf.
 C
-C  Block  : NAVCOMP  (PROGRAM, CSECT NAVSECT)
-C  Symbols: ALTITUDE       SCALAR
-C           ARMED          BOOLEAN
-C           BITS           BIT(16)
-C           COUNT          INTEGER
-C           INERTIA        MATRIX(3,3)
-C           LONGSYMBOLNAME SCALAR
-C           MESSAGE        CHARACTER(20)
-C           VELOCITY       VECTOR(3)
+C  Block 1: NAVCOMP  (PROGRAM, CSECT NAVSECT)
+C    Variables:
+C      ALTITUDE        SCALAR
+C      ARMED           BOOLEAN
+C      BITS            BIT(16)
+C      COUNT           INTEGER
+C      INERTIA         MATRIX(3,3)
+C      LONGSYMBOLNAME  SCALAR
+C      MESSAGE         CHARACTER(20)
+C      READINGS        ARRAY(10) SCALAR
+C      SENSOR          SENSOR_DATA    (STRUCTURE instance)
+C      TABLE           ARRAY(3,4) INTEGER
+C      VELOCITY        VECTOR(3)
 C
-C  The SDF statement nodes (stmts 1-4) correspond to:
-C    S0001  ALTITUDE = 35000.0;           (assignment, 1 LHS)
-C    S0002  BURN:  COUNT = COUNT + 1;     (assignment, 1 label, 1 LHS)
-C    S0003  IF ARMED THEN ...;            (IF statement)
-C    S0004  DECLARE ...;                  (non-executable, declare group)
+C  Block 2: SENSOR_DATA  (STRUCTURE template)
+C    Members:
+C      ALT_READING     SCALAR
+C      STATUS_CODE     INTEGER
+C      VEL_READING     VECTOR(3)
 C
-C  The SRN sequence S0001-S0004 is assigned by the compiler and does
-C  not appear in the source text.
+C  Statements in NAVCOMP:
+C    S0001  ALTITUDE = 35000.0;
+C    S0002  BURN: COUNT = COUNT + 1;
+C    S0003  IF ARMED THEN ALTITUDE = ALTITUDE + VELOCITY$(1);
+C    S0004  DECLARE ...;   (non-executable)
 C
-C  HAL/S syntax notes used here:
-C    - Every program begins with a labeled PROGRAM statement and ends
-C      with CLOSE <name>;
-C    - DECLARE lists multiple variables separated by commas.
-C    - VECTOR(n) is a column vector of n SCALAR elements.
-C    - MATRIX(r,c) is an r x c matrix of SCALAR elements.
-C    - CHARACTER(n) is a character string of at most n characters.
-C    - BIT(n) is a bit string of n bits.
-C    - Binary literals use the form BIN'<digits>'.
-C    - VECTOR and MATRIX variables may have INITIAL clauses using
-C      flattened (row-major) data: INITIAL(v1, v2, ..., vn).
-C    - INITIAL(...) supplies a compile-time initial value.
-C    - Subscripts in 1-dimensional format use $(i) notation.
-C    - /* ... */ are inline comments.
-C    - C in column 1 marks a full-line comment.
-C    - Source lines must not exceed 80 columns.  Statements may be
-C      continued on successive lines, provided the continuation text
-C      begins in column 2 or later (column 1 must be blank or C).
+C  HAL/S STRUCTURE notes
+C  ---------------------
+C  A STRUCTURE declaration defines a named composite type.  Each
+C  field (member) is introduced with a level number (1 for top-level
+C  members).  Variables of a structure type are declared using the
+C  structure name as the type keyword.  Member access uses dot notation:
+C    SENSOR.ALT_READING  or  SENSOR.VEL_READING$(2)
+C
+C  In the SDF, a STRUCTURE type occupies its own block (blk_class=3).
+C  The template header symbol (CLASS=3, TYPE=10) is self-referential:
+C  its ROWS field holds its own symbol number.  An instance variable
+C  (CLASS=1, TYPE=10) has its ROWS field set to the symbol number of
+C  the template header.
 C ========================================================================
 
    NAVCOMP:
    PROGRAM;
+
+   STRUCTURE SENSOR_DATA:
+      1 ALT_READING  SCALAR,
+      1 STATUS_CODE  INTEGER,
+      1 VEL_READING  VECTOR(3);
 
    DECLARE
       ALTITUDE        SCALAR        INITIAL(35000.0),
@@ -57,19 +63,22 @@ C ========================================================================
                                             0.0, 0.0, 1.0),
       LONGSYMBOLNAME  SCALAR        INITIAL(0.0),
       MESSAGE         CHARACTER(20) INITIAL('NAVIGATION NOMINAL'),
+      READINGS        ARRAY(10)     SCALAR,
+      SENSOR          SENSOR_DATA-STRUCTURE,
+      TABLE           ARRAY(3, 4)   INTEGER,
       VELOCITY        VECTOR(3)     INITIAL(100.0, 0.0, -50.0);
 
-C ------------------------------------------------------------------------
-C  Executable statements (SRNs S0001 - S0003)
-C ------------------------------------------------------------------------
+C -----------------------------------------------------------------------
+C  Executable statements
+C -----------------------------------------------------------------------
 
-   ALTITUDE = 35000.0;                /* S0001: set initial altitude  */
+   ALTITUDE = 35000.0;                /* S0001 */
 
    BURN:
-   COUNT = COUNT + 1;                 /* S0002: increment burn count  */
+   COUNT = COUNT + 1;                 /* S0002 (labeled) */
 
-   IF ARMED                           /* S0003: if armed, adjust      */
-      THEN ALTITUDE = ALTITUDE        /*        altitude by eastward  */
-                    + VELOCITY$(1);   /*        velocity component    */
+   IF ARMED                           /* S0003 */
+      THEN ALTITUDE = ALTITUDE
+                    + VELOCITY$(1);
 
    CLOSE NAVCOMP;

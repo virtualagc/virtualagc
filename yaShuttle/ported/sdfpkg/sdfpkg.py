@@ -311,14 +311,15 @@ class _SymbDC:
     # block_num(2) extd_off(1) xref_off(1) array_off(1) struct_of(1)
     # sym_class(1) sym_type(1) flag1(1) flag2(1) flag3(1) flag4(1)
     # symb_len(1) rel_addr(3) sblk_id(2) rows(1) columns(1) lock_num(1)
-    # byte_size(3) name_cont(24)
-    SIZE = 47   # 12 + 3 + 2 + 3 + 3 + 24 = 47 (approx, enough for our fields)
-    __slots__ = ('block_num','sym_class','sym_type','flag1','flag2',
+    # byte_size(3) name_cont[0..24)   [ARRADATA follows if array_off != 0]
+    SIZE = 47   # minimum fixed size
+    __slots__ = ('block_num','array_off','sym_class','sym_type','flag1','flag2',
                  'flag3','flag4','symb_len','rel_addr','rows','columns',
-                 'name_cont')
+                 'name_cont','array_dims')
     def __init__(self, data, off: int = 0):
         o = off
         self.block_num = _be16(data, o)
+        self.array_off = data[o+4]    # byte offset from SDC start to ARRADATA
         self.sym_class = data[o+6]
         self.sym_type  = data[o+7]
         self.flag1     = data[o+8]
@@ -331,6 +332,17 @@ class _SymbDC:
         self.columns   = data[o+19]
         cont_len       = max(0, min(self.symb_len, LONG_NAME_LEN) - NAME_LEN)
         self.name_cont = bytes(data[o+24 : o+24+cont_len])
+        # Parse ARRADATA if present
+        if self.array_off:
+            ao = off + self.array_off  # offset within full page buffer
+            # ARRADATA: arraynum(H) + range1(H) + range2(H) + range3(H)
+            ndims = _be16(data, ao)
+            r1    = _be16(data, ao + 2)
+            r2    = _be16(data, ao + 4)
+            r3    = _be16(data, ao + 6)
+            self.array_dims = (ndims, r1, r2, r3)
+        else:
+            self.array_dims = (0, 0, 0, 0)
 
 class _StmtNod0:
     SIZE = 4
@@ -410,19 +422,20 @@ class BlockResult:
 
 @dataclass
 class SymbolResult:
-    symb_no:   int = 0
-    blk_no:    int = 0
-    symb_name: str = ''
-    sym_class: int = 0
-    sym_type:  int = 0
-    flag1:     int = 0
-    flag2:     int = 0
-    flag3:     int = 0
-    flag4:     int = 0
-    rows:      int = 0
-    columns:   int = 0
-    symb_len:  int = 0
+    symb_no:    int = 0
+    blk_no:     int = 0
+    symb_name:  str = ''
+    sym_class:  int = 0
+    sym_type:   int = 0
+    flag1:      int = 0
+    flag2:      int = 0
+    flag3:      int = 0
+    flag4:      int = 0
+    rows:       int = 0
+    columns:    int = 0
+    symb_len:   int = 0
     raw_offset: int = 0
+    array_dims: tuple = (0, 0, 0, 0)  # (ndims, d1, d2, d3); ndims=0 = not array
 
 @dataclass
 class StmtResult:
@@ -1380,18 +1393,19 @@ class SdfContext:
         self._comm_symb_no = symb_no
 
         result = SymbolResult(
-            symb_no   = symb_no,
-            blk_no    = blk_num,
-            symb_name = full_name,
-            sym_class = sdc.sym_class,
-            sym_type  = sdc.sym_type,
-            flag1     = sdc.flag1,
-            flag2     = sdc.flag2,
-            flag3     = sdc.flag3,
-            flag4     = sdc.flag4,
-            rows      = sdc.rows,
-            columns   = sdc.columns,
-            symb_len  = total_len,
+            symb_no    = symb_no,
+            blk_no     = blk_num,
+            symb_name  = full_name,
+            sym_class  = sdc.sym_class,
+            sym_type   = sdc.sym_type,
+            flag1      = sdc.flag1,
+            flag2      = sdc.flag2,
+            flag3      = sdc.flag3,
+            flag4      = sdc.flag4,
+            rows       = sdc.rows,
+            columns    = sdc.columns,
+            symb_len   = total_len,
+            array_dims = sdc.array_dims,
         )
         self._set_disps(disp)
         return result
@@ -1461,6 +1475,9 @@ class SdfContext:
                     if ev.lst_symb >= srcharg8:
                         delta = (ev.lst_off - ev.fst_off) // 12
                         hi    = lo + delta
+                        # Cap hi at the block's own last symbol number.
+                        if hi > self._sav_lsymb:
+                            hi = self._sav_lsymb
                         break
                     cnt = (ev.lst_off - ev.fst_off) // 12 + 1
                     lo += cnt
@@ -2004,19 +2021,25 @@ class WBlock:
 @dataclass
 class WSymbol:
     """Descriptor for one symbol passed to SdfWriter."""
-    blk_no:    int   = 0
-    symb_name: str   = ''
-    sym_class: int   = SCLASS_VARIABLE
-    sym_type:  int   = STYPE_SCALAR
-    flag1:     int   = 0
-    flag2:     int   = 0
-    flag3:     int   = 0
-    flag4:     int   = 0
-    rows:      int   = 0
-    columns:   int   = 0
-    rel_addr:  int   = 0
-    lock_num:  int   = 0
-    byte_size: int   = 0
+    blk_no:     int   = 0
+    symb_name:  str   = ''
+    sym_class:  int   = SCLASS_VARIABLE
+    sym_type:   int   = STYPE_SCALAR
+    flag1:      int   = 0
+    flag2:      int   = 0
+    flag3:      int   = 0
+    flag4:      int   = 0
+    rows:       int   = 0
+    columns:    int   = 0
+    rel_addr:   int   = 0
+    lock_num:   int   = 0
+    byte_size:  int   = 0
+    array_dims: tuple = (0, 0, 0, 0)
+    # array_dims: (ndims, d1, d2, d3).  ndims=0 means not an array.
+    # Examples:
+    #   ARRAY(10) SCALAR     -> (1, 10, 0, 0)
+    #   ARRAY(3, 4) INTEGER  -> (2,  3, 4, 0)
+    #   ARRAY(5) VECTOR(3)   -> (1,  5, 0, 0)  (rows=3 for the VECTOR)
 
 
 @dataclass
@@ -2179,15 +2202,32 @@ class SdfWriter:
         has_srns = bool(self._flags & WFLAG_HAS_SRNS)
         node_sz  = 12 if has_srns else 4
 
-        # ---- 1. Sort symbols alphabetically; reassign numbers ----
-        self._symbols.sort(key=lambda s: s['desc'].symb_name)
-        for i, s in enumerate(self._symbols):
-            s['symb_no'] = i + 1
-
-        # ---- 2. Sort blocks by name; reassign numbers ----
+        # ---- 1. Sort blocks by name; reassign numbers ----
         self._blocks.sort(key=lambda b: b['desc'].blk_name)
         for i, b in enumerate(self._blocks):
             b['blk_no'] = i + 1
+
+        # ---- 2. Sort symbols: alphabetically within each block,
+        #         then concatenate in block order.
+        # This keeps each block's symbols contiguous, which is required
+        # for the fsymb_no..lsymb_no range in BLKTCELL to be meaningful.
+        def blk_order(s):
+            # Return (block_sort_position, symbol_name)
+            for bi, b in enumerate(self._blocks):
+                if b['blk_no'] == s['desc'].blk_no:
+                    return (bi, s['desc'].symb_name)
+            return (999, s['desc'].symb_name)
+        self._symbols.sort(key=blk_order)
+        for i, s in enumerate(self._symbols):
+            s['symb_no'] = i + 1
+
+        # Fix self-referential template header rows fields:
+        # A STRUCTURE template header (CLASS=3, TYPE=10) should have
+        # rows = its own final symbol number.
+        for s in self._symbols:
+            d = s['desc']
+            if d.sym_class == 3 and d.sym_type == 10:
+                d.rows = s['symb_no']
 
         # ---- 3. Compute per-block symbol and statement ranges ----
         for sym in self._symbols:
@@ -2324,17 +2364,20 @@ class SdfWriter:
         # ---- 8. Symbol data cells ----
         sdc_vptrs = []
         for sym in self._symbols:
-            name  = sym['desc'].symb_name
+            d     = sym['desc']            # must be inside the loop
+            name  = d.symb_name
             nlen  = min(len(name), LONG_NAME_LEN)
             cont  = max(0, nlen - NAME_LEN)
-            sz    = 24 + cont   # fixed=24 bytes + continuation
+            has_array = (d.array_dims[0] > 0)
+            sz    = 24 + cont + (8 if has_array else 0)
             vp    = alloc(sz)
             sdc_vptrs.append(vp)
-            d     = sym['desc']
             ra    = (self._init_reladdrs.get(sym['symb_no'], d.rel_addr))
             b     = pages[vptr_page(vp)]
             o     = vptr_offset(vp)
-            struct.pack_into('>H', b, o,    d.blk_no)
+            struct.pack_into('>H', b, o, d.blk_no)
+            # array_off: byte offset from SDC start to ARRADATA (0 if none)
+            b[o+4]  = (24 + cont) if has_array else 0
             b[o+6]  = d.sym_class
             b[o+7]  = d.sym_type
             b[o+8]  = d.flag1
@@ -2354,6 +2397,11 @@ class SdfWriter:
             if cont:
                 enc = name[NAME_LEN:].encode('ascii')[:cont]
                 b[o+24:o+24+cont] = enc
+            if has_array:
+                ao = o + 24 + cont
+                struct.pack_into('>HHHH', b, ao,
+                    d.array_dims[0], d.array_dims[1],
+                    d.array_dims[2], d.array_dims[3])
 
         # Write symbol nodes
         for i, sym in enumerate(self._symbols):

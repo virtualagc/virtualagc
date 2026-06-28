@@ -299,8 +299,9 @@ typedef struct {
     uint16_t block_num;
     uint8_t  extd_off;
     uint8_t  xref_off;
-    uint8_t  array_off;
-    uint8_t  struct_of;
+    uint8_t  array_off;         /* byte offset from SDC start to ARRADATA */
+                                /*   (0 = not an array)                   */
+    uint8_t  struct_of;         /* byte offset from SDC start to STRCDATA */
     uint8_t  sym_class;
     uint8_t  sym_type;
     uint8_t  flag1;
@@ -318,6 +319,25 @@ typedef struct {
     /* name continuation follows (variable length) */
     char     name_cont[SDF_LONG_NAME_LEN - SDF_NAME_LEN];
 } SDF_PACKED sdf_symbdc_disk_t;
+
+/*
+ * ARRADATA (Section 6.12.2 of SDFPKG Users Guide)
+ *
+ * Located at (SDC_base + array_off) when array_off != 0.
+ * Describes the array dimensions of an ARRAY variable.
+ * HAL/S allows 1 to 3 dimensions; unused ranges are 0.
+ *
+ * Examples:
+ *   DECLARE A  ARRAY(10)    SCALAR;    -> arraynum=1, range1=10
+ *   DECLARE B  ARRAY(3, 4)  INTEGER;   -> arraynum=2, range1=3, range2=4
+ *   DECLARE C  ARRAY(5)     VECTOR(3); -> arraynum=1, range1=5
+ */
+typedef struct {
+    uint16_t arraynum;   /* number of dimensions (1, 2, or 3)  */
+    uint16_t range1;     /* size of dimension 1                 */
+    uint16_t range2;     /* size of dimension 2 (0 if 1-D)     */
+    uint16_t range3;     /* size of dimension 3 (0 if <= 2-D)  */
+} SDF_PACKED sdf_arradata_disk_t;
 
 /* Symbol class / type flags */
 #define SDF_CLASS_EQUATE_EXT  2

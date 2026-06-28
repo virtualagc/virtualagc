@@ -91,6 +91,10 @@ typedef struct {
     uint8_t   flag1, flag2, flag3, flag4;
     uint8_t   rows, columns;
     uint8_t   symb_len;
+    /* Array dimension info (ARRADATA, Section 6.12.2 of SDFPKG Users Guide).
+     * array_ndims = 0 means this symbol is not an ARRAY variable. */
+    uint16_t  array_ndims;      /* number of dimensions (0, 1, 2, or 3)   */
+    uint16_t  array_range[3];   /* size of each dimension; unused = 0      */
     void     *raw_cell;    /* pointer into paged memory (SYMBDC)      */
 } sdf_symbol_result_t;
 

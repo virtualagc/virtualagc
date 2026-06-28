@@ -1,20 +1,26 @@
+# Contents
+
+* [Introduction](#introduction)
+* [Some Notes About the Ported SDFPKG](#some-notes-about-the-ported-sdfpkg)
+* [What's Here](#whats-here)
+* [Some Background Info](#some-background-info)
+
 # Introduction
 
-This folder holds an attempted port of [SDFPKG.ASM](https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/SDFPKG.ASM), an IBM Basic Assembly Language (BAL) subroutine called by several passes of the HAL/S compiler(s) (HALSFC and HAL&lowbar;S&lowbar;FC), to both C and to Python.  I (RSB) looked at porting the code manually, but my understanding of BAL (and the surviving documentation of SDFPKG.ASM itself) is negligible enough that the effort to do so was not only estimated to be very high, but edged sharply upward even as I researched the issue.
+This folder holds a port of [SDFPKG.ASM](https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/SDFPKG.ASM), an IBM Basic Assembly Language (BAL) subroutine called by several passes of the original HAL/S compilers (HAL/S-FC and HAL/S-BFC), to both C and to Python.
 
-On the good side, document USA001556, the [HAL/S-FC SDL Interface Control Document](https://www.ibiblio.org/apollo/Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf), was found to contain good documentation for the structure of the Simulation Data Files (SDF's) themselves.
+The following documentation related to SDFPKG has survived:
 
-Nevertheless, after a few false starts on my part, it was suggested that an A.I. might assist the effort.  I submitted the entire source code of SDFPKG.ASM, along with required macro definitions (DIAGNSTC.MACLIB) to Anthropic's Claude, requesting that it be ported to both C (for integration into HALSFC and HALSTAT) and Python 3 (for integration into HAL&lowbar;S&lowbar;FC).  The conversion was done by Claude Sonnet version 4.6.  All files in SDFPKG.ASM were ported except for TEST1.bal, a simple test program that I'll eventually port myself if there remains any reason to do so.
+* USA001556, the [HAL/S-FC SDL Interface Control Document](https://www.ibiblio.org/apollo/Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf), documents the structure of the Simulation Data Files (SDF) upon which SDFPKG operates.
+* SFPC-PASS0092, the [SDFPKG User's Guide](https://www.ibiblio.org/apollo/Shuttle/SDFPKG-USERS-GUIDE-29-14.pdf) for PASS 29.0 and BFS 14.0, documents the SDFPKG API, both for the original assembly-language source code and for a C-language port of it (whose source-code has not survived as far as I'm aware).
 
-> **Note**:  Each source-code file (&ast;.h, &ast;.c, &ast;.py, Makefile, &ast;.hal) was coded entirely by Claude, albeit with my direction.  No source-code file in this directory has been written or even edited by me.
+Our own port was created by submitting the entire BAL source code of SDFPKG.ASM, along with required macro definitions (DIAGNSTC.MACLIB), to Anthropic's Claude Sonnet version 4.6, requesting that it be ported to both C (for integration into HALSFC and HALSTAT) and Python 3 (for integration into HAL&lowbar;S&lowbar;FC).  (I did not submit the file TEST1.bal, a simple test program.)  Each source-code file (&ast;.h, &ast;.c, &ast;.py, Makefile, &ast;.hal) was coded entirely by Claude, albeit with my (RSB) direction.  No source-code file in this directory has been written or even edited by humans.
 
-> **Note**:  I say it's an "attempted" port only because I don't know yet how well the generated code works, and I have not yet attempted (let alone succeeded in) the actual integration.  As that attempt progresses and success or failure become evident, I'll modify my comments here.
-
-By definition, <i>Simulation Data Files</i> (SDF) are objects created during compilation of source code written the HAL/S language.  Ideally, they are created by PASS3 of the HAL/S compiler.  Again ideally, they are subsequently potentially used in a variety of ways, of which those of most importance to us are (in descending order of importance):
+By definition, <i>Simulation Data Files</i> (SDF) are objects created during compilation of source code written the HAL/S language.  Ideally, they are created by PASS3 of the HAL/S compiler, although the original compilers <i>wrote</i> SDF's directly and only used SDFPKG to <i>read</i> SDF's.  Again ideally, the SDF's are subsequently potentially used in a variety of ways, of which those of most importance to us are (in descending order of importance):
 
 1. Imported into PASS1 of the HAL/S compiler when compiling <i>other</i> HAL/S source-code files, as a transparent alternative to importing so-called "templates".  This is likely key to fixing certain intractable compilation problems &mdash; see issue #1281 and issue #1280 &mdash;, but is not yet implemented in PASS1.
 2. Fed into the HALSTAT program (not yet ported for modern use) for producing certain kinds of reports.
-3. Fed into pass 4 of the compiler (not yet ported) for actual simulation purposes.
+3. Fed into PASS4 of the compiler (not yet ported) for actual simulation purposes.
 
 # Some Notes About the Ported SDFPKG
 
@@ -23,8 +29,9 @@ Originally, since HAL/S compilation occurred in an IBM System/360 environment, S
 * The SDF's originally were so-called Partitioned Data Sets (PDS).  Claude has instead invented its own "synthetic flat-file" format, based on POSIX-type filesystems.
 * Symbolic labels retained their EBCDIC encoding within the original PDS-based SDF's.  I've asked Claude to use standard ASCII encoding instead.
 * SDFPKG originally concerned itself entirely with <i>reading</i> SDF's in various ways.  The port adds a framework (invented by Claude) for <i>writing</i> SDF's as well.
+* The HAL/S compiler, in any form (original HAL/S-FC, or modern HALSFC and HAL&lowbar;S&lowbar;FC), does not call `SDFPKG` directly for reading SDF's.  Rather, it calls the `MONITOR(22, ...)` function, which then calls `SDFPKG` essentially by passing its arguments (other than the leading 22) directly to `SDFPKG`.  Writing to SDF's, in the modern ports of the HAL/S compiler, requires direct calls to the ported SDFPKG.
 * It should be possible to build the C port in Linux, Mac OS, or Windows w/ MSYS2, using either gcc or clang as the compiler.  To date, I've only tried it in Linux.
-* Although I've chosen to locate this material in a directory used for HAL&lowbar;S&lowbar;FC.py source code, only the file sdfpkg.py relates to HAL&lowbar;S&lowbar;FC.py, and in particular, the C files do not do so.  Instead, they are compiled and used by HALSFC, located elsewhere.  Putting them all here was merely a reasonably-convenient way to keep all of the Claude-generated files together, which seems to me at the moment to be a prudent thing to do, which it increasingly appears there is not.  Perhaps that can be an exercise for the reader.
+* Although I've chosen to locate this material in a directory used for HAL&lowbar;S&lowbar;FC.py source code, only the file sdfpkg.py relates to HAL&lowbar;S&lowbar;FC.py, and in particular, the C files do not do so.  Instead, they are compiled and used by HALSFC, located elsewhere.  Putting them all here was merely a reasonably-convenient way to keep all of the Claude-generated files together, which seems to me at the moment to be a prudent thing to do.
 
 # What's Here
 
@@ -43,15 +50,24 @@ Here is a rundown of the files in this directory, as distributed:
     * test&lowbar;sdfpkg.py: A program for testing sdfpkg.py.
     * demo&lowbar;sdfpkg.py: A demo program that teaches how to use sdfpkg.py to read and write SDF's.
 * In C:
-    * Makefile: For building the C port, which again is entirely unnecessary just for using the Python port, using a `make` utility such as GNU `make`.  Use `make clean all` for a clean build of the C code that selects the C the compiler by the CC environment variable, falling back on clang, falling back on gcc.  Use of gcc or clang can be forced with `make CC=gcc clean all` or `make CC=clang clean all`.
+    * Makefile: For building the C port &mdash; which again, is entirely unnecessary just for <i>using</i> the Python port &mdash;, using a `make` utility such as GNU `make`.  Use `make clean all` for a clean build of the C code.  (The C the compiler is auto-selected, first by consulting the CC environment variable, then falling back on clang if that fails, and finally falling back on gcc.  Use of gcc or clang can be forced with `make CC=gcc clean all` or `make CC=clang clean all`.)
     * All &ast;.c and &ast;.h except test&lowbar;&ast;.c: The C port of SDFPKG.  It's intended for use in HALSFC-PASS1, HALSFC-PASS3, HALSFC-PASS4, and HALMAT, but there's no reason it couldn't be used as well by other C programs or XPL/I programs translated into C.
     * test&lowbar;sdfpkg.c: A comprehensive test program for the C port.
     * test.sdf&lowbar;write.c: An older test program limited to just the SDF-writing framework.
+    * (It seemed unnecessary to create a C equivalent for demo&lowbar;sdfpkg.py, so I haven't done so.)
 
 <i>After</i> building the C port, there will be various additional files (removable by <code>make clean</code>) as well:
 
 * libsdfpkg.a: A linkable library containing public functions for the C port of SDFPKG.
-* sdf&lowbar;convert[.exe]: A program having the same SDF-conversion and SDF-listing functionality as sdfpkg.py does (when run in its stand-alone mode).
+* sdf&lowbar;convert\[.exe]: A program having the same SDF-conversion and SDF-listing functionality as sdfpkg.py does (when run in its stand-alone mode).
+
+If you should have occasion to compile NAVCOMP.hal &mdash; for which I personally use the command <code>HALSFC --clean --archive --test NAVCOMP.hal</code> &mdash;, you'll also find additional directories and files like the following:
+
+* &ast;.results/
+* TEMPLIB/ and TEMPLIB.json
+* INCLIB/ and INCLIB.json
+
+I've provided no particular command for deleting these, so if you object to them they'll have to be removed manually.
 
 # Some Background Info
 
@@ -59,7 +75,7 @@ Craig Schulenberg, the original designer and implementer of SDF's, has told me v
 
 > I believe that the OUTPUTSD code is complete and is 'universal'; it writes out to a datafile (an SDF) the 1680-byte SDF 'pages' that have been used throughout PASS3. The SDF is a series of 1680-byte fixed-length records that contain 'logical' data blocks (cells) that are interconnected by virtual memory 'pointers', a fullword broken up into a 16-bit page number (identifying a 1680 byte record within the SDF) and a 16-bit page offset. PASS3 builds up the SDF as it runs, and uses the various VMEM (VMEM1, VMEM2,...) functions (which I also wrote) to gradually put the SDF together. PASS3 reads the Symbol Table (passed to it from PASS 1 and 2), various  data arrays (also passed via common memory), and even the HALMAT. I believe that after I had ceased to be involved with the compiler, the VMEM machinery was utilized in more and more places in the earlier compiler phases (including AUXMAT, FLOMAT) as a generic way to pass large amounts of structure data  from one part of the compiler to another. Then, PASS3 just has to add its own data, allowing OUTPUTSD (SDF) to simply write the 1680-byte blocks out to the SDF fatafile. So, this is a simple process.
 
-Here, [OUTPUTSD refers to a source-code module, written in the XPL/I language, of pass 3 of the HAL/S compiler](https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS3.PROCS/OUTPUTSD.xpl).  Similarly, [VMEM<i>x</i>](https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/HALINCL) refers to various modules comprising the compiler's "virtual memory" system.
+Here, [OUTPUTSD refers to a source-code module](https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS3.PROCS/OUTPUTSD.xpl), written in the XPL/I language, within PASS3 of the HAL/S compiler.  Similarly, [VMEM](https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/HALINCL) refers to various modules comprising the compiler's "virtual memory" system.
 
 > [I] was asked to add 'SYM' cards to the HAL/S compiler (Pass 3, and then 4), I decided to 'overkill' the job by re-implementing my PDF-15 'virtual memory' functionality  in XPL, using it to actually construct the Simulation Data File (SDF) as a hierarchical structure of 'cells', interconnected by virtual memory 'pointers' (16-bit page# and 16-bit offset on the page). Each 'page' was 1680 bytes of disk space, and there was a 'paging area', with memory addresses of each in-memory 'page', usage counters, etc., so as to form a demand paging system.
 
@@ -73,36 +89,6 @@ The term "submonitor" refers to BAL software that formed a bridge between the or
 
 > I also worked on the HAL/SDL ICD (USA001556 document), and thus it contains extensive detail about the layout and contents of an SDF. Historically, HAL/S is unique because perhaps as much effort was devoted to having it generate METADATA, as was ever devoted to having it generate code.
 
-USA001556 is [the HAL/S-FC SDL Interface Control Document](https://www.ibiblio.org/apollo/Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf), with SDL being the Software Development Lab.
-
 > With all of that being said, it would be fairly straightforward to replace SDFs with fixed-blocksize files that could be manipulated using C, for example. It might be 500 lines of C code before all was said and done, but there would be no need for assembly language. After all, I redeveloped a similar concept using XPL (the VMEM machinery in the HAL/S compiler).
 
 > Note that it would not be a major job to redevelop SDFPKG in C, thus allowing the compilation process to switch to its preferred method of using SDFs as input instead of processing source templates. There is a huge speed improvement when doing this, but for your purposes this is no major gain. However, having SDFPKG would allow you to compile the HALSTAT tool, and this would provide visibility over the entire HAL/S program complex. Pass 3 would be straightforward once there is an SDFPKG, and Pass 4 would be totally optional since its main use was in debugging Pass 3 as more and more data categories were added to the SDF as the decades rolled by -- first, the addition of the HALMAT, and eventually, the addition of the entire Symbol Table (and Literal Table) that would permit SDFs to be used instead of source Templates.
-
-# IDE
-
-The HAL/S compiler, in any form (original HAL/S-FC, or modern HALSFC and HAL&lowbar;S&lowbar;FC) does not call `SDFPKG` directly.  Rather, it calls the `MONITOR(22, ...)` function, which then calls `SDFPKG` essentially by passing its arguments (other than the leading 22) directly to `SDFPKG`.
-
-The first argument is a <i>mode</i>, having one of the following values:
-
-0. INITIALIZE
-1. TERMINATE SDFPKG
-2. AUGMENT PAGING AREA OR FCB AREA
-3. RESCIND AUGMENTED PAGING AREA
-4. SELECT FILE
-5. LOCATE VIRTUAL MEMORY POINTER
-6. SET DISPOSITION PARAMETERS
-7. LOCATE ROOT CELL
-8. FIND BLOCK CELL GIVEN #
-9. FIND SYMBOL CELL GIVEN #
-10. FIND STMT CELL GIVEN #
-11. FIND BLOCK CELL GIVEN NAME
-12. FIND SYMBOL CELL GIVEN BLK NAME/SYMB NAME
-13. FIND SYMB CELL GIVEN NAME (& LST BLK)
-14. FIND STMT CELL GIVEN SRN
-15. FIND BLOCK NODE GIVEN #
-16. FIND SYMBOL NODE GIVEN #
-17. FIND STMT NODE GIVEN #
-18. FIND INIT DATA AT GIVEN #
-
-However, that's obviously not enough info about the API to actually use it for anything, and I may or may not add addition explanation of the API later.  It's unclear at this writing whether that remains necessary.

@@ -195,6 +195,11 @@ typedef struct {
  * rel_addr   : Relative core address (3-byte value, 0 if not used).
  * lock_num   : Lock group number (0 if not locked).
  * byte_size  : Total bytes used by this symbol in memory (0 if not known).
+ * array_dims : Array dimensions.  array_dims[0] is the number of dimensions
+ *              (0 = not an array, 1-3 = ARRAY variable).  array_dims[1..3]
+ *              are the sizes of each dimension (unused slots are 0).
+ *              When array_dims[0] > 0, sdf_commit() appends an ARRADATA
+ *              block to the SDC and sets the array_off field accordingly.
  */
 typedef struct {
     uint16_t blk_no;
@@ -207,6 +212,7 @@ typedef struct {
     uint32_t rel_addr;
     uint8_t  lock_num;
     uint32_t byte_size;
+    uint16_t array_dims[4];  /* [0]=ndims, [1..3]=dim sizes; 0=not array */
 } sdf_wsymbol_t;
 
 /*

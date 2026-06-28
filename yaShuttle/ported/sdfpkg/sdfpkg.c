@@ -1,4 +1,3 @@
-#define _POSIX_C_SOURCE 200809L
 /*
  * sdfpkg.c  --  Top-level SDF package dispatcher.
  *
@@ -31,6 +30,7 @@
  *   sdf_find_init_data()            → mode 18 (CR13079)
  */
 
+#include "sdf_compat.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -196,6 +196,20 @@ static sdf_rc_t do_symbol_fill(sdf_ctx_t *ctx,
         strncpy(result->symb_name, full_name, SDF_LONG_NAME_LEN);
         result->symb_name[SDF_LONG_NAME_LEN] = '\0';
         result->raw_cell  = sdc_raw;
+        /* Parse ARRADATA if array_off != 0 */
+        result->array_ndims    = 0;
+        result->array_range[0] = 0;
+        result->array_range[1] = 0;
+        result->array_range[2] = 0;
+        if (sdc->array_off != 0) {
+            const sdf_arradata_disk_t *arr =
+                (const sdf_arradata_disk_t *)((const uint8_t *)sdc_raw
+                                              + sdc->array_off);
+            result->array_ndims    = sdf_be16(&arr->arraynum);
+            result->array_range[0] = sdf_be16(&arr->range1);
+            result->array_range[1] = sdf_be16(&arr->range2);
+            result->array_range[2] = sdf_be16(&arr->range3);
+        }
     }
 
     return sdf_set_disps(ctx, disp_flags);
