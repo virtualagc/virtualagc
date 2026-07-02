@@ -8,6 +8,9 @@
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
                 2024-07-14 RSB	Enclosed call to INCLUDE_SDF in /?W ... ?/.
+                2026-06-29 RSB  Removed the /?W ... ?/ enclosure, now 
+                                relying on `INCLUDE_SDF` to return False
+                                if not implemented.
     Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -72,9 +75,7 @@ INCLUDE_OK:                                                                     
          RETURN FALSE;                                                          00002170
       END;                                                                      00002180
       IF SDF_FLAG THEN DO;
-         /?W
          IF INCLUDE_SDF(MEMBER, INCL_FLAGS) THEN RETURN FALSE;                  00002190
-         ?/
          IF ^TEMPLATE_FLAG THEN RETURN FALSE;                                   00002200
       END;                                                                      00002210
       IF TEMPLATE_FLAG THEN MEMBER = DESCORE(MEMBER);                           00002220

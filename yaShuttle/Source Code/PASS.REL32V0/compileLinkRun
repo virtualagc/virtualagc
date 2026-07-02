@@ -89,7 +89,7 @@ print(f"For file {basename}.hal, producing {objfile}, {fcmfile}, {symfile}")
 # First step, compile.
 command = ["HALSFC", filename, f"--parms={parmList}", "-o", objfile]
 if not noTest:
-    command += ["--test", "--force"]
+    command += ["--test", "--force", "--clean", "--archive"]
 command += extraPass1
 print(" ".join(command))
 try:

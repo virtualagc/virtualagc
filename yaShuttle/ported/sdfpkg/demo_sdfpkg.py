@@ -9,10 +9,19 @@ HAL/S STRUCTURE variables.
   Part 2 -- Read:  open the file and extract all blocks, symbols,
             and statements, with special handling for STRUCTURE types.
 
-Usage:  ./demo_sdfpkg.py [--help] [file.sdf [member]]
+Usage:  ./demo_sdfpkg.py [--help] [--add-member] [file.sdf [member]]
 
 If file.sdf is omitted a temporary file is created and deleted on exit.
-If a supplied file already exists, Part 1 is skipped.
+If a supplied file already exists and --add-member is NOT given, Part 1
+is skipped and only Part 2 (read) is executed.
+
+--add-member
+    Add a new member to file.sdf (creating it if it does not yet exist).
+    The member index is derived from the current member count in the file:
+      - 1st member: object names are unmodified (e.g. ALTITUDE, ARMED).
+      - 2nd member: all object names are suffixed with "2" (ALTITUDE2, ARMED2).
+      - Nth member: all object names are suffixed with the index N.
+    The member name itself follows the same rule (NAVCOMP, NAVCOMP2, ...).
 """
 
 import sys
@@ -31,6 +40,7 @@ from sdfpkg import (
     STTYPE_ASSIGN, STTYPE_IF,
     WFLAG_HAS_SRNS,
     RC_NOT_EXEC, DISP_NONE,
+    flat_info,
 )
 
 # ---------------------------------------------------------------------------
@@ -113,28 +123,37 @@ def sym_type_detail(sym, template_map=None):
 # Part 1 -- Write
 # ---------------------------------------------------------------------------
 
-def demo_write(sdf_path, member='NAVCOMP'):
+def demo_write(sdf_path, member='NAVCOMP', suffix='', append=False):
     print('=' * 62)
     print('Part 1 -- Write: creating SDF member with STRUCTURE + COPY')
     print('=' * 62)
     print(f'  Output file : {sdf_path}')
     print(f'  Member name : {member}')
+    if suffix:
+        print(f'  Name suffix : {suffix!r}')
     print()
+
+    # Helper: append suffix to every object name
+    def n(base):
+        return base + suffix
 
     # ------------------------------------------------------------------
     # Step W1: Create write context
     # ------------------------------------------------------------------
     print('Step W1: create write context')
-    w = SdfWriter.create(sdf_path, member, flags=WFLAG_HAS_SRNS)
+    if append:
+        w = SdfWriter.add_member(sdf_path, member, flags=WFLAG_HAS_SRNS)
+    else:
+        w = SdfWriter.create(sdf_path, member, flags=WFLAG_HAS_SRNS)
 
     # ------------------------------------------------------------------
     # Step W2: Add blocks
     # ------------------------------------------------------------------
     # We add four blocks:
-    #   Block 1: NAVCOMP     -- the main PROGRAM block
-    #   Block 2: SENSOR_DATA -- a STRUCTURE template block (base)
-    #   Block 3: EXT_SENSOR  -- a STRUCTURE template that COPYs SENSOR_DATA
-    #   Block 4: BURN_TASK   -- a TASK block (blk_class=BCLASS_TASK=4)
+    #   Block 1: NAVCOMP{s}     -- the main PROGRAM block
+    #   Block 2: SENSOR_DATA{s} -- a STRUCTURE template block (base)
+    #   Block 3: EXT_SENSOR{s}  -- a STRUCTURE template that COPYs SENSOR_DATA{s}
+    #   Block 4: BURN_TASK{s}   -- a TASK block (blk_class=BCLASS_TASK=4)
     #
     # STRUCTURE template blocks use blk_class=BCLASS_PROCEDURE (3).
     # TASK blocks use blk_class=BCLASS_TASK (4).
@@ -142,115 +161,115 @@ def demo_write(sdf_path, member='NAVCOMP'):
 
     print('Step W2: add blocks')
     blk1 = w.add_block(WBlock(
-        csect_name = 'NAVSECT',
-        blk_name   = 'NAVCOMP',
+        csect_name = n('NAVSECT'),
+        blk_name   = n('NAVCOMP'),
         blk_class  = BCLASS_PROGRAM,
         blk_id     = 1,
     ))
-    print(f'  Block {blk1}: NAVCOMP (PROGRAM)')
+    print(f'  Block {blk1}: {n("NAVCOMP")} (PROGRAM)')
 
     blk2 = w.add_block(WBlock(
-        csect_name = 'STRCSECT',
-        blk_name   = 'SENSOR_DATA',
+        csect_name = n('STRCSECT'),
+        blk_name   = n('SENSOR_DATA'),
         blk_class  = BCLASS_PROCEDURE,
         blk_id     = 2,
     ))
-    print(f'  Block {blk2}: SENSOR_DATA (STRUCTURE template, base)')
+    print(f'  Block {blk2}: {n("SENSOR_DATA")} (STRUCTURE template, base)')
 
     blk3 = w.add_block(WBlock(
-        csect_name = 'STRCSECT',
-        blk_name   = 'EXT_SENSOR',
+        csect_name = n('STRCSECT'),
+        blk_name   = n('EXT_SENSOR'),
         blk_class  = BCLASS_PROCEDURE,
         blk_id     = 3,
     ))
-    print(f'  Block {blk3}: EXT_SENSOR (STRUCTURE template, COPYs SENSOR_DATA)')
+    print(f'  Block {blk3}: {n("EXT_SENSOR")} (STRUCTURE template, COPYs {n("SENSOR_DATA")})')
 
     blk4 = w.add_block(WBlock(
-        csect_name = 'NAVSECT',
-        blk_name   = 'BURN_TASK',
+        csect_name = n('NAVSECT'),
+        blk_name   = n('BURN_TASK'),
         blk_class  = BCLASS_TASK,            # = 4: TASK block
         blk_id     = 4,
     ))
-    print(f'  Block {blk4}: BURN_TASK (TASK)')
+    print(f'  Block {blk4}: {n("BURN_TASK")} (TASK)')
     print()
 
     # ------------------------------------------------------------------
     # Step W3: Add SENSOR_DATA template symbols (block 2)
     # ------------------------------------------------------------------
-    print('Step W3: add SENSOR_DATA template symbols (block 2)')
+    print(f'Step W3: add {n("SENSOR_DATA")} template symbols (block {blk2})')
     templ_hdr_no = w.add_symbol(WSymbol(
         blk_no    = blk2,
-        symb_name = 'SENSOR_DATA',
+        symb_name = n('SENSOR_DATA'),
         sym_class = SCLASS_TEMPLATE,
         sym_type  = STYPE_STRUCTURE,
         # copy_blk_no = 0: this is the base template; it does not COPY anything
     ))
-    print(f'  Symbol {templ_hdr_no}: SENSOR_DATA (template header, no COPY)')
+    print(f'  Symbol {templ_hdr_no}: {n("SENSOR_DATA")} (template header, no COPY)')
 
     mem_alt = w.add_symbol(WSymbol(
         blk_no    = blk2,
-        symb_name = 'ALT_READING',
+        symb_name = n('ALT_READING'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_SCALAR,
     ))
-    print(f'  Symbol {mem_alt}: ALT_READING  SCALAR')
+    print(f'  Symbol {mem_alt}: {n("ALT_READING")}  SCALAR')
 
     mem_stat = w.add_symbol(WSymbol(
         blk_no    = blk2,
-        symb_name = 'STATUS_CODE',
+        symb_name = n('STATUS_CODE'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_INTEGER,
     ))
-    print(f'  Symbol {mem_stat}: STATUS_CODE  INTEGER')
+    print(f'  Symbol {mem_stat}: {n("STATUS_CODE")}  INTEGER')
 
     mem_vel = w.add_symbol(WSymbol(
         blk_no    = blk2,
-        symb_name = 'VEL_READING',
+        symb_name = n('VEL_READING'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_VECTOR,
         rows      = 3,
     ))
-    print(f'  Symbol {mem_vel}: VEL_READING  VECTOR(3)')
+    print(f'  Symbol {mem_vel}: {n("VEL_READING")}  VECTOR(3)')
     print()
 
     # ------------------------------------------------------------------
     # Step W3b: Add EXT_SENSOR template symbols (block 3)
     # ------------------------------------------------------------------
-    # EXT_SENSOR COPYs SENSOR_DATA.  Its template header symbol carries
-    # copy_blk_no = blk2 (the block number of SENSOR_DATA).  At SDF write
+    # EXT_SENSOR{s} COPYs SENSOR_DATA{s}.  Its template header symbol carries
+    # copy_blk_no = blk2 (the block number of SENSOR_DATA{s}).  At SDF write
     # time this is stored in a STRCDATA block appended to the SDC, and the
     # SDC's struct_of byte is set to the byte offset of that STRCDATA block.
     #
-    # EXT_SENSOR also adds one new own member (RANGE_KM) beyond those
+    # EXT_SENSOR{s} also adds one new own member (RANGE_KM{s}) beyond those
     # inherited via COPY.
 
-    print('Step W3b: add EXT_SENSOR template symbols (block 3, COPYs SENSOR_DATA)')
+    print(f'Step W3b: add {n("EXT_SENSOR")} template symbols (block {blk3}, COPYs {n("SENSOR_DATA")})')
     ext_hdr_no = w.add_symbol(WSymbol(
         blk_no      = blk3,
-        symb_name   = 'EXT_SENSOR',
+        symb_name   = n('EXT_SENSOR'),
         sym_class   = SCLASS_TEMPLATE,
         sym_type    = STYPE_STRUCTURE,
-        copy_blk_no = blk2,   # <-- COPY link: inherits SENSOR_DATA members
+        copy_blk_no = blk2,   # <-- COPY link: inherits SENSOR_DATA{s} members
     ))
-    print(f'  Symbol {ext_hdr_no}: EXT_SENSOR (template header, copy_blk_no={blk2})')
+    print(f'  Symbol {ext_hdr_no}: {n("EXT_SENSOR")} (template header, copy_blk_no={blk2})')
 
     mem_range = w.add_symbol(WSymbol(
         blk_no    = blk3,
-        symb_name = 'RANGE_KM',
+        symb_name = n('RANGE_KM'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_SCALAR,
     ))
-    print(f'  Symbol {mem_range}: RANGE_KM  SCALAR  (own member of EXT_SENSOR)')
+    print(f'  Symbol {mem_range}: {n("RANGE_KM")}  SCALAR  (own member of {n("EXT_SENSOR")})')
     print()
 
     # ------------------------------------------------------------------
-    # Step W4: Add program symbols (block 1: NAVCOMP)
+    # Step W4: Add program symbols (block 1: NAVCOMP{s})
     # ------------------------------------------------------------------
     # Demonstrates all supported symbol classes:
     #   SCLASS_VARIABLE   (1) -- ordinary variables
     #   SCLASS_EQUATE_EXT (2) -- external equate reference (compiler-internal)
     #   SCLASS_LABEL      (4) -- NAME variable; sym_type = type of referent
-    print('Step W4: add program symbols (block 1: NAVCOMP)')
+    print(f'Step W4: add program symbols (block {blk1}: {n("NAVCOMP")})')
     prog_syms = [
         # (name,           type,            rows, cols, array_dims)
         ('ALTITUDE',       STYPE_SCALAR,    0,  0, (0,0,0,0)),
@@ -268,7 +287,7 @@ def demo_write(sdf_path, member='NAVCOMP'):
     for name, typ, rows, cols, adims in prog_syms:
         sno = w.add_symbol(WSymbol(
             blk_no     = blk1,
-            symb_name  = name,
+            symb_name  = n(name),
             sym_class  = SCLASS_VARIABLE,
             sym_type   = typ,
             rows       = rows,
@@ -281,60 +300,60 @@ def demo_write(sdf_path, member='NAVCOMP'):
             type_str = f'ARRAY({dims_str}) {base_type}'
         else:
             type_str = base_type
-        print(f'  Symbol {sno}: {name:<18} {type_str}')
+        print(f'  Symbol {sno}: {n(name):<18} {type_str}')
 
     # SENSOR instance: TYPE=STRUCTURE, rows=0 placeholder
     sensor_no = w.add_symbol(WSymbol(
         blk_no    = blk1,
-        symb_name = 'SENSOR',
+        symb_name = n('SENSOR'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_STRUCTURE,
         rows      = 0,   # PASS3 would fill this in
     ))
-    print(f'  Symbol {sensor_no}: SENSOR             STRUCTURE instance (rows=TBD)')
+    print(f'  Symbol {sensor_no}: {n("SENSOR"):<18} STRUCTURE instance (rows=TBD)')
 
     # NAME variable (sym_class=SCLASS_LABEL=4): refers to a SCALAR
     # In HAL/S: DECLARE ALT_PTR NAME;  -- a NAME to an unspecified type
     # sym_type holds the type of the referent (STYPE_SCALAR here)
     name_no = w.add_symbol(WSymbol(
         blk_no    = blk1,
-        symb_name = 'ALT_PTR',
+        symb_name = n('ALT_PTR'),
         sym_class = SCLASS_LABEL,        # = 4: NAME variable
         sym_type  = STYPE_SCALAR,        # type of the thing it names
     ))
-    print(f'  Symbol {name_no}: ALT_PTR            NAME(SCALAR)  (sym_class=LABEL)')
+    print(f'  Symbol {name_no}: {n("ALT_PTR"):<18} NAME(SCALAR)  (sym_class=LABEL)')
 
     # EQUATE_EXT (sym_class=2, sym_type=8): external equate reference
     # Compiler-internal; used when a COMPOOL symbol is referenced externally
     eq_no = w.add_symbol(WSymbol(
         blk_no    = blk1,
-        symb_name = 'EXT_CONST',
+        symb_name = n('EXT_CONST'),
         sym_class = SCLASS_EQUATE_EXT,   # = 2
         sym_type  = STYPE_EQUATE_EXT,    # = 8
     ))
-    print(f'  Symbol {eq_no}: EXT_CONST          EQUATE EXT  (sym_class=2, sym_type=8)')
+    print(f'  Symbol {eq_no}: {n("EXT_CONST"):<18} EQUATE EXT  (sym_class=2, sym_type=8)')
     print()
 
     # ------------------------------------------------------------------
-    # Step W4b: Add TASK block symbols (block 4: BURN_TASK)
+    # Step W4b: Add TASK block symbols (block 4: BURN_TASK{s})
     # ------------------------------------------------------------------
     # A TASK block is a parallel HAL/S task.  Its entry-point symbol has
     # sym_type=STYPE_TASK (11).  Other symbols (locals) use normal types.
-    print('Step W4b: add BURN_TASK symbols (block 4: TASK)')
+    print(f'Step W4b: add {n("BURN_TASK")} symbols (block {blk4}: TASK)')
     task_sym_no = w.add_symbol(WSymbol(
         blk_no    = blk4,
-        symb_name = 'BURN_TASK',
+        symb_name = n('BURN_TASK'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_TASK,          # = 11: task entry-point symbol
     ))
-    print(f'  Symbol {task_sym_no}: BURN_TASK          TASK  (entry-point symbol)')
+    print(f'  Symbol {task_sym_no}: {n("BURN_TASK"):<18} TASK  (entry-point symbol)')
     task_local_no = w.add_symbol(WSymbol(
         blk_no    = blk4,
-        symb_name = 'THRUST_LEVEL',
+        symb_name = n('THRUST_LEVEL'),
         sym_class = SCLASS_VARIABLE,
         sym_type  = STYPE_SCALAR,
     ))
-    print(f'  Symbol {task_local_no}: THRUST_LEVEL       SCALAR  (TASK local variable)')
+    print(f'  Symbol {task_local_no}: {n("THRUST_LEVEL"):<18} SCALAR  (TASK local variable)')
     print()
 
     # ------------------------------------------------------------------
@@ -373,7 +392,7 @@ def demo_write(sdf_path, member='NAVCOMP'):
 # Part 2 -- Read
 # ---------------------------------------------------------------------------
 
-def demo_read(sdf_path, member='NAVCOMP'):
+def demo_read(sdf_path, member='NAVCOMP', suffix=''):
     print('=' * 62)
     print('Part 2 -- Read: accessing SDF member')
     print('=' * 62)
@@ -383,6 +402,10 @@ def demo_read(sdf_path, member='NAVCOMP'):
 
     ctx = SdfContext.open(sdf_path, npages=4)
     ctx.select(member)
+
+    # Helper: append suffix to every object name
+    def n(base):
+        return base + suffix
 
     # ------------------------------------------------------------------
     # Step R1: Root cell
@@ -471,11 +494,11 @@ def demo_read(sdf_path, member='NAVCOMP'):
     print()
 
     # ------------------------------------------------------------------
-    # Step R5: Drill into SENSOR_DATA template block
+    # Step R5: Drill into SENSOR_DATA{s} template block
     # ------------------------------------------------------------------
-    print('Step R5: find SENSOR_DATA template block by name')
+    print(f'Step R5: find {n("SENSOR_DATA")} template block by name')
     try:
-        blk = ctx.find_block_by_name('SENSOR_DATA')
+        blk = ctx.find_block_by_name(n('SENSOR_DATA'))
         copy_tag = ''
         cb = copy_map.get(blk.blk_no, 0)
         if cb:
@@ -498,11 +521,11 @@ def demo_read(sdf_path, member='NAVCOMP'):
     print()
 
     # ------------------------------------------------------------------
-    # Step R5b: Drill into EXT_SENSOR template block (shows COPY link)
+    # Step R5b: Drill into EXT_SENSOR{s} template block (shows COPY link)
     # ------------------------------------------------------------------
-    print('Step R5b: find EXT_SENSOR template block by name (COPY demo)')
+    print(f'Step R5b: find {n("EXT_SENSOR")} template block by name (COPY demo)')
     try:
-        blk = ctx.find_block_by_name('EXT_SENSOR')
+        blk = ctx.find_block_by_name(n('EXT_SENSOR'))
         cb = copy_map.get(blk.blk_no, 0)
         copy_tag = ''
         if cb:
@@ -524,15 +547,15 @@ def demo_read(sdf_path, member='NAVCOMP'):
                 role = 'own member'
             print(f'    {sym.symb_no:>3}  {sym.symb_name:<16}  {typ:<16}  ({role})')
     except SdfError as e:
-        print(f'  Not found (file may have been written without EXT_SENSOR): {e}')
+        print(f'  Not found (file may have been written without {n("EXT_SENSOR")}): {e}')
     print()
 
     # ------------------------------------------------------------------
-    # Step R5c: Drill into BURN_TASK block (TASK block demo)
+    # Step R5c: Drill into BURN_TASK{s} block (TASK block demo)
     # ------------------------------------------------------------------
-    print('Step R5c: find BURN_TASK block by name (TASK block demo)')
+    print(f'Step R5c: find {n("BURN_TASK")} block by name (TASK block demo)')
     try:
-        blk = ctx.find_block_by_name('BURN_TASK')
+        blk = ctx.find_block_by_name(n('BURN_TASK'))
         print(f'  Block found: #{blk.blk_no} {blk.blk_name}  '
               f'class={BLK_CLASS.get(blk.blk_class, blk.blk_class)}')
         print(f'  Symbol range: {blk.fsymb_no}..{blk.lsymb_no}')
@@ -548,10 +571,10 @@ def demo_read(sdf_path, member='NAVCOMP'):
     # ------------------------------------------------------------------
     # Step R6: Find STRUCTURE instance variable by name
     # ------------------------------------------------------------------
-    print('Step R6: find STRUCTURE instance variable SENSOR')
+    print(f'Step R6: find STRUCTURE instance variable {n("SENSOR")}')
     ctx.find_block_by_number(1)  # set block 1 as search context
     try:
-        sym = ctx.find_symbol_by_name('SENSOR')
+        sym = ctx.find_symbol_by_name(n('SENSOR'))
         typ = sym_type_detail(sym, template_map)
         print(f'  Found: symb_no={sym.symb_no}  type={typ}')
         if sym.rows:
@@ -598,32 +621,57 @@ def demo_read(sdf_path, member='NAVCOMP'):
 # ---------------------------------------------------------------------------
 
 def main():
-    if '--help' in sys.argv or '-h' in sys.argv:
+    args = sys.argv[1:]
+
+    if '--help' in args or '-h' in args:
         print(__doc__)
         sys.exit(0)
 
-    member    = 'NAVCOMP'
-    temp_file = None
+    add_member_mode = '--add-member' in args
+    args = [a for a in args if not a.startswith('--')]
 
-    if len(sys.argv) >= 2:
-        sdf_path = sys.argv[1]
-        if len(sys.argv) >= 3:
-            member = sys.argv[2]
-        if os.path.exists(sdf_path):
-            demo_read(sdf_path, member)
-            return
+    base_member = 'NAVCOMP'
+    temp_file   = None
+
+    if args:
+        sdf_path = args[0]
+        if len(args) >= 2:
+            base_member = args[1]
+
+        if add_member_mode:
+            # Determine object-name suffix from the 1-based position this member
+            # will occupy after the write.  Position 1 → no suffix; position N → "N".
+            #   - Overwrite: position = index of existing member with same name.
+            #   - New member: position = existing count + 1.
+            if os.path.exists(sdf_path):
+                existing = flat_info(sdf_path)
+                names = [m['name'] for m in existing]
+                if base_member in names:
+                    new_index = names.index(base_member) + 1   # 1-based position
+                else:
+                    new_index = len(existing) + 1
+                suffix = '' if new_index == 1 else str(new_index)
+                demo_write(sdf_path, base_member, suffix=suffix, append=True)
+            else:
+                suffix = ''
+                demo_write(sdf_path, base_member, suffix=suffix, append=False)
+            demo_read(sdf_path, base_member, suffix=suffix)
+        elif os.path.exists(sdf_path):
+            demo_read(sdf_path, base_member)
+        else:
+            demo_write(sdf_path, base_member)
+            demo_read(sdf_path, base_member)
     else:
         fd, sdf_path = tempfile.mkstemp(suffix='.sdf', prefix='sdfpkg_demo_')
         os.close(fd)
         temp_file = sdf_path
-
-    try:
-        demo_write(sdf_path, member)
-        demo_read(sdf_path, member)
-    finally:
-        if temp_file and os.path.exists(temp_file):
-            os.unlink(temp_file)
-            print(f'Temporary file removed.')
+        try:
+            demo_write(sdf_path, base_member)
+            demo_read(sdf_path, base_member)
+        finally:
+            if os.path.exists(temp_file):
+                os.unlink(temp_file)
+                print(f'Temporary file removed.')
 
 
 if __name__ == '__main__':

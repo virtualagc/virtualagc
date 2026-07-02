@@ -1594,7 +1594,11 @@ def pds_info(pds_path: str) -> list[dict]:
     return members
 
 def flat_info(flat_path: str) -> list[dict]:
-    """Read a flat SDF file and return a list of member dicts."""
+    """Read a flat SDF file and return a list of member dicts.
+
+    Each dict has keys: ``name``, ``page_count``, ``offset``, ``version``.
+    ``version`` is the 16-bit value stored in PAGEZERO of that member.
+    """
     with open(flat_path, 'rb') as f:
         hdr = f.read(8)
         if hdr[:4] != FLAT_MAGIC:
@@ -1607,6 +1611,10 @@ def flat_info(flat_path: str) -> list[dict]:
             pc   = struct.unpack_from('>I', e, 8)[0]
             off  = struct.unpack_from('>Q', e, 12)[0]
             members.append({'name': name, 'page_count': pc, 'offset': off})
+        for m in members:
+            f.seek(m['offset'])
+            ver_bytes = f.read(2)
+            m['version'] = struct.unpack('>H', ver_bytes)[0] if len(ver_bytes) == 2 else 0
     return members
 
 def pds2flat(pds_path: str, flat_path: str,
@@ -2143,7 +2151,7 @@ class SdfWriter:
         self._init_data: bytes = b''
         self._init_reladdrs: dict = {}   # symb_no -> rel_addr halfword offset
         self._flags   = WFLAG_NONE
-        self._version = 1
+        self._version = 0
         self._member  = ''
         self._path    = ''
         self._append  = False   # True -> sdf_add_member mode
@@ -2155,26 +2163,40 @@ class SdfWriter:
 
     @classmethod
     def create(cls, path: str, member_name: str,
-               version: int = 1, flags: int = WFLAG_NONE) -> 'SdfWriter':
-        """Create a new SDF flat file and begin a new member."""
+               flags: int = WFLAG_NONE) -> 'SdfWriter':
+        """Create a new SDF flat file with a single member at version 0."""
         w = cls()
         w._path    = path
         w._member  = member_name[:NAME_LEN].rstrip()
-        w._version = version or 1
+        w._version = 0
         w._flags   = flags
         w._append  = False
         return w
 
     @classmethod
     def add_member(cls, path: str, member_name: str,
-                   version: int = 1, flags: int = WFLAG_NONE) -> 'SdfWriter':
-        """Add a new member to an existing SDF flat file."""
+                   flags: int = WFLAG_NONE) -> 'SdfWriter':
+        """Add or replace a member in an existing SDF flat file.
+
+        If *member_name* is already present the member is overwritten and its
+        version number is incremented by 1.  A brand-new member starts at
+        version 0.
+        """
         w = cls()
         w._path    = path
-        w._member  = member_name[:NAME_LEN].rstrip()
-        w._version = version or 1
+        name_key   = member_name[:NAME_LEN].rstrip()
+        w._member  = name_key
         w._flags   = flags
         w._append  = True
+        w._version = 0   # default for genuinely new member
+        if os.path.exists(path):
+            try:
+                for m in flat_info(path):
+                    if m['name'] == name_key:
+                        w._version = m['version'] + 1
+                        break
+            except (OSError, ValueError):
+                pass
         return w
 
     def __enter__(self):
@@ -2665,44 +2687,60 @@ class SdfWriter:
         self._write_flat(pages, num_pages)
 
     def _write_flat(self, pages: list, num_pages: int) -> None:
-        """Write (or append to) the flat file."""
-        import time as _time
-
+        """Write (or append/replace) the flat file."""
         if self._append:
-            # Read existing file, insert new index entry, rewrite
+            # Read the existing file into memory
             try:
                 with open(self._path, 'rb') as f:
                     hdr = f.read(8)
                     if hdr[:4] != FLAT_MAGIC:
                         raise SdfError(-4030, 'not a valid SDF flat file')
                     n = struct.unpack_from('>I', hdr, 4)[0]
-                    old_idx = f.read(n * 20)
-                    old_data = f.read()
+                    # Parse index
+                    old_entries = []
+                    for _ in range(n):
+                        e   = f.read(FLAT_IDX_ENTRY)
+                        nm  = e[:NAME_LEN].rstrip(b' ').decode('ascii', errors='replace')
+                        pc  = struct.unpack_from('>I', e, 8)[0]
+                        off = struct.unpack_from('>Q', e, 12)[0]
+                        old_entries.append({'name': nm, 'pc': pc})
+                    # Load all page data keyed by name
+                    member_data = {}
+                    for oe in old_entries:
+                        member_data[oe['name']] = f.read(oe['pc'] * PAGE_SIZE)
             except OSError as e:
                 raise SdfError(-4030, str(e)) from e
 
-            # Update pg0_offsets in existing index entries (shift by 20)
-            updated_idx = bytearray(old_idx)
-            for i in range(n):
-                eo  = i * 20
-                off = struct.unpack_from('>Q', updated_idx, eo + 12)[0]
-                struct.pack_into('>Q', updated_idx, eo + 12, off + 20)
+            new_page_data = b''.join(bytes(pg) for pg in pages)
+            overwrite = self._member in member_data
 
-            # New member's pages start at end of updated file
-            new_pg0_off = 8 + (n + 1) * 20 + len(old_data)
-            new_entry   = self._make_index_entry(new_pg0_off, num_pages)
+            if overwrite:
+                member_data[self._member] = new_page_data
+                final_entries = old_entries   # same order, same count
+                new_n = n
+            else:
+                member_data[self._member] = new_page_data
+                final_entries = old_entries + [{'name': self._member, 'pc': num_pages}]
+                new_n = n + 1
 
             with open(self._path, 'wb') as f:
-                new_hdr = FLAT_MAGIC + struct.pack('>I', n + 1)
-                f.write(new_hdr)
-                f.write(bytes(updated_idx))
-                f.write(new_entry)
-                f.write(old_data)
-                for pg in pages:
-                    f.write(bytes(pg))
+                f.write(FLAT_MAGIC + struct.pack('>I', new_n))
+                idx_start = f.tell()
+                f.write(b'\x00' * (new_n * FLAT_IDX_ENTRY))
+                for i, fe in enumerate(final_entries):
+                    pg_off = f.tell()
+                    data   = member_data[fe['name']]
+                    pc     = len(data) // PAGE_SIZE
+                    f.write(data)
+                    name_field = (fe['name'].encode('ascii') + b' ' * NAME_LEN)[:NAME_LEN]
+                    entry = name_field + struct.pack('>I', pc) + struct.pack('>Q', pg_off)
+                    cur = f.tell()
+                    f.seek(idx_start + i * FLAT_IDX_ENTRY)
+                    f.write(entry)
+                    f.seek(cur)
         else:
             # Create new file
-            pg0_off   = 8 + 20   # header + one index entry
+            pg0_off   = 8 + FLAT_IDX_ENTRY
             new_entry = self._make_index_entry(pg0_off, num_pages)
             try:
                 with open(self._path, 'wb') as f:
@@ -2760,10 +2798,10 @@ def _main():
         for path in args[1:]:
             members = flat_info(path)
             print(f'sdfpkg flat file: {path}  ({len(members)} member(s))')
-            print(f'  {"NAME":<8}  {"PAGES":>6}  {"OFFSET":>12}  BYTES')
+            print(f'  {"NAME":<8}  {"PAGES":>6}  {"OFFSET":>12}  {"BYTES":>6}  VER')
             for m in members:
                 print(f'  {m["name"]:<8}  {m["page_count"]:>6}  '
-                      f'{m["offset"]:>12}  {m["page_count"]*PAGE_SIZE}')
+                      f'{m["offset"]:>12}  {m["page_count"]*PAGE_SIZE:>6}  {m["version"]}')
 
     elif cmd == 'pds_info':
         if not args[1:]:

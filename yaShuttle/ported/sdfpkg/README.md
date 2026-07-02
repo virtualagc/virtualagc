@@ -38,7 +38,7 @@ Originally, since HAL/S compilation occurred in an IBM System/360 environment, S
 Here is a rundown of the files in this directory, as distributed:
 
 * README.md: This file you're reading right now, of course!
-* sample.sdf, make&lowbar;sample&lowbar;sdf.py, NAVCOMP.hal: A sample SDF (synthetic format), the Python file that created it, and a HAL/S source-code file that's intended to be consistent with the contents of the SDF.
+* sample.sdf, make&lowbar;sample&lowbar;sdf.py, NAVCOMP.hal: A sample SDF (synthetic format), the Python file that created it, and a HAL/S source-code file that's intended to be consistent with the contents of the SDF.  (The program demo_sdfpkg.py, below, is actually a more-flexible and possibly more-current way to create these sample SDF's.)
 * In Python 3:
     * sdfpkg.py: This is an importable module that comprises the entirety of the original SDFPKG functionality, plus the new framework for writing SDF's. It's intended for integration into the HAL/S compiler HAL&lowbar;S&lowbar;FC.py, but there's no reason it cannot be imported by other Python program as well.  It can also be run in standalone mode (try `sdfpkg.py --help`) to perform various functions.  At this writing, those functions are:
         * List the members of a given SDF (synthetic flat-file format).

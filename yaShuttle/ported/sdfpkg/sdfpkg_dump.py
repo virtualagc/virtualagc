@@ -138,15 +138,16 @@ def dump_index(out, sdf_path):
     """Print the flat-file member index."""
     members = flat_info(sdf_path)
     _section(out, f'Flat-file index  ({sdf_path})')
-    print(f'  {"MEMBER":<10}  {"PAGES":>6}  {"OFFSET":>12}  {"BYTES":>8}', file=out)
-    print(f'  {"-"*10}  {"-"*6}  {"-"*12}  {"-"*8}', file=out)
+    print(f'  {"MEMBER":<10}  {"PAGES":>6}  {"OFFSET":>12}  {"BYTES":>8}  {"VER":>3}', file=out)
+    print(f'  {"-"*10}  {"-"*6}  {"-"*12}  {"-"*8}  {"-"*3}', file=out)
     for m in members:
         print(f'  {m["name"]:<10}  {m["page_count"]:>6}  '
-              f'{m["offset"]:>12}  {m["page_count"]*PAGE_SIZE:>8}', file=out)
+              f'{m["offset"]:>12}  {m["page_count"]*PAGE_SIZE:>8}  {m["version"]:>3}', file=out)
     print(f'\n  Total members: {len(members)}', file=out)
 
 
-def dump_member(out, ctx, member_name, show_blocks, show_symbols, show_stmts):
+def dump_member(out, ctx, member_name, show_blocks, show_symbols, show_stmts,
+                version=None):
     """Dump one member's contents."""
     _header(out, f'Member: {member_name}')
 
@@ -162,6 +163,8 @@ def dump_member(out, ctx, member_name, show_blocks, show_symbols, show_stmts):
     nonmono    = bool(sdf_flags & 0x0400)
 
     _section(out, 'Directory root cell (DROOTCEL)')
+    if version is not None:
+        print(f'  Version      : {version}', file=out)
     print(f'  SDF flags    : 0x{sdf_flags:04X}', file=out)
     print(f'    HAS_SRNS   : {has_srns}', file=out)
     print(f'    NONMONO    : {nonmono}', file=out)
@@ -376,7 +379,8 @@ def main():
                 try:
                     ctx.select(m['name'])
                     dump_member(out, ctx, m['name'],
-                                show_blocks, show_symbols, show_stmts)
+                                show_blocks, show_symbols, show_stmts,
+                                version=m['version'])
                 except SdfError as e:
                     print(f'\nERROR dumping member {m["name"]!r}: {e}',
                           file=out)
