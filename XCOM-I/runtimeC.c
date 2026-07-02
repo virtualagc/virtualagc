@@ -59,9 +59,10 @@
  *              2026-05-17 RSB  Corrected `SUBSTR` behavior when the starting
  *                              position is past the end of the string.  See
  *                              issue #1306.
- *              2026-07-02 RSB  Changed the EBCDIC encoding of [ and ] to 0xBD
-                                and 0xAD respectively.  See the discussion at
-                                https://github.com/ColanderCombo/nsts-sim-gpc/issues/18.
+ *              2026-07-02 RSB  Changed the EBCDIC encoding of [ and ] to 0xAD
+ *                              and 0xBD respectively.  See the discussion at
+ *                              https://github.com/ColanderCombo/nsts-sim-gpc/issues/18.
+ *                              Added `sdfFilename`.
  *
  *
  * The functions herein are documented in runtimeC.h.
@@ -240,6 +241,7 @@ void writeZipfile(gzFile dest) {
 // Extern'd in runtimeC.h or configuration.h:
 int debugX = 0;
 int outUTF8 = 0;
+char *sdfFilename = NULL;
 DCB_t DCB_INS[DCB_MAX];
 DCB_t DCB_OUTS[DCB_MAX];
 FILE *COMMON_OUT = NULL;
@@ -289,7 +291,7 @@ static uint8_t asciiToEbcdic[128] = {
   0x7C, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, /* @ABCDEFG     */
   0xC8, 0xC9, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, /* HIJKLMNO     */
   0xD7, 0xD8, 0xD9, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, /* PQRSTUVW     */
-  0xE7, 0xE8, 0xE9, 0xBD, 0xFE, 0xAD, 0x5F, 0x6D, /* XYZ[\]^_     */
+  0xE7, 0xE8, 0xE9, 0xAD, 0xFE, 0xBD, 0x5F, 0x6D, /* XYZ[\]^_     */
   0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
   0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
   0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
@@ -389,9 +391,9 @@ static char ebcdicToAscii[256] = {
   ' '   , 'j'   , 'k'   , 'l'   , 'm'   , 'n'   , 'o'   , 'p'   ,
   'q'   , 'r'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   ' '   , ' '   , 's'   , 't'   , 'u'   , 'v'   , 'w'   , 'x'   ,
-  'y'   , 'z'   , ' '   , ' '   , ' '   , ']'   , ' '   , ' '   ,
+  'y'   , 'z'   , ' '   , ' '   , ' '   , '['   , ' '   , ' '   ,
   ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , ' '   , ' '   , ' '   , '['   , ' '   , ' '   ,
+  ' '   , ' '   , ' '   , ' '   , ' '   , ']'   , ' '   , ' '   ,
   '{'   , 'A'   , 'B'   , 'C'   , 'D'   , 'E'   , 'F'   , 'G'   ,
   'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
@@ -931,6 +933,8 @@ parseCommandLine(int argc, char **argv)
         watchpoint = j;
       else if (1 == sscanf(argv[i], "--debug=%X", &j))
 	debugX = j;
+      else if (!strncmp(argv[i], "--sdf=", 6))
+	sdfFilename = &argv[i][6];
 #ifdef ALLOW_PRETTY_BNF
       else if (!strcmp(argv[i], "--pretty-bnf"))
 	wantPrettyBNF = 1;
@@ -1185,6 +1189,11 @@ parseCommandLine(int argc, char **argv)
           printf("              hence is disabled for standard XPL programs.\n");
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
+          printf("--sdf=F       Name of a file used for storing Simulation Data\n");
+          printf("              Files (SDF).  By default, there is no file\n");
+          printf("              defined, and no SDF's are read.  When a file is\n");
+          printf("              is used, it is in the so-called 'flat-file' format\n");
+          printf("              defined by the port of SDFPKG to C/Python.");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
           printf("              (Not presently functional in Windows).\n");
           printf("--trace-inlines If available, trace execution of patched\n");

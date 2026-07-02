@@ -26,7 +26,7 @@ By definition, <i>Simulation Data Files</i> (SDF) are objects created during com
 
 Originally, since HAL/S compilation occurred in an IBM System/360 environment, SDF's partook of the special characteristics of that environment, but that's not necessarily useful in modern terms.  Specifically:
 
-* The SDF's originally were so-called Partitioned Data Sets (PDS).  Claude has instead invented its own "synthetic flat-file" format, based on POSIX-type filesystems.
+* The SDF's originally were so-called Partitioned Data Sets (PDS).  Claude has instead invented its own "synthetic flat-file" format, based on POSIX-type filesystems.  However, there is a conversion program that can convert back and forth from the synthetic flat-file format to true PDS.  True PDS if implemented strictly is itself a file format, in which a single file contains all of the members of the PDS.  It is more-convenient in some ways to model a PDS as a directory in which each member of the PDS is itself a file.  The conversion program also allows for conversion of PDS files to/from directories of PDS-member files.
 * Symbolic labels retained their EBCDIC encoding within the original PDS-based SDF's.  I've asked Claude to use standard ASCII encoding instead.
 * SDFPKG originally concerned itself entirely with <i>reading</i> SDF's in various ways.  The port adds a framework (invented by Claude) for <i>writing</i> SDF's as well.
 * The HAL/S compiler, in any form (original HAL/S-FC, or modern HALSFC and HAL&lowbar;S&lowbar;FC), does not call `SDFPKG` directly for reading SDF's.  Rather, it calls the `MONITOR(22, ...)` function, which then calls `SDFPKG` essentially by passing its arguments (other than the leading 22) directly to `SDFPKG`.  Writing to SDF's, in the modern ports of the HAL/S compiler, requires direct calls to the ported SDFPKG.
@@ -46,6 +46,8 @@ Here is a rundown of the files in this directory, as distributed:
         * Convert an SDF in true PDS to the synthetic flat-file format.
         * Convert an SDF in the synthetic flat-file format to true PDS.
         * Validate members of an SDF (synthetic format) via the port of SDFCHECK.
+        * Convert a true-PDS file to a directory of member SDF files.
+        * Convert a directory of member SDF files to a true-PDS file.
     * sdfpkg&lowbar;dump.py: A utility for creating a human-readable report about the contents of a given SDF (synthetic format).
     * test&lowbar;sdfpkg.py: A program for testing sdfpkg.py.
     * demo&lowbar;sdfpkg.py: A demo program that teaches how to use sdfpkg.py to read and write SDF's.

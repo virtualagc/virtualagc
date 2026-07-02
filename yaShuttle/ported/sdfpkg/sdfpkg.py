@@ -1714,6 +1714,116 @@ def flat2pds(flat_path: str, pds_path: str,
 
     return len(members)
 
+
+def pds2dir(pds_path: str, dir_path: str,
+            member_filter: Optional[list[str]] = None) -> int:
+    """
+    Extract each member of a raw z/OS PDS binary to a separate
+    single-member sdfpkg flat file in *dir_path*.
+
+    Each output file is named ``<MEMBERNAME>.sdf`` and is a valid flat
+    file readable by ``SdfContext.open()``.  *dir_path* is created if it
+    does not already exist.  Returns the number of members written.
+    """
+    os.makedirs(dir_path, exist_ok=True)
+    with open(pds_path, 'rb') as pds:
+        all_members = _read_pds_directory(pds)
+        data_start  = pds.tell()
+
+        offset = data_start
+        for m in all_members:
+            m['pds_offset'] = offset
+            offset += m['page_count'] * PAGE_SIZE
+
+        if member_filter is not None:
+            upper   = {s.upper() for s in member_filter}
+            wanted  = [m for m in all_members if m['name'].upper() in upper]
+        else:
+            wanted  = all_members
+
+        if not wanted:
+            raise ValueError('no matching members found')
+
+        for m in wanted:
+            out_path   = os.path.join(dir_path, m['name'] + '.sdf')
+            pg0_off    = 8 + FLAT_IDX_ENTRY
+            name_field = (m['name'].encode('ascii') + b' ' * NAME_LEN)[:NAME_LEN]
+            idx_entry  = (name_field +
+                          struct.pack('>I', m['page_count']) +
+                          struct.pack('>Q', pg0_off))
+            with open(out_path, 'wb') as f:
+                f.write(FLAT_MAGIC + struct.pack('>I', 1))
+                f.write(idx_entry)
+                pds.seek(m['pds_offset'])
+                for _ in range(m['page_count']):
+                    page = pds.read(PAGE_SIZE)
+                    if len(page) != PAGE_SIZE:
+                        raise IOError(f'short read on member {m["name"]}')
+                    f.write(page)
+
+    return len(wanted)
+
+
+def dir2pds(dir_path: str, pds_path: str,
+            member_filter: Optional[list[str]] = None) -> int:
+    """
+    Pack single-member sdfpkg flat files from *dir_path* into a raw
+    z/OS PDS binary.
+
+    Every ``*.sdf`` file in *dir_path* is expected to contain exactly one
+    member (as produced by ``pds2dir``).  Members are written to the PDS
+    in alphabetical order by member name.  Returns the number of members
+    written.
+    """
+    entries = [
+        fn for fn in os.listdir(dir_path)
+        if fn.upper().endswith('.SDF')
+    ]
+    entries.sort()
+
+    members_data: list = []
+    for fn in entries:
+        path = os.path.join(dir_path, fn)
+        try:
+            mlist = flat_info(path)
+        except (OSError, ValueError):
+            continue
+        if not mlist:
+            continue
+        m = mlist[0]
+        if member_filter is not None:
+            upper = {s.upper() for s in member_filter}
+            if m['name'].upper() not in upper:
+                continue
+        with open(path, 'rb') as f:
+            f.seek(m['offset'])
+            page_data = f.read(m['page_count'] * PAGE_SIZE)
+        members_data.append((m, page_data))
+
+    if not members_data:
+        raise ValueError('no matching members found')
+
+    members_data.sort(key=lambda x: x[0]['name'])
+    members = [m for m, _ in members_data]
+
+    EPB        = 254 // 28
+    dir_blocks = (len(members) + EPB - 1) // EPB + 1
+
+    with open(pds_path, 'wb') as pds:
+        _write_pds_directory(pds, members, dir_blocks, 0)
+        abs_blocks  = []
+        cur_block   = dir_blocks
+        for m, page_data in members_data:
+            abs_blocks.append(cur_block)
+            pds.write(page_data)
+            cur_block += m['page_count']
+        pds.seek(0)
+        _write_pds_directory(pds, members, dir_blocks,
+                             dir_blocks, abs_blocks)
+
+    return len(members_data)
+
+
 # --- PDS directory helpers ---
 
 _EBCDIC_TO_ASCII = bytes([
@@ -1945,6 +2055,48 @@ Examples:
   sdfpkg.py flat2pds PASS1.sdf   partial.pds  HALSDF
 """,
 
+    'pds2dir': """Usage: sdfpkg.py pds2dir <input.pds> <output-dir> [member ...]
+
+Extract each member of a raw z/OS PDS binary to a separate
+single-member sdfpkg flat file inside <output-dir>.
+
+Arguments:
+  input.pds     Source PDS binary (DSORG=PO, RECFM=F, LRECL=1680).
+  output-dir    Destination directory (created if it does not exist).
+  member ...    Optional list of member names to extract (case-
+                insensitive).  If omitted, all members are extracted.
+
+Each output file is named <MEMBERNAME>.sdf and is a valid flat file
+readable by SdfContext.open(), sdfcheck, and sdfpkg_dump.py.
+
+Exits with status 0 on success, 1 on error.
+
+Examples:
+  sdfpkg.py pds2dir HAL_SDF.pds  ./sdf_members/
+  sdfpkg.py pds2dir HAL_SDF.pds  ./subset/  HALSDF HALSDF2
+""",
+
+    'dir2pds': """Usage: sdfpkg.py dir2pds <input-dir> <output.pds> [member ...]
+
+Pack single-member sdfpkg flat files from <input-dir> into a raw
+z/OS PDS binary.
+
+Arguments:
+  input-dir     Directory produced by pds2dir.  Every *.sdf file
+                must contain exactly one member.
+  output.pds    Destination PDS binary (created or overwritten).
+  member ...    Optional list of member names to include (case-
+                insensitive).  If omitted, all *.sdf files are packed.
+
+Members are written to the PDS in alphabetical order by member name.
+
+Exits with status 0 on success, 1 on error.
+
+Examples:
+  sdfpkg.py dir2pds ./sdf_members/  HAL_SDF.pds
+  sdfpkg.py dir2pds ./subset/       partial.pds  HALSDF
+""",
+
     'sdfcheck': """Usage: sdfpkg.py sdfcheck <file.sdf> [member ...]
 
 Validate the members of a sdfpkg flat file.
@@ -1981,6 +2133,8 @@ Commands:
   pds_info    List members in a raw z/OS PDS binary file.
   pds2flat    Convert a raw PDS binary to a sdfpkg flat file.
   flat2pds    Convert a sdfpkg flat file to a raw PDS binary.
+  pds2dir     Extract PDS members to a directory of single-member flat files.
+  dir2pds     Pack a directory of single-member flat files into a PDS binary.
   sdfcheck    Validate members of a sdfpkg flat file.
 
 Run 'sdfpkg.py help <command>' for detailed help on a specific command.
@@ -2825,6 +2979,18 @@ def _main():
             print(_HELP['flat2pds']); sys.exit(1)
         n = flat2pds(args[1], args[2], args[3:] or None)
         print(f'flat2pds: wrote {n} member(s) to {args[2]}')
+
+    elif cmd == 'pds2dir':
+        if len(args) < 3:
+            print(_HELP['pds2dir']); sys.exit(1)
+        n = pds2dir(args[1], args[2], args[3:] or None)
+        print(f'pds2dir: wrote {n} member(s) to {args[2]}/')
+
+    elif cmd == 'dir2pds':
+        if len(args) < 3:
+            print(_HELP['dir2pds']); sys.exit(1)
+        n = dir2pds(args[1], args[2], args[3:] or None)
+        print(f'dir2pds: wrote {n} member(s) to {args[2]}')
 
     elif cmd == 'sdfcheck':
         if len(args) < 2:

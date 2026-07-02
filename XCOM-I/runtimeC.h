@@ -19,6 +19,7 @@
  *              2026-04-08 RSB  Added `debugX`.
  *              2026-04-14 RSB  Added "pretty BNF".
  *              2026-05-01 DS   Alterations related to HFP-native arithmetic.
+ *              2026-07-02 RSB  Added `sdfFilename`.
  */
 
 #ifndef RUNTIMEC_H
@@ -82,6 +83,7 @@ typedef char sbuf_t[MAX_XPL_STRING + 1];
 
 extern int debugX;
 extern int outUTF8;
+extern char *sdfFilename;
 // "Device control blocks" for sequential files and PDS.  These have nothing
 // to do with IBM 360 DCBs.
 #define DCB_MAX 10

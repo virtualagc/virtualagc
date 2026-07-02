@@ -92,6 +92,12 @@ The available OPTIONS are:
     --rsb-trace=N    Activate my production trace, if available.
     --debug-literals Show extra messages in HAL_S_FC.py report for literals.
     --verbose        Show the command lines for HALSFC-xxx and HAL_S_FC.py.
+    --pass3          By default, compilation stops after object-file generation
+                     by PASS2.  With --pass3, it experimentally continues and
+                     attempts to run PASS3 as well, in order to add or modify
+                     a member in the Simulation Data File (SDF).
+    --pass4          And similarly for PASS4.  Requires --pass3.  But this is
+                     just a placeholder, not really implemented, so don't try it!
     
 '''
 
@@ -113,6 +119,8 @@ verbose = False
 debugLiterals = ""
 clean = False
 archive = False
+pass3 = False
+pass4 = False
 if isWindows:
     ext = ".exe"
 for parm in sys.argv[1:]:
@@ -151,6 +159,10 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
+    elif parm == "--pass3":
+        pass3 = True
+    elif parm == "--pass4":
+        pass4 = True
     elif not parm.startswith("-"):
         if halsFile != None:
             print("Multiple HAL/S files specified")
@@ -531,7 +543,45 @@ if exitCode != 0:
     errorExit("Aborted after PASS2")
 shutil.copy("litfile.bin", "litfile4.bin")
 
-# PASS3 and PASS4 aren't ready for use yet.
+# PASS3 and PASS4 aren't ready for use yet, but ....
+if pass3:
+    # Run PASS3.  Note that while SDF generation in principle would use
+    # --raf=B,1680,5,FILENAME (and probably --raf=B,3360,6,vmem.bin),
+    # in practice the port of SDFPKG.ASM to C actually bypasses the XPL
+    # runtime library's file conventions and VMEM entirely, and uses file 
+    # operations directly to its own "flatfile" format.
+    command = '''%s 
+     %s 
+     --pdsi=5,"%s" 
+     --commoni=COMMON4%s 
+     --commono=COMMON5%s 
+     --sdf=SDFLIB.sdf 
+     --raf=B,1560,2,litfile.bin 
+     --raf=B,3360,6,vmem.bin 
+     %s
+     >pass2.rpt''' % (PASS3, ERRORLIB, extCOMMON, extCOMMON, debugX)
+    command = command.replace("\n", "")
+    if verbose:
+        print(command)
+    exitCode = os.system(command)
+    if exitCode != 0:
+        errorExit("Aborted after PASS3")
+
+if pass3 and pass4:
+    # Run PASS4. **FIXME**
+    command = '''%s 
+     %s 
+     --pdsi=5,"%s" 
+     --commoni=COMMON4%s 
+     --commono=COMMON5%s 
+     %s
+     >pass2.rpt''' % (PASS4, extCOMMON, extCOMMON, debugX)
+    command = command.replace("\n", "")
+    if verbose:
+        print(command)
+    exitCode = os.system(command)
+    if exitCode != 0:
+        errorExit("Aborted after PASS4")
 
 moveAll(f"Success: {' '.join(sys.argv)}")
 print("Compilation successful.")
