@@ -50,7 +50,8 @@ Here is a rundown of the files in this directory, as distributed:
         * Convert a directory of member SDF files to a true-PDS file.
     * sdfpkg&lowbar;dump.py: A utility for creating a human-readable report about the contents of a given SDF (synthetic format).
     * test&lowbar;sdfpkg.py: A program for testing sdfpkg.py.
-    * demo&lowbar;sdfpkg.py: A demo program that teaches how to use sdfpkg.py to read and write SDF's.
+    * demo&lowbar;sdfpkg.py: A demo program originally intended merely to teach how to use sdfpkg.py to read and write SDF's.  Over time it has acquired useful capabilities as a stand-alone utility, including the ability to create SDF's to which new members (compilation units, described by user-supplied JSON files) can be added, or existing members can be modified, extracted, or deleted.
+    * sdf&lowbar;json&lowbar;format.md: A file that documents how to create the JSON files used by demo&lowbar;sdfpkg.py (see preceding item).
 * In C:
     * Makefile: For building the C port &mdash; which again, is entirely unnecessary just for <i>using</i> the Python port &mdash;, using a `make` utility such as GNU `make`.  Use `make clean all` for a clean build of the C code.  (The C the compiler is auto-selected, first by consulting the CC environment variable, then falling back on clang if that fails, and finally falling back on gcc.  Use of gcc or clang can be forced with `make CC=gcc clean all` or `make CC=clang clean all`.)
     * All &ast;.c and &ast;.h except test&lowbar;&ast;.c: The C port of SDFPKG.  It's intended for use in HALSFC-PASS1, HALSFC-PASS3, HALSFC-PASS4, and HALMAT, but there's no reason it couldn't be used as well by other C programs or XPL/I programs translated into C.

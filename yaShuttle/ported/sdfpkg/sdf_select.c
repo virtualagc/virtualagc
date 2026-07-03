@@ -109,6 +109,15 @@ static sdf_rc_t init_fcb_from_page0(sdf_ctx_t *ctx, sdf_fcb_t *fcb)
     return SDF_OK;
 }
 
+sdf_rc_t sdf_find_member(sdf_ctx_t *ctx, const char *member_name)
+{
+    char name8[SDF_IDX_NAME_LEN];
+    sdf_str_to_field(member_name, name8, SDF_IDX_NAME_LEN);
+    off_t    pg0_offset;
+    uint32_t pg_count;
+    return find_member(ctx, name8, &pg0_offset, &pg_count);
+}
+
 sdf_rc_t sdf_do_select(sdf_ctx_t *ctx)
 {
     ctx->select_cnt++;

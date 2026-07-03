@@ -174,6 +174,18 @@ sdf_rc_t sdf_rescind(sdf_ctx_t *ctx);
  */
 sdf_rc_t sdf_select(sdf_ctx_t *ctx, const char *member_name);
 
+/*
+ * sdf_find_member()  --  Test whether a named member exists in the file.
+ *
+ * Scans the flat-file index for a member whose name matches `member_name`
+ * (first 8 characters, ASCII, case-sensitive).  Does NOT change the
+ * current member selection.
+ *
+ * Returns SDF_OK (0) if the member exists, SDF_NOT_FOUND if it does not,
+ * or SDF_ERR_OPEN_FAIL if the index cannot be read.
+ */
+sdf_rc_t sdf_find_member(sdf_ctx_t *ctx, const char *member_name);
+
 /* ------------------------------------------------------------------ */
 /* Low-level pointer access                                            */
 /* ------------------------------------------------------------------ */

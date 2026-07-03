@@ -1040,6 +1040,13 @@ class SdfContext:
         """Return (reads, writes, selects) counters."""
         return self._reads, self._writes, self._selects
 
+    def find_member(self, member_name: str) -> bool:
+        """Return True if *member_name* exists in this SDF flat file.
+
+        Does not change the current member selection.
+        """
+        return find_member(self._fp.name, member_name)
+
     # ==================================================================
     # Private: paging area management (PAGMOD.bal)
     # ==================================================================
@@ -1616,6 +1623,57 @@ def flat_info(flat_path: str) -> list[dict]:
             ver_bytes = f.read(2)
             m['version'] = struct.unpack('>H', ver_bytes)[0] if len(ver_bytes) == 2 else 0
     return members
+
+def find_member(flat_path: str, member_name: str) -> bool:
+    """Return True if *member_name* exists in the flat SDF file *flat_path*.
+
+    The check is case-sensitive and limited to the first 8 characters
+    (matching the on-disk name field).  Returns False if the file cannot
+    be opened or is not a valid flat file.
+    """
+    name_key = member_name[:NAME_LEN].rstrip()
+    try:
+        return any(m['name'] == name_key for m in flat_info(flat_path))
+    except (OSError, ValueError):
+        return False
+
+
+def delete_member(flat_path: str, member_name: str) -> None:
+    """Delete a named member from a flat SDF file, rewriting it in place.
+
+    Raises ValueError if *member_name* is not found.
+    Raises OSError on file I/O errors.
+    """
+    name_key = member_name[:NAME_LEN].rstrip()
+    members  = flat_info(flat_path)
+    if not any(m['name'] == name_key for m in members):
+        raise ValueError(f'member {name_key!r} not found in {flat_path!r}')
+    keep = [m for m in members if m['name'] != name_key]
+
+    with open(flat_path, 'rb') as f:
+        pages_data = {}
+        for m in keep:
+            f.seek(m['offset'])
+            pages_data[m['name']] = f.read(m['page_count'] * PAGE_SIZE)
+
+    new_n = len(keep)
+    with open(flat_path, 'wb') as f:
+        f.write(FLAT_MAGIC + struct.pack('>I', new_n))
+        idx_start = f.tell()
+        f.write(b'\x00' * (new_n * FLAT_IDX_ENTRY))
+        for i, m in enumerate(keep):
+            pg_off = f.tell()
+            data   = pages_data[m['name']]
+            f.write(data)
+            name_field = (m['name'].encode('ascii') + b' ' * NAME_LEN)[:NAME_LEN]
+            entry = (name_field +
+                     struct.pack('>I', m['page_count']) +
+                     struct.pack('>Q', pg_off))
+            cur = f.tell()
+            f.seek(idx_start + i * FLAT_IDX_ENTRY)
+            f.write(entry)
+            f.seek(cur)
+
 
 def pds2flat(pds_path: str, flat_path: str,
              member_filter: Optional[list[str]] = None) -> int:
@@ -2869,6 +2927,22 @@ class SdfWriter:
             overwrite = self._member in member_data
 
             if overwrite:
+                # Skip the write entirely when page content is unchanged.
+                # Mask out the two fields that always differ across writes
+                # (version at bytes 0-1 and sdf_date at bytes 16-19 of page 0)
+                # before comparing, so that purely cosmetic metadata changes
+                # do not trigger a rewrite.
+                old_page_data = member_data[self._member]
+                if len(new_page_data) == len(old_page_data):
+                    def _mask_page0(data: bytes) -> bytearray:
+                        b = bytearray(data[:PAGE_SIZE])
+                        b[0:2]   = b'\x00\x00'            # version
+                        b[16:20] = b'\x00\x00\x00\x00'   # sdf_date
+                        return b
+                    if (_mask_page0(new_page_data) == _mask_page0(old_page_data)
+                            and new_page_data[PAGE_SIZE:] == old_page_data[PAGE_SIZE:]):
+                        return   # content unchanged; leave file as-is
+
                 member_data[self._member] = new_page_data
                 final_entries = old_entries   # same order, same count
                 new_n = n
