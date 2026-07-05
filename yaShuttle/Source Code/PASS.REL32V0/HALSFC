@@ -222,7 +222,7 @@ filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz",
                  "auxp.rpt", "flo.rpt", "COMMON4.out.bin.gz", "litfile4.bin",
                  "COMMON3.out"]
 filesReallyPreserve = ["TEMPLIB.json", "TEMPLIBB.json", 
-                       "INCLIB.json", "INCLIBB.json"]
+                       "INCLIB.json", "INCLIBB.json", "SDFLIB.sdf"]
 dirsReallyPreserve = ["TEMPLIB", "TEMPLIBB", 
                        "INCLIB", "INCLIBB"]
 if clean:
@@ -551,7 +551,6 @@ if pass3:
     # runtime library's file conventions and VMEM entirely, and uses file 
     # operations directly to its own "flatfile" format.
     command = '''%s 
-     %s 
      --pdsi=5,"%s" 
      --commoni=COMMON4%s 
      --commono=COMMON5%s 
@@ -570,7 +569,6 @@ if pass3:
 if pass3 and pass4:
     # Run PASS4. **FIXME**
     command = '''%s 
-     %s 
      --pdsi=5,"%s" 
      --commoni=COMMON4%s 
      --commono=COMMON5%s 

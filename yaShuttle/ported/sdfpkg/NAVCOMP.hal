@@ -1,89 +1,89 @@
-C ========================================================================
-C  NAVCOMP.hal
-C
-C  Sample HAL/S program corresponding to the SDF member NAVCOMP in
-C  sample.sdf.
-C
-C  Block 1: NAVCOMP  (PROGRAM, CSECT NAVSECT)
-C    Variables:
-C      ALTITUDE        SCALAR
-C      ARMED           BOOLEAN
-C      BITS            BIT(16)
-C      COUNT           INTEGER
-C      INERTIA         MATRIX(3,3)
-C      LAUNCH_ENABLE   EVENT
-C      LONGSYMBOLNAME  SCALAR
-C      MESSAGE         CHARACTER(20)
-C      READINGS        ARRAY(10) SCALAR
-C      SENSOR          SENSOR_DATA-STRUCTURE  (STRUCTURE instance)
-C      TABLE           ARRAY(3,4) INTEGER
-C      VELOCITY        VECTOR(3)
-C
-C  Block 2: SENSOR_DATA  (STRUCTURE template)
-C    Members:
-C      ALT_READING     SCALAR
-C      STATUS_CODE     INTEGER
-C      VEL_READING     VECTOR(3)
-C
-C  Statements in NAVCOMP:
-C    S0001  ALTITUDE = 35000.0;
-C    S0002  BURN: COUNT = COUNT + 1;
-C    S0003  IF ARMED THEN ALTITUDE = ALTITUDE + VELOCITY$(1);
-C    S0004  DECLARE ...;   (non-executable)
-C
-C  HAL/S STRUCTURE notes
-C  ---------------------
-C  A STRUCTURE statement may only appear inside a compilation unit
-C  (COMPOOL, PROCEDURE, FUNCTION, or PROGRAM).  It defines a named
-C  composite type whose members are each introduced with a level
-C  number (1 for top-level members).
-C
-C  Variables of a structure type are declared using the template name
-C  suffixed with "-STRUCTURE".  Member access uses dot notation:
-C    SENSOR.ALT_READING  or  SENSOR.VEL_READING$(2)
-C
-C  In the SDF, a STRUCTURE type occupies its own block (blk_class=3).
-C  The template header symbol (CLASS=3, TYPE=10) is self-referential:
-C  its ROWS field holds its own symbol number.  An instance variable
-C  (CLASS=1, TYPE=10) has its ROWS field set to the symbol number of
-C  the template header.
-C ========================================================================
-
-   NAVCOMP:
-   PROGRAM;
-
-   STRUCTURE SENSOR_DATA:
-      1 ALT_READING  SCALAR,
-      1 STATUS_CODE  INTEGER,
-      1 VEL_READING  VECTOR(3);
-
-   DECLARE
-      ALTITUDE        SCALAR        INITIAL(35000.0),
-      ARMED           BOOLEAN       INITIAL(FALSE),
-      BITS            BIT(16)       INITIAL(BIN'0000000000000001'),
-      COUNT           INTEGER       INITIAL(0),
-      INERTIA         MATRIX(3, 3)  INITIAL(1.0, 0.0, 0.0,
-                                            0.0, 1.0, 0.0,
-                                            0.0, 0.0, 1.0),
-      LAUNCH_ENABLE   EVENT,
-      LONGSYMBOLNAME  SCALAR        INITIAL(0.0),
-      MESSAGE         CHARACTER(20) INITIAL('NAVIGATION NOMINAL'),
-      READINGS        ARRAY(10)     SCALAR,
-      SENSOR          SENSOR_DATA-STRUCTURE,
-      TABLE           ARRAY(3, 4)   INTEGER,
-      VELOCITY        VECTOR(3)     INITIAL(100.0, 0.0, -50.0);
-
-C -----------------------------------------------------------------------
-C  Executable statements
-C -----------------------------------------------------------------------
-
-   ALTITUDE = 35000.0;                /* S0001 */
-
-   BURN:
-   COUNT = COUNT + 1;                 /* S0002 (labeled) */
-
-   IF ARMED                           /* S0003 */
-      THEN ALTITUDE = ALTITUDE
-                    + VELOCITY$(1);
-
-   CLOSE NAVCOMP;
+C ======================================================================000010
+C  NAVCOMP.hal                                                          000020
+C                                                                       000030
+C  Sample HAL/S program corresponding to the SDF member NAVCOMP in      000040
+C  sample.sdf.                                                          000050
+C                                                                       000060
+C  Block 1: NAVCOMP  (PROGRAM, CSECT NAVSECT)                           000070
+C    Variables:                                                         000080
+C      ALTITUDE        SCALAR                                           000090
+C      ARMED           BOOLEAN                                          000100
+C      BITS            BIT(16)                                          000110
+C      COUNT           INTEGER                                          000120
+C      INERTIA         MATRIX(3,3)                                      000130
+C      LAUNCH_ENABLE   EVENT                                            000140
+C      LONGSYMBOLNAME  SCALAR                                           000150
+C      MESSAGE         CHARACTER(20)                                    000160
+C      READINGS        ARRAY(10) SCALAR                                 000170
+C      SENSOR          SENSOR_DATA-STRUCTURE  (STRUCTURE instance)      000180
+C      TABLE           ARRAY(3,4) INTEGER                               000190
+C      VELOCITY        VECTOR(3)                                        000200
+C                                                                       000210
+C  Block 2: SENSOR_DATA  (STRUCTURE template)                           000220
+C    Members:                                                           000230
+C      ALT_READING     SCALAR                                           000240
+C      STATUS_CODE     INTEGER                                          000250
+C      VEL_READING     VECTOR(3)                                        000260
+C                                                                       000270
+C  Statements in NAVCOMP:                                               000280
+C    S0001  ALTITUDE = 35000.0;                                         000290
+C    S0002  BURN: COUNT = COUNT + 1;                                    000300
+C    S0003  IF ARMED THEN ALTITUDE = ALTITUDE + VELOCITY$(1);           000310
+C    S0004  DECLARE ...;   (non-executable)                             000320
+C                                                                       000330
+C  HAL/S STRUCTURE notes                                                000340
+C  ---------------------                                                000350
+C  A STRUCTURE statement may only appear inside a compilation unit      000360
+C  (COMPOOL, PROCEDURE, FUNCTION, or PROGRAM).  It defines a named      000370
+C  composite type whose members are each introduced with a level        000380
+C  number (1 for top-level members).                                    000390
+C                                                                       000400
+C  Variables of a structure type are declared using the template name   000410
+C  suffixed with "-STRUCTURE".  Member access uses dot notation:        000420
+C    SENSOR.ALT_READING  or  SENSOR.VEL_READING$(2)                     000430
+C                                                                       000440
+C  In the SDF, a STRUCTURE type occupies its own block (blk_class=3).   000450
+C  The template header symbol (CLASS=3, TYPE=10) is self-referential:   000460
+C  its ROWS field holds its own symbol number.  An instance variable    000470
+C  (CLASS=1, TYPE=10) has its ROWS field set to the symbol number of    000480
+C  the template header.                                                 000490
+C ======================================================================000500
+                                                                        000510
+   NAVCOMP:                                                             000520
+   PROGRAM;                                                             000530
+                                                                        000540
+   STRUCTURE SENSOR_DATA:                                               000550
+      1 ALT_READING  SCALAR,                                            000560
+      1 STATUS_CODE  INTEGER,                                           000570
+      1 VEL_READING  VECTOR(3);                                         000580
+                                                                        000590
+   DECLARE                                                              000600
+      ALTITUDE        SCALAR        INITIAL(35000.0),                   000610
+      ARMED           BOOLEAN       INITIAL(FALSE),                     000620
+      BITS            BIT(16)       INITIAL(BIN'0000000000000001'),     000630
+      COUNT           INTEGER       INITIAL(0),                         000640
+      INERTIA         MATRIX(3, 3)  INITIAL(1.0, 0.0, 0.0,              000650
+                                            0.0, 1.0, 0.0,              000660
+                                            0.0, 0.0, 1.0),             000670
+      LAUNCH_ENABLE   EVENT,                                            000680
+      LONGSYMBOLNAME  SCALAR        INITIAL(0.0),                       000690
+      MESSAGE         CHARACTER(20) INITIAL('NAVIGATION NOMINAL'),      000700
+      READINGS        ARRAY(10)     SCALAR,                             000710
+      SENSOR          SENSOR_DATA-STRUCTURE,                            000720
+      TABLE           ARRAY(3, 4)   INTEGER,                            000730
+      VELOCITY        VECTOR(3)     INITIAL(100.0, 0.0, -50.0);         000740
+                                                                        000750
+C ----------------------------------------------------------------------000760
+C  Executable statements                                                000770
+C ----------------------------------------------------------------------000780
+                                                                        000790
+   ALTITUDE = 35000.0;                /* S0001 */                       000800
+                                                                        000810
+   BURN:                                                                000820
+   COUNT = COUNT + 1;                 /* S0002 (labeled) */             000830
+                                                                        000840
+   IF ARMED                           /* S0003 */                       000850
+      THEN ALTITUDE = ALTITUDE                                          000860
+                    + VELOCITY$(1);                                     000870
+                                                                        000880
+   CLOSE NAVCOMP;                                                       000890

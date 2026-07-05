@@ -54,6 +54,14 @@
 #		make EXTRA=-ggdb
 #       The equivalent for the MS `cl` compiler would be
 #               make EXTRA=/DEBUG
+#
+#       To add extra link-libraries, via the compiler's -L and -l switches,
+#       use the EXTRALIBS variable, such as:
+#               make EXTRALIBS="-L... -l..."
+#       EXTRA and EXTRALIBS are very similar, with the difference being that
+#       EXTRA is inserted immediately after the compiler name, whereas
+#       EXTRALIBS is inserted after the libraries chosen by XCOM-I, nearly at
+#       the end of the compiler command line.
 
 #       In some environments, the compiler switch -rdynamic is not supported.
 #       We try to guess which environments those are, but aren't always 
@@ -121,7 +129,7 @@ HEADERS := $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(RDYNAMIC) $(QUIET)
+	$(CC) $(EXTRA) $(OUT) $@ $(SOURCES) $(LIBS) $(EXTRALIBS) $(RDYNAMIC) $(QUIET)
 	chmod +x $(TARGET)
 	$(MV) $@ ..
 

@@ -2893,11 +2893,45 @@ MONITOR13(descriptor_t *namep) {
   return WHERE_MONITOR_13;
 }
 
+#ifdef HALSFC_PASS3
+uint32_t
+MONITOR14(uint32_t n, uint32_t a) {
+  extern char sdfName[32];
+  void MONITOR14_0(uint32_t lastPage);
+  void MONITOR14_4(uint32_t locAddr);
+  uint32_t MONITOR14_8(const char *memberName);
+  if (n == 0)
+    {
+      MONITOR14_0(a);
+      return (0);
+    }
+  else if (n == 4)
+    {
+      MONITOR14_4(a);
+      return (0);
+    }
+  else if (n == 8)
+    {
+      descriptor_t *name;
+      char *cname;
+      strcpy(sdfName, "SDFLIB");
+      name = getCHARACTERd(a);
+      cname = descriptorToAscii(name);
+      return (MONITOR14_8(cname));
+    }
+  else
+    {
+      abend("MONITOR(14) unrecognized option");
+      return 0; // `abend` doesn't return; this just avoids a compiler complaint.
+    }
+}
+#else
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
   abend("MONITOR(14) not yet implemented");
   return 0; // `abend` doesn't return; this just avoids a compiler complaint.
 }
+#endif
 
 uint32_t
 MONITOR15(void) {

@@ -74,7 +74,8 @@ LIB_SRCS = \
     sdf_pagmod.c  \
     sdf_select.c  \
     sdfpkg.c      \
-    sdf_write.c
+    sdf_write.c   \
+    monitor14.c
 
 LIB_OBJS      = $(LIB_SRCS:.c=.o)
 LIB           = libsdfpkg.a
@@ -83,7 +84,7 @@ CONVERT       = sdf_convert
 TEST_BIN      = test_sdfpkg
 TEST_WRITE    = test_sdf_write
 ALLDEP_SRCS   = $(LIB_SRCS) sdfcheck.c sdf_convert.c \
-                test_sdfpkg.c test_sdf_write.c
+                test_sdfpkg.c test_sdf_write.c monitor14.c
 
 # On Windows (MSYS2/MinGW) executables have the .exe extension.
 # $(EXE) is appended to each binary target automatically by MinGW's
