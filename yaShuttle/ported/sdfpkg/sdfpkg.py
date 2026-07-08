@@ -88,7 +88,10 @@ DISP_MODF = 0x40
 DISP_RELS = 0x20
 DISP_RESV = 0x10
 
-# Symbol class/type constants
+# Internal chk_match literals (exact values from SDFPKG.ASM CLI instructions).
+# In the corrected HAL/S numbering: CLASS=2 = LABEL_CLASS, TYPE=8 = IORS_TYPE.
+# Equate-externals are LABEL-class symbols with IORS type; SDFPKG.ASM detects
+# them with "CLI CLASS,2 / CLI TYPE,8 / BE SKIPIT".
 CLASS_EQUATE_EXT    = 2
 TYPE_EQUATE_EXT     = 8
 FLAG1_UNQUAL_STRUC  = 0x03
@@ -1459,7 +1462,7 @@ class SdfContext:
             pass  # fall through to full name comparison
 
         else:
-            # Classes > 3 (NAME=4, COMPOOL=6, etc.):
+            # Classes > 3 (REPL_ARG=5, REPLACE=6, TEMPLATE=7, TPL_LAB=8, TPL_FUNC=9):
             # accept only if FLAG1 has exactly one UNQUAL_STRUC bit set
             # (template header).  Both or neither → skip.
             # Mirrors BAL: TM FLAG1,X'03' / BC 5,SYMFOUND
@@ -2233,33 +2236,46 @@ Using sdfpkg as a Python library
 # (Python port of sdf_write.h / sdf_write.c)
 # ======================================================================
 
-# Block class constants
-BCLASS_PROGRAM   = 1
+# Block class constants (##DRIVER.xpl PROC_MODE..INLINE_MODE)
+BCLASS_PROCEDURE = 1
 BCLASS_FUNCTION  = 2
-BCLASS_PROCEDURE = 3
-BCLASS_TASK      = 4
-BCLASS_COMPOOL   = 5
-BCLASS_CLOSE     = 6
+BCLASS_COMPOOL   = 3
+BCLASS_PROGRAM   = 4
+BCLASS_TASK      = 5
+BCLASS_UPDATE    = 6
+BCLASS_INLINE    = 7
 
-# Symbol class constants
-SCLASS_VARIABLE   = 1
-SCLASS_EQUATE_EXT = 2
-SCLASS_TEMPLATE   = 3
-SCLASS_LABEL      = 4
-SCLASS_COMPOOL    = 6
+# Symbol class constants (##DRIVER.xpl VAR_CLASS..TPL_FUNC_CLASS)
+SCLASS_VARIABLE  = 1
+SCLASS_LABEL     = 2
+SCLASS_FUNC      = 3
+SCLASS_REPL_ARG  = 5
+SCLASS_REPLACE   = 6
+SCLASS_TEMPLATE  = 7
+SCLASS_TPL_LAB   = 8
+SCLASS_TPL_FUNC  = 9
 
-# Symbol type constants
-STYPE_SCALAR     = 1
-STYPE_INTEGER    = 2
-STYPE_BOOLEAN    = 3
-STYPE_CHARACTER  = 4
-STYPE_BIT        = 5
-STYPE_VECTOR     = 6
-STYPE_MATRIX     = 7
-STYPE_EQUATE_EXT = 8
-STYPE_EVENT      = 9
-STYPE_STRUCTURE  = 10
-STYPE_TASK       = 11
+# Symbol type constants (##DRIVER.xpl BIT_TYPE..EQUATE_LABEL)
+STYPE_BIT           = 1
+STYPE_CHARACTER     = 2
+STYPE_MATRIX        = 3
+STYPE_VECTOR        = 4
+STYPE_SCALAR        = 5
+STYPE_INTEGER       = 6
+STYPE_IORS          = 8
+STYPE_EVENT         = 9
+STYPE_STRUCTURE     = 10
+STYPE_ANY           = 11
+STYPE_TEMPL_NAME    = 0x3E
+STYPE_STMT_LABEL    = 0x42
+STYPE_UNSPEC_LABEL  = 0x43
+STYPE_IND_CALL_LAB  = 0x45
+STYPE_CALLED_LABEL  = 0x46
+STYPE_PROC_LABEL    = 0x47
+STYPE_TASK_LABEL    = 0x48
+STYPE_PROG_LABEL    = 0x49
+STYPE_COMPOOL_LABEL = 0x4A
+STYPE_EQUATE_LABEL  = 0x4B
 
 # Statement type constants
 STTYPE_ASSIGN    = 1
@@ -2533,11 +2549,11 @@ class SdfWriter:
             s['symb_no'] = i + 1
 
         # Fix self-referential template header rows fields:
-        # A STRUCTURE template header (CLASS=3, TYPE=10) should have
-        # rows = its own final symbol number.
+        # A STRUCTURE template header (SCLASS_TEMPLATE, STYPE_STRUCTURE) should
+        # have rows = its own final symbol number.
         for s in self._symbols:
             d = s['desc']
-            if d.sym_class == 3 and d.sym_type == 10:
+            if d.sym_class == SCLASS_TEMPLATE and d.sym_type == STYPE_STRUCTURE:
                 d.rows = s['symb_no']
 
         # ---- 3. Compute per-block symbol and statement ranges ----

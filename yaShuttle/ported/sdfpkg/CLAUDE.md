@@ -81,16 +81,25 @@ The write path uses a bump allocator starting at page 1 (page 0 = PAGEZERO + DRO
 ## Data Model
 
 ### Symbol Classes (`sym_class`)
-`SCLASS_VARIABLE=1`, `SCLASS_EQUATE_EXT=2`, `SCLASS_TEMPLATE=3`, `SCLASS_LABEL=4` (NAME vars), `SCLASS_COMPOOL=6`
+From `##DRIVER.xpl` VAR_CLASS..TPL_FUNC_CLASS:
+`SCLASS_VARIABLE=1`, `SCLASS_LABEL=2` (NAME vars and equate-externals), `SCLASS_FUNC=3`, `SCLASS_REPL_ARG=5`, `SCLASS_REPLACE=6`, `SCLASS_TEMPLATE=7`, `SCLASS_TPL_LAB=8`, `SCLASS_TPL_FUNC=9`
+
+Equate-external symbols use `SCLASS_LABEL=2` with `STYPE_IORS=8` (detected by SDFPKG.ASM via `CLI CLASS,2 / CLI TYPE,8`).
 
 ### Symbol Types (`sym_type`)
-`STYPE_SCALAR=1`, `STYPE_INTEGER=2`, `STYPE_BOOLEAN=3`, `STYPE_CHARACTER=4`, `STYPE_BIT=5`, `STYPE_VECTOR=6`, `STYPE_MATRIX=7`, `STYPE_EQUATE_EXT=8`, `STYPE_EVENT=9`, `STYPE_STRUCTURE=10`, `STYPE_TASK=11`
+From `##DRIVER.xpl` BIT_TYPE..EQUATE_LABEL:
+`STYPE_BIT=1`, `STYPE_CHARACTER=2`, `STYPE_MATRIX=3`, `STYPE_VECTOR=4`, `STYPE_SCALAR=5`, `STYPE_INTEGER=6`, `STYPE_IORS=8`, `STYPE_EVENT=9`, `STYPE_STRUCTURE=10`, `STYPE_ANY=11`
+
+Label types (hex): `STYPE_TEMPL_NAME=0x3E`, `STYPE_STMT_LABEL=0x42`, `STYPE_UNSPEC_LABEL=0x43`, `STYPE_IND_CALL_LAB=0x45`, `STYPE_CALLED_LABEL=0x46`, `STYPE_PROC_LABEL=0x47`, `STYPE_TASK_LABEL=0x48`, `STYPE_PROG_LABEL=0x49`, `STYPE_COMPOOL_LABEL=0x4A`, `STYPE_EQUATE_LABEL=0x4B`
+
+HAL/S BOOLEAN is `STYPE_BIT` with `rows=1` (no separate BOOLEAN type).
 
 ### Block Classes (`blk_class`)
-`BCLASS_PROGRAM=1`, `BCLASS_FUNCTION=2`, `BCLASS_PROCEDURE=3` (also STRUCTURE templates), `BCLASS_TASK=4`, `BCLASS_COMPOOL=5`, `BCLASS_CLOSE=6`
+From `##DRIVER.xpl` PROC_MODE..INLINE_MODE:
+`BCLASS_PROCEDURE=1` (also STRUCTURE templates), `BCLASS_FUNCTION=2`, `BCLASS_COMPOOL=3`, `BCLASS_PROGRAM=4`, `BCLASS_TASK=5`, `BCLASS_UPDATE=6`, `BCLASS_INLINE=7`
 
 ### Special Structures
-- **STRUCTURE template**: `blk_class=3`; header symbol has `sym_class=3`, `sym_type=10`, `rows=own symb_no`
+- **STRUCTURE template**: `blk_class=1` (BCLASS_PROCEDURE); header symbol has `sym_class=7` (SCLASS_TEMPLATE), `sym_type=10` (STYPE_STRUCTURE), `rows=own symb_no`
 - **STRUCTURE COPY**: SDC carries a 2-byte STRCDATA block at `struct_of` offset; `copy_blk_no` = source block number
 - **ARRAY variable**: SDC has ARRADATA at `array_off` offset (8 bytes: `arraynum(H) + range1(H) + range2(H) + range3(H)`)
 - **SDC fixed layout**: 24 bytes fixed, then name continuation (bytes 24–47), then optional ARRADATA, then optional STRCDATA

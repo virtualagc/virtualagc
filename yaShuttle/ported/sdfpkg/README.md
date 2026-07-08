@@ -2,7 +2,7 @@
 
 * [Introduction](#introduction)
 * [Some Notes About the Ported SDFPKG](#some-notes-about-the-ported-sdfpkg)
-* [What's Here](#whats-here)
+* [What's Here](#what-s-here)
 * [Some Background Info](#some-background-info)
 
 # Introduction
@@ -11,8 +11,12 @@ This folder holds a port of [SDFPKG.ASM](https://github.com/virtualagc/virtualag
 
 The following documentation related to SDFPKG has survived:
 
-* USA001556, the [HAL/S-FC SDL Interface Control Document](https://www.ibiblio.org/apollo/Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf), documents the structure of the Simulation Data Files (SDF) upon which SDFPKG operates.
-* SFPC-PASS0092, the [SDFPKG User's Guide](https://www.ibiblio.org/apollo/Shuttle/SDFPKG-USERS-GUIDE-29-14.pdf) for PASS 29.0 and BFS 14.0, documents the SDFPKG API, both for the original assembly-language source code and for a C-language port of it (whose source-code has not survived as far as I'm aware).
+* IR-95-5, the <a hrel="https://www.ibiblio.org/apollo/Shuttle/19760015838.pdf#page=108"><i>HAL/S-FC Compiler System Specification</i> (1976), section 4.0</a>, provides some high-level information about SDF's and their creation by PASS3 of the HAL/S compiler.
+* IR-182-1, the <a hrel="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=815"><i>HAL/S-FC & HAL/S-360 Compiler System Program Description</i> (1976), section 12.0</a>, describes the access routines provided by the package for accessing the SDF.  It recommends document IR-60 (see below), but "augments the description" given in it, "providing details inappropriate in that forum".
+* IR-60-5, the <a hrel="https://www.ibiblio.org/apollo/Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf#page=106"><i>HAL/S Compiler System Specification</i> (1977), section 5.9</a>, describes the usage of the access routines provided by the package.  But unfortunately, our copy contains only <i>changed</i> pages relative to the preceding document revision, and is therefore incomplete.
+* Memo, <a hrel="">"Simulation Data File (SDF) Access Package" (1992)</a>, seems to be an earlier version of the <i>SDFPKG User's Guide</i> (see below) but is different in various respects such as describing a PL/I interface to the package.
+* SFPC-PASS0092, the <a hrel="https://www.ibiblio.org/apollo/Shuttle/SDFPKG-USERS-GUIDE-29-14.pdf"><i>SDFPKG User's Guide</i> (1999)</a> for PASS 29.0 and BFS 14.0, documents the SDFPKG API, both for the original assembly-language source code and for a C-language port of it (whose source-code has not survived as far as I'm aware).
+* USA001556, the <a hrel="https://www.ibiblio.org/apollo/Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf"><i>HAL/S-FC SDL Interface Control Document</i> (2005)</a>, documents the structure of the Simulation Data Files (SDF) upon which SDFPKG operates.
 
 Our own port was created by submitting the entire BAL source code of SDFPKG.ASM, along with required macro definitions (DIAGNSTC.MACLIB), to Anthropic's Claude Sonnet version 4.6, requesting that it be ported to both C (for integration into HALSFC and HALSTAT) and Python 3 (for integration into HAL&lowbar;S&lowbar;FC).  (I did not submit the file TEST1.bal, a simple test program.)  Each source-code file (&ast;.h, &ast;.c, &ast;.py, Makefile, &ast;.hal) was coded entirely by Claude, albeit with my (RSB) direction.  No source-code file in this directory has been written or even edited by humans.
 

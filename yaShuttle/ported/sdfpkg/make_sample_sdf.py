@@ -41,17 +41,17 @@ Creates 'sample.sdf' containing one member 'NAVCOMP' with:
 
 HAL/S STRUCTURE encoding in the SDF
 =====================================
-  Block class 3 (PROCEDURE) is used for STRUCTURE template blocks.
+  Block class 1 (PROCEDURE) is used for STRUCTURE template blocks.
   The template block contains the member symbols.
 
-  Template header symbol (CLASS=3, TYPE=10):
+  Template header symbol (CLASS=7=TEMPLATE, TYPE=10=STRUCTURE):
     Appears in the template block; rows field holds the symbol's own
     symbol number (self-referential template marker).
 
-  Member symbols (CLASS=1, various types):
+  Member symbols (CLASS=1=VARIABLE, various types):
     Appear in the template block, sorted alphabetically among themselves.
 
-  Instance variable (CLASS=1, TYPE=10=STRUCTURE):
+  Instance variable (CLASS=1=VARIABLE, TYPE=10=STRUCTURE):
     Appears in the program block.
     rows field = symbol number of the template header symbol.
 
@@ -78,10 +78,10 @@ if script_dir not in sys.path:
 from sdfpkg import (
     SdfWriter, WBlock, WSymbol, WStmt,
     BCLASS_PROGRAM, BCLASS_PROCEDURE, BCLASS_TASK,
-    SCLASS_VARIABLE, SCLASS_TEMPLATE, SCLASS_LABEL, SCLASS_EQUATE_EXT,
-    STYPE_SCALAR, STYPE_INTEGER, STYPE_BOOLEAN, STYPE_CHARACTER,
+    SCLASS_VARIABLE, SCLASS_TEMPLATE, SCLASS_LABEL,
+    STYPE_SCALAR, STYPE_INTEGER, STYPE_CHARACTER,
     STYPE_BIT, STYPE_VECTOR, STYPE_MATRIX, STYPE_STRUCTURE, STYPE_EVENT,
-    STYPE_TASK, STYPE_EQUATE_EXT,
+    STYPE_TASK_LABEL, STYPE_IORS,
     STTYPE_ASSIGN, STTYPE_IF,
     WFLAG_HAS_SRNS,
 )
@@ -107,21 +107,21 @@ b_prog = w.add_block(WBlock(
 b_base = w.add_block(WBlock(
     csect_name = 'STRCSECT',
     blk_name   = 'SENSOR_DATA',
-    blk_class  = BCLASS_PROCEDURE,   # blk_class=3: STRUCTURE template
+    blk_class  = BCLASS_PROCEDURE,   # blk_class=1: PROCEDURE (STRUCTURE template)
     blk_id     = 2,
 ))
 
 b_ext = w.add_block(WBlock(
     csect_name = 'STRCSECT',
     blk_name   = 'EXT_SENSOR',
-    blk_class  = BCLASS_PROCEDURE,   # blk_class=3: STRUCTURE template
+    blk_class  = BCLASS_PROCEDURE,   # blk_class=1: PROCEDURE (STRUCTURE template)
     blk_id     = 3,
 ))
 
 b_task = w.add_block(WBlock(
     csect_name = 'NAVSECT',
     blk_name   = 'BURN_TASK',
-    blk_class  = BCLASS_TASK,        # blk_class=4: TASK block
+    blk_class  = BCLASS_TASK,        # blk_class=5: TASK block
     blk_id     = 4,
 ))
 
@@ -181,12 +181,12 @@ w.add_symbol(WSymbol(
 # ---------------------------------------------------------------------------
 # BURN_TASK task symbols  (block b_task)
 # ---------------------------------------------------------------------------
-# The task entry-point symbol uses sym_type=STYPE_TASK (11).
+# The task entry-point symbol uses sym_type=STYPE_TASK_LABEL (0x48).
 w.add_symbol(WSymbol(
     blk_no    = b_task,
     symb_name = 'BURN_TASK',
     sym_class = SCLASS_VARIABLE,
-    sym_type  = STYPE_TASK,       # TYPE=11: task entry-point
+    sym_type  = STYPE_TASK_LABEL,  # TYPE=0x48: task entry-point label
 ))
 
 w.add_symbol(WSymbol(
@@ -203,7 +203,7 @@ w.add_symbol(WSymbol(blk_no=b_prog, symb_name='ALTITUDE',
                      sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
 
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='ARMED',
-                     sym_class=SCLASS_VARIABLE, sym_type=STYPE_BOOLEAN))
+                     sym_class=SCLASS_VARIABLE, sym_type=STYPE_BIT, rows=1))
 
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='BITS',
                      sym_class=SCLASS_VARIABLE, sym_type=STYPE_BIT, rows=16))
@@ -211,9 +211,9 @@ w.add_symbol(WSymbol(blk_no=b_prog, symb_name='BITS',
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='COUNT',
                      sym_class=SCLASS_VARIABLE, sym_type=STYPE_INTEGER))
 
-# EQUATE_EXT (sym_class=2, sym_type=8): compiler-internal external equate
+# Equate-external: LABEL class (2) with IORS type (8) — per SDFPKG.ASM
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='EXT_CONST',
-                     sym_class=SCLASS_EQUATE_EXT, sym_type=STYPE_EQUATE_EXT))
+                     sym_class=SCLASS_LABEL, sym_type=STYPE_IORS))
 
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='INERTIA',
                      sym_class=SCLASS_VARIABLE, sym_type=STYPE_MATRIX,
@@ -229,7 +229,7 @@ w.add_symbol(WSymbol(blk_no=b_prog, symb_name='MESSAGE',
                      sym_class=SCLASS_VARIABLE, sym_type=STYPE_CHARACTER,
                      columns=20))
 
-# NAME variable (sym_class=SCLASS_LABEL=4): sym_type = type of referent
+# NAME variable (sym_class=SCLASS_LABEL=2): sym_type = type of referent
 w.add_symbol(WSymbol(blk_no=b_prog, symb_name='ALT_PTR',
                      sym_class=SCLASS_LABEL, sym_type=STYPE_SCALAR))
 
@@ -295,13 +295,17 @@ print(f'  Statements: {fstmt}..{lstm}')
 print()
 
 from sdfpkg import (SCLASS_TEMPLATE as _TMPL, STYPE_STRUCTURE as _STRUC,
-                    SCLASS_LABEL as _LABEL, SCLASS_EQUATE_EXT as _EQEXT,
-                    STYPE_TASK as _TASK)
+                    SCLASS_LABEL as _LABEL, STYPE_IORS as _IORS,
+                    STYPE_TASK_LABEL as _TASK_LABEL)
 
-SYM_TYPE = {1:'SCALAR',2:'INTEGER',3:'BOOLEAN',4:'CHARACTER',5:'BIT',
-            6:'VECTOR',7:'MATRIX',8:'equate-ext',9:'EVENT',10:'STRUCTURE',11:'TASK'}
-BLK_CLASS = {1:'PROGRAM', 2:'FUNCTION', 3:'STRUCTURE template',
-             4:'TASK', 5:'COMPOOL', 6:'CLOSE BLOCK'}
+SYM_TYPE = {1:'BIT', 2:'CHARACTER', 3:'MATRIX', 4:'VECTOR', 5:'SCALAR',
+            6:'INTEGER', 8:'IORS', 9:'EVENT', 10:'STRUCTURE', 11:'ANY',
+            0x3E:'TEMPL_NAME', 0x42:'STMT_LABEL', 0x43:'UNSPEC_LABEL',
+            0x45:'IND_CALL_LAB', 0x46:'CALLED_LABEL', 0x47:'PROC_LABEL',
+            0x48:'TASK_LABEL', 0x49:'PROG_LABEL', 0x4A:'COMPOOL_LABEL',
+            0x4B:'EQUATE_LABEL'}
+BLK_CLASS = {1:'PROCEDURE', 2:'FUNCTION', 3:'COMPOOL',
+             4:'PROGRAM', 5:'TASK', 6:'UPDATE', 7:'INLINE'}
 for bn in range(1, blk_nodes + 1):
     blk = ctx.find_block_by_number(bn)
     sr  = f'{blk.fsymb_no}..{blk.lsymb_no}' if blk.fsymb_no else '—'
@@ -315,11 +319,11 @@ for bn in range(1, blk_nodes + 1):
             if sym.copy_blk_no:
                 src = ctx.find_block_by_number(sym.copy_blk_no)
                 extra += f' copy_blk_no={sym.copy_blk_no}({src.blk_name})'
+        elif sym.sym_class == _LABEL and sym.sym_type == _IORS:
+            extra = ' EQUATE_EXT'
         elif sym.sym_class == _LABEL:
             extra = f' NAME({SYM_TYPE.get(sym.sym_type, sym.sym_type)})'
-        elif sym.sym_class == _EQEXT:
-            extra = ' EQUATE_EXT'
-        elif sym.sym_type == _TASK:
+        elif sym.sym_type == _TASK_LABEL:
             extra = ' TASK-entry'
         print(f'    {sn:>3}: {sym.symb_name}{extra}')
 

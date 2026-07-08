@@ -30,6 +30,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
                             Changed pretty BNF for <NOT> to print '~' rather
                             than '^', to match HALSFC.
             2026-06-27 RSB  Now imports sdfpkg.py.
+            2026-07-05 RSB  Added --tabs.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -40,17 +41,7 @@ import sys
 from xplBuiltins import OUTPUT, BYTE, fromFloatIBM, scriptParentFolder
 import HALINCL.COMMON as h
 # I chose the same stuff to import as demo_sdfpkg.py does.
-from sdfpkg import (
-    SdfContext, SdfWriter, SdfError,
-    WBlock, WSymbol, WStmt,
-    BCLASS_PROGRAM,
-    SCLASS_VARIABLE,
-    STYPE_SCALAR, STYPE_INTEGER, STYPE_BOOLEAN, STYPE_CHARACTER,
-    STYPE_BIT, STYPE_VECTOR, STYPE_MATRIX,
-    STTYPE_ASSIGN, STTYPE_IF,
-    WFLAG_HAS_SRNS,
-    RC_NOT_EXEC, DISP_NONE,
-)
+from sdfpkg import *
 
 productionTrigger = -1
 productionCount = 0
@@ -705,6 +696,7 @@ if not suppress:
             print('--pfs            Compile for PFS (PASS).')
             print('--bfs            Compile for BFS. (Default is --pfs.)')
             print('                 Note that if --bfs is used, place it first.')
+            print('--tabs=N         (Default 8.) Tab-stop size in source code.')
             print('--templib        Identify &&TEMPLIB with TEMPLIB.')
             print('--utf8           Use UTF-8 in program listings.')
             print('--ascii          (Default.) Use ASCII in program listings.')

@@ -23,6 +23,7 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
             2026-05-14 RSB  Converted MONITOR 9, 10, and 12 from ibmHex module
                             to ibmFloat module for native HFP calculations.
                             Other changes also related to issue #1306.
+            2026-07-05 RSB  Accounted for --tabs with `tabSize`.
 '''
 
 import sys
@@ -69,10 +70,15 @@ pfs = not bfs
 # "\xef\xbb\xbf" at the beginning of the file when you save it.
 # Of course, for us, that's pure garbage, so we remove it if
 # it's there ... or anywhere!
+tabSize = 8
+for parm in sys.argv[1:]:
+    if parm.startswith("--tabs="):
+        tabSize = int(parm.split("=")[1])
+        break
 def normalizeInputText(line):
     return line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
            .replace("¢", "`").replace("\xef\xbb\xbf", "")\
-           .expandtabs(8).ljust(80)
+           .expandtabs(tabSize).ljust(80)
 
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's

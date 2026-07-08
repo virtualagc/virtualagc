@@ -1,64 +1,64 @@
 C ======================================================================000010
 C  NAVCOMP.hal                                                          000020
 C                                                                       000030
-C  Sample HAL/S program corresponding to the SDF member NAVCOMP in      000040
-C  sample.sdf.                                                          000050
-C                                                                       000060
-C  Block 1: NAVCOMP  (PROGRAM, CSECT NAVSECT)                           000070
-C    Variables:                                                         000080
-C      ALTITUDE        SCALAR                                           000090
-C      ARMED           BOOLEAN                                          000100
-C      BITS            BIT(16)                                          000110
-C      COUNT           INTEGER                                          000120
-C      INERTIA         MATRIX(3,3)                                      000130
-C      LAUNCH_ENABLE   EVENT                                            000140
-C      LONGSYMBOLNAME  SCALAR                                           000150
-C      MESSAGE         CHARACTER(20)                                    000160
-C      READINGS        ARRAY(10) SCALAR                                 000170
-C      SENSOR          SENSOR_DATA-STRUCTURE  (STRUCTURE instance)      000180
-C      TABLE           ARRAY(3,4) INTEGER                               000190
-C      VELOCITY        VECTOR(3)                                        000200
-C                                                                       000210
-C  Block 2: SENSOR_DATA  (STRUCTURE template)                           000220
-C    Members:                                                           000230
-C      ALT_READING     SCALAR                                           000240
-C      STATUS_CODE     INTEGER                                          000250
-C      VEL_READING     VECTOR(3)                                        000260
-C                                                                       000270
-C  Statements in NAVCOMP:                                               000280
-C    S0001  ALTITUDE = 35000.0;                                         000290
-C    S0002  BURN: COUNT = COUNT + 1;                                    000300
-C    S0003  IF ARMED THEN ALTITUDE = ALTITUDE + VELOCITY$(1);           000310
-C    S0004  DECLARE ...;   (non-executable)                             000320
-C                                                                       000330
-C  HAL/S STRUCTURE notes                                                000340
-C  ---------------------                                                000350
-C  A STRUCTURE statement may only appear inside a compilation unit      000360
-C  (COMPOOL, PROCEDURE, FUNCTION, or PROGRAM).  It defines a named      000370
-C  composite type whose members are each introduced with a level        000380
-C  number (1 for top-level members).                                    000390
-C                                                                       000400
-C  Variables of a structure type are declared using the template name   000410
-C  suffixed with "-STRUCTURE".  Member access uses dot notation:        000420
-C    SENSOR.ALT_READING  or  SENSOR.VEL_READING$(2)                     000430
-C                                                                       000440
-C  In the SDF, a STRUCTURE type occupies its own block (blk_class=3).   000450
-C  The template header symbol (CLASS=3, TYPE=10) is self-referential:   000460
-C  its ROWS field holds its own symbol number.  An instance variable    000470
-C  (CLASS=1, TYPE=10) has its ROWS field set to the symbol number of    000480
-C  the template header.                                                 000490
-C ======================================================================000500
-                                                                        000510
-   NAVCOMP:                                                             000520
-   PROGRAM;                                                             000530
-                                                                        000540
-   STRUCTURE SENSOR_DATA:                                               000550
-      1 ALT_READING  SCALAR,                                            000560
-      1 STATUS_CODE  INTEGER,                                           000570
-      1 VEL_READING  VECTOR(3);                                         000580
-                                                                        000590
-   DECLARE                                                              000600
-      ALTITUDE        SCALAR        INITIAL(35000.0),                   000610
+C  Sample HAL/S source corresponding to SDF member NAVCOMP in           000040
+C  sample.sdf.  SRNs appear in columns 73-78 of each statement's        000050
+C  opening card.                                                        000060
+C                                                                       000070
+C  Blocks in the SDF member:                                            000080
+C    Block 1: BURN_TASK   (TASK,      blk_class=5, CSECT NAVSECT)       000090
+C    Block 2: EXT_SENSOR  (PROCEDURE, blk_class=1, structure template)  000100
+C    Block 3: NAVCOMP     (PROGRAM,   blk_class=4, CSECT NAVSECT)       000110
+C    Block 4: SENSOR_DATA (PROCEDURE, blk_class=1, structure template)  000120
+C                                                                       000130
+C  Variables in NAVCOMP (block 3):                                      000140
+C    ALTITUDE        SCALAR                                             000150
+C    ALT_PTR         NAME SCALAR    (NAME variable, sym_class=2)        000160
+C    ARMED           BOOLEAN        (BIT(1) in SDF: STYPE_BIT, rows=1)  000170
+C    BITS            BIT(16)                                            000180
+C    COUNT           INTEGER                                            000190
+C    EXT_CONST       EQUATE_EXT     (compiler-internal, not in source)  000200
+C    INERTIA         MATRIX(3,3)                                        000210
+C    LAUNCH_ENABLE   EVENT                                              000220
+C    LONGSYMBOLNAME  SCALAR                                             000230
+C    MESSAGE         CHARACTER(20)                                      000240
+C    READINGS        ARRAY(10) SCALAR                                   000250
+C    SENSOR          SENSOR_DATA-STRUCTURE  (instance)                  000260
+C    TABLE           ARRAY(3,4) INTEGER                                 000270
+C    VELOCITY        VECTOR(3)                                          000280
+C                                                                       000290
+C  Statements in NAVCOMP (SRNs in columns 73-78):                       000300
+C    S0004  DECLARE ...;            (non-executable)                    000310
+C    S0001  ALTITUDE = 35000.0;    (assignment)                         000320
+C    S0002  BURN: COUNT = COUNT+1; (labeled assignment)                 000330
+C    S0003  IF ARMED THEN ...;     (IF statement)                       000340
+C                                                                       000350
+C  HAL/S STRUCTURE notes                                                000360
+C  ---------------------                                                000370
+C  STRUCTURE templates occupy their own blocks in the SDF (blk_class=1, 000380
+C  PROCEDURE).  The template header symbol has sym_class=7 (TEMPLATE)   000390
+C  and sym_type=10 (STRUCTURE); its ROWS field is self-referential      000400
+C  (holds the symbol's own symbol number).  An instance variable has    000410
+C  sym_class=1 (VARIABLE) and sym_type=10 (STRUCTURE); its ROWS field   000420
+C  holds the template header's symbol number.                           000430
+C ======================================================================000440
+                                                                        000450
+C --- STRUCTURE templates (defined inside NAVCOMP) ---                  000460
+                                                                        000470
+   NAVCOMP:                                                             000480
+   PROGRAM;                                                             000490
+                                                                        000500
+   STRUCTURE SENSOR_DATA:                                               000510
+      1 ALT_READING  SCALAR,                                            000520
+      1 STATUS_CODE  INTEGER,                                           000530
+      1 VEL_READING  VECTOR(3);                                         000540
+                                                                        000550
+   STRUCTURE EXT_SENSOR COPY SENSOR_DATA:                               000560
+      1 RANGE_KM     SCALAR;                                            000570
+                                                                        000580
+   DECLARE                                                              S0004 
+      ALTITUDE        SCALAR        INITIAL(35000.0),                   000600
+      ALT_PTR         NAME          SCALAR,                             000610
       ARMED           BOOLEAN       INITIAL(FALSE),                     000620
       BITS            BIT(16)       INITIAL(BIN'0000000000000001'),     000630
       COUNT           INTEGER       INITIAL(0),                         000640
@@ -73,17 +73,20 @@ C ======================================================================000500
       TABLE           ARRAY(3, 4)   INTEGER,                            000730
       VELOCITY        VECTOR(3)     INITIAL(100.0, 0.0, -50.0);         000740
                                                                         000750
-C ----------------------------------------------------------------------000760
-C  Executable statements                                                000770
-C ----------------------------------------------------------------------000780
+C --- Executable statements ---                                         000760
+                                                                        000770
+   ALTITUDE = 35000.0;                                                  S0001 
                                                                         000790
-   ALTITUDE = 35000.0;                /* S0001 */                       000800
-                                                                        000810
-   BURN:                                                                000820
-   COUNT = COUNT + 1;                 /* S0002 (labeled) */             000830
-                                                                        000840
-   IF ARMED                           /* S0003 */                       000850
-      THEN ALTITUDE = ALTITUDE                                          000860
-                    + VELOCITY$(1);                                     000870
-                                                                        000880
-   CLOSE NAVCOMP;                                                       000890
+   BURN:                                                                S0002 
+   COUNT = COUNT + 1;                                                   000810
+                                                                        000820
+   IF ARMED                                                             S0003 
+      THEN ALTITUDE = ALTITUDE + VELOCITY$(1);                          000840
+                                                                        000850
+   CLOSE NAVCOMP;                                                       000860
+                                                                        000870
+C --- BURN_TASK: TASK block ---                                         000880
+                                                                        000890
+   BURN_TASK: TASK;                                                     000900
+   DECLARE THRUST_LEVEL SCALAR;                                         000910
+   CLOSE BURN_TASK;                                                     000920

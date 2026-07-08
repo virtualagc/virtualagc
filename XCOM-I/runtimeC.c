@@ -63,6 +63,9 @@
  *                              and 0xBD respectively.  See the discussion at
  *                              https://github.com/ColanderCombo/nsts-sim-gpc/issues/18.
  *                              Added `sdfFilename`.
+ *              2026-07-05 RSB  Now allow tabs in source code to respond properly
+ *                              to tab stops at equal intervals, default 8,
+ *                              adjustable via --tabs=N.
  *
  *
  * The functions herein are documented in runtimeC.h.
@@ -891,6 +894,7 @@ openCommonOutFile(char *filename)
 #ifdef ALLOW_PRETTY_BNF
 int wantPrettyBNF = 0;
 #endif
+int tabSize = 8;
 int __attribute__ ((no_instrument_function))
 parseCommandLine(int argc, char **argv)
 {
@@ -931,6 +935,8 @@ parseCommandLine(int argc, char **argv)
 #endif
       else if (1 == sscanf(argv[i], "--watch=%d", &j))
         watchpoint = j;
+      else if (1 == sscanf(argv[i], "--tabs=%d", &j))
+	tabSize = j;
       else if (1 == sscanf(argv[i], "--debug=%X", &j))
 	debugX = j;
       else if (!strncmp(argv[i], "--sdf=", 6))
@@ -1193,7 +1199,9 @@ parseCommandLine(int argc, char **argv)
           printf("              Files (SDF).  By default, there is no file\n");
           printf("              defined, and no SDF's are read.  When a file is\n");
           printf("              is used, it is in the so-called 'flat-file' format\n");
-          printf("              defined by the port of SDFPKG to C/Python.");
+          printf("              defined by the port of SDFPKG to C/Python.\n");
+          printf("--tabs=N      (Default 8.)  Convert tabs in HAL/S source\n");
+          printf("              to spaces, with tab stops every N columns.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
           printf("              (Not presently functional in Windows).\n");
           printf("--trace-inlines If available, trace execution of patched\n");
@@ -2195,6 +2203,27 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
   fflush(fp);
 }
 
+// Convert tabs in string `s` to spaces, storing the result in `sss`,
+// which must have been previously allocated.
+void detab(int tabSize, char *s, char *sss) {
+    int col = 0;
+    char *d = sss;
+    while (*s) {
+        if (*s == '\t') {
+            int spaces = tabSize - (col % tabSize);
+            while (spaces--) {
+                *d++ = ' ';
+                col++;
+            }
+            s++;
+        } else {
+            *d++ = *s++;
+            col++;
+        }
+    }
+    *d = '\0';
+}
+
 #define MAX_INPUTS 128
 //sbuf_t lastInput0 = "";
 descriptor_t *
@@ -2254,11 +2283,20 @@ INPUT(uint32_t lun) {
           *ss = '~';
           memmove(ss+1, ss+2, strlen(ss+2) + 1);
         }
-      // Convert all tab characters to single spaces.  Yes ... the user
-      // probably expected them to be something like 1-8 spaces, but I'm
-      // afraid to do that.
-      while (NULL != (ss = strstr(s, "\t")))
-	*ss = ' ';
+      if (lun != 0)
+	{
+	  // Convert all tab characters to single spaces.  Yes ... the user
+	  // probably expected them to be something like 1-8 spaces, but I'm
+	  // afraid to do that.
+	  while (NULL != (ss = strstr(s, "\t")))
+	    *ss = ' ';
+	}
+      else
+	{
+	  char raw[1024];
+	  detab(tabSize, s, raw); // tabSize determined by --tabs=N, default 8.
+	  strcpy(s, raw);
+	}
       // Since input is expected to be arriving on punch-cards, we want to
       // pad all input lines to be at least 80 characters.  This isn't
       // normally significant, but for a legacy compiler like XCOM.xpl or
@@ -2896,6 +2934,9 @@ MONITOR13(descriptor_t *namep) {
 #ifdef HALSFC_PASS3
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
+  static char memberName[32];
+  static FILE *fp = NULL;
+  static int count4 = 0;
   extern char sdfName[32];
   void MONITOR14_0(uint32_t lastPage);
   void MONITOR14_4(uint32_t locAddr);
@@ -2907,6 +2948,9 @@ MONITOR14(uint32_t n, uint32_t a) {
     }
   else if (n == 4)
     {
+      if (count4 > 0)
+	fwrite(&memory[a], 1680, 1, fp);
+      count4++;
       MONITOR14_4(a);
       return (0);
     }
@@ -2917,6 +2961,18 @@ MONITOR14(uint32_t n, uint32_t a) {
       strcpy(sdfName, "SDFLIB");
       name = getCHARACTERd(a);
       cname = descriptorToAscii(name);
+      if (fp == NULL)
+	{
+	  sprintf(memberName, "%s.rawsdf", cname);
+	  fp = fopen(memberName, "wb");
+	}
+      else
+	{
+	  fflush(fp);
+	  fclose(fp);
+	  fp = NULL;
+	  count4 = 0;
+	}
       return (MONITOR14_8(cname));
     }
   else

@@ -708,11 +708,11 @@ def t33_name_roundtrip():
 
 
 def t34_equate_ext_roundtrip():
-    """T34: write an EQUATE_EXT symbol; read back class=2 and type=8."""
+    """T34: write an equate-external symbol (LABEL class, IORS type); read back class=2, type=8."""
     print('T34: EQUATE_EXT -- write and read back')
     from sdfpkg import (
         SdfWriter, WBlock, WSymbol,
-        BCLASS_PROGRAM, SCLASS_VARIABLE, SCLASS_EQUATE_EXT, STYPE_EQUATE_EXT,
+        BCLASS_PROGRAM, SCLASS_VARIABLE, SCLASS_LABEL, STYPE_IORS,
         STYPE_SCALAR,
     )
     import tempfile, os
@@ -723,7 +723,7 @@ def t34_equate_ext_roundtrip():
         b1 = w.add_block(WBlock(csect_name='ECS', blk_name='EQPROG',
                                 blk_class=BCLASS_PROGRAM, blk_id=1))
         w.add_symbol(WSymbol(blk_no=b1, symb_name='EXT_CONST',
-                             sym_class=SCLASS_EQUATE_EXT, sym_type=STYPE_EQUATE_EXT))
+                             sym_class=SCLASS_LABEL, sym_type=STYPE_IORS))
         w.add_symbol(WSymbol(blk_no=b1, symb_name='LOCAL_VAR',
                              sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
         w.commit()
@@ -733,8 +733,8 @@ def t34_equate_ext_roundtrip():
         # After sort: EXT_CONST(1), LOCAL_VAR(2)
         e = ctx.find_symbol_by_number(1)
         CHECK('T34: EXT_CONST name',              e.symb_name == 'EXT_CONST')
-        CHECK('T34: EXT_CONST class=EQUATE_EXT',  e.sym_class == SCLASS_EQUATE_EXT)
-        CHECK('T34: EXT_CONST type=EQUATE_EXT',   e.sym_type  == STYPE_EQUATE_EXT)
+        CHECK('T34: EXT_CONST class=LABEL(2)',     e.sym_class == SCLASS_LABEL)
+        CHECK('T34: EXT_CONST type=IORS(8)',       e.sym_type  == STYPE_IORS)
         CHECK('T34: EXT_CONST rows=0',            e.rows == 0)
         CHECK('T34: EXT_CONST copy_blk_no=0',     e.copy_blk_no == 0)
 
@@ -746,11 +746,11 @@ def t34_equate_ext_roundtrip():
 
 
 def t35_task_block_roundtrip():
-    """T35: write a TASK block with TASK entry-point symbol; read back blk_class and sym_type."""
+    """T35: write a TASK block with TASK_LABEL entry-point symbol; read back blk_class and sym_type."""
     print('T35: TASK block -- write and read back')
     from sdfpkg import (
         SdfWriter, WBlock, WSymbol,
-        BCLASS_PROGRAM, BCLASS_TASK, SCLASS_VARIABLE, STYPE_SCALAR, STYPE_TASK,
+        BCLASS_PROGRAM, BCLASS_TASK, SCLASS_VARIABLE, STYPE_SCALAR, STYPE_TASK_LABEL,
     )
     import tempfile, os
     fd2, path2 = tempfile.mkstemp(suffix='.sdf')
@@ -763,7 +763,7 @@ def t35_task_block_roundtrip():
                                     blk_class=BCLASS_TASK, blk_id=2))
         # TASK entry-point symbol
         w.add_symbol(WSymbol(blk_no=b_task, symb_name='BURN_TASK',
-                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_TASK))
+                             sym_class=SCLASS_VARIABLE, sym_type=STYPE_TASK_LABEL))
         # TASK local variable
         w.add_symbol(WSymbol(blk_no=b_task, symb_name='THRUST_LEVEL',
                              sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
@@ -788,7 +788,7 @@ def t35_task_block_roundtrip():
         # BURN_TASK entry-point symbol (first in BURN_TASK block)
         ts = ctx.find_symbol_by_number(tb.fsymb_no)
         CHECK('T35: entry name=BURN_TASK',     ts.symb_name == 'BURN_TASK')
-        CHECK('T35: entry type=TASK',          ts.sym_type == STYPE_TASK)
+        CHECK('T35: entry type=TASK_LABEL',    ts.sym_type == STYPE_TASK_LABEL)
         CHECK('T35: entry class=VARIABLE',     ts.sym_class == SCLASS_VARIABLE)
 
         # THRUST_LEVEL is second in BURN_TASK block

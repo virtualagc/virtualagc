@@ -7,6 +7,7 @@
    History:     2023-10-28 RSB  Created just a stub, which at present will never
                                 be called.
                 2026-03-12 RSB  Imported `SAVE_LITERAL`.
+                2026-07-05 RSB  Changed `LIT_TOP` to `LIT_TOP()`.
     
     *** IMPORTANT NOTE ***
     
@@ -580,7 +581,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             else: 
                 SAVE_LITERAL(1, SDFPKG_LOC_ADDR,0,1)
             #MOD-DR109083
-            g.SYT_PTR(g.ID_LOC, -g.LIT_TOP)
+            g.SYT_PTR(g.ID_LOC, -g.LIT_TOP())
             LOCATE_SDF_PTR(TEMP_PTR)
         #END
         return;

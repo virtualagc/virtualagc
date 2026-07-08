@@ -17,14 +17,14 @@ COMPB: COMPOOL;
 CLOSE COMPB;
 
 After commit(), blocks sort alphabetically:
-  Block 1 = ASTRUCTURE (BCLASS_PROCEDURE=3, structure template)
-  Block 2 = COMPA or COMPB (BCLASS_COMPOOL=5)
+  Block 1 = ASTRUCTURE (BCLASS_PROCEDURE=1, structure template)
+  Block 2 = COMPA or COMPB (BCLASS_COMPOOL=3)
 
 Symbol ordering within ASTRUCTURE block (alphabetical):
-  1: ASTRUCTURE  (template header, SCLASS_TEMPLATE, rows=own symb_no=1)
+  1: ASTRUCTURE  (template header, SCLASS_TEMPLATE=7, rows=own symb_no=1)
   2: SC
   3: SI
-  4: SL
+  4: SL          (BIT(1), i.e. BOOLEAN)
   5: SS
 
 Symbol ordering within COMPA block (alphabetical):
@@ -54,12 +54,12 @@ from sdfpkg import (
     SdfContext, flat_info,
     BCLASS_PROCEDURE, BCLASS_COMPOOL,
     SCLASS_VARIABLE, SCLASS_TEMPLATE,
-    STYPE_SCALAR, STYPE_INTEGER, STYPE_BOOLEAN, STYPE_CHARACTER,
+    STYPE_SCALAR, STYPE_INTEGER, STYPE_CHARACTER,
     STYPE_BIT, STYPE_STRUCTURE,
 )
 
 SYM_TYPE_NAME = {
-    STYPE_SCALAR: 'SCALAR', STYPE_INTEGER: 'INTEGER', STYPE_BOOLEAN: 'BOOLEAN',
+    STYPE_SCALAR: 'SCALAR', STYPE_INTEGER: 'INTEGER',
     STYPE_CHARACTER: 'CHARACTER', STYPE_BIT: 'BIT', STYPE_STRUCTURE: 'STRUCTURE',
 }
 BLK_CLASS_NAME = {BCLASS_PROCEDURE: 'STRUCTURE template', BCLASS_COMPOOL: 'COMPOOL'}
@@ -123,7 +123,7 @@ def make_compa():
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SI',
                          sym_class=SCLASS_VARIABLE, sym_type=STYPE_INTEGER))
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SL',
-                         sym_class=SCLASS_VARIABLE, sym_type=STYPE_BOOLEAN))
+                         sym_class=SCLASS_VARIABLE, sym_type=STYPE_BIT, rows=1))
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SS',
                          sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
 
@@ -169,7 +169,7 @@ def make_compb():
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SI',
                          sym_class=SCLASS_VARIABLE, sym_type=STYPE_INTEGER))
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SL',
-                         sym_class=SCLASS_VARIABLE, sym_type=STYPE_BOOLEAN))
+                         sym_class=SCLASS_VARIABLE, sym_type=STYPE_BIT, rows=1))
     w.add_symbol(WSymbol(blk_no=b_astruc, symb_name='SS',
                          sym_class=SCLASS_VARIABLE, sym_type=STYPE_SCALAR))
 

@@ -43,20 +43,28 @@ from sdfpkg import (
 # ---------------------------------------------------------------------------
 
 BLK_CLASS = {
-    1: 'PROGRAM',    2: 'FUNCTION',   3: 'PROCEDURE',
-    4: 'TASK',       5: 'COMPOOL',    6: 'CLOSE BLOCK',
+    1: 'PROCEDURE',  2: 'FUNCTION',   3: 'COMPOOL',
+    4: 'PROGRAM',    5: 'TASK',       6: 'UPDATE',
+    7: 'INLINE',
 }
 BLK_TYPE = {}   # no standard values documented; show numeric
 
 SYM_CLASS = {
-    1: 'variable',    2: 'equate-ext',  3: 'template',
-    4: 'label',       6: 'compool',
+    1: 'variable',   2: 'label',      3: 'function',
+    5: 'repl-arg',   6: 'replace',    7: 'template',
+    8: 'tpl-label',  9: 'tpl-func',
 }
 SYM_TYPE = {
-    1: 'SCALAR',      2: 'INTEGER',     3: 'BOOLEAN',
-    4: 'CHARACTER',   5: 'BIT',         6: 'VECTOR',
-    7: 'MATRIX',      8: 'equate-ext',  9: 'EVENT',
-    10: 'STRUCTURE',  11: 'TASK',
+    1:    'BIT',           2:    'CHARACTER',    3:    'MATRIX',
+    4:    'VECTOR',        5:    'SCALAR',        6:    'INTEGER',
+    8:    'IORS',          9:    'EVENT',
+    10:   'STRUCTURE',     11:   'ANY',
+    0x3E: 'TEMPL_NAME',
+    0x42: 'STMT_LABEL',    0x43: 'UNSPEC_LABEL',
+    0x45: 'IND_CALL_LAB',  0x46: 'CALLED_LABEL',
+    0x47: 'PROC_LABEL',    0x48: 'TASK_LABEL',
+    0x49: 'PROG_LABEL',    0x4A: 'COMPOOL_LABEL',
+    0x4B: 'EQUATE_LABEL',
 }
 STMT_TYPE = {
     1:  'ASSIGNMENT',   2:  'IF',        3:  'DO',
@@ -74,28 +82,18 @@ def _sym_class_str(v):
 def _sym_type_str(sym):
     base = SYM_TYPE.get(sym.sym_type, f'type={sym.sym_type}')
     t = sym.sym_type
-    c = sym.sym_class
-    # NAME variable: sym_class=4 (LABEL), sym_type = type of referent
-    if c == 4:
-        referent = SYM_TYPE.get(t, f'type={t}')
-        return f'NAME({referent})'
-    # EQUATE_EXT: class=2, type=8
-    if c == 2 and t == 8:
-        return 'EQUATE EXT'
-    if t == 6:   # VECTOR
+    if t == 4:   # VECTOR
         return f'VECTOR({sym.rows})' if sym.rows else 'VECTOR'
-    if t == 7:   # MATRIX
+    if t == 3:   # MATRIX
         if sym.rows and sym.columns:
             return f'MATRIX({sym.rows},{sym.columns})'
         return 'MATRIX'
-    if t == 4:   # CHARACTER
+    if t == 2:   # CHARACTER
         return f'CHARACTER({sym.columns})' if sym.columns else 'CHARACTER'
-    if t == 5:   # BIT
+    if t == 1:   # BIT
         return f'BIT({sym.rows})' if sym.rows else 'BIT'
     if t == 9:   # EVENT
         return 'EVENT'
-    if t == 11:  # TASK
-        return 'TASK'
     return base
 
 def _stmt_type_str(v):

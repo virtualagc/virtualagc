@@ -8,6 +8,8 @@ Purpose:    This is part of the port of the original XPL source code for
             include all program comments that were present in the original code.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-27 RSB  Ported.
+            2026-07-05 RSB  Corrected bug in which an empty literal table could
+                            be printed.
 '''
 
 from xplBuiltins import *
@@ -62,7 +64,7 @@ def LIT_DUMP():
     T = '  CHAR   ARITH    BIT    '
     ZEROS = '00000000'
        
-    if g.LIT_TOP == 0:
+    if g.LIT_TOP() == 0:
         return;
     OUTPUT(1, '0L I T E R A L   T A B L E   D U M P:');
     OUTPUT(1, '0 LOC  TYPE          LITERAL');
