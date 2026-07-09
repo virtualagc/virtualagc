@@ -547,7 +547,7 @@ void MONITOR14_4(uint32_t locAddr)
  * If called before MONITOR14_0 or before the first MONITOR14_4 in this
  * cycle, the call is silently ignored and 0 is returned.
  */
-uint32_t MONITOR14_8(const char *memberName)
+uint32_t MONITOR14_8(char *filename, const char *memberName)
 {
     /* Ignore if the sequence MONITOR14_0 → MONITOR14_4 → ... hasn't run */
     if (!m14_ready || !m14_scratch_done) {
@@ -559,8 +559,8 @@ uint32_t MONITOR14_8(const char *memberName)
     m14_scratch_done = false;
 
     /* Build the SDF flat-file path: sdfName + ".sdf" */
-    char filename[sizeof(sdfName) + 8];
-    snprintf(filename, sizeof(filename), "%s.sdf", sdfName);
+    //char filename[sizeof(sdfName) + 8];
+    //snprintf(filename, sizeof(filename), "%s.sdf", sdfName);
 
     /* Encode the member name as an 8-char space-padded key */
     char name8[NAME_LEN];

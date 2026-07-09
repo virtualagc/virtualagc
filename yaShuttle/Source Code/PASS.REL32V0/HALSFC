@@ -92,12 +92,6 @@ The available OPTIONS are:
     --rsb-trace=N    Activate my production trace, if available.
     --debug-literals Show extra messages in HAL_S_FC.py report for literals.
     --verbose        Show the command lines for HALSFC-xxx and HAL_S_FC.py.
-    --pass3          By default, compilation stops after object-file generation
-                     by PASS2.  With --pass3, it experimentally continues and
-                     attempts to run PASS3 as well, in order to add or modify
-                     a member in the Simulation Data File (SDF).
-    --pass4          And similarly for PASS4.  Requires --pass3.  But this is
-                     just a placeholder, not really implemented, so don't try it!
     
 '''
 
@@ -119,8 +113,6 @@ verbose = False
 debugLiterals = ""
 clean = False
 archive = False
-pass3 = False
-pass4 = False
 if isWindows:
     ext = ".exe"
 for parm in sys.argv[1:]:
@@ -159,10 +151,6 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
-    elif parm == "--pass3":
-        pass3 = True
-    elif parm == "--pass4":
-        pass4 = True
     elif not parm.startswith("-"):
         if halsFile != None:
             print("Multiple HAL/S files specified")
@@ -197,6 +185,8 @@ if objectFilename == None:
         objectFilename = "cards"
     else:
         objectFilename = "cards.bin"
+pass3 = "NOTABLES" not in parmString
+pass4 = False #pass3
 
 now = datetime.now()
 now = now.strftime("%Y-%m-%d %H-%M-%S")
@@ -222,9 +212,9 @@ filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz",
                  "auxp.rpt", "flo.rpt", "COMMON4.out.bin.gz", "litfile4.bin",
                  "COMMON3.out"]
 filesReallyPreserve = ["TEMPLIB.json", "TEMPLIBB.json", 
-                       "INCLIB.json", "INCLIBB.json", "SDFLIB.sdf"]
+                       "INCLIB.json", "INCLIBB.json"]
 dirsReallyPreserve = ["TEMPLIB", "TEMPLIBB", 
-                       "INCLIB", "INCLIBB"]
+                       "INCLIB", "INCLIBB", "SDFLIB"]
 if clean:
     filesLocal += filesPreserve
     filesPreserve = []
@@ -547,14 +537,11 @@ shutil.copy("litfile.bin", "litfile4.bin")
 if pass3:
     # Run PASS3.  Note that while SDF generation in principle would use
     # --raf=B,1680,5,FILENAME (and probably --raf=B,3360,6,vmem.bin),
-    # in practice the port of SDFPKG.ASM to C actually bypasses the XPL
-    # runtime library's file conventions and VMEM entirely, and uses file 
-    # operations directly to its own "flatfile" format.
+    # but our implementation bypasses all of that.
     command = '''%s 
      --pdsi=5,"%s" 
      --commoni=COMMON4%s 
      --commono=COMMON5%s 
-     --sdf=SDFLIB.sdf 
      --raf=B,1560,2,litfile.bin 
      --raf=B,3360,6,vmem.bin 
      %s
@@ -563,6 +550,7 @@ if pass3:
     if verbose:
         print(command)
     exitCode = os.system(command)
+    os.system("echo >>pass3.rpt") # Doesn't end with a newline, so add one.
     if exitCode != 0:
         errorExit("Aborted after PASS3")
 

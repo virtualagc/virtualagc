@@ -150,13 +150,13 @@ CARDS := --ddo=3,cards2.bin,E
 endif
 
 # For including SDFPKG in PASS3.
-override export EXTRALIBS += -DHALSFC_PASS3 -L../../${SDFPKG} -lsdfpkg
+#override export EXTRALIBS += -DHALSFC_PASS3 -L../../${SDFPKG} -lsdfpkg
 
 all:	$(TARGETS) $(TARGETSB)
 
 .PHONY: $(SDFPKG)
 $(SDFPKG):
-	make -C $(SDFPKG)
+	#make -C $(SDFPKG)
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: regression

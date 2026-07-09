@@ -17,6 +17,6 @@ Regarding the tests being performed, the program comments often aren't very fort
   * DR109430.xpl:  Seems to be a test related to a documentation change related to problems when multiple SDF's are open simultaneously.  Alas, there is no available information about the nature of the problem.
   * MON22.xpl, MON22A.xpl, MON22B.xpl, MON22C.xpl:  General tests of `MONITOR(22)`, which is the wrapper function used in XPL/I for calling SDFPKG.
   * SDF.xpl:  TBD.
-  * SDF40<i>NN</i>.xpl:  SDFPKG abends on various conditions, with abend codes 4001 through 4023, so the test with names like SDF40<i>NN</i>.xpl seem to be tests intended to reproduce or avoid reproducing those error conditions.
+  * SDF40<i>NN</i>.xpl:  SDFPKG abends on various conditions, with abend codes 4001 through 4023, so the tests with names like SDF40<i>NN</i>.xpl seem to be tests intended to reproduce or avoid reproducing those error conditions.
   * SDFPKG.xpl:  TBD
 

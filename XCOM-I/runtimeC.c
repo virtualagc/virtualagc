@@ -66,7 +66,8 @@
  *              2026-07-05 RSB  Now allow tabs in source code to respond properly
  *                              to tab stops at equal intervals, default 8,
  *                              adjustable via --tabs=N.
- *
+ *              2026-07-09 RSB  Change `sdfFilename` to `sdfDirnameIn` and
+ *                              `sdfDirnameOut`.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -162,6 +163,16 @@
 //#define SET_BINARY_MODE(file)
 #endif
 
+#include <errno.h>
+
+#ifdef _WIN32
+    #include <direct.h>
+    #define make_dir(path) _mkdir(path)
+#else
+    // 0777 gives read, write, and execute permissions to everyone (modified by umask)
+    #define make_dir(path) mkdir(path, 0777)
+#endif
+
 // The idea of `productionTrace()` is that it can be conditionally inserted at
 // entry to `SYNTHESIZE()` and can be used to print out any useful messages.
 // If there's an identically-matching function in HAL_S_FC.py's SYNTHESIZE.py,
@@ -244,7 +255,8 @@ void writeZipfile(gzFile dest) {
 // Extern'd in runtimeC.h or configuration.h:
 int debugX = 0;
 int outUTF8 = 0;
-char *sdfFilename = NULL;
+char *sdfDirnameIn = NULL;
+char *sdfDirnameOut = "SDFLIB";
 DCB_t DCB_INS[DCB_MAX];
 DCB_t DCB_OUTS[DCB_MAX];
 FILE *COMMON_OUT = NULL;
@@ -939,8 +951,10 @@ parseCommandLine(int argc, char **argv)
 	tabSize = j;
       else if (1 == sscanf(argv[i], "--debug=%X", &j))
 	debugX = j;
-      else if (!strncmp(argv[i], "--sdf=", 6))
-	sdfFilename = &argv[i][6];
+      else if (!strncmp(argv[i], "--sdfi=", 6))
+	sdfDirnameIn = &argv[i][7];
+      else if (!strncmp(argv[i], "--sdfo=", 6))
+	sdfDirnameOut = &argv[i][7];
 #ifdef ALLOW_PRETTY_BNF
       else if (!strcmp(argv[i], "--pretty-bnf"))
 	wantPrettyBNF = 1;
@@ -1195,11 +1209,13 @@ parseCommandLine(int argc, char **argv)
           printf("              hence is disabled for standard XPL programs.\n");
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
-          printf("--sdf=F       Name of a file used for storing Simulation Data\n");
-          printf("              Files (SDF).  By default, there is no file\n");
-          printf("              defined, and no SDF's are read.  When a file is\n");
-          printf("              is used, it is in the so-called 'flat-file' format\n");
-          printf("              defined by the port of SDFPKG to C/Python.\n");
+          printf("--sdfi=D      Name of a directory used for reading Simulation Data\n");
+          printf("              Files (SDF).  By default, there is no directory\n");
+          printf("              defined, and no SDF's are read.  Customarily,\n");
+          printf("              --sdfi=SDFLIB, but any directory can be used.\n");
+          printf("--sdfo=D      Name of a directory used by PASS3 for writing\n");
+          printf("              Simulation Data Files (SDF).  Defaults to\n");
+          printf("              --sdfo=SDFLIB, but any directory can be used.\n");
           printf("--tabs=N      (Default 8.)  Convert tabs in HAL/S source\n");
           printf("              to spaces, with tab stops every N columns.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
@@ -2931,49 +2947,107 @@ MONITOR13(descriptor_t *namep) {
   return WHERE_MONITOR_13;
 }
 
-#ifdef HALSFC_PASS3
+#if 1 // defined(HALSFC_PASS3)
+#define OLD_SDF_BUFFER_MAXPAGES 250
+#define PAGE_SIZE 1680
+int oldSdfBufferNumPages = 0;
+uint8_t oldSdfBuffer[OLD_SDF_BUFFER_MAXPAGES][PAGE_SIZE];
+uint32_t oldSdfBufferMismatch = 0;
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
-  static char memberName[32];
+  static char memberName[64];
   static FILE *fp = NULL;
-  static int count4 = 0;
-  extern char sdfName[32];
-  void MONITOR14_0(uint32_t lastPage);
-  void MONITOR14_4(uint32_t locAddr);
-  uint32_t MONITOR14_8(const char *memberName);
+  static int count4 = -1;
+  static int firstMismatch = -1, lastMismatch = -1;
+  //void MONITOR14_0(uint32_t lastPage);
+  //void MONITOR14_4(uint32_t locAddr);
+  //uint32_t MONITOR14_8(const char *memberName);
   if (n == 0)
     {
-      MONITOR14_0(a);
+      //MONITOR14_0(a);
       return (0);
     }
   else if (n == 4)
     {
-      if (count4 > 0)
-	fwrite(&memory[a], 1680, 1, fp);
+      if (count4 >= 0)
+	{
+	  // We want to write out a page to the SDF.  However, we have to
+	  // eventually be in the position of saying whether or not the SDF
+	  // has changed or not.  Unfortunately for our purposes, the SDF
+	  // contains a date/time-stamp for its creation, so these will obviously
+	  // always differ, but don't matter.  Fortunately they're in 8
+	  // consecutive bytes, so although we don't know exactly where they
+	  // are without parsing the file, we can verify whether or not all
+	  // mismatches are within 8 bytes of each other.  This check is
+	  // literally the hardest thing that MONITOR(14) has to do.
+	  // ***NOTE**:  The messages in PASS3's output report are misleading
+	  // in this regard.  If 1 is returned (meaning that the SDF has changed)
+	  // the message is that the SDF was "replaced", which is fine.  But
+	  // if 0 is returned (meaning that the SDF is new or unchanged) the
+	  // message is that the SDF was "created".  It would be nicer if it
+	  // could say that the SDF was "unchanged" or something similar, but
+	  // it can't, so don't be confused by seeing that it was "created".
+	  // (Actually, it's true that it was newly created, because it will
+	  // still have the newer timestamp.
+	  fwrite(&memory[a], PAGE_SIZE, 1, fp);
+	  if (oldSdfBufferNumPages > 0)
+	    {
+	      if (count4 >= oldSdfBufferNumPages)
+		oldSdfBufferMismatch = 1;
+	      else if (memcmp(&memory[a], oldSdfBuffer[count4], PAGE_SIZE) != 0)
+		{
+		  int i;
+		  for (i = 0; i < PAGE_SIZE; i++)
+		    if (memory[a + i] != oldSdfBuffer[count4][i])
+		      {
+			if (firstMismatch == -1)
+			  firstMismatch = a + i;
+			lastMismatch = a + i;
+		      }
+		  if (lastMismatch - firstMismatch >= 8)
+		    oldSdfBufferMismatch = 1;
+		}
+	    }
+	}
       count4++;
-      MONITOR14_4(a);
+      //MONITOR14_4(a);
       return (0);
     }
   else if (n == 8)
     {
       descriptor_t *name;
       char *cname;
-      strcpy(sdfName, "SDFLIB");
       name = getCHARACTERd(a);
       cname = descriptorToAscii(name);
       if (fp == NULL)
 	{
-	  sprintf(memberName, "%s.rawsdf", cname);
+	  firstMismatch = -1;
+	  lastMismatch = -1;
+	  oldSdfBufferNumPages = 0;
+	  oldSdfBufferMismatch = 0;
+	  make_dir(sdfDirnameOut); // Fail silently if dir exists.
+	  sprintf(memberName, "%s/%s.sdf", sdfDirnameOut, cname);
+	  fp = fopen(memberName, "rb");
+	  if (fp != NULL)
+	    {
+	      while (oldSdfBufferNumPages < OLD_SDF_BUFFER_MAXPAGES &&
+		     fread(oldSdfBuffer[oldSdfBufferNumPages], PAGE_SIZE, 1, fp) == 1)
+		  oldSdfBufferNumPages += 1;
+	      fclose(fp);
+	    }
 	  fp = fopen(memberName, "wb");
 	}
       else
 	{
+	  if (count4 < oldSdfBufferNumPages)
+	    oldSdfBufferMismatch = 1;
 	  fflush(fp);
 	  fclose(fp);
 	  fp = NULL;
-	  count4 = 0;
+	  count4 = -1;
 	}
-      return (MONITOR14_8(cname));
+      //return (MONITOR14_8(cname));
+      return oldSdfBufferMismatch;
     }
   else
     {
