@@ -3,7 +3,7 @@
 License:    Declared to be in the Public Domain in the U.S. by its author
             (Ron Burkey), and may be used, modified, or distributed freely for
             any purpose whatever.
-Filename:   rawSdfDumper.py
+Filename:   sdfParser.py
 Purpose:    Parses a "raw" SDF file as output by HALSFC-PASS3, closely 
             following the description of the SDF format in document USA001556, 
             "HAL/S-FC SDL Interface Control Document".
