@@ -68,6 +68,8 @@
  *                              adjustable via --tabs=N.
  *              2026-07-09 RSB  Change `sdfFilename` to `sdfDirnameIn` and
  *                              `sdfDirnameOut`.
+ *              2026-08-03 DAS  use runtime record widths set by SET_RECORD_WIDTH
+ *                              on RECORD DYNAMIC tables
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -3384,7 +3386,7 @@ rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
           return foundRawADDR->address;
       }
       address = getFIXED(foundRawADDR->address);       // -> beginning of alloc.
-      address += bIndex * foundRawADDR->recordSize;    // -> beginning of record.
+      address += bIndex * COREHALFWORD(foundRawADDR->address + 4); // -> beginning of record.
       if (fVar == NULL || *fVar == 0 || !strcmp(fVar, "(blank)")) // No field specified.
         return address;
       // Look for the specific field in the record (and the specific

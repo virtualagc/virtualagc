@@ -14,6 +14,8 @@ Mods:       2024-03-27 RSB  Began.
                             code upon error.
             2026-02-19 RSB  Switched from left-to-right processing order in
                             in multipl assignments to right-to-left.
+            2026-08-03 DAS  use runtime record widths set by SET_RECORD_WIDTH
+                            on RECORD DYNAMIC tables
 '''
 
 import sys
@@ -1213,6 +1215,29 @@ def getIdentifier(token):
         return token["builtin"]
     errxit("Token is neither an `identifier` nor a `builtin`: %s", str(token))
 
+# For a `BASED ... RECORD DYNAMIC` variable, the row width can be changed at
+# runtime by SET_RECORD_WIDTH (HALINCL/SPACELIB.xpl:70) so the stride used
+# for indexing records must be read at runtime rather than frozen at
+# translation time. Specifically, SPACELIB.xpl defines:
+#   _DOPE_WIDTH(1) _AS 'COREHALFWORD(%1%+4)',
+#   SET_RECORD_WIDTH(2) _AS  '_DOPE_WIDTH(ADDR(%1%))=%2%'
+# So to get the record width:
+#   COREHALFWORD(ADDR(x)+4)
+#
+# (ex: OPT.PROCS/INITIALI.xpl:123 sets PAR_SYM's row width to 2*(SYT_SIZE+1)
+#  via SET_RECORD_WIDTH; using the static one-element stride made all
+#  rows alias, destroying the CSE catalog on every PUSH_STACK.)
+#
+# Returns the C source for the stride, or None if the variable is not a
+# dynamic-width record (in which case the translation-time width is correct).
+#
+def dynamicRowStride(attributes):
+    if attributes != None and "BASED" in attributes and \
+            "RECORD" in attributes and "DYNAMIC" in attributes:
+        return "COREHALFWORD(%s + 4)" % \
+               memoryMap[attributes["address"]]["superMangled"]
+    return None
+
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
 # expression.  Returns a pair:
@@ -1305,8 +1330,11 @@ def generateExpression(scope, expression):
         else:
             errxit("Field %s.%s not subscripted properly" % \
                    (baseName, fieldName))
+        rowStride = dynamicRowStride(baseAttributes)
+        if rowStride == None:
+            rowStride = "%d" % baseAttributes["recordSize"]
         sourceAddress = "getFIXED(%s)" % memoryMap[baseAttributes['address']]["superMangled"] + \
-                        " + %d * (%s)" % (baseAttributes["recordSize"],
+                        " + %s * (%s)" % (rowStride,
                                           sourceb) + \
                         " + %d + " % fieldAttributes["offset"] + \
                         "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
@@ -1396,6 +1424,9 @@ def generateExpression(scope, expression):
                             entryWidth = 2
                         else:
                             entryWidth = 4
+                    entryWidthSrc = dynamicRowStride(attributes)
+                    if entryWidthSrc == None:
+                        entryWidthSrc = "%d" % entryWidth
                     function = None
                     if "FIXED" in attributes:
                         tipe = "FIXED"
@@ -1413,7 +1444,7 @@ def generateExpression(scope, expression):
                         source = function + baseAddress + ")"
                     else:
                         source = function + baseAddress + \
-                                 " + %d*" % entryWidth + \
+                                 " + %s*" % entryWidthSrc + \
                                  index + ")"
                     return tipe, source
             else:
@@ -1902,9 +1933,12 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 else:
                     errxit("Field %s.%s not subscripted properly" % \
                            (baseName, fieldName))
+                rowStride = dynamicRowStride(baseAttributes)
+                if rowStride == None:
+                    rowStride = "%d" % baseAttributes["recordSize"]
                 try:
                     sourceAddress = "getFIXED(%s)" % memoryMap[baseAttributes['address']]["superMangled"] + \
-                                    " + %d * (%s)" % (baseAttributes["recordSize"],
+                                    " + %s * (%s)" % (rowStride,
                                                       sourceb) + \
                                     " + %d + " % fieldAttributes["offset"] + \
                                     "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
@@ -1969,6 +2003,9 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         entryWidth = 2
                     else:
                         entryWidth = 4
+                entryWidthSrc = dynamicRowStride(attributes)
+                if entryWidthSrc == None:
+                    entryWidthSrc = "%d" % entryWidth
                 if len(children) == 1: # Compute index.
                     tipeL, sourceL = generateExpression(scope, children[0])
                     if tipeL != "FIXED":
@@ -1979,7 +2016,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         print(indent + "putFIXED(" + baseAddress + \
-                              "+ %d*(" % entryWidth + \
+                              "+ %s*(" % entryWidthSrc + \
                               sourceL + "), numberRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -1991,7 +2028,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     elif len(children) == 1:
                         print(indent + "putBIT(%d, " % attributes["BIT"] + \
                               baseAddress + \
-                              "+ %d*(" % entryWidth + \
+                              "+ %s*(" % entryWidthSrc + \
                               sourceL + "), bitRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -2001,7 +2038,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
                         print(indent + "putCHARACTER(" + baseAddress + \
-                              "+ %d*(" % entryWidth + \
+                              "+ %s*(" % entryWidthSrc + \
                               sourceL + "), stringRHS);") 
                     else:
                         errxit("Too many subscripts")
