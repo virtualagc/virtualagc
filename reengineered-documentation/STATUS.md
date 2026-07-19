@@ -481,11 +481,13 @@ exactly**), IINT (0x8C1, class 8 — see [IINT](class-8/IINT.md)).
 
 ## Class 7 — Conditional and Comparison
 
-**All 27 known opcodes now documented** (see `class-7/`) — High confidence
-for opcode, behavior drawn from [MSC-01847].
+**All 28 known opcodes now documented** (see `class-7/`) — High confidence
+for opcode, behavior drawn from [MSC-01847] except [BTRU](class-7/BTRU.md)
+(a HAL/S-only addition, no HAL-1971 analog — see below the table).
 
 | HAL/S opcode | Mnemonic | HAL-1971 opcode | Notes |
 |---|---|---|---|
+| 0x720 | BTRU | — (new) | Bit-is-true test (universal bit-string/`EVENT`-in-conditional-context mechanism) — see [BTRU](class-7/BTRU.md) |
 | 0x725 | BNEQ | 0x721 (differs) | bit string not equal |
 | 0x726 | BEQU | 0x722 (differs) | bit string equal |
 | 0x745 | CNEQ | 0x741 (differs) | character not equal |
@@ -514,10 +516,13 @@ for opcode, behavior drawn from [MSC-01847].
 | 0x7E3 | COR | 0x7E3 (match) | logical or |
 | 0x7E4 | CNOT | 0x7E4 (match) | logical not |
 
-All 27 opcodes now primary-source confirmed for HAL/S via [##DRIVER.xpl].
-[IR-60-5] A-111's claim that Class 7 spans 0x725 (BNEQ) to 0x7CA (ILT) is
-now **exactly** confirmed at both ends (previously only the upper bound
-matched when compared against HAL-1971's BNEQ). Interesting pattern:
+All 28 opcodes now primary-source confirmed for HAL/S via [##DRIVER.xpl].
+[IR-60-5] A-111's claim that Class 7 spans 0x725 (BNEQ) to 0x7CA (ILT)
+covers the HAL-1971-derived core exactly at both ends (previously only
+the upper bound matched when compared against HAL-1971's BNEQ);
+[BTRU](class-7/BTRU.md) at 0x720 sits just below that range and has no
+HAL-1971 counterpart, so it's not a discrepancy with the [IR-60-5] claim,
+just an addition outside its scope. Interesting pattern:
 bit/character/matrix/vector compares were renumbered between HAL-1971 and
 HAL/S, but scalar/integer/logical compares were not — no explanation
 found yet for why only those families were left alone.
@@ -614,13 +619,18 @@ address — a completely separate concept from READ/WRITE's sequential
 device numbers, confirmed at both the language level (§22.2) and the
 HALMAT level. Compiling `FILE(3, 7) = S1;` / `I1 = FILE(4, 8);` with
 `HALSFC --parms="LSTALL"` showed that **FILE does not route through
-XXST/XXAR/XXND at all** — the channel code and record address aren't
-carried as HALMAT operand words on FILE (0x022) at all; they're compiled
-directly into the object code as immediate constants passed to runtime
-routines `#QFILEOUT`/`#QFILEIN`. FILE's own two operands are a
-literal-table reference (exact meaning not fully pinned down — likely a
-type/format descriptor for the runtime call) and a symbol-table reference
-to the transferred variable. The write-mode FILE statement in the test
+XXST/XXAR/XXND at all**. **Fully resolved in a later session** (via a
+direct `unHALMAT.py` binary read cross-checked against `unLitfile.py`'s
+literal-table decode): FILE's own two operands are a literal-table
+reference — confirmed to be the record address itself, not an
+unidentified type/format descriptor as first guessed — and a
+symbol-table reference to the transferred variable; the channel code
+turned out to be the operator word's own `TAG` field, not a
+separate operand at all. Both values are *also* independently baked
+into the generated object code as immediate constants passed to runtime
+routines `#QFILEOUT`/`#QFILEIN` (PASS2 choosing immediate-constant
+codegen for compile-time-known values rather than a runtime lookup) —
+see [FILE](class-0/FILE.md) for the full account. The write-mode FILE statement in the test
 program happened to be preceded by a previously-undocumented no-operand
 instruction, now named [EDCL](class-0/EDCL.md) (0x031) — this initially
 looked FILE-specific but a follow-up test (see "DO CASE construct" below)
@@ -1088,8 +1098,15 @@ marked empirically confirmed.
    tables now in this file's Class 1–7 sections — agreement between
    [Halmat.pdf] (an independent HAL/S-source-derived reconstruction) and
    [MSC-01847] (the HAL-1971 primary source) on a given mnemonic/opcode
-   would be meaningfully stronger evidence than either alone. This is now
-   the highest-value remaining source-review task for Phase 1.
+   would be meaningfully stronger evidence than either alone. This is the
+   highest-value remaining source-review task for Phase 1 — **but per
+   direct user instruction, comparison with [Halmat.pdf] should be the
+   very last task undertaken in Phase 2** (empirical verification), to
+   avoid anchoring on a secondary reconstruction before independent
+   compiler-source/real-HALMAT verification is as complete as possible.
+   A future session should not start this task while any other Phase 2
+   empirical-verification work (see "Next steps" items below, and
+   `HALMAT.md`'s "Optimizer HALMAT" section) remains open.
 3. Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
    part3 p. 41) — likely just closing appendix material, low priority.
 4. Write the "Control Flow Patterns" cross-reference material that IFHD,
@@ -1105,12 +1122,21 @@ marked empirically confirmed.
    compiler-source-tree-grep technique. In a further follow-up,
    [BTOQ](class-1/BTOQ.md)/[CTOQ](class-1/CTOQ.md) were also directly
    compiled and confirmed (no longer analogy-only), closing out **every**
-   Medium/Medium-High-confidence opcode in the project — all 178
-   documented opcodes are now High confidence.
+   Medium/Medium-High-confidence opcode in the project. As of this
+   session (with [IPEX](class-6/IPEX.md) added), all 179 documented
+   opcodes are High confidence — reconfirmed by direct grep, no
+   Medium/Low-confidence files remain anywhere in `class-*/`.
 6. Investigate the open question above about HAL/S's structureness
    specifier (no confirmed Class 0 opcode, unlike ADLP).
-7. Investigate the remaining mnemonics listed above (ENDS/ENTS/EXTS,
-   FCLM/FLIN/FPGE/FSKP/FTAB, LIST/LSTE, FASN, CASS, UEND, ZRFN, ASIZ/TSIZ)
-   against the unlisted-gap opcodes in [IR-60-5]'s Class 0 index, if a
-   fuller copy of that index or its target pages ever turns up. (TASN/
-   TEQU/TNEQ were resolved this session — see above.)
+7. ~~Investigate the remaining mnemonics listed above~~ — **narrowed**:
+   `FCLM`/`FLIN`/`FPGE`/`FSKP`/`FTAB` (folded into [XXAR](class-0/XXAR.md)'s
+   `TAG2` field) and `FASN` (superseded by the JCL `CHANNELn` DD-name
+   convention, [USA00309] §6.1.4) are now resolved — see
+   [XXAR](class-0/XXAR.md)'s Unresolved Questions and the "HAL/S I/O
+   device numbers" section above. `LIST`/`LSTE`/`CASS` were already
+   resolved in an earlier session (folded into `XXST`/`XXAR`/`XXND`).
+   Genuinely still unaccounted for: `ENDS`/`ENTS`/`EXTS`, `UEND`, `ZRFN`,
+   `ASIZ`/`TSIZ` — investigate against the unlisted-gap opcodes in
+   [IR-60-5]'s Class 0 index if a fuller copy of that index or its target
+   pages ever turns up. (`TASN`/`TEQU`/`TNEQ` were resolved in an earlier
+   session — see above.)

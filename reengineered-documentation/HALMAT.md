@@ -23,6 +23,7 @@ References elsewhere in this documentation use the following abbreviations:
 | [GENCLASn] | HAL/S-FC compiler source files `GENCLAS0.xpl` through `GENCLAS8.xpl` (part of PASS2), which implement per-class code generation dispatch. Referenced via the virtualagc project's mirror of the HAL/S-FC source tree. |
 | [USA00309] | Document USA00309, "HAL/S-FC User's Manual" (2005). Primary source. §8.2 ("Runtime Characteristics") and §6.1.2–6.1.3 ("Input/Output Data Formats") reviewed in full — the authoritative source for datatype precision representation and every pairwise BIT/CHARACTER/SCALAR/INTEGER conversion. |
 | [USA003087] | Document USA003087, "HAL/S Programmer's Guide" (2005). Primary source, also covering datatype conversions (Appendix A) and I/O statement formatting (§12.2). Only §12.2 reviewed so far. |
+| [CourseSlides.pdf] | "Basic HAL/S Programming Course" (undated), a slide-deck training document distinct in kind from the reference-manual sources above (informal, scanned-OCR text with layout artifacts). Primary source where cited — e.g. confirming [EINT](class-8/EINT.md)'s `EQUATE EXTERNAL`/ESD-entry-point purpose (pp. 486–487, "DATA CSECTS (CONTINUED)"). Only the page range directly cited per-instruction has been reviewed; see `STATUS.md`'s "Source material reviewed so far" table for extent and source URL. |
 
 ## Instruction Classes
 

@@ -19,7 +19,7 @@ Now fully enumerated for the six "HAL variable types" — confirmed by
 compiling `READ(5) B1/V1/M1/I1/S1/C1;` for each type in turn: `1`=BIT,
 `2`=CHARACTER, `3`=MATRIX, `4`=VECTOR, `5`=SCALAR, `6`=INTEGER — **exactly
 matching HALMAT's own CLASS numbering** (Class 1=bit, 2=char, 3=matrix,
-4=vector, 5=scalar, 6=integer; see [HALMAT.md](HALMAT.md#instruction-classes)),
+4=vector, 5=scalar, 6=integer; see [HALMAT.md](../HALMAT.md#instruction-classes)),
 i.e. `TAG1` is literally the argument's HALMAT class number. A structure
 argument is a distinct case: `QUAL`=4=XPT instead of 1=SYT (an "extended
 pointer" reference, per [EXTN](EXTN.md)) and `TAG1`=`10`, confirmed by
