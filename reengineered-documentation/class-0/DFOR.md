@@ -1,7 +1,9 @@
 # DFOR
 
 **Mnemonic:** DFOR
+
 **Opcode:** 0x010
+
 **Confidence:** High
 
 ## Behavioral Description

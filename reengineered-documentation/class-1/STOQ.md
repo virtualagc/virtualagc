@@ -1,7 +1,9 @@
 # STOQ
 
 **Mnemonic:** STOQ
+
 **Opcode:** 0x1A2
+
 **Confidence:** High
 
 ## Behavioral Description

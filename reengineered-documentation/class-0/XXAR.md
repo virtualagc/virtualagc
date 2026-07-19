@@ -1,7 +1,9 @@
 # XXAR
 
 **Mnemonic:** XXAR
+
 **Opcode:** 0x027
+
 **Confidence:** High
 
 ## Behavioral Description

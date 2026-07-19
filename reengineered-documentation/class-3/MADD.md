@@ -1,7 +1,9 @@
 # MADD
 
 **Mnemonic:** MADD
+
 **Opcode:** 0x362
+
 **Confidence:** High
 
 ## Behavioral Description

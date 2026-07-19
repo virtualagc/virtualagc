@@ -1,7 +1,9 @@
 # CINT
 
 **Mnemonic:** CINT
+
 **Opcode:** 0x41
+
 **Confidence:** High
 
 ## Behavioral Description

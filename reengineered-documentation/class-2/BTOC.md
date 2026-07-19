@@ -1,7 +1,9 @@
 # BTOC
 
 **Mnemonic:** BTOC
+
 **Opcode:** 0x221
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # TSUB
 
 **Mnemonic:** TSUB
+
 **Opcode:** 0x01B
+
 **Confidence:** High
 
 ## Behavioral Description

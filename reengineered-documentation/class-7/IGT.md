@@ -1,7 +1,9 @@
 # IGT
 
 **Mnemonic:** IGT
+
 **Opcode:** 0x7C8
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # CFOR
 
 **Mnemonic:** CFOR
+
 **Opcode:** 0x012
+
 **Confidence:** High
 
 ## Behavioral Description

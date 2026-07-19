@@ -1,7 +1,9 @@
 # CLOS
 
 **Mnemonic:** CLOS
+
 **Opcode:** 0x030
+
 **Confidence:** High
 
 ## Behavioral Description

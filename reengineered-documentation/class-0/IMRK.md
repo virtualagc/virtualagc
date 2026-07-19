@@ -1,7 +1,9 @@
 # IMRK
 
 **Mnemonic:** IMRK
+
 **Opcode:** 0x003
+
 **Confidence:** High
 
 ## Behavioral Description

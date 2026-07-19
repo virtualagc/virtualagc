@@ -1,7 +1,9 @@
 # FDEF
 
 **Mnemonic:** FDEF
+
 **Opcode:** 0x02C
+
 **Confidence:** High
 
 ## Behavioral Description

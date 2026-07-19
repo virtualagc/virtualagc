@@ -1,7 +1,9 @@
 # CTOS
 
 **Mnemonic:** CTOS
+
 **Opcode:** 0x541
+
 **Confidence:** High
 
 ## Behavioral Description

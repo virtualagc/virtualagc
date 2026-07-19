@@ -1,7 +1,9 @@
 # BNEQ
 
 **Mnemonic:** BNEQ
+
 **Opcode:** 0x725
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # CTOQ
 
 **Mnemonic:** CTOQ
+
 **Opcode:** 0x142
+
 **Confidence:** High
 
 ## Behavioral Description

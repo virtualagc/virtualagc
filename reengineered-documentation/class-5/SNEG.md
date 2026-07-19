@@ -1,7 +1,9 @@
 # SNEG
 
 **Mnemonic:** SNEG
+
 **Opcode:** 0x5B0
+
 **Confidence:** High
 
 ## Behavioral Description

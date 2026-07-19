@@ -1,7 +1,9 @@
 # MASN
 
 **Mnemonic:** MASN
+
 **Opcode:** 0x301
+
 **Confidence:** High
 
 ## Behavioral Description

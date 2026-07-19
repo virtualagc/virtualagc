@@ -1,7 +1,9 @@
 # ERON
 
 **Mnemonic:** ERON
+
 **Opcode:** 0x03C
+
 **Confidence:** High
 
 ## Behavioral Description

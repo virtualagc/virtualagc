@@ -1,7 +1,9 @@
 # VSUB
 
 **Mnemonic:** VSUB
+
 **Opcode:** 0x483
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # ITOS
 
 **Mnemonic:** ITOS
+
 **Opcode:** 0x5C1
+
 **Confidence:** High
 
 ## Behavioral Description

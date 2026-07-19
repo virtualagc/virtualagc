@@ -1,7 +1,9 @@
 # ETST
 
 **Mnemonic:** ETST
+
 **Opcode:** 0x00F
+
 **Confidence:** High
 
 ## Behavioral Description

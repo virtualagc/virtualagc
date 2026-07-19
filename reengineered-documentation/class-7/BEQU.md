@@ -1,7 +1,9 @@
 # BEQU
 
 **Mnemonic:** BEQU
+
 **Opcode:** 0x726
+
 **Confidence:** High
 
 ## Behavioral Description

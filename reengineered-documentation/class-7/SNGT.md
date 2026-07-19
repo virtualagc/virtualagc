@@ -1,7 +1,9 @@
 # SNGT
 
 **Mnemonic:** SNGT
+
 **Opcode:** 0x7A7
+
 **Confidence:** High
 
 ## Behavioral Description

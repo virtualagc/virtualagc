@@ -1,7 +1,9 @@
 # ITOQ
 
 **Mnemonic:** ITOQ
+
 **Opcode:** 0x1C2
+
 **Confidence:** High
 
 ## Behavioral Description

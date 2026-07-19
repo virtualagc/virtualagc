@@ -1,7 +1,9 @@
 # ETRI
 
 **Mnemonic:** ETRI
+
 **Opcode:** 0x04
+
 **Confidence:** High
 
 ## Behavioral Description

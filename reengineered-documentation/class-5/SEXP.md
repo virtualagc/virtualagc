@@ -1,7 +1,9 @@
 # SEXP
 
 **Mnemonic:** SEXP
+
 **Opcode:** 0x5AF
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # SFST
 
 **Mnemonic:** SFST
+
 **Opcode:** 0x045
+
 **Confidence:** High
 
 ## Behavioral Description

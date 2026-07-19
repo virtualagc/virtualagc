@@ -1,7 +1,9 @@
 # BINT
 
 **Mnemonic:** BINT
+
 **Opcode:** 0x21
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # STRI
 
 **Mnemonic:** STRI
+
 **Opcode:** 0x01
+
 **Confidence:** High
 
 ## Behavioral Description

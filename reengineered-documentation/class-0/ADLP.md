@@ -1,7 +1,9 @@
 # ADLP
 
 **Mnemonic:** ADLP
+
 **Opcode:** 0x017
+
 **Confidence:** High
 
 ## Behavioral Description

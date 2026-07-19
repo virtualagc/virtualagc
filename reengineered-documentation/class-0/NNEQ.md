@@ -1,7 +1,9 @@
 # NNEQ
 
 **Mnemonic:** NNEQ
+
 **Opcode:** 0x055
+
 **Confidence:** High
 
 ## Behavioral Description

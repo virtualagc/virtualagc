@@ -1,7 +1,9 @@
 # CCAT
 
 **Mnemonic:** CCAT
+
 **Opcode:** 0x202
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # SNEQ
 
 **Mnemonic:** SNEQ
+
 **Opcode:** 0x7A5
+
 **Confidence:** High
 
 ## Behavioral Description

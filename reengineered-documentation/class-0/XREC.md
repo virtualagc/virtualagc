@@ -1,7 +1,9 @@
 # XREC
 
 **Mnemonic:** XREC
+
 **Opcode:** 0x002
+
 **Confidence:** High
 
 ## Behavioral Description

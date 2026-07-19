@@ -1,7 +1,9 @@
 # MNEQ
 
 **Mnemonic:** MNEQ
+
 **Opcode:** 0x765
+
 **Confidence:** High
 
 ## Behavioral Description

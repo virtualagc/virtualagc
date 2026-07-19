@@ -1,7 +1,9 @@
 # TDEF
 
 **Mnemonic:** TDEF
+
 **Opcode:** 0x02A
+
 **Confidence:** High
 
 ## Behavioral Description

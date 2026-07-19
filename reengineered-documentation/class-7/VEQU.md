@@ -1,7 +1,9 @@
 # VEQU
 
 **Mnemonic:** VEQU
+
 **Opcode:** 0x786
+
 **Confidence:** High
 
 ## Behavioral Description

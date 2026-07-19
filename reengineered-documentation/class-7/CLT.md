@@ -1,7 +1,9 @@
 # CLT
 
 **Mnemonic:** CLT
+
 **Opcode:** 0x74A
+
 **Confidence:** High
 
 ## Behavioral Description

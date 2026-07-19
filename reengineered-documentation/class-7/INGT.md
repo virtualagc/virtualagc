@@ -1,7 +1,9 @@
 # INGT
 
 **Mnemonic:** INGT
+
 **Opcode:** 0x7C7
+
 **Confidence:** High
 
 ## Behavioral Description

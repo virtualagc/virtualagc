@@ -1,7 +1,9 @@
 # CTST
 
 **Mnemonic:** CTST
+
 **Opcode:** 0x016
+
 **Confidence:** High
 
 ## Behavioral Description

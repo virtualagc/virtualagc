@@ -1,7 +1,9 @@
 # XXND
 
 **Mnemonic:** XXND
+
 **Opcode:** 0x026
+
 **Confidence:** High
 
 ## Behavioral Description

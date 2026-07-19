@@ -1,7 +1,9 @@
 # ECAS
 
 **Mnemonic:** ECAS
+
 **Opcode:** 0x00C
+
 **Confidence:** High
 
 ## Behavioral Description

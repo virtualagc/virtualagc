@@ -1,7 +1,9 @@
 # STOS
 
 **Mnemonic:** STOS
+
 **Opcode:** 0x5A1
+
 **Confidence:** High
 
 ## Behavioral Description

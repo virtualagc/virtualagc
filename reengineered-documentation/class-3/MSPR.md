@@ -1,7 +1,9 @@
 # MSPR
 
 **Mnemonic:** MSPR
+
 **Opcode:** 0x3A5
+
 **Confidence:** High
 
 ## Behavioral Description

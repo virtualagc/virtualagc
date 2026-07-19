@@ -1,7 +1,9 @@
 # PDEF
 
 **Mnemonic:** PDEF
+
 **Opcode:** 0x02D
+
 **Confidence:** High
 
 ## Behavioral Description

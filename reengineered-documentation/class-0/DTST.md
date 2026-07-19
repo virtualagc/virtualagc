@@ -1,7 +1,9 @@
 # DTST
 
 **Mnemonic:** DTST
+
 **Opcode:** 0x00E
+
 **Confidence:** High
 
 ## Behavioral Description

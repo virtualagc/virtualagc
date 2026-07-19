@@ -1,7 +1,9 @@
 # VASN
 
 **Mnemonic:** VASN
+
 **Opcode:** 0x401
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # EDCL
 
 **Mnemonic:** EDCL
+
 **Opcode:** 0x031
+
 **Confidence:** High
 
 ## Behavioral Description

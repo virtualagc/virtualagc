@@ -1,7 +1,9 @@
 # NINT
 
 **Mnemonic:** NINT
+
 **Opcode:** 0xE1
+
 **Confidence:** High
 
 ## Behavioral Description

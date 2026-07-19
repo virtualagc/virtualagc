@@ -1,7 +1,9 @@
 # SGNL
 
 **Mnemonic:** SGNL
+
 **Opcode:** 0x035
+
 **Confidence:** High
 
 ## Behavioral Description

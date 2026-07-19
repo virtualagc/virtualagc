@@ -1,7 +1,9 @@
 # BTRU
 
 **Mnemonic:** BTRU
+
 **Opcode:** 0x720
+
 **Confidence:** High
 
 ## Behavioral Description

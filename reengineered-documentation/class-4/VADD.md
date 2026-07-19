@@ -1,7 +1,9 @@
 # VADD
 
 **Mnemonic:** VADD
+
 **Opcode:** 0x482
+
 **Confidence:** High
 
 ## Behavioral Description

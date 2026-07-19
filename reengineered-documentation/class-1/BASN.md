@@ -1,7 +1,9 @@
 # BASN
 
 **Mnemonic:** BASN
+
 **Opcode:** 0x101
+
 **Confidence:** High
 
 ## Behavioral Description

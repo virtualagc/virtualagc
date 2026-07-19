@@ -1,7 +1,9 @@
 # READ
 
 **Mnemonic:** READ
+
 **Opcode:** 0x01F
+
 **Confidence:** High
 
 ## Behavioral Description

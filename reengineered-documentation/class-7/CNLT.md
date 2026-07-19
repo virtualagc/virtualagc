@@ -1,7 +1,9 @@
 # CNLT
 
 **Mnemonic:** CNLT
+
 **Opcode:** 0x749
+
 **Confidence:** High
 
 ## Behavioral Description

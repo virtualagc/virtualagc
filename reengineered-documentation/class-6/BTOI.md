@@ -1,7 +1,9 @@
 # BTOI
 
 **Mnemonic:** BTOI
+
 **Opcode:** 0x621
+
 **Confidence:** High
 
 ## Behavioral Description

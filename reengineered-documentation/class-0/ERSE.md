@@ -1,7 +1,9 @@
 # ERSE
 
 **Mnemonic:** ERSE
+
 **Opcode:** 0x03D
+
 **Confidence:** High
 
 ## Behavioral Description

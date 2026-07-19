@@ -1,7 +1,9 @@
 # ICLS
 
 **Mnemonic:** ICLS
+
 **Opcode:** 0x052
+
 **Confidence:** High
 
 ## Behavioral Description

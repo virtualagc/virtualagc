@@ -1,7 +1,9 @@
 # FCAL
 
 **Mnemonic:** FCAL
+
 **Opcode:** 0x01E
+
 **Confidence:** High
 
 ## Behavioral Description

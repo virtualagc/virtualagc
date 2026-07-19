@@ -1,7 +1,9 @@
 # TNEQ
 
 **Mnemonic:** TNEQ
+
 **Opcode:** 0x04D
+
 **Confidence:** High
 
 ## Behavioral Description

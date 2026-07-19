@@ -1,7 +1,9 @@
 # COR
 
 **Mnemonic:** COR
+
 **Opcode:** 0x7E3
+
 **Confidence:** High
 
 ## Behavioral Description

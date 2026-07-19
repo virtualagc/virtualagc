@@ -1,7 +1,9 @@
 # DSUB
 
 **Mnemonic:** DSUB
+
 **Opcode:** 0x019
+
 **Confidence:** High
 
 ## Behavioral Description

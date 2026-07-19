@@ -1,7 +1,9 @@
 # LBL
 
 **Mnemonic:** LBL
+
 **Opcode:** 0x008
+
 **Confidence:** High
 
 ## Behavioral Description

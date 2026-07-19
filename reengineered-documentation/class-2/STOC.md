@@ -1,7 +1,9 @@
 # STOC
 
 **Mnemonic:** STOC
+
 **Opcode:** 0x2A1
+
 **Confidence:** High
 
 ## Behavioral Description

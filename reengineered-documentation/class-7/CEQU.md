@@ -1,7 +1,9 @@
 # CEQU
 
 **Mnemonic:** CEQU
+
 **Opcode:** 0x746
+
 **Confidence:** High
 
 ## Behavioral Description

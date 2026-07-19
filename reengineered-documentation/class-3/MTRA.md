@@ -1,7 +1,9 @@
 # MTRA
 
 **Mnemonic:** MTRA
+
 **Opcode:** 0x329
+
 **Confidence:** High
 
 ## Behavioral Description

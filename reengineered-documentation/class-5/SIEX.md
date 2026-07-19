@@ -1,7 +1,9 @@
 # SIEX
 
 **Mnemonic:** SIEX
+
 **Opcode:** 0x571
+
 **Confidence:** High
 
 ## Behavioral Description

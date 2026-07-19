@@ -1,7 +1,9 @@
 # ISUB
 
 **Mnemonic:** ISUB
+
 **Opcode:** 0x6CC
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # DCAS
 
 **Mnemonic:** DCAS
+
 **Opcode:** 0x00B
+
 **Confidence:** High
 
 ## Behavioral Description

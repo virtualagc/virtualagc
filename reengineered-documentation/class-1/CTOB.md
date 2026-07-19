@@ -1,7 +1,9 @@
 # CTOB
 
 **Mnemonic:** CTOB
+
 **Opcode:** 0x141
+
 **Confidence:** High
 
 ## Behavioral Description

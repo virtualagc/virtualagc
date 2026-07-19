@@ -1,7 +1,9 @@
 # PCAL
 
 **Mnemonic:** PCAL
+
 **Opcode:** 0x01D
+
 **Confidence:** High
 
 ## Behavioral Description

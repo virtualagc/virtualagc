@@ -1,7 +1,9 @@
 # BTOS
 
 **Mnemonic:** BTOS
+
 **Opcode:** 0x521
+
 **Confidence:** High
 
 ## Behavioral Description

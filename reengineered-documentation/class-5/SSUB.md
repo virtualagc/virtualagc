@@ -1,7 +1,9 @@
 # SSUB
 
 **Mnemonic:** SSUB
+
 **Opcode:** 0x5AC
+
 **Confidence:** High
 
 ## Behavioral Description

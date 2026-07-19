@@ -1,7 +1,9 @@
 # INEQ
 
 **Mnemonic:** INEQ
+
 **Opcode:** 0x7C5
+
 **Confidence:** High
 
 ## Behavioral Description

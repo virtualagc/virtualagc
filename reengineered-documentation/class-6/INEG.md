@@ -1,7 +1,9 @@
 # INEG
 
 **Mnemonic:** INEG
+
 **Opcode:** 0x6D0
+
 **Confidence:** High
 
 ## Behavioral Description

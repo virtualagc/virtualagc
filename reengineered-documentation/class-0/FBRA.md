@@ -1,7 +1,9 @@
 # FBRA
 
 **Mnemonic:** FBRA
+
 **Opcode:** 0x00A
+
 **Confidence:** High
 
 ## Behavioral Description

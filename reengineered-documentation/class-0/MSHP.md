@@ -1,7 +1,9 @@
 # MSHP
 
 **Mnemonic:** MSHP
+
 **Opcode:** 0x040
+
 **Confidence:** High
 
 ## Behavioral Description

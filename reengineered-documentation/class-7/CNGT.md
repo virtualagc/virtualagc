@@ -1,7 +1,9 @@
 # CNGT
 
 **Mnemonic:** CNGT
+
 **Opcode:** 0x747
+
 **Confidence:** High
 
 ## Behavioral Description

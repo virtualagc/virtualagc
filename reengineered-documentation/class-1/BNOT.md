@@ -1,7 +1,9 @@
 # BNOT
 
 **Mnemonic:** BNOT
+
 **Opcode:** 0x104
+
 **Confidence:** High
 
 ## Behavioral Description

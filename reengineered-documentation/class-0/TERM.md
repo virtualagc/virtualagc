@@ -1,7 +1,9 @@
 # TERM
 
 **Mnemonic:** TERM
+
 **Opcode:** 0x037
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # INLT
 
 **Mnemonic:** INLT
+
 **Opcode:** 0x7C9
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # SGT
 
 **Mnemonic:** SGT
+
 **Opcode:** 0x7A8
+
 **Confidence:** High
 
 ## Behavioral Description

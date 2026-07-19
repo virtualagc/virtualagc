@@ -1,7 +1,9 @@
 # BOR
 
 **Mnemonic:** BOR
+
 **Opcode:** 0x103
+
 **Confidence:** High
 
 ## Behavioral Description

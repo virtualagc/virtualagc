@@ -1,7 +1,9 @@
 # XXST
 
 **Mnemonic:** XXST
+
 **Opcode:** 0x025
+
 **Confidence:** High
 
 ## Behavioral Description

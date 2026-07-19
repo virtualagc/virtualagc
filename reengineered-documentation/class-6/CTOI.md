@@ -1,7 +1,9 @@
 # CTOI
 
 **Mnemonic:** CTOI
+
 **Opcode:** 0x641
+
 **Confidence:** High
 
 ## Behavioral Description

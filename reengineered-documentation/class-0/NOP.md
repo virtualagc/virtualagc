@@ -1,7 +1,9 @@
 # NOP
 
 **Mnemonic:** NOP
+
 **Opcode:** 0x000
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # MSUB
 
 **Mnemonic:** MSUB
+
 **Opcode:** 0x363
+
 **Confidence:** High
 
 ## Behavioral Description

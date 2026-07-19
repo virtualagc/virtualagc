@@ -1,7 +1,9 @@
 # RDAL
 
 **Mnemonic:** RDAL
+
 **Opcode:** 0x020
+
 **Confidence:** High
 
 ## Behavioral Description

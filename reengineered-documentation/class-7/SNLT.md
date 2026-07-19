@@ -1,7 +1,9 @@
 # SNLT
 
 **Mnemonic:** SNLT
+
 **Opcode:** 0x7A9
+
 **Confidence:** High
 
 ## Behavioral Description

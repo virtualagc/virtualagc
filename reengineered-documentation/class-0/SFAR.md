@@ -1,7 +1,9 @@
 # SFAR
 
 **Mnemonic:** SFAR
+
 **Opcode:** 0x047
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # AFOR
 
 **Mnemonic:** AFOR
+
 **Opcode:** 0x015
+
 **Confidence:** High
 
 ## Behavioral Description

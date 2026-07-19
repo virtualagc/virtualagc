@@ -1,7 +1,9 @@
 # STOB
 
 **Mnemonic:** STOB
+
 **Opcode:** 0x1A1
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # SPEX
 
 **Mnemonic:** SPEX
+
 **Opcode:** 0x572
+
 **Confidence:** High
 
 ## Behavioral Description

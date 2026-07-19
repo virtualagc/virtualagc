@@ -1,6 +1,7 @@
 # TINT
 
 **Mnemonic:** TINT
+
 **Opcode:** 0xE2
 
 **Confidence:** High

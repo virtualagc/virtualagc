@@ -1,7 +1,9 @@
 # PMAR
 
 **Mnemonic:** PMAR
+
 **Opcode:** 0x05A
+
 **Confidence:** High
 
 ## Behavioral Description

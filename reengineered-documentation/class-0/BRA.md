@@ -1,7 +1,9 @@
 # BRA
 
 **Mnemonic:** BRA
+
 **Opcode:** 0x009
+
 **Confidence:** High
 
 ## Behavioral Description

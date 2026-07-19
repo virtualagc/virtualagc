@@ -1,7 +1,9 @@
 # BAND
 
 **Mnemonic:** BAND
+
 **Opcode:** 0x102
+
 **Confidence:** High
 
 ## Behavioral Description

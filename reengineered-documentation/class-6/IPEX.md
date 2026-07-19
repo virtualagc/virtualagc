@@ -1,7 +1,9 @@
 # IPEX
 
 **Mnemonic:** IPEX
+
 **Opcode:** 0x6D2
+
 **Confidence:** High
 
 ## Behavioral Description

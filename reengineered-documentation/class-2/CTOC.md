@@ -1,7 +1,9 @@
 # CTOC
 
 **Mnemonic:** CTOC
+
 **Opcode:** 0x241
+
 **Confidence:** High
 
 ## Behavioral Description

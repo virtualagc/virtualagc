@@ -1,7 +1,9 @@
 # NEQU
 
 **Mnemonic:** NEQU
+
 **Opcode:** 0x056
+
 **Confidence:** High
 
 ## Behavioral Description

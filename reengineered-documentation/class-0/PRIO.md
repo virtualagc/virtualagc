@@ -1,7 +1,9 @@
 # PRIO
 
 **Mnemonic:** PRIO
+
 **Opcode:** 0x038
+
 **Confidence:** High
 
 ## Behavioral Description

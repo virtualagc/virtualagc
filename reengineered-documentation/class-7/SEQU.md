@@ -1,7 +1,9 @@
 # SEQU
 
 **Mnemonic:** SEQU
+
 **Opcode:** 0x7A6
+
 **Confidence:** High
 
 ## Behavioral Description

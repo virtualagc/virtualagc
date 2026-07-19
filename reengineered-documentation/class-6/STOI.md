@@ -1,7 +1,9 @@
 # STOI
 
 **Mnemonic:** STOI
+
 **Opcode:** 0x6A1
+
 **Confidence:** High
 
 ## Behavioral Description

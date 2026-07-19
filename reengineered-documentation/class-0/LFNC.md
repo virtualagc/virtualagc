@@ -1,7 +1,9 @@
 # LFNC
 
 **Mnemonic:** LFNC
+
 **Opcode:** 0x04B
+
 **Confidence:** High
 
 ## Behavioral Description

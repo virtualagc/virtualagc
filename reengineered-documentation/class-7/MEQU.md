@@ -1,7 +1,9 @@
 # MEQU
 
 **Mnemonic:** MEQU
+
 **Opcode:** 0x766
+
 **Confidence:** High
 
 ## Behavioral Description

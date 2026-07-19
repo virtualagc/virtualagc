@@ -1,7 +1,9 @@
 # BTOQ
 
 **Mnemonic:** BTOQ
+
 **Opcode:** 0x122
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # PXRC
 
 **Mnemonic:** PXRC
+
 **Opcode:** 0x005
+
 **Confidence:** High
 
 ## Behavioral Description

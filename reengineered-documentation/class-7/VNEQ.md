@@ -1,7 +1,9 @@
 # VNEQ
 
 **Mnemonic:** VNEQ
+
 **Opcode:** 0x785
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # WRIT
 
 **Mnemonic:** WRIT
+
 **Opcode:** 0x021
+
 **Confidence:** High
 
 ## Behavioral Description

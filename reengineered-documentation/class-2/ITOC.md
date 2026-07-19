@@ -1,7 +1,9 @@
 # ITOC
 
 **Mnemonic:** ITOC
+
 **Opcode:** 0x2C1
+
 **Confidence:** High
 
 ## Behavioral Description

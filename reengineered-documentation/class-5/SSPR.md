@@ -1,7 +1,9 @@
 # SSPR
 
 **Mnemonic:** SSPR
+
 **Opcode:** 0x5AD
+
 **Confidence:** High
 
 ## Behavioral Description

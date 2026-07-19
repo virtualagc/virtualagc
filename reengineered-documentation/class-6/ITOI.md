@@ -1,7 +1,9 @@
 # ITOI
 
 **Mnemonic:** ITOI
+
 **Opcode:** 0x6C1
+
 **Confidence:** High
 
 ## Behavioral Description

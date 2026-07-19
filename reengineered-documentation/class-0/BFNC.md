@@ -1,7 +1,9 @@
 # BFNC
 
 **Mnemonic:** BFNC
+
 **Opcode:** 0x04A
+
 **Confidence:** High
 
 ## Behavioral Description

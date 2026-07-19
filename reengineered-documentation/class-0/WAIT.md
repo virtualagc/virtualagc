@@ -1,7 +1,9 @@
 # WAIT
 
 **Mnemonic:** WAIT
+
 **Opcode:** 0x034
+
 **Confidence:** High
 
 ## Behavioral Description

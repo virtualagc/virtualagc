@@ -1,7 +1,9 @@
 # CAND
 
 **Mnemonic:** CAND
+
 **Opcode:** 0x7E2
+
 **Confidence:** High
 
 ## Behavioral Description

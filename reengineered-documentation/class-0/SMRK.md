@@ -1,7 +1,9 @@
 # SMRK
 
 **Mnemonic:** SMRK
+
 **Opcode:** 0x004
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # SINT
 
 **Mnemonic:** SINT
+
 **Opcode:** 0xA1
+
 **Confidence:** High
 
 ## Behavioral Description

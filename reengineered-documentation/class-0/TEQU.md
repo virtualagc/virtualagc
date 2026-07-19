@@ -1,7 +1,9 @@
 # TEQU
 
 **Mnemonic:** TEQU
+
 **Opcode:** 0x04E
+
 **Confidence:** High
 
 ## Behavioral Description

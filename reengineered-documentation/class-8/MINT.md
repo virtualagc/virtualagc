@@ -1,7 +1,9 @@
 # MINT
 
 **Mnemonic:** MINT
+
 **Opcode:** 0x61
+
 **Confidence:** High
 
 ## Behavioral Description

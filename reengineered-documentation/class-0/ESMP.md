@@ -1,7 +1,9 @@
 # ESMP
 
 **Mnemonic:** ESMP
+
 **Opcode:** 0x014
+
 **Confidence:** High
 
 ## Behavioral Description

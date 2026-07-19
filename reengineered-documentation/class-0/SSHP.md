@@ -1,7 +1,9 @@
 # SSHP
 
 **Mnemonic:** SSHP
+
 **Opcode:** 0x042
+
 **Confidence:** High
 
 ## Behavioral Description

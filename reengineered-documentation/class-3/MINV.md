@@ -1,7 +1,9 @@
 # MINV
 
 **Mnemonic:** MINV
+
 **Opcode:** 0x3CA
+
 **Confidence:** High
 
 ## Behavioral Description

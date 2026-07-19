@@ -1,7 +1,9 @@
 # ELRI
 
 **Mnemonic:** ELRI
+
 **Opcode:** 0x03
+
 **Confidence:** High
 
 ## Behavioral Description

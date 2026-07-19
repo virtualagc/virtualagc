@@ -1,7 +1,9 @@
 # IIPR
 
 **Mnemonic:** IIPR
+
 **Opcode:** 0x6CD
+
 **Confidence:** High
 
 ## Behavioral Description

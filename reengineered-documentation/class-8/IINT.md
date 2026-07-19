@@ -1,7 +1,9 @@
 # IINT
 
 **Mnemonic:** IINT
+
 **Opcode:** 0xC1
+
 **Confidence:** High
 
 ## Behavioral Description

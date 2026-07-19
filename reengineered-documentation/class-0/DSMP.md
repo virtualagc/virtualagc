@@ -1,7 +1,9 @@
 # DSMP
 
 **Mnemonic:** DSMP
+
 **Opcode:** 0x013
+
 **Confidence:** High
 
 ## Behavioral Description

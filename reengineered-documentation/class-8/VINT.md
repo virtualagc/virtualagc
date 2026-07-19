@@ -1,7 +1,9 @@
 # VINT
 
 **Mnemonic:** VINT
+
 **Opcode:** 0x81
+
 **Confidence:** High
 
 ## Behavioral Description

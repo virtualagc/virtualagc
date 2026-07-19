@@ -1,7 +1,9 @@
 # CGT
 
 **Mnemonic:** CGT
+
 **Opcode:** 0x748
+
 **Confidence:** High
 
 ## Behavioral Description

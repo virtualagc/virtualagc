@@ -1,7 +1,9 @@
 # BCAT
 
 **Mnemonic:** BCAT
+
 **Opcode:** 0x105
+
 **Confidence:** High
 
 ## Behavioral Description

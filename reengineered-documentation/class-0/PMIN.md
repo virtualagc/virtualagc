@@ -1,7 +1,9 @@
 # PMIN
 
 **Mnemonic:** PMIN
+
 **Opcode:** 0x05B
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # IDEF
 
 **Mnemonic:** IDEF
+
 **Opcode:** 0x051
+
 **Confidence:** High
 
 ## Behavioral Description

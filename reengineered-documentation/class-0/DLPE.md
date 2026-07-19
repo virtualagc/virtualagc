@@ -1,7 +1,9 @@
 # DLPE
 
 **Mnemonic:** DLPE
+
 **Opcode:** 0x018
+
 **Confidence:** High
 
 ## Behavioral Description

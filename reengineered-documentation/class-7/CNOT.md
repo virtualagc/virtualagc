@@ -1,7 +1,9 @@
 # CNOT
 
 **Mnemonic:** CNOT
+
 **Opcode:** 0x7E4
+
 **Confidence:** High
 
 ## Behavioral Description

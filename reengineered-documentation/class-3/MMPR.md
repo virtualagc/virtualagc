@@ -1,7 +1,9 @@
 # MMPR
 
 **Mnemonic:** MMPR
+
 **Opcode:** 0x368
+
 **Confidence:** High
 
 ## Behavioral Description

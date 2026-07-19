@@ -1,7 +1,9 @@
 # CNEQ
 
 **Mnemonic:** CNEQ
+
 **Opcode:** 0x745
+
 **Confidence:** High
 
 ## Behavioral Description

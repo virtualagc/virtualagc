@@ -1,7 +1,9 @@
 # EXTN
 
 **Mnemonic:** EXTN
+
 **Opcode:** 0x001
+
 **Confidence:** High
 
 ## Behavioral Description

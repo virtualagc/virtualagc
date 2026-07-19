@@ -1,7 +1,9 @@
 # TASN
 
 **Mnemonic:** TASN
+
 **Opcode:** 0x04F
+
 **Confidence:** High
 
 ## Behavioral Description

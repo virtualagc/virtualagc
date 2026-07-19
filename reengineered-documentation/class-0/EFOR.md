@@ -1,7 +1,9 @@
 # EFOR
 
 **Mnemonic:** EFOR
+
 **Opcode:** 0x011
+
 **Confidence:** High
 
 ## Behavioral Description

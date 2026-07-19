@@ -1,7 +1,9 @@
 # VNEG
 
 **Mnemonic:** VNEG
+
 **Opcode:** 0x444
+
 **Confidence:** High
 
 ## Behavioral Description

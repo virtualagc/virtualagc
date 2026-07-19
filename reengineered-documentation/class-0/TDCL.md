@@ -1,7 +1,9 @@
 # TDCL
 
 **Mnemonic:** TDCL
+
 **Opcode:** 0x033
+
 **Confidence:** High
 
 ## Behavioral Description

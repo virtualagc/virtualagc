@@ -1,7 +1,9 @@
 # SLRI
 
 **Mnemonic:** SLRI
+
 **Opcode:** 0x02
+
 **Confidence:** High
 
 ## Behavioral Description

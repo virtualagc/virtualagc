@@ -314,6 +314,7 @@ Instruction files that exist so far, indexed three ways:
 ### By Class, then Mnemonic
 
 **Class 0:**
+
 - [ADLP](class-0/ADLP.md) — 0x017 — Arrayness specifier, brackets array loops
 - [AFOR](class-0/AFOR.md) — 0x015 — Per-value instruction for list-form DO FOR
 - [BFNC](class-0/BFNC.md) — 0x04A — Built-in function call (e.g. PRIO, SINCOS)
@@ -390,6 +391,7 @@ Instruction files that exist so far, indexed three ways:
 - [XXST](class-0/XXST.md) — 0x025 — I/O statement start, carries I/O-kind code
 
 **Class 1:**
+
 - [BAND](class-1/BAND.md) — 0x102 — Bit-string AND
 - [BASN](class-1/BASN.md) — 0x101 — Bit-string assign
 - [BCAT](class-1/BCAT.md) — 0x105 — Bit-string catenate
@@ -405,6 +407,7 @@ Instruction files that exist so far, indexed three ways:
 - [STOQ](class-1/STOQ.md) — 0x1A2 — SUBBIT pseudo-conversion, scalar argument
 
 **Class 2:**
+
 - [BTOC](class-2/BTOC.md) — 0x221 — Bit to character conversion
 - [CASN](class-2/CASN.md) — 0x201 — Character assign
 - [CCAT](class-2/CCAT.md) — 0x202 — Character catenate
@@ -413,6 +416,7 @@ Instruction files that exist so far, indexed three ways:
 - [STOC](class-2/STOC.md) — 0x2A1 — Scalar to character conversion
 
 **Class 3:**
+
 - [MADD](class-3/MADD.md) — 0x362 — Matrix add
 - [MASN](class-3/MASN.md) — 0x301 — Matrix assign
 - [MINV](class-3/MINV.md) — 0x3CA — Matrix invert
@@ -426,6 +430,7 @@ Instruction files that exist so far, indexed three ways:
 - [VVPR](class-3/VVPR.md) — 0x387 — Vector outer product, matrix result
 
 **Class 4:**
+
 - [MVPR](class-4/MVPR.md) — 0x46C — Matrix-vector product
 - [VADD](class-4/VADD.md) — 0x482 — Vector add
 - [VASN](class-4/VASN.md) — 0x401 — Vector assign
@@ -438,6 +443,7 @@ Instruction files that exist so far, indexed three ways:
 - [VTOV](class-4/VTOV.md) — 0x441 — Vector precision scale
 
 **Class 5:**
+
 - [BTOS](class-5/BTOS.md) — 0x521 — Bit string to scalar conversion
 - [CTOS](class-5/CTOS.md) — 0x541 — Character to scalar conversion
 - [ITOS](class-5/ITOS.md) — 0x5C1 — Integer to scalar conversion
@@ -454,6 +460,7 @@ Instruction files that exist so far, indexed three ways:
 - [VDOT](class-5/VDOT.md) — 0x58E — Vector dot product, scalar result
 
 **Class 6:**
+
 - [BTOI](class-6/BTOI.md) — 0x621 — Bit to integer conversion
 - [CTOI](class-6/CTOI.md) — 0x641 — Character to integer conversion
 - [IADD](class-6/IADD.md) — 0x6CB — Integer add
@@ -466,6 +473,7 @@ Instruction files that exist so far, indexed three ways:
 - [STOI](class-6/STOI.md) — 0x6A1 — Scalar to integer conversion
 
 **Class 7:**
+
 - [BEQU](class-7/BEQU.md) — 0x726 — Bit string equal
 - [BNEQ](class-7/BNEQ.md) — 0x725 — Bit string not equal
 - [BTRU](class-7/BTRU.md) — 0x720 — Bit-is-true test (conditional context)
@@ -496,6 +504,7 @@ Instruction files that exist so far, indexed three ways:
 - [VNEQ](class-7/VNEQ.md) — 0x785 — Vector not equal
 
 **Class 8:**
+
 - [BINT](class-8/BINT.md) — 0x21 — Bit-string initialize
 - [CINT](class-8/CINT.md) — 0x41 — Character initialize
 - [EINT](class-8/EINT.md) — 0xE3 — EQUATE EXTERNAL statement
@@ -698,6 +707,7 @@ Note: Class 0 and Class 8 opcodes overlap numerically (each class's OPCODE
 byte is independent); sorted here by class first, then opcode.
 
 **Class 0:**
+
 - 0x000 — [NOP](class-0/NOP.md) — No operation
 - 0x001 — [EXTN](class-0/EXTN.md) — Extended (qualified-name) pointer
 - 0x002 — [XREC](class-0/XREC.md) — End-of-record marker
@@ -774,6 +784,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x05B — [PMIN](class-0/PMIN.md) — %macro invocation end
 
 **Class 1:**
+
 - 0x101 — [BASN](class-1/BASN.md) — Bit-string assign
 - 0x102 — [BAND](class-1/BAND.md) — Bit-string AND
 - 0x103 — [BOR](class-1/BOR.md) — Bit-string OR
@@ -789,6 +800,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x1C2 — [ITOQ](class-1/ITOQ.md) — SUBBIT pseudo-conversion, integer argument
 
 **Class 2:**
+
 - 0x201 — [CASN](class-2/CASN.md) — Character assign
 - 0x202 — [CCAT](class-2/CCAT.md) — Character catenate
 - 0x221 — [BTOC](class-2/BTOC.md) — Bit to character conversion
@@ -797,6 +809,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x2C1 — [ITOC](class-2/ITOC.md) — Integer to character conversion
 
 **Class 3:**
+
 - 0x301 — [MASN](class-3/MASN.md) — Matrix assign
 - 0x329 — [MTRA](class-3/MTRA.md) — Matrix transpose
 - 0x341 — [MTOM](class-3/MTOM.md) — Matrix precision scale
@@ -810,6 +823,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x3CA — [MINV](class-3/MINV.md) — Matrix invert
 
 **Class 4:**
+
 - 0x401 — [VASN](class-4/VASN.md) — Vector assign
 - 0x441 — [VTOV](class-4/VTOV.md) — Vector precision scale
 - 0x444 — [VNEG](class-4/VNEG.md) — Vector negate
@@ -822,6 +836,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x4A6 — [VSDV](class-4/VSDV.md) — Vector divide by scalar
 
 **Class 5:**
+
 - 0x501 — [SASN](class-5/SASN.md) — Scalar assign
 - 0x521 — [BTOS](class-5/BTOS.md) — Bit string to scalar conversion
 - 0x541 — [CTOS](class-5/CTOS.md) — Character to scalar conversion
@@ -838,6 +853,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x5C1 — [ITOS](class-5/ITOS.md) — Integer to scalar conversion
 
 **Class 6:**
+
 - 0x601 — [IASN](class-6/IASN.md) — Integer assign
 - 0x621 — [BTOI](class-6/BTOI.md) — Bit to integer conversion
 - 0x641 — [CTOI](class-6/CTOI.md) — Character to integer conversion
@@ -850,6 +866,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x6D2 — [IPEX](class-6/IPEX.md) — Integer exponentiation by positive integer
 
 **Class 7:**
+
 - 0x720 — [BTRU](class-7/BTRU.md) — Bit-is-true test (conditional context)
 - 0x725 — [BNEQ](class-7/BNEQ.md) — Bit string not equal
 - 0x726 — [BEQU](class-7/BEQU.md) — Bit string equal
@@ -880,6 +897,7 @@ byte is independent); sorted here by class first, then opcode.
 - 0x7E4 — [CNOT](class-7/CNOT.md) — Logical NOT
 
 **Class 8:**
+
 - 0x01 — [STRI](class-8/STRI.md) — Repeated-initialize specifier
 - 0x02 — [SLRI](class-8/SLRI.md) — Start repeated-initialize loop
 - 0x03 — [ELRI](class-8/ELRI.md) — End (one unit of a) repeated-initialize loop

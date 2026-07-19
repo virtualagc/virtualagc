@@ -1,7 +1,9 @@
 # IEQU
 
 **Mnemonic:** IEQU
+
 **Opcode:** 0x7C6
+
 **Confidence:** High
 
 ## Behavioral Description

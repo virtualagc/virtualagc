@@ -1,7 +1,9 @@
 # IDLP
 
 **Mnemonic:** IDLP
+
 **Opcode:** 0x01A
+
 **Confidence:** High
 
 ## Behavioral Description

@@ -1,7 +1,9 @@
 # RTRN
 
 **Mnemonic:** RTRN
+
 **Opcode:** 0x032
+
 **Confidence:** High
 
 ## Behavioral Description

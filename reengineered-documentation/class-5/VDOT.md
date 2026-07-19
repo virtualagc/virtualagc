@@ -1,7 +1,9 @@
 # VDOT
 
 **Mnemonic:** VDOT
+
 **Opcode:** 0x58E
+
 **Confidence:** High
 
 ## Behavioral Description

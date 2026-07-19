@@ -1,7 +1,9 @@
 # SLT
 
 **Mnemonic:** SLT
+
 **Opcode:** 0x7AA
+
 **Confidence:** High
 
 ## Behavioral Description

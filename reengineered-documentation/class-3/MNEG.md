@@ -1,7 +1,9 @@
 # MNEG
 
 **Mnemonic:** MNEG
+
 **Opcode:** 0x344
+
 **Confidence:** High
 
 ## Behavioral Description
