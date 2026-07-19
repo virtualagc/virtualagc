@@ -226,9 +226,11 @@ table above:
   `EXTERNAL`-defined bound) — not something DSUB's own subscript operands
   ever carry in the cases tested here.
 
-See also [TSUB](../STATUS.md) (not yet documented), which appears alongside
-DSUB in the source material's subscripting discussion and is presumably a
-related, simpler subscript-specifier form.
+See also [TSUB](TSUB.md), which appears alongside DSUB in the source
+material's subscripting discussion and is a related, simpler
+subscript-specifier form — now separately, fully empirically confirmed
+(no array-dimension-vs-component distinction, just single-copy-select
+and range-select forms).
 
 The predecessor language HAL (1971) achieves the same effect via nine
 separate, narrower instructions instead of one unified DSUB: a subscript

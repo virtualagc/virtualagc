@@ -50,9 +50,10 @@ the confirming worked example.
   unconfirmed; only the opcode number is primary-sourced.
 - Whether HAL/S retains the same three-instruction STRI/DLPI/DLEI grouping
   structure as the 1971 predecessor, or restructures it, is unconfirmed.
-- The relationship (if any) between STRI and the separately-opcoded
-  HAL/S instructions at 0x02 and 0x03 (see [STATUS.md](../STATUS.md);
-  possibly renamed/restructured successors to DLPI/DLEI) is speculative.
+- ~~The relationship (if any) between STRI and the separately-opcoded
+  HAL/S instructions at 0x02 and 0x03... is speculative.~~ **Resolved**:
+  0x02/0x03 are [SLRI](SLRI.md)/[ELRI](ELRI.md), HAL/S's renamed successors
+  to HAL-1971's DLPI/DLEI, empirically confirmed — see Usage Context above.
 
 ## Source Analysis & Reliability
 

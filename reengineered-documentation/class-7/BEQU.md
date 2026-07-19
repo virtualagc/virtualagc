@@ -18,8 +18,10 @@ type, regardless of operand type.
 Emitted for HAL/S expressions using the `=` comparison operator between
 two BIT operands, typically as the test of an `IF`, `DO WHILE`, or `DO
 UNTIL` statement (directly, or via a following
-[FBRA](../class-0/FBRA.md)/[BBRA](../STATUS.md)-family branch consuming
-the result).
+[FBRA](../class-0/FBRA.md) branch consuming the result — HAL/S has no
+separate `BBRA`; that mnemonic exists only in the HAL-1971 predecessor's
+own, differently-organized opcode space, at an unrelated "computed
+branch" role — see `STATUS.md`'s Class 0 branch-instruction notes).
 
 ## Unresolved Questions
 

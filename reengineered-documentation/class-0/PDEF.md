@@ -10,8 +10,7 @@
 
 Procedure definition header. PDEF is the first significant instruction of
 the HALMAT text for a HAL/S *procedure* compilation unit, matched by a
-closing `CLOS` operator (opcode 0x030, not yet documented — see
-[STATUS.md](../STATUS.md)) at the end of the text.
+closing [CLOS](CLOS.md) operator (opcode 0x030) at the end of the text.
 
 ```
  31         24 23         16 15      12 11         4  3    1 0

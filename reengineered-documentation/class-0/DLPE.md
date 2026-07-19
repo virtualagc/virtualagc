@@ -10,8 +10,12 @@
 
 End of array- and structureness-specification. A fixed-format terminator
 instruction (no meaningful operands) used to close a sequence of one or
-more [ADLP](ADLP.md) (arrayness) and/or SDLP (structureness, not yet
-documented for HAL/S — see [STATUS.md](../STATUS.md)) instructions.
+more [ADLP](ADLP.md) instructions — confirmed this session that HAL/S
+never split arrayness and structureness into separate opcodes (no
+distinct SDLP exists): ADLP itself serves both roles, matching
+[MSC-01847]'s predecessor-language section title "ARRAYNESS and
+STRUCTURENESS SPECIFIERS" — see [ADLP](ADLP.md)'s "role 3" for the
+structureness case and its full worked trace.
 
 ## Usage Context
 

@@ -14,7 +14,7 @@ conversion or reshaping pseudo-function such as `BIT(...)`, `CHARACTER(...)`,
 `VECTOR(...)`, `MATRIX(...)`, `INTEGER(...)`, `SCALAR(...)`, or the
 `CONTENT` pseudo-variable. Carries the current function-nesting level (for
 shaping functions nested inside other shaping functions) and an internal
-flow number shared with the related [BFNC](../STATUS.md)-or-equivalent
+flow number shared with the related [BFNC](BFNC.md)-or-equivalent
 invocation instruction.
 
 ## Usage Context
@@ -28,7 +28,7 @@ CONTENT usage).
 ## Unresolved Questions
 
 - HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
-- The relationship between SFST/SFAR/SFND and [BFNC](../STATUS.md) (HAL/S
+- The relationship between SFST/SFAR/SFND and [BFNC](BFNC.md) (HAL/S
   opcode 0x04A, "built-in function," per [IR-60-5] A-112's Optimizer-HALMAT
   SINCOS note) is presumed but not confirmed — in the predecessor language
   the analogous invocation instruction is FUNC, not a BFNC-named opcode.
