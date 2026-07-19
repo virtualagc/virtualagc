@@ -955,11 +955,27 @@ features (full detail and worked traces in
   `DSUB` partition-copy loop followed by an ordinary arithmetic loop of
   the same size was *not* fused; the exact fusion criteria are not fully
   characterized.
+- **MAT/VEC op bit confirmed**: `V3 = V1 + V2;` for `V1`/`V2`/`V3`
+  declared `ARRAY(4) VECTOR(3)` (vector arrayness *inside an array
+  loop*, as opposed to a bare fixed-size `VECTOR(3)` operation — tested
+  first and found to need no `ADLP`/`DLPE` bracket at all, since HAL/S
+  evaluates small fixed-size `VECTOR`/`MATRIX` arithmetic directly) shows
+  every operand inside the loop (both operands, the `VADD` result, and
+  the assignment target) gaining the same single new TAG2 bit
+  post-optimization, matching "1 if the operand ... possesses
+  vector/matrix arrayness" exactly.
+- **ADLP arrayness-specifier tag partially confirmed**: same test —
+  `ADLP`'s own size operand gains a nonzero `TAG1` value (`5`) precisely
+  when the loop involves vector arrayness, alongside its `DATA` field
+  changing from the array element count (`4`) to the total scalar-word
+  count (`12` = 4×3) — consistent with "gains an arrayness-specifier
+  bit," though a `MATRIX` case and a second `VECTOR` dimension would be
+  needed to fully separate the bit's meaning from an incidental value.
 
-Still [IR-60-5]-only, not yet independently triggered: Cross Block and
-MAT/VEC-op bits; DSUB's subscript-common-expression operand; the
-integer-product subscript TAG; and the ADLP/DLPE inline-vector/
-matrix-loop bits.
+Still [IR-60-5]-only, not yet independently triggered: Cross Block;
+DSUB's subscript-common-expression operand; the integer-product
+subscript TAG; and the `MATRIX`-specific/multi-dimensional-`VECTOR`
+cases of the ADLP/DLPE inline-vector/matrix-loop bits.
 
 ## Empirical Verification (Phase 2)
 

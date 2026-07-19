@@ -280,7 +280,21 @@ post-optimization.
   is referenced by inter-VAC operands), a **Cross Block** bit (1 if PTR
   refers to the previous HALMAT record), and a **MAT/VEC op** bit (1 if the
   operand, inside a vector/matrix loop, possesses vector/matrix arrayness).
-  **CSE bit empirically confirmed this session**, same test as above: the
+  **MAT/VEC op bit empirically confirmed in a later session**: compiling
+  `V3 = V1 + V2;` for `V1`/`V2`/`V3` declared `ARRAY(4) VECTOR(3)` (an
+  array of vectors, i.e. genuinely "vector arrayness inside a[n array]
+  loop," as opposed to a bare `VECTOR(3)` operation — which was tested
+  first and found to need **no** `ADLP`/`DLPE` bracket at all, since
+  HAL/S evaluates fixed-size `VECTOR`/`MATRIX` arithmetic directly rather
+  than looping) shows every operand inside the resulting `ADLP`/`DLPE`-
+  bracketed `VADD`/`VASN` (both `V1` and `V2`'s references, the `VADD`
+  result's `VAC`, and `V3`) gaining exactly one new bit, isolated by
+  comparing `unHALMAT.py`'s field-by-field decode: the middle bit of the
+  3-bit TAG2 field (value `2` out of `0`/`2`/`4`/`6` in this position),
+  present pre-optimization as `0` and post-optimization as `2` uniformly
+  across all four operands — matching "1 if the operand ... possesses
+  vector/matrix arrayness" exactly, since every operand here genuinely is
+  vector-typed. **CSE bit empirically confirmed this session**, same test as above: the
   VAC operand referencing the CSE-flagged `SADD` from *within* the same
   statement (the doubling addition's second `X + Y` reference) carries an
   extra nonzero tag not present on an ordinary VAC operand — consistent
@@ -351,16 +365,29 @@ post-optimization.
   `MSPR`/`VSPR`, and `MSDV`/`VSDV` — presumably Class 3 (matrix) and Class 4
   (vector) assign/negate/add/subtract/scalar-product/scalar-divide
   operators, though their opcodes have not yet been confirmed against
-  primary source.
+  primary source. **Arrayness-specifier tag partially confirmed in a
+  later session**, same `ARRAY(4) VECTOR(3)` test as the MAT/VEC op bit
+  above: `ADLP`'s own size operand gains a nonzero `TAG1` value (`5`,
+  where the pre-optimization value is always `0`) precisely when the
+  loop involves vector arrayness, alongside its `DATA` field changing
+  from `4` (the array element count) to `12` (element count × vector
+  dimension — i.e. total scalar-word count) — consistent with "gains an
+  arrayness-specifier bit" but not enough data points yet (no `MATRIX`
+  case, no second `VECTOR` dimension tested) to separate the specific
+  bit meaning of `5` from an incidental value, or to confirm whether the
+  `DATA`-field reinterpretation (count of vector-typed elements → count
+  of underlying scalar words) is itself part of the documented mechanism
+  or a separate, related OPT behavior.
 
 [^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6). CSE
-    (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop, and
-    SINCOS all empirically confirmed against real compiled HALMAT
-    (`halmat.bin` vs. `optmat.bin` diffing), across two sessions — see the
-    confirmations inline above. Remaining bullets (Cross Block, MAT/VEC op,
-    subscript common expressions, integer-product subscript TAG, inline
-    vector/matrix loop bits) remain [IR-60-5]-only, not yet independently
-    triggered.
+    (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop,
+    SINCOS, MAT/VEC op, and ADLP's arrayness-specifier tag (partial) all
+    empirically confirmed against real compiled HALMAT (`halmat.bin` vs.
+    `optmat.bin` diffing), across two sessions — see the confirmations
+    inline above. Remaining bullets (Cross Block; subscript common
+    expressions; integer-product subscript TAG; `MATRIX`-specific and
+    multi-dimensional `VECTOR` cases of the inline vector/matrix loop
+    bits) remain [IR-60-5]-only, not yet independently triggered.
 
 ## Auxiliary HALMAT (AUXMAT)
 
