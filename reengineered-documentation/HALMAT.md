@@ -386,34 +386,39 @@ post-optimization.
   `MSPR`/`VSPR`, and `MSDV`/`VSDV` — presumably Class 3 (matrix) and Class 4
   (vector) assign/negate/add/subtract/scalar-product/scalar-divide
   operators, though their opcodes have not yet been confirmed against
-  primary source. **Arrayness-specifier tag partially confirmed in a
-  later session**, same `ARRAY(4) VECTOR(3)` test as the MAT/VEC op bit
-  above: `ADLP`'s own size operand gains a nonzero `TAG1` value (`5`,
-  where the pre-optimization value is always `0`) precisely when the
-  loop involves vector arrayness, alongside its `DATA` field changing
-  from `4` (the array element count) to `12` (element count × vector
-  dimension — i.e. total scalar-word count) — consistent with "gains an
-  arrayness-specifier bit" but not enough data points yet (no `MATRIX`
-  case, no second `VECTOR` dimension tested) to separate the specific
-  bit meaning of `5` from an incidental value, or to confirm whether the
-  `DATA`-field reinterpretation (count of vector-typed elements → count
-  of underlying scalar words) is itself part of the documented mechanism
-  or a separate, related OPT behavior.
+  primary source. **Arrayness-specifier tag confirmed in a later
+  session**, extending the `ARRAY(4) VECTOR(3)` test above with a second,
+  `MATRIX` case: `M3 = M1 + M2;` for `M1`/`M2`/`M3` declared
+  `ARRAY(3) MATRIX(2,2)` shows the *identical* pattern — `ADLP`'s size
+  operand's `TAG1` goes from `0` to `5`, and its `DATA` field goes from
+  `3` (the array element count) to `12` (element count × matrix size,
+  `3×4`, mirroring the `VECTOR` case's element-count × vector-dimension
+  scaling) — with the same `MADD`/`MASN` operands all gaining the
+  identical MAT/VEC op TAG2 bit described above. Both the `VECTOR(3)`
+  case (`TAG1`=5, scale factor 3) and the `MATRIX(2,2)` case (`TAG1`=5,
+  scale factor 4, i.e. a *different* per-element word count) land on the
+  exact same `TAG1`=`5` value, confirming this is a fixed
+  "vector/matrix-arrayed loop" flag rather than something that encodes
+  the specific element type or dimension — the `DATA`-field
+  reinterpretation (element count → total scalar-word count) scales
+  correctly with each type's own word size in both cases, confirming it
+  as part of the same mechanism rather than a coincidence. A second
+  `VECTOR` dimension (e.g. `VECTOR(2)`) was not additionally tested, but
+  the `MATRIX` cross-check already rules out dimension-encoding in
+  `TAG1` itself.
 
 [^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6). CSE
     (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop,
-    SINCOS, MAT/VEC op, ADLP's arrayness-specifier tag (partial),
-    subscript common expressions, and the integer-product subscript TAG
-    all empirically confirmed against real compiled HALMAT (`halmat.bin`
-    vs. `optmat.bin` diffing), across two sessions — see the
-    confirmations inline above. Remaining bullets (Cross Block;
-    `MATRIX`-specific and multi-dimensional `VECTOR` cases of the inline
-    vector/matrix loop bits) remain [IR-60-5]-only, not yet independently
-    triggered — Cross Block in particular is expected to be
-    disproportionately hard to trigger deliberately, since it requires a
-    reference crossing a 7200-byte/1800-paragraph HALMAT *record*
-    boundary, which in practice means a program large enough to span
-    multiple records.
+    SINCOS, MAT/VEC op, ADLP's arrayness-specifier tag (`VECTOR` and
+    `MATRIX` cases both), subscript common expressions, and the
+    integer-product subscript TAG all empirically confirmed against real
+    compiled HALMAT (`halmat.bin` vs. `optmat.bin` diffing), across two
+    sessions — see the confirmations inline above. Only Cross Block
+    remains [IR-60-5]-only, not yet independently triggered — it is
+    expected to be disproportionately hard to trigger deliberately,
+    since it requires a reference crossing a 7200-byte/1800-paragraph
+    HALMAT *record* boundary, which in practice means a program large
+    enough to span multiple records.
 
 ## Auxiliary HALMAT (AUXMAT)
 

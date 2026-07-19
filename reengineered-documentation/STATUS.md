@@ -964,13 +964,17 @@ features (full detail and worked traces in
   the assignment target) gaining the same single new TAG2 bit
   post-optimization, matching "1 if the operand ... possesses
   vector/matrix arrayness" exactly.
-- **ADLP arrayness-specifier tag partially confirmed**: same test —
-  `ADLP`'s own size operand gains a nonzero `TAG1` value (`5`) precisely
-  when the loop involves vector arrayness, alongside its `DATA` field
-  changing from the array element count (`4`) to the total scalar-word
-  count (`12` = 4×3) — consistent with "gains an arrayness-specifier
-  bit," though a `MATRIX` case and a second `VECTOR` dimension would be
-  needed to fully separate the bit's meaning from an incidental value.
+- **ADLP arrayness-specifier tag confirmed**: same test, plus a `MATRIX`
+  cross-check (`M3 = M1 + M2;`, `ARRAY(3) MATRIX(2,2)`) — `ADLP`'s own
+  size operand gains a nonzero `TAG1` value of `5` in *both* cases
+  (`VECTOR` and `MATRIX`), with its `DATA` field changing from the array
+  element count to the total scalar-word count (element count × the
+  type's own word size — `4×3=12` for the `VECTOR` case, `3×4=12` for
+  the `MATRIX` case) — the identical `TAG1`=`5` value across two
+  different element types/sizes confirms this is a fixed
+  "vector/matrix-arrayed loop" flag rather than a dimension-encoded
+  value, and that the `DATA`-field reinterpretation is part of the same
+  mechanism, not a coincidence.
 - **Subscript common expression and integer-product subscript TAG both
   confirmed, by the same test**: `S2 = S1(I1,I2);` for a 2-D
   `ARRAY(3,4) SCALAR S1` with `INTEGER` (runtime-valued, not
@@ -986,13 +990,13 @@ features (full detail and worked traces in
   this instruction has no pre-optimization counterpart to compare
   against. Full trace in [HALMAT.md](HALMAT.md#optimizer-halmat).
 
-Still [IR-60-5]-only, not yet independently triggered: Cross Block, and
-the `MATRIX`-specific/multi-dimensional-`VECTOR` cases of the ADLP/DLPE
-inline-vector/matrix-loop bits. Cross Block is expected to be
-disproportionately hard to trigger deliberately — it requires a
-reference crossing a 7200-byte/1800-paragraph HALMAT *record* boundary,
-which in practice means a program large enough to span multiple
-records.
+Only **Cross Block** remains [IR-60-5]-only, not yet independently
+triggered — it is expected to be disproportionately hard to trigger
+deliberately, since it requires a reference crossing a
+7200-byte/1800-paragraph HALMAT *record* boundary, which in practice
+means a program large enough to span multiple records. Every other
+Optimizer HALMAT feature named in [HALMAT.md](HALMAT.md#optimizer-halmat)
+is now empirically confirmed against real compiled HALMAT.
 
 ## Empirical Verification (Phase 2)
 
@@ -1264,18 +1268,15 @@ marked empirically confirmed.
    compiler-source/real-HALMAT verification is as complete as possible.
    A future session should not start this task while any other Phase 2
    empirical-verification work remains open. **Status as of this
-   session**: nearly everything else is now closed — every opcode is
-   documented at High confidence, [MSC-01847] is fully reviewed, and
-   `HALMAT.md`'s "Optimizer HALMAT" section has only two items left
-   untriggered (Cross Block, flagged as disproportionately hard to
-   reach deliberately since it needs a program large enough to span
-   multiple 7200-byte HALMAT records; and the `MATRIX`-specific/
-   multi-dimensional-`VECTOR` cases of the inline vector/matrix loop
-   bits, a narrower gap alongside the already-confirmed `VECTOR`/1-D
-   case). A future session could reasonably treat those two as an
-   acceptable residual and proceed to the [Halmat.pdf] comparison, or
-   spend more effort on Cross Block first — a judgment call for whoever
-   picks this up next, not preempted here.
+   session**: essentially everything else is now closed — every opcode
+   is documented at High confidence, [MSC-01847] is fully reviewed, and
+   `HALMAT.md`'s "Optimizer HALMAT" section has only **one** item left
+   untriggered: Cross Block, flagged as disproportionately hard to reach
+   deliberately since it needs a program large enough to span multiple
+   7200-byte HALMAT records. A future session could reasonably treat
+   that single item as an acceptable residual and proceed to the
+   [Halmat.pdf] comparison, or spend more effort on Cross Block first —
+   a judgment call for whoever picks this up next, not preempted here.
 3. ~~Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
    part3 p. 41)~~ — **done**: [MSC-01847] is now fully reviewed, page for
    page, with no remaining gaps. The tail turned out to contain a genuine
