@@ -150,6 +150,82 @@ same literal-folding-to-immediate pattern already seen elsewhere in this
 project (e.g. [XXST](XXST.md)'s/[READ](READ.md)'s device numbers), not a
 correction to the primary source.
 
+**Remaining rows confirmed in a later session** — to-partition,
+at-partition, component (`CHARACTER`) subscripting, and the `CSZ`
+subsidiary-operand mechanism, closing out every row of the "detailed"
+table above:
+
+- **Array to-partition** (`S1(2 TO 5)`, an `ARRAY(10) SCALAR` sliced into
+  an `ARRAY(4)` receiver): confirms `α`=6/6, `β`=1/0 exactly:
+  ```
+  HALMAT: 019(3),5,0
+            2(1),0,0             <- op 1: S1, QUAL=1=SYT
+            2(6),6,1             <- op 2: literal 2 (range start), QUAL=6=IMD, α=6, β=1
+            5(6),6,0             <- op 3: literal 5 (range end), QUAL=6=IMD, α=6, β=0
+  ```
+- **Array at-partition** (`S1(2 AT 4)`): note the argument order is
+  **length AT position** (`2 AT 4"` = 2 elements starting at position 4),
+  not "position AT length" — confirmed by the arrayness-mismatch error
+  produced by the other reading. Confirms `α`=7/7, `β`=1/0 exactly:
+  ```
+  HALMAT: 019(3),5,0
+            2(1),0,0             <- op 1: S1, QUAL=1=SYT
+            2(6),7,1             <- op 2: literal 2 (the length), QUAL=6=IMD, α=7, β=1
+            4(6),7,0             <- op 3: literal 4 (the position), QUAL=6=IMD, α=7, β=0
+  ```
+- **Component (`CHARACTER`) to-partition** (`C1(2 TO 5)`, a substring):
+  confirms `α`=2/2 (the *component* column, distinct from the
+  array-dimension `α`=6 above), `β`=1/0, and — notably — the operator
+  word's own `TAG` (2, not 5) directly signals "component" vs.
+  "array-dimension" subscripting:
+  ```
+  HALMAT: 019(3),2,0            <- TAG=2 (component), vs. TAG=5 for array-dimension cases
+            2(1),0,0               <- op 1: C1, QUAL=1=SYT
+            2(6),2,1               <- op 2: literal 2 (start), QUAL=6=IMD, α=2, β=1
+            5(6),2,0               <- op 3: literal 5 (end), QUAL=6=IMD, α=2, β=0
+  ```
+- **`CSZ`, case (a) — bare `#`** (`C1(2 TO #)`, "from position 2 to the
+  string's actual current length"): the second range operand becomes
+  `QUAL`=8=`CSZ` with `DATA`=0 and no subsidiary operand, exactly
+  matching the primary-source diagram:
+  ```
+  HALMAT: 019(3),2,0
+            2(1),0,0               <- op 1: C1, QUAL=1=SYT
+            2(6),2,1               <- op 2: literal 2 (start), QUAL=6=IMD
+            0(8),2,0               <- op 3: DATA=0, QUAL=8=CSZ, α=2 (bare "#")
+  ```
+- **`CSZ`, case (b) — `# ± expression`** (`C1(2 TO # - 2)`): the `CSZ`
+  operand gains a **fourth** operand word immediately after it, holding
+  the expression's own value — `NUMOP` grows from 3 to 4 accordingly:
+  ```
+  HALMAT: 019(4),2,0
+            2(1),0,0               <- op 1: C1, QUAL=1=SYT
+            2(6),2,1               <- op 2: literal 2 (start), QUAL=6=IMD
+            2(8),2,0               <- op 3: DATA=2, QUAL=8=CSZ, α=2 ("# - expression")
+            2(6),0,0               <- op 4: literal 2 (the subsidiary expression value), QUAL=6=IMD
+  ```
+  The primary-source formula ("`tag` = 1 + expression, or 2 − expression")
+  is confirmed structurally (a nonzero `DATA` appears on the `CSZ`
+  operand precisely when a `±expression` is present, `0` when bare `#`
+  alone) but not fully pinned down bit-for-bit — `DATA`=2 was observed
+  for `# - 2`; testing `# + n` and a non-literal expression would be
+  needed to fully separate the `+`-vs-`−` encoding from the "is this a
+  literal" encoding.
+- **`ASZ` — genuinely does not appear in DSUB for the case tested**:
+  `S1(2 TO #)` for a fixed-size `ARRAY(10)` resolves `#` directly to the
+  compile-time-known literal bound (`10`, plain `IMD`), never to an
+  `ASZ`-qualified operand — unlike `CHARACTER`'s `CSZ`, `#` for an
+  `ARRAY` never needs a *runtime* length lookup, since HAL/S array bounds
+  are always compile-time-fixed (arrays have no "current vs. declared
+  length" distinction the way `CHARACTER` strings do). Tracing
+  `PASS1.PROCS/EMITARRA.xpl`'s `EMIT_ARRAYNESS` procedure shows `XASZ`
+  actually used in a **different** context entirely — as an operand
+  qualifier in [ADLP](ADLP.md)'s own operand list, for a negative
+  `CURRENT_ARRAYNESS(I)` sentinel value (presumably an
+  externally/symbolically-sized dimension, e.g. a `COMPOOL` array with an
+  `EXTERNAL`-defined bound) — not something DSUB's own subscript operands
+  ever carry in the cases tested here.
+
 See also [TSUB](../STATUS.md) (not yet documented), which appears alongside
 DSUB in the source material's subscripting discussion and is presumably a
 related, simpler subscript-specifier form.
@@ -184,16 +260,23 @@ not simply renamed and kept as separate HAL/S opcodes).
   appears to be a lookup/dispatch table in the compiler; their operational
   meaning beyond "selects a subscript-handling code path" is unconfirmed.
   Given the consolidation noted above, `α` plausibly encodes which of the
-  nine predecessor specifier-kinds applies. **Partially resolved this
-  session**: `α`=5 (index)/`α`=4 (asterisk) both empirically confirmed
-  against real compiled HALMAT for the array-dimension case (see Usage
-  Context) — the remaining unconfirmed rows are the *component*-subscript
-  values and the to-/at-partition forms (2 operands each), none tested
-  yet.
-- The to-partition/at-partition (2-operand) subscript kinds, component
+  nine predecessor specifier-kinds applies. **Fully resolved across two
+  sessions**: every row of the "detailed" table — index (`α`=5/1),
+  asterisk (`α`=4/0), array to-partition (`α`=6/6), array at-partition
+  (`α`=7/7), component to-partition (`α`=2/2), and the `CSZ` bare-`#` and
+  `# ± expression` cases — is now empirically confirmed against real
+  compiled HALMAT (see Usage Context). `ASZ` was traced to a different
+  instruction ([ADLP](ADLP.md)) entirely rather than confirmed as a DSUB
+  operand qualifier — see that row's note below.
+- ~~The to-partition/at-partition (2-operand) subscript kinds, component
   (rather than array-dimension) subscripting, and the CSZ/ASZ subsidiary-
   operand mechanism were not tested this session — only single-operand
-  array-dimension index/asterisk forms were compiled.
+  array-dimension index/asterisk forms were compiled.~~ **Resolved in a
+  later session**: all of these are now confirmed — see Usage Context.
+  The one open item is the exact bit encoding distinguishing `+`
+  vs. `−` in the `CSZ`/`# ± expression` case (a `DATA`=2 value was
+  observed for `# - 2`, but the `+` case and a non-literal expression
+  were not tested).
 
 ## Source Analysis & Reliability
 
@@ -213,3 +296,16 @@ discovering the array-subscript source syntax requires the same
 `S`-prefixed continuation-line convention already established for
 [ERON](ERON.md)/[TSUB](TSUB.md) — a same-line `var(subscript)` form was
 rejected by this compiler build. See Usage Context above for the traces.
+
+**Remaining rows confirmed in a later session**: the to-partition,
+at-partition, component (`CHARACTER`) subscripting, and `CSZ`
+subsidiary-operand rows were all directly confirmed via `unHALMAT.py`
+against real compiled HALMAT, closing out every row of the primary
+source's "detailed" table. `ASZ` was not found in DSUB's own operand
+list for the array case tested (`#` resolves directly to a compile-time
+literal for arrays); source tracing via `EMITARRA.xpl` located `XASZ`
+use instead in [ADLP](ADLP.md)'s operand list, for a negative
+`CURRENT_ARRAYNESS(I)` sentinel — a different instruction and context
+than DSUB's own subscript operands. This makes DSUB one of the most
+thoroughly empirically-confirmed Class 0 instructions in this corpus.
+See Usage Context above for the full traces.
