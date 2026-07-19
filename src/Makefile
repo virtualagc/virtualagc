@@ -6,9 +6,10 @@ CC := $(shell command -v clang >/dev/null 2>&1 && echo clang || echo gcc)
 endif
 
 CFLAGS ?= -std=c99 -Wall -Wextra -g -O0
-LDFLAGS ?=
+LDFLAGS ?= -lm
 
-SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c
+SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
+        literal.c ebcdic.c interp.c
 OBJS := $(SRCS:.c=.o)
 TARGET := yaHALMAT2
 
