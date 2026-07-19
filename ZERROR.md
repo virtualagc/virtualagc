@@ -72,14 +72,17 @@ this project independently hit and fixed for the same instruction.
 
 ---
 
-## New Phase 2 avenue this comparison surfaced (not a Halmat.pdf error)
+## Bonus finding this comparison surfaced (not a Halmat.pdf error)
 
 `Halmat.pdf`'s `MATRIX(3,3)` subscripting examples (pp. 111–113) show
 `DSUB`'s per-operand `TAG1` ("α") value as `1` for the "index" subscript
 kind, where our own documentation had it as `5` — established only from
-`ARRAY` subscripting tests. We confirmed `Halmat.pdf` is correct here:
-compiling matrix-subscript references ourselves reproduces `TAG1`=1 for
-`MATRIX`. So `DSUB`'s "index" α is container-type-dependent (`ARRAY`=5,
-`MATRIX`=1, `VECTOR` untested) — a real gap in our own subscript-kind
-table, now noted in `class-0/DSUB.md`, worth a full re-sweep against
-`MATRIX`/`VECTOR` containers in a future session.
+`ARRAY` subscripting tests. A follow-up sweep (asterisk/index/
+to-partition/at-partition, on both `VECTOR(3)` and `MATRIX(3,3)`)
+resolved this fully: `VECTOR`/`MATRIX` element subscripting doesn't use
+a separate scheme at all — it reuses the primary source's existing
+"component" α column (0/1/2/3), the same one previously confirmed only
+for `CHARACTER` structure-terminal access. The real axis the primary
+source's table draws is "`ARRAY`-dimension subscripting" (α=4–7) vs.
+"everything else" (α=0–3), not "array vs. component" read literally.
+Now fully documented in `class-0/DSUB.md`.

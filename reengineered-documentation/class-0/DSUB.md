@@ -73,6 +73,16 @@ whether the component is character type or another type:
 | to-partition | 2 | 6 / 6 | 2 / 2 | 1 / 0 | IMD | EEV, CSZ / EEV, CSZ | IMD |
 | at-partition | 2 | 7 / 7 | 3 / 3 | 1 / 0 | IMD / EEV, ASZ | EEV | EEV |
 
+**Empirically confirmed in a later session**: the "component" column
+isn't limited to structure-terminal (`CHARACTER`) component access — it
+is also exactly what `VECTOR`/`MATRIX` element subscripting uses (`V1(3)`,
+`M1(1,2)`, `M1(1,*)`, `V1(2 TO 3)`, `M1(2 AT 1,1)`, etc., all give the
+`α`=0/1/2/3 "component" values, never the `α`=4/5/6/7 "array" values —
+see Unresolved Questions for the full worked confirmation). The table's
+real axis is "subscripting an `ARRAY` dimension" vs. "subscripting
+anything else" (structure component *or* `VECTOR`/`MATRIX` element),
+not "array vs. component" read literally.
+
 If an operand's `qual` is CSZ or ASZ, it may be immediately followed by one
 extra subsidiary operand word specifying `# ± expression` (a size given
 relative to a compile-time-unknown character-string or array length):
@@ -286,18 +296,35 @@ not simply renamed and kept as separate HAL/S opcodes).
   vs. `−` in the `CSZ`/`# ± expression` case (a `DATA`=2 value was
   observed for `# - 2`, but the `+` case and a non-literal expression
   were not tested).
-- **New, found via a Halmat.pdf cross-check**: the "index" row's `α`
-  value of `5` (established above) turns out to be specific to `ARRAY`
-  subscripting — a `MATRIX` subscripted the same way (`M1(1,2)` and
-  `M1(I1,I2)`, both literal and variable forms, on a real `MATRIX(3,3)`)
-  gives `α`=`1` instead, confirmed directly via `unHALMAT.py`. The
-  "detailed" table's array/component split therefore isn't the whole
-  picture — `α` for at least the "index" kind also depends on the
-  *container* type (`ARRAY` vs `MATRIX`, and presumably `VECTOR`, not
-  yet tested). The primary source's table may simply not have a row for
-  matrix subscripting, or may fold it into a category not yet
-  identified. Worth a full re-sweep of every subscript kind against
-  `MATRIX`/`VECTOR` containers, not just `ARRAY`.
+- ~~The "detailed" table's array/component split may not be the whole
+  picture — `α` for at least the "index" kind may also depend on the
+  container type (`ARRAY` vs `MATRIX`/`VECTOR`).~~ **Resolved in a full
+  sweep**: `VECTOR`/`MATRIX` subscripting doesn't need a third `α`
+  column at all — it simply **reuses the primary source's existing
+  "component" column** (`α`=0/1/2/3 for asterisk/index/to-partition/
+  at-partition), the same column previously confirmed only for
+  `CHARACTER` structure-terminal subscripting. Confirmed for every kind,
+  on both `VECTOR(3)` and `MATRIX(3,3)`:
+  - **Asterisk** (`V1(*)`, whole-vector select; `M1(1,*)`, row select):
+    `α`=0 in both cases (matches the component column's `*` row exactly).
+  - **Index** (`V1(3)`/`V1(I1)`; `M1(1,2)`/`M1(I1,I2)`): `α`=1 in every
+    case, literal or variable (this is the row that first surfaced the
+    discrepancy — see Halmat.pdf's own `MATRIX(3,3)` examples, which
+    independently show the same `α`=1).
+  - **To-partition** (`V1(2 TO 3)`; `M1(1 TO 2,1)`, partial-column
+    select): `α`=2/2 in both cases.
+  - **At-partition** (`V1(2 AT 2)`; `M1(2 AT 1,1)`): `α`=3/3 in both
+    cases.
+  So the real distinction the primary source's table draws is not
+  "array vs. component" but "`ARRAY`-dimension subscripting" (`α`=4–7)
+  vs. "everything else" (`α`=0–3) — structure-terminal component access
+  and `VECTOR`/`MATRIX` element access both fall in the latter bucket
+  and share its numbering exactly. `DSUB`'s own operator-word `TAG` was
+  also confirmed in the same sweep to simply be **the HALMAT class
+  number of the subscripted *result*'s type** (`5`=`SCALAR` for every
+  single-element access tested earlier; `4`=`VECTOR` for `V1(*)` and
+  `M1(1,*)`, which don't reduce dimensionality) — not a
+  subscript-kind-specific tag as earlier phrasing implied.
 
 ## Source Analysis & Reliability
 
