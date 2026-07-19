@@ -13,6 +13,10 @@
 #define OP_XREC 0x002
 #define OP_SMRK 0x004
 #define OP_PXRC 0x005
+#define OP_IFHD 0x007
+#define OP_LBL 0x008
+#define OP_BRA 0x009
+#define OP_FBRA 0x00A
 #define OP_DTST 0x00E
 #define OP_ETST 0x00F
 #define OP_DSMP 0x013
@@ -153,6 +157,26 @@ static void precompute_loop_targets(halmat_state_t *state) {
     }
 }
 
+/* LBL destinations for BRA/FBRA (IF/THEN/ELSE), keyed by INL label
+ * number -- a flat table, not stack-based, since BRA/FBRA/LBL don't
+ * nest the way DTST/CTST/ETST do (see class-0/LBL.md, class-0/BRA.md,
+ * class-0/FBRA.md). Confirmed against a real compiled test_ifelse.hal
+ * trace: the branch target is LBL's own position (a no-op instruction),
+ * not position+1 -- falling through it naturally lands one past it. */
+static void precompute_labels(halmat_state_t *state) {
+    state->label_pos = malloc(HALMAT_LABEL_MAX * sizeof(size_t));
+    for (size_t i = 0; i < HALMAT_LABEL_MAX; i++) {
+        state->label_pos[i] = NO_TARGET;
+    }
+    for (size_t i = 0; i < state->prog->count; i++) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if (ins->opcode == OP_LBL && ins->operand_count == 1) {
+            uint16_t label = ins->operands[0].data;
+            if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i;
+        }
+    }
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
@@ -160,13 +184,16 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->literals = literals;
     state->num_blanks = num_blanks;
     precompute_loop_targets(state);
+    precompute_labels(state);
 }
 
 void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
+    free(state->label_pos);
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
+    state->label_pos = NULL;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -204,11 +231,32 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_DSMP:
             case OP_ESMP:
             case OP_DTST:
-                /* Structural/bookkeeping markers; no runtime effect for a
-                 * single straight-line program (see Plan.md M4 step 2).
-                 * DTST just opens a loop's bookkeeping label -- the real
-                 * work happens in CTST/ETST below. */
+            case OP_IFHD:
+            case OP_LBL:
+                /* Structural/bookkeeping markers; no runtime effect on
+                 * their own. DTST/LBL just open a bookkeeping label --
+                 * the real work happens in CTST/ETST/BRA/FBRA below. */
                 break;
+
+            case OP_BRA:
+            case OP_FBRA: {
+                if (ins->opcode == OP_FBRA) {
+                    if (ins->operand_count != 2) { fail(state, "FBRA: expected 2 operands"); break; }
+                    if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                    if (a.integer != 0) break; /* condition true: fall through, no branch */
+                } else if (ins->operand_count != 1) {
+                    fail(state, "BRA: expected 1 operand");
+                    break;
+                }
+                uint16_t label = ins->operands[0].data;
+                if (label >= HALMAT_LABEL_MAX || state->label_pos[label] == NO_TARGET) {
+                    fail(state, "branch to undefined label %u", label);
+                    break;
+                }
+                state->pc = state->label_pos[label];
+                branched = true;
+                break;
+            }
 
             case OP_INEQ:
             case OP_IEQU:

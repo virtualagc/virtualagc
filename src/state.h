@@ -61,6 +61,14 @@ struct halmat_state {
      * where not applicable. See interp.c's precompute_loop_targets(). */
     size_t *ctst_exit_target;
     size_t *etst_back_target;
+
+    /* LBL destinations for BRA/FBRA (IF/THEN/ELSE), keyed by the INL
+     * "bookkeeping label" number carried by LBL/BRA/FBRA's own operand --
+     * a separate numbering/table from the loop labels above. Sized
+     * HALMAT_LABEL_MAX; NO_TARGET where unset. See precompute_labels(). */
+    size_t *label_pos;
 };
+
+#define HALMAT_LABEL_MAX 4096
 
 #endif
