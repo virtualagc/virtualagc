@@ -17,10 +17,13 @@
 #define OP_LBL 0x008
 #define OP_BRA 0x009
 #define OP_FBRA 0x00A
-#define OP_DTST 0x00E
-#define OP_ETST 0x00F
+#define OP_DFOR 0x010
+#define OP_EFOR 0x011
 #define OP_DSMP 0x013
 #define OP_ESMP 0x014
+#define OP_AFOR 0x015
+#define OP_DTST 0x00E
+#define OP_ETST 0x00F
 #define OP_CTST 0x016
 #define OP_WRIT 0x021
 #define OP_XXST 0x025
@@ -177,6 +180,66 @@ static void precompute_labels(halmat_state_t *state) {
     }
 }
 
+/* List-form DO FOR (class-0/AFOR.md's "call-and-computed-return"
+ * mechanism): a DFOR with exactly 2 operands (construct id + control
+ * variable, no range literals -- see class-0/DFOR.md) opens the list,
+ * followed immediately by one AFOR per value, then the (single, shared)
+ * loop body, then the matching EFOR. Range-form DO FOR (DFOR with 4+
+ * operands) isn't implemented yet -- efor_is_list_form stays false for
+ * it, and EFOR fails loudly rather than misbehaving silently. */
+#define FOR_STACK_MAX 64
+
+static void precompute_for_loops(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->afor_body_target = malloc(n * sizeof(size_t));
+    state->afor_return_target = malloc(n * sizeof(size_t));
+    state->afor_control_var = calloc(n, sizeof(uint16_t));
+    state->efor_is_list_form = calloc(n, sizeof(bool));
+    for (size_t i = 0; i < n; i++) {
+        state->afor_body_target[i] = NO_TARGET;
+        state->afor_return_target[i] = NO_TARGET;
+    }
+
+    struct {
+        bool is_list;
+        uint16_t control_var;
+        size_t afor_positions[HALMAT_MAX_OPERANDS * 8]; /* generous: real lists are short */
+        size_t afor_count;
+    } stack[FOR_STACK_MAX];
+    int sp = 0;
+
+    for (size_t i = 0; i < n; i++) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if (ins->opcode == OP_DFOR) {
+            if (sp < FOR_STACK_MAX) {
+                bool is_list = (ins->operand_count == 2);
+                stack[sp].is_list = is_list;
+                stack[sp].control_var = is_list ? ins->operands[1].data : 0;
+                stack[sp].afor_count = 0;
+                sp++;
+            }
+        } else if (ins->opcode == OP_AFOR) {
+            if (sp > 0 && stack[sp - 1].is_list && stack[sp - 1].afor_count < HALMAT_MAX_OPERANDS * 8) {
+                stack[sp - 1].afor_positions[stack[sp - 1].afor_count++] = i;
+                state->afor_control_var[i] = stack[sp - 1].control_var;
+            }
+        } else if (ins->opcode == OP_EFOR) {
+            if (sp > 0) {
+                sp--;
+                if (stack[sp].is_list) {
+                    state->efor_is_list_form[i] = true;
+                    size_t count = stack[sp].afor_count;
+                    for (size_t k = 0; k < count; k++) {
+                        size_t pos = stack[sp].afor_positions[k];
+                        state->afor_body_target[pos] = stack[sp].afor_positions[count - 1] + 1;
+                        state->afor_return_target[pos] = (k + 1 < count) ? stack[sp].afor_positions[k + 1] : (i + 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
@@ -185,15 +248,24 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->num_blanks = num_blanks;
     precompute_loop_targets(state);
     precompute_labels(state);
+    precompute_for_loops(state);
 }
 
 void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
     free(state->label_pos);
+    free(state->afor_body_target);
+    free(state->afor_return_target);
+    free(state->afor_control_var);
+    free(state->efor_is_list_form);
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
     state->label_pos = NULL;
+    state->afor_body_target = NULL;
+    state->afor_return_target = NULL;
+    state->afor_control_var = NULL;
+    state->efor_is_list_form = NULL;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -233,6 +305,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_DTST:
             case OP_IFHD:
             case OP_LBL:
+            case OP_DFOR:
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below. */
@@ -302,6 +375,33 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 size_t target = state->etst_back_target[state->pc];
                 if (target == NO_TARGET) { fail(state, "ETST has no matching DTST"); break; }
                 state->pc = target;
+                branched = true;
+                break;
+            }
+
+            case OP_AFOR: {
+                if (ins->operand_count != 1) { fail(state, "AFOR: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (state->afor_body_target[state->pc] == NO_TARGET) {
+                    fail(state, "AFOR outside of a recognized list-form DO FOR");
+                    break;
+                }
+                state->syt[state->afor_control_var[state->pc]].type = SYT_TYPE_INTEGER;
+                state->syt[state->afor_control_var[state->pc]].value = a.integer;
+                if (state->for_return_sp >= 64) { fail(state, "DO FOR nesting too deep"); break; }
+                state->for_return_stack[state->for_return_sp++] = state->afor_return_target[state->pc];
+                state->pc = state->afor_body_target[state->pc];
+                branched = true;
+                break;
+            }
+
+            case OP_EFOR: {
+                if (!state->efor_is_list_form[state->pc]) {
+                    fail(state, "range-form DO FOR not yet implemented");
+                    break;
+                }
+                if (state->for_return_sp <= 0) { fail(state, "EFOR with no matching AFOR dispatch"); break; }
+                state->pc = state->for_return_stack[--state->for_return_sp];
                 branched = true;
                 break;
             }

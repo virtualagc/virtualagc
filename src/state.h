@@ -67,6 +67,21 @@ struct halmat_state {
      * a separate numbering/table from the loop labels above. Sized
      * HALMAT_LABEL_MAX; NO_TARGET where unset. See precompute_labels(). */
     size_t *label_pos;
+
+    /* List-form DO FOR (AFOR): per class-0/AFOR.md's "call-and-computed-
+     * return" mechanism -- each AFOR sets the control variable and jumps
+     * into the (single, shared) loop body; EFOR jumps back to whichever
+     * address the triggering AFOR pushed (the next AFOR, or the loop
+     * exit for the list's last AFOR). Modeled here as a small runtime
+     * LIFO return-address stack (safe because nested DO FOR bodies fully
+     * complete, including their own AFOR/EFOR cycles, before control
+     * returns to an enclosing one). See interp.c's precompute_for_loops(). */
+    size_t *afor_body_target;   /* per-AFOR: where to jump to run the body */
+    size_t *afor_return_target; /* per-AFOR: what EFOR should return to afterward */
+    uint16_t *afor_control_var; /* per-AFOR: SYT slot to assign this value into */
+    bool *efor_is_list_form;    /* per-EFOR: true if it uses the AFOR return-stack */
+    size_t for_return_stack[64];
+    int for_return_sp;
 };
 
 #define HALMAT_LABEL_MAX 4096
