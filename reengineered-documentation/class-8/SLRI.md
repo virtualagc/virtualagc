@@ -2,7 +2,7 @@
 
 **Mnemonic:** SLRI
 
-**Opcode:** 0x02
+**Opcode:** 0x802
 
 **Confidence:** High
 
@@ -70,7 +70,7 @@ absolute index.
 
 ## Source Analysis & Reliability
 
-Opcode (0x02) doubly confirmed (`XSLRI`) in `PASS1.PROCS/##DRIVER.xpl` —
+Opcode (0x802) doubly confirmed (`XSLRI`) in `PASS1.PROCS/##DRIVER.xpl` —
 see [##DRIVER.xpl] in `STATUS.md`. Slot matches HAL-1971's DLPI
 ("initialize loop header"); the mnemonic itself differs, so this remains
 a plausibly-renamed version of the same concept rather than a confirmed

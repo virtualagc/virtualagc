@@ -2,7 +2,7 @@
 
 **Mnemonic:** ELRI
 
-**Opcode:** 0x03
+**Opcode:** 0x803
 
 **Confidence:** High
 
@@ -35,7 +35,7 @@ appears with no following operand line, once per repeated element.
 
 ## Source Analysis & Reliability
 
-Opcode (0x03) doubly confirmed (`XELRI`) in `PASS1.PROCS/##DRIVER.xpl` —
+Opcode (0x803) doubly confirmed (`XELRI`) in `PASS1.PROCS/##DRIVER.xpl` —
 see [##DRIVER.xpl] in `STATUS.md`. Slot matches HAL-1971's DLEI
 ("initialize loop end"); the mnemonic itself differs, so this remains a
 plausibly-renamed version of the same concept rather than a confirmed

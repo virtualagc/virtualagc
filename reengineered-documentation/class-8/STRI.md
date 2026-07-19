@@ -2,7 +2,7 @@
 
 **Mnemonic:** STRI
 
-**Opcode:** 0x01
+**Opcode:** 0x801
 
 **Confidence:** High
 
@@ -52,12 +52,13 @@ the confirming worked example.
   structure as the 1971 predecessor, or restructures it, is unconfirmed.
 - ~~The relationship (if any) between STRI and the separately-opcoded
   HAL/S instructions at 0x02 and 0x03... is speculative.~~ **Resolved**:
-  0x02/0x03 are [SLRI](SLRI.md)/[ELRI](ELRI.md), HAL/S's renamed successors
-  to HAL-1971's DLPI/DLEI, empirically confirmed — see Usage Context above.
+  0x802/0x803 are [SLRI](SLRI.md)/[ELRI](ELRI.md), HAL/S's renamed
+  successors to HAL-1971's DLPI/DLEI, empirically confirmed — see Usage
+  Context above.
 
 ## Source Analysis & Reliability
 
-The opcode (0x01) and mnemonic STRI are primary-sourced from [IR-60-5] A.2
+The opcode (0x801) and mnemonic STRI are primary-sourced from [IR-60-5] A.2
 (the Class 8 operator index, p. A-109); no page content for STRI's own
 HAL/S description (target p. 85) is present in the available partial copy.
 

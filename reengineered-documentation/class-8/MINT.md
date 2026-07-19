@@ -2,7 +2,7 @@
 
 **Mnemonic:** MINT
 
-**Opcode:** 0x61
+**Opcode:** 0x861
 
 **Confidence:** High
 
@@ -31,7 +31,7 @@ one per element.
 
 ## Source Analysis & Reliability
 
-Opcode (0x61) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
+Opcode (0x861) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
 A-109); no page content for MINT's own HAL/S description (target p. 87) is
 present in the available partial copy.
 

@@ -2,7 +2,7 @@
 
 **Mnemonic:** NINT
 
-**Opcode:** 0xE1
+**Opcode:** 0x8E1
 
 **Confidence:** High
 
@@ -53,7 +53,7 @@ HALMAT: 8E1(2),133,0          <- NINT: NS2 initialized to NULL
 
 ## Source Analysis & Reliability
 
-Opcode (0xE1) confirmed primary-source: `XNINT BIT(16) INITIAL("0E1")`
+Opcode (0x8E1) confirmed primary-source: `XNINT BIT(16) INITIAL("8E1")`
 in `PASS1.PROCS/##DRIVER.xpl` — see [##DRIVER.xpl] in `STATUS.md`; no
 HAL-1971 analog (opcode range 0xE1–0xE3 unused in HAL 1971's Class 8,
 since the `NAME` facility postdates that language). Statement syntax

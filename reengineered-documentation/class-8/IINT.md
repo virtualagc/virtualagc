@@ -2,7 +2,7 @@
 
 **Mnemonic:** IINT
 
-**Opcode:** 0xC1
+**Opcode:** 0x8C1
 
 **Confidence:** High
 
@@ -47,7 +47,7 @@ HALMAT: 8C1(2),6,0            <- IINT
 
 ## Source Analysis & Reliability
 
-Opcode (0xC1) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
+Opcode (0x8C1) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
 A-109); no page content for IINT's own HAL/S description (target p. 87) is
 present in the available partial copy. Operand-word structure confirmed
 directly against real compiled HALMAT this session via a direct

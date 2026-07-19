@@ -2,7 +2,7 @@
 
 **Mnemonic:** TINT
 
-**Opcode:** 0xE2
+**Opcode:** 0x8E2
 
 **Confidence:** High
 
@@ -172,7 +172,7 @@ the non-coalesced case (above) match `ICQ_OUTPUT`'s source logic exactly.
 
 ## Source Analysis & Reliability
 
-Opcode (0xE2) confirmed primary-source: `XTINT BIT(16) INITIAL("8E2")` in
+Opcode (0x8E2) confirmed primary-source: `XTINT BIT(16) INITIAL("8E2")` in
 `PASS1.PROCS/##DRIVER.xpl` (grouped with [NINT](NINT.md)'s `XNINT` and
 [EINT](EINT.md)'s `XEINT`) — see [##DRIVER.xpl] in `STATUS.md`. Found by
 grepping the full `PASS.REL32V0` compiler source tree for every site

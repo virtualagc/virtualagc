@@ -2,7 +2,7 @@
 
 **Mnemonic:** CINT
 
-**Opcode:** 0x41
+**Opcode:** 0x841
 
 **Confidence:** High
 
@@ -47,7 +47,7 @@ HALMAT: 841(2),2,0            <- CINT
 
 ## Source Analysis & Reliability
 
-Opcode (0x41) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
+Opcode (0x841) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
 A-109); no page content for CINT's own HAL/S description (target p. 87) is
 present in the available partial copy. Operand-word structure confirmed
 directly against real compiled HALMAT this session via a direct

@@ -2,7 +2,7 @@
 
 **Mnemonic:** SINT
 
-**Opcode:** 0xA1
+**Opcode:** 0x8A1
 
 **Confidence:** High
 
@@ -68,7 +68,7 @@ array element, bracketed by [SLRI](SLRI.md)/[ELRI](ELRI.md)/
 
 ## Source Analysis & Reliability
 
-Opcode (0xA1) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
+Opcode (0x8A1) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
 A-109); no page content for SINT's own HAL/S description (target p. 87) is
 present in the available partial copy. Base two-operand form (symbol +
 literal) independently confirmed against real compiled HALMAT this

@@ -2,7 +2,7 @@
 
 **Mnemonic:** EINT
 
-**Opcode:** 0xE3
+**Opcode:** 0x8E3
 
 **Confidence:** High
 
@@ -130,7 +130,7 @@ an alternate linkage-table name rather than a separate data cell.
 
 ## Source Analysis & Reliability
 
-Opcode (0xE3) confirmed primary-source: `XEINT BIT(16) INITIAL("8E3")` in
+Opcode (0x8E3) confirmed primary-source: `XEINT BIT(16) INITIAL("8E3")` in
 `PASS1.PROCS/##DRIVER.xpl` (grouped with [NINT](NINT.md)'s `XNINT` and
 [TINT](TINT.md)'s `XTINT`) — see [##DRIVER.xpl] in `STATUS.md`. Found by
 grepping the full `PASS.REL32V0` compiler source tree for every site

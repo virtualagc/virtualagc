@@ -2,7 +2,7 @@
 
 **Mnemonic:** VINT
 
-**Opcode:** 0x81
+**Opcode:** 0x881
 
 **Confidence:** High
 
@@ -30,7 +30,7 @@ instructions.
 
 ## Source Analysis & Reliability
 
-Opcode (0x81) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
+Opcode (0x881) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
 A-109); no page content for VINT's own HAL/S description (target p. 87) is
 present in the available partial copy.
 

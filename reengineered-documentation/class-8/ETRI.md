@@ -2,7 +2,7 @@
 
 **Mnemonic:** ETRI
 
-**Opcode:** 0x04
+**Opcode:** 0x804
 
 **Confidence:** High
 
@@ -33,7 +33,7 @@ exactly once, right after the 1000th (last) [ELRI](ELRI.md).
 
 ## Source Analysis & Reliability
 
-Opcode (0x04) doubly confirmed (`XETRI`) in `PASS1.PROCS/##DRIVER.xpl` —
+Opcode (0x804) doubly confirmed (`XETRI`) in `PASS1.PROCS/##DRIVER.xpl` —
 see [##DRIVER.xpl] in `STATUS.md`; no HAL-1971 analog identified at this
 slot. Full behavioral description and operand-word structure confirmed
 directly against real compiled HALMAT this session — see
