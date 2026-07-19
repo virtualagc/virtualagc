@@ -9,6 +9,7 @@
 
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks);
+void interp_cleanup(halmat_state_t *state);
 
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:

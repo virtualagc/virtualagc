@@ -55,6 +55,12 @@ struct halmat_state {
 
     bool halted;
     int exit_code;
+
+    /* Precomputed DTST/CTST/ETST loop-branch targets (array positions
+     * into prog->instrs), one entry per instruction; NO_TARGET (SIZE_MAX)
+     * where not applicable. See interp.c's precompute_loop_targets(). */
+    size_t *ctst_exit_target;
+    size_t *etst_back_target;
 };
 
 #endif

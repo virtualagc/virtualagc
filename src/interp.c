@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "opcode_table.h"
@@ -12,8 +13,11 @@
 #define OP_XREC 0x002
 #define OP_SMRK 0x004
 #define OP_PXRC 0x005
+#define OP_DTST 0x00E
+#define OP_ETST 0x00F
 #define OP_DSMP 0x013
 #define OP_ESMP 0x014
+#define OP_CTST 0x016
 #define OP_WRIT 0x021
 #define OP_XXST 0x025
 #define OP_XXND 0x026
@@ -22,9 +26,17 @@
 #define OP_CLOS 0x030
 #define OP_EDCL 0x031
 #define OP_IASN 0x601
+#define OP_INEQ 0x7C5
+#define OP_IEQU 0x7C6
+#define OP_INGT 0x7C7
+#define OP_IGT 0x7C8
+#define OP_INLT 0x7C9
+#define OP_ILT 0x7CA
 #define OP_IADD 0x6CB
 #define OP_ISUB 0x6CC
 #define OP_IINT 0x8C1
+
+#define NO_TARGET ((size_t)-1)
 
 typedef struct {
     bool is_string;
@@ -92,12 +104,69 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
     }
 }
 
+/* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
+ * label" carried as both instructions' sole INL operand (see
+ * class-0/DTST.md, class-0/ETST.md). CTST (class-0/CTST.md) sits right
+ * after the per-cycle condition computation and has no label of its own;
+ * it belongs to whichever DTST is innermost-open when it's reached, which
+ * a single forward pass with a small stack captures directly (HALMAT
+ * blocks nest strictly, so this doesn't need label-based matching for
+ * CTST). CTST's own tag distinguishes WHILE (0, exit when the condition
+ * is false) from UNTIL (1, exit when the condition is true) -- both
+ * confirmed against a real compiled test_while.hal trace. */
+#define LOOP_STACK_MAX 64
+
+static void precompute_loop_targets(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->ctst_exit_target = malloc(n * sizeof(size_t));
+    state->etst_back_target = malloc(n * sizeof(size_t));
+    for (size_t i = 0; i < n; i++) {
+        state->ctst_exit_target[i] = NO_TARGET;
+        state->etst_back_target[i] = NO_TARGET;
+    }
+
+    struct {
+        size_t dtst_pos;
+        size_t ctst_pos;
+    } stack[LOOP_STACK_MAX];
+    int sp = 0;
+
+    for (size_t i = 0; i < n; i++) {
+        uint16_t opcode = state->prog->instrs[i].opcode;
+        if (opcode == OP_DTST) {
+            if (sp < LOOP_STACK_MAX) {
+                stack[sp].dtst_pos = i;
+                stack[sp].ctst_pos = NO_TARGET;
+                sp++;
+            }
+        } else if (opcode == OP_CTST) {
+            if (sp > 0) stack[sp - 1].ctst_pos = i;
+        } else if (opcode == OP_ETST) {
+            if (sp > 0) {
+                sp--;
+                if (stack[sp].ctst_pos != NO_TARGET) {
+                    state->ctst_exit_target[stack[sp].ctst_pos] = i + 1;
+                }
+                state->etst_back_target[i] = stack[sp].dtst_pos + 1;
+            }
+        }
+    }
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
     state->prog = prog;
     state->literals = literals;
     state->num_blanks = num_blanks;
+    precompute_loop_targets(state);
+}
+
+void interp_cleanup(halmat_state_t *state) {
+    free(state->ctst_exit_target);
+    free(state->etst_back_target);
+    state->ctst_exit_target = NULL;
+    state->etst_back_target = NULL;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -124,6 +193,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
     while (!state->halted && state->pc < state->prog->count) {
         const halmat_instr_t *ins = &state->prog->instrs[state->pc];
         resolved_value_t a, b;
+        bool branched = false;
 
         switch (ins->opcode) {
             case OP_PXRC:
@@ -133,9 +203,60 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_EDCL:
             case OP_DSMP:
             case OP_ESMP:
+            case OP_DTST:
                 /* Structural/bookkeeping markers; no runtime effect for a
-                 * single straight-line program (see Plan.md M4 step 2). */
+                 * single straight-line program (see Plan.md M4 step 2).
+                 * DTST just opens a loop's bookkeeping label -- the real
+                 * work happens in CTST/ETST below. */
                 break;
+
+            case OP_INEQ:
+            case OP_IEQU:
+            case OP_INGT:
+            case OP_IGT:
+            case OP_INLT:
+            case OP_ILT: {
+                if (ins->operand_count != 2) { fail(state, "integer comparison: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                bool result;
+                switch (ins->opcode) {
+                    case OP_INEQ: result = a.integer != b.integer; break;
+                    case OP_IEQU: result = a.integer == b.integer; break;
+                    case OP_INGT: result = a.integer <= b.integer; break;
+                    case OP_IGT: result = a.integer > b.integer; break;
+                    case OP_INLT: result = a.integer >= b.integer; break;
+                    case OP_ILT: default: result = a.integer < b.integer; break;
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index] = result ? 1 : 0;
+                break;
+            }
+
+            case OP_CTST: {
+                if (ins->operand_count != 1) { fail(state, "CTST: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                bool cond_true = (a.integer != 0);
+                /* tag 0 = WHILE (exit when condition false), tag 1 = UNTIL
+                 * (exit when condition true) -- confirmed against a real
+                 * compiled test_while.hal trace (see precompute_loop_targets). */
+                bool exit_loop = ins->tag ? cond_true : !cond_true;
+                if (exit_loop) {
+                    size_t target = state->ctst_exit_target[state->pc];
+                    if (target == NO_TARGET) { fail(state, "CTST has no matching ETST"); break; }
+                    state->pc = target;
+                    branched = true;
+                }
+                break;
+            }
+
+            case OP_ETST: {
+                size_t target = state->etst_back_target[state->pc];
+                if (target == NO_TARGET) { fail(state, "ETST has no matching DTST"); break; }
+                state->pc = target;
+                branched = true;
+                break;
+            }
 
             case OP_IINT:
                 if (ins->operand_count != 2) { fail(state, "IINT: expected 2 operands"); break; }
@@ -211,7 +332,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
             }
         }
 
-        if (!state->halted) {
+        if (!state->halted && !branched) {
             state->pc++;
         }
     }

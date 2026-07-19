@@ -130,6 +130,7 @@ int main(int argc, char **argv) {
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
     int rc = interp_run(&state, stdout);
+    interp_cleanup(&state);
 
     if (have_literals) halmat_literal_free(&literals);
     halmat_program_free(&prog);
