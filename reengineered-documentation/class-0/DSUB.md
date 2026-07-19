@@ -286,6 +286,18 @@ not simply renamed and kept as separate HAL/S opcodes).
   vs. `−` in the `CSZ`/`# ± expression` case (a `DATA`=2 value was
   observed for `# - 2`, but the `+` case and a non-literal expression
   were not tested).
+- **New, found via a Halmat.pdf cross-check**: the "index" row's `α`
+  value of `5` (established above) turns out to be specific to `ARRAY`
+  subscripting — a `MATRIX` subscripted the same way (`M1(1,2)` and
+  `M1(I1,I2)`, both literal and variable forms, on a real `MATRIX(3,3)`)
+  gives `α`=`1` instead, confirmed directly via `unHALMAT.py`. The
+  "detailed" table's array/component split therefore isn't the whole
+  picture — `α` for at least the "index" kind also depends on the
+  *container* type (`ARRAY` vs `MATRIX`, and presumably `VECTOR`, not
+  yet tested). The primary source's table may simply not have a row for
+  matrix subscripting, or may fold it into a category not yet
+  identified. Worth a full re-sweep of every subscript kind against
+  `MATRIX`/`VECTOR` containers, not just `ARRAY`.
 
 ## Source Analysis & Reliability
 
