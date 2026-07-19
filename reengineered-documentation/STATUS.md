@@ -1300,8 +1300,9 @@ marked empirically confirmed.
    HAL/S's more general instructions rather than left as an unindexed gap
    — see the "MSC-01847 ADDENDUM" section above.
 4. ~~Write the "Control Flow Patterns" cross-reference material~~ —
-   **done**: see [CONTROL-FLOW-PATTERNS.md](CONTROL-FLOW-PATTERNS.md),
-   covering `IF`/`THEN`/`ELSE`, `DO WHILE`/`UNTIL`, both `DO FOR` forms,
+   **done**: see [HALMAT.md's "Control Flow Patterns"](HALMAT.md#control-flow-patterns)
+   section (merged in from a formerly-standalone file), covering
+   `IF`/`THEN`/`ELSE`, `DO WHILE`/`UNTIL`, both `DO FOR` forms,
    `DO CASE`, and plain `DO;...END;`.
 5. ~~Consider whether SLRI/ELRI are safe to document~~ — resolved: both,
    plus ETRI, TINT, and EINT, are now empirically confirmed at High

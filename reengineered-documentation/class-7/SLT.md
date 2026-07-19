@@ -18,7 +18,7 @@ two SCALAR operands. Appears explicitly in [MSC-01847]'s worked simple-IF-
 statement example (§3.3.1, `IF X<0.5 THEN ...`), where SLT is shown as the
 comparison instruction immediately preceding a false-branch instruction —
 directly corroborating the general IF-statement HALMAT pattern described
-in [Control Flow Patterns](../CONTROL-FLOW-PATTERNS.md).
+in [Control Flow Patterns](../HALMAT.md#control-flow-patterns).
 
 ## Operand-Word Format (confirmed empirically)
 
