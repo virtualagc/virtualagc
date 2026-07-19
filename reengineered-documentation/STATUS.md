@@ -1263,10 +1263,27 @@ marked empirically confirmed.
    avoid anchoring on a secondary reconstruction before independent
    compiler-source/real-HALMAT verification is as complete as possible.
    A future session should not start this task while any other Phase 2
-   empirical-verification work (see "Next steps" items below, and
-   `HALMAT.md`'s "Optimizer HALMAT" section) remains open.
-3. Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
-   part3 p. 41) — likely just closing appendix material, low priority.
+   empirical-verification work remains open. **Status as of this
+   session**: nearly everything else is now closed — every opcode is
+   documented at High confidence, [MSC-01847] is fully reviewed, and
+   `HALMAT.md`'s "Optimizer HALMAT" section has only two items left
+   untriggered (Cross Block, flagged as disproportionately hard to
+   reach deliberately since it needs a program large enough to span
+   multiple 7200-byte HALMAT records; and the `MATRIX`-specific/
+   multi-dimensional-`VECTOR` cases of the inline vector/matrix loop
+   bits, a narrower gap alongside the already-confirmed `VECTOR`/1-D
+   case). A future session could reasonably treat those two as an
+   acceptable residual and proceed to the [Halmat.pdf] comparison, or
+   spend more effort on Cross Block first — a judgment call for whoever
+   picks this up next, not preempted here.
+3. ~~Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
+   part3 p. 41)~~ — **done**: [MSC-01847] is now fully reviewed, page for
+   page, with no remaining gaps. The tail turned out to contain a genuine
+   find, not just closing material — an ADDENDUM (its own final page)
+   documenting three HAL-1971 instructions (`ZDLP`/`PFST`/`PFND`) omitted
+   from the main text; both were empirically confirmed superseded by
+   HAL/S's more general instructions rather than left as an unindexed gap
+   — see the "MSC-01847 ADDENDUM" section above.
 4. ~~Write the "Control Flow Patterns" cross-reference material~~ —
    **done**: see [CONTROL-FLOW-PATTERNS.md](CONTROL-FLOW-PATTERNS.md),
    covering `IF`/`THEN`/`ELSE`, `DO WHILE`/`UNTIL`, both `DO FOR` forms,
