@@ -765,11 +765,15 @@ function, and `ON ERROR`/`OFF ERROR` (multiple forms):
   case, now confirmed as the general mechanism and cross-linked from
   [FCAL](class-0/FCAL.md).
 - **[SCHD](class-0/SCHD.md)** (0x039) — `SCHEDULE label PRIORITY(α)
-  DEPENDENT;` confirmed for the simplest (immediate-initiation) form;
-  the trailing header bitmask is now fully decoded directly from the
-  `<SCHEDULE HEAD>`/`<SCHEDULE PHRASE>`/`<SCHEDULE CONTROL>` grammar
-  rules (High confidence) — delayed/cyclic forms still not independently
-  compiled, but their operand/tag contributions are known from source.
+  DEPENDENT;` confirmed for the simplest (immediate-initiation) form; the
+  trailing header bitmask, decoded directly from the `<SCHEDULE
+  HEAD>`/`<SCHEDULE PHRASE>`/`<SCHEDULE CONTROL>` grammar rules, was then
+  independently confirmed in a later session by compiling every
+  delayed/cyclic variant (`AT`/`IN`/`ON`, `REPEAT EVERY`/`AFTER`,
+  `REPEAT WHILE`/`UNTIL`) — every predicted tag value matched exactly,
+  and operand order was found to follow strict left-to-right source
+  order across all clauses. See [SCHD](class-0/SCHD.md) for the full
+  worked traces.
 - **[ERON](class-0/ERON.md)** (0x03C) — handles **all** tested `ON
   ERROR`/`OFF ERROR` forms (`SYSTEM`, `IGNORE`, `IGNORE AND SET var`, the
   user-supplied-statement form, and `OFF ERROR`), a single opcode with a
