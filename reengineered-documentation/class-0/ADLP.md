@@ -40,7 +40,13 @@ Confirmed this session in two distinct roles:
    every case tested. Always terminated by a single [DLPE](DLPE.md), even
    for multi-dimensional arrayness (the compiler flattens multi-dimensional
    array operations into one loop over the total element count, rather
-   than nesting one nested loop per dimension).
+   than nesting one nested loop per dimension). Also confirmed, in a later
+   session, to cover a case the HAL-1971 predecessor needed a dedicated
+   opcode for: an arrayed *expression* (not a plain symbol-table variable)
+   passed as a procedure argument (`CALL P((S1 + S2));`) is bracketed by
+   an ordinary role-1 `ADLP`/`DLPE` pair around the [XXAR](XXAR.md)
+   operand, exactly like any other array-valued expression — see
+   `STATUS.md`'s "ZDLP/PFST/PFND addendum" note for the full context.
 2. **Uniform single-value array initialization** — via the compiler's
    `ICQ_ARRAYNESS_OUTPUT` routine (`PASS1.PROCS/ICQARRA2.xpl`), for a
    HAL/S `INITIAL(v)`/`CONSTANT(v)` specification giving one value to
