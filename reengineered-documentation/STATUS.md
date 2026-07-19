@@ -185,7 +185,7 @@ found (from [MSC-01847] cross-reference or better).
 | 0x045 | SFST | Documented | High | 59 | Opcode confirmed ([##DRIVER.xpl] `XSFST`). [MSC-01847] "SFST" at HAL-1971 opcode 0x04A — brackets type-conversion "shaping function" invocations like BIT(...), CHAR(...), VECTOR(...), MATRIX(...) |
 | 0x046 | SFND | Documented | High | 60 | Opcode confirmed ([##DRIVER.xpl] `XSFND`). [MSC-01847] "SFND" at HAL-1971 opcode 0x04C |
 | 0x047 | SFAR | Documented | High | 60 | Opcode confirmed ([##DRIVER.xpl] `XSFAR`). [MSC-01847] "SFAR" at HAL-1971 opcode 0x04B |
-| 0x04A | BFNC | Documented | High | 64 | Opcode confirmed ([##DRIVER.xpl] `XBFNC`); Optimizer-HALMAT-era SINCOS special case documented from IR-60-5 A-112, now also empirically confirmed this session for the `PRIO` built-in function. Confirms HAL/S's split-off of HAL 1971's FUNC (which handled both user and built-in function invocation together) — see [FCAL](class-0/FCAL.md) |
+| 0x04A | BFNC | Documented | High | 64 | Opcode confirmed ([##DRIVER.xpl] `XBFNC`); empirically confirmed for the `PRIO` built-in function and 14 others. Optimizer-HALMAT-era SINCOS special case (TAG=0x39/0x3A) documented from IR-60-5 A-112, now also empirically confirmed. Confirms HAL/S's split-off of HAL 1971's FUNC (which handled both user and built-in function invocation together) — see [FCAL](class-0/FCAL.md) |
 | 0x04B | LFNC | Documented | High | — | **New** — not in [IR-60-5]'s partial index. Opcode confirmed ([##DRIVER.xpl] `XLFNC`). The `MAX`/`MIN` built-in functions specifically (a separate "L-FUNC" dispatch category from [BFNC](class-0/BFNC.md), found by grepping the compiler source tree for `XLFNC` usage) — see [LFNC](class-0/LFNC.md) |
 | 0x04D | TNEQ | Documented | High | — | Opcode confirmed ([##DRIVER.xpl] `XTEQU` array element 1). Structure `¬=` comparison, empirically confirmed this session (delegates to the same runtime routine `#QCSTRUC` as TEQU). [MSC-01847] describes an identically-named "structure not equal" instruction, but at HAL-1971 opcode 0x044 |
 | 0x04E | TEQU | Documented | High | — | Opcode confirmed ([##DRIVER.xpl] `XTEQU` array element 0). Structure `=` comparison, empirically confirmed this session (delegates to runtime routine `#QCSTRUC`). [MSC-01847] "structure equal" at HAL-1971 opcode 0x045 |
@@ -864,14 +864,43 @@ Findings (full detail and worked traces in
   gains `TAG`=1 post-optimization, matching T1's documented "only
   comparison operator in the statement" meaning exactly.
 
-Still [IR-60-5]-only, not yet independently triggered: Cross Block,
-Cross Loop, and MAT/VEC-op bits; T2; SINCOS; DSUB's subscript-common-
-expression operand; the integer-product subscript TAG; and the
-ADLP/DLPE inline-vector/matrix-loop bits. Good candidates for a future
-session using the same `halmat.bin`-vs-`optmat.bin` diffing technique:
-a `SIN(X)`/`COS(X)` pair (SINCOS), an array reference inside a loop
-whose value is also used outside it (Cross Loop), and a two-comparison
-`CAND`/`COR` expression (T2).
+**Confirmed in a later session**, extending the same
+`halmat.bin`-vs-`optmat.bin` diffing technique to three more bits/
+features (full detail and worked traces in
+[HALMAT.md](HALMAT.md#optimizer-halmat)):
+
+- **Class 7 T2 confirmed**: a `CAND` of two `IGT` comparisons
+  (`IF I1 > 0 AND I2 > 0 THEN ...`) gives both comparisons `TAG`=2
+  post-optimization (not 1=T1, since neither is the statement's sole
+  comparison) — pinning T2 to bit position 1 (value 2), distinct from
+  T1's bit position 0 (value 1).
+- **Cross Loop confirmed**: a genuine common subexpression shared between
+  two *different*, unfused array loops (`C = (A+B)+(A+B); I1 = 99;
+  D = A+B;`, all `ARRAY(5)`) shows the shared `A+B` `SADD` carrying
+  COPT=5 (CSE's 4, plus a new bit worth 1) rather than plain CSE's 4 —
+  pinning Cross Loop to bit position 0 (value 1) of the same 3-bit field,
+  and CSE to bit position 2 (value 4).
+- **SINCOS confirmed**: `S1 = SIN(X); C1 = COS(X);` collapses to one
+  `BFNC` with TAG=0x39 post-optimization (previously two separate `BFNC`
+  calls at TAG=0x0D/0x02) — matching the documented 0x39/0x3A values,
+  with the operator word itself giving the SIN result and the (repurposed)
+  operand word giving COS, confirming the documented split exactly.
+- **Loop fusion discovered** (a related but distinct OPT behavior, not
+  one of the originally-tracked bits): adjacent same-trip-count
+  array-valued statements with a direct data dependency and no
+  intervening statement get merged into a *single* `ADLP`/`DLPE` loop
+  bracket by OPT — this is why the Cross Loop test above needed an
+  intervening scalar statement to block fusion (otherwise the shared
+  subexpression becomes an ordinary same-loop CSE case instead). Fusion
+  is not automatic for all same-trip-count adjacent loops, though — a
+  `DSUB` partition-copy loop followed by an ordinary arithmetic loop of
+  the same size was *not* fused; the exact fusion criteria are not fully
+  characterized.
+
+Still [IR-60-5]-only, not yet independently triggered: Cross Block and
+MAT/VEC-op bits; DSUB's subscript-common-expression operand; the
+integer-product subscript TAG; and the ADLP/DLPE inline-vector/
+matrix-loop bits.
 
 ## Empirical Verification (Phase 2)
 

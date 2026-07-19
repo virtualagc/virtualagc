@@ -20,10 +20,12 @@ instruction (which handled both user-defined and built-in function
 invocation together) — see [FCAL](FCAL.md) for the user-defined-function
 counterpart, now kept separate in HAL/S.
 
-Previously known only from an Optimizer-HALMAT-era special case: when
-BFNC's `TAG` field is `0x39` or `0x3A`, it represents a combined sine/
-cosine computation (`SINCOS`) — see `HALMAT.md`'s Optimizer HALMAT
-section.
+Also carries an Optimizer-HALMAT-era special case: when BFNC's `TAG`
+field is `0x39` or `0x3A`, it represents a combined sine/cosine
+computation (`SINCOS`) — **empirically confirmed in a later session**
+(`S1 = SIN(X); C1 = COS(X);` collapses to a single post-optimization
+`BFNC` with `TAG`=`0x39`) — see `HALMAT.md`'s Optimizer HALMAT section
+for the full trace.
 
 ## Usage Context
 
@@ -70,8 +72,9 @@ Confirmed selector table (all Class 0 opcode-line trailing-field values):
 | 6 | `LOG` | 24 | `SQRT` | 49 | `INVERSE` |
 | 13 | `SIN` | 26 | `TRIM` | 27 | `UNIT` |
 
-(`0x39`/`0x3A` = `SINCOS`, an Optimizer-HALMAT-era special case not
-re-confirmed this session — see `HALMAT.md`'s Optimizer HALMAT section.)
+(`0x39`/`0x3A` = `SINCOS`, an Optimizer-HALMAT-era special case —
+empirically confirmed for the `0x39` case in a later session — see
+`HALMAT.md`'s Optimizer HALMAT section.)
 
 ## Unresolved Questions
 
@@ -88,7 +91,10 @@ re-confirmed this session — see `HALMAT.md`'s Optimizer HALMAT section.)
 Opcode (0x04A) confirmed primary-source: `XBFNC BIT(16) INITIAL("04A")`
 in `PASS1.PROCS/##DRIVER.xpl` — see [##DRIVER.xpl] in `STATUS.md`.
 Optimizer-HALMAT-era `SINCOS` special case primary-sourced from
-[IR-60-5] A-112 (documented in an earlier session). `PRIO` case
+[IR-60-5] A-112 (documented in an earlier session), and empirically
+confirmed against real compiled HALMAT (`halmat.bin`-vs-`optmat.bin`
+diffing) in a later session — see `HALMAT.md`'s Optimizer HALMAT
+section. `PRIO` case
 confirmed directly against real compiled HALMAT in an earlier session
 (a byproduct of investigating [PRIO](PRIO.md), 0x038). The 14-function
 selector table confirmed this session by testing every single-argument

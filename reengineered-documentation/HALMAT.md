@@ -235,6 +235,47 @@ post-optimization.
   post-optimization for a confirmed CSE case — consistent with CSE being
   the bit-2 sub-position of the 3-bit field, but Cross-Block/Cross-Loop's
   own bit positions remain unconfirmed pending a triggering test case.)
+  **Cross Loop bit empirically confirmed in a later session**, extending
+  the same technique to *array*-valued expressions: compiling
+  `C = (A + B) + (A + B); I1 = 99; D = A + B;` (`A`/`B`/`C`/`D` all
+  `ARRAY(5) SCALAR`, with the intervening scalar statement blocking loop
+  fusion between the `C=` and `D=` array-valued statements — otherwise
+  OPT fuses adjacent same-trip-count array loops into one, observed as a
+  separate finding below) shows the shared `A + B` `SADD` — referenced
+  *twice* inside its own array loop (`C`'s doubling addition, matching
+  the CSE pattern above) *and once more* from the wholly separate `D=`
+  array loop — carrying COPT=`5` (`4`+`1`), not just `4`. That extra `+1`
+  over the pure-CSE value is the first independent confirmation of a
+  *second* nonzero COPT bit, and its trigger condition (a same-loop reuse
+  *plus* a reference from a genuinely different, unfused array loop)
+  matches Cross Loop's documented meaning exactly — while the ordinary
+  singly-referenced `SADD` immediately after it (inside the ordinary,
+  unfused `D=` loop) carries COPT=`0` as expected. The referencing VAC
+  operand *inside* `D=`'s loop (the genuinely cross-loop reference) shows
+  no extra operand-level tag beyond the ordinary default — consistent
+  with Cross Loop being purely an *operator*-word bit (unlike CSE, which
+  also has an operand-word-level bit — see below). This also pins down
+  the 3-bit field's ordering: CSE = bit 2 (value `4`), Cross Loop = bit 0
+  (value `1`); Cross Block's own bit position (presumably bit 1, value
+  `2`, by elimination) remains untriggered.
+  **Loop fusion discovered as a related, distinct OPT behavior**: chaining
+  two same-trip-count array-valued statements with a genuine data
+  dependency and no intervening barrier (`S2 = S1 + 1; S3 = S2 + 1;`, both
+  `ARRAY(5)`) causes OPT to merge their *separate* `ADLP`/`DLPE` loop
+  brackets into a *single* combined loop — the second statement's `ADLP`
+  and the first statement's `DLPE` both become `NOP`, and both statements'
+  bodies execute per iteration inside the one surviving loop. This is why
+  the Cross Loop test above needed a fusion-blocking intervening scalar
+  statement: without it, the two array statements are fused into one loop
+  and the shared subexpression becomes an ordinary same-loop CSE case
+  (COPT=`4`) rather than a genuine Cross Loop case. Loop fusion does not
+  always happen for adjacent same-trip-count array loops, though — a
+  `DSUB` partition-copy loop (`S3 = S2(1 TO 3);`) immediately followed by
+  an ordinary arithmetic loop of the same trip count (`S3 = S3 + 1;`) was
+  *not* fused, suggesting fusion is restricted to structurally-similar
+  loop bodies (or is blocked by the write-then-read dependency through a
+  named symbol, unlike the register/VAC-mediated dependency in the fused
+  case) — not yet fully characterized.
 - **Operand word** — gains a **CSE** bit (1 if QUAL is VAC and the operator
   is referenced by inter-VAC operands), a **Cross Block** bit (1 if PTR
   refers to the previous HALMAT record), and a **MAT/VEC op** bit (1 if the
@@ -259,13 +300,44 @@ post-optimization.
   comparison per statement) shows the comparison operator's own `TAG`
   byte going from `0` pre-optimization to `1` post-optimization —
   matching T1's documented meaning exactly, since each tested comparison
-  genuinely is the sole comparison in its statement. T2 not yet isolated
-  (would need a test with two comparisons in one statement, e.g. a CAND
-  of two comparisons, to see whether the first gets T2=1).
+  genuinely is the sole comparison in its statement.
+  **T2 empirically confirmed in a later session**: compiling
+  `IF I1 > 0 AND I2 > 0 THEN ...` (`I1`/`I2` `INTEGER`, a `CAND` of two
+  `IGT` comparisons) shows *both* `IGT` operators' `TAG` byte going from
+  `0` pre-optimization to `2` post-optimization — not `1` (T1), since
+  neither is the sole comparison in the statement, and not `3` (both
+  bits), confirming T2 occupies bit position 1 (value `2`), distinct from
+  T1's bit position 0 (value `1`). Both comparisons in the chain carry
+  T2=1 here (not just the first), which is compatible with the documented
+  "register environment can be preserved to the next comparison operator"
+  meaning read as a chain-membership flag rather than strictly "has a
+  following comparison" — the exact operational distinction (why the
+  *last* comparison in the chain, with no comparison after it, still sets
+  T2) is not fully pinned down.
 - **SINCOS** — the `BFNC` (0x04A) operator, when its TAG field is `0x39` or
   `0x3A`, represents a combined sine/cosine computation: VACs point to the
   operator word for one of {SIN, COS} and the operand word for the other,
-  with TAG selecting which is which.
+  with TAG selecting which is which. **Empirically confirmed in a later
+  session**: compiling `S1 = SIN(X); C1 = COS(X);` (`X`/`S1`/`C1` all
+  `SCALAR`) shows OPT collapsing the separate pre-optimization `SIN`
+  (`BFNC` TAG=`0x0D`) and `COS` (`BFNC` TAG=`0x02`) calls into a single
+  post-optimization `BFNC` with TAG=`0x39`, out of `unHALMAT.py`'s
+  `bfncTypes` table range (confirming this is genuinely a SINCOS-specific
+  tag value, not an ordinary built-in-function code) — matching the
+  documented `0x39`/`0x3A` values exactly. The original second `BFNC`
+  (`COS`) becomes a `NOP`. `S1`'s `SASN` (statement 3, `SIN`, compiled
+  first) references the *operator* word (the combined `BFNC` itself);
+  `C1`'s `SASN` (statement 4, `COS`) references what was the *operand*
+  word (`X`'s symbol reference, repurposed as the second result's VAC
+  target) — confirming the documented "operator word for one of
+  {SIN, COS}, operand word for the other" split, with TAG=`0x39`
+  specifically meaning "operator word = SIN, operand word = COS" (the
+  `0x3A` case, presumably the reverse assignment, was not triggered by
+  this test's statement order). The combined operator's own COPT value
+  is `4` (the CSE bit — its result is referenced twice, once per
+  original function call), reinforcing that SINCOS is implemented as a
+  form of common-subexpression sharing between the two trig calls rather
+  than a wholly separate mechanism.
 - **Subscript common expressions** — `DSUB` may gain a final operand
   (α=5, β=1) giving a quantity to be added to the subscript computation
   before type/alignment shifting.
@@ -282,12 +354,13 @@ post-optimization.
   primary source.
 
 [^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6). CSE
-    (operator- and operand-word) and Class 7 T1 empirically confirmed
-    against real compiled HALMAT (`halmat.bin` vs. `optmat.bin` diffing)
-    this session — see the confirmations inline above. Remaining bullets
-    (Cross Block, Cross Loop, MAT/VEC op, T2, SINCOS, subscript common
-    expressions, integer-product subscript TAG, inline vector/matrix loop
-    bits) remain [IR-60-5]-only, not yet independently triggered.
+    (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop, and
+    SINCOS all empirically confirmed against real compiled HALMAT
+    (`halmat.bin` vs. `optmat.bin` diffing), across two sessions — see the
+    confirmations inline above. Remaining bullets (Cross Block, MAT/VEC op,
+    subscript common expressions, integer-product subscript TAG, inline
+    vector/matrix loop bits) remain [IR-60-5]-only, not yet independently
+    triggered.
 
 ## Auxiliary HALMAT (AUXMAT)
 
