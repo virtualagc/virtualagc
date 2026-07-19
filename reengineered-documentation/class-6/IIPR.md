@@ -19,7 +19,13 @@ vector cross product and produces a compile error between two integers
 (see `STATUS.md`'s "Empirical Verification" section). Under Optimizer
 HALMAT, the optimizer may itself generate an IIPR instruction as part of
 a subscript-address computation, with TAG=1 distinguishing that case —
-see [HALMAT.md](../HALMAT.md#optimizer-halmat).
+**empirically confirmed in a later session**: compiling `S2 = S1(I1,I2);`
+for a 2-D array with runtime-valued subscripts shows a `TAG`=1 `IIPR`
+appear in `optmat.bin` with **no pre-optimization counterpart at all**
+(absent from `halmat.bin` entirely) computing the row-major
+index-flattening multiply, immediately consumed by [DSUB](../class-0/DSUB.md)'s
+optimizer-era common-expression operand — see
+[HALMAT.md](../HALMAT.md#optimizer-halmat) for the full trace.
 
 ## Operand-Word Format (confirmed empirically)
 

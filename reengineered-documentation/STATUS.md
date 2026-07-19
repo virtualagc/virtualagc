@@ -971,11 +971,28 @@ features (full detail and worked traces in
   count (`12` = 4×3) — consistent with "gains an arrayness-specifier
   bit," though a `MATRIX` case and a second `VECTOR` dimension would be
   needed to fully separate the bit's meaning from an incidental value.
+- **Subscript common expression and integer-product subscript TAG both
+  confirmed, by the same test**: `S2 = S1(I1,I2);` for a 2-D
+  `ARRAY(3,4) SCALAR S1` with `INTEGER` (runtime-valued, not
+  compile-time-constant) subscripts `I1`/`I2` shows OPT synthesizing the
+  row-major index-flattening arithmetic that pre-optimization `DSUB`
+  simply leaves as two plain `I1`/`I2` operands: a **brand-new** `IIPR`
+  (0x6CD, absent from `halmat.bin` entirely) computing `I1 × 4`,
+  immediately `IADD`ed with `I2`, with `DSUB` itself gaining a fourth
+  operand (`NUMOP` 3→4) referencing that sum — `α`=5, `β`=1, exactly the
+  documented "final operand" — while its original two index operands are
+  zeroed but not removed. The synthesized `IIPR`'s `TAG` is `1`, matching
+  "generated as part of a subscript computation" unambiguously, since
+  this instruction has no pre-optimization counterpart to compare
+  against. Full trace in [HALMAT.md](HALMAT.md#optimizer-halmat).
 
-Still [IR-60-5]-only, not yet independently triggered: Cross Block;
-DSUB's subscript-common-expression operand; the integer-product
-subscript TAG; and the `MATRIX`-specific/multi-dimensional-`VECTOR`
-cases of the ADLP/DLPE inline-vector/matrix-loop bits.
+Still [IR-60-5]-only, not yet independently triggered: Cross Block, and
+the `MATRIX`-specific/multi-dimensional-`VECTOR` cases of the ADLP/DLPE
+inline-vector/matrix-loop bits. Cross Block is expected to be
+disproportionately hard to trigger deliberately — it requires a
+reference crossing a 7200-byte/1800-paragraph HALMAT *record* boundary,
+which in practice means a program large enough to span multiple
+records.
 
 ## Empirical Verification (Phase 2)
 

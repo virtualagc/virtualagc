@@ -352,12 +352,33 @@ post-optimization.
   original function call), reinforcing that SINCOS is implemented as a
   form of common-subexpression sharing between the two trig calls rather
   than a wholly separate mechanism.
-- **Subscript common expressions** — `DSUB` may gain a final operand
-  (α=5, β=1) giving a quantity to be added to the subscript computation
-  before type/alignment shifting.
-- **Integer product** — the Integer-Integer-Product operator's opcode
-  changes to `0x6CD` (mnemonic likely `IIPR`, per [Halmat.pdf]), with TAG=1
-  if the optimizer generated it as part of a subscript computation.
+- **Subscript common expressions and integer product — both empirically
+  confirmed together in a later session**, by the same test: compiling
+  `S2 = S1(I1,I2);` (`S1` a 2-D `ARRAY(3,4) SCALAR`, `I1`/`I2` `INTEGER`
+  variables — a genuinely runtime-computed 2-D index, not a compile-time
+  constant) shows OPT synthesizing the row-major index-flattening
+  arithmetic that PASS1 leaves for PASS2 pre-optimization:
+  pre-optimization, `DSUB`'s two subscript operands are just the plain
+  `I1`/`I2` `SYT` references (`α`=5 each, the ordinary "index" row — see
+  [DSUB](class-0/DSUB.md)); post-optimization, a **brand-new** `IIPR`
+  (0x6CD) appears — not merely reused, genuinely absent from
+  `halmat.bin` — computing `I1 × 4` (the row size), immediately followed
+  by a new `IADD` adding `I2`, and `DSUB` itself gains a **fourth**
+  operand (`NUMOP` 3→4) referencing that `IADD`'s result with `α`=5,
+  `β`=1 — exactly the documented "final operand (α=5, β=1)" — while its
+  original two index operands are zeroed out (`DATA`=0, still `IMD`) but
+  not removed. The synthesized `IIPR`'s own `TAG` is `1`, matching
+  "TAG=1 if the optimizer generated it as part of a subscript
+  computation" exactly — the clean, unambiguous signal being that this
+  `IIPR` has no pre-optimization counterpart at all, so its TAG cannot be
+  confused with an ordinary source-level integer multiplication (which
+  would carry `TAG`=0, ordinary/unmarked, per every other Class 6
+  arithmetic operator in this project's corpus). Opcode `0x6CD` itself
+  was already independently, primary-source-confirmed as ordinary
+  `IIPR`'s opcode (see [IIPR](class-6/IIPR.md)) — this finding confirms
+  the *TAG*-based optimizer-generated marking on top of that, not the
+  opcode number, which does not change between ordinary and
+  optimizer-synthesized use.
 - **Inline vector/matrix loops** — `ADLP` (0x017) and `DLPE` (0x018), which
   bracket array-processing loops, gain arrayness-specifier and CSE bits
   when the loop involves vector/matrix arrayness. This applies to operator
@@ -381,13 +402,18 @@ post-optimization.
 
 [^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6). CSE
     (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop,
-    SINCOS, MAT/VEC op, and ADLP's arrayness-specifier tag (partial) all
-    empirically confirmed against real compiled HALMAT (`halmat.bin` vs.
-    `optmat.bin` diffing), across two sessions — see the confirmations
-    inline above. Remaining bullets (Cross Block; subscript common
-    expressions; integer-product subscript TAG; `MATRIX`-specific and
-    multi-dimensional `VECTOR` cases of the inline vector/matrix loop
-    bits) remain [IR-60-5]-only, not yet independently triggered.
+    SINCOS, MAT/VEC op, ADLP's arrayness-specifier tag (partial),
+    subscript common expressions, and the integer-product subscript TAG
+    all empirically confirmed against real compiled HALMAT (`halmat.bin`
+    vs. `optmat.bin` diffing), across two sessions — see the
+    confirmations inline above. Remaining bullets (Cross Block;
+    `MATRIX`-specific and multi-dimensional `VECTOR` cases of the inline
+    vector/matrix loop bits) remain [IR-60-5]-only, not yet independently
+    triggered — Cross Block in particular is expected to be
+    disproportionately hard to trigger deliberately, since it requires a
+    reference crossing a 7200-byte/1800-paragraph HALMAT *record*
+    boundary, which in practice means a program large enough to span
+    multiple records.
 
 ## Auxiliary HALMAT (AUXMAT)
 

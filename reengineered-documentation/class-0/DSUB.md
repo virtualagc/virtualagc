@@ -101,7 +101,14 @@ subsidiary operand's DATA gives the expression reference.
 DSUB is emitted for any data reference that involves array subscripting,
 component subscripting, or both. Under Optimizer HALMAT, DSUB may gain a
 further final operand (α=5, β=1, a subscript common expression addend) —
-see "Optimizer HALMAT" in [HALMAT.md](../HALMAT.md#optimizer-halmat).
+**empirically confirmed in a later session**: compiling `S2 = S1(I1,I2);`
+for a 2-D `ARRAY(3,4) SCALAR S1` with runtime `INTEGER` subscripts shows
+OPT synthesizing the row-major index-flattening arithmetic (a new `IIPR`
+computing `I1 × 4`, `IADD`ed with `I2`) and appending its result to `DSUB`
+as exactly this operand (`NUMOP` growing 3→4, `α`=5, `β`=1) — while the
+original two per-dimension index operands are zeroed but left in place.
+See "Optimizer HALMAT" in [HALMAT.md](../HALMAT.md#optimizer-halmat) for
+the full trace.
 
 **First empirical confirmation this session**, for the plain "index"
 subscript kind against a 1-D array: compiling `S2 = S1(3);` (`S1` a
