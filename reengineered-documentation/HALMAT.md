@@ -256,8 +256,19 @@ post-optimization.
   with Cross Loop being purely an *operator*-word bit (unlike CSE, which
   also has an operand-word-level bit — see below). This also pins down
   the 3-bit field's ordering: CSE = bit 2 (value `4`), Cross Loop = bit 0
-  (value `1`); Cross Block's own bit position (presumably bit 1, value
-  `2`, by elimination) remains untriggered.
+  (value `1`).
+  **Cross Block bit empirically confirmed in a still later session**,
+  completing the 3-bit field: triggering a genuine cross-*record*
+  reference requires a HALMAT program large enough to span multiple
+  7200-byte/1800-word records (built by padding a copy of the CSE test
+  above with ~577 filler `INTEGER` assignment statements ahead of it,
+  then tuning the exact filler count so the shared `X + Y` `SADD`'s
+  defining paragraph falls in the last few words of one record while its
+  reuse — `S4`'s assignment — falls in the next). The defining `SADD`
+  carries COPT=`6` (`4`+`2`), not just `4` — pinning Cross Block to bit
+  1 (value `2`), the position left by elimination after CSE (bit 2) and
+  Cross Loop (bit 0) — fully decoding the 3-bit COPT field: Cross
+  Loop = bit 0 (`1`), Cross Block = bit 1 (`2`), CSE = bit 2 (`4`).
   **Loop fusion discovered as a related, distinct OPT behavior**: chaining
   two same-trip-count array-valued statements with a genuine data
   dependency and no intervening barrier (`S2 = S1 + 1; S3 = S2 + 1;`, both
@@ -280,6 +291,27 @@ post-optimization.
   is referenced by inter-VAC operands), a **Cross Block** bit (1 if PTR
   refers to the previous HALMAT record), and a **MAT/VEC op** bit (1 if the
   operand, inside a vector/matrix loop, possesses vector/matrix arrayness).
+  **Cross Block bit empirically confirmed in a still later session**, same
+  multi-record test as the operator-word confirmation above: the
+  cross-record `VAC` operand referencing `S4`'s reused `X + Y` (in the
+  record *after* the one holding the defining `SADD`) shows `DATA`
+  (`unHALMAT.py`'s "PTR" field) as `0x86F2`, not the plain paragraph
+  offset `0x06F2` (`1778` decimal, the defining `SADD`'s actual
+  same-numbering-scheme position in the previous record — HALMAT
+  paragraph numbering restarts at 0 for every record). `0x86F2 & 0x7FFF
+  == 0x06F2` exactly: the top bit of the 16-bit `DATA`/`PTR` field itself
+  (`0x8000`) is the documented "1 if PTR refers to the previous HALMAT
+  record" signal, with the low 15 bits giving the referenced paragraph's
+  ordinary intra-record offset — **not** one of the 3-bit TAG2 field's
+  bits (which stays `0` on this operand), refining the primary source's
+  "PTR"-based description into a concrete bit-level mechanism. Triggering
+  this required a HALMAT program large enough to span multiple
+  7200-byte/1800-word records — built by padding a copy of the earlier
+  scalar CSE test (`S3 = (X + Y) + (X + Y); S4 = X + Y;`) with several
+  hundred filler `INTEGER` assignment statements ahead of it, then tuning
+  the exact filler count so the shared `X + Y`'s defining `SADD` paragraph
+  fell in the last few words of one record while `S4`'s reuse of it fell
+  in the next.
   **MAT/VEC op bit empirically confirmed in a later session**: compiling
   `V3 = V1 + V2;` for `V1`/`V2`/`V3` declared `ARRAY(4) VECTOR(3)` (an
   array of vectors, i.e. genuinely "vector arrayness inside a[n array]
@@ -407,18 +439,17 @@ post-optimization.
   the `MATRIX` cross-check already rules out dimension-encoding in
   `TAG1` itself.
 
-[^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6). CSE
-    (operator- and operand-word), Class 7 T1, Class 7 T2, Cross Loop,
-    SINCOS, MAT/VEC op, ADLP's arrayness-specifier tag (`VECTOR` and
-    `MATRIX` cases both), subscript common expressions, and the
-    integer-product subscript TAG all empirically confirmed against real
-    compiled HALMAT (`halmat.bin` vs. `optmat.bin` diffing), across two
-    sessions — see the confirmations inline above. Only Cross Block
-    remains [IR-60-5]-only, not yet independently triggered — it is
-    expected to be disproportionately hard to trigger deliberately,
-    since it requires a reference crossing a 7200-byte/1800-paragraph
-    HALMAT *record* boundary, which in practice means a program large
-    enough to span multiple records.
+[^optnote]: [IR-60-5] pp. A-110–A-113 (sections A.3.1 through A.3.6).
+    **Every named feature in this section is now empirically confirmed**
+    against real compiled HALMAT (`halmat.bin` vs. `optmat.bin` diffing,
+    and — for Cross Block — a specially constructed multi-record HALMAT
+    program), across three sessions: CSE (operator- and operand-word),
+    Class 7 T1, Class 7 T2, Cross Loop, Cross Block (operator- and
+    operand-word, the latter revealing the actual bit-level "PTR"
+    addressing mechanism), SINCOS, MAT/VEC op, ADLP's arrayness-specifier
+    tag (`VECTOR` and `MATRIX` cases both), subscript common expressions,
+    and the integer-product subscript TAG — see the confirmations inline
+    above for full worked traces of each.
 
 ## Auxiliary HALMAT (AUXMAT)
 

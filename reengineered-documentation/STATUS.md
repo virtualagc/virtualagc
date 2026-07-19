@@ -990,13 +990,28 @@ features (full detail and worked traces in
   this instruction has no pre-optimization counterpart to compare
   against. Full trace in [HALMAT.md](HALMAT.md#optimizer-halmat).
 
-Only **Cross Block** remains [IR-60-5]-only, not yet independently
-triggered — it is expected to be disproportionately hard to trigger
-deliberately, since it requires a reference crossing a
-7200-byte/1800-paragraph HALMAT *record* boundary, which in practice
-means a program large enough to span multiple records. Every other
-Optimizer HALMAT feature named in [HALMAT.md](HALMAT.md#optimizer-halmat)
-is now empirically confirmed against real compiled HALMAT.
+- **Cross Block confirmed**, closing out the last open item: built a
+  HALMAT program large enough to span multiple 7200-byte/1800-word
+  records (a copy of the scalar CSE test above, padded with several
+  hundred filler `INTEGER` assignment statements, with the exact count
+  tuned so the shared `X+Y`'s defining `SADD` paragraph lands in the
+  last few words of one record and its reuse in `S4`'s assignment lands
+  in the next). The defining `SADD` carries COPT=`6` (`4`+`2`, not just
+  `4`), pinning Cross Block to bit 1 (value `2`) of the operator word's
+  3-bit field — completing it: Cross Loop=bit 0 (`1`), Cross
+  Block=bit 1 (`2`), CSE=bit 2 (`4`). The cross-record `VAC` operand
+  itself reveals the actual addressing mechanism behind "PTR refers to
+  the previous HALMAT record": its `DATA` field is `0x8000 |` the
+  defining paragraph's ordinary intra-record offset (`0x86F2` = `0x8000
+  | 0x06F2`, and `0x06F2` = `1778` decimal = the defining `SADD`'s exact
+  position — HALMAT paragraph numbering restarts at 0 every record) —
+  the operand-word Cross Block "bit" is the top bit of the 16-bit
+  `DATA`/`PTR` field itself, not one of the 3-bit TAG2 field's bits
+  (which stays `0` on this operand).
+
+**Every named feature in [HALMAT.md](HALMAT.md#optimizer-halmat)'s
+Optimizer HALMAT section is now empirically confirmed against real
+compiled HALMAT** — no items remain [IR-60-5]-only.
 
 ## Empirical Verification (Phase 2)
 
@@ -1268,15 +1283,14 @@ marked empirically confirmed.
    compiler-source/real-HALMAT verification is as complete as possible.
    A future session should not start this task while any other Phase 2
    empirical-verification work remains open. **Status as of this
-   session**: essentially everything else is now closed — every opcode
-   is documented at High confidence, [MSC-01847] is fully reviewed, and
-   `HALMAT.md`'s "Optimizer HALMAT" section has only **one** item left
-   untriggered: Cross Block, flagged as disproportionately hard to reach
-   deliberately since it needs a program large enough to span multiple
-   7200-byte HALMAT records. A future session could reasonably treat
-   that single item as an acceptable residual and proceed to the
-   [Halmat.pdf] comparison, or spend more effort on Cross Block first —
-   a judgment call for whoever picks this up next, not preempted here.
+   session**: everything else is now closed — every opcode is documented
+   at High confidence, [MSC-01847] is fully reviewed, and every named
+   feature in `HALMAT.md`'s "Optimizer HALMAT" section (including Cross
+   Block, the last holdout, triggered via a specially constructed
+   multi-record HALMAT program) is empirically confirmed against real
+   compiled HALMAT. **The [Halmat.pdf] comparison is now the only
+   remaining Phase 2 item** — a future session can proceed directly to
+   it.
 3. ~~Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
    part3 p. 41)~~ — **done**: [MSC-01847] is now fully reviewed, page for
    page, with no remaining gaps. The tail turned out to contain a genuine
