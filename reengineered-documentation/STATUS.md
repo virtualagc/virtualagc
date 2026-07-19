@@ -594,7 +594,7 @@ beyond the 1971 language.
 | 0xA1 | SINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 4). [MSC-01847] "SINT" at the *same* opcode |
 | 0xC1 | IINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 5). [MSC-01847] "IINT" at the *same* opcode |
 | 0xE1 | NINT | Documented | High | 98/99 | Opcode doubly confirmed (`XNINT`). `NAME` (pointer) initialize, empirically confirmed this session (both real-pointer and `NULL` forms); no HAL-1971 analog (opcode range 0xE1-0xE3 unused in HAL 1971's Class 8) |
-| 0xE2 | TINT | Documented | High | 87 | Opcode doubly confirmed (`XTINT`). Structure-terminal initialize for a whole-structure `INITIAL(...)` list ([USA003087] §19.6), bracketed by [STRI](class-8/STRI.md)/[ETRI](class-8/ETRI.md); found by grepping the compiler source tree for `XTINT`, leading to `ICQCHECK.xpl`'s `ICQ_CHECK_TYPE` dispatch. No HAL-1971 analog. **Note**: a `unHALMAT.py` cross-check found only *one* TINT emitted for a 2-terminal/2-value test case; traced to `ICQOUTPU.xpl`'s `ICQ_OUTPUT` procedure, which coalesces consecutive initial-constant values (whose literal-table and slot positions are both sequential) into a single instruction, encoding the run count in the literal operand's tag — a genuine optimization, not a gap. See [TINT](class-8/TINT.md) |
+| 0xE2 | TINT | Documented | High | 87 | Opcode doubly confirmed (`XTINT`). Structure-terminal initialize for a whole-structure `INITIAL(...)` list ([USA003087] §19.6), bracketed by [STRI](class-8/STRI.md)/[ETRI](class-8/ETRI.md); found by grepping the compiler source tree for `XTINT`, leading to `ICQCHECK.xpl`'s `ICQ_CHECK_TYPE` dispatch. No HAL-1971 analog. **Fully closed out**: traced to `ICQOUTPU.xpl`'s `ICQ_OUTPUT` procedure, which coalesces consecutive initial-constant values (sequential literal-table and slot positions) into a single instruction with a run-count tag — confirmed both directions, a coalescing case (one `TINT` covering two terminals) and a non-coalescing case (an interposed array terminal breaks the run into three separate `TINT`s). See [TINT](class-8/TINT.md) |
 | 0xE3 | EINT | Documented | High | 87 | Opcode doubly confirmed (`XEINT`). `EQUATE EXTERNAL <id> TO <variable>;` statement — an undocumented-in-prose HAL/S declaration (only its reserved word appears in [USA003087]'s index) that aliases a new local name to a same-block variable, apparently for external/linker naming purposes; empirically confirmed this session by grepping the compiler source tree for `XEINT`, leading to `SYNTHESI.xpl`'s `<DECLARE ELEMENT> ::= EQUATE EXTERNAL <IDENTIFIER> TO <VARIABLE> ;` grammar rule. No HAL-1971 analog |
 
 13 of 13 known Class 8 opcodes inventoried; **all 13 now documented**
@@ -785,7 +785,8 @@ function, and `ON ERROR`/`OFF ERROR` (multiple forms):
   error simulation/signaling) — ERSE ("ERror SEnd") confirmed directly.
 - **[TERM](class-0/TERM.md)** (0x037, already documented) — self form
   (`TERMINATE;`) confirmed empirically as a byproduct; named/list forms
-  still untested.
+  (`TERMINATE label;` / `TERMINATE label1, label2;`) confirmed in a later
+  session — one `SYT` operand per name, `NUMOP` extended accordingly.
 
 ## New primary sources: now available and reviewed
 

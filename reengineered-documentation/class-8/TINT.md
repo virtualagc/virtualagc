@@ -132,10 +132,43 @@ HALMAT: 804(0),0,0            <- ETRI (closes the group)
   the bit level.
 - Multiple-copy structures (`Q-STRUCTURE(n)`), structures initialized via
   a `CONSTANT` attribute rather than `INITIAL`, and nested/multi-level
-  structure templates were not tested. A structure whose terminals'
-  initial values do *not* coalesce (e.g. non-sequential literal
-  placement, forced by an intervening declaration) would be a good
-  follow-up test to directly observe two separate `TINT`s.
+  structure templates were not tested.
+
+**Non-coalescing case confirmed in a follow-up.** Attempting to break
+coalescing by making the two terminal values *reuse* an identical literal
+(hoping the compiler would dedupe the literal-table entry and break the
+sequential-pointer condition) did **not** work — the compiler creates a
+fresh literal-table entry per `INITIAL` context even for a
+previously-seen value, so the two terminals stayed adjacent and still
+coalesced. What *does* reliably break it: interposing a terminal of a
+different `ICQ` "form" between them. Compiling
+`STRUCTURE Q: 1 QI INTEGER, 1 QARR ARRAY(3) SCALAR, 1 QS SCALAR;
+DECLARE Z Q-STRUCTURE INITIAL(5, 3#1.0, 1.5);` produces **three** separate
+`TINT`s, each with the literal-operand tag `1` (not `2`) — the array
+terminal's own `n#value` repeat form uses
+[SLRI](SLRI.md)/[ELRI](ELRI.md) instead of `IC_FORM=2`, which resets
+`ICQ_OUTPUT`'s running coalesce count (`CT_LIT=0`) exactly per the traced
+source logic:
+
+```
+HALMAT: 801(1),0,0            <- STRI (opens the group)
+HALMAT: 8E2(2),6,0            <- TINT: QI's initializer (tag 1 — alone)
+          0(10),0,0              <- OFFSET=0
+          5(5),1,0               <- literal (value 5), tag=1
+HALMAT: 802(2),1,0            <- SLRI (opens QARR's array-repeat loop, count=3)
+HALMAT: 8E2(2),6,0            <- TINT: QARR's per-element initializer (tag 1)
+          1(10),0,0              <- OFFSET=1
+          7(5),1,0               <- literal (value 1.0), tag=1
+HALMAT: 803(0),1,0            <- ELRI (closes the array-repeat loop)
+HALMAT: 8E2(2),5,0            <- TINT: QS's initializer (tag 1 — alone again)
+          4(10),0,0              <- OFFSET=4
+          8(5),1,0               <- literal (value 1.5), tag=1
+HALMAT: 804(0),0,0            <- ETRI (closes the whole group)
+```
+
+This is now a complete, closed-loop confirmation of the coalescing
+mechanism: both the coalesced case (this file's main worked trace) and
+the non-coalesced case (above) match `ICQ_OUTPUT`'s source logic exactly.
 
 ## Source Analysis & Reliability
 
