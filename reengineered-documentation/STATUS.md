@@ -1270,27 +1270,28 @@ marked empirically confirmed.
    reference and assignment context). **Every opcode identified this
    project has now been assigned a behavioral description** — none
    remain in the "not started" or purely negative-result state.
-2. Read [Halmat.pdf] pages 16–114 to get its full reconstructed HAL/S
-   inventory for Classes 1–8, and cross-check it against the HAL-1971
-   tables now in this file's Class 1–7 sections — agreement between
-   [Halmat.pdf] (an independent HAL/S-source-derived reconstruction) and
-   [MSC-01847] (the HAL-1971 primary source) on a given mnemonic/opcode
-   would be meaningfully stronger evidence than either alone. This is the
-   highest-value remaining source-review task for Phase 1 — **but per
-   direct user instruction, comparison with [Halmat.pdf] should be the
-   very last task undertaken in Phase 2** (empirical verification), to
-   avoid anchoring on a secondary reconstruction before independent
-   compiler-source/real-HALMAT verification is as complete as possible.
-   A future session should not start this task while any other Phase 2
-   empirical-verification work remains open. **Status as of this
-   session**: everything else is now closed — every opcode is documented
-   at High confidence, [MSC-01847] is fully reviewed, and every named
-   feature in `HALMAT.md`'s "Optimizer HALMAT" section (including Cross
-   Block, the last holdout, triggered via a specially constructed
-   multi-record HALMAT program) is empirically confirmed against real
-   compiled HALMAT. **The [Halmat.pdf] comparison is now the only
-   remaining Phase 2 item** — a future session can proceed directly to
-   it.
+2. ~~Read [Halmat.pdf] pages 16–114... comparison with [Halmat.pdf]
+   should be the very last task undertaken in Phase 2~~ — **done**: read
+   in full (all 114 pages) and cross-checked against this project's
+   corpus, per direct user instruction, only after every other Phase 2
+   empirical-verification item was closed. Every opcode number in
+   [Halmat.pdf]'s 180-entry inventory matches ours except two genuine
+   errors on its part (see below); its Control Flow Patterns material
+   independently corroborates several bugs this project found and fixed
+   earlier (`xASN` operand order, `CLBL`/`AFOR` sentinel behavior). Five
+   confirmed content errors in [Halmat.pdf] were written up as a
+   concise, page-tagged checklist in `ZERROR.md` (repository root) for
+   submission as an issue against its repo: two fabricated opcodes
+   (`MDET`/`MIDN`, sourced from an unrelated PASS2-internal dispatch
+   table), one missing real opcode (`VSDV`), a mislabeled instruction
+   trio (`SFST`/`SFND`/`SFAR` called "subscript range" instead of
+   shaping-function brackets), two nonexistent mnemonics (`IGE`/`ILE`)
+   in a worked-example table, and a self-contradicting `XXST` operand
+   interpretation. One genuine gap in *our own* corpus also surfaced and
+   was fully resolved: `DSUB`'s subscript `α` value for `VECTOR`/`MATRIX`
+   containers, now fully swept and documented (see `class-0/DSUB.md`).
+   **This closes out Phase 2 entirely — nothing further is queued before
+   Phase 3.**
 3. ~~Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
    part3 p. 41)~~ — **done**: [MSC-01847] is now fully reviewed, page for
    page, with no remaining gaps. The tail turned out to contain a genuine
