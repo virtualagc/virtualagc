@@ -146,7 +146,7 @@ found (from [MSC-01847] cross-reference or better).
 | 0x014 | ESMP | Documented | High | 57 | Opcode confirmed ([##DRIVER.xpl] `XESMP`). Plain `DO; ... END;` group end, empirically confirmed this session |
 | 0x015 | AFOR | Documented | High | 56 | Opcode confirmed ([##DRIVER.xpl] `XAFOR`). Per-value instruction for list-form `DO FOR`, empirically confirmed this session |
 | 0x016 | CTST | Documented | High | 53 | Opcode confirmed ([##DRIVER.xpl] `XCTST`). `DO WHILE`/`DO UNTIL` per-cycle condition test, empirically confirmed this session |
-| 0x017 | ADLP | Documented | High | 89 | Opcode confirmed ([##DRIVER.xpl] `XADLP`); Optimizer-HALMAT-era arrayness-specifier changes documented from IR-60-5 A-113. [MSC-01847] confirms the concept ("arrayness specifier", bracketing array-processing loops with a closing DLPE) at HAL-1971 opcode 0x00D |
+| 0x017 | ADLP | Documented | High | 89 | Opcode confirmed ([##DRIVER.xpl] `XADLP`); Optimizer-HALMAT-era arrayness-specifier changes documented from IR-60-5 A-113. [MSC-01847] confirms the concept ("arrayness **and structureness** specifier", bracketing array-processing loops with a closing DLPE) at HAL-1971 opcode 0x00D. **Structureness role empirically confirmed this session** — see [ADLP](class-0/ADLP.md)'s "role 3" |
 | 0x018 | DLPE | Documented | High | 90 | Opcode confirmed ([##DRIVER.xpl] `XDLPE`); [MSC-01847] "DLPE"/"end of array- and structureness specification" at HAL-1971 opcode 0x00E |
 | 0x019 | DSUB | Documented | High | 93/101 | Opcode confirmed ([##DRIVER.xpl] `XDSUB`); consolidates 9 separate HAL-1971 subscript-specifier instructions (ALC/ALCE/RALC + TASB/TIDX/TTSB + AASB/AIDX/ATSB + SASB/SIDX/STSB) into one opcode — see DSUB.md's Source Analysis. Array-dimension "index"/"asterisk" subscript kinds now empirically confirmed too (previously primary-source-only) |
 | 0x01A | IDLP | Documented | High | 90 | Opcode confirmed ([##DRIVER.xpl] `XIDLP`). `STATIC`/default counterpart of [ADLP](class-0/ADLP.md) — both describe a multi-element array's shape during uniform-single-value initialization, chosen by the array's `AUTOMATIC`/`STATIC` attribute; found via direct compiler-source inspection (`ICQARRA2.xpl`) after 4 syntax hypotheses failed, then empirically confirmed — see [IDLP](class-0/IDLP.md) |
@@ -164,7 +164,7 @@ found (from [MSC-01847] cross-reference or better).
 | 0x02B | MDEF | Documented | High | 8 | Opcode confirmed ([##DRIVER.xpl] `XMDEF`). [MSC-01847] "MDEF" at HAL-1971 opcode 0x036 corroborates the role |
 | 0x02C | FDEF | Documented | High | 8 | Opcode confirmed ([##DRIVER.xpl] `XFDEF`). [MSC-01847] "FDEF" is at the *same* opcode in HAL 1971 — a rare exact match |
 | 0x02D | PDEF | Documented | High | 8 | Opcode confirmed ([##DRIVER.xpl] `XPDEF`). HAL 1971 has no distinct PDEF; see PDEF.md |
-| 0x02E | UDEF | Documented | High | 9 | Opcode confirmed ([##DRIVER.xpl] `XUDEF`). [MSC-01847] "UDEF" at HAL-1971 opcode 0x033, paired with "UEND" (HAL-1971 0x037, no confirmed HAL/S opcode) |
+| 0x02E | UDEF | Documented | High | 9 | Opcode confirmed ([##DRIVER.xpl] `XUDEF`). [MSC-01847] "UDEF" at HAL-1971 opcode 0x033, paired with "UEND" (HAL-1971 0x037) — **resolved this session**: HAL/S has no distinct UEND opcode, update blocks close via the generic [CLOS](class-0/CLOS.md) (0x030) instead, empirically confirmed |
 | 0x02F | CDEF | Documented | High | 9 | Opcode confirmed ([##DRIVER.xpl] `XCDEF`). `COMPOOL` block definition header, empirically confirmed this session |
 | 0x030 | CLOS | Documented | High | 9 | Opcode confirmed ([##DRIVER.xpl] `XCLOS`); empirically confirmed (`CLOSE FTEST;`), one SYT operand referencing the closed block. No distinct HAL-1971 analog identified — HAL 1971's RTRN (0x030 in that scheme) appears to serve the closing role instead |
 | 0x031 | EDCL | Documented | High | 9 | Opcode confirmed ([##DRIVER.xpl] `XEDCL`); "end of declarations" marker, mnemonic reading and trailing-tag meaning confirmed directly from `SYNTHESI.xpl`'s `<BLOCK BODY>` grammar rule — see [EDCL](class-0/EDCL.md) |
@@ -230,19 +230,44 @@ This means HAL-1971's `LIST`/`LSTE`/`CASS` were folded into HAL/S's
 gap in this project's inventory was a cross-referencing gap, not a
 missing primary-source fact.
 
-**Instructions found in [MSC-01847] §2.10–2.15 still with no confirmed
-HAL/S opcode:** ENDS, ENTS, EXTS (static bypass block markers —
-referenced from [STRI](class-8/STRI.md)); FCLM, FLIN, FPGE, FSKP, FTAB
-(I/O column/line/page/skip/tab control specifiers); FASN (file-assignment,
-companion to [FILE](class-0/FILE.md)); UEND (update-block end, companion
-to [UDEF](class-0/UDEF.md)); ZRFN (receiver/pseudo-variable function
-invocation); ASIZ, TSIZ (shaping function arrayness/terminal-size
-specifiers). Confirmed this session: none of these are declared under
-their own name (`XENDS`/`XENTS`/`XEXTS`/`XFCLM`/`XFLIN`/`XFPGE`/`XFSKP`/
-`XFTAB`/`XFASN`/`XUEND`/`XZRFN`/`XASIZ`/`XTSIZ`) anywhere in the
-`PASS.REL32V0` tree, nor hiding as an unnamed array element near a
-conceptually-related opcode (checked `XFILE`, `XUDEF`, `XSFST`/`XSFAR`/
-`XSFND`). Also found: unexplained numeric gaps at 0x023/0x024 (between
+**Instructions found in [MSC-01847] §2.10–2.15 with no confirmed HAL/S
+opcode of their own — status per mnemonic (updated across several later
+sessions):**
+
+- `FCLM`/`FLIN`/`FPGE`/`FSKP`/`FTAB` (I/O column/line/page/skip/tab
+  control specifiers) — **resolved**: folded into
+  [XXAR](class-0/XXAR.md)'s `TAG2` field; see that file's Behavioral
+  Description and Usage Context for the full mechanism and worked traces.
+- `FASN` (file-assignment, companion to [FILE](class-0/FILE.md)) —
+  **resolved**: superseded by the JCL `CHANNELn` DD-name convention
+  ([USA00309] §6.1.4), never a HAL/S-level construct to begin with; see
+  [XXAR](class-0/XXAR.md)'s Unresolved Questions.
+- `UEND` (update-block end, companion to [UDEF](class-0/UDEF.md)) —
+  **resolved this session**: HAL/S has no distinct `UEND` opcode; update
+  blocks close via the same generic [CLOS](class-0/CLOS.md) (0x030)
+  instruction used for `PROGRAM`/`PROCEDURE`/`FUNCTION`/`TASK`, confirmed
+  by compiling `UPB: UPDATE; ... CLOSE UPB;` and reading the binary
+  directly with `unHALMAT.py` — see [UDEF](class-0/UDEF.md).
+- `ENDS`/`ENTS`/`EXTS` (static bypass block markers, referenced from
+  [STRI](class-8/STRI.md)), `ZRFN` (receiver/pseudo-variable function
+  invocation), and `ASIZ`/`TSIZ` (shaping function arrayness/terminal-size
+  specifiers) — **still genuinely unaccounted for**. Confirmed this
+  session: none of these are declared under their own name
+  (`XENDS`/`XENTS`/`XEXTS`/`XZRFN`/`XASIZ`/`XTSIZ`) anywhere across
+  **all seven** compiler passes (`PASS1.PROCS`/`OPT.PROCS`/`PASS2.PROCS`/
+  `PASS3.PROCS`/`PASS4.PROCS`/`AUX_PROCS`/`FLO.PROCS`) or the shared
+  `HALINCL/` includes — the earlier "found none... anywhere in the
+  `PASS.REL32V0` tree" claim below had only actually been verified
+  against PASS1/OPT/PASS2; this session closed that gap by grepping the
+  four previously-unchecked pass directories directly. Nor hiding as an
+  unnamed array element near a conceptually-related opcode (checked
+  `XFILE`, `XUDEF`, `XSFST`/`XSFAR`/`XSFND`). This is now about as
+  exhaustive a negative result as static source search can give — closing
+  these (if they're findable at all) likely requires either a fuller copy
+  of [IR-60-5]'s Class 0 index, or accepting they were genuinely dropped
+  from HAL/S.
+
+Also found: unexplained numeric gaps at 0x023/0x024 (between
 `XFILE`=0x022 and `XXXST`=0x025) and 0x03A/0x03B (between `XSCHD`=0x039
 and `XERON`=0x03C) in Class 0's opcode space — plausibly where some of
 these would sit if HAL/S ever used them, but no declared constant fills
@@ -284,14 +309,21 @@ concept in HAL/S-FC, so no HALMAT instruction (FASN's role or otherwise)
 was ever needed for it. Consistent with [FILE](class-0/FILE.md)'s
 existing finding that HAL/S-FC's own runtime doesn't support `FILE` I/O.
 
-**Open question:** HAL/S's structureness-specifier instruction (the
-counterpart to [ADLP](class-0/ADLP.md) for multiple-copy structure
+**Resolved this session.** HAL/S's structureness-specifier instruction
+(the counterpart to [ADLP](class-0/ADLP.md) for multiple-copy structure
 terminals, analogous to HAL-1971's SDLP) does not appear in [IR-60-5]'s
-62-entry Class 0 index at all. Either HAL/S folded structureness handling
-into ADLP itself (i.e. ADLP handles both arrayness and structureness
-dimensions, distinguished by an operand qualifier), or a Class 0 opcode
-already in the index (not yet identified) serves this role, or the index
-itself is incomplete.
+62-entry Class 0 index at all — because it doesn't need its own entry:
+**HAL/S folded structureness handling into ADLP itself**, confirmed by
+compiling `ZQ4 = ZQ3;` (both `Q-STRUCTURE(3)`) and reading the binary
+directly with `unHALMAT.py` — the [TASN](class-0/TASN.md) whole-structure
+copy is followed by an `ADLP`/`DLPE` pair whose operand is the structure's
+copy count (`3`), the exact same opcode and operand shape already
+confirmed for array-element counts. This matches [MSC-01847]'s own
+section title for the HAL-1971 predecessor instruction, "2.4 ARRAYNESS
+and STRUCTURENESS SPECIFIERS" — both language versions treat this as one
+concept, not two. See [ADLP](class-0/ADLP.md)'s "role 3" for the full
+worked trace and the one open follow-up (multi-dimensional/nested
+multi-copy structures untested).
 
 ## Classes 1–7 — general note
 
@@ -1126,17 +1158,23 @@ marked empirically confirmed.
    session (with [IPEX](class-6/IPEX.md) added), all 179 documented
    opcodes are High confidence — reconfirmed by direct grep, no
    Medium/Low-confidence files remain anywhere in `class-*/`.
-6. Investigate the open question above about HAL/S's structureness
-   specifier (no confirmed Class 0 opcode, unlike ADLP).
-7. ~~Investigate the remaining mnemonics listed above~~ — **narrowed**:
-   `FCLM`/`FLIN`/`FPGE`/`FSKP`/`FTAB` (folded into [XXAR](class-0/XXAR.md)'s
-   `TAG2` field) and `FASN` (superseded by the JCL `CHANNELn` DD-name
-   convention, [USA00309] §6.1.4) are now resolved — see
-   [XXAR](class-0/XXAR.md)'s Unresolved Questions and the "HAL/S I/O
-   device numbers" section above. `LIST`/`LSTE`/`CASS` were already
-   resolved in an earlier session (folded into `XXST`/`XXAR`/`XXND`).
-   Genuinely still unaccounted for: `ENDS`/`ENTS`/`EXTS`, `UEND`, `ZRFN`,
-   `ASIZ`/`TSIZ` — investigate against the unlisted-gap opcodes in
-   [IR-60-5]'s Class 0 index if a fuller copy of that index or its target
-   pages ever turns up. (`TASN`/`TEQU`/`TNEQ` were resolved in an earlier
-   session — see above.)
+6. ~~Investigate the open question above about HAL/S's structureness
+   specifier~~ — **resolved this session**: it's ADLP itself (role 3);
+   see the "Open question" note above and [ADLP](class-0/ADLP.md).
+7. ~~Investigate the remaining mnemonics listed above~~ — **narrowed
+   further**: `FCLM`/`FLIN`/`FPGE`/`FSKP`/`FTAB` (folded into
+   [XXAR](class-0/XXAR.md)'s `TAG2` field), `FASN` (superseded by the JCL
+   `CHANNELn` DD-name convention, [USA00309] §6.1.4), and `UEND` (no
+   distinct opcode — update blocks close via the generic
+   [CLOS](class-0/CLOS.md), confirmed empirically) are now resolved — see
+   [XXAR](class-0/XXAR.md)'s and [UDEF](class-0/UDEF.md)'s Unresolved
+   Questions and the "HAL/S I/O device numbers" section above.
+   `LIST`/`LSTE`/`CASS` were already resolved in an earlier session
+   (folded into `XXST`/`XXAR`/`XXND`). Genuinely still unaccounted for,
+   after an exhaustive grep of all seven compiler passes (not just
+   PASS1/OPT/PASS2): `ENDS`/`ENTS`/`EXTS`, `ZRFN`, `ASIZ`/`TSIZ` —
+   investigate against the unlisted-gap opcodes in [IR-60-5]'s Class 0
+   index if a fuller copy of that index or its target pages ever turns
+   up; short of that, these may simply be genuinely dropped from HAL/S.
+   (`TASN`/`TEQU`/`TNEQ` were resolved in an earlier session — see
+   above.)

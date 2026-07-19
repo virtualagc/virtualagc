@@ -9,9 +9,14 @@
 ## Behavioral Description
 
 Close statement. Emitted for a HAL/S `CLOSE <name>;` statement, closing the
-named `PROGRAM`, `PROCEDURE`, `FUNCTION`, or `TASK` block. Carries one
-operand, `SYT`-qualified, referencing the symbol-table entry of the block
-being closed.
+named `PROGRAM`, `PROCEDURE`, `FUNCTION`, `TASK`, or — confirmed this
+session — `UPDATE` block. Carries one operand, `SYT`-qualified,
+referencing the symbol-table entry of the block being closed. HAL/S has
+no distinct closing opcode per block kind (unlike, say,
+[STRI](../class-8/STRI.md)/[ETRI](../class-8/ETRI.md)'s dedicated pair) —
+CLOS is the single generic "close whatever block this symbol names"
+instruction, confirmed now for two different opening headers
+([MDEF](MDEF.md) and [UDEF](UDEF.md)) with identical shape.
 
 ## Usage Context
 
@@ -31,9 +36,10 @@ in `pass1.rpt`'s symbol table listing).
 
 ## Unresolved Questions
 
-- Behavior when closing a `PROCEDURE`/`FUNCTION`/`TASK` rather than a
-  `PROGRAM` is not yet tested — presumably identical (just a different
-  symbol-table entry), but unconfirmed.
+- Behavior when closing a `PROCEDURE`/`FUNCTION`/`TASK` specifically is
+  not yet tested — confirmed identical for `PROGRAM` and `UPDATE` blocks
+  (just a different symbol-table entry each time), presumed but
+  unconfirmed for the remaining block kinds.
 
 ## Source Analysis & Reliability
 
