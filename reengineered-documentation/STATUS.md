@@ -1146,9 +1146,10 @@ marked empirically confirmed.
    `HALMAT.md`'s "Optimizer HALMAT" section) remains open.
 3. Read the remaining unreviewed tail of [MSC-01847] (part2 pp. 41–42,
    part3 p. 41) — likely just closing appendix material, low priority.
-4. Write the "Control Flow Patterns" cross-reference material that IFHD,
-   BRA, FBRA and related entries reference, now that BRA/FBRA/LBL/CLBL are
-   documented.
+4. ~~Write the "Control Flow Patterns" cross-reference material~~ —
+   **done**: see [CONTROL-FLOW-PATTERNS.md](CONTROL-FLOW-PATTERNS.md),
+   covering `IF`/`THEN`/`ELSE`, `DO WHILE`/`UNTIL`, both `DO FOR` forms,
+   `DO CASE`, and plain `DO;...END;`.
 5. ~~Consider whether SLRI/ELRI are safe to document~~ — resolved: both,
    plus ETRI, TINT, and EINT, are now empirically confirmed at High
    confidence (see Class 8 table above; **all 13 Class 8 opcodes are now
