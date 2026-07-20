@@ -8,6 +8,17 @@ endif
 CFLAGS ?= -std=c99 -Wall -Wextra -g -O0
 LDFLAGS ?= -lm
 
+# Optional zlib dependency, for decompressing the gzip'd COMMONx.out.bin.gz
+# memory images HALSFC produces (needed for CHARACTER literal text -- see
+# literal.c). Mirrors the reference yaHALMAT emulator's own Makefile probe
+# (../Halmat/emu/Makefile). Falls back to popen("gzip -dc ...") in
+# literal.c if zlib isn't found, so the build still works without it.
+ZLIB_CHECK := $(shell echo 'int main(){return 0;}' | $(CC) -xc - -lz -o /dev/null 2>/dev/null && echo yes)
+ifeq ($(ZLIB_CHECK),yes)
+CFLAGS += -DHAVE_ZLIB
+LDFLAGS += -lz
+endif
+
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
         literal.c ebcdic.c interp.c value.c symtab.c debug.c
 OBJS := $(SRCS:.c=.o)

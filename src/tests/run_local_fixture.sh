@@ -19,7 +19,6 @@ workdir=$(mktemp -d)
 trap 'rm -rf "$workdir"' EXIT
 cp "$HAL_SRC_DIR/test_$name.hal" "$workdir/"
 ( cd "$workdir" && "$HALSFC" "test_$name.hal" >/dev/null )
-gzip -dk "$workdir/COMMON0.out.bin.gz"
 
 actual=$("$YAHALMAT2" "$workdir/halmat.bin")
 

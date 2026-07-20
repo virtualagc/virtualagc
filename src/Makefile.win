@@ -10,6 +10,16 @@
 #                                           clang build, e.g. LLVM's,
 #                                           using GCC-style flags -- not
 #                                           clang-cl's MSVC-style ones)
+#   nmake /f Makefile.win HAVE_ZLIB=1     (link zlib for native
+#                                           COMMONx.out.bin.gz decompression
+#                                           -- requires zlib.lib/zlib.h on
+#                                           the include/lib path, e.g. via
+#                                           vcpkg. Without this, literal.c
+#                                           falls back to piping through a
+#                                           `gzip` binary on PATH, which is
+#                                           not a normal Windows default --
+#                                           see Makefile's unconditional
+#                                           zlib probe for the Unix side.)
 #
 # CC defaults to cl below; nmake's default precedence (command-line
 # macros win over the makefile) is all that's needed to override it,
@@ -36,22 +46,34 @@ TARGET = yaHALMAT2.exe
 !IF "$(CC)" == "cl"
 CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS
 OBJS = $(SRCS:.c=.obj)
+LIBS =
 !ELSE
 CFLAGS = -std=c99 -Wall -Wextra -g -O0
 OBJS = $(SRCS:.c=.o)
+LIBS = -lm
+!ENDIF
+
+!IFDEF HAVE_ZLIB
+!IF "$(CC)" == "cl"
+CFLAGS = $(CFLAGS) /DHAVE_ZLIB
+LIBS = $(LIBS) zlib.lib
+!ELSE
+CFLAGS = $(CFLAGS) -DHAVE_ZLIB
+LIBS = $(LIBS) -lz
+!ENDIF
 !ENDIF
 
 all: $(TARGET)
 
 !IF "$(CC)" == "cl"
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) /Fe$(TARGET) $(OBJS)
+	$(CC) $(CFLAGS) /Fe$(TARGET) $(OBJS) $(LIBS)
 
 .c.obj:
 	$(CC) $(CFLAGS) /c /Fo$@ $<
 !ELSE
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) -lm
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<

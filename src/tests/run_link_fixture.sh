@@ -25,7 +25,6 @@ for name in "$@"; do
     mkdir -p "$unitdir"
     cp "$HAL_SRC_DIR/test_$name.hal" "$unitdir/"
     ( cd "$unitdir" && "$HALSFC" "test_$name.hal" >/dev/null )
-    gzip -dk "$unitdir/COMMON0.out.bin.gz"
     echo "$unitdir" >> "$listfile"
 done
 

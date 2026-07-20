@@ -5,12 +5,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 #include "ebcdic.h"
 
 #define LIT_RECORD_BYTES 1560
 #define LIT_PAGE_BYTES 520
 #define LIT_CELL_BYTES 4
 #define LIT_CELLS_PER_PAGE (LIT_PAGE_BYTES / LIT_CELL_BYTES)
+
+/* COMMONx.out.bin.gz, despite the name, is a gzip'd image of AP-101S
+ * compiler memory (not closely related to the plain-text COMMONx.out
+ * symbol table) -- CHARACTER literal text lives in it, addressed by the
+ * litfile's pointer field. 16 MB matches the reference yaHALMAT
+ * emulator's own HALMAT_MEM_SIZE (../Halmat/emu/halmat.h). */
+#define HALMAT_MEM_IMAGE_MAX 0x1000000
 
 double ibm_hex_float_to_double(uint32_t msw, uint32_t lsw) {
     int sign = (msw >> 31) & 1;
@@ -44,6 +55,60 @@ static char *read_whole_file(const char *path, size_t *out_size) {
     return buf;
 }
 
+static bool has_gz_suffix(const char *path) {
+    size_t len = strlen(path);
+    return len > 3 && strcmp(path + len - 3, ".gz") == 0;
+}
+
+/* Decompresses a gzip'd memory image (COMMONx.out.bin.gz) into a capped
+ * HALMAT_MEM_IMAGE_MAX buffer via zlib when available, falling back to
+ * piping through the `gzip` binary otherwise (mirrors the reference
+ * yaHALMAT emulator's halmat_loader.c precedent for the same file kind).
+ * Non-.gz paths are read verbatim via read_whole_file. */
+static uint8_t *read_memory_image(const char *path, size_t *out_size) {
+    if (!has_gz_suffix(path)) {
+        return (uint8_t *)read_whole_file(path, out_size);
+    }
+
+#ifdef HAVE_ZLIB
+    gzFile gz = gzopen(path, "rb");
+    if (!gz) return NULL;
+    uint8_t *buf = malloc(HALMAT_MEM_IMAGE_MAX);
+    if (!buf) { gzclose(gz); return NULL; }
+    int nread = gzread(gz, buf, HALMAT_MEM_IMAGE_MAX);
+    gzclose(gz);
+    if (nread < 0) { free(buf); return NULL; }
+    *out_size = (size_t)nread;
+    return buf;
+#else
+    char cmd[1200];
+    snprintf(cmd, sizeof(cmd), "gzip -dc \"%s\" 2>/dev/null", path);
+#ifdef _WIN32
+    FILE *fp = _popen(cmd, "rb");
+#else
+    FILE *fp = popen(cmd, "r");
+#endif
+    if (!fp) return NULL;
+    uint8_t *buf = malloc(HALMAT_MEM_IMAGE_MAX);
+    if (!buf) {
+#ifdef _WIN32
+        _pclose(fp);
+#else
+        pclose(fp);
+#endif
+        return NULL;
+    }
+    size_t nread = fread(buf, 1, HALMAT_MEM_IMAGE_MAX, fp);
+#ifdef _WIN32
+    _pclose(fp);
+#else
+    pclose(fp);
+#endif
+    *out_size = nread;
+    return buf;
+#endif
+}
+
 bool halmat_literal_load(const char *litfile_path, const char *memory_path,
                           halmat_literal_table_t *out, char *errbuf, size_t errbuf_size) {
     memset(out, 0, sizeof(*out));
@@ -64,7 +129,7 @@ bool halmat_literal_load(const char *litfile_path, const char *memory_path,
     uint8_t *memory = NULL;
     size_t memory_size = 0;
     if (memory_path) {
-        memory = (uint8_t *)read_whole_file(memory_path, &memory_size);
+        memory = read_memory_image(memory_path, &memory_size);
         if (!memory) {
             snprintf(errbuf, errbuf_size, "cannot read memory-image file '%s'", memory_path);
             free(litfile);

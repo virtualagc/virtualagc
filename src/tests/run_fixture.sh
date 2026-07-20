@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Recompiles a HAL/S fixture with the locally installed HALSFC (to get the
-# full companion-file set -- litfile0.bin + COMMON0.out.bin -- that the
+# full companion-file set -- litfile0.bin + COMMON0.out.bin.gz -- that the
 # prebaked Halmat/data/out_* fixtures don't ship with) and diffs
 # yaHALMAT2's output against the expected string.
 #
@@ -19,7 +19,6 @@ workdir=$(mktemp -d)
 trap 'rm -rf "$workdir"' EXIT
 cp "$HAL_SRC_DIR/test_$name.hal" "$workdir/"
 ( cd "$workdir" && "$HALSFC" "test_$name.hal" >/dev/null )
-gzip -dk "$workdir/COMMON0.out.bin.gz"
 
 actual=$("$YAHALMAT2" "$workdir/halmat.bin")
 

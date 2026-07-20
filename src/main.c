@@ -62,8 +62,9 @@ static bool file_exists(const char *path) {
  * convention unHALMAT.py uses for halmat.bin (litfile0.bin/COMMON0.out.*)
  * plus the plainer litfile.bin/COMMON0.out.bin naming the prebaked
  * Halmat/data/out_* fixtures happen to use. gzip'd memory images
- * (COMMON0.out.bin.gz) aren't decompressed by this loader yet -- gunzip
- * them first; see Plan.md M2/M3 for the deferred zlib-dependency follow-up. */
+ * (COMMON0.out.bin.gz) are decompressed on the fly by literal.c's
+ * halmat_literal_load (via zlib, or a `gzip -dc` pipe fallback if zlib
+ * wasn't available at build time) -- no manual gunzip needed. */
 static bool find_companion(const char *halmat_path, const char *const *candidates,
                             size_t num_candidates, char *out, size_t out_size) {
     const char *slash = strrchr(halmat_path, '/');
@@ -97,8 +98,9 @@ static bool apply_device_maps(halmat_state_t *state, const device_map_t *maps, i
     return true;
 }
 
-static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, const char *litfile_opt,
-                       const char *memory_opt, int num_blanks, const device_map_t *maps, int num_maps) {
+static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, bool use_opt,
+                       const char *litfile_opt, const char *memory_opt, int num_blanks,
+                       const device_map_t *maps, int num_maps) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -116,25 +118,33 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
     const char *lit_path = litfile_opt;
     const char *mem_path = memory_opt;
 
-    /* --py: HAL_S_FC.py's own companion-file naming convention (FILE2.bin/
-     * LIT_CHAR.bin, no COMMON*.out symbol table at all -- see unHALMAT.py's
-     * own filename-triggered defaults, referenced throughout this
-     * project's research). Missing companions are accepted transparently
-     * either way: have_literals/have_symtab just stay false, degrading
-     * gracefully (blank string literals, "no symbol table loaded" for
-     * --debug's `print`) rather than erroring out. */
+    /* Companion-file defaults, per confirmed convention: halmat.bin pairs
+     * with litfile0.bin + COMMON0.out.bin.gz; optmat.bin (--opt) pairs
+     * with litfile2.bin + COMMON2.out.bin.gz; FILE1.bin (--py, HAL_S_FC.py's
+     * own naming) pairs with FILE2.bin + LIT_CHAR.bin, which is never
+     * gzipped and carries no COMMON*.out symbol table at all. The plain
+     * (non-.gz) litfile.bin/COMMON0.out.bin/COMMON2.out.bin fallbacks
+     * remain for prebaked or manually-decompressed fixtures. Missing
+     * companions are accepted transparently either way: have_literals/
+     * have_symtab just stay false, degrading gracefully (blank string
+     * literals, "no symbol table loaded" for --debug's `print`) rather
+     * than erroring out. */
     if (!lit_path) {
         static const char *lit_candidates_py[] = {"FILE2.bin"};
+        static const char *lit_candidates_opt[] = {"litfile2.bin"};
         static const char *lit_candidates_default[] = {"litfile0.bin", "litfile.bin"};
-        bool found = use_py ? find_companion(path, lit_candidates_py, 1, lit_buf, sizeof(lit_buf))
-                             : find_companion(path, lit_candidates_default, 2, lit_buf, sizeof(lit_buf));
+        bool found = use_py    ? find_companion(path, lit_candidates_py, 1, lit_buf, sizeof(lit_buf))
+                     : use_opt ? find_companion(path, lit_candidates_opt, 1, lit_buf, sizeof(lit_buf))
+                               : find_companion(path, lit_candidates_default, 2, lit_buf, sizeof(lit_buf));
         if (found) lit_path = lit_buf;
     }
     if (!mem_path) {
         static const char *mem_candidates_py[] = {"LIT_CHAR.bin"};
-        static const char *mem_candidates_default[] = {"COMMON0.out.bin"};
-        bool found = use_py ? find_companion(path, mem_candidates_py, 1, mem_buf, sizeof(mem_buf))
-                             : find_companion(path, mem_candidates_default, 1, mem_buf, sizeof(mem_buf));
+        static const char *mem_candidates_opt[] = {"COMMON2.out.bin.gz", "COMMON2.out.bin"};
+        static const char *mem_candidates_default[] = {"COMMON0.out.bin.gz", "COMMON0.out.bin"};
+        bool found = use_py    ? find_companion(path, mem_candidates_py, 1, mem_buf, sizeof(mem_buf))
+                     : use_opt ? find_companion(path, mem_candidates_opt, 2, mem_buf, sizeof(mem_buf))
+                               : find_companion(path, mem_candidates_default, 2, mem_buf, sizeof(mem_buf));
         if (found) mem_path = mem_buf;
     }
 
@@ -160,8 +170,11 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
     bool have_symtab = false;
     if (!use_py) {
         char sym_buf[1024];
-        static const char *sym_candidates[] = {"COMMON0.out"};
-        if (find_companion(path, sym_candidates, 1, sym_buf, sizeof(sym_buf))) {
+        static const char *sym_candidates_opt[] = {"COMMON3.out"};
+        static const char *sym_candidates_default[] = {"COMMON0.out"};
+        bool found = use_opt ? find_companion(path, sym_candidates_opt, 1, sym_buf, sizeof(sym_buf))
+                              : find_companion(path, sym_candidates_default, 1, sym_buf, sizeof(sym_buf));
+        if (found) {
             char err2[256];
             have_symtab = halmat_symtab_load(sym_buf, &symtab, err2, sizeof(err2));
         }
@@ -261,8 +274,6 @@ static bool load_unit(const char *dir, unit_mode_t mode, unit_t *u, char *errbuf
     strncpy(u->dir, dir, sizeof(u->dir) - 1);
 
     const char *halmat_name = (mode == UNIT_MODE_OPT) ? "optmat.bin" : (mode == UNIT_MODE_PY) ? "FILE1.bin" : "halmat.bin";
-    const char *lit_name = (mode == UNIT_MODE_OPT) ? "litfile2.bin" : (mode == UNIT_MODE_PY) ? "FILE2.bin" : "litfile0.bin";
-    const char *mem_name = (mode == UNIT_MODE_OPT) ? "COMMON2.out.bin" : (mode == UNIT_MODE_PY) ? "LIT_CHAR.bin" : "COMMON0.out.bin";
     /* HAL_S_FC.py produces no COMMON*.out symbol table at all -- EXTERNAL
      * COMPOOL linking is unavailable for --py units, accepted
      * transparently (have_symtab just stays false) rather than erroring. */
@@ -272,18 +283,39 @@ static bool load_unit(const char *dir, unit_mode_t mode, unit_t *u, char *errbuf
     snprintf(halmat_path, sizeof(halmat_path), "%s/%s", dir, halmat_name);
     if (!halmat_load(halmat_path, &u->prog, errbuf, errbuf_size)) return false;
 
-    char lit_path[1024], mem_path[1024], sym_path[1024];
-    snprintf(lit_path, sizeof(lit_path), "%s/%s", dir, lit_name);
-    snprintf(mem_path, sizeof(mem_path), "%s/%s", dir, mem_name);
+    /* Companion defaults per the same confirmed convention as run_single:
+     * halmat.bin -> litfile0.bin + COMMON0.out.bin.gz; optmat.bin ->
+     * litfile2.bin + COMMON2.out.bin.gz; FILE1.bin (--py) -> FILE2.bin +
+     * LIT_CHAR.bin (never gzipped). Plain .bin fallbacks are kept for
+     * prebaked/manually-decompressed fixtures. */
+    char lit_buf[1024], mem_buf[1024];
+    bool have_lit_path, have_mem_path;
+    if (mode == UNIT_MODE_PY) {
+        static const char *lit_c[] = {"FILE2.bin"};
+        static const char *mem_c[] = {"LIT_CHAR.bin"};
+        have_lit_path = find_companion(halmat_path, lit_c, 1, lit_buf, sizeof(lit_buf));
+        have_mem_path = find_companion(halmat_path, mem_c, 1, mem_buf, sizeof(mem_buf));
+    } else if (mode == UNIT_MODE_OPT) {
+        static const char *lit_c[] = {"litfile2.bin"};
+        static const char *mem_c[] = {"COMMON2.out.bin.gz", "COMMON2.out.bin"};
+        have_lit_path = find_companion(halmat_path, lit_c, 1, lit_buf, sizeof(lit_buf));
+        have_mem_path = find_companion(halmat_path, mem_c, 2, mem_buf, sizeof(mem_buf));
+    } else {
+        static const char *lit_c[] = {"litfile0.bin", "litfile.bin"};
+        static const char *mem_c[] = {"COMMON0.out.bin.gz", "COMMON0.out.bin"};
+        have_lit_path = find_companion(halmat_path, lit_c, 2, lit_buf, sizeof(lit_buf));
+        have_mem_path = find_companion(halmat_path, mem_c, 2, mem_buf, sizeof(mem_buf));
+    }
 
-    if (file_exists(lit_path)) {
-        if (!halmat_literal_load(lit_path, file_exists(mem_path) ? mem_path : NULL, &u->literals, errbuf, errbuf_size)) {
+    if (have_lit_path) {
+        if (!halmat_literal_load(lit_buf, have_mem_path ? mem_buf : NULL, &u->literals, errbuf, errbuf_size)) {
             halmat_program_free(&u->prog);
             return false;
         }
         u->have_literals = true;
     }
     if (sym_name) {
+        char sym_path[1024];
         snprintf(sym_path, sizeof(sym_path), "%s/%s", dir, sym_name);
         if (file_exists(sym_path)) {
             u->have_symtab = halmat_symtab_load(sym_path, &u->symtab, errbuf, errbuf_size);
@@ -564,5 +596,5 @@ int main(int argc, char **argv) {
         return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, litfile_opt, memory_opt, num_blanks, maps, num_maps);
+    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps);
 }
