@@ -8,6 +8,7 @@
 #include "halmat.h"
 #include "literal.h"
 #include "opcode_table.h" /* for the halmat_state_t typedef */
+#include "symtab.h"
 #include "value.h"
 
 /* Logical device numbers, per class-0/XXAR.md's Unresolved-Questions note
@@ -30,17 +31,28 @@
  * until a multi-record program is actually encountered. */
 #define HALMAT_VAC_MAX HALMAT_RECORD_WORDS
 
-/* ARRAY/MATRIX element storage: declared dimensions aren't visible
- * anywhere in HALMAT for the simple (no ADLP) cases seen so far -- that
- * needs the compiler's own symbol table (SYM_ARRAY et al in COMMON*.out),
- * which isn't parsed yet (a natural fit for the same --common/symtab
- * work M6's EXTERNAL-symbol linking will need). Until then, containers
- * get a generous fixed-size flat buffer and DSUB's multi-index offset
- * flattening uses a placeholder stride rather than the real per-
- * dimension extent -- fine for fixtures that don't observe layout via
- * printed output, wrong for anything that would actually depend on true
- * row-major addressing. See interp.c's DSUB handling. */
+/* ARRAY/MATRIX/VECTOR element storage. Declared dimensions aren't
+ * visible in HALMAT itself (no ADLP-arrayed case carries them either --
+ * see HALMAT.md's Optimizer-HALMAT notes) -- they come from the
+ * compiler's own symbol table (COMMON*.out's SYM_TYPE/SYM_LENGTH/
+ * SYM_ARRAY+EXTuARRAY fields, symtab.h/symtab.c) when it's available
+ * (main.c auto-discovers/loads it same as litfile/memory; --py units
+ * have none, degrading gracefully). When it's not available (or the
+ * symbol isn't found in it), DSUB/MASN/etc fall back to a generic
+ * flat buffer of this capacity with a placeholder stride -- correct
+ * for simple single-dimension access, wrong for true multi-dimension
+ * row-major addressing without the real extents. See interp.c's
+ * ensure_container/DSUB/MASN-family handling. */
 #define HALMAT_CONTAINER_CAPACITY 64
+
+/* Row-major MATRIX(r,c) storage, per row: HAL/S itself is the actual
+ * unresolved-primary-source question here (no MSC-01847/USA003087
+ * page confirming row-major vs. column-major was found), but row-major
+ * is the far more common convention and DSUB's own subscript-operand
+ * order (row index first, per class-0/DSUB.md's confirmed trace)
+ * matches a row-major flattening more naturally than column-major
+ * would -- treated as the working assumption, not independently
+ * confirmed. */
 
 typedef enum {
     SYT_TYPE_UNKNOWN = 0,
@@ -54,8 +66,12 @@ typedef struct {
     halmat_syt_type_t type;
     int32_t value;          /* SYT_TYPE_INTEGER */
     halmat_scalar_t scalar; /* SYT_TYPE_SCALAR (plain, non-subscripted) */
-    halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX of SCALAR; lazily allocated */
+    halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX/VECTOR of SCALAR; lazily allocated */
     size_t element_count;
+    int rows, cols; /* MATRIX(r,c): both set (row-major, r*c elements). VECTOR(n): cols=n, rows=0.
+                      * Plain ARRAY(n): both 0 (element_count is authoritative, single dimension).
+                      * Set by ensure_container() the first time the symbol's elements are
+                      * allocated -- 0/0 also means "not yet allocated" together with elements==NULL. */
     char *char_value; /* SYT_TYPE_CHARACTER; owned, malloc'd, NUL-terminated. No
                         * fixed-length/VARYING-vs-fixed truncation-or-padding
                         * behavior is implemented yet (class-2/CASN.md's
@@ -89,7 +105,22 @@ typedef struct {
                                * only the final value per slot) by interp_cleanup(). */
     bool is_bits;            /* is_ref=false, !is_string: true if this slot holds a BIT result (e.g. BAND/BOR/BNOT); takes priority over is_scalar */
     uint32_t bits;           /* is_ref=false, is_bits */
-    int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits */
+    bool is_container;       /* is_ref=false, !is_string, !is_bits: true if this slot holds a whole
+                               * MATRIX/VECTOR intermediate result (e.g. MADD/VADD), consumed by a
+                               * following MASN/VASN or another MATRIX/VECTOR op -- class-3/MADD.md's
+                               * "no destination operand -- consumed by a following MASN via a VAC-
+                               * qualified operand" pattern. Takes priority over is_scalar. */
+    halmat_scalar_t *container; /* is_ref=false, is_container; owned, malloc'd -- heap, NOT an inline
+                                  * array, since HALMAT_VAC_MAX (1800) slots x a fixed-size inline
+                                  * buffer would balloon halmat_state_t (itself a local/stack variable
+                                  * in main.c) by well over a megabyte, risking stack overflow on
+                                  * platforms with small default stacks (Windows threads default to
+                                  * 1 MiB -- a real concern per Plan.md's MSVC/cross-platform target).
+                                  * Same reuse-without-freeing-prior-iteration's-buffer leak as the
+                                  * VAC string buffers above; freed in bulk by interp_cleanup(). */
+    size_t container_count;
+    int container_rows, container_cols; /* is_container: shape, same convention as halmat_syt_entry_t's rows/cols */
+    int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits, !is_container */
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
     size_t ref_offset;      /* is_ref=true */
@@ -117,6 +148,11 @@ typedef struct {
 struct halmat_state {
     const halmat_program_t *prog;
     const halmat_literal_table_t *literals;
+    const halmat_symtab_t *symtab; /* optional (NULL if unavailable, e.g. --py units);
+                                     * needed for MATRIX/VECTOR/ARRAY declared dimensions
+                                     * (DSUB/MASN-family container allocation) since HALMAT
+                                     * itself never carries them -- see HALMAT_CONTAINER_
+                                     * CAPACITY's comment above. Not owned by the interpreter. */
     size_t pc; /* index into prog->instrs */
 
     halmat_syt_entry_t syt[HALMAT_SYT_MAX];

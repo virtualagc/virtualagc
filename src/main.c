@@ -149,9 +149,16 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         have_literals = true;
     }
 
+    /* HAL_S_FC.py produces no COMMON*.out at all -- --debug's `print` and
+     * MATRIX/VECTOR/ARRAY declared-dimension lookups (state.h's symtab
+     * field) both just degrade gracefully without it (see this project's
+     * established "transparently accept, don't display/use it" pattern
+     * for every other optional companion file). Loaded unconditionally
+     * now (previously only under --debug) since MATRIX/VECTOR arithmetic
+     * needs it in ordinary (non-debugger) runs too. */
     halmat_symtab_t symtab;
     bool have_symtab = false;
-    if (debug_mode && !use_py) { /* HAL_S_FC.py produces no COMMON*.out; --debug's `print` just degrades to "no symbol table loaded" */
+    if (!use_py) {
         char sym_buf[1024];
         static const char *sym_candidates[] = {"COMMON0.out"};
         if (find_companion(path, sym_candidates, 1, sym_buf, sizeof(sym_buf))) {
@@ -162,6 +169,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
 
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
+    if (have_symtab) interp_set_symtab(&state, &symtab);
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
         interp_cleanup(&state);
@@ -358,6 +366,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
 
         halmat_state_t aux;
         interp_init(&aux, &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
+        if (units[i].have_symtab) interp_set_symtab(&aux, &units[i].symtab);
         interp_run(&aux, stdout);
 
         bool wired_in = false;
@@ -428,6 +437,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     halmat_state_t primary_state;
     interp_init(&primary_state, &units[primary].prog,
                 units[primary].have_literals ? &units[primary].literals : NULL, num_blanks);
+    if (units[primary].have_symtab) interp_set_symtab(&primary_state, &units[primary].symtab);
 
     for (int k = 0; k < import_count; k++) {
         const halmat_symtab_entry_t *primary_ref =

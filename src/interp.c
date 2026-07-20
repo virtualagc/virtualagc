@@ -567,6 +567,10 @@ void interp_set_device(halmat_state_t *state, int device, FILE *f) {
     state->devices[device] = f;
 }
 
+void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab) {
+    state->symtab = symtab;
+}
+
 void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
@@ -605,6 +609,7 @@ void interp_cleanup(halmat_state_t *state) {
     }
     for (size_t i = 0; i < HALMAT_VAC_MAX; i++) {
         if (state->vac[i].is_string) free(state->vac[i].string);
+        if (state->vac[i].is_container) free(state->vac[i].container);
     }
 }
 

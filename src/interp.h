@@ -18,6 +18,13 @@ void interp_cleanup(halmat_state_t *state);
  * (main.c, for --ddi/--ddo) owns their lifetime. */
 void interp_set_device(halmat_state_t *state, int device, FILE *f);
 
+/* Attaches a (possibly NULL) symbol table for MATRIX/VECTOR/ARRAY
+ * declared-dimension lookups (state.h's symtab field) -- optional; not
+ * calling this at all leaves it NULL, and DSUB/MASN-family opcodes fall
+ * back to the generic placeholder-stride behavior. Not owned by the
+ * interpreter (main.c manages the halmat_symtab_t's lifetime). */
+void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */
