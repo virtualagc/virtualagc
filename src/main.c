@@ -4,6 +4,14 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <io.h>
+#define halmat_isatty _isatty
+#else
+#include <unistd.h>
+#define halmat_isatty isatty
+#endif
+
 #include "debug.h"
 #include "disasm.h"
 #include "halmat.h"
@@ -59,6 +67,14 @@ static void usage(const char *prog) {
             "                   matches the historical HAL/S-FC runtime option of the same\n"
             "                   name/shape). N is a separate device-number namespace from\n"
             "                   --ddi/--ddo/READ/WRITE -- reusing the same number is fine.\n"
+            "  --color=WHEN     colorize --debug output: auto (default, TTY-detected),\n"
+            "                   always, or never\n"
+            "  --color-prompt=NAME    debugger prompt color (default: red)\n"
+            "  --color-input=NAME     echoed debugger-input color (default: brown/yellow)\n"
+            "  --color-stmt=NAME      HAL/S source-line color (default: green)\n"
+            "  --color-default=NAME   everything else the debugger prints (default: black)\n"
+            "                   NAME is one of black/red/green/yellow/blue/magenta/cyan/white\n"
+            "                   (or brown, an alias for yellow)\n"
             "  --help           this message\n"
             "\n"
             "@list is a text file listing one HALSFC output directory per line, each\n"
@@ -136,7 +152,8 @@ static bool apply_raf_maps(halmat_state_t *state, const raf_map_t *maps, int num
 static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, bool use_opt,
                        const char *litfile_opt, const char *memory_opt, int num_blanks,
                        const device_map_t *maps, int num_maps,
-                       const raf_map_t *raf_maps, int num_raf_maps) {
+                       const raf_map_t *raf_maps, int num_raf_maps,
+                       const debug_colors_t *colors) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -256,7 +273,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         halmat_program_free(&prog);
         return 1;
     }
-    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, stdout)
+    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, colors, stdout)
                          : interp_run(&state, stdout);
     interp_cleanup(&state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
@@ -590,6 +607,11 @@ int main(int argc, char **argv) {
     raf_map_t raf_maps[MAX_DEVICE_MAPS];
     int num_raf_maps = 0;
     static char raf_paths[MAX_DEVICE_MAPS][1024];
+    const char *color_when = "auto";
+    const char *color_prompt_name = "red";
+    const char *color_input_name = "brown";
+    const char *color_stmt_name = "green";
+    const char *color_default_name = "black";
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--disasm") == 0) {
@@ -643,6 +665,16 @@ int main(int argc, char **argv) {
             raf_maps[num_raf_maps].path = raf_paths[num_raf_maps];
             raf_maps[num_raf_maps].mode = mode;
             num_raf_maps++;
+        } else if (strncmp(argv[i], "--color=", 8) == 0) {
+            color_when = argv[i] + 8;
+        } else if (strncmp(argv[i], "--color-prompt=", 15) == 0) {
+            color_prompt_name = argv[i] + 15;
+        } else if (strncmp(argv[i], "--color-input=", 14) == 0) {
+            color_input_name = argv[i] + 14;
+        } else if (strncmp(argv[i], "--color-stmt=", 13) == 0) {
+            color_stmt_name = argv[i] + 13;
+        } else if (strncmp(argv[i], "--color-default=", 16) == 0) {
+            color_default_name = argv[i] + 16;
         } else if (strcmp(argv[i], "--help") == 0) {
             usage(argv[0]);
             return 0;
@@ -660,6 +692,25 @@ int main(int argc, char **argv) {
 
     if (!path) {
         usage(argv[0]);
+        return 1;
+    }
+
+    debug_colors_t colors = {0};
+    if (strcmp(color_when, "always") == 0) {
+        colors.enabled = true;
+    } else if (strcmp(color_when, "never") == 0) {
+        colors.enabled = false;
+    } else if (strcmp(color_when, "auto") == 0) {
+        colors.enabled = halmat_isatty(1) != 0; /* fd 1 = stdout */
+    } else {
+        fprintf(stderr, "%s: --color expects auto, always, or never\n", argv[0]);
+        return 1;
+    }
+    if (!debug_color_by_name(color_prompt_name, &colors.prompt_code) ||
+        !debug_color_by_name(color_input_name, &colors.input_code) ||
+        !debug_color_by_name(color_stmt_name, &colors.stmt_code) ||
+        !debug_color_by_name(color_default_name, &colors.other_code)) {
+        fprintf(stderr, "%s: --color-* names must be one of black/red/green/yellow/blue/magenta/cyan/white/brown\n", argv[0]);
         return 1;
     }
 
@@ -685,5 +736,5 @@ int main(int argc, char **argv) {
         return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps);
+    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps, &colors);
 }
