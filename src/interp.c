@@ -30,6 +30,11 @@
 #define OP_SLRI 0x802
 #define OP_ELRI 0x803
 #define OP_ETRI 0x804
+#define OP_IDEF 0x051
+#define OP_ICLS 0x052
+#define OP_IMRK 0x003
+#define OP_TDCL 0x033
+#define OP_UDEF 0x02E
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_CFOR 0x012
@@ -201,6 +206,33 @@ static halmat_scalar_t rv_to_scalar(const resolved_value_t *v) {
     if (v->kind == RV_SCALAR) return v->scalar;
     if (v->kind == RV_INTEGER) return halmat_scalar_from_integer(v->integer, false);
     return halmat_scalar_zero(false);
+}
+
+/* Stores a resolved_value_t into a VAC slot by its own kind (mirrors the
+ * inline field-setting every other opcode does at its own ins->index,
+ * factored out for OP_RTRN's inline-FUNCTION case, which needs to store
+ * to a slot other than its own -- IDEF's, not RTRN's -- and must
+ * preserve whatever type the inline function actually returns, unlike
+ * the existing FCAL/RTRN path which always narrows to INTEGER). */
+static void store_resolved_to_vac(halmat_vac_slot_t *slot, const resolved_value_t *val) {
+    memset(slot, 0, sizeof(*slot));
+    switch (val->kind) {
+        case RV_SCALAR:
+            slot->is_scalar = true;
+            slot->scalar = val->scalar;
+            break;
+        case RV_STRING:
+            slot->is_string = true;
+            slot->string = val->string;
+            break;
+        case RV_BITS:
+            slot->is_bits = true;
+            slot->bits = val->bits;
+            break;
+        default:
+            slot->integer = val->integer;
+            break;
+    }
 }
 
 static void fail(halmat_state_t *state, const char *fmt, ...) {
@@ -1165,6 +1197,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_SLRI:
             case OP_ELRI:
             case OP_ETRI:
+            case OP_IMRK:
+            case OP_TDCL:
+            case OP_UDEF:
+                /* IMRK (class-0/IMRK.md) brackets each statement inside
+                 * an inline FUNCTION block -- a pure marker (see
+                 * OP_IDEF/OP_ICLS below for the block's own open/close
+                 * handling). TDCL (class-0/TDCL.md, `TEMPORARY`
+                 * data-item declaration) generates no code of its own
+                 * ("pure declaration" per its confirmed trace). UDEF
+                 * (class-0/UDEF.md) just labels an update block's own
+                 * name; the block's body is ordinary already-supported
+                 * HALMAT. */
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below.
@@ -3053,14 +3097,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
+            case OP_IDEF:
+                /* Opens an inline FUNCTION block (class-0/IDEF.md) --
+                 * unlike FCAL, no branch: the block's own HALMAT already
+                 * appears in-line in the stream and simply falls
+                 * through. Pushed so the matching RTRN (see below) knows
+                 * which VAC slot to write its result to. */
+                if (state->inline_func_sp >= 16) { fail(state, "inline FUNCTION nesting too deep"); break; }
+                state->inline_func_stack[state->inline_func_sp++] = state->pc;
+                break;
+
+            case OP_ICLS:
+                /* Closes the inline FUNCTION block opened by the most
+                 * recent IDEF (class-0/ICLS.md); pure bracket, no
+                 * runtime effect of its own beyond popping the stack IDEF
+                 * pushed -- the RTRN inside already wrote the result. */
+                if (state->inline_func_sp <= 0) { fail(state, "ICLS with no active inline FUNCTION"); break; }
+                state->inline_func_sp--;
+                break;
+
             case OP_RTRN: {
                 /* Two forms (class-0/RTRN.md): 1 operand = function
                  * return value (result flows back via the FCAL's own VAC
                  * slot); 0 operands = procedure/task return (no value --
                  * used by PCAL-initiated calls, which have no VAC result
-                 * to write). */
+                 * to write). Inline-FUNCTION form (class-0/IDEF.md): a
+                 * RTRN reached with no active FCAL/PCAL call frame but an
+                 * open IDEF instead writes its result to the IDEF's own
+                 * VAC slot (mirroring FCAL's role) and simply falls
+                 * through (no branch -- IDEF.md's confirmed trace shows
+                 * the inline body already appears in-line in the
+                 * instruction stream, unlike a real subprogram body
+                 * defined elsewhere). */
                 if (ins->operand_count > 1) { fail(state, "RTRN: expected 0 or 1 operands"); break; }
-                if (state->call_return_sp <= 0) { fail(state, "RTRN with no active call"); break; }
+                if (state->call_return_sp <= 0) {
+                    if (state->inline_func_sp <= 0) { fail(state, "RTRN with no active call"); break; }
+                    if (ins->operand_count != 1) { fail(state, "RTRN: inline FUNCTION requires a return value"); break; }
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    size_t idef_pos = state->inline_func_stack[state->inline_func_sp - 1];
+                    size_t vac_index = state->prog->instrs[idef_pos].index;
+                    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    store_resolved_to_vac(&state->vac[vac_index], &a);
+                    break;
+                }
                 if (ins->operand_count == 1) {
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];

@@ -376,8 +376,15 @@ struct halmat_state {
     size_t *def_clos_target;  /* per-FDEF/TDEF position: matching CLOS's array position + 1 */
     size_t call_return_stack[64]; /* FCAL's own array position, per active call */
     int call_return_sp;
+    size_t inline_func_stack[16]; /* IDEF's own array position, per open inline FUNCTION
+                                    * block (class-0/IDEF.md) -- RTRN inside one writes its
+                                    * result to the IDEF's own VAC slot (mirroring FCAL's
+                                    * role) and falls through rather than branching, since
+                                    * the inline body already appears in-line in the stream */
+    int inline_func_sp;
 
-    /* Virtual-clock task scheduler (SCHD/WAIT/TERM; SGNL/CANC/PRIO and
+    /* Virtual-clock task scheduler (SCHD/WAIT/TERM/CANC/SGNL implemented;
+     * PRIO is BFNC's selector-19 built-in, not a standalone opcode.
      * SCHD's delayed/cyclic AT/IN/ON/EVERY/AFTER/WHILE/UNTIL forms are
      * not yet implemented -- immediate SCHEDULE with PRIORITY/DEPENDENT
      * only). Ticks 1:1 per HALMAT instruction executed (the user's

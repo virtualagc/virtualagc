@@ -75,6 +75,8 @@ run ./run_local_fixture.sh stri "$(printf ' 1.5000000E+00\n 1.5000000E+00\n 1.50
 run ./run_local_fixture.sh canc "N=               0"
 run ./run_local_fixture.sh canc_control "N=               1"
 run ./run_local_fixture.sh sgnl "DONE"
+run ./run_local_fixture.sh idef " 1.2000000E+01"
+run ./run_local_fixture.sh tdcl " 6.0000000E+00"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)
