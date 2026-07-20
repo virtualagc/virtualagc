@@ -120,6 +120,7 @@
 #define OP_SSDV 0x5AE
 #define OP_MASN 0x301
 #define OP_MTRA 0x329
+#define OP_MINV 0x3CA
 #define OP_MNEG 0x344
 #define OP_MADD 0x362
 #define OP_MSUB 0x363
@@ -390,6 +391,57 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     e->element_count = count;
     e->rows = rows;
     e->cols = cols;
+}
+
+/* Matrix inverse (MINV, class-3/MINV.md; BFNC's INVERSE selector), via
+ * ordinary double-precision Gauss-Jordan elimination with partial
+ * pivoting. No specific inversion algorithm is mandated by the primary
+ * sources -- only that INVERSE/MINV compute a genuine matrix inverse --
+ * so this doesn't attempt bit-exact matching against whatever routine
+ * the original compiler's runtime library used, and goes through double
+ * (via halmat_scalar_to_double/from_double) rather than genuine hex-
+ * float arithmetic, the same documented precision compromise as SEXP.
+ * n is capped at 8 (n*n <= HALMAT_CONTAINER_CAPACITY=64, this
+ * interpreter's generic container-size ceiling elsewhere). Returns
+ * false for a singular (or n>8) matrix -- a genuine runtime ERROR
+ * CONDITION under HAL/S's error model, not a value to silently
+ * substitute (same disposition as SSDV's divide-by-zero), though the
+ * exact USA003090 Appendix C response text wasn't available to consult
+ * in this session -- the caller fail()s loudly rather than guessing at
+ * that wording. */
+static bool matrix_invert(const halmat_scalar_t *in, int n, halmat_scalar_t *out) {
+    if (n <= 0 || n > 8) return false;
+    double aug[8][16];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) aug[i][j] = halmat_scalar_to_double(in[i * n + j]);
+        for (int j = 0; j < n; j++) aug[i][n + j] = (i == j) ? 1.0 : 0.0;
+    }
+    for (int col = 0; col < n; col++) {
+        int pivot = col;
+        double best = fabs(aug[col][col]);
+        for (int r = col + 1; r < n; r++) {
+            if (fabs(aug[r][col]) > best) { best = fabs(aug[r][col]); pivot = r; }
+        }
+        if (best < 1e-12) return false; /* singular */
+        if (pivot != col) {
+            for (int j = 0; j < 2 * n; j++) { double t = aug[col][j]; aug[col][j] = aug[pivot][j]; aug[pivot][j] = t; }
+        }
+        double pv = aug[col][col];
+        for (int j = 0; j < 2 * n; j++) aug[col][j] /= pv;
+        for (int r = 0; r < n; r++) {
+            if (r == col) continue;
+            double factor = aug[r][col];
+            for (int j = 0; j < 2 * n; j++) aug[r][j] -= factor * aug[col][j];
+        }
+    }
+    bool dbl = false;
+    for (int i = 0; i < n * n; i++) {
+        if (in[i].double_precision) { dbl = true; break; }
+    }
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            out[i * n + j] = halmat_scalar_from_double(aug[i][n + j], dbl);
+    return true;
 }
 
 /* Reads a whole MATRIX/VECTOR operand (SYT variable or a VAC-carried
@@ -1207,6 +1259,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     for (int c = 0; c < cols; c++)
                         result[c * rows + r] = src[r * cols + c];
                 if (!store_container_result(state, ins->index, result, count, cols, rows)) break;
+                break;
+            }
+
+            case OP_MINV: {
+                /* Two operands, not one -- class-3/MINV.md's own doc
+                 * (written before this session, when MINV was still
+                 * unimplemented) states the operand-word format as
+                 * unconfirmed; empirically it's operand[0]=SYT (the
+                 * matrix) plus a second QUAL=5=LIT operand this session
+                 * didn't fully decode (the generated object code loads
+                 * its DATA value via a bare `LA` -- load-address, not a
+                 * literal-table dereference -- suggesting a compile-time
+                 * constant/routine-selector rather than a numeric input
+                 * to the inversion itself; ignored here since the
+                 * inverse computed from operand[0] alone already matches
+                 * hand-derived expected values exactly). */
+                if (ins->operand_count != 2) { fail(state, "MINV: expected 2 operands"); break; }
+                halmat_scalar_t *src; size_t count; int rows, cols;
+                if (!resolve_container(state, &ins->operands[0], &src, &count, &rows, &cols)) break;
+                if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "MINV: operand is not a square MATRIX"); break; }
+                if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MINV: container too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                if (!matrix_invert(src, rows, result)) {
+                    fail(state, "MINV: singular matrix (floating point error condition)");
+                    break;
+                }
+                if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                 break;
             }
 
@@ -2069,9 +2148,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             state->vac[ins->index].string = trimmed;
                         }
                         break;
-                    case 49: /* INVERSE: matrix inverse -- deferred, same as MINV */
-                        fail(state, "BFNC INVERSE (matrix inverse) is not yet implemented");
+                    case 49: { /* INVERSE: matrix inverse, same algorithm as MINV */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "INVERSE: operand is not a square MATRIX"); break; }
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "INVERSE: container too large"); break; }
+                        halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                        if (!matrix_invert(ca, rows, result)) {
+                            fail(state, "INVERSE: singular matrix (floating point error condition)");
+                            break;
+                        }
+                        if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                         break;
+                    }
                     default:
                         fail(state, "BFNC: unknown/unimplemented built-in function selector %u", ins->tag);
                         break;
