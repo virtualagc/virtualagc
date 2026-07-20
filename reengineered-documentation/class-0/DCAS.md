@@ -87,6 +87,21 @@ closing [ECAS](ECAS.md).
   changes the encoding (e.g. requires an explicit rounding/STOI-style
   conversion beforehand) is untested.
 
+**Resolved (Phase 3)**: the selector's indexing base was pinned down
+against [USA003087] §10.3 directly (rules 2–3 plus a worked example: `I
+= 3; DO CASE I; ...` — "Execution results in the **third** statement
+being scheduled for execution") — selector value `k` is **1-based**
+(`k`=1 selects the first case). Confirmed by an independent yaHALMAT2
+implementation matching this rule exactly against a freshly compiled
+`test_case.hal` (`SEL INITIAL(2)` correctly selects the second case,
+`RESULT=20`). Note for future cross-checking: the existing reference
+`yaHALMAT` emulator's `POP_DCAS` handler
+(`Halmat/emu/halmat_class0.c`) is **0-based** (`case_idx` starts at 0
+and is compared directly against the selector value) — a genuine bug in
+that tool relative to the primary source, not an alternate valid
+reading; don't use its output as a DCAS cross-check without adjusting
+for this.
+
 ## Source Analysis & Reliability
 
 Opcode (0x00B) confirmed primary-source: `XDCAS BIT(16) INITIAL("00B")`

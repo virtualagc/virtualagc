@@ -82,7 +82,22 @@ struct halmat_state {
     bool *efor_is_list_form;    /* per-EFOR: true if it uses the AFOR return-stack */
     size_t for_return_stack[64];
     int for_return_sp;
+
+    /* DO CASE (DCAS/CLBL/ECAS): per class-0/ECAS.md, "every case body
+     * ends with an unconditional branch" to ECAS's join point -- but
+     * that branch is synthesized only in PASS2's machine-code output,
+     * with no corresponding distinct HALMAT opcode. Modeled here by
+     * having DCAS's computed jump land just *past* the selected CLBL
+     * (skipping it), while CLBL itself, whenever reached by ordinary
+     * sequential fall-through from a preceding case body (i.e. every
+     * time except a DCAS landing), acts as the implicit branch to ECAS.
+     * See interp.c's precompute_case_dispatch(). */
+    size_t *dcas_case_target;  /* flat [dcas_pos * HALMAT_MAX_CASES + (sel-1)] -> jump target */
+    size_t *dcas_case_count;   /* per-DCAS position: how many ordinary (non-trap) cases */
+    size_t *clbl_ecas_target;  /* per-CLBL position: where to jump (ECAS join point + 1) */
 };
+
+#define HALMAT_MAX_CASES 64
 
 #define HALMAT_LABEL_MAX 4096
 

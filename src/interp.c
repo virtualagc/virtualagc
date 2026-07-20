@@ -17,6 +17,9 @@
 #define OP_LBL 0x008
 #define OP_BRA 0x009
 #define OP_FBRA 0x00A
+#define OP_DCAS 0x00B
+#define OP_ECAS 0x00C
+#define OP_CLBL 0x00D
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_DSMP 0x013
@@ -240,6 +243,59 @@ static void precompute_for_loops(halmat_state_t *state) {
     }
 }
 
+/* DO CASE (DCAS/CLBL/ECAS): see state.h's field comments and
+ * class-0/DCAS.md, class-0/CLBL.md, class-0/ECAS.md. The final CLBL
+ * before ECAS (tag=1, class-0/CLBL.md's "trap" CLBL) is excluded from
+ * the selectable case list -- its role for out-of-range selectors is
+ * documented as untested/unresolved, so an out-of-range selector fails
+ * loudly here rather than guessing. */
+#define CASE_STACK_MAX 64
+
+static void precompute_case_dispatch(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->dcas_case_target = malloc(n * HALMAT_MAX_CASES * sizeof(size_t));
+    state->dcas_case_count = calloc(n, sizeof(size_t));
+    state->clbl_ecas_target = malloc(n * sizeof(size_t));
+    for (size_t i = 0; i < n; i++) state->clbl_ecas_target[i] = NO_TARGET;
+
+    struct {
+        size_t dcas_pos;
+        size_t clbl_positions[HALMAT_MAX_CASES];
+        size_t clbl_count;
+    } stack[CASE_STACK_MAX];
+    int sp = 0;
+
+    for (size_t i = 0; i < n; i++) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if (ins->opcode == OP_DCAS) {
+            if (sp < CASE_STACK_MAX) {
+                stack[sp].dcas_pos = i;
+                stack[sp].clbl_count = 0;
+                sp++;
+            }
+        } else if (ins->opcode == OP_CLBL) {
+            if (sp > 0 && stack[sp - 1].clbl_count < HALMAT_MAX_CASES) {
+                stack[sp - 1].clbl_positions[stack[sp - 1].clbl_count++] = i;
+            }
+        } else if (ins->opcode == OP_ECAS) {
+            if (sp > 0) {
+                sp--;
+                size_t dcas_pos = stack[sp].dcas_pos;
+                size_t clbl_count = stack[sp].clbl_count;
+                size_t ordinary_count = clbl_count > 0 ? clbl_count - 1 : 0; /* last CLBL is the trap */
+                state->dcas_case_count[dcas_pos] = ordinary_count;
+                for (size_t k = 0; k < clbl_count; k++) {
+                    size_t clbl_pos = stack[sp].clbl_positions[k];
+                    state->clbl_ecas_target[clbl_pos] = i + 1;
+                    if (k < ordinary_count) {
+                        state->dcas_case_target[dcas_pos * HALMAT_MAX_CASES + k] = clbl_pos + 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
@@ -249,6 +305,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_loop_targets(state);
     precompute_labels(state);
     precompute_for_loops(state);
+    precompute_case_dispatch(state);
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -259,6 +316,9 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->afor_return_target);
     free(state->afor_control_var);
     free(state->efor_is_list_form);
+    free(state->dcas_case_target);
+    free(state->dcas_case_count);
+    free(state->clbl_ecas_target);
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
     state->label_pos = NULL;
@@ -266,6 +326,9 @@ void interp_cleanup(halmat_state_t *state) {
     state->afor_return_target = NULL;
     state->afor_control_var = NULL;
     state->efor_is_list_form = NULL;
+    state->dcas_case_target = NULL;
+    state->dcas_case_count = NULL;
+    state->clbl_ecas_target = NULL;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -405,6 +468,35 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 branched = true;
                 break;
             }
+
+            case OP_DCAS: {
+                if (ins->operand_count != 2) { fail(state, "DCAS: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                size_t count = state->dcas_case_count[state->pc];
+                if (a.integer < 1 || (size_t)a.integer > count) {
+                    fail(state, "DO CASE selector %d out of range 1..%zu (out-of-range/ELSE handling not yet implemented)",
+                         a.integer, count);
+                    break;
+                }
+                state->pc = state->dcas_case_target[state->pc * HALMAT_MAX_CASES + (a.integer - 1)];
+                branched = true;
+                break;
+            }
+
+            case OP_CLBL: {
+                /* Reached here only by falling through from the
+                 * preceding case's body (DCAS always jumps past its
+                 * target CLBL) -- this is the implicit "branch to ECAS"
+                 * every case body ends with (class-0/ECAS.md). */
+                size_t target = state->clbl_ecas_target[state->pc];
+                if (target == NO_TARGET) { fail(state, "CLBL has no matching ECAS"); break; }
+                state->pc = target;
+                branched = true;
+                break;
+            }
+
+            case OP_ECAS:
+                break; /* join point; no-op */
 
             case OP_IINT:
                 if (ins->operand_count != 2) { fail(state, "IINT: expected 2 operands"); break; }
