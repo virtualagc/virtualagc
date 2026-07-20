@@ -34,6 +34,13 @@
 #define OP_RDAL 0x020
 #define OP_READ 0x01F
 #define OP_WRIT 0x021
+#define OP_MSHP 0x040
+#define OP_VSHP 0x041
+#define OP_SSHP 0x042
+#define OP_ISHP 0x043
+#define OP_SFST 0x045
+#define OP_SFND 0x046
+#define OP_SFAR 0x047
 #define OP_XXST 0x025
 #define OP_XXND 0x026
 #define OP_XXAR 0x027
@@ -1905,6 +1912,64 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = (int32_t)lround(strtod(a.string, NULL));
+                break;
+
+            case OP_SFST:
+                /* Shaping-function argument-list start (class-0/SFST.md);
+                 * its own operand (nesting level/flow number) isn't
+                 * needed for evaluation, only by the compiler itself. */
+                state->shape_pending.active = true;
+                state->shape_pending.item_count = 0;
+                break;
+
+            case OP_SFAR:
+                /* One per shaping-function argument (class-0/SFAR.md).
+                 * Stored raw -- see state.h's shape_pending comment for
+                 * why resolution is deferred to the shaping-result
+                 * opcode (VSHP/MSHP/etc) rather than done here. */
+                if (!state->shape_pending.active) { fail(state, "SFAR outside of an SFST...SFND block"); break; }
+                if (ins->operand_count != 1) { fail(state, "SFAR: expected 1 operand"); break; }
+                if (state->shape_pending.item_count >= HALMAT_MAX_OPERANDS) {
+                    fail(state, "shaping-function argument list too long");
+                    break;
+                }
+                state->shape_pending.items[state->shape_pending.item_count++] = ins->operands[0];
+                break;
+
+            case OP_SFND:
+                state->shape_pending.active = false;
+                break;
+
+            case OP_VSHP: {
+                /* List-form VECTOR(...) construction (class-0/VSHP.md):
+                 * own operand is the resulting length (IMD literal);
+                 * each pending SFAR argument resolves as a plain SCALAR
+                 * (unlike MSHP, whose arguments are themselves VECTORs
+                 * -- not implemented, see state.h). */
+                if (ins->operand_count != 1) { fail(state, "VSHP: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                size_t length = (size_t)rv_to_integer(&a);
+                if (length != state->shape_pending.item_count) {
+                    fail(state, "VSHP: declared length %zu doesn't match %u arguments", length, state->shape_pending.item_count);
+                    break;
+                }
+                if (length > HALMAT_CONTAINER_CAPACITY) { fail(state, "VSHP: result too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                bool ok = true;
+                for (size_t i = 0; ok && i < length; i++) {
+                    resolved_value_t item;
+                    if (!resolve_operand(state, &state->shape_pending.items[i], &item)) { ok = false; break; }
+                    result[i] = rv_to_scalar(&item);
+                }
+                if (!ok) break;
+                if (!store_container_result(state, ins->index, result, length, 0, (int)length)) break;
+                break;
+            }
+
+            case OP_MSHP:
+            case OP_SSHP:
+            case OP_ISHP:
+                fail(state, "list-form MATRIX(...)/SCALAR(...)/INTEGER(...) shaping functions are not yet implemented");
                 break;
 
             case OP_XXST:

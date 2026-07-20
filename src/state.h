@@ -197,6 +197,21 @@ struct halmat_state {
         uint8_t item_count;
     } io_pending;
 
+    /* Pending shaping-function argument list, accumulated between SFST
+     * and SFND (class-0/SFST.md/SFAR.md/SFND.md) -- e.g. `V1 =
+     * VECTOR(S1, S2, S1);`. Each SFAR's operand is stored raw (not
+     * resolved) since the appropriate resolution differs by which
+     * shaping-result opcode (VSHP/MSHP/SSHP/ISHP) ultimately consumes
+     * the list -- VSHP resolves each as a plain SCALAR, but MSHP's own
+     * arguments are themselves whole VECTORs (class-0/MSHP.md), which
+     * isn't known until MSHP itself is reached. Only VSHP is
+     * implemented; MSHP/SSHP/ISHP fail loudly. */
+    struct {
+        bool active;
+        halmat_operand_t items[HALMAT_MAX_OPERANDS];
+        uint8_t item_count;
+    } shape_pending;
+
     bool halted;
     int exit_code;
 
