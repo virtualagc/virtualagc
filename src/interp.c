@@ -24,6 +24,7 @@
 #define OP_ECAS 0x00C
 #define OP_CLBL 0x00D
 #define OP_ADLP 0x017
+#define OP_IDLP 0x01A
 #define OP_DLPE 0x018
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
@@ -697,10 +698,16 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
         uint16_t opcode = state->prog->instrs[i].opcode;
         if (opcode == OP_SMRK) {
             boundary = i + 1;
-        } else if (opcode == OP_ADLP) {
+        } else if (opcode == OP_ADLP || opcode == OP_IDLP) {
+            /* IDLP (STATIC-array counterpart of ADLP, class-0/IDLP.md)
+             * shares the exact same single-instance-plus-trailing-
+             * metadata shape for the uniform-INITIAL()-value case
+             * (confirmed empirically: `V1 INITIAL(4.0)` on a default/
+             * STATIC ARRAY(3) compiles to one SINT then IDLP(3) then
+             * DLPE, no per-element repetition) -- treated identically. */
             size_t j = i;
             int count = 0;
-            while (j < n && state->prog->instrs[j].opcode == OP_ADLP) {
+            while (j < n && (state->prog->instrs[j].opcode == OP_ADLP || state->prog->instrs[j].opcode == OP_IDLP)) {
                 const halmat_instr_t *adlp = &state->prog->instrs[j];
                 if (adlp->operand_count == 1 && adlp->operands[0].qual == QUAL_IMD) {
                     count = (int16_t)adlp->operands[0].data;
@@ -1073,6 +1080,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_IFHD:
             case OP_LBL:
             case OP_ADLP:
+            case OP_IDLP:
             case OP_DLPE:
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
@@ -1875,16 +1883,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_SINT:
-                /* Direct symbol-table form only (class-8/SINT.md); the
-                 * OFFSET-addressed element-by-element form (ARRAY/MATRIX/
-                 * VECTOR of SCALAR) isn't implemented -- no fixture needs
-                 * it yet (containers so far are only ever assigned at
-                 * runtime, never INITIAL()'d). */
+                /* Direct symbol-table form (class-8/SINT.md) -- goes
+                 * through write_destination (not a raw state->syt field
+                 * write) specifically so a whole-ARRAY/VECTOR/MATRIX
+                 * destination (the uniform-INITIAL()-value case, e.g.
+                 * `V1 INITIAL(4.0)` on ARRAY(3) SCALAR, confirmed to
+                 * compile to exactly this single SINT plus a trailing
+                 * IDLP/ADLP-and-DLPE metadata pair -- see interp_step's
+                 * arrayed-paragraph replay) correctly redirects through
+                 * the same syt_is_array_shaped check ordinary assignment
+                 * opcodes use, instead of silently corrupting the
+                 * array's element storage with a scalar write. The
+                 * OFFSET-addressed element-by-element form (a `n#value`
+                 * repeated-INITIAL list, STRI.md's family) isn't
+                 * implemented -- no fixture needs it yet. */
                 if (ins->operand_count != 2) { fail(state, "SINT: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "SINT: OFFSET-addressed form not yet implemented"); break; }
-                state->syt[ins->operands[0].data].type = SYT_TYPE_SCALAR;
-                state->syt[ins->operands[0].data].scalar = rv_to_scalar(&a);
+                {
+                    halmat_scalar_t sv = rv_to_scalar(&a);
+                    a.kind = RV_SCALAR;
+                    a.scalar = sv;
+                }
+                if (!write_destination(state, &ins->operands[0], &a)) break;
                 break;
 
             case OP_CINT:
