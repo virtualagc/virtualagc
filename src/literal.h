@@ -22,7 +22,8 @@ typedef enum {
 typedef struct {
     halmat_lit_type_t type;
     char *string;       /* LIT_STRING: EBCDIC-decoded, NUL-terminated */
-    double numeric;      /* LIT_FIXED/LIT_DOUBLE: decoded IBM hex-float value */
+    double numeric;      /* LIT_FIXED/LIT_DOUBLE: decoded IBM hex-float value (for INTEGER-context use) */
+    uint32_t msw, lsw;    /* LIT_FIXED/LIT_DOUBLE: raw IBM hex-float words (for SCALAR-context use, avoiding a lossy double round-trip -- see value.h) */
     uint32_t bits;        /* LIT_BIT: raw value */
 } halmat_literal_t;
 

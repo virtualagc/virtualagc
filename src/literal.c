@@ -119,9 +119,9 @@ bool halmat_literal_load(const char *litfile_path, const char *memory_path,
                 case LIT_FIXED:
                 case LIT_DOUBLE: {
                     e->type = (halmat_lit_type_t)type;
-                    uint32_t msw = read_be32(c2);
-                    uint32_t lsw = read_be32(c3);
-                    e->numeric = ibm_hex_float_to_double(msw, lsw);
+                    e->msw = read_be32(c2);
+                    e->lsw = read_be32(c3);
+                    e->numeric = ibm_hex_float_to_double(e->msw, e->lsw);
                     break;
                 }
                 case LIT_BIT: {

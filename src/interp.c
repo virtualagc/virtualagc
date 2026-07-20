@@ -1,15 +1,15 @@
 #include "interp.h"
 
-#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "opcode_table.h"
+#include "value.h"
 
 /* Combined 12-bit class:opcode values for the instructions implemented so
- * far (M4 step 2, targeting the out_simple_do fixture). Extended
- * opcode-by-opcode as later fixtures require -- see Plan.md M4. */
+ * far. Extended opcode-by-opcode as later fixtures require -- see
+ * Plan.md M4. */
 #define OP_XREC 0x002
 #define OP_SMRK 0x004
 #define OP_PXRC 0x005
@@ -28,6 +28,7 @@
 #define OP_DTST 0x00E
 #define OP_ETST 0x00F
 #define OP_CTST 0x016
+#define OP_DSUB 0x019
 #define OP_WRIT 0x021
 #define OP_XXST 0x025
 #define OP_XXND 0x026
@@ -39,6 +40,7 @@
 #define OP_RTRN 0x032
 #define OP_FCAL 0x01E
 #define OP_IASN 0x601
+#define OP_SASN 0x501
 #define OP_INEQ 0x7C5
 #define OP_IEQU 0x7C6
 #define OP_INGT 0x7C7
@@ -51,11 +53,25 @@
 
 #define NO_TARGET ((size_t)-1)
 
+typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR } rv_kind_t;
+
 typedef struct {
-    bool is_string;
-    char *string;   /* borrowed */
-    int32_t integer;
+    rv_kind_t kind;
+    char *string;   /* RV_STRING; borrowed from the literal table */
+    int32_t integer; /* RV_INTEGER */
+    halmat_scalar_t scalar; /* RV_SCALAR */
 } resolved_value_t;
+
+static int32_t rv_to_integer(const resolved_value_t *v) {
+    if (v->kind == RV_SCALAR) return halmat_scalar_to_integer(v->scalar);
+    return v->integer;
+}
+
+static halmat_scalar_t rv_to_scalar(const resolved_value_t *v) {
+    if (v->kind == RV_SCALAR) return v->scalar;
+    if (v->kind == RV_INTEGER) return halmat_scalar_from_integer(v->integer, false);
+    return halmat_scalar_zero(false);
+}
 
 static void fail(halmat_state_t *state, const char *fmt, ...) {
     char buf[256];
@@ -72,14 +88,21 @@ static void fail(halmat_state_t *state, const char *fmt, ...) {
 static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, resolved_value_t *out) {
     memset(out, 0, sizeof(*out));
     switch (op->qual) {
-        case QUAL_SYT:
+        case QUAL_SYT: {
             if (op->data >= HALMAT_SYT_MAX) {
                 fail(state, "SYT index %u out of range", op->data);
                 return false;
             }
-            out->is_string = false;
-            out->integer = state->syt[op->data].value;
+            const halmat_syt_entry_t *e = &state->syt[op->data];
+            if (e->type == SYT_TYPE_SCALAR) {
+                out->kind = RV_SCALAR;
+                out->scalar = e->scalar;
+            } else {
+                out->kind = RV_INTEGER;
+                out->integer = e->value;
+            }
             return true;
+        }
         case QUAL_LIT: {
             if (!state->literals || op->data >= state->literals->count) {
                 fail(state, "literal index %u out of range", op->data);
@@ -87,11 +110,15 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             }
             const halmat_literal_t *lit = &state->literals->entries[op->data];
             if (lit->type == LIT_STRING) {
-                out->is_string = true;
+                out->kind = RV_STRING;
                 out->string = lit->string;
             } else if (lit->type == LIT_FIXED || lit->type == LIT_DOUBLE) {
-                out->is_string = false;
-                out->integer = (int32_t)lround(lit->numeric);
+                /* Litfile numeric entries carry no INTEGER-vs-SCALAR
+                 * distinction of their own (see literal.h) -- resolve as
+                 * the exact bit-level SCALAR value; INTEGER-context
+                 * consumers convert via rv_to_integer(). */
+                out->kind = RV_SCALAR;
+                out->scalar = halmat_scalar_from_ibm_words(lit->msw, lit->lsw, lit->type == LIT_DOUBLE);
             } else {
                 fail(state, "literal index %u has an unsupported type (%d) for this context",
                      op->data, (int)lit->type);
@@ -100,21 +127,88 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             return true;
         }
         case QUAL_IMD:
-            out->is_string = false;
+            out->kind = RV_INTEGER;
             out->integer = (int32_t)(int16_t)op->data; /* IMD is a signed 16-bit immediate */
             return true;
-        case QUAL_VAC:
+        case QUAL_VAC: {
             if (op->data >= HALMAT_VAC_MAX) {
                 fail(state, "VAC index %u out of range", op->data);
                 return false;
             }
-            out->is_string = false;
-            out->integer = state->vac[op->data];
+            const halmat_vac_slot_t *slot = &state->vac[op->data];
+            if (slot->is_ref) {
+                if (slot->ref_syt >= HALMAT_SYT_MAX) {
+                    fail(state, "VAC subscript reference SYT out of range");
+                    return false;
+                }
+                const halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
+                if (!base->elements || slot->ref_offset >= base->element_count) {
+                    fail(state, "subscript reference out of range");
+                    return false;
+                }
+                out->kind = RV_SCALAR;
+                out->scalar = base->elements[slot->ref_offset];
+            } else {
+                out->kind = RV_INTEGER;
+                out->integer = slot->integer;
+            }
             return true;
+        }
         default:
             fail(state, "operand qualifier %s not yet implemented in this context", halmat_qual_name(op->qual));
             return false;
     }
+}
+
+/* Assignment destination: a plain SYT slot (coerced to whichever of
+ * INTEGER/SCALAR the destination already is, or established by this
+ * first write -- matches the empirical finding that the assign opcode's
+ * class tracks the *source*'s type, with any INTEGER<->SCALAR coercion
+ * happening implicitly at the store, not via a separate conversion
+ * opcode; see class-0/FCAL.md-adjacent notes and the out_array/
+ * out_matrix fixtures), or a DSUB-produced subscript reference (ARRAY/
+ * MATRIX element, always SCALAR for now -- see class-0/DSUB.md). */
+static bool write_destination(halmat_state_t *state, const halmat_operand_t *op, const resolved_value_t *val) {
+    if (op->qual == QUAL_SYT) {
+        if (op->data >= HALMAT_SYT_MAX) {
+            fail(state, "SYT index %u out of range", op->data);
+            return false;
+        }
+        halmat_syt_entry_t *e = &state->syt[op->data];
+        if (e->type == SYT_TYPE_UNKNOWN) {
+            e->type = (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
+        }
+        if (e->type == SYT_TYPE_SCALAR) {
+            e->scalar = rv_to_scalar(val);
+        } else {
+            e->value = rv_to_integer(val);
+        }
+        return true;
+    }
+    if (op->qual == QUAL_VAC) {
+        if (op->data >= HALMAT_VAC_MAX) {
+            fail(state, "VAC index %u out of range", op->data);
+            return false;
+        }
+        halmat_vac_slot_t *slot = &state->vac[op->data];
+        if (!slot->is_ref) {
+            fail(state, "assignment destination is not a subscript reference");
+            return false;
+        }
+        if (slot->ref_syt >= HALMAT_SYT_MAX) {
+            fail(state, "VAC subscript reference SYT out of range");
+            return false;
+        }
+        halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
+        if (!base->elements || slot->ref_offset >= base->element_count) {
+            fail(state, "subscript destination out of range");
+            return false;
+        }
+        base->elements[slot->ref_offset] = rv_to_scalar(val);
+        return true;
+    }
+    fail(state, "unsupported assignment destination qualifier %s", halmat_qual_name(op->qual));
+    return false;
 }
 
 /* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
@@ -190,9 +284,7 @@ static void precompute_labels(halmat_state_t *state) {
  * mechanism): a DFOR with exactly 2 operands (construct id + control
  * variable, no range literals -- see class-0/DFOR.md) opens the list,
  * followed immediately by one AFOR per value, then the (single, shared)
- * loop body, then the matching EFOR. Range-form DO FOR (DFOR with 4+
- * operands) isn't implemented yet -- efor_is_list_form stays false for
- * it, and EFOR fails loudly rather than misbehaving silently. */
+ * loop body, then the matching EFOR. */
 #define FOR_STACK_MAX 64
 
 static void precompute_for_loops(halmat_state_t *state) {
@@ -375,6 +467,11 @@ void interp_cleanup(halmat_state_t *state) {
     state->clbl_ecas_target = NULL;
     state->symbol_fdef_pos = NULL;
     state->fdef_clos_target = NULL;
+
+    for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
+        free(state->syt[i].elements);
+        state->syt[i].elements = NULL;
+    }
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -388,7 +485,11 @@ static void flush_write(halmat_state_t *state, FILE *out) {
             /* INTEGER WRITE field: 11-char right-justified, empirically
              * confirmed against a real HALSFC compile + yaHALMAT run
              * (see commit message / STATUS.md follow-up) -- not yet
-             * cross-checked against USA00309's own text. */
+             * cross-checked against USA00309's own text. SCALAR WRITE
+             * items aren't formatted per STOC.md's documented field
+             * format yet (not exercised by any fixture); they fall
+             * through to this same integer path via rv_to_integer at
+             * XXAR time, which is a known gap, not a considered choice. */
             fprintf(out, "%11d", state->io_pending.items[i].integer);
         }
     }
@@ -430,7 +531,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                  * without a pre-test (class-0/DFOR.md) -- just set the
                  * control variable and fall through into the body. */
                 state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
-                state->syt[ins->operands[1].data].value = a.integer;
+                state->syt[ins->operands[1].data].value = rv_to_integer(&a);
                 break;
 
             case OP_BRA:
@@ -438,7 +539,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 if (ins->opcode == OP_FBRA) {
                     if (ins->operand_count != 2) { fail(state, "FBRA: expected 2 operands"); break; }
                     if (!resolve_operand(state, &ins->operands[1], &a)) break;
-                    if (a.integer != 0) break; /* condition true: fall through, no branch */
+                    if (rv_to_integer(&a) != 0) break; /* condition true: fall through, no branch */
                 } else if (ins->operand_count != 1) {
                     fail(state, "BRA: expected 1 operand");
                     break;
@@ -462,24 +563,26 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "integer comparison: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                int32_t ai = rv_to_integer(&a), bi = rv_to_integer(&b);
                 bool result;
                 switch (ins->opcode) {
-                    case OP_INEQ: result = a.integer != b.integer; break;
-                    case OP_IEQU: result = a.integer == b.integer; break;
-                    case OP_INGT: result = a.integer <= b.integer; break;
-                    case OP_IGT: result = a.integer > b.integer; break;
-                    case OP_INLT: result = a.integer >= b.integer; break;
-                    case OP_ILT: default: result = a.integer < b.integer; break;
+                    case OP_INEQ: result = ai != bi; break;
+                    case OP_IEQU: result = ai == bi; break;
+                    case OP_INGT: result = ai <= bi; break;
+                    case OP_IGT: result = ai > bi; break;
+                    case OP_INLT: result = ai >= bi; break;
+                    case OP_ILT: default: result = ai < bi; break;
                 }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                state->vac[ins->index] = result ? 1 : 0;
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = result ? 1 : 0;
                 break;
             }
 
             case OP_CTST: {
                 if (ins->operand_count != 1) { fail(state, "CTST: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                bool cond_true = (a.integer != 0);
+                bool cond_true = (rv_to_integer(&a) != 0);
                 /* tag 0 = WHILE (exit when condition false), tag 1 = UNTIL
                  * (exit when condition true) -- confirmed against a real
                  * compiled test_while.hal trace (see precompute_loop_targets). */
@@ -509,7 +612,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 state->syt[state->afor_control_var[state->pc]].type = SYT_TYPE_INTEGER;
-                state->syt[state->afor_control_var[state->pc]].value = a.integer;
+                state->syt[state->afor_control_var[state->pc]].value = rv_to_integer(&a);
                 if (state->for_return_sp >= 64) { fail(state, "DO FOR nesting too deep"); break; }
                 state->for_return_stack[state->for_return_sp++] = state->afor_return_target[state->pc];
                 state->pc = state->afor_body_target[state->pc];
@@ -532,13 +635,15 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 if (dfor->operand_count == 5) {
                     if (!resolve_operand(state, &dfor->operands[4], &incr_val)) break;
                 } else {
+                    incr_val.kind = RV_INTEGER;
                     incr_val.integer = 1; /* implicit default increment (class-0/DFOR.md) */
                 }
+                int32_t incr = rv_to_integer(&incr_val);
+                int32_t final = rv_to_integer(&final_val);
                 uint16_t control_var = dfor->operands[1].data;
-                int32_t new_value = state->syt[control_var].value + incr_val.integer;
+                int32_t new_value = state->syt[control_var].value + incr;
                 state->syt[control_var].value = new_value;
-                bool in_range = (incr_val.integer >= 0) ? (new_value <= final_val.integer)
-                                                          : (new_value >= final_val.integer);
+                bool in_range = (incr >= 0) ? (new_value <= final) : (new_value >= final);
                 if (in_range) {
                     state->pc = dfor_pos + 1;
                     branched = true;
@@ -550,13 +655,14 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_DCAS: {
                 if (ins->operand_count != 2) { fail(state, "DCAS: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                int32_t sel = rv_to_integer(&a);
                 size_t count = state->dcas_case_count[state->pc];
-                if (a.integer < 1 || (size_t)a.integer > count) {
+                if (sel < 1 || (size_t)sel > count) {
                     fail(state, "DO CASE selector %d out of range 1..%zu (out-of-range/ELSE handling not yet implemented)",
-                         a.integer, count);
+                         sel, count);
                     break;
                 }
-                state->pc = state->dcas_case_target[state->pc * HALMAT_MAX_CASES + (a.integer - 1)];
+                state->pc = state->dcas_case_target[state->pc * HALMAT_MAX_CASES + (sel - 1)];
                 branched = true;
                 break;
             }
@@ -576,12 +682,54 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_ECAS:
                 break; /* join point; no-op */
 
+            case OP_DSUB: {
+                /* Only the single-index "index" subscript kind is
+                 * implemented (alpha=5 array-dimension / alpha=1
+                 * component -- both single-value forms; see
+                 * class-0/DSUB.md's confirmed table). Asterisk/to-
+                 * partition/at-partition/CSZ/ASZ forms aren't handled.
+                 * Multi-index (MATRIX) flattening uses a placeholder
+                 * stride since real per-dimension extents aren't visible
+                 * without symbol-table parsing (see HALMAT_CONTAINER_
+                 * CAPACITY's comment in state.h) -- unobserved by any
+                 * current fixture (no printed output touches array/
+                 * matrix element values or addresses). */
+                if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
+                uint16_t base_syt = ins->operands[0].data;
+                if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
+                halmat_syt_entry_t *base = &state->syt[base_syt];
+                if (!base->elements) {
+                    base->elements = calloc(HALMAT_CONTAINER_CAPACITY, sizeof(halmat_scalar_t));
+                    base->element_count = HALMAT_CONTAINER_CAPACITY;
+                }
+
+                bool ok = true;
+                size_t offset = 0;
+                uint8_t num_indices = ins->operand_count - 1;
+                for (uint8_t i = 0; i < num_indices; i++) {
+                    resolved_value_t idx;
+                    if (!resolve_operand(state, &ins->operands[1 + i], &idx)) { ok = false; break; }
+                    int32_t idx_val = rv_to_integer(&idx) - 1; /* HAL/S is 1-indexed */
+                    if (idx_val < 0) idx_val = 0;
+                    offset = offset * 16 + (size_t)idx_val; /* placeholder stride per extra dimension */
+                }
+                if (!ok) break;
+                offset %= base->element_count;
+
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = true;
+                state->vac[ins->index].ref_syt = base_syt;
+                state->vac[ins->index].ref_offset = offset;
+                break;
+            }
+
             case OP_IINT:
                 if (ins->operand_count != 2) { fail(state, "IINT: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "IINT: destination must be SYT"); break; }
                 state->syt[ins->operands[0].data].type = SYT_TYPE_INTEGER;
-                state->syt[ins->operands[0].data].value = a.integer;
+                state->syt[ins->operands[0].data].value = rv_to_integer(&a);
                 break;
 
             case OP_IADD:
@@ -590,15 +738,24 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                state->vac[ins->index] = (ins->opcode == OP_IADD) ? (a.integer + b.integer) : (a.integer - b.integer);
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = (ins->opcode == OP_IADD)
+                    ? (rv_to_integer(&a) + rv_to_integer(&b))
+                    : (rv_to_integer(&a) - rv_to_integer(&b));
                 break;
 
             case OP_IASN:
-                if (ins->operand_count != 2) { fail(state, "IASN: expected 2 operands"); break; }
+            case OP_SASN:
+                /* Both just resolve the source and write through to the
+                 * destination -- write_destination() does whatever
+                 * INTEGER<->SCALAR coercion the destination's actual
+                 * type needs, so there's nothing IASN/SASN-specific left
+                 * once operand resolution is type-generic (see the
+                 * out_array fixture, which assigns an INTEGER source
+                 * into a SCALAR array element via IASN, not SASN). */
+                if (ins->operand_count != 2) { fail(state, "IASN/SASN: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->operands[1].qual != QUAL_SYT) { fail(state, "IASN: destination must be SYT"); break; }
-                state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
-                state->syt[ins->operands[1].data].value = a.integer;
+                if (!write_destination(state, &ins->operands[1], &a)) break;
                 break;
 
             case OP_XXST:
@@ -614,7 +771,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 } else {
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                     state->io_pending.is_call = false;
-                    state->io_pending.kind = a.integer;
+                    state->io_pending.kind = rv_to_integer(&a);
                 }
                 break;
 
@@ -626,9 +783,10 @@ int interp_run(halmat_state_t *state, FILE *out) {
                     fail(state, "WRITE statement has too many items");
                     break;
                 }
-                state->io_pending.items[state->io_pending.item_count].is_string = a.is_string;
+                state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
-                state->io_pending.items[state->io_pending.item_count].integer = a.integer;
+                state->io_pending.items[state->io_pending.item_count].integer =
+                    (a.kind == RV_STRING) ? 0 : rv_to_integer(&a);
                 state->io_pending.item_count++;
                 break;
 
@@ -636,9 +794,10 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 if (!state->io_pending.active) { fail(state, "WRIT outside of an XXST...XXND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "WRIT: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                /* a.integer is the device number; device-to-file mapping
-                 * (--ddo) is out of scope for this milestone, everything
-                 * goes to `out` (stdout by default from main.c). */
+                /* rv_to_integer(&a) is the device number; device-to-file
+                 * mapping (--ddo) is out of scope for this milestone,
+                 * everything goes to `out` (stdout by default from
+                 * main.c). */
                 flush_write(state, out);
                 break;
 
@@ -691,7 +850,8 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                 size_t vac_index = state->prog->instrs[fcal_pos].index;
                 if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                state->vac[vac_index] = a.integer;
+                state->vac[vac_index].is_ref = false;
+                state->vac[vac_index].integer = rv_to_integer(&a);
                 state->pc = fcal_pos + 1;
                 branched = true;
                 break;

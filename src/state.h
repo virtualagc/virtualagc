@@ -7,6 +7,7 @@
 #include "halmat.h"
 #include "literal.h"
 #include "opcode_table.h" /* for the halmat_state_t typedef */
+#include "value.h"
 
 /* Sized generously per yaHALMAT's precedent (see Plan.md M2); revisit
  * once a --memory-size CLI switch exists (Plan.md Phase 3 default is
@@ -20,15 +21,44 @@
  * until a multi-record program is actually encountered. */
 #define HALMAT_VAC_MAX HALMAT_RECORD_WORDS
 
+/* ARRAY/MATRIX element storage: declared dimensions aren't visible
+ * anywhere in HALMAT for the simple (no ADLP) cases seen so far -- that
+ * needs the compiler's own symbol table (SYM_ARRAY et al in COMMON*.out),
+ * which isn't parsed yet (a natural fit for the same --common/symtab
+ * work M6's EXTERNAL-symbol linking will need). Until then, containers
+ * get a generous fixed-size flat buffer and DSUB's multi-index offset
+ * flattening uses a placeholder stride rather than the real per-
+ * dimension extent -- fine for fixtures that don't observe layout via
+ * printed output, wrong for anything that would actually depend on true
+ * row-major addressing. See interp.c's DSUB handling. */
+#define HALMAT_CONTAINER_CAPACITY 64
+
 typedef enum {
     SYT_TYPE_UNKNOWN = 0,
     SYT_TYPE_INTEGER,
+    SYT_TYPE_SCALAR,
 } halmat_syt_type_t;
 
 typedef struct {
     halmat_syt_type_t type;
-    int32_t value; /* INTEGER only, for now; widened as other types are implemented */
+    int32_t value;          /* SYT_TYPE_INTEGER */
+    halmat_scalar_t scalar; /* SYT_TYPE_SCALAR (plain, non-subscripted) */
+    halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX of SCALAR; lazily allocated */
+    size_t element_count;
 } halmat_syt_entry_t;
+
+/* A VAC slot either holds a plain computed value (most opcodes: IADD,
+ * comparisons, etc.) or -- when produced by DSUB -- a reference into an
+ * ARRAY/MATRIX element, to be read (dereferenced) or written (write-
+ * through) depending on which operand position it's used in by the
+ * consuming instruction. See class-0/DSUB.md and interp.c's DSUB/
+ * resolve_operand/write_destination. */
+typedef struct {
+    bool is_ref;
+    int32_t integer;   /* is_ref=false */
+    uint16_t ref_syt;  /* is_ref=true */
+    size_t ref_offset; /* is_ref=true */
+} halmat_vac_slot_t;
 
 struct halmat_state {
     const halmat_program_t *prog;
@@ -36,7 +66,7 @@ struct halmat_state {
     size_t pc; /* index into prog->instrs */
 
     halmat_syt_entry_t syt[HALMAT_SYT_MAX];
-    int32_t vac[HALMAT_VAC_MAX];
+    halmat_vac_slot_t vac[HALMAT_VAC_MAX];
 
     int num_blanks; /* WRITE-item separator, Plan.md Phase 3 default 5 */
 
