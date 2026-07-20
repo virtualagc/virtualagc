@@ -50,6 +50,15 @@
 #define OP_FCAL 0x01E
 #define OP_IASN 0x601
 #define OP_SASN 0x501
+#define OP_SNEQ 0x7A5
+#define OP_SEQU 0x7A6
+#define OP_SNGT 0x7A7
+#define OP_SGT 0x7A8
+#define OP_SNLT 0x7A9
+#define OP_SLT 0x7AA
+#define OP_CAND 0x7E2
+#define OP_COR 0x7E3
+#define OP_CNOT 0x7E4
 #define OP_INEQ 0x7C5
 #define OP_IEQU 0x7C6
 #define OP_INGT 0x7C7
@@ -58,12 +67,16 @@
 #define OP_ILT 0x7CA
 #define OP_IADD 0x6CB
 #define OP_ISUB 0x6CC
+#define OP_IIPR 0x6CD
+#define OP_INEG 0x6D0
+#define OP_IPEX 0x6D2
 #define OP_SADD 0x5AB
 #define OP_SSUB 0x5AC
 #define OP_SSPR 0x5AD
 #define OP_SSDV 0x5AE
 #define OP_SNEG 0x5B0
 #define OP_IINT 0x8C1
+#define OP_SINT 0x8A1
 
 #define NO_TARGET ((size_t)-1)
 
@@ -610,6 +623,60 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
+            case OP_SNEQ:
+            case OP_SEQU:
+            case OP_SNGT:
+            case OP_SGT:
+            case OP_SNLT:
+            case OP_SLT: {
+                /* Exact hex-float comparison via subtraction, sign/true-
+                 * zero test (SEQU.md's "exact vs. tolerance" question is
+                 * unresolved in the primary sources -- exact bit
+                 * comparison is the natural hardware-faithful reading,
+                 * consistent with this interpreter's genuine-hex-float
+                 * (not native-double) arithmetic elsewhere). True zero is
+                 * always sign=0 (halmat_scalar_add's convention). */
+                if (ins->operand_count != 2) { fail(state, "scalar comparison: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                halmat_scalar_t diff = halmat_scalar_sub(rv_to_scalar(&a), rv_to_scalar(&b));
+                bool is_zero = (diff.msw == 0 && diff.lsw == 0);
+                bool is_negative = ((diff.msw >> 31) & 1) != 0;
+                bool result;
+                switch (ins->opcode) {
+                    case OP_SNEQ: result = !is_zero; break;
+                    case OP_SEQU: result = is_zero; break;
+                    case OP_SNGT: result = is_zero || is_negative; break;
+                    case OP_SGT: result = !is_zero && !is_negative; break;
+                    case OP_SNLT: result = is_zero || !is_negative; break;
+                    case OP_SLT: default: result = !is_zero && is_negative; break;
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = result ? 1 : 0;
+                break;
+            }
+
+            case OP_CAND:
+            case OP_COR: {
+                if (ins->operand_count != 2) { fail(state, "logical AND/OR: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                bool ab = (rv_to_integer(&a) != 0), bb = (rv_to_integer(&b) != 0);
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = ((ins->opcode == OP_CAND) ? (ab && bb) : (ab || bb)) ? 1 : 0;
+                break;
+            }
+
+            case OP_CNOT:
+                if (ins->operand_count != 1) { fail(state, "logical NOT: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = (rv_to_integer(&a) == 0) ? 1 : 0;
+                break;
+
             case OP_INEQ:
             case OP_IEQU:
             case OP_INGT:
@@ -788,6 +855,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->syt[ins->operands[0].data].value = rv_to_integer(&a);
                 break;
 
+            case OP_SINT:
+                /* Direct symbol-table form only (class-8/SINT.md); the
+                 * OFFSET-addressed element-by-element form (ARRAY/MATRIX/
+                 * VECTOR of SCALAR) isn't implemented -- no fixture needs
+                 * it yet (containers so far are only ever assigned at
+                 * runtime, never INITIAL()'d). */
+                if (ins->operand_count != 2) { fail(state, "SINT: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "SINT: OFFSET-addressed form not yet implemented"); break; }
+                state->syt[ins->operands[0].data].type = SYT_TYPE_SCALAR;
+                state->syt[ins->operands[0].data].scalar = rv_to_scalar(&a);
+                break;
+
             case OP_IADD:
             case OP_ISUB:
                 if (ins->operand_count != 2) { fail(state, "IADD/ISUB: expected 2 operands"); break; }
@@ -800,6 +880,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     ? (rv_to_integer(&a) + rv_to_integer(&b))
                     : (rv_to_integer(&a) - rv_to_integer(&b));
                 break;
+
+            case OP_IIPR:
+                if (ins->operand_count != 2) { fail(state, "IIPR: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = rv_to_integer(&a) * rv_to_integer(&b);
+                break;
+
+            case OP_INEG:
+                if (ins->operand_count != 1) { fail(state, "INEG: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = -rv_to_integer(&a);
+                break;
+
+            case OP_IPEX: {
+                /* Positive-literal-exponent integer power (class-6/IPEX.md):
+                 * repeated multiplication, exponent >= 0 (non-negative
+                 * literal, confirmed compile-time-known). Negative/non-
+                 * literal exponents never reach this opcode -- HAL/S
+                 * coerces those to SCALAR (ITOS+SIEX/SEXP) at compile
+                 * time instead, per IPEX.md's Usage Context. */
+                if (ins->operand_count != 2) { fail(state, "IPEX: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                int32_t base = rv_to_integer(&a);
+                int32_t exponent = rv_to_integer(&b);
+                if (exponent < 0) { fail(state, "IPEX: negative exponent (expected non-negative literal)"); break; }
+                int32_t result = 1;
+                for (int32_t i = 0; i < exponent; i++) result *= base;
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = result;
+                break;
+            }
 
             case OP_SADD:
             case OP_SSUB:

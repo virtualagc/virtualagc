@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Full permanent regression suite. Run after any interp.c/value.c change,
+# before committing (see Plan.md M8's testing-strategy note on running
+# the full suite before every commit).
+set -uo pipefail
+cd "$(dirname "$0")"
+
+fail=0
+run() { "$@" || fail=1; }
+
+# INTEGER field width (11-char right-justified, num_blanks=5 separator --
+# see interp.c's flush_write) is easy to mistype by hand; derive the
+# expected strings for the purely-INTEGER fixtures from the *reference*
+# yaHALMAT emulator (ground truth for these two -- no known reference
+# bug affects them, unlike case/nested below) rather than hardcoding a
+# hand-counted string of spaces or comparing against our own output.
+HALSFC="/home/rburkey/git/virtualagc/yaShuttle/Source Code/PASS.REL32V0/HALSFC"
+REF_YAHALMAT="/mnt/STORAGE/home/rburkey/git/Halmat/emu/yaHALMAT"
+derive_expected() {
+    local name="$1"
+    local workdir
+    workdir=$(mktemp -d)
+    cp "/mnt/STORAGE/home/rburkey/git/Halmat/data/test_$name.hal" "$workdir/"
+    ( cd "$workdir" && "$HALSFC" "test_$name.hal" >/dev/null 2>&1 )
+    gzip -dk "$workdir/COMMON0.out.bin.gz" 2>/dev/null
+    "$REF_YAHALMAT" "$workdir/halmat.bin"
+    rm -rf "$workdir"
+}
+
+run ./run_fixture.sh simple_do "$(derive_expected simple_do)"
+run ./run_fixture.sh ifelse "$(printf 'C IS FIVE\nDONE')"
+run ./run_fixture.sh while "TOTAL=              45"
+run ./run_fixture.sh discrete_for "RESULT=              63"
+run ./run_fixture.sh case "RESULT=              20"    # reference tool's "30" is its own bug -- YERRORS.md
+run ./run_fixture.sh nested "K=             150"        # reference tool's "40" is its own bug -- YERRORS.md
+run ./run_fixture.sh proc "$(derive_expected proc)"
+run ./run_fixture.sh array ""
+run ./run_fixture.sh matrix ""
+run ./run_local_fixture.sh sched_high "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
+run ./run_local_fixture.sh sched_low "$(printf 'BEFORE SCHEDULE\nAFTER SCHEDULE')"
+run ./run_local_fixture.sh scalar_arith " 3.7500000E+00"
+run ./run_local_fixture.sh scalar_sub "-7.5000000E-01"
+run ./run_local_fixture.sh scalar_muldiv "$(printf ' 1.0000000E+01\n 3.3333331E-01')"
+run ./run_local_fixture.sh int_arith2 "P=              12     N=              -3     E=              27"
+run ./run_local_fixture.sh scalar_cmp "$(printf 'LESS\nEQUAL\nAND-TRUE\nNOT-TRUE')"
+run ./run_local_fixture.sh logical_or "OR-TRUE"
+run ./run_link_fixture.sh "Y=              43" link_pool link_prog
+run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
+
+HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
+workdir=$(mktemp -d)
+cp /mnt/STORAGE/home/rburkey/git/Halmat/data/test_simple_do.hal "$workdir/"
+( cd "$workdir" && python3 "$HAL_S_FC_PY" "--hal=test_simple_do.hal" >/dev/null )
+py_exp=$(./../yaHALMAT2 --py "$workdir/FILE1.bin")
+rm -rf "$workdir"
+run ./run_py_fixture.sh simple_do "$py_exp"
+
+echo "============================"
+if [ "$fail" -eq 0 ]; then
+    echo "ALL TESTS PASSED"
+else
+    echo "SOME TESTS FAILED"
+fi
+exit $fail
