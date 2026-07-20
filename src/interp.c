@@ -36,6 +36,9 @@
 #define OP_WRIT 0x021
 #define OP_ERON 0x03C
 #define OP_ERSE 0x03D
+#define OP_NNEQ 0x055
+#define OP_NEQU 0x056
+#define OP_NASN 0x057
 #define OP_MSHP 0x040
 #define OP_VSHP 0x041
 #define OP_SSHP 0x042
@@ -161,6 +164,7 @@
 #define OP_BINT 0x821
 #define OP_MINT 0x861
 #define OP_VINT 0x881
+#define OP_NINT 0x8E1
 
 #define NO_TARGET ((size_t)-1)
 
@@ -890,6 +894,53 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * than guessed at. */
                 break;
 
+            case OP_NASN:
+                /* NAME (pointer) assign, class-0/NASN.md: both operands
+                 * are ordinary SYT references to data items, not to the
+                 * NAME variable's own stored value -- pointer semantics
+                 * are implicit in NASN's identity, not the operand
+                 * qualifiers. Bypasses resolve_operand/write_destination
+                 * entirely (those resolve a *value*; NASN needs the raw
+                 * target SYT index instead). NULL is QUAL=IMD (any
+                 * value), per NINT.md's confirmed NULL encoding. */
+                if (ins->operand_count != 2) { fail(state, "NASN: expected 2 operands"); break; }
+                if (ins->operands[1].qual != QUAL_SYT) { fail(state, "NASN: receiver must be SYT"); break; }
+                {
+                    uint16_t target = (ins->operands[0].qual == QUAL_SYT) ? ins->operands[0].data : HALMAT_NAME_NULL;
+                    uint16_t dest_syt = ins->operands[1].data;
+                    if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "NASN: SYT index out of range"); break; }
+                    state->syt[dest_syt].type = SYT_TYPE_NAME;
+                    state->syt[dest_syt].name_target = target;
+                }
+                break;
+
+            case OP_NEQU:
+            case OP_NNEQ:
+                /* NAME (pointer) equal/not-equal, class-0/NEQU.md/
+                 * NNEQ.md: TRUE if both sides' stored pointer target
+                 * matches (pointer identity, not target-value equality).
+                 * A NAME variable never assigned via NASN/NINT defaults
+                 * to SYT_TYPE_UNKNOWN with name_target=0 (zero-
+                 * initialized), which is a valid-looking SYT index, not
+                 * NULL -- comparisons against an unset NAME are
+                 * therefore not reliably NULL-equivalent; no fixture
+                 * exercises that case. */
+                if (ins->operand_count != 2) { fail(state, "NEQU/NNEQ: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_SYT || ins->operands[1].qual != QUAL_SYT) {
+                    fail(state, "NEQU/NNEQ: both operands must be SYT");
+                    break;
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                {
+                    uint16_t sym_a = ins->operands[0].data, sym_b = ins->operands[1].data;
+                    if (sym_a >= HALMAT_SYT_MAX || sym_b >= HALMAT_SYT_MAX) { fail(state, "NEQU/NNEQ: SYT index out of range"); break; }
+                    bool equal = (state->syt[sym_a].name_target == state->syt[sym_b].name_target);
+                    bool result = (ins->opcode == OP_NEQU) ? equal : !equal;
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].integer = result ? 1 : 0;
+                }
+                break;
+
             case OP_DFOR:
                 if (ins->operand_count == 2) {
                     break; /* list-form: no-op, AFOR does the real work */
@@ -1504,6 +1555,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (a.kind != RV_BITS) { fail(state, "BINT: initializer is not BIT"); break; }
                 state->syt[ins->operands[0].data].type = SYT_TYPE_BIT;
                 state->syt[ins->operands[0].data].bit_value = a.bits;
+                break;
+
+            case OP_NINT:
+                /* NAME (pointer) initialize, class-8/NINT.md: operand 1
+                 * = the NAME variable, operand 2 = SYT target (real
+                 * pointer) or IMD (NULL) -- same raw-index handling as
+                 * NASN, bypassing resolve_operand. */
+                if (ins->operand_count != 2) { fail(state, "NINT: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "NINT: OFFSET-addressed form not yet implemented"); break; }
+                {
+                    uint16_t target = (ins->operands[1].qual == QUAL_SYT) ? ins->operands[1].data : HALMAT_NAME_NULL;
+                    state->syt[ins->operands[0].data].type = SYT_TYPE_NAME;
+                    state->syt[ins->operands[0].data].name_target = target;
+                }
                 break;
 
             case OP_MINT:

@@ -60,7 +60,12 @@ typedef enum {
     SYT_TYPE_SCALAR,
     SYT_TYPE_CHARACTER,
     SYT_TYPE_BIT,
+    SYT_TYPE_NAME,
 } halmat_syt_type_t;
+
+/* NAME (pointer) sentinel for "points at nothing" (NULL), distinct from
+ * any valid SYT index (0 is itself a valid slot, hence ~0 not 0). */
+#define HALMAT_NAME_NULL ((uint16_t)0xFFFFu)
 
 typedef struct {
     halmat_syt_type_t type;
@@ -82,6 +87,13 @@ typedef struct {
                           * is unconfirmed (class-1/BAND.md's Unresolved
                           * Questions), so AND/OR/NOT operate on the full
                           * 32-bit pattern as-is. */
+    uint16_t name_target; /* SYT_TYPE_NAME; the SYT index this pointer
+                            * refers to, or HALMAT_NAME_NULL. Only
+                            * pointer *identity* is modeled (NASN/NEQU/
+                            * NNEQ/NINT) -- dereferencing through a NAME
+                            * to read/write its target's value (HAL/S's
+                            * CONTENT pseudo-variable) isn't implemented,
+                            * no fixture needs it yet. */
 } halmat_syt_entry_t;
 
 /* A VAC slot either holds a plain computed value (most opcodes: IADD,
