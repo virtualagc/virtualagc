@@ -87,8 +87,45 @@ made no difference). Left for the reference implementation's author to
 diagnose further; see `reengineered-documentation/class-0/EFOR.md` for
 this project's own notes.
 
+## 3. `CTOI`/`CTOS` (CHARACTER→INTEGER/SCALAR conversion) are unconditional stubs
+
+**File**: `emu/halmat_class6.c`, `POP_CTOI` case (~line 138);
+`emu/halmat_class5.c`, `POP_CTOS` case (~line 183).
+
+Both handlers ignore their operand entirely and always store a zero
+result (`r.v.integer = 0;` / `r.v.scalar = 0.0;`), regardless of the
+CHARACTER string's actual content:
+
+```
+DECLARE CHARACTER(20), C4 INITIAL('123');
+DECLARE INTEGER, I2;
+I2 = INTEGER(C4);
+WRITE(6) 'I2=', I2;
+```
+(`src/tests/hal/test_char_conv.hal`). Per `USA00309` §6.1.2/§8.2 rule 16
+(cited directly in this project's `class-6/CTOI.md`/`class-5/CTOS.md`),
+a CHARACTER string in a standard input format (decimal digits, optional
+sign, optional `E`/`B`/`H` exponent) converts to its parsed numeric
+value. `yaHALMAT` produces `I2=0` for every input regardless of content;
+`yaHALMAT2` produces `I2=123`, parsing the string as documented.
+
+## 4. `STOC` (SCALAR→CHARACTER conversion) uses `%g`, not the documented fixed-width format
+
+**File**: `emu/halmat_class2.c`, `POP_STOC` case (~line 60).
+
+Uses `snprintf(..., "%g", a.v.scalar)` — a compact, variable-width C
+`%g` rendering (e.g. `3.5`). `USA00309` §6.1.3 (cited by `class-2/
+STOC.md`, and by `class-5/CTOS.md`'s sibling `SCALAR`-format rules)
+specifies a fixed-width right-aligned scientific-notation field instead
+(`sd.ddddddddE±dd`, single precision), the same format this project's
+own `halmat_scalar_format()` already implements and cross-verified for
+`WRITE` output (see the `SADD`/`SSUB` commit). `yaHALMAT2` reuses that
+same formatter for `STOC`, producing `" 3.5000000E+00"` for the input
+above rather than `yaHALMAT`'s `"3.5"`.
+
 ---
 
-Both findings were cross-checked against a primary source or independent
-hand-calculation, not merely against `yaHALMAT2`'s own output, consistent
-with this project's general sourcing discipline (see `Plan.md`, `STATUS.md`).
+All four findings were cross-checked against a primary source or
+independent hand-calculation, not merely against `yaHALMAT2`'s own
+output, consistent with this project's general sourcing discipline (see
+`Plan.md`, `STATUS.md`).

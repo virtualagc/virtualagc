@@ -1,5 +1,6 @@
 #include "interp.h"
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,11 @@
 #define OP_SASN 0x501
 #define OP_CASN 0x201
 #define OP_CCAT 0x202
+#define OP_CTOC 0x241
+#define OP_STOC 0x2A1
+#define OP_ITOC 0x2C1
+#define OP_CTOS 0x541
+#define OP_CTOI 0x641
 #define OP_CNEQ 0x745
 #define OP_CEQU 0x746
 #define OP_CNGT 0x747
@@ -1163,6 +1169,84 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].string = result;
                 break;
             }
+
+            case OP_CTOC:
+                /* Character-to-character (length-adjustment) self-
+                 * conversion, class-2/CTOC.md. This interpreter's
+                 * CHARACTER storage has no fixed-length/VARYING
+                 * distinction (state.h), so there's nothing to truncate
+                 * or pad -- a straight passthrough copy. */
+                if (ins->operand_count != 1) { fail(state, "CTOC: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_STRING) { fail(state, "CTOC: operand is not CHARACTER"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_string = true;
+                state->vac[ins->index].string = dup_string(a.string);
+                break;
+
+            case OP_STOC: {
+                /* Scalar->character, class-2/STOC.md: same fixed-width
+                 * scientific-notation field as WRITE's own SCALAR
+                 * formatting (halmat_scalar_format) -- STOC.md's format
+                 * rules explicitly cite the same USA00309 Sec. 6.1.3
+                 * source WRITE uses. */
+                if (ins->operand_count != 1) { fail(state, "STOC: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                char buf[32];
+                halmat_scalar_format(rv_to_scalar(&a), buf, sizeof(buf));
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_string = true;
+                state->vac[ins->index].string = dup_string(buf);
+                break;
+            }
+
+            case OP_ITOC: {
+                /* Integer->character, class-2/ITOC.md: variable-length
+                 * (up to 11 chars), right-justified with leading zeros
+                 * suppressed, no sign character for non-negative values
+                 * -- i.e. just "%d", not WRITE's fixed-width "%11d". */
+                if (ins->operand_count != 1) { fail(state, "ITOC: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                char buf[16];
+                snprintf(buf, sizeof(buf), "%d", rv_to_integer(&a));
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_string = true;
+                state->vac[ins->index].string = dup_string(buf);
+                break;
+            }
+
+            case OP_CTOS:
+                /* Character->scalar, class-5/CTOS.md: parses the
+                 * standard input formats (USA00309 Sec. 6.1.2) --
+                 * strtod() covers the decimal and "dddEddd" forms
+                 * directly; the HAL/S-specific B(binary)/H(hex) exponent
+                 * suffixes aren't implemented (no fixture uses them). No
+                 * rounding step for SCALAR (unlike CTOI below). */
+                if (ins->operand_count != 1) { fail(state, "CTOS: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_STRING) { fail(state, "CTOS: operand is not CHARACTER"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_from_double(strtod(a.string, NULL), false);
+                break;
+
+            case OP_CTOI:
+                /* Character->integer, class-6/CTOI.md: same parse as
+                 * CTOS, then rounds to nearest (per the doc's explicit
+                 * "rounded to the nearest integral value" rule) rather
+                 * than truncating. */
+                if (ins->operand_count != 1) { fail(state, "CTOI: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_STRING) { fail(state, "CTOI: operand is not CHARACTER"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = (int32_t)lround(strtod(a.string, NULL));
+                break;
 
             case OP_XXST:
                 /* General bracketed-argument-list start: I/O (IMD kind

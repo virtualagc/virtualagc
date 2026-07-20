@@ -47,6 +47,7 @@ run ./run_local_fixture.sh logical_or "OR-TRUE"
 run ./run_local_fixture.sh mixed_type "S2=      5.5000000E+00"
 run ./run_local_fixture.sh stoi "I1=               7     I2=               8     I3=              -8     I4=              -7"
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
+run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
 
