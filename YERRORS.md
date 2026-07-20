@@ -228,10 +228,12 @@ exactly this reason) rather than as a narrow, fixable defect.
 
 ---
 
-## 8. `STRI`/`SLRI`/`ELRI`/`ETRI` (repeated-`INITIAL()` group) are unconditional no-ops
+## 8. `STRI`/`SLRI`/`ELRI`/`ETRI`/`TINT`/`EINT` (repeated-`INITIAL()`/structure-init group) are unconditional no-ops
 
 **File**: `emu/halmat_class8.c`, the `case POP_STRI: case POP_SLRI: case
-POP_ELRI: case POP_ETRI: break;` block (~line 90).
+POP_ELRI: case POP_ETRI: break;` block (~line 90), and the earlier
+`case POP_NINT: case POP_TINT: case POP_EINT: /* TODO */ break;` block
+(~line 85).
 
 The whole repeated-initialize group for HAL/S's `n#value` `INITIAL()`
 repetition-factor form (`class-8/STRI.md`, `SLRI.md`, `ELRI.md`,
@@ -246,6 +248,20 @@ three elements; `yaHALMAT` produces `0.0` for all three. Same class of
 gap as finding #7 (a real feature never implemented, not implemented
 incorrectly) but in a different source file (`halmat_class8.c`, not
 `halmat_class0.c`), so listed separately.
+
+`TINT` (whole-structure `INITIAL(...)`, `class-8/TINT.md`) confirmed
+separately as the same symptom, explicitly `/* TODO */`-stubbed rather
+than merely falling through to a shared no-op case:
+```
+STRUCTURE Q: 1 QI INTEGER, 1 QS SCALAR;
+DECLARE Z Q-STRUCTURE INITIAL(5,4.3);
+```
+(`src/tests/hal/test_tint.hal`). `yaHALMAT2` produces `Z.QI=5`,
+`Z.QS=4.3` (both correctly populated from the single coalesced `TINT`
+instruction the compiler emits for this case — see `TINT.md`'s own
+ICQ_OUTPUT-coalescing finding); `yaHALMAT` produces `0`/`0.0` for both.
+Folded into this finding rather than listed separately, same root cause
+and same source file region.
 
 ---
 

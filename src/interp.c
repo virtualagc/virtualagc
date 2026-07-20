@@ -188,6 +188,7 @@
 #define OP_IINT 0x8C1
 #define OP_SINT 0x8A1
 #define OP_CINT 0x841
+#define OP_TINT 0x8E2
 #define OP_BINT 0x821
 #define OP_MINT 0x861
 #define OP_VINT 0x881
@@ -1085,6 +1086,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->task_count = 1;
     state->current_task = 0;
     state->stri_target_syt = -1;
+    state->stri_target_template_syt = -1;
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
      * convention (Plan.md Phase 3) -- overridable via interp_set_device
@@ -1275,15 +1277,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_STRI:
-                /* Names the SYT target for a following SLRI/ELRI/ETRI
-                 * repeated-initialize group (class-8/STRI.md), consumed
-                 * by write_destination's QUAL_OFF case. Recorded here
-                 * (not during precompute) since STRI executes normally,
-                 * exactly once, immediately before the SLRI-driven
-                 * paragraph replay begins -- see precompute_arrayed_
-                 * paragraphs' OP_SLRI case. */
+                /* Names the target for a following repeated-initialize
+                 * group (class-8/STRI.md). Two distinct forms, per the
+                 * operand's own qualifier:
+                 * - QUAL_SYT: the `n#value` array-repetition form
+                 *   (SLRI/ELRI/ETRI, class-8/SLRI.md) -- stri_target_syt
+                 *   is the array's own symbol, consumed by
+                 *   write_destination's QUAL_OFF case.
+                 * - QUAL_XPT: the whole-structure INITIAL(...) form
+                 *   (TINT, class-8/TINT.md) -- the operand is a bare/
+                 *   unqualified EXTN reference (struct_field_syt is the
+                 *   TEMPLATE's own symbol, not a real field). Records
+                 *   both the structure *instance*'s own SYT
+                 *   (stri_target_syt, the shadow-slot storage base) and
+                 *   the TEMPLATE's SYT (stri_target_template_syt, used
+                 *   to compute each terminal's own field symbol via
+                 *   offset arithmetic -- see TINT's own case). */
+                state->stri_target_template_syt = -1;
                 if (ins->operand_count == 1 && ins->operands[0].qual == QUAL_SYT) {
                     state->stri_target_syt = (int32_t)ins->operands[0].data;
+                } else if (ins->operand_count == 1 && ins->operands[0].qual == QUAL_XPT) {
+                    if (ins->operands[0].data < HALMAT_VAC_MAX) {
+                        const halmat_vac_slot_t *slot = &state->vac[ins->operands[0].data];
+                        if (slot->is_struct_ref) {
+                            state->stri_target_syt = (int32_t)slot->struct_base_syt;
+                            state->stri_target_template_syt = (int32_t)slot->struct_field_syt;
+                        }
+                    }
                 }
                 break;
 
@@ -2194,6 +2214,70 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     e->char_value = dup_string(a.string);
                 }
                 break;
+
+            case OP_TINT: {
+                /* Structure-terminal initialize (class-8/TINT.md):
+                 * whole-structure INITIAL(...) list, one TINT per
+                 * *coalesced run* of consecutive terminals (the
+                 * compiler's ICQ_OUTPUT coalescing -- confirmed
+                 * empirically this session: the literal operand's own
+                 * tag1 carries the run length, defaulting to 1 when
+                 * absent/zero). Two operands: OFFSET (the run's starting
+                 * terminal-slot index, cumulative across the whole STRI
+                 * group) and the first coalesced value's literal-table
+                 * index. Requires a preceding structure-form STRI (see
+                 * OP_STRI) to have resolved the target instance/template;
+                 * each terminal's own field symbol is template_syt+1+
+                 * offset -- the compiler emits a template's terminal
+                 * symbols at consecutive SYT indices immediately
+                 * following the template's own (confirmed empirically),
+                 * matching FCAL's "callee+1+i" argument convention.
+                 * ARRAY/MATRIX/VECTOR terminals (which occupy more than
+                 * one terminal-slot each, per TINT.md's own worked
+                 * multi-terminal trace) aren't handled -- this only
+                 * covers the plain scalar/integer-terminal case, no
+                 * fixture needs more yet. */
+                if (ins->operand_count != 2) { fail(state, "TINT: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_OFF) { fail(state, "TINT: expected an OFFSET first operand"); break; }
+                if (ins->operands[1].qual != QUAL_LIT) { fail(state, "TINT: expected a LIT second operand"); break; }
+                if (state->stri_target_syt < 0 || state->stri_target_template_syt < 0) {
+                    fail(state, "TINT used without a preceding whole-structure STRI");
+                    break;
+                }
+                uint16_t base_syt = (uint16_t)state->stri_target_syt;
+                uint16_t template_syt = (uint16_t)state->stri_target_template_syt;
+                int run_count = ins->operands[1].tag1 > 0 ? ins->operands[1].tag1 : 1;
+                int32_t copy_idx = current_copy_index(state);
+                bool ok = true;
+                for (int k = 0; ok && k < run_count; k++) {
+                    halmat_operand_t lit_op = {0};
+                    lit_op.qual = QUAL_LIT;
+                    lit_op.data = (uint16_t)(ins->operands[1].data + k);
+                    resolved_value_t rv;
+                    if (!resolve_operand(state, &lit_op, &rv)) { ok = false; break; }
+                    uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data + (uint32_t)k;
+                    if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); ok = false; break; }
+                    /* Litfile numeric entries carry no INTEGER-vs-SCALAR
+                     * distinction of their own (resolve_operand's QUAL_LIT
+                     * case always resolves FIXED/DOUBLE as RV_SCALAR) --
+                     * unlike SINT/IINT (whose own opcode identity already
+                     * says which), TINT is shared across every terminal
+                     * type, so the declared type has to come from the
+                     * symbol table instead, per-terminal. */
+                    if (state->symtab && rv.kind == RV_SCALAR) {
+                        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, field_syt32);
+                        if (fsym && fsym->hal_class == 6) { /* INTEGER */
+                            int32_t iv = rv_to_integer(&rv);
+                            rv.kind = RV_INTEGER;
+                            rv.integer = iv;
+                        }
+                    }
+                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, copy_idx);
+                    if (!write_syt_entry(state, field, &rv)) { ok = false; break; }
+                }
+                if (!ok) break;
+                break;
+            }
 
             case OP_BINT:
                 /* Direct symbol-table form only (class-8/BINT.md), same

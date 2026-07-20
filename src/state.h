@@ -436,6 +436,22 @@ struct halmat_state {
                                * consumed by QUAL_OFF writes inside the
                                * SLRI/ELRI/ETRI-bracketed repeated-initialize
                                * paragraph replay (class-8/STRI.md family) */
+    int32_t stri_target_template_syt; /* whole-structure INITIAL() form only
+                               * (class-8/TINT.md): the structure TEMPLATE's own
+                               * SYT index, when STRI's operand is QUAL_XPT (a
+                               * bare/unqualified EXTN reference) rather than
+                               * QUAL_SYT -- -1 otherwise/inactive. stri_target_syt
+                               * itself still holds the structure *instance*'s own
+                               * SYT (the base for shadow-slot storage) in this
+                               * case; TINT needs both: instance to know which
+                               * structure to write into, template to compute
+                               * each OFFSET-addressed terminal's own field symbol
+                               * as template_syt+1+offset (the compiler emits a
+                               * template's terminal symbols at consecutive SYT
+                               * indices immediately following the template's own,
+                               * confirmed empirically -- the same "callee+1+i"
+                               * positional convention already used for FCAL's
+                               * arguments, class-0/FCAL.md). */
     int64_t virtual_time;
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };

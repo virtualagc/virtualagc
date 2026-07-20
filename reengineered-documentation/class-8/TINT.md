@@ -170,6 +170,75 @@ This is now a complete, closed-loop confirmation of the coalescing
 mechanism: both the coalesced case (this file's main worked trace) and
 the non-coalesced case (above) match `ICQ_OUTPUT`'s source logic exactly.
 
+## Confirmed later: STRI's own operand, and the OFFSET-to-field-symbol mapping
+
+The remaining practical question — resolved this session — was how a
+runtime consumer maps `TINT`'s `OFFSET`-addressed, purely numeric slot
+index back to an actual structure terminal to write into, since `TINT`
+itself carries no field-symbol operand at all. Two pieces close this
+loop:
+
+**`STRI`'s own operand, for this (whole-structure) usage, is `QUAL`=
+`XPT` (not `QUAL`=`SYT` as in the array-`n#value` case,
+[SLRI](SLRI.md)) — a reference to a preceding *bare* [EXTN](../class-0/EXTN.md)**
+(operand 2 = the TEMPLATE's own symbol, `TAG2`=0, per
+[EXTN](../class-0/EXTN.md)'s already-confirmed "unqualified reference"
+shape), confirmed by compiling `DECLARE Z Q-STRUCTURE INITIAL(5,4.3);`
+(`Q`: `1 QI INTEGER, 1 QS SCALAR;`):
+```
+HALMAT: 001(2),0,0            <- EXTN (bare): Z, symbol index 5; Q (the template), symbol index 2
+HALMAT: 801(1),0,0            <- STRI, QUAL=XPT, referencing that EXTN's own stream position
+HALMAT: 8E2(2),6,0            <- TINT (see main trace above): OFFSET=0, tag1=2 (coalesced run of 2)
+HALMAT: 804(0),0,0            <- ETRI
+```
+So `STRI` here resolves *both* pieces a runtime consumer needs: the
+structure *instance* being initialized (`Z`, from the bare EXTN's own
+base operand) and the TEMPLATE it's an instance of (`Q`, from the bare
+EXTN's second operand).
+
+**The TEMPLATE's terminal symbols are confirmed to occupy consecutive
+SYT indices immediately following the TEMPLATE's own** — in the trace
+above, `Q`=symbol index 2, `QI`=index 3, `QS`=index 4 (confirmed via
+`COMMON0.out`'s own symbol dump, in declaration order, with no other
+symbols interleaved). This is the same "callee+1+i" positional
+convention this project already confirmed for
+[FCAL](../class-0/FCAL.md)'s argument binding — so a given `TINT`'s
+`OFFSET` operand maps directly to field symbol
+`TEMPLATE_syt + 1 + OFFSET` for the plain scalar/integer-terminal case
+(an `ARRAY`/`MATRIX`/`VECTOR` terminal, which per the non-coalesced
+trace above occupies multiple consecutive `OFFSET` slots for its own
+elements, needs more than this simple formula — untested, see below).
+
+**One more wrinkle, confirmed the hard way**: the literal table itself
+carries no `INTEGER`-vs-`SCALAR` distinction (`FIXED`/`DOUBLE` litfile
+entries both resolve as an exact-bit-pattern `SCALAR` value regardless
+of which HAL/S type the value is destined for — already established
+elsewhere in this project, e.g. `ITOS`/`STOI`). Unlike `SINT`/`IINT`
+(whose own opcode identity already says which), `TINT` is shared across
+every terminal type uniformly, so a runtime consumer needs the
+TEMPLATE's own per-terminal declared type (from the symbol table, via
+the computed field symbol) to correctly coerce each coalesced value —
+without it, an `INTEGER` terminal like `QI` above would be silently
+mis-typed as `SCALAR`.
+
+**End-to-end runtime confirmation** (`src/tests/hal/test_tint.hal`):
+`DECLARE Z Q-STRUCTURE INITIAL(5,4.3);` followed by `WRITE(6) Z.QI;
+WRITE(6) Z.QS;` prints `5` (correctly `INTEGER`-formatted) then
+`4.2999992E+00` (the expected hex-float rounding of `4.3` at single
+precision) — confirming both the coalesced run's values land on the
+correct terminals, *and* the per-terminal type coercion above is
+necessary and correct.
+
+## Unresolved (still, after the above)
+
+- `ARRAY`/`MATRIX`/`VECTOR` structure terminals (which the non-coalesced
+  trace above shows occupying multiple `OFFSET` slots each, one per
+  element) are not implemented — only plain scalar/integer terminals.
+- Multiple-copy structures (`Q-STRUCTURE(n)` with a whole-structure
+  `INITIAL(...)` list) were not tested in combination with `TINT`.
+- The trailing `6` on the `TINT` operator word itself is still not
+  decoded at the bit level.
+
 ## Source Analysis & Reliability
 
 Opcode (0x8E2) confirmed primary-source: `XTINT BIT(16) INITIAL("8E2")` in
