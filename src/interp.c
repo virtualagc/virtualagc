@@ -98,6 +98,29 @@
 #define OP_SSUB 0x5AC
 #define OP_SSPR 0x5AD
 #define OP_SSDV 0x5AE
+#define OP_MASN 0x301
+#define OP_MTRA 0x329
+#define OP_MNEG 0x344
+#define OP_MADD 0x362
+#define OP_MSUB 0x363
+#define OP_MMPR 0x368
+#define OP_VVPR 0x387
+#define OP_MSPR 0x3A5
+#define OP_MSDV 0x3A6
+#define OP_VASN 0x401
+#define OP_VNEG 0x444
+#define OP_MVPR 0x46C
+#define OP_VMPR 0x46D
+#define OP_VADD 0x482
+#define OP_VSUB 0x483
+#define OP_VCRS 0x48B
+#define OP_VSPR 0x4A5
+#define OP_VSDV 0x4A6
+#define OP_VDOT 0x58E
+#define OP_MNEQ 0x765
+#define OP_MEQU 0x766
+#define OP_VNEQ 0x785
+#define OP_VEQU 0x786
 #define OP_SIEX 0x571
 #define OP_SPEX 0x572
 #define OP_SEXP 0x5AF
@@ -344,6 +367,60 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     e->element_count = count;
     e->rows = rows;
     e->cols = cols;
+}
+
+/* Reads a whole MATRIX/VECTOR operand (SYT variable or a VAC-carried
+ * intermediate result, e.g. a prior MADD/VADD -- class-3/MADD.md's "no
+ * destination operand, consumed by a following MASN via a VAC-qualified
+ * operand" pattern applies to every MATRIX/VECTOR arithmetic opcode).
+ * Does not copy -- the returned pointer aliases the SYT/VAC slot's own
+ * storage, valid until that slot is next written. */
+static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
+                               halmat_scalar_t **out_elems, size_t *out_count, int *out_rows, int *out_cols) {
+    if (op->qual == QUAL_SYT) {
+        if (op->data >= HALMAT_SYT_MAX) { fail(state, "SYT index %u out of range", op->data); return false; }
+        ensure_container(state, op->data);
+        halmat_syt_entry_t *e = &state->syt[op->data];
+        *out_elems = e->elements;
+        *out_count = e->element_count;
+        *out_rows = e->rows;
+        *out_cols = e->cols;
+        return true;
+    }
+    if (op->qual == QUAL_VAC) {
+        if (op->data >= HALMAT_VAC_MAX) { fail(state, "VAC index %u out of range", op->data); return false; }
+        halmat_vac_slot_t *slot = &state->vac[op->data];
+        if (!slot->is_container) { fail(state, "operand is not a MATRIX/VECTOR intermediate result"); return false; }
+        *out_elems = slot->container;
+        *out_count = slot->container_count;
+        *out_rows = slot->container_rows;
+        *out_cols = slot->container_cols;
+        return true;
+    }
+    fail(state, "unsupported MATRIX/VECTOR operand qualifier %s", halmat_qual_name(op->qual));
+    return false;
+}
+
+/* Stores a computed MATRIX/VECTOR result (elems/count, freshly built by
+ * the caller into a stack buffer -- copied here, not aliased) into a VAC
+ * slot, for a following MASN/VASN or chained arithmetic op to consume.
+ * Frees any previous container this slot held (unlike the VAC string/
+ * bits leak-across-loop-iterations tradeoff elsewhere in this file,
+ * freeing here is just as simple as leaking and avoids it outright). */
+static bool store_container_result(halmat_state_t *state, size_t vac_index,
+                                    const halmat_scalar_t *elems, size_t count, int rows, int cols) {
+    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); return false; }
+    halmat_vac_slot_t *slot = &state->vac[vac_index];
+    free(slot->container);
+    slot->container = malloc(count * sizeof(halmat_scalar_t));
+    if (!slot->container) { fail(state, "out of memory"); return false; }
+    memcpy(slot->container, elems, count * sizeof(halmat_scalar_t));
+    slot->is_ref = false;
+    slot->is_container = true;
+    slot->container_count = count;
+    slot->container_rows = rows;
+    slot->container_cols = cols;
+    return true;
 }
 
 /* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
@@ -1000,6 +1077,250 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = true;
                 state->vac[ins->index].ref_syt = base_syt;
                 state->vac[ins->index].ref_offset = offset;
+                break;
+            }
+
+            case OP_MASN:
+            case OP_VASN: {
+                /* Whole-container assign, source-first/receiver-second
+                 * like the rest of the xASN family (class-3/MASN.md,
+                 * class-4/VASN.md). */
+                if (ins->operand_count != 2) { fail(state, "MASN/VASN: expected 2 operands"); break; }
+                halmat_scalar_t *src; size_t src_count; int src_rows, src_cols;
+                if (!resolve_container(state, &ins->operands[0], &src, &src_count, &src_rows, &src_cols)) break;
+                if (ins->operands[1].qual != QUAL_SYT) { fail(state, "MASN/VASN: receiver must be SYT"); break; }
+                uint16_t dest_syt = ins->operands[1].data;
+                if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: SYT index out of range"); break; }
+                ensure_container(state, dest_syt);
+                halmat_syt_entry_t *dest = &state->syt[dest_syt];
+                if (dest->element_count != src_count) {
+                    fail(state, "MASN/VASN: shape mismatch (%zu vs %zu elements)", src_count, dest->element_count);
+                    break;
+                }
+                memcpy(dest->elements, src, src_count * sizeof(halmat_scalar_t));
+                dest->rows = src_rows;
+                dest->cols = src_cols;
+                break;
+            }
+
+            case OP_MNEG:
+            case OP_VNEG: {
+                if (ins->operand_count != 1) { fail(state, "MNEG/VNEG: expected 1 operand"); break; }
+                halmat_scalar_t *src; size_t count; int rows, cols;
+                if (!resolve_container(state, &ins->operands[0], &src, &count, &rows, &cols)) break;
+                if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MNEG/VNEG: container too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (size_t i = 0; i < count; i++) result[i] = halmat_scalar_negate(src[i]);
+                if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
+                break;
+            }
+
+            case OP_MADD:
+            case OP_MSUB:
+            case OP_VADD:
+            case OP_VSUB: {
+                /* Elementwise add/sub, class-3/MADD.md's confirmed
+                 * "no destination operand -- consumed by a following
+                 * MASN via a VAC-qualified operand" pattern. */
+                if (ins->operand_count != 2) { fail(state, "MADD/MSUB/VADD/VSUB: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (count_a != count_b) { fail(state, "MADD/MSUB/VADD/VSUB: operand shape mismatch"); break; }
+                if (count_a > HALMAT_CONTAINER_CAPACITY) { fail(state, "MADD/MSUB/VADD/VSUB: container too large"); break; }
+                bool is_sub = (ins->opcode == OP_MSUB || ins->opcode == OP_VSUB);
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (size_t i = 0; i < count_a; i++) {
+                    result[i] = is_sub ? halmat_scalar_sub(ca[i], cb[i]) : halmat_scalar_add(ca[i], cb[i]);
+                }
+                if (!store_container_result(state, ins->index, result, count_a, rows_a, cols_a)) break;
+                break;
+            }
+
+            case OP_MSPR:
+            case OP_MSDV:
+            case OP_VSPR:
+            case OP_VSDV: {
+                /* Matrix/vector times/divided-by a plain SCALAR operand
+                 * (class-3/MSPR.md, class-3/MSDV.md, class-4/VSPR.md,
+                 * class-4/VSDV.md) -- assumed container-operand-first,
+                 * scalar-operand-second by analogy with every other
+                 * base-then-modifier operand order in this project
+                 * (e.g. SPEX/IPEX's base-then-exponent); operand-word
+                 * order isn't independently confirmed in the primary
+                 * sources for these four opcodes specifically. */
+                if (ins->operand_count != 2) { fail(state, "MSPR/MSDV/VSPR/VSDV: expected 2 operands"); break; }
+                halmat_scalar_t *ca; size_t count; int rows, cols;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MSPR/MSDV/VSPR/VSDV: container too large"); break; }
+                halmat_scalar_t scalar_operand = rv_to_scalar(&b);
+                bool is_div = (ins->opcode == OP_MSDV || ins->opcode == OP_VSDV);
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                bool ok = true;
+                for (size_t i = 0; ok && i < count; i++) {
+                    if (is_div) {
+                        if (!halmat_scalar_divide(ca[i], scalar_operand, &result[i])) {
+                            fail(state, "MSDV/VSDV: division by zero (floating point divide exception)");
+                            ok = false;
+                        }
+                    } else {
+                        result[i] = halmat_scalar_multiply(ca[i], scalar_operand);
+                    }
+                }
+                if (!ok) break;
+                if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
+                break;
+            }
+
+            case OP_MTRA: {
+                if (ins->operand_count != 1) { fail(state, "MTRA: expected 1 operand"); break; }
+                halmat_scalar_t *src; size_t count; int rows, cols;
+                if (!resolve_container(state, &ins->operands[0], &src, &count, &rows, &cols)) break;
+                if (rows <= 0 || cols <= 0) { fail(state, "MTRA: operand is not a MATRIX (unknown shape)"); break; }
+                if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MTRA: container too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (int r = 0; r < rows; r++)
+                    for (int c = 0; c < cols; c++)
+                        result[c * rows + r] = src[r * cols + c];
+                if (!store_container_result(state, ins->index, result, count, cols, rows)) break;
+                break;
+            }
+
+            case OP_MMPR: {
+                if (ins->operand_count != 2) { fail(state, "MMPR: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (rows_a <= 0 || cols_a <= 0 || rows_b <= 0 || cols_b <= 0) { fail(state, "MMPR: operands must be MATRIX (unknown shape)"); break; }
+                if (cols_a != rows_b) { fail(state, "MMPR: dimension mismatch (%dx%d times %dx%d)", rows_a, cols_a, rows_b, cols_b); break; }
+                size_t result_count = (size_t)rows_a * (size_t)cols_b;
+                if (result_count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MMPR: result too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (int i = 0; i < rows_a; i++) {
+                    for (int j = 0; j < cols_b; j++) {
+                        halmat_scalar_t sum = halmat_scalar_zero(false);
+                        for (int k = 0; k < cols_a; k++) {
+                            sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i * cols_a + k], cb[k * cols_b + j]));
+                        }
+                        result[i * cols_b + j] = sum;
+                    }
+                }
+                if (!store_container_result(state, ins->index, result, result_count, rows_a, cols_b)) break;
+                break;
+            }
+
+            case OP_MVPR: {
+                /* Matrix-vector product (matrix premultiplies vector),
+                 * class-4/MVPR.md. */
+                if (ins->operand_count != 2) { fail(state, "MVPR: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (rows_a <= 0 || cols_a <= 0) { fail(state, "MVPR: first operand must be MATRIX"); break; }
+                if ((size_t)cols_a != count_b) { fail(state, "MVPR: dimension mismatch"); break; }
+                if ((size_t)rows_a > HALMAT_CONTAINER_CAPACITY) { fail(state, "MVPR: result too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (int i = 0; i < rows_a; i++) {
+                    halmat_scalar_t sum = halmat_scalar_zero(false);
+                    for (int k = 0; k < cols_a; k++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i * cols_a + k], cb[k]));
+                    result[i] = sum;
+                }
+                if (!store_container_result(state, ins->index, result, (size_t)rows_a, 0, rows_a)) break;
+                break;
+            }
+
+            case OP_VMPR: {
+                /* Vector-matrix product (vector premultiplies matrix),
+                 * class-4/VMPR.md. */
+                if (ins->operand_count != 2) { fail(state, "VMPR: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (rows_b <= 0 || cols_b <= 0) { fail(state, "VMPR: second operand must be MATRIX"); break; }
+                if (count_a != (size_t)rows_b) { fail(state, "VMPR: dimension mismatch"); break; }
+                if ((size_t)cols_b > HALMAT_CONTAINER_CAPACITY) { fail(state, "VMPR: result too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (int j = 0; j < cols_b; j++) {
+                    halmat_scalar_t sum = halmat_scalar_zero(false);
+                    for (int k = 0; k < rows_b; k++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[k], cb[k * cols_b + j]));
+                    result[j] = sum;
+                }
+                if (!store_container_result(state, ins->index, result, (size_t)cols_b, 0, cols_b)) break;
+                break;
+            }
+
+            case OP_VCRS: {
+                if (ins->operand_count != 2) { fail(state, "VCRS: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (count_a != 3 || count_b != 3) { fail(state, "VCRS: both operands must be 3-element VECTORs"); break; }
+                halmat_scalar_t result[3];
+                result[0] = halmat_scalar_sub(halmat_scalar_multiply(ca[1], cb[2]), halmat_scalar_multiply(ca[2], cb[1]));
+                result[1] = halmat_scalar_sub(halmat_scalar_multiply(ca[2], cb[0]), halmat_scalar_multiply(ca[0], cb[2]));
+                result[2] = halmat_scalar_sub(halmat_scalar_multiply(ca[0], cb[1]), halmat_scalar_multiply(ca[1], cb[0]));
+                if (!store_container_result(state, ins->index, result, 3, 0, 3)) break;
+                break;
+            }
+
+            case OP_VDOT: {
+                /* Vector dot product, class-5/VDOT.md -- classed under
+                 * SCALAR by HALMAT's result-type convention; unlike
+                 * every other MATRIX/VECTOR opcode here, the result is a
+                 * plain scalar VAC value, not a container. */
+                if (ins->operand_count != 2) { fail(state, "VDOT: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                if (count_a != count_b) { fail(state, "VDOT: operand shape mismatch"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                halmat_scalar_t sum = halmat_scalar_zero(false);
+                for (size_t i = 0; i < count_a; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], cb[i]));
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = sum;
+                break;
+            }
+
+            case OP_VVPR: {
+                /* Vector outer product, class-3/VVPR.md -- classed under
+                 * MATRIX by HALMAT's result-type convention. */
+                if (ins->operand_count != 2) { fail(state, "VVPR: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                size_t result_count = count_a * count_b;
+                if (result_count > HALMAT_CONTAINER_CAPACITY) { fail(state, "VVPR: result too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                for (size_t i = 0; i < count_a; i++)
+                    for (size_t j = 0; j < count_b; j++)
+                        result[i * count_b + j] = halmat_scalar_multiply(ca[i], cb[j]);
+                if (!store_container_result(state, ins->index, result, result_count, (int)count_a, (int)count_b)) break;
+                break;
+            }
+
+            case OP_MEQU:
+            case OP_MNEQ:
+            case OP_VEQU:
+            case OP_VNEQ: {
+                /* Elementwise comparison across the whole container
+                 * (class-7/MEQU.md/VEQU.md); *EQU true only if every
+                 * element matches exactly (same exact-comparison
+                 * rationale as SEQU -- see that case's comment). */
+                if (ins->operand_count != 2) { fail(state, "MEQU/MNEQ/VEQU/VNEQ: expected 2 operands"); break; }
+                halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
+                bool all_equal = (count_a == count_b);
+                for (size_t i = 0; all_equal && i < count_a; i++) {
+                    halmat_scalar_t diff = halmat_scalar_sub(ca[i], cb[i]);
+                    if (!(diff.msw == 0 && diff.lsw == 0)) all_equal = false;
+                }
+                bool is_neq = (ins->opcode == OP_MNEQ || ins->opcode == OP_VNEQ);
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = (is_neq ? !all_equal : all_equal) ? 1 : 0;
                 break;
             }
 

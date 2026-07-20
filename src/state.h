@@ -116,8 +116,10 @@ typedef struct {
                                   * in main.c) by well over a megabyte, risking stack overflow on
                                   * platforms with small default stacks (Windows threads default to
                                   * 1 MiB -- a real concern per Plan.md's MSVC/cross-platform target).
-                                  * Same reuse-without-freeing-prior-iteration's-buffer leak as the
-                                  * VAC string buffers above; freed in bulk by interp_cleanup(). */
+                                  * Unlike the VAC string-buffer leak-across-loop-iterations tradeoff
+                                  * above, interp.c's store_container_result() frees the previous
+                                  * buffer before replacing it -- no accumulating leak here, just the
+                                  * final value per slot freed again in bulk by interp_cleanup(). */
     size_t container_count;
     int container_rows, container_cols; /* is_container: shape, same convention as halmat_syt_entry_t's rows/cols */
     int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits, !is_container */

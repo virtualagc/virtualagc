@@ -1,0 +1,49 @@
+ TEST_MAT_VEC:
+ PROGRAM;
+    DECLARE A MATRIX(2, 2);
+    DECLARE B MATRIX(2, 2);
+    DECLARE C MATRIX(2, 2);
+    DECLARE SCALAR, VAL;
+M   A    = 1.0;
+S    1,1
+M   A    = 2.0;
+S    1,2
+M   A    = 3.0;
+S    2,1
+M   A    = 4.0;
+S    2,2
+M   B    = 5.0;
+S    1,1
+M   B    = 6.0;
+S    1,2
+M   B    = 7.0;
+S    2,1
+M   B    = 8.0;
+S    2,2
+    C = A + B;
+M   VAL = C   ;
+S          1,1
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          1,2
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          2,1
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          2,2
+    WRITE(6) VAL;
+    C = A B;
+M   VAL = C   ;
+S          1,1
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          1,2
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          2,1
+    WRITE(6) VAL;
+M   VAL = C   ;
+S          2,2
+    WRITE(6) VAL;
+ CLOSE TEST_MAT_VEC;

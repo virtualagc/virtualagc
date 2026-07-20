@@ -154,9 +154,47 @@ wasn't traced further. Left for the reference implementation's author to
 diagnose, per this project's stated approach to `yaHALMAT` bugs (see
 finding 2's identical disposition).
 
+## 6. `MADD`/`MMPR` (and likely the rest of Class 3/4) produce all-zero results even with `--symtab` supplied
+
+**File**: `emu/halmat_class34.c`, `POP_MADD`/`POP_MSUB` case (~line 27)
+and onward (the whole Class 3/4 arithmetic family shares the same
+`a.rows`/`a.cols`/`v.matrix[]` shape dependency).
+
+```
+DECLARE A MATRIX(2, 2);
+DECLARE B MATRIX(2, 2);
+DECLARE C MATRIX(2, 2);
+A(1,1)=1.0; A(1,2)=2.0; A(2,1)=3.0; A(2,2)=4.0;
+B(1,1)=5.0; B(1,2)=6.0; B(2,1)=7.0; B(2,2)=8.0;
+C = A + B;
+C = A B;   -- matrix product, juxtaposition
+```
+(`src/tests/hal/test_matvec.hal`). Hand-derived expected values: `A+B`
+= `[6,8,10,12]` (row-major); `A*B` = `[19,22,43,50]`. `yaHALMAT2`
+produces exactly these values (verified against both `+` and
+juxtaposition-multiply). `yaHALMAT --symtab COMMON0.out halmat.bin`
+produces all zeros for every element of both results, even with the
+compiler's own symbol table supplied via `--symtab` (which is where a
+MATRIX's declared row/column counts live -- HALMAT itself carries no
+size info on `MADD`/`MMPR`'s own operand words, confirmed empirically
+this session).
+
+**Not fully root-caused** — a source read of `POP_MADD` shows
+`r.rows`/`r.cols` derived from the *resolved operands'* own `a.rows`/
+`b.rows` fields (`r.rows = a.rows > b.rows ? a.rows : b.rows`), with the
+elementwise loop bounded by `n = r.rows * r.cols`; if `halmat_resolve_
+operand` (or the `--symtab`-driven SYT initialization feeding it) never
+actually populates a SYT-backed MATRIX's `rows`/`cols` fields, `n` stays
+`0` and the loop never executes, silently leaving `r` at its zero-
+initialized default -- consistent with every observed symptom here, but
+not traced into `halmat_resolve_operand` itself to confirm. Left for
+the reference implementation's author to diagnose further, per this
+project's established disposition for not-fully-root-caused findings
+(see finding 2).
+
 ---
 
-All five findings were cross-checked against a primary source or
+All six findings were cross-checked against a primary source or
 independent hand-calculation, not merely against `yaHALMAT2`'s own
 output, consistent with this project's general sourcing discipline (see
 `Plan.md`, `STATUS.md`).
