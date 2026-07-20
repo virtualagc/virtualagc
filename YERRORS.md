@@ -222,7 +222,28 @@ exactly this reason) rather than as a narrow, fixable defect.
 
 ---
 
-All seven findings were cross-checked against a primary source or
+## 8. `STRI`/`SLRI`/`ELRI`/`ETRI` (repeated-`INITIAL()` group) are unconditional no-ops
+
+**File**: `emu/halmat_class8.c`, the `case POP_STRI: case POP_SLRI: case
+POP_ELRI: case POP_ETRI: break;` block (~line 90).
+
+The whole repeated-initialize group for HAL/S's `n#value` `INITIAL()`
+repetition-factor form (`class-8/STRI.md`, `SLRI.md`, `ELRI.md`,
+`ETRI.md`) is recognized (doesn't hit the "unknown popcode" default) but
+has no effect at all — the array element(s) it's meant to populate are
+left at their zero-initialized default. Confirmed for:
+```
+DECLARE A ARRAY(3) SCALAR INITIAL(3#1.5);
+```
+(`src/tests/hal/test_stri.hal`). `yaHALMAT2` produces `1.5` for all
+three elements; `yaHALMAT` produces `0.0` for all three. Same class of
+gap as finding #7 (a real feature never implemented, not implemented
+incorrectly) but in a different source file (`halmat_class8.c`, not
+`halmat_class0.c`), so listed separately.
+
+---
+
+All eight findings were cross-checked against a primary source or
 independent hand-calculation, not merely against `yaHALMAT2`'s own
 output, consistent with this project's general sourcing discipline (see
 `Plan.md`, `STATUS.md`).

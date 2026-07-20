@@ -394,6 +394,10 @@ struct halmat_state {
     int current_task; /* index into tasks[], set by the scheduler loop before each instruction */
     long current_stmt; /* HAL/S statement number of the last-executed SMRK, or -1 before any;
                          * for --debug's source-line display (see srcmap.c) */
+    int32_t stri_target_syt; /* SYT index most recently named by STRI, or -1;
+                               * consumed by QUAL_OFF writes inside the
+                               * SLRI/ELRI/ETRI-bracketed repeated-initialize
+                               * paragraph replay (class-8/STRI.md family) */
     int64_t virtual_time;
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };

@@ -16,16 +16,20 @@ operands.
 
 ## Usage Context
 
-Appears exactly once per repetition group, immediately after the last
-element's [SINT](SINT.md)/[ELRI](ELRI.md) pair, closing out the sequence
-opened by [STRI](STRI.md)/[SLRI](SLRI.md).
+Appears exactly once per repetition group, immediately after the
+[SINT](SINT.md)/[ELRI](ELRI.md) pair, closing out the sequence opened by
+[STRI](STRI.md)/[SLRI](SLRI.md). **Correction (later session):** the
+compiler emits only a single SINT/ELRI unit regardless of repetition
+count (not one per element — see [SLRI](SLRI.md)'s corrected Usage
+Context), so ETRI immediately follows that one unit, not "the last of N"
+elements.
 
 ## Operand-Word Format (confirmed empirically)
 
-No operands. Confirmed by compiling `DECLARE S1 ARRAY(1000) SCALAR
-INITIAL(1000#1.5);` with `HALSFC --parms="LSTALL"` — see
-[SLRI](SLRI.md) for the full worked trace; `HALMAT: 804(0),0,0` appears
-exactly once, right after the 1000th (last) [ELRI](ELRI.md).
+No operands. Confirmed by compiling `DECLARE A ARRAY(3) SCALAR
+INITIAL(3#1.5);` — see [SLRI](SLRI.md) for the full worked trace;
+`HALMAT: 804(0),0,0` appears exactly once, right after the single
+[ELRI](ELRI.md).
 
 ## Unresolved Questions
 

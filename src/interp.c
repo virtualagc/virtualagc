@@ -26,6 +26,10 @@
 #define OP_ADLP 0x017
 #define OP_IDLP 0x01A
 #define OP_DLPE 0x018
+#define OP_STRI 0x801
+#define OP_SLRI 0x802
+#define OP_ELRI 0x803
+#define OP_ETRI 0x804
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_CFOR 0x012
@@ -481,6 +485,31 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         base->elements[slot->ref_offset] = rv_to_scalar(val);
         return true;
     }
+    if (op->qual == QUAL_OFF) {
+        /* OFFSET-addressed element write, used by SINT (etc.) inside a
+         * STRI/SLRI/ELRI/ETRI repeated-initialize group (class-8/
+         * STRI.md, SLRI.md) -- op->data is a sequential offset (always
+         * observed as 0) relative to the current replay iteration, added
+         * to state->arrayed_index (the SLRI-driven paragraph-replay
+         * counter, same mechanism ADLP/IDLP use for QUAL_SYT redirection
+         * -- see interp_step). The target symbol itself isn't carried by
+         * this operand at all; it comes from the most recently executed
+         * STRI (state->stri_target_syt). */
+        if (state->arrayed_index < 0) {
+            fail(state, "QUAL_OFF destination used outside a repeated-initialize (STRI/SLRI) replay");
+            return false;
+        }
+        if (state->stri_target_syt < 0 || state->stri_target_syt >= HALMAT_SYT_MAX) {
+            fail(state, "QUAL_OFF destination used without a preceding STRI");
+            return false;
+        }
+        uint16_t base_syt = (uint16_t)state->stri_target_syt;
+        ensure_container(state, base_syt);
+        halmat_syt_entry_t *e = &state->syt[base_syt];
+        size_t idx = (size_t)(state->arrayed_index + (int32_t)op->data) % (e->element_count ? e->element_count : 1);
+        e->elements[idx] = rv_to_scalar(val);
+        return true;
+    }
     fail(state, "unsupported assignment destination qualifier %s", halmat_qual_name(op->qual));
     return false;
 }
@@ -718,6 +747,33 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                 state->arrayed_paragraph_end[boundary] = j + 1;
                 state->arrayed_paragraph_count[boundary] = count;
             }
+        } else if (opcode == OP_SLRI) {
+            /* STRI/SLRI/ELRI/ETRI: repeated-initialize group for the
+             * n#value INITIAL() repetition-factor form (class-8/
+             * SLRI.md). Unlike ADLP/IDLP (which trail the paragraph
+             * they replay), SLRI leads it -- the preceding STRI names
+             * the target symbol (recorded at runtime into
+             * state->stri_target_syt, consumed by QUAL_OFF writes
+             * inside the paragraph), SLRI's own first operand carries
+             * the repetition count, and the bracketed paragraph runs
+             * from just after SLRI up to (not including) ETRI. Contrary
+             * to SLRI.md's original documented trace (which showed
+             * literal per-element unrolling for a 1000-element array),
+             * today's HALSFC build was confirmed (this session) to
+             * always emit exactly one SINT/ELRI unit here regardless of
+             * count -- i.e. the same single-instance-plus-replay-count
+             * shape ADLP/IDLP use, just with SLRI leading instead of
+             * trailing. Corrected in SLRI.md alongside this change. */
+            const halmat_instr_t *slri = &state->prog->instrs[i];
+            if (slri->operand_count == 2 && slri->operands[0].qual == QUAL_IMD) {
+                int count = (int16_t)slri->operands[0].data;
+                size_t j = i + 1;
+                while (j < n && state->prog->instrs[j].opcode != OP_ETRI) j++;
+                if (j < n && count > 0) {
+                    state->arrayed_paragraph_end[i + 1] = j + 1;
+                    state->arrayed_paragraph_count[i + 1] = count;
+                }
+            }
         }
     }
 }
@@ -930,6 +986,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->task_count = 1;
     state->current_task = 0;
     state->current_stmt = -1;
+    state->stri_target_syt = -1;
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
      * convention (Plan.md Phase 3) -- overridable via interp_set_device
@@ -1078,6 +1135,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count == 1) state->current_stmt = (long)ins->operands[0].data;
                 break;
 
+            case OP_STRI:
+                /* Names the SYT target for a following SLRI/ELRI/ETRI
+                 * repeated-initialize group (class-8/STRI.md), consumed
+                 * by write_destination's QUAL_OFF case. Recorded here
+                 * (not during precompute) since STRI executes normally,
+                 * exactly once, immediately before the SLRI-driven
+                 * paragraph replay begins -- see precompute_arrayed_
+                 * paragraphs' OP_SLRI case. */
+                if (ins->operand_count == 1 && ins->operands[0].qual == QUAL_SYT) {
+                    state->stri_target_syt = (int32_t)ins->operands[0].data;
+                }
+                break;
+
             case OP_NOP:
             case OP_PXRC:
             case OP_XREC:
@@ -1092,6 +1162,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_ADLP:
             case OP_IDLP:
             case OP_DLPE:
+            case OP_SLRI:
+            case OP_ELRI:
+            case OP_ETRI:
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below.
@@ -1904,12 +1977,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the same syt_is_array_shaped check ordinary assignment
                  * opcodes use, instead of silently corrupting the
                  * array's element storage with a scalar write. The
-                 * OFFSET-addressed element-by-element form (a `n#value`
-                 * repeated-INITIAL list, STRI.md's family) isn't
-                 * implemented -- no fixture needs it yet. */
+                 * OFFSET-addressed form (QUAL_OFF, a `n#value` repeated-
+                 * INITIAL list, STRI.md's family) is handled the same
+                 * way, via write_destination's QUAL_OFF case. */
                 if (ins->operand_count != 2) { fail(state, "SINT: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
-                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "SINT: OFFSET-addressed form not yet implemented"); break; }
                 {
                     halmat_scalar_t sv = rv_to_scalar(&a);
                     a.kind = RV_SCALAR;

@@ -19,42 +19,54 @@ repeated-initialize header) and carries the repetition count.
 ## Usage Context
 
 Appears once per repetition group, immediately after [STRI](STRI.md).
-Even for large repetition counts, the compiler fully unrolls the
-sequence into one [SINT](SINT.md)/[ELRI](ELRI.md) pair per element
-(confirmed for a 1000-element array) rather than generating an actual
-runtime loop — consistent with `STATIC` initialization ([USA003087]
-§16.4) being realized as compile-time-laid-out data rather than
-executable code. The whole sequence is closed by [ETRI](ETRI.md).
+**Correction (later session, re-confirmed against a current HALSFC
+build):** the compiler emits exactly one [SINT](SINT.md)/[ELRI](ELRI.md)
+unit regardless of repetition count — confirmed for both a 3-element and
+a 1000-element array (`DECLARE A ARRAY(1000) SCALAR
+INITIAL(1000#1.5);`, both `--parms="LSTALL"` and plain compiles agree:
+exactly one `SINT`/`ELRI` pair, not one per element). The originally
+documented "999 more repetitions" trace below does not reproduce against
+this build and is believed to have been a documentation error rather
+than a genuine compiler-version difference (no other evidence of
+compiler-version-dependent HALMAT shape has turned up elsewhere in this
+project). The single unit is instead **replayed by the consuming
+program** at runtime, driven by SLRI's own repetition-count operand — the
+same "single-instance-plus-trailing-metadata, replayed by the consumer"
+shape [ADLP](../class-0/ADLP.md)/[IDLP](../class-0/IDLP.md) use, except
+SLRI *leads* the paragraph it describes (STRI names the target symbol,
+SLRI opens the replay, the single SINT/ELRI unit is the body, ETRI
+closes it) rather than trailing it. Consistent either way with `STATIC`
+initialization ([USA003087] §16.4) being realized as compile-time-laid-
+out data rather than executable code — a real runtime loop was never
+required, whichever the compiler generates. The whole sequence is closed
+by [ETRI](ETRI.md).
 
 ## Operand-Word Format (confirmed empirically)
 
 Two operands: operand 1 = `DATA`=the repetition count, `QUAL`=6=IMD;
 operand 2 = `DATA`=1 (observed; presumably the number of values per
 repeated unit — 1 for a simple `n#value` pattern), `QUAL`=6=IMD.
-Confirmed by compiling `DECLARE S1 ARRAY(1000) SCALAR
-INITIAL(1000#1.5);` with `HALSFC --parms="LSTALL"`:
+Confirmed by compiling `DECLARE A ARRAY(3) SCALAR INITIAL(3#1.5);`:
 
 ```
-HALMAT: 801(1),0,0            <- STRI: S1, symbol index 2
+HALMAT: 801(1),0,0            <- STRI: A, symbol index 2
 HALMAT: 802(2),1,0            <- SLRI
-       1000(6),0,0               <- literal 1000 (repetition count), QUAL=6=IMD
+          3(6),0,0               <- literal 3 (repetition count), QUAL=6=IMD
           1(6),0,0               <- literal 1 (values per unit), QUAL=6=IMD
-HALMAT: 8A1(2),5,0            <- SINT (see SINT.md), element 1
+HALMAT: 8A1(2),5,0            <- SINT (see SINT.md), single unit -- the runtime
+                                  consumer replays this once per repetition
           0(10),0,0              <- DATA=0, QUAL=A=OFF (relative/sequential offset — see SINT.md)
           3(5),1,0               <- literal-table index 3 (the value 1.5), QUAL=5=LIT
 HALMAT: 803(0),1,0            <- ELRI (see ELRI.md): end of this unit
-... (repeated 999 more times, each SINT/ELRI pair byte-identical — the
-     literal-table index and OFFSET operand never change across
-     repetitions, since every element gets the same value 1.5)
 HALMAT: 804(0),0,0            <- ETRI (see ETRI.md): end of the whole sequence
 ```
 
 This confirms [SINT](SINT.md)'s previously-speculative "OFFSET-addressed
 form... used for element-by-element matrix/vector initialization" —
 here used for a scalar array instead, with `QUAL`=A=OFF and `DATA`=0 for
-every element, implying the offset is *relative*/sequential (advancing
-implicitly with each emitted instruction) rather than an explicit
-absolute index.
+every element, implying the offset is *relative*/sequential (the
+runtime replay's own iteration counter, not a literal encoded per
+instance) rather than an explicit absolute index.
 
 ## Unresolved Questions
 
@@ -63,8 +75,8 @@ absolute index.
   produces a different `ELRI` count per group-repetition was not tested
   — only the simplest single-value `n#value` form was compiled.
 - Whether `AUTOMATIC` initialization (re-run on every block entry, per
-  §16.4) produces an actual runtime loop instead of this unrolled form
-  was not tested.
+  §16.4) produces an actual runtime loop instead of this single-unit-
+  replayed form was not tested.
 - The exact meaning of operand 2 (observed value `1`) is inferred, not
   confirmed against a case where it would differ.
 

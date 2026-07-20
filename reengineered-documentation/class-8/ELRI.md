@@ -16,18 +16,18 @@ single element of a `n#value` repeated `INITIAL(...)` specification
 
 ## Usage Context
 
-Appears once per repeated element, immediately after that element's
-initialization instruction, for the full unrolled length of the
-repetition (e.g. 1000 times for a 1000-element uniformly-repeated
-array). The final one is followed by the sequence-closing
-[ETRI](ETRI.md) instead of another element.
+**Correction (later session):** appears exactly once per `SLRI`/`ETRI`
+group, not once per repeated element — see [SLRI](SLRI.md)'s corrected
+Usage Context. The compiler emits a single [SINT](SINT.md)/`ELRI` unit
+regardless of repetition count; the runtime consumer replays that single
+unit (SLRI's own repetition-count operand driving the replay), so ELRI
+closes the one emitted unit, not "one of N" unrolled copies.
 
 ## Operand-Word Format (confirmed empirically)
 
-No operands. Confirmed by compiling `DECLARE S1 ARRAY(1000) SCALAR
-INITIAL(1000#1.5);` with `HALSFC --parms="LSTALL"` — see
-[SLRI](SLRI.md) for the full worked trace, in which `HALMAT: 803(0),1,0`
-appears with no following operand line, once per repeated element.
+No operands. Confirmed by compiling `DECLARE A ARRAY(3) SCALAR
+INITIAL(3#1.5);` — see [SLRI](SLRI.md) for the full worked trace, in
+which `HALMAT: 803(0),1,0` appears with no following operand line.
 
 ## Unresolved Questions
 

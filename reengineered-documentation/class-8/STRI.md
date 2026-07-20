@@ -43,13 +43,26 @@ initialization group" bracket reused for both the array-uniform-value case
 structure case) and the structure-terminal case. See [TINT](TINT.md) for
 the confirming worked example.
 
+## Operand-Word Format (confirmed empirically)
+
+One operand: `DATA`=the SYT index of the variable being repeat-
+initialized, `QUAL`=SYT. Unlike the HAL-1971 predecessor's three-operand
+form (variable, shared internal loop counter, loop count), HAL/S's STRI
+carries only the target symbol — the repetition count instead lives on
+the following [SLRI](SLRI.md)'s own first operand. Confirmed by
+compiling `DECLARE A ARRAY(3) SCALAR INITIAL(3#1.5);`:
+```
+HALMAT: 801(1),0,0            <- STRI: A, symbol index 2
+```
+See [SLRI](SLRI.md) for the full worked trace including the following
+SLRI/SINT/ELRI/ETRI sequence.
+
 ## Unresolved Questions
 
-- The HAL/S operand-word format (DATA/TAG1/QUAL/TAG2 layout, per
-  [HALMAT.md](../HALMAT.md#operand-word-bit-0--1)) for STRI's operands is
-  unconfirmed; only the opcode number is primary-sourced.
 - Whether HAL/S retains the same three-instruction STRI/DLPI/DLEI grouping
-  structure as the 1971 predecessor, or restructures it, is unconfirmed.
+  structure as the 1971 predecessor, or restructures it: **resolved** —
+  it does not; see Operand-Word Format above. HAL/S's STRI carries only
+  the target symbol, one operand.
 - ~~The relationship (if any) between STRI and the separately-opcoded
   HAL/S instructions at 0x02 and 0x03... is speculative.~~ **Resolved**:
   0x802/0x803 are [SLRI](SLRI.md)/[ELRI](ELRI.md), HAL/S's renamed
