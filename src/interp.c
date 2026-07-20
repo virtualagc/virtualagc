@@ -55,6 +55,12 @@
 #define OP_FCAL 0x01E
 #define OP_IASN 0x601
 #define OP_SASN 0x501
+#define OP_BASN 0x101
+#define OP_BAND 0x102
+#define OP_BOR 0x103
+#define OP_BNOT 0x104
+#define OP_ITOB 0x1C1
+#define OP_BTOI 0x621
 #define OP_CASN 0x201
 #define OP_CCAT 0x202
 #define OP_CTOC 0x241
@@ -101,17 +107,19 @@
 
 #define NO_TARGET ((size_t)-1)
 
-typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR } rv_kind_t;
+typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR, RV_BITS } rv_kind_t;
 
 typedef struct {
     rv_kind_t kind;
     char *string;   /* RV_STRING; borrowed from the literal table */
     int32_t integer; /* RV_INTEGER */
     halmat_scalar_t scalar; /* RV_SCALAR */
+    uint32_t bits;   /* RV_BITS -- raw pattern, no declared-width tracking (see state.h) */
 } resolved_value_t;
 
 static int32_t rv_to_integer(const resolved_value_t *v) {
     if (v->kind == RV_SCALAR) return halmat_scalar_to_integer(v->scalar);
+    if (v->kind == RV_BITS) return (int32_t)v->bits;
     return v->integer;
 }
 
@@ -157,6 +165,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             } else if (e->type == SYT_TYPE_CHARACTER) {
                 out->kind = RV_STRING;
                 out->string = e->char_value ? e->char_value : "";
+            } else if (e->type == SYT_TYPE_BIT) {
+                out->kind = RV_BITS;
+                out->bits = e->bit_value;
             } else {
                 out->kind = RV_INTEGER;
                 out->integer = e->value;
@@ -179,6 +190,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                  * consumers convert via rv_to_integer(). */
                 out->kind = RV_SCALAR;
                 out->scalar = halmat_scalar_from_ibm_words(lit->msw, lit->lsw, lit->type == LIT_DOUBLE);
+            } else if (lit->type == LIT_BIT) {
+                out->kind = RV_BITS;
+                out->bits = lit->bits;
             } else {
                 fail(state, "literal index %u has an unsupported type (%d) for this context",
                      op->data, (int)lit->type);
@@ -211,6 +225,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             } else if (slot->is_string) {
                 out->kind = RV_STRING;
                 out->string = slot->string ? slot->string : "";
+            } else if (slot->is_bits) {
+                out->kind = RV_BITS;
+                out->bits = slot->bits;
             } else if (slot->is_scalar) {
                 out->kind = RV_SCALAR;
                 out->scalar = slot->scalar;
@@ -243,6 +260,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         halmat_syt_entry_t *e = &state->syt[op->data];
         if (e->type == SYT_TYPE_UNKNOWN) {
             e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
+                    : (val->kind == RV_BITS) ? SYT_TYPE_BIT
                     : (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
         }
         if (e->type == SYT_TYPE_CHARACTER) {
@@ -252,6 +270,12 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             }
             free(e->char_value);
             e->char_value = dup_string(val->string);
+        } else if (e->type == SYT_TYPE_BIT) {
+            if (val->kind != RV_BITS) {
+                fail(state, "cannot assign a non-BIT value to a BIT destination");
+                return false;
+            }
+            e->bit_value = val->bits;
         } else if (e->type == SYT_TYPE_SCALAR) {
             e->scalar = rv_to_scalar(val);
         } else {
@@ -1143,6 +1167,62 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     a.scalar = sv;
                 }
                 if (!write_destination(state, &ins->operands[1], &a)) break;
+                break;
+
+            case OP_BASN:
+                /* Bit-string assign, source-first/receiver-second like
+                 * the rest of the xASN family (class-1/BASN.md). */
+                if (ins->operand_count != 2) { fail(state, "BASN: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BASN: source is not BIT"); break; }
+                if (!write_destination(state, &ins->operands[1], &a)) break;
+                break;
+
+            case OP_BAND:
+            case OP_BOR:
+                /* class-1/BAND.md/BOR.md: full 32-bit pattern AND/OR, no
+                 * declared-width masking (unconfirmed truncation rule,
+                 * see state.h). */
+                if (ins->operand_count != 2) { fail(state, "BAND/BOR: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BAND/BOR: both operands must be BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = (ins->opcode == OP_BAND) ? (a.bits & b.bits) : (a.bits | b.bits);
+                break;
+
+            case OP_BNOT:
+                if (ins->operand_count != 1) { fail(state, "BNOT: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BNOT: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = ~a.bits;
+                break;
+
+            case OP_ITOB:
+                /* Integer->bit, class-1/ITOB.md: raw bit pattern of the
+                 * integer value (inline shift/store per real object code
+                 * -- here just a reinterpretation of the same 32 bits). */
+                if (ins->operand_count != 1) { fail(state, "ITOB: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a);
+                break;
+
+            case OP_BTOI:
+                if (ins->operand_count != 1) { fail(state, "BTOI: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BTOI: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = (int32_t)a.bits;
                 break;
 
             case OP_CASN:

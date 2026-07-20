@@ -47,6 +47,7 @@ typedef enum {
     SYT_TYPE_INTEGER,
     SYT_TYPE_SCALAR,
     SYT_TYPE_CHARACTER,
+    SYT_TYPE_BIT,
 } halmat_syt_type_t;
 
 typedef struct {
@@ -60,6 +61,11 @@ typedef struct {
                         * behavior is implemented yet (class-2/CASN.md's
                         * Unresolved Questions) -- the string just grows/
                         * shrinks to fit whatever's assigned. */
+    uint32_t bit_value; /* SYT_TYPE_BIT; raw pattern, no declared-width
+                          * tracking -- BIT(n)'s truncation/padding rule
+                          * is unconfirmed (class-1/BAND.md's Unresolved
+                          * Questions), so AND/OR/NOT operate on the full
+                          * 32-bit pattern as-is. */
 } halmat_syt_entry_t;
 
 /* A VAC slot either holds a plain computed value (most opcodes: IADD,
@@ -81,7 +87,9 @@ typedef struct {
                                * iteration count within one interpreter run, not a
                                * long-lived-process concern. Freed in bulk (best-effort,
                                * only the final value per slot) by interp_cleanup(). */
-    int32_t integer;        /* is_ref=false, !is_scalar, !is_string */
+    bool is_bits;            /* is_ref=false, !is_string: true if this slot holds a BIT result (e.g. BAND/BOR/BNOT); takes priority over is_scalar */
+    uint32_t bits;           /* is_ref=false, is_bits */
+    int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits */
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
     size_t ref_offset;      /* is_ref=true */

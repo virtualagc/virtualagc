@@ -123,9 +123,40 @@ own `halmat_scalar_format()` already implements and cross-verified for
 same formatter for `STOC`, producing `" 3.5000000E+00"` for the input
 above rather than `yaHALMAT`'s `"3.5"`.
 
+## 5. `BAND`/`BOR`/`BNOT`/`ITOB`/`BTOI` produce all-zero results for a real BIT program
+
+**File**: `emu/halmat_class1.c` (`POP_BAND`/`POP_BOR`/`POP_BNOT`/
+`POP_ITOB`), `emu/halmat_class6.c` (`POP_BTOI`).
+
+```
+DECLARE BIT(8), B1, B2, B3, B4;
+DECLARE INTEGER, I1, I2, I3;
+B1 = BIT(12);
+B2 = BIT(10);
+B3 = B1 AND B2;
+B4 = B1 OR B2;
+I1 = INTEGER(B3);
+I2 = INTEGER(B4);
+I3 = INTEGER(NOT B1);
+```
+(`src/tests/hal/test_bit.hal`). Hand-derived expected values: `12 AND
+10` = `0b1100 & 0b1010` = `0b1000` = `8`; `12 OR 10` = `0b1110` = `14`;
+`NOT 12` (32-bit one's complement) = `-13`. `yaHALMAT2` produces exactly
+`I1=8 I2=14 I3=-13`. `yaHALMAT` produces `I1=0 I2=0 I3=-1` for the same
+compiled binary.
+
+**Not root-caused** — a source read of the four opcodes' handlers in
+`halmat_class1.c`/`halmat_class6.c` shows correct-looking `&`/`|`/`~`
+logic operating on `.v.bits`, so the defect is presumably in
+`halmat_resolve_operand`'s handling of a `BASN`-assigned SYT entry's BIT
+type/union tag rather than in the bitwise ops themselves, but this
+wasn't traced further. Left for the reference implementation's author to
+diagnose, per this project's stated approach to `yaHALMAT` bugs (see
+finding 2's identical disposition).
+
 ---
 
-All four findings were cross-checked against a primary source or
+All five findings were cross-checked against a primary source or
 independent hand-calculation, not merely against `yaHALMAT2`'s own
 output, consistent with this project's general sourcing discipline (see
 `Plan.md`, `STATUS.md`).
