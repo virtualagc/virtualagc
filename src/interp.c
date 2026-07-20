@@ -10,6 +10,7 @@
 /* Combined 12-bit class:opcode values for the instructions implemented so
  * far. Extended opcode-by-opcode as later fixtures require -- see
  * Plan.md M4. */
+#define OP_NOP 0x000
 #define OP_XREC 0x002
 #define OP_SMRK 0x004
 #define OP_PXRC 0x005
@@ -75,6 +76,8 @@
 #define OP_SSPR 0x5AD
 #define OP_SSDV 0x5AE
 #define OP_SNEG 0x5B0
+#define OP_ITOS 0x5C1
+#define OP_STOI 0x6A1
 #define OP_IINT 0x8C1
 #define OP_SINT 0x8A1
 
@@ -573,6 +576,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
         bool branched = false;
 
         switch (ins->opcode) {
+            case OP_NOP:
             case OP_PXRC:
             case OP_XREC:
             case OP_SMRK:
@@ -973,6 +977,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_negate(rv_to_scalar(&a));
+                break;
+
+            case OP_ITOS:
+                /* Integer->scalar, per class-5/ITOS.md's USA00309 Sec.
+                 * 8.2 rule 9. The rule's "double-precision intermediate,
+                 * narrowed afterward if needed" framing describes the
+                 * conversion *algorithm* (exact for any INTEGER value
+                 * either way -- INTEGER's full range fits losslessly in
+                 * a single-precision 6-hex-digit fraction too, since
+                 * HAL/S INTEGER is at most 32 bits ~ 8 hex digits...
+                 * actually not always lossless at single precision, but
+                 * empirically ITOS's own HALMAT-level result is single
+                 * -- see below), not the static HALMAT-level type ITOS
+                 * itself produces: cross-checked against the reference
+                 * yaHALMAT emulator on `S2 = I1 + S1;` (S1/S2 single-
+                 * precision SCALAR), which prints single-precision
+                 * (7 fractional digits), not double -- ITOS carries no
+                 * precision tag of its own in the compiled HALMAT (no
+                 * operand/TAG distinguishes it), so single is the only
+                 * representation consistent with that observation. */
+                if (ins->operand_count != 1) { fail(state, "ITOS: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_from_integer(rv_to_integer(&a), false);
+                break;
+
+            case OP_STOI:
+                /* Scalar->integer, per class-6/STOI.md's USA00309 Sec.
+                 * 8.2 rule 10: truncates (halmat_scalar_to_integer's
+                 * documented behavior, value.h) -- the real out-of-range
+                 * ERROR CONDITION isn't implemented, no fixture exercises
+                 * it (same documented gap as halmat_scalar_to_integer
+                 * itself). */
+                if (ins->operand_count != 1) { fail(state, "STOI: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = rv_to_integer(&a);
                 break;
 
             case OP_IASN:

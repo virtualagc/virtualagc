@@ -29,10 +29,12 @@ halmat_scalar_t halmat_scalar_from_ibm_words(uint32_t msw, uint32_t lsw, bool do
  * digits (AP-101S Software Model PDF Sec. 8.2). */
 halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision);
 
-/* Truncates toward zero. Real HAL/S treats a non-representable
- * SCALAR->INTEGER conversion as a runtime ERROR CONDITION (see
- * class-6/STOI.md) rather than silent truncation; that check isn't
- * implemented here yet since no fixture exercises the failure path. */
+/* Rounds to nearest, ties away from zero (confirmed against the
+ * reference yaHALMAT emulator, class-6/STOI.md -- NOT truncation).
+ * Real HAL/S treats a non-representable SCALAR->INTEGER conversion as a
+ * runtime ERROR CONDITION (see class-6/STOI.md) rather than silently
+ * producing an out-of-range result; that check isn't implemented here
+ * yet since no fixture exercises the failure path. */
 int32_t halmat_scalar_to_integer(halmat_scalar_t s);
 
 double halmat_scalar_to_double(halmat_scalar_t s);

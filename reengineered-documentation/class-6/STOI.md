@@ -9,10 +9,11 @@
 ## Behavioral Description
 
 Scalar to integer conversion. Converts a scalar (floating-point) operand
-to its integer representation (presumably truncating or rounding — exact
-rule unconfirmed). Classed under Class 6 (integer) because HALMAT classes
-conversion operators by their *result* type — see [BTOI](BTOI.md) for the
-general pattern.
+to its integer representation, **rounding to nearest (ties away from
+zero) — empirically confirmed this session** (see Confirmed Runtime
+Behavior below), not truncation. Classed under Class 6 (integer) because
+HALMAT classes conversion operators by their *result* type — see
+[BTOI](BTOI.md) for the general pattern.
 
 ## Usage Context
 
@@ -34,12 +35,29 @@ to this instruction — see that file for the full resolution. STOI itself
 has no special zero-handling; it simply errors or succeeds per the range
 rule above.
 
+**Rounding rule for in-range fractional values, empirically confirmed
+this session** against the reference yaHALMAT emulator (yaHALMAT2's own
+Phase 3 implementation work): compiling `I1 = INTEGER(S1);` for
+S1 = 7.2, 7.5, -7.5, -7.2 in turn (via HAL/S's `INTEGER(...)` shaping-
+function conversion, which compiles to a plain STOI, `6A1(1),1,0`) and
+running the resulting HALMAT on the reference emulator produces
+I1 = 7, 8, -8, -7 respectively — i.e. **round to nearest, ties away from
+zero**, not truncation (truncation would give 7, 7, -7, -7). A ties-to-
+even reading can't be distinguished from this data alone (-8 is itself
+even), but "ties away from zero" already matches every case with no
+counterexample, so there's no evidence favoring the more complex rule.
+Note the tested construct used tag=1 on the STOI operator word (vs. the
+tag=0 form seen for implicit narrowing coercions elsewhere in this
+project) — whether the tag distinguishes a rounding mode is unconfirmed
+(see Unresolved Questions).
+
 ## Unresolved Questions
 
-- HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
-- Whether a non-integral (fractional) in-range scalar is truncated,
-  rounded, or also triggers the error condition is not fully
-  disambiguated by [USA00309] rule 10's wording alone.
+- HAL/S operand-word format beyond the single SYT source operand is
+  unconfirmed; see [STRI](../class-8/STRI.md).
+- Whether STOI's `TAG` field selects between rounding and truncation (the
+  one confirmed case above used `TAG`=1) is unconfirmed — no compiled
+  example with `TAG`=0 and a fractional operand has been checked yet.
 
 ## Source Analysis & Reliability
 

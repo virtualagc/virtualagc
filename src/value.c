@@ -50,7 +50,15 @@ halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision)
 }
 
 int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
-    return (int32_t)trunc(halmat_scalar_to_double(s));
+    /* Rounds to nearest, ties away from zero -- NOT truncation (an
+     * earlier, wrong assumption here, corrected after cross-checking
+     * `I1 = INTEGER(S1);` against the reference yaHALMAT emulator for
+     * 7.2/7.5/-7.5/-7.2, which produced 7/8/-8/-7 respectively; a ties-
+     * to-even reading can't be distinguished from this data (-8 is
+     * itself even) but round()'s ties-away-from-zero already matches
+     * every observed case exactly, so there's no evidence to prefer the
+     * more complex ties-to-even rule). See class-6/STOI.md. */
+    return (int32_t)round(halmat_scalar_to_double(s));
 }
 
 double halmat_scalar_to_double(halmat_scalar_t s) {
