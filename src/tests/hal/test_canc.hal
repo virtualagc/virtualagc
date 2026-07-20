@@ -1,0 +1,16 @@
+ TEST_CANC:
+ PROGRAM;
+    DECLARE INTEGER, N INITIAL(0);
+
+    MYTASK:
+    TASK;
+       WAIT(2);
+       N = N + 1;
+    CLOSE MYTASK;
+
+    SCHEDULE MYTASK PRIORITY(30);
+    WAIT(1);
+    CANCEL MYTASK;
+    WAIT(5);
+    WRITE(6) 'N=', N;
+ CLOSE TEST_CANC;

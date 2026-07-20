@@ -3179,6 +3179,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
+            case OP_CANC: {
+                /* CANCEL statement (class-0/CANC.md): gracefully cancels
+                 * a cyclic process, removing it from the run queue --
+                 * same observable effect as TERM for this interpreter's
+                 * purposes (no distinct "cyclic re-arm" state is
+                 * modeled, since SCHD's cyclic REPEAT EVERY/AFTER forms
+                 * aren't implemented either -- see OP_SCHD above), so
+                 * this reuses TERM's exact self/named-form logic. */
+                if (ins->operand_count == 0) {
+                    halmat_task_t *cur = &state->tasks[state->current_task];
+                    cur->task_state = TASK_TERMINATED;
+                    if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+                } else {
+                    for (uint8_t i = 0; i < ins->operand_count; i++) {
+                        if (ins->operands[i].qual != QUAL_SYT) { fail(state, "CANC: expected SYT operand"); break; }
+                        uint16_t sym = ins->operands[i].data;
+                        if (sym < HALMAT_SYT_MAX && state->symbol_active_task[sym] != -1) {
+                            int idx = state->symbol_active_task[sym];
+                            state->tasks[idx].task_state = TASK_TERMINATED;
+                            state->symbol_active_task[sym] = -1;
+                        }
+                    }
+                }
+                break;
+            }
+
+            case OP_SGNL: {
+                /* SIGNAL statement (class-0/SGNL.md): makes an EVENT
+                 * data item transiently TRUE. Modeled as a direct BIT
+                 * write to the target's SYT entry (bit_value=1) -- the
+                 * "transient" (auto-reset) aspect and WAIT-ON-EVENT
+                 * consumption aren't modeled, since this interpreter has
+                 * no EVENT-aware WAIT form yet (only WAIT's interval
+                 * form is implemented -- see OP_WAIT above); no fixture
+                 * currently observes the target afterward, so this is a
+                 * safe, honest partial implementation rather than a
+                 * silent no-op. */
+                if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_SYT) {
+                    fail(state, "SGNL: expected one SYT operand");
+                    break;
+                }
+                uint16_t sym = ins->operands[0].data;
+                if (sym >= HALMAT_SYT_MAX) { fail(state, "SGNL: SYT index out of range"); break; }
+                halmat_syt_entry_t *e = &state->syt[sym];
+                e->type = SYT_TYPE_BIT;
+                e->bit_value = 1;
+                break;
+            }
+
             case OP_TERM: {
                 if (ins->operand_count == 0) {
                     /* Self form. */
@@ -3236,6 +3285,33 @@ static void sched_wake_waiting(halmat_state_t *state) {
     }
 }
 
+/* If every in-use task is either TERMINATED or TASK_WAITING (nothing
+ * READY right now, but something will eventually wake), fast-forwards
+ * state->virtual_time to the earliest pending wake_deadline and
+ * re-applies sched_wake_waiting -- otherwise the interpreter would
+ * incorrectly treat "nothing is READY this instant" as "the program has
+ * ended" even though a WAIT(n) is due to expire later, since virtual_time
+ * (per state.h's scheduler comment) only otherwise advances one tick per
+ * *executed* instruction, and no instruction executes while every task
+ * is blocked. A no-op when something is already READY or truly nothing
+ * is left (all TERMINATED). */
+static void sched_advance_to_next_wake(halmat_state_t *state) {
+    bool any_ready = false, any_waiting = false;
+    int64_t earliest = 0;
+    for (int i = 0; i < state->task_count; i++) {
+        if (!state->tasks[i].in_use) continue;
+        if (state->tasks[i].task_state == TASK_READY) { any_ready = true; break; }
+        if (state->tasks[i].task_state == TASK_WAITING) {
+            if (!any_waiting || state->tasks[i].wake_deadline < earliest) earliest = state->tasks[i].wake_deadline;
+            any_waiting = true;
+        }
+    }
+    if (!any_ready && any_waiting && earliest > state->virtual_time) {
+        state->virtual_time = earliest;
+        sched_wake_waiting(state);
+    }
+}
+
 /* Runs the scheduler for exactly one instruction (picks the
  * highest-priority TASK_READY task, executes one instruction for it,
  * advances the virtual clock). Returns true once nothing is left to run
@@ -3245,6 +3321,7 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     if (state->halted) return true;
 
     sched_wake_waiting(state);
+    sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
 
@@ -3298,6 +3375,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
 const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     if (state->halted) return NULL;
     sched_wake_waiting(state);
+    sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return NULL;
     if (state->tasks[next].saved_pc >= state->prog->count) return NULL;
