@@ -1,0 +1,51 @@
+# yaHALMAT2 -- Windows nmake build, for a normal Developer Command Prompt
+# (Visual C by default). See Makefile for Linux/Mac/MSYS2 (GNU make,
+# clang-with-gcc-fallback) -- MSYS2 terminals should use that one, not
+# this one, per Plan.md's Phase 3 build-system requirements.
+#
+# Usage (from a "x64 Native Tools Command Prompt for VS" or similar):
+#   nmake /f Makefile.win
+#   nmake /f Makefile.win clean
+#   nmake /f Makefile.win CC=clang        (override; expects a Windows
+#                                           clang build, e.g. LLVM's,
+#                                           using GCC-style flags -- not
+#                                           clang-cl's MSVC-style ones)
+#
+# CC defaults to cl below; nmake's default precedence (command-line
+# macros win over the makefile) is all that's needed to override it,
+# e.g. `nmake /f Makefile.win CC=clang`.
+
+!IFNDEF CC
+CC = cl
+!ENDIF
+
+SRCS = main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
+       literal.c ebcdic.c interp.c value.c
+TARGET = yaHALMAT2.exe
+
+!IF "$(CC)" == "cl"
+CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS
+OBJS = $(SRCS:.c=.obj)
+!ELSE
+CFLAGS = -std=c99 -Wall -Wextra -g -O0
+OBJS = $(SRCS:.c=.o)
+!ENDIF
+
+all: $(TARGET)
+
+!IF "$(CC)" == "cl"
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) /Fe$(TARGET) $(OBJS)
+
+.c.obj:
+	$(CC) $(CFLAGS) /c /Fo$@ $<
+!ELSE
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) -lm
+
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+!ENDIF
+
+clean:
+	-del /f /q *.obj *.o *.pdb $(TARGET) 2>NUL
