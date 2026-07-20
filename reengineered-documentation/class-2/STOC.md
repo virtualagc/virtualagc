@@ -58,6 +58,29 @@ sign/field-width rule that applies to every value.
   confirmed — [USA00309] describes both under the same section, which is
   suggestive but not conclusive.
 
+**Phase 3 follow-up — internal inconsistency found, not yet resolved
+against [USA00309] itself**: this file's own two claims don't agree.
+"14 characters" total, with `s`(1) + `d`(1) + `.`(1) + `E`(1) + sign(1)
++ 2 exponent digits = 7 fixed characters, leaves exactly **7** fractional
+digits for single precision (23 total - 7 fixed = 16 for double) — not
+the "8"/"17" stated in the field-by-field description just above. Given
+a real compiled `SADD` result (`1.5 + 2.25 = 3.75`) was cross-checked
+against the reference `yaHALMAT` emulator's own `WRITE` output this
+session and it printed `" 3.7500000E+00"` — 14 characters, 7 fractional
+digits, **and** a leading nonzero digit (standard normalized scientific
+notation, not the "always leading zero" reading this file's zero-value
+worked example (`" 0.00000000E+00"`, itself 15 characters as written)
+suggested) — `yaHALMAT2`'s implementation (`value.c`) now follows the
+7/16-fractional-digit, standard-normalized-leading-digit convention,
+matching the reference tool and this file's own total-width claim. This
+hasn't been independently re-verified against [USA00309] §6.1.3's actual
+text yet (not available in this project's extracted sources this
+session) — flagged here rather than silently changed, since the
+reference tool is generally not treated as authoritative in this
+project (see `YERRORS.md` for two confirmed bugs found in it elsewhere).
+If [USA00309] is consulted directly in a future session, re-verify
+against its primary text rather than trusting this note indefinitely.
+
 ## Source Analysis & Reliability
 
 Opcode (0x2A1) confirmed primary-source: element 4 of the `XBTOS`-pattern

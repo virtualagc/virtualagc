@@ -55,9 +55,11 @@ typedef struct {
  * resolve_operand/write_destination. */
 typedef struct {
     bool is_ref;
-    int32_t integer;   /* is_ref=false */
-    uint16_t ref_syt;  /* is_ref=true */
-    size_t ref_offset; /* is_ref=true */
+    bool is_scalar;         /* is_ref=false: true if this slot holds a SCALAR (e.g. SADD/SSUB) rather than INTEGER result */
+    int32_t integer;        /* is_ref=false, !is_scalar */
+    halmat_scalar_t scalar; /* is_ref=false, is_scalar */
+    uint16_t ref_syt;       /* is_ref=true */
+    size_t ref_offset;      /* is_ref=true */
 } halmat_vac_slot_t;
 
 #define HALMAT_MAX_TASKS 32
@@ -102,8 +104,10 @@ struct halmat_state {
         uint16_t call_target; /* call case: XXST's SYT operand (the called function/procedure) */
         struct {
             bool is_string;
+            bool is_scalar;
             char *string;   /* borrowed from the literal table; not owned */
             int32_t integer;
+            halmat_scalar_t scalar;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
     } io_pending;

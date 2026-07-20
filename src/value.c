@@ -1,6 +1,7 @@
 #include "value.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #include "literal.h"
 
@@ -54,4 +55,106 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
 
 double halmat_scalar_to_double(halmat_scalar_t s) {
     return ibm_hex_float_to_double(s.msw, s.lsw);
+}
+
+static int hex_digit_count64(uint64_t v) {
+    int n = 0;
+    while (v != 0) { n++; v >>= 4; }
+    return n;
+}
+
+halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b) {
+    bool dbl = a.double_precision || b.double_precision;
+
+    int sign_a = (int)((a.msw >> 31) & 1), sign_b = (int)((b.msw >> 31) & 1);
+    int char_a = (int)((a.msw >> 24) & 0x7F), char_b = (int)((b.msw >> 24) & 0x7F);
+    uint64_t frac_a = ((uint64_t)(a.msw & 0x00FFFFFFu) << 32) | a.lsw;
+    uint64_t frac_b = ((uint64_t)(b.msw & 0x00FFFFFFu) << 32) | b.lsw;
+
+    /* True zero: sign of a sum/difference with a zero fraction is
+     * positive (AP-101S Software Model PDF Sec. 8.2's "true zero" rule);
+     * an operand that's already true zero just yields the other,
+     * re-cast to the result's precision. */
+    if (frac_a == 0 && frac_b == 0) return halmat_scalar_zero(dbl);
+    if (frac_a == 0) return halmat_scalar_from_ibm_words(b.msw, b.lsw, dbl);
+    if (frac_b == 0) return halmat_scalar_from_ibm_words(a.msw, a.lsw, dbl);
+
+    /* Align: right-shift the smaller-characteristic operand's fraction
+     * until both characteristics match. */
+    int char_r = (char_a > char_b) ? char_a : char_b;
+    if (char_a < char_r) frac_a >>= (4 * (char_r - char_a));
+    if (char_b < char_r) frac_b >>= (4 * (char_r - char_b));
+
+    int64_t signed_a = sign_a ? -(int64_t)frac_a : (int64_t)frac_a;
+    int64_t signed_b = sign_b ? -(int64_t)frac_b : (int64_t)frac_b;
+    int64_t sum = signed_a + signed_b;
+
+    int result_sign = (sum < 0) ? 1 : 0;
+    uint64_t result_frac = (sum < 0) ? (uint64_t)(-sum) : (uint64_t)sum;
+
+    if (result_frac == 0) return halmat_scalar_zero(dbl);
+
+    /* Postnormalize in the wide (14-hex-digit/double) domain regardless
+     * of the result's final precision; packing below truncates to 6 hex
+     * digits for a single-precision result. */
+    int max_hex_digits = 14;
+    int k = hex_digit_count64(result_frac);
+    if (k > max_hex_digits) {
+        result_frac >>= (4 * (k - max_hex_digits));
+        char_r += (k - max_hex_digits);
+    } else if (k < max_hex_digits) {
+        result_frac <<= (4 * (max_hex_digits - k));
+        char_r -= (max_hex_digits - k);
+    }
+    if (char_r < 0) char_r = 0;
+    if (char_r > 127) char_r = 127;
+
+    halmat_scalar_t result;
+    result.double_precision = dbl;
+    if (dbl) {
+        result.msw = ((uint32_t)result_sign << 31) | ((uint32_t)char_r << 24) | (uint32_t)((result_frac >> 32) & 0x00FFFFFFu);
+        result.lsw = (uint32_t)(result_frac & 0xFFFFFFFFu);
+    } else {
+        uint64_t short_frac = result_frac >> 32; /* top 6 hex digits only */
+        result.msw = ((uint32_t)result_sign << 31) | ((uint32_t)char_r << 24) | (uint32_t)(short_frac & 0x00FFFFFFu);
+        result.lsw = 0;
+    }
+    return result;
+}
+
+halmat_scalar_t halmat_scalar_negate(halmat_scalar_t a) {
+    halmat_scalar_t r = a;
+    if (r.msw != 0 || r.lsw != 0) r.msw ^= 0x80000000u; /* true zero's sign stays positive */
+    return r;
+}
+
+halmat_scalar_t halmat_scalar_sub(halmat_scalar_t a, halmat_scalar_t b) {
+    return halmat_scalar_add(a, halmat_scalar_negate(b));
+}
+
+void halmat_scalar_format(halmat_scalar_t s, char *buf, size_t buf_size) {
+    /* Standard normalized scientific notation (leading digit 1-9 for any
+     * nonzero value): 7 fractional digits single-precision, 16 double --
+     * confirmed against the reference yaHALMAT emulator's own WRITE
+     * output for a genuine nonzero value (1.5+2.25=3.75 -> " 3.7500000E+00"),
+     * and self-consistent with class-2/STOC.md's stated total field
+     * width (14/23 characters); that file's prose "8/17 fractional
+     * digits" claim and its zero-value worked example both appear to be
+     * off by one relative to its own total-width claim -- see the
+     * Phase 3 follow-up note added there. */
+    int frac_digits = s.double_precision ? 16 : 7;
+    double value = halmat_scalar_to_double(s);
+    char sign = (value < 0.0) ? '-' : ' ';
+    double mag = (value < 0.0) ? -value : value;
+    int exponent = 0;
+
+    if (mag != 0.0) {
+        exponent = (int)floor(log10(mag));
+        mag = mag / pow(10.0, exponent);
+        if (mag >= 10.0) { mag /= 10.0; exponent++; }  /* guard rounding at the boundary */
+        if (mag < 1.0) { mag *= 10.0; exponent--; }
+    }
+
+    snprintf(buf, buf_size, "%c%.*fE%c%02d", sign, frac_digits, mag, (exponent < 0) ? '-' : '+',
+             (exponent < 0) ? -exponent : exponent);
 }

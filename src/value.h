@@ -2,6 +2,7 @@
 #define HALMAT_VALUE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* AP-101S SCALAR representation: IBM System/360-style hexadecimal
@@ -35,5 +36,26 @@ halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision)
 int32_t halmat_scalar_to_integer(halmat_scalar_t s);
 
 double halmat_scalar_to_double(halmat_scalar_t s);
+
+/* Genuine IBM System/360-style hex-float arithmetic (AP-101S Software
+ * Model PDF Sec. 8: characteristic comparison and alignment, fraction
+ * add/subtract, postnormalization) -- not a native-double approximation.
+ * Result precision is double if either operand is double, else single.
+ * Known limitations (documented, not silently wrong): no guard-digit
+ * extra precision during alignment (real hardware keeps a few extra
+ * bits before the final truncation; this truncates immediately), and
+ * characteristic overflow/underflow clamps to [0,127] rather than
+ * raising the real ERROR CONDITION interrupt. */
+halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b);
+halmat_scalar_t halmat_scalar_sub(halmat_scalar_t a, halmat_scalar_t b);
+halmat_scalar_t halmat_scalar_negate(halmat_scalar_t a);
+
+/* WRITE-statement/STOC-conversion fixed-width field, per class-2/STOC.md
+ * (USA00309 Sec. 6.1.3): "sd.ddddddddE+-dd" (single, 8 fractional
+ * digits) or the 17-fractional-digit double form. `s` is blank for
+ * non-negative values (including 0.0), '-' for negative -- no other
+ * zero-specific case. Writes exactly the field width into buf (must be
+ * at least 24 bytes) and returns it via strlen(buf). */
+void halmat_scalar_format(halmat_scalar_t s, char *buf, size_t buf_size);
 
 #endif

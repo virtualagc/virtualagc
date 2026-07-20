@@ -57,6 +57,9 @@
 #define OP_ILT 0x7CA
 #define OP_IADD 0x6CB
 #define OP_ISUB 0x6CC
+#define OP_SADD 0x5AB
+#define OP_SSUB 0x5AC
+#define OP_SNEG 0x5B0
 #define OP_IINT 0x8C1
 
 #define NO_TARGET ((size_t)-1)
@@ -156,6 +159,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 }
                 out->kind = RV_SCALAR;
                 out->scalar = base->elements[slot->ref_offset];
+            } else if (slot->is_scalar) {
+                out->kind = RV_SCALAR;
+                out->scalar = slot->scalar;
             } else {
                 out->kind = RV_INTEGER;
                 out->integer = slot->integer;
@@ -506,15 +512,17 @@ static void flush_write(halmat_state_t *state, FILE *out) {
         }
         if (state->io_pending.items[i].is_string) {
             fputs(state->io_pending.items[i].string, out);
+        } else if (state->io_pending.items[i].is_scalar) {
+            /* Fixed-width scientific-notation field per class-2/STOC.md
+             * (USA00309 Sec. 6.1.3). */
+            char buf[32];
+            halmat_scalar_format(state->io_pending.items[i].scalar, buf, sizeof(buf));
+            fputs(buf, out);
         } else {
             /* INTEGER WRITE field: 11-char right-justified, empirically
              * confirmed against a real HALSFC compile + yaHALMAT run
              * (see commit message / STATUS.md follow-up) -- not yet
-             * cross-checked against USA00309's own text. SCALAR WRITE
-             * items aren't formatted per STOC.md's documented field
-             * format yet (not exercised by any fixture); they fall
-             * through to this same integer path via rv_to_integer at
-             * XXAR time, which is a known gap, not a considered choice. */
+             * cross-checked against USA00309's own text. */
             fprintf(out, "%11d", state->io_pending.items[i].integer);
         }
     }
@@ -770,22 +778,67 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = (ins->opcode == OP_IADD)
                     ? (rv_to_integer(&a) + rv_to_integer(&b))
                     : (rv_to_integer(&a) - rv_to_integer(&b));
                 break;
 
+            case OP_SADD:
+            case OP_SSUB:
+                /* Genuine IBM hex-float arithmetic (value.c's
+                 * halmat_scalar_add/sub), not a native-double
+                 * approximation -- see value.h's documented caveats
+                 * (no guard digits, characteristic overflow clamps
+                 * rather than raising the real ERROR CONDITION). */
+                if (ins->operand_count != 2) { fail(state, "SADD/SSUB: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = (ins->opcode == OP_SADD)
+                    ? halmat_scalar_add(rv_to_scalar(&a), rv_to_scalar(&b))
+                    : halmat_scalar_sub(rv_to_scalar(&a), rv_to_scalar(&b));
+                break;
+
+            case OP_SNEG:
+                if (ins->operand_count != 1) { fail(state, "SNEG: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_negate(rv_to_scalar(&a));
+                break;
+
             case OP_IASN:
             case OP_SASN:
-                /* Both just resolve the source and write through to the
-                 * destination -- write_destination() does whatever
-                 * INTEGER<->SCALAR coercion the destination's actual
-                 * type needs, so there's nothing IASN/SASN-specific left
-                 * once operand resolution is type-generic (see the
-                 * out_array fixture, which assigns an INTEGER source
-                 * into a SCALAR array element via IASN, not SASN). */
+                /* Resolve the source, then coerce it to the kind the
+                 * opcode's own class asserts (IASN=INTEGER, SASN=SCALAR)
+                 * *before* write_destination() sees it. This matters
+                 * because a LIT-qualified source carries no INTEGER-vs-
+                 * SCALAR distinction of its own (litfile numeric entries
+                 * always resolve as RV_SCALAR -- see resolve_operand),
+                 * so on a destination's *first* write (still
+                 * SYT_TYPE_UNKNOWN) write_destination's type inference
+                 * needs the opcode's own class as the ground truth, not
+                 * the source operand's generic resolved kind. This still
+                 * lets write_destination correctly write an
+                 * IASN-sourced INTEGER value into an already-SCALAR
+                 * destination (e.g. out_array's ARR=I into a SCALAR
+                 * array element) via its own coercion -- only the
+                 * *kind tag* changes here, not any value. */
                 if (ins->operand_count != 2) { fail(state, "IASN/SASN: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->opcode == OP_IASN) {
+                    int32_t iv = rv_to_integer(&a);
+                    a.kind = RV_INTEGER;
+                    a.integer = iv;
+                } else {
+                    halmat_scalar_t sv = rv_to_scalar(&a);
+                    a.kind = RV_SCALAR;
+                    a.scalar = sv;
+                }
                 if (!write_destination(state, &ins->operands[1], &a)) break;
                 break;
 
@@ -815,9 +868,13 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
+                state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
-                state->io_pending.items[state->io_pending.item_count].integer =
-                    (a.kind == RV_STRING) ? 0 : rv_to_integer(&a);
+                if (a.kind == RV_SCALAR) {
+                    state->io_pending.items[state->io_pending.item_count].scalar = a.scalar;
+                } else if (a.kind != RV_STRING) {
+                    state->io_pending.items[state->io_pending.item_count].integer = rv_to_integer(&a);
+                }
                 state->io_pending.item_count++;
                 break;
 
@@ -865,8 +922,13 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     uint16_t param_syt = callee + 1 + i;
                     if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); break; }
-                    state->syt[param_syt].type = SYT_TYPE_INTEGER;
-                    state->syt[param_syt].value = state->io_pending.items[i].integer;
+                    if (state->io_pending.items[i].is_scalar) {
+                        state->syt[param_syt].type = SYT_TYPE_SCALAR;
+                        state->syt[param_syt].scalar = state->io_pending.items[i].scalar;
+                    } else {
+                        state->syt[param_syt].type = SYT_TYPE_INTEGER;
+                        state->syt[param_syt].value = state->io_pending.items[i].integer;
+                    }
                 }
                 if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
