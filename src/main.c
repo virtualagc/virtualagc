@@ -27,7 +27,14 @@ static void usage(const char *prog) {
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
             "  --num-blanks N   blanks between WRITE items (default: 5, per USA003087 Sec. 12.2)\n"
             "  --debug          interactive gdb-subset debugger (see debug.h; single HALMAT_FILE only)\n"
-            "  --opt            for @list: load optmat.bin (+ its companions) instead of halmat.bin\n"
+            "  --opt            load optmat.bin (+ its companions) instead of halmat.bin\n"
+            "                   (single-file mode: only changes companion auto-discovery,\n"
+            "                   since HALMAT_FILE is given explicitly either way)\n"
+            "  --py             load FILE1.bin (+ FILE2.bin/LIT_CHAR.bin, HAL_S_FC.py's own\n"
+            "                   naming convention) instead of halmat.bin -- mutually exclusive\n"
+            "                   with --opt. HAL_S_FC.py produces no COMMON*.out symbol table,\n"
+            "                   so --debug's `print` and @list's EXTERNAL-COMPOOL linking are\n"
+            "                   unavailable for --py units (accepted transparently, not an error)\n"
             "  --entry DIR      for @list: which directory is the executing PROGRAM unit\n"
             "                   (auto-detected if exactly one directory holds a PROGRAM)\n"
             "  --help           this message\n"
@@ -62,7 +69,7 @@ static bool find_companion(const char *halmat_path, const char *const *candidate
     return false;
 }
 
-static int run_single(const char *path, bool disasm, bool debug_mode, const char *litfile_opt,
+static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, const char *litfile_opt,
                        const char *memory_opt, int num_blanks) {
     halmat_program_t prog;
     char errbuf[512];
@@ -81,17 +88,26 @@ static int run_single(const char *path, bool disasm, bool debug_mode, const char
     const char *lit_path = litfile_opt;
     const char *mem_path = memory_opt;
 
+    /* --py: HAL_S_FC.py's own companion-file naming convention (FILE2.bin/
+     * LIT_CHAR.bin, no COMMON*.out symbol table at all -- see unHALMAT.py's
+     * own filename-triggered defaults, referenced throughout this
+     * project's research). Missing companions are accepted transparently
+     * either way: have_literals/have_symtab just stay false, degrading
+     * gracefully (blank string literals, "no symbol table loaded" for
+     * --debug's `print`) rather than erroring out. */
     if (!lit_path) {
-        static const char *lit_candidates[] = {"litfile0.bin", "litfile.bin"};
-        if (find_companion(path, lit_candidates, 2, lit_buf, sizeof(lit_buf))) {
-            lit_path = lit_buf;
-        }
+        static const char *lit_candidates_py[] = {"FILE2.bin"};
+        static const char *lit_candidates_default[] = {"litfile0.bin", "litfile.bin"};
+        bool found = use_py ? find_companion(path, lit_candidates_py, 1, lit_buf, sizeof(lit_buf))
+                             : find_companion(path, lit_candidates_default, 2, lit_buf, sizeof(lit_buf));
+        if (found) lit_path = lit_buf;
     }
     if (!mem_path) {
-        static const char *mem_candidates[] = {"COMMON0.out.bin"};
-        if (find_companion(path, mem_candidates, 1, mem_buf, sizeof(mem_buf))) {
-            mem_path = mem_buf;
-        }
+        static const char *mem_candidates_py[] = {"LIT_CHAR.bin"};
+        static const char *mem_candidates_default[] = {"COMMON0.out.bin"};
+        bool found = use_py ? find_companion(path, mem_candidates_py, 1, mem_buf, sizeof(mem_buf))
+                             : find_companion(path, mem_candidates_default, 1, mem_buf, sizeof(mem_buf));
+        if (found) mem_path = mem_buf;
     }
 
     halmat_literal_table_t literals;
@@ -107,7 +123,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, const char
 
     halmat_symtab_t symtab;
     bool have_symtab = false;
-    if (debug_mode) {
+    if (debug_mode && !use_py) { /* HAL_S_FC.py produces no COMMON*.out; --debug's `print` just degrades to "no symbol table loaded" */
         char sym_buf[1024];
         static const char *sym_candidates[] = {"COMMON0.out"};
         if (find_companion(path, sym_candidates, 1, sym_buf, sizeof(sym_buf))) {
@@ -160,6 +176,8 @@ static int run_single(const char *path, bool disasm, bool debug_mode, const char
  * buffer's ownership across the aux unit's interp_cleanup() safely needs
  * more than a struct copy, deferred until a test needs it). */
 
+typedef enum { UNIT_MODE_HALMAT, UNIT_MODE_OPT, UNIT_MODE_PY } unit_mode_t;
+
 typedef struct {
     char dir[900];
     halmat_program_t prog;
@@ -193,18 +211,25 @@ static const char *symtab_name_for_index(const halmat_symtab_t *t, size_t index)
     return NULL;
 }
 
-static bool load_unit(const char *dir, bool use_opt, unit_t *u, char *errbuf, size_t errbuf_size) {
+static bool load_unit(const char *dir, unit_mode_t mode, unit_t *u, char *errbuf, size_t errbuf_size) {
     memset(u, 0, sizeof(*u));
     strncpy(u->dir, dir, sizeof(u->dir) - 1);
 
+    const char *halmat_name = (mode == UNIT_MODE_OPT) ? "optmat.bin" : (mode == UNIT_MODE_PY) ? "FILE1.bin" : "halmat.bin";
+    const char *lit_name = (mode == UNIT_MODE_OPT) ? "litfile2.bin" : (mode == UNIT_MODE_PY) ? "FILE2.bin" : "litfile0.bin";
+    const char *mem_name = (mode == UNIT_MODE_OPT) ? "COMMON2.out.bin" : (mode == UNIT_MODE_PY) ? "LIT_CHAR.bin" : "COMMON0.out.bin";
+    /* HAL_S_FC.py produces no COMMON*.out symbol table at all -- EXTERNAL
+     * COMPOOL linking is unavailable for --py units, accepted
+     * transparently (have_symtab just stays false) rather than erroring. */
+    const char *sym_name = (mode == UNIT_MODE_PY) ? NULL : (mode == UNIT_MODE_OPT) ? "COMMON3.out" : "COMMON0.out";
+
     char halmat_path[1024];
-    snprintf(halmat_path, sizeof(halmat_path), "%s/%s", dir, use_opt ? "optmat.bin" : "halmat.bin");
+    snprintf(halmat_path, sizeof(halmat_path), "%s/%s", dir, halmat_name);
     if (!halmat_load(halmat_path, &u->prog, errbuf, errbuf_size)) return false;
 
     char lit_path[1024], mem_path[1024], sym_path[1024];
-    snprintf(lit_path, sizeof(lit_path), "%s/%s", dir, use_opt ? "litfile2.bin" : "litfile0.bin");
-    snprintf(mem_path, sizeof(mem_path), "%s/%s", dir, use_opt ? "COMMON2.out.bin" : "COMMON0.out.bin");
-    snprintf(sym_path, sizeof(sym_path), "%s/%s", dir, use_opt ? "COMMON3.out" : "COMMON0.out");
+    snprintf(lit_path, sizeof(lit_path), "%s/%s", dir, lit_name);
+    snprintf(mem_path, sizeof(mem_path), "%s/%s", dir, mem_name);
 
     if (file_exists(lit_path)) {
         if (!halmat_literal_load(lit_path, file_exists(mem_path) ? mem_path : NULL, &u->literals, errbuf, errbuf_size)) {
@@ -213,8 +238,11 @@ static bool load_unit(const char *dir, bool use_opt, unit_t *u, char *errbuf, si
         }
         u->have_literals = true;
     }
-    if (file_exists(sym_path)) {
-        u->have_symtab = halmat_symtab_load(sym_path, &u->symtab, errbuf, errbuf_size);
+    if (sym_name) {
+        snprintf(sym_path, sizeof(sym_path), "%s/%s", dir, sym_name);
+        if (file_exists(sym_path)) {
+            u->have_symtab = halmat_symtab_load(sym_path, &u->symtab, errbuf, errbuf_size);
+        }
     }
     return true;
 }
@@ -225,7 +253,7 @@ static void free_unit(unit_t *u) {
     halmat_program_free(&u->prog);
 }
 
-static int run_linked(char **dirs, int num_dirs, bool use_opt, const char *entry_dir,
+static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
                        bool disasm, int num_blanks) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
@@ -235,7 +263,7 @@ static int run_linked(char **dirs, int num_dirs, bool use_opt, const char *entry
     unit_t units[MAX_UNITS];
     char errbuf[512];
     for (int i = 0; i < num_dirs; i++) {
-        if (!load_unit(dirs[i], use_opt, &units[i], errbuf, sizeof(errbuf))) {
+        if (!load_unit(dirs[i], mode, &units[i], errbuf, sizeof(errbuf))) {
             fprintf(stderr, "yaHALMAT2: %s: %s\n", dirs[i], errbuf);
             for (int j = 0; j < i; j++) free_unit(&units[j]);
             return 1;
@@ -402,6 +430,7 @@ int main(int argc, char **argv) {
     const char *memory_opt = NULL;
     const char *entry_opt = NULL;
     bool use_opt = false;
+    bool use_py = false;
     int num_blanks = 5;
 
     for (int i = 1; i < argc; i++) {
@@ -417,6 +446,8 @@ int main(int argc, char **argv) {
             num_blanks = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--opt") == 0) {
             use_opt = true;
+        } else if (strcmp(argv[i], "--py") == 0) {
+            use_py = true;
         } else if (strcmp(argv[i], "--entry") == 0 && i + 1 < argc) {
             entry_opt = argv[++i];
         } else if (strcmp(argv[i], "--help") == 0) {
@@ -439,6 +470,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (use_opt && use_py) {
+        fprintf(stderr, "%s: --opt and --py are mutually exclusive\n", argv[0]);
+        return 1;
+    }
+    unit_mode_t mode = use_py ? UNIT_MODE_PY : use_opt ? UNIT_MODE_OPT : UNIT_MODE_HALMAT;
+
     if (path[0] == '@') {
         char dirs[MAX_UNITS][900];
         int num_dirs = 0;
@@ -452,8 +489,8 @@ int main(int argc, char **argv) {
         }
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
-        return run_linked(dir_ptrs, num_dirs, use_opt, entry_opt, disasm, num_blanks);
+        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks);
     }
 
-    return run_single(path, disasm, debug_mode, litfile_opt, memory_opt, num_blanks);
+    return run_single(path, disasm, debug_mode, use_py, litfile_opt, memory_opt, num_blanks);
 }
