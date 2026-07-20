@@ -144,6 +144,20 @@ typedef struct {
                                * own TEMPLATE symbol for a bare/unqualified reference (EXTN.md's
                                * confirmed "operand 2 = the TEMPLATE's own symbol" case) rather than a
                                * real field -- interp.c's TASN/TEQU/TNEQ treat that case specially. */
+    int32_t struct_copy_index; /* is_struct_ref; -1 = "use the ambient current_copy_index() (interp.c)",
+                               * the ordinary case for a ADLP/DLPE-driven multi-copy replay or a plain
+                               * single-instance structure. >=0 = an *explicit* copy, set when this
+                               * EXTN's base came from a TSUB single-copy-select (is_copy_ref below)
+                               * rather than a plain SYT -- overrides the ambient index, since a
+                               * TSUB-selected copy is fixed at compile-time/by-expression, independent
+                               * of whatever replay (if any) happens to be active when this executes. */
+    bool is_copy_ref;       /* is_ref=false, !is_string, !is_bits, !is_container, !is_struct_ref: true if
+                               * this slot holds a TSUB single-copy-select result (class-0/TSUB.md),
+                               * (copy_ref_base_syt, copy_ref_copy_index), consumed by a following EXTN
+                               * via a QUAL_VAC operand referencing TSUB's own stream position (in place
+                               * of EXTN's ordinary plain-SYT base operand). */
+    uint16_t copy_ref_base_syt;
+    int32_t copy_ref_copy_index;
     int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits, !is_container, !is_struct_ref */
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
@@ -166,9 +180,19 @@ typedef struct {
  * halmat_syt_entry_t-shaped storage slot, found-or-created on first touch.
  * A small growable linear-scan table -- structures aren't expected to be
  * touched in tight hot loops for the kind of programs this interpreter
- * targets. */
+ * targets.
+ *
+ * copy_index distinguishes copies of a multiple-copy structure
+ * (`TEMPLATE-STRUCTURE(n)`, class-0/TSUB.md) -- 0 for an ordinary
+ * single-instance structure. HAL/S folds "structureness" (multi-copy
+ * looping) into the same ADLP/DLPE arrayness bracket already used for
+ * arrays (confirmed: `ZQ4 = ZQ1;` between two `(3)`-copy structures
+ * compiles to plain TASN wrapped in ADLP(3)/DLPE, no distinct opcode --
+ * see STATUS.md), so the copy index for any given field touch during
+ * such a replay is just interp.c's existing state->arrayed_index. */
 typedef struct {
     uint16_t base_syt, field_syt;
+    int32_t copy_index;
     halmat_syt_entry_t value;
 } halmat_struct_field_t;
 

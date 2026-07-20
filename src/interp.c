@@ -49,6 +49,7 @@
 #define OP_ETST 0x00F
 #define OP_CTST 0x016
 #define OP_DSUB 0x019
+#define OP_TSUB 0x01B
 #define OP_RDAL 0x020
 #define OP_READ 0x01F
 #define OP_WRIT 0x021
@@ -306,14 +307,24 @@ static void read_syt_entry(const halmat_syt_entry_t *e, resolved_value_t *out) {
     }
 }
 
+/* The copy index for whatever structure-field touch is happening right
+ * now (state.h's halmat_struct_field_t comment) -- state->arrayed_index
+ * during an ADLP/DLPE-driven multi-copy replay, 0 for an ordinary
+ * single-instance structure access outside one. */
+static int32_t current_copy_index(halmat_state_t *state) {
+    return state->arrayed_index >= 0 ? state->arrayed_index : 0;
+}
+
 /* Finds (or lazily creates) the shadow storage slot for a structure
- * field reference, keyed by (base_syt, field_syt) -- see state.h's
- * halmat_struct_field_t comment for why this indirection exists (field
- * symbols are shared across every instance of a STRUCTURE TEMPLATE, so
- * field_syt alone can't be used as a direct storage key). */
-static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, uint16_t base_syt, uint16_t field_syt) {
+ * field reference, keyed by (base_syt, field_syt, copy_index) -- see
+ * state.h's halmat_struct_field_t comment for why this indirection
+ * exists (field symbols are shared across every instance of a STRUCTURE
+ * TEMPLATE, so field_syt alone can't be used as a direct storage key;
+ * copy_index further distinguishes copies of a multiple-copy structure). */
+static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, uint16_t base_syt, uint16_t field_syt, int32_t copy_index) {
     for (size_t i = 0; i < state->struct_field_count; i++) {
-        if (state->struct_fields[i].base_syt == base_syt && state->struct_fields[i].field_syt == field_syt) {
+        if (state->struct_fields[i].base_syt == base_syt && state->struct_fields[i].field_syt == field_syt &&
+            state->struct_fields[i].copy_index == copy_index) {
             return &state->struct_fields[i].value;
         }
     }
@@ -326,13 +337,15 @@ static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, ui
     memset(slot, 0, sizeof(*slot));
     slot->base_syt = base_syt;
     slot->field_syt = field_syt;
+    slot->copy_index = copy_index;
     return &slot->value;
 }
 
 /* Resolves a QUAL_XPT operand (class-0/EXTN.md's "extended pointer",
  * DATA=stream position of the resolving EXTN instruction) to its shadow
- * storage slot. Fails loudly if the referenced VAC slot isn't actually
- * an EXTN result, or if it's a bare/unqualified reference (struct_field_
+ * storage slot, for whichever copy is current (current_copy_index).
+ * Fails loudly if the referenced VAC slot isn't actually an EXTN
+ * result, or if it's a bare/unqualified reference (struct_field_
  * syt is the structure's own TEMPLATE symbol, not a real field --
  * TASN/TEQU/TNEQ handle that case themselves; this helper is only for
  * ordinary xASN-family opcodes reading/writing a single qualified
@@ -347,7 +360,8 @@ static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat
         fail(state, "XPT operand does not reference an EXTN result");
         return NULL;
     }
-    return find_or_create_struct_field(state, slot->struct_base_syt, slot->struct_field_syt);
+    int32_t copy_idx = slot->struct_copy_index >= 0 ? slot->struct_copy_index : current_copy_index(state);
+    return find_or_create_struct_field(state, slot->struct_base_syt, slot->struct_field_syt, copy_idx);
 }
 
 /* True if the symbol table (state->symtab, unavailable e.g. for --py
@@ -1198,17 +1212,66 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * own TEMPLATE symbol (bare/unqualified reference, e.g.
                  * plain ZQ1) -- EXTN.md's confirmed shape. No runtime
                  * effect of its own beyond recording this for later
-                 * lookup (find_or_create_struct_field/resolve_xpt_field). */
+                 * lookup (find_or_create_struct_field/resolve_xpt_field).
+                 *
+                 * The base operand is ordinarily QUAL_SYT (the plain
+                 * structure symbol; struct_copy_index=-1, meaning "use
+                 * whatever copy is ambient" -- current_copy_index()).
+                 * When a single-copy-select subscript is present (e.g.
+                 * `ZQ3 = ZQ1; S 2` picking ZQ3's copy 2, class-0/TSUB.md),
+                 * the base is instead QUAL_VAC referencing a preceding
+                 * TSUB's own stream position -- an *explicit* copy index
+                 * that overrides the ambient one. */
                 if (ins->operand_count != 2) { fail(state, "EXTN: expected 2 operands"); break; }
-                if (ins->operands[0].qual != QUAL_SYT || ins->operands[1].qual != QUAL_SYT) {
-                    fail(state, "EXTN: expected two SYT operands");
+                if (ins->operands[1].qual != QUAL_SYT) {
+                    fail(state, "EXTN: expected a SYT field operand");
                     break;
                 }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->operands[0].qual == QUAL_SYT) {
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_struct_ref = true;
+                    state->vac[ins->index].struct_base_syt = ins->operands[0].data;
+                    state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                    state->vac[ins->index].struct_copy_index = -1;
+                } else if (ins->operands[0].qual == QUAL_VAC) {
+                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "EXTN: VAC index out of range"); break; }
+                    const halmat_vac_slot_t *copy_slot = &state->vac[ins->operands[0].data];
+                    if (!copy_slot->is_copy_ref) { fail(state, "EXTN: VAC base operand does not reference a TSUB result"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_struct_ref = true;
+                    state->vac[ins->index].struct_base_syt = copy_slot->copy_ref_base_syt;
+                    state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                    state->vac[ins->index].struct_copy_index = copy_slot->copy_ref_copy_index;
+                } else {
+                    fail(state, "EXTN: unsupported base operand qualifier %s", halmat_qual_name(ins->operands[0].qual));
+                    break;
+                }
+                break;
+
+            case OP_TSUB:
+                /* Structure-copy subscript specifier, single-copy-select
+                 * form only (class-0/TSUB.md) -- range-select (3
+                 * operands) fails loudly, untested. Two operands: the
+                 * multi-copy structure's own SYT, then the copy number
+                 * (confirmed QUAL_IMD for a literal index; an expression
+                 * operand, which per USA003087 Sec 19.6 should also be
+                 * legal, isn't implemented). Result consumed by a
+                 * following EXTN via a QUAL_VAC operand referencing
+                 * TSUB's own stream position (see OP_EXTN above), not
+                 * used directly by anything else. */
+                if (ins->operand_count != 2) { fail(state, "TSUB: only the single-copy-select form (2 operands) is implemented"); break; }
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "TSUB: expected a SYT structure operand"); break; }
+                if (ins->operands[1].qual != QUAL_IMD) { fail(state, "TSUB: only a literal copy index is implemented"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
-                state->vac[ins->index].is_struct_ref = true;
-                state->vac[ins->index].struct_base_syt = ins->operands[0].data;
-                state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                state->vac[ins->index].is_copy_ref = true;
+                state->vac[ins->index].copy_ref_base_syt = ins->operands[0].data;
+                /* Copy numbers are 1-based in HAL/S source (`copy 2`) but
+                 * this interpreter's copy_index is 0-based (matches
+                 * arrayed_index's own 0-based convention, and ADLP's
+                 * count directly, per state.h) -- subtract 1. */
+                state->vac[ins->index].copy_ref_copy_index = (int32_t)(int16_t)ins->operands[1].data - 1;
                 break;
 
             case OP_STRI:
@@ -1334,6 +1397,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 uint16_t src_base = src_ref->struct_base_syt, dst_base = dst_ref->struct_base_syt;
+                int32_t ambient_idx = current_copy_index(state);
+                int32_t src_copy_idx = src_ref->struct_copy_index >= 0 ? src_ref->struct_copy_index : ambient_idx;
+                int32_t dst_copy_idx = dst_ref->struct_copy_index >= 0 ? dst_ref->struct_copy_index : ambient_idx;
                 /* Snapshot the count first: find_or_create may realloc/append
                  * (a field touched on the destination for the first time)
                  * while we're iterating, which would otherwise walk into
@@ -1341,7 +1407,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 size_t count = state->struct_field_count;
                 bool ok = true;
                 for (size_t i = 0; ok && i < count; i++) {
-                    if (state->struct_fields[i].base_syt != src_base) continue;
+                    if (state->struct_fields[i].base_syt != src_base || state->struct_fields[i].copy_index != src_copy_idx) continue;
                     uint16_t field = state->struct_fields[i].field_syt;
                     /* Snapshot the source's scalar fields by value before
                      * find_or_create_struct_field's possible realloc (which
@@ -1357,7 +1423,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         ok = false;
                         break;
                     }
-                    halmat_syt_entry_t *dst_field = find_or_create_struct_field(state, dst_base, field);
+                    halmat_syt_entry_t *dst_field = find_or_create_struct_field(state, dst_base, field, dst_copy_idx);
                     free(dst_field->char_value);
                     *dst_field = src_snapshot;
                     dst_field->char_value = src_snapshot.char_value ? dup_string(src_snapshot.char_value) : NULL;
@@ -1393,14 +1459,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 uint16_t lhs_base = lhs_ref->struct_base_syt, rhs_base = rhs_ref->struct_base_syt;
+                int32_t ambient_idx = current_copy_index(state);
+                int32_t lhs_copy_idx = lhs_ref->struct_copy_index >= 0 ? lhs_ref->struct_copy_index : ambient_idx;
+                int32_t rhs_copy_idx = rhs_ref->struct_copy_index >= 0 ? rhs_ref->struct_copy_index : ambient_idx;
                 bool all_equal = true;
                 size_t count = state->struct_field_count;
                 for (size_t i = 0; i < count && all_equal; i++) {
                     uint16_t base = state->struct_fields[i].base_syt;
+                    int32_t want_idx = (base == lhs_base) ? lhs_copy_idx : rhs_copy_idx;
+                    if (state->struct_fields[i].copy_index != want_idx) continue;
                     if (base != lhs_base && base != rhs_base) continue;
                     uint16_t field = state->struct_fields[i].field_syt;
-                    halmat_syt_entry_t *lhs_field = find_or_create_struct_field(state, lhs_base, field);
-                    halmat_syt_entry_t *rhs_field = find_or_create_struct_field(state, rhs_base, field);
+                    halmat_syt_entry_t *lhs_field = find_or_create_struct_field(state, lhs_base, field, lhs_copy_idx);
+                    halmat_syt_entry_t *rhs_field = find_or_create_struct_field(state, rhs_base, field, rhs_copy_idx);
                     resolved_value_t lv, rv;
                     read_syt_entry(lhs_field, &lv);
                     read_syt_entry(rhs_field, &rv);
@@ -2992,17 +3063,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_XXST:
                 /* General bracketed-argument-list start: I/O (IMD kind
                  * code) or a function/procedure call (SYT callee) --
-                 * see class-0/XXST.md. */
+                 * see class-0/XXST.md. If io_pending is already active,
+                 * this XXST is being re-entered mid-ADLP/DLPE-driven
+                 * replay (a whole-array/structure-field WRITE argument,
+                 * e.g. `WRITE(6) ZQ3.QI;` on a multi-copy structure,
+                 * compiles with XXST itself inside the replayed
+                 * paragraph, not just the XXAR argument-computation) --
+                 * skip re-initializing so each iteration's XXAR keeps
+                 * accumulating into the same item list instead of the
+                 * next iteration's XXST wiping the previous one's item
+                 * right before the single WRIT that flushes them all
+                 * after the replay loop ends. */
                 if (ins->operand_count != 1) { fail(state, "XXST: expected 1 operand"); break; }
-                state->io_pending.active = true;
-                state->io_pending.item_count = 0;
-                if (ins->operands[0].qual == QUAL_SYT) {
-                    state->io_pending.is_call = true;
-                    state->io_pending.call_target = ins->operands[0].data;
-                } else {
-                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                    state->io_pending.is_call = false;
-                    state->io_pending.kind = rv_to_integer(&a);
+                if (!state->io_pending.active) {
+                    state->io_pending.active = true;
+                    state->io_pending.item_count = 0;
+                    if (ins->operands[0].qual == QUAL_SYT) {
+                        state->io_pending.is_call = true;
+                        state->io_pending.call_target = ins->operands[0].data;
+                    } else {
+                        if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                        state->io_pending.is_call = false;
+                        state->io_pending.kind = rv_to_integer(&a);
+                    }
                 }
                 break;
 

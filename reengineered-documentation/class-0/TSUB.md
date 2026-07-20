@@ -66,6 +66,61 @@ resolves the final structure pointer used by [TASN](TASN.md)/
 - Structure-and-terminal subscripting (combining a structure-copy
   subscript with a terminal's own type/array subscript, per
   [USA003087] §19.6) was not tested — only bare structure-copy selection.
+- The range-select form's runtime semantics (how the resulting arrayed
+  copies are actually consumed downstream, and its interaction with
+  ADLP/DLPE) were not implemented or tested this session — only the
+  single-copy-select form is confirmed working end-to-end.
+
+## Confirmed later: working source syntax and end-to-end runtime behavior
+
+The single-copy-select form's card-column source syntax (a real gotcha,
+initially mistaken for `TREE(copy)`-select-*of-the-source*, when it's
+actually the *destination*/receiver being subscripted, exactly as this
+file's own trace comment already said): given a multi-copy structure
+`ZQ3` (`TEMPLATE-STRUCTURE(3)`) and a single-instance `ZQ1`
+(`TEMPLATE-STRUCTURE`), `ZQ3 = ZQ1;` with a continuation `S` line whose
+non-blank subscript digit(s) align to the column *immediately following*
+where the receiver (`ZQ3`, not the source `ZQ1`) ends on the `M` line —
+the same "one past the variable's own end column" convention already
+established for `DSUB`'s array/matrix element subscripts, just applied
+to the assignment's left-hand side instead of a read. E.g. for
+`M   ZQ3 = ZQ1;`, `ZQ3` ends at column 7, so the `S` line's copy number
+must start at column 8 (`ZQ3` at columns 5–7; column 9 is `=`, and a
+subscript landing there — one column too late — trips a "S-LINE
+OVERLAPS M-LINE" compile error, since it collides with a real character
+still on the M line at that position).
+
+Copy numbers are 1-based in HAL/S source (`copy 2`, `copy 3`, ...) but
+this interpreter's own internal copy-index bookkeeping (mirroring
+`arrayed_index`'s existing 0-based convention for ADLP/IDLP-driven
+array replay) is 0-based — `yaHALMAT2` subtracts 1 from `TSUB`'s literal
+copy operand.
+
+**Confirmed: the single-copy-select assignment itself is *not* wrapped
+in `ADLP`/`DLPE`** — unlike the whole-copy-count-matching case
+(`ZQ4 = ZQ1;` between two same-count multi-copy structures, no `TSUB`
+involved, which *is* `ADLP`-wrapped per `STATUS.md`'s finding), a single
+specific copy is a scalar (non-arrayed) selection, so `TASN` executes
+exactly once. However, **reading back an unsubscripted field of a
+multi-copy structure (e.g. `WRITE(6) ZQ3.QI;`) *is* `ADLP`-wrapped**
+(one read per copy, broadcasting all copies' values) — confirmed
+end-to-end: `ZQ1.QI = 9; ZQ3 = ZQ1; S <copy 2>; WRITE(6) ZQ3.QI;`
+(`ZQ3` a 3-copy structure) prints `0  9  0` — copy 2 (1-indexed) holds
+the assigned value, copies 1 and 3 remain at their zero default,
+confirming both the copy-selection mechanism itself and that distinct
+copies of a multi-copy structure are genuinely independent storage
+(not aliased to each other).
+
+This end-to-end runtime trace also surfaced a previously-latent,
+unrelated interpreter bug (now fixed, not a HALMAT-level finding): a
+`WRITE` statement whose argument computation is `ADLP`-wrapped includes
+the statement's own `XXST` (I/O-list-open, class-0/XXST.md) *inside*
+the replayed paragraph, not just the argument-fetching `XXAR`. Blindly
+re-running `XXST`'s original behavior (reset the pending-item list) on
+every replay iteration wiped every item but the last one before the
+single post-loop `WRIT` ever got to flush them. Fixed by making `XXST`
+a no-op when an I/O list is already open (i.e. being re-entered
+mid-replay) rather than unconditionally resetting.
 
 ## Source Analysis & Reliability
 
