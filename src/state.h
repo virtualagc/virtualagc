@@ -265,6 +265,17 @@ struct halmat_state {
     size_t for_return_stack[64];
     int for_return_sp;
 
+    /* CFOR (class-0/CFOR.md): a range-form DO FOR's supplementary
+     * WHILE/UNTIL clause, positioned once per cycle just before the
+     * loop body. Consumes a VAC-carried boolean; when false, exits the
+     * loop the same place EFOR's own range-exhausted exit would (one
+     * past the enclosing EFOR) -- per-CFOR position, precomputed
+     * alongside efor_dfor_pos since it needs the same DFOR/EFOR nesting
+     * walk. NO_TARGET for a CFOR not inside a range-form DO FOR (list-
+     * form DO FOR's own supplementary-condition case isn't handled
+     * here, no fixture exercises it). */
+    size_t *cfor_exit_target;
+
     /* DO CASE (DCAS/CLBL/ECAS): per class-0/ECAS.md, "every case body
      * ends with an unconditional branch" to ECAS's join point -- but
      * that branch is synthesized only in PASS2's machine-code output,

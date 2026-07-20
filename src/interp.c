@@ -24,6 +24,7 @@
 #define OP_CLBL 0x00D
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
+#define OP_CFOR 0x012
 #define OP_DSMP 0x013
 #define OP_ESMP 0x014
 #define OP_AFOR 0x015
@@ -592,10 +593,12 @@ static void precompute_for_loops(halmat_state_t *state) {
     state->afor_control_var = calloc(n, sizeof(uint16_t));
     state->efor_is_list_form = calloc(n, sizeof(bool));
     state->efor_dfor_pos = malloc(n * sizeof(size_t));
+    state->cfor_exit_target = malloc(n * sizeof(size_t));
     for (size_t i = 0; i < n; i++) {
         state->afor_body_target[i] = NO_TARGET;
         state->afor_return_target[i] = NO_TARGET;
         state->efor_dfor_pos[i] = NO_TARGET;
+        state->cfor_exit_target[i] = NO_TARGET;
     }
 
     struct {
@@ -604,6 +607,8 @@ static void precompute_for_loops(halmat_state_t *state) {
         uint16_t control_var;
         size_t afor_positions[HALMAT_MAX_OPERANDS * 8]; /* generous: real lists are short */
         size_t afor_count;
+        size_t cfor_positions[64]; /* range-form only: pending CFORs to patch once EFOR's position is known */
+        size_t cfor_count;
     } stack[FOR_STACK_MAX];
     int sp = 0;
 
@@ -616,12 +621,17 @@ static void precompute_for_loops(halmat_state_t *state) {
                 stack[sp].dfor_pos = i;
                 stack[sp].control_var = is_list ? ins->operands[1].data : 0;
                 stack[sp].afor_count = 0;
+                stack[sp].cfor_count = 0;
                 sp++;
             }
         } else if (ins->opcode == OP_AFOR) {
             if (sp > 0 && stack[sp - 1].is_list && stack[sp - 1].afor_count < HALMAT_MAX_OPERANDS * 8) {
                 stack[sp - 1].afor_positions[stack[sp - 1].afor_count++] = i;
                 state->afor_control_var[i] = stack[sp - 1].control_var;
+            }
+        } else if (ins->opcode == OP_CFOR) {
+            if (sp > 0 && !stack[sp - 1].is_list && stack[sp - 1].cfor_count < 64) {
+                stack[sp - 1].cfor_positions[stack[sp - 1].cfor_count++] = i;
             }
         } else if (ins->opcode == OP_EFOR) {
             if (sp > 0) {
@@ -636,6 +646,9 @@ static void precompute_for_loops(halmat_state_t *state) {
                     }
                 } else {
                     state->efor_dfor_pos[i] = stack[sp].dfor_pos;
+                    for (size_t k = 0; k < stack[sp].cfor_count; k++) {
+                        state->cfor_exit_target[stack[sp].cfor_positions[k]] = i + 1;
+                    }
                 }
             }
         }
@@ -777,6 +790,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->afor_control_var);
     free(state->efor_is_list_form);
     free(state->efor_dfor_pos);
+    free(state->cfor_exit_target);
     free(state->dcas_case_target);
     free(state->dcas_case_count);
     free(state->clbl_ecas_target);
@@ -792,6 +806,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->afor_control_var = NULL;
     state->efor_is_list_form = NULL;
     state->efor_dfor_pos = NULL;
+    state->cfor_exit_target = NULL;
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
     state->clbl_ecas_target = NULL;
@@ -1096,6 +1111,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (exit_loop) {
                     size_t target = state->ctst_exit_target[state->pc];
                     if (target == NO_TARGET) { fail(state, "CTST has no matching ETST"); break; }
+                    state->pc = target;
+                    branched = true;
+                }
+                break;
+            }
+
+            case OP_CFOR: {
+                /* Range-form DO FOR's supplementary WHILE/UNTIL clause,
+                 * class-0/CFOR.md -- same tag=WHILE(0)/UNTIL(1)
+                 * convention as CTST, but exits to one past the
+                 * enclosing EFOR (precompute_for_loops' cfor_exit_
+                 * target) rather than a DTST/ETST pair's own target. */
+                if (ins->operand_count != 1) { fail(state, "CFOR: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                bool cond_true = (rv_to_integer(&a) != 0);
+                bool exit_loop = ins->tag ? cond_true : !cond_true;
+                if (exit_loop) {
+                    size_t target = state->cfor_exit_target[state->pc];
+                    if (target == NO_TARGET) { fail(state, "CFOR has no matching (range-form) EFOR"); break; }
                     state->pc = target;
                     branched = true;
                 }
