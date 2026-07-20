@@ -123,10 +123,16 @@ own `halmat_scalar_format()` already implements and cross-verified for
 same formatter for `STOC`, producing `" 3.5000000E+00"` for the input
 above rather than `yaHALMAT`'s `"3.5"`.
 
-## 5. `BAND`/`BOR`/`BNOT`/`ITOB`/`BTOI` produce all-zero results for a real BIT program
+## 5. `BAND`/`BOR`/`BNOT`/`ITOB`/`BTOI`/`BCAT` produce all-zero results for a real BIT program
 
 **File**: `emu/halmat_class1.c` (`POP_BAND`/`POP_BOR`/`POP_BNOT`/
-`POP_ITOB`), `emu/halmat_class6.c` (`POP_BTOI`).
+`POP_ITOB`/`POP_BCAT`), `emu/halmat_class6.c` (`POP_BTOI`).
+
+`BCAT` confirmed separately (`src/tests/hal/test_bcat.hal`: `B1=BIT(10);
+B2=BIT(5); B3=B1||B2;` on `BIT(4)` operands, expected `B3=0b10100101`=
+`165` as an unsigned `INTEGER(B3)` — `yaHALMAT2` produces `165`,
+`yaHALMAT` produces `0`) — same symptom, same likely root cause below,
+folded into this finding rather than a separate one.
 
 ```
 DECLARE BIT(8), B1, B2, B3, B4;

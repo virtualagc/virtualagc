@@ -163,6 +163,8 @@ bool halmat_symtab_load(const char *path, halmat_symtab_t *out, char *errbuf, si
         } else if (raw[i].sym_type == 4) { /* VECTOR */
             entries[i].shape = HALMAT_SHAPE_VECTOR;
             entries[i].cols = (int)raw[i].sym_length;
+        } else if (raw[i].sym_type == 1) { /* BIT */
+            entries[i].bit_width = (int)raw[i].sym_length;
         }
     }
 

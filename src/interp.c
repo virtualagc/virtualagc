@@ -91,6 +91,7 @@
 #define OP_IASN 0x601
 #define OP_SASN 0x501
 #define OP_BASN 0x101
+#define OP_BCAT 0x105
 #define OP_BAND 0x102
 #define OP_BOR 0x103
 #define OP_BNOT 0x104
@@ -2418,6 +2419,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BASN: source is not BIT"); break; }
                 if (!write_destination(state, &ins->operands[1], &a)) break;
+                break;
+
+            case OP_BCAT:
+                /* Bit-string catenate (class-1/BCAT.md): B1 || B2, B1
+                 * occupying the more-significant bits. Neither operand
+                 * carries its own width (confirmed empirically: both are
+                 * plain SYT references, tag1=0) -- the declared BIT(n)
+                 * width is the only source of truth for how far to shift
+                 * B1 left, so this requires a symtab (state->symtab) and
+                 * both operands to be QUAL_SYT; any other shape fails
+                 * loudly rather than guessing a width. */
+                if (ins->operand_count != 2) { fail(state, "BCAT: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_SYT || ins->operands[1].qual != QUAL_SYT) {
+                    fail(state, "BCAT: only plain SYT operands are implemented (need declared BIT width)");
+                    break;
+                }
+                if (!state->symtab) { fail(state, "BCAT: needs a symbol table (auto-discovered COMMON*.out) for declared BIT widths"); break; }
+                {
+                    const halmat_symtab_entry_t *sym2 = halmat_symtab_find_by_index(state->symtab, ins->operands[1].data);
+                    if (!sym2 || sym2->bit_width <= 0) { fail(state, "BCAT: second operand's declared BIT width is unknown"); break; }
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                    if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BCAT: both operands must be BIT"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    uint32_t mask2 = (sym2->bit_width >= 32) ? 0xFFFFFFFFu : ((1u << sym2->bit_width) - 1u);
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_bits = true;
+                    state->vac[ins->index].bits = (a.bits << sym2->bit_width) | (b.bits & mask2);
+                }
                 break;
 
             case OP_BAND:

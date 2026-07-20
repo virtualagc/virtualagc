@@ -80,6 +80,7 @@ run ./run_local_fixture.sh tdcl " 6.0000000E+00"
 run ./run_local_fixture.sh stos " 1.5000000000000000E+00"
 run ./run_local_fixture.sh mtom "$(printf ' 1.0000000E+00\n 4.0000000E+00')"
 run ./run_local_fixture.sh vtov "$(printf ' 5.0000000E+00\n 7.0000000E+00')"
+run ./run_local_fixture.sh bcat "        165"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)

@@ -36,7 +36,12 @@
  *   ARRAY(7) => same shape at a different EXTuARRAY offset). Only
  *   dimension count 1 has been exercised; the multi-dimension case is
  *   assumed to work the same way (each extra bound simply follows) but
- *   isn't independently confirmed. */
+ *   isn't independently confirmed.
+ * - BIT(n): SYM_LENGTH is n directly, same convention as VECTOR --
+ *   confirmed against BIT(4) => SYM_LENGTH=0x0004, BIT(8) =>
+ *   SYM_LENGTH=0x0008. Needed for BCAT (class-1/BCAT.md), whose operands
+ *   carry no width of their own -- the declared width is the only source
+ *   of truth for how far to shift during concatenation. */
 typedef enum {
     HALMAT_SHAPE_NONE = 0,
     HALMAT_SHAPE_MATRIX,
@@ -55,6 +60,7 @@ typedef struct {
     int rows, cols; /* HALMAT_SHAPE_MATRIX: rows x cols. HALMAT_SHAPE_VECTOR: cols = dimension, rows unused. */
     int array_dims[HALMAT_SYM_MAX_ARRAY_DIMS]; /* HALMAT_SHAPE_ARRAY: each dimension's bound, in order */
     int array_dim_count;
+    int bit_width; /* declared width for a BIT(n) symbol (hal_class==1), 0 if not a BIT or unknown */
 } halmat_symtab_entry_t;
 
 typedef struct {
