@@ -12,6 +12,7 @@
  * far. Extended opcode-by-opcode as later fixtures require -- see
  * Plan.md M4. */
 #define OP_NOP 0x000
+#define OP_EXTN 0x001
 #define OP_XREC 0x002
 #define OP_SMRK 0x004
 #define OP_PXRC 0x005
@@ -37,6 +38,9 @@
 #define OP_WRIT 0x021
 #define OP_ERON 0x03C
 #define OP_ERSE 0x03D
+#define OP_TNEQ 0x04D
+#define OP_TEQU 0x04E
+#define OP_TASN 0x04F
 #define OP_NNEQ 0x055
 #define OP_NEQU 0x056
 #define OP_NASN 0x057
@@ -212,6 +216,69 @@ static char *dup_string(const char *s) {
     return copy;
 }
 
+/* Shared by QUAL_SYT and QUAL_XPT (structure-field shadow slots, see
+ * state.h's halmat_struct_field_t) -- both address the same shape of
+ * storage, just keyed differently. */
+static void read_syt_entry(const halmat_syt_entry_t *e, resolved_value_t *out) {
+    if (e->type == SYT_TYPE_SCALAR) {
+        out->kind = RV_SCALAR;
+        out->scalar = e->scalar;
+    } else if (e->type == SYT_TYPE_CHARACTER) {
+        out->kind = RV_STRING;
+        out->string = e->char_value ? e->char_value : "";
+    } else if (e->type == SYT_TYPE_BIT) {
+        out->kind = RV_BITS;
+        out->bits = e->bit_value;
+    } else {
+        out->kind = RV_INTEGER;
+        out->integer = e->value;
+    }
+}
+
+/* Finds (or lazily creates) the shadow storage slot for a structure
+ * field reference, keyed by (base_syt, field_syt) -- see state.h's
+ * halmat_struct_field_t comment for why this indirection exists (field
+ * symbols are shared across every instance of a STRUCTURE TEMPLATE, so
+ * field_syt alone can't be used as a direct storage key). */
+static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, uint16_t base_syt, uint16_t field_syt) {
+    for (size_t i = 0; i < state->struct_field_count; i++) {
+        if (state->struct_fields[i].base_syt == base_syt && state->struct_fields[i].field_syt == field_syt) {
+            return &state->struct_fields[i].value;
+        }
+    }
+    if (state->struct_field_count >= state->struct_field_capacity) {
+        size_t new_cap = state->struct_field_capacity ? state->struct_field_capacity * 2 : 32;
+        state->struct_fields = realloc(state->struct_fields, new_cap * sizeof(halmat_struct_field_t));
+        state->struct_field_capacity = new_cap;
+    }
+    halmat_struct_field_t *slot = &state->struct_fields[state->struct_field_count++];
+    memset(slot, 0, sizeof(*slot));
+    slot->base_syt = base_syt;
+    slot->field_syt = field_syt;
+    return &slot->value;
+}
+
+/* Resolves a QUAL_XPT operand (class-0/EXTN.md's "extended pointer",
+ * DATA=stream position of the resolving EXTN instruction) to its shadow
+ * storage slot. Fails loudly if the referenced VAC slot isn't actually
+ * an EXTN result, or if it's a bare/unqualified reference (struct_field_
+ * syt is the structure's own TEMPLATE symbol, not a real field --
+ * TASN/TEQU/TNEQ handle that case themselves; this helper is only for
+ * ordinary xASN-family opcodes reading/writing a single qualified
+ * field). */
+static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat_operand_t *op) {
+    if (op->data >= HALMAT_VAC_MAX) {
+        fail(state, "XPT stream position %u out of range", op->data);
+        return NULL;
+    }
+    const halmat_vac_slot_t *slot = &state->vac[op->data];
+    if (!slot->is_struct_ref) {
+        fail(state, "XPT operand does not reference an EXTN result");
+        return NULL;
+    }
+    return find_or_create_struct_field(state, slot->struct_base_syt, slot->struct_field_syt);
+}
+
 static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, resolved_value_t *out) {
     memset(out, 0, sizeof(*out));
     switch (op->qual) {
@@ -220,20 +287,13 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 fail(state, "SYT index %u out of range", op->data);
                 return false;
             }
-            const halmat_syt_entry_t *e = &state->syt[op->data];
-            if (e->type == SYT_TYPE_SCALAR) {
-                out->kind = RV_SCALAR;
-                out->scalar = e->scalar;
-            } else if (e->type == SYT_TYPE_CHARACTER) {
-                out->kind = RV_STRING;
-                out->string = e->char_value ? e->char_value : "";
-            } else if (e->type == SYT_TYPE_BIT) {
-                out->kind = RV_BITS;
-                out->bits = e->bit_value;
-            } else {
-                out->kind = RV_INTEGER;
-                out->integer = e->value;
-            }
+            read_syt_entry(&state->syt[op->data], out);
+            return true;
+        }
+        case QUAL_XPT: {
+            const halmat_syt_entry_t *e = resolve_xpt_field(state, op);
+            if (!e) return false;
+            read_syt_entry(e, out);
             return true;
         }
         case QUAL_LIT: {
@@ -313,37 +373,46 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
  * opcode; see class-0/FCAL.md-adjacent notes and the out_array/
  * out_matrix fixtures), or a DSUB-produced subscript reference (ARRAY/
  * MATRIX element, always SCALAR for now -- see class-0/DSUB.md). */
+/* Shared by QUAL_SYT and QUAL_XPT, mirroring read_syt_entry() above. */
+static bool write_syt_entry(halmat_state_t *state, halmat_syt_entry_t *e, const resolved_value_t *val) {
+    if (e->type == SYT_TYPE_UNKNOWN) {
+        e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
+                : (val->kind == RV_BITS) ? SYT_TYPE_BIT
+                : (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
+    }
+    if (e->type == SYT_TYPE_CHARACTER) {
+        if (val->kind != RV_STRING) {
+            fail(state, "cannot assign a non-CHARACTER value to a CHARACTER destination");
+            return false;
+        }
+        free(e->char_value);
+        e->char_value = dup_string(val->string);
+    } else if (e->type == SYT_TYPE_BIT) {
+        if (val->kind != RV_BITS) {
+            fail(state, "cannot assign a non-BIT value to a BIT destination");
+            return false;
+        }
+        e->bit_value = val->bits;
+    } else if (e->type == SYT_TYPE_SCALAR) {
+        e->scalar = rv_to_scalar(val);
+    } else {
+        e->value = rv_to_integer(val);
+    }
+    return true;
+}
+
 static bool write_destination(halmat_state_t *state, const halmat_operand_t *op, const resolved_value_t *val) {
     if (op->qual == QUAL_SYT) {
         if (op->data >= HALMAT_SYT_MAX) {
             fail(state, "SYT index %u out of range", op->data);
             return false;
         }
-        halmat_syt_entry_t *e = &state->syt[op->data];
-        if (e->type == SYT_TYPE_UNKNOWN) {
-            e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
-                    : (val->kind == RV_BITS) ? SYT_TYPE_BIT
-                    : (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
-        }
-        if (e->type == SYT_TYPE_CHARACTER) {
-            if (val->kind != RV_STRING) {
-                fail(state, "cannot assign a non-CHARACTER value to a CHARACTER destination");
-                return false;
-            }
-            free(e->char_value);
-            e->char_value = dup_string(val->string);
-        } else if (e->type == SYT_TYPE_BIT) {
-            if (val->kind != RV_BITS) {
-                fail(state, "cannot assign a non-BIT value to a BIT destination");
-                return false;
-            }
-            e->bit_value = val->bits;
-        } else if (e->type == SYT_TYPE_SCALAR) {
-            e->scalar = rv_to_scalar(val);
-        } else {
-            e->value = rv_to_integer(val);
-        }
-        return true;
+        return write_syt_entry(state, &state->syt[op->data], val);
+    }
+    if (op->qual == QUAL_XPT) {
+        halmat_syt_entry_t *e = resolve_xpt_field(state, op);
+        if (!e) return false;
+        return write_syt_entry(state, e, val);
     }
     if (op->qual == QUAL_VAC) {
         if (op->data >= HALMAT_VAC_MAX) {
@@ -823,6 +892,14 @@ void interp_cleanup(halmat_state_t *state) {
         if (state->vac[i].is_string) free(state->vac[i].string);
         if (state->vac[i].is_container) free(state->vac[i].container);
     }
+    for (size_t i = 0; i < state->struct_field_count; i++) {
+        free(state->struct_fields[i].value.elements);
+        free(state->struct_fields[i].value.char_value);
+    }
+    free(state->struct_fields);
+    state->struct_fields = NULL;
+    state->struct_field_count = 0;
+    state->struct_field_capacity = 0;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -866,6 +943,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
         bool branched = false;
 
         switch (ins->opcode) {
+            case OP_EXTN:
+                /* "Extended pointer" -- resolves a structure-variable
+                 * reference for a following TASN/TEQU/TNEQ or ordinary
+                 * xASN-family opcode to consume via a QUAL_XPT operand
+                 * referencing this instruction's own stream position
+                 * (class-0/EXTN.md). Two operands always: base structure
+                 * symbol, then either a specific field's symbol
+                 * (qualified reference, e.g. ZQ1.QI) or the structure's
+                 * own TEMPLATE symbol (bare/unqualified reference, e.g.
+                 * plain ZQ1) -- EXTN.md's confirmed shape. No runtime
+                 * effect of its own beyond recording this for later
+                 * lookup (find_or_create_struct_field/resolve_xpt_field). */
+                if (ins->operand_count != 2) { fail(state, "EXTN: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_SYT || ins->operands[1].qual != QUAL_SYT) {
+                    fail(state, "EXTN: expected two SYT operands");
+                    break;
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_struct_ref = true;
+                state->vac[ins->index].struct_base_syt = ins->operands[0].data;
+                state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                break;
+
             case OP_NOP:
             case OP_PXRC:
             case OP_XREC:
@@ -908,6 +1009,121 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * every existing fail() call site is deferred rather
                  * than guessed at. */
                 break;
+
+            case OP_TASN: {
+                /* Structure assign, class-0/TASN.md: source-first,
+                 * receiver-second, both QUAL_XPT (stream position of
+                 * the resolving EXTN) referencing a *bare* structure
+                 * reference. Real hardware copies the whole structure
+                 * as a byte blob; this interpreter has no byte-layout
+                 * model (state.h's halmat_struct_field_t comment), so
+                 * instead copies every field this interpreter has
+                 * itself already tracked (via a prior qualified
+                 * assignment) from the source's shadow slots to the
+                 * receiver's -- an approximation that's exact once every
+                 * field has been touched individually at least once, but
+                 * won't reproduce a field the source never had assigned
+                 * (stays at the receiver's own prior/zero value instead
+                 * of copying source's zero-initialized default). */
+                if (ins->operand_count != 2) { fail(state, "TASN: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_XPT || ins->operands[1].qual != QUAL_XPT) {
+                    fail(state, "TASN: both operands must be XPT");
+                    break;
+                }
+                if (ins->operands[0].data >= HALMAT_VAC_MAX || ins->operands[1].data >= HALMAT_VAC_MAX) {
+                    fail(state, "TASN: XPT stream position out of range");
+                    break;
+                }
+                const halmat_vac_slot_t *src_ref = &state->vac[ins->operands[0].data];
+                const halmat_vac_slot_t *dst_ref = &state->vac[ins->operands[1].data];
+                if (!src_ref->is_struct_ref || !dst_ref->is_struct_ref) {
+                    fail(state, "TASN: XPT operand does not reference an EXTN result");
+                    break;
+                }
+                uint16_t src_base = src_ref->struct_base_syt, dst_base = dst_ref->struct_base_syt;
+                /* Snapshot the count first: find_or_create may realloc/append
+                 * (a field touched on the destination for the first time)
+                 * while we're iterating, which would otherwise walk into
+                 * newly-appended entries. */
+                size_t count = state->struct_field_count;
+                bool ok = true;
+                for (size_t i = 0; ok && i < count; i++) {
+                    if (state->struct_fields[i].base_syt != src_base) continue;
+                    uint16_t field = state->struct_fields[i].field_syt;
+                    /* Snapshot the source's scalar fields by value before
+                     * find_or_create_struct_field's possible realloc (which
+                     * would invalidate a pointer into struct_fields[i]). */
+                    halmat_syt_entry_t src_snapshot = state->struct_fields[i].value;
+                    if (src_snapshot.elements) {
+                        /* ARRAY/MATRIX/VECTOR structure terminal: deep-copying
+                         * correctly needs element_count, which is on the
+                         * snapshot already -- but no fixture exercises this,
+                         * so fail loudly rather than risk a silent aliasing
+                         * bug in an unverified path. */
+                        fail(state, "TASN: copying a structure terminal with ARRAY/MATRIX/VECTOR type is not yet implemented");
+                        ok = false;
+                        break;
+                    }
+                    halmat_syt_entry_t *dst_field = find_or_create_struct_field(state, dst_base, field);
+                    free(dst_field->char_value);
+                    *dst_field = src_snapshot;
+                    dst_field->char_value = src_snapshot.char_value ? dup_string(src_snapshot.char_value) : NULL;
+                }
+                if (!ok) break;
+                break;
+            }
+
+            case OP_TEQU:
+            case OP_TNEQ: {
+                /* Structure equal/not-equal, class-0/TEQU.md/TNEQ.md:
+                 * same XPT-pair shape as TASN. Real hardware delegates
+                 * to a runtime routine (#QCSTRUC) that loops over every
+                 * terminal; this compares every field either side's
+                 * shadow-slot table knows about (union of both), via the
+                 * same exact-value comparison as SEQU/MEQU -- a field
+                 * neither side has touched contributes a vacuous zero-
+                 * equals-zero match, consistent with TASN's own
+                 * approximation above. */
+                if (ins->operand_count != 2) { fail(state, "TEQU/TNEQ: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_XPT || ins->operands[1].qual != QUAL_XPT) {
+                    fail(state, "TEQU/TNEQ: both operands must be XPT");
+                    break;
+                }
+                if (ins->operands[0].data >= HALMAT_VAC_MAX || ins->operands[1].data >= HALMAT_VAC_MAX) {
+                    fail(state, "TEQU/TNEQ: XPT stream position out of range");
+                    break;
+                }
+                const halmat_vac_slot_t *lhs_ref = &state->vac[ins->operands[0].data];
+                const halmat_vac_slot_t *rhs_ref = &state->vac[ins->operands[1].data];
+                if (!lhs_ref->is_struct_ref || !rhs_ref->is_struct_ref) {
+                    fail(state, "TEQU/TNEQ: XPT operand does not reference an EXTN result");
+                    break;
+                }
+                uint16_t lhs_base = lhs_ref->struct_base_syt, rhs_base = rhs_ref->struct_base_syt;
+                bool all_equal = true;
+                size_t count = state->struct_field_count;
+                for (size_t i = 0; i < count && all_equal; i++) {
+                    uint16_t base = state->struct_fields[i].base_syt;
+                    if (base != lhs_base && base != rhs_base) continue;
+                    uint16_t field = state->struct_fields[i].field_syt;
+                    halmat_syt_entry_t *lhs_field = find_or_create_struct_field(state, lhs_base, field);
+                    halmat_syt_entry_t *rhs_field = find_or_create_struct_field(state, rhs_base, field);
+                    resolved_value_t lv, rv;
+                    read_syt_entry(lhs_field, &lv);
+                    read_syt_entry(rhs_field, &rv);
+                    if (lv.kind == RV_STRING || rv.kind == RV_STRING) {
+                        if (lv.kind != rv.kind || strcmp(lv.string, rv.string) != 0) all_equal = false;
+                    } else {
+                        halmat_scalar_t diff = halmat_scalar_sub(rv_to_scalar(&lv), rv_to_scalar(&rv));
+                        if (!(diff.msw == 0 && diff.lsw == 0)) all_equal = false;
+                    }
+                }
+                bool result = (ins->opcode == OP_TEQU) ? all_equal : !all_equal;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = result ? 1 : 0;
+                break;
+            }
 
             case OP_NASN:
                 /* NAME (pointer) assign, class-0/NASN.md: both operands

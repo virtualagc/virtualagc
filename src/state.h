@@ -134,11 +134,43 @@ typedef struct {
                                   * final value per slot freed again in bulk by interp_cleanup(). */
     size_t container_count;
     int container_rows, container_cols; /* is_container: shape, same convention as halmat_syt_entry_t's rows/cols */
-    int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits, !is_container */
+    bool is_struct_ref;      /* is_ref=false, !is_string, !is_bits, !is_container: true if this slot
+                               * holds an EXTN-resolved structure reference (class-0/EXTN.md) --
+                               * (struct_base_syt, struct_field_syt), consumed by a following TASN/
+                               * TEQU/TNEQ (whole-structure) or an ordinary xASN (single qualified
+                               * field, e.g. ZQ1.QI=...) via a QUAL_XPT operand referencing EXTN's own
+                               * stream position. Takes priority over is_scalar/is_container. */
+    uint16_t struct_base_syt, struct_field_syt; /* is_struct_ref; struct_field_syt is the structure's
+                               * own TEMPLATE symbol for a bare/unqualified reference (EXTN.md's
+                               * confirmed "operand 2 = the TEMPLATE's own symbol" case) rather than a
+                               * real field -- interp.c's TASN/TEQU/TNEQ treat that case specially. */
+    int32_t integer;        /* is_ref=false, !is_scalar, !is_string, !is_bits, !is_container, !is_struct_ref */
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
     size_t ref_offset;      /* is_ref=true */
 } halmat_vac_slot_t;
+
+/* Structure-field "shadow slot" storage: HAL/S structure fields (class-0/
+ * EXTN.md's qualified references, e.g. ZQ1.QI) are addressed by a
+ * (base_syt, field_syt) pair, NOT by field_syt alone -- confirmed
+ * empirically this session that field_syt is the same symbol-table index
+ * across every instance of a given STRUCTURE TEMPLATE (ZQ1.QI and ZQ2.QI
+ * both resolve field_syt=3 for two independently-DECLAREd ZQ1/ZQ2), so
+ * using field_syt as a direct storage key would incorrectly alias every
+ * instance's same-named field together. Real hardware instead computes a
+ * byte offset into the structure's own memory block (confirmed by TASN.md's
+ * "ZQ1+2"-style addressing in its object-code trace); this interpreter
+ * doesn't model byte-precise structure layout at all (would need parsing
+ * TEMPLATE field lists/sizes from the symbol table, not done), so instead
+ * gives each distinct (base_syt, field_syt) pair its own independent
+ * halmat_syt_entry_t-shaped storage slot, found-or-created on first touch.
+ * A small growable linear-scan table -- structures aren't expected to be
+ * touched in tight hot loops for the kind of programs this interpreter
+ * targets. */
+typedef struct {
+    uint16_t base_syt, field_syt;
+    halmat_syt_entry_t value;
+} halmat_struct_field_t;
 
 #define HALMAT_MAX_TASKS 32
 
@@ -223,6 +255,12 @@ struct halmat_state {
         halmat_operand_t items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
     } shape_pending;
+
+    /* Structure-field shadow-slot table, see halmat_struct_field_t above.
+     * Growable (realloc'd in interp.c's find_or_create_struct_field). */
+    halmat_struct_field_t *struct_fields;
+    size_t struct_field_count;
+    size_t struct_field_capacity;
 
     bool halted;
     int exit_code;
