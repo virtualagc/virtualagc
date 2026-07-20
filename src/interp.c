@@ -929,6 +929,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->tasks[0].saved_pc = 0;
     state->task_count = 1;
     state->current_task = 0;
+    state->current_stmt = -1;
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
      * convention (Plan.md Phase 3) -- overridable via interp_set_device
@@ -1067,10 +1068,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].struct_field_syt = ins->operands[1].data;
                 break;
 
+            case OP_SMRK:
+                /* Records the HAL/S statement number a SMRK opens, for
+                 * --debug's source-line display (debug.c, srcmap.c) --
+                 * the SMRK-to-source-line correlation the M7 plan flagged
+                 * as the prerequisite for statement-level source display.
+                 * Otherwise a pure bookkeeping marker, same as the group
+                 * below. */
+                if (ins->operand_count == 1) state->current_stmt = (long)ins->operands[0].data;
+                break;
+
             case OP_NOP:
             case OP_PXRC:
             case OP_XREC:
-            case OP_SMRK:
             case OP_MDEF:
             case OP_CDEF:
             case OP_EDCL:

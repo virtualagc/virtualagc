@@ -39,12 +39,23 @@ static const halmat_instr_t *find_instr_by_word_index(const halmat_program_t *pr
     return NULL;
 }
 
-static void print_current(halmat_state_t *state, FILE *out) {
+static void print_source(const halmat_srcmap_t *srcmap, long stmt, FILE *out) {
+    if (!srcmap || stmt < 0) return;
+    size_t n;
+    const halmat_srcmap_line_t *l = halmat_srcmap_find(srcmap, stmt, &n);
+    if (!l) return;
+    for (size_t i = 0; i < n; i++) {
+        fprintf(out, "%4ld\t%s\n", l[i].stmt, l[i].text);
+    }
+}
+
+static void print_current(halmat_state_t *state, const halmat_srcmap_t *srcmap, FILE *out) {
     const halmat_instr_t *ins = interp_peek_next(state);
     if (!ins) {
         fprintf(out, "(program has ended)\n");
         return;
     }
+    print_source(srcmap, state->current_stmt, out);
     /* interp_peek_next() doesn't expose which task it picked without a
      * step actually happening, so state->current_task here is only
      * accurate right after a step -- a reasonable approximation before
@@ -107,12 +118,12 @@ static void print_help(FILE *out) {
             "quit, q         stop debugging (does not finish running the program)\n");
 }
 
-int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, FILE *out) {
+int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat_srcmap_t *srcmap, FILE *out) {
     breakpoints_t bp = {0};
     char line[256];
 
     fprintf(out, "yaHALMAT2 debugger. Type 'help' for commands.\n");
-    print_current(state, out);
+    print_current(state, srcmap, out);
 
     for (;;) {
         fprintf(out, "(halmat) ");
@@ -157,7 +168,7 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, FILE *out) {
             }
         } else if (strcmp(cmd, "step") == 0 || strcmp(cmd, "s") == 0) {
             bool done = interp_step(state, out);
-            print_current(state, out);
+            print_current(state, srcmap, out);
             if (done) fprintf(out, "(program has ended, exit code %d)\n", state->exit_code);
         } else if (strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0) {
             bool done = false;
@@ -171,7 +182,7 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, FILE *out) {
                 done = interp_step(state, out);
                 if (done) break;
             }
-            print_current(state, out);
+            print_current(state, srcmap, out);
             if (hit_bp) fprintf(out, "breakpoint hit\n");
             if (done) fprintf(out, "(program has ended, exit code %d)\n", state->exit_code);
         } else if (strcmp(cmd, "print") == 0 || strcmp(cmd, "p") == 0) {

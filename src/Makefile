@@ -20,7 +20,7 @@ LDFLAGS += -lz
 endif
 
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
-        literal.c ebcdic.c interp.c value.c symtab.c debug.c
+        literal.c ebcdic.c interp.c value.c symtab.c debug.c srcmap.c
 OBJS := $(SRCS:.c=.o)
 DEPS := $(SRCS:.c=.d)
 TARGET := yaHALMAT2

@@ -9,6 +9,7 @@
 #include "halmat.h"
 #include "interp.h"
 #include "literal.h"
+#include "srcmap.h"
 #include "state.h"
 #include "symtab.h"
 
@@ -180,22 +181,42 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         }
     }
 
+    /* pass1.rpt is HALSFC's PASS1 report -- its "STMT ... SOURCE ...
+     * REVISION" section carries the HAL/S source text keyed by statement
+     * number (srcmap.c), which --debug correlates against SMRK's
+     * statement-number operand (state->current_stmt) to show source
+     * alongside each instruction. Only relevant/loaded under --debug;
+     * missing or unparseable degrades to instruction-only display like
+     * every other optional companion file. */
+    halmat_srcmap_t srcmap;
+    bool have_srcmap = false;
+    if (debug_mode) {
+        char src_buf[1024];
+        static const char *src_candidates[] = {"pass1.rpt"};
+        if (find_companion(path, src_candidates, 1, src_buf, sizeof(src_buf))) {
+            char err3[256];
+            have_srcmap = halmat_srcmap_load(src_buf, &srcmap, err3, sizeof(err3));
+        }
+    }
+
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
     if (have_symtab) interp_set_symtab(&state, &symtab);
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
         interp_cleanup(&state);
+        if (have_srcmap) halmat_srcmap_free(&srcmap);
         if (have_symtab) halmat_symtab_free(&symtab);
         if (have_literals) halmat_literal_free(&literals);
         halmat_program_free(&prog);
         return 1;
     }
-    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, stdout)
+    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, stdout)
                          : interp_run(&state, stdout);
     interp_cleanup(&state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
 
+    if (have_srcmap) halmat_srcmap_free(&srcmap);
     if (have_symtab) halmat_symtab_free(&symtab);
     if (have_literals) halmat_literal_free(&literals);
     halmat_program_free(&prog);

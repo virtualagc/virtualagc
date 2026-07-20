@@ -392,6 +392,8 @@ struct halmat_state {
     halmat_task_t tasks[HALMAT_MAX_TASKS];
     int task_count;
     int current_task; /* index into tasks[], set by the scheduler loop before each instruction */
+    long current_stmt; /* HAL/S statement number of the last-executed SMRK, or -1 before any;
+                         * for --debug's source-line display (see srcmap.c) */
     int64_t virtual_time;
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };
