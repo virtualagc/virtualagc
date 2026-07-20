@@ -33,8 +33,11 @@
 #define OP_XXND 0x026
 #define OP_XXAR 0x027
 #define OP_MDEF 0x02B
+#define OP_FDEF 0x02C
 #define OP_CLOS 0x030
 #define OP_EDCL 0x031
+#define OP_RTRN 0x032
+#define OP_FCAL 0x01E
 #define OP_IASN 0x601
 #define OP_INEQ 0x7C5
 #define OP_IEQU 0x7C6
@@ -302,6 +305,36 @@ static void precompute_case_dispatch(halmat_state_t *state) {
     }
 }
 
+/* Function/procedure definitions (FDEF...CLOS) sit inline in the
+ * enclosing PROGRAM's own instruction stream, so ordinary fall-through
+ * must skip over them entirely -- they're only ever entered via an
+ * explicit FCAL jump (to fdef_pos+1, bypassing FDEF itself, so FDEF's
+ * own "skip to my CLOS" logic never fires on a call). Matched by SYT
+ * symbol equality (FDEF and its CLOS share the same operand), not a
+ * nesting stack, since HAL/S subprograms don't nest inside each other --
+ * only inside the top-level MDEF (also closed by CLOS, but never opened
+ * via FDEF, so it never enters this map). See state.h's field comments. */
+static void precompute_subprograms(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->symbol_fdef_pos = malloc(HALMAT_SYT_MAX * sizeof(size_t));
+    state->fdef_clos_target = malloc(n * sizeof(size_t));
+    for (size_t i = 0; i < HALMAT_SYT_MAX; i++) state->symbol_fdef_pos[i] = NO_TARGET;
+    for (size_t i = 0; i < n; i++) state->fdef_clos_target[i] = NO_TARGET;
+
+    for (size_t i = 0; i < n; i++) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if (ins->opcode == OP_FDEF && ins->operand_count == 1) {
+            uint16_t sym = ins->operands[0].data;
+            if (sym < HALMAT_SYT_MAX) state->symbol_fdef_pos[sym] = i;
+        } else if (ins->opcode == OP_CLOS && ins->operand_count == 1) {
+            uint16_t sym = ins->operands[0].data;
+            if (sym < HALMAT_SYT_MAX && state->symbol_fdef_pos[sym] != NO_TARGET) {
+                state->fdef_clos_target[state->symbol_fdef_pos[sym]] = i + 1;
+            }
+        }
+    }
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
@@ -312,6 +345,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_labels(state);
     precompute_for_loops(state);
     precompute_case_dispatch(state);
+    precompute_subprograms(state);
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -326,6 +360,8 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->dcas_case_target);
     free(state->dcas_case_count);
     free(state->clbl_ecas_target);
+    free(state->symbol_fdef_pos);
+    free(state->fdef_clos_target);
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
     state->label_pos = NULL;
@@ -337,6 +373,8 @@ void interp_cleanup(halmat_state_t *state) {
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
     state->clbl_ecas_target = NULL;
+    state->symbol_fdef_pos = NULL;
+    state->fdef_clos_target = NULL;
 }
 
 static void flush_write(halmat_state_t *state, FILE *out) {
@@ -564,11 +602,20 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_XXST:
+                /* General bracketed-argument-list start: I/O (IMD kind
+                 * code) or a function/procedure call (SYT callee) --
+                 * see class-0/XXST.md. */
                 if (ins->operand_count != 1) { fail(state, "XXST: expected 1 operand"); break; }
-                if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 state->io_pending.active = true;
-                state->io_pending.kind = a.integer;
                 state->io_pending.item_count = 0;
+                if (ins->operands[0].qual == QUAL_SYT) {
+                    state->io_pending.is_call = true;
+                    state->io_pending.call_target = ins->operands[0].data;
+                } else {
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    state->io_pending.is_call = false;
+                    state->io_pending.kind = a.integer;
+                }
                 break;
 
             case OP_XXAR:
@@ -599,9 +646,69 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 state->io_pending.active = false;
                 break;
 
+            case OP_FDEF: {
+                /* Only ever reached by ordinary fall-through -- FCAL
+                 * jumps straight to fdef_pos+1, past this instruction
+                 * (see precompute_subprograms). Skip the whole
+                 * definition; it's entered only via an explicit call. */
+                size_t target = state->fdef_clos_target[state->pc];
+                if (target == NO_TARGET) { fail(state, "FDEF has no matching CLOS"); break; }
+                state->pc = target;
+                branched = true;
+                break;
+            }
+
+            case OP_FCAL: {
+                if (!state->io_pending.active || !state->io_pending.is_call) {
+                    fail(state, "FCAL outside of an XXST...XXND call block");
+                    break;
+                }
+                if (ins->operand_count != 1) { fail(state, "FCAL: expected 1 operand"); break; }
+                uint16_t callee = ins->operands[0].data;
+                if (callee >= HALMAT_SYT_MAX || state->symbol_fdef_pos[callee] == NO_TARGET) {
+                    fail(state, "call to undefined function (symbol %u)", callee);
+                    break;
+                }
+                /* Positional argument binding: SYT callee+1+i, per
+                 * class-0/FCAL.md's confirmed convention. */
+                for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                    uint16_t param_syt = callee + 1 + i;
+                    if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); break; }
+                    state->syt[param_syt].type = SYT_TYPE_INTEGER;
+                    state->syt[param_syt].value = state->io_pending.items[i].integer;
+                }
+                if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
+                state->call_return_stack[state->call_return_sp++] = state->pc;
+                state->pc = state->symbol_fdef_pos[callee] + 1;
+                branched = true;
+                break;
+            }
+
+            case OP_RTRN: {
+                if (ins->operand_count != 1) { fail(state, "RTRN: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (state->call_return_sp <= 0) { fail(state, "RTRN with no active call"); break; }
+                size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                size_t vac_index = state->prog->instrs[fcal_pos].index;
+                if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[vac_index] = a.integer;
+                state->pc = fcal_pos + 1;
+                branched = true;
+                break;
+            }
+
             case OP_CLOS:
-                state->halted = true;
-                state->exit_code = 0;
+                if (state->call_return_sp > 0) {
+                    /* Implicit return (procedure with no explicit RETURN,
+                     * or a fallthrough past the last statement) -- no
+                     * return value is available here. */
+                    size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                    state->pc = fcal_pos + 1;
+                    branched = true;
+                } else {
+                    state->halted = true;
+                    state->exit_code = 0;
+                }
                 break;
 
             default: {

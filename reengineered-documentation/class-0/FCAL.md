@@ -46,6 +46,31 @@ One operand: `DATA`=symbol-table index of the invoked function,
   user-defined and one for built-in functions) remains unconfirmed by a
   direct primary source describing FCAL's own role, though both halves
   of the split are now independently confirmed to behave sensibly.
+- How the arguments accumulated by the [XXAR](XXAR.md) list actually
+  bind to the callee's formal parameters is not documented anywhere in
+  the HALMAT stream itself — there is no separate "parameter
+  declaration" opcode, and bare (uninitialized) `DECLARE`s like a
+  parameter's don't emit an `IINT`-family instruction either, so nothing
+  in the callee's own HALMAT text marks a given symbol as a parameter.
+
+**Phase 3 finding**: the binding is by symbol-table position, not
+anything encoded in HALMAT. Compiling two probes (`FUNCTION(N)` and
+`FUNCTION(A, B)`, the latter with an extra non-parameter local declared
+after the parameters) shows the parameters always occupy the SYT slots
+**immediately following the function's own symbol, contiguously, in
+source declaration order** — e.g. function symbol at SYT 4 with two
+parameters gives `A`=SYT 5, `B`=SYT 6, with any further (non-parameter)
+locals starting at SYT 7. Cross-checked against the compiler's own
+symbol table (`COMMON0.out`'s `SYM_FLAGS` field): the parameters carry
+the `0x00000400` ("INPUT") bit, while the trailing non-parameter local
+carries `0x00000200` ("STATIC") instead — confirming the positional
+pattern isn't coincidental. So: for a call with `k` arguments to a
+function/procedure whose own symbol is at SYT index `f`, argument `i`
+(0-indexed) binds to SYT slot `f + 1 + i`. Not yet tested against a
+function with an explicit `ASSIGN`/output parameter (see [PCAL](PCAL.md)
+for the procedure case, which has both input and assign arguments) or
+one with array/structure-typed parameters, where this simple
+contiguous-slot pattern may not hold.
 
 ## Source Analysis & Reliability
 

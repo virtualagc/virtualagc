@@ -42,9 +42,15 @@ struct halmat_state {
 
     /* Pending WRITE-statement argument list, accumulated between XXST
      * and XXND (see class-0/WRIT.md's Usage Context). */
+    /* XXST/XXAR/XXND is a general bracketed-argument-list construct
+     * (class-0/XXST.md), shared by I/O statements and function/procedure
+     * calls alike -- discriminated by XXST's own operand qualifier
+     * (IMD=I/O kind code, SYT=called symbol). */
     struct {
         bool active;
-        int kind; /* XXST's IMD operand: 2 = WRITE (only kind implemented so far) */
+        bool is_call;
+        int kind;             /* I/O case: XXST's IMD operand (2 = WRITE, only kind implemented) */
+        uint16_t call_target; /* call case: XXST's SYT operand (the called function/procedure) */
         struct {
             bool is_string;
             char *string;   /* borrowed from the literal table; not owned */
@@ -106,6 +112,22 @@ struct halmat_state {
     size_t *dcas_case_target;  /* flat [dcas_pos * HALMAT_MAX_CASES + (sel-1)] -> jump target */
     size_t *dcas_case_count;   /* per-DCAS position: how many ordinary (non-trap) cases */
     size_t *clbl_ecas_target;  /* per-CLBL position: where to jump (ECAS join point + 1) */
+
+    /* Function/procedure calls (FDEF/FCAL/RTRN/CLOS): a function's body
+     * sits inline in the enclosing PROGRAM's own instruction stream, so
+     * FDEF, reached by ordinary fall-through (i.e. NOT via a call jump,
+     * since FCAL jumps past FDEF straight to its body), skips over the
+     * whole definition to its matching CLOS. FCAL jumps to fdef_pos+1
+     * and binds arguments to SYT slots per class-0/FCAL.md's confirmed
+     * positional convention (callee_symbol+1+i). RTRN resolves its
+     * operand as the return value, stores it in VAC at FCAL's own word
+     * index (so the caller's ordinary VAC-qualified pickup works
+     * unmodified), and jumps back to just past FCAL. See
+     * interp.c's precompute_subprograms(). */
+    size_t *symbol_fdef_pos;   /* indexed by SYT symbol: FDEF's array position, or NO_TARGET */
+    size_t *fdef_clos_target;  /* per-FDEF position: matching CLOS's array position + 1 */
+    size_t call_return_stack[64]; /* FCAL's own array position, per active call */
+    int call_return_sp;
 };
 
 #define HALMAT_MAX_CASES 64
