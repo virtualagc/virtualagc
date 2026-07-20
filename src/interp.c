@@ -34,6 +34,8 @@
 #define OP_RDAL 0x020
 #define OP_READ 0x01F
 #define OP_WRIT 0x021
+#define OP_ERON 0x03C
+#define OP_ERSE 0x03D
 #define OP_MSHP 0x040
 #define OP_VSHP 0x041
 #define OP_SSHP 0x042
@@ -855,6 +857,32 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below. */
+                break;
+
+            case OP_ERON:
+            case OP_ERSE:
+                /* ON ERROR/OFF ERROR (ERON, class-0/ERON.md) and SEND
+                 * ERROR (ERSE, class-0/ERSE.md) register/simulate error-
+                 * handling metadata for HAL/S's ERROR CONDITION recovery
+                 * mechanism (per the user-supplied-statement form's own
+                 * confirmed trace, the handler code itself is skipped in
+                 * normal flow by an ordinary BRA already emitted right
+                 * after ERON -- not something ERON needs to act on). A
+                 * genuine no-op here is therefore correct for normal
+                 * (no-runtime-error) execution. What's NOT implemented:
+                 * this interpreter's existing runtime-error path (fail(),
+                 * used uniformly for divide-by-zero, singular MINV, out-
+                 * of-range subscripts, etc.) never consults an ON ERROR
+                 * table -- every runtime error is unconditionally fatal
+                 * regardless of any ON ERROR IGNORE/SYSTEM/handler-
+                 * statement modification a program may have set up, and
+                 * ERSE's SEND ERROR doesn't actually simulate a
+                 * recovery action. USA003090 Appendix C is understood to
+                 * document HAL/S's execution-time-error response
+                 * conventions in detail, but wasn't available to consult
+                 * in this session -- wiring real ON ERROR dispatch into
+                 * every existing fail() call site is deferred rather
+                 * than guessed at. */
                 break;
 
             case OP_DFOR:
