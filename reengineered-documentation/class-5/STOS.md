@@ -72,11 +72,21 @@ this session, but is expected by direct analogy — see
 
 ## Unresolved Questions
 
-- The `SINGLE_FLAG` value (narrowing direction, `exp$(@SINGLE)`) was not
-  independently compiled this session — only `@DOUBLE` was tested.
 - Whether `TAG` ever carries additional bits beyond the single/double
   flag (the original 4-bit-mask hypothesis) is not ruled out, just not
   observed in this simple case.
+
+## Confirmed later: `SINGLE_FLAG` = 1
+
+Compiling `S2 = S1$(@SINGLE);` (`S1` `DOUBLE`, `S2` `SINGLE`) confirms
+`TAG`=1 for `@SINGLE`, cross-checked identically for
+[MTOM](../class-3/MTOM.md)/[VTOV](../class-4/VTOV.md). Also noted this
+session: `DECLARE DOUBLE SCALAR x;` (precision keyword *before* the type
+name) reliably produces a "SCALAR syntactically illegal" compile error,
+while `DECLARE SCALAR DOUBLE, x;` (precision keyword *after*, matching
+`MATRIX(r,c) DOUBLE`/`VECTOR(n) DOUBLE`'s confirmed working order)
+compiles cleanly — a HAL/S declaration-syntax gotcha, not a HALMAT-level
+finding, but worth recording since it wasted real debugging time.
 
 ## Source Analysis & Reliability
 

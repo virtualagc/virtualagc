@@ -1,0 +1,19 @@
+ TEST_VTOV:
+ PROGRAM;
+    DECLARE VECTOR(2), V1;
+    DECLARE VECTOR(2) DOUBLE, V2;
+    DECLARE VECTOR(2), N;
+    DECLARE SCALAR, VAL;
+M   V1  = 5.0;
+S     1
+M   V1  = 7.0;
+S     2
+    V2 = V1$(@DOUBLE);
+    N = V2$(@SINGLE);
+M   VAL = N  ;
+S          1
+    WRITE(6) VAL;
+M   VAL = N  ;
+S          2
+    WRITE(6) VAL;
+ CLOSE TEST_VTOV;

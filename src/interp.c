@@ -150,6 +150,7 @@
 #define OP_MTRA 0x329
 #define OP_MINV 0x3CA
 #define OP_MNEG 0x344
+#define OP_MTOM 0x341
 #define OP_MADD 0x362
 #define OP_MSUB 0x363
 #define OP_MMPR 0x368
@@ -158,6 +159,7 @@
 #define OP_MSDV 0x3A6
 #define OP_VASN 0x401
 #define OP_VNEG 0x444
+#define OP_VTOV 0x441
 #define OP_MVPR 0x46C
 #define OP_VMPR 0x46D
 #define OP_VADD 0x482
@@ -176,6 +178,7 @@
 #define OP_SNEG 0x5B0
 #define OP_ITOS 0x5C1
 #define OP_STOI 0x6A1
+#define OP_STOS 0x5A1
 #define OP_IINT 0x8C1
 #define OP_SINT 0x8A1
 #define OP_CINT 0x841
@@ -233,6 +236,22 @@ static void store_resolved_to_vac(halmat_vac_slot_t *slot, const resolved_value_
             slot->integer = val->integer;
             break;
     }
+}
+
+/* Precision-scale conversion for STOS/MTOM/VTOV's family (class-5/
+ * STOS.md, class-3/MTOM.md, class-4/VTOV.md), per USA00309 Sec. 8.2's
+ * confirmed bit-level rules: rule 12 (widening, single->double) pads 32
+ * zero bits onto the mantissa's right; rule 7 (narrowing, double->
+ * single) truncates the rightmost 32 bits. Since this project's
+ * halmat_scalar_t already keeps lsw==0 for every single-precision value
+ * (halmat_scalar_from_ibm_words, value.c), both directions reduce to
+ * just flipping the double_precision flag (widening) or additionally
+ * zeroing lsw (narrowing) -- no reconstruction through a native double
+ * intermediate needed, so this is exact, not an approximation. */
+static halmat_scalar_t scale_precision(halmat_scalar_t s, bool to_double) {
+    s.double_precision = to_double;
+    if (!to_double) s.lsw = 0;
+    return s;
 }
 
 static void fail(halmat_state_t *state, const char *fmt, ...) {
@@ -1786,6 +1805,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
+            case OP_MTOM:
+            case OP_VTOV: {
+                /* Matrix/vector precision scale (class-3/MTOM.md,
+                 * class-4/VTOV.md) -- same exp$(@SINGLE)/exp$(@DOUBLE)
+                 * trigger and TAG convention as STOS, applied
+                 * elementwise. One operand (source SYT); consumed by a
+                 * following MASN/VASN via this instruction's own VAC
+                 * slot, same "no destination operand" pattern as MADD/
+                 * VADD. Confirmed empirically this session to compile as
+                 * a single whole-container instruction (like MADD/VADD),
+                 * not the ADLP/DLPE-wrapped per-element loop originally
+                 * documented -- see MTOM.md/VTOV.md's correction. */
+                if (ins->operand_count != 1) { fail(state, "MTOM/VTOV: expected 1 operand"); break; }
+                halmat_scalar_t *ca; size_t count_a; int rows_a, cols_a;
+                if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
+                if (count_a > HALMAT_CONTAINER_CAPACITY) { fail(state, "MTOM/VTOV: container too large"); break; }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                bool to_double = (ins->tag == 2);
+                for (size_t i = 0; i < count_a; i++) result[i] = scale_precision(ca[i], to_double);
+                if (!store_container_result(state, ins->index, result, count_a, rows_a, cols_a)) break;
+                break;
+            }
+
             case OP_MADD:
             case OP_MSUB:
             case OP_VADD:
@@ -2303,6 +2345,22 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_from_integer(rv_to_integer(&a), false);
+                break;
+
+            case OP_STOS:
+                /* Scalar precision scale (class-5/STOS.md), triggered by
+                 * the explicit exp$(@SINGLE)/exp$(@DOUBLE) qualifier
+                 * (not plain assignment, which widens/narrows via the
+                 * object code directly with no HALMAT-level opcode of
+                 * its own). One operand (source SCALAR SYT); the
+                 * instruction's own TAG carries the target precision --
+                 * confirmed 2=DOUBLE_FLAG, 1=SINGLE_FLAG. */
+                if (ins->operand_count != 1) { fail(state, "STOS: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = scale_precision(rv_to_scalar(&a), ins->tag == 2);
                 break;
 
             case OP_STOI:

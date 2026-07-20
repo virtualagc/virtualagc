@@ -16,9 +16,19 @@ only. Confirmed trigger: HAL/S's postfix precision-qualifier syntax,
 `exp$(@SINGLE)`/`exp$(@DOUBLE)` (`PASS1.PROCS/SYNTHESI.xpl`'s grammar
 rule `<QUALIFIER> ::= <$> ( @ <PREC SPEC> )`, `<PREC SPEC> ::= SINGLE |
 DOUBLE`) — an explicit request to force an expression's result to a
-specific precision. Like [VTOV](../class-4/VTOV.md), `MTOM` converts one
-element at a time and is wrapped in an [ADLP](../class-0/ADLP.md)/
-[DLPE](../class-0/DLPE.md) arrayness loop.
+specific precision. **Correction (later session, re-confirmed against a
+current HALSFC build):** `MTOM` compiles as a single whole-matrix
+instruction, *not* wrapped in an [ADLP](../class-0/ADLP.md)/
+[DLPE](../class-0/DLPE.md) per-element arrayness loop as originally
+documented below — that trace does not reproduce and is believed to have
+been a documentation error (see [SLRI](../class-8/SLRI.md)'s correction
+this same session for an analogous case). `MTOM` converts every element
+of its source matrix at once and is consumed by a following `MASN` via
+its own VAC slot, the same "no destination operand" pattern
+[MADD](MADD.md)/[MSUB](MSUB.md) use — i.e. it belongs conceptually with
+the container-level MATRIX arithmetic family, not the per-element
+arrayed-expression family. [VTOV](../class-4/VTOV.md) shares this
+corrected shape too.
 
 The instruction's operator-word `TAG` field carries the precision request
 directly: confirmed `2` for `@DOUBLE` (`PRECSCAL.xpl`'s `DOUBLE_FLAG`
@@ -43,31 +53,25 @@ handled implicitly by the generated object code).
 ## Operand-Word Format (confirmed empirically)
 
 One operand: `DATA`=symbol-table index of the source `MATRIX`,
-`QUAL`=1=SYT, with a non-zero trailing tag (observed `2`) not decoded
-(same pattern as [VTOV](../class-4/VTOV.md)'s operand). Confirmed trace:
+`QUAL`=1=SYT. The instruction's own `TAG` carries the target precision:
+confirmed `2`=`@DOUBLE`, `1`=`@SINGLE` (`SINGLE_FLAG`, cross-confirmed
+against [STOS](../class-5/STOS.md)'s identical convention). Confirmed
+trace, compiling `M2 = M1$(@DOUBLE);` (both `MATRIX(2,2)`, `M1` single,
+`M2` double):
 
 ```
-HALMAT: 017(1),0,4            <- ADLP (opens the per-element arrayness loop)
-          4(6),1,0
-          4(6),1,0
-          4(6),1,0
-L 7,=F'65539'                    <- loop-control literal (packed count/step)
 HALMAT: 341(1),2,0            <- MTOM, TAG=2=DOUBLE_FLAG
-          6(1),0,2                <- M1, symbol index 6, QUAL=1=SYT, trailing tag 2
-LE 0,M1(7) / SER 1,1              <- indexed load (index register 7 = loop counter),
-                                      widens into place
-STED 0,M2(7)                      <- indexed store to M2
-HALMAT: 018(0),0,4            <- DLPE (closes the loop)
-BIX 7,P#4                         <- branch-index, loops back
+          2(1),0,0                <- M1, symbol index 2, QUAL=1=SYT
+HALMAT: 301(2),0,0            <- MASN (see MASN.md)
+          ?(1),0,0                <- MTOM's own VAC slot (source)
+          3(1),0,0                <- M2, symbol index 3, QUAL=1=SYT (destination)
 ```
+
+No `ADLP`/`DLPE` wrapping and no per-operand trailing tag appear in this
+build's output — see the correction note above.
 
 ## Unresolved Questions
 
-- The `ADLP` operand's own encoding and the `L 7,=F'65539'` loop-control
-  literal's exact bit packing are not decoded (same open question as
-  [VTOV](../class-4/VTOV.md)).
-- The `SINGLE_FLAG` value (narrowing direction) was not independently
-  compiled this session — only `@DOUBLE` was tested.
 - Non-square matrices were not tested.
 
 ## Source Analysis & Reliability
