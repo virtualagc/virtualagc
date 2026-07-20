@@ -12,6 +12,12 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks);
 void interp_cleanup(halmat_state_t *state);
 
+/* Maps a logical device number (0-9, HALMAT_DEVICE_MAX) to an already-open
+ * file, overriding the default (5=stdin/6=stdout, set by interp_init).
+ * The interpreter never opens or closes device files itself -- the caller
+ * (main.c, for --ddi/--ddo) owns their lifetime. */
+void interp_set_device(halmat_state_t *state, int device, FILE *f);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */

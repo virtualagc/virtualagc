@@ -188,6 +188,28 @@ static void pack_scalar(int sign, int characteristic, uint64_t frac, bool dbl, h
     }
 }
 
+halmat_scalar_t halmat_scalar_from_double(double value, bool double_precision) {
+    if (value == 0.0) return halmat_scalar_zero(double_precision);
+
+    int sign = (value < 0.0) ? 1 : 0;
+    double mag = (value < 0.0) ? -value : value;
+    int characteristic = 64;
+
+    while (mag >= 1.0) { mag /= 16.0; characteristic++; }
+    while (mag < 0.0625) { mag *= 16.0; characteristic--; }
+
+    uint64_t frac = (uint64_t)(mag * 72057594037927936.0 /* 2^56 */ + 0.5);
+    if (frac >= ((uint64_t)1 << 56)) { frac >>= 4; characteristic++; }
+    if (characteristic < 0) characteristic = 0;
+    if (characteristic > 127) characteristic = 127;
+
+    if (frac == 0) return halmat_scalar_zero(double_precision);
+
+    halmat_scalar_t result;
+    pack_scalar(sign, characteristic, frac, double_precision, &result);
+    return result;
+}
+
 /* Portable (no __uint128_t) 64x64->128 unsigned multiply, schoolbook
  * 32-bit-limb technique -- needed for a genuinely correct 56-bit x
  * 56-bit fraction product without relying on a compiler extension that

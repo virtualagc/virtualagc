@@ -37,6 +37,15 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s);
 
 double halmat_scalar_to_double(halmat_scalar_t s);
 
+/* Inverse of halmat_scalar_to_double: repeatedly rescales by 16 until the
+ * magnitude is hex-normalized (in [1/16, 1)), then quantizes to a 56-bit
+ * fraction. Not a primary-source algorithm (READ's ASCII-to-internal
+ * conversion isn't covered in the extracted AP-101S material) -- used
+ * for READ-statement input parsing, where the source value only exists
+ * as decimal text to begin with, so double is an unavoidable intermediate
+ * representation rather than a precision compromise on already-hex data. */
+halmat_scalar_t halmat_scalar_from_double(double value, bool double_precision);
+
 /* Genuine IBM System/360-style hex-float arithmetic (AP-101S Software
  * Model PDF Sec. 8: characteristic comparison and alignment, fraction
  * add/subtract, postnormalization) -- not a native-double approximation.

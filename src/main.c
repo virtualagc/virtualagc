@@ -16,6 +16,13 @@
 #define OP_CDEF_CONST 0x02F
 
 #define MAX_UNITS 64
+#define MAX_DEVICE_MAPS 16
+
+typedef struct {
+    int device;
+    const char *path;
+    bool is_output;
+} device_map_t;
 
 static void usage(const char *prog) {
     fprintf(stderr,
@@ -37,6 +44,8 @@ static void usage(const char *prog) {
             "                   unavailable for --py units (accepted transparently, not an error)\n"
             "  --entry DIR      for @list: which directory is the executing PROGRAM unit\n"
             "                   (auto-detected if exactly one directory holds a PROGRAM)\n"
+            "  --ddi N:PATH     map READ(N)/READALL(N) to PATH (default: device 5=stdin)\n"
+            "  --ddo N:PATH     map WRITE(N) to PATH (default: device 6=stdout)\n"
             "  --help           this message\n"
             "\n"
             "@list is a text file listing one HALSFC output directory per line, each\n"
@@ -69,8 +78,27 @@ static bool find_companion(const char *halmat_path, const char *const *candidate
     return false;
 }
 
+/* Opens every --ddi/--ddo mapping and wires it into `state` via
+ * interp_set_device, tracking the opened FILE*s in `opened` (capped at
+ * MAX_DEVICE_MAPS, one per mapping) so the caller can fclose them after
+ * the run -- interp_set_device doesn't take ownership (state.h). Returns
+ * false (with a message on stderr) if any path fails to open. */
+static bool apply_device_maps(halmat_state_t *state, const device_map_t *maps, int num_maps,
+                               FILE **opened, const char *prog) {
+    for (int i = 0; i < num_maps; i++) {
+        FILE *f = fopen(maps[i].path, maps[i].is_output ? "w" : "r");
+        if (!f) {
+            fprintf(stderr, "%s: cannot open '%s' for device %d\n", prog, maps[i].path, maps[i].device);
+            return false;
+        }
+        opened[i] = f;
+        interp_set_device(state, maps[i].device, f);
+    }
+    return true;
+}
+
 static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, const char *litfile_opt,
-                       const char *memory_opt, int num_blanks) {
+                       const char *memory_opt, int num_blanks, const device_map_t *maps, int num_maps) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -134,9 +162,18 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
 
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
+    FILE *opened_devices[MAX_DEVICE_MAPS];
+    if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
+        interp_cleanup(&state);
+        if (have_symtab) halmat_symtab_free(&symtab);
+        if (have_literals) halmat_literal_free(&literals);
+        halmat_program_free(&prog);
+        return 1;
+    }
     int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, stdout)
                          : interp_run(&state, stdout);
     interp_cleanup(&state);
+    for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
 
     if (have_symtab) halmat_symtab_free(&symtab);
     if (have_literals) halmat_literal_free(&literals);
@@ -254,7 +291,7 @@ static void free_unit(unit_t *u) {
 }
 
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
-                       bool disasm, int num_blanks) {
+                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
         return 1;
@@ -399,8 +436,15 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         primary_state.syt[primary_ref->index] = imports[k].value;
     }
 
+    FILE *opened_devices[MAX_DEVICE_MAPS];
+    if (!apply_device_maps(&primary_state, maps, num_maps, opened_devices, "yaHALMAT2")) {
+        interp_cleanup(&primary_state);
+        for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+        return 1;
+    }
     int rc = interp_run(&primary_state, stdout);
     interp_cleanup(&primary_state);
+    for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
 
     for (int i = 0; i < num_dirs; i++) free_unit(&units[i]);
     return rc;
@@ -432,6 +476,8 @@ int main(int argc, char **argv) {
     bool use_opt = false;
     bool use_py = false;
     int num_blanks = 5;
+    device_map_t maps[MAX_DEVICE_MAPS];
+    int num_maps = 0;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--disasm") == 0) {
@@ -450,6 +496,22 @@ int main(int argc, char **argv) {
             use_py = true;
         } else if (strcmp(argv[i], "--entry") == 0 && i + 1 < argc) {
             entry_opt = argv[++i];
+        } else if ((strcmp(argv[i], "--ddi") == 0 || strcmp(argv[i], "--ddo") == 0) && i + 1 < argc) {
+            bool is_output = (strcmp(argv[i], "--ddo") == 0);
+            const char *arg = argv[++i];
+            const char *colon = strchr(arg, ':');
+            if (!colon) {
+                fprintf(stderr, "%s: %s expects N:PATH (e.g. 7:input.txt)\n", argv[0], is_output ? "--ddo" : "--ddi");
+                return 1;
+            }
+            if (num_maps >= MAX_DEVICE_MAPS) {
+                fprintf(stderr, "%s: too many --ddi/--ddo mappings (max %d)\n", argv[0], MAX_DEVICE_MAPS);
+                return 1;
+            }
+            maps[num_maps].device = atoi(arg);
+            maps[num_maps].path = colon + 1;
+            maps[num_maps].is_output = is_output;
+            num_maps++;
         } else if (strcmp(argv[i], "--help") == 0) {
             usage(argv[0]);
             return 0;
@@ -489,8 +551,8 @@ int main(int argc, char **argv) {
         }
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
-        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks);
+        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, litfile_opt, memory_opt, num_blanks);
+    return run_single(path, disasm, debug_mode, use_py, litfile_opt, memory_opt, num_blanks, maps, num_maps);
 }

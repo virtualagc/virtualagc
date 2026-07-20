@@ -29,6 +29,7 @@
 #define OP_ETST 0x00F
 #define OP_CTST 0x016
 #define OP_DSUB 0x019
+#define OP_READ 0x01F
 #define OP_WRIT 0x021
 #define OP_XXST 0x025
 #define OP_XXND 0x026
@@ -469,6 +470,17 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->tasks[0].saved_pc = 0;
     state->task_count = 1;
     state->current_task = 0;
+
+    /* Default device mapping: 5=input/6=output, per HAL/S language
+     * convention (Plan.md Phase 3) -- overridable via interp_set_device
+     * (main.c's --ddi/--ddo). Every other device starts unmapped. */
+    state->devices[5] = stdin;
+    state->devices[6] = stdout;
+}
+
+void interp_set_device(halmat_state_t *state, int device, FILE *f) {
+    if (device < 0 || device >= HALMAT_DEVICE_MAX) return;
+    state->devices[device] = f;
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -539,6 +551,9 @@ static void flush_write(halmat_state_t *state, FILE *out) {
  * scheduler can interleave tasks at instruction granularity -- see
  * state.h's scheduler field comments. */
 static void exec_one(halmat_state_t *state, FILE *out) {
+    (void)out; /* WRIT/READ now resolve their own device via state->devices
+                * (--ddi/--ddo, state.h) rather than this parameter; kept
+                * for interp_step/interp_run's public signature stability. */
     {
         const halmat_instr_t *ins = &state->prog->instrs[state->pc];
         resolved_value_t a, b;
@@ -890,11 +905,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_XXAR:
                 if (!state->io_pending.active) { fail(state, "XXAR outside of an XXST...XXND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "XXAR: expected 1 operand"); break; }
-                if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (state->io_pending.item_count >= HALMAT_MAX_OPERANDS) {
-                    fail(state, "WRITE statement has too many items");
+                    fail(state, "I/O statement has too many items");
                     break;
                 }
+                if (!state->io_pending.is_call && state->io_pending.kind != 2) {
+                    /* READ/READALL: the argument is a destination, not a
+                     * value -- capture the raw operand for OP_READ to
+                     * write through later, per class-0/XXAR.md. TAG2 != 0
+                     * means an I/O control specifier (TAB/COLUMN/SKIP/
+                     * LINE/PAGE); TAG1 outside {5=SCALAR,6=INTEGER} means
+                     * a type this interpreter doesn't store yet (BIT/
+                     * CHARACTER/MATRIX/VECTOR/structure) -- both fail
+                     * loudly rather than misbehave, no fixture needs them
+                     * yet. */
+                    if (ins->operands[0].tag2 != 0) {
+                        fail(state, "READ: I/O control specifiers (TAB/COLUMN/SKIP/LINE/PAGE) not yet implemented");
+                        break;
+                    }
+                    uint8_t cls = ins->operands[0].tag1;
+                    if (cls != 5 && cls != 6) {
+                        fail(state, "READ: only SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
+                        break;
+                    }
+                    state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
+                    state->io_pending.items[state->io_pending.item_count].dest_class = cls;
+                    state->io_pending.item_count++;
+                    break;
+                }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
@@ -906,16 +945,54 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->io_pending.item_count++;
                 break;
 
-            case OP_WRIT:
+            case OP_WRIT: {
                 if (!state->io_pending.active) { fail(state, "WRIT outside of an XXST...XXND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "WRIT: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                /* rv_to_integer(&a) is the device number; device-to-file
-                 * mapping (--ddo) is out of scope for this milestone,
-                 * everything goes to `out` (stdout by default from
-                 * main.c). */
-                flush_write(state, out);
+                int device = rv_to_integer(&a);
+                if (device < 0 || device >= HALMAT_DEVICE_MAX || !state->devices[device]) {
+                    fail(state, "WRITE(%d): device not mapped (use --ddo)", device);
+                    break;
+                }
+                flush_write(state, state->devices[device]);
                 break;
+            }
+
+            case OP_READ: {
+                if (!state->io_pending.active) { fail(state, "READ outside of an XXST...XXND block"); break; }
+                if (ins->operand_count != 1) { fail(state, "READ: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                int device = rv_to_integer(&a);
+                if (device < 0 || device >= HALMAT_DEVICE_MAX || !state->devices[device]) {
+                    fail(state, "READ(%d): device not mapped (use --ddi)", device);
+                    break;
+                }
+                FILE *in = state->devices[device];
+                for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                    resolved_value_t rv;
+                    if (state->io_pending.items[i].dest_class == 6) {
+                        long v;
+                        if (fscanf(in, "%ld", &v) != 1) {
+                            fail(state, "READ(%d): end of input or malformed INTEGER", device);
+                            break;
+                        }
+                        rv.kind = RV_INTEGER;
+                        rv.integer = (int32_t)v;
+                    } else {
+                        double v;
+                        if (fscanf(in, "%lf", &v) != 1) {
+                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                            break;
+                        }
+                        rv.kind = RV_SCALAR;
+                        rv.scalar = halmat_scalar_from_double(v, false);
+                    }
+                    if (!write_destination(state, &state->io_pending.items[i].dest_operand, &rv)) break;
+                }
+                state->io_pending.active = false;
+                state->io_pending.item_count = 0;
+                break;
+            }
 
             case OP_XXND:
                 state->io_pending.active = false;

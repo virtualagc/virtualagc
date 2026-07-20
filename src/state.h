@@ -3,11 +3,20 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "halmat.h"
 #include "literal.h"
 #include "opcode_table.h" /* for the halmat_state_t typedef */
 #include "value.h"
+
+/* Logical device numbers, per class-0/XXAR.md's Unresolved-Questions note
+ * on USA00309 Sec. 6.1.4's "device numbers 2-9 map to a fixed DD name"
+ * JCL convention -- 0-9 is the whole implementation-defined range. Device
+ * 5=input/6=output are wired to stdin/stdout by default (HAL/S language
+ * convention, Plan.md Phase 3); --ddi/--ddo (main.c) can remap any device
+ * to a file, including overriding 5/6. */
+#define HALMAT_DEVICE_MAX 10
 
 /* Sized generously per yaHALMAT's precedent (see Plan.md M2); revisit
  * once a --memory-size CLI switch exists (Plan.md Phase 3 default is
@@ -91,8 +100,14 @@ struct halmat_state {
 
     int num_blanks; /* WRITE-item separator, Plan.md Phase 3 default 5 */
 
-    /* Pending WRITE-statement argument list, accumulated between XXST
-     * and XXND (see class-0/WRIT.md's Usage Context). */
+    /* Logical device number -> open file, see HALMAT_DEVICE_MAX above.
+     * NULL = unmapped (READ/WRITE against it fails loudly). Not owned by
+     * the interpreter -- main.c opens/closes any --ddi/--ddo files and
+     * owns stdin/stdout, so interp_cleanup() must not fclose() these. */
+    FILE *devices[HALMAT_DEVICE_MAX];
+
+    /* Pending WRITE/READ-statement argument list, accumulated between
+     * XXST and XXND (see class-0/WRIT.md's Usage Context). */
     /* XXST/XXAR/XXND is a general bracketed-argument-list construct
      * (class-0/XXST.md), shared by I/O statements and function/procedure
      * calls alike -- discriminated by XXST's own operand qualifier
@@ -100,7 +115,7 @@ struct halmat_state {
     struct {
         bool active;
         bool is_call;
-        int kind;             /* I/O case: XXST's IMD operand (2 = WRITE, only kind implemented) */
+        int kind;             /* I/O case: XXST's IMD operand (0=READ, 1=READALL, 2=WRITE) */
         uint16_t call_target; /* call case: XXST's SYT operand (the called function/procedure) */
         struct {
             bool is_string;
@@ -108,6 +123,14 @@ struct halmat_state {
             char *string;   /* borrowed from the literal table; not owned */
             int32_t integer;
             halmat_scalar_t scalar;
+            /* READ/READALL only (kind != 2): the destination operand,
+             * captured raw by XXAR rather than resolved to a value, plus
+             * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
+             * tells READ's handler which format to parse from the device.
+             * Only INTEGER(6)/SCALAR(5) are implemented -- see interp.c's
+             * OP_READ case. */
+            halmat_operand_t dest_operand;
+            uint8_t dest_class;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
     } io_pending;
