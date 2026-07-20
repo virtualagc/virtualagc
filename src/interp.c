@@ -312,6 +312,40 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
     return false;
 }
 
+/* Lazily allocates a SYT slot's ARRAY/MATRIX/VECTOR element storage
+ * (idempotent -- returns immediately if already allocated), sizing it
+ * from the symbol table's declared dimensions when available (state->
+ * symtab, see symtab.h) and falling back to the generic placeholder
+ * capacity otherwise (HALMAT_CONTAINER_CAPACITY's comment, state.h).
+ * Sets rows/cols too, which DSUB/MASN-family opcodes use to tell a
+ * real declared MATRIX shape from the unknown-shape fallback. */
+static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
+    halmat_syt_entry_t *e = &state->syt[syt_index];
+    if (e->elements) return;
+
+    int rows = 0, cols = 0;
+    size_t count = 0;
+    if (state->symtab) {
+        const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
+        if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->cols > 0) {
+            rows = sym->rows;
+            cols = sym->cols;
+            count = (size_t)rows * (size_t)cols;
+        } else if (sym && sym->shape == HALMAT_SHAPE_VECTOR && sym->cols > 0) {
+            cols = sym->cols;
+            count = (size_t)cols;
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1) {
+            count = (size_t)sym->array_dims[0]; /* only a single dimension is used -- see symtab.h */
+        }
+    }
+    if (count == 0) count = HALMAT_CONTAINER_CAPACITY;
+
+    e->elements = calloc(count, sizeof(halmat_scalar_t));
+    e->element_count = count;
+    e->rows = rows;
+    e->cols = cols;
+}
+
 /* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
  * label" carried as both instructions' sole INL operand (see
  * class-0/DTST.md, class-0/ETST.md). CTST (class-0/CTST.md) sits right
@@ -924,31 +958,40 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * component -- both single-value forms; see
                  * class-0/DSUB.md's confirmed table). Asterisk/to-
                  * partition/at-partition/CSZ/ASZ forms aren't handled.
-                 * Multi-index (MATRIX) flattening uses a placeholder
-                 * stride since real per-dimension extents aren't visible
-                 * without symbol-table parsing (see HALMAT_CONTAINER_
-                 * CAPACITY's comment in state.h) -- unobserved by any
-                 * current fixture (no printed output touches array/
-                 * matrix element values or addresses). */
+                 * Two-index (MATRIX) flattening uses the real declared
+                 * row-major shape when the symbol table confirms it
+                 * (ensure_container/symtab.h); otherwise (no symtab, or
+                 * more than 2 indices) falls back to a placeholder
+                 * stride -- unobserved by any fixture that doesn't also
+                 * have its COMMON*.out available. */
                 if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
                 uint16_t base_syt = ins->operands[0].data;
                 if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
+                ensure_container(state, base_syt);
                 halmat_syt_entry_t *base = &state->syt[base_syt];
-                if (!base->elements) {
-                    base->elements = calloc(HALMAT_CONTAINER_CAPACITY, sizeof(halmat_scalar_t));
-                    base->element_count = HALMAT_CONTAINER_CAPACITY;
-                }
 
                 bool ok = true;
                 size_t offset = 0;
                 uint8_t num_indices = ins->operand_count - 1;
-                for (uint8_t i = 0; i < num_indices; i++) {
-                    resolved_value_t idx;
-                    if (!resolve_operand(state, &ins->operands[1 + i], &idx)) { ok = false; break; }
-                    int32_t idx_val = rv_to_integer(&idx) - 1; /* HAL/S is 1-indexed */
-                    if (idx_val < 0) idx_val = 0;
-                    offset = offset * 16 + (size_t)idx_val; /* placeholder stride per extra dimension */
+                if (base->rows > 0 && num_indices == 2) {
+                    resolved_value_t ridx, cidx;
+                    if (!resolve_operand(state, &ins->operands[1], &ridx)) { ok = false; }
+                    else if (!resolve_operand(state, &ins->operands[2], &cidx)) { ok = false; }
+                    else {
+                        int32_t r = rv_to_integer(&ridx) - 1, c = rv_to_integer(&cidx) - 1;
+                        if (r < 0) r = 0;
+                        if (c < 0) c = 0;
+                        offset = (size_t)r * (size_t)base->cols + (size_t)c;
+                    }
+                } else {
+                    for (uint8_t i = 0; i < num_indices; i++) {
+                        resolved_value_t idx;
+                        if (!resolve_operand(state, &ins->operands[1 + i], &idx)) { ok = false; break; }
+                        int32_t idx_val = rv_to_integer(&idx) - 1; /* HAL/S is 1-indexed */
+                        if (idx_val < 0) idx_val = 0;
+                        offset = offset * 16 + (size_t)idx_val; /* placeholder stride per extra dimension */
+                    }
                 }
                 if (!ok) break;
                 offset %= base->element_count;
