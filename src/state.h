@@ -80,6 +80,17 @@ struct halmat_state {
     size_t *afor_return_target; /* per-AFOR: what EFOR should return to afterward */
     uint16_t *afor_control_var; /* per-AFOR: SYT slot to assign this value into */
     bool *efor_is_list_form;    /* per-EFOR: true if it uses the AFOR return-stack */
+
+    /* Range-form DO FOR (DFOR with 4-5 operands: construct id, control
+     * var, initial, final, [increment]). DFOR assigns the control
+     * variable directly and falls straight into the body (the range
+     * form always runs its first in-range cycle without a pre-test,
+     * per class-0/DFOR.md); EFOR increments, compares against the final
+     * value (direction per the increment's sign), and either branches
+     * back to just past DFOR (re-running the body) or falls through
+     * (loop exit). Per-EFOR position: its matching DFOR's position, so
+     * the increment/final/[step] operands can be read straight from it. */
+    size_t *efor_dfor_pos;
     size_t for_return_stack[64];
     int for_return_sp;
 

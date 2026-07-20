@@ -198,13 +198,16 @@ static void precompute_for_loops(halmat_state_t *state) {
     state->afor_return_target = malloc(n * sizeof(size_t));
     state->afor_control_var = calloc(n, sizeof(uint16_t));
     state->efor_is_list_form = calloc(n, sizeof(bool));
+    state->efor_dfor_pos = malloc(n * sizeof(size_t));
     for (size_t i = 0; i < n; i++) {
         state->afor_body_target[i] = NO_TARGET;
         state->afor_return_target[i] = NO_TARGET;
+        state->efor_dfor_pos[i] = NO_TARGET;
     }
 
     struct {
         bool is_list;
+        size_t dfor_pos;
         uint16_t control_var;
         size_t afor_positions[HALMAT_MAX_OPERANDS * 8]; /* generous: real lists are short */
         size_t afor_count;
@@ -217,6 +220,7 @@ static void precompute_for_loops(halmat_state_t *state) {
             if (sp < FOR_STACK_MAX) {
                 bool is_list = (ins->operand_count == 2);
                 stack[sp].is_list = is_list;
+                stack[sp].dfor_pos = i;
                 stack[sp].control_var = is_list ? ins->operands[1].data : 0;
                 stack[sp].afor_count = 0;
                 sp++;
@@ -237,6 +241,8 @@ static void precompute_for_loops(halmat_state_t *state) {
                         state->afor_body_target[pos] = stack[sp].afor_positions[count - 1] + 1;
                         state->afor_return_target[pos] = (k + 1 < count) ? stack[sp].afor_positions[k + 1] : (i + 1);
                     }
+                } else {
+                    state->efor_dfor_pos[i] = stack[sp].dfor_pos;
                 }
             }
         }
@@ -316,6 +322,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->afor_return_target);
     free(state->afor_control_var);
     free(state->efor_is_list_form);
+    free(state->efor_dfor_pos);
     free(state->dcas_case_target);
     free(state->dcas_case_count);
     free(state->clbl_ecas_target);
@@ -326,6 +333,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->afor_return_target = NULL;
     state->afor_control_var = NULL;
     state->efor_is_list_form = NULL;
+    state->efor_dfor_pos = NULL;
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
     state->clbl_ecas_target = NULL;
@@ -368,10 +376,23 @@ int interp_run(halmat_state_t *state, FILE *out) {
             case OP_DTST:
             case OP_IFHD:
             case OP_LBL:
-            case OP_DFOR:
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below. */
+                break;
+
+            case OP_DFOR:
+                if (ins->operand_count == 2) {
+                    break; /* list-form: no-op, AFOR does the real work */
+                }
+                if (ins->operand_count < 4) { fail(state, "DFOR: expected 2 (list) or 4-5 (range) operands"); break; }
+                if (!resolve_operand(state, &ins->operands[2], &a)) break; /* initial value */
+                if (ins->operands[1].qual != QUAL_SYT) { fail(state, "DFOR: control variable must be SYT"); break; }
+                /* Range form always runs its first in-range cycle
+                 * without a pre-test (class-0/DFOR.md) -- just set the
+                 * control variable and fall through into the body. */
+                state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
+                state->syt[ins->operands[1].data].value = a.integer;
                 break;
 
             case OP_BRA:
@@ -459,13 +480,32 @@ int interp_run(halmat_state_t *state, FILE *out) {
             }
 
             case OP_EFOR: {
-                if (!state->efor_is_list_form[state->pc]) {
-                    fail(state, "range-form DO FOR not yet implemented");
+                if (state->efor_is_list_form[state->pc]) {
+                    if (state->for_return_sp <= 0) { fail(state, "EFOR with no matching AFOR dispatch"); break; }
+                    state->pc = state->for_return_stack[--state->for_return_sp];
+                    branched = true;
                     break;
                 }
-                if (state->for_return_sp <= 0) { fail(state, "EFOR with no matching AFOR dispatch"); break; }
-                state->pc = state->for_return_stack[--state->for_return_sp];
-                branched = true;
+                size_t dfor_pos = state->efor_dfor_pos[state->pc];
+                if (dfor_pos == NO_TARGET) { fail(state, "EFOR has no matching DFOR"); break; }
+                const halmat_instr_t *dfor = &state->prog->instrs[dfor_pos];
+                resolved_value_t final_val, incr_val;
+                if (!resolve_operand(state, &dfor->operands[3], &final_val)) break;
+                if (dfor->operand_count == 5) {
+                    if (!resolve_operand(state, &dfor->operands[4], &incr_val)) break;
+                } else {
+                    incr_val.integer = 1; /* implicit default increment (class-0/DFOR.md) */
+                }
+                uint16_t control_var = dfor->operands[1].data;
+                int32_t new_value = state->syt[control_var].value + incr_val.integer;
+                state->syt[control_var].value = new_value;
+                bool in_range = (incr_val.integer >= 0) ? (new_value <= final_val.integer)
+                                                          : (new_value >= final_val.integer);
+                if (in_range) {
+                    state->pc = dfor_pos + 1;
+                    branched = true;
+                }
+                /* else: fall through, loop exit */
                 break;
             }
 

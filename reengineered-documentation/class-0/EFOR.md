@@ -50,6 +50,23 @@ L#13 EQU *                        <- loop-exit label
 
 - None for the base cases tested.
 
+**Phase 3 cross-check note**: an independent yaHALMAT2 implementation of
+range-form DFOR/EFOR (control variable set directly by DFOR, falling
+through into the body without a pre-test; EFOR increments, compares
+against the final value per the increment's sign, and branches back to
+just past DFOR or falls through on exit) was verified by hand against
+`test_nested.hal` (nested `DO WHILE`/range-form `DO FOR`/`IF`-`ELSE`):
+10 outer-loop passes × (5 cycles `K=K+2` + 5 cycles `K=K+1`) = `K=150`,
+matching a plain arithmetic derivation with no interpretive ambiguity.
+The reference `yaHALMAT` emulator produces `K=40` for the same input
+(with or without `--symtab`) — its `--trace` output shows far fewer
+`DFOR`/`EFOR` events than a correct 10-outer × 11-inner nesting would
+produce, indicating its inner loop exits early. Not fully root-caused
+(not investigated further, consistent with this project's existing
+stance that the reference tool isn't authoritative) — don't use it as
+a cross-check for range-form `DO FOR` without independently verifying
+the expected iteration count by hand first.
+
 ## Source Analysis & Reliability
 
 Opcode (0x011) confirmed primary-source: `XEFOR BIT(16) INITIAL("011")`
