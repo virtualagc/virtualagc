@@ -68,6 +68,8 @@ run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"
 run ./run_local_fixture.sh struct "$(printf 'TEQU-TRUE\nTNEQ-TRUE\n          5\nTASN-COPIED')"
+run ./run_local_fixture.sh adlp "$(printf ' 3.0000000E+00\n 3.0000000E+00\n 3.0000000E+00')"
+run ./run_local_fixture.sh lfnc "$(printf ' 9.0000000E+00\n 2.0000000E+00')"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)

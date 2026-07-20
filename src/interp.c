@@ -23,6 +23,8 @@
 #define OP_DCAS 0x00B
 #define OP_ECAS 0x00C
 #define OP_CLBL 0x00D
+#define OP_ADLP 0x017
+#define OP_DLPE 0x018
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_CFOR 0x012
@@ -49,6 +51,7 @@
 #define OP_SSHP 0x042
 #define OP_ISHP 0x043
 #define OP_BFNC 0x04A
+#define OP_LFNC 0x04B
 /* OP_LFNC (0x04B, MAX/MIN over an ARRAY) not implemented -- its argument
  * is bracketed by ADLP/DLPE (class-0/ADLP.md's "free arrayness" loop
  * markers), a distinct and substantially larger mechanism not built yet;
@@ -216,6 +219,13 @@ static char *dup_string(const char *s) {
     return copy;
 }
 
+/* Forward-declared: defined later in this file (needs HALMAT_CONTAINER_
+ * CAPACITY-adjacent machinery), but resolve_operand/write_destination's
+ * QUAL_SYT case (arrayed-paragraph-replay redirection, see state.h's
+ * arrayed_index comment) needs it earlier in the file than its own
+ * natural home alongside resolve_container/store_container_result. */
+static void ensure_container(halmat_state_t *state, uint16_t syt_index);
+
 /* Shared by QUAL_SYT and QUAL_XPT (structure-field shadow slots, see
  * state.h's halmat_struct_field_t) -- both address the same shape of
  * storage, just keyed differently. */
@@ -279,6 +289,17 @@ static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat
     return find_or_create_struct_field(state, slot->struct_base_syt, slot->struct_field_syt);
 }
 
+/* True if the symbol table (state->symtab, unavailable e.g. for --py
+ * units) confirms this SYT index is a declared ARRAY/VECTOR/MATRIX --
+ * used by resolve_operand/write_destination's QUAL_SYT case to tell a
+ * genuine whole-array reference (only valid inside an arrayed-paragraph
+ * replay, state.h's arrayed_index) from an ordinary scalar/integer one. */
+static bool syt_is_array_shaped(halmat_state_t *state, uint16_t syt_index) {
+    if (!state->symtab) return false;
+    const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
+    return sym && (sym->shape == HALMAT_SHAPE_ARRAY || sym->shape == HALMAT_SHAPE_VECTOR || sym->shape == HALMAT_SHAPE_MATRIX);
+}
+
 static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, resolved_value_t *out) {
     memset(out, 0, sizeof(*out));
     switch (op->qual) {
@@ -286,6 +307,18 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             if (op->data >= HALMAT_SYT_MAX) {
                 fail(state, "SYT index %u out of range", op->data);
                 return false;
+            }
+            if (syt_is_array_shaped(state, op->data)) {
+                if (state->arrayed_index < 0) {
+                    fail(state, "SYT index %u is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph replay", op->data);
+                    return false;
+                }
+                ensure_container(state, op->data);
+                halmat_syt_entry_t *e = &state->syt[op->data];
+                size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
+                out->kind = RV_SCALAR;
+                out->scalar = e->elements[idx];
+                return true;
             }
             read_syt_entry(&state->syt[op->data], out);
             return true;
@@ -406,6 +439,17 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         if (op->data >= HALMAT_SYT_MAX) {
             fail(state, "SYT index %u out of range", op->data);
             return false;
+        }
+        if (syt_is_array_shaped(state, op->data)) {
+            if (state->arrayed_index < 0) {
+                fail(state, "SYT index %u is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph replay", op->data);
+                return false;
+            }
+            ensure_container(state, op->data);
+            halmat_syt_entry_t *e = &state->syt[op->data];
+            size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
+            e->elements[idx] = rv_to_scalar(val);
+            return true;
         }
         return write_syt_entry(state, &state->syt[op->data], val);
     }
@@ -628,6 +672,49 @@ static void precompute_loop_targets(halmat_state_t *state) {
     }
 }
 
+/* See state.h's arrayed_paragraph_end/_count comment. Finds every
+ * "ADLP immediately followed by DLPE" trailing-metadata pair (the only
+ * shape confirmed empirically this session -- role 2/3's own no-body
+ * cases share this exact shape too, so they're harmlessly treated the
+ * same way: a paragraph of zero or more instructions, replayed N times,
+ * is a correct no-op replay when N-times-replaying an empty or already-
+ * scalar paragraph doesn't change anything) and records the preceding
+ * paragraph (from the last statement boundary up to the ADLP) as
+ * replayable. Multiple consecutive ADLPs before one DLPE (the multi-
+ * dimensional-array case) use only the last ADLP's element count --
+ * documented simplification, not exercised by any fixture. */
+static void precompute_arrayed_paragraphs(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->arrayed_paragraph_end = malloc(n * sizeof(size_t));
+    state->arrayed_paragraph_count = malloc(n * sizeof(int));
+    for (size_t i = 0; i < n; i++) {
+        state->arrayed_paragraph_end[i] = NO_TARGET;
+        state->arrayed_paragraph_count[i] = 0;
+    }
+
+    size_t boundary = 0;
+    for (size_t i = 0; i < n; i++) {
+        uint16_t opcode = state->prog->instrs[i].opcode;
+        if (opcode == OP_SMRK) {
+            boundary = i + 1;
+        } else if (opcode == OP_ADLP) {
+            size_t j = i;
+            int count = 0;
+            while (j < n && state->prog->instrs[j].opcode == OP_ADLP) {
+                const halmat_instr_t *adlp = &state->prog->instrs[j];
+                if (adlp->operand_count == 1 && adlp->operands[0].qual == QUAL_IMD) {
+                    count = (int16_t)adlp->operands[0].data;
+                }
+                j++;
+            }
+            if (j < n && state->prog->instrs[j].opcode == OP_DLPE && count > 0) {
+                state->arrayed_paragraph_end[boundary] = j + 1;
+                state->arrayed_paragraph_count[boundary] = count;
+            }
+        }
+    }
+}
+
 /* LBL destinations for BRA/FBRA (IF/THEN/ELSE), keyed by INL label
  * number -- a flat table, not stack-based, since BRA/FBRA/LBL don't
  * nest the way DTST/CTST/ETST do (see class-0/LBL.md, class-0/BRA.md,
@@ -823,6 +910,8 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_for_loops(state);
     precompute_case_dispatch(state);
     precompute_subprograms(state);
+    precompute_arrayed_paragraphs(state);
+    state->arrayed_index = -1;
 
     /* Primal process: priority 50 by default (USA003087 Sec. 13.1-13.3),
      * starts at the first instruction, READY. */
@@ -866,6 +955,8 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->symbol_def_pos);
     free(state->def_clos_target);
     free(state->symbol_active_task);
+    free(state->arrayed_paragraph_end);
+    free(state->arrayed_paragraph_count);
     state->symbol_active_task = NULL;
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
@@ -881,6 +972,8 @@ void interp_cleanup(halmat_state_t *state) {
     state->clbl_ecas_target = NULL;
     state->symbol_def_pos = NULL;
     state->def_clos_target = NULL;
+    state->arrayed_paragraph_end = NULL;
+    state->arrayed_paragraph_count = NULL;
 
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
         free(state->syt[i].elements);
@@ -979,9 +1072,22 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_DTST:
             case OP_IFHD:
             case OP_LBL:
+            case OP_ADLP:
+            case OP_DLPE:
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
-                 * the real work happens in CTST/ETST/BRA/FBRA below. */
+                 * the real work happens in CTST/ETST/BRA/FBRA below.
+                 * ADLP/DLPE (class-0/ADLP.md) are reached directly here
+                 * only as a defensive fallback -- interp_step's own
+                 * arrayed-paragraph replay (state.h's arrayed_paragraph_
+                 * end/_count, precompute_arrayed_paragraphs) normally
+                 * jumps straight past a recognized ADLP/DLPE pair without
+                 * ever executing them individually. Falling through to
+                 * here (role 3's structureness metadata, which never
+                 * wraps a real body; or a role 1/2 shape this session's
+                 * precompute didn't recognize) is a safe no-op either
+                 * way -- see ADLP.md's own confirmation that role 3
+                 * "brackets no HALMAT loop body at all". */
                 break;
 
             case OP_ERON:
@@ -2452,6 +2558,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 fail(state, "list-form MATRIX(...)/SCALAR(...)/INTEGER(...) shaping functions are not yet implemented");
                 break;
 
+            case OP_LFNC: {
+                /* MAX(array)/MIN(array), class-0/LFNC.md: selector 7=MAX,
+                 * 8=MIN, QUAL=IMD on LFNC's own operand. The array
+                 * argument itself was captured raw by SFAR (inside an
+                 * ADLP/DLPE bracket this interpreter treats as a no-op --
+                 * see interp_step's arrayed-paragraph replay comment;
+                 * SFAR's own operand capture doesn't call resolve_operand
+                 * so it's unaffected by the arrayed-whole-array guard
+                 * either way), so it's read here via resolve_container. */
+                if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_IMD) {
+                    fail(state, "LFNC: expected 1 IMD operand");
+                    break;
+                }
+                if (!state->shape_pending.active || state->shape_pending.item_count != 1) {
+                    fail(state, "LFNC: expected exactly one SFAR-captured array argument");
+                    break;
+                }
+                halmat_scalar_t *ca; size_t count; int rows, cols;
+                if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
+                if (count == 0) { fail(state, "LFNC: empty array argument"); break; }
+                bool want_max = (ins->operands[0].data == 7);
+                if (!want_max && ins->operands[0].data != 8) {
+                    fail(state, "LFNC: unknown selector %u (expected 7=MAX or 8=MIN)", ins->operands[0].data);
+                    break;
+                }
+                halmat_scalar_t best = ca[0];
+                for (size_t i = 1; i < count; i++) {
+                    halmat_scalar_t diff = halmat_scalar_sub(ca[i], best); /* ca[i] - best */
+                    bool is_zero = (diff.msw == 0 && diff.lsw == 0);
+                    bool is_negative = ((diff.msw >> 31) & 1) != 0;
+                    bool i_is_greater = !is_zero && !is_negative;
+                    bool i_is_less = !is_zero && is_negative;
+                    if ((want_max && i_is_greater) || (!want_max && i_is_less)) {
+                        best = ca[i];
+                    }
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = best;
+                break;
+            }
+
             case OP_BFNC: {
                 /* Built-in function call, class-0/BFNC.md's confirmed
                  * selector table (the instruction's own TAG field). Only
@@ -2471,8 +2620,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operand_count != 1) { fail(state, "BFNC: expected 1 operand (selector %u)", ins->tag); break; }
-                if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                /* ABVAL(28)/UNIT(27)/INVERSE(49) take a whole VECTOR/
+                 * MATRIX argument and resolve it via resolve_container
+                 * themselves below -- resolve_operand would (correctly,
+                 * per the new arrayed-paragraph-replay guard) reject a
+                 * bare whole-array SYT reference outside a replay
+                 * context, so it's only called for the plain-scalar-
+                 * argument selectors that actually need `a`. */
+                if (ins->tag != 27 && ins->tag != 28 && ins->tag != 49) {
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                }
 
                 switch (ins->tag) {
                     case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: {
@@ -2995,7 +3153,27 @@ bool interp_step(halmat_state_t *state, FILE *out) {
         return true;
     }
 
-    exec_one(state, out);
+    /* Arrayed-paragraph replay (state.h's arrayed_paragraph_end/_count):
+     * if this position starts a recognized ADLP-trailed paragraph,
+     * replay it element-count times (once per array index) instead of
+     * executing it once -- see precompute_arrayed_paragraphs() and the
+     * resolve_operand/write_destination QUAL_SYT redirection it enables. */
+    size_t paragraph_end = state->arrayed_paragraph_end[state->pc];
+    if (paragraph_end != NO_TARGET) {
+        size_t paragraph_start = state->pc;
+        int count = state->arrayed_paragraph_count[paragraph_start];
+        for (int idx = 0; idx < count && !state->halted; idx++) {
+            state->arrayed_index = idx;
+            state->pc = paragraph_start;
+            while (state->pc < paragraph_end && !state->halted) {
+                exec_one(state, out);
+            }
+        }
+        state->arrayed_index = -1;
+        if (!state->halted) state->pc = paragraph_end;
+    } else {
+        exec_one(state, out);
+    }
 
     state->tasks[next].saved_pc = state->pc;
     /* sched_advance seam: 1 tick per HALMAT instruction executed (the

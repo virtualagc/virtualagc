@@ -1,0 +1,15 @@
+ TEST_LFNC:
+ PROGRAM;
+    DECLARE SA1 ARRAY(3) SCALAR;
+    DECLARE SCALAR, S2;
+M   SA1   = 5.0;
+S      1
+M   SA1   = 9.0;
+S      2
+M   SA1   = 2.0;
+S      3
+    S2 = MAX(SA1);
+    WRITE(6) S2;
+    S2 = MIN(SA1);
+    WRITE(6) S2;
+ CLOSE TEST_LFNC;

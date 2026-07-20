@@ -265,6 +265,38 @@ struct halmat_state {
     bool halted;
     int exit_code;
 
+    /* Arrayed-expression "paragraph" replay (class-0/ADLP.md role 1):
+     * an ordinary arithmetic/assign paragraph over ARRAY-typed operands
+     * compiles as a SINGLE-instance instruction sequence (e.g. one
+     * SADD + one SASN, not one per element) with an ADLP/DLPE pair
+     * *trailing* it (not wrapping it, confirmed empirically this
+     * session -- PASS2/the optimizer does the per-element loop
+     * unrolling at object-code-generation time using ADLP's element-
+     * count operand as metadata; HALMAT itself never repeats the
+     * paragraph). Reproducing the correct per-element result therefore
+     * needs this interpreter to itself replay the paragraph N times,
+     * once per array index, redirecting any ARRAY/VECTOR/MATRIX-typed
+     * SYT operand within it to that element instead of treating the
+     * whole-array symbol as an illegal scalar reference. Precomputed by
+     * interp.c's precompute_arrayed_paragraphs(): keyed by the
+     * paragraph's start position (right after the previous SMRK/program
+     * start); NO_TARGET where a position doesn't start a recognized
+     * arrayed paragraph. Only the single-ADLP case is handled (the
+     * multi-ADLP multi-dimensional-array case existing in principle per
+     * ADLP.md is not; no fixture exercises it). Requires a symbol table
+     * (state->symtab) to know which SYT operands within the paragraph
+     * are actually the arrayed ones -- without one, arrayed paragraphs
+     * aren't detected at all and their SYT operands fail loudly instead
+     * (see interp.c's resolve_operand/write_destination). */
+    size_t *arrayed_paragraph_end; /* one past the trailing DLPE */
+    int *arrayed_paragraph_count;  /* element count to replay */
+    /* Set (>=0) only while actively replaying a paragraph found above;
+     * -1 otherwise. Consulted by resolve_operand/write_destination's
+     * QUAL_SYT case to redirect an ARRAY/VECTOR/MATRIX-shaped operand to
+     * elements[arrayed_index] instead of treating it as an ordinary
+     * (illegal, for a whole-array symbol) scalar/integer reference. */
+    int32_t arrayed_index;
+
     /* Precomputed DTST/CTST/ETST loop-branch targets (array positions
      * into prog->instrs), one entry per instruction; NO_TARGET (SIZE_MAX)
      * where not applicable. See interp.c's precompute_loop_targets(). */
