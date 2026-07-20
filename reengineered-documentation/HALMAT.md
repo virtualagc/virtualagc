@@ -28,6 +28,9 @@ repository root for the roadmap and editorial rules governing this material.
   - [DO CASE](#do-case)
   - [Plain `DO; ... END;`](#plain-do--end)
   - [Related: Optimizer HALMAT](#related-optimizer-halmat)
+- [Multi-file Linking](MULTI-FILE-LINKING.md) (Phase 3: how `yaHALMAT2`
+  links independently-compiled units via `EXTERNAL COMPOOL` templates,
+  since the real toolchain has no HALMAT-level linker of its own)
 - [Instructions](#instructions)
   - [By Class, then Mnemonic](#by-class-then-mnemonic)
   - [By Mnemonic (alphabetical)](#by-mnemonic-alphabetical)

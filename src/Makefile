@@ -9,7 +9,7 @@ CFLAGS ?= -std=c99 -Wall -Wextra -g -O0
 LDFLAGS ?= -lm
 
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
-        literal.c ebcdic.c interp.c value.c
+        literal.c ebcdic.c interp.c value.c symtab.c
 OBJS := $(SRCS:.c=.o)
 TARGET := yaHALMAT2
 

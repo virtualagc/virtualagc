@@ -35,6 +35,7 @@
 #define OP_XXAR 0x027
 #define OP_TDEF 0x02A
 #define OP_MDEF 0x02B
+#define OP_CDEF 0x02F
 #define OP_FDEF 0x02C
 #define OP_WAIT 0x034
 #define OP_SGNL 0x035
@@ -538,6 +539,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_XREC:
             case OP_SMRK:
             case OP_MDEF:
+            case OP_CDEF:
             case OP_EDCL:
             case OP_DSMP:
             case OP_ESMP:
