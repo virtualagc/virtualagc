@@ -810,6 +810,34 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
     }
 }
 
+/* Precomputed per array-index position: the HAL/S statement number whose
+ * code that position belongs to, for --debug's source-line display (see
+ * srcmap.c, debug.c, interp_current_stmt_for_next()). SMRK's confirmed
+ * placement (empirically, and per direct user correction) is *after* a
+ * statement's own HALMAT, not before it -- SMRK(K) is the last
+ * instruction generated for statement K, and the code that follows it
+ * belongs to statement K+1. So the statement a given position belongs to
+ * can't be determined by remembering the last SMRK *executed* (that's
+ * always one statement behind); it has to be found by looking *forward*
+ * to the next SMRK at or after that position. Filled by a single
+ * backward scan: walking from the end, each SMRK(K) sets a running
+ * "next statement" value to K, and every position (including the SMRK's
+ * own) gets stamped with whatever that running value currently is.
+ * Positions after the last SMRK in the stream (e.g. the trailing XREC)
+ * get -1 (no statement). */
+static void precompute_stmt_for_pc(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    state->stmt_for_pc = malloc(n * sizeof(long));
+    long next_stmt = -1;
+    for (size_t i = n; i-- > 0; ) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if (ins->opcode == OP_SMRK && ins->operand_count == 1) {
+            next_stmt = (long)ins->operands[0].data;
+        }
+        state->stmt_for_pc[i] = next_stmt;
+    }
+}
+
 /* LBL destinations for BRA/FBRA (IF/THEN/ELSE), keyed by INL label
  * number -- a flat table, not stack-based, since BRA/FBRA/LBL don't
  * nest the way DTST/CTST/ETST do (see class-0/LBL.md, class-0/BRA.md,
@@ -1006,6 +1034,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_case_dispatch(state);
     precompute_subprograms(state);
     precompute_arrayed_paragraphs(state);
+    precompute_stmt_for_pc(state);
     state->arrayed_index = -1;
 
     /* Primal process: priority 50 by default (USA003087 Sec. 13.1-13.3),
@@ -1017,7 +1046,6 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->tasks[0].saved_pc = 0;
     state->task_count = 1;
     state->current_task = 0;
-    state->current_stmt = -1;
     state->stri_target_syt = -1;
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
@@ -1054,6 +1082,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->symbol_active_task);
     free(state->arrayed_paragraph_end);
     free(state->arrayed_paragraph_count);
+    free(state->stmt_for_pc);
     state->symbol_active_task = NULL;
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
@@ -1071,6 +1100,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->def_clos_target = NULL;
     state->arrayed_paragraph_end = NULL;
     state->arrayed_paragraph_count = NULL;
+    state->stmt_for_pc = NULL;
 
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
         free(state->syt[i].elements);
@@ -1157,16 +1187,6 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].struct_field_syt = ins->operands[1].data;
                 break;
 
-            case OP_SMRK:
-                /* Records the HAL/S statement number a SMRK opens, for
-                 * --debug's source-line display (debug.c, srcmap.c) --
-                 * the SMRK-to-source-line correlation the M7 plan flagged
-                 * as the prerequisite for statement-level source display.
-                 * Otherwise a pure bookkeeping marker, same as the group
-                 * below. */
-                if (ins->operand_count == 1) state->current_stmt = (long)ins->operands[0].data;
-                break;
-
             case OP_STRI:
                 /* Names the SYT target for a following SLRI/ELRI/ETRI
                  * repeated-initialize group (class-8/STRI.md), consumed
@@ -1183,6 +1203,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_NOP:
             case OP_PXRC:
             case OP_XREC:
+            case OP_SMRK:
             case OP_MDEF:
             case OP_CDEF:
             case OP_EDCL:
@@ -3459,4 +3480,20 @@ const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     if (next == -1) return NULL;
     if (state->tasks[next].saved_pc >= state->prog->count) return NULL;
     return &state->prog->instrs[state->tasks[next].saved_pc];
+}
+
+/* HAL/S statement number of the instruction interp_peek_next() would
+ * return (see precompute_stmt_for_pc()'s comment for why this can't be
+ * tracked incrementally as SMRK instructions execute), or -1 if there is
+ * no next instruction (halted, or nothing left to run). For --debug's
+ * source-line display. */
+long interp_current_stmt_for_next(halmat_state_t *state) {
+    if (state->halted) return -1;
+    sched_wake_waiting(state);
+    sched_advance_to_next_wake(state);
+    int next = sched_pick_next(state);
+    if (next == -1) return -1;
+    size_t pc = state->tasks[next].saved_pc;
+    if (pc >= state->prog->count) return -1;
+    return state->stmt_for_pc[pc];
 }

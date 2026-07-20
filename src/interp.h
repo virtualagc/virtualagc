@@ -43,4 +43,9 @@ bool interp_step(halmat_state_t *state, FILE *out);
  * breakpoint/step display. */
 const halmat_instr_t *interp_peek_next(halmat_state_t *state);
 
+/* HAL/S statement number whose code interp_peek_next() falls within, or
+ * -1 if there's no next instruction. For --debugger's source-line
+ * display (debug.c, srcmap.c). */
+long interp_current_stmt_for_next(halmat_state_t *state);
+
 #endif

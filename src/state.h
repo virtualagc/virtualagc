@@ -399,8 +399,15 @@ struct halmat_state {
     halmat_task_t tasks[HALMAT_MAX_TASKS];
     int task_count;
     int current_task; /* index into tasks[], set by the scheduler loop before each instruction */
-    long current_stmt; /* HAL/S statement number of the last-executed SMRK, or -1 before any;
-                         * for --debug's source-line display (see srcmap.c) */
+    long *stmt_for_pc; /* precomputed per array-index position: the HAL/S statement number
+                         * whose HALMAT code that position belongs to, or -1 if none (past
+                         * the last SMRK). SMRK's own confirmed placement is AFTER a
+                         * statement's HALMAT, not before -- so this is filled by scanning
+                         * *backward* from each SMRK to the previous one, not forward from
+                         * SMRK-execution time (an earlier, simpler-looking approach that
+                         * turned out to always display the *previous* statement instead of
+                         * the current one). For --debug's source-line display, see srcmap.c
+                         * and interp_current_stmt_for_next(). */
     int32_t stri_target_syt; /* SYT index most recently named by STRI, or -1;
                                * consumed by QUAL_OFF writes inside the
                                * SLRI/ELRI/ETRI-bracketed repeated-initialize

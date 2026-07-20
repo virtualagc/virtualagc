@@ -55,7 +55,7 @@ static void print_current(halmat_state_t *state, const halmat_srcmap_t *srcmap, 
         fprintf(out, "(program has ended)\n");
         return;
     }
-    print_source(srcmap, state->current_stmt, out);
+    print_source(srcmap, interp_current_stmt_for_next(state), out);
     /* interp_peek_next() doesn't expose which task it picked without a
      * step actually happening, so state->current_task here is only
      * accurate right after a step -- a reasonable approximation before
