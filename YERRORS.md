@@ -1,0 +1,94 @@
+# yaHALMAT (reference emulator) — Bugs Found During Phase 3
+
+Found while implementing `yaHALMAT2` (this project's independent HALMAT
+emulator, `src/`) and cross-checking its output against the existing
+reference emulator, `yaHALMAT` (`../Halmat/emu/`, upstream:
+https://github.com/Zaneham/Halmat). Per `Plan.md`, that repo has proven
+impossible to push corrections to directly, so bugs found this way are
+recorded here instead, for eventual manual reporting to its author.
+
+Each item below was independently verified against a primary source
+and/or a hand-derived expected result before being listed — not just
+flagged because `yaHALMAT2` disagreed with it.
+
+## 1. `DCAS` (`DO CASE`) selector is 0-indexed; should be 1-indexed
+
+**File**: `emu/halmat_class0.c`, `POP_DCAS` case (~line 427).
+
+The selector-to-case matching loop initializes `case_idx = 0` and walks
+forward through `CLBL` entries comparing `case_idx == case_val` — i.e.
+a selector value of `0` matches the *first* case, `1` the second, and
+so on.
+
+The primary source, `USA003087` ("HAL/S Programmer's Guide") §10.3,
+states explicitly (rule 2): *"If its value is k (after rounding if
+necessary), then the **kth** statement of the group is selected for
+execution"* — and gives a fully worked example removing any ambiguity:
+
+> `I = 3; DO CASE I; X=4; X=3; DO X=7; Y=3; END; X=1; X=0; END;`
+> "Execution results in the **third** statement being scheduled for
+> execution" (i.e. the `DO X=7; Y=3; END;` compound statement — X≡7,
+> Y≡3 given).
+
+Selection is 1-based: `k=3` selects the third statement, not the fourth.
+
+**Repro**: compile
+```
+DECLARE INTEGER, SEL INITIAL(2), RESULT;
+DO CASE SEL;
+     RESULT = 10;
+     RESULT = 20;
+     RESULT = 30;
+END;
+```
+(`Halmat/data/test_case.hal`). Per the primary source above, `SEL=2`
+must select the *second* case (`RESULT=20`). `yaHALMAT` produces
+`RESULT=30` (the third case, i.e. `case_idx` 2 under 0-based indexing);
+`yaHALMAT2` produces `RESULT=20`, matching the spec.
+
+**Collateral effect**: `Halmat/README.md`'s own documented "expected"
+output for this fixture (`RESULT= 30`) was evidently captured from this
+buggy emulator rather than derived from the language spec, so it isn't
+usable as an independent check either — see this project's
+`reengineered-documentation/class-0/DCAS.md` for the full writeup.
+
+## 2. Range-form `DO FOR` produces wrong iteration counts when nested
+
+**File**: `emu/halmat_class0.c`, `POP_DFOR`/`POP_EFOR` cases (~lines
+222–380).
+
+For a `DO WHILE` loop containing a range-form `DO FOR` in its body:
+```
+DECLARE INTEGER, I, J INITIAL(0), K INITIAL(0);
+DO WHILE J < 100;
+   DO FOR I = 1 TO 10;
+      IF I > 5 THEN K = K + 1; ELSE K = K + 2;
+   END;
+   J = J + 10;
+END;
+WRITE(6) 'K=', K;
+```
+(`Halmat/data/test_nested.hal`), a correct execution has 10 outer-loop
+passes (`J`=0,10,…,90, all `<100`) × 10 inner-loop cycles each (5 with
+`K+=2`, 5 with `K+=1`) = `K = 10 × 15 = 150`.
+
+`yaHALMAT` produces `K=40`. Running it with `--trace` shows only 30
+total `DFOR`/`EFOR` events for the whole program — far fewer than the
+~110 a correct 10-outer × 11-inner (1 `DFOR` + 10 `EFOR` per pass)
+nesting would produce, indicating the inner loop is exiting early on
+most outer-loop passes. `yaHALMAT2` produces `K=150`, matching the
+hand-derived expected value (no interpretive ambiguity is involved here
+— unlike finding 1, this is a plain arithmetic check).
+
+**Not fully root-caused** — a `lv->declared`/`SYM_FLAGS`-based hypothesis
+(that the loop variable's declared-type bookkeeping is wrong without an
+explicit `--symtab` file) was tested and ruled out (`--symtab COMMON0.out`
+made no difference). Left for the reference implementation's author to
+diagnose further; see `reengineered-documentation/class-0/EFOR.md` for
+this project's own notes.
+
+---
+
+Both findings were cross-checked against a primary source or independent
+hand-calculation, not merely against `yaHALMAT2`'s own output, consistent
+with this project's general sourcing discipline (see `Plan.md`, `STATUS.md`).
