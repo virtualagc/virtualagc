@@ -33,8 +33,15 @@
 #define OP_XXST 0x025
 #define OP_XXND 0x026
 #define OP_XXAR 0x027
+#define OP_TDEF 0x02A
 #define OP_MDEF 0x02B
 #define OP_FDEF 0x02C
+#define OP_WAIT 0x034
+#define OP_SGNL 0x035
+#define OP_CANC 0x036
+#define OP_TERM 0x037
+#define OP_PRIO 0x038
+#define OP_SCHD 0x039
 #define OP_CLOS 0x030
 #define OP_EDCL 0x031
 #define OP_RTRN 0x032
@@ -397,31 +404,36 @@ static void precompute_case_dispatch(halmat_state_t *state) {
     }
 }
 
-/* Function/procedure definitions (FDEF...CLOS) sit inline in the
- * enclosing PROGRAM's own instruction stream, so ordinary fall-through
- * must skip over them entirely -- they're only ever entered via an
- * explicit FCAL jump (to fdef_pos+1, bypassing FDEF itself, so FDEF's
- * own "skip to my CLOS" logic never fires on a call). Matched by SYT
- * symbol equality (FDEF and its CLOS share the same operand), not a
- * nesting stack, since HAL/S subprograms don't nest inside each other --
- * only inside the top-level MDEF (also closed by CLOS, but never opened
- * via FDEF, so it never enters this map). See state.h's field comments. */
+/* Function/procedure/task definitions (FDEF|TDEF...CLOS) sit inline in
+ * the enclosing PROGRAM's own instruction stream, so ordinary
+ * fall-through must skip over them entirely -- they're only ever
+ * entered via an explicit FCAL/SCHD jump (to def_pos+1, bypassing
+ * FDEF/TDEF itself, so its own "skip to my CLOS" logic never fires on
+ * entry). Matched by SYT symbol equality (FDEF/TDEF and their CLOS
+ * share the same operand), not a nesting stack, since HAL/S
+ * functions/procedures/tasks don't nest inside each other -- only
+ * inside the top-level MDEF (also closed by CLOS, but never opened via
+ * FDEF/TDEF, so it never enters this map). See state.h's field comments. */
 static void precompute_subprograms(halmat_state_t *state) {
     size_t n = state->prog->count;
-    state->symbol_fdef_pos = malloc(HALMAT_SYT_MAX * sizeof(size_t));
-    state->fdef_clos_target = malloc(n * sizeof(size_t));
-    for (size_t i = 0; i < HALMAT_SYT_MAX; i++) state->symbol_fdef_pos[i] = NO_TARGET;
-    for (size_t i = 0; i < n; i++) state->fdef_clos_target[i] = NO_TARGET;
+    state->symbol_def_pos = malloc(HALMAT_SYT_MAX * sizeof(size_t));
+    state->def_clos_target = malloc(n * sizeof(size_t));
+    state->symbol_active_task = malloc(HALMAT_SYT_MAX * sizeof(int));
+    for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
+        state->symbol_def_pos[i] = NO_TARGET;
+        state->symbol_active_task[i] = -1;
+    }
+    for (size_t i = 0; i < n; i++) state->def_clos_target[i] = NO_TARGET;
 
     for (size_t i = 0; i < n; i++) {
         const halmat_instr_t *ins = &state->prog->instrs[i];
-        if (ins->opcode == OP_FDEF && ins->operand_count == 1) {
+        if ((ins->opcode == OP_FDEF || ins->opcode == OP_TDEF) && ins->operand_count == 1) {
             uint16_t sym = ins->operands[0].data;
-            if (sym < HALMAT_SYT_MAX) state->symbol_fdef_pos[sym] = i;
+            if (sym < HALMAT_SYT_MAX) state->symbol_def_pos[sym] = i;
         } else if (ins->opcode == OP_CLOS && ins->operand_count == 1) {
             uint16_t sym = ins->operands[0].data;
-            if (sym < HALMAT_SYT_MAX && state->symbol_fdef_pos[sym] != NO_TARGET) {
-                state->fdef_clos_target[state->symbol_fdef_pos[sym]] = i + 1;
+            if (sym < HALMAT_SYT_MAX && state->symbol_def_pos[sym] != NO_TARGET) {
+                state->def_clos_target[state->symbol_def_pos[sym]] = i + 1;
             }
         }
     }
@@ -438,6 +450,16 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_for_loops(state);
     precompute_case_dispatch(state);
     precompute_subprograms(state);
+
+    /* Primal process: priority 50 by default (USA003087 Sec. 13.1-13.3),
+     * starts at the first instruction, READY. */
+    state->tasks[0].in_use = true;
+    state->tasks[0].is_primal = true;
+    state->tasks[0].priority = 50;
+    state->tasks[0].task_state = TASK_READY;
+    state->tasks[0].saved_pc = 0;
+    state->task_count = 1;
+    state->current_task = 0;
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -452,8 +474,10 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->dcas_case_target);
     free(state->dcas_case_count);
     free(state->clbl_ecas_target);
-    free(state->symbol_fdef_pos);
-    free(state->fdef_clos_target);
+    free(state->symbol_def_pos);
+    free(state->def_clos_target);
+    free(state->symbol_active_task);
+    state->symbol_active_task = NULL;
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
     state->label_pos = NULL;
@@ -465,8 +489,8 @@ void interp_cleanup(halmat_state_t *state) {
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
     state->clbl_ecas_target = NULL;
-    state->symbol_fdef_pos = NULL;
-    state->fdef_clos_target = NULL;
+    state->symbol_def_pos = NULL;
+    state->def_clos_target = NULL;
 
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
         free(state->syt[i].elements);
@@ -498,8 +522,13 @@ static void flush_write(halmat_state_t *state, FILE *out) {
     state->io_pending.item_count = 0;
 }
 
-int interp_run(halmat_state_t *state, FILE *out) {
-    while (!state->halted && state->pc < state->prog->count) {
+/* Executes exactly one instruction for whatever task is current
+ * (state->current_task, state->pc already set to its saved_pc by the
+ * scheduler loop in interp_run). Split out from interp_run so the
+ * scheduler can interleave tasks at instruction granularity -- see
+ * state.h's scheduler field comments. */
+static void exec_one(halmat_state_t *state, FILE *out) {
+    {
         const halmat_instr_t *ins = &state->prog->instrs[state->pc];
         resolved_value_t a, b;
         bool branched = false;
@@ -805,13 +834,14 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 state->io_pending.active = false;
                 break;
 
-            case OP_FDEF: {
-                /* Only ever reached by ordinary fall-through -- FCAL
-                 * jumps straight to fdef_pos+1, past this instruction
-                 * (see precompute_subprograms). Skip the whole
-                 * definition; it's entered only via an explicit call. */
-                size_t target = state->fdef_clos_target[state->pc];
-                if (target == NO_TARGET) { fail(state, "FDEF has no matching CLOS"); break; }
+            case OP_FDEF:
+            case OP_TDEF: {
+                /* Only ever reached by ordinary fall-through -- FCAL/SCHD
+                 * jump straight to def_pos+1, past this instruction (see
+                 * precompute_subprograms). Skip the whole definition;
+                 * it's entered only via an explicit call/schedule. */
+                size_t target = state->def_clos_target[state->pc];
+                if (target == NO_TARGET) { fail(state, "FDEF/TDEF has no matching CLOS"); break; }
                 state->pc = target;
                 branched = true;
                 break;
@@ -824,7 +854,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "FCAL: expected 1 operand"); break; }
                 uint16_t callee = ins->operands[0].data;
-                if (callee >= HALMAT_SYT_MAX || state->symbol_fdef_pos[callee] == NO_TARGET) {
+                if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] == NO_TARGET) {
                     fail(state, "call to undefined function (symbol %u)", callee);
                     break;
                 }
@@ -838,7 +868,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
                 }
                 if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
-                state->pc = state->symbol_fdef_pos[callee] + 1;
+                state->pc = state->symbol_def_pos[callee] + 1;
                 branched = true;
                 break;
             }
@@ -865,11 +895,122 @@ int interp_run(halmat_state_t *state, FILE *out) {
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                     state->pc = fcal_pos + 1;
                     branched = true;
+                } else if (!state->tasks[state->current_task].is_primal) {
+                    /* A scheduled task's body fell through to its own
+                     * end without an explicit TERMINATE -- implicit
+                     * self-termination (class-0/RTRN.md's "every
+                     * subprogram body is terminated regardless" note,
+                     * TASK analog). Ends this task only, not the whole
+                     * program -- the scheduler picks the next READY task. */
+                    halmat_task_t *cur = &state->tasks[state->current_task];
+                    cur->task_state = TASK_TERMINATED;
+                    if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
                 } else {
+                    /* Primal process closing: per USA003087 Sec. 13.3,
+                     * all other processes are always dependent on the
+                     * primal process for their existence, so this ends
+                     * the whole program. */
                     state->halted = true;
                     state->exit_code = 0;
                 }
                 break;
+
+            case OP_SCHD: {
+                /* Only the immediate-initiation form (PRIORITY/DEPENDENT
+                 * only) is implemented; delayed (AT/IN/ON) and cyclic
+                 * (REPEAT EVERY/AFTER, WHILE/UNTIL) forms fail loudly
+                 * rather than misbehaving -- see class-0/SCHD.md's
+                 * confirmed tag bitmask. */
+                if (ins->operand_count < 1 || ins->operands[0].qual != QUAL_SYT) {
+                    fail(state, "SCHD: expected task symbol as first operand");
+                    break;
+                }
+                uint16_t task_sym = ins->operands[0].data;
+                if (task_sym >= HALMAT_SYT_MAX || state->symbol_def_pos[task_sym] == NO_TARGET) {
+                    fail(state, "SCHEDULE of undefined task (symbol %u)", task_sym);
+                    break;
+                }
+                if (ins->tag & ~(uint8_t)0x0C) { /* anything beyond PRIORITY(4)|DEPENDENT(8) */
+                    fail(state, "SCHEDULE: only the immediate PRIORITY/DEPENDENT form is implemented (tag 0x%X)", ins->tag);
+                    break;
+                }
+                int priority = 50; /* default when no PRIORITY(...) clause; matches the primal's own default, but untested -- no primary-source confirmation for this specific case */
+                bool dependent = (ins->tag & 0x8) != 0;
+                uint8_t operand_idx = 1;
+                if (ins->tag & 0x4) { /* PRIORITY(...) present */
+                    if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing PRIORITY operand"); break; }
+                    if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
+                    priority = rv_to_integer(&a);
+                }
+                if (priority <= 0 || priority >= 255) {
+                    fail(state, "SCHEDULE priority %d out of range 0<P<255 (USA003087 Sec. 13.1-13.3)", priority);
+                    break;
+                }
+                if (state->symbol_active_task[task_sym] != -1) {
+                    /* At most one active instance per task symbol for
+                     * now -- reentrant/concurrent re-scheduling of the
+                     * same task block isn't implemented; no fixture
+                     * exercises it. */
+                    fail(state, "task already active (concurrent re-scheduling of the same task not yet implemented)");
+                    break;
+                }
+                if (state->task_count >= HALMAT_MAX_TASKS) { fail(state, "too many concurrent tasks"); break; }
+                int idx = state->task_count++;
+                state->tasks[idx].in_use = true;
+                state->tasks[idx].is_primal = false;
+                state->tasks[idx].symbol = task_sym;
+                state->tasks[idx].priority = priority;
+                state->tasks[idx].task_state = TASK_READY;
+                state->tasks[idx].saved_pc = state->symbol_def_pos[task_sym] + 1;
+                state->tasks[idx].dependent = dependent;
+                state->symbol_active_task[task_sym] = idx;
+                /* No branch here -- SCHD only adds the task to the pool;
+                 * the scheduler loop in interp_run naturally picks it up
+                 * next if its priority is higher than whatever is
+                 * currently executing (immediate preemption), or lets
+                 * the current flow continue otherwise. */
+                break;
+            }
+
+            case OP_WAIT: {
+                /* Only the interval form (WAIT <seconds>;, tag=1) is
+                 * implemented; WAIT UNTIL (tag=2) and WAIT FOR DEPENDENT
+                 * (tag=0, no operands) fail loudly -- see class-0/WAIT.md. */
+                if (ins->operand_count != 1 || ins->tag != 1) {
+                    fail(state, "WAIT: only the interval form is implemented");
+                    break;
+                }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                int32_t ticks = rv_to_integer(&a); /* WAIT's duration treated as tick count -- see state.h's scheduler comment on the tick/second calibration */
+                if (ticks < 0) ticks = 0;
+                halmat_task_t *cur = &state->tasks[state->current_task];
+                cur->task_state = TASK_WAITING;
+                cur->wake_deadline = state->virtual_time + ticks;
+                break;
+            }
+
+            case OP_TERM: {
+                if (ins->operand_count == 0) {
+                    /* Self form. */
+                    halmat_task_t *cur = &state->tasks[state->current_task];
+                    cur->task_state = TASK_TERMINATED;
+                    if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+                } else {
+                    /* Named/list form: terminating an inactive/already-
+                     * finished task is a no-op (USA003087's "removed
+                     * from the process queue" framing), not an error. */
+                    for (uint8_t i = 0; i < ins->operand_count; i++) {
+                        if (ins->operands[i].qual != QUAL_SYT) { fail(state, "TERM: expected SYT operand"); break; }
+                        uint16_t sym = ins->operands[i].data;
+                        if (sym < HALMAT_SYT_MAX && state->symbol_active_task[sym] != -1) {
+                            int idx = state->symbol_active_task[sym];
+                            state->tasks[idx].task_state = TASK_TERMINATED;
+                            state->symbol_active_task[sym] = -1;
+                        }
+                    }
+                }
+                break;
+            }
 
             default: {
                 const opcode_desc_t *desc = opcode_lookup(ins->opcode);
@@ -883,9 +1024,52 @@ int interp_run(halmat_state_t *state, FILE *out) {
             state->pc++;
         }
     }
+}
 
-    if (state->pc >= state->prog->count && !state->halted) {
-        fail(state, "instruction stream ended without a CLOS");
+/* Highest-priority TASK_READY task, or -1 if none are ready (everything
+ * is TERMINATED or TASK_WAITING). */
+static int sched_pick_next(halmat_state_t *state) {
+    int best = -1;
+    for (int i = 0; i < state->task_count; i++) {
+        if (!state->tasks[i].in_use || state->tasks[i].task_state != TASK_READY) continue;
+        if (best == -1 || state->tasks[i].priority > state->tasks[best].priority) best = i;
+    }
+    return best;
+}
+
+static void sched_wake_waiting(halmat_state_t *state) {
+    for (int i = 0; i < state->task_count; i++) {
+        if (state->tasks[i].in_use && state->tasks[i].task_state == TASK_WAITING &&
+            state->tasks[i].wake_deadline <= state->virtual_time) {
+            state->tasks[i].task_state = TASK_READY;
+        }
+    }
+}
+
+int interp_run(halmat_state_t *state, FILE *out) {
+    for (;;) {
+        sched_wake_waiting(state);
+        int next = sched_pick_next(state);
+        if (next == -1) break; /* nothing left ready (and nothing left to ever wake) */
+
+        state->current_task = next;
+        state->pc = state->tasks[next].saved_pc;
+
+        if (state->pc >= state->prog->count) {
+            fail(state, "instruction stream ended without a CLOS");
+            break;
+        }
+
+        exec_one(state, out);
+
+        state->tasks[next].saved_pc = state->pc;
+        /* sched_advance seam: 1 tick per HALMAT instruction executed
+         * (the user's confirmed per-instruction granularity choice) --
+         * see state.h's scheduler field comments for what a future
+         * --time-scale option would multiply here. */
+        state->virtual_time++;
+
+        if (state->halted) break;
     }
 
     return state->exit_code;

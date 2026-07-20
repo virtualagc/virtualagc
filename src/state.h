@@ -60,6 +60,25 @@ typedef struct {
     size_t ref_offset; /* is_ref=true */
 } halmat_vac_slot_t;
 
+#define HALMAT_MAX_TASKS 32
+
+typedef enum {
+    TASK_READY,
+    TASK_WAITING,
+    TASK_TERMINATED,
+} halmat_task_state_t;
+
+typedef struct {
+    bool in_use;
+    bool is_primal;
+    uint16_t symbol;   /* SYT slot of the task's own name (arbitrary for primal) */
+    int priority;
+    halmat_task_state_t task_state;
+    size_t saved_pc;
+    int64_t wake_deadline; /* virtual_time tick at which a TASK_WAITING task becomes TASK_READY */
+    bool dependent;    /* SCHEDULE ... DEPENDENT was specified; parsed but not yet behaviorally enforced beyond primal-exit ending the whole program */
+} halmat_task_t;
+
 struct halmat_state {
     const halmat_program_t *prog;
     const halmat_literal_table_t *literals;
@@ -143,21 +162,41 @@ struct halmat_state {
     size_t *dcas_case_count;   /* per-DCAS position: how many ordinary (non-trap) cases */
     size_t *clbl_ecas_target;  /* per-CLBL position: where to jump (ECAS join point + 1) */
 
-    /* Function/procedure calls (FDEF/FCAL/RTRN/CLOS): a function's body
-     * sits inline in the enclosing PROGRAM's own instruction stream, so
-     * FDEF, reached by ordinary fall-through (i.e. NOT via a call jump,
-     * since FCAL jumps past FDEF straight to its body), skips over the
-     * whole definition to its matching CLOS. FCAL jumps to fdef_pos+1
-     * and binds arguments to SYT slots per class-0/FCAL.md's confirmed
-     * positional convention (callee_symbol+1+i). RTRN resolves its
-     * operand as the return value, stores it in VAC at FCAL's own word
-     * index (so the caller's ordinary VAC-qualified pickup works
-     * unmodified), and jumps back to just past FCAL. See
-     * interp.c's precompute_subprograms(). */
-    size_t *symbol_fdef_pos;   /* indexed by SYT symbol: FDEF's array position, or NO_TARGET */
-    size_t *fdef_clos_target;  /* per-FDEF position: matching CLOS's array position + 1 */
+    /* Function/procedure calls and TASK bodies (FDEF/TDEF/FCAL/RTRN/
+     * SCHD/CLOS): a function's or task's body sits inline in the
+     * enclosing PROGRAM's own instruction stream, so FDEF/TDEF, reached
+     * by ordinary fall-through (i.e. NOT via a call/schedule jump, since
+     * those jump past FDEF/TDEF straight to the body), skip over the
+     * whole definition to its matching CLOS. Both share one symbol->
+     * definition-position map since the "skip on fall-through, enter
+     * only via an explicit trigger" shape is identical; FCAL and SCHD
+     * differ only in what they do once they've found the entry point
+     * (FCAL jumps the *same* flow of control in and back per class-0/
+     * FCAL.md's positional argument-binding convention; SCHD spawns an
+     * *additional*, concurrently-scheduled task -- see the task/
+     * scheduler fields below). See interp.c's precompute_subprograms(). */
+    size_t *symbol_def_pos;   /* indexed by SYT symbol: FDEF/TDEF's array position, or NO_TARGET */
+    size_t *def_clos_target;  /* per-FDEF/TDEF position: matching CLOS's array position + 1 */
     size_t call_return_stack[64]; /* FCAL's own array position, per active call */
     int call_return_sp;
+
+    /* Virtual-clock task scheduler (SCHD/WAIT/TERM; SGNL/CANC/PRIO and
+     * SCHD's delayed/cyclic AT/IN/ON/EVERY/AFTER/WHILE/UNTIL forms are
+     * not yet implemented -- immediate SCHEDULE with PRIORITY/DEPENDENT
+     * only). Ticks 1:1 per HALMAT instruction executed (the user's
+     * confirmed per-instruction granularity choice), with WAIT's
+     * duration treated as that many ticks -- an explicit, documented
+     * simplification (no wall-clock fidelity is attempted regardless;
+     * see Plan.md's Phase 3 scheduler notes), not a calibration to real
+     * seconds. sched_advance() is the single seam where a future
+     * `--time-scale` option could someday multiply ticks against a
+     * wall-clock delta. Priority: 0 < P < 255, higher number = higher
+     * priority, primal defaults to 50 (USA003087 Sec. 13.1-13.3). */
+    halmat_task_t tasks[HALMAT_MAX_TASKS];
+    int task_count;
+    int current_task; /* index into tasks[], set by the scheduler loop before each instruction */
+    int64_t virtual_time;
+    int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };
 
 #define HALMAT_MAX_CASES 64
