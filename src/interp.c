@@ -1048,31 +1048,50 @@ static void sched_wake_waiting(halmat_state_t *state) {
     }
 }
 
-int interp_run(halmat_state_t *state, FILE *out) {
-    for (;;) {
-        sched_wake_waiting(state);
-        int next = sched_pick_next(state);
-        if (next == -1) break; /* nothing left ready (and nothing left to ever wake) */
+/* Runs the scheduler for exactly one instruction (picks the
+ * highest-priority TASK_READY task, executes one instruction for it,
+ * advances the virtual clock). Returns true once nothing is left to run
+ * (halted, or no task is READY/ever going to wake). Exposed for
+ * --debugger's step command; interp_run() is just this called in a loop. */
+bool interp_step(halmat_state_t *state, FILE *out) {
+    if (state->halted) return true;
 
-        state->current_task = next;
-        state->pc = state->tasks[next].saved_pc;
+    sched_wake_waiting(state);
+    int next = sched_pick_next(state);
+    if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
 
-        if (state->pc >= state->prog->count) {
-            fail(state, "instruction stream ended without a CLOS");
-            break;
-        }
+    state->current_task = next;
+    state->pc = state->tasks[next].saved_pc;
 
-        exec_one(state, out);
-
-        state->tasks[next].saved_pc = state->pc;
-        /* sched_advance seam: 1 tick per HALMAT instruction executed
-         * (the user's confirmed per-instruction granularity choice) --
-         * see state.h's scheduler field comments for what a future
-         * --time-scale option would multiply here. */
-        state->virtual_time++;
-
-        if (state->halted) break;
+    if (state->pc >= state->prog->count) {
+        fail(state, "instruction stream ended without a CLOS");
+        return true;
     }
 
+    exec_one(state, out);
+
+    state->tasks[next].saved_pc = state->pc;
+    /* sched_advance seam: 1 tick per HALMAT instruction executed (the
+     * user's confirmed per-instruction granularity choice) -- see
+     * state.h's scheduler field comments for what a future --time-scale
+     * option would multiply here. */
+    state->virtual_time++;
+
+    return state->halted;
+}
+
+int interp_run(halmat_state_t *state, FILE *out) {
+    while (!interp_step(state, out)) {
+        /* keep going */
+    }
     return state->exit_code;
+}
+
+const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
+    if (state->halted) return NULL;
+    sched_wake_waiting(state);
+    int next = sched_pick_next(state);
+    if (next == -1) return NULL;
+    if (state->tasks[next].saved_pc >= state->prog->count) return NULL;
+    return &state->prog->instrs[state->tasks[next].saved_pc];
 }

@@ -1,6 +1,7 @@
 #ifndef HALMAT_INTERP_H
 #define HALMAT_INTERP_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "halmat.h"
@@ -15,5 +16,18 @@ void interp_cleanup(halmat_state_t *state);
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */
 int interp_run(halmat_state_t *state, FILE *out);
+
+/* Executes exactly one scheduler step (see interp.c). Returns true once
+ * nothing is left to run (halted, or no task ready/ever waking) -- the
+ * building block interp_run() loops on, and what --debugger's `step`
+ * command calls directly. */
+bool interp_step(halmat_state_t *state, FILE *out);
+
+/* Read-only(-ish; may transition a TASK_WAITING task to TASK_READY if
+ * its deadline has already passed) peek at whichever instruction
+ * interp_step() would execute next, without executing it. Returns NULL
+ * if the program has halted or nothing is left ready. For --debugger's
+ * breakpoint/step display. */
+const halmat_instr_t *interp_peek_next(halmat_state_t *state);
 
 #endif

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "debug.h"
 #include "disasm.h"
 #include "halmat.h"
 #include "interp.h"
@@ -25,6 +26,7 @@ static void usage(const char *prog) {
             "  --litfile F      literal file (default: auto-discovered alongside HALMAT_FILE)\n"
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
             "  --num-blanks N   blanks between WRITE items (default: 5, per USA003087 Sec. 12.2)\n"
+            "  --debug          interactive gdb-subset debugger (see debug.h; single HALMAT_FILE only)\n"
             "  --opt            for @list: load optmat.bin (+ its companions) instead of halmat.bin\n"
             "  --entry DIR      for @list: which directory is the executing PROGRAM unit\n"
             "                   (auto-detected if exactly one directory holds a PROGRAM)\n"
@@ -60,7 +62,7 @@ static bool find_companion(const char *halmat_path, const char *const *candidate
     return false;
 }
 
-static int run_single(const char *path, bool disasm, const char *litfile_opt,
+static int run_single(const char *path, bool disasm, bool debug_mode, const char *litfile_opt,
                        const char *memory_opt, int num_blanks) {
     halmat_program_t prog;
     char errbuf[512];
@@ -103,11 +105,24 @@ static int run_single(const char *path, bool disasm, const char *litfile_opt,
         have_literals = true;
     }
 
+    halmat_symtab_t symtab;
+    bool have_symtab = false;
+    if (debug_mode) {
+        char sym_buf[1024];
+        static const char *sym_candidates[] = {"COMMON0.out"};
+        if (find_companion(path, sym_candidates, 1, sym_buf, sizeof(sym_buf))) {
+            char err2[256];
+            have_symtab = halmat_symtab_load(sym_buf, &symtab, err2, sizeof(err2));
+        }
+    }
+
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
-    int rc = interp_run(&state, stdout);
+    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, stdout)
+                         : interp_run(&state, stdout);
     interp_cleanup(&state);
 
+    if (have_symtab) halmat_symtab_free(&symtab);
     if (have_literals) halmat_literal_free(&literals);
     halmat_program_free(&prog);
     return rc;
@@ -381,6 +396,7 @@ static bool read_list_file(const char *path, char dirs[][900], int *count, int m
 
 int main(int argc, char **argv) {
     bool disasm = false;
+    bool debug_mode = false;
     const char *path = NULL;
     const char *litfile_opt = NULL;
     const char *memory_opt = NULL;
@@ -391,6 +407,8 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--disasm") == 0) {
             disasm = true;
+        } else if (strcmp(argv[i], "--debug") == 0) {
+            debug_mode = true;
         } else if (strcmp(argv[i], "--litfile") == 0 && i + 1 < argc) {
             litfile_opt = argv[++i];
         } else if (strcmp(argv[i], "--memory") == 0 && i + 1 < argc) {
@@ -437,5 +455,5 @@ int main(int argc, char **argv) {
         return run_linked(dir_ptrs, num_dirs, use_opt, entry_opt, disasm, num_blanks);
     }
 
-    return run_single(path, disasm, litfile_opt, memory_opt, num_blanks);
+    return run_single(path, disasm, debug_mode, litfile_opt, memory_opt, num_blanks);
 }

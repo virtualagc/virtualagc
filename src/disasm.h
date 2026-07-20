@@ -13,4 +13,7 @@
  * count/opcode sequence, not to be a drop-in replacement. */
 void halmat_disasm_program(const halmat_program_t *prog, FILE *out);
 
+/* Same format, for a single instruction -- used by --debugger. */
+void halmat_disasm_instr(const halmat_instr_t *ins, FILE *out);
+
 #endif
