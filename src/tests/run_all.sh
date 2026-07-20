@@ -53,6 +53,7 @@ run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      
 run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
+run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)

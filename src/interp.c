@@ -98,6 +98,9 @@
 #define OP_SSUB 0x5AC
 #define OP_SSPR 0x5AD
 #define OP_SSDV 0x5AE
+#define OP_SIEX 0x571
+#define OP_SPEX 0x572
+#define OP_SEXP 0x5AF
 #define OP_SNEG 0x5B0
 #define OP_ITOS 0x5C1
 #define OP_STOI 0x6A1
@@ -1083,6 +1086,64 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = quotient;
+                break;
+            }
+
+            case OP_SPEX:
+            case OP_SIEX: {
+                /* SPEX (positive-literal exponent, class-5/SPEX.md) and
+                 * SIEX (any-sign integer exponent, class-5/SIEX.md): both
+                 * inline repeated multiplication on the base; SIEX
+                 * additionally takes the reciprocal for a negative
+                 * exponent (1/base^|n|) since HAL/S has no separate
+                 * negative-exponent opcode. */
+                if (ins->operand_count != 2) { fail(state, "SPEX/SIEX: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                halmat_scalar_t base = rv_to_scalar(&a);
+                int32_t exponent = rv_to_integer(&b);
+                bool dbl = base.double_precision;
+                if (ins->opcode == OP_SPEX && exponent < 0) {
+                    fail(state, "SPEX: negative exponent (expected a positive literal)");
+                    break;
+                }
+                halmat_scalar_t result = halmat_scalar_from_integer(1, dbl);
+                uint32_t magnitude = (exponent < 0) ? (uint32_t)(-(int64_t)exponent) : (uint32_t)exponent;
+                for (uint32_t i = 0; i < magnitude; i++) result = halmat_scalar_multiply(result, base);
+                if (exponent < 0) {
+                    halmat_scalar_t reciprocal;
+                    if (!halmat_scalar_divide(halmat_scalar_from_integer(1, dbl), result, &reciprocal)) {
+                        fail(state, "SIEX: division by zero (0 raised to a negative exponent)");
+                        break;
+                    }
+                    result = reciprocal;
+                }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = result;
+                break;
+            }
+
+            case OP_SEXP: {
+                /* Scalar-exponent-by-scalar (class-5/SEXP.md), the fully
+                 * general case (e.g. fractional exponents). No documented
+                 * hex-float power algorithm exists in the extracted
+                 * AP-101S material (unlike SADD/SSPR/SSDV's primary-
+                 * sourced characteristic/fraction algorithms) -- goes
+                 * through double via pow(), a documented precision
+                 * compromise for this one opcode rather than the genuine
+                 * hex-float arithmetic used everywhere else in this
+                 * interpreter. */
+                if (ins->operand_count != 2) { fail(state, "SEXP: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                halmat_scalar_t base = rv_to_scalar(&a);
+                double result = pow(halmat_scalar_to_double(base), halmat_scalar_to_double(rv_to_scalar(&b)));
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_from_double(result, base.double_precision);
                 break;
             }
 
