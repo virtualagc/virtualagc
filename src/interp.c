@@ -61,6 +61,14 @@
 #define OP_BNOT 0x104
 #define OP_ITOB 0x1C1
 #define OP_BTOI 0x621
+#define OP_CTOB 0x141
+#define OP_STOB 0x1A1
+#define OP_BTOC 0x221
+#define OP_BTOS 0x521
+#define OP_ITOI 0x6C1
+#define OP_BTRU 0x720
+#define OP_BNEQ 0x725
+#define OP_BEQU 0x726
 #define OP_CASN 0x201
 #define OP_CCAT 0x202
 #define OP_CTOC 0x241
@@ -1653,6 +1661,111 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = (int32_t)a.bits;
+                break;
+
+            case OP_BTOS:
+                /* Bit->scalar, class-5/BTOS.md: the raw bit pattern
+                 * reinterpreted as an unsigned integer value (matching
+                 * the reference emulator's own `(double)a.v.bits` -- no
+                 * primary-source operand format exists to check this
+                 * against independently, but it's the only reading
+                 * consistent with BTOI's parallel "raw pattern as
+                 * integer" conversion). */
+                if (ins->operand_count != 1) { fail(state, "BTOS: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BTOS: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_from_double((double)a.bits, false);
+                break;
+
+            case OP_ITOI:
+                /* Integer precision scale, class-6/ITOI.md -- this
+                 * interpreter's INTEGER has no single/double precision
+                 * distinction to scale between (int32_t only), so this
+                 * is a plain passthrough. */
+                if (ins->operand_count != 1) { fail(state, "ITOI: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = false;
+                state->vac[ins->index].integer = rv_to_integer(&a);
+                break;
+
+            case OP_BTOC: {
+                /* Bit->character, class-2/BTOC.md. No confirmed output
+                 * format (BIT has no declared-width tracking here to
+                 * inform how many digits to show either way -- see
+                 * state.h) -- matches the reference emulator's own
+                 * plain "%u" decimal-of-the-raw-pattern convention. */
+                if (ins->operand_count != 1) { fail(state, "BTOC: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BTOC: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                char buf[16];
+                snprintf(buf, sizeof(buf), "%u", a.bits);
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_string = true;
+                state->vac[ins->index].string = dup_string(buf);
+                break;
+            }
+
+            case OP_CTOB:
+                /* Character->bit, class-1/CTOB.md. No reference
+                 * implementation exists to cross-check (falls to
+                 * yaHALMAT's own "unknown popcode" default there) --
+                 * implemented as the natural inverse of BTOC's decimal-
+                 * of-raw-pattern convention above. */
+                if (ins->operand_count != 1) { fail(state, "CTOB: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_STRING) { fail(state, "CTOB: operand is not CHARACTER"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = (uint32_t)strtoul(a.string, NULL, 10);
+                break;
+
+            case OP_STOB:
+                /* Scalar->bit, class-1/STOB.md. No reference
+                 * implementation exists to cross-check -- implemented as
+                 * BTOS's inverse: round to the nearest integer (STOI's
+                 * rule, halmat_scalar_to_integer) then reinterpret as an
+                 * unsigned bit pattern. */
+                if (ins->operand_count != 1) { fail(state, "STOB: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a);
+                break;
+
+            case OP_BTRU:
+                /* Bit-is-true test, class-7/BTRU.md: the generic "make
+                 * this bit value branch-testable" operator FBRA consumes
+                 * -- nonzero is true, matching BEQU/BNEQ/every other
+                 * comparison's VAC-carried 0/1 convention. */
+                if (ins->operand_count != 1) { fail(state, "BTRU: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BTRU: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = (a.bits != 0) ? 1 : 0;
+                break;
+
+            case OP_BEQU:
+            case OP_BNEQ:
+                if (ins->operand_count != 2) { fail(state, "BEQU/BNEQ: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BEQU/BNEQ: both operands must be BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                {
+                    bool equal = (a.bits == b.bits);
+                    bool result = (ins->opcode == OP_BEQU) ? equal : !equal;
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].integer = result ? 1 : 0;
+                }
                 break;
 
             case OP_CASN:
