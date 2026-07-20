@@ -31,6 +31,7 @@
 #define OP_ETST 0x00F
 #define OP_CTST 0x016
 #define OP_DSUB 0x019
+#define OP_RDAL 0x020
 #define OP_READ 0x01F
 #define OP_WRIT 0x021
 #define OP_XXST 0x025
@@ -40,6 +41,7 @@
 #define OP_MDEF 0x02B
 #define OP_CDEF 0x02F
 #define OP_FDEF 0x02C
+#define OP_PDEF 0x02D
 #define OP_WAIT 0x034
 #define OP_SGNL 0x035
 #define OP_CANC 0x036
@@ -49,6 +51,7 @@
 #define OP_CLOS 0x030
 #define OP_EDCL 0x031
 #define OP_RTRN 0x032
+#define OP_PCAL 0x01D
 #define OP_FCAL 0x01E
 #define OP_IASN 0x601
 #define OP_SASN 0x501
@@ -491,7 +494,7 @@ static void precompute_subprograms(halmat_state_t *state) {
 
     for (size_t i = 0; i < n; i++) {
         const halmat_instr_t *ins = &state->prog->instrs[i];
-        if ((ins->opcode == OP_FDEF || ins->opcode == OP_TDEF) && ins->operand_count == 1) {
+        if ((ins->opcode == OP_FDEF || ins->opcode == OP_TDEF || ins->opcode == OP_PDEF) && ins->operand_count == 1) {
             uint16_t sym = ins->operands[0].data;
             if (sym < HALMAT_SYT_MAX) state->symbol_def_pos[sym] = i;
         } else if (ins->opcode == OP_CLOS && ins->operand_count == 1) {
@@ -1277,23 +1280,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * value -- capture the raw operand for OP_READ to
                      * write through later, per class-0/XXAR.md. TAG2 != 0
                      * means an I/O control specifier (TAB/COLUMN/SKIP/
-                     * LINE/PAGE); TAG1 outside {5=SCALAR,6=INTEGER} means
-                     * a type this interpreter doesn't store yet (BIT/
-                     * CHARACTER/MATRIX/VECTOR/structure) -- both fail
-                     * loudly rather than misbehave, no fixture needs them
-                     * yet. */
+                     * LINE/PAGE); TAG1 outside {2=CHARACTER,5=SCALAR,
+                     * 6=INTEGER} means a type this interpreter doesn't
+                     * store yet (BIT/MATRIX/VECTOR/structure) -- both
+                     * fail loudly rather than misbehave, no fixture needs
+                     * them yet. (CHARACTER matters in practice: real
+                     * HAL/S's READALL requires CHARACTER-typed targets --
+                     * confirmed via a real HALSFC compile rejecting an
+                     * INTEGER/SCALAR READALL with "VARIABLE IN READALL IS
+                     * NOT OF CHARACTER TYPE".) */
                     if (ins->operands[0].tag2 != 0) {
                         fail(state, "READ: I/O control specifiers (TAB/COLUMN/SKIP/LINE/PAGE) not yet implemented");
                         break;
                     }
                     uint8_t cls = ins->operands[0].tag1;
-                    if (cls != 5 && cls != 6) {
-                        fail(state, "READ: only SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
+                    if (cls != 2 && cls != 5 && cls != 6) {
+                        fail(state, "READ: only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
                         break;
                     }
                     state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                     state->io_pending.items[state->io_pending.item_count].dest_class = cls;
                     state->io_pending.item_count++;
+                    break;
+                }
+                if (state->io_pending.is_call && ins->operands[0].tag2 != 0) {
+                    /* ASSIGN-form CALL argument (class-0/XXST.md's `CALL
+                     * TWO(I1) ASSIGN(I1);` trace): the callee's parameter
+                     * value must be written back into the caller's
+                     * variable after the procedure returns. Not
+                     * implemented -- fail loudly rather than silently
+                     * dropping the write-back; no fixture needs it yet. */
+                    fail(state, "PCAL: ASSIGN-form arguments are not yet implemented");
                     break;
                 }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
@@ -1321,9 +1338,16 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
-            case OP_READ: {
-                if (!state->io_pending.active) { fail(state, "READ outside of an XXST...XXND block"); break; }
-                if (ins->operand_count != 1) { fail(state, "READ: expected 1 operand"); break; }
+            case OP_READ:
+            case OP_RDAL: {
+                /* RDAL (READALL) is structurally identical to READ for
+                 * the plain scalar/integer-list case (class-0/RDAL.md) --
+                 * shares this handler. READALL's real-HAL/S array/until-
+                 * EOF looping behavior isn't modeled (reads exactly the
+                 * listed items, same as READ); no fixture uses an
+                 * arrayed READALL target yet. */
+                if (!state->io_pending.active) { fail(state, "READ/READALL outside of an XXST...XXND block"); break; }
+                if (ins->operand_count != 1) { fail(state, "READ/READALL: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 int device = rv_to_integer(&a);
                 if (device < 0 || device >= HALMAT_DEVICE_MAX || !state->devices[device]) {
@@ -1341,6 +1365,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         }
                         rv.kind = RV_INTEGER;
                         rv.integer = (int32_t)v;
+                    } else if (state->io_pending.items[i].dest_class == 2) {
+                        /* Whitespace-delimited token, same convention as
+                         * the numeric cases -- HAL/S's real fixed-column
+                         * card-image READ format isn't modeled (see
+                         * state.h's CHARACTER-storage note), just enough
+                         * for the common case of reading a plain word. */
+                        char buf[1024];
+                        if (fscanf(in, "%1023s", buf) != 1) {
+                            fail(state, "READ(%d): end of input for CHARACTER", device);
+                            break;
+                        }
+                        rv.kind = RV_STRING;
+                        rv.string = buf;
+                        if (!write_destination(state, &state->io_pending.items[i].dest_operand, &rv)) break;
+                        continue;
                     } else {
                         double v;
                         if (fscanf(in, "%lf", &v) != 1) {
@@ -1362,14 +1401,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_FDEF:
-            case OP_TDEF: {
-                /* Only ever reached by ordinary fall-through -- FCAL/SCHD
-                 * jump straight to def_pos+1, past this instruction (see
-                 * precompute_subprograms). Skip the whole definition;
-                 * it's entered only via an explicit call/schedule. */
+            case OP_TDEF:
+            case OP_PDEF: {
+                /* Only ever reached by ordinary fall-through -- FCAL/PCAL/
+                 * SCHD jump straight to def_pos+1, past this instruction
+                 * (see precompute_subprograms). Skip the whole
+                 * definition; it's entered only via an explicit
+                 * call/schedule. */
                 size_t target = state->def_clos_target[state->pc];
-                if (target == NO_TARGET) { fail(state, "FDEF/TDEF has no matching CLOS"); break; }
+                if (target == NO_TARGET) { fail(state, "FDEF/TDEF/PDEF has no matching CLOS"); break; }
                 state->pc = target;
+                branched = true;
+                break;
+            }
+
+            case OP_PCAL: {
+                /* Procedure call header (class-0/PCAL.md): same
+                 * bracketed-argument-list/positional-binding mechanism as
+                 * FCAL, but no VAC return-value slot to fill -- the
+                 * callee returns via RTRN's 0-operand (procedure) form. */
+                if (!state->io_pending.active || !state->io_pending.is_call) {
+                    fail(state, "PCAL outside of an XXST...XXND call block");
+                    break;
+                }
+                if (ins->operand_count != 1) { fail(state, "PCAL: expected 1 operand"); break; }
+                uint16_t proc = ins->operands[0].data;
+                if (proc >= HALMAT_SYT_MAX || state->symbol_def_pos[proc] == NO_TARGET) {
+                    fail(state, "call to undefined procedure (symbol %u)", proc);
+                    break;
+                }
+                for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                    uint16_t param_syt = proc + 1 + i;
+                    if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); break; }
+                    if (state->io_pending.items[i].is_scalar) {
+                        state->syt[param_syt].type = SYT_TYPE_SCALAR;
+                        state->syt[param_syt].scalar = state->io_pending.items[i].scalar;
+                    } else {
+                        state->syt[param_syt].type = SYT_TYPE_INTEGER;
+                        state->syt[param_syt].value = state->io_pending.items[i].integer;
+                    }
+                }
+                if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
+                state->call_return_stack[state->call_return_sp++] = state->pc;
+                state->pc = state->symbol_def_pos[proc] + 1;
                 branched = true;
                 break;
             }
@@ -1406,15 +1480,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_RTRN: {
-                if (ins->operand_count != 1) { fail(state, "RTRN: expected 1 operand"); break; }
-                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                /* Two forms (class-0/RTRN.md): 1 operand = function
+                 * return value (result flows back via the FCAL's own VAC
+                 * slot); 0 operands = procedure/task return (no value --
+                 * used by PCAL-initiated calls, which have no VAC result
+                 * to write). */
+                if (ins->operand_count > 1) { fail(state, "RTRN: expected 0 or 1 operands"); break; }
                 if (state->call_return_sp <= 0) { fail(state, "RTRN with no active call"); break; }
-                size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
-                size_t vac_index = state->prog->instrs[fcal_pos].index;
-                if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                state->vac[vac_index].is_ref = false;
-                state->vac[vac_index].integer = rv_to_integer(&a);
-                state->pc = fcal_pos + 1;
+                if (ins->operand_count == 1) {
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                    size_t vac_index = state->prog->instrs[fcal_pos].index;
+                    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[vac_index].is_ref = false;
+                    state->vac[vac_index].integer = rv_to_integer(&a);
+                    state->pc = fcal_pos + 1;
+                } else {
+                    size_t call_pos = state->call_return_stack[--state->call_return_sp];
+                    state->pc = call_pos + 1;
+                }
                 branched = true;
                 break;
             }
