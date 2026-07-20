@@ -36,6 +36,9 @@
 #define OP_TDCL 0x033
 #define OP_UDEF 0x02E
 #define OP_EINT 0x8E3
+#define OP_PMHD 0x059
+#define OP_PMAR 0x05A
+#define OP_PMIN 0x05B
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_CFOR 0x012
@@ -3446,6 +3449,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 break;
             }
+
+            case OP_PMHD:
+            case OP_PMAR:
+            case OP_PMIN:
+                /* %macro invocation (class-0/PMHD.md/PMAR.md/PMIN.md):
+                 * a small, fixed set of compiler-predefined utility
+                 * macros (%SVC, %NAMEBIAS, %NAMECOPY, %COPY, %SVCI,
+                 * %NAMEADD) that compile directly to raw AP-101S
+                 * machine instructions (confirmed: %SVC(5) literally
+                 * emits an SVC -- supervisor call -- trap instruction),
+                 * not portable HALMAT-level semantics. Deliberately out
+                 * of scope, per this project's own stated boundary
+                 * (yaHALMAT2 interprets HALMAT, never AP-101S object
+                 * code) -- failing loudly here with a specific message
+                 * rather than silently no-opping, since ignoring an SVC
+                 * call could hide behavior a real program depends on. */
+                fail(state, "opcode 0x%03X (%s): %%macro invocations (%%SVC etc.) compile to raw "
+                            "AP-101S machine instructions with no portable HALMAT-level semantics -- "
+                            "out of scope for this interpreter",
+                     ins->opcode, ins->opcode == OP_PMHD ? "PMHD" : ins->opcode == OP_PMAR ? "PMAR" : "PMIN");
+                break;
 
             default: {
                 const opcode_desc_t *desc = opcode_lookup(ins->opcode);
