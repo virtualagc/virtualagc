@@ -75,7 +75,12 @@
 #define OP_BNOT 0x104
 #define OP_ITOB 0x1C1
 #define OP_BTOI 0x621
+#define OP_BTOB 0x121
+#define OP_BTOQ 0x122
 #define OP_CTOB 0x141
+#define OP_CTOQ 0x142
+#define OP_STOQ 0x1A2
+#define OP_ITOQ 0x1C2
 #define OP_STOB 0x1A1
 #define OP_BTOC 0x221
 #define OP_BTOS 0x521
@@ -1890,6 +1895,54 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a);
+                break;
+
+            case OP_BTOB:
+                /* Bit->bit self-conversion (length adjustment), class-1/
+                 * BTOB.md -- confirmed to compile to a plain register
+                 * load/store with no runtime call, i.e. a pure
+                 * passthrough at the value level (this interpreter has
+                 * no declared-width tracking to actually adjust, see
+                 * state.h). */
+                if (ins->operand_count != 1) { fail(state, "BTOB: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_BITS) { fail(state, "BTOB: operand is not BIT"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                state->vac[ins->index].bits = a.bits;
+                break;
+
+            case OP_BTOQ:
+            case OP_CTOQ:
+            case OP_STOQ:
+            case OP_ITOQ:
+                /* SUBBIT pseudo-conversion (class-1/ITOQ.md's shared
+                 * XBTOQ family): TAG=0 is reference context (read the
+                 * argument's raw representation as a bit pattern --
+                 * identical in effect to BTOB/CTOB/STOB/ITOB's own
+                 * conversions, per ITOQ.md's confirmed "I1's raw bit
+                 * pattern copied directly into B1" trace); TAG=1 is
+                 * assignment context (`SUBBIT(x) = ...;`, where this
+                 * opcode's result instead supplies a *destination* for
+                 * the following assign) -- not implemented, no fixture
+                 * needs it, fails loudly rather than silently dropping
+                 * the write-through. */
+                if (ins->tag != 0) {
+                    fail(state, "SUBBIT assignment context (TAG=%u) is not yet implemented", ins->tag);
+                    break;
+                }
+                if (ins->operand_count != 1) { fail(state, "BTOQ/CTOQ/STOQ/ITOQ: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_bits = true;
+                switch (a.kind) {
+                    case RV_BITS: state->vac[ins->index].bits = a.bits; break;
+                    case RV_INTEGER: state->vac[ins->index].bits = (uint32_t)a.integer; break;
+                    case RV_SCALAR: state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a); break;
+                    case RV_STRING: state->vac[ins->index].bits = (uint32_t)strtoul(a.string, NULL, 10); break;
+                }
                 break;
 
             case OP_BTRU:
