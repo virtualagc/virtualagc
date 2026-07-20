@@ -158,3 +158,142 @@ void halmat_scalar_format(halmat_scalar_t s, char *buf, size_t buf_size) {
     snprintf(buf, buf_size, "%c%.*fE%c%02d", sign, frac_digits, mag, (exponent < 0) ? '-' : '+',
              (exponent < 0) ? -exponent : exponent);
 }
+
+/* Shared postnormalize step (see halmat_scalar_add's identical logic):
+ * bring `frac` (any nonzero width) to exactly 14 hex digits (56 bits),
+ * adjusting `*characteristic` for whichever direction it shifts. */
+static void postnormalize(uint64_t *frac, int *characteristic) {
+    int k = hex_digit_count64(*frac);
+    const int max_hex_digits = 14;
+    if (k > max_hex_digits) {
+        *frac >>= (4 * (k - max_hex_digits));
+        *characteristic += (k - max_hex_digits);
+    } else if (k < max_hex_digits) {
+        *frac <<= (4 * (max_hex_digits - k));
+        *characteristic -= (max_hex_digits - k);
+    }
+    if (*characteristic < 0) *characteristic = 0;
+    if (*characteristic > 127) *characteristic = 127;
+}
+
+static void pack_scalar(int sign, int characteristic, uint64_t frac, bool dbl, halmat_scalar_t *out) {
+    out->double_precision = dbl;
+    if (dbl) {
+        out->msw = ((uint32_t)sign << 31) | ((uint32_t)characteristic << 24) | (uint32_t)((frac >> 32) & 0x00FFFFFFu);
+        out->lsw = (uint32_t)(frac & 0xFFFFFFFFu);
+    } else {
+        uint64_t short_frac = frac >> 32; /* top 6 hex digits only */
+        out->msw = ((uint32_t)sign << 31) | ((uint32_t)characteristic << 24) | (uint32_t)(short_frac & 0x00FFFFFFu);
+        out->lsw = 0;
+    }
+}
+
+/* Portable (no __uint128_t) 64x64->128 unsigned multiply, schoolbook
+ * 32-bit-limb technique -- needed for a genuinely correct 56-bit x
+ * 56-bit fraction product without relying on a compiler extension that
+ * MSVC doesn't provide (Plan.md's cross-platform requirement). */
+static void mul64x64(uint64_t a, uint64_t b, uint64_t *hi, uint64_t *lo) {
+    uint64_t a_lo = a & 0xFFFFFFFFu, a_hi = a >> 32;
+    uint64_t b_lo = b & 0xFFFFFFFFu, b_hi = b >> 32;
+
+    uint64_t lo_lo = a_lo * b_lo;
+    uint64_t hi_lo = a_hi * b_lo;
+    uint64_t lo_hi = a_lo * b_hi;
+    uint64_t hi_hi = a_hi * b_hi;
+
+    uint64_t cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFFu) + (lo_hi & 0xFFFFFFFFu);
+    *lo = (cross << 32) | (lo_lo & 0xFFFFFFFFu);
+    *hi = hi_hi + (hi_lo >> 32) + (lo_hi >> 32) + (cross >> 32);
+}
+
+/* Portable 128-by-64-bit unsigned restoring division, producing a 64-bit
+ * quotient (bits beyond bit 63, if the true quotient were ever wider,
+ * are silently dropped -- doesn't happen for normalized 56-bit fraction
+ * inputs scaled by exactly 56 bits, per halmat_scalar_divide's own
+ * range analysis). O(128) per call; not performance-critical for an
+ * interpreter. */
+static uint64_t div128by64(uint64_t dividend_hi, uint64_t dividend_lo, uint64_t divisor) {
+    uint64_t remainder = 0;
+    uint64_t quotient = 0;
+    for (int i = 127; i >= 0; i--) {
+        uint64_t bit = (i >= 64) ? ((dividend_hi >> (i - 64)) & 1u) : ((dividend_lo >> i) & 1u);
+        remainder = (remainder << 1) | bit;
+        if (remainder >= divisor) {
+            remainder -= divisor;
+            if (i < 64) quotient |= ((uint64_t)1 << i);
+        }
+    }
+    return quotient;
+}
+
+halmat_scalar_t halmat_scalar_multiply(halmat_scalar_t a, halmat_scalar_t b) {
+    bool dbl = a.double_precision || b.double_precision;
+    int sign_a = (int)((a.msw >> 31) & 1), sign_b = (int)((b.msw >> 31) & 1);
+    int char_a = (int)((a.msw >> 24) & 0x7F), char_b = (int)((b.msw >> 24) & 0x7F);
+    uint64_t frac_a = ((uint64_t)(a.msw & 0x00FFFFFFu) << 32) | a.lsw;
+    uint64_t frac_b = ((uint64_t)(b.msw & 0x00FFFFFFu) << 32) | b.lsw;
+
+    /* "When either the multiplicand or multiplier is a true zero, the
+     * result is normally forced to a true zero" (AP-101S Software Model
+     * PDF Sec. 8.24). */
+    if (frac_a == 0 || frac_b == 0) return halmat_scalar_zero(dbl);
+
+    uint64_t prod_hi, prod_lo;
+    mul64x64(frac_a, frac_b, &prod_hi, &prod_lo);
+    /* "The sum of the characteristics less 64 is used as the
+     * characteristic of an intermediate product" (Sec. 8.24). Taking the
+     * product's top 56 bits (dropping the low 56, i.e. >>56) is exactly
+     * the fraction value at that characteristic's scale -- see the
+     * derivation in this file's Phase 3 commit message; no further
+     * digit-count correction is needed before postnormalize(). */
+    int char_r = char_a + char_b - 64;
+    uint64_t result_frac = (prod_hi << 8) | (prod_lo >> 56);
+    int result_sign = sign_a ^ sign_b;
+
+    if (result_frac == 0) return halmat_scalar_zero(dbl);
+    postnormalize(&result_frac, &char_r);
+
+    halmat_scalar_t result;
+    pack_scalar(result_sign, char_r, result_frac, dbl, &result);
+    return result;
+}
+
+bool halmat_scalar_divide(halmat_scalar_t a, halmat_scalar_t b, halmat_scalar_t *out) {
+    bool dbl = a.double_precision || b.double_precision;
+    int sign_a = (int)((a.msw >> 31) & 1), sign_b = (int)((b.msw >> 31) & 1);
+    int char_a = (int)((a.msw >> 24) & 0x7F), char_b = (int)((b.msw >> 24) & 0x7F);
+    uint64_t frac_a = ((uint64_t)(a.msw & 0x00FFFFFFu) << 32) | a.lsw;
+    uint64_t frac_b = ((uint64_t)(b.msw & 0x00FFFFFFu) << 32) | b.lsw;
+
+    if (frac_b == 0) {
+        /* "When division by a zero divisor is attempted, the operation
+         * is suppressed... a program interruption for floating point
+         * divide exception occurs" (Sec. 8.16) -- a real ERROR
+         * CONDITION, not a value to silently substitute. */
+        return false;
+    }
+    if (frac_a == 0) {
+        /* "When the dividend is a true zero, the quotient fraction will
+         * be zero... yielding a true zero result" (Sec. 8.16). */
+        *out = halmat_scalar_zero(dbl);
+        return true;
+    }
+
+    /* Scale the dividend left by exactly 14 hex digits (56 bits) before
+     * dividing, so the integer quotient itself directly represents the
+     * result fraction at characteristic (char_a - char_b + 64) -- see
+     * this file's Phase 3 commit message for the full derivation
+     * (mirrors halmat_scalar_multiply's approach in reverse). Normalized
+     * 56-bit operands keep the true quotient within 64 bits. */
+    uint64_t dividend_hi = frac_a >> 8;         /* frac_a << 56, split into hi/lo of a 128-bit value */
+    uint64_t dividend_lo = frac_a << 56;
+    uint64_t quotient = div128by64(dividend_hi, dividend_lo, frac_b);
+
+    int char_r = char_a - char_b + 64;
+    int result_sign = sign_a ^ sign_b;
+
+    if (quotient == 0) { *out = halmat_scalar_zero(dbl); return true; }
+    postnormalize(&quotient, &char_r);
+    pack_scalar(result_sign, char_r, quotient, dbl, out);
+    return true;
+}

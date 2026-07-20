@@ -59,6 +59,8 @@
 #define OP_ISUB 0x6CC
 #define OP_SADD 0x5AB
 #define OP_SSUB 0x5AC
+#define OP_SSPR 0x5AD
+#define OP_SSDV 0x5AE
 #define OP_SNEG 0x5B0
 #define OP_IINT 0x8C1
 
@@ -801,6 +803,32 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     ? halmat_scalar_add(rv_to_scalar(&a), rv_to_scalar(&b))
                     : halmat_scalar_sub(rv_to_scalar(&a), rv_to_scalar(&b));
                 break;
+
+            case OP_SSPR:
+                if (ins->operand_count != 2) { fail(state, "SSPR: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = halmat_scalar_multiply(rv_to_scalar(&a), rv_to_scalar(&b));
+                break;
+
+            case OP_SSDV: {
+                if (ins->operand_count != 2) { fail(state, "SSDV: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                halmat_scalar_t quotient;
+                if (!halmat_scalar_divide(rv_to_scalar(&a), rv_to_scalar(&b), &quotient)) {
+                    fail(state, "division by zero (floating point divide exception)");
+                    break;
+                }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_scalar = true;
+                state->vac[ins->index].scalar = quotient;
+                break;
+            }
 
             case OP_SNEG:
                 if (ins->operand_count != 1) { fail(state, "SNEG: expected 1 operand"); break; }

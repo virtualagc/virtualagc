@@ -50,6 +50,17 @@ halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b);
 halmat_scalar_t halmat_scalar_sub(halmat_scalar_t a, halmat_scalar_t b);
 halmat_scalar_t halmat_scalar_negate(halmat_scalar_t a);
 
+/* Characteristic addition/subtraction + a genuine (portable, no
+ * __uint128_t/compiler-extension dependency -- this needs to build under
+ * MSVC too, per Plan.md's cross-platform requirement) wide fraction
+ * multiply/divide, per the AP-101S Software Model PDF Sec. 8's
+ * documented algorithm. Division by a zero divisor is a real ERROR
+ * CONDITION on real hardware (floating point divide exception, dividend
+ * left unchanged) -- returns false rather than silently producing a
+ * result; the caller should fail() loudly, not substitute a default. */
+halmat_scalar_t halmat_scalar_multiply(halmat_scalar_t a, halmat_scalar_t b);
+bool halmat_scalar_divide(halmat_scalar_t a, halmat_scalar_t b, halmat_scalar_t *out);
+
 /* WRITE-statement/STOC-conversion fixed-width field, per class-2/STOC.md
  * (USA00309 Sec. 6.1.3): "sd.ddddddddE+-dd" (single, 8 fractional
  * digits) or the 17-fractional-digit double form. `s` is blank for
