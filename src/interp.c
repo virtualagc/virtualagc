@@ -35,6 +35,7 @@
 #define OP_IMRK 0x003
 #define OP_TDCL 0x033
 #define OP_UDEF 0x02E
+#define OP_EINT 0x8E3
 #define OP_DFOR 0x010
 #define OP_EFOR 0x011
 #define OP_CFOR 0x012
@@ -1241,6 +1242,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_IMRK:
             case OP_TDCL:
             case OP_UDEF:
+            case OP_EINT:
                 /* IMRK (class-0/IMRK.md) brackets each statement inside
                  * an inline FUNCTION block -- a pure marker (see
                  * OP_IDEF/OP_ICLS below for the block's own open/close
@@ -1249,7 +1251,13 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * ("pure declaration" per its confirmed trace). UDEF
                  * (class-0/UDEF.md) just labels an update block's own
                  * name; the block's body is ordinary already-supported
-                 * HALMAT. */
+                 * HALMAT. EINT (`EQUATE EXTERNAL`, class-8/EINT.md) is
+                 * pure linker metadata for non-HAL/S callers -- "takes
+                 * up no space," generates an ESD entry-point record at
+                 * the object-code level, and its new equate name is
+                 * flagged INACTIVE so HAL/S itself can never reference
+                 * it again (confirmed: doing so is a compile error) --
+                 * nothing for this interpreter to do at runtime. */
                 /* Structural/bookkeeping markers; no runtime effect on
                  * their own. DTST/LBL just open a bookkeeping label --
                  * the real work happens in CTST/ETST/BRA/FBRA below.
