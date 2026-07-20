@@ -138,6 +138,9 @@
 #define OP_IINT 0x8C1
 #define OP_SINT 0x8A1
 #define OP_CINT 0x841
+#define OP_BINT 0x821
+#define OP_MINT 0x861
+#define OP_VINT 0x881
 
 #define NO_TARGET ((size_t)-1)
 
@@ -1365,6 +1368,36 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     free(e->char_value);
                     e->type = SYT_TYPE_CHARACTER;
                     e->char_value = dup_string(a.string);
+                }
+                break;
+
+            case OP_BINT:
+                /* Direct symbol-table form only (class-8/BINT.md), same
+                 * shape as SINT/IINT/CINT. */
+                if (ins->operand_count != 2) { fail(state, "BINT: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "BINT: OFFSET-addressed form not yet implemented"); break; }
+                if (a.kind != RV_BITS) { fail(state, "BINT: initializer is not BIT"); break; }
+                state->syt[ins->operands[0].data].type = SYT_TYPE_BIT;
+                state->syt[ins->operands[0].data].bit_value = a.bits;
+                break;
+
+            case OP_MINT:
+            case OP_VINT:
+                /* Uniform fill: every element of the MATRIX/VECTOR gets
+                 * the same literal value (class-8/MINT.md/VINT.md);
+                 * per-element INITIAL() lists instead use repeated SINT,
+                 * already handled by SINT's own direct-SYT case. */
+                if (ins->operand_count != 2) { fail(state, "MINT/VINT: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "MINT/VINT: OFFSET-addressed form not yet implemented"); break; }
+                {
+                    uint16_t dest_syt = ins->operands[0].data;
+                    if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MINT/VINT: SYT index out of range"); break; }
+                    ensure_container(state, dest_syt);
+                    halmat_syt_entry_t *e = &state->syt[dest_syt];
+                    halmat_scalar_t fill = rv_to_scalar(&a);
+                    for (size_t i = 0; i < e->element_count; i++) e->elements[i] = fill;
                 }
                 break;
 
