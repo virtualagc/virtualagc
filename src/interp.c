@@ -50,6 +50,7 @@
 #define OP_CTST 0x016
 #define OP_DSUB 0x019
 #define OP_TSUB 0x01B
+#define OP_FILE 0x022
 #define OP_RDAL 0x020
 #define OP_READ 0x01F
 #define OP_WRIT 0x021
@@ -1098,6 +1099,12 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
 void interp_set_device(halmat_state_t *state, int device, FILE *f) {
     if (device < 0 || device >= HALMAT_DEVICE_MAX) return;
     state->devices[device] = f;
+}
+
+void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int record_size) {
+    if (channel < 0 || channel >= HALMAT_DEVICE_MAX) return;
+    state->raf_devices[channel] = f;
+    state->raf_record_size[channel] = record_size;
 }
 
 void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab) {
@@ -3240,6 +3247,118 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 flush_write(state, state->devices[device]);
+                break;
+            }
+
+            case OP_FILE: {
+                /* Random-access file I/O (class-0/FILE.md): FILE(n,addr)=exp
+                 * (write) or var=FILE(n,addr) (read). Two operands: LIT
+                 * (the record address/number -- confirmed to be the address
+                 * itself, not a format descriptor) and SYT (the transferred
+                 * variable) -- only a plain unsubscripted SYT is confirmed/
+                 * implemented. The channel is the operator word's own TAG
+                 * (confirmed via two independent real compiles this
+                 * session: FILE(1,...) both times shows tag=0x01). Write
+                 * vs read is disambiguated by the SYT operand's own TAG2
+                 * (confirmed empirically this session, not previously
+                 * documented: 1=write/source, 0=read/destination).
+                 *
+                 * Channel/record-size mapping comes from --raf (main.c),
+                 * modeled directly on the historical HAL/S-FC runtime's
+                 * own option of the same name and shape (a *separate*
+                 * device-number namespace from READ/WRITE's --ddi/--ddo,
+                 * per that option's own documentation) -- see
+                 * interp_set_raf_device. Record layout: INTEGER as a
+                 * 4-byte big-endian value; SCALAR as its existing
+                 * msw/lsw wire format (4 bytes single, 8 bytes double,
+                 * matching this project's already-established bit-exact
+                 * representation elsewhere, e.g. literal.c). No
+                 * real-toolchain cross-validation is possible (BFS
+                 * object files use a different format from PFS, and the
+                 * available lnk101 doesn't support BFS -- direct user
+                 * confirmation), so this is validated by internal
+                 * write-then-read round-trip correctness only, not
+                 * byte-for-byte compatibility with any other tool. */
+                if (ins->operand_count != 2) { fail(state, "FILE: expected 2 operands"); break; }
+                if (ins->operands[0].qual != QUAL_LIT) { fail(state, "FILE: expected a LIT address operand"); break; }
+                if (ins->operands[1].qual != QUAL_SYT) { fail(state, "FILE: only a plain SYT transferred-variable operand is implemented"); break; }
+                int channel = ins->tag;
+                if (channel < 0 || channel >= HALMAT_DEVICE_MAX || !state->raf_devices[channel]) {
+                    fail(state, "FILE(%d): channel not mapped (use --raf)", channel);
+                    break;
+                }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                int32_t record_num = rv_to_integer(&a);
+                int record_size = state->raf_record_size[channel];
+                FILE *fp = state->raf_devices[channel];
+                long position = (long)record_size * (long)record_num;
+                uint16_t var_syt = ins->operands[1].data;
+                if (var_syt >= HALMAT_SYT_MAX) { fail(state, "FILE: SYT index out of range"); break; }
+                bool is_write = (ins->operands[1].tag2 != 0);
+                halmat_syt_entry_t *e = &state->syt[var_syt];
+                if (fseek(fp, position, SEEK_SET) != 0) { fail(state, "FILE(%d): seek to record %d failed", channel, record_num); break; }
+                if (is_write) {
+                    uint8_t buf[8];
+                    int nbytes;
+                    if (e->type == SYT_TYPE_SCALAR) {
+                        nbytes = e->scalar.double_precision ? 8 : 4;
+                        buf[0] = (uint8_t)(e->scalar.msw >> 24); buf[1] = (uint8_t)(e->scalar.msw >> 16);
+                        buf[2] = (uint8_t)(e->scalar.msw >> 8);  buf[3] = (uint8_t)e->scalar.msw;
+                        if (e->scalar.double_precision) {
+                            buf[4] = (uint8_t)(e->scalar.lsw >> 24); buf[5] = (uint8_t)(e->scalar.lsw >> 16);
+                            buf[6] = (uint8_t)(e->scalar.lsw >> 8);  buf[7] = (uint8_t)e->scalar.lsw;
+                        }
+                    } else {
+                        int32_t v = (e->type == SYT_TYPE_INTEGER) ? e->value : 0;
+                        nbytes = 4;
+                        buf[0] = (uint8_t)(v >> 24); buf[1] = (uint8_t)(v >> 16);
+                        buf[2] = (uint8_t)(v >> 8);  buf[3] = (uint8_t)v;
+                    }
+                    if (nbytes > record_size) {
+                        fail(state, "FILE(%d): value needs %d bytes, --raf record size is only %d", channel, nbytes, record_size);
+                        break;
+                    }
+                    if (fwrite(buf, 1, (size_t)nbytes, fp) != (size_t)nbytes) {
+                        fail(state, "FILE(%d): write to record %d failed", channel, record_num);
+                        break;
+                    }
+                    fflush(fp);
+                } else {
+                    /* If the destination has never been written before
+                     * (still SYT_TYPE_UNKNOWN), its format can't be
+                     * inferred from itself -- consult the symbol table's
+                     * declared type instead (same fallback TINT uses),
+                     * since guessing INTEGER by default would silently
+                     * misinterpret a SCALAR's hex-float bit pattern as a
+                     * plain integer. */
+                    bool as_scalar = (e->type == SYT_TYPE_SCALAR);
+                    if (e->type == SYT_TYPE_UNKNOWN && state->symtab) {
+                        const halmat_symtab_entry_t *vsym = halmat_symtab_find_by_index(state->symtab, var_syt);
+                        if (vsym && vsym->hal_class == 5) as_scalar = true;
+                    }
+                    int nbytes = as_scalar ? (e->scalar.double_precision ? 8 : 4) : 4;
+                    if (nbytes > record_size) {
+                        fail(state, "FILE(%d): value needs %d bytes, --raf record size is only %d", channel, nbytes, record_size);
+                        break;
+                    }
+                    uint8_t buf[8] = {0};
+                    if (fread(buf, 1, (size_t)nbytes, fp) != (size_t)nbytes) {
+                        fail(state, "FILE(%d): read from record %d failed (short or missing record)", channel, record_num);
+                        break;
+                    }
+                    if (as_scalar) {
+                        uint32_t msw = ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | buf[3];
+                        uint32_t lsw = e->scalar.double_precision
+                            ? (((uint32_t)buf[4] << 24) | ((uint32_t)buf[5] << 16) | ((uint32_t)buf[6] << 8) | buf[7])
+                            : 0;
+                        e->type = SYT_TYPE_SCALAR;
+                        e->scalar = halmat_scalar_from_ibm_words(msw, lsw, e->scalar.double_precision);
+                    } else {
+                        int32_t v = (int32_t)(((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | buf[3]);
+                        e->type = SYT_TYPE_INTEGER;
+                        e->value = v;
+                    }
+                }
                 break;
             }
 

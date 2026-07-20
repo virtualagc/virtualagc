@@ -18,6 +18,13 @@ void interp_cleanup(halmat_state_t *state);
  * (main.c, for --ddi/--ddo) owns their lifetime. */
 void interp_set_device(halmat_state_t *state, int device, FILE *f);
 
+/* Maps a --raf random-access-file channel number (0-9, HALMAT_DEVICE_MAX,
+ * a namespace distinct from interp_set_device's) to an already-open file
+ * plus its fixed record size, for the FILE opcode (class-0/FILE.md).
+ * Not owned by the interpreter, same caller-owns-lifetime convention as
+ * interp_set_device. */
+void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int record_size);
+
 /* Attaches a (possibly NULL) symbol table for MATRIX/VECTOR/ARRAY
  * declared-dimension lookups (state.h's symtab field) -- optional; not
  * calling this at all leaves it NULL, and DSUB/MASN-family opcodes fall

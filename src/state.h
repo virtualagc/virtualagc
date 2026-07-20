@@ -236,6 +236,20 @@ struct halmat_state {
      * owns stdin/stdout, so interp_cleanup() must not fclose() these. */
     FILE *devices[HALMAT_DEVICE_MAX];
 
+    /* --raf=I,R,N,F ("random-access file", per the historical HAL/S-FC
+     * runtime's own option of the same name/shape -- see class-0/FILE.md)
+     * device table. A *separate* device-number namespace from `devices`
+     * above (confirmed: the real option's own docs note device N for
+     * --raf can be safely reused for --ddi with no collision), since a
+     * FILE statement's channel and a READ/WRITE device number are
+     * distinct HAL/S concepts that just happen to share the same numeric
+     * range by convention. record_size is fixed per device (host-side
+     * configuration, not carried by the HALMAT stream itself); fp NULL
+     * means unmapped. Not owned by the interpreter -- main.c opens/closes
+     * these, matching `devices`' own ownership convention. */
+    FILE *raf_devices[HALMAT_DEVICE_MAX];
+    int raf_record_size[HALMAT_DEVICE_MAX];
+
     /* Pending WRITE/READ-statement argument list, accumulated between
      * XXST and XXND (see class-0/WRIT.md's Usage Context). */
     /* XXST/XXAR/XXND is a general bracketed-argument-list construct

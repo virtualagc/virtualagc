@@ -25,6 +25,13 @@ typedef struct {
     bool is_output;
 } device_map_t;
 
+typedef struct {
+    int channel;
+    int record_size;
+    const char *path;
+    char mode; /* 'I', 'O', or 'B' (input/output/both) -- see --raf's usage text */
+} raf_map_t;
+
 static void usage(const char *prog) {
     fprintf(stderr,
             "usage: %s [options] HALMAT_FILE\n"
@@ -47,6 +54,11 @@ static void usage(const char *prog) {
             "                   (auto-detected if exactly one directory holds a PROGRAM)\n"
             "  --ddi N:PATH     map READ(N)/READALL(N) to PATH (default: device 5=stdin)\n"
             "  --ddo N:PATH     map WRITE(N) to PATH (default: device 6=stdout)\n"
+            "  --raf=I,R,N,F    attach random-access file F to FILE(N,...) (class-0/FILE.md),\n"
+            "                   record size R bytes; I is I/O/B (accepted, not enforced --\n"
+            "                   matches the historical HAL/S-FC runtime option of the same\n"
+            "                   name/shape). N is a separate device-number namespace from\n"
+            "                   --ddi/--ddo/READ/WRITE -- reusing the same number is fine.\n"
             "  --help           this message\n"
             "\n"
             "@list is a text file listing one HALSFC output directory per line, each\n"
@@ -99,9 +111,32 @@ static bool apply_device_maps(halmat_state_t *state, const device_map_t *maps, i
     return true;
 }
 
+/* Opens every --raf mapping and wires it into `state` via
+ * interp_set_raf_device (same non-owning-caller convention as
+ * apply_device_maps). Opened read+write ("r+b") so a channel already
+ * used for both FILE-write and FILE-read statements works without a
+ * second flag -- matches the historical --raf option's own note that
+ * mode is "always B" in practice. Falls back to creating the file
+ * ("w+b") if it doesn't exist yet. */
+static bool apply_raf_maps(halmat_state_t *state, const raf_map_t *maps, int num_maps,
+                            FILE **opened, const char *prog) {
+    for (int i = 0; i < num_maps; i++) {
+        FILE *f = fopen(maps[i].path, "r+b");
+        if (!f) f = fopen(maps[i].path, "w+b");
+        if (!f) {
+            fprintf(stderr, "%s: cannot open '%s' for --raf channel %d\n", prog, maps[i].path, maps[i].channel);
+            return false;
+        }
+        opened[i] = f;
+        interp_set_raf_device(state, maps[i].channel, f, maps[i].record_size);
+    }
+    return true;
+}
+
 static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, bool use_opt,
                        const char *litfile_opt, const char *memory_opt, int num_blanks,
-                       const device_map_t *maps, int num_maps) {
+                       const device_map_t *maps, int num_maps,
+                       const raf_map_t *raf_maps, int num_raf_maps) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -211,10 +246,21 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         halmat_program_free(&prog);
         return 1;
     }
+    FILE *opened_raf[MAX_DEVICE_MAPS];
+    if (!apply_raf_maps(&state, raf_maps, num_raf_maps, opened_raf, "yaHALMAT2")) {
+        interp_cleanup(&state);
+        for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
+        if (have_srcmap) halmat_srcmap_free(&srcmap);
+        if (have_symtab) halmat_symtab_free(&symtab);
+        if (have_literals) halmat_literal_free(&literals);
+        halmat_program_free(&prog);
+        return 1;
+    }
     int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, stdout)
                          : interp_run(&state, stdout);
     interp_cleanup(&state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
+    for (int i = 0; i < num_raf_maps; i++) fclose(opened_raf[i]);
 
     if (have_srcmap) halmat_srcmap_free(&srcmap);
     if (have_symtab) halmat_symtab_free(&symtab);
@@ -541,6 +587,9 @@ int main(int argc, char **argv) {
     int num_blanks = 5;
     device_map_t maps[MAX_DEVICE_MAPS];
     int num_maps = 0;
+    raf_map_t raf_maps[MAX_DEVICE_MAPS];
+    int num_raf_maps = 0;
+    static char raf_paths[MAX_DEVICE_MAPS][1024];
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--disasm") == 0) {
@@ -575,6 +624,25 @@ int main(int argc, char **argv) {
             maps[num_maps].path = colon + 1;
             maps[num_maps].is_output = is_output;
             num_maps++;
+        } else if (strncmp(argv[i], "--raf=", 6) == 0) {
+            if (num_raf_maps >= MAX_DEVICE_MAPS) {
+                fprintf(stderr, "%s: too many --raf mappings (max %d)\n", argv[0], MAX_DEVICE_MAPS);
+                return 1;
+            }
+            char mode;
+            int record_size, channel;
+            char filename[1024];
+            if (sscanf(argv[i], "--raf=%c,%d,%d,%1023[^\n\r]", &mode, &record_size, &channel, filename) != 4) {
+                fprintf(stderr, "%s: --raf expects I,R,N,F (e.g. --raf=B,1024,1,data.bin)\n", argv[0]);
+                return 1;
+            }
+            strncpy(raf_paths[num_raf_maps], filename, sizeof(raf_paths[num_raf_maps]) - 1);
+            raf_paths[num_raf_maps][sizeof(raf_paths[num_raf_maps]) - 1] = '\0';
+            raf_maps[num_raf_maps].channel = channel;
+            raf_maps[num_raf_maps].record_size = record_size;
+            raf_maps[num_raf_maps].path = raf_paths[num_raf_maps];
+            raf_maps[num_raf_maps].mode = mode;
+            num_raf_maps++;
         } else if (strcmp(argv[i], "--help") == 0) {
             usage(argv[0]);
             return 0;
@@ -617,5 +685,5 @@ int main(int argc, char **argv) {
         return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps);
+    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps);
 }

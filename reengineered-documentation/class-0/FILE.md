@@ -101,16 +101,60 @@ READ/RDAL/WRIT header itself — corrected in a later session; see
 distinctly from READ/WRITE's, down to the HALMAT encoding level, not
 just the numbering convention.
 
+## Confirmed later: read/write disambiguation, and real runtime semantics via `--raf`
+
+**The SYT operand's own `TAG2` distinguishes write from read**, confirmed
+by two independent real compiles (this file's own trace above, plus a
+fresh one this session): `TAG2`=1 when the variable is the *source*
+(`FILE(n,addr)=exp` — write), `TAG2`=0 when it's the *destination*
+(`var=FILE(n,addr)` — read). Not previously called out; the two example
+statements above happen to use different channels, which obscured that
+`TAG2` (not the channel) is what actually carries the direction.
+
+**`FILE` I/O *is* supported by a real, working runtime** — just not the
+one the original "Unresolved Questions" bullet below refers to. That
+bullet's claim (`#QFILEOUT`/`#QFILEIN` unresolved at link time, per
+[USA00309] §6.2) is about the *original* 1980s IBM-mainframe HAL/S-FC
+runtime library, confirmed independently by
+`Programming in HAL-S/176-P.hal`'s own source comment citing that exact
+manual section as the reason its `FILE` statement is commented out. The
+*modern* `virtualagc` project's own C reimplementation of the runtime
+(`PASS.REL32V0/PASS2.PROCS/PASS2B.build/runtimeC.c`) does implement
+`#QFILEOUT`/`#QFILEIN` (as C functions `lFILE`/`rFILE`), gated by a
+`--raf=I,R,N,F` runtime option ("attach random-access file F to device
+number N, record size R bytes") — a real, authoritative reference for
+`FILE`'s intended runtime behavior, even though (per direct user
+clarification) BFS-flavor object files use a different format from PFS
+and the available `lnk101` linker doesn't support BFS, so no genuinely
+linked-and-run comparison binary could be produced this session either.
+`lFILE`/`rFILE`'s logic is simple: `position = recordSize * recordNumber`
+(so `address` truly is a *record number*, not a byte offset); the full
+`recordSize` bytes are copied verbatim between the file and the
+variable's memory, with **no recoding/translation of any kind** (per
+`--raf`'s own documented text) — i.e. genuinely raw, fixed-size binary
+records.
+
+`yaHALMAT2` implements `FILE` against this specification (own `--raf`
+option, same name/shape) since it has no byte-addressable "memory" to
+copy from/to the way the real runtime does — instead serializing
+`INTEGER` as a 4-byte big-endian value and `SCALAR` as its existing
+msw/lsw wire format (4 bytes single, 8 bytes double, matching this
+project's already-established bit-exact representation elsewhere).
+Confirmed end-to-end (`src/tests/hal/test_file.hal`): writing `INTEGER`
+`42` then `SCALAR` `3.5` to two different records, reading both back,
+overwriting the `INTEGER` record with `99` and reading that back too,
+round-trips correctly through `yaHALMAT2`'s own execution. This is
+internal round-trip validation only, **not** verified byte-for-byte
+compatible with the real runtime's own in-memory layout for these
+types (no way to test that without a working BFS link).
+
 ## Unresolved Questions
 
 - Whether/how array-, structure-, or arrayed-type transfers (legal per
   [USA003087] §22.2's write-mode type list) change the operand-word
   count or structure is untested — both statements compiled here used a
-  single unarrayed scalar.
-- `FILE` I/O is not supported by the HAL/S-FC *runtime* library (per
-  [USA00309] §6.2 — it compiles but fails at link time with unresolved
-  external references to `#QFILEOUT`/`#QFILEIN`), so only HALMAT
-  generation (not actual execution) could be tested.
+  single unarrayed scalar. `yaHALMAT2` only implements the plain
+  `INTEGER`/`SCALAR` case for the same reason.
 - Whether `FILE`'s channel-number space is JCL-associated the same way
   `READ`/`WRITE`'s is — [USA00309] §6.1.4 documents a fixed `CHANNELn` DD
   name convention for `READ`/`WRITE`/`READALL` device numbers 2–9 (see
@@ -119,6 +163,9 @@ just the numbering convention.
   channel/address values are compiled as immediate constants rather than
   going through the same device-number mechanism at all (see Operand-Word
   Format above), so this may not even apply.
+- The exact byte layout the real runtime uses for `INTEGER`/`SCALAR` in
+  a `--raf` record (endianness, padding) is not independently confirmed
+  against `yaHALMAT2`'s own choice, for the reason given above.
 
 ## Source Analysis & Reliability
 

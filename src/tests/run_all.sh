@@ -84,6 +84,7 @@ run ./run_local_fixture.sh bcat "        165"
 run ./run_local_fixture.sh eint " 2.5000000E+00"
 run ./run_local_fixture.sh tsub "          0               9               0"
 run ./run_local_fixture.sh tint "$(printf '          5\n 4.2999992E+00')"
+run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n         99')"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)
