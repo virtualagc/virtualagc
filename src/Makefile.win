@@ -20,8 +20,18 @@ CC = cl
 !ENDIF
 
 SRCS = main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
-       literal.c ebcdic.c interp.c value.c
+       literal.c ebcdic.c interp.c value.c symtab.c debug.c
 TARGET = yaHALMAT2.exe
+
+# NOTE: unlike Makefile (which uses -MMD/-MP, GCC/clang-only), this file
+# has no header-dependency tracking -- neither `.c.obj`/`.c.o` rule below
+# depends on the project's .h files, only on the matching .c. Editing a
+# shared header (state.h, halmat.h, etc.) without a `nmake /f Makefile.win
+# clean` first can leave some .obj/.o files compiled against the old
+# struct layout and others against the new one, corrupting memory at
+# runtime with no compile-time warning -- confirmed the hard way on the
+# Unix side this session (see Makefile's comment on the same issue).
+# ALWAYS run `clean` before rebuilding after touching any .h file.
 
 !IF "$(CC)" == "cl"
 CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS

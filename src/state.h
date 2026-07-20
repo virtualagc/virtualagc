@@ -46,6 +46,7 @@ typedef enum {
     SYT_TYPE_UNKNOWN = 0,
     SYT_TYPE_INTEGER,
     SYT_TYPE_SCALAR,
+    SYT_TYPE_CHARACTER,
 } halmat_syt_type_t;
 
 typedef struct {
@@ -54,6 +55,11 @@ typedef struct {
     halmat_scalar_t scalar; /* SYT_TYPE_SCALAR (plain, non-subscripted) */
     halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX of SCALAR; lazily allocated */
     size_t element_count;
+    char *char_value; /* SYT_TYPE_CHARACTER; owned, malloc'd, NUL-terminated. No
+                        * fixed-length/VARYING-vs-fixed truncation-or-padding
+                        * behavior is implemented yet (class-2/CASN.md's
+                        * Unresolved Questions) -- the string just grows/
+                        * shrinks to fit whatever's assigned. */
 } halmat_syt_entry_t;
 
 /* A VAC slot either holds a plain computed value (most opcodes: IADD,
@@ -65,7 +71,17 @@ typedef struct {
 typedef struct {
     bool is_ref;
     bool is_scalar;         /* is_ref=false: true if this slot holds a SCALAR (e.g. SADD/SSUB) rather than INTEGER result */
-    int32_t integer;        /* is_ref=false, !is_scalar */
+    bool is_string;          /* is_ref=false: true if this slot holds a CHARACTER result (e.g. CCAT); takes priority over is_scalar */
+    char *string;            /* is_ref=false, is_string; owned, malloc'd. VAC slots are
+                               * reused across loop iterations (addressed by static
+                               * stream position, not a fresh allocation per call) --
+                               * re-running CCAT overwrites .string without freeing the
+                               * prior iteration's buffer. Deliberately leaked rather
+                               * than reference-counted/arena-managed: bounded by loop
+                               * iteration count within one interpreter run, not a
+                               * long-lived-process concern. Freed in bulk (best-effort,
+                               * only the final value per slot) by interp_cleanup(). */
+    int32_t integer;        /* is_ref=false, !is_scalar, !is_string */
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
     size_t ref_offset;      /* is_ref=true */

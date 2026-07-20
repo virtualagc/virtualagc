@@ -51,6 +51,14 @@
 #define OP_FCAL 0x01E
 #define OP_IASN 0x601
 #define OP_SASN 0x501
+#define OP_CASN 0x201
+#define OP_CCAT 0x202
+#define OP_CNEQ 0x745
+#define OP_CEQU 0x746
+#define OP_CNGT 0x747
+#define OP_CGT 0x748
+#define OP_CNLT 0x749
+#define OP_CLT 0x74A
 #define OP_SNEQ 0x7A5
 #define OP_SEQU 0x7A6
 #define OP_SNGT 0x7A7
@@ -80,6 +88,7 @@
 #define OP_STOI 0x6A1
 #define OP_IINT 0x8C1
 #define OP_SINT 0x8A1
+#define OP_CINT 0x841
 
 #define NO_TARGET ((size_t)-1)
 
@@ -115,6 +124,15 @@ static void fail(halmat_state_t *state, const char *fmt, ...) {
     state->exit_code = 1;
 }
 
+/* strdup is POSIX, not ISO C99 -- MSVC (Plan.md's cross-platform build
+ * target) doesn't provide it under strict conformance either. */
+static char *dup_string(const char *s) {
+    size_t len = strlen(s) + 1;
+    char *copy = malloc(len);
+    if (copy) memcpy(copy, s, len);
+    return copy;
+}
+
 static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, resolved_value_t *out) {
     memset(out, 0, sizeof(*out));
     switch (op->qual) {
@@ -127,6 +145,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             if (e->type == SYT_TYPE_SCALAR) {
                 out->kind = RV_SCALAR;
                 out->scalar = e->scalar;
+            } else if (e->type == SYT_TYPE_CHARACTER) {
+                out->kind = RV_STRING;
+                out->string = e->char_value ? e->char_value : "";
             } else {
                 out->kind = RV_INTEGER;
                 out->integer = e->value;
@@ -178,6 +199,9 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 }
                 out->kind = RV_SCALAR;
                 out->scalar = base->elements[slot->ref_offset];
+            } else if (slot->is_string) {
+                out->kind = RV_STRING;
+                out->string = slot->string ? slot->string : "";
             } else if (slot->is_scalar) {
                 out->kind = RV_SCALAR;
                 out->scalar = slot->scalar;
@@ -209,9 +233,17 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         }
         halmat_syt_entry_t *e = &state->syt[op->data];
         if (e->type == SYT_TYPE_UNKNOWN) {
-            e->type = (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
+            e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
+                    : (val->kind == RV_SCALAR) ? SYT_TYPE_SCALAR : SYT_TYPE_INTEGER;
         }
-        if (e->type == SYT_TYPE_SCALAR) {
+        if (e->type == SYT_TYPE_CHARACTER) {
+            if (val->kind != RV_STRING) {
+                fail(state, "cannot assign a non-CHARACTER value to a CHARACTER destination");
+                return false;
+            }
+            free(e->char_value);
+            e->char_value = dup_string(val->string);
+        } else if (e->type == SYT_TYPE_SCALAR) {
             e->scalar = rv_to_scalar(val);
         } else {
             e->value = rv_to_integer(val);
@@ -532,6 +564,11 @@ void interp_cleanup(halmat_state_t *state) {
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
         free(state->syt[i].elements);
         state->syt[i].elements = NULL;
+        free(state->syt[i].char_value);
+        state->syt[i].char_value = NULL;
+    }
+    for (size_t i = 0; i < HALMAT_VAC_MAX; i++) {
+        if (state->vac[i].is_string) free(state->vac[i].string);
     }
 }
 
@@ -624,6 +661,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 state->pc = state->label_pos[label];
                 branched = true;
+                break;
+            }
+
+            case OP_CNEQ:
+            case OP_CEQU:
+            case OP_CNGT:
+            case OP_CGT:
+            case OP_CNLT:
+            case OP_CLT: {
+                /* Plain strcmp: padding rule for unequal-length operands
+                 * is unconfirmed (class-7/CEQU.md) -- no fixture found a
+                 * counterexample to the natural "compare as-is" reading,
+                 * so that's what's implemented; revisit if a fixed-length
+                 * CHARACTER comparison ever needs blank-padding instead. */
+                if (ins->operand_count != 2) { fail(state, "character comparison: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (a.kind != RV_STRING || b.kind != RV_STRING) { fail(state, "character comparison: both operands must be CHARACTER"); break; }
+                int cmp = strcmp(a.string, b.string);
+                bool result;
+                switch (ins->opcode) {
+                    case OP_CNEQ: result = cmp != 0; break;
+                    case OP_CEQU: result = cmp == 0; break;
+                    case OP_CNGT: result = cmp <= 0; break;
+                    case OP_CGT: result = cmp > 0; break;
+                    case OP_CNLT: result = cmp >= 0; break;
+                    case OP_CLT: default: result = cmp < 0; break;
+                }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].integer = result ? 1 : 0;
                 break;
             }
 
@@ -872,6 +940,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->syt[ins->operands[0].data].scalar = rv_to_scalar(&a);
                 break;
 
+            case OP_CINT:
+                /* Direct symbol-table form only (class-8/CINT.md), same
+                 * shape as SINT/IINT. */
+                if (ins->operand_count != 2) { fail(state, "CINT: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &a)) break;
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "CINT: OFFSET-addressed form not yet implemented"); break; }
+                if (a.kind != RV_STRING) { fail(state, "CINT: initializer is not CHARACTER"); break; }
+                {
+                    halmat_syt_entry_t *e = &state->syt[ins->operands[0].data];
+                    free(e->char_value);
+                    e->type = SYT_TYPE_CHARACTER;
+                    e->char_value = dup_string(a.string);
+                }
+                break;
+
             case OP_IADD:
             case OP_ISUB:
                 if (ins->operand_count != 2) { fail(state, "IADD/ISUB: expected 2 operands"); break; }
@@ -1007,10 +1090,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
 
             case OP_STOI:
                 /* Scalar->integer, per class-6/STOI.md's USA00309 Sec.
-                 * 8.2 rule 10: truncates (halmat_scalar_to_integer's
-                 * documented behavior, value.h) -- the real out-of-range
-                 * ERROR CONDITION isn't implemented, no fixture exercises
-                 * it (same documented gap as halmat_scalar_to_integer
+                 * 8.2 rule 10: rounds to nearest, ties away from zero
+                 * (halmat_scalar_to_integer's documented behavior,
+                 * value.h -- confirmed against the reference emulator,
+                 * NOT truncation) -- the real out-of-range ERROR
+                 * CONDITION isn't implemented, no fixture exercises it
+                 * (same documented gap as halmat_scalar_to_integer
                  * itself). */
                 if (ins->operand_count != 1) { fail(state, "STOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
@@ -1050,6 +1135,34 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (!write_destination(state, &ins->operands[1], &a)) break;
                 break;
+
+            case OP_CASN:
+                /* Character assign, source-first/receiver-second like the
+                 * rest of the xASN family (class-2/CASN.md). Unlike IASN/
+                 * SASN, no kind coercion is needed: a CHARACTER source
+                 * (SYT or LIT) already resolves as RV_STRING. */
+                if (ins->operand_count != 2) { fail(state, "CASN: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (a.kind != RV_STRING) { fail(state, "CASN: source is not CHARACTER"); break; }
+                if (!write_destination(state, &ins->operands[1], &a)) break;
+                break;
+
+            case OP_CCAT: {
+                if (ins->operand_count != 2) { fail(state, "CCAT: expected 2 operands"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (a.kind != RV_STRING || b.kind != RV_STRING) { fail(state, "CCAT: both operands must be CHARACTER"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                size_t len_a = strlen(a.string), len_b = strlen(b.string);
+                char *result = malloc(len_a + len_b + 1);
+                if (!result) { fail(state, "CCAT: out of memory"); break; }
+                memcpy(result, a.string, len_a);
+                memcpy(result + len_a, b.string, len_b + 1);
+                state->vac[ins->index].is_ref = false;
+                state->vac[ins->index].is_string = true;
+                state->vac[ins->index].string = result;
+                break;
+            }
 
             case OP_XXST:
                 /* General bracketed-argument-list start: I/O (IMD kind
