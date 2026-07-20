@@ -192,9 +192,37 @@ the reference implementation's author to diagnose further, per this
 project's established disposition for not-fully-root-caused findings
 (see finding 2).
 
+## 7. A broad swath of Class 0 opcodes are unconditional no-ops
+
+**File**: `emu/halmat_class0.c`, the `case POP_SFST: case POP_SFND: ...`
+block (~line 643) and the `case 0x034: /* WAIT */ ...` block immediately
+after it (~line 655).
+
+Roughly two dozen opcodes share a single `ADVANCE(); return HALMAT_OK;`
+body -- they're recognized (don't hit the "unknown popcode" default)
+but have no effect whatsoever: `SFST`/`SFND`/`SFAR`/`BFNC`/`LFNC`/
+`TNEQ`/`TEQU`/`TASN`/`NASN` in the first block; `WAIT`/`SGNL`/`CANC`/
+`TERM`/`PRIO`/`SCHD`/`ERON`/`ERSE`/`MSHP`/`VSHP`/`SSHP`/`ISHP`/`PMHD`/
+`PMAR`/`PMIN`/`NNEQ`/`NEQU` in the second. Confirmed for `BFNC`:
+```
+R = SQRT(2.0);   -- expect 1.4142135...
+```
+(`src/tests/hal/test_bfnc.hal`, also exercising `ABS`/`SIGN`/`ROUND`/
+`ABVAL`). `yaHALMAT2` produces the correct value for all five; `yaHALMAT`
+produces `0.0` for every one of them (the no-op leaves the destination's
+zero-initialized default in place). This isn't a single bug so much as
+a documented scope boundary in the reference tool -- its real-time
+task model (`WAIT`/`SCHD`/etc., already known absent per Plan.md's
+original gap list) and its shaping-function/built-in-function/structure
+machinery were apparently never implemented at all, rather than
+implemented incorrectly. Listed here for completeness (this project's
+independent `WAIT`/`SCHD`/`VSHP`/`BFNC` implementations were all
+verified by hand-calculation rather than against this reference, for
+exactly this reason) rather than as a narrow, fixable defect.
+
 ---
 
-All six findings were cross-checked against a primary source or
+All seven findings were cross-checked against a primary source or
 independent hand-calculation, not merely against `yaHALMAT2`'s own
 output, consistent with this project's general sourcing discipline (see
 `Plan.md`, `STATUS.md`).

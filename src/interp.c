@@ -38,6 +38,11 @@
 #define OP_VSHP 0x041
 #define OP_SSHP 0x042
 #define OP_ISHP 0x043
+#define OP_BFNC 0x04A
+/* OP_LFNC (0x04B, MAX/MIN over an ARRAY) not implemented -- its argument
+ * is bracketed by ADLP/DLPE (class-0/ADLP.md's "free arrayness" loop
+ * markers), a distinct and substantially larger mechanism not built yet;
+ * falls through to the default "not yet implemented" case. */
 #define OP_SFST 0x045
 #define OP_SFND 0x046
 #define OP_SFAR 0x047
@@ -1971,6 +1976,108 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_ISHP:
                 fail(state, "list-form MATRIX(...)/SCALAR(...)/INTEGER(...) shaping functions are not yet implemented");
                 break;
+
+            case OP_BFNC: {
+                /* Built-in function call, class-0/BFNC.md's confirmed
+                 * selector table (the instruction's own TAG field). Only
+                 * the plain-SCALAR-argument arithmetic functions plus
+                 * PRIO (no argument) and the VECTOR/CHARACTER functions
+                 * ABVAL/UNIT/LENGTH/TRIM are implemented; INVERSE (matrix
+                 * inverse) fails loudly -- same deferred numerical
+                 * algorithm as MINV (class-3/MINV.md). SIGN's documented
+                 * return type is unconfirmed; implemented returning
+                 * SCALAR like its arithmetic-function siblings in the
+                 * same table, not INTEGER. */
+                if (ins->tag == 19) { /* PRIO: no argument, current task's priority */
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_scalar = false;
+                    state->vac[ins->index].integer = state->tasks[state->current_task].priority;
+                    break;
+                }
+                if (ins->operand_count != 1) { fail(state, "BFNC: expected 1 operand (selector %u)", ins->tag); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+
+                switch (ins->tag) {
+                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: {
+                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND: through
+                         * double via libm, same documented precision
+                         * compromise as SEXP (no hex-float algorithm for
+                         * these in the extracted AP-101S material). */
+                        double x = halmat_scalar_to_double(rv_to_scalar(&a));
+                        double r;
+                        switch (ins->tag) {
+                            case 1: r = fabs(x); break;
+                            case 2: r = cos(x); break;
+                            case 5: r = exp(x); break;
+                            case 6: r = log(x); break;
+                            case 13: r = sin(x); break;
+                            case 15: r = tan(x); break;
+                            case 21: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break;
+                            case 24: r = sqrt(x); break;
+                            case 33: default: r = round(x); break;
+                        }
+                        bool dbl = rv_to_scalar(&a).double_precision;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl);
+                        break;
+                    }
+                    case 28: { /* ABVAL: vector magnitude -> SCALAR */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        halmat_scalar_t sum = halmat_scalar_zero(false);
+                        for (size_t i = 0; i < count; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], ca[i]));
+                        double mag = sqrt(halmat_scalar_to_double(sum));
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(mag, false);
+                        break;
+                    }
+                    case 27: { /* UNIT: normalize -> VECTOR */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "UNIT: container too large"); break; }
+                        halmat_scalar_t sum = halmat_scalar_zero(false);
+                        for (size_t i = 0; i < count; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], ca[i]));
+                        double mag = sqrt(halmat_scalar_to_double(sum));
+                        if (mag == 0.0) { fail(state, "UNIT: zero-magnitude vector"); break; }
+                        halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                        for (size_t i = 0; i < count; i++) {
+                            result[i] = halmat_scalar_from_double(halmat_scalar_to_double(ca[i]) / mag, false);
+                        }
+                        if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
+                        break;
+                    }
+                    case 40: /* LENGTH: CHARACTER length -> INTEGER */
+                        if (a.kind != RV_STRING) { fail(state, "LENGTH: operand is not CHARACTER"); break; }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = (int32_t)strlen(a.string);
+                        break;
+                    case 26: /* TRIM: strip trailing blanks -> CHARACTER */
+                        if (a.kind != RV_STRING) { fail(state, "TRIM: operand is not CHARACTER"); break; }
+                        {
+                            size_t len = strlen(a.string);
+                            while (len > 0 && a.string[len - 1] == ' ') len--;
+                            char *trimmed = malloc(len + 1);
+                            memcpy(trimmed, a.string, len);
+                            trimmed[len] = '\0';
+                            state->vac[ins->index].is_ref = false;
+                            state->vac[ins->index].is_string = true;
+                            state->vac[ins->index].string = trimmed;
+                        }
+                        break;
+                    case 49: /* INVERSE: matrix inverse -- deferred, same as MINV */
+                        fail(state, "BFNC INVERSE (matrix inverse) is not yet implemented");
+                        break;
+                    default:
+                        fail(state, "BFNC: unknown/unimplemented built-in function selector %u", ins->tag);
+                        break;
+                }
+                break;
+            }
 
             case OP_XXST:
                 /* General bracketed-argument-list start: I/O (IMD kind
