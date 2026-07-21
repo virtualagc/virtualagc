@@ -77,9 +77,10 @@ static void usage(const char *prog) {
             "                   support (see Makefile's HAVE_POSIX_TIMERS probe on non-\n"
             "                   Windows targets); fails loudly at startup if not available.\n"
             "  --debug          interactive gdb-subset debugger (see debug.h). Works with a single\n"
-            "                   HALMAT_FILE, or with @list/a linked-archive file when it names\n"
-            "                   exactly one unit -- fails with a clear error for 2+ units, real\n"
-            "                   multi-unit interactive debugging isn't implemented.\n"
+            "                   HALMAT_FILE, or with @list/a linked-archive file naming any number\n"
+            "                   of units -- `step` can descend into a cross-unit CALL made into a\n"
+            "                   separately-compiled EXTERNAL FUNCTION/PROCEDURE unit, `next` keeps\n"
+            "                   it atomic (see debug.c's print_help()).\n"
             "  --opt            load optmat.bin (+ its companions) instead of halmat.bin\n"
             "                   (single-file mode: only changes companion auto-discovery,\n"
             "                   since HALMAT_FILE is given explicitly either way)\n"
@@ -327,8 +328,14 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         halmat_program_free(&prog);
         return 1;
     }
-    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, colors, stdout)
-                         : interp_run(&state, stdout);
+    /* A lone HALMAT_FILE has no external_calls[] at all (interp_set_
+     * external_units() is never called for this path), so `step`'s
+     * cross-unit step-into is simply never triggered here -- units=NULL/
+     * num_units=0 is exactly right, not a placeholder to fill in later. */
+    int rc = debug_mode
+                 ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, path, NULL, 0, colors,
+                             stdout)
+                 : interp_run(&state, stdout);
     interp_cleanup(&state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
     for (int i = 0; i < num_raf_maps; i++) fclose(opened_raf[i]);
@@ -542,26 +549,6 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         return 0;
     }
 
-    /* --debug is only wired up for the trivial single-unit case (no
-     * COMPOOL/FUNCTION/PROCEDURE auxiliary units at all -- num_units==1
-     * means the sole listed unit unconditionally *is* the primary,
-     * structurally identical to run_single()'s own single-file case).
-     * Real multi-unit interactive debugging would need the debugger to
-     * track/switch between several independent halmat_state_t instances
-     * (each with its own PC/symtab/pass1.rpt) and to follow execution
-     * across a cross-unit CALL (run_external_call(), interp.c) -- design
-     * work nobody's asked for yet. Fail loudly here rather than silently
-     * ignoring --debug the way this code path previously did (debug_mode
-     * simply wasn't threaded through at all before this check existed). */
-    if (debug_mode && num_units > 1) {
-        fprintf(stderr,
-                "yaHALMAT2: --debug is only supported when @list/the container names exactly one "
-                "unit (found %d); multi-unit interactive debugging isn't implemented yet\n",
-                num_units);
-        for (int i = 0; i < num_units; i++) free_unit(&units[i]);
-        return 1;
-    }
-
     /* Run every non-primary COMPOOL unit to completion, harvest any
      * values the primary EXTERNALLY references from it, by name (see
      * the comment above this function). A non-primary FDEF/PDEF
@@ -766,9 +753,30 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         }
     }
 
+    /* debug.h's debug_unit_info_t: lets the debugger find a stepped-into
+     * callee's own directory (for lazy pass1.rpt loading) and symbol
+     * table -- built here from this function's own units[]/ext_states[]
+     * arrays (one entry per linked EXTERNAL FUNCTION/PROCEDURE unit;
+     * COMPOOL units run to completion above and are never call targets,
+     * so they're not included), the only place both are already
+     * available together. Only needed under --debug; harmless to build
+     * unconditionally, but skipped otherwise since it's pure overhead. */
+    debug_unit_info_t debug_units[MAX_UNITS];
+    int debug_unit_count = 0;
+    if (debug_mode) {
+        for (int i = 0; i < num_units; i++) {
+            if (!ext_states[i]) continue;
+            debug_units[debug_unit_count].state = ext_states[i];
+            debug_units[debug_unit_count].dir = units[i].dir;
+            debug_units[debug_unit_count].symtab = units[i].have_symtab ? &units[i].symtab : NULL;
+            debug_unit_count++;
+        }
+    }
+
     int rc = debug_mode
                  ? debug_run(&primary_state, units[primary].have_symtab ? &units[primary].symtab : NULL,
-                             have_srcmap ? &srcmap : NULL, colors, stdout)
+                             have_srcmap ? &srcmap : NULL, units[primary].dir, debug_units, debug_unit_count, colors,
+                             stdout)
                  : interp_run(&primary_state, stdout);
     if (have_srcmap) halmat_srcmap_free(&srcmap);
     interp_cleanup(&primary_state);
