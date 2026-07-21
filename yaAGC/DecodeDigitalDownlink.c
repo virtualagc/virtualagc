@@ -803,7 +803,7 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
   for (int j = 0; j < numTsvFiles && j < MAX_DOWNLISTS; j++)
     {
       int id;
-      char filename[64];
+      char filename[SWIDTH + 1];
       DownlinkListSpec_t *dls;
       FieldSpec_t *fieldSpec;
       FILE *fp;
