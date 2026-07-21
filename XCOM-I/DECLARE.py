@@ -8,6 +8,7 @@ Purpose:    This is the module of XCOM-I.py which processes XPL
             DECLARE, ARRAY, or BASED statements.
 Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-03-07 RSB  Began experimenting with this concept.
+            2026-08-03 DAS  Allow '(' in INITIAL expressions.
 '''
 
 import copy
@@ -247,7 +248,7 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                 for token in attributes:
                     if skip > 0:
                         skip -= 1
-                    elif token == "(": # and inFirst:
+                    elif token == "(" and not inInitial:
                         inTop = True
                         topString = ''
                     elif inTop:
