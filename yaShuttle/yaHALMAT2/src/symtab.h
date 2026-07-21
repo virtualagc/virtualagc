@@ -69,6 +69,17 @@ typedef struct {
 } halmat_symtab_t;
 
 bool halmat_symtab_load(const char *path, halmat_symtab_t *out, char *errbuf, size_t errbuf_size);
+
+/* Same COMMON*.out text parse as halmat_symtab_load(), but from an
+ * already-in-memory buffer (a linked-archive container's verbatim-
+ * embedded symtab text, see container.h) rather than a file path. Unlike
+ * halmat_symtab_load() (which uses fgets over a FILE*), this scans `buf`
+ * directly for '\n'-delimited lines (a bare trailing partial line at EOF
+ * still counts as a line) -- deliberately not fmemopen(), which is a
+ * POSIX/glibc extension unavailable to the MSVC/nmake Windows build this
+ * project supports (Makefile.win). */
+bool halmat_symtab_load_from_buffer(const uint8_t *buf, size_t size, halmat_symtab_t *out,
+                                     char *errbuf, size_t errbuf_size);
 void halmat_symtab_free(halmat_symtab_t *table);
 
 /* Case-sensitive name lookup (HAL/S identifiers are compiled upper-case).

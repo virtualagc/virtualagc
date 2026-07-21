@@ -12,6 +12,7 @@
 #define halmat_isatty isatty
 #endif
 
+#include "container.h"
 #include "debug.h"
 #include "disasm.h"
 #include "halmat.h"
@@ -46,7 +47,15 @@ static void usage(const char *prog) {
     fprintf(stderr,
             "usage: %s [options] HALMAT_FILE\n"
             "       %s [options] @list\n"
+            "       %s [options] LINKED_ARCHIVE\n"
+            "       %s --link-only FILENAME @list\n"
             "options:\n"
+            "  --link-only FILENAME  build a self-contained, compressed linked-archive\n"
+            "                   container from @list at FILENAME, instead of running it;\n"
+            "                   the resulting file can later be run directly, positionally,\n"
+            "                   in place of @list or HALMAT_FILE, with no directory tree\n"
+            "                   needed (mutually exclusive with --disasm/--debug; requires\n"
+            "                   an @list argument, not a plain HALMAT_FILE)\n"
             "  --disasm         disassemble only, do not execute\n"
             "  --litfile F      literal file (default: auto-discovered alongside HALMAT_FILE)\n"
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
@@ -80,13 +89,35 @@ static void usage(const char *prog) {
             "  --help           this message\n"
             "\n"
             "@list is a text file listing one HALSFC output directory per line, each\n"
-            "holding a separately compiled HAL/S unit (see Plan.md's Phase 3 M6 notes).\n",
-            prog, prog);
+            "holding a separately compiled HAL/S unit (see Plan.md's Phase 3 M6 notes).\n"
+            "LINKED_ARCHIVE is a container file previously built with --link-only\n"
+            "(see reengineered-documentation/MULTI-FILE-LINKING.md); it is auto-detected\n"
+            "by its \"YHLA\" magic, so no special flag is needed to run one.\n",
+            prog, prog, prog, prog);
 }
 
 static bool file_exists(const char *path) {
     struct stat st;
     return stat(path, &st) == 0;
+}
+
+/* Plain whole-file read into a malloc'd buffer, used by write_container()
+ * below to re-read a unit's halmat.bin/litfile/COMMON*.out companion
+ * files' exact original bytes for verbatim embedding in a --link-only
+ * container (see container.h) -- distinct from load_unit()'s own parsing
+ * of those same files, which the container format must NOT re-serialize. */
+static uint8_t *read_raw_file(const char *path, size_t *out_size) {
+    FILE *f = fopen(path, "rb");
+    if (!f) return NULL;
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
+    long size = ftell(f);
+    if (size < 0 || fseek(f, 0, SEEK_SET) != 0) { fclose(f); return NULL; }
+    uint8_t *buf = malloc((size_t)size > 0 ? (size_t)size : 1);
+    if (!buf) { fclose(f); return NULL; }
+    if (size > 0 && fread(buf, 1, (size_t)size, f) != (size_t)size) { free(buf); fclose(f); return NULL; }
+    fclose(f);
+    *out_size = (size_t)size;
+    return buf;
 }
 
 /* Companion-file auto-discovery, following the same directory-relative
@@ -436,52 +467,57 @@ static void free_ext_states(halmat_state_t **ext_states, int num_dirs) {
     }
 }
 
-static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
-                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps) {
-    if (num_dirs > MAX_UNITS) {
-        fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
-        return 1;
-    }
-
-    unit_t units[MAX_UNITS];
-    char errbuf[512];
-    for (int i = 0; i < num_dirs; i++) {
-        if (!load_unit(dirs[i], mode, &units[i], errbuf, sizeof(errbuf))) {
-            fprintf(stderr, "yaHALMAT2: %s: %s\n", dirs[i], errbuf);
-            for (int j = 0; j < i; j++) free_unit(&units[j]);
-            return 1;
-        }
-    }
-
-    if (disasm) {
-        for (int i = 0; i < num_dirs; i++) {
-            printf("=== %s ===\n", dirs[i]);
-            halmat_disasm_program(&units[i].prog, stdout);
-        }
-        for (int i = 0; i < num_dirs; i++) free_unit(&units[i]);
-        return 0;
-    }
-
+/* Resolves which of units[0..num_units) is the executing PROGRAM
+ * (MDEF-headed) unit -- via --entry's directory-label match if given, or
+ * auto-detecting the sole MDEF-headed unit otherwise. Factored out of
+ * run_linked() so both the ordinary @list-run path and the --link-only
+ * container-write path (write_container(), below) share the exact same
+ * selection logic and error messages. On failure, writes a message to
+ * errbuf and returns false; the caller owns units[]/cleanup either way. */
+static bool find_primary_unit(unit_t *units, int num_units, const char *entry_dir,
+                               int *primary_out, char *errbuf, size_t errbuf_size) {
     int primary = -1;
-    for (int i = 0; i < num_dirs; i++) {
+    for (int i = 0; i < num_units; i++) {
         uint16_t def_op, def_sym;
         bool has_def = find_leading_def(&units[i].prog, &def_op, &def_sym);
         if (entry_dir) {
             if (strcmp(units[i].dir, entry_dir) == 0) primary = i;
         } else if (has_def && def_op == OP_MDEF_CONST) {
             if (primary != -1) {
-                fprintf(stderr, "yaHALMAT2: multiple PROGRAM units found (%s and %s); use --entry to select one\n",
-                        units[primary].dir, units[i].dir);
-                for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
-                return 1;
+                snprintf(errbuf, errbuf_size,
+                         "multiple PROGRAM units found (%s and %s); use --entry to select one",
+                         units[primary].dir, units[i].dir);
+                return false;
             }
             primary = i;
         }
     }
     if (primary == -1) {
-        fprintf(stderr, "yaHALMAT2: no PROGRAM unit found (or --entry didn't match any @list directory)\n");
-        for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
-        return 1;
+        snprintf(errbuf, errbuf_size, "no PROGRAM unit found (or --entry didn't match any @list directory)");
+        return false;
+    }
+    *primary_out = primary;
+    return true;
+}
+
+/* Steps (b) disasm-and-exit, (d) EXTERNAL COMPOOL/FUNCTION/PROCEDURE
+ * wiring, (e) seed + run the primary unit, and (f) cleanup of
+ * run_linked()'s original single body -- factored out so both the
+ * @list-run path (run_linked(), below) and the linked-archive-container
+ * run path (run_linked_container(), below) share this delicate, hand-
+ * verified wiring logic rather than duplicating it. Owns freeing
+ * units[]/ext_states internally on every exit path, same convention as
+ * the pre-refactor run_linked(). `primary` must already be resolved
+ * (e.g. via find_primary_unit()). */
+static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks,
+                             const device_map_t *maps, int num_maps) {
+    if (disasm) {
+        for (int i = 0; i < num_units; i++) {
+            printf("=== %s ===\n", units[i].dir);
+            halmat_disasm_program(&units[i].prog, stdout);
+        }
+        for (int i = 0; i < num_units; i++) free_unit(&units[i]);
+        return 0;
     }
 
     /* Run every non-primary COMPOOL unit to completion, harvest any
@@ -501,7 +537,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     halmat_external_call_map_t ext_map[MAX_UNITS];
     int ext_map_count = 0;
 
-    for (int i = 0; i < num_dirs; i++) {
+    for (int i = 0; i < num_units; i++) {
         if (i == primary) continue;
 
         uint16_t def_op, def_sym;
@@ -564,8 +600,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         if (!has_def || def_op != OP_CDEF_CONST) {
             fprintf(stderr, "yaHALMAT2: %s: only COMPOOL/FUNCTION/PROCEDURE auxiliary units are supported (not the PROGRAM entry point)\n",
                     units[i].dir);
-            free_ext_states(ext_states, num_dirs);
-            for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+            free_ext_states(ext_states, num_units);
+            for (int j = 0; j < num_units; j++) free_unit(&units[j]);
             return 1;
         }
 
@@ -633,8 +669,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
             }
         }
         if (unresolved) {
-            free_ext_states(ext_states, num_dirs);
-            for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+            free_ext_states(ext_states, num_units);
+            for (int j = 0; j < num_units; j++) free_unit(&units[j]);
             return 1;
         }
     }
@@ -656,15 +692,232 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&primary_state, maps, num_maps, opened_devices, "yaHALMAT2")) {
         interp_cleanup(&primary_state);
-        free_ext_states(ext_states, num_dirs);
-        for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+        free_ext_states(ext_states, num_units);
+        for (int j = 0; j < num_units; j++) free_unit(&units[j]);
         return 1;
     }
     int rc = interp_run(&primary_state, stdout);
     interp_cleanup(&primary_state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
-    free_ext_states(ext_states, num_dirs);
+    free_ext_states(ext_states, num_units);
 
+    for (int i = 0; i < num_units; i++) free_unit(&units[i]);
+    return rc;
+}
+
+/* Loads every directory in @list (unchanged from before this refactor),
+ * resolves the primary PROGRAM unit, and hands off to run_linked_units()
+ * for the actual wiring + run. */
+static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
+                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps) {
+    if (num_dirs > MAX_UNITS) {
+        fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
+        return 1;
+    }
+
+    unit_t units[MAX_UNITS];
+    char errbuf[512];
+    for (int i = 0; i < num_dirs; i++) {
+        if (!load_unit(dirs[i], mode, &units[i], errbuf, sizeof(errbuf))) {
+            fprintf(stderr, "yaHALMAT2: %s: %s\n", dirs[i], errbuf);
+            for (int j = 0; j < i; j++) free_unit(&units[j]);
+            return 1;
+        }
+    }
+
+    int primary;
+    char errbuf2[512];
+    if (!find_primary_unit(units, num_dirs, entry_dir, &primary, errbuf2, sizeof(errbuf2))) {
+        fprintf(stderr, "yaHALMAT2: %s\n", errbuf2);
+        for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+        return 1;
+    }
+
+    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps);
+}
+
+/* Builds each unit_t from a linked-archive container's already-in-memory
+ * bytes (see container.h) via the buffer-based loader entry points
+ * (halmat_load_from_buffer/halmat_literal_load_from_buffer/halmat_symtab_
+ * load_from_buffer), then hands off to run_linked_units() -- same wiring
+ * logic as an @list run, just sourced from a single container file
+ * instead of a directory tree. */
+static int run_linked_container(halmat_container_t *c, int num_blanks, const device_map_t *maps,
+                                 int num_maps, bool disasm) {
+    if (c->num_units > MAX_UNITS) {
+        fprintf(stderr, "yaHALMAT2: too many units in linked-archive container (max %d)\n", MAX_UNITS);
+        return 1;
+    }
+
+    unit_t units[MAX_UNITS];
+    char errbuf[512];
+    for (int i = 0; i < c->num_units; i++) {
+        memset(&units[i], 0, sizeof(units[i]));
+        const halmat_container_unit_view_t *cu = &c->units[i];
+        strncpy(units[i].dir, cu->label, sizeof(units[i].dir) - 1);
+
+        if (!halmat_load_from_buffer(cu->halmat_bytes, cu->halmat_len, &units[i].prog, errbuf, sizeof(errbuf))) {
+            fprintf(stderr, "yaHALMAT2: %s: %s\n", cu->label, errbuf);
+            for (int j = 0; j < i; j++) free_unit(&units[j]);
+            return 1;
+        }
+
+        if (cu->have_lit) {
+            if (!halmat_literal_load_from_buffer(cu->litfile_bytes, cu->litfile_len, cu->string_blob,
+                                                  cu->string_blob_len, &units[i].literals, errbuf, sizeof(errbuf))) {
+                fprintf(stderr, "yaHALMAT2: %s: %s\n", cu->label, errbuf);
+                halmat_program_free(&units[i].prog);
+                for (int j = 0; j < i; j++) free_unit(&units[j]);
+                return 1;
+            }
+            units[i].have_literals = true;
+        }
+
+        if (cu->have_sym) {
+            if (!halmat_symtab_load_from_buffer(cu->symtab_bytes, cu->symtab_len, &units[i].symtab, errbuf,
+                                                 sizeof(errbuf))) {
+                fprintf(stderr, "yaHALMAT2: %s: %s\n", cu->label, errbuf);
+                if (units[i].have_literals) halmat_literal_free(&units[i].literals);
+                halmat_program_free(&units[i].prog);
+                for (int j = 0; j < i; j++) free_unit(&units[j]);
+                return 1;
+            }
+            units[i].have_symtab = true;
+        }
+    }
+
+    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, maps, num_maps);
+}
+
+/* Builds a --link-only container from @list: loads every unit the
+ * ordinary way (load_unit(), reused verbatim) to resolve the primary and
+ * to know which companion files each unit actually has, then
+ * independently re-reads each unit's halmat.bin/optmat.bin, litfile, and
+ * COMMON*.out companion files' raw bytes straight off disk (load_unit()
+ * only parses them; the container format needs the exact original file
+ * bytes verbatim, not a re-serialization of the parsed structures) --
+ * re-deriving the same companion paths load_unit() itself uses, via the
+ * same find_companion() helper and candidate lists, rather than
+ * reimplementing that discovery. */
+static int write_container(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
+                            const char *out_path) {
+    if (num_dirs > MAX_UNITS) {
+        fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
+        return 1;
+    }
+
+    unit_t units[MAX_UNITS];
+    char errbuf[512];
+    for (int i = 0; i < num_dirs; i++) {
+        if (!load_unit(dirs[i], mode, &units[i], errbuf, sizeof(errbuf))) {
+            fprintf(stderr, "yaHALMAT2: %s: %s\n", dirs[i], errbuf);
+            for (int j = 0; j < i; j++) free_unit(&units[j]);
+            return 1;
+        }
+    }
+
+    int primary;
+    char errbuf2[512];
+    if (!find_primary_unit(units, num_dirs, entry_dir, &primary, errbuf2, sizeof(errbuf2))) {
+        fprintf(stderr, "yaHALMAT2: %s\n", errbuf2);
+        for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
+        return 1;
+    }
+
+    const char *halmat_name = (mode == UNIT_MODE_OPT) ? "optmat.bin" : (mode == UNIT_MODE_PY) ? "FILE1.bin" : "halmat.bin";
+    const char *sym_name = (mode == UNIT_MODE_PY) ? NULL : (mode == UNIT_MODE_OPT) ? "COMMON3.out" : "COMMON0.out";
+
+    uint8_t *halmat_bytes[MAX_UNITS] = {0};
+    size_t halmat_lens[MAX_UNITS] = {0};
+    uint8_t *litfile_bytes[MAX_UNITS] = {0};
+    size_t litfile_lens[MAX_UNITS] = {0};
+    uint8_t *symtab_bytes[MAX_UNITS] = {0};
+    size_t symtab_lens[MAX_UNITS] = {0};
+
+    bool ok = true;
+    for (int i = 0; ok && i < num_dirs; i++) {
+        char halmat_path[1024];
+        snprintf(halmat_path, sizeof(halmat_path), "%s/%s", dirs[i], halmat_name);
+        halmat_bytes[i] = read_raw_file(halmat_path, &halmat_lens[i]);
+        if (!halmat_bytes[i]) {
+            fprintf(stderr, "yaHALMAT2: cannot read '%s' for --link-only\n", halmat_path);
+            ok = false;
+            break;
+        }
+
+        if (units[i].have_literals) {
+            char lit_buf[1024];
+            bool have_lit_path;
+            if (mode == UNIT_MODE_PY) {
+                static const char *lit_c[] = {"FILE2.bin"};
+                have_lit_path = find_companion(halmat_path, lit_c, 1, lit_buf, sizeof(lit_buf));
+            } else if (mode == UNIT_MODE_OPT) {
+                static const char *lit_c[] = {"litfile2.bin"};
+                have_lit_path = find_companion(halmat_path, lit_c, 1, lit_buf, sizeof(lit_buf));
+            } else {
+                static const char *lit_c[] = {"litfile0.bin", "litfile.bin"};
+                have_lit_path = find_companion(halmat_path, lit_c, 2, lit_buf, sizeof(lit_buf));
+            }
+            if (!have_lit_path) {
+                fprintf(stderr,
+                        "yaHALMAT2: %s: literal table loaded but its file vanished before --link-only "
+                        "could re-read it raw\n",
+                        dirs[i]);
+                ok = false;
+                break;
+            }
+            litfile_bytes[i] = read_raw_file(lit_buf, &litfile_lens[i]);
+            if (!litfile_bytes[i]) {
+                fprintf(stderr, "yaHALMAT2: cannot read '%s' for --link-only\n", lit_buf);
+                ok = false;
+                break;
+            }
+        }
+
+        if (units[i].have_symtab && sym_name) {
+            char sym_path[1024];
+            snprintf(sym_path, sizeof(sym_path), "%s/%s", dirs[i], sym_name);
+            symtab_bytes[i] = read_raw_file(sym_path, &symtab_lens[i]);
+            if (!symtab_bytes[i]) {
+                fprintf(stderr, "yaHALMAT2: cannot read '%s' for --link-only\n", sym_path);
+                ok = false;
+                break;
+            }
+        }
+    }
+
+    int rc = 1;
+    if (ok) {
+        halmat_container_unit_t cunits[MAX_UNITS];
+        for (int i = 0; i < num_dirs; i++) {
+            cunits[i].label = dirs[i];
+            cunits[i].halmat_bytes = halmat_bytes[i];
+            cunits[i].halmat_len = halmat_lens[i];
+            cunits[i].have_lit = units[i].have_literals;
+            cunits[i].litfile_bytes = litfile_bytes[i];
+            cunits[i].litfile_len = litfile_lens[i];
+            cunits[i].literals = units[i].have_literals ? &units[i].literals : NULL;
+            cunits[i].have_sym = units[i].have_symtab;
+            cunits[i].symtab_bytes = symtab_bytes[i];
+            cunits[i].symtab_len = symtab_lens[i];
+        }
+
+        char cerrbuf[512];
+        if (halmat_container_write(out_path, cunits, num_dirs, primary, cerrbuf, sizeof(cerrbuf))) {
+            printf("yaHALMAT2: wrote linked-archive container '%s' (%d unit%s, primary '%s')\n", out_path,
+                   num_dirs, num_dirs == 1 ? "" : "s", units[primary].dir);
+            rc = 0;
+        } else {
+            fprintf(stderr, "yaHALMAT2: %s\n", cerrbuf);
+            rc = 1;
+        }
+    }
+
+    for (int i = 0; i < num_dirs; i++) {
+        free(halmat_bytes[i]);
+        free(litfile_bytes[i]);
+        free(symtab_bytes[i]);
+    }
     for (int i = 0; i < num_dirs; i++) free_unit(&units[i]);
     return rc;
 }
@@ -692,6 +945,7 @@ int main(int argc, char **argv) {
     const char *litfile_opt = NULL;
     const char *memory_opt = NULL;
     const char *entry_opt = NULL;
+    const char *link_only_opt = NULL;
     bool use_opt = false;
     bool use_py = false;
     int num_blanks = 5;
@@ -723,6 +977,8 @@ int main(int argc, char **argv) {
             use_py = true;
         } else if (strcmp(argv[i], "--entry") == 0 && i + 1 < argc) {
             entry_opt = argv[++i];
+        } else if (strcmp(argv[i], "--link-only") == 0 && i + 1 < argc) {
+            link_only_opt = argv[++i];
         } else if ((strcmp(argv[i], "--ddi") == 0 || strcmp(argv[i], "--ddo") == 0) && i + 1 < argc) {
             bool is_output = (strcmp(argv[i], "--ddo") == 0);
             const char *arg = argv[++i];
@@ -812,6 +1068,49 @@ int main(int argc, char **argv) {
         return 1;
     }
     unit_mode_t mode = use_py ? UNIT_MODE_PY : use_opt ? UNIT_MODE_OPT : UNIT_MODE_HALMAT;
+
+    if (link_only_opt) {
+        if (path[0] != '@') {
+            fprintf(stderr, "%s: --link-only requires an @list argument\n", argv[0]);
+            return 1;
+        }
+        if (disasm || debug_mode) {
+            fprintf(stderr, "%s: --link-only is mutually exclusive with --disasm/--debug\n", argv[0]);
+            return 1;
+        }
+        char dirs[MAX_UNITS][900];
+        int num_dirs = 0;
+        if (!read_list_file(path + 1, dirs, &num_dirs, MAX_UNITS)) {
+            fprintf(stderr, "%s: cannot read list file '%s'\n", argv[0], path + 1);
+            return 1;
+        }
+        if (num_dirs == 0) {
+            fprintf(stderr, "%s: '%s' lists no directories\n", argv[0], path + 1);
+            return 1;
+        }
+        char *dir_ptrs[MAX_UNITS];
+        for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
+        return write_container(dir_ptrs, num_dirs, mode, entry_opt, link_only_opt);
+    }
+
+    if (path[0] != '@' && halmat_container_sniff(path)) {
+        if (use_opt || use_py || entry_opt || litfile_opt || memory_opt) {
+            fprintf(stderr,
+                    "%s: --opt/--py/--entry/--litfile/--memory have no effect on a linked-archive file "
+                    "(these were fixed when it was built with --link-only)\n",
+                    argv[0]);
+            return 1;
+        }
+        halmat_container_t c;
+        char cerrbuf[512];
+        if (!halmat_container_read(path, &c, cerrbuf, sizeof(cerrbuf))) {
+            fprintf(stderr, "%s: %s\n", argv[0], cerrbuf);
+            return 1;
+        }
+        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm);
+        halmat_container_free(&c);
+        return rc;
+    }
 
     if (path[0] == '@') {
         char dirs[MAX_UNITS][900];

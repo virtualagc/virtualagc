@@ -37,6 +37,24 @@ typedef struct {
  * (mirrors yaHALMAT's graceful degradation when --common isn't given). */
 bool halmat_literal_load(const char *litfile_path, const char *memory_path,
                           halmat_literal_table_t *out, char *errbuf, size_t errbuf_size);
+
+/* Same litfile decode as halmat_literal_load(), but for a linked-archive
+ * container (see container.h): litfile_buf/litfile_size is the verbatim
+ * litfile*.bin bytes, and instead of indexing a 16MB memory-image buffer
+ * by (pointer,length) for each LIT_STRING cell, each such cell's already-
+ * EBCDIC-decoded text is read sequentially from string_blob -- a run of
+ * (u32 BE length; length bytes) records, one per LIT_STRING cell, in the
+ * same record/page/cell order this function's own decode loop visits
+ * them. Unlike the graceful degrade-to-blanks behavior of
+ * halmat_literal_load() when no memory image is available, a LIT_STRING
+ * cell that needs a string blob has none left is a genuine container
+ * corruption (an internal invariant violation, not a "missing optional
+ * companion file"), so this fails loudly via errbuf rather than
+ * degrading -- see this project's fail-loudly discipline (e.g. interp.c's
+ * fail() calls). */
+bool halmat_literal_load_from_buffer(const uint8_t *litfile_buf, size_t litfile_size,
+                                      const uint8_t *string_blob, size_t string_blob_size,
+                                      halmat_literal_table_t *out, char *errbuf, size_t errbuf_size);
 void halmat_literal_free(halmat_literal_table_t *table);
 
 /* IBM System/360-style long (64-bit) hex-float decode: 1 sign bit + 7-bit

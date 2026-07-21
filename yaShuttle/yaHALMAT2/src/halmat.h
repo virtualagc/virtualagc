@@ -66,6 +66,13 @@ typedef struct {
  * Returns true on success and fills *out; on failure returns false and
  * writes a human-readable message to errbuf. */
 bool halmat_load(const char *path, halmat_program_t *out, char *errbuf, size_t errbuf_size);
+
+/* Same decode as halmat_load(), but from an already-in-memory buffer
+ * (e.g. a linked-archive container's verbatim-embedded halmat.bin bytes,
+ * see container.h) rather than a file path. halmat_load() is a thin
+ * file-I/O wrapper around this. */
+bool halmat_load_from_buffer(const uint8_t *buf, size_t size, halmat_program_t *out,
+                              char *errbuf, size_t errbuf_size);
 void halmat_program_free(halmat_program_t *prog);
 
 #endif

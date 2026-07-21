@@ -51,6 +51,20 @@ run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=     
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
 run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
 run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
+
+# --link-only / linked-archive-container round trips (self-contained
+# compressed file built from an @list, run positionally with no @list
+# directory tree needed -- see reengineered-documentation/MULTI-FILE-
+# LINKING.md's container-format section). Round-trip both the EXTERNAL
+# COMPOOL and EXTERNAL FUNCTION linking cases above through it (proving
+# the linking logic itself survives), plus a minimal CHARACTER-literal-
+# only fixture that specifically exercises the string-blob mechanism
+# replacing the 16MB memory image (would fail or print blank/wrong output
+# if that plumbing were broken or omitted).
+run ./run_link_container_fixture.sh --plain 150000 "Y=              43" link_pool link_prog
+run ./run_link_container_fixture.sh --tmpl 150000 "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
+run ./run_link_container_fixture.sh --plain 50000 "HELLO CONTAINER" link_lit
+
 run ./run_local_fixture.sh write_lit "          5      3.5000000E+00"
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
 run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"

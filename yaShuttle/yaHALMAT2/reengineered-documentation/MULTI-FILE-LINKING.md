@@ -115,3 +115,166 @@ produces `Y=43` (`SHARED_X`=42, imported from the separately-compiled
 `COMPOOL`, `+1`), and omitting the `COMPOOL` unit from the `@list`
 correctly fails with `unresolved external 'POOL'` rather than silently
 defaulting `SHARED_X` to `0`.
+
+## Linked-archive containers (`--link-only`): one self-contained file instead of a directory tree
+
+`@list` is convenient for development (each line is just a HALSFC output
+directory already sitting on disk) but awkward to *distribute*: shipping
+a linked program means shipping N directories, each with its own
+`halmat.bin`/`litfile0.bin`/`COMMON0.out`/`COMMON0.out.bin.gz` quartet.
+`yaHALMAT2 --link-only FILENAME @list` instead builds a single,
+self-contained, compressed container file from an `@list`, which can
+later be run directly and positionally — `yaHALMAT2 FILENAME`, no `@`,
+no directory tree — in place of either `@list` or a plain `HALMAT_FILE`.
+The container is auto-detected by its own magic bytes, so no extra flag
+is needed to run one.
+
+### Why the container doesn't embed `COMMONn.out.bin.gz` verbatim
+
+`COMMONn.out.bin.gz` (decompressed size capped by `HALMAT_MEM_IMAGE_MAX`
+in `literal.c`, matching the reference `yaHALMAT` emulator's own
+`HALMAT_MEM_SIZE`) is a **fixed 16 MB** image of AP-101S compiler memory,
+of which `halmat_literal_load()` only ever reads small `(pointer,
+length)` slices out — one per `CHARACTER` literal (`LIT_STRING`-typed
+litfile entries). Measured this session against a 2-literal test fixture
+(`WRITE(6) 'HELLO WORLD', 'A SECOND LONGER LITERAL STRING FOR TESTING';`):
+only **~54 bytes total** were ever actually read out of that 16 MB
+buffer — and the file is still **35 KB even gzip'd** on disk, because the
+other 16 MB, minus a couple dozen bytes, is compiler-internal padding
+irrelevant to running the program. Embedding it verbatim in a
+"self-contained" container would make the container hundreds of times
+larger than the `halmat.bin`/`litfile*.bin`/`COMMON*.out` data that
+actually matters.
+
+The container format therefore never stores the memory image. Instead,
+at `--link-only` build time, every `CHARACTER` literal's text is resolved
+once (the normal way, via the unit's own `COMMON*.out.bin.gz`) and only
+the resulting already-EBCDIC-decoded strings are stored — see "byte
+layout" below. `COMMONn.out` (the *other*, unrelated, plain-text
+symbol-table report `symtab.c` parses) is not similarly wasteful — in the
+same test fixture, ~91% of its lines were genuine per-symbol field
+records `symtab.c` actually parses, scaling with the declared-symbol
+count — so it's stored unfiltered, verbatim.
+
+Measured real container sizes (`src/tests/run_link_container_fixture.sh`,
+via `src/tests/run_all.sh`): the minimal single-unit `CHARACTER`-literal
+round trip (`test_link_lit.hal`, exercising exactly the string-blob
+mechanism above) produces a **26260-byte** container; the two-unit
+`EXTERNAL COMPOOL` round trip (`test_link_pool.hal` + `test_link_prog.hal`)
+**52712 bytes**; the three-unit `EXTERNAL FUNCTION` round trip
+(`test_ext_mytable.hal` + `test_ext_square.hal` + `test_ext_squroo.hal`)
+**79299 bytes** — all of them, even the 3-unit case with three separate
+embedded `COMMON*.out` symbol tables, over two orders of magnitude
+smaller than the one 16 MB memory image `--link-only` would otherwise
+need to embed per unit.
+
+### Byte layout
+
+All multi-byte integers are big-endian, matching this codebase's existing
+convention (e.g. `loader.c`'s `decode_word_be`):
+
+```
+bytes 0-3:   magic "YHLA" (4 raw ASCII bytes, no NUL)
+byte  4:     format version = 1
+bytes 5-12:  u64 BE -- uncompressed payload length
+bytes 13-20: u64 BE -- compressed payload length
+bytes 21..:  exactly <compressed payload length> bytes of zlib-deflated payload
+```
+
+The magic/version/lengths prefix is deliberately left uncompressed, so a
+reader can identify and size-check the file (`halmat_container_sniff()`)
+without decompressing anything. Compression is `zlib`'s one-shot
+`compress2()`/`uncompress()` under `#ifdef HAVE_ZLIB` (this build's
+existing convention -- see the `Makefile`'s zlib probe and `literal.c`'s
+memory-image handling), falling back to piping through the `gzip` binary
+via `popen`/`_popen` when zlib isn't available at build time.
+
+Payload (after decompression), all integers big-endian:
+
+```
+u16 num_units
+u16 primary_idx              -- index into the units array below; the executing PROGRAM unit
+repeated num_units times, a "unit record":
+    u16 label_len ; label_len bytes            -- unit label (originally the @list directory
+                                                   string; diagnostics/disasm headers only, not
+                                                   semantically used)
+    u32 halmat_len ; halmat_len bytes           -- raw halmat.bin/optmat.bin file content,
+                                                   VERBATIM (exact original file bytes)
+    u8  have_lit (0 or 1)
+    if have_lit:
+        u32 litfile_len ; litfile_len bytes         -- raw litfile*.bin content, VERBATIM
+                                                        (unchanged 1560-byte-record format)
+        u32 string_blob_len ; string_blob_len bytes -- sequence of (u32 str_len BE; str_len
+                                                        bytes), one entry per LIT_STRING-typed
+                                                        cell in the unit's literal table (including
+                                                        unused/placeholder cells -- the reader must
+                                                        consume exactly one blob entry per such
+                                                        cell, in the same order halmat_literal_load's
+                                                        decode loop visits them, or its blob cursor
+                                                        desyncs from the writer's). Each string is
+                                                        the already-resolved, EBCDIC-decoded
+                                                        CHARACTER text, taking the place of the
+                                                        16MB memory image.
+    u8  have_sym (0 or 1)
+    if have_sym:
+        u32 symtab_len ; symtab_len bytes           -- raw COMMON*.out text content, VERBATIM,
+                                                        unfiltered
+```
+
+### Implementation
+
+- `src/container.h`/`src/container.c`: the format itself --
+  `halmat_container_write()` (writer, takes raw bytes directly, no
+  dependency on `main.c`'s internal `unit_t`) and
+  `halmat_container_sniff()`/`halmat_container_read()`/
+  `halmat_container_free()` (reader).
+- `src/loader.c` (`halmat_load_from_buffer`), `src/literal.c`
+  (`halmat_literal_load_from_buffer`), and `src/symtab.c`
+  (`halmat_symtab_load_from_buffer`) each grew a buffer-based sibling of
+  their existing file-based loader, sharing the actual decode logic (not
+  duplicating it) so a container-sourced unit is parsed by exactly the
+  same code as a file-sourced one. The literal buffer-loader is the one
+  case with a real behavioral difference from its file-based sibling: a
+  `LIT_STRING` cell whose blob entry is missing or the blob is exhausted
+  is a genuine container-corruption error and fails loudly via `errbuf`,
+  unlike the file-based path's graceful degrade-to-blanks when no memory
+  image is available at all.
+- `src/main.c`: `run_linked()`'s original body was split into
+  `find_primary_unit()` (resolve which `@list`/container unit is the
+  executing `PROGRAM`) and `run_linked_units()` (the `EXTERNAL`
+  COMPOOL/FUNCTION/PROCEDURE wiring + run, unchanged from before this
+  split) so both the ordinary `@list` path and the new
+  `run_linked_container()` path share that logic instead of duplicating
+  it. `write_container()` implements `--link-only`: it loads every unit
+  the ordinary way to resolve the primary and each unit's companion-file
+  set, then independently re-reads each companion file's raw bytes off
+  disk (the container needs the exact original bytes, not a
+  re-serialization of the parsed structures).
+
+### CLI usage
+
+```
+yaHALMAT2 --link-only OUT.yhla @list      # build a container from @list
+yaHALMAT2 OUT.yhla                        # run it directly, no @ needed
+```
+
+`--link-only` requires an `@list` argument (not a plain `HALMAT_FILE`)
+and is mutually exclusive with `--disasm`/`--debug`. Once built, a
+container fixes everything `--opt`/`--py`/`--entry`/`--litfile`/
+`--memory` would otherwise let you override per invocation (those
+choices were baked in at `--link-only` build time), so passing any of
+them alongside a container path is a usage error rather than silently
+ignored. `--debug` is not supported for a container run, matching the
+existing, pre-existing gap where `--debug` is already unsupported for a
+plain `@list` run today.
+
+Validated end-to-end (`src/tests/run_link_container_fixture.sh`, driven
+from `src/tests/run_all.sh`): round-tripping both the `EXTERNAL COMPOOL`
+fixture pair and the `EXTERNAL FUNCTION` fixture set above through
+`--link-only` + a container run reproduces their original `@list`-run
+output exactly, and the dedicated `test_link_lit.hal` fixture
+(`WRITE(6) 'HELLO CONTAINER';`, a single `PROGRAM` unit with no
+`EXTERNAL` linking at all) confirms the string-blob mechanism itself: it
+fails or prints blank/wrong output if that plumbing is broken, so a
+passing run is specific evidence the memory-image-avoidance fix works,
+not just that linking survives round-tripping.

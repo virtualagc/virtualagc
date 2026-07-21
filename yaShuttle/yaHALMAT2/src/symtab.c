@@ -49,6 +49,132 @@ typedef struct {
     uint32_t sym_array;
 } raw_shape_t;
 
+/* Shared mutable parse state, so the per-line body (symtab_process_line)
+ * and the final resolution pass (symtab_finalize) are usable by both the
+ * FILE*-based (halmat_symtab_load) and buffer-based (halmat_symtab_load_
+ * from_buffer) entry points without duplicating either. */
+typedef struct {
+    halmat_symtab_entry_t *entries;
+    raw_shape_t *raw;
+    size_t capacity, count;
+
+    bool have_current;
+    size_t current_index;
+    char *current_name;
+    uint32_t current_flags;
+    raw_shape_t current_raw;
+
+    size_t extarray_capacity, extarray_count;
+    uint32_t *extarray;
+} symtab_parse_state_t;
+
+static void symtab_parse_init(symtab_parse_state_t *st) {
+    memset(st, 0, sizeof(*st));
+    st->capacity = 256;
+    st->entries = malloc(st->capacity * sizeof(halmat_symtab_entry_t));
+    st->raw = malloc(st->capacity * sizeof(raw_shape_t));
+}
+
+/* Appends the in-progress current_* record (if any) to entries[]/raw[],
+ * transferring ownership of current_name's allocation into the new
+ * entry -- same convention as the pre-refactor code (no free/dup here). */
+static void symtab_flush_current(symtab_parse_state_t *st) {
+    if (!st->have_current) return;
+    if (st->count >= st->capacity) {
+        st->capacity *= 2;
+        st->entries = realloc(st->entries, st->capacity * sizeof(halmat_symtab_entry_t));
+        st->raw = realloc(st->raw, st->capacity * sizeof(raw_shape_t));
+    }
+    memset(&st->entries[st->count], 0, sizeof(st->entries[st->count]));
+    st->entries[st->count].index = st->current_index;
+    st->entries[st->count].name = st->current_name ? st->current_name : dup_unquoted("");
+    st->entries[st->count].flags = st->current_flags;
+    st->raw[st->count] = st->current_raw;
+    st->count++;
+}
+
+/* Processes one already newline-stripped-or-not line (trailing \n/\r are
+ * stripped here, same as the pre-refactor code did right after fgets). */
+static void symtab_process_line(symtab_parse_state_t *st, char *line) {
+    size_t len = strlen(line);
+    while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) line[--len] = '\0';
+    if (len == 0) return;
+
+    char *fields[MAX_FIELDS];
+    int n = split_tabs(line, fields);
+    if (n < 2) return;
+
+    if (strcmp(fields[0], "/") == 0 && strcmp(fields[1], "SYMuTAB") == 0) {
+        symtab_flush_current(st);
+        st->have_current = true;
+        st->current_index = (n >= 3) ? (size_t)strtoul(fields[2], NULL, 10) : 0;
+        st->current_name = NULL;
+        st->current_flags = 0;
+        memset(&st->current_raw, 0, sizeof(st->current_raw));
+    } else if (strcmp(fields[0], ".") == 0 && n >= 5) {
+        if (strcmp(fields[1], "SYM_NAME") == 0) {
+            free(st->current_name);
+            st->current_name = dup_unquoted(fields[4]);
+        } else if (strcmp(fields[1], "SYM_FLAGS") == 0) {
+            st->current_flags = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_TYPE") == 0) {
+            st->current_raw.sym_type = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_LENGTH") == 0) {
+            st->current_raw.sym_length = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_ARRAY") == 0) {
+            st->current_raw.sym_array = (uint32_t)strtoul(fields[4], NULL, 16);
+        }
+    } else if (strcmp(fields[0], "+") == 0 && n >= 5 && strcmp(fields[1], "EXTuARRAY") == 0) {
+        size_t idx = (size_t)strtoul(fields[2], NULL, 10);
+        if (idx >= st->extarray_capacity) {
+            size_t new_cap = idx + 64;
+            st->extarray = realloc(st->extarray, new_cap * sizeof(uint32_t));
+            memset(st->extarray + st->extarray_capacity, 0, (new_cap - st->extarray_capacity) * sizeof(uint32_t));
+            st->extarray_capacity = new_cap;
+        }
+        st->extarray[idx] = (uint32_t)strtoul(fields[4], NULL, 16);
+        if (idx + 1 > st->extarray_count) st->extarray_count = idx + 1;
+    }
+}
+
+/* Flushes any still-pending record, then runs the MATRIX/VECTOR/ARRAY/BIT
+ * shape-resolution pass (needs the whole file read first, since EXTuARRAY
+ * appears after the SYMuTAB blocks that reference it) and hands the
+ * finished table to `out`. */
+static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
+    symtab_flush_current(st);
+
+    for (size_t i = 0; i < st->count; i++) {
+        st->entries[i].hal_class = (uint8_t)st->raw[i].sym_type;
+        if (st->raw[i].sym_array != 0) {
+            st->entries[i].shape = HALMAT_SHAPE_ARRAY;
+            uint32_t base = st->raw[i].sym_array;
+            if (base < st->extarray_count) {
+                uint32_t dim_count = st->extarray[base];
+                if (dim_count > HALMAT_SYM_MAX_ARRAY_DIMS) dim_count = HALMAT_SYM_MAX_ARRAY_DIMS;
+                st->entries[i].array_dim_count = (int)dim_count;
+                for (uint32_t d = 0; d < dim_count && base + 1 + d < st->extarray_count; d++) {
+                    st->entries[i].array_dims[d] = (int)st->extarray[base + 1 + d];
+                }
+            }
+        } else if (st->raw[i].sym_type == 3) { /* MATRIX, HALMAT class number */
+            st->entries[i].shape = HALMAT_SHAPE_MATRIX;
+            st->entries[i].rows = (int)((st->raw[i].sym_length >> 8) & 0xFF);
+            st->entries[i].cols = (int)(st->raw[i].sym_length & 0xFF);
+        } else if (st->raw[i].sym_type == 4) { /* VECTOR */
+            st->entries[i].shape = HALMAT_SHAPE_VECTOR;
+            st->entries[i].cols = (int)st->raw[i].sym_length;
+        } else if (st->raw[i].sym_type == 1) { /* BIT */
+            st->entries[i].bit_width = (int)st->raw[i].sym_length;
+        }
+    }
+
+    free(st->raw);
+    free(st->extarray);
+    out->entries = st->entries;
+    out->count = st->count;
+}
+
 bool halmat_symtab_load(const char *path, halmat_symtab_t *out, char *errbuf, size_t errbuf_size) {
     memset(out, 0, sizeof(*out));
 
@@ -58,120 +184,50 @@ bool halmat_symtab_load(const char *path, halmat_symtab_t *out, char *errbuf, si
         return false;
     }
 
-    size_t capacity = 256;
-    halmat_symtab_entry_t *entries = malloc(capacity * sizeof(halmat_symtab_entry_t));
-    raw_shape_t *raw = malloc(capacity * sizeof(raw_shape_t));
-    size_t count = 0;
-    bool have_current = false;
-    size_t current_index = 0;
-    char *current_name = NULL;
-    uint32_t current_flags = 0;
-    raw_shape_t current_raw = {0};
-
-    size_t extarray_capacity = 0, extarray_count = 0;
-    uint32_t *extarray = NULL;
+    symtab_parse_state_t st;
+    symtab_parse_init(&st);
 
     char line[MAX_LINE];
     while (fgets(line, sizeof(line), f)) {
-        size_t len = strlen(line);
-        while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) line[--len] = '\0';
-        if (len == 0) continue;
-
-        char *fields[MAX_FIELDS];
-        int n = split_tabs(line, fields);
-        if (n < 2) continue;
-
-        if (strcmp(fields[0], "/") == 0 && strcmp(fields[1], "SYMuTAB") == 0) {
-            if (have_current) {
-                if (count >= capacity) {
-                    capacity *= 2;
-                    entries = realloc(entries, capacity * sizeof(halmat_symtab_entry_t));
-                    raw = realloc(raw, capacity * sizeof(raw_shape_t));
-                }
-                memset(&entries[count], 0, sizeof(entries[count]));
-                entries[count].index = current_index;
-                entries[count].name = current_name ? current_name : dup_unquoted("");
-                entries[count].flags = current_flags;
-                raw[count] = current_raw;
-                count++;
-            }
-            have_current = true;
-            current_index = (n >= 3) ? (size_t)strtoul(fields[2], NULL, 10) : 0;
-            current_name = NULL;
-            current_flags = 0;
-            memset(&current_raw, 0, sizeof(current_raw));
-        } else if (strcmp(fields[0], ".") == 0 && n >= 5) {
-            if (strcmp(fields[1], "SYM_NAME") == 0) {
-                free(current_name);
-                current_name = dup_unquoted(fields[4]);
-            } else if (strcmp(fields[1], "SYM_FLAGS") == 0) {
-                current_flags = (uint32_t)strtoul(fields[4], NULL, 16);
-            } else if (strcmp(fields[1], "SYM_TYPE") == 0) {
-                current_raw.sym_type = (uint32_t)strtoul(fields[4], NULL, 16);
-            } else if (strcmp(fields[1], "SYM_LENGTH") == 0) {
-                current_raw.sym_length = (uint32_t)strtoul(fields[4], NULL, 16);
-            } else if (strcmp(fields[1], "SYM_ARRAY") == 0) {
-                current_raw.sym_array = (uint32_t)strtoul(fields[4], NULL, 16);
-            }
-        } else if (strcmp(fields[0], "+") == 0 && n >= 5 && strcmp(fields[1], "EXTuARRAY") == 0) {
-            size_t idx = (size_t)strtoul(fields[2], NULL, 10);
-            if (idx >= extarray_capacity) {
-                size_t new_cap = idx + 64;
-                extarray = realloc(extarray, new_cap * sizeof(uint32_t));
-                memset(extarray + extarray_capacity, 0, (new_cap - extarray_capacity) * sizeof(uint32_t));
-                extarray_capacity = new_cap;
-            }
-            extarray[idx] = (uint32_t)strtoul(fields[4], NULL, 16);
-            if (idx + 1 > extarray_count) extarray_count = idx + 1;
-        }
-    }
-    if (have_current) {
-        if (count >= capacity) {
-            capacity += 1;
-            entries = realloc(entries, capacity * sizeof(halmat_symtab_entry_t));
-            raw = realloc(raw, capacity * sizeof(raw_shape_t));
-        }
-        memset(&entries[count], 0, sizeof(entries[count]));
-        entries[count].index = current_index;
-        entries[count].name = current_name ? current_name : dup_unquoted("");
-        entries[count].flags = current_flags;
-        raw[count] = current_raw;
-        count++;
+        symtab_process_line(&st, line);
     }
     fclose(f);
 
-    /* Resolution pass: now that EXTuARRAY (if present) is fully read,
-     * turn each symbol's raw SYM_TYPE/SYM_LENGTH/SYM_ARRAY into a
-     * shape + dimensions. See symtab.h for the encoding. */
-    for (size_t i = 0; i < count; i++) {
-        entries[i].hal_class = (uint8_t)raw[i].sym_type;
-        if (raw[i].sym_array != 0) {
-            entries[i].shape = HALMAT_SHAPE_ARRAY;
-            uint32_t base = raw[i].sym_array;
-            if (base < extarray_count) {
-                uint32_t dim_count = extarray[base];
-                if (dim_count > HALMAT_SYM_MAX_ARRAY_DIMS) dim_count = HALMAT_SYM_MAX_ARRAY_DIMS;
-                entries[i].array_dim_count = (int)dim_count;
-                for (uint32_t d = 0; d < dim_count && base + 1 + d < extarray_count; d++) {
-                    entries[i].array_dims[d] = (int)extarray[base + 1 + d];
-                }
-            }
-        } else if (raw[i].sym_type == 3) { /* MATRIX, HALMAT class number */
-            entries[i].shape = HALMAT_SHAPE_MATRIX;
-            entries[i].rows = (int)((raw[i].sym_length >> 8) & 0xFF);
-            entries[i].cols = (int)(raw[i].sym_length & 0xFF);
-        } else if (raw[i].sym_type == 4) { /* VECTOR */
-            entries[i].shape = HALMAT_SHAPE_VECTOR;
-            entries[i].cols = (int)raw[i].sym_length;
-        } else if (raw[i].sym_type == 1) { /* BIT */
-            entries[i].bit_width = (int)raw[i].sym_length;
-        }
+    symtab_finalize(&st, out);
+    return true;
+}
+
+bool halmat_symtab_load_from_buffer(const uint8_t *buf, size_t size, halmat_symtab_t *out,
+                                     char *errbuf, size_t errbuf_size) {
+    memset(out, 0, sizeof(*out));
+
+    if (!buf && size > 0) {
+        snprintf(errbuf, errbuf_size, "no symbol-table buffer given");
+        return false;
     }
 
-    free(raw);
-    free(extarray);
-    out->entries = entries;
-    out->count = count;
+    symtab_parse_state_t st;
+    symtab_parse_init(&st);
+
+    /* Portable in-buffer line reader (no fmemopen(), a POSIX/glibc
+     * extension unavailable to this project's MSVC/nmake Windows build --
+     * see symtab.h): scan for '\n', and treat a bare trailing partial
+     * line at EOF as a line too, matching fgets' own behavior on a file
+     * that doesn't end with a trailing newline. */
+    char line[MAX_LINE];
+    size_t pos = 0;
+    while (pos < size) {
+        size_t start = pos;
+        while (pos < size && buf[pos] != '\n') pos++;
+        size_t line_len = pos - start;
+        if (line_len > sizeof(line) - 1) line_len = sizeof(line) - 1; /* match fgets' MAX_LINE cap */
+        memcpy(line, buf + start, line_len);
+        line[line_len] = '\0';
+        if (pos < size) pos++; /* consume the '\n' itself */
+        symtab_process_line(&st, line);
+    }
+
+    symtab_finalize(&st, out);
     return true;
 }
 

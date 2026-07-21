@@ -35,6 +35,117 @@ static void decode_operand(uint32_t w, halmat_operand_t *o) {
     o->tag2 = (uint8_t)((w >> 1) & 0x7);
 }
 
+/* Decodes an already-in-memory HALMAT byte stream -- everything
+ * halmat_load() below used to do once the whole file was read into
+ * memory. `<buffer>` stands in for a file path in error messages here,
+ * since a buffer-based caller (e.g. container.c's linked-archive reader,
+ * which has no on-disk path for this data) can't supply one; halmat_load()
+ * substitutes the real path back in below so its own callers see byte-
+ * identical messages to before this refactor. */
+bool halmat_load_from_buffer(const uint8_t *buf, size_t size, halmat_program_t *out,
+                              char *errbuf, size_t errbuf_size) {
+    memset(out, 0, sizeof(*out));
+
+    size_t num_records = size / HALMAT_RECORD_BYTES;
+    size_t num_words_total = size / 4;
+
+    /* Upper bound: worst case every word is its own operator instruction
+     * with zero operands, i.e. one halmat_instr_t per word. */
+    halmat_instr_t *instrs = malloc(num_words_total * sizeof(halmat_instr_t));
+    if (!instrs) {
+        snprintf(errbuf, errbuf_size, "out of memory decoding '<buffer>'");
+        return false;
+    }
+    size_t instr_count = 0;
+
+    for (size_t rec = 0; rec < num_records; rec++) {
+        size_t record_base_word = rec * HALMAT_RECORD_WORDS;
+        size_t lw = 0;
+        while (lw < HALMAT_RECORD_WORDS) {
+            size_t gw = record_base_word + lw;
+            uint32_t w = decode_word_be(buf + gw * 4);
+
+            if (w & 1) {
+                snprintf(errbuf, errbuf_size,
+                         "malformed HALMAT stream in '<buffer>': expected an operator word "
+                         "at word index %zu, found an operand word (record %zu)",
+                         gw, rec);
+                free(instrs);
+                return false;
+            }
+
+            halmat_instr_t *instr = &instrs[instr_count++];
+            instr->index = gw;
+            instr->tag = (uint8_t)((w >> 24) & 0xFF);
+            instr->numop = (uint8_t)((w >> 16) & 0xFF);
+            instr->opcode = (uint16_t)(((w >> 12) & 0xF) << 8 | ((w >> 4) & 0xFF));
+            instr->copt = (uint8_t)((w >> 1) & 0x7);
+            instr->operand_count = 0;
+
+            if (instr->numop > HALMAT_MAX_OPERANDS) {
+                snprintf(errbuf, errbuf_size,
+                         "instruction at word index %zu in '<buffer>' claims %u operands, "
+                         "exceeding the %d-operand cap -- format assumption needs revisiting",
+                         gw, instr->numop, HALMAT_MAX_OPERANDS);
+                free(instrs);
+                return false;
+            }
+            if (lw + 1 + instr->numop > HALMAT_RECORD_WORDS) {
+                snprintf(errbuf, errbuf_size,
+                         "instruction at word index %zu in '<buffer>' overruns its record boundary",
+                         gw);
+                free(instrs);
+                return false;
+            }
+
+            for (uint8_t i = 0; i < instr->numop; i++) {
+                size_t ogw = gw + 1 + i;
+                uint32_t ow = decode_word_be(buf + ogw * 4);
+                if (!(ow & 1)) {
+                    snprintf(errbuf, errbuf_size,
+                             "malformed HALMAT stream in '<buffer>': expected an operand word "
+                             "at word index %zu (operand %u of instruction at %zu)",
+                             ogw, i, gw);
+                    free(instrs);
+                    return false;
+                }
+                decode_operand(ow, &instr->operands[i]);
+                instr->operand_count++;
+            }
+
+            lw += 1 + instr->numop;
+
+            if (instr->opcode == HALMAT_OPCODE_XREC) {
+                break; /* rest of this record is a wasted gap; move to next record */
+            }
+        }
+    }
+
+    out->instrs = instrs;
+    out->count = instr_count;
+    return true;
+}
+
+/* Rewrites a halmat_load_from_buffer() failure message's generic
+ * '<buffer>' source marker into the real file path, so halmat_load()'s
+ * own callers see exactly the same wording this function produced
+ * before it was split into a buffer-decode half and a file-I/O half. */
+static void substitute_buffer_marker(char *errbuf, size_t errbuf_size, const char *path) {
+    static const char marker[] = "<buffer>";
+    char *found = strstr(errbuf, marker);
+    if (!found) return;
+    char tail[512];
+    strncpy(tail, found + sizeof(marker) - 1, sizeof(tail) - 1);
+    tail[sizeof(tail) - 1] = '\0';
+    size_t head_len = (size_t)(found - errbuf);
+    if (head_len >= errbuf_size) return;
+    char head[512];
+    size_t copy_len = head_len < sizeof(head) - 1 ? head_len : sizeof(head) - 1;
+    memcpy(head, errbuf, copy_len);
+    head[copy_len] = '\0';
+    snprintf(errbuf, errbuf_size, "%s%s%s", head, path, tail);
+}
+
 bool halmat_load(const char *path, halmat_program_t *out, char *errbuf, size_t errbuf_size) {
     memset(out, 0, sizeof(*out));
 
@@ -77,90 +188,10 @@ bool halmat_load(const char *path, halmat_program_t *out, char *errbuf, size_t e
     }
     fclose(f);
 
-    size_t num_records = (size_t)size / HALMAT_RECORD_BYTES;
-    size_t num_words_total = (size_t)size / 4;
-
-    /* Upper bound: worst case every word is its own operator instruction
-     * with zero operands, i.e. one halmat_instr_t per word. */
-    halmat_instr_t *instrs = malloc(num_words_total * sizeof(halmat_instr_t));
-    if (!instrs) {
-        snprintf(errbuf, errbuf_size, "out of memory decoding '%s'", path);
-        free(buf);
-        return false;
-    }
-    size_t instr_count = 0;
-
-    for (size_t rec = 0; rec < num_records; rec++) {
-        size_t record_base_word = rec * HALMAT_RECORD_WORDS;
-        size_t lw = 0;
-        while (lw < HALMAT_RECORD_WORDS) {
-            size_t gw = record_base_word + lw;
-            uint32_t w = decode_word_be(buf + gw * 4);
-
-            if (w & 1) {
-                snprintf(errbuf, errbuf_size,
-                         "malformed HALMAT stream in '%s': expected an operator word "
-                         "at word index %zu, found an operand word (record %zu)",
-                         path, gw, rec);
-                free(instrs);
-                free(buf);
-                return false;
-            }
-
-            halmat_instr_t *instr = &instrs[instr_count++];
-            instr->index = gw;
-            instr->tag = (uint8_t)((w >> 24) & 0xFF);
-            instr->numop = (uint8_t)((w >> 16) & 0xFF);
-            instr->opcode = (uint16_t)(((w >> 12) & 0xF) << 8 | ((w >> 4) & 0xFF));
-            instr->copt = (uint8_t)((w >> 1) & 0x7);
-            instr->operand_count = 0;
-
-            if (instr->numop > HALMAT_MAX_OPERANDS) {
-                snprintf(errbuf, errbuf_size,
-                         "instruction at word index %zu in '%s' claims %u operands, "
-                         "exceeding the %d-operand cap -- format assumption needs revisiting",
-                         gw, path, instr->numop, HALMAT_MAX_OPERANDS);
-                free(instrs);
-                free(buf);
-                return false;
-            }
-            if (lw + 1 + instr->numop > HALMAT_RECORD_WORDS) {
-                snprintf(errbuf, errbuf_size,
-                         "instruction at word index %zu in '%s' overruns its record boundary",
-                         gw, path);
-                free(instrs);
-                free(buf);
-                return false;
-            }
-
-            for (uint8_t i = 0; i < instr->numop; i++) {
-                size_t ogw = gw + 1 + i;
-                uint32_t ow = decode_word_be(buf + ogw * 4);
-                if (!(ow & 1)) {
-                    snprintf(errbuf, errbuf_size,
-                             "malformed HALMAT stream in '%s': expected an operand word "
-                             "at word index %zu (operand %u of instruction at %zu)",
-                             path, ogw, i, gw);
-                    free(instrs);
-                    free(buf);
-                    return false;
-                }
-                decode_operand(ow, &instr->operands[i]);
-                instr->operand_count++;
-            }
-
-            lw += 1 + instr->numop;
-
-            if (instr->opcode == HALMAT_OPCODE_XREC) {
-                break; /* rest of this record is a wasted gap; move to next record */
-            }
-        }
-    }
-
+    bool ok = halmat_load_from_buffer(buf, (size_t)size, out, errbuf, errbuf_size);
     free(buf);
-    out->instrs = instrs;
-    out->count = instr_count;
-    return true;
+    if (!ok) substitute_buffer_marker(errbuf, errbuf_size, path);
+    return ok;
 }
 
 void halmat_program_free(halmat_program_t *prog) {
