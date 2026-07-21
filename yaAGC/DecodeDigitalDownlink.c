@@ -819,7 +819,7 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       dls->id = id;
       if (aliasDoc[0] != 0)
 	{
-	  sprintf(dls->URL, "%s%s/ddd-%05o-%s.html", docPrefix, aliasDoc, id, aliasDoc);
+	  snprintf(dls->URL, sizeof(dls->URL), "%s%s/ddd-%05o-%s.html", docPrefix, aliasDoc, id, aliasDoc);
 	  //fprintf(stderr, "***DEBUG*** trying %s\n", dls->URL);
 	  // Test if the chosen file exists.
 	  aliases = fopen(&(dls->URL[7]), "r");
@@ -839,10 +839,10 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
       if (dls->URL[0] == 0)
 	{
 	  if (!useFallbackDocumentation)
-	    sprintf(dls->URL, "%sddd-no-documentation.html", docPrefix);
+	    snprintf(dls->URL, sizeof(dls->URL), "%sddd-no-documentation.html", docPrefix);
 	  else if (CmOrLm)
 	    {
-	      sprintf(filename, "%sddd-%05o-unavailable-CM.html", docPrefix, id);
+	      snprintf(filename, sizeof(filename), "%sddd-%05o-unavailable-CM.html", docPrefix, id);
 	      fp = fopen(&filename[7], "r");
 	      if (fp != NULL)
 		{
@@ -850,11 +850,11 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 		  strcpy(dls->URL, filename);
 		}
 	      else
-		sprintf(dls->URL, "%sddd-unavailable-CM.html", docPrefix);
+		snprintf(dls->URL, sizeof(dls->URL), "%sddd-unavailable-CM.html", docPrefix);
 	    }
 	  else if (!Sundance)
 	    {
-	      sprintf(filename, "%sddd-%05o-unavailable-LM.html", docPrefix, id);
+	      snprintf(filename, sizeof(filename), "%sddd-%05o-unavailable-LM.html", docPrefix, id);
 	      //fprintf(stderr, "Checking for %s\n", filename);
 	      fp = fopen(&filename[7], "r");
 	      if (fp != NULL)
@@ -866,11 +866,11 @@ dddConfigure (char *agcSoftware, const char *docPrefix)
 	      else
 		{
 		  //fprintf(stderr, "Not found\n");
-		  sprintf(dls->URL, "%sddd-unavailable-LM.html", docPrefix);
+		  snprintf(dls->URL, sizeof(dls->URL), "%sddd-unavailable-LM.html", docPrefix);
 		}
 	    }
 	  else
-	    sprintf(dls->URL, "%sddd-unavailable.html", docPrefix);
+	    snprintf(dls->URL, sizeof(dls->URL), "%sddd-unavailable.html", docPrefix);
 	}
       sprintf(filename, "ddd-%05o-%s.tsv", id, aliasTsv);
       fp = fopen(filename, "rt");
