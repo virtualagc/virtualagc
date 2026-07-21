@@ -200,9 +200,39 @@ typedef struct {
 
 typedef enum {
     TASK_READY,
-    TASK_WAITING,
+    TASK_WAITING,    /* wake_deadline: a fixed future virtual_time tick (WAIT interval, or SCHD's AT/IN/EVERY/AFTER) */
+    TASK_WAITING_ON, /* on_event_syt: re-checked every tick (SCHD's ON <bit exp> initiation) -- no fixed
+                       * deadline exists to fast-forward to, unlike TASK_WAITING, since nothing says in
+                       * advance *when* another task's SIGNAL will flip the bit; see interp.c's
+                       * sched_wake_on_events(). */
     TASK_TERMINATED,
 } halmat_task_state_t;
+
+/* SCHD's tag-bitmask sub-fields (class-0/SCHD.md's confirmed table), decoded once at SCHEDULE
+ * time and stored per-task rather than re-decoded on every rearm. */
+typedef enum {
+    SCHD_REPEAT_NONE = 0,
+    SCHD_REPEAT_BARE = 1,  /* ", REPEAT" alone -- rearm immediately (tag 0x10) */
+    SCHD_REPEAT_EVERY = 2, /* ", REPEAT EVERY <exp>" -- fixed period, chained off the previous target (tag 0x20) */
+    SCHD_REPEAT_AFTER = 3, /* ", REPEAT AFTER <exp>" -- delay measured from this cycle's completion (tag 0x30) */
+} halmat_schd_repeat_t;
+
+typedef enum {
+    SCHD_STOP_NONE = 0,
+    SCHD_STOP_UNTIL_TIME = 1, /* WHILE/UNTIL <ARITH EXP> -- both keywords compile identically (tag 0x40):
+                                * confirmed by HALSFC itself rejecting "WHILE <time>" ("WHILE EXPRESSION MAY
+                                * NOT BE A TIMING EXPRESSION"), so UNTIL is the only legal keyword here --
+                                * "while it's before T" and "until T" describe the same deadline anyway. */
+    SCHD_STOP_WHILE_BIT = 2,  /* REPEAT WHILE <bit exp> -- stop once the event goes false (tag 0x80, FIXL(MP)=0) */
+    SCHD_STOP_UNTIL_BIT = 3,  /* REPEAT UNTIL <bit exp> -- stop once the event goes true (tag 0xC0, FIXL(MP)=1).
+                                * WHILE vs UNTIL for a bit exp DO get distinct tags -- confirmed by compiling
+                                * both this session (SCHD.md previously only had the WHILE case, and flagged
+                                * FIXL(MP) as unconfirmed for anything but 0); the tag's own bit width (an
+                                * 8-bit trailing field, 2 bits already spent on bits 6-7 here) caps FIXL(MP)
+                                * at {0,1}, so a subscripted/latched-event third value structurally cannot
+                                * exist within this encoding -- the "unconfirmed higher FIXL(MP)" case from
+                                * SCHD.md's Unresolved Questions is now resolved as moot, not just untested. */
+} halmat_schd_stop_t;
 
 typedef struct {
     bool in_use;
@@ -211,8 +241,44 @@ typedef struct {
     int priority;
     halmat_task_state_t task_state;
     size_t saved_pc;
-    int64_t wake_deadline; /* virtual_time tick at which a TASK_WAITING task becomes TASK_READY */
+    int64_t wake_deadline; /* virtual_time tick at which a TASK_WAITING task becomes TASK_READY. Also
+                             * doubles as SCHD_REPEAT_EVERY's own phase reference (see interp.c's OP_CLOS
+                             * cyclic-rearm code) -- initialized to the tick SCHD itself executed (or the
+                             * AT/IN target, if delayed), then incremented by the EVERY interval on each
+                             * rearm so the period stays fixed instead of drifting with execution jitter.
+                             * Known, concretely-identified-but-undemonstrated collision: an ordinary WAIT
+                             * statement executed *inside* a REPEAT EVERY task's own body also writes this
+                             * same field (OP_WAIT), which would silently reset EVERY's phase reference and
+                             * make its period drift like AFTER's instead of staying fixed. Not a problem
+                             * for REPEAT AFTER (its own rearm recomputes wake_deadline from the *current*
+                             * virtual_time rather than chaining off the old value, so an intervening WAIT
+                             * is harmless there -- confirmed by test_sched_after.hal, whose WORKER body
+                             * does WAIT internally). No fixture combines REPEAT EVERY with an internal
+                             * WAIT, so this is deferred per this project's "fix once a concrete test
+                             * demonstrates the problem" discipline, not fixed preemptively; a fix would
+                             * need a separate field for EVERY's phase reference, distinct from the
+                             * ordinary WAIT/AT/IN deadline this field otherwise holds. */
     bool dependent;    /* SCHEDULE ... DEPENDENT was specified; parsed but not yet behaviorally enforced beyond primal-exit ending the whole program */
+
+    bool has_on_event;      /* SCHD's ON <bit exp> initiation form was used */
+    uint16_t on_event_syt;  /* valid iff has_on_event; only a plain (unsubscripted) EVENT SYT reference is
+                              * confirmed (class-0/SCHD.md's "QUAL=1=SYT, plain EVENT ref, no VAC needed") */
+
+    halmat_schd_repeat_t repeat_kind;
+    int32_t repeat_interval; /* ticks; valid iff repeat_kind is EVERY or AFTER. Resolved once, at the
+                               * original SCHEDULE statement's execution -- re-evaluating it per cycle
+                               * would mean re-running whatever HALMAT produced its value, which nothing
+                               * else in this interpreter's execution model does for an instruction that
+                               * already ran (see interp.c's OP_SCHD comment). */
+
+    halmat_schd_stop_t stop_kind;
+    int64_t stop_deadline;   /* valid iff stop_kind==SCHD_STOP_UNTIL_TIME: virtual_time tick at which the
+                               * cycle stops. Resolved once at SCHEDULE time (same reasoning as
+                               * repeat_interval above -- the compiled operand is a VAC snapshot, not a
+                               * live reference). */
+    uint16_t stop_event_syt; /* valid iff stop_kind==SCHD_STOP_WHILE_BIT/UNTIL_BIT: re-read live (a plain
+                               * SYT operand, unlike stop_deadline, needs no re-execution to get a fresh
+                               * value) each time a cycle completes -- see interp.c's OP_CLOS. */
 } halmat_task_t;
 
 struct halmat_state {
@@ -472,19 +538,26 @@ struct halmat_state {
                                     * the inline body already appears in-line in the stream */
     int inline_func_sp;
 
-    /* Virtual-clock task scheduler (SCHD/WAIT/TERM/CANC/SGNL implemented;
-     * PRIO is BFNC's selector-19 built-in, not a standalone opcode.
-     * SCHD's delayed/cyclic AT/IN/ON/EVERY/AFTER/WHILE/UNTIL forms are
-     * not yet implemented -- immediate SCHEDULE with PRIORITY/DEPENDENT
-     * only). Ticks 1:1 per HALMAT instruction executed (the user's
-     * confirmed per-instruction granularity choice), with WAIT's
-     * duration treated as that many ticks -- an explicit, documented
-     * simplification (no wall-clock fidelity is attempted regardless;
-     * see Plan.md's Phase 3 scheduler notes), not a calibration to real
-     * seconds. sched_advance() is the single seam where a future
-     * `--time-scale` option could someday multiply ticks against a
-     * wall-clock delta. Priority: 0 < P < 255, higher number = higher
-     * priority, primal defaults to 50 (USA003087 Sec. 13.1-13.3). */
+    /* Virtual-clock task scheduler (SCHD/WAIT/TERM/CANC/SGNL implemented,
+     * including SCHD's delayed AT/IN/ON initiation and cyclic REPEAT
+     * [EVERY/AFTER] [WHILE/UNTIL] forms -- see halmat_task_t's has_on_event/
+     * repeat_kind/stop_kind fields and interp.c's OP_SCHD/OP_CLOS. PRIO is
+     * BFNC's selector-19 built-in, not a standalone opcode. A STOPPING
+     * clause (WHILE/UNTIL) with no REPEAT at all -- grammatically legal per
+     * class-0/SCHD.md's <SCHEDULE CONTROL> ::= <STOPPING> alternative, which
+     * would presumably cancel a still-pending delayed AT/IN/ON activation
+     * rather than end a cycle -- is not implemented; no fixture exercises
+     * it and its semantics were never empirically confirmed, so OP_SCHD
+     * fails loudly on that combination rather than guessing). Ticks 1:1 per
+     * HALMAT instruction executed (the user's confirmed per-instruction
+     * granularity choice), with WAIT's duration and SCHD's AT/IN/EVERY/
+     * AFTER/stopping-deadline expressions all treated as that many ticks --
+     * an explicit, documented simplification (no wall-clock fidelity is
+     * attempted regardless; see Plan.md's Phase 3 scheduler notes), not a
+     * calibration to real seconds. sched_advance() is the single seam
+     * where a future `--time-scale` option could someday multiply ticks
+     * against a wall-clock delta. Priority: 0 < P < 255, higher number =
+     * higher priority, primal defaults to 50 (USA003087 Sec. 13.1-13.3). */
     halmat_task_t tasks[HALMAT_MAX_TASKS];
     int task_count;
     int current_task; /* index into tasks[], set by the scheduler loop before each instruction */

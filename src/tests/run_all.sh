@@ -89,6 +89,18 @@ run ./run_local_fixture.sh tsub "          0               9               0"
 run ./run_local_fixture.sh tint "$(printf '          5\n 4.2999992E+00')"
 run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n         99')"
 
+# SCHEDULE's delayed (AT/IN/ON) and cyclic (REPEAT EVERY/AFTER, WHILE/
+# UNTIL) forms -- class-0/SCHD.md's confirmed tag bitmask. Expected
+# values hand-derived from the scheduler's own rules (priority
+# preemption + fixed-tick-per-instruction virtual clock), not just
+# copied from a run -- see the commit message for the arithmetic.
+run ./run_local_fixture.sh sched_at "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
+run ./run_local_fixture.sh sched_in "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
+run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nWORKER RUNNING\nAFTER SIGNAL')"
+run ./run_local_fixture.sh sched_every "N=               5"
+run ./run_local_fixture.sh sched_after "N=               4"
+run ./run_local_fixture.sh sched_while "N=               1"
+
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)
 cp /mnt/STORAGE/home/rburkey/git/Halmat/data/test_simple_do.hal "$workdir/"

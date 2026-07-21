@@ -3756,15 +3756,93 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->pc = fcal_pos + 1;
                     branched = true;
                 } else if (!state->tasks[state->current_task].is_primal) {
-                    /* A scheduled task's body fell through to its own
-                     * end without an explicit TERMINATE -- implicit
-                     * self-termination (class-0/RTRN.md's "every
-                     * subprogram body is terminated regardless" note,
-                     * TASK analog). Ends this task only, not the whole
-                     * program -- the scheduler picks the next READY task. */
+                    /* A scheduled task's body fell through to its own end
+                     * without an explicit TERMINATE -- either genuine
+                     * completion (class-0/RTRN.md's "every subprogram body
+                     * is terminated regardless" note, TASK analog) or, for
+                     * a cyclic (REPEAT) task, just the end of one cycle.
+                     * Explicit TERMINATE/CANCEL (OP_TERM/OP_CANC below)
+                     * always end the task outright and bypass this rearm
+                     * check entirely -- only a *fallthrough* CLOS is
+                     * eligible to rearm, matching REPEAT/WHILE/UNTIL's
+                     * role as governing the task's own natural completion,
+                     * not something an explicit mid-body CANCEL could be
+                     * talked out of. */
                     halmat_task_t *cur = &state->tasks[state->current_task];
-                    cur->task_state = TASK_TERMINATED;
-                    if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+                    bool stop = true;
+                    if (cur->repeat_kind != SCHD_REPEAT_NONE) {
+                        /* Stopping-condition expressions are evaluated only
+                         * here -- once per completed cycle, at the moment
+                         * the task would otherwise be rearmed -- never
+                         * continuously every tick. class-0/SCHD.md frames
+                         * WHILE/UNTIL as governing *whether the cycle
+                         * continues*, the same "test at the iteration
+                         * boundary" shape HAL/S's own DO WHILE/DO UNTIL
+                         * loops use (already this interpreter's CFOR
+                         * pattern) -- there's no primary-source basis for
+                         * treating it as an asynchronous mid-execution
+                         * interrupt, and WAIT is already the language's
+                         * only mechanism for a task to suspend mid-body. */
+                        switch (cur->stop_kind) {
+                            case SCHD_STOP_NONE:
+                                stop = false;
+                                break;
+                            case SCHD_STOP_UNTIL_TIME:
+                                stop = (state->virtual_time >= cur->stop_deadline);
+                                break;
+                            case SCHD_STOP_WHILE_BIT:
+                                /* WHILE <bit exp>: keep cycling while true, stop once false. */
+                                stop = (cur->stop_event_syt >= HALMAT_SYT_MAX ||
+                                        state->syt[cur->stop_event_syt].bit_value == 0);
+                                break;
+                            case SCHD_STOP_UNTIL_BIT:
+                                /* UNTIL <bit exp>: keep cycling until true, stop once true. */
+                                stop = (cur->stop_event_syt < HALMAT_SYT_MAX &&
+                                        state->syt[cur->stop_event_syt].bit_value != 0);
+                                break;
+                        }
+                    }
+                    if (!stop) {
+                        /* Rearming jumps this task's own pc back to its
+                         * body's start -- must go through the same state-
+                         * >pc/branched mechanism TDEF/RTRN use (not a bare
+                         * cur->saved_pc write), since exec_one's own tail
+                         * ("if (!branched) state->pc++") and interp_step's
+                         * post-exec_one "saved_pc = state->pc" would
+                         * otherwise clobber it with CLOS's own position+1
+                         * right after this case returns. */
+                        state->pc = state->symbol_def_pos[cur->symbol] + 1;
+                        branched = true;
+                        switch (cur->repeat_kind) {
+                            case SCHD_REPEAT_BARE:
+                                /* No interval -- immediate back-to-back retrigger. */
+                                cur->task_state = TASK_READY;
+                                break;
+                            case SCHD_REPEAT_EVERY:
+                                /* Fixed period, chained off the previous
+                                 * target (not off "now") so a late-running
+                                 * cycle doesn't push later ones out --
+                                 * wake_deadline already holds that
+                                 * previous target (set at SCHD time, or by
+                                 * the prior rearm). */
+                                cur->wake_deadline += cur->repeat_interval;
+                                cur->task_state = TASK_WAITING;
+                                break;
+                            case SCHD_REPEAT_AFTER:
+                                /* Delay measured from *this* completion,
+                                 * so it does drift with however long the
+                                 * cycle actually took -- the language-level
+                                 * distinction from EVERY. */
+                                cur->wake_deadline = state->virtual_time + cur->repeat_interval;
+                                cur->task_state = TASK_WAITING;
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        cur->task_state = TASK_TERMINATED;
+                        if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+                    }
                 } else {
                     /* Primal process closing: per USA003087 Sec. 13.3,
                      * all other processes are always dependent on the
@@ -3776,11 +3854,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_SCHD: {
-                /* Only the immediate-initiation form (PRIORITY/DEPENDENT
-                 * only) is implemented; delayed (AT/IN/ON) and cyclic
-                 * (REPEAT EVERY/AFTER, WHILE/UNTIL) forms fail loudly
-                 * rather than misbehaving -- see class-0/SCHD.md's
-                 * confirmed tag bitmask. */
+                /* Full tag decode per class-0/SCHD.md's primary-source-
+                 * confirmed bitmask (PASS1.PROCS/SYNTHESI.xpl's <SCHEDULE
+                 * HEAD>/<SCHEDULE PHRASE>/<SCHEDULE CONTROL> construction
+                 * of INX(REFER_LOC)) -- every field below is exclusive
+                 * within its own bit range, so a plain switch/if-chain on
+                 * each extracted sub-field covers every legal combination
+                 * with no guessing. Operands appear in strict left-to-
+                 * right source order (SCHD.md's confirmed general rule):
+                 * task, [AT/IN-exp or ON-event], [priority], [EVERY/AFTER-
+                 * exp], [stop-exp-or-event] -- operand_idx just walks that
+                 * fixed sequence, skipping whichever clauses the tag says
+                 * aren't present. */
                 if (ins->operand_count < 1 || ins->operands[0].qual != QUAL_SYT) {
                     fail(state, "SCHD: expected task symbol as first operand");
                     break;
@@ -3790,22 +3875,83 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "SCHEDULE of undefined task (symbol %u)", task_sym);
                     break;
                 }
-                if (ins->tag & ~(uint8_t)0x0C) { /* anything beyond PRIORITY(4)|DEPENDENT(8) */
-                    fail(state, "SCHEDULE: only the immediate PRIORITY/DEPENDENT form is implemented (tag 0x%X)", ins->tag);
+
+                uint8_t init_kind = ins->tag & 0x3;          /* 0=immediate, 1=AT, 2=IN, 3=ON */
+                bool has_priority = (ins->tag & 0x4) != 0;
+                bool dependent = (ins->tag & 0x8) != 0;
+                uint8_t repeat_bits = (ins->tag & 0x30) >> 4; /* 0=none, 1=bare, 2=EVERY, 3=AFTER -- matches halmat_schd_repeat_t's own numbering */
+                uint8_t stop_bits = (ins->tag & 0xC0) >> 6;   /* 0=none, 1=UNTIL-time, 2=WHILE-bit, 3=UNTIL-bit -- matches halmat_schd_stop_t's own numbering */
+                if (repeat_bits == 0 && stop_bits != 0) {
+                    /* Grammatically legal per SCHD.md's <SCHEDULE CONTROL>
+                     * ::= <STOPPING> alternative (WHILE/UNTIL with no
+                     * REPEAT at all), which would presumably cancel a
+                     * still-pending delayed AT/IN/ON activation rather
+                     * than end a cycle -- but no fixture exercises it and
+                     * its semantics were never empirically confirmed, so
+                     * fail loudly rather than guessing (see state.h's
+                     * scheduler comment). */
+                    fail(state, "SCHEDULE: WHILE/UNTIL without REPEAT is not implemented (tag 0x%X) -- see class-0/SCHD.md", ins->tag);
                     break;
                 }
-                int priority = 50; /* default when no PRIORITY(...) clause; matches the primal's own default, but untested -- no primary-source confirmation for this specific case */
-                bool dependent = (ins->tag & 0x8) != 0;
+
+                int64_t at_in_value = 0;
+                uint16_t on_event_syt = 0;
                 uint8_t operand_idx = 1;
-                if (ins->tag & 0x4) { /* PRIORITY(...) present */
+                if (init_kind == 1 || init_kind == 2) { /* AT or IN: VAC ref to the arith exp */
+                    if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing AT/IN operand"); break; }
+                    if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
+                    at_in_value = rv_to_integer(&a); /* ticks, same WAIT-interval-as-ticks convention as OP_WAIT above */
+                    operand_idx++;
+                } else if (init_kind == 3) { /* ON: plain EVENT SYT ref (SCHD.md's confirmed "no VAC needed" case) */
+                    if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
+                        fail(state, "SCHD: ON expects a plain EVENT symbol operand (subscripted/latched bit exps unconfirmed)");
+                        break;
+                    }
+                    on_event_syt = ins->operands[operand_idx].data;
+                    operand_idx++;
+                }
+
+                int priority = 50; /* default when no PRIORITY(...) clause; matches the primal's own default, but untested -- no primary-source confirmation for this specific case */
+                if (has_priority) {
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing PRIORITY operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
                     priority = rv_to_integer(&a);
+                    operand_idx++;
                 }
                 if (priority <= 0 || priority >= 255) {
                     fail(state, "SCHEDULE priority %d out of range 0<P<255 (USA003087 Sec. 13.1-13.3)", priority);
                     break;
                 }
+
+                int32_t repeat_interval = 0;
+                if (repeat_bits == 2 || repeat_bits == 3) { /* EVERY or AFTER: VAC ref to the arith exp */
+                    if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing REPEAT EVERY/AFTER operand"); break; }
+                    if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
+                    repeat_interval = rv_to_integer(&a);
+                    operand_idx++;
+                }
+
+                int64_t stop_deadline = 0;
+                uint16_t stop_event_syt = 0;
+                if (stop_bits == 1) { /* UNTIL <ARITH EXP>: VAC ref to the time-valued exp */
+                    if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing WHILE/UNTIL operand"); break; }
+                    if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
+                    stop_deadline = rv_to_integer(&a);
+                    operand_idx++;
+                } else if (stop_bits == 2 || stop_bits == 3) { /* WHILE/UNTIL <BIT EXP>: plain SYT ref, same as ON */
+                    if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
+                        fail(state, "SCHD: WHILE/UNTIL <bit exp> expects a plain event symbol operand (subscripted/latched bit exps unconfirmed)");
+                        break;
+                    }
+                    stop_event_syt = ins->operands[operand_idx].data;
+                    operand_idx++;
+                }
+
+                if (operand_idx != ins->operand_count) {
+                    fail(state, "SCHD: operand count %u doesn't match tag 0x%X's expected clauses", ins->operand_count, ins->tag);
+                    break;
+                }
+
                 if (state->symbol_active_task[task_sym] != -1) {
                     /* At most one active instance per task symbol for
                      * now -- reentrant/concurrent re-scheduling of the
@@ -3816,19 +3962,51 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (state->task_count >= HALMAT_MAX_TASKS) { fail(state, "too many concurrent tasks"); break; }
                 int idx = state->task_count++;
-                state->tasks[idx].in_use = true;
-                state->tasks[idx].is_primal = false;
-                state->tasks[idx].symbol = task_sym;
-                state->tasks[idx].priority = priority;
-                state->tasks[idx].task_state = TASK_READY;
-                state->tasks[idx].saved_pc = state->symbol_def_pos[task_sym] + 1;
-                state->tasks[idx].dependent = dependent;
+                halmat_task_t *nt = &state->tasks[idx];
+                nt->in_use = true;
+                nt->is_primal = false;
+                nt->symbol = task_sym;
+                nt->priority = priority;
+                nt->saved_pc = state->symbol_def_pos[task_sym] + 1;
+                nt->dependent = dependent;
+                nt->repeat_kind = (halmat_schd_repeat_t)repeat_bits;
+                nt->repeat_interval = repeat_interval;
+                nt->stop_kind = (halmat_schd_stop_t)stop_bits;
+                nt->stop_deadline = stop_deadline;
+                nt->stop_event_syt = stop_event_syt;
+                /* wake_deadline doubles as REPEAT EVERY's own phase
+                 * reference (see OP_CLOS) -- default to "now" (this
+                 * SCHD's own execution tick) so a bare/ON/immediate-start
+                 * cyclic task's first period is measured from here;
+                 * overridden just below for AT/IN, whose own target is
+                 * the more natural first reference point. */
+                nt->wake_deadline = state->virtual_time;
+
+                switch (init_kind) {
+                    case 1: /* AT <absolute virtual time> */
+                        nt->task_state = TASK_WAITING;
+                        nt->wake_deadline = at_in_value;
+                        break;
+                    case 2: /* IN <relative delay> */
+                        nt->task_state = TASK_WAITING;
+                        nt->wake_deadline = state->virtual_time + at_in_value;
+                        break;
+                    case 3: /* ON <bit exp>: no fixed deadline, re-checked every tick (state.h's TASK_WAITING_ON) */
+                        nt->task_state = TASK_WAITING_ON;
+                        nt->has_on_event = true;
+                        nt->on_event_syt = on_event_syt;
+                        break;
+                    default: /* immediate */
+                        nt->task_state = TASK_READY;
+                        break;
+                }
                 state->symbol_active_task[task_sym] = idx;
                 /* No branch here -- SCHD only adds the task to the pool;
                  * the scheduler loop in interp_run naturally picks it up
-                 * next if its priority is higher than whatever is
-                 * currently executing (immediate preemption), or lets
-                 * the current flow continue otherwise. */
+                 * next if it's immediately READY and higher-priority than
+                 * whatever is currently executing, or lets the current
+                 * flow continue otherwise (delayed/ON forms aren't READY
+                 * at all yet). */
                 break;
             }
 
@@ -3976,16 +4154,40 @@ static void sched_wake_waiting(halmat_state_t *state) {
     }
 }
 
-/* If every in-use task is either TERMINATED or TASK_WAITING (nothing
- * READY right now, but something will eventually wake), fast-forwards
- * state->virtual_time to the earliest pending wake_deadline and
- * re-applies sched_wake_waiting -- otherwise the interpreter would
- * incorrectly treat "nothing is READY this instant" as "the program has
- * ended" even though a WAIT(n) is due to expire later, since virtual_time
- * (per state.h's scheduler comment) only otherwise advances one tick per
- * *executed* instruction, and no instruction executes while every task
- * is blocked. A no-op when something is already READY or truly nothing
- * is left (all TERMINATED). */
+/* SCHD's ON <bit exp> initiation (state.h's TASK_WAITING_ON): unlike
+ * TASK_WAITING's fixed wake_deadline, there's no way to know in advance
+ * *when* (or whether) some other task's SIGNAL will flip the event, so
+ * this has to actually re-read the live SYT bit_value every tick rather
+ * than being folded into sched_advance_to_next_wake's fast-forward --
+ * see that function's comment for why TASK_WAITING_ON is deliberately
+ * left out of it. */
+static void sched_wake_on_events(halmat_state_t *state) {
+    for (int i = 0; i < state->task_count; i++) {
+        halmat_task_t *t = &state->tasks[i];
+        if (t->in_use && t->task_state == TASK_WAITING_ON &&
+            t->on_event_syt < HALMAT_SYT_MAX && state->syt[t->on_event_syt].bit_value != 0) {
+            t->task_state = TASK_READY;
+        }
+    }
+}
+
+/* If every in-use task is either TERMINATED, TASK_WAITING_ON, or
+ * TASK_WAITING (nothing READY right now, but something will eventually
+ * wake), fast-forwards state->virtual_time to the earliest pending
+ * wake_deadline and re-applies sched_wake_waiting -- otherwise the
+ * interpreter would incorrectly treat "nothing is READY this instant" as
+ * "the program has ended" even though a WAIT(n)/delayed SCHD is due to
+ * expire later, since virtual_time (per state.h's scheduler comment) only
+ * otherwise advances one tick per *executed* instruction, and no
+ * instruction executes while every task is blocked. A no-op when
+ * something is already READY or truly nothing is left (all TERMINATED).
+ * TASK_WAITING_ON tasks are deliberately excluded from the "something will
+ * eventually wake" determination -- an ON condition has no deadline to
+ * fast-forward to, so if only TASK_WAITING_ON tasks remain (nothing left
+ * that could ever SIGNAL the event they're waiting on), this correctly
+ * falls through to "nothing left to run" rather than spinning forever;
+ * that's a silent-starvation outcome (the ON task just never runs), not a
+ * crash or a hang, and no fixture has hit it in practice. */
 static void sched_advance_to_next_wake(halmat_state_t *state) {
     bool any_ready = false, any_waiting = false;
     int64_t earliest = 0;
@@ -4012,6 +4214,7 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     if (state->halted) return true;
 
     sched_wake_waiting(state);
+    sched_wake_on_events(state);
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
@@ -4066,6 +4269,7 @@ int interp_run(halmat_state_t *state, FILE *out) {
 const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     if (state->halted) return NULL;
     sched_wake_waiting(state);
+    sched_wake_on_events(state);
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return NULL;
@@ -4081,6 +4285,7 @@ const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
 long interp_current_stmt_for_next(halmat_state_t *state) {
     if (state->halted) return -1;
     sched_wake_waiting(state);
+    sched_wake_on_events(state);
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return -1;

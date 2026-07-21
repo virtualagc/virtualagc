@@ -140,14 +140,49 @@ time-valued `STOPPING`=0x40), confirming the table needed no correction.
 
 ## Unresolved Questions
 
-- `SHL(FIXL(MP)+2,6)` for the `WHILE <BIT EXP>` case: confirmed `FIXL(MP)=0`
-  for a plain (unsubscripted, unlatched) `EVENT` variable, giving
-  `SHL(2,6)=0x80` — the observed tag-0x94 case above. Other `FIXL(MP)`
-  values (e.g. for a subscripted or latched-event bit expression) remain
-  unconfirmed.
+- `SHL(FIXL(MP)+2,6)` for the `WHILE <BIT EXP>`/`UNTIL <BIT EXP>` case:
+  **resolved this session, both empirically and structurally.**
+  `FIXL(MP)=0` for `WHILE <event>` (a plain, unsubscripted, unlatched
+  `EVENT` variable), giving `SHL(2,6)=0x80` — the previously-observed
+  tag-0x94 case above. Compiling the same expression with `UNTIL`
+  instead of `WHILE` (`SCHEDULE MYTASK PRIORITY(50), REPEAT UNTIL EV1;`)
+  gives tag `0xD4` = `4(PRIORITY) | 0x10(bare REPEAT) | 0xC0`, i.e.
+  `FIXL(MP)=1`, `SHL(3,6)=0xC0` — so `WHILE` vs `UNTIL` for a bit
+  expression *do* get distinct tags after all (this file previously only
+  had the `WHILE` case on record and had flagged `UNTIL`'s own tag as
+  unconfirmed). Further, `FIXL(MP)` **cannot** take any value beyond
+  `{0,1}` within this encoding: the tag is an 8-bit trailing field (`tag
+  = (w >> 24) & 0xFF` in this project's own loader), and bits 0–5 are
+  already spent on the `AT/IN/ON` (2), `PRIORITY` (1), `DEPENDENT` (1),
+  and `REPEAT` (2) sub-fields, leaving only bits 6–7 (2 bits, values
+  0–3) for `SHL(FIXL(MP)+2,6)` — `FIXL(MP)=2` would require `SHL(4,6) =
+  0x100`, which doesn't fit. So the previously-open question of what a
+  subscripted/latched-event bit expression's `FIXL(MP)` might be is now
+  moot, not just untested: whatever `FIXL(MP)` structurally represents
+  in the compiler's own source, it is bounded to exactly the two values
+  needed to distinguish `WHILE` from `UNTIL`, with no room left for a
+  third case to exist in this tag encoding at all.
+- Relatedly: `WHILE <ARITH EXP>` (the time-valued form) was compiled
+  this session and rejected outright by HALSFC — `***** WHILE EXPRESSION
+  MAY NOT BE A TIMING EXPRESSION *****` (severity-2 error at the
+  `SCHEDULE` statement). Only `UNTIL <ARITH EXP>` is legal for a
+  time-valued stopping condition; the grammar section's parenthetical
+  `(UNTIL <time-valued exp>)` note beside the `<ARITH EXP>` alternative
+  was hinting at exactly this, now confirmed directly rather than left
+  as a hint. This also explains, independently of the bit-width argument
+  above, why the time-valued case needs only one tag bit (`0x40`) with
+  no `WHILE`/`UNTIL` distinction: there is no `WHILE`-with-a-deadline
+  variant to distinguish it from.
 - Whether `α` (the priority expression) may be a general integer
   expression (rather than the literal tested here), changing that
   operand's `QUAL` to `VAC`, is untested.
+- A `WHILE`/`UNTIL` stopping condition with no `REPEAT` clause at all
+  (grammatically permitted per `<SCHEDULE CONTROL> ::= <STOPPING>`
+  above, with no `<TIMING>`) was not compiled or implemented this
+  session — its runtime semantics (presumably cancelling a still-pending
+  delayed `AT`/`IN`/`ON` activation before it ever fires, rather than
+  ending a cycle) are unconfirmed. yaHALMAT2 fails loudly on this tag
+  combination rather than guessing (see `interp.c`'s `OP_SCHD`).
 
 ## Source Analysis & Reliability
 
