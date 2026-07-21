@@ -9,6 +9,7 @@
 
 #include "interp.h"
 
+#include <errno.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
+#include <signal.h>
 #include <time.h>
 #endif
 
@@ -1154,6 +1156,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->stri_target_syt = -1;
     state->stri_target_template_syt = -1;
     state->time_scale = 1.0; /* genuine real-time pacing by default; --time-scale overrides (main.c) */
+    state->pacing_mode = HALMAT_PACING_BURST; /* interp_run_burst() by default; --pacing=signal overrides (main.c) */
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
      * convention (Plan.md Phase 3) -- overridable via interp_set_device
@@ -1189,6 +1192,10 @@ void interp_set_external_units(halmat_state_t *state, const halmat_external_call
 
 void interp_set_time_scale(halmat_state_t *state, double scale) {
     state->time_scale = scale;
+}
+
+void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode) {
+    state->pacing_mode = mode;
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -4431,7 +4438,7 @@ static void sleep_seconds(double seconds) {
  * simply resets to "now" -- no catch-up/runaway-acceleration debt ever
  * accumulates across windows; a stall is never made up for by later
  * blasting through instructions faster than real time. */
-int interp_run(halmat_state_t *state, FILE *out) {
+static int interp_run_burst(halmat_state_t *state, FILE *out) {
     double ref_wall = monotonic_seconds();
     int64_t ref_virtual = state->virtual_time;
     int64_t window_ticks = (int64_t)(HALMAT_TICKS_PER_SECOND * (HALMAT_REALTIME_BURST_MS / 1000.0));
@@ -4449,6 +4456,281 @@ int interp_run(halmat_state_t *state, FILE *out) {
         }
     }
     return state->exit_code;
+}
+
+/* interp_run_signal(): the alternative, signal/timer-notification-driven
+ * pacing implementation, added purely for direct side-by-side comparison
+ * against interp_run_burst() above (both implement the exact same
+ * pacing contract -- see state.h's halmat_pacing_mode_t comment; select
+ * with --pacing=signal, main.c). Where interp_run_burst() periodically
+ * *asks* "how much wall-clock time has elapsed?" (a polling design whose
+ * reaction granularity is bounded by how often it happens to check, i.e.
+ * HALMAT_REALTIME_BURST_MS), this implementation is *notified*: a POSIX
+ * per-process real-time timer (CLOCK_MONOTONIC, same clock source as
+ * interp_run_burst() -- must not be affected by wall-clock/NTP
+ * adjustments) delivers a real-time signal on a fixed schedule, and the
+ * interpreter blocks (sigsuspend(), never a busy-poll) until notified,
+ * rather than discovering drift only at its next scheduled check.
+ *
+ * SIGRTMIN+2 (a real-time signal), not SIGALRM: real-time signals queue
+ * rather than coalescing multiple pending instances into one, so if
+ * interp_step() occasionally takes a while (a genuinely slow
+ * instruction, or the idle-fast-forward case below) no tick
+ * notifications are silently lost while the interpreter is busy -- they
+ * are delivered/counted once it catches up. (+2 rather than bare
+ * SIGRTMIN on the untested-but-plausible theory that SIGRTMIN itself is
+ * the first one anything else sharing this process might reach for.)
+ *
+ * The signal handler (pacing_signal_handler, below) does *only*
+ * `pacing_flag = 1` -- a static volatile sig_atomic_t, nothing else
+ * touched, no calls into interpreter state -- the same async-signal-safe
+ * pattern discussed with the project owner. Race-free wait: the signal
+ * is blocked up front (sigprocmask), then sigsuspend() atomically
+ * unblocks it and sleeps until *some* unblocked signal arrives, closing
+ * the check-then-sleep missed-wakeup window a naive
+ * "if (!pacing_flag) sleep()" loop would leave open.
+ *
+ * Budget accounting mirrors interp_run_burst()'s own window (point 5 of
+ * the project owner's spec, for an apples-to-apples comparison): each
+ * timer firing grants HALMAT_TICKS_PER_SECOND * (HALMAT_REALTIME_BURST_MS
+ * / 1000.0) * time_scale ticks of budget, exactly interp_run_burst()'s
+ * own per-window tick count -- HALMAT_TICKS_PER_SECOND itself and every
+ * SCHD/WAIT seconds-to-ticks conversion are untouched either way.
+ *
+ * Idle-fast-forward special case (point 4): sched_advance_to_next_wake()
+ * (unchanged) can jump virtual_time far ahead in a single interp_step()
+ * call when every task is TASK_WAITING/TASK_WAITING_ON and nothing is
+ * READY. interp_run_burst() handles this for free (its check is purely
+ * "how much virtual time has elapsed", regardless of how it
+ * accumulated) -- but naively letting this fall through here would mean
+ * looping on sigsuspend() through however many real timer firings the
+ * gap represents (a 10-second idle gap at a 50ms window is ~200
+ * firings): correct, but needlessly granular for a jump the interpreter
+ * already knows about in one shot from a single virtual_time read.
+ * Instead, once a step's tick delta exceeds a whole window's worth,
+ * compute the equivalent real-time gap directly (same computation
+ * interp_run_burst() already does) and sleep that directly, then resume
+ * normal signal-driven pacing for the next window. */
+#ifdef HAVE_POSIX_TIMERS
+
+/* SIGRTMIN is not a compile-time constant on Linux glibc (it's a function
+ * call, to allow for kernel-reserved real-time signals) -- fine, this is
+ * only ever evaluated at runtime, never in a preprocessor conditional. */
+#define HALMAT_PACING_RT_SIGNAL (SIGRTMIN + 2)
+
+static volatile sig_atomic_t pacing_flag = 0;
+
+static void pacing_signal_handler(int signo) {
+    (void)signo;
+    pacing_flag = 1;
+}
+
+static int interp_run_signal(halmat_state_t *state, FILE *out) {
+    pacing_flag = 0;
+
+    sigset_t rt_set;
+    sigemptyset(&rt_set);
+    sigaddset(&rt_set, HALMAT_PACING_RT_SIGNAL);
+
+    struct sigaction sa, old_sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = pacing_signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    if (sigaction(HALMAT_PACING_RT_SIGNAL, &sa, &old_sa) != 0) {
+        fail(state, "interp_run_signal: sigaction failed: %s", strerror(errno));
+        return state->exit_code;
+    }
+
+    /* Block the signal up front so it can never be delivered
+     * asynchronously mid-check between interp_step() calls -- sigsuspend()
+     * below is the only place it's ever transiently unblocked, atomically,
+     * right before going to sleep for it. */
+    sigset_t old_mask;
+    if (sigprocmask(SIG_BLOCK, &rt_set, &old_mask) != 0) {
+        fail(state, "interp_run_signal: sigprocmask failed: %s", strerror(errno));
+        sigaction(HALMAT_PACING_RT_SIGNAL, &old_sa, NULL);
+        return state->exit_code;
+    }
+
+    timer_t timerid;
+    struct sigevent sev;
+    memset(&sev, 0, sizeof(sev));
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = HALMAT_PACING_RT_SIGNAL;
+    sev.sigev_value.sival_ptr = &timerid;
+    if (timer_create(CLOCK_MONOTONIC, &sev, &timerid) != 0) {
+        fail(state, "interp_run_signal: timer_create failed: %s", strerror(errno));
+        sigprocmask(SIG_SETMASK, &old_mask, NULL);
+        sigaction(HALMAT_PACING_RT_SIGNAL, &old_sa, NULL);
+        return state->exit_code;
+    }
+
+    double window_seconds = HALMAT_REALTIME_BURST_MS / 1000.0;
+    struct itimerspec its;
+    its.it_value.tv_sec = (time_t)window_seconds;
+    its.it_value.tv_nsec = (long)((window_seconds - (double)its.it_value.tv_sec) * 1e9);
+    its.it_interval = its.it_value;
+    if (timer_settime(timerid, 0, &its, NULL) != 0) {
+        fail(state, "interp_run_signal: timer_settime failed: %s", strerror(errno));
+        timer_delete(timerid);
+        sigprocmask(SIG_SETMASK, &old_mask, NULL);
+        sigaction(HALMAT_PACING_RT_SIGNAL, &old_sa, NULL);
+        return state->exit_code;
+    }
+
+    int64_t window_ticks_budget =
+        (int64_t)(HALMAT_TICKS_PER_SECOND * (HALMAT_REALTIME_BURST_MS / 1000.0) * state->time_scale);
+    if (window_ticks_budget < 1) window_ticks_budget = 1;
+    int64_t budget_ticks = 0;
+
+    bool halted = false;
+    while (!halted) {
+        if (budget_ticks <= 0) {
+            while (!pacing_flag) {
+                sigsuspend(&old_mask);
+            }
+            pacing_flag = 0;
+            budget_ticks += window_ticks_budget;
+        }
+
+        int64_t before_virtual = state->virtual_time;
+        halted = interp_step(state, out);
+        int64_t consumed = state->virtual_time - before_virtual;
+
+        if (consumed > window_ticks_budget) {
+            /* Idle fast-forward (see this function's own comment above) --
+             * sleep the equivalent real time directly instead of waiting
+             * out however many timer firings it represents. */
+            double gap_seconds = (consumed / (double)HALMAT_TICKS_PER_SECOND) / state->time_scale;
+            sleep_seconds(gap_seconds);
+            budget_ticks = 0; /* resume ordinary signal-driven pacing next window */
+        } else {
+            budget_ticks -= consumed;
+        }
+    }
+
+    timer_delete(timerid);
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+    sigaction(HALMAT_PACING_RT_SIGNAL, &old_sa, NULL);
+    return state->exit_code;
+}
+
+#elif defined(_WIN32)
+
+/* Windows has no POSIX signals at all, so this uses the platform's own
+ * equivalent primitives rather than trying to emulate signals:
+ * CreateTimerQueueTimer() for the periodic notification -- which runs
+ * its callback on a thread-pool thread, NOT synchronously on the main
+ * thread, a real difference from POSIX signals interrupting the same
+ * thread -- and a Win32 Event object (CreateEvent/SetEvent in the
+ * callback, WaitForSingleObject in the main loop) as the equivalent of
+ * sigsuspend()'s blocking wait, rather than a raw flag spin-polled in a
+ * loop (which would defeat the entire "don't waste CPU" point).
+ *
+ * Because the callback runs on a separate thread, the tick-budget
+ * bookkeeping can't just be a flag the way POSIX's sig_atomic_t works
+ * (same-thread signal handlers get an implicit ordering guarantee a
+ * plain cross-thread write does not). pacing_fired_count is instead a
+ * genuine Interlocked (atomic) counter of how many timer periods have
+ * fired since the main loop last serviced it -- not just a boolean --
+ * for the same reason the POSIX side uses a *queuing* real-time signal
+ * instead of SIGALRM: a plain auto-reset Event collapses any number of
+ * un-waited SetEvent() calls into a single signaled state, which would
+ * silently lose tick notifications if the callback fires again before
+ * the main thread catches up (e.g. while it's blocked in a slow
+ * interp_step()). Counting fired periods, then multiplying by
+ * window_ticks_budget when serviced, avoids that loss. */
+static volatile LONG pacing_fired_count = 0;
+
+static void CALLBACK pacing_timer_callback(void *param, BOOLEAN timer_or_wait_fired) {
+    (void)timer_or_wait_fired;
+    InterlockedIncrement(&pacing_fired_count);
+    SetEvent((HANDLE)param);
+}
+
+static int interp_run_signal(halmat_state_t *state, FILE *out) {
+    pacing_fired_count = 0;
+
+    HANDLE event = CreateEvent(NULL, FALSE, FALSE, NULL); /* auto-reset, initially unsignaled */
+    if (!event) {
+        fail(state, "interp_run_signal: CreateEvent failed (error %lu)", (unsigned long)GetLastError());
+        return state->exit_code;
+    }
+
+    HANDLE timer = NULL;
+    DWORD period_ms = (DWORD)HALMAT_REALTIME_BURST_MS;
+    if (!CreateTimerQueueTimer(&timer, NULL, pacing_timer_callback, event, period_ms, period_ms,
+                                WT_EXECUTEDEFAULT)) {
+        fail(state, "interp_run_signal: CreateTimerQueueTimer failed (error %lu)", (unsigned long)GetLastError());
+        CloseHandle(event);
+        return state->exit_code;
+    }
+
+    int64_t window_ticks_budget =
+        (int64_t)(HALMAT_TICKS_PER_SECOND * (HALMAT_REALTIME_BURST_MS / 1000.0) * state->time_scale);
+    if (window_ticks_budget < 1) window_ticks_budget = 1;
+    int64_t budget_ticks = 0;
+
+    bool halted = false;
+    while (!halted) {
+        if (budget_ticks <= 0) {
+            LONG fired;
+            while ((fired = InterlockedExchange(&pacing_fired_count, 0)) == 0) {
+                WaitForSingleObject(event, INFINITE);
+            }
+            budget_ticks += (int64_t)fired * window_ticks_budget;
+        }
+
+        int64_t before_virtual = state->virtual_time;
+        halted = interp_step(state, out);
+        int64_t consumed = state->virtual_time - before_virtual;
+
+        if (consumed > window_ticks_budget) {
+            /* Idle fast-forward -- see this function's own comment above
+             * interp_run_signal's POSIX branch for the full reasoning
+             * (identical here). */
+            double gap_seconds = (consumed / (double)HALMAT_TICKS_PER_SECOND) / state->time_scale;
+            sleep_seconds(gap_seconds);
+            budget_ticks = 0;
+        } else {
+            budget_ticks -= consumed;
+        }
+    }
+
+    /* INVALID_HANDLE_VALUE as the completion event makes this call block
+     * until any in-flight callback finishes, so the timer is fully torn
+     * down (no lingering thread-pool callback touching `event` after
+     * it's closed) before returning. */
+    DeleteTimerQueueTimer(NULL, timer, INVALID_HANDLE_VALUE);
+    CloseHandle(event);
+    return state->exit_code;
+}
+
+#else
+
+/* Neither HAVE_POSIX_TIMERS (Makefile's build-time probe) nor _WIN32:
+ * this target has no known reliable periodic-timer-plus-notification
+ * primitive available (notably, real per-process interval timers via
+ * timer_create()/timer_settime() have historically been unreliable or
+ * absent on some BSD-family systems, including macOS, despite this
+ * project's own Makefile listing Mac as a supported target). Fail
+ * loudly and specifically rather than silently falling back to
+ * interp_run_burst()'s behavior or crashing -- matches this project's
+ * established "fail loudly, don't silently degrade" discipline. */
+static int interp_run_signal(halmat_state_t *state, FILE *out) {
+    (void)out;
+    fail(state,
+         "this build was compiled without POSIX real-time timer support -- "
+         "rebuild with HAVE_POSIX_TIMERS, or use --pacing=burst");
+    return state->exit_code;
+}
+
+#endif
+
+int interp_run(halmat_state_t *state, FILE *out) {
+    if (state->pacing_mode == HALMAT_PACING_SIGNAL) return interp_run_signal(state, out);
+    return interp_run_burst(state, out);
 }
 
 const halmat_instr_t *interp_peek_next(halmat_state_t *state) {

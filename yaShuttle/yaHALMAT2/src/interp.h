@@ -61,6 +61,16 @@ void interp_set_external_units(halmat_state_t *state, const halmat_external_call
  * of this; only how long interp_run() actually sleeps changes. */
 void interp_set_time_scale(halmat_state_t *state, double scale);
 
+/* Overrides interp_init's default pacing_mode of HALMAT_PACING_BURST
+ * (state.h) -- selects which of interp_run()'s two wall-clock pacing
+ * implementations a run uses (--pacing, main.c): HALMAT_PACING_BURST
+ * (interp_run_burst(), the original burst-execute-then-sleep polling
+ * design) or HALMAT_PACING_SIGNAL (interp_run_signal(), the POSIX/Win32
+ * timer-notification-driven alternative). Purely a dispatch choice --
+ * both implement the identical pacing contract and honor time_scale
+ * identically; see state.h's halmat_pacing_mode_t comment. */
+void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */

@@ -19,6 +19,31 @@ CFLAGS += -DHAVE_ZLIB
 LDFLAGS += -lz
 endif
 
+# Optional POSIX real-time timer support, for interp_run_signal()'s
+# --pacing=signal alternative (interp.c) to interp_run_burst()'s default
+# polling-based pacing. Not every POSIX-ish target reliably has
+# timer_create()/timer_settime() -- notably, real per-process interval
+# timers via this exact API have historically been unreliable/absent on
+# some BSD-family systems, including macOS, despite this file's own
+# header comment listing Mac as a supported target -- so probe for it
+# rather than assuming. Tries linking with no extra library first (modern
+# glibc needs none), then falls back to -lrt (older glibc required it for
+# timer_create()). Without this, --pacing=signal fails loudly at runtime
+# with a clear message instead of silently degrading or crashing -- see
+# interp.c's HAVE_POSIX_TIMERS-gated stub.
+POSIX_TIMER_CHECK := $(shell printf '#include <signal.h>\n#include <time.h>\nint main(void){timer_t t;struct sigevent sev;sev.sigev_notify=SIGEV_SIGNAL;sev.sigev_signo=SIGRTMIN;sev.sigev_value.sival_ptr=&t;timer_create(CLOCK_MONOTONIC,&sev,&t);struct itimerspec its={{0,0},{0,0}};timer_settime(t,0,&its,(void*)0);struct sigaction sa;sa.sa_handler=(void(*)(int))0;sigemptyset(&sa.sa_mask);sa.sa_flags=0;sigaction(SIGRTMIN,&sa,(void*)0);sigset_t set;sigemptyset(&set);sigsuspend(&set);return 0;}\n' | $(CC) -std=c99 -D_POSIX_C_SOURCE=200809L -xc - -o /dev/null 2>/dev/null && echo yes)
+POSIX_TIMER_LIBS :=
+ifneq ($(POSIX_TIMER_CHECK),yes)
+POSIX_TIMER_CHECK := $(shell printf '#include <signal.h>\n#include <time.h>\nint main(void){timer_t t;struct sigevent sev;sev.sigev_notify=SIGEV_SIGNAL;sev.sigev_signo=SIGRTMIN;sev.sigev_value.sival_ptr=&t;timer_create(CLOCK_MONOTONIC,&sev,&t);struct itimerspec its={{0,0},{0,0}};timer_settime(t,0,&its,(void*)0);struct sigaction sa;sa.sa_handler=(void(*)(int))0;sigemptyset(&sa.sa_mask);sa.sa_flags=0;sigaction(SIGRTMIN,&sa,(void*)0);sigset_t set;sigemptyset(&set);sigsuspend(&set);return 0;}\n' | $(CC) -std=c99 -D_POSIX_C_SOURCE=200809L -xc - -lrt -o /dev/null 2>/dev/null && echo yes)
+ifeq ($(POSIX_TIMER_CHECK),yes)
+POSIX_TIMER_LIBS := -lrt
+endif
+endif
+ifeq ($(POSIX_TIMER_CHECK),yes)
+CFLAGS += -DHAVE_POSIX_TIMERS
+LDFLAGS += $(POSIX_TIMER_LIBS)
+endif
+
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
         literal.c ebcdic.c interp.c value.c symtab.c debug.c srcmap.c \
         container.c

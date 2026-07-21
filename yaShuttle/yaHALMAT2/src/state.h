@@ -72,6 +72,18 @@
  * owner's own direction ("a 50 or 100 millisecond cycle"). */
 #define HALMAT_REALTIME_BURST_MS 50
 
+/* Which of interp.c's two interp_run() pacing implementations to use
+ * (--pacing, main.c) -- both implement the identical "keep virtual_time
+ * roughly in step with the wall clock" contract, added side by side for
+ * direct comparison per the project owner's own request: HALMAT_PACING_
+ * BURST is interp_run_burst()'s original polling design (periodically
+ * compare elapsed virtual ticks against monotonic_seconds(), sleep off
+ * any surplus); HALMAT_PACING_SIGNAL is interp_run_signal()'s POSIX
+ * real-time-timer-driven alternative (a signal/platform-timer callback
+ * notifies the interpreter instead of it having to ask). See interp.c's
+ * comments on both for the full writeup. */
+typedef enum { HALMAT_PACING_BURST, HALMAT_PACING_SIGNAL } halmat_pacing_mode_t;
+
 /* Sized generously per yaHALMAT's precedent (see Plan.md M2); revisit
  * once a --memory-size CLI switch exists (Plan.md Phase 3 default is
  * meant to be AP-101S-realistic, pending the M0.1 PDF findings). */
@@ -676,6 +688,11 @@ struct halmat_state {
                          * virtual-time interval (e.g. 100000 makes an hour of virtual/HAL-S
                          * time finish in about 36ms of wall-clock sleep), without changing any
                          * tick arithmetic at all -- see the scheduler comment above. */
+    halmat_pacing_mode_t pacing_mode; /* interp_run()'s dispatch selector (--pacing, main.c) --
+                         * defaults to HALMAT_PACING_BURST (interp_init), same default-then-
+                         * override pattern as time_scale just above. Selects between
+                         * interp_run_burst() and interp_run_signal() (interp.c); orthogonal to
+                         * time_scale, which either implementation still honors identically. */
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };
 

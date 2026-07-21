@@ -128,6 +128,15 @@ run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
 run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
 
+# --pacing=signal smoke test: reuses sched_every (a fast, already-passing
+# fixture) with a large --time-scale, same reasoning as the --time-scale
+# usage above, to confirm interp_run_signal()'s tick-budget accounting
+# and task interleaving produce byte-identical output to the default
+# interp_run_burst() path -- this is what would catch a bug in the
+# signal-mode budget/tick-consumption arithmetic itself, independent of
+# real-time precision (see interp.c's interp_run_signal()).
+run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000 --pacing=signal
+
 # Proves interp_run()'s wall-clock real-time pacing actually does
 # something -- every sched_*/canc* fixture above passes a large
 # --time-scale specifically to make its sleep negligible, so none of
@@ -135,8 +144,10 @@ run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 10
 # (finishing near-instantly) or hung/massively over-slept. This one runs
 # at the default time_scale=1.0 (no --time-scale) and checks the actual
 # wall-clock elapsed time against a generous tolerance band -- see
-# run_realtime_fixture.sh.
-run ./run_realtime_fixture.sh realtime_wait "DONE" 0.2
+# run_realtime_fixture.sh. Run under both pacing implementations, for the
+# same reason: neither is exempt from this regression class.
+run ./run_realtime_fixture.sh realtime_wait "DONE" 0.2 burst
+run ./run_realtime_fixture.sh realtime_wait "DONE" 0.2 signal
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)
