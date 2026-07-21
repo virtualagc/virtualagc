@@ -60,12 +60,15 @@ if "--no-sdfpkg" in sys.argv:
 #    COMMTABL (30 `FIXED`)
 #    250 SDF pages (1680 bytes) (From SDFPKG User's Guide, PDF p. 11)
 #    Area for FCBs.
+MAX_CONCURRENT_SDFS = 10
 COMMTABL_base = 0
 COMMTABL_size = 30 * 4
+SDF_PAGE_size = 1680
+SDF_NUM_PAGES = 250
 SDF_PAGES_base = COMMTABL_base + COMMTABL_size
-SDF_PAGES_size = 250 * 1680
+SDF_PAGES_size = SDF_NUM_PAGES * SDF_PAGE_size
 FCBS_base = SDF_PAGES_base + SDF_PAGES_size
-FCBS_size = 250000 # No idea how big this needs to be
+FCBS_size = MAX_CONCURRENT_SDFS * 128
 memorySize = FCBS_base + FCBS_size
 memoryModel = bytearray(memorySize)
 

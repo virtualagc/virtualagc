@@ -17,6 +17,8 @@ History:    2023-09-12 RSB  Began porting from XPL
                             and 137.
             2026-04-14 RSB  Added "pretty BNF".
             2026-05-16 RSB  Changes related to issue #1306.
+            2026-07-18 RSB  Some fixes related to issue #1337, but fix not yet
+                            complete.
 
 I realized belatedly that the method I use for handling spaghetti code in all
 of the modules so far -- namely, the use of goto_XXXX variables, one for each
@@ -3674,7 +3676,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <PRIMARY>  ::=  <ARITH INLINE DEF>  <BLOCK BODY>  <CLOSING>  ;
         if goto == "INLINE_SCOPE": goto = None
         g.TEMP2 = g.INLINE_LEVEL;
-        g.TEMP = XICLS;
+        g.TEMP = g.XICLS;
         g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP], \
                         g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP]) | g.INLINE_FLAG);
         goto = "CLOSE_SCOPE"
@@ -4751,7 +4753,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         EMIT_SMRK();
         if g.BLOCK_MODE[g.NEST] == g.INLINE_MODE: 
             g.INLINE_INDENT_RESET = g.EXT_P[g.PTR[g.MP]];
-            g.INDENT_LEVEL = INLINE_INDENT + g.INDENT_INCR;
+            g.INDENT_LEVEL = g.INLINE_INDENT + g.INDENT_INCR;
             g.INLINE_STMT_RESET = g.STMT_NUM();
             g.STMT_NUM(g.INX[g.PTR[g.MP]]);
             g.INX[g.PTR[g.MP]] = 0;
@@ -4765,9 +4767,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.STAB2_MARK = 0;
                 g.XSET(g.STAB_STACK[0]);
                 g.SRN_FLAG = g.FALSE;
-                g.SRN[2] = SRN_MARK[:];
-                g.INCL_SRN[2] = INCL_SRN_MARK[:];
-                g.SRN_COUNT[2] = SRN_COUNT_MARK;
+                g.SRN[2] = g.SRN_MARK[:];
+                g.INCL_SRN[2] = g.INCL_SRN_MARK[:];
+                g.SRN_COUNT[2] = g.SRN_COUNT_MARK;
             g.FIXF[g.MP] = 0;
         else:
             BLOCK_SUMMARY();
@@ -4858,7 +4860,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.SRN_COUNT_MARK = g.SRN_COUNT[2];
             g.STMT_TYPE = 0;
         g.INLINE_LABEL = g.INLINE_LABEL + 1;
-        g.VAR[g.MP] = l.INLINE_NAME + g.INLINE_LABEL;
+        g.VAR[g.MP] = l.INLINE_NAME + str(g.INLINE_LABEL);
         g.NAME_HASH = HASH(g.VAR[g.MP], g.SYT_HASHSIZE);
         g.FIXL[g.MP] = ENTER(g.VAR[g.MP], g.FUNC_CLASS);
         g.FIXL[g.MP] = g.I

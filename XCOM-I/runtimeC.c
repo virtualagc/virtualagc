@@ -3128,7 +3128,7 @@ MONITOR22(uint32_t n1) {
       fprintf(stderr, "\nFYI: MONITOR(22,n) not yet implemented\n");
       fflush(stderr);
     }
-  return 0;
+  return 1;
 }
 
 uint32_t
@@ -3141,7 +3141,7 @@ MONITOR22A(uint32_t n2) {
       fprintf(stderr, "FYI: MONITOR(22,0,n) not yet implemented\n");
       fflush(stderr);
     }
-  return 0;
+  return 1;
 }
 
 descriptor_t *
