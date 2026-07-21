@@ -72,6 +72,27 @@ auxiliary unit is treated as an unresolved external — a hard error at
 startup, mirroring a normal linker, not a silent zero-default at
 runtime.
 
+## The templating mechanism is generic, not `COMPOOL`-specific
+
+`--parms=TEMPLATE` isn't a `COMPOOL`-only feature: it works on any unit
+kind. Compiling a plain `PROGRAM` with `--parms=TEMPLATE` (not otherwise
+useful for linking, but tried for completeness) still produces a
+`TEMPLIB/@@name` entry, and decoding it (EBCDIC) shows the same rewrite
+rule already documented above for `COMPOOL`/`FUNCTION`/`PROCEDURE`:
+the unit's own header keyword gets `EXTERNAL` prefixed, its body is
+stripped to nothing:
+
+```
+TEST_PROG_TMPL: EXTERNAL PROGRAM; CLOSE;
+```
+
+So the rule is uniform across `CDEF`/`FDEF`/`PDEF`/`MDEF`-headed units:
+`--parms=TEMPLATE` always emits `EXTERNAL <original keyword>` plus
+(for `COMPOOL`) the mirrored declarations. This matters for scope
+questions below — "is templating available for kind X" is never itself
+a reason a linking feature is unsupported; the *executor's* handling of
+that kind is the actual gate.
+
 ## Execution model: `COMPOOL` units don't need real concurrency
 
 Compiling a real, standalone `COMPOOL` and inspecting its HALMAT
@@ -85,12 +106,44 @@ with its resulting `SYT` values harvested by name afterward and seeded
 into the primary unit's matching `SYT` slots before the primary itself
 runs normally.
 
+## `EXTERNAL FUNCTION`/`PROCEDURE` (comsub) units: synchronous cross-unit calls
+
+Unlike `COMPOOL`, a comsub-headed (`FDEF`/`PDEF`) auxiliary unit is *not*
+run to completion once at link time — it's a callable entry point, kept
+loaded persistently for the life of the run. `yaHALMAT2` gives each such
+unit its own independent, heap-allocated interpreter state (own `SYT`,
+literal table, PC, VAC — no sharing with the primary or with each other),
+wired into the primary's `FCAL`/`PCAL` dispatch by the same by-name
+`EXTERNAL`-flag match already used for `COMPOOL` blocks. A call from the
+primary (or from another linked unit) runs that unit's own interpreter
+loop synchronously to completion of exactly one call, then copies the
+single return value (function form only) back into the caller's VAC slot.
+State persists across repeated calls to the same unit — matching this
+interpreter's existing same-unit call semantics, i.e. no "fresh locals per
+call."
+
+One symbol-table wrinkle specific to comsubs: `INCLUDE TEMPLATE NAME` on
+a `PROCEDURE` referenced via `CALL` produces *two* symtab entries sharing
+that name — an unused "template stub" (carrying the `EXTERNAL` flag) plus
+a separate, actually-referenced call-site entry that does not carry the
+flag. A naive first-match-by-name lookup picks the wrong one; `yaHALMAT2`
+confirms `EXTERNAL`-ness via *any* matching-name entry, then wires the
+call table against *every* entry sharing that name.
+
+Validated end-to-end: `src/tests/hal/test_ext_mytable.hal` +
+`test_ext_square.hal`/`test_ext_squroo.hal` (the `FUNCTION`/`FCAL` case)
+and `test_ext_pcal_prog.hal` + `test_ext_double.hal` (the `PROCEDURE`/
+`PCAL` case), both via `src/tests/run_ext_func_fixture.sh`.
+
 ## `yaHALMAT2` scope (current)
 
 - One executing `PROGRAM` (`MDEF`-headed) unit, selected via `--entry
   <directory>` or auto-detected (exactly one `MDEF`-headed directory in
   the `@list`).
-- Any number of `COMPOOL` (`CDEF`-headed) auxiliary units.
+- Any number of `COMPOOL` (`CDEF`-headed) auxiliary units, run to
+  completion once at link time (see above).
+- Any number of `FUNCTION`/`PROCEDURE` (`FDEF`/`PDEF`-headed) auxiliary
+  units, called synchronously at runtime (see above).
 - `--opt` loads `optmat.bin` (+ its own companion convention:
   `litfile2.bin`, `COMMON2.out.bin[.gz]`, `COMMON3.out`) instead of
   `halmat.bin` for every unit in the list.
@@ -99,15 +152,20 @@ runs normally.
 - Multiple concurrently-*executing* `PROGRAM` units sharing live,
   mutable `COMPOOL` state (each would need to observe the others'
   writes as they happen — full per-unit scheduler integration, not
-  attempted yet).
+  attempted yet). This also bounds the comsub support above: a linked
+  `FUNCTION`/`PROCEDURE` unit is invoked synchronously to completion of
+  one call and never itself `SCHEDULE`s a task that outlives that call.
 - `ARRAY`/`MATRIX`-typed `EXTERNAL COMPOOL` variables (only plain
   `INTEGER`/`SCALAR` values are imported; safely transferring an element
   buffer's ownership across the auxiliary unit's cleanup needs more than
   a struct copy).
-- `EXTERNAL PROCEDURE`/`FUNCTION` blocks (comsubs, [USA003087] §15.3) —
-  only `COMPOOL` auxiliary units are recognized; a comsub-headed (`FDEF`/
-  `PDEF`) auxiliary unit is rejected with an explicit error rather than
-  silently mishandled.
+- A `PROGRAM`-headed (`MDEF`) auxiliary unit referenced as if callable.
+  `--parms=TEMPLATE` will happily produce an `EXTERNAL PROGRAM` template
+  for one (see above) — HALSFC's templating step doesn't know or care
+  what the caller intends to do with it — but nothing in real HAL/S calls
+  *into* another `PROGRAM`, and `yaHALMAT2` has no `MDEF`-as-callee path;
+  an `MDEF`-headed non-primary unit is simply not matched by the
+  `FCAL`/`PCAL` external-call wiring.
 
 Validated end-to-end with `src/tests/hal/test_link_pool.hal` +
 `test_link_prog.hal` (`src/tests/run_link_fixture.sh`): the linked run
