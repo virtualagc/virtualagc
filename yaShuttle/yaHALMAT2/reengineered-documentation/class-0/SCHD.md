@@ -240,6 +240,89 @@ time-valued `STOPPING`=0x40), confirming the table needed no correction.
   than guessing — this is now a confirmed-open question, not an
   unexplored one.
 
+## Real-Time Calibration (yaHALMAT2's interpreter, not HALSFC)
+
+The sections above are about how HALSFC *compiles* `SCHEDULE` into HALMAT.
+This section is about a different question: once `yaHALMAT2` executes that
+HALMAT, what does `AT`/`IN`/`EVERY`/`AFTER`/a time-valued `UNTIL`'s
+numeric-seconds expression (and `WAIT`'s own interval, class-0/WAIT.md)
+actually mean in real elapsed time? Earlier interpreter work (see
+`state.h`'s scheduler comment, `interp.c`'s `OP_SCHD`/`OP_WAIT`) ticked
+`virtual_time` 1:1 per HALMAT instruction executed and used a resolved
+`SCHEDULE`/`WAIT` seconds value directly as a tick count with no unit
+conversion at all — a documented stopgap ("not a calibration to real
+seconds"), not a real timing model. This section documents the real one,
+sourced from the AP-101S Software Model PDF ("the POO",
+<https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf>)
+plus an empirical HALMAT-to-AP-101S-instruction-count sample, so a future
+session can verify or refine `HALMAT_TICKS_PER_SECOND` (`state.h`) without
+redoing the PDF research from scratch.
+
+**Primary-source facts used:**
+
+- Sec. 16.1 ("Instruction Execution — Pipeline Basics") states directly:
+  > "For the AP-101S computer, the pipeline cycle time is 0.250
+  > microseconds."
+- Sec. 17.0 ("AP-101S Instruction Execution Times") is a per-mnemonic
+  table in microseconds. The two entries that matter most for real
+  HAL/S-compiled code are `SCAL` (subroutine call) = **18.125 µs** and
+  `SVC` (supervisor call) = **20.25 µs** — both large, unambiguous, high-
+  confidence reads, and both dominant in practice: runtime-library calls
+  (I/O formatting, matrix/scalar math support routines) are a major real
+  cost on this architecture, not just explicit HAL/S `CALL` statements.
+
+**What was still missing**: how many AP-101S instructions a typical
+HALMAT instruction expands into. To get that, 7 representative existing
+test fixtures — `src/tests/hal/test_int_arith2.hal`, `test_pcal.hal`,
+`test_scalar_arith.hal`, `test_write_lit.hal`, `test_bit.hal`,
+`test_matrix_sub.hal`, `test_cfor.hal` — were compiled with `HALSFC
+--parms="LSTALL"` (the `LSTALL` technique documented in
+`reengineered-documentation/STATUS.md`), and the resulting `pass2.rpt`'s
+interleaved `HALMAT: <opcode>(...)` / generated-AP-101S-assembly-line
+listing was parsed for each.
+
+**Result, aggregated across all 7 fixtures**: **230 HALMAT instructions
+generated 188 AP-101S instructions**, with the mnemonic mix dominated by
+`SCAL` (34 occurrences) and `SVC` (7); the remainder were simple
+`RR`/`RS`/`RI` loads/stores/arithmetic, priced via Sec. 16's format-class
+averages (`RR`=0.25µs, `SRS`=0.375µs, `RS`=0.5µs steady-state pipelined
+cycles — ~0.4µs was used as a single representative "simple instruction"
+figure rather than chasing every individual mnemonic through an
+OCR'd/hand-transcribed table). This works out to **≈3.62 µs per HALMAT
+instruction**, aggregate — per-fixture range was 2.45–6.05 µs (i.e.
+~165,000–408,000 ticks/sec depending on program mix: arithmetic-heavy
+code is cheaper per instruction, call/I-O-heavy code pricier). The
+aggregate figure was adopted as a single project-wide constant:
+
+```c
+#define HALMAT_TICKS_PER_SECOND 276000
+```
+
+This is deliberately rough — HAL/S source doesn't determine exact AP-101S
+code shape, and a single global constant can't track per-program
+mix — but it is sourced, not asserted: every number above traces to either
+the PDF's own text/tables or a real, reproducible compiled-code sample.
+To redo or refine it: recompile the 7 fixtures above (or a larger/
+different sample) with `HALSFC --parms="LSTALL"`, re-tally the
+`pass2.rpt` HALMAT-vs-AP-101S-instruction counts and mnemonic mix, and
+re-price against Sec. 16/17's tables the same way.
+
+**How it's applied**: `interp.c`'s `schd_seconds_to_ticks()` converts a
+resolved `SCHEDULE`/`WAIT` seconds value (as a raw double, before any
+rounding) to a tick count via this constant, used at all four sites that
+resolve a HAL/S numeric-seconds expression (`OP_SCHD`'s `AT`/`IN`,
+`EVERY`/`AFTER`, time-valued `UNTIL`, and `OP_WAIT`'s interval).
+`interp_run()` then paces real execution against a monotonic wall clock
+using this same constant (`HALMAT_REALTIME_BURST_MS`-sized bursts,
+`state.h`'s scheduler comment) — so a real run of, e.g., `SCHEDULE WORKER
+PRIORITY(80), REPEAT EVERY 1.0;` now genuinely re-triggers `WORKER`
+roughly once per real second, rather than roughly once per instruction. A
+`--time-scale FACTOR` option (`main.c`) divides only that pacing layer's
+*sleep* duration — never `HALMAT_TICKS_PER_SECOND` or the tick arithmetic
+itself — so existing fixtures' tick counts/interleaving/output are
+unaffected by it; it exists purely so tests and interactive use aren't
+forced to wait out real HAL/S-modeled seconds.
+
 ## Source Analysis & Reliability
 
 Opcode (0x039) confirmed primary-source: `XSCHD BIT(16) INITIAL("039")`

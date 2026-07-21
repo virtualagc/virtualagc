@@ -89,8 +89,13 @@ run ./run_local_fixture.sh adlp "$(printf ' 3.0000000E+00\n 3.0000000E+00\n 3.00
 run ./run_local_fixture.sh lfnc "$(printf ' 9.0000000E+00\n 2.0000000E+00')"
 run ./run_local_fixture.sh idlp "$(printf ' 4.0000000E+00\n 4.0000000E+00\n 4.0000000E+00')"
 run ./run_local_fixture.sh stri "$(printf ' 1.5000000E+00\n 1.5000000E+00\n 1.5000000E+00')"
-run ./run_local_fixture.sh canc "N=               0"
-run ./run_local_fixture.sh canc_control "N=               1"
+# --time-scale 1000000 keeps these WAIT-using fixtures' now-real-time-
+# throttled runs fast (see interp_run()'s wall-clock pacing, state.h's
+# scheduler comment) -- it's a pure sleep-duration divisor, so the tick
+# arithmetic/expected output below is unaffected either way (verified by
+# comparing against a --time-scale-free run of the same fixtures).
+run ./run_local_fixture.sh canc "N=               0" --time-scale 1000000
+run ./run_local_fixture.sh canc_control "N=               1" --time-scale 1000000
 run ./run_local_fixture.sh sgnl "DONE"
 run ./run_local_fixture.sh idef " 1.2000000E+01"
 run ./run_local_fixture.sh tdcl " 6.0000000E+00"
@@ -107,14 +112,31 @@ run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n        
 # UNTIL) forms -- class-0/SCHD.md's confirmed tag bitmask. Expected
 # values hand-derived from the scheduler's own rules (priority
 # preemption + fixed-tick-per-instruction virtual clock), not just
-# copied from a run -- see the commit message for the arithmetic.
-run ./run_local_fixture.sh sched_at "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
-run ./run_local_fixture.sh sched_in "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
+# copied from a run -- see the commit message for the arithmetic. Every
+# AT/IN/EVERY/AFTER/UNTIL-time/WAIT value is now real HAL/S seconds
+# (HALMAT_TICKS_PER_SECOND-scaled, not a raw tick count -- see state.h's
+# scheduler comment), but a uniform linear rescale of the time axis
+# changes absolute tick magnitudes, not relative ordering, so every
+# expected string below is unchanged; --time-scale 1000000 just keeps
+# the now-real-time-throttled runs fast (verified: byte-identical
+# output with and without --time-scale).
+run ./run_local_fixture.sh sched_at "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
+run ./run_local_fixture.sh sched_in "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
 run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nWORKER RUNNING\nAFTER SIGNAL')"
-run ./run_local_fixture.sh sched_every "N=               5"
-run ./run_local_fixture.sh sched_after "N=               4"
-run ./run_local_fixture.sh sched_while "N=               1"
-run ./run_local_fixture.sh sched_every_wait "N=               5"
+run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000
+run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
+run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
+run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
+
+# Proves interp_run()'s wall-clock real-time pacing actually does
+# something -- every sched_*/canc* fixture above passes a large
+# --time-scale specifically to make its sleep negligible, so none of
+# them alone would catch a regression that silently disabled throttling
+# (finishing near-instantly) or hung/massively over-slept. This one runs
+# at the default time_scale=1.0 (no --time-scale) and checks the actual
+# wall-clock elapsed time against a generous tolerance band -- see
+# run_realtime_fixture.sh.
+run ./run_realtime_fixture.sh realtime_wait "DONE" 0.2
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)

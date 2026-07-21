@@ -19,6 +19,59 @@
  * to a file, including overriding 5/6. */
 #define HALMAT_DEVICE_MAX 10
 
+/* Ticks-per-(real-)second calibration for the virtual-clock scheduler
+ * (see halmat_state_t's virtual_time/scheduler comment block below) --
+ * sourced from the AP-101S Software Model PDF ("the POO", https://www.
+ * ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-
+ * 101S.pdf) plus an empirical HALMAT-to-AP-101S-instruction-count
+ * sample, not a guess:
+ *
+ *   - Sec. 16.1 ("Instruction Execution - Pipeline Basics") states
+ *     directly: "For the AP-101S computer, the pipeline cycle time is
+ *     0.250 microseconds."
+ *   - Sec. 17.0 ("AP-101S Instruction Execution Times") is a per-
+ *     mnemonic table in microseconds; SCAL (subroutine call) = 18.125us
+ *     and SVC (supervisor call) = 20.25us are the two entries that
+ *     matter most for real HAL/S-compiled code, since runtime-library
+ *     calls (I/O formatting, matrix/scalar math support routines) are a
+ *     major real cost on this architecture, not just explicit HAL/S
+ *     CALL statements.
+ *   - To get the other half of the calibration -- how many AP-101S
+ *     instructions a typical HALMAT instruction expands into -- 7
+ *     representative existing test fixtures (test_int_arith2.hal,
+ *     test_pcal.hal, test_scalar_arith.hal, test_write_lit.hal,
+ *     test_bit.hal, test_matrix_sub.hal, test_cfor.hal) were compiled
+ *     with HALSFC --parms="LSTALL" (reengineered-documentation/STATUS.md's
+ *     LSTALL section) and pass2.rpt's interleaved HALMAT/generated-
+ *     AP-101S-assembly listing was parsed. Aggregated across all 7:
+ *     230 HALMAT instructions -> 188 AP-101S instructions, mnemonic mix
+ *     dominated by SCAL (34 occurrences) and SVC (7), the remainder
+ *     simple RR/RS/RI loads/stores/arithmetic priced via Sec. 16's
+ *     format-class averages (RR=0.25us, SRS=0.375us, RS=0.5us
+ *     steady-state pipelined cycles; ~0.4us used as a single
+ *     representative "simple instruction" figure rather than chasing
+ *     every individual mnemonic in an OCR'd/hand-transcribed table).
+ *     This works out to ~3.62 us/HALMAT-instruction aggregate (per-
+ *     fixture range 2.45-6.05 us, i.e. ~165,000-408,000 ticks/sec
+ *     depending on program mix -- arithmetic-heavy code is cheaper per
+ *     instruction, call/I-O-heavy code pricier).
+ *
+ * See reengineered-documentation/class-0/SCHD.md's "Real-time
+ * calibration" section for the full writeup/derivation, including how
+ * to redo or refine this sample. Deliberately rough (HAL/S source
+ * doesn't determine exact AP-101S code shape) but sourced, not
+ * asserted. */
+#define HALMAT_TICKS_PER_SECOND 276000
+
+/* interp_run()'s wall-clock pacing window (see its own comment in
+ * interp.c): execute a burst of instructions, then check the wall
+ * clock and sleep off any surplus, on roughly this cycle -- long enough
+ * that the monotonic-clock read/sleep-syscall overhead is negligible
+ * (~20 checks/sec of virtual-equivalent time), short enough to track
+ * real time closely from a human user's perspective. Per the project
+ * owner's own direction ("a 50 or 100 millisecond cycle"). */
+#define HALMAT_REALTIME_BURST_MS 50
+
 /* Sized generously per yaHALMAT's precedent (see Plan.md M2); revisit
  * once a --memory-size CLI switch exists (Plan.md Phase 3 default is
  * meant to be AP-101S-realistic, pending the M0.1 PDF findings). */
@@ -557,16 +610,33 @@ struct halmat_state {
      * would presumably cancel a still-pending delayed AT/IN/ON activation
      * rather than end a cycle -- is not implemented; no fixture exercises
      * it and its semantics were never empirically confirmed, so OP_SCHD
-     * fails loudly on that combination rather than guessing). Ticks 1:1 per
-     * HALMAT instruction executed (the user's confirmed per-instruction
-     * granularity choice), with WAIT's duration and SCHD's AT/IN/EVERY/
-     * AFTER/stopping-deadline expressions all treated as that many ticks --
-     * an explicit, documented simplification (no wall-clock fidelity is
-     * attempted regardless; see Plan.md's Phase 3 scheduler notes), not a
-     * calibration to real seconds. sched_advance() is the single seam
-     * where a future `--time-scale` option could someday multiply ticks
-     * against a wall-clock delta. Priority: 0 < P < 255, higher number =
-     * higher priority, primal defaults to 50 (USA003087 Sec. 13.1-13.3). */
+     * fails loudly on that combination rather than guessing). virtual_time
+     * itself still ticks 1:1 per HALMAT instruction executed (interp_step's
+     * own per-instruction granularity, unchanged) -- but WAIT's duration and
+     * SCHD's AT/IN/EVERY/AFTER/stopping-deadline expressions are no longer
+     * treated as raw tick counts. They're genuine HAL/S numeric-seconds
+     * values, converted to ticks via HALMAT_TICKS_PER_SECOND (above) before
+     * being stored into wake_deadline/repeat_interval/stop_deadline --
+     * see interp.c's schd_seconds_to_ticks() (shared by OP_SCHD's three
+     * AT/IN/EVERY/AFTER/UNTIL-time sites and OP_WAIT), which converts the
+     * *raw* double seconds value before rounding once at the end, so
+     * fractional-second intervals (WAIT(0.5), etc.) aren't destroyed by an
+     * intermediate round-to-nearest-second step. Real wall-clock pacing is
+     * then layered on top in interp_run() (interp.c) alone -- NOT in
+     * interp_step() itself, which stays a pure virtual-time primitive
+     * shared by both interp_run()'s automatic loop and --debug's
+     * breakpoint/step loop (debug_run(), debug.c): interp_run() bursts
+     * through instructions, then periodically (HALMAT_REALTIME_BURST_MS)
+     * compares elapsed virtual_time-as-real-seconds against the actual
+     * wall clock and sleeps off any surplus, so a real run tracks real
+     * time from a human user's perspective without busy-spinning the CPU.
+     * time_scale (below) is a pure sleep-duration divisor applied only in
+     * that pacing layer -- it never touches HALMAT_TICKS_PER_SECOND or the
+     * seconds-to-ticks conversion, so every task's tick arithmetic and
+     * interleaving order (and therefore every program's computed output)
+     * is completely independent of --time-scale; only wall-clock runtime
+     * changes. Priority: 0 < P < 255, higher number = higher priority,
+     * primal defaults to 50 (USA003087 Sec. 13.1-13.3). */
     halmat_task_t tasks[HALMAT_MAX_TASKS];
     int task_count;
     int current_task; /* index into tasks[], set by the scheduler loop before each instruction */
@@ -600,6 +670,12 @@ struct halmat_state {
                                * positional convention already used for FCAL's
                                * arguments, class-0/FCAL.md). */
     int64_t virtual_time;
+    double time_scale; /* interp_run()'s wall-clock pacing divisor (--time-scale, main.c) --
+                         * defaults to 1.0 (interp_init) for genuine real-time pacing; a larger
+                         * value shrinks how long interp_run() actually sleeps for a given
+                         * virtual-time interval (e.g. 100000 makes an hour of virtual/HAL-S
+                         * time finish in about 36ms of wall-clock sleep), without changing any
+                         * tick arithmetic at all -- see the scheduler comment above. */
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 };
 

@@ -1,9 +1,24 @@
+/* Needed (before any header pulls in <time.h> transitively) for
+ * clock_gettime()/CLOCK_MONOTONIC/nanosleep() below (interp_run()'s
+ * wall-clock pacing) -- POSIX.1-2008, not exposed under plain -std=c99
+ * without this. No effect on _WIN32 (which takes the QueryPerformanceCounter/
+ * Sleep() path instead). */
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "interp.h"
 
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <time.h>
+#endif
 
 #include "opcode_table.h"
 #include "value.h"
@@ -272,6 +287,49 @@ static void fail(halmat_state_t *state, const char *fmt, ...) {
             state->prog->instrs[state->pc].index);
     state->halted = true;
     state->exit_code = 1;
+}
+
+/* Converts a resolved HAL/S numeric-seconds value (as produced by SCHD's
+ * AT/IN/EVERY/AFTER/UNTIL-time arith exps, or WAIT's interval exp) to a
+ * tick count via HALMAT_TICKS_PER_SECOND (state.h) -- multiplying the
+ * *raw* seconds value (as a double) by the tick rate, then rounding once
+ * at the end. Deliberately NOT implemented as rv_to_integer() followed
+ * by a multiply: rv_to_integer() rounds a SCALAR to the nearest whole
+ * number first (halmat_scalar_to_integer), which would round to the
+ * nearest whole *second* before ever being scaled -- destroying
+ * sub-second precision (WAIT(0.5) must become
+ * round(0.5*HALMAT_TICKS_PER_SECOND) ticks, not round(0.5)=... seconds
+ * first). `what` names the clause for fail()'s message (e.g. "SCHD: AT/IN",
+ * "WAIT"). Fails loudly (via fail(), state->halted per this file's
+ * established convention) and returns false if the tick count doesn't
+ * fit in an int64_t, or -- when want_int32 is true -- doesn't fit in an
+ * int32_t either. Only repeat_interval needs want_int32=true: it's the
+ * one genuinely fixed-width int32_t field of halmat_task_t this value
+ * ever gets narrowed into (state.h). at_in_value/stop_deadline/WAIT's
+ * own tick count all flow into int64_t fields/locals (wake_deadline,
+ * etc.) and pass want_int32=false accordingly -- none of them have a
+ * real 32-bit ceiling to enforce, and at HALMAT_TICKS_PER_SECOND=276000,
+ * an ordinary multi-thousand-second WAIT/AT/IN interval can legitimately
+ * exceed INT32_MAX ticks without being any kind of error. */
+static bool schd_seconds_to_ticks(halmat_state_t *state, const resolved_value_t *v,
+                                   const char *what, bool want_int32, int64_t *out_ticks) {
+    double seconds = (v->kind == RV_SCALAR) ? halmat_scalar_to_double(v->scalar)
+                      : (v->kind == RV_BITS) ? (double)(int32_t)v->bits
+                                              : (double)v->integer;
+    double rounded = round(seconds * (double)HALMAT_TICKS_PER_SECOND);
+    if (!(rounded >= (double)INT64_MIN && rounded <= (double)INT64_MAX)) {
+        fail(state, "%s: %.6g seconds overflows a 64-bit tick count at %d ticks/second",
+             what, seconds, HALMAT_TICKS_PER_SECOND);
+        return false;
+    }
+    int64_t ticks = (int64_t)rounded;
+    if (want_int32 && (ticks < INT32_MIN || ticks > INT32_MAX)) {
+        fail(state, "%s: %.6g seconds (%lld ticks) overflows a 32-bit tick count at %d ticks/second",
+             what, seconds, (long long)ticks, HALMAT_TICKS_PER_SECOND);
+        return false;
+    }
+    *out_ticks = ticks;
+    return true;
 }
 
 /* strdup is POSIX, not ISO C99 -- MSVC (Plan.md's cross-platform build
@@ -1095,6 +1153,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->current_task = 0;
     state->stri_target_syt = -1;
     state->stri_target_template_syt = -1;
+    state->time_scale = 1.0; /* genuine real-time pacing by default; --time-scale overrides (main.c) */
 
     /* Default device mapping: 5=input/6=output, per HAL/S language
      * convention (Plan.md Phase 3) -- overridable via interp_set_device
@@ -1126,6 +1185,10 @@ void interp_set_external_units(halmat_state_t *state, const halmat_external_call
         state->external_calls[map[i].local_syt].target_state = map[i].target_state;
         state->external_calls[map[i].local_syt].target_entry_syt = map[i].target_entry_syt;
     }
+}
+
+void interp_set_time_scale(halmat_state_t *state, double scale) {
+    state->time_scale = scale;
 }
 
 void interp_cleanup(halmat_state_t *state) {
@@ -3919,7 +3982,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (init_kind == 1 || init_kind == 2) { /* AT or IN: VAC ref to the arith exp */
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing AT/IN operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
-                    at_in_value = rv_to_integer(&a); /* ticks, same WAIT-interval-as-ticks convention as OP_WAIT above */
+                    if (!schd_seconds_to_ticks(state, &a, "SCHD: AT/IN", false, &at_in_value)) break;
                     operand_idx++;
                 } else if (init_kind == 3) { /* ON: plain EVENT SYT ref (SCHD.md's confirmed "no VAC needed" case) */
                     if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
@@ -3946,7 +4009,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (repeat_bits == 2 || repeat_bits == 3) { /* EVERY or AFTER: VAC ref to the arith exp */
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing REPEAT EVERY/AFTER operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
-                    repeat_interval = rv_to_integer(&a);
+                    int64_t repeat_interval64;
+                    if (!schd_seconds_to_ticks(state, &a, "SCHD: REPEAT EVERY/AFTER", true, &repeat_interval64)) break;
+                    repeat_interval = (int32_t)repeat_interval64;
                     operand_idx++;
                 }
 
@@ -3955,7 +4020,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (stop_bits == 1) { /* UNTIL <ARITH EXP>: VAC ref to the time-valued exp */
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing WHILE/UNTIL operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
-                    stop_deadline = rv_to_integer(&a);
+                    if (!schd_seconds_to_ticks(state, &a, "SCHD: WHILE/UNTIL <time>", false, &stop_deadline)) break;
                     operand_idx++;
                 } else if (stop_bits == 2 || stop_bits == 3) { /* WHILE/UNTIL <BIT EXP>: plain SYT ref, same as ON */
                     if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
@@ -4045,7 +4110,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                int32_t ticks = rv_to_integer(&a); /* WAIT's duration treated as tick count -- see state.h's scheduler comment on the tick/second calibration */
+                /* Not narrowed to int32_t: unlike repeat_interval (a real,
+                 * fixed-width int32_t field of halmat_task_t), WAIT's tick
+                 * count is only ever added into wake_deadline (int64_t) --
+                 * there's no persisted 32-bit field it must fit into, and
+                 * at HALMAT_TICKS_PER_SECOND=276000, a real (if unusually
+                 * long) WAIT(10000) already exceeds INT32_MAX ticks, so
+                 * narrowing here would fail loudly on a perfectly ordinary
+                 * interval. want_int32=false matches at_in_value/
+                 * stop_deadline's own int64_t treatment above. */
+                int64_t ticks;
+                if (!schd_seconds_to_ticks(state, &a, "WAIT", false, &ticks)) break;
                 if (ticks < 0) ticks = 0;
                 halmat_task_t *cur = &state->tasks[state->current_task];
                 cur->task_state = TASK_WAITING;
@@ -4276,18 +4351,102 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     }
 
     state->tasks[next].saved_pc = state->pc;
-    /* sched_advance seam: 1 tick per HALMAT instruction executed (the
-     * user's confirmed per-instruction granularity choice) -- see
-     * state.h's scheduler field comments for what a future --time-scale
-     * option would multiply here. */
+    /* 1 tick per HALMAT instruction executed -- unchanged, still the
+     * interpreter's fundamental virtual-time granularity. WAIT/SCHD
+     * intervals are converted from real seconds into however many of
+     * these ticks that represents (schd_seconds_to_ticks(), OP_SCHD/
+     * OP_WAIT above, via HALMAT_TICKS_PER_SECOND); interp_run()'s
+     * wall-clock pacing (below) is a separate layer on top of this that
+     * never changes the tick arithmetic itself, only how fast real time
+     * elapses alongside it. */
     state->virtual_time++;
 
     return state->halted;
 }
 
+#ifdef _WIN32
+static double monotonic_seconds(void) {
+    static LARGE_INTEGER freq;
+    static bool have_freq = false;
+    if (!have_freq) {
+        QueryPerformanceFrequency(&freq);
+        have_freq = true;
+    }
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    return (double)count.QuadPart / (double)freq.QuadPart;
+}
+
+static void sleep_seconds(double seconds) {
+    if (seconds <= 0.0) return;
+    /* Sleep() only takes whole milliseconds -- round up so this never
+     * sleeps for less than the computed deficit. */
+    DWORD ms = (DWORD)ceil(seconds * 1000.0);
+    Sleep(ms);
+}
+#else
+static double monotonic_seconds(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+}
+
+static void sleep_seconds(double seconds) {
+    if (seconds <= 0.0) return;
+    struct timespec req;
+    req.tv_sec = (time_t)seconds;
+    req.tv_nsec = (long)((seconds - (double)req.tv_sec) * 1e9);
+    nanosleep(&req, NULL);
+}
+#endif
+
+/* Runs interp_step() in a loop (same as always) but paced against the
+ * wall clock, per the project owner's own direction: "burst execute some
+ * number of instructions, then sleep to let the operating system do
+ * whatever else it needs to do, then execute a new burst ... on a 50 or
+ * 100 millisecond cycle. This keeps you close to being synchronized with
+ * real time from a human user's perception without really using much of
+ * the CPU." Deliberately NOT inside interp_step() itself -- that stays a
+ * pure virtual-time primitive shared by --debug's own run/step loop
+ * (debug_run(), debug.c), which must NOT be throttled (time spent
+ * blocked on debugger input must never count against real time).
+ *
+ * ref_wall/ref_virtual are reset together every time a pacing window's
+ * threshold (window_ticks, ~HALMAT_REALTIME_BURST_MS worth of ticks) is
+ * crossed: interp_step() is called repeatedly, accumulating virtual_time
+ * ticks with no wall-clock check at all, until elapsed_virtual crosses
+ * that threshold -- so the monotonic-clock read happens only ~20x/sec of
+ * virtual-equivalent time, not once per instruction. This same check
+ * also correctly handles sched_advance_to_next_wake()'s idle fast-
+ * forward (a single interp_step() call that can jump virtual_time a
+ * large amount at once, when every task is TASK_WAITING and nothing is
+ * READY): that jump alone pushes elapsed_virtual past the threshold, and
+ * the resulting sleep correctly represents the real elapsed time
+ * equivalent to it -- sched_advance_to_next_wake() itself needs no
+ * special-casing here at all.
+ *
+ * If a burst genuinely took longer in wall-clock terms than its virtual-
+ * time equivalent (slow host, heavy/debug build), target_wall_seconds >
+ * actual_wall_seconds is false, nothing sleeps, and the reference pair
+ * simply resets to "now" -- no catch-up/runaway-acceleration debt ever
+ * accumulates across windows; a stall is never made up for by later
+ * blasting through instructions faster than real time. */
 int interp_run(halmat_state_t *state, FILE *out) {
+    double ref_wall = monotonic_seconds();
+    int64_t ref_virtual = state->virtual_time;
+    int64_t window_ticks = (int64_t)(HALMAT_TICKS_PER_SECOND * (HALMAT_REALTIME_BURST_MS / 1000.0));
+
     while (!interp_step(state, out)) {
-        /* keep going */
+        int64_t elapsed_virtual = state->virtual_time - ref_virtual;
+        if (elapsed_virtual >= window_ticks) {
+            double target_wall_seconds = (elapsed_virtual / (double)HALMAT_TICKS_PER_SECOND) / state->time_scale;
+            double actual_wall_seconds = monotonic_seconds() - ref_wall;
+            if (target_wall_seconds > actual_wall_seconds) {
+                sleep_seconds(target_wall_seconds - actual_wall_seconds);
+            }
+            ref_wall = monotonic_seconds();
+            ref_virtual = state->virtual_time;
+        }
     }
     return state->exit_code;
 }

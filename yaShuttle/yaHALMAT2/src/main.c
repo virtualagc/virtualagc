@@ -60,6 +60,13 @@ static void usage(const char *prog) {
             "  --litfile F      literal file (default: auto-discovered alongside HALMAT_FILE)\n"
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
             "  --num-blanks N   blanks between WRITE items (default: 5, per USA003087 Sec. 12.2)\n"
+            "  --time-scale FACTOR   wall-clock pacing divisor for SCHEDULE/WAIT real-time\n"
+            "                   throttling (default: 1.0, genuine real time; FACTOR > 0).\n"
+            "                   A larger FACTOR shrinks how long the interpreter actually\n"
+            "                   sleeps for a given HAL/S-seconds interval (e.g. 100000 turns\n"
+            "                   an hour of program time into about 36ms of sleeping) without\n"
+            "                   changing any SCHEDULE/WAIT tick arithmetic or program output\n"
+            "                   at all -- see state.h's scheduler comment.\n"
             "  --debug          interactive gdb-subset debugger (see debug.h; single HALMAT_FILE only)\n"
             "  --opt            load optmat.bin (+ its companions) instead of halmat.bin\n"
             "                   (single-file mode: only changes companion auto-discovery,\n"
@@ -186,7 +193,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
                        const char *litfile_opt, const char *memory_opt, int num_blanks,
                        const device_map_t *maps, int num_maps,
                        const raf_map_t *raf_maps, int num_raf_maps,
-                       const debug_colors_t *colors) {
+                       const debug_colors_t *colors, double time_scale) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -286,6 +293,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
 
     halmat_state_t state;
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
+    interp_set_time_scale(&state, time_scale);
     if (have_symtab) interp_set_symtab(&state, &symtab);
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
@@ -510,7 +518,7 @@ static bool find_primary_unit(unit_t *units, int num_units, const char *entry_di
  * the pre-refactor run_linked(). `primary` must already be resolved
  * (e.g. via find_primary_unit()). */
 static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks,
-                             const device_map_t *maps, int num_maps) {
+                             const device_map_t *maps, int num_maps, double time_scale) {
     if (disasm) {
         for (int i = 0; i < num_units; i++) {
             printf("=== %s ===\n", units[i].dir);
@@ -546,6 +554,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         if (has_def && (def_op == OP_FDEF_CONST || def_op == OP_PDEF_CONST)) {
             ext_states[i] = malloc(sizeof(halmat_state_t));
             interp_init(ext_states[i], &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
+            interp_set_time_scale(ext_states[i], time_scale);
             if (units[i].have_symtab) interp_set_symtab(ext_states[i], &units[i].symtab);
 
             if (units[i].have_symtab && units[primary].have_symtab) {
@@ -607,6 +616,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
 
         halmat_state_t aux;
         interp_init(&aux, &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
+        interp_set_time_scale(&aux, time_scale);
         if (units[i].have_symtab) interp_set_symtab(&aux, &units[i].symtab);
         interp_run(&aux, stdout);
 
@@ -679,6 +689,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
     halmat_state_t primary_state;
     interp_init(&primary_state, &units[primary].prog,
                 units[primary].have_literals ? &units[primary].literals : NULL, num_blanks);
+    interp_set_time_scale(&primary_state, time_scale);
     if (units[primary].have_symtab) interp_set_symtab(&primary_state, &units[primary].symtab);
     if (ext_map_count > 0) interp_set_external_units(&primary_state, ext_map, ext_map_count);
 
@@ -709,7 +720,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
  * resolves the primary PROGRAM unit, and hands off to run_linked_units()
  * for the actual wiring + run. */
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
-                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps) {
+                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps, double time_scale) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
         return 1;
@@ -733,7 +744,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         return 1;
     }
 
-    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps);
+    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps, time_scale);
 }
 
 /* Builds each unit_t from a linked-archive container's already-in-memory
@@ -743,7 +754,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
  * logic as an @list run, just sourced from a single container file
  * instead of a directory tree. */
 static int run_linked_container(halmat_container_t *c, int num_blanks, const device_map_t *maps,
-                                 int num_maps, bool disasm) {
+                                 int num_maps, bool disasm, double time_scale) {
     if (c->num_units > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in linked-archive container (max %d)\n", MAX_UNITS);
         return 1;
@@ -786,7 +797,7 @@ static int run_linked_container(halmat_container_t *c, int num_blanks, const dev
         }
     }
 
-    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, maps, num_maps);
+    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, maps, num_maps, time_scale);
 }
 
 /* Builds a --link-only container from @list: loads every unit the
@@ -949,6 +960,7 @@ int main(int argc, char **argv) {
     bool use_opt = false;
     bool use_py = false;
     int num_blanks = 5;
+    double time_scale = 1.0;
     device_map_t maps[MAX_DEVICE_MAPS];
     int num_maps = 0;
     raf_map_t raf_maps[MAX_DEVICE_MAPS];
@@ -971,6 +983,13 @@ int main(int argc, char **argv) {
             memory_opt = argv[++i];
         } else if (strcmp(argv[i], "--num-blanks") == 0 && i + 1 < argc) {
             num_blanks = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--time-scale") == 0 && i + 1 < argc) {
+            char *endptr = NULL;
+            time_scale = strtod(argv[++i], &endptr);
+            if (endptr == argv[i] || *endptr != '\0' || !(time_scale > 0.0)) {
+                fprintf(stderr, "%s: --time-scale expects a positive number\n", argv[0]);
+                return 1;
+            }
         } else if (strcmp(argv[i], "--opt") == 0) {
             use_opt = true;
         } else if (strcmp(argv[i], "--py") == 0) {
@@ -1107,7 +1126,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: %s\n", argv[0], cerrbuf);
             return 1;
         }
-        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm);
+        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm, time_scale);
         halmat_container_free(&c);
         return rc;
     }
@@ -1125,8 +1144,8 @@ int main(int argc, char **argv) {
         }
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
-        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps);
+        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps, time_scale);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps, &colors);
+    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale);
 }

@@ -52,6 +52,15 @@ typedef struct {
  * itself afterward. */
 void interp_set_external_units(halmat_state_t *state, const halmat_external_call_map_t *map, size_t count);
 
+/* Overrides interp_init's default time_scale of 1.0 (state.h) -- the
+ * wall-clock pacing divisor interp_run() applies to the *sleep* duration
+ * of its burst-execute-then-sleep throttling (--time-scale, main.c).
+ * Does not affect HALMAT_TICKS_PER_SECOND or any SCHD/WAIT tick
+ * arithmetic at all -- every task's tick counts, interleaving order, and
+ * therefore every program's computed output are completely independent
+ * of this; only how long interp_run() actually sleeps changes. */
+void interp_set_time_scale(halmat_state_t *state, double scale);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */
