@@ -1,0 +1,13 @@
+ TEST_BIT:
+ PROGRAM;
+    DECLARE BIT(8), B1, B2, B3, B4;
+    DECLARE INTEGER, I1, I2, I3;
+    B1 = BIT(12);
+    B2 = BIT(10);
+    B3 = B1 AND B2;
+    B4 = B1 OR B2;
+    I1 = INTEGER(B3);
+    I2 = INTEGER(B4);
+    I3 = INTEGER(NOT B1);
+    WRITE(6) 'I1=', I1, 'I2=', I2, 'I3=', I3;
+ CLOSE TEST_BIT;

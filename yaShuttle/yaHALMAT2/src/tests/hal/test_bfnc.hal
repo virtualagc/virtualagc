@@ -1,0 +1,23 @@
+ TEST_BFNC:
+ PROGRAM;
+    DECLARE SCALAR, X INITIAL(2.0);
+    DECLARE SCALAR, NEGX INITIAL(-3.5);
+    DECLARE SCALAR, R;
+    DECLARE V VECTOR(3);
+    R = SQRT(X);
+    WRITE(6) R;
+    R = ABS(NEGX);
+    WRITE(6) R;
+    R = SIGN(NEGX);
+    WRITE(6) R;
+    R = ROUND(X);
+    WRITE(6) R;
+M   V    = 3.0;
+S     1
+M   V    = 4.0;
+S     2
+M   V    = 0.0;
+S     3
+    R = ABVAL(V);
+    WRITE(6) R;
+ CLOSE TEST_BFNC;

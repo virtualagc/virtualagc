@@ -1,0 +1,33 @@
+# Source PDFs (large, third-party; not meant to live in the repo)
+source-documentation/
+
+# Eclipse IDE project files
+.project
+.settings/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor swap/backup files
+*.swp
+*~
+
+# RTK (Rust Token Killer) tooling artifacts — local Claude Code proxy
+# infrastructure, not a project dependency
+node_modules/
+package.json
+package-lock.json
+
+# Claude Code: personal/machine-local, not shared project config.
+# .claude/settings.json, .claude/commands/, .claude/agents/, etc. (if
+# ever added) are meant to be shared and should still be committed.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# yaHALMAT2 (Phase 3) build artifacts
+src/*.o
+src/*.obj
+src/*.d
+src/yaHALMAT2
+src/yaHALMAT2.exe

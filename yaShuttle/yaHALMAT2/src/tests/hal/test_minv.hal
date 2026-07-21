@@ -1,0 +1,27 @@
+ TEST_MINV:
+ PROGRAM;
+    DECLARE A MATRIX(2, 2);
+    DECLARE B MATRIX(2, 2);
+    DECLARE SCALAR, VAL;
+M   A    = 4.0;
+S    1,1
+M   A    = 7.0;
+S    1,2
+M   A    = 2.0;
+S    2,1
+M   A    = 6.0;
+S    2,2
+    B = INVERSE(A);
+M   VAL = B   ;
+S          1,1
+    WRITE(6) VAL;
+M   VAL = B   ;
+S          1,2
+    WRITE(6) VAL;
+M   VAL = B   ;
+S          2,1
+    WRITE(6) VAL;
+M   VAL = B   ;
+S          2,2
+    WRITE(6) VAL;
+ CLOSE TEST_MINV;

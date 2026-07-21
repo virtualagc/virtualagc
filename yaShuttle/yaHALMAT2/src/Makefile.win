@@ -1,0 +1,83 @@
+# yaHALMAT2 -- Windows nmake build, for a normal Developer Command Prompt
+# (Visual C by default). See Makefile for Linux/Mac/MSYS2 (GNU make,
+# clang-with-gcc-fallback) -- MSYS2 terminals should use that one, not
+# this one, per Plan.md's Phase 3 build-system requirements.
+#
+# Usage (from a "x64 Native Tools Command Prompt for VS" or similar):
+#   nmake /f Makefile.win
+#   nmake /f Makefile.win clean
+#   nmake /f Makefile.win CC=clang        (override; expects a Windows
+#                                           clang build, e.g. LLVM's,
+#                                           using GCC-style flags -- not
+#                                           clang-cl's MSVC-style ones)
+#   nmake /f Makefile.win HAVE_ZLIB=1     (link zlib for native
+#                                           COMMONx.out.bin.gz decompression
+#                                           -- requires zlib.lib/zlib.h on
+#                                           the include/lib path, e.g. via
+#                                           vcpkg. Without this, literal.c
+#                                           falls back to piping through a
+#                                           `gzip` binary on PATH, which is
+#                                           not a normal Windows default --
+#                                           see Makefile's unconditional
+#                                           zlib probe for the Unix side.)
+#
+# CC defaults to cl below; nmake's default precedence (command-line
+# macros win over the makefile) is all that's needed to override it,
+# e.g. `nmake /f Makefile.win CC=clang`.
+
+!IFNDEF CC
+CC = cl
+!ENDIF
+
+SRCS = main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
+       literal.c ebcdic.c interp.c value.c symtab.c debug.c srcmap.c
+TARGET = yaHALMAT2.exe
+
+# NOTE: unlike Makefile (which uses -MMD/-MP, GCC/clang-only), this file
+# has no header-dependency tracking -- neither `.c.obj`/`.c.o` rule below
+# depends on the project's .h files, only on the matching .c. Editing a
+# shared header (state.h, halmat.h, etc.) without a `nmake /f Makefile.win
+# clean` first can leave some .obj/.o files compiled against the old
+# struct layout and others against the new one, corrupting memory at
+# runtime with no compile-time warning -- confirmed the hard way on the
+# Unix side this session (see Makefile's comment on the same issue).
+# ALWAYS run `clean` before rebuilding after touching any .h file.
+
+!IF "$(CC)" == "cl"
+CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS
+OBJS = $(SRCS:.c=.obj)
+LIBS =
+!ELSE
+CFLAGS = -std=c99 -Wall -Wextra -g -O0
+OBJS = $(SRCS:.c=.o)
+LIBS = -lm
+!ENDIF
+
+!IFDEF HAVE_ZLIB
+!IF "$(CC)" == "cl"
+CFLAGS = $(CFLAGS) /DHAVE_ZLIB
+LIBS = $(LIBS) zlib.lib
+!ELSE
+CFLAGS = $(CFLAGS) -DHAVE_ZLIB
+LIBS = $(LIBS) -lz
+!ENDIF
+!ENDIF
+
+all: $(TARGET)
+
+!IF "$(CC)" == "cl"
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) /Fe$(TARGET) $(OBJS) $(LIBS)
+
+.c.obj:
+	$(CC) $(CFLAGS) /c /Fo$@ $<
+!ELSE
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
+
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+!ENDIF
+
+clean:
+	-del /f /q *.obj *.o *.pdb $(TARGET) 2>NUL

@@ -1,0 +1,23 @@
+ TEST_MTOM:
+ PROGRAM;
+    DECLARE MATRIX(2,2), M1;
+    DECLARE MATRIX(2,2) DOUBLE, M2;
+    DECLARE MATRIX(2,2), N;
+    DECLARE SCALAR, VAL;
+M   M1   = 1.0;
+S     1,1
+M   M1   = 2.0;
+S     1,2
+M   M1   = 3.0;
+S     2,1
+M   M1   = 4.0;
+S     2,2
+    M2 = M1$(@DOUBLE);
+    N = M2$(@SINGLE);
+M   VAL = N   ;
+S          1,1
+    WRITE(6) VAL;
+M   VAL = N   ;
+S          2,2
+    WRITE(6) VAL;
+ CLOSE TEST_MTOM;

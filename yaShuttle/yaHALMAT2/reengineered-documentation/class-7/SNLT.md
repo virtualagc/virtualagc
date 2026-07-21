@@ -1,0 +1,32 @@
+# SNLT
+
+**Mnemonic:** SNLT
+
+**Opcode:** 0x7A9
+
+**Confidence:** High
+
+## Behavioral Description
+
+Scalar not less than. Computes whether one scalar operand is not less
+than another (i.e. greater-than-or-equal), producing a logical
+(TRUE/FALSE) result.
+
+## Usage Context
+
+Emitted for HAL/S expressions using the `>=` comparison operator between
+two SCALAR operands.
+
+## Unresolved Questions
+
+- HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
+
+## Source Analysis & Reliability
+
+Opcode (0x7A9) confirmed primary-source: `XSEQU(5)` array element 5
+(`XSNLT`) in `PASS1.PROCS/##DRIVER.xpl` — see [##DRIVER.xpl] in
+`STATUS.md`. Matches [MSC-01847]'s HAL-1971 SNLT opcode (0x7A9) exactly.
+
+Behavioral description is a straightforward reading of "scalar not less
+than" corroborated by [MSC-01847] §2.22; no verbatim operand-word prose
+transcribed yet.

@@ -1,0 +1,31 @@
+ TEST_VEC:
+ PROGRAM;
+    DECLARE X VECTOR(3);
+    DECLARE Y VECTOR(3);
+    DECLARE Z VECTOR(3);
+    DECLARE SCALAR, VAL;
+M   X    = 1.0;
+S    1
+M   X    = 2.0;
+S    2
+M   X    = 3.0;
+S    3
+M   Y    = 4.0;
+S    1
+M   Y    = 5.0;
+S    2
+M   Y    = 6.0;
+S    3
+    VAL = X . Y;
+    WRITE(6) VAL;
+    Z = X * Y;
+M   VAL = Z  ;
+S          1
+    WRITE(6) VAL;
+M   VAL = Z  ;
+S          2
+    WRITE(6) VAL;
+M   VAL = Z  ;
+S          3
+    WRITE(6) VAL;
+ CLOSE TEST_VEC;
