@@ -170,7 +170,23 @@ static void print_current(const debug_frame_t *frame, long *last_shown,
      * call manually rather than going through cprintf's single-fmt-call
      * shape. */
     if (use_color) fprintf(out, "\033[%dm", oc);
-    fprintf(out, "[task %d] ", frame->state->current_task);
+    /* Approximate elapsed HAL/S-real-time for this frame's own unit, via
+     * the same HALMAT_TICKS_PER_SECOND calibration interp_run_burst()/
+     * interp_run_signal() use for real-time throttling (state.h) --
+     * neither pacing implementation is ever active during --debug
+     * (debug_run() drives execution via interp_step() directly, never
+     * interp_run(), so time spent waiting on debugger input never counts
+     * against it), but virtual_time itself is tracked identically either
+     * way (interp_step() increments it unconditionally), so this is
+     * accurate regardless of --pacing or whether pacing is even running.
+     * Per-frame, not per-program: a stepped-into external unit's own
+     * virtual_time is its own persistent, cumulative clock across every
+     * call ever made to it (run_external_call()'s target persists across
+     * calls, interp.c), not reset per-call or relative to the caller's
+     * timeline -- consistent with this debugger's existing per-frame
+     * design for breakpoints/symtab/etc. */
+    fprintf(out, "t~%.3fs [task %d] ", frame->state->virtual_time / (double)HALMAT_TICKS_PER_SECOND,
+            frame->state->current_task);
     halmat_disasm_instr(ins, out);
     if (use_color) fprintf(out, "\033[0m");
 }
