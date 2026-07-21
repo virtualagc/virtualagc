@@ -419,31 +419,14 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 /* Litfile numeric entries carry no INTEGER-vs-SCALAR
                  * distinction of their own (see literal.h) -- resolve as
                  * the exact bit-level SCALAR value; INTEGER-context
-                 * consumers convert via rv_to_integer(). KNOWN GAP:
-                 * callers that *store* this resolved value under a type
-                 * tag rather than immediately consuming it numerically
-                 * (XXAR's CALL/WRITE argument binding, interp.c) use
-                 * `out->kind == RV_SCALAR` at face value, so a bare
-                 * INTEGER literal passed as a call argument (e.g. `CALL
-                 * P(5);`, P's parameter declared INTEGER) gets bound with
-                 * SYT_TYPE_SCALAR instead -- silently wrong for any
-                 * consumer that inspects the stored type tag directly
-                 * (e.g. WRITE) rather than going through an arithmetic op
-                 * that coerces regardless of tag. The operand's own tag1
-                 * (already carried on halmat_operand_t, used by XXAR's
-                 * READ/READALL destination-class case) is the available
-                 * fix -- not applied here since it's a call-site-wide
-                 * change (WRITE and CALL arguments both funnel through
-                 * XXAR). test_pcal.hal already passes a bare INTEGER
-                 * literal to a CALL (`CALL ADD_TO_RESULT(5)`) without
-                 * exposing the bug, only because its parameter is
-                 * immediately used in IADD (which coerces via
-                 * rv_to_integer regardless of the stored tag) rather than
-                 * WRITE (which trusts the tag directly) -- confirmed via
-                 * src/tests/hal/test_ext_pcal_prog.hal /
-                 * test_ext_double.hal, which *does* WRITE its parameter
-                 * and had to be written passing a variable, not a
-                 * literal, to sidestep this. */
+                 * consumers convert via rv_to_integer(). Callers that
+                 * instead *store* this resolved value under a type tag
+                 * (XXAR's CALL/WRITE argument binding, interp.c) can't
+                 * rely on `out->kind` alone for that -- they reclassify
+                 * using the operand's own tag1 (the HALMAT class the
+                 * compiler actually recorded for it), the same signal
+                 * XXAR's READ/READALL destination-class case already
+                 * uses; see OP_XXAR's `literal_is_integer` below. */
                 out->kind = RV_SCALAR;
                 out->scalar = halmat_scalar_from_ibm_words(lit->msw, lit->lsw, lit->type == LIT_DOUBLE);
             } else if (lit->type == LIT_BIT) {
@@ -3335,6 +3318,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                /* A bare numeric literal (QUAL_LIT) always resolves as
+                 * RV_SCALAR (see resolve_operand's QUAL_LIT case -- the
+                 * litfile itself carries no INTEGER-vs-SCALAR distinction
+                 * for LIT_FIXED/LIT_DOUBLE entries), even when the
+                 * literal is actually being used in an INTEGER context
+                 * (e.g. `CALL P(5);` with P's parameter declared
+                 * INTEGER, or `WRITE(6) 5;`). This operand's own tag1 --
+                 * the HALMAT class the compiler recorded for it, already
+                 * used the same way just above for READ/READALL's
+                 * dest_class -- is the actual source of truth for a
+                 * literal's intended class, so use it to reclassify a
+                 * QUAL_LIT/RV_SCALAR resolution as INTEGER when tag1
+                 * says so. Not needed for non-literal operands (SYT reads
+                 * already carry the correct kind via the SYT entry's own
+                 * stored type, independent of tag1). */
+                bool literal_is_integer = (a.kind == RV_SCALAR) &&
+                    ins->operands[0].qual == QUAL_LIT && ins->operands[0].tag1 == 6;
+                if (literal_is_integer) {
+                    a.integer = halmat_scalar_to_integer(a.scalar);
+                    a.kind = RV_INTEGER;
+                }
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
