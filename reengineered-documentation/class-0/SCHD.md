@@ -178,11 +178,67 @@ time-valued `STOPPING`=0x40), confirming the table needed no correction.
   operand's `QUAL` to `VAC`, is untested.
 - A `WHILE`/`UNTIL` stopping condition with no `REPEAT` clause at all
   (grammatically permitted per `<SCHEDULE CONTROL> ::= <STOPPING>`
-  above, with no `<TIMING>`) was not compiled or implemented this
-  session — its runtime semantics (presumably cancelling a still-pending
-  delayed `AT`/`IN`/`ON` activation before it ever fires, rather than
-  ending a cycle) are unconfirmed. yaHALMAT2 fails loudly on this tag
-  combination rather than guessing (see `interp.c`'s `OP_SCHD`).
+  above, with no `<TIMING>`) — **investigated in a later session, still
+  left unimplemented, but now for a documented reason rather than just
+  "not compiled yet".** `HALSFC` does accept the syntax: compiling
+  `SCHEDULE WORKER AT 100.0 PRIORITY(50) UNTIL 50.0;`, `SCHEDULE WORKER
+  ON EV1 PRIORITY(50) WHILE EV2;`, and `SCHEDULE WORKER PRIORITY(50)
+  WHILE EV1;` (immediate initiation, no delay at all) all compiled
+  cleanly, producing tags `0x45`, `0x87`, `0x84` respectively — each
+  decodes as `repeat_bits=0`/`stop_bits!=0` exactly as this file's
+  bitmask table predicts, with operand order (`task`,
+  `[AT/IN-exp|ON-event]`, `[priority]`, `stop-exp-or-event`) matching
+  the existing left-to-right rule with no surprises; cross-checked with
+  `unHALMAT.py`. (Aside: all three needed an explicit `PRIORITY(...)`
+  to compile at all — `SCHEDULE WORKER;` with no clauses and no
+  `PRIORITY` *also* failed the same `RT4`/"PRIORITY EXPRESSION...
+  ABSENT OR ILLEGAL" check, so this looks like a blanket requirement of
+  this compiler build unrelated to `STOPPING` specifically, not a new
+  finding about this gap — `interp.c`'s default-`50`-priority code path
+  remains as untested as before.)
+
+  What's still missing is the *runtime* semantics, and this session's
+  research indicates that's not just an oversight on this project's
+  part — it looks genuinely undocumented in the primary source. Two
+  independent checks:
+  1. `PASS1.PROCS/SYNTHESI.xpl`'s own semantic action for `<SCHEDULE
+     CONTROL>::=<STOPPING>` (line 5786-5787) is a bare `;` — no
+     validation, no distinct code path from the `<TIMING><STOPPING>`
+     case right below it. The compiler doesn't even notice this
+     combination is unusual; it just ORs in whatever bits `<STOPPING>`
+     contributes, same as it would for a cyclic schedule. That's
+     consistent with the grammar simply not bothering to exclude the
+     combination (parser-generality), not with a deliberately designed
+     independent language feature.
+  2. [USA003087] discusses `WHILE`/`UNTIL` stopping conditions in
+     exactly one place, §23.5 ("SCHEDULE STATEMENT FOR CYCLIC
+     PROCESSES"), and every single form and example given there pairs
+     `UNTIL`/`WHILE` with `REPEAT` — e.g. `SCHEDULE label initiation,
+     REPEAT UNTIL time;`. §13.4's own text introducing the plain
+     (non-cyclic) `SCHEDULE` forms explicitly defers stopping
+     conditions to those cyclic sections ("SCHEDULE statements can also
+     specify the cyclic execution of a process until a stopping
+     criterion is met... See: Guide/23.4 & 23.5") rather than describing
+     any non-cyclic use. §23.4's own conceptual model reinforces this:
+     a non-cyclic process reaching `RETURN`/`CLOSE` goes straight to the
+     *terminated* inactive state (§13.3); "cancellation" (the thing a
+     stopping condition triggers) is a concept `23.4` defines
+     specifically for a cyclic process choosing *not to begin its next
+     cycle* — a non-cyclic process has no next cycle to cancel. The
+     previous session's "presumably cancels a still-pending delayed
+     `AT`/`IN`/`ON` activation" theory also doesn't generalize to the
+     immediate-initiation case tested here (`SCHEDULE WORKER
+     PRIORITY(50) WHILE EV1;` has no delayed activation pending at all
+     — the process is placed `READY` immediately), so that theory isn't
+     even self-consistent across the three `SCHEDULE HEAD` variants.
+
+  Net: the compiler's grammar is more permissive than the language
+  guide's documented behavior here, and nothing in either source
+  defines what should happen at runtime. Per this project's standing
+  discipline, `yaHALMAT2` continues to fail loudly on this tag
+  combination (`repeat_bits==0 && stop_bits!=0`) in `OP_SCHD` rather
+  than guessing — this is now a confirmed-open question, not an
+  unexplored one.
 
 ## Source Analysis & Reliability
 

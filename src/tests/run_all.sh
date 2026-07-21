@@ -100,6 +100,7 @@ run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nW
 run ./run_local_fixture.sh sched_every "N=               5"
 run ./run_local_fixture.sh sched_after "N=               4"
 run ./run_local_fixture.sh sched_while "N=               1"
+run ./run_local_fixture.sh sched_every_wait "N=               5"
 
 HAL_S_FC_PY="/home/rburkey/git/virtualagc/yaShuttle/ported/PASS1.PROCS/HAL_S_FC.py"
 workdir=$(mktemp -d)

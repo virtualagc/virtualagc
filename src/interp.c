@@ -3822,10 +3822,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 /* Fixed period, chained off the previous
                                  * target (not off "now") so a late-running
                                  * cycle doesn't push later ones out --
-                                 * wake_deadline already holds that
+                                 * every_phase_ref already holds that
                                  * previous target (set at SCHD time, or by
-                                 * the prior rearm). */
-                                cur->wake_deadline += cur->repeat_interval;
+                                 * the prior rearm), kept in its own field
+                                 * (state.h) so it can't be clobbered by an
+                                 * internal WAIT in the task's body (OP_WAIT
+                                 * only ever touches wake_deadline). Assign
+                                 * wake_deadline from the post-increment
+                                 * value since sched_wake_waiting() only
+                                 * ever reads wake_deadline, never this
+                                 * field directly. */
+                                cur->every_phase_ref += cur->repeat_interval;
+                                cur->wake_deadline = cur->every_phase_ref;
                                 cur->task_state = TASK_WAITING;
                                 break;
                             case SCHD_REPEAT_AFTER:
@@ -3884,12 +3892,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (repeat_bits == 0 && stop_bits != 0) {
                     /* Grammatically legal per SCHD.md's <SCHEDULE CONTROL>
                      * ::= <STOPPING> alternative (WHILE/UNTIL with no
-                     * REPEAT at all), which would presumably cancel a
-                     * still-pending delayed AT/IN/ON activation rather
-                     * than end a cycle -- but no fixture exercises it and
-                     * its semantics were never empirically confirmed, so
-                     * fail loudly rather than guessing (see state.h's
-                     * scheduler comment). */
+                     * REPEAT at all) -- confirmed HALSFC really does
+                     * accept and compile it (three SCHEDULE HEAD variants
+                     * tried: AT+UNTIL, ON+WHILE, and plain immediate+
+                     * WHILE, each producing exactly the tag/operand-order
+                     * this decode already expects). But its *runtime*
+                     * semantics are genuinely undocumented, not just
+                     * unconfirmed by this project: SYNTHESI.xpl's own
+                     * grammar action for this case is a bare no-op (no
+                     * special-casing vs. the cyclic <TIMING><STOPPING>
+                     * form), and USA003087 discusses WHILE/UNTIL stopping
+                     * conditions exclusively as a cyclic-process
+                     * ("cancel the next cycle") concept (Sec. 23.4-23.5)
+                     * that has no defined meaning for a process with no
+                     * next cycle. See SCHD.md's Unresolved Questions for
+                     * the full writeup -- failing loudly here reflects an
+                     * actually-researched open question, not an
+                     * unexplored one. */
                     fail(state, "SCHEDULE: WHILE/UNTIL without REPEAT is not implemented (tag 0x%X) -- see class-0/SCHD.md", ins->tag);
                     break;
                 }
@@ -3974,22 +3993,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 nt->stop_kind = (halmat_schd_stop_t)stop_bits;
                 nt->stop_deadline = stop_deadline;
                 nt->stop_event_syt = stop_event_syt;
-                /* wake_deadline doubles as REPEAT EVERY's own phase
-                 * reference (see OP_CLOS) -- default to "now" (this
-                 * SCHD's own execution tick) so a bare/ON/immediate-start
-                 * cyclic task's first period is measured from here;
-                 * overridden just below for AT/IN, whose own target is
-                 * the more natural first reference point. */
+                /* every_phase_ref (state.h) holds REPEAT EVERY's own
+                 * phase reference, kept separate from wake_deadline so an
+                 * internal WAIT in the task's body can't corrupt it --
+                 * default to "now" (this SCHD's own execution tick) so a
+                 * bare/ON/immediate-start cyclic task's first period is
+                 * measured from here; overridden just below for AT/IN,
+                 * whose own target is the more natural first reference
+                 * point. Mirrors wake_deadline's own default/override
+                 * below for exactly the same reason -- at this moment,
+                 * before the task has ever run, both fields agree. */
                 nt->wake_deadline = state->virtual_time;
+                nt->every_phase_ref = state->virtual_time;
 
                 switch (init_kind) {
                     case 1: /* AT <absolute virtual time> */
                         nt->task_state = TASK_WAITING;
                         nt->wake_deadline = at_in_value;
+                        nt->every_phase_ref = at_in_value;
                         break;
                     case 2: /* IN <relative delay> */
                         nt->task_state = TASK_WAITING;
                         nt->wake_deadline = state->virtual_time + at_in_value;
+                        nt->every_phase_ref = nt->wake_deadline;
                         break;
                     case 3: /* ON <bit exp>: no fixed deadline, re-checked every tick (state.h's TASK_WAITING_ON) */
                         nt->task_state = TASK_WAITING_ON;

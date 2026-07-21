@@ -241,23 +241,32 @@ typedef struct {
     int priority;
     halmat_task_state_t task_state;
     size_t saved_pc;
-    int64_t wake_deadline; /* virtual_time tick at which a TASK_WAITING task becomes TASK_READY. Also
-                             * doubles as SCHD_REPEAT_EVERY's own phase reference (see interp.c's OP_CLOS
-                             * cyclic-rearm code) -- initialized to the tick SCHD itself executed (or the
-                             * AT/IN target, if delayed), then incremented by the EVERY interval on each
-                             * rearm so the period stays fixed instead of drifting with execution jitter.
-                             * Known, concretely-identified-but-undemonstrated collision: an ordinary WAIT
-                             * statement executed *inside* a REPEAT EVERY task's own body also writes this
-                             * same field (OP_WAIT), which would silently reset EVERY's phase reference and
-                             * make its period drift like AFTER's instead of staying fixed. Not a problem
-                             * for REPEAT AFTER (its own rearm recomputes wake_deadline from the *current*
-                             * virtual_time rather than chaining off the old value, so an intervening WAIT
-                             * is harmless there -- confirmed by test_sched_after.hal, whose WORKER body
-                             * does WAIT internally). No fixture combines REPEAT EVERY with an internal
-                             * WAIT, so this is deferred per this project's "fix once a concrete test
-                             * demonstrates the problem" discipline, not fixed preemptively; a fix would
-                             * need a separate field for EVERY's phase reference, distinct from the
-                             * ordinary WAIT/AT/IN deadline this field otherwise holds. */
+    int64_t wake_deadline; /* virtual_time tick at which a TASK_WAITING task becomes TASK_READY --
+                             * set by WAIT <n> (OP_WAIT), SCHD's AT/IN delayed-initiation targets, and
+                             * (as the *result* of each cyclic rearm) SCHD_REPEAT_EVERY/AFTER's own
+                             * rearm code in OP_CLOS. This is the only field sched_wake_waiting() reads,
+                             * so whichever of those wrote it last must leave it holding the actual next
+                             * wake tick. Previously also doubled as SCHD_REPEAT_EVERY's own chained
+                             * phase reference, which collided with an internal WAIT inside the same
+                             * task's body (both write this field) and made EVERY's period silently
+                             * drift like AFTER's; fixed by giving EVERY its own dedicated field,
+                             * every_phase_ref below -- see that field's comment and
+                             * test_sched_every_wait.hal. */
+    int64_t every_phase_ref; /* valid iff repeat_kind==SCHD_REPEAT_EVERY: the task's own chained phase
+                               * reference for REPEAT EVERY, kept separate from wake_deadline so that an
+                               * ordinary WAIT executed *inside* the task's own cyclic body (OP_WAIT,
+                               * which only ever touches wake_deadline) can't clobber it. Initialized at
+                               * OP_SCHD time to the tick SCHD itself executed (or the AT/IN target, if
+                               * delayed) -- mirroring wake_deadline's own initial value at that same
+                               * moment, since that's the natural first phase reference for a task that
+                               * hasn't cycled yet -- then incremented by repeat_interval on each
+                               * OP_CLOS rearm so the period stays fixed instead of drifting with
+                               * execution jitter; wake_deadline is then assigned from this field's
+                               * post-increment value so sched_wake_waiting() still sees the right tick.
+                               * Not used by REPEAT AFTER, whose rearm recomputes wake_deadline directly
+                               * from the *current* virtual_time rather than chaining off a stored
+                               * reference (confirmed harmless by test_sched_after.hal, whose WORKER
+                               * body does WAIT internally without perturbing AFTER's own delay). */
     bool dependent;    /* SCHEDULE ... DEPENDENT was specified; parsed but not yet behaviorally enforced beyond primal-exit ending the whole program */
 
     bool has_on_event;      /* SCHD's ON <bit exp> initiation form was used */
