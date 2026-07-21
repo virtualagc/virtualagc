@@ -65,6 +65,13 @@ run ./run_link_container_fixture.sh --plain 150000 "Y=              43" link_poo
 run ./run_link_container_fixture.sh --tmpl 150000 "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
 run ./run_link_container_fixture.sh --plain 50000 "HELLO CONTAINER" link_lit
 
+# --debug + @list: works for a single-unit @list (previously silently
+# ignored -- debug_mode was parsed but never threaded through
+# run_linked()/run_linked_units()), fails loudly for a multi-unit one
+# rather than silently ignoring --debug (real multi-unit interactive
+# debugging isn't implemented).
+run ./run_debug_link_fixture.sh
+
 run ./run_local_fixture.sh write_lit "          5      3.5000000E+00"
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
 run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"

@@ -1311,7 +1311,7 @@ static void flush_write(halmat_state_t *state, FILE *out) {
  * arguments, or the callee itself failed (its own fail() has already
  * fired against `target`, e.g. for a genuinely unimplemented opcode
  * reached inside the callee's own body). */
-static bool run_external_call(halmat_state_t *state, halmat_state_t *target, uint16_t entry_syt, FILE *out) {
+bool interp_prepare_external_call(halmat_state_t *state, halmat_state_t *target, uint16_t entry_syt) {
     if (target->symbol_def_pos[entry_syt] == NO_TARGET) {
         fail(state, "external call has no entry point (symbol %u)", entry_syt);
         return false;
@@ -1337,12 +1337,75 @@ static bool run_external_call(halmat_state_t *state, halmat_state_t *target, uin
     target->current_task = 0;
     target->tasks[0].task_state = TASK_READY;
     target->tasks[0].saved_pc = target->pc;
-    interp_run(target, out);
+    return true;
+}
+
+bool interp_finish_external_call(halmat_state_t *state, halmat_state_t *target) {
     if (target->exit_code != 0) {
         fail(state, "external call failed");
         return false;
     }
     return true;
+}
+
+bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *target, const halmat_instr_t *ins) {
+    if (!target->external_call_has_result) {
+        fail(state, "external function returned no value");
+        return false;
+    }
+    if (target->external_call_result.is_string || target->external_call_result.is_container) {
+        /* Both carry owned heap pointers -- copying the slot verbatim
+         * would alias ownership between this caller's own VAC array and
+         * the callee's, risking a double-free when both states are
+         * eventually cleaned up. Neither case is confirmed to even be
+         * legal for a FUNCTION return anyway, so fail loudly rather than
+         * risk silent corruption for an untested path. */
+        fail(state, "external function: CHARACTER/MATRIX/VECTOR return values are not yet implemented");
+        return false;
+    }
+    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); return false; }
+    state->vac[ins->index] = target->external_call_result;
+    return true;
+}
+
+bool interp_is_external_call(const halmat_state_t *state, const halmat_instr_t *ins,
+                              halmat_state_t **target_out, uint16_t *entry_syt_out, bool *is_function_out) {
+    if (!ins || (ins->opcode != OP_FCAL && ins->opcode != OP_PCAL) || ins->operand_count != 1) return false;
+    uint16_t callee = ins->operands[0].data;
+    if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] != NO_TARGET) return false;
+    if (!state->external_calls || !state->external_calls[callee].target_state) return false;
+    if (target_out) *target_out = state->external_calls[callee].target_state;
+    if (entry_syt_out) *entry_syt_out = state->external_calls[callee].target_entry_syt;
+    if (is_function_out) *is_function_out = (ins->opcode == OP_FCAL);
+    return true;
+}
+
+/* Runs a cross-unit call (source-documentation/Multiple-file-problem.md)
+ * to completion in one shot -- `target` is a persistent, previously
+ * interp_init'd state for the external unit (main.c's
+ * interp_set_external_units), reused across every call to it, not
+ * recreated fresh each time. Its own SYT storage (ordinary local
+ * variables) therefore intentionally persists across repeated calls,
+ * matching how a same-unit function's own locals already behave (no
+ * per-call freshness is modeled anywhere in this interpreter, so this
+ * isn't a new inconsistency). Scheduler/task state is reset to a single
+ * fresh READY primal task before each call (interp_prepare_external_
+ * call()), since concurrent scheduling across units is explicitly out of
+ * scope for now (per direct user guidance) -- an external call is always
+ * a plain synchronous call, never a SCHEDULEd task of its own.
+ *
+ * Just interp_prepare_external_call() + interp_run() + interp_finish_
+ * external_call() -- the atomic path OP_FCAL/OP_PCAL's own cross-unit
+ * branches use below, and what --debugger's `next` command gets for free
+ * simply by calling interp_step() on the FCAL/PCAL instruction itself
+ * (exec_one() below reaches this same function). Only `step`, which
+ * needs to run the callee via its *own* step loop instead of straight
+ * through, calls the two phases directly rather than through this
+ * wrapper (debug.c). */
+static bool run_external_call(halmat_state_t *state, halmat_state_t *target, uint16_t entry_syt, FILE *out) {
+    if (!interp_prepare_external_call(state, target, entry_syt)) return false;
+    interp_run(target, out);
+    return interp_finish_external_call(state, target);
 }
 
 /* Executes exactly one instruction for whatever task is current
@@ -3693,24 +3756,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     halmat_state_t *target = state->external_calls[callee].target_state;
                     uint16_t entry_syt = state->external_calls[callee].target_entry_syt;
                     if (!run_external_call(state, target, entry_syt, out)) break;
-                    if (!target->external_call_has_result) {
-                        fail(state, "external function returned no value");
-                        break;
-                    }
-                    if (target->external_call_result.is_string || target->external_call_result.is_container) {
-                        /* Both carry owned heap pointers -- copying the
-                         * slot verbatim would alias ownership between
-                         * this caller's own VAC array and the callee's,
-                         * risking a double-free when both states are
-                         * eventually cleaned up. Neither case is
-                         * confirmed to even be legal for a FUNCTION
-                         * return anyway, so fail loudly rather than risk
-                         * silent corruption for an untested path. */
-                        fail(state, "external function: CHARACTER/MATRIX/VECTOR return values are not yet implemented");
-                        break;
-                    }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                    state->vac[ins->index] = target->external_call_result;
+                    interp_copy_external_call_result(state, target, ins);
                     break;
                 }
                 if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] == NO_TARGET) {
@@ -4742,6 +4788,14 @@ const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     if (next == -1) return NULL;
     if (state->tasks[next].saved_pc >= state->prog->count) return NULL;
     return &state->prog->instrs[state->tasks[next].saved_pc];
+}
+
+int interp_peek_next_task(halmat_state_t *state) {
+    if (state->halted) return -1;
+    sched_wake_waiting(state);
+    sched_wake_on_events(state);
+    sched_advance_to_next_wake(state);
+    return sched_pick_next(state);
 }
 
 /* HAL/S statement number of the instruction interp_peek_next() would

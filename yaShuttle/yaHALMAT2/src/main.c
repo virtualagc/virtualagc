@@ -76,7 +76,11 @@ static void usage(const char *prog) {
             "                   build to have been compiled with POSIX real-time timer\n"
             "                   support (see Makefile's HAVE_POSIX_TIMERS probe on non-\n"
             "                   Windows targets); fails loudly at startup if not available.\n"
-            "  --debug          interactive gdb-subset debugger (see debug.h; single HALMAT_FILE only)\n"
+            "  --debug          interactive gdb-subset debugger (see debug.h). Works with a single\n"
+            "                   HALMAT_FILE, or with @list/a linked-archive file naming any number\n"
+            "                   of units -- `step` can descend into a cross-unit CALL made into a\n"
+            "                   separately-compiled EXTERNAL FUNCTION/PROCEDURE unit, `next` keeps\n"
+            "                   it atomic (see debug.c's print_help()).\n"
             "  --opt            load optmat.bin (+ its companions) instead of halmat.bin\n"
             "                   (single-file mode: only changes companion auto-discovery,\n"
             "                   since HALMAT_FILE is given explicitly either way)\n"
@@ -324,8 +328,14 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         halmat_program_free(&prog);
         return 1;
     }
-    int rc = debug_mode ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, colors, stdout)
-                         : interp_run(&state, stdout);
+    /* A lone HALMAT_FILE has no external_calls[] at all (interp_set_
+     * external_units() is never called for this path), so `step`'s
+     * cross-unit step-into is simply never triggered here -- units=NULL/
+     * num_units=0 is exactly right, not a placeholder to fill in later. */
+    int rc = debug_mode
+                 ? debug_run(&state, have_symtab ? &symtab : NULL, have_srcmap ? &srcmap : NULL, path, NULL, 0, colors,
+                             stdout)
+                 : interp_run(&state, stdout);
     interp_cleanup(&state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
     for (int i = 0; i < num_raf_maps; i++) fclose(opened_raf[i]);
@@ -529,7 +539,7 @@ static bool find_primary_unit(unit_t *units, int num_units, const char *entry_di
  * (e.g. via find_primary_unit()). */
 static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks,
                              const device_map_t *maps, int num_maps, double time_scale,
-                             halmat_pacing_mode_t pacing_mode) {
+                             halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors) {
     if (disasm) {
         for (int i = 0; i < num_units; i++) {
             printf("=== %s ===\n", units[i].dir);
@@ -721,7 +731,54 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         for (int j = 0; j < num_units; j++) free_unit(&units[j]);
         return 1;
     }
-    int rc = interp_run(&primary_state, stdout);
+
+    /* Same pass1.rpt-based source correlation run_single() loads for
+     * --debug (see its own comment) -- here the unit's own directory is
+     * already known (units[primary].dir) rather than derived from a
+     * HALMAT_FILE path, so this builds the candidate path directly
+     * instead of going through find_companion(). For a linked-archive
+     * container, units[primary].dir is really just the container's
+     * embedded diagnostic label (container.h), not necessarily a live
+     * filesystem path -- pass1.rpt won't be found there in practice
+     * (containers don't embed it), which is fine: same graceful
+     * instruction-only degrade as any other missing optional companion. */
+    halmat_srcmap_t srcmap;
+    bool have_srcmap = false;
+    if (debug_mode) {
+        char src_path[1024];
+        snprintf(src_path, sizeof(src_path), "%s/pass1.rpt", units[primary].dir);
+        if (file_exists(src_path)) {
+            char err3[256];
+            have_srcmap = halmat_srcmap_load(src_path, &srcmap, err3, sizeof(err3));
+        }
+    }
+
+    /* debug.h's debug_unit_info_t: lets the debugger find a stepped-into
+     * callee's own directory (for lazy pass1.rpt loading) and symbol
+     * table -- built here from this function's own units[]/ext_states[]
+     * arrays (one entry per linked EXTERNAL FUNCTION/PROCEDURE unit;
+     * COMPOOL units run to completion above and are never call targets,
+     * so they're not included), the only place both are already
+     * available together. Only needed under --debug; harmless to build
+     * unconditionally, but skipped otherwise since it's pure overhead. */
+    debug_unit_info_t debug_units[MAX_UNITS];
+    int debug_unit_count = 0;
+    if (debug_mode) {
+        for (int i = 0; i < num_units; i++) {
+            if (!ext_states[i]) continue;
+            debug_units[debug_unit_count].state = ext_states[i];
+            debug_units[debug_unit_count].dir = units[i].dir;
+            debug_units[debug_unit_count].symtab = units[i].have_symtab ? &units[i].symtab : NULL;
+            debug_unit_count++;
+        }
+    }
+
+    int rc = debug_mode
+                 ? debug_run(&primary_state, units[primary].have_symtab ? &units[primary].symtab : NULL,
+                             have_srcmap ? &srcmap : NULL, units[primary].dir, debug_units, debug_unit_count, colors,
+                             stdout)
+                 : interp_run(&primary_state, stdout);
+    if (have_srcmap) halmat_srcmap_free(&srcmap);
     interp_cleanup(&primary_state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
     free_ext_states(ext_states, num_units);
@@ -735,7 +792,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
  * for the actual wiring + run. */
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
                        bool disasm, int num_blanks, const device_map_t *maps, int num_maps, double time_scale,
-                       halmat_pacing_mode_t pacing_mode) {
+                       halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
         return 1;
@@ -759,7 +816,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         return 1;
     }
 
-    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps, time_scale, pacing_mode);
+    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps, time_scale, pacing_mode,
+                             debug_mode, colors);
 }
 
 /* Builds each unit_t from a linked-archive container's already-in-memory
@@ -769,7 +827,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
  * logic as an @list run, just sourced from a single container file
  * instead of a directory tree. */
 static int run_linked_container(halmat_container_t *c, int num_blanks, const device_map_t *maps,
-                                 int num_maps, bool disasm, double time_scale, halmat_pacing_mode_t pacing_mode) {
+                                 int num_maps, bool disasm, double time_scale, halmat_pacing_mode_t pacing_mode,
+                                 bool debug_mode, const debug_colors_t *colors) {
     if (c->num_units > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in linked-archive container (max %d)\n", MAX_UNITS);
         return 1;
@@ -813,7 +872,7 @@ static int run_linked_container(halmat_container_t *c, int num_blanks, const dev
     }
 
     return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, maps, num_maps, time_scale,
-                             pacing_mode);
+                             pacing_mode, debug_mode, colors);
 }
 
 /* Builds a --link-only container from @list: loads every unit the
@@ -1153,7 +1212,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: %s\n", argv[0], cerrbuf);
             return 1;
         }
-        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm, time_scale, pacing_mode);
+        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm, time_scale, pacing_mode, debug_mode,
+                                       &colors);
         halmat_container_free(&c);
         return rc;
     }
@@ -1172,7 +1232,7 @@ int main(int argc, char **argv) {
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
         return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps, time_scale,
-                           pacing_mode);
+                           pacing_mode, debug_mode, &colors);
     }
 
     return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode);

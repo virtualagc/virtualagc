@@ -78,8 +78,9 @@ int interp_run(halmat_state_t *state, FILE *out);
 
 /* Executes exactly one scheduler step (see interp.c). Returns true once
  * nothing is left to run (halted, or no task ready/ever waking) -- the
- * building block interp_run() loops on, and what --debugger's `step`
- * command calls directly. */
+ * building block interp_run() loops on, and what --debugger's `next`
+ * command (and `step`, for anything that isn't a cross-unit call) calls
+ * directly. */
 bool interp_step(halmat_state_t *state, FILE *out);
 
 /* Read-only(-ish; may transition a TASK_WAITING task to TASK_READY if
@@ -89,9 +90,60 @@ bool interp_step(halmat_state_t *state, FILE *out);
  * breakpoint/step display. */
 const halmat_instr_t *interp_peek_next(halmat_state_t *state);
 
+/* Which tasks[] index interp_step()/interp_peek_next() would resume next
+ * (identical sched_pick_next() logic, called the same way), or -1 if
+ * nothing is ready. interp_peek_next() itself doesn't expose this (see
+ * its own comment for why an approximation was fine before); the
+ * debugger's step-into (point 3, Plan.md) needs the exact value, since it
+ * defers interp_step()'s own current_task/tasks[].saved_pc bookkeeping
+ * for a cross-unit FCAL/PCAL until the stepped-into callee's call
+ * eventually returns (debug.c's auto_pop()). */
+int interp_peek_next_task(halmat_state_t *state);
+
 /* HAL/S statement number whose code interp_peek_next() falls within, or
  * -1 if there's no next instruction. For --debugger's source-line
  * display (debug.c, srcmap.c). */
 long interp_current_stmt_for_next(halmat_state_t *state);
+
+/* True iff `ins` is an FCAL/PCAL resolving to a cross-unit call in
+ * `state`'s external_calls[] table (interp_set_external_units(), main.c)
+ * -- same detection OP_FCAL/OP_PCAL's own handlers use internally, for
+ * the debugger's step-into decision (point 1/3, Plan.md). On true,
+ * target_out/entry_syt_out identify the callee; is_function_out
+ * distinguishes FCAL (has a return value to copy back) from PCAL
+ * (doesn't). Any of the three output pointers may be NULL if the caller
+ * doesn't need that particular value. `ins` may be NULL (returns false). */
+bool interp_is_external_call(const halmat_state_t *state, const halmat_instr_t *ins,
+                              halmat_state_t **target_out, uint16_t *entry_syt_out, bool *is_function_out);
+
+/* Phase 1 of a cross-unit call (source-documentation/Multiple-file-
+ * problem.md): binds `state`'s currently-open io_pending call arguments
+ * into `target`'s own SYT numbering and positions `target`'s PC at its
+ * entry point, resetting its scheduler to a single fresh READY primal
+ * task -- everything the interpreter's own cross-unit FCAL/PCAL handling
+ * used to do inline before running the callee, now exposed so a caller
+ * (the debugger, for step-into) can run the callee itself (its own step
+ * loop) instead of via interp_run(). Returns false (having already
+ * called fail() on `state`, the *caller*) if entry_syt has no FDEF/PDEF
+ * in `target`, or there are too many arguments. */
+bool interp_prepare_external_call(halmat_state_t *state, halmat_state_t *target, uint16_t entry_syt);
+
+/* Phase 2: checks target->exit_code after the callee has finished
+ * (however it got run -- interp_run() for the atomic path, or the
+ * debugger's own step loop for step-into) and fail()s `state` (the
+ * caller) if it didn't succeed. Returns false in that case (fail()
+ * already called), true otherwise. */
+bool interp_finish_external_call(halmat_state_t *state, halmat_state_t *target);
+
+/* Copies a just-finished external FUNCTION call's captured RTRN result
+ * (target->external_call_result) into `ins`'s own VAC slot in `state` --
+ * the same place a same-unit call's result would land. Used by OP_FCAL's
+ * own cross-unit path and by the debugger's step-into return path (once
+ * a stepped-into callee frame auto-pops). Never called for a PCAL
+ * (procedures don't return a value). Returns false (having already
+ * called fail() on `state`) if the callee's RTRN carried no result, or
+ * if the result is a CHARACTER/MATRIX/VECTOR value (not yet implemented
+ * for a FUNCTION return -- see the implementation). */
+bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *target, const halmat_instr_t *ins);
 
 #endif
