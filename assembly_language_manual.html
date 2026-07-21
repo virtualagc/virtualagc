@@ -35,12 +35,17 @@ document.write(headerTemplate.replace("@TITLE@","Programmer's Manual").replace("
       </li>
       <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
           Summary Tables</a></li>
-      <li><a href="#UnprogrammedSequences">Unprogrammed Sequences</a><br>
+      <li><a href="#UnprogrammedSequences">Unprogrammed Sequences</a></li>
+      <li><a moz-do-not-send="true" href="#blockly">A Rapid-Application
+          Development (RAD) Environment for the AGC</a><br>
       </li>
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Blocks_for_All_Occasions" id="Blocks_for_All_Occasions"></a>Blocks
 for
+
+
+
 
 
 
@@ -105,6 +110,9 @@ AGC4
 
 
 
+
+
+
             Basic Training</span> <span style="font-style: italic;">Manual</span>,
           <span style="font-style: italic;">Volume I</span></a>, by
         Bernard Savage and Alice Drake, January 1967. <br>
@@ -143,6 +151,9 @@ Preliminary
 
 
 
+
+
+
           MOD 3C Programmers Manual</a>, by R. Alonso, J. H. Laning,
         Jr., and H. Blair-Smith, November 1961.</li>
       <li><a href="hrst/archive/1706.pdf" style="font-style: italic;">Keyboard
@@ -158,10 +169,16 @@ and
 
 
 
+
+
+
           Display Program and Operation</a>, by Alan I. Greene and
         Robert J. Filene, June 1, 1967.</li>
       <li><a href="hrst/archive/1705.pdf" style="font-style: italic;">Block
 II
+
+
+
 
 
 
@@ -448,6 +465,9 @@ missing
 
 
 
+
+
+
           numbers due to spacing. But having said that, I have to
           explain why the card number following a remark over 72 columns
           wide is generally 2 more than the one you can see on the
@@ -604,6 +624,9 @@ components
 
 
 
+
+
+
     of a vector can be represented by three consecutive DP values.<br>
     <h3>Unsigned-Integer (2's-Complement) Format</h3>
     There are some cases, such as the CDU counters described in the next
@@ -680,6 +703,9 @@ components
     counter/timer registers.&nbsp; This is not so.&nbsp; Incrementing or
     decrementing the counter/timer registers is (and was) actually
     implemented by the use of "<a href="#UnprogrammedSequences">unprogrammed
+
+
+
 
 
 
@@ -787,6 +813,9 @@ components
             accumulator to a true 15-bit register, it is <span
               style="font-style: italic;">overflow-corrected</span>.&nbsp;
 Overflow-correction
+
+
+
 
 
 
@@ -1414,6 +1443,9 @@ Overflow-correction
 
 
 
+
+
+
             Because 10 ms. is usually much longer than the amount of
             time needed to vector to the interrupt service routine, it
             is unnecessary in such calculations to account for the time
@@ -1433,6 +1465,9 @@ Overflow-correction
             by means of a <span style="font-family: monospace;">DINC</span><a
               href="#UnprogrammedSequences">unprogrammed sequence</a>.&nbsp;
 There
+
+
+
 
 
 
@@ -1568,6 +1603,9 @@ There
 
 
 
+
+
+
               below</a>) in order to increase the angles by one unit,
             and are processed with the <span style="font-family:
               monospace;">MCDU</span> unprogrammed sequence to decrease
@@ -1675,6 +1713,9 @@ There
             reports the count to <span style="font-weight: bold;">yaAGC</span>
             via <a href="developer.html#Fictitious_IO_Channels">fictitious
 input
+
+
+
 
 
 
@@ -1915,6 +1956,9 @@ of
 
 
 
+
+
+
       the structure of the memory map</a>, and it may prove helpful to
     have his diagram at hand whilst reading the following description.<br>
     <br>
@@ -2041,6 +2085,9 @@ of
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
+
+
+
 
 
 
@@ -2371,6 +2418,9 @@ The
 
 
 
+
+
+
         field <span style="font-family: monospace;">PPP</span> is
         referred to as the "peripheral code" or "PC".</li>
       <li>Finally, a fourth bit was made available beyond the 15 within
@@ -2386,6 +2436,9 @@ The
         completely different set of instructions called <span
           style="font-style: italic; font-weight: bold;">extracodes</span>.&nbsp;
 In
+
+
+
 
 
 
@@ -2425,6 +2478,9 @@ In
     <hr style="width: 100%; height: 2px;">
     <h2><a name="AGC4_Instruction_Set" id="AGC4_Instruction_Set"></a>AGC4
 Instruction
+
+
+
 
 
 
@@ -2535,6 +2591,9 @@ Instruction
 
 
 
+
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">DOUBLE</span> instruction.<br>
           </td>
@@ -2617,6 +2676,9 @@ Instruction
             are added together, and the result is stored both in the
             accumulator and in <span style="font-family: monospace;">K</span>.&nbsp;
 The
+
+
+
 
 
 
@@ -3066,6 +3128,9 @@ The
 
 
 
+
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">NOOP</span> instruction.<br>
           </td>
@@ -3181,6 +3246,9 @@ The
                   monospace;">CCS</span>.&nbsp; If equal to -0,
                 execution continues at the 4<sup>th</sup> instruction
                 after the <span style="font-family: monospace;">CCS</span>.&nbsp;&nbsp;
+
+
+
 
 
 
@@ -3405,6 +3473,9 @@ The
 
 
 
+
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">COM</span> instruction.<br>
           </td>
@@ -3498,6 +3569,9 @@ Refer
 
 
 
+
+
+
             to the <span style="font-family: monospace;">DDOUBL</span>
             instruction for an explanation of this case.<br>
             <br>
@@ -3513,6 +3587,9 @@ Refer
                 style="font-family: monospace; color: rgb(0, 0, 0);">K+1</span><span
                 style="color: rgb(0, 0, 0);">.&nbsp;</span> (</span><a
               style="color: rgb(0, 153, 0);" href="#Data_Representation">See
+
+
+
 
 
 
@@ -3647,6 +3724,9 @@ Refer
                 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCA
+
+
+
 
 
 
@@ -3854,11 +3934,17 @@ Refer
 
 
 
+
+
+
               A</span>", refer to the <span style="font-family:
               monospace;">DCOM</span> instruction.<span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCS
+
+
+
 
 
 
@@ -4571,9 +4657,15 @@ Refer
 
 
 
+
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
+
+
 
 
 
@@ -4599,6 +4691,9 @@ Refer
 
 
 
+
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
@@ -4613,9 +4708,15 @@ Refer
 
 
 
+
+
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
+
+
 
 
 
@@ -4652,9 +4753,15 @@ Refer
 
 
 
+
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
+
+
 
 
 
@@ -4680,6 +4787,9 @@ Refer
 
 
 
+
+
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
@@ -4694,9 +4804,15 @@ Refer
 
 
 
+
+
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
+
+
 
 
 
@@ -4733,9 +4849,15 @@ Refer
 
 
 
+
+
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
+
 
 
 
@@ -4761,6 +4883,9 @@ Refer
 
 
 
+
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
@@ -4775,9 +4900,15 @@ Refer
 
 
 
+
+
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
+
+
 
 
 
@@ -4814,9 +4945,15 @@ Refer
 
 
 
+
+
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
+
 
 
 
@@ -4842,6 +4979,9 @@ Refer
 
 
 
+
+
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
@@ -4856,9 +4996,15 @@ Refer
 
 
 
+
+
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
+
+
 
 
 
@@ -4898,9 +5044,15 @@ Refer
 
 
 
+
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
+
 
 
 
@@ -4926,6 +5078,9 @@ Refer
 
 
 
+
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
@@ -4940,9 +5095,15 @@ Refer
 
 
 
+
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
+
+
+
 
 
 
@@ -4980,9 +5141,15 @@ Refer
 
 
 
+
+
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5008,6 +5175,9 @@ Refer
 
 
 
+
+
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
@@ -5022,9 +5192,15 @@ Refer
 
 
 
+
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
+
+
+
 
 
 
@@ -5063,6 +5239,9 @@ Refer
 
 
 
+
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
@@ -5077,9 +5256,15 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5105,6 +5290,9 @@ Refer
 
 
 
+
+
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
@@ -5119,6 +5307,9 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                 </tr>
@@ -5146,6 +5337,9 @@ Refer
 
 
 
+
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
@@ -5160,9 +5354,15 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
+
+
 
 
 
@@ -5188,9 +5388,15 @@ Refer
 
 
 
+
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
+
+
 
 
 
@@ -5229,6 +5435,9 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
@@ -5243,9 +5452,15 @@ Refer
 
 
 
+
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5271,9 +5486,15 @@ Refer
 
 
 
+
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5312,9 +5533,15 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5340,6 +5567,9 @@ Refer
 
 
 
+
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
@@ -5354,9 +5584,15 @@ Refer
 
 
 
+
+
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
+
 
 
 
@@ -5470,6 +5706,9 @@ Refer
             when placed in A.<br>
             <br>
             In the case of the "<span style="font-family: monospace;">DXCH
+
+
+
 
 
 
@@ -5963,6 +6202,9 @@ TC&nbsp;
 
 
 
+
+
+
                 &nbsp;&nbsp;&nbsp; JMPTAB<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -6046,6 +6288,9 @@ TC&nbsp;
               monospace;">INDEX</span> is used (i.e., without a
             preceding <span style="font-family: monospace;">EXTEND</span>),
 the
+
+
+
 
 
 
@@ -6476,11 +6721,17 @@ then
 
 
 
+
+
+
             you would indeed find a result of 4, but it would be in L
             register because it would be part of the DP value 4×2<sup>-28</sup>
             rather than just the integer 4.<br>
             <br>
             For the special case "<span style="font-family: monospace;">MP
+
+
+
 
 
 
@@ -7272,6 +7523,9 @@ then
 
 
 
+
+
+
                 instruction</span><br>
             </div>
             would not index the final instruction as shown, because "<span
@@ -7858,6 +8112,9 @@ The
 
 
 
+
+
+
             <span style="font-family: monospace;">TC</span> instruction
             may also be used to accomplish an indirect jump (i.e., a
             jump to a computed rather than a hard-coded address) by
@@ -7899,6 +8156,9 @@ The
 
 
 
+
+
+
               A</span> will require 2 MCT of CPU time instead of the 1
             MCT quoted earlier, since it actually results in <span
               style="font-style: italic;">two</span> <span
@@ -7913,6 +8173,9 @@ The
             <br>
             <span style="text-decoration: underline;">Indirect calls</span>:&nbsp;
 For
+
+
+
 
 
 
@@ -8115,6 +8378,9 @@ For
             <br>
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
 For
+
+
+
 
 
 
@@ -9044,6 +9310,9 @@ For
 
 
 
+
+
+
         4</span><br style="font-family: monospace;">
       <span style="font-family: monospace;">FIFOHAF = 8</span><br>
     </div>
@@ -9213,6 +9482,9 @@ For
 
 
 
+
+
+
         MYLABEL<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -9226,16 +9498,6 @@ For
 
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
 
 
 
@@ -9252,8 +9514,30 @@ For
 
 
 
+
+
+
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9279,8 +9563,14 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
         MYJUMP<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9305,21 +9595,30 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
 
 
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9490,6 +9789,9 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       required <tt>EBANK=</tt> card immediately preceding the <tt>BBCON</tt>).
 
 
+
+
+
       In addition, bits 7-5 containing the required setting for <tt>SUPERBNK</tt>
       (for addresses in <tt>S3</tt> and <tt>S4</tt>), or reflects the
       last <tt>S3</tt> or <tt>S4</tt> <tt>BANK</tt> card or <tt>SBANK=</tt>
@@ -9535,6 +9837,9 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       precision quantity (that excludes, therefore, <tt>SUPERBNK</tt>
       information).&nbsp; Bits 15-11 of the cell correspond to the <tt>FBANK</tt>
       setting and bits 10-1 to the least significant 10 bits of the <tt>S</tt>-register.&nbsp;
+
+
+
 
 
       The <tt>CADR</tt> operation is used with the appropriate program
@@ -9742,6 +10047,9 @@ The
 
 
 
+
+
+
     <span style="font-style: italic; font-family: monospace;">n</span>
     operand is discarded, and is present principally for documentation
     purposes.<br>
@@ -9836,6 +10144,9 @@ EQUALS&nbsp;&nbsp;
 
 
 
+
+
+
           0</tt><tt><br>
         </tt> <tt>000006,000006:</tt> <tt><br>
         </tt> <tt>000007,000007:&nbsp;&nbsp;&nbsp;
@@ -9853,10 +10164,16 @@ BLOCK&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           2</tt><tt><br>
         </tt> <tt>000008,000008:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9886,11 +10203,17 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000010,000010:&nbsp;&nbsp;&nbsp;
           4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9920,10 +10243,16 @@ BLOCK&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           3</tt><tt><br>
         </tt> <tt>000013,000013:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9953,9 +10282,15 @@ XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000015,000015:&nbsp;&nbsp;&nbsp;
           6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -9972,6 +10307,9 @@ XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </tt> <tt>000016,000016:&nbsp;&nbsp;&nbsp;
           6064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10001,11 +10339,17 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000018,000018:</tt> <tt><br>
         </tt> <tt>000019,000019:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SETLOC&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10033,10 +10377,16 @@ SETLOC&nbsp;&nbsp;
 
 
 
+
+
+
           BANK</tt><tt><br>
         </tt> <tt>000021,000021:&nbsp;&nbsp;&nbsp;
           4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10066,6 +10416,9 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000023,000023:</tt> <tt><br>
         </tt> <tt>000024,000024:&nbsp;&nbsp;&nbsp;
@@ -10083,10 +10436,16 @@ BLOCK&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           3</tt><tt><br>
         </tt> <tt>000025,000025:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10116,6 +10475,9 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000027,000027:</tt> <tt><br>
         </tt> <tt>000028,000028:&nbsp;&nbsp;&nbsp;
@@ -10133,10 +10495,16 @@ BLOCK&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           3</tt><tt><br>
         </tt> <tt>000029,000029:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10166,6 +10534,9 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000031,000031:</tt> <tt><br>
         </tt> <tt>000032,000032:
@@ -10183,10 +10554,16 @@ BANK&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           2</tt><tt><br>
         </tt> <tt>000033,000033:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10216,9 +10593,15 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           A</tt><tt><br>
         </tt> <tt>000035,000035:
           02,2040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10247,12 +10630,18 @@ SECSIZ&nbsp;&nbsp;
 
 
 
+
+
+
           18</tt><tt><br>
         </tt> <tt>000037,000037:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SEVENTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -10299,6 +10688,9 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <h3>SUBRO</h3>
     This is simply discarded by <span style="font-weight: bold;">yaYUL</span>.&nbsp;
 Its
+
+
+
 
 
 
@@ -10424,6 +10816,9 @@ These
 
 
 
+
+
+
     encode to 15-bit values, and can be used to represent any address in
     fixed-memory banks 00-37.&nbsp; (Superbanks 40-43 are not accesible
     to the interpreter.)&nbsp; I'll designate this rule by <span
@@ -10433,6 +10828,9 @@ These
           = X</span></li>
       <li>Common-fixed:&nbsp; <span style="font-family: monospace;">f(X)
 =
+
+
+
 
 
 
@@ -10815,6 +11213,9 @@ I'd
 
 
 
+
+
+
     often wondered about that, but after a dozen years of wondering
     about it and inventing my own little stories about it, I finally
     thought to <i>ask</i> someone about it ... and as luck would have
@@ -10963,6 +11364,9 @@ erasable
 
 
 
+
+
+
               memory (i.e. erasable banks 0 - 2)</font></td>
         </tr>
         <tr>
@@ -10970,6 +11374,9 @@ erasable
           <td align="center"><font color="#663300">256</font></td>
           <td colspan="2" align="center"><font color="#663300">Currently-selected
 erasable
+
+
+
 
 
 
@@ -11805,6 +12212,9 @@ erasable
     Colossus program listings.&nbsp; However, many additional i/o
     channels are covered <a href="developer.html#Table_of_IO_Channels">on
 the
+
+
+
 
 
 
@@ -12860,6 +13270,9 @@ the
 
 
 
+
+
+
         Map</span><br>
     </div>
     <table summary="" style="width: 100%; height: 451px; text-align:
@@ -13114,8 +13527,14 @@ the
 
 
 
+
+
+
       Sequences</h2>
     As mentioned earlier in the <a href="#CPU_Architecture_Registers">CPU
+
+
+
 
 
 
@@ -13381,8 +13800,93 @@ the
         </tr>
       </tbody>
     </table>
-    <br>
-    <br>
+    <h2><a name="blockly"></a>A Rapid-Application Development (RAD)
+      Environment for the AGC</h2>
+    <p>Huh?&nbsp; Yes, it's true, there is such a thing!&nbsp; In these
+      newfangled days of AI coding assistants, with the Singularity
+      nipping sometimes painfully and sometimes wonderfully at our
+      heels, it's probably becoming passé, and after a few years the new
+      guys (and gals) won't even know what I'm talking about.&nbsp;
+      (Well, that's nothing new; I barely know what I'm talking about
+      myself anyway.)&nbsp; A <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/Rapid_application_development">RAD</a>
+      is a software-development tool that's typically used for quickly
+      throwing together a graphical user interface, by dragging widgets
+      around on the display screen to where you want them, and then
+      writing some code that glues these widgets together.&nbsp; But the
+      widgets aren't necessarily graphical, and can represent all kinds
+      of prepackaged functionality from which the RAD can then generate
+      source code that implements large portions of the design, so the
+      designs you can implement with a RAD aren't necessarily limited to
+      just user interfaces. <br>
+    </p>
+    <p>At any rate, Neil Fraser <i>et al.</i> (thanks a bunch!) have
+      created just such a RAD for writing AGC programs, and have indeed
+      written some such programs which you can actually use.&nbsp; <a
+        moz-do-not-send="true"
+        href="https://github.com/NeilFraser/AGC-code">The GitHub
+        repository for it</a> is called "AGC-code", so I suppose I'll
+      refer to it that way as well.&nbsp; I don't know if there's an
+      official designation for it.&nbsp; <br>
+    </p>
+    <p><a moz-do-not-send="true"
+        href="https://neil.fraser.name/software/blockly-agc/">There's a
+        live online demo of <b>AGC-code</b></a> as well, which you can
+      actually use to compose an AGC program without installing anything
+      locally.&nbsp; If you're anything like me — a risky assumption, I
+      admit — you may need a little bit of indoctrination before jumping
+      in.&nbsp; <b>AGC-code</b> is based on <a moz-do-not-send="true"
+        href="https://docs.blockly.com/">the Blockly library</a>, with
+      which I cannot claim any past (or present) familiarity, and the
+      material there is likely to be very helpful in getting
+      started.&nbsp; There's also a short, interesting presentation
+      given by Neil that I'd recommend.&nbsp; The presentation isn't
+      primarily about the RAD tool, but rather about some thoughts
+      concerning the <i>educational</i> usefulness of the GOTO command
+      (as contrasted with its universal disrepute in <i>professional</i>
+      environments), but it does demo the RAD in an easy-to-understand
+      way as well:</p>
+    <center><iframe src="https://www.youtube.com/embed/UOu_319O_n8"
+        title="Programming the Apollo Guidance Computer | Blockly Summit
+        2026" allow="accelerometer; autoplay; clipboard-write;
+        encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="879" height="494" frameborder="0"></iframe><br>
+    </center>
+    <p>As an example of <b>AGC-code</b>'s capabilities, the tic-tac-toe
+      game you find offered as one of the many available AGC simulations
+      in <a moz-do-not-send="true"
+        href="https://www.ibiblio.org/apollo/index.html#Running_the_Emulator">the
+
+
+        VirtualAGC GUI program</a> was in fact written in <b>AGC-code</b>.
+      Below is a screenshot (click to enlarge) of what that RAD design
+      for tic-tac-toe looks like.&nbsp; If you want to see the generated
+      code, you'll have to run the live demo of <b>AGC-code</b> that I
+      mentioned above, and click on the tab labeled "AGC".&nbsp; (Well,
+      or look <a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tree/master/TicTacToe">in
+
+
+        our own repository</a> for it, but in this context that would be
+      cheating!)<br>
+    </p>
+    <div align="center"><a href="AGC-code-tic-tac-toe.png"><img
+          moz-do-not-send="true" src="AGC-code-tic-tac-toe.png"
+          title="Click to enlarge" alt="" width="983" height="711"
+          border="0"></a></div>
+    <p>I'd also encourage anyone interested in extending the
+      capabilities of the RAD to do so! I'm sure it could always use
+      some new types of code blocks.&nbsp; Also, I'd point out that the
+      code that can be generated is limited right now to so-called "bare
+      metal" programming.&nbsp; In other words, <b>AGC-code</b>
+      generates AGC programs that expect to be the <i>only</i> code
+      running on the AGC.&nbsp; Another scenario would be writing
+      programs that could be integrated into LUMINARY or COLOSSUS, which
+      would act as operating systems.&nbsp; After all, as long as I'm
+      wishing, I may as well wish for the moon, right? <br>
+      <br>
+    </p>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
       <span style="color: rgb(84, 89, 93); font-family: sans-serif;
@@ -13406,10 +13910,13 @@ Commons
 
 
 
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-03-14.<br>
+          2026-07-10.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

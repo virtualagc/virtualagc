@@ -50,6 +50,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
 
 
 
+
             Datatype 0x84</a></li>
         <li><a moz-do-not-send="true" href="#characterEncoding">Encoding
             of Character Data in Object Decks</a></li>
@@ -266,7 +267,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         of the <b>HAL/S-BFC</b> source code</a> can produce <b>PILOT</b>-compatible
+
 
 
 
@@ -287,9 +290,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       Catchy, eh?&nbsp; This script can read object files created by the
       <b>HAL/S-BFC</b>, and parse them into a human readable form.&nbsp;
       Moreover, there's additional commentary embedded within <b>coPILOT.py</b>'s
+
 
 
 
@@ -298,6 +303,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       about <b>coPILOT.py</b>, I'd suggest referring to <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/issues/1273#issuecomment-3897924815">the
+
 
 
 
@@ -355,6 +361,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
             Assembler Language - OS Release 21</a>".&nbsp; Manual for
           the System/360 macro assembler upon which <b>ASM101S</b> is
           modeled.</li>
@@ -363,6 +370,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
             collection of notes about the AP-101S/AP-101B</a>.</li>
         <li>"<a moz-do-not-send="true"
 href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf">AP
+
 
 
 
@@ -415,10 +423,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
               I and II</a>:&nbsp; :&nbsp; Principles of Operation for
             PCI/PCO and MSC</li>
           <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
 
 
 
@@ -467,11 +477,13 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
 
 
 
+
             Shuttle Advanced System/4 Pi Model AP-101 Central Processor
             Unit Technical Description</a>".&nbsp; Note that this
           predates the AP-101S model and doesn't precisely match it.</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
 
 
 
@@ -497,9 +509,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             Wikipedia article "OS/360 Object File Format"</a></li>
         <li><a moz-do-not-send="true"
             href="https://publibz.boulder.ibm.com/epubs/pdf/iea2b270.pdf#page=209">The
+
 
 
 
@@ -514,6 +528,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
             Appendix A</a></li>
         <li><a moz-do-not-send="true"
 href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assembler_Programmers_Guide_Sep82.pdf#page=83">The
+
 
 
 
@@ -605,7 +620,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
     </blockquote>
     <p>In the simplest manner available right now, you might compile it,
       link it, and run it as the following table describes:</p>
-    <table width="100%" cellspacing="2" cellpadding="2">
+    <table cellspacing="2" cellpadding="2" width="100%">
       <tbody>
         <tr>
           <th valign="top">Command-Line Instruction<br>
@@ -623,6 +638,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
 
 
 
+
               more-complete usage instructions are found here</a>.<br>
           </td>
         </tr>
@@ -634,6 +650,7 @@ href="https://bitsavers.org/pdf/ibm/370/OS_VS/assembler/GC33-4021-4_OS_VS_Assemb
             object files that we had compiled separately, rather than
             just a single file, then we could have listed all of them on
             the command line.&nbsp; The option "<font color="#663333"><code>--json-symbols
+
 
 
 
@@ -665,81 +682,26 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             <br>
           </td>
         </tr>
         <tr>
           <td valign="top" nowrap="nowrap">
-            <pre><font color="#663333">gpc-batch --no-trace --outfile6 HELLO_WORLD.txt HELLO_WORLD.fcm</font></pre>
+            <pre><font color="#663333">gpc run --interactive HELLO_WORLD.fcm<br></font></pre>
           </td>
-          <td valign="top">The program <b>gpc-batch</b> is an AP-101S
+          <td valign="top">There are several alternatives, one of which
+            is this.&nbsp; The program <b>gpc</b> is an AP-101S
             emulator and debugger that operates from a command line. It
-            will be available as part of the <b>lnk101</b>
-            installation. We just want to run our program without a lot
-            of messages from <b>gpc-batch</b>, so we use the <font
-              color="#663333"><code>--no-trace</code></font> switch to
-            turn most of its running commentary about what instructions
-            it's executing, what the CPU register values are, and so
-            on.&nbsp; The option "<font color="#663333"><code>--outfile6
-              </code><code><i>FILENAME</i></code><code>.txt</code></font>"
-            tells it the name if the file into which output from the
-            HAL/S <font color="#663333"><code>WRITE(6)</code></font>
-            statements should go.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" nowrap="nowrap">
-            <pre><font color="#663333">cat HELLO_WORLD.txt</font></pre>
-          </td>
-          <td valign="top">Among other things, the <b>cat</b> program
-            is used in Linux or Mac OS to print a file to the
-            display.&nbsp; In Windows, the equivalent command (for our
-            immediate purposes) is <b>type</b>.<br>
+            is available as part of the <b>lnk101</b>
+            installation.&nbsp; For more information, see <a
+              moz-do-not-send="true" href="emulation-shuttle.html">the
+              page dedicated to emulation</a>.<br>
           </td>
         </tr>
       </tbody>
     </table>
-    <p>Each of these programs has additional alternatives that could be
-      explored using their <font color="#663333"><code>--help</code></font>
-      command-line switches.&nbsp; For example, if we ran <b>gpc-batch</b>
-      instead as <br>
-    </p>
-    <blockquote>
-      <pre><font color="#663333">gpc-batch --no-trace --interactive HELLO_WORLD.fcm</font><br></pre>
-    </blockquote>
-    <p>then we could have seen messages immediately as they were
-      emitted, or input directly from the keyboard (if the HAL/S program
-      allowed for it), rather than having to deal with all of the i/o
-      through files.<br>
-    </p>
-    <p>Another possibility would be to use the graphical (GUI) form of
-      the emulator:</p>
-    <blockquote>
-      <pre><font color="#663333"><code>gpc-gui HELLO_WORLD.fcm</code></font><br></pre>
-    </blockquote>
-    <p>That opens up a window that looks something like the following:<br>
-    </p>
-    <p><img moz-do-not-send="true" src="gpc-gui-hello-before.png" alt=""
-        width="1810" height="1056"><br>
-    </p>
-    <p>Just hit the Run hot-button and you'll see it change (look at the
-      TERMINAL pane near the bottom of the window) to <br>
-    </p>
-    <p><img moz-do-not-send="true" src="gpc-gui-hello-after.png" alt=""
-        width="1810" height="1056"><br>
-    </p>
-    <p>Curiously, there's no obvious way to <i>exit</i> the GUI
-      emulator — the <i>un</i>obvious way is to hit ctrl-Q on the
-      keyboard —, but I'm assured that'll be corrected by the time
-      you're likely to be reading this.<br>
-    </p>
-    <p>If HELLO_WORLD.hal had been a more-interactive program, in which
-      it not only used <font color="#663333"><code>WRITE(6)</code></font>
-      to display messages but also <font color="#663333"><code>READ(5)</code></font>
-      to get keyboard input from you, you could have typed your input
-      into the pane at the bottom of the window, where it now shows the
-      message "(waiting for program input...)".<br>
-    </p>
+    <br>
     <h2><a name="scenario2"></a>Scenario 2:&nbsp; Linking a Single
       Object File That Is Not a Complete Program</h2>
     <p>In this scenario, you have one (or a few) object file(s) that
@@ -784,6 +746,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       Shuttle era by a program called <b>MAFGEN</b>.&nbsp; Such a
       disassembly can be parsed to obtain a list of all CSECTs and their
       locations in memory, using a utility I've written called <b>unlinkMAFGEN2.py</b>.&nbsp;
+
 
 
 
@@ -883,6 +846,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
     Given a list of CSECTs, <b>fcmcmp</b> will compare two memory-image
     files, but <i>only</i> the contents of the CSECTs that are
     relevant.&nbsp; In our example of GV7RTL, the memory dump for load
@@ -891,6 +855,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     GV7RTL are actually compared, while the remainder of G16 is simply
     ignored.<br>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -1030,6 +995,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       HAL/S program</a> 140-STATISTICS from the book <i>Programming in
       HAL/S</i>:<br>
     <blockquote>
@@ -1091,7 +1057,9 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
       "Basic HAL/S Programming" course's section "HAL/S CSECTS"</a>.&nbsp;
+
 
 
 
@@ -1136,6 +1104,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
 
 
 
+
           PROCEDURE</code>) accessible by other compilation units.&nbsp;
         <code>ZCON</code> code and <code>REMOTE</code> data are "far
         away" in the AP-101S address space from the code accessing them,
@@ -1144,6 +1113,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf#page
         and <code>ESUM</code> are AP-101S assembly-language functions
         from <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
 
@@ -1218,7 +1188,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         Earlier when I mentioned <a moz-do-not-send="true" href="#bfs">the
+
 
 
 
@@ -1360,6 +1332,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       As for condition #2, the only <font color="#663300"><code>USING</code></font>
       pseudo-op follows the instruction rather than precedes it, so
       there is no way for the assembler to make any assumptions about
@@ -1407,6 +1380,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       That discussion points out a single AP-101S-specific datatype, Z,
       that's speculated to be <i>unrelated</i> to the System/360
       datatype also designated as Z ("zoned decimal", 0x34).&nbsp; For
@@ -1443,11 +1417,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     characters or control codes, the numerical encoding matches ASCII as
     well. <br>
     <p align="center"><img moz-do-not-send="true" src="encodingDEU.png"
-        alt="" width="638" height="468" align="top"></p>
+        alt="" align="top" width="638" height="468"></p>
     Reverse engineering reveals at least some of the cases in which DEU
     encoding is used in place of EBCDIC in the object files:<br>
     <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="top">Classification of Textual Data<br>
@@ -1471,7 +1445,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
               </li>
             </ul>
           </td>
-          <td valign="middle" align="center">EBCDIC<br>
+          <td align="center" valign="middle">EBCDIC<br>
           </td>
         </tr>
         <tr>
@@ -1479,7 +1453,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             source code, such as <code>DECLARE CHARACTER CONSTANT</code>
             statements, <code>DECLARE CHARACTER INITIAL</code>
             constants, or character literals.</td>
-          <td valign="middle" align="center">DEU<br>
+          <td align="center" valign="middle">DEU<br>
           </td>
         </tr>
         <tr>
@@ -1487,7 +1461,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             assembly-language source code, such as <code>DC</code>
             pseudo-ops or so-called "literals" like "<code>=C'...'</code>".<br>
           </td>
-          <td valign="middle" align="center">TBD (currently, assumed
+          <td align="center" valign="middle">TBD (currently, assumed
             EBCDIC)<br>
           </td>
         </tr>
@@ -1496,6 +1470,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <br>
     Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/037-ROOTS.hal">this
+
 
 
 
@@ -1532,6 +1507,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         There's no easy way, as far as I know, using just information
         within the object decks themselves, to easily locate individual
         unnamed string literals within the TXT records of the object
@@ -1541,6 +1517,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         invalidate the conclusions in any way.&nbsp; In the next
         section, we'll learn enough to infer that the these strings <i>should</i>
         have been found in a <code>CSECT</code> called <code>#DROOTS</code>.&nbsp;
+
 
 
 
@@ -1574,6 +1551,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S/021-SIMPLE.hal">this
+
 
 
 
@@ -1660,7 +1638,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-03-31<br>
+          2026-07-20<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

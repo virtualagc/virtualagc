@@ -1,0 +1,1119 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>HAL/S Development Chain</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <link rel="stylesheet" href="Header.css">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Running It!").replace("@SUBTITLE@","Emulation for HAL/S and/or AP-101"))</script><br>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#Installation">Installation of
+          the Emulators</a></li>
+      <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a></li>
+      <li>Emulating HALMAT</li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#zane">Zane Hambly's
+            Emulator</a></li>
+        <li><a moz-do-not-send="true" href="#claude">Claude's Emulator</a><br>
+        </li>
+      </ul>
+      <li>Emulating AP-101</li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#don">Don Schmidt's Emulator</a></li>
+        <li><a moz-do-not-send="true" href="#dan">Dan Weaver's Emulator</a><br>
+        </li>
+      </ul>
+      <ul>
+      </ul>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    Elsewhere we've talked about <a moz-do-not-send="true"
+      href="HAL.html">how to compile HAL/S-language programs</a>, <a
+      moz-do-not-send="true" href="ASM101S.html">how to assemble AP-101S
+      assembly-language programs</a>, and <a moz-do-not-send="true"
+      href="HALLINK101S.html">how to link AP-101S object-code files to
+      get executable AP-101S memory images</a>.&nbsp; The important
+    topic of how to actually run any of these programs without an actual
+    AP-101S computer and a Space Shuttle to provide the computer's
+    peripheral devices remains.&nbsp; Let's tackle that now.<br>
+    <br>
+    The answer is <i>emulation</i>.&nbsp; We provide "virtual machines"
+    that run within your own computer — whether Linux, Mac OS, or
+    Windows —, but which can run HAL/S or AP-101S code in some
+    fashion.&nbsp; There are several alternative ways to accomplish this
+    feat.&nbsp; You may consider these choices either a blessing or a
+    curse, but you nevertheless need to make a decision about which
+    approach is most-suitable for your own purposes.<br>
+    <br>
+    There are actually two broadly-different classes of emulators
+    available, and multiple emulators in each of the two classes.&nbsp;
+    Two of the emulators accept AP-101S memory images as alluded to
+    above, and pretend to be an AP-101S computer, directly executing
+    AP-101S machine code.&nbsp; <br>
+    <br>
+    Two of the emulators instead accept programs in a form that's known
+    as the <i>HALMAT Intermediate Language</i>, and execute
+    instructions of the HALMAT language.&nbsp; Where would you get such
+    a "HALMAT" program from, and why in the world would you want
+    to?&nbsp; Getting your hands on HALMAT code is not a problem,
+    because HALMAT is the natural way that the HAL/S compiler
+    communicates amongst its various passes; in other words, HALMAT is
+    going to be produced by the HAL/S compilation process automatically,
+    whether you happen to care about it or not.&nbsp; There are various
+    pro's and con's related to emulation via HALMAT versus via AP-101S:<br>
+    <ul>
+      <li>Pro: Using HALMAT is easier and simpler than using AP-101S
+        object code in some sense.&nbsp; How?&nbsp; As you may recall,
+        we have two modern ports of the HAL/S compiler:&nbsp; We have a
+        <i>full</i> port that is time-consuming to install and requires
+        a complex environment in which to operate, and we have a
+        Python-language port of just the compiler's first pass, which is
+        simplicity itself to install and to use anywhere.&nbsp; For
+        HALMAT emulation we could compile our HAL/S using <i>either</i>
+        compiler, but for AP-101S emulation we're forced to install and
+        use the trickier compiler.<br>
+      </li>
+      <li>Pro: No separate "linking" step is needed for combining sets
+        of separately-compiled HAL/S modules.<br>
+      </li>
+      <li>Pro: Emulated HALMAT would be expected to run faster and more
+        efficiently than emulated AP-101S.</li>
+      <li>Con: There is no form of HALMAT used by the AP-101S assembler,
+        so AP-101S assembly-language programs are not supported.</li>
+      <li>Con: Unlike machine code, HALMAT instructions don't have
+        specific timings, so it's tricky to maintain exact timing in
+        software that needs it.<br>
+      </li>
+    </ul>
+    <h1><a name="Installation"></a>Installation of the Emulators</h1>
+    <p>You can choose to install any or all of the available
+      emulators.&nbsp; Or none of them, of course, though if so, I'd
+      question why you're even reading this at all.<br>
+    </p>
+    <p>I'd note that most of these emulators are written by independent
+      developers and reside in their own projects, separate from the
+      Virtual AGC Project itself, so I literally have no way of giving
+      you authoritative installation instructions for them, or of
+      dealing with problems you encounter using them.&nbsp; Nor are all
+      of the emulators (yet) at fully-comparable levels of development
+      or capability.&nbsp; Weighing all of that, I'll very-subjectively
+      prioritize them as follows in terms of which ones I think might be
+      most useful to you if you're complete newbies.&nbsp; Of course,
+      the rankings are just at the time of this writing ... all of which
+      may (and probably will!) change in time.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1" align="center"
+      width="50%">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>yaHALMAT2</b><br>
+            </div>
+            <br>
+            I'll assume you have a local clone of the Virtual AGC source
+            tree from GitHub, and for the sake of argument I'll refer to
+            that local directory as <i><code>virtualagc</code></i>.&nbsp;
+            But use the <i>actual</i> directory name in the
+            instructions below.<br>
+            <br>
+            To build it on Linux or Mac OS, simply<br>
+            <blockquote>
+              <pre>cd <font color="#996633"><i>virtualagc</i></font>/yaShuttle/yaHALMAT2/src<br>make clean all<br></pre>
+            </blockquote>
+            On Windows, you should be able to build it either in an
+            MSYS2 environment (for which the instructions should be the
+            same as above), or else in a Windows "developer" terminal
+            using Visual C.&nbsp; In the latter case, I'm told that
+            instead of <b>make</b> you have to use <b>nmake</b>, along
+            with the makefile called Makefile.win.&nbsp; But I've only
+            built <b>yaHALMAT2</b> on Linux, so you can regard anything
+            I say about Mac OS or Windows as speculative.&nbsp; The
+            default on Linux, Mac, or Windows with MSYS2 is to use <b>clang</b>
+            as the compiler if available, falling back on <b>gcc</b>.&nbsp;
+            Regardless of the platform, you can choose any compiler you
+            want by specifying it on the <b>make</b>/<b>nmake</b>
+            command line with the <code>CC</code> variable.&nbsp; I
+            have not tried that myself.<br>
+            <br>
+            Finally, once compiled, unless you want to invoke <b>yaHALMAT2</b>
+            by using its full pathname, you'll probably want to copy or
+            link <b>yaHALMAT2[.exe]</b> somewhere into your existing
+            path, or else change your <code>PATH</code> variable to
+            include the directory that <b>yaHALMAT2</b> is in.&nbsp;
+            I'll let you to figure out that part.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>gpc</b><br>
+            </div>
+            <br>
+            To my recollection, I have lost the ability to build <b>gpc</b>
+            from source, but perhaps <a moz-do-not-send="true"
+              href="https://github.com/ColanderCombo/nsts-sim-gpc">the
+              author's instructions</a> might work for you.&nbsp; I
+            think what worked for me was to download <a
+              moz-do-not-send="true"
+              href="https://github.com/ColanderCombo/nsts-sim-gpc/releases">the
+              pre-built "AppImage" for Linux</a>, rename it "gpc", and
+            copy it into my path.&nbsp; There are also pre-built Mac OS
+            "dmg" files at the same link, though I don't know how to use
+            them myself.&nbsp; As far as Windows is concerned, I haven't
+            a clue as to what you have to do. <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>ap0000a</b><br>
+            </div>
+            <br>
+            (Not yet publicly available. I've seen it privately, only in
+            very-preliminary versions.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>yaHALMAT</b><br>
+            </div>
+            <br>
+            You need first to clone <a moz-do-not-send="true"
+              href="https://github.com/Zaneham/Halmat">the source tree
+              from GitHub</a> (or download it via a zipfile) into a
+            local directory in your filesystem.&nbsp; For the sake of
+            discussion, let's suppose that the local directory is called
+            <i><code>Halmat</code></i>.&nbsp; If you've chosen to call
+            it something else, then substitute the correct name
+            instead.&nbsp; To build it on Linux or Mac OS, do this:<br>
+            <blockquote>
+              <pre>cd <font color="#996633"><i>Halmat</i></font>/emu<br>make clean yaHALMAT<br></pre>
+            </blockquote>
+            On Windows?&nbsp; Maybe it will work.&nbsp; I don't know,
+            I've only tried it on Linux myself.<br>
+            <br>
+            Finally, once compiled, unless you want to invoke <b>yaHALMAT</b>
+            by using its full pathname, you'll probably want to copy or
+            link <b>yaHALMAT[.exe]</b> somewhere into your existing
+            path, or else change your <code>PATH</code> variable to
+            include the directory that <b>yaHALMAT</b> is in.&nbsp;
+            I'll let you to figure out that part.</td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="halmat"></a>The Mystery of HALMAT</h1>
+    <p>Supporting HALMAT is quite a bit trickier than supporting AP-101S
+      machine language, not because of its structure, but for historical
+      reasons.&nbsp; So a few words of explanation are in order.<br>
+    </p>
+    <p>As you already know, the original compiler used for converting
+      Space Shuttle flight software written in the high-level language
+      known as HAL/S into assembly-language object code for the Space
+      Shuttle's general purpose computers was partitioned into several
+      successive passes as follows:<br>
+    </p>
+    <ul>
+      <li>PASS1 parsed the HAL/S source code and generated a
+        representation of the software in terms of an "intermediate
+        language" called HALMAT.</li>
+      <li>OPT "optimized" the HALMAT produced by PASS1, thus producing
+        another functionally-identical but presumably more-efficient set
+        of HALMAT instructions.</li>
+      <li>PASS2 imported the optimized HALMAT and generated AP-101S
+        assembly-language object code.</li>
+    </ul>
+    Given that any emulation is going to be run on modern computers that
+    are <i>many</i> times faster than the original AP-101S computers,
+    with incredibly more memory, one might question the continued need
+    for "optimization" at all.&nbsp; So if you were going to run a HAL/S
+    program by emulating its HALMAT rather than its AP-101S machine
+    code, your development pipeline could conceivably reduce from <br>
+    <br>
+    <div align="center">Compiler PASS1 → OPT → PASS2 → link → AP-101S
+      emulator</div>
+    to just<br>
+    <br>
+    <div align="center">Compiler PASS1 → HALMAT emulator </div>
+    <br>
+    What makes the latter even more compelling, at least at first
+    glance, is that we have two separate versions of the HAL/S
+    compiler's PASS1, and in the second pipeline can use the version of
+    the compiler that's easier to install.<br>
+    <br>
+    Sounds promising.&nbsp; But alas, not perfect!&nbsp; Where this
+    concept has fallen apart up to now is the inadequacy of surviving
+    documentation <i>about</i> HALMAT.&nbsp; Without a satisfactory
+    definition of the HALMAT language, how might we be expected to
+    create an emulator for it?&nbsp; On the other hand,&nbsp; <i>some</i>
+    HALMAT documentation has survived:<br>
+    <ol>
+      <li><a moz-do-not-send="true"
+          href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">A
+          complete description was written up in 1971</a>.&nbsp; As the
+        document itself explains, it "is essentially a handbook of an
+        intermediate language HALMAT produced and used during the
+        operation of the HAL360-V1 compiler".&nbsp; In case it isn't
+        obvious, HAL360-V1 was Intermetrics's very first attempt at a
+        HAL compiler — <i>not</i> yet HAL/S —, producing object code
+        running on an IBM System/360 computer rather than an AP-101S
+        computer.&nbsp; Actually, the document says only that HAL360-V1
+        ran on an IBM System/360, and doesn't explicitly say that the
+        compiled form of the HAL software ran on a System/360; but the
+        document nowhere mentions the AP-101 computer, and that seems
+        very telling!&nbsp; Besides which, the document specifically
+        calls HAL360-V1 a "preliminary version", or as we might think of
+        it, a proof of concept.&nbsp; The problem is, that being
+        "preliminary", details changed later!&nbsp; How much was changed
+        or added we can't tell from a superficial examination, but
+        changes there definitely were.</li>
+      <li>Intermetrics's much later document IR-60, "HAL/S-360 Compiler
+        System Specification", has a very large Appendix A that
+        specifies the HALMAT instructions in detail.&nbsp; We have no
+        assurance that this is the final form of the HALMAT language,
+        but all later documentation refers back to IR-60 as the
+        authoritative source, so I think we should probably recognize it
+        as such as well.&nbsp; <i>Unfortunately</i>, the only copy of
+        IR-60 which has survived to fall into our hands is <a
+          moz-do-not-send="true"
+href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">Revision
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          5 of the document, IR-60-5 from 1977</a>, and this version
+        contains only the pages that changed between Revision 4 and
+        Revision 5.&nbsp; The complete Appendix A, which from the page
+        markings must contain at least 118 pages, has only 20 pages in
+        our surviving copy!&nbsp; Then too, a Revision 6 is known to
+        have been in the JSC library at one time — though not any longer
+        — and so potentially there could have been changes later even
+        than in what has survived in our copy.&nbsp; It could be that
+        more-complete copies of IR-60 still exist somewhere, perhaps in
+        the hands of a collector, but for now we have no reason to
+        believe that they weren't all simply thrown away.<br>
+      </li>
+      <li>Though not "documentation" as such, the HAL/S-FC compiler
+        passes PASS1, OPT, and PASS2 all outputed and/or inputed HALMAT
+        files, so potentially one could get additional information about
+        HALMAT's individual instructions or groupings of instructions by
+        looking through HAL/S-FC source code.</li>
+      <li>Moreover, PASS1 has the optional capability of interleaving
+        HAL/S statements with the derived HALMAT in the compilation
+        reports it generates.&nbsp; Similarly, PASS2 has the optional
+        capability of interleaving HALMAT with the assembly-language
+        instructions it generates in the compilation reports it
+        generates.&nbsp; (And even OPT, which normally doesn't output
+        much of a report, has an analogous capability.)&nbsp; Therefore,
+        by crafting sample HAL/S source-code files and compiling them,
+        it's possible to deduce more detail about HALMAT instructions as
+        well.</li>
+    </ol>
+    <p><a name="zane-doc"></a>Thus although complete documentation about
+      HALMAT in a nicely-packaged, authoritative document seems to have
+      escaped us, it is not necessarily clear that we couldn't
+      regenerate a complete description of the language through reverse
+      engineering.&nbsp; And if we could do that, perhaps a HALMAT
+      emulator could become a reality.&nbsp; It is, however, very tricky
+      to do so, or to justify without advance guarantee of success.<br>
+    </p>
+    Zane Hambly (go, Zane!) made the first key steps in that
+    direction.&nbsp; Zane's key idea was to provide a parser that
+    roughly served to analyze the source code of the original HAL/S
+    compiler (which was written in a computer language I call XPL/I,
+    though the original developers misleadingly called it XPL).&nbsp;
+    This allowed picking out all references to how HALMAT was generated
+    or used by the original compiler.&nbsp; Zane's synthesis of all of
+    that led to a preliminary description of HALMAT and its many
+    instructions is in the form of <a moz-do-not-send="true"
+      href="https://github.com/Zaneham/Halmat/blob/main/Halmat.pdf">a
+      single document describing all that was then known or suspected
+      about HALMAT</a>.&nbsp; Indeed, he went farther than that, and
+    created a preliminary HALMAT emulator based on the synthesized
+    specification.&nbsp; The emulator itself is called <b>yaHALMAT</b>,
+    and as we discussed in the installation section above, resides in
+    Zane's own <a moz-do-not-send="true"
+      href="https://github.com/Zaneham/Halmat/tree/main">repository</a>.&nbsp;
+    At this writing, the fly in the ointment is that after the
+    extremely-rapid initial development of the HALMAT spec and of <b>yaHALMAT</b>,
+    life and priorities intervened and progress came to a halt.&nbsp;
+    Zane seems clear that it will resume, and we'll keep our fingers
+    crossed that he's right.&nbsp; In the meantime, the work that has
+    been done so far serves as a very powerful proof-of-concept.<br>
+    <br>
+    The hiatus in <b>yaHALMAT</b> development just mentioned has
+    motivated me to follow-up Zane's work by leveraging AI, and
+    specifically ANTHROP\C Claude (using LLM Sonnet 5).&nbsp; While this
+    is pretty far-out thinking, Claude has proven up to the task,
+    managing (albeit with guidance) to create both new documentation for
+    HALMAT and a new emulator (<b>yaHALMAT2</b>, based loosely on <b>yaHALMAT</b>).<br>
+    <br>
+    There's another tool for understanding HALMAT as well.&nbsp; If
+    you've read much of our discussions of the HAL/S language and the
+    development tools provided for it, you'll have seen various examples
+    of actual HALMAT.&nbsp; But those examples have always been in the
+    form of incomprehensible numerical codes provided in one form or
+    another by reports output by the HAL/S compiler.&nbsp; [<i>Nota bene</i>:
+    Aside from being incomprehensible in themselves, they are also
+    sometimes actually wrong, in that HALMAT instructions may be
+    duplicated, may be shown out of order, and so on.]&nbsp; Those
+    bursts of HALMAT code, unsurprisingly, have little value to us
+    today, or at least not as-is.&nbsp; To help bridge the
+    comprehensibility gap a little, I've written a little utility called
+    <b>unHALMAT.py</b> that produces a surprisingly useful and fairly
+    human-friendly version of the HALMAT produced by the compiler, by
+    combining it with other available information like symbol tables,
+    literal files, and so on.&nbsp; Here's what <b>unHALMAT.py</b> can
+    do with the HALMAT file generated by compiling our ubiquitous
+    HELLO.hal program:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">HALSFC --clean --archive --parms=SRN,LSTALL,ADDRS,LISTING2 HELLO.hal</font><br>Results stored in the folder "archive.results/HALSFC HELLO.hal 2026-07-20 06-51-35.results".<br>Accessible also as "current.results" until next HALSFC run.<br>For previous runs see also "current-1.results", "current-2.results".<br>Compilation successful.<br>&gt; <font color="#996633">cd current.results</font><br>&gt; <font color="#996633">unHALMAT.py halmat.bin</font><br>7200 bytes read from halmat.bin<br>RECORD 0<br>  HALMAT #0 (0x005, Start of HALMAT block): PXRC(1) 00 0 0<br>  HALMAT #1	  | 05C 00 00(  0) 00 00 00 01 00 00   (Matching XREC is at HALMAT #92)<br>  HALMAT #2 (0x02B, Start of PROGRAM definition): MDEF(1) 00 0 0<br>  HALMAT #3	  | 001 00 01(SYT) 00 00 00 01 00 00   (Symbol #1: HELLO, PROGRAM LABEL)<br>  HALMAT #4 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #5	  | 001 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #1)<br><br>          1 M| HELLO:                                                                                              |<br>          1 M| PROGRAM;                                                                                            |<br><br>  HALMAT #6 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #7	  | 002 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #2)<br><br>          2 M|   DECLARE I INTEGER;                                                                                |<br><br>  HALMAT #8 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #9	  | 003 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #3)<br><br>          3 M|   DECLARE POOKIE CHARACTER(20);                                                                     |<br><br>  HALMAT #10 (0x841, CHARACTER INITIAL value): CINT(2) 02 0 0<br>  HALMAT #11	  | 004 00 01(SYT) 00 00 00 01 00 00   (Symbol #4: MY_NAME, CHARACTER ALIGNED STATIC INITIAL)<br>  HALMAT #12	  | 003 00 05(LIT) 00 00 00 01 00 00   (Literal #3: Type CHARACTER, 'RON BURKEY')<br>  HALMAT #13 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #14	  | 004 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #4)<br><br>          4 M|   DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');                                              |<br><br>  HALMAT #15 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #16	  | 005 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #5)<br><br>          5 M|   DECLARE INTEGER, J;                                                                               |<br><br>  HALMAT #17 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #18	  | 006 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #6)<br><br>          6 M|   REPLACE PRINTER BY "6";                                                                           |<br><br>  HALMAT #19 (0x031, End of DECLAREs): EDCL(0) 01 1 0<br>  HALMAT #20 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #21	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #22 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #23	  | 005 02 05(LIT) 00 00 00 01 00 00   (Literal #5: Type CHARACTER, 'THE BEGINNING')<br>  HALMAT #24 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #25	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #26 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #27 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #28	  | 007 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #7)<br><br>          7 M|   WRITE(PRINTER) 'THE BEGINNING';                                                                   |<br>     .<br>     .<br>     .<br><br> &nbsp;HALMAT #79 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #80	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #81 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #82	  | 011 02 05(LIT) 00 00 00 01 00 00   (Literal #17: Type CHARACTER, 'THE END')<br>  HALMAT #83 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #84	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #85 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #86 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #87	  | 00E 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #14)<br><br>         14 M|   WRITE(6) 'THE END';                                                                               |<br><br>  HALMAT #88 (0x030): CLOS(1) 00 0 0<br>  HALMAT #89	  | 001 00 01(SYT) 00 00 00 01 00 00   (Symbol #1: HELLO, PROGRAM LABEL)<br>  HALMAT #90 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #91	  | 00F 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #15)<br><br>         15 M| CLOSE HELLO;                                                                                        |<br><br>  HALMAT #92 (0x002, End of HALMAT block): XREC final<br><br></pre>
+    </blockquote>
+    <p>Human-friendly, you say?&nbsp; What kind of dope dream is
+      that?&nbsp; Well, let's just go through a few lines of it:<br>
+    </p>
+    <ul>
+      <li>HALMAT #0:&nbsp; "Start of HALMAT block".&nbsp; Seems
+        understandable to me.</li>
+      <li>HALMAT #1:&nbsp; This is an argument for HALMAT #0.&nbsp; It
+        tells us that the HALMAT block ends at HALMAT #90.</li>
+      <li>HALMAT #2:&nbsp; "Start of PROGRAM definition".&nbsp; Tells us
+        that this HALMAT block is a <code>PROGRAM</code> (versus a <code>PROCEDURE</code>,
+        <code>FUNCTION</code>, or <code>COMPOOL</code>).</li>
+      <li>HALMAT #3:&nbsp; This is an argument for HALMAT #2.&nbsp; It
+        tells us that the <code>PROGRAM</code> is named <code>HELLO</code>.&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        That information is just to help out the reader, though.&nbsp;
+        HALMAT only cares that it's "Symbol #1", and not what it's
+        particular name is in your imagination.<br>
+      </li>
+      <li>HALMAT #4:&nbsp; "HAL/S statement marker".&nbsp; These appear
+        at the <i>ends</i> of sequences of HALMAT instructions
+        implementing a given statement in the HAL/S source code, though
+        in compiler reports they're generally printed at the beginning
+        instead.<br>
+      </li>
+      <li>HALMAT #5:&nbsp; This is an argument for HALMAT #4, telling is
+        that the HAL/S statement at issue is statement #1.&nbsp; The
+        number matches the numbers printed in compiler pass 1
+        reports.&nbsp; In this particular example, the pass 1 report
+        says <font color="#663333"><code>1 M| HELLO:</code></font>
+        followed by <font color="#663333"><code>1 M| PROGRAM;</code></font>.<br>
+      </li>
+      <li>HALMAT #6 and #7:&nbsp; Another HAL/S statement marker, this
+        time for HAL/S statement #2.&nbsp; that's just <font
+          color="#663333"><code>2 M|&nbsp;&nbsp; DECLARE I INTEGER;</code></font>,
+        which apparently doesn't require any HALMAT instructions.</li>
+      <li>HALMAT #8 and #9:&nbsp; Boring!<br>
+      </li>
+      <li>HALMAT #10 through #14:&nbsp; Finally, something more
+        interesting!&nbsp; This tells us that HAL/S statement #3, <font
+          color="#663333"><code>3 M|&nbsp;&nbsp; DECLARE MY_NAME
+            CHARACTER(20) INITIAL('RON BURKEY');</code></font>,&nbsp;
+        "Symbol #3" is a "CHARACTER INITIAL value", whose symbol for
+        your reading ease is <code>MY_NAME</code>, and whose value is
+        "RON BURKEY".</li>
+      <li>And so on.&nbsp; The remainder is an exercise for the
+        reader.&nbsp; But the point is clear:&nbsp; HALMAT is not so
+        hard to understand, once you know the trick!<br>
+      </li>
+    </ul>
+    <ul>
+    </ul>
+    <h1>Emulating HALMAT</h1>
+    One characteristic of HALMAT files is that they don't <i>quite</i>
+    contain all of the information needed to run the program.&nbsp; The
+    thing they're missing is the values of <i>literals</i>, and HALMAT
+    emulators have to be supplied that information separately from the
+    HALMAT file itself.&nbsp; The values of literals are actually
+    provided in <i>two</i> files, both of which are needed, with
+    filenames differing according to the compiler or compiler pass that
+    produced them. One of the files contains the values and indications
+    of datatypes for all of the literals, <i>except</i> that the
+    textual data for <code>CHARACTER</code> literals instead appears in
+    the second of the files, with the first file providing only an index
+    into the second file.&nbsp; Too complex for your tastes?&nbsp; Mine
+    too!&nbsp; But I'm not the one who set it up that way.&nbsp; Here's
+    a handy lookup table for the default filenames involved:<br>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <th align="center" valign="middle">Compiler/Pass<br>
+          </th>
+          <th align="center" valign="middle">HALMAT Filename<br>
+          </th>
+          <th align="center" valign="middle">First Literal File<br>
+          </th>
+          <th align="center" valign="middle">Second Literal File<br>
+          </th>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">HALSFC-PASS1<br>
+          </td>
+          <td align="center" valign="middle">halmat.bin<br>
+          </td>
+          <td align="center" valign="middle">litfile0.bin<br>
+          </td>
+          <td align="center" valign="middle">COMMON0.out.bin.gz</td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">HALSFC-OPT<br>
+          </td>
+          <td align="center" valign="middle">optmat.bin<br>
+          </td>
+          <td align="center" valign="middle">litfile2.bin<br>
+          </td>
+          <td align="center" valign="middle">COMMON2.out.bin.gz<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">HAL_S_FC.py<br>
+          </td>
+          <td align="center" valign="middle">FILE1.bin<br>
+          </td>
+          <td align="center" valign="middle">FILE2.bin<br>
+          </td>
+          <td align="center" valign="middle">LIT_CHAR.bin<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    But ... literals?&nbsp; What are they?&nbsp; If you're actually
+    interested, here's a long digression to sate your curiosity. There
+    are 3 types of literals in HAL/S: numeric literals (corresponding to
+    <code>INTEGER</code> and <code>SCALAR</code> datatypes), string
+    literals <code>(CHARACTER</code> datatype), and bit literals (<code>BIT</code>
+    datatype).&nbsp; It's best to illustrate them by looking at the
+    source-code itself, where I've highlighted all of the literals in <font
+      color="#cc33cc">purple</font>:<br>
+    <font size="-1"> </font>
+    <blockquote>
+      <pre>DEBUG ¢C¢D¢E¢F<br> HELLO: PROGRAM;<br>    DECLARE I INTEGER;<br>    DECLARE MY_NAME CHARACTER(<font color="#cc33cc">20</font>) INITIAL(<font color="#cc33cc">'RON BURKEY'</font>);<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(<font color="#cc33cc">PRINTER</font>) <font color="#cc33cc">'THE BEGINNING'</font>;<br>    DO FOR I = <font color="#cc33cc">1</font> TO <font color="#cc33cc">5</font>;<br>       WRITE(<font color="#cc33cc">PRINTER</font>) I, <font color="#cc33cc">'HELLO, WORLD!'</font>;<br>       DO FOR J = <font color="#cc33cc">2</font> TO <font color="#cc33cc">8</font> BY <font color="#cc33cc">2</font>;<br>          WRITE(<font color="#cc33cc">PRINTER</font>) <font color="#cc33cc">'     '</font>, J, MY_NAME||<font color="#cc33cc">' SAYS ISN''T THIS FUN?'</font>;<br>       END;<br>    END;<br>    WRITE(<font color="#cc33cc">6</font>) <font color="#cc33cc">'THE END'</font>;<br> CLOSE HELLO;</pre>
+    </blockquote>
+    <font size="-1"> </font>I bet you're scratching your head over
+    that, aren't you?&nbsp; <img moz-do-not-send="true"
+      src="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/smiley.png"
+      alt="" width="16" height="16">&nbsp; You're asking why <code>"6"</code>
+    is not a literal but <code>PRINTER</code> is one?&nbsp; Remember
+    that in HAL/S, something like <code>REPLACE PRINTER BY "6"</code>
+    is really a <i>preprocessor</i> instruction causing every instance
+    of <code>PRINTER</code> to be replaced by <code>6</code>.&nbsp; So
+    as far as the HALMAT is concerned, there isn't any such thing as
+    "PRINTER", there's only 6, whereas to the compiler the opposite is
+    true.<br>
+    <br>
+    In fact, we have <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">a
+      handy utility (<b>unLitfile</b>) that parses these litfiles into
+      human-readable form</a>, so you can see exactly what literals they
+    are communicating:
+    <blockquote>
+      <pre>&gt; unLitfile litfile0.bin<br>Literal    1: FIXED  42140000,00000000 ' 2.000000000000000E+01'<br>Literal    2: STRING 'RON BURKEY'<br>Literal    3: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal    4: STRING 'THE BEGINNING'<br>Literal    5: FIXED  41100000,00000000 ' 1.000000000000000E+00'<br>Literal    6: FIXED  41500000,00000000 ' 5.000000000000000E+00'<br>Literal    7: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal    8: STRING 'HELLO, WORLD!'<br>Literal    9: FIXED  41200000,00000000 ' 2.000000000000000E+00'<br>Literal   10: FIXED  41800000,00000000 ' 8.000000000000000E+00'<br>Literal   11: FIXED  41200000,00000000 ' 2.000000000000000E+00'<br>Literal   12: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal   13: STRING '     '<br>Literal   14: STRING ' SAYS ISN'T THIS FUN?'<br>Literal   15: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal   16: STRING 'THE END'<font size="-1"><br></font></pre>
+    </blockquote>
+    Exactly as you might guess from our <font color="#cc33cc">purple
+      highlights</font>!<br>
+    <blockquote><b><font size="-1">Aside:</font><font size="-2"> </font></b><font
+        size="-1">Beware, though, because the litfile format doesn't
+        allow determination of the total number of literals contained
+        within it — you just have to know! —, so <b>unLitfile</b>
+        doesn't know for sure where the list ends.&nbsp; There may be
+        extra literals at the end of the list that look like real
+        literals but have little to do with anything in the HAL/S source
+        code.&nbsp; More precisely: the litfile is formatted as a series
+        of "pages" of 130 literals each, and generally speaking, any
+        unused areas in the <i>final</i> page will be duplicates of
+        literals found in corresponding locations on the penultimate
+        page.&nbsp; If there are 130 or less literals, as in the example
+        above, all is well.&nbsp; If there are more than 130, but not an
+        exact multiple of 130, there will be bogus literals at the end.</font><br>
+    </blockquote>
+    <font size="-1"> </font>But you don't really need <b>unLitfile</b>
+    if you're just curious about how literals are communicated between
+    compiler passes.&nbsp; When <code>¢E</code> is present in a <code>DEBUG</code>
+    directive in the HAL/S file, it causes the compiler to print the
+    entire literal table in the report (pass1.rpt) it emits from its
+    parsing path.&nbsp; Not surprisingly, you get the same info as from
+    <b>unLitfile</b>, albeit with a little less info ... <i>but</i>
+    with the added benefit that since the compiler actually knows how
+    many literals there are, it doesn't print any bogus ones at the end
+    of the list!<br>
+    <font size="-1"> </font>
+    <blockquote>
+      <pre>L I T E R A L   T A B L E   D U M P:<br><br> LOC  TYPE          LITERAL<br> <br>   1 ARITH  4214000000000000<br>   2  CHAR  RON BURKEY<br>   3 ARITH  4160000000000000<br>   4  CHAR  THE BEGINNING<br>   5 ARITH  4110000000000000<br>   6 ARITH  4150000000000000<br>   7 ARITH  4160000000000000<br>   8  CHAR  HELLO, WORLD!<br>   9 ARITH  4120000000000000<br>  10 ARITH  4180000000000000<br>  11 ARITH  4120000000000000<br>  12 ARITH  4160000000000000<br>  13  CHAR       <br>  14  CHAR   SAYS ISN'T THIS FUN?<br>  15 ARITH  4160000000000000<br>  16  CHAR  THE END<br></pre>
+    </blockquote>
+    <p>The other little mystery, if you've kept your eyes open, is that
+      <b>unLitfile</b> seems to be implying that literals like 1, 8, or
+      6 are really floating-point.&nbsp; Or at least, are <i>stored</i>
+      that way. &nbsp; It's true.&nbsp; The numeric literals, whether <b>SCALAR</b>
+      <i>or</i> <b>INTEGER</b>, double <i>or</i> single precision, are
+      stored in the litfiles as double-precision floating point in
+      so-called IBM Hexadecimal (HFP) format.&nbsp; <b>BIT</b>
+      literals, on the other hand, of which there are none in our
+      example, are all stored as 32-bit big-endian form.</p>
+    <blockquote> </blockquote>
+    <h2><a name="zane"></a>Zane Hambly's Emulator<br>
+    </h2>
+    My illustrating comments here are frozen at the emulator's condition
+    when I first wrote about it, so you may find some differences if you
+    try out the emulator now.&nbsp; <a moz-do-not-send="true"
+      href="https://github.com/Zaneham/Halmat">All of Zane's material is
+      in his own GitHub repository</a>.&nbsp; <a moz-do-not-send="true"
+      href="https://github.com/Zaneham/Halmat/issues/new/choose">That's
+      also where bugs should be reported, as "issues" in the repository</a>.<br>
+    <br>
+    This program itself is called <b>yaHALMAT</b> — or probably
+    yaHALMAT.exe on Windows, though I haven't tried it there myself —
+    and you'll want to make sure that it gets into your PATH.&nbsp;
+    Assuming you've done all that, it's time to play!&nbsp; I'll give a
+    few examples of my own below, although Zane has some of his own as
+    well.<br>
+    <br>
+    What's the first thing to try out?&nbsp; You know the answer, so why
+    even ask?&nbsp; Here's a program I call REALLY_HELLO.hal (to
+    distinguish it from the entirely-different sample program I
+    foolishly called HELLO.hal that we've been using throughout many of
+    our discussions of HAL/S):<br>
+    <blockquote>
+      <pre> HELLO: PROGRAM;<br>     WRITE(6) 'Hello, world!';<br> CLOSE HELLO;<br></pre>
+    </blockquote>
+    Compile it:<br>
+    <blockquote>
+      <pre>HALSFC --test REALLY_HELLO.hal<br></pre>
+    </blockquote>
+    And now we want to run it.&nbsp; As we saw above, there are several
+    different HALMAT files we could use, so there are several different
+    <b>yaHALMAT</b> invocations we could use.&nbsp; Running the
+    unoptimized HALMAT from <b>HALSFC</b> would be done like this:<br>
+    <blockquote>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+      <pre>yaHALMAT halmat.bin<br></pre>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+    </blockquote>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    Whereas running the optimized HALMAT would look like:<br>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <blockquote>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+      <pre>yaHALMAT optmat.bin<br></pre>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+    </blockquote>
+    <ul>
+    </ul>
+    <i>Or</i> we could use the unoptimized HALMAT from <b>HAL_S_FC.py</b>.&nbsp;
+    In principle, the compilation command for that would have been<br>
+    <ul>
+    </ul>
+    <blockquote>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+      <pre>HAL_S_FC.py --hal=REALLY_HELLO.hal<br></pre>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+    </blockquote>
+    but I accomplished the same thing by adding the <code>--test</code>
+    switch to the <b>HALSFC</b> command line, so we end up with the
+    files we wanted anyway:<br>
+    <blockquote>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+      <pre>yaHALMAT --litfile FILE2.bin --common LIT_CHAR.bin FILE1.bin<br></pre>
+      <blockquote>
+        <blockquote> </blockquote>
+      </blockquote>
+    </blockquote>
+    The output in any of these emulations looks exactly the same:<br>
+    <blockquote>
+      <pre>Hello, world!<br></pre>
+    </blockquote>
+    But instead, let's try the goofy HELLO.hal we've been using to
+    demonstrate lots of stuff, namely<br>
+    <blockquote>
+      <pre>DEBUG ¢C¢D¢E¢F<br> HELLO: PROGRAM;<br>    DECLARE I INTEGER;<br>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(PRINTER) 'THE BEGINNING';<br>    DO FOR I = 1 TO 5;<br>       WRITE(PRINTER) I, 'HELLO, WORLD!';<br>       DO FOR J = 2 TO 8 BY 2;<br>          WRITE(PRINTER) '     ', J, MY_NAME||' SAYS ISN''T THIS FUN?';<br>       END;<br>    END;<br>    WRITE(6) 'THE END';<br> CLOSE HELLO;<br></pre>
+    </blockquote>
+    Compile and run it:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">HALSFC HELLO.hal</font><br>Compilation successful. Results in "HALSFC HELLO.hal Tue 02-24-2026  6-50-07.00.results".<br>&gt; <font color="#996633">yaHALMAT halmat.bin</font><br>THE BEGINNING<br>          1     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>THE END<br><br></pre>
+    </blockquote>
+    And just for OCD's sake, a final example source-code example:<br>
+    <blockquote>
+      <pre> POWER_TABLE: PROGRAM;<br>   WRITE(6) '          N       N**2       N**3       N**4       N**5';<br>   WRITE(6) ' ---------- ---------- ---------- ---------- ----------';<br>   DO FOR TEMPORARY N = 1 TO 10;<br>     WRITE(6) N, N N, N**3, N**4, N**5;<br>   END;<br> CLOSE POWER_TABLE;<br></pre>
+    </blockquote>
+    Emulating this we get:<br>
+    <blockquote>
+      <pre>          N       N**2       N**3       N**4       N**5<br> ---------- ---------- ---------- ---------- ----------<br>          1          1          1          1          1<br>          2          4          8         16         32<br>          3          9         27         81        243<br>          4         16         64        256       1024<br>          5         25        125        625       3125<br>          6         36        216       1296       7776<br>          7         49        343       2401      16807<br>          8         64        512       4096      32768<br>          9         81        729       6561      59049<br>         10        100       1000      10000     100000<br><br></pre>
+    </blockquote>
+    <h2><a name="claude"></a>Claude's Emulator<br>
+    </h2>
+    As I mentioned earlier, the "Claude" in this case is ANTHROP\C
+    Claude.&nbsp; Unlike the other emulators described herein, the
+    emulator Claude (with some advice from me) developed is actually
+    part of Virtual AGC itself, so it's the one emulator over which we
+    can actually exhibit some control.&nbsp; <br>
+    <br>
+    Our first step was to regenerate complete HALMAT documentation,
+    using not only <a moz-do-not-send="true" href="#zane-doc">the
+      technique pioneered earlier by Zane Hambly</a>, but also extensive
+    compilation of HAL/S test code, comparison of HALMAT to generated
+    object code, and refering to additional documentation not specific
+    to HALMAT that might not have been previously consulted ... in other
+    words, to hit the problem with an enormous helping of obsessive
+    attention to detail.&nbsp; After all of that had been completed, and
+    only then, a final cross-check was done against Zane's earlier
+    reconstructed documentation.&nbsp; While there were discrepancies
+    (i.e., <i>errors</i>) on both sides when the cross-check was
+    performed, they were surprisingly few, which should give us some
+    confidence in the results.&nbsp; Of course, Claude's errors have
+    been corrected by the time you've read this.<br>
+    <br>
+    <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/reengineered-documentation/HALMAT.md">This
+      new, full HALMAT documentation can be seen on GitHub</a>.&nbsp; As
+    a slap in the face to the current hubbub about how "human" A.I. is,
+    this new documentation looks very much as though a machine wrote it
+    ... or at least someone with little interest in engaging the
+    reader.&nbsp; With that's said, it's kind of fascinating to look at,
+    and indeed very informative if you're the kind of person who really
+    likes to get at the nuts and bolts of everything.&nbsp; If you're <i>that</i>
+    person, you might be interested in <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/reengineered-documentation/STATUS.md">the
+      document that describes the current state of development</a>, or <a
+      moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/Plan.md">the
+      document used to plan development</a>.&nbsp; All of this
+    documentation is in so-called "markdown" format to make it easy to
+    update as further corrections become necessary, as well as being
+    extensively annotated to describe how the results were arrived
+    at.&nbsp; I'd recommend just looking at it directly on GitHub if
+    you're interested.&nbsp; Of course, you <i>could</i> also download
+    it and view it locally if you have a markdown viewer, though I'd
+    note that not all markdown viewers are as capable as GitHub's.&nbsp;
+    In other words, your results may vary.<br>
+    <br>
+    The next step was to proceed to implementation of the emulator
+    itself, called <b>yaHALMAT2</b> to distinguish itself from Zane's <b>yaHALMAT</b>.&nbsp;
+    To give credit where credit is due, Claude concluded that <b>yaHALMAT</b>
+    had a nice, clean design, and therefore may have based <b>yaHALMAT2</b>
+    at least partially on it.<br>
+    <br>
+    Enough yapping!&nbsp; Let's compile and emulate our ever-present
+    HELLO.hal sample code that's not a "HELLO" program at all, namely
+    (in its latest incarnation as of this writing):<br>
+    <blockquote>
+      <pre>DEBUG ¢4 ¢E<br> HELLO: PROGRAM;<br>  DECLARE I INTEGER;<br>    DECLARE POOKIE CHARACTER(20);<br>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(PRINTER) 'THE BEGINNING';<br>    DO FOR I = 1 TO 5;<br>       WRITE(PRINTER) I, 'HELLO, WORLD!';<br>       DO FOR J = 2 TO 8 BY 2;<br>          WRITE(PRINTER) '     ', J, MY_NAME||' SAYS ISN''T THIS FUN?';<br>       END;<br>    END;<br>    WRITE(6) 'THE END';<br> CLOSE HELLO;<br><br></pre>
+    </blockquote>
+    Compile it and run it:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">HALSFC  HELLO.hal</font><br>Results stored in the folder "HALSFC HELLO.hal 2026-07-20 11-50-02.results".<br>Accessible also as "current.results" until next HALSFC run.<br>For previous runs see also "current-1.results", "current-2.results".<br>Compilation successful.<br>&gt; <font color="#996633">yaHALMAT2 halmat.bin</font><br>THE BEGINNING<br>          1     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          2     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          3     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          4     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          5     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>THE END<br></pre>
+    </blockquote>
+    The emulator also has a debugging mode built into it, modeled after
+    the <b>gdb</b> debugger.&nbsp; Below, I load halmat.bin in
+    debugging mode and single step through a few HALMAT instructions:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">yaHALMAT2 --debug halmat.bin</font><br>yaHALMAT2 debugger. Type 'help' for commands.
+<span style="color:green;">   1	  HELLO:
+</span><span style="color:green;">   1	  PROGRAM;
+</span><span style="color:dimgray;">[task 0] #0      0x005 PXRC  numop=1 tag=0x00 copt=0x0  ; Record header, points to closing XREC
+        [0] data=0x005C(92) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:dimgray;">[task 0] #2      0x02B MDEF  numop=1 tag=0x00 copt=0x0  ; Program definition header
+        [0] data=0x0001(1) qual=SYT tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:dimgray;">[task 0] #4      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0001(1) qual=  0 tag1=0x00 tag2=0x1
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   2	    DECLARE I INTEGER;
+</span><span style="color:dimgray;">[task 0] #6      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0002(2) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   3	    DECLARE POOKIE CHARACTER(20);
+</span><span style="color:dimgray;">[task 0] #8      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0003(3) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   4	    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');
+</span><span style="color:dimgray;">[task 0] #10     0x841 CINT  numop=2 tag=0x02 copt=0x0  ; Character initialize
+        [0] data=0x0004(4) qual=SYT tag1=0x00 tag2=0x0
+        [1] data=0x0003(3) qual=LIT tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:dimgray;">[task 0] #13     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0004(4) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   5	    DECLARE INTEGER, J;
+</span><span style="color:dimgray;">[task 0] #15     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0005(5) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   6	    REPLACE PRINTER BY "6";
+</span><span style="color:dimgray;">[task 0] #17     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
+        [0] data=0x0006(6) qual=  0 tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:green;">   7	    WRITE(PRINTER) 'THE BEGINNING';
+</span><span style="color:dimgray;">[task 0] #19     0x031 EDCL  numop=0 tag=0x01 copt=0x1  ; End-of-declarations marker
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
+</span><span style="color:dimgray;">[task 0] #20     0x025 XXST  numop=1 tag=0x00 copt=0x1  ; I/O statement start, carries I/O-kind code
+        [0] data=0x0002(2) qual=IMD tag1=0x00 tag2=0x0
+</span><span style="color:red;">(halmat) </span><span style="color:olive;">kill
+</span>execution stopped
+<span style="color:red;">(halmat) </span><span style="color:olive;">quit
+</span></pre>
+    </blockquote>
+    The colors are adjustable via the command line, or can be disabled
+    entirely.&nbsp; HALMAT instructions aren't just dumped on you
+    willy-nilly in binary, but are instead parsed into a somewhat
+    human-readable format like the <b>unHALMAT.py</b> utility discussed
+    earlier, along with embedding the HAL/S source code so you can see
+    the larger context.<br>
+    <br>
+    Another feature supported by <b>yaHALMAT2</b> is loading multiple
+    HALMAT files at once.&nbsp; Or to put it loosely, <b>yaHALMAT2</b>
+    can act like an on-the-fly "linker" for HALMAT files.&nbsp; Each
+    HALMAT file corresponds to a HAL/S source-code file, and very few
+    significant programs are written as a single source-code file, so
+    this is a necessary feature.<br>
+    <br>
+    The <b>yaHALMAT2</b> command line supports two different formats
+    for selecting the HALMAT file(s) to load for emulation.&nbsp; The
+    syntax we used above supports only a single file:<br>
+    <blockquote>
+      <pre>yaHALMAT2 [<i>OPTIONS</i>] <i>HALMAT_FILE</i><br></pre>
+    </blockquote>
+    Pragmatically speaking, while <i>HALMAT_FILE</i> could be anything
+    you desire, it's actually always halmat.bin, optmat.bin, or
+    FILE1.bin, and it expects to find those files in the <i>current</i>
+    directory.&nbsp; (You could use a path to somewhere else, but trust
+    me, it would turn out to be a lot more hassle than it's
+    worth.)&nbsp; The problem with directly extending this kind of
+    command-line format to <i>multiple</i> HALMAT files (or to not use
+    the current working directory) is that each HALMAT file is
+    accompanied by various auxiliary files that are either absolutely
+    necessary (like the <i>literal files</i> described earlier) or else
+    really nice to have for the debugger (such as the output report from
+    PASS1 of the HAL/S compiler).&nbsp; The HAL/S compiler produces
+    these files, and lots of others, for each HAL/S source-code files it
+    compiles.&nbsp; To keep your working directory clean of this
+    multitude of files, as well as to maintain order, a typical strategy
+    is to perform all of your HAL/S compilations with the <b>HALSFC</b>
+    command-line switch <code>--clean</code>, or possibly <code>--clean
+      --archive</code>.&nbsp; This strategy creates a new subdirectory
+    for each compilation and shoves all of the files that were generated
+    into it.<br>
+    <br>
+    We can exploit this when we invoke <b>yaHALMAT2</b> by using the
+    alternate syntax<br>
+    <blockquote>
+      <pre>yaHALMAT2 [OPTIONS] @<i>LIST</i><br></pre>
+    </blockquote>
+    That's for running unoptimized HALMAT (output by the compiler's
+    PASS1), whereas to run optimized HALMAT (output by the compilers OPT
+    pass) we could instead say<br>
+    <blockquote>
+      <pre>yaHALMAT2 [OPTIONS] --opt @<i>LIST</i></pre>
+    </blockquote>
+    But the results are indistinguishable.&nbsp; Here, <i>LIST</i> is
+    the name of a file that contains a list of directories of the kind
+    that <b>HALSFC</b> produces for its output products.&nbsp; Actually
+    demonstrating how this works in practice is a little more involved
+    that our simple HELLO.hal example, so bear with me!&nbsp; Let's
+    imagine a HAL/S <code>PROGRAM</code> that prints a table of squares
+    and square roots of integers, and that for some inexplicable reason
+    we've decided to provide two external functions, one that squares a
+    number, and one that computes a square root.&nbsp; Here's what our
+    code might look like:<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <td valign="middle">
+            <pre>C SQUARE.hal<br> SQUARE: FUNCTION(X) SCALAR;<br>    DECLARE X SCALAR;<br>    RETURN X X;<br> CLOSE SQUARE;<br></pre>
+          </td>
+          <td valign="middle">
+            <pre>C MYTABLE.hal<br>D INCLUDE TEMPLATE SQUARE<br>D INCLUDE TEMPLATE SQUROO<br> MYTABLE: PROGRAM;<br>    DO FOR TEMPORARY I = 1 TO 10;<br>       WRITE(6) I, SQUARE(I), SQU_ROOT(I);<br>    END;<br> CLOSE MYTABLE;<br></pre>
+          </td>
+          <td valign="middle">
+            <pre>C SQUROO.hal<br> SQU_ROOT: FUNCTION(X) SCALAR;<br>    DECLARE X SCALAR;<br>    RETURN SQRT(X);<br> CLOSE SQU_ROOT;<br></pre>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    Compile it:<br>
+    <blockquote>
+      <pre>HALSFC --clean --archive --parms=TEMPLATE SQUARE.hal<br>HALSFC --clean --archive --parms=TEMPLATE SQUROO.hal<br>HALSFC --clean --archive MYTABLE.hal<br></pre>
+    </blockquote>
+    This creates directories for the compiler output products of:<br>
+    <ul>
+      <li>archive.results/</li>
+      <ul>
+        <li>'HALSFC SQUARE.hal 2026-07-20 18-20-58.results'/</li>
+        <li>'HALSFC SQUROO.hal 2026-07-20 18-19-01.results'/</li>
+        <li>'HALSFC MYTABLE.hal 2026-07-20 18-21-04.results'/<br>
+        </li>
+      </ul>
+    </ul>
+    For you, of course, the directory names would be different, since
+    they'd have different dates/times.&nbsp; Next you have to create a
+    file called "LIST" that points to these directories:<br>
+    <blockquote>
+      <pre>archive.results/HALSFC SQUARE.hal 2026-07-20 18-20-58.results<br>archive.results/HALSFC SQUROO.hal 2026-07-20 18-19-01.results<br>archive.results/HALSFC MYTABLE.hal 2026-07-20 18-21-04.results</pre>
+    </blockquote>
+    Notice that there are spaces in these directory names as stored in <i>LIST</i>,
+    but no surrounding quotation marks are used.&nbsp; (Quotation marks
+    would break it!)&nbsp; Run it:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">yaHALMAT2 @LIST</font><br>          1      1.0000000E+00      1.0000000E+00<br>          2      4.0000000E+00      1.4142132E+00<br>          3      9.0000000E+00      1.7320499E+00<br>          4      1.6000000E+01      2.0000000E+00<br>          5      2.5000000E+01      2.2360678E+00<br>          6      3.6000000E+01      2.4494896E+00<br>          7      4.9000000E+01      2.6457510E+00<br>          8      6.4000000E+01      2.8284264E+00<br>          9      8.1000000E+01      3.0000000E+00<br>         10      1.0000000E+02      3.1622772E+00<br></pre>
+    </blockquote>
+    Multi-file capability isn't <i>fully</i> implemented yet in <b>yaHALMAT2</b>.&nbsp;
+    HAL/S real-time mechanisms allow multiple <code>PROGRAM</code>'s to
+    be simultanously running, while flipping back and forth between
+    them, whereas all <i>we</i> have implemented so far is a <i>single</i>
+    <code>PROGRAM</code> plus multiple <code>COMPOOL</code>'s, <code>PROCEDURE</code>'s,
+    and <code>FUNCTION</code>'s.&nbsp; First things first!<br>
+    <br>
+    Actually, I gave <b>yaHALMAT2</b> short shrift earlier when I said
+    that it could act as an "on-the-fly" HALMAT linker.&nbsp; While
+    that's true, it can act as an actual HALMAT linker as well.&nbsp;
+    What do I mean by that?&nbsp; Well, while this @LIST mechanism may
+    be reasonably-efficient for development purposes, it's not very
+    convenient for actually distributing a program in HALMAT form to
+    anybody.&nbsp; If a program consisted of (say) 10 HAL/S source-code
+    files, to give the program's HALMAT to anybody we'd have to send out
+    40 files generated by the HAL/S compiler, some of them <i>big</i>
+    ones, stored in a rigid directory hierarchy.&nbsp; Sure, we <i>could</i>
+    do it — that's what zipfiles are for, after all — but it seems like
+    a bit of overkill.&nbsp; We can bypass that problem by running
+    yaHALMAT2 with the <code>--link-only</code> option:<br>
+    <blockquote>
+      <pre>yaHALMAT2 --link-only MYTABLE.yhla @LIST<br></pre>
+    </blockquote>
+    This doesn't perform any emulation, but instead just produces a new
+    file (MYTABLE.yhla) that we can think of as the "linked" form of the
+    program.&nbsp; And it doesn't just contain the HALMAT, but it also
+    contains the literal files, and the HAL/S source-code lines for
+    display in the emulator's debugger ... i.e., it's entirely
+    self-contained.&nbsp; Obviously, there is no pre-existing file
+    format for "linked" HALMAT, and never was one, so Claude invented
+    one for us, and documented it too.&nbsp; Why the filename extension
+    ".yhla"?&nbsp; I asked, using up hundreds of precious tokens, and
+    got this answer:&nbsp; <br>
+    <blockquote>"YHLA" is my own abbreviation for YaHalmat Linked
+      Archive — I picked it as the 4-byte magic when I specified the
+      container format for the implementing agent, following the
+      convention of short ASCII magic-number prefixes (like "PK" for
+      zip, "GZ"-ish headers for gzip). No deeper significance than that.</blockquote>
+    Makes sense to me.&nbsp; Anyway, you can run a YHLA without any
+    particular to-do; <b>yaHALMAT2</b> just recognizes from the
+    embedded magic numbers that it's a YHLA file rather than a HALMAT
+    file:<br>
+    <blockquote>
+      <pre>&gt; <font color="#996633">yaHALMAT2 MYTABLE.yhla</font><br>          1      1.0000000E+00      1.0000000E+00<br>          2      4.0000000E+00      1.4142132E+00<br>          3      9.0000000E+00      1.7320499E+00<br>          4      1.6000000E+01      2.0000000E+00<br>          5      2.5000000E+01      2.2360678E+00<br>          6      3.6000000E+01      2.4494896E+00<br>          7      4.9000000E+01      2.6457510E+00<br>          8      6.4000000E+01      2.8284264E+00<br>          9      8.1000000E+01      3.0000000E+00<br>         10      1.0000000E+02      3.1622772E+00</pre>
+    </blockquote>
+    <b>yaHALMAT2</b> also supports HAL/S's scheduling features.&nbsp;
+    Consider the following example program, which simply counts up from
+    1 to 20, once per second:<br>
+    <blockquote>
+      <pre> COUNTUP: PROGRAM;<br>    DECLARE I INTEGER INITIAL(1);<br> <br>    NEXT: TASK;<br>       WRITE(6) I;<br>       I = I + 1;<br>    CLOSE NEXT;<br>    <br>    SCHEDULE NEXT PRIORITY(80), REPEAT EVERY 1.0;<br>    WAIT 19.5;<br> CLOSE COUNTUP;<br></pre>
+    </blockquote>
+    <blockquote>
+      <pre>&gt; <font color="#996633">HALSFC --clean --archive COUNTUP.hal<br><font color="#000000">&gt; </font># Note that LISTC contains a single entry: current.results<br></font>&gt; <font color="#996633">time yaHALMAT2 @LISTC</font><br>          1<br>          2<br>          3<br>          4<br>          5<br>          6<br>          7<br>          8<br>          9<br>         10<br>         11<br>         12<br>         13<br>         14<br>         15<br>         16<br>         17<br>         18<br>         19<br>         20<br><br>real	0m19.555s<br>user	0m0.045s<br>sys	0m0.010s<br></pre>
+    </blockquote>
+    Windows users may wonder why the command to start the emulation has
+    the word <code>time</code> in front of it.&nbsp; It has nothing to
+    do with using the <code>SCHEDULE</code> or <code>WAIT</code>
+    feature.&nbsp; Rather, in Linux or Mac OS that just means to time
+    how long the program took, which was 19.555 seconds.&nbsp; And why
+    19.5 seconds?&nbsp; Because it only takes 19 seconds to count from 1
+    to 20 if you do so once per second.<br>
+    <h1>Emulating AP-101</h1>
+    <p>Both of the emulators presented below accept an AP-101S memory
+      image as input, as opposed (say) to an IBM "load file".&nbsp; To
+      produce such a memory image, it's necessary first to compile or
+      assemble all of the individual source code modules comprising the
+      program, and then to use a linker program to combine the separate
+      object files generated by compilation/assembly.&nbsp; <a
+        moz-do-not-send="true" href="HALLINK101S.html#scenario1">Please
+        refer to our linker page for more information</a> for more
+      specifics.&nbsp; Below, for simplicity of expossion, we'll just
+      suppose that you've compiled a HAL/S program called <i>MYPROGRAM</i>.hal,
+      and have produced a memory image from it that's called <i>MYPROGRAM</i>.fcm,
+      with ".fcm" being the conventional filename extension we use for
+      memory images.<br>
+    </p>
+    <p>Specifically, we'll use the following test code called
+      HELLO_WORLD.hal.<br>
+    </p>
+    <blockquote>
+      <pre><font color="#663333">C A TEST PROGAM<br>&nbsp; HELLO_WORLD: PROGRAM;<br>    WRITE(6) 'Hello, world!';<br>    WRITE(6) '';<br>  CLOSE HELLO_WORLD;</font><br></pre>
+    </blockquote>
+    Compiling it and linking it like so,<br>
+    <br>
+    <blockquote>
+      <pre>HALSFC -o HELLO_WORLD.obj HELLO_WORLD.hal<br>lnk101 -o HELLO_WORLD.fcm --json-symbols HELLO_WORLD.sym.json HELLO_WORLD.obj<br></pre>
+    </blockquote>
+    gives us HELLO_WORLD.fcm.<br>
+    <h2><a name="don"></a>Don Schmidt's Emulator</h2>
+    <p>Don's emulator, <b>gpc</b>, can be run in either a simple mode
+      that just executes the code without fanfare, or else in a fancy
+      graphical debugging mode.&nbsp; Let's just look at the simple mode
+      first:<br>
+    </p>
+    <blockquote>
+      <pre>gpc run --interactive HELLO_WORLD.fcm<br></pre>
+    </blockquote>
+    <p>This results in:<br>
+    </p>
+    <blockquote>
+      <pre>Hello, world!<br><br>*** HAL/S PROGRAM HALT (SVC 0)<br></pre>
+    </blockquote>
+    <p>The <code>--interactive</code> switch tells the emulator to
+      accept keyboard input on device 5 (as in the HAL/S <code>READ(5)
+        ...;</code>) and output to device 6 (as in the HAL/S <code>WRITE(6)
+        ...;</code>).&nbsp; In this example, we could hav just omitted
+      it.<br>
+    </p>
+    <p>Or if we were to try the same thing but with our ubiquitous but
+      misnamed HELLO.hal, we'd get this instead:<br>
+    </p>
+    <blockquote>
+      <pre>THE BEGINNING<br>          1     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          2     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          3     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          4     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>          5     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    4     RON BURKEY SAYS ISN'T THIS FUN?<br>                    6     RON BURKEY SAYS ISN'T THIS FUN?<br>                    8     RON BURKEY SAYS ISN'T THIS FUN?<br>THE END<br><br>*** HAL/S PROGRAM HALT (SVC 0)<br></pre>
+    </blockquote>
+    <p>There are actually lots of command-line options, which you can
+      view with the command <code>gpc help run</code>.<br>
+    </p>
+    <p>The second way to run the emulator is, as I mentioned, with a GUI
+      debugging interface.&nbsp; You could use a command like,<br>
+    </p>
+    <blockquote>
+      <pre>gpc gui HELLO_WORLD.fcm<br></pre>
+    </blockquote>
+    <p>resulting in:<br>
+    </p>
+    <p align="left"><img moz-do-not-send="true"
+        src="gpc-gui-hello-before.png" alt="" width="1810" height="1056"></p>
+    <p>Just hit the Run hot-button and you'll see it change (look at the
+      TERMINAL pane near the bottom of the window) to<br>
+    </p>
+    <p><img moz-do-not-send="true" src="gpc-gui-hello-after.png" alt=""
+        width="1810" height="1056"><br>
+    </p>
+    <p>No obvious way to <i>exit</i> the GUI emulator in these old
+      screenshots, but when you actually run the program you'll see a
+      Quit button near the top right.<br>
+    </p>
+    If HELLO_WORLD.hal had been a more-interactive program, in which it
+    not only used <font color="#663333"><code>WRITE(6)</code></font> to
+    display messages but also <font color="#663333"><code>READ(5)</code></font>
+    to get keyboard input from you, you could have typed your input into
+    the pane at the bottom of the window, where it now shows the message
+    "(waiting for program input...)".
+    <h2><a name="dan"></a>Dan Weaver's Emulator</h2>
+    (Not yet publicly available.)<br>
+    <p> </p>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2026-07-21<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>

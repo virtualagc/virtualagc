@@ -95,12 +95,10 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
 
 
 
+
             the Compiler Itself</a><br>
         </li>
       </ul>
-      <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a></li>
-      <li><a moz-do-not-send="true" href="#emulatingHALMAT">Emulating
-          HALMAT</a></li>
       <li><a moz-do-not-send="true" href="#imponderable">Other
           Imponderable Mysteries</a></li>
       <li><a moz-do-not-send="true" href="#morePreprocessors">More About
@@ -124,6 +122,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
 
 
 
@@ -227,6 +226,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
 
 
 
@@ -422,6 +422,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -431,6 +432,7 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
 
 
 
@@ -512,36 +514,22 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">Th
     <p>The HAL/S development tools we focus on <i>here</i> are:<br>
     </p>
     <ol>
-      <li>A HAL/S compiler, implementing 100% of HAL/S features,
-        producing IBM AP-101S object code in either PFS or BFS file
-        formats as appropriate.&nbsp; That's the topic of the present
-        page, of course!<br>
+      <li>HAL/S compiler(s).&nbsp; That's the topic of the present page,
+        of course!<br>
       </li>
       <li>An <a moz-do-not-send="true" href="ASM101S.html">IBM AP-101S
-          assembler</a>, largely complete (I think), but presently able
-        to produce object code only in the PFS-specific file format (not
-        BFS).</li>
+          assembler</a>.</li>
       <li>An <a moz-do-not-send="true" href="HALLINK101S.html">IBM
-          AP-101S linker for PFS object code</a>.<br>
+          AP-101S linker</a>.<br>
       </li>
-      <li>IBM AP-101S emulator (with integrated debugger).&nbsp; <a
-          moz-do-not-send="true" href="HALLINK101S.html">See the linker
-          page</a>. </li>
-      <li>A <a moz-do-not-send="true"
-          href="https://github.com/Zaneham/Halmat">HALMAT emulator</a>,
-        developed by Zane Hambly.&nbsp; "HALMAT" is a so-called
-        "intermediate language" into which our (and Intermetrics) HAL/S
-        compilers convert HAL/S source code, and from which those HAL/S
-        compilers generate AP-101S object code.&nbsp; (Thus, compiled
-        HAL/S programs could be run using <i>either</i> an AP-101S
-        emulator or a HALMAT emulator.)<br>
-      </li>
+      <li>IBM AP-101S emulator/debugger(s).&nbsp; <a
+          moz-do-not-send="true" href="emulation-shuttle.html">See the
+          emulator page</a>. </li>
+      <li>HALMAT emulator/debugger(s).&nbsp; <a moz-do-not-send="true"
+          href="emulation-shuttle.html">See the emulator page</a>. </li>
     </ol>
-    <p>The list above can be regarded a roadmap for development of the
-      development tools.<br>
-    </p>
-    <p>The HAL/S compiler, which I will refer to as <b>HALSFC</b>, is
-      based on <a moz-do-not-send="true"
+    The principal HAL/S compiler, which I will refer to as <b>HALSFC</b>,
+    is based on <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
 
 
@@ -614,10 +602,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
-        source code for the original Intermetrics HAL/S compiler called
-        HAL/S-FC</a>.&nbsp; Intermetrics actually had three separate
-      HAL/S compilers that I know about:<br>
-    </p>
+
+      source code for the original Intermetrics HAL/S compiler called
+      HAL/S-FC</a>.&nbsp; We'll also have call to discuss <b>HALSFC</b>'s
+    "baby brother" (in terms of capabilities) but "big brother" (in
+    terms of age), and still incredibly useful, <b>HAL_S_FC.py</b>.<br>
+    <br>
+    Back in the day, Intermetrics actually had three separate HAL/S
+    compilers that I know about:<br>
     <ul>
       <li>HAL/S-360 was a compiler that converted HAL/S source code into
         IBM 360 object code. <br>
@@ -724,58 +716,59 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           <td valign="top">Cross-compile HAL/S source code to HALMAT
             intermediate language<br>
           </td>
-          <td valign="middle" align="center">PASS1<br>
+          <td align="center" valign="middle">PASS1<br>
           </td>
-          <td valign="middle" align="center">PASS1B<br>
+          <td align="center" valign="middle">PASS1B<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Produce some optional reports about the
             HALMAT.&nbsp; Sometimes called&nbsp; "FLOWGEN"<br>
           </td>
-          <td rowspan="1" colspan="2" valign="middle" align="center">FLO<br>
+          <td rowspan="1" colspan="2" align="center" valign="middle">FLO<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Optimize the HALMAT representation<br>
           </td>
-          <td valign="middle" align="center">OPT<br>
+          <td align="center" valign="middle">OPT<br>
           </td>
-          <td valign="middle" align="center">OPTB<br>
+          <td align="center" valign="middle">OPTB<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Optimize it some more!<br>
           </td>
-          <td rowspan="1" colspan="2" valign="middle" align="center">AUX<br>
+          <td rowspan="1" colspan="2" align="center" valign="middle">AUX<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Cross-compile the HALMAT intermediate
             language to AP-101S object code</td>
-          <td valign="middle" align="center">PASS2<br>
+          <td align="center" valign="middle">PASS2<br>
           </td>
-          <td valign="middle" align="center">PASS2B<br>
+          <td align="center" valign="middle">PASS2B<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Produce optional Simulation Data Files (SDF)<br>
           </td>
-          <td valign="middle" align="center">PASS3<br>
+          <td align="center" valign="middle">PASS3<br>
           </td>
-          <td valign="middle" align="center">PASS3B<br>
+          <td align="center" valign="middle">PASS3B<br>
           </td>
         </tr>
         <tr>
           <td valign="top">Print optional reports about the SDF<br>
           </td>
-          <td rowspan="1" colspan="2" valign="middle" align="center">PASS4<br>
+          <td rowspan="1" colspan="2" align="center" valign="middle">PASS4<br>
           </td>
         </tr>
       </tbody>
     </table>
     <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -984,10 +977,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
       decision to create <b>XCOM-I</b>, I had made a similarly-painful
       decision to manually port the source code for PASS1/PASS1B of
       HAL/S-FC into the Python 3 language.&nbsp; The result was a
       working version of PASS1/PASS1B that I call <b>HAL_S_FC</b>.&nbsp;
+
 
 
 
@@ -1169,6 +1164,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
         <br>
       </li>
       <li><font color="#663333"><code>-o <i>OBJECTFILE</i></code></font>
@@ -1180,7 +1176,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       </font> </p>
     <font size="+1"> </font>
     <blockquote>
-      <pre><font size="+1" color="#663300">HALSFC HELLO.hal --parms="LIST</font><font size="+1">"<br></font></pre>
+      <pre><font color="#663300" size="+1">HALSFC HELLO.hal --parms="LIST</font><font size="+1">"<br></font></pre>
     </blockquote>
     <p>After a short period of time we're told:<br>
     </p>
@@ -1200,13 +1196,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       and therefore that I suppose you might find of use as well:&nbsp;
       e.g., reports by the various passes (covered later) of the
       compiler, files needed for examining or emulating program
-      execution using HALMAT (covered later), the AP-101S object file
-      itself, and so on.&nbsp; What about the big "HALSFC ...".results
-      directory?&nbsp; Well, that contains <i>every</i> file generated
-      by the compiler, not just the ones I claim are "immediately
-      interesting".&nbsp; A lot of these are covered later on.&nbsp;
-      Every time you run <b>HALSFC</b>, a new "HALSFC ...".results
-      directory is created.&nbsp; <br>
+      execution using HALMAT, the AP-101S object file itself, and so
+      on.&nbsp; What about the big "HALSFC ...".results directory?&nbsp;
+      Well, that contains <i>every</i> file generated by the compiler,
+      not just the ones I claim are "immediately interesting".&nbsp; A
+      lot of these are covered later on.&nbsp; Every time you run <b>HALSFC</b>,
+      a new "HALSFC ...".results directory is created.&nbsp; <br>
     </p>
     <p>As a convenience, if your operating system allows it, you'll also
       find some symbolic links to the results directories of recent <b>HALSFC</b>
@@ -1279,79 +1274,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       thing is probably the message "NO ERRORS WERE DETECTED DURING
       PHASE 1".&nbsp; What phase 1 (PASS1) has accomplished is mostly to
       output a processed form of our HAL/S program as expressed in an
-      "intermediate language" called HALMAT.&nbsp; Unfortunately, most
-      of the documentation about HALMAT has not survived, so this file
-      is only partially comprehensible, but since the additional passes
-      of the compiler <i>do</i> understand HALMAT, we don't necessarily
-      need to understand it ourselves.&nbsp; The HALMAT form of the
-      program is the file halmat.bin.&nbsp; <b>Note:</b>&nbsp; In an
-      unaccustomed burst of energy, I did create a script called <a
-        moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHALMAT.py">unHALMAT.py</a>
-      that parse a HALMAT file, <i>à la</i> "<tt>unHALMAT.py halmat.bin</tt>",
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      though the extent to which the result is informative is
-      questionable.&nbsp; But there will be more discussion of HALMAT
-      later on, if that's something that seems interesting to you.<br>
+      "intermediate language" called HALMAT.&nbsp; The HALMAT form of
+      the program is the file halmat.bin.<br>
     </p>
     <p>After phase 1, the compiler then proceeded to further process
       halmat.bin, using the "phase 1.5" programs (FLO, OPT, and
@@ -1381,6 +1305,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       the report as eye candy!&nbsp; You can read more about it in the
       document "<a moz-do-not-send="true"
         href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+
 
 
 
@@ -1498,6 +1423,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
         Object File Format</a> ... or at least, <a
         moz-do-not-send="true" href="HALLINK101S.html">according to my
         write-up of it</a>, very close to that format!&nbsp; If you're
@@ -1550,12 +1476,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
       format has in fact been decoded</a>, or at least mostly so.<br>
     <p>Rather than compiling HELLO.hal using the command given earlier,
       I'd personally be more likely to compile it using the command</p>
     <font size="+1"> </font>
     <blockquote>
-      <pre><font size="+1" color="#663300">HALSFC HELLO.hal --test --parms="LIST</font><font size="+1"><font color="#663300">,LISTING2"</font><br></font></pre>
+      <pre><font color="#663300" size="+1">HALSFC HELLO.hal --test --parms="LIST</font><font size="+1"><font color="#663300">,LISTING2"</font><br></font></pre>
     </blockquote>
     <p>The difference, you'll recall, is that <font color="#996633"><code>--test</code></font>
       additionally performs some verification of the compiler
@@ -1605,7 +1532,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
       the VM.&nbsp; <br>
     </p>
     <blockquote><font size="-1"><b><img moz-do-not-send="true"
-            src="update.png" alt="" width="40" height="40" align="left">Important
+            src="update.png" alt="" align="left" width="40" height="40">Important
+
 
 
 
@@ -1640,6 +1568,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     </p>
     <ol start="1">
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
 
 
 
@@ -1796,6 +1725,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
 
 
 
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -1811,6 +1741,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/unHA
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
 
 
 
@@ -1885,72 +1816,16 @@ href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">e
       above.&nbsp; These tools are:<br>
     </p>
     <ul>
-      <li>The AP-101S object-file linker (<b>lnk101</b>).</li>
-      <li>The AP-101S CPU emulator (which does not yet have any catchy
-        name, but which if you install it according to my suggestions
-        will be called <b>gpc</b>).</li>
-      <li>The HALMAT emulator (<b>yaHALMAT</b>).</li>
+      <li>The AP-101S object-file linker (<b>lnk101</b>)</li>
+      <li>The AP-101S CPU emulator(s) (<b>gpc</b> <i>et al</i>.)</li>
+      <li>The HALMAT emulator(s) (<b>yaHALMAT2</b><i> et al.</i>)</li>
     </ul>
-    <p>If you want to <i>run</i> any HAL/S programs, you need either <b>yaHALMAT</b>
-      or else <b>lnk101</b>/<b>gpc</b>.&nbsp; And if you have both, all
-      the better!&nbsp; Why are the instructions for their installation
-      provided separately?&nbsp; These programs are not a part of the
-      Virtual AGC Project proper, having their own separate software
-      repositories, their own problem-reporting systems, their own
-      independent software developers, and their own installation
-      instructions not under our control.&nbsp; So while I can give you
-      advice on installation and usage in Virtual AGC that may
-      supplement the instructions provided by their own developers, this
-      advice reflects only my own experience rather than being anything
-      official.<br>
-    </p>
-    <p>Rather than providing a comprehensive write-up here of
-      installation steps, I'd refer you <a moz-do-not-send="true"
-        href="https://github.com/virtualagc/virtualagc/issues/1298">issue
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #1298</a>, "Incompatibilities between VM update procedure and
-      current HAL/S tools", among our GitHub repository's problem
-      reports.&nbsp; It covers instructions for installing these tools
-      on the Virtual AGC VM, but should apply directly to any Ubuntu
-      system, with minimal adaptation to Linux Mint, and to varying
-      degrees to most other Linux systems.&nbsp; As far as Mac OS and
-      Windows, I don't yet have any experience with these tools on them,
-      so you'll need to consult the notes in the developers' own
-      repositories:<br>
-    </p>
-    <ul>
-      <li><a moz-do-not-send="true"
-          href="https://github.com/ColanderCombo/nsts-sdl-dps"><b>lnk101</b>
-          repository</a></li>
-      <li><a moz-do-not-send="true"
-          href="https://github.com/ColanderCombo/nsts-sim-gpc"><b>gpc</b>
-          repository</a></li>
-      <li><a moz-do-not-send="true"
-          href="https://github.com/Zaneham/Halmat"><b>yaHALMAT</b>
-          repository</a></li>
-    </ul>
-    <p>If anyone asks me, I'll offer my own sage (or just-in-thyme?)
-      advice on difficulties you may experience in integrating these
-      tools with Virtual AGC on these platforms.&nbsp; The native
-      developers themselves would have the best advice concerning the
-      tools themselves.<br>
+    <p>If you want to <i>run</i> any HAL/S programs, you need either <b>yaHALMAT2</b>
+      or else <b>lnk101</b>+<b>gpc</b>.&nbsp; And if you have both, all
+      the better! For installation/usage instructions, see <a
+        moz-do-not-send="true" href="HALLINK101S.html">our linker page</a>
+      and <a moz-do-not-send="true" href="emulation-shuttle.html">our
+        emulation page</a>.<br>
     </p>
     <p> </p>
     <h1><a name="wildThings"></a>Where the Wild HAL/S Files Are</h1>
@@ -1971,6 +1846,7 @@ href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">e
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Ryer's
+
 
 
 
@@ -2090,6 +1966,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20
 
 
 
+
           edition</a>) is a rich source of source code and documentation
         for it.&nbsp; <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/Programming%20in%20HAL-S">A
@@ -2099,6 +1976,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         but contemporary (though alas undocumented) <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/BENCH">source-code
+
 
 
 
@@ -2232,6 +2110,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           HAL-S-360 Users Manual</a> provides <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-360%20Users%20Manual">a
           source-code file called DEMO.hal</a>.&nbsp; <br>
@@ -2290,7 +2169,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </font></blockquote>
     Here's my own analysis and conclusions about what's available:<br>
     <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="bottom">Flight Software<br>
@@ -2306,10 +2185,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           </th>
         </tr>
         <tr>
-          <td valign="middle" align="center">PASS (PFS+FCOS)</td>
-          <td valign="middle" align="center"> OI-34.07 (OI340700)</td>
-          <td valign="middle" align="center"><b>HAL/S-FC</b> v32.0</td>
-          <td valign="middle" nowrap="nowrap" align="center">STS-134<br>
+          <td align="center" valign="middle">PASS (PFS+FCOS)</td>
+          <td align="center" valign="middle"> OI-34.07 (OI340700)</td>
+          <td align="center" valign="middle"><b>HAL/S-FC</b> v32.0</td>
+          <td align="center" valign="middle" nowrap="nowrap">STS-134<br>
             FRR 31 Mar 2011<br>
             Launch 16 May 2011<br>
           </td>
@@ -2337,11 +2216,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">PASS (PFS+FCOS)<br>
+          <td align="center" valign="middle">PASS (PFS+FCOS)<br>
           </td>
-          <td valign="middle" align="center">OI-34.06 (OI340600)</td>
-          <td valign="middle" align="center"><b>HAL/S-FC</b> v32.0</td>
-          <td valign="middle" nowrap="nowrap" align="center">STS-128<br>
+          <td align="center" valign="middle">OI-34.06 (OI340600)</td>
+          <td align="center" valign="middle"><b>HAL/S-FC</b> v32.0</td>
+          <td align="center" valign="middle" nowrap="nowrap">STS-128<br>
             FRR 18 Aug 2009<br>
             Launch 28 Aug 2009 </td>
           <td valign="top"><b>Regarding the flight software</b>:&nbsp;
@@ -2376,6 +2255,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
 
 
 
+
               MOD FRR</a> as having been implemented already in flight
             STS-128, as well as almost all of the OI-34.05 and OI-34.04
             modifications as well.&nbsp; It's difficult to avoid the
@@ -2383,11 +2263,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">BFS+BOS<br>
+          <td align="center" valign="middle">BFS+BOS<br>
           </td>
-          <td valign="middle" align="center">OI-34.01</td>
-          <td valign="middle" align="center"><b>HAL/S-BFC</b> v16.1</td>
-          <td valign="middle" nowrap="nowrap" align="center">STS-128<br>
+          <td align="center" valign="middle">OI-34.01</td>
+          <td align="center" valign="middle"><b>HAL/S-BFC</b> v16.1</td>
+          <td align="center" valign="middle" nowrap="nowrap">STS-128<br>
             FRR 18 Aug 2009<br>
             Launch 28 Aug 2009<br>
           </td>
@@ -2426,15 +2306,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">PASS<br>
+          <td align="center" valign="middle">PASS<br>
             (PFS+FCOS)<br>
           </td>
-          <td valign="middle" align="center">OI-30.17 (OI301700)<br>
+          <td align="center" valign="middle">OI-30.17 (OI301700)<br>
           </td>
-          <td valign="middle" align="center"><b>HAL/S-FC</b> prior to
+          <td align="center" valign="middle"><b>HAL/S-FC</b> prior to
             32.0<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">STS-114<br>
+          <td align="center" valign="middle" nowrap="nowrap">STS-114<br>
             FRR 29 Jun 2005<br>
             Launch 26 Jul 2005<br>
           </td>
@@ -2484,6 +2364,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
     as it did, expected that the underlying encoding of textual
     characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
 
 
 
@@ -2585,10 +2466,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
     <p><a
 href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
           moz-do-not-send="true" src="encodingDEU.png" alt=""
-          title="Click to enlarge" width="638" height="468" border="2"
-          align="right"></a>These restrictions apply only to HAL/S
-      source code.&nbsp; Any human-readable reports generated by our
-      modern ports of the HAL/S compiler are pure 7-bit ASCII with the
+          title="Click to enlarge" border="2" align="right" width="638"
+          height="468"></a>These restrictions apply only to HAL/S source
+      code.&nbsp; Any human-readable reports generated by our modern
+      ports of the HAL/S compiler are pure 7-bit ASCII with the
       substitutions mentioned, and may contain tab characters.&nbsp;
       This should <i>not</i> be taken to imply that character data is
       maintained internally by the modern compiler(s) in ASCII encoding,
@@ -2641,6 +2522,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
     </blockquote>
     <p>See the <a moz-do-not-send="true"
         href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=102">HAL/S-FC
+
 
 
 
@@ -2782,6 +2664,7 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
 
 
 
+
         Separate compilation units are in separate files.&nbsp; Of
         course, definitions of blocks like <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>,
         etc., can be local to another block, so in that sense there can
@@ -2866,6 +2749,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -2879,6 +2763,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
 
 
 
@@ -3030,10 +2915,12 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
 
 
 
@@ -3105,6 +2992,7 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           of the <code>%SVC</code> macro, which inserts an <a
             moz-do-not-send="true"
             href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">AP-101S
+
 
 
 
@@ -3231,6 +3119,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
             Chapter 12, "Real-Time Statements"</a> isn't supported by
           the BFS version of the HAL/S compiler.&nbsp; This includes the
           keywords <code>SCHEDULE</code>, <code>TERMINATE</code>, <code>CANCEL</code>,
@@ -3300,7 +3189,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       TEMPLATE parameter is added to the list of compiler options, as in<br>
     </p>
     <blockquote>
-      <pre><font size="+1" color="#663300">HALSFC SOME_PROCEDURE.hal --test --parms="TEMPLATE,LIST</font><font size="+1"><font color="#663300">,NOTABLES"</font></font></pre>
+      <pre><font color="#663300" size="+1">HALSFC SOME_PROCEDURE.hal --test --parms="TEMPLATE,LIST</font><font size="+1"><font color="#663300">,NOTABLES"</font></font></pre>
     </blockquote>
     <p>then the library will also be updated with templates for the file
       being compiled.&nbsp; <br>
@@ -3314,6 +3203,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       template for that object.&nbsp; For example, suppose you want to
       call an external <font color="#996633"><code>PROCEDURE</code></font>
       named <font color="#996633"><code>SOME_PROCEDURE</code></font>.&nbsp;
+
 
 
 
@@ -3392,6 +3282,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
         se</i>, but is rather a "compiler directive" that tells the
       HAL/S compiler to go into the template library and determine just
       what <font color="#996633"><code>SOME_PROCEDURE</code></font>
@@ -3407,6 +3298,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
 
 
 
@@ -3548,6 +3440,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -3631,6 +3524,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
       This directive instructs the compiler to insert the entirety of
       the HAL/S source-code file <i><font color="#996633"><code>name</code></font></i>
       at the current point.&nbsp; The distinction, in case it isn't
@@ -3661,6 +3555,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       the files INCLIB.json or INCLIBB.json.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -3862,6 +3757,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
         At this writing, PASS1 of the compiler does not yet read
         SDF's.&nbsp; So my remarks below will be forward-looking rather
         than describing what actually exists in the modern HAL/S
@@ -4002,6 +3898,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -4028,6 +3925,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
 
 
 
@@ -4229,6 +4127,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -4252,6 +4151,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
 
 
 
@@ -4358,17 +4258,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <caption><font size="+1"><b>PARM-Field Options and Defaults, by
             Compiler Pass</b></font></caption> <tbody>
         <tr>
-          <td valign="top" align="center"><b>Accepted in PASS1</b><br>
+          <td align="center" valign="top"><b>Accepted in PASS1</b><br>
           </td>
-          <th valign="top" align="center">Accepted in PASS1B<br>
+          <th align="center" valign="top">Accepted in PASS1B<br>
           </th>
-          <td valign="bottom" nowrap="nowrap" align="center"><b>Accepted
+          <td align="center" valign="bottom" nowrap="nowrap"><b>Accepted
               in PASS4</b></td>
           <th valign="top">Description<br>
           </th>
         </tr>
         <tr>
-          <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+          <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
 
 
 
@@ -4444,12 +4345,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">DUMP (off,
+          <td align="center" valign="middle" nowrap="nowrap">DUMP (off,
             DP)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">DUMP (off,
+          <td align="center" valign="middle" nowrap="nowrap">DUMP (off,
             DP)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Requests the compiler to produce a memory
             dump if internal compiler failures occur; useful only for
@@ -4457,13 +4358,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LISTING2
+          <td align="center" valign="middle" nowrap="nowrap">LISTING2
             (off, L2)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LISTING2
+          <td align="center" valign="middle" nowrap="nowrap">LISTING2
             (off, L2)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes PASS1 to generate an "unformatted"
             source listing, which is an output-file (listing2.txt by
@@ -4501,13 +4402,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LIST (off,
+          <td align="center" valign="middle" nowrap="nowrap">LIST (off,
             L)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LIST (off,
+          <td align="center" valign="middle" nowrap="nowrap">LIST (off,
             L)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes PASS2 to include AP-101S
             assembly-language for the compiled HAL/S program in the
@@ -4517,13 +4418,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TRACE (on,
+          <td align="center" valign="middle" nowrap="nowrap">TRACE (on,
             TR)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TRACE (on,
+          <td align="center" valign="middle" nowrap="nowrap">TRACE (on,
             TR)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">(I'm not sure what TRACE does, but the
             comments in HAL/S-FC source code indicate that it is for the
@@ -4531,13 +4432,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">VARSYM
+          <td align="center" valign="middle" nowrap="nowrap">VARSYM
             (off, VS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">VARSYM
+          <td align="center" valign="middle" nowrap="nowrap">VARSYM
             (off, VS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">If specified, symbol-table information about
             the variables declared in the HAL/S program will be included
@@ -4547,6 +4448,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
               color="#663300"><code>I</code></font> and <font
               color="#663300"><code>J</code></font>, and the string
             variable <font color="#663300"><code>MY_NAME</code></font>.&nbsp;
+
 
 
 
@@ -4703,17 +4605,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               Wikipedia article about the IBM 360 Object File Format</a>.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">DECK (off,
+          <td align="center" valign="middle" nowrap="nowrap">DECK (off,
             D)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">DECK (off,
+          <td align="center" valign="middle" nowrap="nowrap">DECK (off,
             D)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">If specified, an additional copy (by default,
             deck.bin) of the object file produced by Phase 2 (by
@@ -4726,13 +4629,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TABLES (on,
+          <td align="center" valign="middle" nowrap="nowrap">TABLES (on,
             TBL)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TABLES (on,
+          <td align="center" valign="middle" nowrap="nowrap">TABLES (on,
             TBL)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">With the TABLES option, PASS3 and PASS4 of
             the HAL/S compiler are enabled, with the advantage that a
@@ -4749,37 +4652,37 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TABLST
+          <td align="center" valign="middle" nowrap="nowrap">TABLST
             (off, TL)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TABLST
+          <td align="center" valign="middle" nowrap="nowrap">TABLST
             (off, TL)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TABLST
+          <td align="center" valign="middle" nowrap="nowrap">TABLST
             (off, TL) </td>
           <td valign="top">Causes PASS4 of the compiler to produce a
             formatted dump of the Simulation Data File.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">ADDRS (off,
+          <td align="center" valign="middle" nowrap="nowrap">ADDRS (off,
             A)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">ADDRS (off,
+          <td align="center" valign="middle" nowrap="nowrap">ADDRS (off,
             A)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes the Simulation Data Files (SDF)
             produced to include statement address information.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">SRN (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">SRN (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">SRN (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">SRN (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">This should be specified if the source
             program is line numbered.&nbsp; It causes the compiler to
@@ -4793,17 +4696,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">SDL (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">SDL (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">SDL (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">SDL (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Used to indicate to the compiler that this
             compilation is for SDL (Software Development Lab) use.&nbsp;
             The HAL/S-FC User's Manual goes on to describe a lot of <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=68">additional
+
 
 
 
@@ -4957,9 +4861,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
 
 
 
@@ -5035,32 +4941,33 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TABDMP
+          <td align="center" valign="middle" nowrap="nowrap">TABDMP
             (off, TBD)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TABDMP
+          <td align="center" valign="middle" nowrap="nowrap">TABDMP
             (off, TBD)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TABDMP
+          <td align="center" valign="middle" nowrap="nowrap">TABDMP
             (off, TBD) </td>
           <td valign="top">Causes PASS4 to produce a hexadecimal dump of
             the Simulation Data File.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">ZCON (on,
+          <td align="center" valign="middle" nowrap="nowrap">ZCON (on,
             Z)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">ZCON (on,
+          <td align="center" valign="middle" nowrap="nowrap">ZCON (on,
             Z)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes calls to out-of-line routines
             (external references) to be performed via long indirect
             address constants.&nbsp; <br>
             <br>
             This is connected to the concept of <font color="#663300"><code>DECLARE</code></font>'ing
+
 
 
 
@@ -5159,13 +5066,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">HALMAT
+          <td align="center" valign="middle" nowrap="nowrap">HALMAT
             (off, HM)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">HALMAT
+          <td align="center" valign="middle" nowrap="nowrap">HALMAT
             (off, HM)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">If specified, HALMAT and literal tables are
             included in the SDF generated by PASS3.&nbsp; NOHALMAT will
@@ -5173,18 +5080,19 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">REGOPT
+          <td align="center" valign="middle" nowrap="nowrap">REGOPT
             (off, R)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">REGOPT
+          <td align="center" valign="middle" nowrap="nowrap">REGOPT
             (off, R) </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Used to indicate to the compiler that
             register optimization is desired. Allows borrowing of
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
 
 
 
@@ -5263,7 +5171,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         <tr>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">SCAL (on,
+          <td align="center" valign="middle" nowrap="nowrap">SCAL (on,
             SC)</td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
@@ -5280,13 +5188,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">MICROCODE
+          <td align="center" valign="middle" nowrap="nowrap">MICROCODE
             (on, MC)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">MICROCODE
+          <td align="center" valign="middle" nowrap="nowrap">MICROCODE
             (on, MC)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Allows use of AP-101 instructions which only
             exist on late versions of the Space Shuttle GPC. This
@@ -5311,13 +5219,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">SREF (off,
+          <td align="center" valign="middle" nowrap="nowrap">SREF (off,
             SR)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">SREF (off,
+          <td align="center" valign="middle" nowrap="nowrap">SREF (off,
             SR)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes only those variables from an included
             <font color="#663300"><code>EXTERNAL COMPOOL</code></font>
@@ -5326,25 +5234,25 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">QUASI (off,
+          <td align="center" valign="middle" nowrap="nowrap">QUASI (off,
             Q)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">QUASI (off,
+          <td align="center" valign="middle" nowrap="nowrap">QUASI (off,
             Q)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">(I'm not sure what QUASI does, but the
             comments in HAL/S-FC source code indicate that it is for the
             IBM 360 target only, and thus is irrelvant for AP-101S.)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TEMPLATE
+          <td align="center" valign="middle" nowrap="nowrap">TEMPLATE
             (off, TP)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TEMPLATE
+          <td align="center" valign="middle" nowrap="nowrap">TEMPLATE
             (off, TP) </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes the generation of a template for the
             compilation unit.&nbsp; For example, if a HAL/S source-code
@@ -5363,12 +5271,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">HIGHOPT
+          <td align="center" valign="middle" nowrap="nowrap">HIGHOPT
             (off, HO)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">HIGHOPT
+          <td align="center" valign="middle" nowrap="nowrap">HIGHOPT
             (off, HO) </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">The high optimization option (HIGHOPT) allows
             the compiler to perform optimizations that may not be valid
@@ -5391,7 +5299,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">ALL (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">ALL (off)</td>
           <td valign="top">The comments in PASS4 source code indicate
             that "ALL" means "process all SDFs", though it's not quite
             clear to me what the implications of that are.<br>
@@ -5402,7 +5310,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">BRIEF (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">BRIEF (off)</td>
           <td valign="top">If BRIEF is in effect, PASS4 does not print a
             formatted dump of the SDF in its output report.&nbsp; BRIEF
             automatically applies the TABLST and NOTABDMP compiler
@@ -5410,7 +5318,8 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+          <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
 
 
 
@@ -5486,37 +5395,37 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">PARSE (off,
+          <td align="center" valign="middle" nowrap="nowrap">PARSE (off,
             P)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">PARSE (off,
+          <td align="center" valign="middle" nowrap="nowrap">PARSE (off,
             P)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Debug. Gives parsing location information if
             an error is encountered.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LSTALL
+          <td align="center" valign="middle" nowrap="nowrap">LSTALL
             (off, LA)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LSTALL
+          <td align="center" valign="middle" nowrap="nowrap">LSTALL
             (off, LA)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Debug.&nbsp; Causes <i>both</i> assembly
             language (like LIST) <i>and</i> HALMAT to appear in PASS2's
             output report.</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LFXI (on)<br>
+          <td align="center" valign="middle" nowrap="nowrap">LFXI (on)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LFXI (on)<br>
+          <td align="center" valign="middle" nowrap="nowrap">LFXI (on)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Causes the AP-101S instruction <font
               color="#663300"><code>LFXI</code></font> to be used in
@@ -5527,10 +5436,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">X1 (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">X1 (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">X1 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap">X1 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top"><a name="x1"></a><a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=625">Documentation</a>
@@ -5601,8 +5510,10 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
               8-28</a> and on <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=197">page
+
 
 
 
@@ -5685,7 +5596,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">X3 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X3 (off)</td>
           <td valign="top"><a moz-do-not-send="true"
               href="Shuttle/19760020796.pdf#page=626">Documentation</a>
             (and <a moz-do-not-send="true"
@@ -5699,15 +5610,15 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">X4 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X4 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X4 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X4 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X4 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X4 (off)</td>
           <td valign="top">(Apparently unused.) </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">X5 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X5 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X5 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X5 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X5 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X5 (off)</td>
           <td valign="top"><a name="X5"></a>The X5 option enables a
             TRACE functionality (not to be confused with the IBM 360
             TRACE option described above) during the OPT pass.&nbsp; <a
@@ -5722,9 +5633,9 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">X6 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X6 (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">X6 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X6 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X6 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X6 (off)</td>
           <td valign="top">The X6 option causes timing and other
             statistics to be collected and printed about the
             optimization process during execution of the OPT and AUXP
@@ -5749,7 +5660,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">X7 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X7 (off)</td>
           <td valign="top">(Apparently unused.) </td>
         </tr>
         <tr>
@@ -5757,7 +5668,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">X8 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X8 (off)</td>
           <td valign="top">(Apparently unused.&nbsp; Comments in PASS2
             erroneously indicate that it is used there, but are in
             actuality referring to the MICROCODE option.)<br>
@@ -5768,30 +5679,30 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">X9 (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">X9 (off)</td>
           <td valign="top">(Apparently unused.)<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XA (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">XA (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">XA (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XA (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XA (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XA (off)</td>
           <td valign="top">(Apparently unused.)<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XB (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">XB (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap">XB (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XB (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">The XB option adds information to PASS3's
             output report about deleted symbols.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XC (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">XC (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap">XC (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XC (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">The XC option adds a symbol-table dump to
             PASS3's output report.<br>
@@ -5802,95 +5713,96 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XD (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XD (off)</td>
           <td rowspan="13" colspan="1" valign="middle">(Apparently
             unused.)<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XE (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap">XE (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XE (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XE (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XF (off)</td>
-          <td valign="middle" nowrap="nowrap" align="center">XF (off)<br>
+          <td align="center" valign="middle" nowrap="nowrap">XF (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XF (off)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XF (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XF (off)</td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XG (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XG (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XH (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XH (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XI (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XI (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XJ (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XJ (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XK (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XK (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XL (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XL (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XM (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XM (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XN (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XN (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XO (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XO (off)</td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XP (off)</td>
+          <td align="center" valign="middle" nowrap="nowrap">XP (off)</td>
         </tr>
         <tr>
-          <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+          <td rowspan="1" colspan="4" align="center" valign="top"><i>Type
+
 
 
 
@@ -5966,12 +5878,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">TITLE ("",
+          <td align="center" valign="middle" nowrap="nowrap">TITLE ("",
             T)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">TITLE ("",
+          <td align="center" valign="middle" nowrap="nowrap">TITLE ("",
             T)</td>
-          <td valign="middle" nowrap="nowrap" align="center">TITLE ("",
+          <td align="center" valign="middle" nowrap="nowrap">TITLE ("",
             T)<br>
           </td>
           <td valign="top">Specifies a (1 to 60 character) title to be
@@ -5991,12 +5903,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LINECT (59,
+          <td align="center" valign="middle" nowrap="nowrap">LINECT (59,
             LC)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LINECT (59,
+          <td align="center" valign="middle" nowrap="nowrap">LINECT (59,
             LC)</td>
-          <td valign="middle" nowrap="nowrap" align="center">LINECT (59,
+          <td align="center" valign="middle" nowrap="nowrap">LINECT (59,
             LC)<br>
           </td>
           <td valign="top">Sets the maximum number of lines to be
@@ -6082,6 +5994,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
                   lines</a>.<br>
               </li>
               <li>Page headings and subheadings.</li>
@@ -6096,12 +6009,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">PAGES
+          <td align="center" valign="middle" nowrap="nowrap">PAGES
             (2500, P)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">PAGES
+          <td align="center" valign="middle" nowrap="nowrap">PAGES
             (2500, P)</td>
-          <td valign="middle" nowrap="nowrap" align="center">PAGES
+          <td align="center" valign="middle" nowrap="nowrap">PAGES
             (10000, P)<br>
           </td>
           <td valign="top">Sets the maximum number of pages to be used
@@ -6109,12 +6022,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">SYMBOLS
+          <td align="center" valign="middle" nowrap="nowrap">SYMBOLS
             (200, SYM)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">SYMBOLS
+          <td align="center" valign="middle" nowrap="nowrap">SYMBOLS
             (200, SYM)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the initial size of the symbol
             table to be used by the compiler. As the value is exceeded,
@@ -6133,12 +6046,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">MACROSIZE
+          <td align="center" valign="middle" nowrap="nowrap">MACROSIZE
             (500, MS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">MACROSIZE
+          <td align="center" valign="middle" nowrap="nowrap">MACROSIZE
             (500, MS)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the initial number of characters
             allowed in the combined text of all <font color="#663300"><code>REPLACE</code></font>
@@ -6148,12 +6061,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LITSTRINGS
+          <td align="center" valign="middle" nowrap="nowrap">LITSTRINGS
             (2000, LITS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LITSTRINGS
+          <td align="center" valign="middle" nowrap="nowrap">LITSTRINGS
             (2000, LITS)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the maximum total number of
             characters permitted in all character literals in the
@@ -6163,12 +6076,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">COMPUNIT
+          <td align="center" valign="middle" nowrap="nowrap">COMPUNIT
             (0, CU)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">COMPUNIT
+          <td align="center" valign="middle" nowrap="nowrap">COMPUNIT
             (0, CU)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies a compilation unit number, which is
             made available in the SDF and in the Block Data Areas, and
@@ -6176,12 +6089,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">XREFSIZE
+          <td align="center" valign="middle" nowrap="nowrap">XREFSIZE
             (2000, XS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">XREFSIZE
+          <td align="center" valign="middle" nowrap="nowrap">XREFSIZE
             (2000, XS)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the initial number of cross
             reference table entries available to the compiler. As the
@@ -6191,12 +6104,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">CARDTYPE
+          <td align="center" valign="middle" nowrap="nowrap">CARDTYPE
             ("", CT)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">CARDTYPE
+          <td align="center" valign="middle" nowrap="nowrap">CARDTYPE
             ("", CT)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top"><a name="cardtype"></a>Allows statements with
             non-standard characters in the first column to be treated in
@@ -6230,6 +6143,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
             As of this writing, the following list describes all of the
             characters you could find in column 1 of HAL/S files (in
             PASS, BFS, our adaptation of sample code from <i>Programming
+
 
 
 
@@ -6317,6 +6231,7 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
                 invented the Virtual AGC Project:</li>
               <ul>
                 <li>For "modern" compilation (by <b>HALSFC</b> or <b>HAL_S_FC.py</b>),
+
 
 
 
@@ -6466,6 +6381,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
 
 
 
+
                 Shuttle Programs Orbiter Avionics Software Programming
                 Standard Document</a></i>.&nbsp; Alas, as of this
             writing we have not a single SAM in our possession.<br>
@@ -6485,6 +6401,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
               <ul>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL/SM
+
 
 
 
@@ -6625,6 +6542,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
 
 
 
+
                       System Software Requirements Specification</a>"<br>
                   </font></li>
               </ul>
@@ -6632,12 +6550,12 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">LABELSIZE
+          <td align="center" valign="middle" nowrap="nowrap">LABELSIZE
             (1200, LBLS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LABELSIZE
+          <td align="center" valign="middle" nowrap="nowrap">LABELSIZE
             (1200, LBLS)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the initial number of labels which
             can be recognized by the compiler. As the value is exceeded,
@@ -6657,10 +6575,10 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">DSR (1)<br>
+          <td align="center" valign="middle" nowrap="nowrap">DSR (1)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">DSR (1)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap">DSR (1)</td>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">
             <blockquote>"Specifies the value to be used for the data
@@ -6678,12 +6596,12 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">BLOCKSUM
+          <td align="center" valign="middle" nowrap="nowrap">BLOCKSUM
             (400, BS)<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">BLOCKSUM
+          <td align="center" valign="middle" nowrap="nowrap">BLOCKSUM
             (400, BS)</td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Specifies the initial size of the PASS1
             internal compiler table used for collecting information for
@@ -6693,11 +6611,11 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap" align="center">MFID ("")<br>
+          <td align="center" valign="middle" nowrap="nowrap">MFID ("")<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td align="center" valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="top">Allows specification of the Major Function
             ID.&nbsp; Implemented in the PASS version of the compiler
@@ -6707,7 +6625,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
         <tr>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">OLDTPL ("",
+          <td align="center" valign="middle" nowrap="nowrap">OLDTPL ("",
             0)</td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
@@ -6721,7 +6639,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
           </td>
           <td valign="middle" nowrap="nowrap"><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">LIST (1, L)</td>
+          <td align="center" valign="middle" nowrap="nowrap">LIST (1, L)</td>
           <td valign="top">(Do not confuse with the LIST option for
             PASS1.&nbsp; Although PASS4 does accept the type-2 LIST
             option, it does not appear to me that it uses the value of
@@ -6765,6 +6683,7 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
         </font></font></blockquote>
     <p> </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
 
 
 
@@ -6898,10 +6817,10 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
       source code just prior to where a problem has been observed, and
       to disable them after the problematic section of code.<br>
     </p>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
-          <th valign="top" align="left">Aid<br>
+          <th align="left" valign="top">Aid<br>
           </th>
           <th valign="top">PASS1<br>
           </th>
@@ -7140,6 +7059,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               production numbers are related to the BNF rules according
               to comments in the compiler's source code</a>.&nbsp; As
             they used to say, "You could look it up!"<br>
@@ -7163,6 +7083,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                 production trace available, though at present it applies
                 to the entire HAL/S source-code file, and cannot
                 selectively </font><font size="-1"><font size="-1">be </font>activated
+
 
 
 
@@ -7333,6 +7254,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -7393,6 +7315,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
 
 
 
@@ -7646,6 +7569,7 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
 
 
 
+
                 H(1)</code></font>" as described above.<br>
           </td>
         </tr>
@@ -7854,6 +7778,7 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
             comments in OPT source code call this "STACK TRACE".&nbsp;
             It is a toggle.&nbsp; The effect is similar but not
             identical to that of <a moz-do-not-send="true" href="#X5">compiler
+
 
 
 
@@ -8490,6 +8415,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -8568,6 +8494,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
               PASS2 source code</a>.&nbsp; Which is not anything I'd
             normally suggest, since I'd like to thoroughly digest all of
             this subject matter and spit it out explicitly for you, so
@@ -8587,6 +8514,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
               <li>The most-common messages are emitted by the `EMITC`
                 `PROCEDURE`.&nbsp; These are of the format "<font
                   color="#663333"><code>%06X:%6d,&nbsp;&nbsp; %04X</code></font>",
+
 
 
 
@@ -8649,12 +8577,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
                 where the fields are the current "location counter" and
                 a "data word".<br>
               </li>
               <li>Finally, there are the messages emitted by the
                 `SAVE_LITERAL` `PROCEDURE` in GENERATE.xpl.&nbsp; These
                 messages are of the format "<font color="#663333"><code>%6d:%08X
+
 
 
 
@@ -8781,8 +8711,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
 
 
 
@@ -8989,7 +8921,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     column, in [brackets]), although they are mostly fixed rather than
     selectable via command-line options.<br>
     <br>
-    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" width="100%">
       <tbody>
         <tr>
           <th valign="bottom">HAL/S-FC Usage<br>
@@ -9013,46 +8945,47 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </th>
         </tr>
         <tr>
-          <td valign="middle" align="center">Input HAL source code<br>
+          <td align="center" valign="middle">Input HAL source code<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--ddi=0,<i>SOURCEFILE</i>.hal</font></code></b><b>
               or </b><b><code><font color="#663300">stdin<br>
                   <br>
                 </font></code></b><code><font color="#663300"><font
                   color="#000000">[--hal=<i>SOURCEFILE</i>.hal]</font><br>
               </font></code><b><code><font color="#663300"> </font></code></b></td>
-          <td valign="middle" align="center"><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
           <td valign="middle"><br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Output report<br>
+          <td align="center" valign="middle">Output report<br>
           </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass1.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass1.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout<br>
                   <br>
                 </code></font></b><font color="#663300"><code><font
                   color="#000000">[&gt;<i>pass1p.rpt</i>]</font><br>
               </code></font><b><font color="#663300"><code></code></font></b><b>
             </b> </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>flo.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>flo.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>opt.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>opt.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>auxp.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>auxp.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass2.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass2.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass3.rpt</i></code></font></b><b>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass3.rpt</i></code></font></b><b>
               or </b><b><font color="#663300"><code>stdout</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=0,<i>pass4.rpt
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=0,<i>pass4.rpt
+
 
 
 
@@ -9130,39 +9063,39 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Output error messages<br>
+          <td align="center" valign="middle">Output error messages<br>
           </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b><b><br>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b><b><br>
               <br>
             </b>[stderr]<br>
             <b> </b> </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>stderr</code></font></b></td>
           <td valign="middle"><br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Extra listing file, plus
+          <td align="center" valign="middle">Extra listing file, plus
             SPACELIB error messages<br>
           </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=2,<i>listing2</i>.txt</code></font></b><b><br>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=2,<i>listing2</i>.txt</code></font></b><b><br>
               <br>
             </b>[LISTING2p.txt]<br>
             <b> </b> </td>
-          <td valign="middle" align="center"><b><font color="#663300"><code></code></font></b><b>n/a</b></td>
-          <td valign="middle" align="center"><font color="#663300"><code></code></font><b>n/a</b>
+          <td align="center" valign="middle"><b><font color="#663300"><code></code></font></b><b>n/a</b></td>
+          <td align="center" valign="middle"><font color="#663300"><code></code></font><b>n/a</b>
           </td>
-          <td valign="middle" align="center"><font color="#663300"><code></code></font><b>n/a</b>
+          <td align="center" valign="middle"><font color="#663300"><code></code></font><b>n/a</b>
           </td>
-          <td valign="middle" align="center"><font color="#663300"><code></code></font><b>n/a</b>
+          <td align="center" valign="middle"><font color="#663300"><code></code></font><b>n/a</b>
           </td>
-          <td valign="middle" align="center"><font color="#663300"><code></code></font><b>TBD</b>
+          <td align="center" valign="middle"><font color="#663300"><code></code></font><b>TBD</b>
           </td>
-          <td valign="middle" align="center"><b>TBD</b> </td>
+          <td align="center" valign="middle"><b>TBD</b> </td>
           <td valign="middle">This file is produced by PASS1 if
             "LISTING2" is among the compiler options.&nbsp; (The
             memory-management system may also direct certain error
@@ -9170,21 +9103,21 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">AP-101S object code<br>
+          <td align="center" valign="middle">AP-101S object code<br>
           </td>
-          <td valign="middle" align="center"><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b>n/a</b><b><br>
             </b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><font color="#663300"><b><code>--ddo=3,<i>cards.bin</i>,E</code></b><font
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><font color="#663300"><b><code>--ddo=3,<i>cards.bin</i>,E</code></b><font
                 color="#000000"> (PASS) or</font></font><br>
             <font color="#663300"><code>-<b>-pdso=3,</b><b><i>cards</i></b><b>,E</b></code></font>
             (BFS)<br>
           </td>
-          <td valign="middle" align="center"><b>TBD<br>
+          <td align="center" valign="middle"><b>TBD<br>
             </b></td>
-          <td valign="middle" align="center"><b>TBD<br>
+          <td align="center" valign="middle"><b>TBD<br>
             </b></td>
           <td valign="top">Generated object code.&nbsp; The file
             cards.bin is in a format similar to the IBM 360 object-code
@@ -9199,18 +9132,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Object code "deck"<br>
+          <td align="center" valign="middle">Object code "deck"<br>
           </td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=4,<i>deck</i><i>.bin</i>,E</code></font></b></td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=4,<i>deck</i><i>.bin</i>,E</code></font></b></td>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
-          <td valign="middle" align="left">An optional copy of the
+          <td align="left" valign="middle">An optional copy of the
             object code.&nbsp; For the PASS version of the compiler,
             it's identical to <font color="#663300"><code><i>cards.bin</i></code></font>
             (see above).&nbsp; For the BFS version, it's a single-file
@@ -9219,9 +9152,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Template library<br>
+          <td align="center" valign="middle">Template library<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=4,TEMPLIB,E<br>
                     --pdso=6,TEMPLIB,E<br>
                     <br>
@@ -9230,12 +9163,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                     TEMPLIBB.json]</font><br>
                 </font></font></code><b><code><font color="#663300"><font
                     color="#663300"> </font></font></code></b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
           <td valign="middle">The output is optional, depending on
             whether or not "TEMPLATE" is among the compiler
             options.&nbsp; For use with the compiler directive "<code>D
@@ -9245,34 +9178,35 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         <tr>
           <td valign="middle">Include library<br>
           </td>
-          <td valign="middle" align="center"><b><code>--pdsi=8,INCLIB,E</code></b><b><code><br>
+          <td align="center" valign="middle"><b><code>--pdsi=8,INCLIB,E</code></b><b><code><br>
                 <br>
               </code></b><code>[INCLIB.json,<br>
               INCLIBB.json]<br>
             </code><b><code> </code></b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
           <td valign="top">For use with the compiler directive "<code>D
               INCLUDE <i>name</i></code>".</td>
         </tr>
         <tr>
           <td valign="middle">Temporary include library<br>
           </td>
-          <td valign="middle" align="center"><b><code>--pdso=8,"&amp;&amp;TEMPINC",E</code></b><b><code><br>
+          <td align="center" valign="middle"><b><code>--pdso=8,"&amp;&amp;TEMPINC",E</code></b><b><code><br>
               </code></b><b><code>--pdsi=9,"&amp;&amp;TEMPINC",E</code></b><b><code><br>
               </code></b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
           <td valign="top">For use with the compiler directives "<code>D
               DEFINE <i>name</i></code>" and "<code>D CLOSE <i>name</i></code>",
+
 
 
 
@@ -9307,9 +9241,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             source-code file) of "<code>D INCLUDE <i>name</i></code>".</td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Input error-message library<br>
+          <td align="center" valign="middle">Input error-message library<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=5,/<i>path</i>/<i>to</i>/ERRORLIB<br>
                     <br>
                   </font></font></code></b><code><font color="#663300"><font
@@ -9317,21 +9251,21 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                     ERRORLIBB.json]<br>
                   </font></font></font></code><b><code><font
                   color="#663300"><font color="#663300"></font></font></code></b></td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=5,/<i>path</i>/<i>to</i>/ERRORLIB</font></font></code></b>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=5,/<i>path</i>/<i>to</i>/ERRORLIB</font></font></code></b>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=5,/<i>path</i>/<i>to</i>/ERRORLIB</font></font></code></b>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300"><font color="#663300">--pdsi=5,/<i>path</i>/<i>to</i>/ERRORLIB</font></font></code></b>
           </td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
           <td valign="middle"><font color="#663300"><code>ERRORLIB</code></font>
             is a library of standardized error messages supplied with
@@ -9357,20 +9291,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Input access-rights library<br>
+          <td align="center" valign="middle">Input access-rights library<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--pdsi=6,ACCESS<br>
                   <br>
                 </font></code></b><code><font color="#663300"><font
                   color="#000000">[FILE6.bin]</font><br>
               </font></code><b><code><font color="#663300"></font></code></b></td>
-          <td valign="middle" align="center"><b>n/a</b> </td>
-          <td valign="middle" align="center"><b>n/a</b> </td>
-          <td valign="middle" align="center"><b>n/a</b> </td>
-          <td valign="middle" align="center"><b>n/a</b> </td>
-          <td valign="middle" align="center"><b>TBD</b> </td>
-          <td valign="middle" align="center"><b>TBD</b> </td>
+          <td align="center" valign="middle"><b>n/a</b> </td>
+          <td align="center" valign="middle"><b>n/a</b> </td>
+          <td align="center" valign="middle"><b>n/a</b> </td>
+          <td align="center" valign="middle"><b>n/a</b> </td>
+          <td align="center" valign="middle"><b>TBD</b> </td>
+          <td align="center" valign="middle"><b>TBD</b> </td>
           <td valign="middle"><font color="#663300"><code>ACCESS</code></font>
             is a library of access-code rights, by which different
             sections of HAL/S code can be restricted in terms of what
@@ -9379,33 +9313,33 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Extra listing<br>
+          <td align="center" valign="middle">Extra listing<br>
           </td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b><font color="#663300"><code>--ddo=7,<i>extra.txt</i></code></font></b></td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b><font color="#663300"><code>--ddo=7,<i>extra.txt</i></code></font></b></td>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
-          <td valign="middle" align="center"><b>TBD</b><br>
+          <td align="center" valign="middle"><b>TBD</b><br>
           </td>
           <td valign="middle">TBD<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Source comparison<br>
+          <td align="center" valign="middle">Source comparison<br>
           </td>
-          <td valign="middle" align="center">
+          <td align="center" valign="middle">
             <pre><font color="#663300">--ddo=9,comparison.txt</font></pre>
           </td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="left">The compiler is able to
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="left" valign="middle">The compiler is able to
             compare two versions of the HAL/S source code and to produce
             an output report on the differences.&nbsp; But so far I'm in
             the dark as to the mechanics of how to feed in the "patches"
@@ -9415,6 +9349,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             scribblings —, you should probably start with <a
               moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/PASS1.PROCS/SOURCECO.xpl">the
+
 
 
 
@@ -9517,29 +9452,30 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
                 = ...;</code></font>" are the ones where the report is
             output.)<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Output or input HALMAT<br>
+          <td align="center" valign="middle">Output or input HALMAT<br>
           </td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ffcccc"
-            align="center"><b><code><font color="#663300">--raf=O,7200,1,<i>halmat.bin<br>
+          <td bgcolor="#ffcccc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=O,7200,1,<i>halmat.bin<br>
                     <br>
                   </i></font></code></b><code><font color="#663300"><font
                   color="#000000">[FILE1.bin]</font><br>
               </font></code><b><code><font color="#663300"><i></i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ffcccc"
-            align="center"><b><code><font color="#663300">--raf=I,7200,1,<i>halmat.bin</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ffcccc"
-            align="center"><b><code><font color="#663300">--raf=I,7200,1,<i>halmat.bin</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#999900"
-            align="center"><b><code><font color="#663300">--raf=O,7200,1,<i>auxmat.bin</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#999900"
-            align="center"><b><code><font color="#663300">--raf=I,7200,1,<i>auxmat.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
+          <td bgcolor="#ffcccc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=I,7200,1,<i>halmat.bin</i></font></code></b></td>
+          <td bgcolor="#ffcccc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=I,7200,1,<i>halmat.bin</i></font></code></b></td>
+          <td bgcolor="#999900" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=O,7200,1,<i>auxmat.bin</i></font></code></b></td>
+          <td bgcolor="#999900" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=I,7200,1,<i>auxmat.bin</i></font></code></b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
           <td valign="top">HALMAT is the "intermediate" language into
             which HAL/S code is converted prior to generation of machine
             code.&nbsp; Various versions are created by the several
@@ -9553,30 +9489,31 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Literal file<br>
+          <td align="center" valign="middle">Literal file<br>
           </td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
-            align="center"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n<br>
+          <td bgcolor="#cc33cc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n<br>
                     <br>
                   </i></font></code></b><code><font color="#663300"><font
                   color="#000000">[FILE2.bin + LIT_CHAR.bin]</font><br>
               </font></code><b><code><font color="#663300"><i></i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
-            align="center"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
-            align="center"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="cc33cc"
-            align="center"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
-            align="center"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" bgcolor="#cc33cc" align="center"><b><code><font
+          <td bgcolor="#cc33cc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+          <td bgcolor="#cc33cc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+          <td bgcolor="cc33cc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+          <td bgcolor="#cc33cc" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+          <td bgcolor="#cc33cc" align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
           <td valign="middle">This is a "random-access file" that the
             compiler uses to store the values of string, floating-point,
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
 
 
 
@@ -9635,20 +9572,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Workfiles<br>
+          <td align="center" valign="middle">Workfiles<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,1600,3,<i>icfile.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b><code></code></b><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" align="center"><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,1600,3,<i>objcode.bin</i><br>
                 </font></code></b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
           <td valign="middle">TBD, but I think that <font
               color="#663300"><code><i>icfile.bin</i></code></font>
             holds values of <font color="#663300"><code>INITIAL</code></font>
@@ -9671,38 +9608,38 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Second HALMAT file<br>
+          <td align="center" valign="middle">Second HALMAT file<br>
           </td>
-          <td valign="middle" align="center"><b><code></code></b><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b><code></code></b><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" align="center"><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" bgcolor="#cc9933" align="center"><b><code><font
+          <td bgcolor="#cc9933" align="center" valign="middle"><b><code><font
                   color="#663300">--raf=O,7200,4,<i>optmat.bin</i></font></code></b></td>
-          <td valign="middle" bgcolor="#cc9933" align="center"><b><code><font
+          <td bgcolor="#cc9933" align="center" valign="middle"><b><code><font
                   color="#663300">--raf=I,7200,4,<i>optmat.bin</i></font></code></b></td>
-          <td valign="middle" bgcolor="#cc9933" align="center"><b><code><font
+          <td bgcolor="#cc9933" align="center" valign="middle"><b><code><font
                   color="#663300">--raf=I,7200,4,<i>optmat.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b><code></code></b><b>TBD</b></td>
-          <td valign="middle" align="center"><b>TBD</b></td>
+          <td align="center" valign="middle"><b><code></code></b><b>TBD</b></td>
+          <td align="center" valign="middle"><b>TBD</b></td>
           <td valign="top">See the comments for <font color="#663300"><i><code>halmat.bin</code></i></font>
             and <font color="#663300"><i><code>auxmat.bin</code></i></font>
             above.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">SDF<br>
+          <td align="center" valign="middle">SDF<br>
           </td>
-          <td valign="middle" bgcolor="#ff6666" align="center"><b><code><font
+          <td bgcolor="#ff6666" align="center" valign="middle"><b><code><font
                   color="#663300">--<i>sdfi=SDFLIB</i></font></code></b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" align="center"><b>n/a</b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ff6666"
-            align="center"><b><code><font color="#663300">[--<i>sdfo=SDFLIB</i>]</font></code></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ff6666"
-            align="center"><b><code><font color="#663300">--<i>sdf=SDFLIB</i></font></code></b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td align="center" valign="middle"><b>n/a</b></td>
+          <td bgcolor="#ff6666" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">[--<i>sdfo=SDFLIB</i>]</font></code></b></td>
+          <td bgcolor="#ff6666" align="center" valign="middle"
+            nowrap="nowrap"><b><code><font color="#663300">--<i>sdf=SDFLIB</i></font></code></b></td>
           <td valign="top">Library of Simulation Data Files (SDF).&nbsp;
             These operations bypass the file-operation conventions
             established by the <b>XCOM-I</b> runtime library, but
@@ -9719,69 +9656,69 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Virtual-memory<br>
+          <td align="center" valign="middle">Virtual-memory<br>
             file<br>
           </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b><b>
             </b> </td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b></td>
-          <td valign="middle" align="center"><b><code><font
+          <td align="center" valign="middle"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" align="center"><b><code><font
+          <td align="center" valign="middle" nowrap="nowrap"><b><code><font
                   color="#663300">--raf=B,3360,6,<i>vmem.bin</i></font></code></b></td>
-          <td valign="middle" nowrap="nowrap" align="center"><b>TBD</b></td>
+          <td align="center" valign="middle" nowrap="nowrap"><b>TBD</b></td>
           <td valign="middle">This is a "random-access file" that the
             compiler uses to store blocks of virtual memory which have
             been temporarily unloaded from memory.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Input <font
+          <td align="center" valign="middle">Input <font
               color="#663300"><code>COMMON</code></font> file<br>
           </td>
-          <td valign="middle" align="center"><b>n/a</b><b><br>
+          <td align="center" valign="middle"><b>n/a</b><b><br>
             </b> </td>
-          <td valign="middle" bgcolor="#ffff99" align="center"><b><font
+          <td bgcolor="#ffff99" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON0.out</i></code></font></b><b><br>
             </b></td>
-          <td valign="middle" bgcolor="#99ff99" align="center"><b><font
+          <td bgcolor="#99ff99" align="center" valign="middle"><b><font
                 color="#663300"><code>--commoni=</code><code><i>COMMON1.out</i></code><code></code></font></b></td>
-          <td valign="middle" bgcolor="#99ffff" align="center"><b><font
+          <td bgcolor="#99ffff" align="center" valign="middle"><b><font
                 color="#663300"><code>--commoni=</code><code><i>COMMON2.out</i></code><code></code></font></b></td>
-          <td valign="middle" bgcolor="#ff6666" align="center"><b><font
+          <td bgcolor="#ff6666" align="center" valign="middle"><b><font
                 color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>3.out</i></code></font></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#ff99ff"
-            align="center"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON4.out</i></code><code></code></font></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cccccc"
-            align="center"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>5.out</i></code></font></b></td>
+          <td bgcolor="#ff99ff" align="center" valign="middle"
+            nowrap="nowrap"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON4.out</i></code><code></code></font></b></td>
+          <td bgcolor="#cccccc" align="center" valign="middle"
+            nowrap="nowrap"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>5.out</i></code></font></b></td>
           <td valign="middle">The state of <font color="#663300"><code>COMMON</code></font>
             memory upon program start.<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">Output <font
+          <td align="center" valign="middle">Output <font
               color="#663300"><code>COMMON</code></font> file<br>
           </td>
-          <td valign="middle" bgcolor="#ffff99" align="center"><b><font
+          <td bgcolor="#ffff99" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON0.out</i></code></font></b><b><br>
             </b> </td>
-          <td valign="middle" bgcolor="#99ff99" align="center"><b><font
+          <td bgcolor="#99ff99" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON1.out</i></code><code></code></font></b></td>
-          <td valign="middle" bgcolor="#99ffff" align="center"><b><font
+          <td bgcolor="#99ffff" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON2.out</i></code><code></code></font></b></td>
-          <td valign="middle" bgcolor="#ff6666" align="center"><b><font
+          <td bgcolor="#ff6666" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON3.out</i></code><code></code></font></b></td>
-          <td valign="middle" bgcolor="#ff99ff" align="center"><b><font
+          <td bgcolor="#ff99ff" align="center" valign="middle"><b><font
                 color="#663300"><code>--commono=</code><code><i>COMMON4.out</i></code><code></code></font></b></td>
-          <td valign="middle" nowrap="nowrap" bgcolor="#cccccc"
-            align="center"><b><font color="#663300"><code>--commono=</code><code><i>COMMON5.out</i></code><code></code></font></b></td>
-          <td valign="middle" nowrap="nowrap" align="center"><b>TBD</b><b><br>
+          <td bgcolor="#cccccc" align="center" valign="middle"
+            nowrap="nowrap"><b><font color="#663300"><code>--commono=</code><code><i>COMMON5.out</i></code><code></code></font></b></td>
+          <td align="center" valign="middle" nowrap="nowrap"><b>TBD</b><b><br>
             </b> </td>
           <td valign="middle">The state of <font color="#663300"><code>COMMON</code></font>
             memory upon program end.&nbsp; <b>Warning:</b>&nbsp; The
@@ -9815,6 +9752,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         confusing naming, but they do fill the similar role of
         preserving the contents of memory between compiler passes.&nbsp;
         Typically, litfile<i>x</i>.bin requires the assistance of COMMON<i>x</i>.out.bin.gz
+
 
 
 
@@ -9921,6 +9859,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         &nbsp; (By "gzipped", I mean that it's compressed and can be
         uncompressed via the GNU <b>gunzip</b> utility, or via the
         standard <b>zlib</b>/<b>libz</b> library available for most
@@ -9947,8 +9886,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     operates correctly.&nbsp; <br>
     <br>
     <img moz-do-not-send="true" src="GoldStar.png" alt="" align="right"><img
-      moz-do-not-send="true" src="Gold_Star.png" alt="" width="60"
-      height="60" align="left">Was I right about you?&nbsp; If was, then
+      moz-do-not-send="true" src="Gold_Star.png" alt="" align="left"
+      width="60" height="60">Was I right about you?&nbsp; If was, then
     Congratulations!&nbsp; Give yourself a gold star.&nbsp; You don't
     need to read this section.&nbsp; You're all done absorbing
     information about the HAL/S compiler.&nbsp; That's why I've stuck
@@ -9992,7 +9931,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     much interest to you.&nbsp; But if we have to, we have to.&nbsp;
     Here's a side-by-side comparison of the development methods:<br>
     <br>
-    <table width="50%" cellspacing="2" cellpadding="2" align="center">
+    <table cellspacing="2" cellpadding="2" align="center" width="50%">
       <tbody>
         <tr>
           <th valign="top"><u>Stage of Development</u><u><br>
@@ -10039,7 +9978,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         <tr>
           <td valign="top">Second stage: joint debugging<br>
           </td>
-          <td rowspan="1" colspan="2" valign="top" align="left">
+          <td rowspan="1" colspan="2" align="left" valign="top">
             <ol type="A">
               <li>Compiled all existing HAL/S source-code files using
                 both <b>HAL_S_FC</b> and <b>HALSFC-PASS1</b>, with the
@@ -10140,6 +10079,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -10155,6 +10095,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
 
 
 
@@ -10328,6 +10269,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         FLO.PROC/, AUX_PROCS/, and OPT.PROCS/ of the folder
         "yaShuttle/Source Code/PASS.REL32V0/".<br>
       </li>
@@ -10340,694 +10282,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <p><a moz-do-not-send="true" href="XPL-I.html#debugging">What little
         else I can say about debugging can be found on the XPL/I page</a>.<br>
     </p>
-    <h1><a name="halmat"></a>The Mystery of HALMAT</h1>
-    <p>All throughout this page, we've seen numerous references to
-      "HALMAT", with nary a suggestion that HALMAT might be of use to us
-      today in our space-shuttling activities, and only minimal
-      explanations as to what HALMAT might be.&nbsp; But the truth is
-      that HALMAT could indeed potentially be of a lot of use, and so it
-      may behoove us to give a little better explanation of what HALMAT
-      is and how it might be of use <i>now</i> as opposed to back in
-      the Space Shuttle era.<br>
-    </p>
-    <p>As you already know, the original compiler used for converting
-      Space Shuttle flight software written in the high-level language
-      known as HAL/S into assembly-language object code for the Space
-      Shuttle's general purpose computers was partitioned into several
-      successive passes as follows:<br>
-    </p>
-    <ul>
-      <li>PASS1 parsed the HAL/S source code and generated a
-        representation of the software in terms of an "intermediate
-        language" called HALMAT.</li>
-      <li>OPT "optimized" the HALMAT produced by PASS1, thus producing
-        another functionally-identical but presumably more-efficient set
-        of HALMAT instructions.</li>
-      <li>PASS2 imported the optimized HALMAT and generated AP-101S
-        assembly-language object code.</li>
-    </ul>
-    If our main interest in compiling the Space Shuttle flight software
-    or indeed any HAL/S program is to actually <i>run</i> that
-    software, two additional items must be available to us once the
-    compilation passes above have completed their work:<br>
-    <ul>
-      <li>We must have a linker program that can combine into a single
-        executable the bits and pieces of AP-101S object code that were
-        derived potentially from many, many original HAL/S source-code
-        files.</li>
-      <li>We must have an emulator for the AP-101S CPU that can run the
-        now-linked object code.<br>
-      </li>
-    </ul>
-    That's a pretty imposing list of things we need to have in order to
-    get it all working, though as of this writing we do have them, even
-    if perhaps not yet in a final form!&nbsp; <br>
-    <br>
-    Stepping back a bit from the list, though, so that we can see the
-    forest rather than the trees, we might ask ourselves the following
-    question:&nbsp; If we had a sufficient understanding of HALMAT at
-    the technical level, mightn't we bypass the entire chain of
-    must-haves after OPT by creating a program that ran HALMAT
-    directly?&nbsp; For that matter, while OPT may have been needed for
-    the relatively-slow computers used back in the Shuttle era, with our
-    much faster computers of today do we even need to "optimize" the
-    HALMAT at all?&nbsp; Mightn't we simply run it directly after PASS1,
-    without running OPT?<br>
-    <br>
-    If we could do that, the entire process of moving from HAL/S source
-    code to running it in emulation might reduce just to:<br>
-    <ul>
-      <li>Use PASS1 to compile HAL/S source code to HALMAT.</li>
-      <li>Run the HALMAT in a HALMAT emulator.&nbsp; (Assuming, of
-        course, that the HALMAT emulator had enough of a primitive
-        linking capability to simultaneously deal with multiple HALMAT
-        files derived from different HAL/S source-code files.)<br>
-      </li>
-    </ul>
-    (And even if we decided that OPT is indeed a necessity, the
-    complexity is hardly any greater.)&nbsp; This notion is particularly
-    appealing when we recall from our prior discussions above that we
-    actually have <i>two</i> working versions of PASS1, namely <b>HALSFC-PASS1</b>,
-    which was created by compiling the original source code of
-    Intermetrics's compiler HAL/S-FC, and a 100% compatible version
-    entirely written in Python, namely <b>HAL_S_FC.py</b>.&nbsp; Then
-    too, communication between the CPU and whatever other simulated
-    peripherals exist in the spacecraft might be easier at the HALMAT
-    level than at the AP-101S level.<br>
-    <br>
-    Sounds promising.&nbsp; But alas, not perfect!&nbsp; Where this
-    concept has fallen apart up to now is the inadequacy of surviving
-    documentation <i>about</i> HALMAT.&nbsp; Without a satisfactory
-    definition of the HALMAT language, how might we be expected to
-    create an emulator for it?&nbsp; <i>Some</i> HALMAT documentation
-    has survived:<br>
-    <ol>
-      <li><a moz-do-not-send="true"
-          href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">A
-          complete description was written up in 1971</a>.&nbsp; As the
-        document itself explains, it "is essentially a handbook of an
-        intermediate language HALMAT produced and used during the
-        operation of the HAL360-V1 compiler".&nbsp; In case it isn't
-        obvious, HAL360-V1 was Intermetrics's very first attempt at a
-        HAL compiler — <i>not</i> yet HAL/S —, producing object code
-        running on an IBM System/360 computer rather than an AP-101S
-        computer.&nbsp; Actually, the document says only that HAL360-V1
-        ran on an IBM System/360, and doesn't explicitly say that the
-        compiled form of the HAL software ran on a System/360; but the
-        document nowhere mentions the AP-101 computer, and that seems
-        very telling!&nbsp; Besides which, the document specifically
-        calls HAL360-V1 a "preliminary version", or as we might think of
-        it, a proof of concept.&nbsp; The problem is, that being
-        "preliminary", details changed later!&nbsp; How much was changed
-        or added we don't know, but changes there definitely were.</li>
-      <li>Intermetrics's much later document IR-60, "HAL/S-360 Compiler
-        System Specification", has a very large Appendix A that
-        specifies the HALMAT instructions in detail.&nbsp; We have no
-        assurance that this is the final form of the HALMAT language,
-        but all later documentation refers back to IR-60 as the
-        authoritative source, so I think we should probably recognize it
-        as such as well.&nbsp; <i>Unfortunately</i>, the only copy of
-        IR-60 which has survived to fall into our hands is <a
-          moz-do-not-send="true"
-href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">Revision
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          5 of the document, IR-60-5 from 1977</a>, and this version
-        contains only the pages that changed between Revision 4 and
-        Revision 5.&nbsp; The complete Appendix A, which from the page
-        markings must contain at least 118 pages, has only 20 pages in
-        our surviving copy!&nbsp; Then too, a Revision 6 is known to
-        have been in the JSC library at one time — though not any longer
-        — and so potentially there could have been changes later even
-        than in what has survived in our copy.&nbsp; It could be that
-        more-complete copies of IR-60 still exist somewhere, perhaps in
-        the hands of a collector, but for now we have no reason to
-        believe that they weren't all simply thrown away.<br>
-      </li>
-      <li>Though not "documentation" as such, the HAL/S-FC compiler
-        passes PASS1, OPT, and PASS2 all output and/or input HALMAT
-        files, so potentially one could get additional information about
-        HALMAT's individual instructions or groupings of instructions by
-        looking through HAL/S-FC source code.</li>
-      <li>Moreover, PASS1 has the optional capability of interleaving
-        HAL/S statements with the derived HALMAT in the compilation
-        reports it generates.&nbsp; Similarly, PASS2 has the optional
-        capability of interleaving HALMAT with the assembly-language
-        instructions it generates in the compilation reports it
-        generates.&nbsp; (And even OPT, which normally doesn't output
-        much of a report, has an analogous capability.)&nbsp; Therefore,
-        by crafting sample HAL/S source-code files and compiling them,
-        it's possible to deduce more detail about HALMAT instructions as
-        well.</li>
-    </ol>
-    <p>Thus although complete documentation about HALMAT in a
-      nicely-packaged, authoritative document seems to have escaped us,
-      it is not necessarily clear that we couldn't regenerate a complete
-      description of the language through reverse engineering.&nbsp; And
-      if we could do that, perhaps a HALMAT emulator could become a
-      reality.&nbsp; <br>
-    </p>
-    As it turns out, Zane Hambly has gotten us moving in that direction:<br>
-    <ul>
-      <li>He has collected data from the sources mentioned above into <a
-          moz-do-not-send="true" href="Halmat.pdf">a single document
-          describing all that's presently known about HALMAT</a>.&nbsp;
-        <br>
-      </li>
-      <li>He has in fact written a HALMAT emulator which he calls <b>yaHALMAT</b>,
-        based on the information he collected.&nbsp; To learn more about
-        that, continue on to the next section.</li>
-    </ul>
-    <p>We've seen various examples of actual HALMAT in the discussion
-      above, but it has always been in the form of incomprehensible
-      numerical codes provided in one form or another by reports output
-      by the HAL/S compiler.&nbsp; Those, unsurprisingly, have little
-      value to us today.&nbsp; To help bridge the comprehensibility gap
-      a little, I've written a little utility called <b>unHALMAT.py</b>
-      that produces a surprisingly useful and fairly human-friendly
-      version of the HALMAT produced by the compiler, by combining it
-      with other available information like symbol tables, literal
-      files, and so on.&nbsp; Here's what <b>unHALMAT.py</b> can do
-      with the HALMAT file generated by compiling our ubiquitous
-      HELLO.hal program:<br>
-    </p>
-    <blockquote>
-      <pre>&gt; HALSFC HELLO.hal<br>Results stored in the folder "HALSFC HELLO.hal 2026-05-14 08-53-39.results".<br>Accessible also as "current.results" until next HALSFC run.<br>Compilation successful.<br>&gt; unHALMAT.py halmat.bin<br>7200 bytes read from halmat.bin<br>RECORD 0<br>  HALMAT #0 (0x005, Start of HALMAT block): PXRC(1) 00 0 0<br>  HALMAT #1	  | 05A 00 00(  0) 00 00 00 01 00 00   (Matching XREC is at HALMAT #90)<br>  HALMAT #2 (0x02B, Start of PROGRAM definition): MDEF(1) 00 0 0<br>  HALMAT #3	  | 001 00 01(SYT) 00 00 00 01 00 00   (Symbol #1: HELLO, PROGRAM LABEL)<br>  HALMAT #4 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #5	  | 001 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #1)<br>  HALMAT #6 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #7	  | 002 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #2)<br>  HALMAT #8 (0x841, CHARACTER INITIAL value): CINT(2) 02 0 0<br>  HALMAT #9	  | 003 00 01(SYT) 00 00 00 01 00 00   (Symbol #3: MY_NAME, CHARACTER ALIGNED STATIC INITIAL)<br>  HALMAT #10	  | 002 00 05(LIT) 00 00 00 01 00 00   (Literal #2: Type CHARACTER, 'RON BURKEY')<br>  HALMAT #11 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #12	  | 003 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #3)<br>  HALMAT #13 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #14	  | 004 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #4)<br>  HALMAT #15 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #16	  | 005 00 00(  0) 00 00 00 01 00 00   (HAL/S statement #5)<br>  HALMAT #17 (0x031, End of DECLAREs): EDCL(0) 01 1 0<br>  HALMAT #18 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #19	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #20 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #21	  | 004 02 05(LIT) 00 00 00 01 00 00   (Literal #4: Type CHARACTER, 'THE BEGINNING')<br>  HALMAT #22 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #23	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #24 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #25 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #26	  | 006 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #6)<br>  HALMAT #27 (0x010, Start of DO FOR block): DFOR(4) 01 1 0<br>  HALMAT #28	  | 001 00 02(INL) 00 00 01 01 00 01   (Bookkeeping label #1)<br>  HALMAT #29	  | 002 00 01(SYT) 00 00 00 01 00 00   (Symbol #2: I, INTEGER SINGLE ALIGNED STATIC)<br>  HALMAT #30	  | 005 00 05(LIT) 00 00 00 01 00 00   (Literal #5: Type FIXED, 41100000,00000000 ' 1.000000000000000E+00')<br>  HALMAT #31	  | 006 00 05(LIT) 00 00 00 01 00 00   (Literal #6: Type FIXED, 41500000,00000000 ' 5.000000000000000E+00')<br>  HALMAT #32 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #33	  | 007 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #7)<br>  HALMAT #34 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #35	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #36 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #37	  | 002 06 01(SYT) 00 00 00 01 00 00   (Symbol #2: I, INTEGER SINGLE ALIGNED STATIC)<br>  HALMAT #38 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #39	  | 008 02 05(LIT) 00 00 00 01 00 00   (Literal #8: Type CHARACTER, 'HELLO, WORLD!')<br>  HALMAT #40 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #41	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #42 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #43 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #44	  | 008 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #8)<br>  HALMAT #45 (0x010, Start of DO FOR block): DFOR(5) 02 1 0<br>  HALMAT #46	  | 006 00 02(INL) 00 00 01 01 00 01   (Bookkeeping label #6)<br>  HALMAT #47	  | 004 00 01(SYT) 00 00 00 01 00 00   (Symbol #4: J, INTEGER SINGLE ALIGNED STATIC)<br>  HALMAT #48	  | 009 00 05(LIT) 00 00 00 01 00 00   (Literal #9: Type FIXED, 41200000,00000000 ' 2.000000000000000E+00')<br>  HALMAT #49	  | 00A 00 05(LIT) 00 00 00 01 00 00   (Literal #10: Type FIXED, 41800000,00000000 ' 8.000000000000000E+00')<br>  HALMAT #50	  | 00B 00 05(LIT) 00 00 00 01 00 00   (Literal #11: Type FIXED, 41200000,00000000 ' 2.000000000000000E+00')<br>  HALMAT #51 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #52	  | 009 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #9)<br>  HALMAT #53 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #54	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #55 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #56	  | 00D 02 05(LIT) 00 00 00 01 00 00   (Literal #13: Type CHARACTER, '     ')<br>  HALMAT #57 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #58	  | 004 06 01(SYT) 00 00 00 01 00 00   (Symbol #4: J, INTEGER SINGLE ALIGNED STATIC)<br>  HALMAT #59 (0x202, CHARACTER concatenation): CCAT(2) 00 0 0<br>  HALMAT #60	  | 003 00 01(SYT) 00 00 00 01 00 00   (Symbol #3: MY_NAME, CHARACTER ALIGNED STATIC INITIAL)<br>  HALMAT #61	  | 00E 00 05(LIT) 00 00 00 01 00 00   (Literal #14: Type CHARACTER, ' SAYS ISN'T THIS FUN?')<br>  HALMAT #62 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #63	  | 03B 02 03(VAC) 00 00 00 01 00 00   (Result from operation at HALMAT #59)<br>  HALMAT #64 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #65	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #66 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #67 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #68	  | 00A 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #10)<br>  HALMAT #69 (0x011, End of DO FOR block): EFOR(1) 00 0 0<br>  HALMAT #70	  | 006 00 02(INL) 00 00 00 01 00 00   (Bookkeeping label #6)<br>  HALMAT #71 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #72	  | 00B 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #11)<br>  HALMAT #73 (0x011, End of DO FOR block): EFOR(1) 00 0 0<br>  HALMAT #74	  | 001 00 02(INL) 00 00 00 01 00 00   (Bookkeeping label #1)<br>  HALMAT #75 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #76	  | 00C 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #12)<br>  HALMAT #77 (0x025, Start of argument list): XXST(1) 00 1 0<br>  HALMAT #78	  | 002 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 2 0x2)<br>  HALMAT #79 (0x027, Argument): XXAR(1) 00 1 0<br>  HALMAT #80	  | 010 02 05(LIT) 00 00 00 01 00 00   (Literal #16: Type CHARACTER, 'THE END')<br>  HALMAT #81 (0x021, WRITE statement): WRIT(1) 00 0 0<br>  HALMAT #82	  | 006 00 06(IMD) 00 00 00 01 00 00   (Immediate integer data 6 0x6)<br>  HALMAT #83 (0x026, End of argument list): XXND(0) 00 0 0<br>  HALMAT #84 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #85	  | 00D 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #13)<br>  HALMAT #86 (0x030): CLOS(1) 00 0 0<br>  HALMAT #87	  | 001 00 01(SYT) 00 00 00 01 00 00   (Symbol #1: HELLO, PROGRAM LABEL)<br>  HALMAT #88 (0x004, HAL/S statement marker): SMRK(1) 00 1 0<br>  HALMAT #89	  | 00E 00 00(  0) 00 00 01 01 00 01   (HAL/S statement #14)<br>  HALMAT #90 (0x002, End of HALMAT block): XREC final<br></pre>
-    </blockquote>
-    <p>Human-friendly, you way?&nbsp; What kind of dope dream is
-      that?&nbsp; Well, let's just go through a few lines of it:<br>
-    </p>
-    <ul>
-      <li>HALMAT #0:&nbsp; "Start of HALMAT block".&nbsp; Seems
-        understandable to me.</li>
-      <li>HALMAT #1:&nbsp; This is an argument for HALMAT #0.&nbsp; It
-        tells us that the HALMAT block ends at HALMAT #90.</li>
-      <li>HALMAT #2:&nbsp; "Start of PROGRAM definition".&nbsp; Tells us
-        that this HALMAT block is a <code>PROGRAM</code> (versus a <code>PROCEDURE</code>,
-        <code>FUNCTION</code>, or <code>COMPOOL</code>).</li>
-      <li>HALMAT #3:&nbsp; This is an argument for HALMAT #2.&nbsp; It
-        tells us that the <code>PROGRAM</code> is named <code>HELLO</code>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-        That information is just to help out the reader, though.&nbsp;
-        HALMAT only cares that it's "Symbol #1", and not what it's
-        particular name is in your imagination.<br>
-      </li>
-      <li>HALMAT #4:&nbsp; "HAL/S statement marker".&nbsp; These appear
-        at the <i>ends</i> of sequences of HALMAT instructions
-        implementing a given statement in the HAL/S source code, though
-        in compiler reports they're generally printed at the beginning
-        instead.<br>
-      </li>
-      <li>HALMAT #5:&nbsp; This is an argument for HALMAT #4, telling is
-        that the HAL/S statement at issue is statement #1.&nbsp; The
-        number matches the numbers printed in compiler pass 1
-        reports.&nbsp; In this particular example, the pass 1 report
-        says <font color="#663333"><code>1 M| HELLO:</code></font>
-        followed by <font color="#663333"><code>1 M| PROGRAM;</code></font>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-        <b>unHALMAT.py</b> <i>could</i> provide this information for
-        you, but instead makes you look it up in the pass 1 report if
-        you're interested.</li>
-      <li>HALMAT #6 and #7:&nbsp; Another HAL/S statement marker, this
-        time for HAL/S statement #2.&nbsp; that's just <font
-          color="#663333"><code>2 M|&nbsp;&nbsp; DECLARE I INTEGER;</code></font>,
-        which apparently doesn't require any HALMAT instructions.</li>
-      <li>HALMAT #8, #9, #10, and #11:&nbsp; Finally, something more
-        interesting!&nbsp; This tells us that HAL/S statement #3, <font
-          color="#663333"><code>3 M|&nbsp;&nbsp; DECLARE MY_NAME
-            CHARACTER(20) INITIAL('RON BURKEY');</code></font>,&nbsp;
-        "Symbol #3" is a "CHARACTER INITIAL value", whose symbol for
-        your reading ease is <code>MY_NAME</code>, and whose value is
-        "RON BURKEY".</li>
-      <li>And so on.&nbsp; The remainder is an exercise for the
-        reader.&nbsp; But the point is clear:&nbsp; It's not so hard to
-        understand, once the binary is parsed in this manner.<br>
-      </li>
-    </ul>
-    <ul>
-    </ul>
-    <h1><a name="emulatingHALMAT"></a>Emulating HALMAT<br>
-    </h1>
-    To recap a little of the preceding section, if there were means of
-    emulating a HALMAT program, where HALMAT is a semi-compiled version
-    of a HAL/S program, there would be some advantages over emulating
-    the AP-101S machine code produced by a full compilation.&nbsp; (But
-    some drawbacks too!)&nbsp; Zane Hambly has given us a good
-    head-start in terms of having such a HALMAT emulator.&nbsp; Zane's
-    emulator is quite impressive so far, but being very new, it's still
-    in an incomplete state.&nbsp; In other words, don't expect
-    everything to work just yet!&nbsp; But a lot of stuff does work, so
-    why not try it out? &nbsp; Live it up a little!&nbsp; In fact, the
-    more we can exercise it with weird (or even normal) HALMAT features,
-    the sooner it will be 100% working.<br>
-    <br>
-    <a moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      of Zane's material is in his own GitHub repository</a>, rather
-    than in the Virtual AGC source tree, so if you want to try it out
-    you'll have to fetch his source tree onto your local computer and
-    follow his very simple directions for building the program.&nbsp; <a
-      moz-do-not-send="true"
-      href="https://github.com/Zaneham/Halmat/issues/new/choose">That's
-      also where bugs should be reported, as "issues" in the repository</a>.<br>
-    <br>
-    As I said, this program is called <b>yaHALMAT</b> — or probably
-    yaHALMAT.exe on Windows, though I haven't tried it there myself —
-    and you'll want to make sure that it gets into your PATH.&nbsp;
-    Assuming you've done all that, it's time to play!&nbsp; I'll give a
-    few examples of my own below, although Zane has some of his own as
-    well.<br>
-    <br>
-    What's the first thing to try out?&nbsp; You know the answer, so why
-    even ask?&nbsp; Here's a program I call REALLY_HELLO.hal (to
-    distinguish it from the entirely-different sample program I
-    foolishly called HELLO.hal that we've been using throughout our
-    discussion):<br>
-    <blockquote>
-      <pre> HELLO: PROGRAM;<br>     WRITE(6) 'Hello, world!';<br> CLOSE HELLO;<br></pre>
-    </blockquote>
-    Compile it:<br>
-    <blockquote>
-      <pre>HALSFC REALLY_HELLO.hal --test --parms="NOTABLES,LIST"<br></pre>
-    </blockquote>
-    Run it!&nbsp; There are actually as many as three ways to do that:<br>
-    <ul>
-      <li>Running the full HAL/S compiler (<b>HALSFC</b>):&nbsp; When
-        you compile a HAL/S program, the compiler first creates a raw
-        HALMAT file which it then optimizes to produce a leaner, meaner
-        version that's functionally identical.&nbsp; You can emulate
-        either of those:</li>
-      <ul>
-        <li>To emulated the raw, unoptimized HALMAT, I'd recommend
-          running it like so:</li>
-      </ul>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <blockquote>
-          <pre>yaHALMAT --litfile litfile0.bin --common COMMON0.out.bin.gz halmat.bin<br></pre>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    <ul>
-      <ul>
-        <li> Whereas I'd recommend running the optimized HALMAT like so:</li>
-      </ul>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <blockquote>
-          <pre>yaHALMAT --litfile litfile2.bin --common COMMON4.out.bin.gz optmat.bin<br></pre>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    <ul>
-      <li> But recall that there's also an alternate version of the
-        compiler (<b>HAL_S_FC.py</b>).&nbsp; It's a crippled version, in
-        the sense that it implements only the very first pass of the
-        HAL/S compiler (out of seven total passes).&nbsp; As such it
-        creates only the raw, unoptimized HALMAT.&nbsp; <b>HAL_S_FC.py</b>
-        is run and thus produces its own output files any time you run <b>HALSFC</b>
-        in TEST mode.&nbsp; But you may find <b>HAL_S_FC.py</b> more
-        advantageous when it's run by itself (without any involvement by
-        <b>HALSFC</b>), in the sense that since it's a pure Python
-        program, it is immediately runnable on any computer platform
-        that has Python on it, without the same onerous installation
-        requirements as <b>HALSFC</b>.&nbsp; You might do that like so:</li>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <blockquote>
-          <pre>HAL_S_FC.py --templib --hal=HELLO.hal<br></pre>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    <blockquote>But regardless of the method you use to run <b>HAL_S_FC.py</b>,
-      here's how to use its output files with yaHALMAT:</blockquote>
-    <blockquote>
-      <blockquote>
-        <blockquote>
-          <pre>yaHALMAT --litfile FILE2.bin --common LIT_CHAR.bin FILE1.bin<br></pre>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    And indeed, here's what the output looks like in any of these cases:<br>
-    <blockquote>
-      <pre>Hello, world!<br></pre>
-    </blockquote>
-    But you know what?&nbsp; Let's in fact try the HELLO.hal we've been
-    using throughout our discussion above — or at least, very similar to
-    it —, namely<br>
-    <blockquote>
-      <pre>DEBUG ¢C¢D¢E¢F<br> HELLO: PROGRAM;<br>    DECLARE I INTEGER;<br>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(PRINTER) 'THE BEGINNING';<br>    DO FOR I = 1 TO 5;<br>       WRITE(PRINTER) I, 'HELLO, WORLD!';<br>       DO FOR J = 2 TO 8 BY 2;<br>          WRITE(PRINTER) '     ', J, MY_NAME||' SAYS ISN''T THIS FUN?';<br>       END;<br>    END;<br>    WRITE(6) 'THE END';<br> CLOSE HELLO;<br></pre>
-    </blockquote>
-    Try it:<br>
-    <blockquote>
-      <pre>&gt; HALSFC HELLO.hal --parms="LIST"<br>Compilation successful. Results in "HALSFC HELLO.hal Tue 02-24-2026  6-50-07.00.results".<br>&gt; yaHALMAT halmat.bin<br>THE BEGINNING<br>          1HELLO, WORLD!<br>               2RON BURKEY SAYS ISN'T THIS FUN?<br>               4RON BURKEY SAYS ISN'T THIS FUN?<br>               6RON BURKEY SAYS ISN'T THIS FUN?<br>               8RON BURKEY SAYS ISN'T THIS FUN?<br>          2HELLO, WORLD!<br>               2RON BURKEY SAYS ISN'T THIS FUN?<br>               4RON BURKEY SAYS ISN'T THIS FUN?<br>               6RON BURKEY SAYS ISN'T THIS FUN?<br>               8RON BURKEY SAYS ISN'T THIS FUN?<br>          3HELLO, WORLD!<br>               2RON BURKEY SAYS ISN'T THIS FUN?<br>               4RON BURKEY SAYS ISN'T THIS FUN?<br>               6RON BURKEY SAYS ISN'T THIS FUN?<br>               8RON BURKEY SAYS ISN'T THIS FUN?<br>          4HELLO, WORLD!<br>               2RON BURKEY SAYS ISN'T THIS FUN?<br>               4RON BURKEY SAYS ISN'T THIS FUN?<br>               6RON BURKEY SAYS ISN'T THIS FUN?<br>               8RON BURKEY SAYS ISN'T THIS FUN?<br>          5HELLO, WORLD!<br>               2RON BURKEY SAYS ISN'T THIS FUN?<br>               4RON BURKEY SAYS ISN'T THIS FUN?<br>               6RON BURKEY SAYS ISN'T THIS FUN?<br>               8RON BURKEY SAYS ISN'T THIS FUN?<br>THE END<br></pre>
-    </blockquote>
-    This output, by the way, is not correct.&nbsp; HAL/S specifies that
-    when you have a statement like "<code>WRITE(6) A, B, C;</code>", a
-    fixed but implementation-dependent number of spaces is printed
-    between the fields.&nbsp; In the case of Intermetrics HAL/S
-    specifically, and thus of <i>our</i> HAL/S, that number is 5, and
-    not 0 as it would appear in the sample output above.&nbsp; Well, <b>yaHALMAT</b>
-    is a work in progress, and that's the kind of thing you get on works
-    in progress.&nbsp; That's what problem reports are for, and in this
-    case <a moz-do-not-send="true"
-      href="https://github.com/Zaneham/Halmat/issues/16">there already
-      is one</a>.<br>
-    <br>
-    You may notice that I didn't bother with the switches <code>--litfile
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      litfile0.bin --common COMMON0.out.bin.gz</code> on the <b>yaHALMAT</b>
-    command line.&nbsp; Why not?&nbsp; Well, as it happens, those are <b>yaHALMAT</b>'s
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    defaults, so if you're actually emulating halmat.bin they're not
-    strictly necessary.&nbsp; <br>
-    <br>
-    But suppose I had included them?&nbsp; What are litfile<i>X</i>.bin
-    and COMMON<i>X</i>.out.bin.gz anyway?&nbsp; Well, firstly, the <i>X</i>
-    in this case is a reference to which pass of the HAL/S compiler
-    produced the files.&nbsp; <i>X</i>=0 refers to <b>HALSFC-PASS1</b>,
-    the parser; <i>X</i>=2 refers to <b>HALSFC-OPT</b>, the optimizer;
-    <i>X</i>=4 refers to <b>HALSFC-PASS2</b>, the code generator.&nbsp;
-    So you can see why <i>X</i>=0 is appropriate for halmat.bin and <i>X</i>=2
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    is appropriate for optmat.bin.&nbsp; As for the files themselves, <i>literals</i>
-    are not stored in the HALMAT files halmat.bin and optmat.bin,
-    whereas instead, litfile<i>X</i>.bin and COMMON<i>X</i>.out.bin.gz
-    communicate information about the literals in the program.&nbsp; So
-    the emulator needs to know about them.<br>
-    <blockquote><font size="-1"><b>Digression:</b>&nbsp; Literals?&nbsp;
-        What are they?&nbsp; There are 3 types of literals in HAL/S:
-        numeric literals (corresponding to <code>INTEGER</code> and <code>SCALAR</code>
-        datatypes), string literals <code>(CHARACTER</code> datatype),
-        and bit literals (<code>BIT</code> datatype).&nbsp; It's best to
-        illustrate by looking at the source-code itself, where I've
-        highlighted all of the literals in <font color="#cc33cc">purple</font>:<br>
-      </font>
-      <blockquote>
-        <pre><font size="-1">DEBUG ¢C¢D¢E¢F<br> HELLO: PROGRAM;<br>    DECLARE I INTEGER;<br>    DECLARE MY_NAME CHARACTER(<font color="#cc33cc">20</font>) INITIAL(<font color="#cc33cc">'RON BURKEY'</font>);<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(<font color="#cc33cc">PRINTER</font>) <font color="#cc33cc">'THE BEGINNING'</font>;<br>    DO FOR I = <font color="#cc33cc">1</font> TO <font color="#cc33cc">5</font>;<br>       WRITE(<font color="#cc33cc">PRINTER</font>) I, <font color="#cc33cc">'HELLO, WORLD!'</font>;<br>       DO FOR J = <font color="#cc33cc">2</font> TO <font color="#cc33cc">8</font> BY <font color="#cc33cc">2</font>;<br>          WRITE(<font color="#cc33cc">PRINTER</font>) <font color="#cc33cc">'     '</font>, J, MY_NAME||<font color="#cc33cc">' SAYS ISN''T THIS FUN?'</font>;<br>       END;<br>    END;<br>    WRITE(<font color="#cc33cc">6</font>) <font color="#cc33cc">'THE END'</font>;<br> CLOSE HELLO;</font></pre>
-      </blockquote>
-      <font size="-1"> I bet you're scratching your head over that,
-        aren't you?&nbsp; <img moz-do-not-send="true" src="smiley.png"
-          alt="" width="16" height="16">&nbsp; You're asking why <code>"6"</code>
-        is not a literal but <code>PRINTER</code> is one?&nbsp;
-        Remember that in HAL/S, something like <code>REPLACE PRINTER BY
-          "6"</code> is really a <i>preprocessor</i> instruction
-        causing every instance of <code>PRINTER</code> to be replaced
-        by <code>6</code>.&nbsp; So as far as the HALMAT is concerned,
-        there isn't any such thing as "PRINTER", there's only 6.<br>
-        <br>
-        In fact, we have <a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">a
-          handy utility (<b>unLitfile</b>) that parses these litfiles
-          into human-readable form</a>, so you can see exactly what
-        literals they are communicating:</font>
-      <blockquote>
-        <pre><font size="-1">&gt; unLitfile litfile0.bin<br>Literal    1: FIXED  42140000,00000000 ' 2.000000000000000E+01'<br>Literal    2: STRING 'RON BURKEY'<br>Literal    3: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal    4: STRING 'THE BEGINNING'<br>Literal    5: FIXED  41100000,00000000 ' 1.000000000000000E+00'<br>Literal    6: FIXED  41500000,00000000 ' 5.000000000000000E+00'<br>Literal    7: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal    8: STRING 'HELLO, WORLD!'<br>Literal    9: FIXED  41200000,00000000 ' 2.000000000000000E+00'<br>Literal   10: FIXED  41800000,00000000 ' 8.000000000000000E+00'<br>Literal   11: FIXED  41200000,00000000 ' 2.000000000000000E+00'<br>Literal   12: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal   13: STRING '     '<br>Literal   14: STRING ' SAYS ISN'T THIS FUN?'<br>Literal   15: FIXED  41600000,00000000 ' 6.000000000000000E+00'<br>Literal   16: STRING 'THE END'<br></font></pre>
-      </blockquote>
-      <font size="-1">Exactly as you might guess from our <font
-          color="#cc33cc">purple highlights</font>!&nbsp; In this
-        command, <code>litfile0.bin</code> is the litfile produced by
-        the HAL/S compiler's parser (<b>HALSFC-PASS1</b>), but </font><font
-        size="-1"><font size="-1"><b>unLitfile</b> ca</font>n also parse
-        the litfile (<code>FILE2.bin)</code> produced by <b>HAL_S_FC.py</b>)
-        .&nbsp; </font><font size="-1"><b>unLitfile</b> also uses the
-        additional files mentioned above for<b> yaHALMAT</b>'s <code>--common</code>
-        option, but supplies them by default, whereas <b>yaHALMAT</b>
-        doesn't presently do so.<br>
-      </font>
-      <blockquote><b><font size="-2"><font size="-1">Aside:&nbsp;</font>
-          </font></b><font size="-1">Beware, though, because the litfile
-          format doesn't allow determination of the total number of
-          literals contained within it — you just have to know! —, so <b>unLitfile</b>
-          doesn't know for sure where the list ends.&nbsp; There may be
-          extra literals at the end of the list that look like real
-          literals but have little to do with anything in the HAL/S
-          source code.&nbsp; More precisely: the litfile is formatted as
-          a series of "pages" of 130 literals each, and generally
-          speaking, any unused areas in the <i>final</i> page will be
-          duplicates of literals found in corresponding locations on the
-          penultimate page.&nbsp; If there are 130 or less literals, as
-          in the example above, all is well.&nbsp; If there are more
-          than 130, but not an exact multiple of 130, there will be
-          bogus literals at the end.<br>
-        </font></blockquote>
-      <font size="-1"> But you don't really need <b>unLitfile</b> if
-        you're just curious about how literals are communicated between
-        compiler passes.&nbsp; When <code>¢E</code> is present in a <code>DEBUG</code>
-        directive in the HAL/S file, it causes the compiler to print the
-        entire literal table in the report (pass1.rpt) it emits from its
-        parsing path.&nbsp; Not surprisingly, you get the same info as
-        from </font><font size="-1"><font size="-1"><b>unLitfile</b></font>,
-        albeit with a little less info ... <i>but</i> with the added
-        benefit that since the compiler actually knows how many literals
-        there are, it doesn't print any bogus ones at the end of the
-        list!<br>
-      </font>
-      <blockquote>
-        <pre><font size="-1">L I T E R A L   T A B L E   D U M P:<br><br> LOC  TYPE          LITERAL<br> <br>   1 ARITH  4214000000000000<br>   2  CHAR  RON BURKEY<br>   3 ARITH  4160000000000000<br>   4  CHAR  THE BEGINNING<br>   5 ARITH  4110000000000000<br>   6 ARITH  4150000000000000<br>   7 ARITH  4160000000000000<br>   8  CHAR  HELLO, WORLD!<br>   9 ARITH  4120000000000000<br>  10 ARITH  4180000000000000<br>  11 ARITH  4120000000000000<br>  12 ARITH  4160000000000000<br>  13  CHAR       <br>  14  CHAR   SAYS ISN'T THIS FUN?<br>  15 ARITH  4160000000000000<br>  16  CHAR  THE END</font><br></pre>
-      </blockquote>
-      <ul>
-      </ul>
-      <p><font size="-1">The other little mystery, if you've kept your
-          eyes open, is that <b>unLitfile</b> seems to be implying that
-          literals like 1, 8, or 6 are really floating-point.&nbsp; Or
-          at least, are <i>stored</i> that way. &nbsp; It's true.&nbsp;
-          The numeric literals, whether <b>SCALAR</b> <i>or</i> <b>INTEGER</b>,
-          double <i>or</i> single precision, are stored in the litfiles
-          as double-precision floating point in so-called IBM
-          Hexadecimal (HFP) format.&nbsp; <b>BIT</b> literals, on the
-          other hand, of which there are none in our example, are all
-          stored as 32-bit big-endian form.</font></p>
-    </blockquote>
-    And just for OCD's sake, a final example:<br>
-    <blockquote>
-      <pre> POWER_TABLE: PROGRAM;<br>   WRITE(6) '          N       N**2       N**3       N**4       N**5';<br>   WRITE(6) ' ---------- ---------- ---------- ---------- ----------';<br>   DO FOR TEMPORARY N = 1 TO 10;<br>     WRITE(6) N, N N, N**3, N**4, N**5;<br>   END;<br> CLOSE POWER_TABLE;<br></pre>
-    </blockquote>
-    <blockquote>
-      <pre>          N       N**2       N**3       N**4       N**5<br> ---------- ---------- ---------- ---------- ----------<br>          1          1          1          1          1<br>          2          4          8         16         32<br>          3          9         27         81        243<br>          4         16         64        256       1024<br>          5         25        125        625       3125<br>          6         36        216       1296       7776<br>          7         49        343       2401      16807<br>          8         64        512       4096      32768<br>          9         81        729       6561      59049<br>         10        100       1000      10000     100000<br><br></pre>
-    </blockquote>
-    In this case, you'll notice that I <i>still</i> didn't include in
-    the source code any attempt to nicely-format the printout, and yet
-    it came out nicely-formatted anyway.&nbsp; Well, it's standard in
-    HAL/S for integers to always be printed right-justified in a field
-    that's of an adequate width to hold the integer with the most digits
-    ... which in our case is 11 characters (since the <code>INTEGER</code>
-    datatype is 32 bits wide and we need to accommodate integers as
-    extreme as -2<sup>31</sup>=-2147483648).&nbsp; To get an integer to
-    print in a field less than 11 characters wide, you actually have to
-    make a non-trivial effort.<br>
     <h1><a name="imponderable"></a>Other Imponderable Mysteries</h1>
     <blockquote>
       <p><b><font size="-1">Important note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -11073,6 +10331,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       intractable problems in PASS source code which <b>HAL/S-FC</b>
       cannot handle in its modern incarnation(s) as <b>HALSFC</b> and <b>HAL_S_FC.py</b>,
       and I've expended enough effort on tracking down bugs in <b>HALSFC</b>'s
+
 
 
 
@@ -11162,10 +10421,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         To avoid a digression that's probably not of interest to you at
         this point, I'll just say that this problem is dissected <i>ad
           nauseam</i> in repository <a moz-do-not-send="true"
           href="https://github.com/virtualagc/virtualagc/issues/1280">issue
+
 
 
 
@@ -11196,6 +10457,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC">preprocessHALSFC</a></b>[.<a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC.bat">bat</a>])
+
 
 
 
@@ -11262,6 +10524,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
           #1281</a>, but there's presently no workaround available for
         it, short of modifying the PASS source code to avoid it.</li>
       <li><u>ZO3</u>:&nbsp; Some (many!) PASS HAL/S source-code files
@@ -11272,6 +10535,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         in the first pass (the parsing pass) of the compiler, ZO3 errors
         are triggered in the compiler's <i>optimization</i> pass ... an
         entirely separate program (<b>HALSFC-OPT</b>, versus <b>HALSFC-PASS1</b>/<b>HAL_S_FC.py</b>).&nbsp;
+
 
 
 
@@ -11324,6 +10588,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
           #1282</a>.&nbsp; There is presently no available
         workaround.&nbsp; Why do I say that, given that I also said that
         the <i>HAL/S-FC User's Manual</i> does offer a
@@ -11344,6 +10609,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         compiled by the HAL/S compiler, it must consist of a single
         "compilation unit", which is defined in HAL/S to be a <code>PROGRAM</code>,
         a <code>PROCEDURE</code>, a <code>FUNCTION</code>, or a <code>COMPOOL</code>.&nbsp;
+
 
 
 
@@ -11419,6 +10685,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
           a discussion here</a>.&nbsp; Even though these pointers are
         (supposedly) never used, this is not regarded as a "good"
         feature in high-reliability software. ( I am saying this in an
@@ -11464,11 +10731,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         But again, this preprocessing is done by the compiler itself
         rather than by a program dedicated to that purpose, just by
         managing the order in which we compile HAL/S source-code files.</li>
       <li>And I've said that "inclusion files" must be processed prior
         to their use, by means of a program I call <b>prepareINCLIB</b>.&nbsp;
+
 
 
 
@@ -11524,9 +10793,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       PASS, those preprocessors are needed, and hence we must recreate
       them ourselves.<br>
     </p>
-    <p><img moz-do-not-send="true" src="CG0180.png" alt="" width="462"
-        height="352" align="right"><i>(Work in progress.)</i>&nbsp; One
-      of those preprocessors relates to the display formats used in the
+    <p><img moz-do-not-send="true" src="CG0180.png" alt="" align="right"
+        width="462" height="352"><i>(Work in progress.)</i>&nbsp; One of
+      those preprocessors relates to the display formats used in the
       Multifunction Display Units (MDU).&nbsp; Consider the display
       format in the illustration to the right, apparently used in PASS
       version OI-34 in OPS 1, 2, 3, 6, and 8.&nbsp; It is my
@@ -11683,6 +10952,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       For the purpose of this discussion, there are two sub-directories
       of significance, namely:<br>
     </p>
@@ -11703,6 +10973,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>INCL80/ contains HAL/S source-code files that are intended
         only for importation into other HAL/S files via the HAL/S
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
 
 
 
@@ -11787,6 +11058,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
 
 
 
@@ -11971,6 +11243,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -11978,6 +11251,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
 
 
 
@@ -12047,6 +11321,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
 
 
 
@@ -12198,6 +11473,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -12215,6 +11491,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
 
 
 
@@ -12429,12 +11706,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
 
 
 
@@ -12538,7 +11817,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-07-09<br>
+          2026-07-20<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
