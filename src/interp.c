@@ -419,7 +419,31 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 /* Litfile numeric entries carry no INTEGER-vs-SCALAR
                  * distinction of their own (see literal.h) -- resolve as
                  * the exact bit-level SCALAR value; INTEGER-context
-                 * consumers convert via rv_to_integer(). */
+                 * consumers convert via rv_to_integer(). KNOWN GAP:
+                 * callers that *store* this resolved value under a type
+                 * tag rather than immediately consuming it numerically
+                 * (XXAR's CALL/WRITE argument binding, interp.c) use
+                 * `out->kind == RV_SCALAR` at face value, so a bare
+                 * INTEGER literal passed as a call argument (e.g. `CALL
+                 * P(5);`, P's parameter declared INTEGER) gets bound with
+                 * SYT_TYPE_SCALAR instead -- silently wrong for any
+                 * consumer that inspects the stored type tag directly
+                 * (e.g. WRITE) rather than going through an arithmetic op
+                 * that coerces regardless of tag. The operand's own tag1
+                 * (already carried on halmat_operand_t, used by XXAR's
+                 * READ/READALL destination-class case) is the available
+                 * fix -- not applied here since it's a call-site-wide
+                 * change (WRITE and CALL arguments both funnel through
+                 * XXAR). test_pcal.hal already passes a bare INTEGER
+                 * literal to a CALL (`CALL ADD_TO_RESULT(5)`) without
+                 * exposing the bug, only because its parameter is
+                 * immediately used in IADD (which coerces via
+                 * rv_to_integer regardless of the stored tag) rather than
+                 * WRITE (which trusts the tag directly) -- confirmed via
+                 * src/tests/hal/test_ext_pcal_prog.hal /
+                 * test_ext_double.hal, which *does* WRITE its parameter
+                 * and had to be written passing a variable, not a
+                 * literal, to sidestep this. */
                 out->kind = RV_SCALAR;
                 out->scalar = halmat_scalar_from_ibm_words(lit->msw, lit->lsw, lit->type == LIT_DOUBLE);
             } else if (lit->type == LIT_BIT) {
@@ -1111,6 +1135,16 @@ void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab) {
     state->symtab = symtab;
 }
 
+void interp_set_external_units(halmat_state_t *state, const halmat_external_call_map_t *map, size_t count) {
+    free(state->external_calls);
+    state->external_calls = calloc(HALMAT_SYT_MAX, sizeof(*state->external_calls));
+    for (size_t i = 0; i < count; i++) {
+        if (map[i].local_syt >= HALMAT_SYT_MAX) continue;
+        state->external_calls[map[i].local_syt].target_state = map[i].target_state;
+        state->external_calls[map[i].local_syt].target_entry_syt = map[i].target_entry_syt;
+    }
+}
+
 void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
@@ -1130,6 +1164,9 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->arrayed_paragraph_end);
     free(state->arrayed_paragraph_count);
     free(state->stmt_for_pc);
+    free(state->external_calls); /* the table itself; the target_states it
+                                   * points to are not owned here -- main.c's */
+    state->external_calls = NULL;
     state->symbol_active_task = NULL;
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
@@ -1193,6 +1230,66 @@ static void flush_write(halmat_state_t *state, FILE *out) {
     fputc('\n', out);
     state->io_pending.active = false;
     state->io_pending.item_count = 0;
+}
+
+/* Binds `state`'s currently-open io_pending call arguments into
+ * `target`'s own SYT numbering (positional, entry_syt+1+i -- the same
+ * convention FCAL/PCAL already use for same-unit calls, applied here to
+ * the *target* unit's own numbering rather than the caller's) and runs
+ * `target` from its own entry point to completion of exactly one call --
+ * a cross-unit call into a separately-compiled EXTERNAL FUNCTION/
+ * PROCEDURE (source-documentation/Multiple-file-problem.md), triggered
+ * by FCAL/PCAL below via state->external_calls[].
+ *
+ * `target` is a persistent, previously interp_init'd state for the
+ * external unit (main.c's interp_set_external_units) -- reused across
+ * every call to it, not recreated fresh each time. Its own SYT storage
+ * (ordinary local variables) therefore intentionally persists across
+ * repeated calls, matching how a same-unit function's own locals
+ * already behave (no per-call freshness is modeled anywhere in this
+ * interpreter, so this isn't a new inconsistency). Scheduler/task state
+ * is reset to a single fresh READY primal task before each call, since
+ * concurrent scheduling across units is explicitly out of scope for now
+ * (per direct user guidance) -- an external call is always a plain
+ * synchronous call, never a SCHEDULEd task of its own.
+ *
+ * Returns false (having already called fail() on `state`, the *caller*)
+ * if entry_syt has no FDEF/PDEF in `target`, there are too many
+ * arguments, or the callee itself failed (its own fail() has already
+ * fired against `target`, e.g. for a genuinely unimplemented opcode
+ * reached inside the callee's own body). */
+static bool run_external_call(halmat_state_t *state, halmat_state_t *target, uint16_t entry_syt, FILE *out) {
+    if (target->symbol_def_pos[entry_syt] == NO_TARGET) {
+        fail(state, "external call has no entry point (symbol %u)", entry_syt);
+        return false;
+    }
+    for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+        uint16_t param_syt = entry_syt + 1 + i;
+        if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); return false; }
+        if (state->io_pending.items[i].is_scalar) {
+            target->syt[param_syt].type = SYT_TYPE_SCALAR;
+            target->syt[param_syt].scalar = state->io_pending.items[i].scalar;
+        } else {
+            target->syt[param_syt].type = SYT_TYPE_INTEGER;
+            target->syt[param_syt].value = state->io_pending.items[i].integer;
+        }
+    }
+    target->pc = target->symbol_def_pos[entry_syt] + 1;
+    target->halted = false;
+    target->exit_code = 0;
+    target->in_external_call = true;
+    target->external_call_has_result = false;
+    target->call_return_sp = 0;
+    target->inline_func_sp = 0;
+    target->current_task = 0;
+    target->tasks[0].task_state = TASK_READY;
+    target->tasks[0].saved_pc = target->pc;
+    interp_run(target, out);
+    if (target->exit_code != 0) {
+        fail(state, "external call failed");
+        return false;
+    }
+    return true;
 }
 
 /* Executes exactly one instruction for whatever task is current
@@ -3151,24 +3248,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
-            case OP_XXST:
+            case OP_XXST: {
                 /* General bracketed-argument-list start: I/O (IMD kind
                  * code) or a function/procedure call (SYT callee) --
-                 * see class-0/XXST.md. If io_pending is already active,
-                 * this XXST is being re-entered mid-ADLP/DLPE-driven
-                 * replay (a whole-array/structure-field WRITE argument,
-                 * e.g. `WRITE(6) ZQ3.QI;` on a multi-copy structure,
-                 * compiles with XXST itself inside the replayed
-                 * paragraph, not just the XXAR argument-computation) --
-                 * skip re-initializing so each iteration's XXAR keeps
-                 * accumulating into the same item list instead of the
-                 * next iteration's XXST wiping the previous one's item
-                 * right before the single WRIT that flushes them all
-                 * after the replay loop ends. */
+                 * see class-0/XXST.md. Two reasons io_pending can already
+                 * be active here: (1) this exact XXST instruction is
+                 * being re-entered mid-ADLP/DLPE-driven replay (a whole-
+                 * array/structure-field WRITE argument, e.g.
+                 * `WRITE(6) ZQ3.QI;` on a multi-copy structure, compiles
+                 * with XXST itself inside the replayed paragraph) --
+                 * state->pc == io_pending.start_pc identifies this case,
+                 * and it must keep accumulating into the same item list
+                 * rather than wiping it; or (2) this is a genuinely
+                 * different, nested XXST (e.g. `WRITE(6) I, SQUARE(I);`,
+                 * where SQUARE(I)'s own call brackets sit inside WRITE's
+                 * argument list -- source-documentation/Multiple-file-
+                 * problem.md's reproduction case), which must push the
+                 * enclosing frame onto io_pending_stack and start a fresh
+                 * one, so the nested call's own XXAR/FCAL/XXND see their
+                 * own frame instead of corrupting the outer one. */
                 if (ins->operand_count != 1) { fail(state, "XXST: expected 1 operand"); break; }
-                if (!state->io_pending.active) {
+                bool replay = state->io_pending.active && state->io_pending.start_pc == state->pc;
+                if (!replay) {
+                    if (state->io_pending.active) {
+                        if (state->io_pending_sp >= 8) { fail(state, "XXST nesting too deep"); break; }
+                        state->io_pending_stack[state->io_pending_sp++] = state->io_pending;
+                    }
                     state->io_pending.active = true;
                     state->io_pending.item_count = 0;
+                    state->io_pending.start_pc = state->pc;
                     if (ins->operands[0].qual == QUAL_SYT) {
                         state->io_pending.is_call = true;
                         state->io_pending.call_target = ins->operands[0].data;
@@ -3179,6 +3287,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                 }
                 break;
+            }
 
             case OP_XXAR:
                 if (!state->io_pending.active) { fail(state, "XXAR outside of an XXST...XXND block"); break; }
@@ -3421,7 +3530,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_XXND:
-                state->io_pending.active = false;
+                /* Closes whichever bracket was most recently opened. If
+                 * that bracket was nested inside an enclosing one (e.g. a
+                 * function-call argument list nested inside a WRITE's own
+                 * argument list -- see OP_XXST above), restore the
+                 * enclosing frame so its own XXAR/WRIT/FCAL/PCAL/XXND see
+                 * their own item list again instead of an empty one. */
+                if (state->io_pending_sp > 0) {
+                    state->io_pending = state->io_pending_stack[--state->io_pending_sp];
+                } else {
+                    state->io_pending.active = false;
+                }
                 break;
 
             case OP_FDEF:
@@ -3450,6 +3569,16 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "PCAL: expected 1 operand"); break; }
                 uint16_t proc = ins->operands[0].data;
+                if (proc < HALMAT_SYT_MAX && state->symbol_def_pos[proc] == NO_TARGET &&
+                    state->external_calls && state->external_calls[proc].target_state) {
+                    /* Cross-unit call into a separately-compiled EXTERNAL
+                     * PROCEDURE (source-documentation/Multiple-file-
+                     * problem.md) -- see run_external_call(). No result
+                     * to copy back (procedures don't return a value). */
+                    run_external_call(state, state->external_calls[proc].target_state,
+                                       state->external_calls[proc].target_entry_syt, out);
+                    break;
+                }
                 if (proc >= HALMAT_SYT_MAX || state->symbol_def_pos[proc] == NO_TARGET) {
                     fail(state, "call to undefined procedure (symbol %u)", proc);
                     break;
@@ -3479,6 +3608,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "FCAL: expected 1 operand"); break; }
                 uint16_t callee = ins->operands[0].data;
+                if (callee < HALMAT_SYT_MAX && state->symbol_def_pos[callee] == NO_TARGET &&
+                    state->external_calls && state->external_calls[callee].target_state) {
+                    /* Cross-unit call into a separately-compiled EXTERNAL
+                     * FUNCTION (source-documentation/Multiple-file-
+                     * problem.md) -- see run_external_call(). Copy the
+                     * callee's captured RTRN result into *this* call's
+                     * own VAC slot, the same place a same-unit call's
+                     * result would land. */
+                    halmat_state_t *target = state->external_calls[callee].target_state;
+                    uint16_t entry_syt = state->external_calls[callee].target_entry_syt;
+                    if (!run_external_call(state, target, entry_syt, out)) break;
+                    if (!target->external_call_has_result) {
+                        fail(state, "external function returned no value");
+                        break;
+                    }
+                    if (target->external_call_result.is_string || target->external_call_result.is_container) {
+                        /* Both carry owned heap pointers -- copying the
+                         * slot verbatim would alias ownership between
+                         * this caller's own VAC array and the callee's,
+                         * risking a double-free when both states are
+                         * eventually cleaned up. Neither case is
+                         * confirmed to even be legal for a FUNCTION
+                         * return anyway, so fail loudly rather than risk
+                         * silent corruption for an untested path. */
+                        fail(state, "external function: CHARACTER/MATRIX/VECTOR return values are not yet implemented");
+                        break;
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index] = target->external_call_result;
+                    break;
+                }
                 if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] == NO_TARGET) {
                     fail(state, "call to undefined function (symbol %u)", callee);
                     break;
@@ -3534,16 +3694,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * through (no branch -- IDEF.md's confirmed trace shows
                  * the inline body already appears in-line in the
                  * instruction stream, unlike a real subprogram body
-                 * defined elsewhere). */
+                 * defined elsewhere). External-call form (source-
+                 * documentation/Multiple-file-problem.md): a RTRN
+                 * reached with no active call frame at all, while this
+                 * state is being run as a run_external_call() target,
+                 * instead captures its result (if any) for the *caller*
+                 * (a different state entirely) to retrieve, and signals
+                 * completion via halted=true -- the same signal CLOS's
+                 * existing "primal process closing" branch already gives
+                 * for an ordinary top-level program falling through
+                 * without an explicit RETURN. */
                 if (ins->operand_count > 1) { fail(state, "RTRN: expected 0 or 1 operands"); break; }
                 if (state->call_return_sp <= 0) {
-                    if (state->inline_func_sp <= 0) { fail(state, "RTRN with no active call"); break; }
-                    if (ins->operand_count != 1) { fail(state, "RTRN: inline FUNCTION requires a return value"); break; }
-                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                    size_t idef_pos = state->inline_func_stack[state->inline_func_sp - 1];
-                    size_t vac_index = state->prog->instrs[idef_pos].index;
-                    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                    store_resolved_to_vac(&state->vac[vac_index], &a);
+                    if (state->inline_func_sp > 0) {
+                        if (ins->operand_count != 1) { fail(state, "RTRN: inline FUNCTION requires a return value"); break; }
+                        if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                        size_t idef_pos = state->inline_func_stack[state->inline_func_sp - 1];
+                        size_t vac_index = state->prog->instrs[idef_pos].index;
+                        if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        store_resolved_to_vac(&state->vac[vac_index], &a);
+                        break;
+                    }
+                    if (state->in_external_call) {
+                        if (ins->operand_count == 1) {
+                            if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                            store_resolved_to_vac(&state->external_call_result, &a);
+                            state->external_call_has_result = true;
+                        }
+                        state->halted = true;
+                        break;
+                    }
+                    fail(state, "RTRN with no active call");
                     break;
                 }
                 if (ins->operand_count == 1) {

@@ -255,12 +255,23 @@ struct halmat_state {
     /* XXST/XXAR/XXND is a general bracketed-argument-list construct
      * (class-0/XXST.md), shared by I/O statements and function/procedure
      * calls alike -- discriminated by XXST's own operand qualifier
-     * (IMD=I/O kind code, SYT=called symbol). */
-    struct {
+     * (IMD=I/O kind code, SYT=called symbol). One such bracket can nest
+     * inside another (e.g. `WRITE(6) I, SQUARE(I);` -- WRITE's own
+     * XXST...XXND brackets a nested XXST...XXND for the SQUARE(I) call,
+     * source-documentation/Multiple-file-problem.md's reproduction case),
+     * so this is a small stack, not a single frame -- see start_pc below
+     * for how a genuinely nested XXST is told apart from an ADLP/DLPE
+     * replay of the *same* XXST instruction. */
+    struct halmat_io_pending_frame {
         bool active;
         bool is_call;
         int kind;             /* I/O case: XXST's IMD operand (0=READ, 1=READALL, 2=WRITE) */
         uint16_t call_target; /* call case: XXST's SYT operand (the called function/procedure) */
+        size_t start_pc;      /* prog->instrs index of the XXST that opened this frame -- an
+                                * ADLP/DLPE replay re-executes that *same* XXST instruction
+                                * (state->pc == start_pc) and must keep accumulating into this
+                                * frame, whereas a genuinely nested call's XXST is a different,
+                                * not-yet-seen instruction and must push a new frame instead. */
         struct {
             bool is_string;
             bool is_scalar;
@@ -277,7 +288,10 @@ struct halmat_state {
             uint8_t dest_class;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
-    } io_pending;
+    } io_pending, io_pending_stack[8];
+    uint8_t io_pending_sp; /* # of saved frames in io_pending_stack (the enclosing
+                             * brackets of whatever nested XXST is active in io_pending
+                             * right now); 0 = io_pending is the outermost/only frame. */
 
     /* Pending shaping-function argument list, accumulated between SFST
      * and SFND (class-0/SFST.md/SFAR.md/SFND.md) -- e.g. `V1 =
@@ -414,6 +428,43 @@ struct halmat_state {
     size_t *def_clos_target;  /* per-FDEF/TDEF position: matching CLOS's array position + 1 */
     size_t call_return_stack[64]; /* FCAL's own array position, per active call */
     int call_return_sp;
+
+    /* Cross-unit calls into a separately-compiled EXTERNAL FUNCTION/
+     * PROCEDURE (source-documentation/Multiple-file-problem.md; the
+     * "one PROGRAM plus multiple FUNCTION/PROCEDURE units" scope --
+     * multiple simultaneously-*executing* PROGRAMs sharing real-time
+     * scheduling remains deferred, per direct user guidance). Indexed
+     * by THIS unit's own local SYT for the external symbol -- exactly
+     * the index for which symbol_def_pos[] is NO_TARGET (no *local*
+     * FDEF/PDEF), which is what makes "is this call external" a cheap
+     * check FCAL/PCAL already needed to make anyway. Installed once by
+     * main.c's interp_set_external_units() (matched by name against the
+     * caller's own EXTERNAL-flagged symtab entries, the same ESD-style
+     * convention already used for EXTERNAL COMPOOL variables -- just
+     * resolving a callable entry point instead of a data value); NULL
+     * (the default) means no external units are linked, so every
+     * external_calls[i] lookup site must tolerate that. Not owned by
+     * this state -- main.c keeps each target_state alive (its own
+     * interp_init/interp_cleanup pair) for as long as any caller might
+     * still invoke it. */
+    struct {
+        halmat_state_t *target_state; /* NULL if this SYT index isn't an external call target */
+        uint16_t target_entry_syt;    /* target_state's OWN SYT for its top-level FDEF/PDEF symbol */
+    } *external_calls;
+
+    /* Set only while this state is being run as a synthetic external-
+     * call target (interp.c's run_external_call(), triggered by some
+     * *other* state's FCAL/PCAL via external_calls[] above) -- RTRN,
+     * reached with no active call_return_stack/inline_func frame,
+     * captures its resolved value here (function form) and always signals
+     * completion via halted=true, the same way CLOS's existing "primal
+     * process closing" branch already does for an ordinary top-level
+     * program -- rather than failing loudly the way a genuinely
+     * unexpected bare RTRN still does when none of these three cases
+     * apply. */
+    bool in_external_call;
+    bool external_call_has_result;
+    halmat_vac_slot_t external_call_result;
     size_t inline_func_stack[16]; /* IDEF's own array position, per open inline FUNCTION
                                     * block (class-0/IDEF.md) -- RTRN inside one writes its
                                     * result to the IDEF's own VAC slot (mirroring FCAL's

@@ -32,6 +32,26 @@ void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int reco
  * interpreter (main.c manages the halmat_symtab_t's lifetime). */
 void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab);
 
+/* One entry of interp_set_external_units()'s map: `local_syt` (this
+ * unit's own SYT index for an EXTERNAL FUNCTION/PROCEDURE symbol, the
+ * exact index for which symbol_def_pos[] is NO_TARGET) resolves to
+ * `target_entry_syt` -- *target_state's own* SYT for its top-level
+ * FDEF/PDEF symbol. See source-documentation/Multiple-file-problem.md
+ * and state.h's external_calls field comment for the full mechanism. */
+typedef struct {
+    uint16_t local_syt;
+    halmat_state_t *target_state;
+    uint16_t target_entry_syt;
+} halmat_external_call_map_t;
+
+/* Installs the cross-unit call table built above (state.h's
+ * external_calls) -- replaces any previous one. `target_state`s are not
+ * owned by `state`; the caller (main.c) must keep each one alive
+ * (its own interp_init/interp_cleanup pair) for as long as `state`
+ * might still call into it, and is responsible for cleaning them up
+ * itself afterward. */
+void interp_set_external_units(halmat_state_t *state, const halmat_external_call_map_t *map, size_t count);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */

@@ -49,6 +49,8 @@ run ./run_local_fixture.sh stoi "I1=               7     I2=               8    
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
 run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
+run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
+run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
 run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"
 run ./run_local_fixture.sh pcal "RESULT=              15"

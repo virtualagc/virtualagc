@@ -23,6 +23,8 @@
 
 #define OP_MDEF_CONST 0x02B
 #define OP_CDEF_CONST 0x02F
+#define OP_FDEF_CONST 0x02C
+#define OP_PDEF_CONST 0x02D
 
 #define MAX_UNITS 64
 #define MAX_DEVICE_MAPS 16
@@ -337,7 +339,8 @@ typedef struct {
 static bool find_leading_def(const halmat_program_t *prog, uint16_t *opcode_out, uint16_t *symbol_out) {
     for (size_t i = 0; i < prog->count && i < 5; i++) {
         uint16_t op = prog->instrs[i].opcode;
-        if ((op == OP_MDEF_CONST || op == OP_CDEF_CONST) && prog->instrs[i].operand_count >= 1) {
+        if ((op == OP_MDEF_CONST || op == OP_CDEF_CONST || op == OP_FDEF_CONST || op == OP_PDEF_CONST) &&
+            prog->instrs[i].operand_count >= 1) {
             *opcode_out = op;
             *symbol_out = prog->instrs[i].operands[0].data;
             return true;
@@ -414,6 +417,25 @@ static void free_unit(unit_t *u) {
     halmat_program_free(&u->prog);
 }
 
+/* Cleans up every heap-allocated FUNCTION/PROCEDURE auxiliary state
+ * created so far (see run_linked below) -- called on every early-return
+ * error path, same as free_unit's own per-path repetition. Each entry
+ * is individually malloc'd (not a `halmat_state_t[MAX_UNITS]` stack
+ * array) since halmat_state_t itself is large (its own syt[]/vac[]
+ * arrays), and MAX_UNITS (64) copies of it would risk overflowing a
+ * constrained stack (Windows threads default to 1 MiB, per Plan.md's
+ * cross-platform target -- the same concern VAC's container pointers
+ * were already made heap-allocated for). */
+static void free_ext_states(halmat_state_t **ext_states, int num_dirs) {
+    for (int j = 0; j < num_dirs; j++) {
+        if (ext_states[j]) {
+            interp_cleanup(ext_states[j]);
+            free(ext_states[j]);
+            ext_states[j] = NULL;
+        }
+    }
+}
+
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
                        bool disasm, int num_blanks, const device_map_t *maps, int num_maps) {
     if (num_dirs > MAX_UNITS) {
@@ -462,20 +484,87 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         return 1;
     }
 
-    /* Run every non-primary (COMPOOL) unit to completion, harvest any
-     * values the primary EXTERNALLY references from it, by name. */
+    /* Run every non-primary COMPOOL unit to completion, harvest any
+     * values the primary EXTERNALLY references from it, by name (see
+     * the comment above this function). A non-primary FDEF/PDEF
+     * (FUNCTION/PROCEDURE) unit is instead kept persistently loaded --
+     * not run to completion -- and matched by the same EXTERNAL-flag/
+     * name convention, for the primary's own FCAL/PCAL to call into at
+     * runtime via run_external_call() (interp.c). See
+     * source-documentation/Multiple-file-problem.md for the motivating
+     * case and design discussion. */
     pending_import_t imports[HALMAT_SYT_MAX];
     int import_count = 0;
     char wired_block_names[MAX_UNITS][128];
     int wired_count = 0;
+    halmat_state_t *ext_states[MAX_UNITS] = {0};
+    halmat_external_call_map_t ext_map[MAX_UNITS];
+    int ext_map_count = 0;
 
     for (int i = 0; i < num_dirs; i++) {
         if (i == primary) continue;
 
         uint16_t def_op, def_sym;
-        if (!find_leading_def(&units[i].prog, &def_op, &def_sym) || def_op != OP_CDEF_CONST) {
-            fprintf(stderr, "yaHALMAT2: %s: only COMPOOL auxiliary units are supported (not the PROGRAM entry point)\n",
+        bool has_def = find_leading_def(&units[i].prog, &def_op, &def_sym);
+
+        if (has_def && (def_op == OP_FDEF_CONST || def_op == OP_PDEF_CONST)) {
+            ext_states[i] = malloc(sizeof(halmat_state_t));
+            interp_init(ext_states[i], &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
+            if (units[i].have_symtab) interp_set_symtab(ext_states[i], &units[i].symtab);
+
+            if (units[i].have_symtab && units[primary].have_symtab) {
+                const char *own_name = symtab_name_for_index(&units[i].symtab, def_sym);
+                if (own_name && own_name[0]) {
+                    /* A CALLed PROCEDURE's name can appear *twice* in the
+                     * primary unit's own symtab: an unused "template"
+                     * stub entry (carrying the EXTERNAL flag, from the
+                     * `D INCLUDE TEMPLATE` prototype) plus a separate,
+                     * actually-referenced call-site entry (the SYT index
+                     * PCAL's own operand uses) that does NOT itself carry
+                     * the flag -- confirmed via a real HALSFC compile's
+                     * COMMON0.out (two SYMTAB records named DOUBLE_IT,
+                     * only the unused one flagged 0x00100040). A plain
+                     * halmat_symtab_find() (first-match-by-name) would
+                     * silently wire the unused stub's index instead of
+                     * the one PCAL actually reads, so instead: confirm
+                     * EXTERNAL-ness via *any* matching entry, then wire
+                     * *every* entry sharing this name (harmless even in
+                     * the FUNCTION case, where there's normally just the
+                     * one entry). */
+                    bool flagged = false;
+                    for (size_t k = 0; k < units[primary].symtab.count; k++) {
+                        const halmat_symtab_entry_t *e = &units[primary].symtab.entries[k];
+                        if (e->name[0] && strcmp(e->name, own_name) == 0 && (e->flags & HALMAT_SYM_FLAG_EXTERNAL)) {
+                            flagged = true;
+                            break;
+                        }
+                    }
+                    if (flagged) {
+                        if (wired_count < MAX_UNITS) {
+                            strncpy(wired_block_names[wired_count], own_name, sizeof(wired_block_names[wired_count]) - 1);
+                            wired_block_names[wired_count][sizeof(wired_block_names[wired_count]) - 1] = '\0';
+                            wired_count++;
+                        }
+                        for (size_t k = 0; k < units[primary].symtab.count; k++) {
+                            const halmat_symtab_entry_t *e = &units[primary].symtab.entries[k];
+                            if (!e->name[0] || strcmp(e->name, own_name) != 0) continue;
+                            if (ext_map_count < MAX_UNITS && e->index < HALMAT_SYT_MAX) {
+                                ext_map[ext_map_count].local_syt = (uint16_t)e->index;
+                                ext_map[ext_map_count].target_state = ext_states[i];
+                                ext_map[ext_map_count].target_entry_syt = def_sym;
+                                ext_map_count++;
+                            }
+                        }
+                    }
+                }
+            }
+            continue;
+        }
+
+        if (!has_def || def_op != OP_CDEF_CONST) {
+            fprintf(stderr, "yaHALMAT2: %s: only COMPOOL/FUNCTION/PROCEDURE auxiliary units are supported (not the PROGRAM entry point)\n",
                     units[i].dir);
+            free_ext_states(ext_states, num_dirs);
             for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
             return 1;
         }
@@ -539,11 +628,12 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
                 if (strcmp(wired_block_names[w], name) == 0) { found = true; break; }
             }
             if (!found) {
-                fprintf(stderr, "yaHALMAT2: unresolved external '%s' (no @list unit defines this COMPOOL)\n", name);
+                fprintf(stderr, "yaHALMAT2: unresolved external '%s' (no @list unit defines this COMPOOL/FUNCTION/PROCEDURE)\n", name);
                 unresolved = true;
             }
         }
         if (unresolved) {
+            free_ext_states(ext_states, num_dirs);
             for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
             return 1;
         }
@@ -554,6 +644,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     interp_init(&primary_state, &units[primary].prog,
                 units[primary].have_literals ? &units[primary].literals : NULL, num_blanks);
     if (units[primary].have_symtab) interp_set_symtab(&primary_state, &units[primary].symtab);
+    if (ext_map_count > 0) interp_set_external_units(&primary_state, ext_map, ext_map_count);
 
     for (int k = 0; k < import_count; k++) {
         const halmat_symtab_entry_t *primary_ref =
@@ -565,12 +656,14 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&primary_state, maps, num_maps, opened_devices, "yaHALMAT2")) {
         interp_cleanup(&primary_state);
+        free_ext_states(ext_states, num_dirs);
         for (int j = 0; j < num_dirs; j++) free_unit(&units[j]);
         return 1;
     }
     int rc = interp_run(&primary_state, stdout);
     interp_cleanup(&primary_state);
     for (int i = 0; i < num_maps; i++) fclose(opened_devices[i]);
+    free_ext_states(ext_states, num_dirs);
 
     for (int i = 0; i < num_dirs; i++) free_unit(&units[i]);
     return rc;
