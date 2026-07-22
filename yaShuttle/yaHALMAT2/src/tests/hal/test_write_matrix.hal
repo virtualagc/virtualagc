@@ -1,0 +1,15 @@
+ TEST_WRITE_MATRIX:
+ PROGRAM;
+    DECLARE N MATRIX(2, 2);
+M   N    = 1.0;
+S    1,1
+M   N    = 2.0;
+S    1,2
+M   N    = 3.0;
+S    2,1
+M   N    = 4.0;
+S    2,2
+    WRITE(6) N;
+    WRITE(6) N$(1,*);
+    WRITE(6) N$(*,2);
+ CLOSE TEST_WRITE_MATRIX;

@@ -1,0 +1,37 @@
+ TEST_PROC_MATRIX_PRECISION:
+ PROGRAM;
+    DECLARE A MATRIX(2,2);
+    DECLARE B MATRIX(2,2) DOUBLE;
+
+    DOUBLE_ECHO: PROCEDURE(M);
+        DECLARE M MATRIX(2,2) DOUBLE;
+        WRITE(6) M$(1,*);
+        WRITE(6) M$(2,*);
+    CLOSE DOUBLE_ECHO;
+
+    SINGLE_ECHO: PROCEDURE(M);
+        DECLARE M MATRIX(2,2);
+        WRITE(6) M$(1,*);
+        WRITE(6) M$(2,*);
+    CLOSE SINGLE_ECHO;
+
+M   A    = 1.5;
+S    1,1
+M   A    = 2.5;
+S    1,2
+M   A    = 3.5;
+S    2,1
+M   A    = 4.5;
+S    2,2
+M   B    = 10.5;
+S    1,1
+M   B    = 20.5;
+S    1,2
+M   B    = 30.5;
+S    2,1
+M   B    = 40.5;
+S    2,2
+
+    CALL DOUBLE_ECHO(A);
+    CALL SINGLE_ECHO(B);
+ CLOSE TEST_PROC_MATRIX_PRECISION;
