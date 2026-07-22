@@ -3,9 +3,9 @@ This directory follows [Zane Hambly's lead from his "Halmat" repository in GitHu
 Specifically, two things are accomplished:
 
 - Regeneration of documentation about the HALMAT "intermediate language" used by the HAL/S compiler, to compensate for the fact that the surviving documentation is either superseded or else incomplete, and only about 20% of it can be trusted as-is.
-- A HALMAT emulator supporting _all_ features of the HAL/S language supported by the original Intermetric system.
+- A HALMAT emulator supporting <i>all</i> features of the HAL/S language supported by the original Intermetric system.
 
-The newly-generated top-level HALMAT documentation [can be found here](reengineered-documentation/HALMAT.md).  Other files potentially of interest are those giving [the development plan used by Claude](Plan.md) and [the status of the development](reengineered-documentation/STATUS.md).
+The newly-generated top-level HALMAT documentation [can be found here](reengineered-documentation/HALMAT.md).  Other files potentially of interest are those giving [the maintenance plan used by Claude](Maintenance.md), [the initial development plan used by Claude](Plan.md) and [the status of the development](reengineered-documentation/STATUS.md).
 
 The source code for that new HALMAT emulator, **yaHALMAT2**, can be found in the src/ directory.  To build it, just `cd` into that directory and do `make clean all`.  The directory src/tests/ contains test code consisting of HAL/S source code and shell scripts.  Note that the shell scripts are for Linux, and (for all I know) may work as-is on Mac OS, but are definitly not suitable for Windows. 
 
