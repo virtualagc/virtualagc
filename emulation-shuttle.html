@@ -849,6 +849,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     earlier, along with embedding the HAL/S source code so you can see
     the larger context.<br>
     <br>
+    But I'm bored with HELLO.hal!&nbsp; Let's look at some other
+    examples that aren't quite so lame.<br>
+    <br>
     Another feature supported by <b>yaHALMAT2</b> is loading multiple
     HALMAT files at once.&nbsp; Or to put it loosely, <b>yaHALMAT2</b>
     can act like an on-the-fly "linker" for HALMAT files.&nbsp; Each
@@ -896,14 +899,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     </blockquote>
     But the results are indistinguishable.&nbsp; Here, <i>LIST</i> is
     the name of a file that contains a list of directories of the kind
-    that <b>HALSFC</b> produces for its output products.&nbsp; Actually
-    demonstrating how this works in practice is a little more involved
-    that our simple HELLO.hal example, so bear with me!&nbsp; Let's
-    imagine a HAL/S <code>PROGRAM</code> that prints a table of squares
-    and square roots of integers, and that for some inexplicable reason
-    we've decided to provide two external functions, one that squares a
-    number, and one that computes a square root.&nbsp; Here's what our
-    code might look like:<br>
+    that <b>HALSFC</b> produces for its output products.&nbsp; <br>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1"> One
+        useful trick is to make a file — let's call it CURRENT — that
+        just contains the single line "current.results".&nbsp; Then
+        invoking <code>yaHALMAT2 @CURRENT</code> always runs the HAL/S
+        program that you've compiled most recently.<br>
+      </font></blockquote>
+    Actually demonstrating how this works in practice is a little more
+    involved that our simple HELLO.hal example, so bear with me!&nbsp;
+    Let's imagine a HAL/S <code>PROGRAM</code> that prints a table of
+    squares and square roots of integers, and that for some inexplicable
+    reason we've decided to provide two external functions, one that
+    squares a number, and one that computes a square root.&nbsp; Here's
+    what our code might look like:<br>
     <br>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
@@ -971,14 +980,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     </blockquote>
     This doesn't perform any emulation, but instead just produces a new
     file (MYTABLE.yhla) that we can think of as the "linked" form of the
-    program.&nbsp; And it doesn't just contain the HALMAT, but it also
-    contains the literal files, and the HAL/S source-code lines for
-    display in the emulator's debugger ... i.e., it's entirely
-    self-contained.&nbsp; Obviously, there is no pre-existing file
-    format for "linked" HALMAT, and never was one, so Claude invented
-    one for us, and documented it too.&nbsp; Why the filename extension
-    ".yhla"?&nbsp; I asked, using up hundreds of precious tokens, and
-    got this answer:&nbsp; <br>
+    program.&nbsp; And MYTABLE.yhla doesn't just contain the HALMAT
+    instructions, but it also contains the literal files, as well as the
+    HAL/S source-code lines for display in the emulator's debugger ...
+    i.e., it's entirely self-contained.&nbsp; Obviously, there is no
+    pre-existing file format for "linked" HALMAT, and never was one, so
+    Claude invented one for us, and documented it too.&nbsp; Why the
+    filename extension ".yhla"?&nbsp; I asked, using up hundreds of
+    precious tokens, and got this answer:&nbsp; <br>
     <blockquote>"YHLA" is my own abbreviation for YaHalmat Linked
       Archive — I picked it as the 4-byte magic when I specified the
       container format for the implementing agent, following the
@@ -991,9 +1000,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <blockquote>
       <pre>&gt; <font color="#996633">yaHALMAT2 MYTABLE.yhla</font><br>          1      1.0000000E+00      1.0000000E+00<br>          2      4.0000000E+00      1.4142132E+00<br>          3      9.0000000E+00      1.7320499E+00<br>          4      1.6000000E+01      2.0000000E+00<br>          5      2.5000000E+01      2.2360678E+00<br>          6      3.6000000E+01      2.4494896E+00<br>          7      4.9000000E+01      2.6457510E+00<br>          8      6.4000000E+01      2.8284264E+00<br>          9      8.1000000E+01      3.0000000E+00<br>         10      1.0000000E+02      3.1622772E+00</pre>
     </blockquote>
-    <b>yaHALMAT2</b> also supports HAL/S's scheduling features.&nbsp;
-    Consider the following example program, which simply counts up from
-    1 to 20, once per second:<br>
+    <b>yaHALMAT2</b> also supports HAL/S's so-called "real time"
+    features.&nbsp; Consider the following example program, which simply
+    counts up from 1 to 20, once per second:<br>
     <blockquote>
       <pre> COUNTUP: PROGRAM;<br>    DECLARE I INTEGER INITIAL(1);<br> <br>    NEXT: TASK;<br>       WRITE(6) I;<br>       I = I + 1;<br>    CLOSE NEXT;<br>    <br>    SCHEDULE NEXT PRIORITY(80), REPEAT EVERY 1.0;<br>    WAIT 19.5;<br> CLOSE COUNTUP;<br></pre>
     </blockquote>
@@ -1007,6 +1016,38 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     how long the program took, which was 19.555 seconds.&nbsp; And why
     19.5 seconds?&nbsp; Because it only takes 19 seconds to count from 1
     to 20 if you do so once per second.<br>
+    <br>
+    Here's another example which is somewhat similar, but which
+    illustrates a different use of real-time features, not to mention
+    matrix multiplication, subscript slicing, printing of vectors, and
+    repetition factors in initializers.&nbsp; It performs the silly
+    functionality of taking a "random" 5×5 orthogonal matrix (i.e., a
+    rotation matrix in 5 dimensions) that I got from Google's A.I.
+    assistant, and just prints several powers of it.&nbsp; Who wouldn't
+    want to do <i>that</i>?<br>
+    <blockquote>
+      <pre> MPOWERS: PROGRAM;<br>    DECLARE P5D MATRIX(5,5) INITIAL(4#(1,5#0),1);<br>    DECLARE M5D MATRIX(5,5) INITIAL(<br>       -0.2877,  0.0722, -0.6645, -0.6217, -0.2898,<br>        0.1356, -0.8101, -0.4713,  0.2571,  0.1928,<br>        0.2684,  0.2374, -0.3093,  0.5534, -0.6853,<br>        0.3257,  0.5176, -0.4731,  0.1254,  0.6217,<br>       -0.8489,  0.1197, -0.1294,  0.4748,  0.1508);<br>    DECLARE COUNT INTEGER INITIAL(0);<br><br>    PRINT_MATRIX_5D: PROCEDURE(M);<br>        DECLARE M MATRIX(5,5);<br>        DO FOR TEMPORARY I = 1 TO 5;<br>           WRITE(6) '', M$(I,*);<br>        END;<br>    CLOSE PRINT_MATRIX_5D;<br>    <br>    WRITE(6) 'Powers of a "random" 5D rotation matrix:';<br>    WRITE(6) '';<br>    <br>    MUL5D: TASK;<br>        WRITE(6) COUNT;<br>        CALL PRINT_MATRIX_5D(P5D);<br>        WRITE(6) '';<br>        COUNT=COUNT+1;<br>        IF COUNT &gt; 5 THEN<br>           CANCEL MUL5D;<br>        P5D = M5D P5D;<br>        SCHEDULE MUL5D IN 1.0 PRIORITY(80) DEPENDENT;<br>    CLOSE MUL5D;<br>    <br>    SCHEDULE MUL5D PRIORITY(80) DEPENDENT;<br> CLOSE MPOWERS;<br></pre>
+    </blockquote>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1"> For
+        full disclosure, I should add that having a <code>TASK</code>
+        re-<code>SCHEDULE</code> itself is not something it's entirely
+        clear from the original documentation that it's something
+        actually allowed.&nbsp; Also, you'll notice that the <code>PROGRAM</code>
+        ends immediately after the <code>SCHEDULE</code> statement, yet
+        the <code>TASK</code> keeps running, which is again something
+        we're not 100% certain about.&nbsp; Both questions could be
+        argued either way.&nbsp; The HAL/S <i>compiler</i> certainly
+        allows both.</font><br>
+    </blockquote>
+    And here's what happens when <b>yaHALMAT2</b> runs it:<br>
+    <blockquote>
+      <pre>&gt; <font color="#663333">HALSFC MPOWERS.hal</font><br>&gt; <font color="#663333">yaHALMAT2 --line-length 132 halmat.bin</font><br>Powers of a "random" 5D rotation matrix:<br><br>          0<br>      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00<br>      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00<br>      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00<br>      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00<br>      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00<br><br>          1<br>     -2.8770000E-01      7.2199941E-02     -6.6450000E-01     -6.2169999E-01     -2.8979999E-01<br>      1.3559997E-01     -8.1009996E-01     -4.7129995E-01      2.5709999E-01      1.9279999E-01<br>      2.6839995E-01      2.3740000E-01     -3.0929995E-01      5.5339998E-01     -6.8529999E-01<br>      3.2569999E-01      5.1760000E-01     -4.7309995E-01      1.2539995E-01      6.2169999E-01<br>     -8.4889996E-01      1.1969995E-01     -1.2939996E-01      4.7479999E-01      1.5079999E-01<br><br>          2<br>     -4.2266667E-02     -5.9349424E-01      6.9430482E-01     -3.8586676E-01      1.2246466E-01<br>     -3.5528886E-01      7.1031874E-01      2.9088461E-01     -4.2961472E-01      3.1641096E-01<br>      6.3395023E-01     -4.1957617E-02     -3.6770761E-01     -5.3297925E-01      4.2065722E-01<br>     -6.3741559E-01     -3.6878169E-01     -4.5381731E-01     -2.0317852E-02      5.0133419E-01<br>      2.5235707E-01      7.4828267E-02      3.0356145E-01      6.1806560E-01      6.7569083E-01<br><br>          3<br>     -1.1160338E-01      4.5750028E-01      2.5975823E-01      2.6767653E-01     -7.9940951E-01<br>     -1.3191772E-01     -7.1651912E-01     -2.6347093E-02      6.6083968E-01     -1.7880785E-01<br>     -8.1745660E-01     -2.3305011E-01     -9.0033829E-02     -4.7551090E-01     -2.0773649E-01<br>     -4.2062706E-01      1.9448555E-01      6.8247473E-01      2.8581071E-01      4.8759234E-01<br>     -3.5327041E-01      4.3045807E-01     -6.7669034E-01      4.2866218E-01      2.1940875E-01<br><br>          4<br>      9.2966521E-01     -2.7415204E-01     -2.4499685E-01     -1.5235722E-02     -1.1599779E-02<br>      3.0074650E-01      8.8532001E-01      1.4399827E-01     -1.1881304E-01      3.0202043E-01<br>      2.0088887E-01     -1.6259080E-01      9.3272901E-01      2.4020857E-01     -7.3284745E-02<br>      9.7340941E-03      1.8039769E-01     -2.2155517E-01      9.5653683E-01     -5.7088077E-02<br>     -6.8258524E-02     -2.8672779E-01      9.9819899E-03      1.1374819E-01      9.4869202E-01<br><br>          5<br>     -3.6551166E-01      2.2177559E-01     -4.0406817E-01     -7.9145658E-01     -1.6559845E-01<br>     -2.2290856E-01     -6.8664449E-01     -6.4450681E-01      2.4883038E-01     -4.3470025E-02<br>      3.1094873E-01      4.8320842E-01     -4.4951409E-01      3.4480387E-01     -5.9047794E-01<br>      3.2220203E-01      2.9023510E-01     -4.6811306E-01      1.0564327E-02      7.6986158E-01<br>     -7.8485996E-01      4.0215373E-01      8.3014206E-04      4.3894553E-01      1.7143917E-01<br><br></pre>
+    </blockquote>
+    In case you wonder about the command-line option <font
+      color="#663333"><code>--line-length 132</code><font
+        color="#000000">, printouts by default wrap around to the next
+        line afer 80 columns.&nbsp; This option just increases that to
+        132 columns instead.</font></font><br>
     <h1>Emulating AP-101</h1>
     <p>Both of the emulators presented below accept an AP-101S memory
       image as input, as opposed (say) to an IBM "load file".&nbsp; To
@@ -1107,7 +1148,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-07-21<br>
+          2026-07-22<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
