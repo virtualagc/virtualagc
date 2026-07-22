@@ -33,15 +33,25 @@ repeat loop rather than listed as a flat sequence of literals (e.g.
 initializing every element of an array with the same value, or
 initializing successive elements from a repeating literal pattern).
 
-Confirmed this session to also bracket a second, distinct kind of group:
-whole-structure `INITIAL(...)` lists ([USA003087] §19.6), where STRI opens
-a sequence of one [TINT](TINT.md) per structure terminal (rather than one
-[SINT](SINT.md) per array element), closed the same way by
-[ETRI](ETRI.md) — i.e. STRI/ETRI is a general "repeated/structured
-initialization group" bracket reused for both the array-uniform-value case
-([SLRI](SLRI.md)/[ELRI](ELRI.md) appear only in that case, not the
-structure case) and the structure-terminal case. See [TINT](TINT.md) for
-the confirming worked example.
+Confirmed this session to also bracket two further, distinct kinds of
+group, for a total of three:
+
+- Whole-structure `INITIAL(...)` lists ([USA003087] §19.6), where STRI
+  opens a sequence of one [TINT](TINT.md) per structure terminal (rather
+  than one [SINT](SINT.md) per array element), closed the same way by
+  [ETRI](ETRI.md). See [TINT](TINT.md) for the confirming worked example.
+- Explicit-literal-list VECTOR/MATRIX/ARRAY `INITIAL(v1, v2, ...)` lists
+  (as opposed to the `n#value` uniform-repetition form below) — STRI
+  opens a bare sequence of one or more [SINT](SINT.md)s (one per
+  *coalesced run* of consecutive literal values, per [SINT](SINT.md)'s
+  own run-length mechanism), with **no [SLRI](SLRI.md)/[ELRI](ELRI.md)
+  at all**, closed by [ETRI](ETRI.md). See [SINT](SINT.md) for the
+  confirming worked example (this was the case a real yaHALMAT2 bug
+  report, `source-documentation/BAD_INITIAL.md`, turned up as unhandled).
+
+I.e. STRI/ETRI is a general "repeated/structured initialization group"
+bracket reused across all three cases ([SLRI](SLRI.md)/[ELRI](ELRI.md)
+appear only in the `n#value` case, not the other two).
 
 ## Operand-Word Format (confirmed empirically)
 

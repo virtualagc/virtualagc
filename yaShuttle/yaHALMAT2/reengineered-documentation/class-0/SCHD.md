@@ -323,6 +323,129 @@ itself — so existing fixtures' tick counts/interleaving/output are
 unaffected by it; it exists purely so tests and interactive use aren't
 forced to wait out real HAL/S-modeled seconds.
 
+## Self-Rescheduling Tasks (a task's own body targeting itself)
+
+A user-reported bug: `NEST: TASK; ...; SCHEDULE NEST IN 1.0 PRIORITY(80);
+CLOSE NEST;` (a task rescheduling *itself* from inside its own body, the
+natural idiom for a periodic/recurring task written imperatively rather
+than via the declarative `REPEAT` clause) failed with "task already
+active (concurrent re-scheduling of the same task not yet implemented)".
+The user pushed back citing [USA003087] p. 160 (printed p. 13-2), and
+correctly: that page defines a process as "active" **if and only if it
+is in the process queue**, with `EXECUTING`/`READY`/`WAITING` as three
+*minor states* of that one active condition — and a task rescheduling
+itself doesn't add a second entry to the queue, it changes its own (sole)
+entry's minor state from `EXECUTING` to `WAITING` (or `READY`, for an
+immediate reschedule). Sec. 13.4's "only one process derived from a
+given task block may be active at any given time" is therefore not
+violated by this pattern at all — it's exactly the same "rearm the same
+queue entry in place" transition already implemented (correctly) for a
+*declaratively* cyclic task (`SCHEDULE label REPEAT EVERY/AFTER ...`,
+handled at `CLOS` when such a task falls through to its own end,
+interp.c) — a self-`SCHEDULE` from inside the body is that identical
+mechanism spelled imperatively, and yaHALMAT2's original code simply
+didn't recognize the two as the same thing.
+
+**Fix**: `OP_SCHD` now detects a task scheduling itself (the target
+task's sole active-task-table slot is the *currently-executing* task) and
+routes it into updating that same task's own rearm parameters
+(`priority`, `dependent`, `repeat_kind`/`repeat_interval`,
+`stop_kind`/`stop_deadline`/`stop_event_syt`) rather than either failing
+or creating a second task-table entry — `CLOS`'s existing, *unmodified*
+rearm switch then picks these up naturally when this same task falls
+through to its own `CLOSE` right after, exactly as it already does for an
+externally-declared `REPEAT`. A self-`SCHEDULE` with no explicit `REPEAT`
+clause (the common case, matching the bug report) synthesizes the
+equivalent one-shot rearm from its plain immediate/`AT`/`IN` form, via
+`SCHD_REPEAT_BARE` (immediate) or `SCHD_REPEAT_AFTER` (delayed) — chosen
+because `AFTER`'s own documented semantics, "delay measured from this
+cycle's completion", is exactly what a self-scheduled `IN`/`AT`, executed
+right before this same cycle's own completion, means. Confirmed against
+a real compile: `NEST` now correctly re-triggers itself repeatedly (every
+1.0s) for as long as the primal process's own `WAIT` keeps the whole
+program alive, and correctly stops when the primal reaches its own
+`CLOSE` (per Sec. 13.1's "all other processes are always dependent on
+the primal process for their existence" — an overriding rule regardless
+of `DEPENDENT`/independent status between the tasks themselves).
+
+Genuinely still unsupported, and still correctly rejected: a *different*
+process targeting a task that's still active (not self-rescheduling) —
+there's no "rearm in place" reading available there, since the calling
+process isn't the one occupying that task's sole queue entry; and
+self-rescheduling with an `ON <event>` condition (rather than a
+time-based `AT`/`IN`/immediate/`REPEAT`), which doesn't cleanly map onto
+the existing time-based rearm mechanism. See
+`src/tests/hal/test_nested_task_schedule.hal` for the regression fixture.
+
+## Waiting For Dependents At CLOSE
+
+A second, related user-reported bug, this time against `COUNTUP2.hal`: a
+`PROGRAM` (`COUNTUP2`) with **no** `WAIT` at all reaches its own `CLOSE`
+immediately after `SCHEDULE NEXT PRIORITY(80) DEPENDENT, REPEAT EVERY
+1.0;` — `NEXT` is scheduled `DEPENDENT`, meant to keep incrementing and
+`WRITE`ing a counter, self-`CANCEL`ing once it exceeds 10. yaHALMAT2
+previously ended the *whole program* the instant the primal reached
+`CLOSE`, so `NEXT` got at most one execution in.
+
+USA003087 Sec. 13.3 (p. 165/13-6, quoted directly by the user) draws a
+distinction the code hadn't implemented: *"If execution ends on a CLOSE
+or RETURN statement, the process goes into the inactive state directly
+only if it has no dependents. Otherwise, it goes into a waiting state
+until the dependents have in their turn terminated."* This is a
+different, more specific rule than Sec. 13.1's *overriding* "all other
+processes are always dependent on the primal process for their
+existence" (which the original code's own comment cited) — that
+overriding rule bounds how long anything else can possibly outlive the
+primal, but says nothing about *when* the primal itself actually goes
+inactive. The user initially wondered whether this CLOSE-specific rule
+was meant only for multiple concurrently-scheduled `PROGRAM`s rather
+than an ordinary `PROGRAM`/`TASK` relationship — but Sec. 13.3 opens with
+*"Programs and tasks are treated together since their representations at
+run time are in both cases real time processes,"* under the heading
+"FLOW OF EXECUTION IN PROGRAM AND TASK BLOCKS" — an explicit statement
+that this rule applies uniformly to both, not a program-to-program-only
+concept. (Some residual uncertainty remains: the one worked real-time
+example in this Guide, Sec. 13.6's SUPERVISOR/TIMER/CALCULATOR program,
+sidesteps this exact case entirely — its tasks are scheduled *without*
+`DEPENDENT`, and the primal ends via explicit `TERMINATE` (which
+cascades unconditionally via the Sec. 13.1 override) rather than a
+natural `CLOSE` fallthrough with active dependents, so there's no worked
+example directly confirming this specific rule's runtime behavior.)
+
+**Fix**: `halmat_task_t` gained a `parent_task` field (`state.h`), set at
+task-creation time in `OP_SCHD` to whichever task executed the
+`SCHEDULE` (self-rescheduling, above, reuses the same slot and leaves it
+unchanged). A new `has_active_dependents()` helper (interp.c) checks
+whether any task still has a given process as `parent_task`, is marked
+`dependent`, and hasn't yet reached `TASK_TERMINATED`. `OP_CLOS`'s two
+termination paths (the primal's own exit, and an ordinary task's
+fallthrough-with-no-rearm) both now check this first: if there are
+active dependents, the process transitions to a new
+`TASK_WAITING_FOR_DEPENDENTS` state instead of terminating/halting
+immediately (`symbol_active_task` is deliberately left pointing at it in
+the meantime — it's still the sole active process for its own task
+symbol, just in a different minor state, so a fresh `SCHEDULE` of the
+same symbol must still be rejected). A new `sched_wake_dependents()`
+scheduler function, polled every tick alongside `sched_wake_waiting()`/
+`sched_wake_on_events()` (no fixed deadline to fast-forward to, same
+reasoning as `TASK_WAITING_ON`), finalizes any such task once its
+dependents have all terminated — halting the whole interpreter if it was
+the primal (Sec. 13.1's override finally taking effect), or completing
+an ordinary task's own deferred termination otherwise.
+
+Confirmed against a real compile of the user's exact program: `NEXT` now
+runs the full 10 iterations (`I`=1 through 10) and self-`CANCEL`s before
+the program ends, rather than running once. This also **corrected an
+existing fixture whose expected output had baked in the old, buggy
+behavior**: `test_sched_low.hal` schedules a `DEPENDENT` `WORKER` at a
+*lower* priority than the primal with no `WAIT`, so `WORKER` previously
+never got to run at all before the (incorrectly) immediately-halting
+primal ended everything; it now correctly runs (after the primal's own
+remaining statements, since it's lower-priority, but before the whole
+program actually ends) — see `src/tests/run_all.sh`'s updated
+`sched_low` entry. See `src/tests/hal/test_countup2.hal` for the new
+regression fixture matching the user's own program.
+
 ## Source Analysis & Reliability
 
 Opcode (0x039) confirmed primary-source: `XSCHD BIT(16) INITIAL("039")`

@@ -37,7 +37,16 @@ run ./run_fixture.sh proc "$(derive_expected proc)"
 run ./run_fixture.sh array ""
 run ./run_fixture.sh matrix ""
 run ./run_local_fixture.sh sched_high "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
-run ./run_local_fixture.sh sched_low "$(printf 'BEFORE SCHEDULE\nAFTER SCHEDULE')"
+# WORKER is DEPENDENT, so per USA003087 Sec. 13.3 (see class-0/SCHD.md's
+# "Waiting For Dependents At CLOSE" section, added in a later session) the
+# primal doesn't halt at its own CLOSE while WORKER is still active -- it
+# waits, so WORKER (lower priority, never preempts the primal, but still
+# gets its turn once nothing higher-priority is left to run) now correctly
+# executes before the whole program ends. Previously "WORKER RUNNING" never
+# appeared at all -- a real yaHALMAT2 bug (the primal halted unconditionally
+# at CLOSE, ignoring any still-active DEPENDENT task), not the intended
+# behavior this fixture was meant to lock in.
+run ./run_local_fixture.sh sched_low "$(printf 'BEFORE SCHEDULE\nAFTER SCHEDULE\nWORKER RUNNING')"
 run ./run_local_fixture.sh scalar_arith " 3.7500000E+00"
 run ./run_local_fixture.sh scalar_sub "-7.5000000E-01"
 run ./run_local_fixture.sh scalar_muldiv "$(printf ' 1.0000000E+01\n 3.3333331E-01')"
@@ -45,7 +54,15 @@ run ./run_local_fixture.sh int_arith2 "P=              12     N=              -3
 run ./run_local_fixture.sh scalar_cmp "$(printf 'LESS\nEQUAL\nAND-TRUE\nNOT-TRUE')"
 run ./run_local_fixture.sh logical_or "OR-TRUE"
 run ./run_local_fixture.sh mixed_type "S2=      5.5000000E+00"
-run ./run_local_fixture.sh stoi "I1=               7     I2=               8     I3=              -8     I4=              -7"
+# This WRITE statement's 8 fields ('I1=',I1,'I2=',I2,'I3=',I3,'I4=',I4)
+# total 91 columns -- past the 80-column line_length default added this
+# session (--line-length, USA003087 Sec. 12.2's "unpaged output: [80
+# columns/line]"), so the last field wraps onto its own line. The
+# reference yaHALMAT emulator (ground truth elsewhere in this file)
+# predates this feature and doesn't wrap at all -- not a discrepancy,
+# just untested behavior on its part; this fixture is the one that
+# happens to be long enough to exercise the new wrap.
+run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=               8     I3=              -8     I4=\n         -7')"
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
 run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
@@ -96,6 +113,104 @@ run ./run_local_fixture.sh adlp "$(printf ' 3.0000000E+00\n 3.0000000E+00\n 3.00
 run ./run_local_fixture.sh lfnc "$(printf ' 9.0000000E+00\n 2.0000000E+00')"
 run ./run_local_fixture.sh idlp "$(printf ' 4.0000000E+00\n 4.0000000E+00\n 4.0000000E+00')"
 run ./run_local_fixture.sh stri "$(printf ' 1.5000000E+00\n 1.5000000E+00\n 1.5000000E+00')"
+# Explicit-literal-list VECTOR/MATRIX INITIAL() -- bare STRI/SINT/ETRI, no
+# SLRI at all, run length carried in SINT's LIT operand's own tag1 byte
+# (class-8/SINT.md). vecinit_split additionally covers a coalescing break
+# (the compile-time `-5` expression's own unused "5" literal splits the
+# run into two SINTs with a non-zero second OFF).
+run ./run_local_fixture.sh vecinit "$(printf ' 1.0000000E+01\n 1.1000000E+01\n 1.2000000E+01')"
+run ./run_local_fixture.sh vecinit_split "$(printf ' 1.0000000E+00\n-5.0000000E+00\n 3.0000000E+00')"
+# BIT/CHARACTER ARRAY explicit-literal-list INITIAL(): BINT/CINT share
+# SINT's xint_offset_run OFFSET-addressed run-length write, and their
+# element storage (state.h's bit_elements/char_elements, dispatched by
+# ensure_container from the symbol table's declared ARRAY element type)
+# is exercised on both the write (INITIAL()) and read (unsubscripted
+# whole-ARRAY WRITE, which enumerates every element) sides.
+run ./run_local_fixture.sh arrinit_types "$(printf 'AB     CD     EF\n          1               2               3')"
+# INITIAL() list mixing a bare literal with n#value repeats in the same
+# clause (`INITIAL(1, 3#0, 1, 3#0, 1)`, a 3x3 identity matrix): user-
+# reported bug -- precompute_arrayed_paragraphs' SLRI branch scanned
+# forward for the *outer* STRI group's ETRI instead of this SLRI's own
+# matching ELRI, so the first SLRI's replay swallowed every following
+# SINT/SLRI/ELRI up to the true end, corrupting every element after the
+# first repeat group (came out 1,1,0,0,1,1,1,0,1 instead of identity).
+# Every previously-tested fixture had only one SLRI...ELRI pair with
+# nothing else before the group's ETRI, so this had no observable effect
+# until a source combining more than one segment was tried.
+run ./run_local_fixture.sh matrix_identity_init "$(printf ' 1.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      1.0000000E+00')"
+# Nested repetition-factor form (USA003087 Sec. 16.2, "The factored form
+# may be nested if necessary"), user-reported: `INITIAL(4#(1,5#0),1)`
+# (a 5x5 identity matrix) -- a second, deeper bug than the one just
+# above: the outer SLRI's own bracketed body itself contains a complete
+# inner SLRI...ELRI pair (for the nested `5#0`), so a flat single-level
+# replay (even with the ELRI-matching fix above) treats the inner SLRI/
+# ELRI as inert no-op markers and never replays the inner group at all,
+# writing its one value at the wrong offset instead of 5 correct ones.
+# Fixed by making the replay itself recurse into nested SLRI-driven
+# paragraphs (run_arrayed_paragraph, interp.c), accumulating each
+# level's own idx*unit_size contribution (SLRI's own confirmed 2nd
+# operand, "elements per repeated unit") into the absolute OFF-write
+# offset. --line-length 200 keeps this fixture's expected output
+# focused on the INITIAL()-value correctness rather than also
+# depending on line-wrap arithmetic (covered separately by write_wrap).
+run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+# User-reported bug: `CALL some_procedure(a_whole_matrix);` failed with
+# the same "outside an arrayed-paragraph replay" error as the whole-
+# VECTOR/MATRIX WRITE-argument bug above, for the same reason -- a
+# whole-MATRIX call argument's XXAR entry has the identical unreplayed
+# QUAL=SYT shape, but OP_XXAR's whole-container detection was gated on
+# WRITE only. Fixed by widening that detection to calls too, and adding
+# bind_call_argument() (interp.c, shared by OP_PCAL/OP_FCAL/
+# interp_prepare_external_call) to copy such an argument's elements into
+# the callee's own parameter storage by value, shape-checked against the
+# parameter's declared dimensions (USA003087 Sec. 11.2/11.4-11.5).
+run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+# USA003087 Sec. 11.2/11.4's "precision conversion is allowed" MATRIX/
+# VECTOR argument-transmission rule: a SINGLE MATRIX argument (A) passed
+# to a DOUBLE parameter widens (scale_precision, the same exact bit-level
+# rule STOS/MTOM/VTOV already use); a DOUBLE argument (B) passed to a
+# SINGLE parameter narrows -- both directions bind by the *parameter's*
+# own declared precision (dest_state's symbol table), not the argument's.
+run ./run_local_fixture.sh proc_matrix_precision "$(printf ' 1.5000000000000000E+00      2.5000000000000000E+00\n 3.5000000000000000E+00      4.5000000000000000E+00\n 1.0500000E+01      2.0500000E+01\n 3.0500000E+01      4.0500000E+01')"
+# User-reported bug: a PROCEDURE calling a *sibling* PROCEDURE (both
+# nested directly in the same enclosing PROGRAM) failed with "call to
+# undefined procedure" -- USA003087 p. 22ff's block-name scoping rules
+# explicitly allow this, and HALSFC compiled it without complaint, but
+# the call site's own XXST/PCAL operand doesn't carry the callee's real
+# PDEF-defining symbol; the compiler emits a *separate*, alias-only
+# symbol-table entry (SYM_TYPE=0x45, "IND CALL LABEL") instead, whose own
+# SYM_PTR field points at the real definition. Fixed by
+# resolve_call_target() (interp.c), which follows that redirect before
+# treating a call operand's symbol as a callable target -- used by
+# OP_PCAL, OP_FCAL, and interp_is_external_call (the debugger's step-into
+# detection). Confirmed the identical alias shape is emitted for a call
+# from inside a TASK block too (not just PROCEDURE/FUNCTION), so the fix
+# (being purely symbol-table-driven, not block-kind-specific) covers that
+# case the same way, though no TASK-based fixture is included here.
+run ./run_local_fixture.sh nest_call "$(printf '      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+# WRITE of a whole VECTOR/MATRIX argument (`WRITE(6) V;`): confirmed this
+# session that -- unlike a plain ARRAY, which the ADLP/DLPE per-element
+# replay above already covered -- this compiles as a single, unreplayed
+# QUAL=SYT XXAR reference to the whole container (class-0/XXAR.md's
+# formerly-unresolved "arrayed argument" question), which used to fail
+# ("... referenced outside an arrayed-paragraph replay") since
+# resolve_operand's ordinary QUAL_SYT case requires an active replay.
+# OP_XXAR now recognizes this shape directly and flush_write expands
+# every element into its own WRITE data field per USA003087 Sec. 12.2.
+run ./run_local_fixture.sh write_vector "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00')"
+# WRITE of a whole MATRIX (row-by-row layout, second/subsequent rows
+# forced onto a new line aligned under the first row's own start column,
+# USA003087 Sec. 12.2), plus MATRIX row ($(1,*)) and column ($(*,2))
+# partition selects -- OP_DSUB's new asterisk-subscript handling,
+# producing a VECTOR-shaped VAC container consumed the same way.
+run ./run_local_fixture.sh write_matrix "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 2.0000000E+00      4.0000000E+00')"
+# WRITE data-field line wrapping (USA003087 Sec. 12.2, "unpaged output:
+# [80 columns/line]"): an 8-element VECTOR's fields total 8*19-5=147
+# columns (14-col SCALAR field + 5-blank separator each, no leading
+# separator on the first) -- wraps after 4 elements at the 80-column
+# default, after 2 at an explicit --line-length 40.
+run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00')"
+run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00')" --line-length 40
 # --time-scale 1000000 keeps these WAIT-using fixtures' now-real-time-
 # throttled runs fast (see interp_run()'s wall-clock pacing, state.h's
 # scheduler comment) -- it's a pure sleep-duration divisor, so the tick
@@ -113,6 +228,12 @@ run ./run_local_fixture.sh bcat "        165"
 run ./run_local_fixture.sh eint " 2.5000000E+00"
 run ./run_local_fixture.sh tsub "          0               9               0"
 run ./run_local_fixture.sh tint "$(printf '          5\n 4.2999992E+00')"
+# Structure "copiness" (`Q-STRUCTURE(n)`) INITIAL(): a coalesced TINT run
+# can span *copies* of one terminal, not just several terminals of one
+# copy -- disambiguated via the target's declared copy count
+# (symtab.h's struct_copies, class-8/TINT.md). Un-subscripted Z.QI in
+# WRITE enumerates every copy.
+run ./run_local_fixture.sh structcopy_init "$(printf '          1               2               3')"
 run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n         99')"
 
 # SCHEDULE's delayed (AT/IN/ON) and cyclic (REPEAT EVERY/AFTER, WHILE/
@@ -134,6 +255,29 @@ run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000
 run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
 run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
+# User-reported bug: a TASK rescheduling *itself* from inside its own
+# body (`SCHEDULE NEST IN 1.0 PRIORITY(80);` executed by NEST, right
+# before its own CLOSE) failed with "task already active" -- USA003087
+# p. 160/13-2 defines "active" as "in the process queue", and a self-
+# reschedule doesn't add a second queue entry, just changes the sole
+# entry's own minor state (EXECUTING -> WAITING), the same "rearm in
+# place" transition CLOS's existing REPEAT EVERY/AFTER handling already
+# does for a declaratively cyclic task. Fixed by routing a detected
+# self-SCHEDULE into that same rearm mechanism -- see class-0/SCHD.md's
+# "Self-Rescheduling Tasks" section. NEST fires at t=0,1,2,3 (COUNT
+# 1-4) before the primal's WAIT 3.5 completes and the whole program
+# (and its still-waiting NEST, per Sec. 13.1's "all other processes are
+# always dependent on the primal process for their existence") ends.
+run ./run_local_fixture.sh nested_task_schedule "$(printf '          1\n          2\n          3\n          4')" --time-scale 1000000
+# User-reported bug (a second, related report against the same underlying
+# gap as sched_low's correction above): COUNTUP2 has *no* WAIT at all and
+# reaches its own CLOSE immediately after the SCHEDULE statement, with
+# NEXT scheduled DEPENDENT -- per USA003087 Sec. 13.3, the primal must
+# wait for NEXT to terminate (its own CANCEL, once I>10) before the whole
+# program actually ends, rather than halting immediately as yaHALMAT2
+# previously did (which let NEXT run at most once). See class-0/SCHD.md's
+# "Waiting For Dependents At CLOSE" section for the full account.
+run ./run_local_fixture.sh countup2 "$(printf '          1\n          2\n          3\n          4\n          5\n          6\n          7\n          8\n          9\n         10')" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale

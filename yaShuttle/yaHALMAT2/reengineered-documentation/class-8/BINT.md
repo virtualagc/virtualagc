@@ -49,9 +49,18 @@ HALMAT: 821(2),1,0            <- BINT
 
 ## Unresolved Questions
 
-- The OFFSET-addressed form (used inside a [STRI](STRI.md) repeat loop,
+- ~~The OFFSET-addressed form (used inside a [STRI](STRI.md) repeat loop,
   by analogy with [SINT](SINT.md)'s OFFSET-addressed form) was not tested
-  — only the direct symbol-table form.
+  — only the direct symbol-table form.~~ **Resolved in a later session**:
+  confirmed by compiling `DECLARE B ARRAY(3) BIT(4)
+  INITIAL(BIN'0001',BIN'0010',BIN'0011');` — a bare STRI/BINT/ETRI group
+  (no [SLRI](SLRI.md)), one BINT with OFFSET.DATA=0 and the LIT operand's
+  own `TAG1`=3 (the coalesced-run-length mechanism [SINT](SINT.md) uses
+  for the same explicit-literal-list case, just for BIT ARRAY elements).
+  A real yaHALMAT2 gap was found and fixed here: BIT ARRAY element
+  storage didn't exist in the interpreter at all before this session
+  (only numeric ARRAY/MATRIX/VECTOR did) — see `state.h`'s
+  `bit_elements`.
 - Whether HAL/S BINT retains both the "direct variable" and "OFFSET" forms
   described for the 1971 predecessor is otherwise unconfirmed.
 

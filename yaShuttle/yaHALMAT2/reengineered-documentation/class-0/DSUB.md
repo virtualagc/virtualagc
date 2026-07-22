@@ -265,6 +265,19 @@ AASB/AIDX/ATSB/SASB/SIDX/STSB have a corresponding entry in [IR-60-5]'s
 Class 0 mnemonic index, consistent with this consolidation (i.e. they were
 not simply renamed and kept as separate HAL/S opcodes).
 
+**yaHALMAT2 implementation status** (this session): the asterisk
+partition kind is now interpreted, not just recognized in the wire
+format — `V$(*)` (whole `VECTOR`), `M$(i,*)` (a `MATRIX` row), and
+`M$(*,j)` (a `MATRIX` column) all produce a `VECTOR`-shaped `VAC`
+container result (the same mechanism `MADD`/`VADD`/etc. already use for
+their own computed results), consumed by a following `WRITE` argument
+([XXAR](XXAR.md)'s whole-container handling) or `MASN`/`VASN` the same
+way. Motivated by `WRITE(6) M$(1,*);` previously failing outright (no
+asterisk handling existed at all). The plain "index" subscript kind
+(single-element access) was already implemented and is unaffected.
+To-partition/at-partition/`CSZ`/`ASZ` subscript kinds — all fully
+confirmed in the wire format above — remain uninterpreted.
+
 ## Unresolved Questions
 
 - The precise distinction between DSUB and TSUB is not yet established;

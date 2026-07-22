@@ -69,8 +69,54 @@ function/procedure whose own symbol is at SYT index `f`, argument `i`
 (0-indexed) binds to SYT slot `f + 1 + i`. Not yet tested against a
 function with an explicit `ASSIGN`/output parameter (see [PCAL](PCAL.md)
 for the procedure case, which has both input and assign arguments) or
-one with array/structure-typed parameters, where this simple
-contiguous-slot pattern may not hold.
+~~one with array/structure-typed parameters, where this simple
+contiguous-slot pattern may not hold~~ **confirmed this session for
+`MATRIX` parameters** (procedure case; see [PCAL](PCAL.md)): the same
+contiguous-slot pattern holds unchanged — a whole-`MATRIX` argument is
+still just one ordinary [XXAR](XXAR.md) entry occupying one slot, only
+its own operand shape differs (`QUAL`=1=SYT with `TAG1`=the class
+number, same as [WRIT](WRIT.md)'s whole-container argument, rather than
+a plain scalar/integer value) — confirmed by compiling `CALL
+some_procedure(a_whole_matrix);` (USA003087 Sec. 11.2's documented
+`PROCEDURE(ARG1)` with `DECLARE ARG1 MATRIX(4,4);` form, pp. 128, 130,
+134) with `HALSFC --parms="LISTING2,LSTALL"`. Structure-typed parameters
+remain untested.
+
+**A call operand's own symbol is not always the callee's real PDEF/FDEF-
+defining symbol** — a second, deeper user-reported bug (`CALL
+some_procedure(...)` failing "call to undefined procedure" even though
+HALSFC accepted the source and USA003087 p. 22ff's block-name scoping
+rules explicitly allow it): when the call site is lexically nested in a
+*different* block than the callee's own definition (e.g. one `PROCEDURE`
+calling a sibling `PROCEDURE`, both nested directly in the same
+enclosing `PROGRAM`/`TASK`), the compiler emits a *separate*, alias-only
+symbol-table entry for the callee at the call site — `SYM_TYPE`=`0x45`
+("IND CALL LABEL" in `unHALMAT.py`'s own `dataTypes` table), not the
+real definition's `0x47` ("PROCEDURE LABEL") symbol. Confirmed via a real
+compile of exactly this shape (`PRINT_MATRIX_5D2` calling its sibling
+`PRINT_MATRIX_5D`, both nested in the enclosing `PROGRAM`): the real
+definition's own symbol (say, SYT 3) is untouched, but the *call site's*
+`XXST`/`PCAL` operands both reference a *different* symbol (SYT 8) whose
+own `COMMON*.out` record has `SYM_TYPE`=`45` and `SYM_PTR`=`3` — the
+alias's `SYM_PTR` field points straight back at the real definition (see
+`symtab.h`'s `sym_ptr` field comment). Since `state->symbol_def_pos[]`
+(interp.c) is only ever populated for a real `PDEF`/`FDEF`'s own symbol,
+looking it up for the *alias* symbol (8) always comes back `NO_TARGET`,
+failing loudly as "undefined" even though the compiler accepted the
+call. Fixed by `resolve_call_target()` (interp.c), which follows this
+`SYM_PTR` redirect (when `state->symtab` is available — this indirection
+has no HALMAT-level marker of its own, so without a symbol table it
+can't be detected at all) before treating a `PCAL`/`FCAL` operand's
+symbol as a callable target; used by both opcodes' handlers and by
+`interp_is_external_call` (the debugger's step-into detection). The
+identical alias shape was confirmed to be emitted for a call from inside
+a `TASK` block too, not just `PROCEDURE`/`FUNCTION` — the fix, being
+purely symbol-table-driven rather than tied to any particular kind of
+enclosing block, covers that the same way. Whether the *unarrayed*/
+same-block case (a procedure calling one defined in the exact same
+lexical block, not a sibling) ever also uses this alias mechanism, or
+only cross-block references do, is not separately confirmed — every
+compile tried so far already needed the alias.
 
 ## Source Analysis & Reliability
 

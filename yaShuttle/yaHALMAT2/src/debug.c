@@ -254,8 +254,9 @@ static void examine_syt(halmat_state_t *state, uint16_t index, FILE *out) {
             fprintf(out, "syt[%u] = <unset>\n", index);
             break;
     }
-    if (e->elements) {
-        fprintf(out, "  container: %zu element(s)", e->element_count);
+    if (e->elements || e->bit_elements || e->char_elements) {
+        const char *kind = e->bit_elements ? "BIT" : e->char_elements ? "CHARACTER" : "SCALAR/INTEGER";
+        fprintf(out, "  container: %zu %s element(s)", e->element_count, kind);
         if (e->rows || e->cols) fprintf(out, ", shape %dx%d", e->rows, e->cols);
         fprintf(out, "\n");
     }

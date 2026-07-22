@@ -34,6 +34,30 @@ One operand: `DATA`=symbol-table index of the called procedure,
 `HALSFC --parms="LSTALL"` — see [XXST](XXST.md) for the full worked
 trace.
 
+**`MATRIX`/`VECTOR` parameters** (USA003087 Sec. 11.2, pp. 128/130,
+"`DECLARE ARG1 MATRIX(4,4);`" as a procedure parameter; Sec. 11.4-11.5,
+pp. 131-134, the transmission/conformance rules) — confirmed this
+session by a user-reported bug (`CALL some_procedure(a_whole_matrix);`
+previously failed with "SYT index N is a whole ARRAY/VECTOR/MATRIX
+referenced outside an arrayed-paragraph replay"): a whole-`MATRIX`
+argument's own [XXAR](XXAR.md) entry has exactly the same shape as
+[WRIT](WRIT.md)'s whole-container `WRITE` argument (`QUAL`=1=SYT,
+`TAG1`=the ordinary class number, not wrapped in any replay) — PCAL
+itself carries nothing special for it. Per Sec. 11.4's transmission
+model ("may be viewed as the assignment of the value of each
+expression... to its corresponding input parameter"), yaHALMAT2 copies
+the argument's elements into the parameter's own storage by value
+(shape-conformance-checked against the parameter's declared
+dimensions), not by reference — see [FCAL](FCAL.md)'s "Phase 3 finding"
+for the confirmation that this doesn't disturb the ordinary contiguous-
+SYT-slot parameter-binding pattern. **Precision conversion** (same
+section: "precision conversion is allowed") is also implemented — a
+SINGLE argument passed to a DOUBLE parameter (or vice versa) is
+converted element-by-element to the *parameter's* own declared
+precision, via the same exact bit-level rule already used for
+STOS/MTOM/VTOV (USA00309 Sec. 8.2), confirmed both directions against a
+real compile.
+
 ## Unresolved Questions
 
 - Whether HAL 1971's second CALL form (invoking a runtime error-handling

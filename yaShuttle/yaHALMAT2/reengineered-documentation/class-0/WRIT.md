@@ -36,6 +36,25 @@ misattribution happened and was caught, and [READ](READ.md) for the
 identical pattern on the read side. WRIT sits between the argument's
 [XXAR](XXAR.md) entries and the closing [XXND](XXND.md), same as READ.
 
+**Multi-valued argument data-field layout** (yaHALMAT2 implementation,
+this session): a whole `VECTOR`/`MATRIX` argument, or a `MATRIX` row/
+column partition select ([XXAR](XXAR.md)'s whole-container handling,
+[DSUB](DSUB.md)'s asterisk-subscript result), is expanded into one
+data field per element rather than written as a single value, per
+USA003087 Sec. 12.2's "DATA FORMATS": a `VECTOR`/`ARRAY` argument lays
+its elements out sequentially; a `MATRIX` argument lays its elements
+out row by row, with the second and subsequent rows forced onto a new
+line, aligned under the first row's own starting column, regardless of
+whether the line has room for more. Every WRITE data field, across the
+whole statement's argument list (not per-argument), also now wraps onto
+a new line once it would exceed the interpreter's line-length limit
+(default 80 columns, matching that section's "unpaged output: [80
+columns/line]" — overridable with `--line-length`, main.c). Previously,
+a whole `VECTOR`/`MATRIX`/plain-`ARRAY`-shaped argument failed outright
+("... referenced outside an arrayed-paragraph replay") rather than
+producing any output at all, and no line-wrapping existed regardless of
+line length.
+
 ## Unresolved Questions
 
 - None remaining specific to this instruction. The device-number

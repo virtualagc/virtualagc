@@ -35,6 +35,7 @@ found elsewhere.
 | [IR-60-5] | PDF pages 108–134 (of 134) | Covers (at least) printed pages A-3–A-8, A-93–A-94, A-103–A-104, A-109, A-110–A-118. This is believed to be the entirety of the HALMAT-relevant material in this partial copy; pages 1–107 were not reviewed (front matter / unrelated compiler chapters, per the document's own page numbering and the source URL's `#page=114` anchor) and should be spot-checked in a future session before being ruled out entirely. |
 | [Halmat.pdf] | PDF pages 1–15 (of 114) | Covers title page, foreword, Word Format, Block Structure/Large-Scale Organisation summary, and Class 0 entries NOP through BRA (partial — BRA's own detail page not yet read). Pages 16–114 (remainder of Class 0, and all of Classes 1–8) not yet reviewed. |
 | [MSC-01847] | **Complete**: part1 pp. 1–42 (all), part2 pp. 1–42 (all), part3 pp. 1–41 (all) | The original file (105 MB) exceeds the Read tool's 100 MB text-extraction limit. Fixed by splitting with `pdftk`: `source-documentation/MSC-01847.part1.pdf` (pp. 1–42), `.part2.pdf` (pp. 43–84), `.part3.pdf` (pp. 85–125) — each well under the cap and directly readable. These split files are untracked/gitignored (under `source-documentation/`). The original 105 MB file (`HALMAT - An Intermediate Language.pdf`) was removed from `source-documentation/` as a duplicate — it's available at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HALMAT - An Intermediate Language.pdf` (see the "Alternate source locations" note below); if the split files are ever missing, regenerate from that path with `pdftk ".../HALMAT - An Intermediate Language.pdf" cat 1-42 output MSC-01847.part1.pdf` (and similarly 43-84 → part2, 85-125 → part3). Covers: front matter/foreword/TOC; **Chapter 1** (§1.1–1.8: symbolic/physical instruction format, notation — see "Notation reference" below); Chapter 2 (§2.1–2.24, full, no gaps: Code Markers, Labels, Branches, Arrayness/Structureness Specifiers, Subscript Allocators, Terminal/Array/Structure Subscript Specifiers, Precision Conversion, Static Initialization Flow Specifiers, Argument List Specifiers, I/O Specifiers, Subprogram Specifiers, Auxiliary Shaping Function Specifiers, Structure Operations, Bit String, Character, Matrix, Vector, Scalar, Integer, Conditional, Initialization Operations, DO FOR Specifiers) with full instruction-level bit diagrams and prose in the predecessor language's own physical format; Chapter 3 (§3.1–3.8, full: worked HALMAT-construct examples for arithmetic, flow-control, I/O, procedure, function, shaping-function, and initialization statements); Appendix A (symbol/literal table layout); **Appendix B** (complete alphabetical mnemonic→opcode→one-line-description table for the full HAL 1971 instruction set, ~150 entries); **Appendix C** (the same data as a full opcode→mnemonic lookup table, cross-confirming B); Appendix D (numeric codes for qualifier/optimization/operand-type subfields); Appendix E (shaping-function numeric codes); and an **ADDENDUM** (p. 125, the document's final page) listing three instructions omitted from the main text due to incomplete 1971-era implementation — see the "ZDLP/PFST/PFND addendum" note below. **This document is now considered fully reviewed, page for page, with no remaining gaps.** This document describes the *predecessor* language HAL (1971), not HAL/S (1977) — see the cross-reference notes throughout this file for how it's being used. Diagnostic note: an independent `pdftotext -layout` dump of a page range is a cheap way to check what's actually on those pages before spending a Read call, though badly-OCR'd bit-diagram pages (like the ADDENDUM) are worth re-rendering as an image (`pdftoppm -r 300 -png`) and reading visually when the text extraction looks scrambled. |
+| [USA003087] | **Full text extracted** (441 pages); individual sections read as needed, not all reviewed yet | "HAL/S Programmer's Guide." Rather than re-rendering page ranges from the PDF on every lookup, the entire document was run once through `pdftotext -layout` into `source-documentation/USA003087.txt` (untracked/gitignored, same convention as the `MSC-01847.part*.pdf` split files) — spot-checked against p. 143's WRITE-statement DATA FORMATS text (word-for-word identical to an independent PDF-page Read) to confirm extraction fidelity. Pages are separated by form-feed (`\f`) characters, so `awk 'BEGIN{RS="\f"}'`-style page-indexed lookups or plain `grep` both work directly on the text file — much cheaper than a Read-tool PDF-page call for prose lookups. **Caveat**: this is a born-digital PDF, so prose extracts cleanly, but the hand-drawn figures (e.g. Figure 12-3/12-4's WRITE-mechanism zigzag diagrams) don't — those still need `pdftoppm -r 300 -png` + a visual Read of the rendered image, same as already noted for [MSC-01847]'s ADDENDUM below. Sections consulted so far: §12.2 (WRITE statement DATA FORMATS, "unpaged output: [80 columns/line]" — see the WRITE-array/line-wrapping fix in the "HAL/S I/O device numbers" section above). |
 | [##DRIVER.xpl] | `PASS1.PROCS/##DRIVER.xpl` lines ~2052–2258 | **Phase 2 primary source.** `../virtualagc/yaShuttle/Source Code/PASS.REL32V0/PASS1.PROCS/##DRIVER.xpl` declares every HALMAT opcode as a named XPL/I constant (`X`-prefixed, e.g. `XSMRK BIT(16) INITIAL("004")`), for direct use by the compiler itself — the single most authoritative source available for HAL/S opcode numbers, since it's what the real compiler actually uses. Also declares the operand-qualifier constants (`XSYT`=1, `XINL`=2, `XVAC`=3, `XXPT`=4, `XLIT`=5, `XIMD`=6, `XAST`=7, `XCSZ`=8, `XASZ`=9, `XOFF`=10 — an exact match to the QUAL table already in [HALMAT.md](HALMAT.md), now primary-source-confirmed for HAL/S itself rather than only via [IR-60-5]) and the two Optimizer-HALMAT code-optimizer tag bits (`XCO_N`="01", `XCO_D`="02"). Confirms essentially every opcode already in this file's Class 0 and Class 8 tables, corrects a couple of values inferred from [MSC-01847] (see Class 4/5 notes below), and gives confirmed opcodes for many previously-undocumented Class 0/1/2/3/4/5/6/7 entries. Not yet exhaustively cross-referenced against emission/consumption sites elsewhere in the source (that's a good next step — see "Next steps" below) — what's recorded here so far is the opcode table itself, read directly, not yet validated against actual compiled HALMAT binaries. Some array-valued declarations (e.g. `XBTOI(5)`) use a comment convention where only the first element has a real variable name and subsequent elements' conceptual names are given in trailing comments (`/* INDEXED OFF OF XCTOI */`); those are recorded below with the same care but flagged where the convention made attribution ambiguous. |
 | Compiler report switches | Tested empirically (see below) | Confirmed: PASS1's compile-time option `HALMAT` (abbreviated `HM`, bit `0x00040000` in `OPTIONS_CODE`, declared in `MONITOR.ASM/COMPOPT.bal`) makes `pass1.rpt` print each HALMAT instruction (`HALMAT LINE N: <opcode>(<numop>),<tag>,<extra>` plus its operand(s)) interleaved with the original HAL/S source listing — verified by compiling `PASS.REL32V0/regression/HELLO.hal` locally with `HALSFC --parms="HALMAT,LIST,LISTING2" HELLO.hal`. The report is very noisy (a full scanner/parser production trace prints regardless of the `TRACE` option and regardless of debug- vs. production-build; cause not yet identified — worth investigating further, or just filtering with `grep`). **PASS2**: per a secondary source (https://www.ibiblio.org/apollo/HAL.html#moron, the historical HAL/S option reference), the compile-time option `LSTALL` makes PASS2's report include HALMAT, generated AP-101S object code, and HAL/S source statements together — statements are identified there only by *statement number*, so cross-referencing back to source text requires consulting the PASS1 report (which does show statement numbers against source lines) as well.
 
@@ -584,17 +585,17 @@ beyond the 1971 language.
 | Opcode | Mnemonic | Status | Confidence | IR-60-5 pg. | Notes |
 |---|---|---|---|---|---|
 | 0x01 | STRI | Documented | High | 85 | Opcode doubly confirmed ([IR-60-5] + [##DRIVER.xpl] `XSTRI`). [MSC-01847] "STRI"/"repeated initialize specifier" at the *same* opcode in HAL 1971 |
-| 0x02 | SLRI | Documented | High | 86 | Opcode doubly confirmed (`XSLRI`). Start of a repeated-initialize sequence (`n#value` in `INITIAL(...)`, §16.2), empirically confirmed this session (fully unrolled for `STATIC` data — 1000 SINT/ELRI pairs for a 1000-element test array). Slot matches HAL-1971's DLPI ("initialize loop header") |
-| 0x03 | ELRI | Documented | High | 86 | Opcode doubly confirmed (`XELRI`). Per-element close of a repeated-initialize sequence, empirically confirmed this session. Slot matches HAL-1971's DLEI ("initialize loop end") |
-| 0x04 | ETRI | Documented | High | 85 | Opcode doubly confirmed (`XETRI`). Close of the whole repeated-initialize sequence, empirically confirmed this session; no HAL-1971 analog identified at this slot |
-| 0x21 | BINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 0). [MSC-01847] "BINT" at the *same* opcode |
-| 0x41 | CINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 1). [MSC-01847] "CINT" at the *same* opcode |
+| 0x02 | SLRI | Documented | High | 86 | Opcode doubly confirmed (`XSLRI`). Start of a repeated-initialize sequence (`n#value` in `INITIAL(...)`, §16.2). **Corrected in a later session**: the compiler emits exactly one SINT/ELRI unit regardless of repetition count (not one per element, as an earlier session's `STATIC` 1000-element trace had concluded — that trace didn't reproduce against a fresh build and is believed to have been a documentation error); the single unit is replayed by the runtime consumer, driven by SLRI's own repetition-count operand. Slot matches HAL-1971's DLPI ("initialize loop header"). **Session update**: fixed a real yaHALMAT2 bug, found via a user report against `INITIAL(1, 3#0, 1, 3#0, 1)` (meant as a 3x3 identity matrix) — `precompute_arrayed_paragraphs` (interp.c) computed each SLRI's replay boundary by scanning forward for the *outer* STRI group's `ETRI` instead of this SLRI's own matching `ELRI`, so the first `n#value` segment's replay swallowed and replayed every following `SINT`/`SLRI`/`ELRI` up to the true end whenever an `INITIAL()` list mixed more than one bare-literal/`n#value` segment (every previously-tested fixture had only one segment, so `ELRI` and `ETRI` were adjacent and the bug had no effect). **Second, deeper session update** (same day): [USA003087] §16.2's *nested* factored form (`n#(v1, m#v2)`) exposed a second bug — a nested `SLRI`'s own bracketed body contains a *complete inner* `SLRI`/`SINT`/`ELRI` triple, which a flat single-level replay treats as inert no-op markers instead of actually replaying, found via a user report against `INITIAL(4#(1,5#0),1)` (meant as a 5x5 identity matrix). Fixed by matching `SLRI`↔`ELRI` pairs by the operator word's own `TAG` field (a confirmed 1-based nesting depth, not "the next `ELRI` found") and making the replay itself (`run_arrayed_paragraph`, interp.c, replacing the old flat loop) recurse into any nested `SLRI`-driven paragraph, accumulating each level's own `idx * unit_size` contribution (`unit_size` = SLRI's own 2nd operand, now confirmed to mean "elements per repeated unit" rather than merely presumed) into the absolute `OFF`-write offset. See [SLRI](class-8/SLRI.md) |
+| 0x03 | ELRI | Documented | High | 86 | Opcode doubly confirmed (`XELRI`). Closes the single SINT/ELRI unit [SLRI](class-8/SLRI.md) replays (see correction above), empirically confirmed this session. Slot matches HAL-1971's DLEI ("initialize loop end") |
+| 0x04 | ETRI | Documented | High | 85 | Opcode doubly confirmed (`XETRI`). Close of the whole repeated-initialize sequence, empirically confirmed this session; no HAL-1971 analog identified at this slot. Also closes the (SLRI/ELRI-free) explicit-literal-list `INITIAL(v1,v2,...)` form — see the SINT row below |
+| 0x21 | BINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 0). [MSC-01847] "BINT" at the *same* opcode. **Session update**: OFFSET-addressed form (BIT ARRAY explicit-literal-list `INITIAL(...)`) now confirmed and implemented — see [BINT](class-8/BINT.md) and the SINT row below |
+| 0x41 | CINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 1). [MSC-01847] "CINT" at the *same* opcode. **Session update**: OFFSET-addressed form (CHARACTER ARRAY explicit-literal-list `INITIAL(...)`) now confirmed and implemented — see [CINT](class-8/CINT.md) and the SINT row below |
 | 0x61 | MINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 2). [MSC-01847] "MINT" at the *same* opcode |
 | 0x81 | VINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 3). [MSC-01847] "VINT" at the *same* opcode |
-| 0xA1 | SINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 4). [MSC-01847] "SINT" at the *same* opcode |
+| 0xA1 | SINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 4). [MSC-01847] "SINT" at the *same* opcode. **Session update**: SINT's OFFSET-addressed form also covers a third, previously-unhandled `INITIAL(...)` case — explicit-literal-list VECTOR/MATRIX/ARRAY inits (`INITIAL(10,11,12)`), a bare STRI/SINT/ETRI group with no SLRI/ELRI, one SINT per coalesced literal run, run length carried in the LIT operand's `TAG1` byte (same mechanism as [TINT](class-8/TINT.md)). Found and fixed via a yaHALMAT2 bug report (`source-documentation/BAD_INITIAL.md`); yaHALMAT2's `interp.c` previously read only the run's first literal and required an enclosing SLRI-driven replay, both wrong for this case. See [SINT](class-8/SINT.md) |
 | 0xC1 | IINT | Documented | High | 87 | Opcode doubly confirmed (`XBINT` array element 5). [MSC-01847] "IINT" at the *same* opcode |
 | 0xE1 | NINT | Documented | High | 98/99 | Opcode doubly confirmed (`XNINT`). `NAME` (pointer) initialize, empirically confirmed this session (both real-pointer and `NULL` forms); no HAL-1971 analog (opcode range 0xE1-0xE3 unused in HAL 1971's Class 8) |
-| 0xE2 | TINT | Documented | High | 87 | Opcode doubly confirmed (`XTINT`). Structure-terminal initialize for a whole-structure `INITIAL(...)` list ([USA003087] §19.6), bracketed by [STRI](class-8/STRI.md)/[ETRI](class-8/ETRI.md); found by grepping the compiler source tree for `XTINT`, leading to `ICQCHECK.xpl`'s `ICQ_CHECK_TYPE` dispatch. No HAL-1971 analog. **Fully closed out**: traced to `ICQOUTPU.xpl`'s `ICQ_OUTPUT` procedure, which coalesces consecutive initial-constant values (sequential literal-table and slot positions) into a single instruction with a run-count tag — confirmed both directions, a coalescing case (one `TINT` covering two terminals) and a non-coalescing case (an interposed array terminal breaks the run into three separate `TINT`s). See [TINT](class-8/TINT.md) |
+| 0xE2 | TINT | Documented | High | 87 | Opcode doubly confirmed (`XTINT`). Structure-terminal initialize for a whole-structure `INITIAL(...)` list ([USA003087] §19.6), bracketed by [STRI](class-8/STRI.md)/[ETRI](class-8/ETRI.md); found by grepping the compiler source tree for `XTINT`, leading to `ICQCHECK.xpl`'s `ICQ_CHECK_TYPE` dispatch. No HAL-1971 analog. **Fully closed out**: traced to `ICQOUTPU.xpl`'s `ICQ_OUTPUT` procedure, which coalesces consecutive initial-constant values (sequential literal-table and slot positions) into a single instruction with a run-count tag — confirmed both directions, a coalescing case (one `TINT` covering two terminals) and a non-coalescing case (an interposed array terminal breaks the run into three separate `TINT`s). **Session update**: `Q-STRUCTURE(n)` "copiness" also uses this same coalesced-run shape to span *copies* of one terminal (indistinguishable from the multi-terminal case without consulting the target's declared copy count, symtab.h's `struct_copies`) — a real yaHALMAT2 bug (silently wrote wrong/nonexistent SYT slots for multi-copy structures) found and fixed this session. See [TINT](class-8/TINT.md) |
 | 0xE3 | EINT | Documented | High | 87 | Opcode doubly confirmed (`XEINT`). `EQUATE EXTERNAL <id> TO <variable>;` statement — an undocumented-in-prose HAL/S declaration (only its reserved word appears in [USA003087]'s index) that aliases a new local name to a same-block variable, apparently for external/linker naming purposes; empirically confirmed this session by grepping the compiler source tree for `XEINT`, leading to `SYNTHESI.xpl`'s `<DECLARE ELEMENT> ::= EQUATE EXTERNAL <IDENTIFIER> TO <VARIABLE> ;` grammar rule. No HAL-1971 analog |
 
 13 of 13 known Class 8 opcodes inventoried; **all 13 now documented**
@@ -671,6 +672,108 @@ from `CLOSE FTEST;`) was also confirmed and written up (its opcode/
 machine-code correlation had been glimpsed once before, unattributed, in
 an earlier session's `ARITH.hal` trace — see "Empirical Verification"
 below).
+
+**WRITE of a whole VECTOR/MATRIX/ARRAY, and WRITE data-field line
+wrapping — both fixed this session.** User-reported bug: `WRITE(6) V;`/
+`WRITE(6) M;` (`V`/`M` a `VECTOR`/`MATRIX`) and `WRITE(6) M$(1,*);`
+(a `MATRIX` row partition select) all failed — the first two with "SYT
+index N is a whole ARRAY/VECTOR/MATRIX referenced outside an
+arrayed-paragraph replay", the third because [DSUB](class-0/DSUB.md)'s
+asterisk-subscript kind wasn't interpreted at all yet. Root cause,
+confirmed by compiling both forms with `HALSFC --parms="LISTING2,LSTALL"`
+and reading the result directly with `unHALMAT.py`: a whole `VECTOR`/
+`MATRIX` WRITE argument is **not** wrapped in an `ADLP`/`DLPE`
+per-element replay the way a plain (or `BIT`/`CHARACTER`) `ARRAY`
+argument already was (`test_arrinit_types.hal`, an earlier session) —
+it's a single, unreplayed `QUAL`=`SYT` [XXAR](class-0/XXAR.md) entry
+referencing the whole container directly, closing the "whether an
+arrayed argument switches QUAL" question left open in XXAR.md. Fixed by
+having `OP_XXAR` recognize this shape (a `SYT` operand the symbol table
+confirms is array/vector/matrix-shaped, *and* not currently inside an
+arrayed-paragraph replay — that second condition is what keeps the
+already-working `ARRAY` ADLP-replay path unaffected) and capture the
+whole element list as a new WRITE-item kind, expanded by `flush_write`
+into one data field per element. `DSUB` gained asterisk-subscript
+interpretation (`V$(*)`, `M$(i,*)`, `M$(*,j)`) producing a `VECTOR`-
+shaped `VAC` container result via the same mechanism `MADD`/`VADD`
+already use, consumed identically. Separately, per a user pointer to
+[USA003087] §12.2 (PDF p. 143), WRITE data fields never wrapped onto a
+new line at all regardless of how long the output got; `flush_write`
+now tracks a running output column and wraps once a field wouldn't fit
+within a line-length limit (default 80, matching that section's
+"unpaged output: [80 columns/line]", overridable with the new
+`--line-length` option), with `MATRIX` arguments additionally forcing
+an aligned new line at every row boundary unconditionally, per that
+section's own layout rules. See [WRIT](class-0/WRIT.md)/
+[XXAR](class-0/XXAR.md)/[DSUB](class-0/DSUB.md) for the full details;
+`src/tests/hal/test_write_vector.hal`/`test_write_matrix.hal`/
+`test_write_wrap.hal` are the new regression fixtures. Whole-structure
+("copiness") WRITE arguments were not investigated this session — the
+user only speculated they might share the same gap, and no primary
+source or compiled trace confirms either way yet.
+
+**The same whole-container gap also affected `PROCEDURE`/`FUNCTION`
+call arguments — fixed in a follow-up session.** User-reported bug:
+`CALL some_procedure(a_whole_matrix);` failed with the identical
+"referenced outside an arrayed-paragraph replay" message, for the
+identical reason — a whole-`MATRIX`/`VECTOR` call argument's `XXAR`
+entry has exactly the same unreplayed `QUAL`=`SYT` shape as `WRITE`'s
+(class-0/XXAR.md), and `OP_XXAR`'s whole-container detection had only
+been gated on `WRITE` (`kind == 2`), not calls. Per a direct user
+pointer to [USA003087] Sec. 11.2 (pp. 128, 130 — `PROCEDURE(ARG1)` with
+`DECLARE ARG1 MATRIX(4,4);`) and Sec. 11.4-11.5 (pp. 131-134,
+transmission/conformance rules): fixed by widening that detection to
+cover call arguments too, and adding a shared `bind_call_argument()`
+helper (interp.c, used by `OP_PCAL`, `OP_FCAL`, and
+`interp_prepare_external_call`'s cross-unit binding) that copies a
+whole-container argument's elements into the callee's own parameter
+storage **by value**, shape-conformance-checked against the parameter's
+declared dimensions — matching Sec. 11.4's transmission model exactly
+("may be viewed as the assignment of the value of each expression...
+to its corresponding input parameter"). **Cross-precision (SINGLE↔DOUBLE)
+conversion during transmission, also documented in that section
+("precision conversion is allowed"), implemented in a second follow-up**:
+`bind_call_argument()` now converts each copied element via
+`scale_precision()` -- the identical exact bit-level rule STOS/MTOM/VTOV
+already use (USA00309 Sec. 8.2) -- to whichever precision the
+*parameter* is declared with (from the callee's own symbol table,
+`HALMAT_SYM_FLAG_SINGLE`/`_DOUBLE`, symtab.h), not the argument's,
+matching the "assignment to its corresponding input parameter" model
+exactly. Confirmed both directions (SINGLE argument to a DOUBLE
+parameter widens; DOUBLE argument to a SINGLE parameter narrows) against
+a real compile. Without a symbol table the parameter's declared
+precision can't be determined, so elements are copied as-is (each keeps
+its own source precision) -- the same graceful-degradation pattern used
+elsewhere when the symbol table is unavailable. See
+[PCAL](class-0/PCAL.md)/[FCAL](class-0/FCAL.md)/[XXAR](class-0/XXAR.md)
+for the full details; `src/tests/hal/test_proc_matrix_arg.hal` and
+`test_proc_matrix_precision.hal` are the regression fixtures.
+
+**A third, deeper same-unit call bug — cross-scope call resolution —
+fixed in a further follow-up.** User-reported bug: a `PROCEDURE` calling
+a *sibling* `PROCEDURE` (both nested directly in the same enclosing
+`PROGRAM`) failed with "call to undefined procedure (symbol N)", despite
+HALSFC compiling it cleanly and USA003087 p. 22ff's block-name scoping
+rules explicitly permitting it. Root cause, confirmed via a real compile
+and its `COMMON*.out` symbol table: the call site's own `XXST`/`PCAL`
+operands don't reference the callee's real `PDEF`-defining symbol
+(`SYM_TYPE`=`0x47`, "PROCEDURE LABEL") at all -- the compiler emits a
+*separate*, alias-only symbol-table entry for the callee, of type
+`0x45` ("IND CALL LABEL", per `unHALMAT.py`'s own `dataTypes` table),
+whose own `SYM_PTR` field points back at the real definition's symbol
+index. `state->symbol_def_pos[]` (interp.c) is only ever populated for a
+real `PDEF`/`FDEF`'s own symbol, so looking it up for the alias always
+came back `NO_TARGET`. Fixed by a new `resolve_call_target()` helper
+(interp.c) that follows the `SYM_PTR` redirect (added as a new parsed
+field, `symtab.h`/`symtab.c`) before treating a `PCAL`/`FCAL` operand's
+symbol as callable -- used by both opcodes' handlers and by
+`interp_is_external_call` (the debugger's step-into detection).
+Confirmed the identical alias shape is also emitted for a call from
+inside a `TASK` block, not just `PROCEDURE`/`FUNCTION` -- the fix
+covers that the same way, being purely symbol-table-driven rather than
+tied to any specific kind of enclosing block. See
+[FCAL](class-0/FCAL.md) for the full trace;
+`src/tests/hal/test_nest_call.hal` is the new regression fixture.
 
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 
@@ -791,6 +894,53 @@ function, and `ON ERROR`/`OFF ERROR` (multiple forms):
   (`TERMINATE;`) confirmed empirically as a byproduct; named/list forms
   (`TERMINATE label;` / `TERMINATE label1, label2;`) confirmed in a later
   session — one `SYT` operand per name, `NUMOP` extended accordingly.
+
+**A genuine yaHALMAT2 bug in `SCHD`'s handling of a self-rescheduling
+task, found and fixed in a follow-up session.** User-reported: a `TASK`
+scheduling *itself* from inside its own body (`SCHEDULE NEST IN 1.0
+PRIORITY(80);` as the last statement before `CLOSE NEST;`) failed with
+"task already active", which the user correctly pushed back on: per a
+direct citation of [USA003087] p. 160 (printed p. 13-2), a process is
+"active" **iff it is in the process queue**, and rescheduling yourself
+doesn't add a second queue entry — it changes your own (sole) entry's
+minor state from `EXECUTING` to `WAITING`/`READY`, the identical "rearm
+in place" transition already correctly implemented for a *declaratively*
+cyclic task (`SCHEDULE label REPEAT EVERY/AFTER ...`, handled at `CLOS`).
+Fixed by detecting self-targeting in `OP_SCHD` and routing it into that
+same existing rearm mechanism instead of either failing or creating a
+second task-table entry (which really would violate the "only one active
+instance" rule, and is still correctly rejected for a genuinely different
+process targeting an already-active task). See [SCHD](class-0/SCHD.md)'s
+"Self-Rescheduling Tasks" section for the full account;
+`src/tests/hal/test_nested_task_schedule.hal` is the new regression
+fixture.
+
+**A fourth bug in the same family, found via a second user-reported
+program (`COUNTUP2.hal`).** The primal ended the *whole program*
+unconditionally the instant it reached its own `CLOSE`, even with an
+active `DEPENDENT` task still running — ignoring USA003087 Sec. 13.3's
+"If execution ends on a CLOSE or RETURN statement, the process goes into
+the inactive state directly only if it has no dependents. Otherwise, it
+goes into a waiting state until the dependents have in their turn
+terminated" (distinct from Sec. 13.1's *overriding* "all other processes
+are always dependent on the primal for their existence," which the
+original code conflated this with — that rule bounds *how long* anything
+can outlive the primal, not *when* the primal itself actually goes
+inactive). The user initially suspected this CLOSE-specific rule might
+apply only to multiple concurrently-scheduled `PROGRAM`s rather than an
+ordinary `PROGRAM`/`TASK` pair, but Sec. 13.3 explicitly states "programs
+and tasks are treated together" for exactly this purpose. Fixed by
+tracking each task's `parent_task` (`state.h`) and adding a
+`has_active_dependents()` check to both of `OP_CLOS`'s termination paths,
+deferring via a new `TASK_WAITING_FOR_DEPENDENTS` state (polled every
+tick by a new `sched_wake_dependents()`) until the dependent(s) actually
+terminate. Also corrected a pre-existing fixture whose expected output
+had baked in the old buggy behavior (`test_sched_low.hal` — a low-
+priority `DEPENDENT` `WORKER` previously never got to run at all). See
+[SCHD](class-0/SCHD.md)'s "Waiting For Dependents At CLOSE" section for
+the full account, including the residual uncertainty the user flagged
+(no worked primary-source example actually exercises this exact case);
+`src/tests/hal/test_countup2.hal` is the new regression fixture.
 
 ## New primary sources: now available and reviewed
 

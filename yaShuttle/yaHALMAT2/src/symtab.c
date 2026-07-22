@@ -47,6 +47,7 @@ typedef struct {
     uint32_t sym_type;
     uint32_t sym_length;
     uint32_t sym_array;
+    uint32_t sym_ptr;
 } raw_shape_t;
 
 /* Shared mutable parse state, so the per-line body (symtab_process_line)
@@ -123,6 +124,8 @@ static void symtab_process_line(symtab_parse_state_t *st, char *line) {
             st->current_raw.sym_length = (uint32_t)strtoul(fields[4], NULL, 16);
         } else if (strcmp(fields[1], "SYM_ARRAY") == 0) {
             st->current_raw.sym_array = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_PTR") == 0) {
+            st->current_raw.sym_ptr = (uint32_t)strtoul(fields[4], NULL, 16);
         }
     } else if (strcmp(fields[0], "+") == 0 && n >= 5 && strcmp(fields[1], "EXTuARRAY") == 0) {
         size_t idx = (size_t)strtoul(fields[2], NULL, 10);
@@ -146,7 +149,10 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
 
     for (size_t i = 0; i < st->count; i++) {
         st->entries[i].hal_class = (uint8_t)st->raw[i].sym_type;
-        if (st->raw[i].sym_array != 0) {
+        st->entries[i].sym_ptr = (int)st->raw[i].sym_ptr;
+        if (st->raw[i].sym_type == 0x0A) { /* MAJ_STRUC: SYM_ARRAY is a direct copy count, not an EXTuARRAY index -- see symtab.h */
+            st->entries[i].struct_copies = (int)st->raw[i].sym_array;
+        } else if (st->raw[i].sym_array != 0) {
             st->entries[i].shape = HALMAT_SHAPE_ARRAY;
             uint32_t base = st->raw[i].sym_array;
             if (base < st->extarray_count) {

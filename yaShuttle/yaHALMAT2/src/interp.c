@@ -350,6 +350,13 @@ static char *dup_string(const char *s) {
  * natural home alongside resolve_container/store_container_result. */
 static void ensure_container(halmat_state_t *state, uint16_t syt_index);
 
+/* Forward-declared for the same reason as ensure_container above --
+ * OP_CLOS (inside exec_one, earlier in the file than the scheduler
+ * helpers it's grouped with) needs it before its natural home alongside
+ * sched_pick_next/sched_wake_waiting. See its own definition for the
+ * USA003087 Sec. 13.3 "dependents" rule this implements. */
+static bool has_active_dependents(const halmat_state_t *state, int parent_task_idx);
+
 /* Shared by QUAL_SYT and QUAL_XPT (structure-field shadow slots, see
  * state.h's halmat_struct_field_t) -- both address the same shape of
  * storage, just keyed differently. */
@@ -453,8 +460,16 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 ensure_container(state, op->data);
                 halmat_syt_entry_t *e = &state->syt[op->data];
                 size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
-                out->kind = RV_SCALAR;
-                out->scalar = e->elements[idx];
+                if (e->bit_elements) {
+                    out->kind = RV_BITS;
+                    out->bits = e->bit_elements[idx];
+                } else if (e->char_elements) {
+                    out->kind = RV_STRING;
+                    out->string = e->char_elements[idx];
+                } else {
+                    out->kind = RV_SCALAR;
+                    out->scalar = e->elements[idx];
+                }
                 return true;
             }
             read_syt_entry(&state->syt[op->data], out);
@@ -515,12 +530,21 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                     return false;
                 }
                 const halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
-                if (!base->elements || slot->ref_offset >= base->element_count) {
+                if ((!base->elements && !base->bit_elements && !base->char_elements) ||
+                    slot->ref_offset >= base->element_count) {
                     fail(state, "subscript reference out of range");
                     return false;
                 }
-                out->kind = RV_SCALAR;
-                out->scalar = base->elements[slot->ref_offset];
+                if (base->bit_elements) {
+                    out->kind = RV_BITS;
+                    out->bits = base->bit_elements[slot->ref_offset];
+                } else if (base->char_elements) {
+                    out->kind = RV_STRING;
+                    out->string = base->char_elements[slot->ref_offset];
+                } else {
+                    out->kind = RV_SCALAR;
+                    out->scalar = base->elements[slot->ref_offset];
+                }
             } else if (slot->is_string) {
                 out->kind = RV_STRING;
                 out->string = slot->string ? slot->string : "";
@@ -578,6 +602,44 @@ static bool write_syt_entry(halmat_state_t *state, halmat_syt_entry_t *e, const 
     return true;
 }
 
+/* Writes one resolved value into a container element (elements/
+ * bit_elements/char_elements, state.h -- exactly one is non-NULL on a
+ * given entry, per ensure_container()'s own dispatch), shared by
+ * write_destination's QUAL_SYT/QUAL_VAC/QUAL_OFF array-element write
+ * paths below. `idx` is assumed already in range. char_elements'
+ * strings are owned, so the old one is freed before the new one is
+ * dup'd in, same convention as write_syt_entry's SYT_TYPE_CHARACTER
+ * case for a non-subscripted CHARACTER variable. A value/container kind
+ * mismatch (e.g. a BIT literal into a numeric-only container, which
+ * happens when no symbol table was available to tell ensure_container
+ * the real declared element type -- see its own comment) fails loudly
+ * rather than silently storing zero/corrupting. */
+static bool write_container_element(halmat_state_t *state, halmat_syt_entry_t *e, size_t idx, const resolved_value_t *val) {
+    if (e->bit_elements) {
+        if (val->kind != RV_BITS) {
+            fail(state, "cannot assign a non-BIT value to a BIT ARRAY element");
+            return false;
+        }
+        e->bit_elements[idx] = val->bits;
+        return true;
+    }
+    if (e->char_elements) {
+        if (val->kind != RV_STRING) {
+            fail(state, "cannot assign a non-CHARACTER value to a CHARACTER ARRAY element");
+            return false;
+        }
+        free(e->char_elements[idx]);
+        e->char_elements[idx] = dup_string(val->string);
+        return true;
+    }
+    if (val->kind == RV_BITS || val->kind == RV_STRING) {
+        fail(state, "BIT/CHARACTER ARRAY element write with no symbol table available to determine element storage");
+        return false;
+    }
+    e->elements[idx] = rv_to_scalar(val);
+    return true;
+}
+
 static bool write_destination(halmat_state_t *state, const halmat_operand_t *op, const resolved_value_t *val) {
     if (op->qual == QUAL_SYT) {
         if (op->data >= HALMAT_SYT_MAX) {
@@ -592,8 +654,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             ensure_container(state, op->data);
             halmat_syt_entry_t *e = &state->syt[op->data];
             size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
-            e->elements[idx] = rv_to_scalar(val);
-            return true;
+            return write_container_element(state, e, idx, val);
         }
         return write_syt_entry(state, &state->syt[op->data], val);
     }
@@ -617,40 +678,71 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             return false;
         }
         halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
-        if (!base->elements || slot->ref_offset >= base->element_count) {
+        if ((!base->elements && !base->bit_elements && !base->char_elements) ||
+            slot->ref_offset >= base->element_count) {
             fail(state, "subscript destination out of range");
             return false;
         }
-        base->elements[slot->ref_offset] = rv_to_scalar(val);
-        return true;
+        return write_container_element(state, base, slot->ref_offset, val);
     }
     if (op->qual == QUAL_OFF) {
-        /* OFFSET-addressed element write, used by SINT (etc.) inside a
-         * STRI/SLRI/ELRI/ETRI repeated-initialize group (class-8/
-         * STRI.md, SLRI.md) -- op->data is a sequential offset (always
-         * observed as 0) relative to the current replay iteration, added
-         * to state->arrayed_index (the SLRI-driven paragraph-replay
-         * counter, same mechanism ADLP/IDLP use for QUAL_SYT redirection
-         * -- see interp_step). The target symbol itself isn't carried by
+        /* OFFSET-addressed element write, used by SINT inside a
+         * STRI/.../ETRI repeated-initialize group (class-8/STRI.md,
+         * SLRI.md). Two sub-cases share this one path (see OP_SINT's own
+         * comment for how they're told apart and why the same formula
+         * covers both): inside an SLRI-driven `n#value` replay, op->data
+         * is always observed as 0 and state->arrayed_index (the
+         * SLRI-driven paragraph-replay counter, same mechanism ADLP/IDLP
+         * use for QUAL_SYT redirection -- see interp_step) supplies the
+         * whole index; outside any replay (arrayed_index still -1, the
+         * explicit-literal-list `VECTOR INITIAL(10,11,12)` form, no SLRI
+         * at all -- confirmed empirically this session), op->data is
+         * itself the run's absolute/cumulative target element offset, so
+         * it's used alone. The target symbol itself isn't carried by
          * this operand at all; it comes from the most recently executed
          * STRI (state->stri_target_syt). */
-        if (state->arrayed_index < 0) {
-            fail(state, "QUAL_OFF destination used outside a repeated-initialize (STRI/SLRI) replay");
-            return false;
-        }
         if (state->stri_target_syt < 0 || state->stri_target_syt >= HALMAT_SYT_MAX) {
             fail(state, "QUAL_OFF destination used without a preceding STRI");
             return false;
         }
+        int32_t base = state->arrayed_index >= 0 ? state->arrayed_index : 0;
         uint16_t base_syt = (uint16_t)state->stri_target_syt;
         ensure_container(state, base_syt);
         halmat_syt_entry_t *e = &state->syt[base_syt];
-        size_t idx = (size_t)(state->arrayed_index + (int32_t)op->data) % (e->element_count ? e->element_count : 1);
-        e->elements[idx] = rv_to_scalar(val);
-        return true;
+        size_t idx = (size_t)(base + (int32_t)op->data) % (e->element_count ? e->element_count : 1);
+        return write_container_element(state, e, idx, val);
     }
     fail(state, "unsupported assignment destination qualifier %s", halmat_qual_name(op->qual));
     return false;
+}
+
+/* Shared OFFSET-addressed run-length write for the class-8 `xINT`
+ * family's OFFSET-addressed form (SINT/BINT/CINT -- see OP_SINT's own
+ * comment for the full disambiguation between this form's two
+ * sub-cases: the `n#value` uniform-repeat case, where this loop is a
+ * no-op since tag1 is always 1 and the repetition instead comes from an
+ * enclosing SLRI-driven arrayed-paragraph replay; and the explicit-
+ * literal-list case, where tag1 itself carries the run length). Each
+ * resolved literal is passed to write_destination in its own native
+ * kind (RV_SCALAR/RV_BITS/RV_STRING, whichever resolve_operand's
+ * QUAL_LIT case produced for that literal's real stored type) rather
+ * than being coerced -- write_container_element (above) dispatches on
+ * that kind against the target container's own allocated storage kind
+ * (elements/bit_elements/char_elements, state.h), so a mismatch (e.g. a
+ * numeric literal run landing on a CHARACTER ARRAY) fails loudly there
+ * rather than silently corrupting. */
+static bool xint_offset_run(halmat_state_t *state, const halmat_instr_t *ins) {
+    int run_count = ins->operands[1].tag1 > 0 ? ins->operands[1].tag1 : 1;
+    for (int k = 0; k < run_count; k++) {
+        halmat_operand_t lit_op = ins->operands[1];
+        lit_op.data = (uint16_t)(ins->operands[1].data + k);
+        resolved_value_t rv;
+        if (!resolve_operand(state, &lit_op, &rv)) return false;
+        halmat_operand_t off_op = ins->operands[0];
+        off_op.data = (uint16_t)(ins->operands[0].data + k);
+        if (!write_destination(state, &off_op, &rv)) return false;
+    }
+    return true;
 }
 
 /* Lazily allocates a SYT slot's ARRAY/MATRIX/VECTOR element storage
@@ -659,13 +751,26 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
  * symtab, see symtab.h) and falling back to the generic placeholder
  * capacity otherwise (HALMAT_CONTAINER_CAPACITY's comment, state.h).
  * Sets rows/cols too, which DSUB/MASN-family opcodes use to tell a
- * real declared MATRIX shape from the unknown-shape fallback. */
+ * real declared MATRIX shape from the unknown-shape fallback.
+ *
+ * Picks which of elements/bit_elements/char_elements (state.h) to
+ * allocate from the symbol table's declared ARRAY element type
+ * (hal_class 1=BIT, 2=CHARACTER, confirmed empirically against real
+ * compiled ARRAY(n) BIT/CHARACTER declarations this session --
+ * everything else, including MATRIX/VECTOR, which are always numeric in
+ * HAL/S, defaults to the numeric `elements` form). Without a symbol
+ * table (e.g. --py mode) the element type can't be known, so this
+ * always falls back to numeric -- callers that need a BIT/CHARACTER
+ * container in that situation fail loudly (see write_destination's
+ * QUAL_OFF case) rather than silently misinterpreting numeric storage
+ * as a bit pattern or string. */
 static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     halmat_syt_entry_t *e = &state->syt[syt_index];
-    if (e->elements) return;
+    if (e->elements || e->bit_elements || e->char_elements) return;
 
     int rows = 0, cols = 0;
     size_t count = 0;
+    int elem_kind = 0; /* 0=numeric, 1=BIT, 2=CHARACTER */
     if (state->symtab) {
         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
         if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->cols > 0) {
@@ -677,11 +782,20 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
             count = (size_t)cols;
         } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1) {
             count = (size_t)sym->array_dims[0]; /* only a single dimension is used -- see symtab.h */
+            if (sym->hal_class == 1) elem_kind = 1;
+            else if (sym->hal_class == 2) elem_kind = 2;
         }
     }
     if (count == 0) count = HALMAT_CONTAINER_CAPACITY;
 
-    e->elements = calloc(count, sizeof(halmat_scalar_t));
+    if (elem_kind == 1) {
+        e->bit_elements = calloc(count, sizeof(uint32_t));
+    } else if (elem_kind == 2) {
+        e->char_elements = calloc(count, sizeof(char *));
+        for (size_t i = 0; i < count; i++) e->char_elements[i] = dup_string("");
+    } else {
+        e->elements = calloc(count, sizeof(halmat_scalar_t));
+    }
     e->element_count = count;
     e->rows = rows;
     e->cols = cols;
@@ -792,6 +906,98 @@ static bool store_container_result(halmat_state_t *state, size_t vac_index,
     return true;
 }
 
+/* Binds one positional call argument (state->io_pending.items[item_index])
+ * into param_syt's SYT slot in dest_state -- shared by OP_PCAL/OP_FCAL's
+ * same-unit binding and interp_prepare_external_call's cross-unit
+ * binding (dest_state is `state` itself for the former, the callee's own
+ * state for the latter). A whole MATRIX/VECTOR argument
+ * (item->is_container, OP_XXAR's whole-container capture above) is
+ * shape-conformance-checked against the parameter's own declared
+ * dimensions (ensure_container, driven by dest_state's symbol table) and
+ * copied element-by-element -- USA003087 Sec. 11.2/11.4's documented
+ * MATRIX/VECTOR parameter rules ("the number of rows and columns of the
+ * argument must be the same as those of the parameter") and transmission
+ * model ("may be viewed as the assignment of the value of each
+ * expression... to its corresponding input parameter", i.e. by value,
+ * not by reference -- confirmed by a direct user pointer to this
+ * section).
+ *
+ * Cross-precision (SINGLE<->DOUBLE) conversion during transmission (also
+ * documented in Sec. 11.4, "precision conversion is allowed") is applied
+ * per element via scale_precision() -- the same exact bit-level rule
+ * already used for STOS/MTOM/VTOV (USA00309 Sec. 8.2) -- to whichever
+ * precision the *parameter* is declared with (dest_state->symtab's
+ * HALMAT_SYM_FLAG_DOUBLE/SINGLE bits, symtab.h), matching the
+ * "assignment to its corresponding input parameter" model: the
+ * parameter's own declared precision wins, exactly as an ordinary
+ * `param = argument;` assignment would produce, regardless of whatever
+ * precision the caller's argument happened to be. Without a symbol
+ * table (dest_state->symtab NULL, e.g. a --py unit) the parameter's
+ * declared precision can't be determined, so elements are copied as-is
+ * (each keeps its own source precision) -- the same graceful-degradation
+ * pattern used elsewhere when the symbol table is unavailable. */
+static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state, uint16_t param_syt, uint8_t item_index) {
+    if (state->io_pending.items[item_index].is_container) {
+        ensure_container(dest_state, param_syt);
+        halmat_syt_entry_t *pe = &dest_state->syt[param_syt];
+        size_t count = state->io_pending.items[item_index].container_count;
+        if (!pe->elements || count != pe->element_count) {
+            fail(state, "procedure/function call: MATRIX/VECTOR/ARRAY argument shape does not match parameter %u",
+                 param_syt);
+            return false;
+        }
+        const halmat_scalar_t *src = state->io_pending.items[item_index].container;
+        const halmat_symtab_entry_t *psym = dest_state->symtab
+            ? halmat_symtab_find_by_index(dest_state->symtab, param_syt) : NULL;
+        if (psym && (psym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+            bool to_double = (psym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+            for (size_t k = 0; k < count; k++) pe->elements[k] = scale_precision(src[k], to_double);
+        } else {
+            memcpy(pe->elements, src, count * sizeof(halmat_scalar_t));
+        }
+        pe->rows = state->io_pending.items[item_index].container_rows;
+        pe->cols = state->io_pending.items[item_index].container_cols;
+        return true;
+    }
+    if (state->io_pending.items[item_index].is_scalar) {
+        dest_state->syt[param_syt].type = SYT_TYPE_SCALAR;
+        dest_state->syt[param_syt].scalar = state->io_pending.items[item_index].scalar;
+    } else {
+        dest_state->syt[param_syt].type = SYT_TYPE_INTEGER;
+        dest_state->syt[param_syt].value = state->io_pending.items[item_index].integer;
+    }
+    return true;
+}
+
+/* Resolves a PCAL/FCAL call operand's symbol to the real PDEF/FDEF-
+ * defining symbol, following the compiler's own "IND CALL LABEL"
+ * indirection (SYM_TYPE=0x45, symtab.h's sym_ptr comment) -- confirmed
+ * this session via a user-reported bug: a call site lexically nested in
+ * a *different* block than the callee's own definition (e.g. one
+ * PROCEDURE calling a sibling PROCEDURE, both nested directly in the
+ * same enclosing PROGRAM/TASK -- USA003087 p. 22ff's block-name scoping
+ * rules, which explicitly allow this) does NOT carry the callee's own
+ * PDEF-defining symbol on its XXST/PCAL operands; it carries a
+ * *separate*, alias-only symbol-table entry of type 0x45 instead, whose
+ * own SYM_PTR points at the real definition. Without following this
+ * redirect, state->symbol_def_pos[[alias symbol]] is NO_TARGET (only
+ * ever populated for a real PDEF/FDEF's own symbol -- precompute_
+ * subprograms), so the call fails loudly as "undefined" even though the
+ * compiler accepted it. Requires a symbol table (state->symtab); without
+ * one this indirection can't be detected at all (no HALMAT-level marker
+ * distinguishes it -- the operand word itself is an ordinary QUAL=SYT
+ * reference either way), so `sym` is returned unchanged, same as before
+ * this fix -- the same graceful degradation every other symtab-dependent
+ * feature in this interpreter already has. */
+static uint16_t resolve_call_target(const halmat_state_t *state, uint16_t sym) {
+    if (!state->symtab || sym >= HALMAT_SYT_MAX) return sym;
+    const halmat_symtab_entry_t *e = halmat_symtab_find_by_index(state->symtab, sym);
+    if (e && e->hal_class == 0x45 && e->sym_ptr > 0 && (size_t)e->sym_ptr < HALMAT_SYT_MAX) {
+        return (uint16_t)e->sym_ptr;
+    }
+    return sym;
+}
+
 /* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
  * label" carried as both instructions' sole INL operand (see
  * class-0/DTST.md, class-0/ETST.md). CTST (class-0/CTST.md) sits right
@@ -856,9 +1062,14 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
     size_t n = state->prog->count;
     state->arrayed_paragraph_end = malloc(n * sizeof(size_t));
     state->arrayed_paragraph_count = malloc(n * sizeof(int));
+    state->arrayed_paragraph_unit_size = malloc(n * sizeof(int));
     for (size_t i = 0; i < n; i++) {
         state->arrayed_paragraph_end[i] = NO_TARGET;
         state->arrayed_paragraph_count[i] = 0;
+        state->arrayed_paragraph_unit_size[i] = 0; /* 0 = ADLP/IDLP-style entry (plain per-index
+                                                     * arrayed_index, no accumulation -- see
+                                                     * run_arrayed_paragraph); an SLRI-style entry
+                                                     * always records a positive value below. */
     }
 
     size_t boundary = 0;
@@ -894,23 +1105,57 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
              * the target symbol (recorded at runtime into
              * state->stri_target_syt, consumed by QUAL_OFF writes
              * inside the paragraph), SLRI's own first operand carries
-             * the repetition count, and the bracketed paragraph runs
-             * from just after SLRI up to (not including) ETRI. Contrary
-             * to SLRI.md's original documented trace (which showed
-             * literal per-element unrolling for a 1000-element array),
-             * today's HALSFC build was confirmed (this session) to
-             * always emit exactly one SINT/ELRI unit here regardless of
-             * count -- i.e. the same single-instance-plus-replay-count
-             * shape ADLP/IDLP use, just with SLRI leading instead of
-             * trailing. Corrected in SLRI.md alongside this change. */
+             * the repetition count, its second operand the number of
+             * elements per repeated unit (confirmed this session -- see
+             * below), and the bracketed paragraph runs from just after
+             * SLRI up to (not including) this SLRI's *own* matching
+             * ELRI.
+             *
+             * SLRI/ELRI pairs are matched by the operator word's own
+             * TAG field (a 1-based nesting depth), NOT by "the next
+             * ELRI found" -- confirmed this session against a real
+             * compile of USA003087 Sec. 16.2's documented nested-
+             * repetition-factor form, `INITIAL(4#(1,5#0),1)` (meant as a
+             * 5x5 identity matrix): this produces an *outer* SLRI(tag=1,
+             * count=4, unit_size=6) whose own bracketed body itself
+             * contains a complete *inner* SLRI(tag=2, count=5,
+             * unit_size=1)...ELRI(tag=2) pair (for the nested `5#0`)
+             * before the outer's own ELRI(tag=1) -- so a naive "first
+             * ELRI found" scan from the outer SLRI would wrongly stop at
+             * the *inner* ELRI instead of its own. Matching by equal TAG
+             * instead correctly skips over any more-deeply-nested (and
+             * therefore higher-tagged) SLRI/ELRI pairs in between. (This
+             * generalizes the single-level "stop at ELRI, not the outer
+             * ETRI" fix from an earlier session, which mixed independent
+             * *sibling* SLRI groups within one STRI/ETRI but never
+             * nested one SLRI's body inside another's.)
+             *
+             * The bracketed paragraph is replayed by
+             * run_arrayed_paragraph() (interp_step's caller), which
+             * recurses into any nested SLRI-driven entry it finds inside
+             * its own body instead of just skipping over it as a no-op
+             * -- see that function's own comment for the offset-
+             * accumulation arithmetic (`outer_base + idx*unit_size`)
+             * that a nested repetition-factor group needs and a flat,
+             * single-level replay can't express. Contrary to SLRI.md's
+             * original documented trace (which showed literal
+             * per-element unrolling for a 1000-element array), today's
+             * HALSFC build was confirmed (an earlier session) to always
+             * emit exactly one SINT/ELRI unit here regardless of count
+             * -- i.e. the same single-instance-plus-replay-count shape
+             * ADLP/IDLP use, just with SLRI leading instead of trailing.
+             * Corrected in SLRI.md alongside this change. */
             const halmat_instr_t *slri = &state->prog->instrs[i];
-            if (slri->operand_count == 2 && slri->operands[0].qual == QUAL_IMD) {
+            if (slri->operand_count == 2 && slri->operands[0].qual == QUAL_IMD &&
+                slri->operands[1].qual == QUAL_IMD) {
                 int count = (int16_t)slri->operands[0].data;
+                int unit_size = (int16_t)slri->operands[1].data;
                 size_t j = i + 1;
-                while (j < n && state->prog->instrs[j].opcode != OP_ETRI) j++;
-                if (j < n && count > 0) {
+                while (j < n && !(state->prog->instrs[j].opcode == OP_ELRI && state->prog->instrs[j].tag == slri->tag)) j++;
+                if (j < n && count > 0 && unit_size > 0) {
                     state->arrayed_paragraph_end[i + 1] = j + 1;
                     state->arrayed_paragraph_count[i + 1] = count;
+                    state->arrayed_paragraph_unit_size[i + 1] = unit_size;
                 }
             }
         }
@@ -1135,6 +1380,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->prog = prog;
     state->literals = literals;
     state->num_blanks = num_blanks;
+    state->line_length = 80; /* USA003087 Sec. 12.2 unpaged default; --line-length overrides (main.c) */
     precompute_loop_targets(state);
     precompute_labels(state);
     precompute_for_loops(state);
@@ -1148,6 +1394,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
      * starts at the first instruction, READY. */
     state->tasks[0].in_use = true;
     state->tasks[0].is_primal = true;
+    state->tasks[0].parent_task = -1; /* the primal has no parent */
     state->tasks[0].priority = 50;
     state->tasks[0].task_state = TASK_READY;
     state->tasks[0].saved_pc = 0;
@@ -1198,6 +1445,27 @@ void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode) {
     state->pacing_mode = mode;
 }
 
+void interp_set_line_length(halmat_state_t *state, int line_length) {
+    state->line_length = line_length;
+}
+
+/* Frees whichever of elements/bit_elements/char_elements (state.h) an
+ * entry has -- char_elements needs each owned string freed individually
+ * first, unlike the other two forms' flat calloc'd buffers. Leaves the
+ * entry's fields NULL/0, safe to call on an entry that never had a
+ * container allocated at all. */
+static void free_syt_container(halmat_syt_entry_t *e) {
+    free(e->elements);
+    e->elements = NULL;
+    free(e->bit_elements);
+    e->bit_elements = NULL;
+    if (e->char_elements) {
+        for (size_t i = 0; i < e->element_count; i++) free(e->char_elements[i]);
+        free(e->char_elements);
+        e->char_elements = NULL;
+    }
+}
+
 void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
@@ -1216,6 +1484,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->symbol_active_task);
     free(state->arrayed_paragraph_end);
     free(state->arrayed_paragraph_count);
+    free(state->arrayed_paragraph_unit_size);
     free(state->stmt_for_pc);
     free(state->external_calls); /* the table itself; the target_states it
                                    * points to are not owned here -- main.c's */
@@ -1237,11 +1506,11 @@ void interp_cleanup(halmat_state_t *state) {
     state->def_clos_target = NULL;
     state->arrayed_paragraph_end = NULL;
     state->arrayed_paragraph_count = NULL;
+    state->arrayed_paragraph_unit_size = NULL;
     state->stmt_for_pc = NULL;
 
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
-        free(state->syt[i].elements);
-        state->syt[i].elements = NULL;
+        free_syt_container(&state->syt[i]);
         free(state->syt[i].char_value);
         state->syt[i].char_value = NULL;
     }
@@ -1250,7 +1519,7 @@ void interp_cleanup(halmat_state_t *state) {
         if (state->vac[i].is_container) free(state->vac[i].container);
     }
     for (size_t i = 0; i < state->struct_field_count; i++) {
-        free(state->struct_fields[i].value.elements);
+        free_syt_container(&state->struct_fields[i].value);
         free(state->struct_fields[i].value.char_value);
     }
     free(state->struct_fields);
@@ -1259,25 +1528,102 @@ void interp_cleanup(halmat_state_t *state) {
     state->struct_field_capacity = 0;
 }
 
+/* Emits one already-formatted WRITE data field, honoring the standard
+ * num_blanks separator and the line_length wrap column (USA003087 Sec.
+ * 12.2: fields "separated from each other by the standard number of
+ * blanks, ... overflowing onto succeeding lines as required") -- shared
+ * by every field kind flush_write below produces, including each
+ * individual element of an expanded whole-VECTOR/MATRIX/ARRAY item.
+ * `*col` is the current 0-based output column; `*need_sep` is false only
+ * for the very first field of the whole WRITE statement, or right after
+ * a forced line break (a MATRIX row boundary, below) where alignment
+ * itself takes the place of a separator. This interpreter doesn't model
+ * TAB/COLUMN-adjusted starting positions (class-0/XXAR.md's I/O-control
+ * specifiers), so column 0 is the only "un-adjusted" wrapped-line start
+ * there is. */
+static void emit_write_field(halmat_state_t *state, FILE *out, const char *text, int *col, bool *need_sep) {
+    int width = (int)strlen(text);
+    int sep = *need_sep ? state->num_blanks : 0;
+    if (*need_sep && *col + sep + width > state->line_length) {
+        fputc('\n', out);
+        *col = 0;
+        sep = 0;
+    }
+    for (int b = 0; b < sep; b++) fputc(' ', out);
+    fputs(text, out);
+    *col += sep + width;
+    *need_sep = true;
+}
+
 static void flush_write(halmat_state_t *state, FILE *out) {
+    int col = 0;
+    bool need_sep = false;
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
-        if (i > 0) {
-            for (int b = 0; b < state->num_blanks; b++) fputc(' ', out);
-        }
-        if (state->io_pending.items[i].is_string) {
-            fputs(state->io_pending.items[i].string, out);
+        if (state->io_pending.items[i].is_container) {
+            /* Whole VECTOR/MATRIX/ARRAY WRITE argument (OP_XXAR above):
+             * expand every element into its own data field, per
+             * USA003087 Sec. 12.2's "DATA FORMATS". */
+            int rows = state->io_pending.items[i].container_rows;
+            int cols = state->io_pending.items[i].container_cols;
+            const halmat_scalar_t *elems = state->io_pending.items[i].container;
+            if (rows > 0) {
+                /* MATRIX: laid out row by row, each row written as if it
+                 * were its own n-vector. "The first element of the
+                 * second and subsequent rows begin a new line, vertically
+                 * aligned under the first element of the first row" --
+                 * an unconditional forced line break at each row
+                 * boundary (distinct from, and taking priority over, the
+                 * generic "only when it doesn't fit" wrap rule used
+                 * everywhere else), with the new line's starting column
+                 * fixed to wherever row 0's own first field began. */
+                int align_col = 0;
+                for (int r = 0; r < rows; r++) {
+                    if (r > 0) {
+                        fputc('\n', out);
+                        for (int p = 0; p < align_col; p++) fputc(' ', out);
+                        col = align_col;
+                        need_sep = false;
+                    }
+                    for (int c = 0; c < cols; c++) {
+                        char buf[32];
+                        halmat_scalar_format(elems[(size_t)r * cols + c], buf, sizeof(buf));
+                        emit_write_field(state, out, buf, &col, &need_sep);
+                        if (r == 0 && c == 0) align_col = col - (int)strlen(buf);
+                    }
+                }
+            } else {
+                /* VECTOR, or a plain ARRAY: a flat sequential run of
+                 * fields, wrapping generically like any other field. */
+                size_t count = state->io_pending.items[i].container_count;
+                bool is_int = state->io_pending.items[i].container_is_integer;
+                for (size_t k = 0; k < count; k++) {
+                    char buf[32];
+                    if (is_int) {
+                        /* INTEGER WRITE field: 11-char right-justified,
+                         * same convention as a plain INTEGER item below. */
+                        snprintf(buf, sizeof(buf), "%11d", halmat_scalar_to_integer(elems[k]));
+                    } else {
+                        halmat_scalar_format(elems[k], buf, sizeof(buf));
+                    }
+                    emit_write_field(state, out, buf, &col, &need_sep);
+                }
+            }
+        } else if (state->io_pending.items[i].is_string) {
+            emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep);
         } else if (state->io_pending.items[i].is_scalar) {
             /* Fixed-width scientific-notation field per class-2/STOC.md
              * (USA00309 Sec. 6.1.3). */
             char buf[32];
             halmat_scalar_format(state->io_pending.items[i].scalar, buf, sizeof(buf));
-            fputs(buf, out);
+            emit_write_field(state, out, buf, &col, &need_sep);
         } else {
             /* INTEGER WRITE field: 11-char right-justified, empirically
              * confirmed against a real HALSFC compile + yaHALMAT run
              * (see commit message / STATUS.md follow-up) -- not yet
              * cross-checked against USA00309's own text. */
-            fprintf(out, "%11d", state->io_pending.items[i].integer);
+            char buf[16];
+            snprintf(buf, sizeof(buf), "%11d", state->io_pending.items[i].integer);
+            emit_write_field(state, out, buf, &col, &need_sep);
         }
     }
     fputc('\n', out);
@@ -1319,13 +1665,7 @@ bool interp_prepare_external_call(halmat_state_t *state, halmat_state_t *target,
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
         uint16_t param_syt = entry_syt + 1 + i;
         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); return false; }
-        if (state->io_pending.items[i].is_scalar) {
-            target->syt[param_syt].type = SYT_TYPE_SCALAR;
-            target->syt[param_syt].scalar = state->io_pending.items[i].scalar;
-        } else {
-            target->syt[param_syt].type = SYT_TYPE_INTEGER;
-            target->syt[param_syt].value = state->io_pending.items[i].integer;
-        }
+        if (!bind_call_argument(state, target, param_syt, i)) return false;
     }
     target->pc = target->symbol_def_pos[entry_syt] + 1;
     target->halted = false;
@@ -1371,7 +1711,7 @@ bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *tar
 bool interp_is_external_call(const halmat_state_t *state, const halmat_instr_t *ins,
                               halmat_state_t **target_out, uint16_t *entry_syt_out, bool *is_function_out) {
     if (!ins || (ins->opcode != OP_FCAL && ins->opcode != OP_PCAL) || ins->operand_count != 1) return false;
-    uint16_t callee = ins->operands[0].data;
+    uint16_t callee = resolve_call_target(state, ins->operands[0].data);
     if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] != NO_TARGET) return false;
     if (!state->external_calls || !state->external_calls[callee].target_state) return false;
     if (target_out) *target_out = state->external_calls[callee].target_state;
@@ -2043,17 +2383,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break; /* join point; no-op */
 
             case OP_DSUB: {
-                /* Only the single-index "index" subscript kind is
-                 * implemented (alpha=5 array-dimension / alpha=1
-                 * component -- both single-value forms; see
-                 * class-0/DSUB.md's confirmed table). Asterisk/to-
-                 * partition/at-partition/CSZ/ASZ forms aren't handled.
-                 * Two-index (MATRIX) flattening uses the real declared
-                 * row-major shape when the symbol table confirms it
-                 * (ensure_container/symtab.h); otherwise (no symtab, or
-                 * more than 2 indices) falls back to a placeholder
-                 * stride -- unobserved by any fixture that doesn't also
-                 * have its COMMON*.out available. */
+                /* Only the single-index "index" subscript kind, and
+                 * (added this session) the asterisk ("*") partition kind,
+                 * are implemented (alpha=5/1 array-dimension/component
+                 * index rows; alpha=4/0 array-dimension/component
+                 * asterisk rows -- see class-0/DSUB.md's confirmed
+                 * table). To-partition/at-partition/CSZ/ASZ forms still
+                 * aren't handled. Two-index (MATRIX) flattening uses the
+                 * real declared row-major shape when the symbol table
+                 * confirms it (ensure_container/symtab.h); otherwise (no
+                 * symtab, or more than 2 indices) falls back to a
+                 * placeholder stride -- unobserved by any fixture that
+                 * doesn't also have its COMMON*.out available. */
                 if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
                 uint16_t base_syt = ins->operands[0].data;
@@ -2061,9 +2402,61 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 ensure_container(state, base_syt);
                 halmat_syt_entry_t *base = &state->syt[base_syt];
 
+                uint8_t num_indices = ins->operand_count - 1;
+
+                /* Asterisk ("$(...,*)") partition subscript: selects a
+                 * whole VECTOR (V$(*)), or a whole MATRIX row/column
+                 * (M$(i,*)/M$(*,j)) -- confirmed this session against
+                 * real compiled HALMAT (`WRITE(6) N$(1,*);` on a
+                 * MATRIX(2,2)): produces a VECTOR-shaped VAC container
+                 * result (this DSUB instruction's own operator-word TAG
+                 * is confirmed to be the HALMAT class of the *result*,
+                 * 4=VECTOR here), consumed the same way as any other
+                 * MATRIX/VECTOR-arithmetic VAC result (e.g. by a
+                 * following WRITE argument -- OP_XXAR's whole-container
+                 * handling below -- or MASN/VASN). Only "select one axis
+                 * entirely, index the other" is implemented; to-
+                 * partition/at-partition subscripts (2 operand words per
+                 * axis) still aren't. */
+                int ast_axis = -1;
+                for (uint8_t i = 0; i < num_indices; i++) {
+                    if (ins->operands[1 + i].qual == QUAL_AST) { ast_axis = (int)i; break; }
+                }
+                if (ast_axis >= 0) {
+                    halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
+                    size_t count;
+                    if (num_indices == 1) {
+                        /* V$(*): the whole vector, unchanged. */
+                        count = base->element_count;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                        memcpy(buf, base->elements, count * sizeof(halmat_scalar_t));
+                    } else if (num_indices == 2 && base->rows > 0) {
+                        resolved_value_t idx;
+                        uint8_t other = 1 - (uint8_t)ast_axis;
+                        if (!resolve_operand(state, &ins->operands[1 + other], &idx)) break;
+                        int32_t n = rv_to_integer(&idx) - 1;
+                        if (n < 0) n = 0;
+                        if (ast_axis == 1) {
+                            /* M$(i,*): row i, every column. */
+                            int r = n % base->rows;
+                            count = (size_t)base->cols;
+                            for (int c = 0; c < base->cols; c++) buf[c] = base->elements[(size_t)r * base->cols + c];
+                        } else {
+                            /* M$(*,j): every row, column j. */
+                            int c = n % base->cols;
+                            count = (size_t)base->rows;
+                            for (int r = 0; r < base->rows; r++) buf[r] = base->elements[(size_t)r * base->cols + c];
+                        }
+                    } else {
+                        fail(state, "DSUB: asterisk subscript with %u indices not yet implemented", num_indices);
+                        break;
+                    }
+                    if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
+                    break;
+                }
+
                 bool ok = true;
                 size_t offset = 0;
-                uint8_t num_indices = ins->operand_count - 1;
                 if (base->rows > 0 && num_indices == 2) {
                     resolved_value_t ridx, cidx;
                     if (!resolve_operand(state, &ins->operands[1], &ridx)) { ok = false; }
@@ -2407,10 +2800,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the same syt_is_array_shaped check ordinary assignment
                  * opcodes use, instead of silently corrupting the
                  * array's element storage with a scalar write. The
-                 * OFFSET-addressed form (QUAL_OFF, a `n#value` repeated-
-                 * INITIAL list, STRI.md's family) is handled the same
-                 * way, via write_destination's QUAL_OFF case. */
+                 * OFFSET-addressed form (QUAL_OFF) has two distinct
+                 * sub-cases, disambiguated below: the `n#value` uniform-
+                 * repeat form (STRI/SLRI/SINT/ELRI/ETRI, STRI.md's
+                 * family, no run loop needed here -- SLRI's own count
+                 * drives interp_step's arrayed-paragraph replay instead),
+                 * and the explicit-literal-list form (`VECTOR
+                 * INITIAL(10,11,12)`, bare STRI/SINT/ETRI, no SLRI at
+                 * all) confirmed this session: PASS1's ICQ_OUTPUT emits
+                 * one SINT per *coalesced run* of consecutive literal-
+                 * table entries feeding consecutive target elements, the
+                 * run length carried in the LIT operand's own tag1 byte
+                 * (same mechanism OP_TINT above already uses for
+                 * whole-structure INITIAL() lists) -- defaulting to 1
+                 * when absent/zero, which is always the case for the
+                 * `n#value` sub-case, so this run loop is a no-op there
+                 * and both sub-cases share one code path. Compiling `V
+                 * VECTOR INITIAL(10,11,12)` produces exactly one
+                 * STRI/SINT/ETRI group with tag1=3; compiling `VECTOR
+                 * INITIAL(1,-5,3)` (whose compile-time `-5` expression's
+                 * own "5" operand literal is never referenced) splits
+                 * into two SINTs, OFF=0/tag1=1 and OFF=1/tag1=2 -- i.e.
+                 * OFF's own DATA is the run's absolute/cumulative target
+                 * element offset, not implicitly relative to a persistent
+                 * "current literal" pointer. */
                 if (ins->operand_count != 2) { fail(state, "SINT: expected 2 operands"); break; }
+                if (ins->operands[0].qual == QUAL_OFF && ins->operands[1].qual == QUAL_LIT) {
+                    xint_offset_run(state, ins);
+                    break;
+                }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 {
                     halmat_scalar_t sv = rv_to_scalar(&a);
@@ -2421,11 +2839,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_CINT:
-                /* Direct symbol-table form only (class-8/CINT.md), same
-                 * shape as SINT/IINT. */
+                /* Direct symbol-table form (class-8/CINT.md), same shape
+                 * as SINT/IINT. The OFFSET-addressed form (CHARACTER
+                 * ARRAY INITIAL(v1,v2,...), no HAL-1971-vs-HAL/S
+                 * distinction from SINT's own case beyond the element
+                 * type) shares SINT's xint_offset_run helper -- see
+                 * OP_SINT's comment for the general mechanism. */
                 if (ins->operand_count != 2) { fail(state, "CINT: expected 2 operands"); break; }
+                if (ins->operands[0].qual == QUAL_OFF && ins->operands[1].qual == QUAL_LIT) {
+                    xint_offset_run(state, ins);
+                    break;
+                }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
-                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "CINT: OFFSET-addressed form not yet implemented"); break; }
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "CINT: unsupported destination qualifier"); break; }
                 if (a.kind != RV_STRING) { fail(state, "CINT: initializer is not CHARACTER"); break; }
                 {
                     halmat_syt_entry_t *e = &state->syt[ins->operands[0].data];
@@ -2456,7 +2882,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * one terminal-slot each, per TINT.md's own worked
                  * multi-terminal trace) aren't handled -- this only
                  * covers the plain scalar/integer-terminal case, no
-                 * fixture needs more yet. */
+                 * fixture needs more yet.
+                 *
+                 * "Copiness" (`Q-STRUCTURE(n)`, an array of structure
+                 * copies): confirmed this session that a coalesced run
+                 * can *also* span copies of the same terminal rather than
+                 * consecutive terminals of one copy -- e.g. `STRUCTURE Q:
+                 * 1 QI INTEGER; DECLARE Z Q-STRUCTURE(3)
+                 * INITIAL(1,2,3);` produces a *single* TINT with
+                 * OFFSET.DATA=0 (constant) and tag1=3, the same shape as
+                 * the single-copy multi-terminal case, but here `k` needs
+                 * to advance the *copy* index with the terminal held
+                 * fixed, not the reverse. Nothing in the HALMAT stream
+                 * itself distinguishes the two shapes; disambiguated here
+                 * via the target's own declared copy count
+                 * (halmat_symtab_entry_t.struct_copies, symtab.h) --
+                 * defaulting to the pre-existing terminal-advancing
+                 * behavior (struct_copies <= 1, or no symtab available)
+                 * to keep the already-tested single-copy multi-terminal
+                 * case unchanged. A run that coalesces *both* several
+                 * terminals *and* several copies in one instruction
+                 * (which would need advancing both axes at once) is not
+                 * handled -- not exercised by any fixture yet, and
+                 * TINT.md already flags multi-copy structures as
+                 * under-tested in general. */
                 if (ins->operand_count != 2) { fail(state, "TINT: expected 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_OFF) { fail(state, "TINT: expected an OFFSET first operand"); break; }
                 if (ins->operands[1].qual != QUAL_LIT) { fail(state, "TINT: expected a LIT second operand"); break; }
@@ -2468,6 +2917,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 uint16_t template_syt = (uint16_t)state->stri_target_template_syt;
                 int run_count = ins->operands[1].tag1 > 0 ? ins->operands[1].tag1 : 1;
                 int32_t copy_idx = current_copy_index(state);
+                int struct_copies = 0;
+                if (state->symtab) {
+                    const halmat_symtab_entry_t *zsym = halmat_symtab_find_by_index(state->symtab, base_syt);
+                    if (zsym) struct_copies = zsym->struct_copies;
+                }
+                bool spans_copies = struct_copies > 1;
                 bool ok = true;
                 for (int k = 0; ok && k < run_count; k++) {
                     halmat_operand_t lit_op = {0};
@@ -2475,7 +2930,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     lit_op.data = (uint16_t)(ins->operands[1].data + k);
                     resolved_value_t rv;
                     if (!resolve_operand(state, &lit_op, &rv)) { ok = false; break; }
-                    uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data + (uint32_t)k;
+                    uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data + (spans_copies ? 0 : (uint32_t)k);
+                    int32_t this_copy_idx = spans_copies ? (copy_idx + k) : copy_idx;
                     if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); ok = false; break; }
                     /* Litfile numeric entries carry no INTEGER-vs-SCALAR
                      * distinction of their own (resolve_operand's QUAL_LIT
@@ -2492,7 +2948,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             rv.integer = iv;
                         }
                     }
-                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, copy_idx);
+                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, this_copy_idx);
                     if (!write_syt_entry(state, field, &rv)) { ok = false; break; }
                 }
                 if (!ok) break;
@@ -2500,11 +2956,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_BINT:
-                /* Direct symbol-table form only (class-8/BINT.md), same
-                 * shape as SINT/IINT/CINT. */
+                /* Direct symbol-table form (class-8/BINT.md), same shape
+                 * as SINT/IINT/CINT. The OFFSET-addressed form (BIT
+                 * ARRAY INITIAL(v1,v2,...)) shares SINT's
+                 * xint_offset_run helper -- see OP_SINT's comment for
+                 * the general mechanism. */
                 if (ins->operand_count != 2) { fail(state, "BINT: expected 2 operands"); break; }
+                if (ins->operands[0].qual == QUAL_OFF && ins->operands[1].qual == QUAL_LIT) {
+                    xint_offset_run(state, ins);
+                    break;
+                }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
-                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "BINT: OFFSET-addressed form not yet implemented"); break; }
+                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "BINT: unsupported destination qualifier"); break; }
                 if (a.kind != RV_BITS) { fail(state, "BINT: initializer is not BIT"); break; }
                 state->syt[ins->operands[0].data].type = SYT_TYPE_BIT;
                 state->syt[ins->operands[0].data].bit_value = a.bits;
@@ -3450,6 +3913,71 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "PCAL: ASSIGN-form arguments are not yet implemented");
                     break;
                 }
+                if ((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) {
+                    /* A whole VECTOR/MATRIX reference (QUAL=SYT, confirmed
+                     * via a real HALSFC compile of `WRITE(6) V;`/
+                     * `WRITE(6) M;` -- class-0/XXAR.md's former "whether
+                     * an arrayed argument switches QUAL" question, now
+                     * resolved: it stays QUAL=SYT with TAG1=the ordinary
+                     * class number, exactly like an unarrayed variable,
+                     * NOT wrapped in an ADLP/DLPE per-element replay), or
+                     * a MATRIX row/column slice's VAC container result
+                     * (`WRITE(6) M$(1,*);`, this file's own OP_DSUB
+                     * asterisk-subscript handling above) is captured
+                     * whole here -- as a WRITE argument, flush_write
+                     * expands every element into its own WRITE data field
+                     * per USA003087 Sec. 12.2; as a same-unit PCAL/FCAL
+                     * argument (confirmed this session by a real HALSFC
+                     * compile of `CALL some_procedure(a_whole_matrix);` --
+                     * USA003087 Sec. 11.2/11.4-11.5's documented "MATRIX
+                     * argument"/"VECTOR argument" parameter-passing rules,
+                     * shape-conformance-checked, transmitted "as [an]
+                     * assignment... to its corresponding input parameter"
+                     * i.e. by value, not by reference), OP_PCAL/OP_FCAL's
+                     * own parameter-binding loop below copies it into the
+                     * callee's own SYT storage instead. Either way, this
+                     * bypasses resolve_operand's ordinary single-value
+                     * QUAL_SYT case below (which requires
+                     * state->arrayed_index >= 0 and fails loudly outside
+                     * any arrayed-paragraph replay -- exactly the
+                     * "outside an arrayed-paragraph replay" report this
+                     * session's bug reports described; this argument
+                     * genuinely isn't one).
+                     *
+                     * The `state->arrayed_index < 0` guard matters: unlike
+                     * VECTOR/MATRIX, a plain (or BIT/CHARACTER) `ARRAY`
+                     * whole-WRITE argument (`WRITE(6) C;`, confirmed via
+                     * test_arrinit_types.hal's real compiled HALMAT) *is*
+                     * wrapped in an ADLP/DLPE per-element replay around
+                     * this exact same QUAL=SYT XXAR shape -- that case
+                     * must keep going through the ordinary per-element
+                     * resolve_operand path below (arrayed_index >= 0
+                     * during the replay selects each element in turn),
+                     * which already handled it correctly before this
+                     * session; only the *unreplayed* whole-container
+                     * shape is new here. */
+                    bool whole_syt = ins->operands[0].qual == QUAL_SYT &&
+                                      syt_is_array_shaped(state, ins->operands[0].data);
+                    bool whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                      state->vac[ins->operands[0].data].is_container;
+                    if (whole_syt || whole_vac) {
+                        if (whole_syt && (ins->operands[0].tag1 == 1 || ins->operands[0].tag1 == 2)) {
+                            fail(state, "whole BIT/CHARACTER ARRAY WRITE/call arguments are not yet implemented");
+                            break;
+                        }
+                        halmat_scalar_t *elems; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
+                        state->io_pending.items[state->io_pending.item_count].is_container = true;
+                        state->io_pending.items[state->io_pending.item_count].container = elems;
+                        state->io_pending.items[state->io_pending.item_count].container_count = count;
+                        state->io_pending.items[state->io_pending.item_count].container_rows = rows;
+                        state->io_pending.items[state->io_pending.item_count].container_cols = cols;
+                        state->io_pending.items[state->io_pending.item_count].container_is_integer =
+                            whole_syt && ins->operands[0].tag1 == 6;
+                        state->io_pending.item_count++;
+                        break;
+                    }
+                }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 /* A bare numeric literal (QUAL_LIT) always resolves as
                  * RV_SCALAR (see resolve_operand's QUAL_LIT case -- the
@@ -3472,6 +4000,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     a.integer = halmat_scalar_to_integer(a.scalar);
                     a.kind = RV_INTEGER;
                 }
+                state->io_pending.items[state->io_pending.item_count].is_container = false; /* items[] slots
+                    * are reused across WRITE statements without zeroing -- a stale true from a
+                    * previous statement's whole-container item at this same slot must be cleared. */
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
@@ -3705,7 +4236,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operand_count != 1) { fail(state, "PCAL: expected 1 operand"); break; }
-                uint16_t proc = ins->operands[0].data;
+                uint16_t proc = resolve_call_target(state, ins->operands[0].data);
                 if (proc < HALMAT_SYT_MAX && state->symbol_def_pos[proc] == NO_TARGET &&
                     state->external_calls && state->external_calls[proc].target_state) {
                     /* Cross-unit call into a separately-compiled EXTERNAL
@@ -3720,16 +4251,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "call to undefined procedure (symbol %u)", proc);
                     break;
                 }
-                for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
-                    uint16_t param_syt = proc + 1 + i;
-                    if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); break; }
-                    if (state->io_pending.items[i].is_scalar) {
-                        state->syt[param_syt].type = SYT_TYPE_SCALAR;
-                        state->syt[param_syt].scalar = state->io_pending.items[i].scalar;
-                    } else {
-                        state->syt[param_syt].type = SYT_TYPE_INTEGER;
-                        state->syt[param_syt].value = state->io_pending.items[i].integer;
+                {
+                    bool bind_ok = true;
+                    for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
+                        uint16_t param_syt = proc + 1 + i;
+                        if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
+                        bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
+                    if (!bind_ok) break;
                 }
                 if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
@@ -3744,7 +4273,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operand_count != 1) { fail(state, "FCAL: expected 1 operand"); break; }
-                uint16_t callee = ins->operands[0].data;
+                uint16_t callee = resolve_call_target(state, ins->operands[0].data);
                 if (callee < HALMAT_SYT_MAX && state->symbol_def_pos[callee] == NO_TARGET &&
                     state->external_calls && state->external_calls[callee].target_state) {
                     /* Cross-unit call into a separately-compiled EXTERNAL
@@ -3765,16 +4294,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 /* Positional argument binding: SYT callee+1+i, per
                  * class-0/FCAL.md's confirmed convention. */
-                for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
-                    uint16_t param_syt = callee + 1 + i;
-                    if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); break; }
-                    if (state->io_pending.items[i].is_scalar) {
-                        state->syt[param_syt].type = SYT_TYPE_SCALAR;
-                        state->syt[param_syt].scalar = state->io_pending.items[i].scalar;
-                    } else {
-                        state->syt[param_syt].type = SYT_TYPE_INTEGER;
-                        state->syt[param_syt].value = state->io_pending.items[i].integer;
+                {
+                    bool bind_ok = true;
+                    for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
+                        uint16_t param_syt = callee + 1 + i;
+                        if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
+                        bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
+                    if (!bind_ok) break;
                 }
                 if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
@@ -3963,15 +4490,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             default:
                                 break;
                         }
+                    } else if (has_active_dependents(state, state->current_task)) {
+                        /* USA003087 Sec. 13.3: "If execution ends on a
+                         * CLOSE or RETURN statement, the process goes
+                         * into the inactive state directly only if it
+                         * has no dependents. Otherwise, it goes into a
+                         * waiting state until the dependents have in
+                         * their turn terminated." Deferred, not
+                         * abandoned -- sched_wake_dependents() (checked
+                         * every tick) finalizes this once true, and
+                         * symbol_active_task is deliberately left
+                         * pointing at this task until then: it's still
+                         * the sole active process for this task symbol
+                         * (just in a different minor state), so a new
+                         * SCHEDULE of the same symbol must still be
+                         * rejected in the meantime. */
+                        cur->task_state = TASK_WAITING_FOR_DEPENDENTS;
                     } else {
                         cur->task_state = TASK_TERMINATED;
                         if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
                     }
+                } else if (has_active_dependents(state, state->current_task)) {
+                    /* Primal process closing, but with a still-active
+                     * DEPENDENT task (user-reported bug, COUNTUP2.hal/
+                     * NESTED_TASK_SCHEDULE_TEST.hal) -- same Sec. 13.3
+                     * rule as the non-primal branch above applies
+                     * identically here (Sec. 13.3's own "programs and
+                     * tasks are treated together since their
+                     * representations at run time are in both cases real
+                     * time processes"): the primal doesn't halt yet, it
+                     * waits. Once sched_wake_dependents() finds no
+                     * dependents left, it sets state->halted itself --
+                     * that's still what finally ends the whole program,
+                     * per Sec. 13.1's overriding "all other processes are
+                     * always dependent on the primal process for their
+                     * existence" rule (which cuts off anything else still
+                     * running at that point, dependent or not). */
+                    state->tasks[state->current_task].task_state = TASK_WAITING_FOR_DEPENDENTS;
                 } else {
-                    /* Primal process closing: per USA003087 Sec. 13.3,
-                     * all other processes are always dependent on the
-                     * primal process for their existence, so this ends
-                     * the whole program. */
+                    /* Primal process closing with no active dependents --
+                     * per USA003087 Sec. 13.3, ends the whole program
+                     * immediately (Sec. 13.1's overriding dependency rule
+                     * means nothing else could legitimately outlive this
+                     * anyway). */
                     state->halted = true;
                     state->exit_code = 0;
                 }
@@ -4089,12 +4650,78 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
 
+                if (state->symbol_active_task[task_sym] == state->current_task &&
+                    !state->tasks[state->current_task].is_primal) {
+                    /* A task scheduling *itself*, from within its own body
+                     * (e.g. `NEST: TASK; ...; SCHEDULE NEST IN 1.0
+                     * PRIORITY(80); CLOSE NEST;` -- a user-reported bug).
+                     * USA003087 Sec. 13.4's "only one process derived from
+                     * a given task block may be active at any given time"
+                     * (p. 13-2/160) does NOT forbid this: per the same
+                     * page's own definition, a process is "active" iff it
+                     * is *in the process queue*; a task rescheduling
+                     * itself doesn't add a second entry to the queue, it
+                     * changes its own (sole, still-in-the-queue) entry's
+                     * minor state from EXECUTING to WAITING/READY -- the
+                     * exact same "rearm in place" transition CLOS's
+                     * existing REPEAT EVERY/AFTER/bare handling already
+                     * implements below for a *declaratively* cyclic task
+                     * (`SCHEDULE label REPEAT EVERY ...`). A self-SCHEDULE
+                     * from inside the body is the same mechanism spelled
+                     * imperatively instead of declaratively, so this
+                     * reuses that exact rearm path: rather than creating a
+                     * new task-table entry (which really would violate
+                     * Sec. 13.4, and is still correctly rejected below for
+                     * a *different* process targeting an already-active
+                     * task), just update *this* task's own rearm
+                     * parameters -- CLOS's unmodified rearm switch (a few
+                     * hundred lines down) picks them up when this task
+                     * naturally falls through to its own CLOSE right
+                     * after this statement, exactly as it already does for
+                     * an externally-declared REPEAT. */
+                    halmat_task_t *cur = &state->tasks[state->current_task];
+                    cur->priority = priority;
+                    cur->dependent = dependent;
+                    if (repeat_bits != 0) {
+                        /* An explicit REPEAT EVERY/AFTER clause on this
+                         * self-SCHEDULE call -- honor it exactly as
+                         * external scheduling would. */
+                        cur->repeat_kind = (halmat_schd_repeat_t)repeat_bits;
+                        cur->repeat_interval = repeat_interval;
+                    } else if (init_kind == 3) {
+                        fail(state, "SCHEDULE: self-rescheduling with ON <event> is not yet implemented");
+                        break;
+                    } else {
+                        /* No REPEAT clause -- synthesize the equivalent
+                         * one-shot rearm from the plain immediate/AT/IN
+                         * form, per SCHD_REPEAT_AFTER's own documented
+                         * "delay measured from this cycle's completion"
+                         * semantics (which is exactly what a self-
+                         * scheduled IN/AT, executed right before this same
+                         * cycle's own completion, means). */
+                        cur->repeat_kind = (init_kind == 0) ? SCHD_REPEAT_BARE : SCHD_REPEAT_AFTER;
+                        cur->repeat_interval = (init_kind == 1)
+                            ? (at_in_value > state->virtual_time ? at_in_value - state->virtual_time : 0)
+                            : at_in_value; /* init_kind==2 (IN): already a relative delay */
+                    }
+                    if (cur->repeat_kind == SCHD_REPEAT_EVERY) cur->every_phase_ref = state->virtual_time;
+                    if (stop_bits != 0) {
+                        cur->stop_kind = (halmat_schd_stop_t)stop_bits;
+                        cur->stop_deadline = stop_deadline;
+                        cur->stop_event_syt = stop_event_syt;
+                    } else {
+                        cur->stop_kind = SCHD_STOP_NONE;
+                    }
+                    break;
+                }
                 if (state->symbol_active_task[task_sym] != -1) {
-                    /* At most one active instance per task symbol for
-                     * now -- reentrant/concurrent re-scheduling of the
-                     * same task block isn't implemented; no fixture
-                     * exercises it. */
-                    fail(state, "task already active (concurrent re-scheduling of the same task not yet implemented)");
+                    /* A *different* process targeting a task that's still
+                     * active (not the self-reschedule case just above) --
+                     * genuinely still unsupported: there's no "rearm in
+                     * place" reading available here, since this calling
+                     * process isn't the one occupying that task's sole
+                     * queue entry. */
+                    fail(state, "task already active (concurrent re-scheduling of the same task by a different process not yet implemented)");
                     break;
                 }
                 if (state->task_count >= HALMAT_MAX_TASKS) { fail(state, "too many concurrent tasks"); break; }
@@ -4102,6 +4729,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 halmat_task_t *nt = &state->tasks[idx];
                 nt->in_use = true;
                 nt->is_primal = false;
+                nt->parent_task = state->current_task;
                 nt->symbol = task_sym;
                 nt->priority = priority;
                 nt->saved_pc = state->symbol_def_pos[task_sym] + 1;
@@ -4288,6 +4916,64 @@ static void exec_one(halmat_state_t *state, FILE *out) {
     }
 }
 
+/* Replays one arrayed paragraph (ADLP/IDLP's per-array-element loop, or
+ * an SLRI's own n#value repeated-initialize loop, both precomputed by
+ * precompute_arrayed_paragraphs) `count` times, recursing into any
+ * nested SLRI-driven paragraph found inside its own body instead of
+ * executing it as a plain no-op (exec_one's behavior for a bare SLRI/
+ * ELRI reached without going through this function) -- needed for
+ * USA003087 Sec. 16.2's nested repetition-factor form (`n#(v1, m#v2)`),
+ * confirmed this session against a real compile of `INITIAL(4#(1,5#0),
+ * 1)` (meant as a 5x5 identity matrix, previously miscomputed with no
+ * nesting support at all: a naive flat single-level replay treats a
+ * nested SLRI/ELRI as inert markers, so the inner `5#0` group's value
+ * was written once instead of five times, at the wrong offsets).
+ *
+ * `unit_size` is 0 for an ADLP/IDLP-driven entry (plain per-index
+ * arrayed_index, exactly the pre-existing single-level behavior) or the
+ * SLRI's own confirmed "elements per repeated unit" operand (its 2nd
+ * operand, class-8/SLRI.md) for an SLRI-driven entry. `outer_base` is
+ * the accumulated offset contribution from every already-active
+ * enclosing level (0 at the top-level call). Each level's own
+ * contribution to a QUAL_OFF write's absolute offset
+ * (write_destination, interp.c) is `idx*unit_size`, added to
+ * `outer_base` -- confirmed against the identity-matrix repro: the
+ * outer SLRI's unit_size=6 (its repeated group `(1,5#0)` spans 6
+ * elements) and the inner SLRI's unit_size=1 give absolute offset
+ * outer_idx*6 + inner_idx*1 + this_instruction's own OFF operand,
+ * exactly matching every element of the expected identity matrix. */
+static void run_arrayed_paragraph(halmat_state_t *state, FILE *out, size_t start, size_t end,
+                                   int count, int unit_size, int32_t outer_base) {
+    for (int idx = 0; idx < count && !state->halted; idx++) {
+        int32_t level_base = unit_size > 0 ? outer_base + idx * unit_size : idx;
+        state->arrayed_index = level_base;
+        state->pc = start;
+        while (state->pc < end && !state->halted) {
+            /* state->pc == start is excluded here: that position is
+             * necessarily *this call's own* registered entry (it's
+             * exactly how the caller found `start`/`end` in the first
+             * place), not a genuinely different nested paragraph --
+             * checking it unconditionally would immediately re-detect
+             * and recurse into this very call with identical arguments,
+             * infinitely (confirmed by a real stack-overflow segfault
+             * before this guard was added). Any *actually* nested SLRI
+             * always registers its own entry at a position strictly
+             * after `start` (one past its own instruction slot), so this
+             * exclusion never hides a real nested paragraph. */
+            size_t nested_end = state->pc == start ? NO_TARGET : state->arrayed_paragraph_end[state->pc];
+            if (nested_end != NO_TARGET && nested_end <= end) {
+                int nested_count = state->arrayed_paragraph_count[state->pc];
+                int nested_unit = state->arrayed_paragraph_unit_size[state->pc];
+                run_arrayed_paragraph(state, out, state->pc, nested_end, nested_count, nested_unit, level_base);
+                state->pc = nested_end;
+                state->arrayed_index = level_base; /* restore -- the nested call left its own iterations' values here */
+            } else {
+                exec_one(state, out);
+            }
+        }
+    }
+}
+
 /* Highest-priority TASK_READY task, or -1 if none are ready (everything
  * is TERMINATED or TASK_WAITING). */
 static int sched_pick_next(halmat_state_t *state) {
@@ -4321,6 +5007,52 @@ static void sched_wake_on_events(halmat_state_t *state) {
         if (t->in_use && t->task_state == TASK_WAITING_ON &&
             t->on_event_syt < HALMAT_SYT_MAX && state->syt[t->on_event_syt].bit_value != 0) {
             t->task_state = TASK_READY;
+        }
+    }
+}
+
+/* True if any task still has `parent_task_idx` as its parent_task and
+ * hasn't yet reached TASK_TERMINATED -- USA003087 Sec. 13.3's
+ * "dependents" check for a process reaching CLOSE/RETURN. Only a task
+ * scheduled with DEPENDENT (state.h's `dependent` field) counts as an
+ * actual dependent the parent must wait for; an independent child of
+ * this same parent doesn't block it (it's still bound by the separate,
+ * unconditional "all other processes are always dependent on the primal
+ * process for their existence" rule, Sec. 13.1, enforced instead by the
+ * primal's own eventual halt cutting off everything at once). */
+static bool has_active_dependents(const halmat_state_t *state, int parent_task_idx) {
+    for (int i = 0; i < state->task_count; i++) {
+        const halmat_task_t *t = &state->tasks[i];
+        if (t->in_use && t->dependent && t->parent_task == parent_task_idx && t->task_state != TASK_TERMINATED) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/* Re-checked every tick (no fixed deadline to fast-forward to, same
+ * reasoning as TASK_WAITING_ON/sched_wake_on_events -- a dependent's own
+ * termination could come from an arbitrary CANCEL/TERMINATE/stop
+ * condition elsewhere, not a fixed time this function could predict):
+ * finalizes any TASK_WAITING_FOR_DEPENDENTS task whose dependents have
+ * all now terminated (USA003087 Sec. 13.3 -- see state.h's
+ * TASK_WAITING_FOR_DEPENDENTS comment). The primal finalizing this way
+ * halts the whole interpreter (Sec. 13.1's overriding dependency-on-
+ * primal rule cuts off everything else at that point, the same way its
+ * CLOS handler already did when there were no dependents to begin with);
+ * an ordinary task instead just completes its own now-deferred
+ * termination. */
+static void sched_wake_dependents(halmat_state_t *state) {
+    for (int i = 0; i < state->task_count; i++) {
+        halmat_task_t *t = &state->tasks[i];
+        if (t->in_use && t->task_state == TASK_WAITING_FOR_DEPENDENTS && !has_active_dependents(state, i)) {
+            if (t->is_primal) {
+                state->halted = true;
+                state->exit_code = 0;
+            } else {
+                t->task_state = TASK_TERMINATED;
+                if (t->symbol < HALMAT_SYT_MAX) state->symbol_active_task[t->symbol] = -1;
+            }
         }
     }
 }
@@ -4369,6 +5101,8 @@ bool interp_step(halmat_state_t *state, FILE *out) {
 
     sched_wake_waiting(state);
     sched_wake_on_events(state);
+    sched_wake_dependents(state);
+    if (state->halted) return true; /* sched_wake_dependents just finalized the primal's own deferred CLOSE */
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
@@ -4382,21 +5116,18 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     }
 
     /* Arrayed-paragraph replay (state.h's arrayed_paragraph_end/_count):
-     * if this position starts a recognized ADLP-trailed paragraph,
-     * replay it element-count times (once per array index) instead of
+     * if this position starts a recognized ADLP-trailed paragraph or an
+     * SLRI-led one, replay it via run_arrayed_paragraph() (handles
+     * arbitrarily nested SLRI groups, see its own comment) instead of
      * executing it once -- see precompute_arrayed_paragraphs() and the
-     * resolve_operand/write_destination QUAL_SYT redirection it enables. */
+     * resolve_operand/write_destination QUAL_SYT/QUAL_OFF redirections
+     * it enables. */
     size_t paragraph_end = state->arrayed_paragraph_end[state->pc];
     if (paragraph_end != NO_TARGET) {
         size_t paragraph_start = state->pc;
         int count = state->arrayed_paragraph_count[paragraph_start];
-        for (int idx = 0; idx < count && !state->halted; idx++) {
-            state->arrayed_index = idx;
-            state->pc = paragraph_start;
-            while (state->pc < paragraph_end && !state->halted) {
-                exec_one(state, out);
-            }
-        }
+        int unit_size = state->arrayed_paragraph_unit_size[paragraph_start];
+        run_arrayed_paragraph(state, out, paragraph_start, paragraph_end, count, unit_size, 0);
         state->arrayed_index = -1;
         if (!state->halted) state->pc = paragraph_end;
     } else {
@@ -4783,6 +5514,8 @@ const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     if (state->halted) return NULL;
     sched_wake_waiting(state);
     sched_wake_on_events(state);
+    sched_wake_dependents(state);
+    if (state->halted) return NULL;
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return NULL;
@@ -4794,6 +5527,8 @@ int interp_peek_next_task(halmat_state_t *state) {
     if (state->halted) return -1;
     sched_wake_waiting(state);
     sched_wake_on_events(state);
+    sched_wake_dependents(state);
+    if (state->halted) return -1;
     sched_advance_to_next_wake(state);
     return sched_pick_next(state);
 }
@@ -4807,6 +5542,8 @@ long interp_current_stmt_for_next(halmat_state_t *state) {
     if (state->halted) return -1;
     sched_wake_waiting(state);
     sched_wake_on_events(state);
+    sched_wake_dependents(state);
+    if (state->halted) return -1;
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
     if (next == -1) return -1;

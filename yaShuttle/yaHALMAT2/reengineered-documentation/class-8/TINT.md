@@ -59,9 +59,12 @@ narrower rule in [USA003087] §19.6 not fully captured by this project's
 reading of it, or a subtlety of this specific test case, is not yet
 determined — flagged as a real open question below, not a minor
 decoding detail. Multiple-copy structures (`Q-STRUCTURE(n)` with a full
-or per-copy initial list, per [USA003087] §19.6) were not tested but are
-expected to repeat the same STRI/TINT.../ETRI group once per copy, by
-analogy with the array case.
+or per-copy initial list, per [USA003087] §19.6) were not tested this
+session. **Resolved in a later session — the guess above was wrong**:
+the compiler does *not* repeat the STRI/TINT/ETRI group per copy; it
+emits a *single* group with one coalesced `TINT` run spanning all
+copies, the same coalescing shape used within one copy for several
+terminals. See "Copiness" below.
 
 ## Operand-Word Format (confirmed empirically)
 
@@ -130,9 +133,53 @@ HALMAT: 804(0),0,0            <- ETRI (closes the group)
   `ICQ_CHECK_TYPE` just dispatches which opcode to use per item type.
 - The trailing `6` on the operator word itself is still not decoded at
   the bit level.
-- Multiple-copy structures (`Q-STRUCTURE(n)`), structures initialized via
-  a `CONSTANT` attribute rather than `INITIAL`, and nested/multi-level
-  structure templates were not tested.
+- ~~Multiple-copy structures (`Q-STRUCTURE(n)`)~~ **Resolved in a later
+  session, and the resolution matters for implementers**: a coalesced
+  `TINT` run can span *copies* of the same terminal, not just several
+  terminals of one copy — confirmed by compiling `STRUCTURE Q: 1 QI
+  INTEGER; DECLARE Z Q-STRUCTURE(3) INITIAL(1,2,3);`, which produces a
+  *single* `TINT` with `OFFSET.DATA=0` (constant) and the LIT operand's
+  `TAG1=3`, the exact same instruction shape the single-copy multi-
+  terminal case uses. **Nothing in the HALMAT stream itself
+  distinguishes the two** — a consumer must know the target's declared
+  copy count (from the symbol table; a yaHALMAT2 bug was found and fixed
+  this session because its interpreter didn't) to know whether a
+  coalesced run's `k`-th value advances the terminal offset (copy held
+  fixed, the original documented case) or the copy index (terminal held
+  fixed, this case) — see "Copiness" below. A run that coalesces *both*
+  several terminals *and* several copies together in one instruction was
+  not tested (unclear whether the compiler ever produces this, or
+  necessarily resets/breaks the run at each copy boundary the way it
+  does at terminal-form boundaries — see the "Non-coalescing case"
+  paragraph above).
+- Structures initialized via a `CONSTANT` attribute rather than
+  `INITIAL`, and nested/multi-level structure templates, were not
+  tested.
+
+### Copiness (`Q-STRUCTURE(n)`) — resolved
+
+For `DECLARE Z Q-STRUCTURE(3) INITIAL(1,2,3);` (one INTEGER terminal,
+three copies), `unHALMAT.py` shows:
+```
+HALMAT: 801(1),0,0            <- STRI: Z, symbol index 4
+HALMAT: 8E2(2),6,0            <- TINT
+          0(10),0,0              <- OFFSET, DATA=0
+          3(5),3,0               <- LIT, DATA=3 (literal #3 = 1.0), TAG1=3
+HALMAT: 804(0),0,0            <- ETRI
+```
+identical in shape to the single-copy, three-terminal coalescing example
+above — only the *target*'s own declared copy count tells them apart.
+That count is available from the COMMON\*.out symbol table: for a
+`MAJ_STRUC`-typed symbol (`SYM_TYPE`=0x0A=10, primary-sourced from
+`PASS1.PROCS/##DRIVER.xpl`'s `MAJ_STRUC LITERALLY '10'`), `SYM_ARRAY`
+holds the copy count **directly** (not an `EXTuARRAY` table index, as it
+is for ordinary numeric `ARRAY`s) — confirmed empirically:
+`Q-STRUCTURE(3)` → `SYM_ARRAY`=0003, `Q-STRUCTURE(5)` → `SYM_ARRAY`=0005,
+plain single-instance `Q-STRUCTURE` (no `(n)`) → `SYM_ARRAY`=0000. See
+`symtab.h`'s `struct_copies` field. yaHALMAT2's interpreter now checks
+this before deciding which axis a coalesced `TINT` run advances,
+defaulting to the original terminal-advancing behavior when
+`struct_copies <= 1` or no symbol table is available.
 
 **Non-coalescing case confirmed in a follow-up.** Attempting to break
 coalescing by making the two terminal values *reuse* an identical literal
@@ -234,8 +281,11 @@ necessary and correct.
 - `ARRAY`/`MATRIX`/`VECTOR` structure terminals (which the non-coalesced
   trace above shows occupying multiple `OFFSET` slots each, one per
   element) are not implemented — only plain scalar/integer terminals.
-- Multiple-copy structures (`Q-STRUCTURE(n)` with a whole-structure
-  `INITIAL(...)` list) were not tested in combination with `TINT`.
+- ~~Multiple-copy structures (`Q-STRUCTURE(n)` with a whole-structure
+  `INITIAL(...)` list) were not tested in combination with `TINT`.~~
+  **Resolved in a later session** — see "Copiness" above. Still open: a
+  single coalesced run spanning *both* multiple terminals *and* multiple
+  copies at once.
 - The trailing `6` on the `TINT` operator word itself is still not
   decoded at the bit level.
 

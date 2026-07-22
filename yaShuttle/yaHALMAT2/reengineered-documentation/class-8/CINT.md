@@ -42,8 +42,16 @@ HALMAT: 841(2),2,0            <- CINT
 
 ## Unresolved Questions
 
-- The OFFSET-addressed form (used inside a [STRI](STRI.md) repeat loop)
-  was not tested — only the direct symbol-table form.
+- ~~The OFFSET-addressed form (used inside a [STRI](STRI.md) repeat loop)
+  was not tested — only the direct symbol-table form.~~ **Resolved in a
+  later session**: confirmed by compiling `DECLARE C ARRAY(3)
+  CHARACTER(4) INITIAL('AB','CD','EF');` — a bare STRI/CINT/ETRI group
+  (no [SLRI](SLRI.md)), one CINT with OFFSET.DATA=0 and the LIT
+  operand's own `TAG1`=3 ([SINT](SINT.md)'s coalesced-run-length
+  mechanism, here for CHARACTER ARRAY elements). A real yaHALMAT2 gap
+  was found and fixed here: CHARACTER ARRAY element storage didn't
+  exist in the interpreter at all before this session (only numeric
+  ARRAY/MATRIX/VECTOR did) — see `state.h`'s `char_elements`.
 
 ## Source Analysis & Reliability
 

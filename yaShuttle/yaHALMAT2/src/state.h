@@ -136,8 +136,29 @@ typedef struct {
     halmat_syt_type_t type;
     int32_t value;          /* SYT_TYPE_INTEGER */
     halmat_scalar_t scalar; /* SYT_TYPE_SCALAR (plain, non-subscripted) */
-    halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX/VECTOR of SCALAR; lazily allocated */
+    halmat_scalar_t *elements; /* non-NULL => this symbol is an ARRAY/MATRIX/VECTOR of SCALAR
+                                 * or INTEGER (INTEGER ARRAY elements are boxed as scalar --
+                                 * confirmed empirically that the compiler itself uses SINT,
+                                 * not IINT, for an INTEGER ARRAY's element-list INITIAL()
+                                 * form, so HALMAT never distinguishes the two at this level
+                                 * either); lazily allocated. Mutually exclusive with
+                                 * bit_elements/char_elements below -- exactly one of the
+                                 * three is non-NULL once ensure_container() has run, per the
+                                 * symbol's own declared ARRAY element type (symtab.h's
+                                 * hal_class: 1=BIT, 2=CHARACTER, else numeric here);
+                                 * MATRIX/VECTOR are always numeric (HAL/S has no BIT/
+                                 * CHARACTER MATRIX/VECTOR). Without a symbol table (e.g.
+                                 * --py mode) the element type can't be determined, so this
+                                 * numeric form is always what gets allocated as a fallback. */
     size_t element_count;
+    uint32_t *bit_elements; /* non-NULL => this symbol is an ARRAY of BIT (see `elements`
+                              * above); parallel to `elements`, same element_count. Same
+                              * "no declared-width tracking" caveat as bit_value below. */
+    char **char_elements; /* non-NULL => this symbol is an ARRAY of CHARACTER (see
+                            * `elements` above); parallel to `elements`, same
+                            * element_count. Each entry is owned/malloc'd/NUL-terminated,
+                            * like char_value below -- never NULL once allocated (starts
+                            * as ""), so reads never need a NULL check. */
     int rows, cols; /* MATRIX(r,c): both set (row-major, r*c elements). VECTOR(n): cols=n, rows=0.
                       * Plain ARRAY(n): both 0 (element_count is authoritative, single dimension).
                       * Set by ensure_container() the first time the symbol's elements are
@@ -270,6 +291,21 @@ typedef enum {
                        * deadline exists to fast-forward to, unlike TASK_WAITING, since nothing says in
                        * advance *when* another task's SIGNAL will flip the bit; see interp.c's
                        * sched_wake_on_events(). */
+    TASK_WAITING_FOR_DEPENDENTS, /* reached CLOSE/RETURN with at least one still-active DEPENDENT
+                                  * child (parent_task below) -- USA003087 Sec. 13.3: "If execution
+                                  * ends on a CLOSE or RETURN statement, the process goes into the
+                                  * inactive state directly only if it has no dependents. Otherwise,
+                                  * it goes into a waiting state until the dependents have in their
+                                  * turn terminated." Re-checked every tick, no fixed deadline (like
+                                  * TASK_WAITING_ON), by interp.c's sched_wake_dependents(): once no
+                                  * dependent remains active, this task actually terminates (or, if
+                                  * it's the primal, halts the whole interpreter -- Sec. 13.1's
+                                  * overriding "all other processes are always dependent on the
+                                  * primal process for their existence" rule, which is what finally
+                                  * ends everything once the primal itself is done). Confirmed this
+                                  * session via a user-reported bug (COUNTUP2.hal/NESTED_TASK_
+                                  * SCHEDULE_TEST.hal): the primal previously halted unconditionally
+                                  * at its own CLOSE, ignoring any still-active DEPENDENT task. */
     TASK_TERMINATED,
 } halmat_task_state_t;
 
@@ -303,6 +339,13 @@ typedef struct {
     bool in_use;
     bool is_primal;
     uint16_t symbol;   /* SYT slot of the task's own name (arbitrary for primal) */
+    int parent_task;   /* tasks[] index of whichever process executed the SCHD that created this
+                         * task (-1 for the primal, which has none) -- used by has_active_dependents()
+                         * (interp.c) to find a given process's own DEPENDENT children when it
+                         * reaches CLOSE/RETURN (USA003087 Sec. 13.3). Set once at creation time in
+                         * OP_SCHD; unaffected by a later self-reschedule (interp.c's OP_SCHD
+                         * self-targeting branch), which reuses this same task-table slot rather
+                         * than creating a new one, so the parent relationship doesn't change. */
     int priority;
     halmat_task_state_t task_state;
     size_t saved_pc;
@@ -369,6 +412,13 @@ struct halmat_state {
     halmat_vac_slot_t vac[HALMAT_VAC_MAX];
 
     int num_blanks; /* WRITE-item separator, Plan.md Phase 3 default 5 */
+    int line_length; /* WRITE data-field wrap column, USA003087 Sec. 12.2
+                       * ("unpaged output: [80 columns/line]") -- default 80,
+                       * overridable via --line-length (main.c). A field that
+                       * wouldn't fit within this many columns starts a fresh
+                       * line instead (flush_write, interp.c); MATRIX rows
+                       * additionally force a new line unconditionally at
+                       * each row boundary regardless of this limit. */
 
     /* Logical device number -> open file, see HALMAT_DEVICE_MAX above.
      * NULL = unmapped (READ/WRITE against it fails loudly). Not owned by
@@ -418,6 +468,33 @@ struct halmat_state {
             char *string;   /* borrowed from the literal table; not owned */
             int32_t integer;
             halmat_scalar_t scalar;
+            /* WRITE only (kind == 2): a whole VECTOR/MATRIX/ARRAY argument
+             * (`WRITE(6) V;`, or a MATRIX row/column slice like
+             * `WRITE(6) M$(1,*);`) -- confirmed this session against real
+             * compiled HALMAT that such an argument is NOT wrapped in an
+             * ADLP/DLPE per-element replay (class-0/XXAR.md's former
+             * "Unresolved Questions" entry, now resolved), so it can't be
+             * captured as a single scalar/integer/string value the way
+             * every other item here is. `container` borrows either the
+             * SYT's own `elements` storage or a DSUB asterisk-subscript's
+             * VAC container result (interp.c's OP_DSUB) -- not owned,
+             * valid only until flush_write runs (no mutation of it can
+             * happen between this XXAR and the statement's own WRIT).
+             * `container_rows/cols` follow halmat_syt_entry_t's own
+             * convention (MATRIX: both set, row-major; VECTOR/ARRAY:
+             * rows=0) -- flush_write uses rows>0 to distinguish "lay out
+             * row by row, forcing a new aligned line per row" (MATRIX,
+             * USA003087 Sec. 12.2) from the flat sequential layout shared
+             * by VECTOR and ARRAY. `container_is_integer` selects the
+             * 11-column INTEGER field format over the default 14-column
+             * SCALAR one (from the whole-SYT case's own TAG1, class-0/
+             * XXAR.md; a MATRIX/VECTOR or slice-of-one is always SCALAR,
+             * HAL/S has no INTEGER MATRIX/VECTOR). */
+            bool is_container;
+            const halmat_scalar_t *container;
+            size_t container_count;
+            int container_rows, container_cols;
+            bool container_is_integer;
             /* READ/READALL only (kind != 2): the destination operand,
              * captured raw by XXAR rather than resolved to a value, plus
              * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
@@ -482,6 +559,17 @@ struct halmat_state {
      * (see interp.c's resolve_operand/write_destination). */
     size_t *arrayed_paragraph_end; /* one past the trailing DLPE */
     int *arrayed_paragraph_count;  /* element count to replay */
+    int *arrayed_paragraph_unit_size; /* 0 for an ADLP/IDLP-driven entry (plain per-index
+                                        * arrayed_index, unchanged); for an SLRI-driven entry
+                                        * (class-8/SLRI.md), the confirmed "elements per
+                                        * repeated unit" value (SLRI's own 2nd operand) --
+                                        * needed because a *nested* repetition-factor group
+                                        * (`n#(v1, m#v2)`, USA003087 Sec. 16.2) replays a
+                                        * multi-element body per outer iteration, not one
+                                        * element, so the outer loop's contribution to a
+                                        * QUAL_OFF write's absolute offset is
+                                        * idx*unit_size, not just idx -- see interp.c's
+                                        * run_arrayed_paragraph(). */
     /* Set (>=0) only while actively replaying a paragraph found above;
      * -1 otherwise. Consulted by resolve_operand/write_destination's
      * QUAL_SYT case to redirect an ARRAY/VECTOR/MATRIX-shaped operand to

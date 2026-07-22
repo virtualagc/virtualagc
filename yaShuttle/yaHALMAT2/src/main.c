@@ -60,6 +60,10 @@ static void usage(const char *prog) {
             "  --litfile F      literal file (default: auto-discovered alongside HALMAT_FILE)\n"
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
             "  --num-blanks N   blanks between WRITE items (default: 5, per USA003087 Sec. 12.2)\n"
+            "  --line-length N  WRITE data-field wrap column (default: 80, per USA003087\n"
+            "                   Sec. 12.2's \"unpaged output: [80 columns/line]\" -- a WRITE\n"
+            "                   data field that wouldn't fit within N columns starts a new\n"
+            "                   output line instead)\n"
             "  --time-scale FACTOR   wall-clock pacing divisor for SCHEDULE/WAIT real-time\n"
             "                   throttling (default: 1.0, genuine real time; FACTOR > 0).\n"
             "                   A larger FACTOR shrinks how long the interpreter actually\n"
@@ -203,7 +207,7 @@ static bool apply_raf_maps(halmat_state_t *state, const raf_map_t *maps, int num
 }
 
 static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, bool use_opt,
-                       const char *litfile_opt, const char *memory_opt, int num_blanks,
+                       const char *litfile_opt, const char *memory_opt, int num_blanks, int line_length,
                        const device_map_t *maps, int num_maps,
                        const raf_map_t *raf_maps, int num_raf_maps,
                        const debug_colors_t *colors, double time_scale, halmat_pacing_mode_t pacing_mode) {
@@ -308,6 +312,7 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
     interp_init(&state, &prog, have_literals ? &literals : NULL, num_blanks);
     interp_set_time_scale(&state, time_scale);
     interp_set_pacing_mode(&state, pacing_mode);
+    interp_set_line_length(&state, line_length);
     if (have_symtab) interp_set_symtab(&state, &symtab);
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
@@ -537,7 +542,7 @@ static bool find_primary_unit(unit_t *units, int num_units, const char *entry_di
  * units[]/ext_states internally on every exit path, same convention as
  * the pre-refactor run_linked(). `primary` must already be resolved
  * (e.g. via find_primary_unit()). */
-static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks,
+static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks, int line_length,
                              const device_map_t *maps, int num_maps, double time_scale,
                              halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors) {
     if (disasm) {
@@ -577,6 +582,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
             interp_init(ext_states[i], &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
             interp_set_time_scale(ext_states[i], time_scale);
             interp_set_pacing_mode(ext_states[i], pacing_mode);
+            interp_set_line_length(ext_states[i], line_length);
             if (units[i].have_symtab) interp_set_symtab(ext_states[i], &units[i].symtab);
 
             if (units[i].have_symtab && units[primary].have_symtab) {
@@ -640,6 +646,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         interp_init(&aux, &units[i].prog, units[i].have_literals ? &units[i].literals : NULL, num_blanks);
         interp_set_time_scale(&aux, time_scale);
         interp_set_pacing_mode(&aux, pacing_mode);
+        interp_set_line_length(&aux, line_length);
         if (units[i].have_symtab) interp_set_symtab(&aux, &units[i].symtab);
         interp_run(&aux, stdout);
 
@@ -714,6 +721,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
                 units[primary].have_literals ? &units[primary].literals : NULL, num_blanks);
     interp_set_time_scale(&primary_state, time_scale);
     interp_set_pacing_mode(&primary_state, pacing_mode);
+    interp_set_line_length(&primary_state, line_length);
     if (units[primary].have_symtab) interp_set_symtab(&primary_state, &units[primary].symtab);
     if (ext_map_count > 0) interp_set_external_units(&primary_state, ext_map, ext_map_count);
 
@@ -791,8 +799,9 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
  * resolves the primary PROGRAM unit, and hands off to run_linked_units()
  * for the actual wiring + run. */
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
-                       bool disasm, int num_blanks, const device_map_t *maps, int num_maps, double time_scale,
-                       halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors) {
+                       bool disasm, int num_blanks, int line_length, const device_map_t *maps, int num_maps,
+                       double time_scale, halmat_pacing_mode_t pacing_mode, bool debug_mode,
+                       const debug_colors_t *colors) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
         return 1;
@@ -816,8 +825,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         return 1;
     }
 
-    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, maps, num_maps, time_scale, pacing_mode,
-                             debug_mode, colors);
+    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, line_length, maps, num_maps, time_scale,
+                             pacing_mode, debug_mode, colors);
 }
 
 /* Builds each unit_t from a linked-archive container's already-in-memory
@@ -826,7 +835,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
  * load_from_buffer), then hands off to run_linked_units() -- same wiring
  * logic as an @list run, just sourced from a single container file
  * instead of a directory tree. */
-static int run_linked_container(halmat_container_t *c, int num_blanks, const device_map_t *maps,
+static int run_linked_container(halmat_container_t *c, int num_blanks, int line_length, const device_map_t *maps,
                                  int num_maps, bool disasm, double time_scale, halmat_pacing_mode_t pacing_mode,
                                  bool debug_mode, const debug_colors_t *colors) {
     if (c->num_units > MAX_UNITS) {
@@ -871,8 +880,8 @@ static int run_linked_container(halmat_container_t *c, int num_blanks, const dev
         }
     }
 
-    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, maps, num_maps, time_scale,
-                             pacing_mode, debug_mode, colors);
+    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, line_length, maps, num_maps,
+                             time_scale, pacing_mode, debug_mode, colors);
 }
 
 /* Builds a --link-only container from @list: loads every unit the
@@ -1035,6 +1044,7 @@ int main(int argc, char **argv) {
     bool use_opt = false;
     bool use_py = false;
     int num_blanks = 5;
+    int line_length = 80;
     double time_scale = 1.0;
     halmat_pacing_mode_t pacing_mode = HALMAT_PACING_BURST;
     device_map_t maps[MAX_DEVICE_MAPS];
@@ -1059,6 +1069,8 @@ int main(int argc, char **argv) {
             memory_opt = argv[++i];
         } else if (strcmp(argv[i], "--num-blanks") == 0 && i + 1 < argc) {
             num_blanks = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--line-length") == 0 && i + 1 < argc) {
+            line_length = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--time-scale") == 0 && i + 1 < argc) {
             char *endptr = NULL;
             time_scale = strtod(argv[++i], &endptr);
@@ -1212,8 +1224,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: %s\n", argv[0], cerrbuf);
             return 1;
         }
-        int rc = run_linked_container(&c, num_blanks, maps, num_maps, disasm, time_scale, pacing_mode, debug_mode,
-                                       &colors);
+        int rc = run_linked_container(&c, num_blanks, line_length, maps, num_maps, disasm, time_scale, pacing_mode,
+                                       debug_mode, &colors);
         halmat_container_free(&c);
         return rc;
     }
@@ -1231,9 +1243,10 @@ int main(int argc, char **argv) {
         }
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
-        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, maps, num_maps, time_scale,
-                           pacing_mode, debug_mode, &colors);
+        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, line_length, maps, num_maps,
+                           time_scale, pacing_mode, debug_mode, &colors);
     }
 
-    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode);
+    return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, line_length,
+                       maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode);
 }

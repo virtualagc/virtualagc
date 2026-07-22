@@ -128,11 +128,58 @@ Unlike every scalar-typed case above, a structure argument's operand is
 no HALMAT class of their own — their class-0 operations are
 [TASN](TASN.md)/[TEQU](TEQU.md)/[TNEQ](TNEQ.md)).
 
+**Whole VECTOR/MATRIX/ARRAY argument** (`WRITE(6) V;`/`WRITE(6) M;`,
+`V` a `VECTOR(3)`, `M` a `MATRIX(2,2)`) — resolved this session,
+answering the "arrayed argument" question below: `QUAL` stays `1`=`SYT`
+and `TAG1` stays the ordinary class number (`4`=`VECTOR`, `3`=`MATRIX`),
+exactly like an unarrayed scalar argument. Confirmed by compiling
+`WRITE(6) X;` (`X` a `VECTOR(3)`) and `WRITE(6) N;` (`N` a `MATRIX(2,2)`)
+with `HALSFC --parms="LISTING2,LSTALL"`:
+
+```
+HALMAT: 025(1),0,0        <- XXST: op 2=WRITE
+HALMAT: 027(1),0,0        <- XXAR: X
+          2(1),4,0           <- op: DATA=2 (symbol X), QUAL=1=SYT, TAG1=4=VECTOR
+HALMAT: 021(1),0,0        <- WRIT: op device=6
+HALMAT: 026(0),0,0        <- XXND
+```
+
+Critically, **this is not wrapped in an `ADLP`/`DLPE` per-element
+replay** the way a whole plain (or `BIT`/`CHARACTER`) `ARRAY` WRITE
+argument is (confirmed separately, compiling `WRITE(6) C;` for a
+`CHARACTER ARRAY C` — see [ADLP](ADLP.md)/[DLPE](DLPE.md)): a
+`VECTOR`/`MATRIX` argument's single `XXAR` entry stands alone, with the
+whole element list expected to be written out by whatever consumes it
+(yaHALMAT2's `OP_XXAR`/`flush_write`, per [USA00309]/USA003087 Sec.
+12.2's data-field layout rules) — there is no per-element replay
+mechanism to lean on the way `ARRAY` gets one. A `MATRIX` row/column
+partition select (`M$(1,*)`/`M$(*,2)`) instead arrives as a
+`QUAL`=3=`VAC` operand referencing a prior [DSUB](DSUB.md) asterisk-
+subscript result, not a direct `SYT` reference — see DSUB.md's own
+confirmation of that shape.
+
+**The identical shape is used for a `PCAL`/`FCAL` procedure/function-call
+argument, not just `WRITE`** — confirmed this session by a second user
+report (`CALL some_procedure(a_whole_matrix);` failing with the same
+"outside an arrayed-paragraph replay" message): `QUAL`=1=`SYT`,
+`TAG1`=the class number, no replay, exactly as above. yaHALMAT2 now
+copies such an argument's elements into the callee's own parameter
+storage by value (USA003087 Sec. 11.4's "assignment... to its
+corresponding input parameter" transmission model, shape-conformance-
+checked per Sec. 11.2/11.4's "rows and columns... must be the same"
+rule) rather than expanding it into data fields — see
+[PCAL](PCAL.md)/[FCAL](FCAL.md) for the call-side details.
+
 ## Unresolved Questions
 
-- Whether an *arrayed* argument of any type (not just a structure) also
-  switches `QUAL` away from `SYT`/uses extra operand words is
-  unconfirmed — only unarrayed variables of each type were tested.
+- ~~Whether an *arrayed* argument of any type (not just a structure)
+  also switches `QUAL` away from `SYT`/uses extra operand words is
+  unconfirmed — only unarrayed variables of each type were tested.~~
+  **Resolved this session** for `VECTOR`/`MATRIX`/`ARRAY` — see the
+  "Whole VECTOR/MATRIX/ARRAY argument" note above. Still unconfirmed
+  for an arrayed *structure* argument specifically (e.g. a
+  `DECLARE T(3) ...` "copiness" structure passed whole to `READ`/
+  `WRITE`) — not tested either this session or previously.
 - ~~HAL 1971's `FASN`~~ ("file assignment", [MSC-01847] §2.12, listed
   alongside `FILE`) **resolved this session**: it has no HAL/S
   counterpart anywhere, and now there's a documented reason why.
