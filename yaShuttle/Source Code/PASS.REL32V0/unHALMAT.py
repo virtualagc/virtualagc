@@ -1,29 +1,55 @@
 #!/usr/bin/env python3
 '''
 License:    This program is declared by its author, Ron Burkey, to be
-            in the Public Domain in the U.S., and can be used or 
+            in the Public Domain in the U.S., and can be used or
             modified in any way desired.
 Filename:   unHALMAT.py
 Purpose:    To parse a binary HALMAT file output by HAL_S_FC.py.
 History:    2023-11-13 RSB  Began.
             2026-04-10 RSB  Some cleanups.
+            2026-07-22 RSB  Fixed a misleading aspect of how a LIT
+                             operand's run of coalesced initial values
+                             was reported (see dumbPrintOperands below):
+                             previously only the *first* literal of a
+                             run was shown, with no indication that the
+                             operand's own TAG1 field (visible in the
+                             raw byte dump, but never interpreted) means
+                             "this one instruction actually represents
+                             TAG1 *consecutive* literals, not one" for
+                             the class-8 xINT family's OFFSET-addressed
+                             form -- the compiler's ICQ_OUTPUT coalescing
+                             of a run of initial values into a single
+                             instruction (see yaHALMAT2's reengineered-
+                             documentation/class-8/SINT.md and TINT.md
+                             for the full mechanism, empirically
+                             confirmed against real compiled HALMAT).
+                             Reading the old report's single truncated
+                             literal as "one instruction, one value" is
+                             a natural but incorrect inference, and that
+                             misreading contributed to a real yaHALMAT2
+                             interpreter bug: it silently dropped every
+                             literal after the first in such a run (see
+                             source-documentation/BAD_INITIAL.md in the
+                             yaHALMAT2 project for the bug report, now
+                             fixed). Also added an annotation for OFFSET
+                             operands, which were previously unannotated
+                             entirely. (Fixes actually made by Claude
+                             Sonnet 5.)
 
-It is unclear to the extent that the goal of this program can be 
+It is unclear to the extent that the goal of this program can be
 achieved.  Only 3 sources of documentation about the inner structure of
 HALMAT are known at this writing:
     REF1: "HALMAT - An Intermediate Language of the First HAL Compiler",
         (1971).  Nominally complete, but is preliminary and contains
         obsoleted ("wrong") data.
     REF2: "HAL/S-360 Compiler System Specification" (1977).  Nominally
-        correct and up-to-date, but less than 20% complete due to 
+        correct and up-to-date, but less than 20% complete due to
         retaining only changed page vs the previous revision.
     REF3: HAL/S-FC compiler source code.  Generates and parses HALMAT
         code, but almost completely without any semantics.
 In other words, there is no known surviving satisfactory documentation
 of HALMAT.  This parsing program will be taken as far as I can feasibly
-take it under the circumstances. 
-
-However, see Zane Hambly's attempt (Halmat.pdf) to fill in the gaps.
+take it under the circumstances.
 '''
 
 import sys
@@ -33,14 +59,14 @@ from unLitfile import getLiteralsFromFile
 helpMsg = '''
 Usage:
      unHALMAT.py [OPTIONS] HALMAT_FILE
-     
+
 The available OPTIONs are:
     --help          Displays this message.
-    --listing2=F    F is the name of a listing file as produced by the HAL/S 
+    --listing2=F    F is the name of a listing file as produced by the HAL/S
                     compiler (HALSFC) when the HALMAT file was
-                    generated, and if present, is used to display HAL/S source 
-                    code corresponding to HALMAT SMRK instructions.  It is 
-                    acceptable for F to be either the PASS 1 report or the 
+                    generated, and if present, is used to display HAL/S source
+                    code corresponding to HALMAT SMRK instructions.  It is
+                    acceptable for F to be either the PASS 1 report or the
                     LISTING2 report.
     --litfile=F     Specify a literal file for displaying values of literals.
                     Requires --memory (see below).
@@ -49,14 +75,14 @@ The available OPTIONs are:
                     for the unLitfile.py program.
     --common=F      Sepecify a COMMON-memory file, in order to print info about
                     symbols in the symbol table.
-    --colorize      Colorize all supplemental information not derived directly 
+    --colorize      Colorize all supplemental information not derived directly
                     from the HALMAT file being analyzed.  (I.e., all information
                     taken from --listing2, --litfile, --memory, or --common.)
-                    
-Note that if HALMAT_FILE is one of "halmat.bin", "optmat.bin", or "FILE1.bin", 
+
+Note that if HALMAT_FILE is one of "halmat.bin", "optmat.bin", or "FILE1.bin",
 then defaults appropriate for the file-naming conventions of the HAL/S compiler
-(HALSFC or HAL_S_FC.py) will be supplied for any missing --listing2, --litfile, 
---memory, or --common options.  If HALMAT_FILE is none of these, then there are 
+(HALSFC or HAL_S_FC.py) will be supplied for any missing --listing2, --litfile,
+--memory, or --common options.  If HALMAT_FILE is none of these, then there are
 no supplied defaults.
 '''
 
@@ -186,6 +212,25 @@ literals = []
 if litfile != None and memory != None:
     literals = getLiteralsFromFile(litfile, memory)
 
+# Formats a single literal-table entry for display, by index.  Factored
+# out of dumbPrintOperands() so it can be called once per literal in a
+# multi-literal LIT-operand run (see dumbPrintOperands' LIT case below),
+# not just for a single literal.
+def formatLiteral(index):
+    if index >= len(literals):
+        return ("?", "(literal index %d out of range)" % index)
+    literal = literals[index]
+    type = literal["type"]
+    value = literal["value"]
+    if type == 0:
+        return ("CHARACTER", "'" + value + "'")
+    elif type == 1:
+        return ("FIXED", value)
+    elif type == 2:
+        return ("BIT", "%08X" % value)
+    else:
+        return (f"{type}", "%08X,%08X" % (0xFFFFFFFF&(value>>32)|(0xFFFFFFFF&value)))
+
 if False:
     qMnemonicsA = ["  0", "SYT", "GLI", "VAC", "XPT", "LIT", "IMD",
                   "AST", "CSZ", "ASZ", "OFF", " 11", " 12", " 13", " 14", " 15"]
@@ -194,46 +239,46 @@ if False:
 else:
     qMnemonics = ["  0", "SYT", "INL", "VAC", "XPT", "LIT", "IMD",
                   "AST", "CSZ", "ASZ", "OFF", " 11", " 12", " 13", " 14", " 15"]
-# REF2 has a table of the following, beginning on p. A-103, but it's 
+# REF2 has a table of the following, beginning on p. A-103, but it's
 # truncated due to page omissions.  PASS1.PROCS/##DRIVER has a bigger
 # list, perhaps complete.
 operatorMnemonics = {
-    0x00: "NOP", 
-    0x01: "EXTN", 
-    0x02: "XREC", 
-    0x03: "IMRK", 
-    0x04: "SMRK", 
-    0x05: "PXRC", 
-    0x07: "IFHD", 
-    0x08: "LBL", 
-    0x09: "BRA", 
-    0x0A: "FBRA", 
-    0x0B: "DCAS", 
-    0x0C: "ECAS", 
-    0x0D: "CLBL", 
-    0x0E: "DTST", 
+    0x00: "NOP",
+    0x01: "EXTN",
+    0x02: "XREC",
+    0x03: "IMRK",
+    0x04: "SMRK",
+    0x05: "PXRC",
+    0x07: "IFHD",
+    0x08: "LBL",
+    0x09: "BRA",
+    0x0A: "FBRA",
+    0x0B: "DCAS",
+    0x0C: "ECAS",
+    0x0D: "CLBL",
+    0x0E: "DTST",
     0x0F: "ETST",
-    0x10: "DFOR", 
-    0x11: "EFOR", 
-    0x12: "CFOR", 
-    0x13: "DSMP", 
-    0x14: "ESMP", 
-    0x15: "AFOR", 
-    0x16: "CTST", 
+    0x10: "DFOR",
+    0x11: "EFOR",
+    0x12: "CFOR",
+    0x13: "DSMP",
+    0x14: "ESMP",
+    0x15: "AFOR",
+    0x16: "CTST",
     0x17: "ADLP",
-    0x18: "DLPE", 
-    0x19: "DSUB", 
-    0x1A: "IDLP", 
-    0x1B: "TSUB", 
-    0x1D: "PCAL", 
-    0x1E: "FCAL", 
+    0x18: "DLPE",
+    0x19: "DSUB",
+    0x1A: "IDLP",
+    0x1B: "TSUB",
+    0x1D: "PCAL",
+    0x1E: "FCAL",
     0x1F: "READ",
-    0x20: "RDAL", 
+    0x20: "RDAL",
     0x21: "WRIT",
     0x22: "FILE",
     0x25: "XXST",
     0x26: "XXND",
-    0x27: "XXAR", 
+    0x27: "XXAR",
     0x2A: "TDEF",
     0x2B: "MDEF",
     0x2C: "FDEF",
@@ -436,7 +481,7 @@ operatorDescriptions = {
     "ERSE": "SEND ERROR statement",
     "MSHP": "MATRIX shaping function",
     "VSHP": "VECTOR shaping function",
-    "SSHP": "SCALAR shaping function", 
+    "SSHP": "SCALAR shaping function",
     "ISHP": "INTEGER shaping function",
     "SFST": "Start of subscript range",
     "SFND": "End of subscript range",
@@ -564,12 +609,12 @@ operatorDescriptions = {
 
 bfncTypes = ["(unused)", "ABS", "COS", "DET", "DIV", "EXP", "LOG", "MAX",
              "MIN", "MOD", "ODD", "SHL", "SHR", "SIN", "SUM", "TAN", "XOR",
-             "COSH", "DATE", "PRIO", "PROD", "SIGN", "SINH", "SIZE", "SQRT", 
-             "TANH", "TRIM", "UNIT", "ABVAL", "FLOOR", "INDEX", "LJUST", 
-             "RJUST", "ROUND", "TRACE", "ARCCOS", "ARCSIN", "ARCTAN", "ERRGRP", 
-             "ERRNUM", "LENGTH", "MIDVAL", "RANDOM", "SIGNUM", "ARCCOSH", 
-             "ARCSINH", "ARCTANH", "ARCTAN2", "CEILING", "INVERSE", "NEXTIME", 
-             "RANDOMG", "RUNTIME", "TRUNCATE", "CLOCKTIME", "REMAINDER", 
+             "COSH", "DATE", "PRIO", "PROD", "SIGN", "SINH", "SIZE", "SQRT",
+             "TANH", "TRIM", "UNIT", "ABVAL", "FLOOR", "INDEX", "LJUST",
+             "RJUST", "ROUND", "TRACE", "ARCCOS", "ARCSIN", "ARCTAN", "ERRGRP",
+             "ERRNUM", "LENGTH", "MIDVAL", "RANDOM", "SIGNUM", "ARCCOSH",
+             "ARCSINH", "ARCTANH", "ARCTAN2", "CEILING", "INVERSE", "NEXTIME",
+             "RANDOMG", "RUNTIME", "TRUNCATE", "CLOCKTIME", "REMAINDER",
              "TRANSPOSE"]
 
 dataTypes = {
@@ -618,12 +663,12 @@ symbolFlags = {
 
 # According to REF1, the HALMAT file is partitioned into 7200-byte PAGEs.
 # This, unfortunately, is almost the last information in REF1 which is
-# useful; in fact, REF2 refers to these pages as RECORDs instead.  From 
-# REF2, it further appears that each RECORD contains up to 1800 
+# useful; in fact, REF2 refers to these pages as RECORDs instead.  From
+# REF2, it further appears that each RECORD contains up to 1800
 # PARAGRAPHs.  Each PARAGRAPH consists of some number of OPERATOR and
 # OPERAND WORDS (each 32-bits in size).  PARAGRAPHs therefore have sizes
-# that are multiples of 4 bytes, but since 7200 bytes will not 
-# necessarily hold an integral number of PARAGRAPHs, there may be 
+# that are multiples of 4 bytes, but since 7200 bytes will not
+# necessarily hold an integral number of PARAGRAPHs, there may be
 # some unused multiple of 4 bytes at the end of a RECORD.  These unused
 # words, in my observation, are all 00.
 if fileLength % 7200 != 0:
@@ -631,7 +676,28 @@ if fileLength % 7200 != 0:
     sys.exit(1)
 numRecords = fileLength // 7200
 
+# The class-8 static-initialization opcodes (the "xINT family": SINT/
+# BINT/CINT/IINT/TINT/NINT -- see yaHALMAT2's reengineered-documentation/
+# class-8/SINT.md and TINT.md, and its own source code's OP_TINT comment
+# citing PASS1.PROCS/ICQCHECK.xpl's ICQ_CHECK_TYPE dispatch, which is what
+# ties this whole family together as one mechanism). IMPORTANT: TAG1 is
+# *not* uniformly a run-length across every opcode that has a LIT operand
+# -- e.g. WRIT/XXAR's own LIT operand uses TAG1 for a completely different
+# purpose (a HAL/S type-class tag, confirmed against yaHALMAT2's own
+# interp.c: `ins->operands[0].tag1 == 6` there means INTEGER, nothing to
+# do with a run length). Applying the run-length reading everywhere would
+# just trade one misleading report for a different one. The run-length
+# interpretation below is therefore gated on both (a) the parent opcode
+# being one of these, *and* (b) this instruction's own first operand
+# being OFFSET-qualified -- exactly the shape confirmed (empirically,
+# against real compiled HALMAT) to carry it; every other LIT operand,
+# including this same family's own direct-symbol-table form, is reported
+# exactly as before.
+xIntFamily = ("SINT", "BINT", "CINT", "IINT", "TINT", "NINT")
+
 def dumbPrintOperands(operands, operandValues, halmatNumber, parentMnemonic):
+    isOffsetAddressedInitRun = (parentMnemonic in xIntFamily and len(operands) > 0
+                                 and qMnemonics[operands[0][2]] == "OFF")
     for i in range(len(operands)):
         operand = operands[i]
         operandValue = operandValues[i]
@@ -653,22 +719,35 @@ def dumbPrintOperands(operands, operandValues, halmatNumber, parentMnemonic):
                 print(f"  (Matching XREC is at HALMAT #{operand[0]})", end="")
             elif parentMnemonic == "SMRK":
                 print(f"  (HAL/S statement #{operand[0]})", end="")
-        elif operandMnemonic == "LIT" and operand[0] < len(literals):
-            literal = literals[operand[0]]
-            type = literal["type"]
-            value = literal["value"]
-            if type == 0:
-                typeName = "CHARACTER"
-                value = "'" + value + "'"
-            elif type == 1:
-                typeName = "FIXED"
-            elif type == 2:
-                typeName = "BIT"
-                value = "%08X" % value
+        elif operandMnemonic == "LIT" and operand[0] < len(literals) and isOffsetAddressedInitRun:
+            # operand[1] is the operand word's TAG1 field, here confirmed
+            # (see isOffsetAddressedInitRun above) to be a *run length*:
+            # this one instruction represents TAG1 *consecutive*
+            # literal-table entries starting at operand[0], not just
+            # operand[0] alone -- the compiler's ICQ_OUTPUT coalescing of
+            # a run of initial values into a single instruction. The run
+            # length is always stated explicitly below (never silently
+            # omitted, even when it's 1), and every literal in a
+            # multi-literal run is listed, not just the first -- see this
+            # file's header comment for why that distinction matters.
+            runLength = operand[1] if operand[1] > 0 else 1
+            if runLength == 1:
+                typeName, valueStr = formatLiteral(operand[0])
+                print(f"  {colorize}(Literal #{operand[0]}, run-length 1: Type {typeName}, {valueStr}){uncolorize}", end="")
             else:
-                typeName = f"{type}"
-                value = "%08X,%08X" % (0xFFFFFFFF&(value>>32)|(0xFFFFFFFF&value))
-            print(f"  {colorize}(Literal #{operand[0]}: Type {typeName}, {value}){uncolorize}", end="")
+                print(f"  {colorize}(Literals #{operand[0]}-#{operand[0]+runLength-1}, "
+                      f"run-length {runLength} -- TAG1={operand[1]} CONSECUTIVE LITERALS "
+                      f"CONSUMED BY THIS ONE INSTRUCTION:{uncolorize}")
+                for k in range(runLength):
+                    typeName, valueStr = formatLiteral(operand[0] + k)
+                    print(f"  {colorize}      #{operand[0]+k}: Type {typeName}, {valueStr}{uncolorize}")
+                print(f"  {colorize}  ){uncolorize}", end="")
+        elif operandMnemonic == "LIT" and operand[0] < len(literals):
+            # Not the confirmed run-length shape (see above) -- reported
+            # as a single literal, no run-length claim made one way or
+            # the other.
+            typeName, valueStr = formatLiteral(operand[0])
+            print(f"  {colorize}(Literal #{operand[0]}: Type {typeName}, {valueStr}){uncolorize}", end="")
         elif operandMnemonic == "SYT" and operand[0] < len(symbolTable):
             symbol = symbolTable[operand[0]]
             name = symbol["SYM_NAME"].strip("'")
@@ -691,6 +770,20 @@ def dumbPrintOperands(operands, operandValues, halmatNumber, parentMnemonic):
             print(f"  (Bookkeeping label #{operand[0]})", end="")
         elif operandMnemonic == "IMD":
             print(f"  (Immediate integer data {operand[0]} 0x{'%X'%operand[0]})", end="")
+        elif operandMnemonic == "OFF":
+            # Not annotated at all previously. Every use of OFF that
+            # yaHALMAT2's own interp.c implements is in the class-8
+            # STRI-bracketed static-initialization family (SINT/BINT/
+            # CINT/TINT/etc.), where it's the absolute/cumulative element
+            # or terminal index -- within the container most recently
+            # named by STRI -- that this instruction's (run of) value(s)
+            # initialize, starting here (class-8/STRI.md, class-8/
+            # SINT.md). That's yaHALMAT2's own implementation coverage,
+            # not a claim that no other opcode could ever use OFF for
+            # something else -- if this annotation looks wrong for some
+            # other opcode, trust the raw byte dump above it instead.
+            print(f"  (OFFSET {operand[0]}: target element/terminal index, "
+                  f"within the container most recently named by STRI)", end="")
         print()
 
 # I don't know if this works for all operands, but ...
@@ -739,12 +832,12 @@ for recordNum in range(numRecords):
         if operatorType in operatorMnemonics:
             mnemonic = operatorMnemonics[operatorType]
         # Interpret these by operator type.
-        #print("  %4d (%02X%02X%02X%02X): " % (originalWordNumber, field1, 
+        #print("  %4d (%02X%02X%02X%02X): " % (originalWordNumber, field1,
         #                                      numberOfOperands, w2, w3), end = "")
         description = ""
         if mnemonic in operatorDescriptions:
             description = ", " + operatorDescriptions[mnemonic]
-        print(f"  HALMAT #%d (0x%03X{description}): " % (originalWordNumber, 
+        print(f"  HALMAT #%d (0x%03X{description}): " % (originalWordNumber,
                                                    operatorType), end = "")
         if mnemonic == "NOP":
             print(f"NOP({numberOfOperands})")
@@ -801,4 +894,3 @@ for recordNum in range(numRecords):
             print(f"%s({numberOfOperands}) %02X %d %d" % (mnemonic,
                                           field1, field4, field5))
             dumbPrintOperands(operands, operandValues, originalWordNumber, mnemonic)
-        
