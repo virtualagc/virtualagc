@@ -214,6 +214,25 @@
 
 #define NO_TARGET ((size_t)-1)
 
+/* USA003090 Appendix C's group-4 "standard fixups" for arithmetic
+ * runtime error conditions (execution-time errors detected by the HAL/S-
+ * FC library and emitted code) -- see STATUS.md for the fuller citation
+ * and per-error trace. Shared by BFNC's plain-SCALAR arithmetic
+ * functions (EXP/LOG/SIN/COS/TAN/SQRT, errors 5-8/11-12) and SEXP/SPEX/
+ * SIEX/IPEX's exponentiation opcodes (errors 4/24). */
+/* (1 - 16**-6) * 16**63 -- the true maximum AP-101S SINGLE-precision
+ * hex-float magnitude (all-1s 6-hex-digit fraction at the top
+ * characteristic), matching the primary source's own "7.237 x 10**75"
+ * to its stated precision. Deliberately NOT the rounder 16**63 itself:
+ * halmat_scalar_from_double's normalization loop divides by 16 until
+ * the mantissa drops below 1.0, so a value >= 16**63 costs one extra
+ * division/characteristic-increment that then gets silently clamped
+ * back to 127 without rescaling the mantissa -- producing a packed
+ * result 16x too small. This value sits just under that boundary so
+ * the loop lands exactly on characteristic=127 without tripping it. */
+#define HAL_S_MAX_REPRESENTABLE 7.2370051459731155e75 /* errors 6/7/9/12 */
+#define HAL_S_SIN_COS_OVERFLOW_RESULT 0.70710678118654752 /* sqrt(2)/2, error 8 */
+
 typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR, RV_BITS } rv_kind_t;
 
 typedef struct {
@@ -850,6 +869,70 @@ static bool matrix_invert(const halmat_scalar_t *in, int n, halmat_scalar_t *out
         for (int j = 0; j < n; j++)
             out[i * n + j] = halmat_scalar_from_double(aug[i][n + j], dbl);
     return true;
+}
+
+/* USA003090 App. C error 27's standard fixup ("argument of INVERSE is a
+ * singular matrix" -> "the result is the identity matrix"), shared by
+ * both real HAL/S spellings of matrix inverse -- BFNC's INVERSE selector
+ * and MINV's `M**(-1)` exponentiation form -- since both route through
+ * matrix_invert() and hit the identical singular-matrix case. `in` only
+ * supplies the elements' SINGLE/DOUBLE precision (the identity's own
+ * value doesn't depend on the singular matrix's contents). */
+static void fill_identity_matrix(const halmat_scalar_t *in, int n, halmat_scalar_t *out) {
+    bool dbl = false;
+    for (int i = 0; i < n * n; i++) {
+        if (in[i].double_precision) { dbl = true; break; }
+    }
+    for (int r = 0; r < n; r++)
+        for (int c = 0; c < n; c++)
+            out[r * n + c] = (r == c) ? halmat_scalar_from_integer(1, dbl) : halmat_scalar_zero(dbl);
+}
+
+/* Square n x n matrix product, out = a * b -- shared by OP_MMPR (below)
+ * and OP_MINV's repeated-self-multiplication exponentiation (M**N, N>1
+ * or N<-1). `out` must not alias `a` or `b`. */
+static void matrix_multiply_square(const halmat_scalar_t *a, const halmat_scalar_t *b, int n, halmat_scalar_t *out) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            halmat_scalar_t sum = halmat_scalar_zero(false);
+            for (int k = 0; k < n; k++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(a[i * n + k], b[k * n + j]));
+            out[i * n + j] = sum;
+        }
+    }
+}
+
+/* Matrix determinant (DET, BFNC selector 3 -- class-0/BFNC.md). Same
+ * double-precision Gaussian elimination with partial pivoting as
+ * matrix_invert just above (no bit-exact algorithm mandated by the
+ * primary sources), tracking the running product of pivots and the sign
+ * flip from each partial-pivot row swap. n capped at 8, same container-
+ * size ceiling as matrix_invert; unlike INVERSE, a singular matrix isn't
+ * a HAL/S error condition here -- DET of a singular matrix is simply
+ * 0.0, so this returns that instead of failing. */
+static halmat_scalar_t matrix_determinant(const halmat_scalar_t *in, int n, bool dbl) {
+    double aug[8][8];
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++) aug[i][j] = halmat_scalar_to_double(in[i * n + j]);
+    double det = 1.0;
+    for (int col = 0; col < n; col++) {
+        int pivot = col;
+        double best = fabs(aug[col][col]);
+        for (int r = col + 1; r < n; r++) {
+            if (fabs(aug[r][col]) > best) { best = fabs(aug[r][col]); pivot = r; }
+        }
+        if (best < 1e-12) return halmat_scalar_from_double(0.0, dbl); /* singular -> DET is 0 */
+        if (pivot != col) {
+            for (int j = col; j < n; j++) { double t = aug[col][j]; aug[col][j] = aug[pivot][j]; aug[pivot][j] = t; }
+            det = -det;
+        }
+        double pv = aug[col][col];
+        det *= pv;
+        for (int r = col + 1; r < n; r++) {
+            double factor = aug[r][col] / pv;
+            for (int j = col; j < n; j++) aug[r][j] -= factor * aug[col][j];
+        }
+    }
+    return halmat_scalar_from_double(det, dbl);
 }
 
 /* Reads a whole MATRIX/VECTOR operand (SYT variable or a VAC-carried
@@ -2586,18 +2669,16 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 halmat_scalar_t scalar_operand = rv_to_scalar(&b);
                 bool is_div = (ins->opcode == OP_MSDV || ins->opcode == OP_VSDV);
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
-                bool ok = true;
-                for (size_t i = 0; ok && i < count; i++) {
-                    if (is_div) {
-                        if (!halmat_scalar_divide(ca[i], scalar_operand, &result[i])) {
-                            fail(state, "MSDV/VSDV: division by zero (floating point divide exception)");
-                            ok = false;
-                        }
-                    } else {
-                        result[i] = halmat_scalar_multiply(ca[i], scalar_operand);
-                    }
+                if (is_div && halmat_scalar_to_double(scalar_operand) == 0.0) {
+                    /* USA003090 App. C error 25 ("VECTOR/MATRIX division
+                     * by zero"): standard fixup is the original vector/
+                     * matrix, unchanged -- not an abort. */
+                    for (size_t i = 0; i < count; i++) result[i] = ca[i];
+                } else if (is_div) {
+                    for (size_t i = 0; i < count; i++) halmat_scalar_divide(ca[i], scalar_operand, &result[i]);
+                } else {
+                    for (size_t i = 0; i < count; i++) result[i] = halmat_scalar_multiply(ca[i], scalar_operand);
                 }
-                if (!ok) break;
                 if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                 break;
             }
@@ -2617,27 +2698,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_MINV: {
-                /* Two operands, not one -- class-3/MINV.md's own doc
-                 * (written before this session, when MINV was still
-                 * unimplemented) states the operand-word format as
-                 * unconfirmed; empirically it's operand[0]=SYT (the
-                 * matrix) plus a second QUAL=5=LIT operand this session
-                 * didn't fully decode (the generated object code loads
-                 * its DATA value via a bare `LA` -- load-address, not a
-                 * literal-table dereference -- suggesting a compile-time
-                 * constant/routine-selector rather than a numeric input
-                 * to the inversion itself; ignored here since the
-                 * inverse computed from operand[0] alone already matches
-                 * hand-derived expected values exactly). */
+                /* Two operands: operand[0]=SYT (the matrix), operand[1]=
+                 * QUAL=5=LIT. class-3/MINV.md previously left the second
+                 * operand's role unresolved (an earlier session, seeing
+                 * only the `A**(-1)` case, mistook its HALMAT-word DATA
+                 * field -- the literal *table index* -- for the operand's
+                 * actual value, since that index didn't match -1). This
+                 * session's `029-DATATYPES.hal` fixture (`A2B**2`,
+                 * `A2B**(-1)`, `A2B**0`, all real HALSFC-compiled) decodes
+                 * the literal table entries themselves as 2.0/-1.0/0.0 --
+                 * exactly the source exponents -- confirming MINV is
+                 * HAL/S's general matrix-exponentiation opcode (`M**N`),
+                 * not INVERSE-only: N=-1 is inverse, N=0 is the identity,
+                 * N>0 is N-fold self-multiplication. Other negative N
+                 * (inverse-then-power) aren't confirmed against a real
+                 * compile but are handled by the same rule MATRIX
+                 * exponentiation's documented integer-power restriction
+                 * implies. */
                 if (ins->operand_count != 2) { fail(state, "MINV: expected 2 operands"); break; }
                 halmat_scalar_t *src; size_t count; int rows, cols;
                 if (!resolve_container(state, &ins->operands[0], &src, &count, &rows, &cols)) break;
                 if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "MINV: operand is not a square MATRIX"); break; }
                 if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "MINV: container too large"); break; }
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                int32_t exponent = rv_to_integer(&b);
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
-                if (!matrix_invert(src, rows, result)) {
-                    fail(state, "MINV: singular matrix (floating point error condition)");
-                    break;
+                if (exponent == 0) {
+                    fill_identity_matrix(src, rows, result);
+                } else {
+                    halmat_scalar_t base[HALMAT_CONTAINER_CAPACITY];
+                    if (exponent < 0) {
+                        if (!matrix_invert(src, rows, base)) {
+                            /* USA003090 App. C error 27 ("argument of
+                             * INVERSE is a singular matrix"): standard
+                             * fixup is the identity matrix, not an abort
+                             * -- applies here too, since a negative-
+                             * exponent M**N still inverts M as its first
+                             * step. */
+                            fill_identity_matrix(src, rows, base);
+                        }
+                    } else {
+                        memcpy(base, src, count * sizeof(halmat_scalar_t));
+                    }
+                    fill_identity_matrix(src, rows, result);
+                    uint32_t magnitude = (exponent < 0) ? (uint32_t)(-(int64_t)exponent) : (uint32_t)exponent;
+                    for (uint32_t p = 0; p < magnitude; p++) {
+                        halmat_scalar_t tmp[HALMAT_CONTAINER_CAPACITY];
+                        matrix_multiply_square(result, base, rows, tmp);
+                        memcpy(result, tmp, count * sizeof(halmat_scalar_t));
+                    }
                 }
                 if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                 break;
@@ -3052,7 +3161,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 int32_t base = rv_to_integer(&a);
                 int32_t exponent = rv_to_integer(&b);
                 if (exponent < 0) { fail(state, "IPEX: negative exponent (expected non-negative literal)"); break; }
-                int32_t result = 1;
+                /* USA003090 App. C error 4: 0**0 is a documented runtime
+                 * fixup of zero, not the ordinary 0**0=1 convention the
+                 * loop below would otherwise produce. */
+                int32_t result = (base == 0 && exponent == 0) ? 0 : 1;
                 for (int32_t i = 0; i < exponent; i++) result *= base;
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
@@ -3123,16 +3235,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "SPEX: negative exponent (expected a positive literal)");
                     break;
                 }
-                halmat_scalar_t result = halmat_scalar_from_integer(1, dbl);
-                uint32_t magnitude = (exponent < 0) ? (uint32_t)(-(int64_t)exponent) : (uint32_t)exponent;
-                for (uint32_t i = 0; i < magnitude; i++) result = halmat_scalar_multiply(result, base);
-                if (exponent < 0) {
-                    halmat_scalar_t reciprocal;
-                    if (!halmat_scalar_divide(halmat_scalar_from_integer(1, dbl), result, &reciprocal)) {
-                        fail(state, "SIEX: division by zero (0 raised to a negative exponent)");
-                        break;
+                halmat_scalar_t result;
+                if (halmat_scalar_to_double(base) == 0.0 && exponent <= 0) {
+                    /* USA003090 App. C error 4 ("exponentiation of zero to
+                     * a power <= 0"): standard fixup is zero -- not the
+                     * ordinary 0**0=1 convention the loop below would
+                     * otherwise produce for SPEX/an exponent==0 SIEX, nor
+                     * SIEX's own reciprocal-of-zero division for a
+                     * negative exponent. */
+                    result = halmat_scalar_zero(dbl);
+                } else {
+                    result = halmat_scalar_from_integer(1, dbl);
+                    uint32_t magnitude = (exponent < 0) ? (uint32_t)(-(int64_t)exponent) : (uint32_t)exponent;
+                    for (uint32_t i = 0; i < magnitude; i++) result = halmat_scalar_multiply(result, base);
+                    if (exponent < 0) {
+                        halmat_scalar_t reciprocal;
+                        if (!halmat_scalar_divide(halmat_scalar_from_integer(1, dbl), result, &reciprocal)) {
+                            fail(state, "SIEX: division by zero (0 raised to a negative exponent)");
+                            break;
+                        }
+                        result = reciprocal;
                     }
-                    result = reciprocal;
                 }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
@@ -3155,7 +3278,28 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 halmat_scalar_t base = rv_to_scalar(&a);
-                double result = pow(halmat_scalar_to_double(base), halmat_scalar_to_double(rv_to_scalar(&b)));
+                double base_d = halmat_scalar_to_double(base);
+                double exponent_d = halmat_scalar_to_double(rv_to_scalar(&b));
+                double result;
+                if (base_d == 0.0 && exponent_d <= 0.0) {
+                    /* USA003090 App. C error 4 ("exponentiation of zero to
+                     * a power <= 0"): standard fixup is zero -- pow(0,0)=1
+                     * and pow(0,negative)=+Inf per C99 would otherwise
+                     * either give the wrong value or (worse, for a
+                     * negative exponent) feed +Inf into
+                     * halmat_scalar_from_double, whose normalization loop
+                     * never terminates for a non-finite input. */
+                    result = 0.0;
+                } else {
+                    /* USA003090 App. C error 24 ("negative base in
+                     * exponentiation"): standard fixup is |A|**B --
+                     * pow()'s underlying log/exp implementation is
+                     * undefined (NaN) for a negative base with any
+                     * non-integer exponent, and this rule applies
+                     * unconditionally (integer exponents too) per the
+                     * primary source, not just the domain-error cases. */
+                    result = pow(fabs(base_d), exponent_d);
+                }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_from_double(result, base.double_precision);
@@ -3708,15 +3852,16 @@ static void exec_one(halmat_state_t *state, FILE *out) {
 
             case OP_BFNC: {
                 /* Built-in function call, class-0/BFNC.md's confirmed
-                 * selector table (the instruction's own TAG field). Only
-                 * the plain-SCALAR-argument arithmetic functions plus
-                 * PRIO (no argument) and the VECTOR/CHARACTER functions
-                 * ABVAL/UNIT/LENGTH/TRIM are implemented; INVERSE (matrix
-                 * inverse) fails loudly -- same deferred numerical
-                 * algorithm as MINV (class-3/MINV.md). SIGN's documented
-                 * return type is unconfirmed; implemented returning
-                 * SCALAR like its arithmetic-function siblings in the
-                 * same table, not INTEGER. */
+                 * selector table (the instruction's own TAG field). The
+                 * plain-SCALAR-argument arithmetic functions, PRIO (no
+                 * argument), the VECTOR/CHARACTER functions ABVAL/UNIT/
+                 * LENGTH/TRIM, and the MATRIX functions DET/INVERSE are
+                 * implemented; DET/INVERSE share the same double-via-
+                 * Gaussian-elimination precision compromise as MINV
+                 * (class-3/MINV.md). SIGN's documented return type is
+                 * unconfirmed; implemented returning SCALAR like its
+                 * arithmetic-function siblings in the same table, not
+                 * INTEGER. */
                 if (ins->tag == 19) { /* PRIO: no argument, current task's priority */
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
@@ -3726,14 +3871,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "BFNC: expected 1 operand (selector %u)", ins->tag); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                /* ABVAL(28)/UNIT(27)/INVERSE(49) take a whole VECTOR/
-                 * MATRIX argument and resolve it via resolve_container
-                 * themselves below -- resolve_operand would (correctly,
-                 * per the new arrayed-paragraph-replay guard) reject a
-                 * bare whole-array SYT reference outside a replay
-                 * context, so it's only called for the plain-scalar-
-                 * argument selectors that actually need `a`. */
-                if (ins->tag != 27 && ins->tag != 28 && ins->tag != 49) {
+                /* DET(3)/ABVAL(28)/UNIT(27)/INVERSE(49) take a whole
+                 * VECTOR/MATRIX argument and resolve it via
+                 * resolve_container themselves below -- resolve_operand
+                 * would (correctly, per the new arrayed-paragraph-replay
+                 * guard) reject a bare whole-array SYT reference outside
+                 * a replay context, so it's only called for the plain-
+                 * scalar-argument selectors that actually need `a`. */
+                if (ins->tag != 3 && ins->tag != 27 && ins->tag != 28 && ins->tag != 49) {
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 }
 
@@ -3742,24 +3887,68 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND: through
                          * double via libm, same documented precision
                          * compromise as SEXP (no hex-float algorithm for
-                         * these in the extracted AP-101S material). */
+                         * these in the extracted AP-101S material). Domain/
+                         * overflow guards on EXP/LOG/SIN/COS/TAN/SQRT below
+                         * implement USA003090 App. C's group-4 "standard
+                         * fixups" (errors 5-8/11-12) rather than letting
+                         * libm's NaN/Inf for out-of-domain input silently
+                         * propagate into the packed result -- see
+                         * STATUS.md's Class 0 section for the fuller
+                         * per-error trace and citation. */
                         double x = halmat_scalar_to_double(rv_to_scalar(&a));
+                        bool dbl = rv_to_scalar(&a).double_precision;
                         double r;
                         switch (ins->tag) {
                             case 1: r = fabs(x); break;
-                            case 2: r = cos(x); break;
-                            case 5: r = exp(x); break;
-                            case 6: r = log(x); break;
-                            case 13: r = sin(x); break;
-                            case 15: r = tan(x); break;
+                            case 2: case 13: { /* COS/SIN: error 8 */
+                                double v = (ins->tag == 2) ? cos(x) : sin(x);
+                                r = (fabs(x) > 823296.0) ? HAL_S_SIN_COS_OVERFLOW_RESULT : v;
+                                break;
+                            }
+                            case 5: /* EXP: error 6 */
+                                r = (x > 174.673) ? HAL_S_MAX_REPRESENTABLE : exp(x);
+                                break;
+                            case 6: /* LOG (natural log): error 7 */
+                                r = (x == 0.0) ? -HAL_S_MAX_REPRESENTABLE : log(fabs(x));
+                                break;
+                            case 15: { /* TAN: errors 11/12 */
+                                double sp_limit = 823549.625, dp_limit = 3.537e15;
+                                if (fabs(x) > (dbl ? dp_limit : sp_limit)) {
+                                    r = 1.0; /* error 11: argument magnitude too large */
+                                } else {
+                                    double v = tan(x);
+                                    /* error 12: argument too close to an odd
+                                     * multiple of pi/2 -- rather than
+                                     * replicating the primary source's own
+                                     * proximity test, detect the same
+                                     * condition by its effect (tan()
+                                     * approaching the singularity, i.e. no
+                                     * longer finite/representable). */
+                                    r = isfinite(v) ? v : HAL_S_MAX_REPRESENTABLE;
+                                }
+                                break;
+                            }
                             case 21: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break;
-                            case 24: r = sqrt(x); break;
+                            case 24: r = sqrt(fabs(x)); break; /* SQRT: error 5 */
                             case 33: default: r = round(x); break;
                         }
-                        bool dbl = rv_to_scalar(&a).double_precision;
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_scalar = true;
                         state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl);
+                        break;
+                    }
+                    case 3: { /* DET: matrix determinant -> SCALAR */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "DET: operand is not a square MATRIX"); break; }
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DET: container too large"); break; }
+                        bool dbl = false;
+                        for (size_t i = 0; i < count; i++) {
+                            if (ca[i].double_precision) { dbl = true; break; }
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = matrix_determinant(ca, rows, dbl);
                         break;
                     }
                     case 28: { /* ABVAL: vector magnitude -> SCALAR */
@@ -3780,10 +3969,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         halmat_scalar_t sum = halmat_scalar_zero(false);
                         for (size_t i = 0; i < count; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], ca[i]));
                         double mag = sqrt(halmat_scalar_to_double(sum));
-                        if (mag == 0.0) { fail(state, "UNIT: zero-magnitude vector"); break; }
                         halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
-                        for (size_t i = 0; i < count; i++) {
-                            result[i] = halmat_scalar_from_double(halmat_scalar_to_double(ca[i]) / mag, false);
+                        if (mag == 0.0) {
+                            /* USA003090 App. C error 28 ("argument of UNIT
+                             * function is null vector"): standard fixup is
+                             * a result vector "all of whose components are
+                             * zero (i.e. the input vector)" -- every
+                             * component of a null vector is already zero,
+                             * so this is just the input passed through
+                             * unnormalized rather than a division-by-zero
+                             * abort. */
+                            for (size_t i = 0; i < count; i++) result[i] = ca[i];
+                        } else {
+                            for (size_t i = 0; i < count; i++) {
+                                result[i] = halmat_scalar_from_double(halmat_scalar_to_double(ca[i]) / mag, false);
+                            }
                         }
                         if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                         break;
@@ -3814,8 +4014,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "INVERSE: container too large"); break; }
                         halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
                         if (!matrix_invert(ca, rows, result)) {
-                            fail(state, "INVERSE: singular matrix (floating point error condition)");
-                            break;
+                            /* USA003090 App. C error 27 ("argument of
+                             * INVERSE is a singular matrix"): standard
+                             * fixup is the identity matrix, not an abort. */
+                            fill_identity_matrix(ca, rows, result);
                         }
                         if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
                         break;

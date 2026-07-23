@@ -35,7 +35,8 @@ found elsewhere.
 | [IR-60-5] | PDF pages 108–134 (of 134) | Covers (at least) printed pages A-3–A-8, A-93–A-94, A-103–A-104, A-109, A-110–A-118. This is believed to be the entirety of the HALMAT-relevant material in this partial copy; pages 1–107 were not reviewed (front matter / unrelated compiler chapters, per the document's own page numbering and the source URL's `#page=114` anchor) and should be spot-checked in a future session before being ruled out entirely. |
 | [Halmat.pdf] | PDF pages 1–15 (of 114) | Covers title page, foreword, Word Format, Block Structure/Large-Scale Organisation summary, and Class 0 entries NOP through BRA (partial — BRA's own detail page not yet read). Pages 16–114 (remainder of Class 0, and all of Classes 1–8) not yet reviewed. |
 | [MSC-01847] | **Complete**: part1 pp. 1–42 (all), part2 pp. 1–42 (all), part3 pp. 1–41 (all) | The original file (105 MB) exceeds the Read tool's 100 MB text-extraction limit. Fixed by splitting with `pdftk`: `source-documentation/MSC-01847.part1.pdf` (pp. 1–42), `.part2.pdf` (pp. 43–84), `.part3.pdf` (pp. 85–125) — each well under the cap and directly readable. These split files are untracked/gitignored (under `source-documentation/`). The original 105 MB file (`HALMAT - An Intermediate Language.pdf`) was removed from `source-documentation/` as a duplicate — it's available at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HALMAT - An Intermediate Language.pdf` (see the "Alternate source locations" note below); if the split files are ever missing, regenerate from that path with `pdftk ".../HALMAT - An Intermediate Language.pdf" cat 1-42 output MSC-01847.part1.pdf` (and similarly 43-84 → part2, 85-125 → part3). Covers: front matter/foreword/TOC; **Chapter 1** (§1.1–1.8: symbolic/physical instruction format, notation — see "Notation reference" below); Chapter 2 (§2.1–2.24, full, no gaps: Code Markers, Labels, Branches, Arrayness/Structureness Specifiers, Subscript Allocators, Terminal/Array/Structure Subscript Specifiers, Precision Conversion, Static Initialization Flow Specifiers, Argument List Specifiers, I/O Specifiers, Subprogram Specifiers, Auxiliary Shaping Function Specifiers, Structure Operations, Bit String, Character, Matrix, Vector, Scalar, Integer, Conditional, Initialization Operations, DO FOR Specifiers) with full instruction-level bit diagrams and prose in the predecessor language's own physical format; Chapter 3 (§3.1–3.8, full: worked HALMAT-construct examples for arithmetic, flow-control, I/O, procedure, function, shaping-function, and initialization statements); Appendix A (symbol/literal table layout); **Appendix B** (complete alphabetical mnemonic→opcode→one-line-description table for the full HAL 1971 instruction set, ~150 entries); **Appendix C** (the same data as a full opcode→mnemonic lookup table, cross-confirming B); Appendix D (numeric codes for qualifier/optimization/operand-type subfields); Appendix E (shaping-function numeric codes); and an **ADDENDUM** (p. 125, the document's final page) listing three instructions omitted from the main text due to incomplete 1971-era implementation — see the "ZDLP/PFST/PFND addendum" note below. **This document is now considered fully reviewed, page for page, with no remaining gaps.** This document describes the *predecessor* language HAL (1971), not HAL/S (1977) — see the cross-reference notes throughout this file for how it's being used. Diagnostic note: an independent `pdftotext -layout` dump of a page range is a cheap way to check what's actually on those pages before spending a Read call, though badly-OCR'd bit-diagram pages (like the ADDENDUM) are worth re-rendering as an image (`pdftoppm -r 300 -png`) and reading visually when the text extraction looks scrambled. |
-| [USA003087] | **Full text extracted** (441 pages); individual sections read as needed, not all reviewed yet | "HAL/S Programmer's Guide." Rather than re-rendering page ranges from the PDF on every lookup, the entire document was run once through `pdftotext -layout` into `source-documentation/USA003087.txt` (untracked/gitignored, same convention as the `MSC-01847.part*.pdf` split files) — spot-checked against p. 143's WRITE-statement DATA FORMATS text (word-for-word identical to an independent PDF-page Read) to confirm extraction fidelity. Pages are separated by form-feed (`\f`) characters, so `awk 'BEGIN{RS="\f"}'`-style page-indexed lookups or plain `grep` both work directly on the text file — much cheaper than a Read-tool PDF-page call for prose lookups. **Caveat**: this is a born-digital PDF, so prose extracts cleanly, but the hand-drawn figures (e.g. Figure 12-3/12-4's WRITE-mechanism zigzag diagrams) don't — those still need `pdftoppm -r 300 -png` + a visual Read of the rendered image, same as already noted for [MSC-01847]'s ADDENDUM below. Sections consulted so far: §12.2 (WRITE statement DATA FORMATS, "unpaged output: [80 columns/line]" — see the WRITE-array/line-wrapping fix in the "HAL/S I/O device numbers" section above). |
+| [USA003087] | **Full text extracted** (441 pages); individual sections read as needed, not all reviewed yet | "HAL/S Programmer's Guide." Rather than re-rendering page ranges from the PDF on every lookup, the entire document was run once through `pdftotext -layout` into `source-documentation/USA003087.txt` — spot-checked against p. 143's WRITE-statement DATA FORMATS text (word-for-word identical to an independent PDF-page Read) to confirm extraction fidelity. Pages are separated by form-feed (`\f`) characters, so `awk 'BEGIN{RS="\f"}'`-style page-indexed lookups or plain `grep` both work directly on the text file — much cheaper than a Read-tool PDF-page call for prose lookups. **Caveat**: this is a born-digital PDF, so prose extracts cleanly, but the hand-drawn figures (e.g. Figure 12-3/12-4's WRITE-mechanism zigzag diagrams) don't — those still need `pdftoppm -r 300 -png` + a visual Read of the rendered image, same as already noted for [MSC-01847]'s ADDENDUM below. Sections consulted so far: §12.2 (WRITE statement DATA FORMATS, "unpaged output: [80 columns/line]" — see the WRITE-array/line-wrapping fix in the "HAL/S I/O device numbers" section above). **Session update**: `USA003087.txt`, and the analogous `USA003090.txt` (see below), are tracked in git despite `source-documentation/`'s general PDF-dedup gitignore policy — small, durable derived text worth keeping versioned alongside the reengineered-documentation that cites them, unlike the large third-party PDFs themselves. |
+| [USA003090] | **Full text extracted** (225 pages); Appendix C (pp. 199-201, "EXECUTION-TIME ERRORS") read in full, remainder not yet reviewed | "HAL/S-FC User's Manual" (2005) — despite the different-looking document ID, this is the **same document** this project's earlier sessions cited as `[USA00309]` (missing the trailing digit; that citation predates this session and is left as-is throughout the existing docs rather than mass-renamed). Extracted the same way as [USA003087] into `source-documentation/USA003090.txt`. Local copy found at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HAL_S-FC User's Manual Nov 2005.pdf` (same mirror as other sources — see "Alternate source locations" above); also at `https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf`. Appendix C tabulates every "group 4" execution-time runtime error (detected by the HAL/S-FC library/emitted code) with its "standard fixup" — the runtime's documented recovery behavior instead of aborting. A user pointer to error 27 ("argument of INVERSE is a singular matrix" → "the result is the identity matrix," not yaHALMAT2's prior abort) prompted extracting the whole appendix and auditing every yaHALMAT2-implemented function against it — see the dedicated "USA003090 Appendix C execution-time-error fixups" section below for the full audit and fix list. Two of the appendix's table cells needed a rendered-page visual check (`pdftoppm -r 300 -png`) rather than trusting `pdftotext -layout` directly: error 8's fixup value (a stacked fraction, √2⁄2, that extracted as garbled "2/...2" text) and error 11's fixup (plain-text "The result is set to one," which *did* extract correctly but was initially misread during a fast skim as another "maximum representable value" case — a reminder to read the actual extracted text carefully rather than pattern-matching against a neighboring row). |
 | [##DRIVER.xpl] | `PASS1.PROCS/##DRIVER.xpl` lines ~2052–2258 | **Phase 2 primary source.** `../virtualagc/yaShuttle/Source Code/PASS.REL32V0/PASS1.PROCS/##DRIVER.xpl` declares every HALMAT opcode as a named XPL/I constant (`X`-prefixed, e.g. `XSMRK BIT(16) INITIAL("004")`), for direct use by the compiler itself — the single most authoritative source available for HAL/S opcode numbers, since it's what the real compiler actually uses. Also declares the operand-qualifier constants (`XSYT`=1, `XINL`=2, `XVAC`=3, `XXPT`=4, `XLIT`=5, `XIMD`=6, `XAST`=7, `XCSZ`=8, `XASZ`=9, `XOFF`=10 — an exact match to the QUAL table already in [HALMAT.md](HALMAT.md), now primary-source-confirmed for HAL/S itself rather than only via [IR-60-5]) and the two Optimizer-HALMAT code-optimizer tag bits (`XCO_N`="01", `XCO_D`="02"). Confirms essentially every opcode already in this file's Class 0 and Class 8 tables, corrects a couple of values inferred from [MSC-01847] (see Class 4/5 notes below), and gives confirmed opcodes for many previously-undocumented Class 0/1/2/3/4/5/6/7 entries. Not yet exhaustively cross-referenced against emission/consumption sites elsewhere in the source (that's a good next step — see "Next steps" below) — what's recorded here so far is the opcode table itself, read directly, not yet validated against actual compiled HALMAT binaries. Some array-valued declarations (e.g. `XBTOI(5)`) use a comment convention where only the first element has a real variable name and subsequent elements' conceptual names are given in trailing comments (`/* INDEXED OFF OF XCTOI */`); those are recorded below with the same care but flagged where the convention made attribution ambiguous. |
 | Compiler report switches | Tested empirically (see below) | Confirmed: PASS1's compile-time option `HALMAT` (abbreviated `HM`, bit `0x00040000` in `OPTIONS_CODE`, declared in `MONITOR.ASM/COMPOPT.bal`) makes `pass1.rpt` print each HALMAT instruction (`HALMAT LINE N: <opcode>(<numop>),<tag>,<extra>` plus its operand(s)) interleaved with the original HAL/S source listing — verified by compiling `PASS.REL32V0/regression/HELLO.hal` locally with `HALSFC --parms="HALMAT,LIST,LISTING2" HELLO.hal`. The report is very noisy (a full scanner/parser production trace prints regardless of the `TRACE` option and regardless of debug- vs. production-build; cause not yet identified — worth investigating further, or just filtering with `grep`). **PASS2**: per a secondary source (https://www.ibiblio.org/apollo/HAL.html#moron, the historical HAL/S option reference), the compile-time option `LSTALL` makes PASS2's report include HALMAT, generated AP-101S object code, and HAL/S source statements together — statements are identified there only by *statement number*, so cross-referencing back to source text requires consulting the PASS1 report (which does show statement numbers against source lines) as well.
 
@@ -186,7 +187,7 @@ found (from [MSC-01847] cross-reference or better).
 | 0x045 | SFST | Documented | High | 59 | Opcode confirmed ([##DRIVER.xpl] `XSFST`). [MSC-01847] "SFST" at HAL-1971 opcode 0x04A — brackets type-conversion "shaping function" invocations like BIT(...), CHAR(...), VECTOR(...), MATRIX(...) |
 | 0x046 | SFND | Documented | High | 60 | Opcode confirmed ([##DRIVER.xpl] `XSFND`). [MSC-01847] "SFND" at HAL-1971 opcode 0x04C |
 | 0x047 | SFAR | Documented | High | 60 | Opcode confirmed ([##DRIVER.xpl] `XSFAR`). [MSC-01847] "SFAR" at HAL-1971 opcode 0x04B |
-| 0x04A | BFNC | Documented | High | 64 | Opcode confirmed ([##DRIVER.xpl] `XBFNC`); empirically confirmed for the `PRIO` built-in function and 14 others. Optimizer-HALMAT-era SINCOS special case (TAG=0x39/0x3A) documented from IR-60-5 A-112, now also empirically confirmed. Confirms HAL/S's split-off of HAL 1971's FUNC (which handled both user and built-in function invocation together) — see [FCAL](class-0/FCAL.md) |
+| 0x04A | BFNC | Documented | High | 64 | Opcode confirmed ([##DRIVER.xpl] `XBFNC`); empirically confirmed for the `PRIO` built-in function and 15 others (including `DET`, added in a later session — see the arrayed-paragraph-replay-guard bug-fix narrative below). Optimizer-HALMAT-era SINCOS special case (TAG=0x39/0x3A) documented from IR-60-5 A-112, now also empirically confirmed. Confirms HAL/S's split-off of HAL 1971's FUNC (which handled both user and built-in function invocation together) — see [FCAL](class-0/FCAL.md) |
 | 0x04B | LFNC | Documented | High | — | **New** — not in [IR-60-5]'s partial index. Opcode confirmed ([##DRIVER.xpl] `XLFNC`). The `MAX`/`MIN` built-in functions specifically (a separate "L-FUNC" dispatch category from [BFNC](class-0/BFNC.md), found by grepping the compiler source tree for `XLFNC` usage) — see [LFNC](class-0/LFNC.md) |
 | 0x04D | TNEQ | Documented | High | — | Opcode confirmed ([##DRIVER.xpl] `XTEQU` array element 1). Structure `¬=` comparison, empirically confirmed this session (delegates to the same runtime routine `#QCSTRUC` as TEQU). [MSC-01847] describes an identically-named "structure not equal" instruction, but at HAL-1971 opcode 0x044 |
 | 0x04E | TEQU | Documented | High | — | Opcode confirmed ([##DRIVER.xpl] `XTEQU` array element 0). Structure `=` comparison, empirically confirmed this session (delegates to runtime routine `#QCSTRUC`). [MSC-01847] "structure equal" at HAL-1971 opcode 0x045 |
@@ -413,7 +414,7 @@ confidence, empirically confirmed.
 | 0x387 | VVPR | 0x387 (match) | vector outer product (result is a matrix, hence classed here despite the "V" mnemonic prefix) |
 | 0x3A5 | MSPR | 0x3A5 (match) | matrix multiply-by-scalar |
 | 0x3A6 | MSDV | 0x3A6 (match) | matrix divide-by-scalar |
-| 0x3CA | MINV | 0x3CA (match) | matrix invert |
+| 0x3CA | MINV | 0x3CA (match) | matrix exponentiation (`M**N`, any integer `N` -- inverse is just the `N=-1` case; **not INVERSE-only as previously documented**, see [MINV](class-3/MINV.md) and the "USA003090 Appendix C" section below) |
 
 Every core matrix-arithmetic opcode matches HAL-1971 exactly (cross-checks
 [IR-60-5] A-113's mnemonic list too). Related, classed elsewhere: MEQU/
@@ -774,6 +775,158 @@ covers that the same way, being purely symbol-table-driven rather than
 tied to any specific kind of enclosing block. See
 [FCAL](class-0/FCAL.md) for the full trace;
 `src/tests/hal/test_nest_call.hal` is the new regression fixture.
+
+**A fourth arrayed-paragraph-replay-guard gap — the `DET` built-in
+function — fixed in a further follow-up.** User-reported bug:
+`WRITE(6) DET(A2A), ...;` (`029-DATATYPES.hal` from "Programming in
+HAL/S," p. 29) failed with the same "SYT index N is a whole ARRAY/
+VECTOR/MATRIX referenced outside an arrayed-paragraph replay" message
+this whole guard-gap family produces, this time at [BFNC](class-0/BFNC.md)
+rather than `XXAR`/`PCAL`/`FCAL`. Root cause, confirmed via
+`HALSFC --parms="LISTING2,LSTALL"` and a direct `unHALMAT.py` read of the
+resulting `halmat.bin` (HALMAT word #566): `DET(A2A)` compiles to a
+`BFNC` instruction with selector `3` (`##DRIVER.xpl`'s alphabetical
+`BI_NAME`/`BI_INDX` array — `ABS`=1, `COS`=2, `DET`=3, ... — previously
+unconfirmed for this project; see [BFNC](class-0/BFNC.md)'s updated
+selector table) whose one operand is a bare `QUAL`=`SYT` reference to
+the whole `A2A` `MATRIX`, exactly the same unreplayed whole-container
+shape `ABVAL`/`UNIT`/`INVERSE` already special-case around
+`resolve_operand`'s guard — but `OP_BFNC`'s dispatch only exempted
+selectors 27/28/49 (`UNIT`/`ABVAL`/`INVERSE`) from the ordinary
+`resolve_operand` path, not `DET` (selector 3), so it fell through into
+the same guard `ABVAL`/`UNIT`/`INVERSE` were already routed around.
+Fixed by adding `DET` to that exemption list and a `matrix_determinant()`
+helper (interp.c, alongside `matrix_invert()`) computing the determinant
+via the identical double-precision Gaussian-elimination-with-partial-
+pivoting approach `matrix_invert()`/`MINV` already use (no bit-exact
+algorithm mandated by the primary sources for either) — tracking the
+running product of pivots and the sign flip from each partial-pivot row
+swap, capped at the same 8x8/`HALMAT_CONTAINER_CAPACITY`=64 ceiling.
+Unlike `INVERSE`, a singular matrix isn't treated as a HAL/S error
+condition for `DET` — its determinant is simply `0.0` (confirmed against
+`029-DATATYPES.hal`'s own `DET(A4A)`, "4x4 determinant should be 0.0"),
+so `matrix_determinant()` returns that rather than failing. Verified
+against all five `DET(...)` calls in `029-DATATYPES.hal` (`-19.0`,
+`18.0`, `0.0`, `-348.0`, `-240.0`, matching the source file's own
+inline comments exactly). See [BFNC](class-0/BFNC.md) for the updated
+selector table; `src/tests/hal/test_bfnc_det.hal` is the new regression
+fixture.
+
+## USA003090 Appendix C execution-time-error "standard fixups"
+
+User-prompted audit: error 27 ("argument of INVERSE is a singular
+matrix") was flagged directly — yaHALMAT2 aborted instead of applying
+the documented "standard fixup" (result = identity matrix). Rather than
+fixing only that one row, [USA003090]'s full Appendix C (pp. 199-201,
+extracted per the "Source material reviewed so far" table above) was
+read in full and cross-checked against every currently-implemented
+yaHALMAT2 function; each row that applied to something actually
+implemented got the same treatment. Rows for functions yaHALMAT2 doesn't
+implement at all yet (`REMAINDER`, `MOD`, `LJUST`/`RJUST`, `ARCSIN`/
+`ARCCOS`/`ARCTAN`/`ARCTAN2`, `SINH`/`COSH`/`ARCCOSH`/`ARCTANH`,
+`BIT@OCT`/`BIT@HEX`, illegal `BIT` strings, the subscripted `SUBBITn TO
+m(...)` form, illegal `CHARACTER` subscripts, and "no `RETURN` statement
+in `FUNCTION`") were left alone — nothing to fix yet, and several are
+flagged as open follow-ups below. `CHARACTER`-to-`SCALAR`/`INTEGER`
+conversion (errors 20/22, empty/blank string → zero) needed no code
+change: [CTOS](class-5/CTOS.md)/[CTOI](class-6/CTOI.md) already go
+through `strtod()`, which already returns `0.0` for an empty or
+all-blank string with no special-casing required.
+
+**Fixes applied** (`src/interp.c`/`src/value.c`, primary-source-cited
+inline at each site; per-opcode detail in each file's own "Confirmed
+Runtime Behavior" section):
+
+- **Error 27** (`INVERSE`/`MINV` singular matrix → identity matrix, not
+  abort): [BFNC](class-0/BFNC.md) selector 49 and [MINV](class-3/MINV.md)
+  (`M**(-1)`) both route through the same `matrix_invert()` call and now
+  share a `fill_identity_matrix()` fallback.
+- **Error 28** (`UNIT` of a null vector → the input vector unchanged,
+  every component already zero): [BFNC](class-0/BFNC.md) selector 27.
+- **Error 25** (`VECTOR`/`MATRIX` division by zero → the original
+  container unchanged): [MSDV](class-3/MSDV.md)/[VSDV](class-4/VSDV.md)'s
+  shared `OP_MSPR`/`OP_MSDV`/`OP_VSPR`/`OP_VSDV` case.
+- **Error 5** (`SQRT`<0 → `sqrt(|x|)`), **error 6** (`EXP`>174.673 → the
+  maximum representable value), **error 7** (`LOG`<=0 → zero maps to the
+  maximum representable *negative* value, negative maps to
+  `log(|x|)`), **error 8** (`SIN`/`COS` `|x|`>~823,296 → `sqrt(2)/2`),
+  **error 11** (`TAN` `|x|` too large → `1`, not "maximum representable
+  value" — read carefully off the rendered page image after an initial
+  fast-skim misread, see the source-material table entry above), and
+  **error 12** (`TAN` too close to an odd multiple of π/2 → the maximum
+  representable value, detected via the practical proxy of `tan()`
+  itself returning non-finite, rather than replicating the primary
+  source's own proximity test): all in [BFNC](class-0/BFNC.md)'s shared
+  arithmetic-function case (selectors 2/5/6/13/15/24).
+- **Error 24** (negative base in exponentiation → `|A|**B`,
+  unconditionally, not just for the fractional-exponent domain-error
+  cases) and **error 4** (`0**B`, `B<=0` → zero, not the ordinary
+  `0**0=1` convention): [SEXP](class-5/SEXP.md) (general case),
+  [SPEX](class-5/SPEX.md)/[SIEX](class-5/SIEX.md) (literal-exponent
+  cases), and [IPEX](class-6/IPEX.md) (`INTEGER`-base case) — four
+  different HALMAT opcodes for the same source-level `**` operator,
+  matched to whichever the compiler picks based on the exponent's
+  compile-time-known type/sign. Fixing error 4 for `SEXP` also fixed a
+  worse latent bug: `pow(0.0, negative)` returns C99's `+Inf`, which fed
+  into `halmat_scalar_from_double`'s normalization loop and hung the
+  interpreter (the loop's `while (mag >= 1.0) mag /= 16.0;` never
+  terminates for a non-finite `mag`) — not merely a wrong-fixup case but
+  a genuine denial-of-service bug for any `0**(negative or zero
+  non-literal)` HAL/S expression.
+- **Error 15** (`SCALAR` too large for `INTEGER` conversion → the
+  maximum representable integer value): `value.c`'s
+  `halmat_scalar_to_integer()`. The primary source's literal fixup value
+  is 32767/-32768 (HAL/S's 16-bit single-precision `INTEGER` halfword),
+  but yaHALMAT2 has never modeled an `INTEGER` SINGLE/DOUBLE precision
+  distinction — every `INTEGER` is a plain `int32_t` throughout, and
+  every other `INTEGER` opcode already treats values above 32767 as
+  ordinary unclamped 32-bit integers — so `INT32_MAX`/`INT32_MIN` (this
+  emulator's own actual representable range) is used instead, for
+  consistency with the rest of the interpreter rather than literal
+  primary-source fidelity. This also fixed a latent undefined-behavior
+  bug independent of the App. C fixup itself: the previous plain
+  `(int32_t)round(double)` cast is undefined behavior in C for any
+  double outside `int32_t`'s range.
+
+**A separate, deeper bug found via this same fixture, not itself an
+App. C error**: verifying error 27's fix end-to-end against
+`029-DATATYPES.hal`'s "matrix exponentiation" section (`A2B**2`,
+`A2B**(-1)`, `A2B**0`) showed all three producing the *same* wrong
+result. Root cause, confirmed by decoding the real compiled HALMAT
+directly: [MINV](class-3/MINV.md) is HAL/S's **general matrix-
+exponentiation opcode** (`M**N` for any integer `N`), not INVERSE-only
+as previously documented — an earlier session's only tested case
+(`A**(-1)`) saw the second operand's `DATA` field (a literal-table
+*index*, value 18) and, since 18 didn't look like -1, concluded it was
+some unrelated compile-time constant rather than recognizing it as an
+ordinary `QUAL`=5=`LIT` operand whose *referenced* literal-table slot
+holds the real exponent. This session's three-value trace (literal
+table entries `2.0`/`-1.0`/`0.0` for the three `A2B**N` calls) makes the
+pattern unambiguous. Fixed by having `OP_MINV` read and dispatch on the
+exponent: `N=0` → identity, `N=-1` → inverse (with error 27's own
+identity-matrix fixup for a singular input), `N>0` → `N`-fold self-
+multiplication via a new shared `matrix_multiply_square()` helper,
+other negative `N` → inverse-then-power by analogy (not independently
+confirmed against a real compile). See [MINV](class-3/MINV.md) for the
+full trace.
+
+**Also found, not fixed (documented as open items)**: `SUBBITn TO
+m(argument)` (the *subscripted* form of `SUBBIT`, error 30 territory)
+is confirmed unimplemented — only the whole-argument form is (see
+[ITOQ](class-1/ITOQ.md)'s own "Unresolved Questions"). Whether a
+same-unit `FUNCTION` that falls through to `CLOSE` without executing a
+`RETURN` (error 14, "standard fixup: Continue") is handled at all is
+unclear — `interp_copy_external_call_result()` has an explicit "external
+function returned no value" check for *cross-unit* calls, but no
+same-unit equivalent was found; not investigated further this session,
+since it's a control-flow question distinct in kind from this session's
+arithmetic/library-function fixups and deserves its own dedicated look.
+
+**Regression fixtures**: `src/tests/hal/test_errfix_matrix.hal` (errors
+25/27/28 plus the MINV exponentiation fix), `test_errfix_scalar.hal`
+(errors 4/5/6/7/24), `test_errfix_trig.hal` (errors 8/11/15). All three
+compiled and verified against real `HALSFC` output, not just hand-
+derived expected values.
 
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 

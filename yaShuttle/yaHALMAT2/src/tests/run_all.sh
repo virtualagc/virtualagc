@@ -104,6 +104,34 @@ run ./run_local_fixture.sh vshp "$(printf ' 1.0000000E+00\n 2.0000000E+00\n 3.00
 run ./run_local_fixture.sh bfnc "$(printf ' 1.4142132E+00\n 3.5000000E+00\n-1.0000000E+00\n 2.0000000E+00\n 5.0000000E+00')"
 run ./run_local_fixture.sh minv "$(printf ' 5.9999996E-01\n-6.9999999E-01\n-1.9999999E-01\n 3.9999998E-01')"
 run ./run_local_fixture.sh bfnc_inv "$(printf ' 5.9999996E-01\n 3.9999998E-01')"
+# BFNC selector 3 (DET, class-0/BFNC.md): a whole-MATRIX argument (`WRITE(6)
+# DET(A2);`) used to hit resolve_operand's arrayed-paragraph-replay guard,
+# since OP_BFNC only exempted ABVAL/UNIT/INVERSE from it, not DET -- "SYT
+# index N is a whole ARRAY/VECTOR/MATRIX referenced outside an
+# arrayed-paragraph replay".
+run ./run_local_fixture.sh bfnc_det "$(printf -- '-1.9000000E+01\n 1.8000000E+01')"
+# USA003090 App. C's group-4 "standard fixups" for execution-time errors
+# (STATUS.md's Class 0 section has the full per-error trace): errors 27
+# (INVERSE of a singular matrix -> identity, both BFNC's INVERSE selector
+# and MINV's `M**(-1)`), 28 (UNIT of a null vector -> the input vector
+# itself), and 25 (MATRIX/scalar division by zero -> the original
+# matrix). Also exercises this session's MINV finding that the opcode is
+# general matrix exponentiation (`M**N`), not INVERSE-only -- N=0/2 here.
+run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00\n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
+# Same table, the plain-SCALAR-argument errors: 5 (SQRT<0 -> sqrt(|x|)),
+# 7 (LOG<=0 -> 0: -max value, else log(|x|)), 6 (EXP>174.673 -> max
+# value), 24 (negative-base exponentiation -> |A|**B, via SEXP), and 4
+# (0**B, B<=0 -> 0, across SEXP/SPEX/SIEX's three different HALMAT
+# opcodes for "non-literal", "literal>=0", and "literal any-sign"
+# exponents respectively).
+run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0000000E+00\n 0.0000000E+00\n 0.0000000E+00')"
+# Errors 11 (TAN |arg| too large -> 1), 8 (SIN/COS |arg| too large ->
+# sqrt(2)/2), and 15 (SCALAR too large for INTEGER conversion -> the
+# maximum representable value -- this emulator's own INT32 range, since
+# INTEGER here is always a plain int32_t with no SINGLE/DOUBLE precision
+# distinction modeled, unlike the primary source's 16-bit halfword
+# default; see value.c's halmat_scalar_to_integer).
+run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n 2147483647')"
 run ./run_local_fixture.sh eron "I1=               1"
 run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"

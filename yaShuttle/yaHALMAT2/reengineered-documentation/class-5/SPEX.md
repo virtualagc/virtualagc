@@ -36,6 +36,15 @@ positive integer.
   SPEX is presumed identical by direct analogy but not independently
   re-derived from source.
 
+## Confirmed Runtime Behavior
+
+[USA003090] Appendix C error 4 ("exponentiation of zero to a power <=
+0"): a `0**0` (base zero, literal exponent zero — the only `B<=0` case
+reachable here, since SPEX's own exponent is always non-negative) gives
+a result of zero, not the ordinary `0**0=1` convention the opcode's
+repeated-multiplication loop would otherwise produce for a zero-count
+loop. Implemented in a later session; see `STATUS.md`'s Class 0 section.
+
 ## Source Analysis & Reliability
 
 Opcode (0x572) confirmed primary-source: `XSPEX(1)` array element 0 in

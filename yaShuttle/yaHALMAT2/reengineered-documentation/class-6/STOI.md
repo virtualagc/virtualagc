@@ -35,6 +35,22 @@ to this instruction — see that file for the full resolution. STOI itself
 has no special zero-handling; it simply errors or succeeds per the range
 rule above.
 
+**Overflow's exact ERROR CONDITION response, implemented in a later
+session**: [USA003090] Appendix C error 15 ("SCALAR too large for
+INTEGER conversion") gives the standard fixup as "the maximum
+representable integer value (32767 or -32768)" — HAL/S's 16-bit
+single-precision INTEGER halfword bounds. This project has never modeled
+an INTEGER SINGLE/DOUBLE precision distinction (every INTEGER is a plain
+`int32_t` throughout `interp.c`/`state.h`, with IADD/ISUB/etc. treating
+values above 32767 as ordinary unclamped 32-bit integers), so
+`halmat_scalar_to_integer` (value.c) clamps to `INT32_MAX`/`INT32_MIN`
+instead — this emulator's own actual representable range, consistent
+with every other INTEGER opcode, rather than the primary source's
+literal 16-bit bounds. Also fixes a latent undefined-behavior bug: the
+previous plain `(int32_t)round(...)` cast was UB in C for any double
+outside `int32_t`'s range. See `STATUS.md`'s Class 0 section;
+`src/tests/hal/test_errfix_trig.hal` is the regression fixture.
+
 **Rounding rule for in-range fractional values, empirically confirmed
 this session** against the reference yaHALMAT emulator (yaHALMAT2's own
 Phase 3 implementation work): compiling `I1 = INTEGER(S1);` for

@@ -87,6 +87,15 @@ integer exponent, `QUAL`=5=LIT. Same shape as [SPEX](../class-5/SPEX.md).
   a table-driven or iterative power routine — its algorithm isn't
   independently confirmed here.
 
+## Confirmed Runtime Behavior
+
+[USA003090] Appendix C error 4 ("exponentiation of zero to a power <=
+0"): `0**0` (base zero, literal exponent zero — the only `B<=0` case
+reachable here, since IPEX's own exponent is always non-negative) gives
+a result of zero, not the ordinary `0**0=1` convention a zero-count
+repeated-multiplication loop would otherwise produce. Implemented in a
+later session; see `STATUS.md`'s Class 0 section.
+
 ## Source Analysis & Reliability
 
 Opcode (0x6D2) confirmed primary-source: `XSPEX(1)` array element 1

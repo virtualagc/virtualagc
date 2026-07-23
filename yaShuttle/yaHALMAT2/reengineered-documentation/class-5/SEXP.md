@@ -25,6 +25,22 @@ type is scalar (not statically known to be integer).
 
 - HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
 
+## Confirmed Runtime Behavior
+
+Two of [USA003090] Appendix C's group-4 "standard fixups" apply here
+(implemented in a later session; see `STATUS.md`'s Class 0 section for
+the fuller citation):
+
+- Error 24 ("negative base in exponentiation," `A**B` where `A<0`):
+  result is `|A|**B` — applied unconditionally whenever the base is
+  negative, not just for the fractional-exponent cases where `pow()`'s
+  underlying log/exp implementation would otherwise return `NaN`.
+- Error 4 ("exponentiation of zero to a power <= 0," `A**B` where `A=0`
+  and `B<=0`): result is zero — not the ordinary `0**0=1` convention
+  `pow()` follows, and critically not `pow(0, negative)`'s C99 `+Inf`
+  result either, which would otherwise feed a non-finite value into
+  `halmat_scalar_from_double`'s normalization loop and hang.
+
 ## Source Analysis & Reliability
 
 Opcode (0x5AF) confirmed primary-source: `XSEXP BIT(16) INITIAL("05AF")`

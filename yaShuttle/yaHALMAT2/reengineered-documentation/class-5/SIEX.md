@@ -23,6 +23,15 @@ be positive).
 
 - HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
 
+## Confirmed Runtime Behavior
+
+[USA003090] Appendix C error 4 ("exponentiation of zero to a power <=
+0"): both reachable `B<=0` cases here (`0**0` and `0**negative`) give a
+result of zero — not the ordinary `0**0=1` convention, and critically
+not an aborting division-by-zero either, since a negative-exponent SIEX
+computes `1/base**|B|` and `base=0` would otherwise divide by zero.
+Implemented in a later session; see `STATUS.md`'s Class 0 section.
+
 ## Source Analysis & Reliability
 
 Opcode (0x571) confirmed primary-source: `XSIEX BIT(16) INITIAL("0571")`

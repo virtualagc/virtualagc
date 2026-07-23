@@ -22,6 +22,14 @@ inline-vector/matrix-loop note in
 
 - HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
 
+## Confirmed Runtime Behavior
+
+[USA003090] Appendix C error 25 ("VECTOR/MATRIX division by zero"):
+result is the original matrix, unchanged — not a runtime abort. Shares
+its implementation (and this same fixup) with [VSDV](../class-4/VSDV.md)
+in `interp.c`'s combined `OP_MSPR`/`OP_MSDV`/`OP_VSPR`/`OP_VSDV` case.
+Implemented in a later session; see `STATUS.md`'s Class 0 section.
+
 ## Source Analysis & Reliability
 
 Opcode (0x3A6) confirmed primary-source: part of the `XMSDV(2)` array

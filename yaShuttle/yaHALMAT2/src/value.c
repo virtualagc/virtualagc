@@ -57,8 +57,24 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
      * to-even reading can't be distinguished from this data (-8 is
      * itself even) but round()'s ties-away-from-zero already matches
      * every observed case exactly, so there's no evidence to prefer the
-     * more complex ties-to-even rule). See class-6/STOI.md. */
-    return (int32_t)round(halmat_scalar_to_double(s));
+     * more complex ties-to-even rule). See class-6/STOI.md.
+     *
+     * USA003090 App. C error 15 ("SCALAR too large for INTEGER
+     * conversion"): standard fixup is "the maximum representable integer
+     * value" -- the primary source gives 32767/-32768 (HAL/S's 16-bit
+     * single-precision INTEGER), but this project has never modeled an
+     * INTEGER SINGLE/DOUBLE precision distinction (every INTEGER is a
+     * plain int32_t throughout interp.c/state.h), so INT32_MAX/INT32_MIN
+     * are this emulator's own actual representable range -- the
+     * literal 16-bit bounds would be inconsistent with every other
+     * INTEGER opcode (IADD/ISUB/etc.) already treating values above
+     * 32767 as ordinary, un-clamped 32-bit integers. Without this clamp,
+     * the plain `(int32_t)round(...)` cast below is undefined behavior
+     * in C for any double outside int32_t's range. */
+    double d = round(halmat_scalar_to_double(s));
+    if (d >= 2147483647.0) return INT32_MAX;
+    if (d <= -2147483648.0) return INT32_MIN;
+    return (int32_t)d;
 }
 
 double halmat_scalar_to_double(halmat_scalar_t s) {
