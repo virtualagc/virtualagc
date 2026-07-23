@@ -62,6 +62,31 @@ number* sits on).
   question is now resolved for both the simple and I/O-control-specifier
   cases.
 
+## Confirmed Runtime Behavior
+
+**Data-field separator, fixed in a later session.** [USA003087] Sec.
+12.3 (PDF p. 12-7): "Data fields are read from left to right along the
+line. The device expects each data field to be separated from the next
+by a comma and/or at least one blank." yaHALMAT2's `OP_READ`/`OP_RDAL`
+handler (`interp.c`) reads each field with a plain `fscanf("%lf"/"%ld"/
+"%s", ...)` — those conversions skip leading whitespace on their own,
+but not a leading comma, so any comma-involving input (`"1,2,3"`,
+`"1, 2, 3"`, etc. — anything other than pure blank-separated) failed
+outright with "end of input or malformed SCALAR/INTEGER" the moment
+`fscanf` hit the comma. Found via a user report against
+`037-ROOTS.hal`'s `READ(5) A, B, C;`. Fixed with a small
+`read_skip_separator()` helper, called before every field except the
+first, that consumes optional whitespace, then at most one comma, then
+whitespace again. Also implements that same section's "two consecutive
+separating commas" rule ("the value of the data item which would have
+been changed by reading a data field between the commas, is instead
+left untouched"): a second comma immediately following the first (no
+value in between) leaves the current item's destination unmodified and
+is pushed back for the *next* field's own separator to consume. See
+`STATUS.md`'s Class 0 section for the fuller trace;
+`src/tests/hal/test_read_comma.hal` is the regression fixture (covers
+both the plain-comma case and the double-comma "leave unchanged" rule).
+
 ## Source Analysis & Reliability
 
 Opcode (0x01F) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.

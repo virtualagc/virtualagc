@@ -92,6 +92,16 @@ run ./run_debug_link_fixture.sh
 run ./run_local_fixture.sh write_lit "          5      3.5000000E+00"
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
 run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"
+# USA003087 Sec. 12.3: READ data fields are separated by "a comma and/or
+# at least one blank" -- fscanf's own %lf/%ld/%s skip leading whitespace
+# but not a leading comma, so any comma-separated READ input (user-
+# reported against 037-ROOTS.hal's `READ(5) A, B, C;`) previously failed
+# outright with "end of input or malformed SCALAR/INTEGER" on the first
+# comma. Also exercises that section's "two consecutive separating
+# commas" rule (the field between them is left untouched, not read as
+# zero/blank) -- S2 stays at its pre-READ value (99.5) across the "1,,3"
+# double comma.
+run ./run_read_fixture.sh read_comma "$(printf '1,,3\n42\n')" "$(printf -- ' 1.0000000E+00      9.9500000E+01      3.0000000E+00              42')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
@@ -159,6 +169,16 @@ run ./run_local_fixture.sh eron "I1=               1"
 run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"
+# EXIT loop-label; (found while chasing the READ comma-separator bug
+# above, against the same user-supplied 037-ROOTS.hal): compiles to a
+# plain BRA targeting the enclosing DTST/ETST pair's own bookkeeping-
+# label number, which precompute_labels() never registered anywhere
+# (DTST/ETST aren't OP_LBL, and precompute_loop_targets() only indexes
+# by instruction position, never by that label number) -- every EXIT
+# statement failed with "branch to undefined label N". See
+# precompute_labels()'s own updated comment for why the landing position
+# is ETST's position + 1, not ETST's position itself.
+run ./run_local_fixture.sh exit_loop "DONE               3"
 run ./run_local_fixture.sh struct "$(printf 'TEQU-TRUE\nTNEQ-TRUE\n          5\nTASN-COPIED')"
 run ./run_local_fixture.sh adlp "$(printf ' 3.0000000E+00\n 3.0000000E+00\n 3.0000000E+00')"
 run ./run_local_fixture.sh lfnc "$(printf ' 9.0000000E+00\n 2.0000000E+00')"

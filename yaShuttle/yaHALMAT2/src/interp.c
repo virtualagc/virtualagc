@@ -9,6 +9,7 @@
 
 #include "interp.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <math.h>
 #include <stdarg.h>
@@ -1383,7 +1384,25 @@ static void precompute_stmt_for_pc(halmat_state_t *state) {
  * nest the way DTST/CTST/ETST do (see class-0/LBL.md, class-0/BRA.md,
  * class-0/FBRA.md). Confirmed against a real compiled test_ifelse.hal
  * trace: the branch target is LBL's own position (a no-op instruction),
- * not position+1 -- falling through it naturally lands one past it. */
+ * not position+1 -- falling through it naturally lands one past it.
+ *
+ * Also registers `EXIT loop-label;`'s own target here: confirmed by
+ * compiling `037-ROOTS.hal` (a user-supplied fixture using `EXIT
+ * ROOTLOOP;` to break out of a `DO WHILE TRUE`) that EXIT compiles to
+ * a completely ordinary BRA, targeting the *same* INL bookkeeping-label
+ * number the enclosing DTST/ETST pair both carry as their own sole
+ * operand (class-0/DTST.md, class-0/ETST.md) -- previously unregistered
+ * anywhere, since DTST/ETST aren't OP_LBL and precompute_loop_targets()
+ * (which does understand DTST/ETST pairing) only ever indexes by
+ * instruction *position*, never by this label *number*, so a real EXIT
+ * statement always failed with "branch to undefined label N". Landing
+ * position is ETST's own position **+ 1**, not ETST's position itself
+ * (unlike the OP_LBL case above): OP_ETST's own handler, reached by
+ * ordinary fall-through at the bottom of a loop body, unconditionally
+ * branches back to retest the loop condition (etst_back_target) rather
+ * than continuing past itself, so landing exactly on ETST would loop
+ * forever instead of exiting -- `i + 1` is the identical "loop actually
+ * exited" position CTST's own ctst_exit_target already uses. */
 static void precompute_labels(halmat_state_t *state) {
     state->label_pos = malloc(HALMAT_LABEL_MAX * sizeof(size_t));
     for (size_t i = 0; i < HALMAT_LABEL_MAX; i++) {
@@ -1394,6 +1413,9 @@ static void precompute_labels(halmat_state_t *state) {
         if (ins->opcode == OP_LBL && ins->operand_count == 1) {
             uint16_t label = ins->operands[0].data;
             if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i;
+        } else if (ins->opcode == OP_ETST && ins->operand_count == 1) {
+            uint16_t label = ins->operands[0].data;
+            if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i + 1;
         }
     }
 }
@@ -1822,6 +1844,38 @@ static void flush_write(halmat_state_t *state, FILE *out) {
     fputc('\n', out);
     state->io_pending.active = false;
     state->io_pending.item_count = 0;
+}
+
+/* Consumes the separator USA003087 Sec. 12.3 requires between two READ
+ * data fields ("a comma and/or at least one blank") before the *next*
+ * field is read -- not called before the very first field of a READ
+ * list, which needs none. `fscanf`'s own "%lf"/"%ld"/"%s" conversions
+ * already skip leading whitespace, but not a leading comma, so
+ * "1,2,3" previously failed outright on the comma right after the "1"
+ * (a real user-reported bug: yaHALMAT2 accepted "1 2 3" but not any
+ * format involving a comma at all). Skips whitespace, then at most one
+ * comma, then whitespace again. Also implements that section's "two
+ * consecutive separating commas" rule ("the value of the data item
+ * which would have been changed...is instead left untouched"): if a
+ * second comma immediately follows the first (only whitespace between
+ * them), it's pushed back for the *next* field's own separator to
+ * consume, and this function returns true so the caller skips reading
+ * a value for the current field entirely, leaving its destination at
+ * whatever value it already held. */
+static bool read_skip_separator(FILE *in) {
+    int c;
+    while ((c = fgetc(in)) != EOF && isspace(c)) {}
+    if (c != ',') {
+        if (c != EOF) ungetc(c, in);
+        return false;
+    }
+    while ((c = fgetc(in)) != EOF && isspace(c)) {}
+    if (c == ',') {
+        ungetc(c, in);
+        return true;
+    }
+    if (c != EOF) ungetc(c, in);
+    return false;
 }
 
 /* Binds `state`'s currently-open io_pending call arguments into
@@ -4621,6 +4675,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 FILE *in = state->devices[device];
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
+                    /* USA003087 Sec. 12.3: fields are separated by "a
+                     * comma and/or at least one blank" -- not needed
+                     * before the first field, and a double comma leaves
+                     * this item's destination untouched (see
+                     * read_skip_separator's own comment). */
+                    if (i > 0 && read_skip_separator(in)) continue;
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {

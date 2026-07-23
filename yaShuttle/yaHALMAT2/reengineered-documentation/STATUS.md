@@ -1053,6 +1053,55 @@ user's own modified `029-DATATYPES.hal` end-to-end again too, to confirm
 this broader change didn't disturb the original error-27 fix. Full
 `run_all.sh` suite passes.
 
+## READ comma-separator bug, and a second EXIT-statement bug found while chasing it
+
+User report, citing [USA003087] Sec. 12.3 (PDF p. 12-7, "the device
+expects each data field to be separated from the next by a comma and/or
+at least one blank") against `037-ROOTS.hal`'s `READ(5) A, B, C;`: any
+input involving a comma at all (`"1,2,3"`, `"1, 2, 3"`, ...) failed with
+"end of input or malformed SCALAR." Root cause: `interp.c`'s `OP_READ`/
+`OP_RDAL` handler reads each field with a plain `fscanf("%lf"/"%ld"/
+"%s", ...)`; those conversions skip leading whitespace on their own but
+not a leading comma, so the parse choked on the first comma it hit.
+Fixed with a new `read_skip_separator()` helper (consumes optional
+whitespace, then at most one comma, then whitespace again) called
+before every field except the first, which also implements that same
+section's "two consecutive separating commas" rule (the field between
+them is left at its prior value, not read as blank/zero) via a one-
+token lookahead/pushback. See [READ](class-0/READ.md)/
+[RDAL](class-0/RDAL.md) for the full detail;
+`src/tests/hal/test_read_comma.hal` is the regression fixture.
+
+**Verifying the fix end-to-end against the full `037-ROOTS.hal` program
+(not just the isolated READ statement) surfaced a second, unrelated bug**:
+once the comma parse succeeded, every run immediately printed "branch to
+undefined label 1" before any program output at all, no matter the input
+format — confirmed present even on the pre-fix binary, so unrelated to
+the READ change itself. Root cause: `037-ROOTS.hal`'s interactive-quit
+pattern (`ROOTLOOP: DO WHILE TRUE; ... EXIT ROOTLOOP; ... END;`) was
+never exercised by any prior fixture. `EXIT loop-label;` compiles to a
+completely ordinary `BRA`, targeting the *same* INL bookkeeping-label
+number the enclosing [DTST](class-0/DTST.md)/[ETST](class-0/ETST.md)
+pair both carry as their own sole operand — but `precompute_labels()`
+only ever registered targets from [LBL](class-0/LBL.md) instructions,
+and DTST/ETST aren't LBL, so that label number was never registered
+anywhere despite `precompute_loop_targets()` already fully
+understanding DTST/ETST pairing (it just indexes by instruction
+*position*, never by this label *number*). Fixed by having
+`precompute_labels()` also scan for `ETST` and register its own label
+number — landing at *ETST's position + 1*, not ETST's own position
+(unlike the ordinary `LBL` case): `OP_ETST`'s handler, reached by
+ordinary fall-through at the bottom of a loop body, always branches
+back to retest the condition rather than continuing past itself, so
+landing exactly on ETST would send `EXIT` into another iteration instead
+of out of the loop — `+ 1` is the identical "loop actually exited"
+position [CTST](class-0/CTST.md)'s own `ctst_exit_target` already uses.
+See [BRA](class-0/BRA.md)/[ETST](class-0/ETST.md) for the full detail;
+`src/tests/hal/test_exit_loop.hal` is the regression fixture. Re-ran the
+complete `037-ROOTS.hal` end-to-end (all five comma/blank format
+variants from the bug report, plus the real-roots code path) to confirm
+both fixes together produce a clean exit with no diagnostics.
+
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 
 Per direct user suggestion (opcode-name pattern-matching: "DCAS"/"ECAS"

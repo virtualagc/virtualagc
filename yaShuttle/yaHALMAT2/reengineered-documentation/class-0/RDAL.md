@@ -47,6 +47,12 @@ is XXST's I/O-statement-kind code `1` (vs. 0=READ, 2=WRITE).
 
 - None remaining specific to this instruction.
 
+## Confirmed Runtime Behavior
+
+Shares `interp.c`'s `OP_READ`/`OP_RDAL` handler with [READ](READ.md), so
+that file's "Confirmed Runtime Behavior" section (the USA003087 Sec.
+12.3 comma/blank data-field separator fix) applies here identically.
+
 ## Source Analysis & Reliability
 
 Opcode (0x020) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.

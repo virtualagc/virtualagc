@@ -38,6 +38,25 @@ L#2 EQU *                      <- loop-exit label (matches CTST's branch target)
 
 - None for the base case.
 
+## Confirmed Runtime Behavior
+
+**`EXIT loop-label;` targets this same construct id directly, found in a
+later session via a user report against `037-ROOTS.hal`'s `EXIT
+ROOTLOOP;`** — not just [CTST](CTST.md)'s own conditional exit branch as
+the Behavioral Description above (written before this was checked)
+implies. `interp.c`'s `precompute_labels()` now registers this label
+number too, resolving to *this instruction's own position + 1* — not
+this instruction's position itself, unlike an ordinary [LBL](LBL.md)
+target. That distinction matters: `interp.c`'s `OP_ETST` handler, when
+reached by ordinary fall-through at the bottom of a loop body, always
+branches back to retest the condition (`etst_back_target`) rather than
+continuing past itself, so landing exactly on ETST would send an EXIT
+back into another iteration instead of leaving the loop — `+ 1` is the
+identical "loop actually exited" position [CTST](CTST.md)'s own
+`ctst_exit_target` already uses. See [BRA](BRA.md)'s own updated
+"Confirmed Runtime Behavior" for the fuller trace;
+`src/tests/hal/test_exit_loop.hal` is the regression fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x00F) confirmed primary-source: `XETST BIT(16) INITIAL("00F")`

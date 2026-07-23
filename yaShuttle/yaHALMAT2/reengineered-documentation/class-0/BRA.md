@@ -40,6 +40,27 @@ trace.
   simple-target form confirmed this session — the two may differ in
   `QUAL`.
 
+## Confirmed Runtime Behavior
+
+**`EXIT loop-label;` also compiles to a plain BRA, found in a later
+session via a user report.** Its target operand carries the exact same
+INL bookkeeping-label number the enclosing `DO WHILE`/`UNTIL`'s
+[DTST](DTST.md)/[ETST](ETST.md) pair both carry as their own sole
+operand — confirmed by compiling `037-ROOTS.hal`'s `EXIT ROOTLOOP;`
+(inside `ROOTLOOP: DO WHILE TRUE; ... END;`). This previously always
+failed at runtime ("branch to undefined label N"): `precompute_labels()`
+(`interp.c`) only registered targets from [LBL](LBL.md) instructions,
+and DTST/ETST aren't LBL, so that shared bookkeeping-label number was
+never registered anywhere BRA's own runtime lookup could find — despite
+`precompute_loop_targets()` already fully understanding DTST/ETST
+pairing, since it indexes exclusively by instruction *position*, never
+by this label *number*. Fixed by having `precompute_labels()` also scan
+for `ETST` and register its own label number, pointing to *ETST's
+position + 1* (not ETST's own position, unlike the ordinary LBL case) —
+see [ETST](ETST.md)'s own note on why. `src/tests/hal/test_exit_loop.hal`
+is the regression fixture; see `STATUS.md`'s Class 0 section for the
+fuller trace.
+
 ## Source Analysis & Reliability
 
 Opcode (0x009) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
