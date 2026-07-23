@@ -178,7 +178,7 @@ found (from [MSC-01847] cross-reference or better).
 | 0x037 | TERM | Documented | High | 82 | Opcode confirmed ([##DRIVER.xpl] `XTERM`). [MSC-01847] "TERM" at HAL-1971 opcode 0x032 |
 | 0x038 | PRIO | Documented | High | 83 | Opcode confirmed ([##DRIVER.xpl] `XPRIO`); **is the `UPDATE PRIORITY` statement, not the `PRIO` built-in function** (which uses [BFNC](class-0/BFNC.md) instead) — empirically confirmed this session |
 | 0x039 | SCHD | Documented | High | 83/84 | Opcode confirmed ([##DRIVER.xpl] `XSCHD`); `SCHEDULE` statement, empirically confirmed for the base form, and the trailing-tag bitmask fully decoded from `SYNTHESI.xpl`'s `<SCHEDULE HEAD>`/`<SCHEDULE PHRASE>`/`<SCHEDULE CONTROL>` grammar rules — see [SCHD](class-0/SCHD.md) |
-| 0x03C | ERON | Documented | High | 80 | Opcode confirmed ([##DRIVER.xpl] `XERON`); handles **all** `ON ERROR`/`OFF ERROR` forms (SYSTEM/IGNORE/user-statement/OFF), empirically confirmed this session |
+| 0x03C | ERON | Documented | High | 80 | Opcode confirmed ([##DRIVER.xpl] `XERON`); handles **all** `ON ERROR`/`OFF ERROR` forms (SYSTEM/IGNORE/user-statement/OFF), empirically confirmed this session. **Session update**: the user-statement (GOTO) form's *runtime* dispatch was a no-op, a real bug found via a user report -- now implemented (registers a real handler table and performs its own normal-flow skip), see the "ON ERROR user-statement (GOTO) form" section below and [ERON](class-0/ERON.md) |
 | 0x03D | ERSE | Documented | High | 80 | Opcode confirmed ([##DRIVER.xpl] `XERSE`). `SEND ERROR` statement (§25.3, error simulation/signaling) — a genuinely distinct statement from `ON ERROR`/`OFF ERROR`, found only after exhaustively ruling out 11 variations of the latter; empirically confirmed this session |
 | 0x040 | MSHP | Documented | High | 76 | Opcode confirmed ([##DRIVER.xpl] `XMSHP` array element 0); `MATRIX(vec1,vec2,...)` shaping function (row-vector argument form, found via the compiler's own regression-test corpus), empirically confirmed — see [MSHP](class-0/MSHP.md) |
 | 0x041 | VSHP | Documented | High | 76 | Opcode confirmed ([##DRIVER.xpl] `XMSHP` array element 1). `VECTOR(...)` shaping function, empirically confirmed this session |
@@ -927,6 +927,131 @@ arithmetic/library-function fixups and deserves its own dedicated look.
 (errors 4/5/6/7/24), `test_errfix_trig.hal` (errors 8/11/15). All three
 compiled and verified against real `HALSFC` output, not just hand-
 derived expected values.
+
+## ON ERROR user-statement (GOTO) form -- ERON was a no-op at runtime
+
+Follow-up bug report, directly against the error-27 fixup above: the
+user modified `029-DATATYPES.hal` per [USA003087] Sec. 25's own worked
+`ON ERROR`/`OFF ERROR` example (PDF p. 315 et seq.) to compute the same
+singular-matrix `INVERSE` three times, trapping the middle occurrence
+with `ON ERROR$(4:27) GO TO SKIPPED;` and restoring standard behavior
+afterward with `SKIPPED: ON ERROR$(4:27) SYSTEM;`. Reported symptom: the
+`WRITE(6)` statement *immediately after* the `ON ERROR` statement never
+ran, even though no error had occurred yet — "as if the `ON ERROR`...is
+reacting to the error which has already occurred...rather than
+responding to future errors."
+
+**Evaluated against the primary source and confirmed the user's
+reading, not the implementation's.** [USA003087] Sec. 25.2's Figure
+25-3 (the section's own worked example) explicitly shows normal
+execution continuing right past an `ON ERROR` statement to the next
+real statement; the ERE only redirects flow on a **later** occurrence of
+the specified error. Root cause, confirmed by compiling the user's exact
+modified file with `HALSFC --parms="LISTING2,LSTALL"` and reading the
+resulting HALMAT directly: `OP_ERON` (`interp.c`) was a complete no-op,
+on the strength of an earlier session's own comment claiming "the
+handler code itself is skipped in normal flow by an ordinary BRA already
+emitted right after ERON." That claim doesn't hold up against
+[ERON](class-0/ERON.md)'s *own* previously-recorded compiled trace,
+which shows the skip as part of ERON's own generated object code (`BC
+7,L#1`), not a separate HALMAT instruction — and no such separate BRA
+appears anywhere in the freshly-decoded stream either. With ERON doing
+nothing, the inline compiled handler body (literally the `GO TO
+SKIPPED` HALMAT the user's statement compiles to, placed directly after
+ERON) fell through and executed unconditionally on every pass, exactly
+matching the reported symptom.
+
+Fixed in two parts (`interp.c`/`state.h`):
+
+1. **`OP_ERON`'s user-statement (`TAG`=0) form now performs the skip
+   itself**: an unconditional jump to `state->label_pos[]`'s entry for
+   its second operand's bookkeeping-label number — identically to how
+   `OP_BRA`/`OP_FBRA` already resolve their own label operands, and
+   using the *same* `state->label_pos[]` table, since `precompute_labels()`
+   already indexes every `LBL` instruction by its operand's raw `DATA`
+   value regardless of whether that operand is `SYT`-qualified (an
+   ordinary user statement label) or `INL`-qualified (the compiler's own
+   internal bookkeeping numbering) — no new precompute pass needed.
+2. **A real (if intentionally un-scoped) `ON ERROR` handler table**
+   (`state.h`'s `halmat_error_handler_t`, a flat list of registered
+   `group:member → action` entries with [USA003087] Sec. 25.2's
+   confirmed exact-code > group > all-errors precedence), so a *later*
+   real occurrence of the trapped error can find the `GO TO` target.
+   Building this exposed a second bug before it ever ran a real test:
+   the handler's own registered target must be the position right
+   *after* ERON, where the inline handler body starts — not the
+   bookkeeping-label position from step 1, which is where fall-through
+   *lands after* that body. Using the same value for both (the first
+   attempt) sent a real error back into the middle of its own "normal
+   continuation" code instead of the handler, hanging the interpreter in
+   an infinite loop the first time it actually fired -- caught by
+   testing the user's exact fixture end-to-end before considering the
+   fix done, per Maintenance.md's own loop.
+
+Only one App. C "standard fixup" site (BFNC's `INVERSE` selector and
+`MINV`'s `M**(-1)`, error 27 — the specific case under test) was wired
+to consult this table; every other fixup site added earlier this
+session still applies its fixup unconditionally. `IGNORE`'s exact effect
+on a value-producing built-in, `AND SET`/`RESET`/`SIGNAL`, and
+[USA003087] Sec. 25.1's per-block dynamic-scoping rule (unwinding a
+`PROCEDURE`/`FUNCTION`'s own modifications on return) are flagged as
+open follow-ups — see [ERON](class-0/ERON.md)'s own updated
+documentation for the full detail. `src/tests/hal/test_eron_goto.hal` is
+the new regression fixture, verified against the user's own modified
+`029-DATATYPES.hal` end-to-end as well.
+
+## ON ERROR wired into every implemented Appendix C fixup site
+
+Direct follow-up instruction: "Implement ON ERROR for all other runtime
+errors listed in Appendix C" — the previous session's fix wired only
+error 27 (INVERSE-of-a-singular-matrix, the one the original bug report
+exercised) into the new `ON ERROR` handler table; every other App. C
+"standard fixup" site added earlier in the same session still applied
+its fixup unconditionally.
+
+Generalized the existing per-error helper (renamed from
+`inverse_singular_should_apply_fixup` to `arithmetic_error_should_apply_
+fixup`, now taking the error *member* number as a parameter rather than
+hardcoding 27) and called it from every remaining fixup site before
+applying the fixup:
+
+- `BFNC`'s shared plain-SCALAR arithmetic case (`SQRT`/`EXP`/`LOG`/
+  `SIN`/`COS`/`TAN`, errors 5/6/7/8/11/12) — restructured from a flat
+  "compute r, then always write it" shape into "detect the error
+  condition, consult the handler, only then decide the fixup value,"
+  with a `redirected` flag threaded back out of the inner `switch
+  (ins->tag)` (a plain `break` there only exits that switch, not the
+  whole case, so the post-switch VAC-write needed an explicit guard).
+- `BFNC`'s `UNIT` selector (error 28).
+- `SEXP`/`SPEX`/`SIEX` (error 4, zero base to a non-positive power) and
+  `SEXP` again (error 24, negative base) — `SEXP`'s error-24 branch was
+  also tightened while here: the old code ran `pow(fabs(base_d), ...)`
+  unconditionally in its "else" branch, which was harmless (`fabs` of a
+  non-negative number is a no-op) but obscured that the fixup is only
+  supposed to apply for a genuinely negative base; now split three ways
+  (zero-nonpositive / negative / ordinary) so each branch's intent
+  matches what it actually does.
+- `IPEX` (error 4, the `INTEGER`-base 0**0 case).
+- The combined `OP_MSPR`/`OP_MSDV`/`OP_VSPR`/`OP_VSDV` case (error 25,
+  VECTOR/MATRIX division by zero).
+- `OP_STOI` (error 15, SCALAR-to-INTEGER overflow) — this one needed a
+  small duplicated range check rather than reading the condition back
+  out of `halmat_scalar_to_integer()` (value.c), since that function is
+  a generic INTEGER coercion called from many unrelated sites (array
+  subscripts, etc.) that have nothing to do with the HAL/S-level `STOI`
+  conversion error 15 is specifically about — consulting the handler
+  table inside the generic function would have fired spuriously for all
+  of them.
+
+Verified with a new fixture (`src/tests/hal/test_eron_goto_appc.hal`)
+that registers a `GO TO` handler for four of the newly-wired errors in
+turn (`SQRT`<0, `UNIT` null vector, `MATRIX`/scalar division by zero,
+and `0**0` zero-to-nonpositive-power — spanning three different opcode
+families) and confirms each one redirects correctly, then confirms
+`SYSTEM` restores the ordinary fixup afterward. Re-ran the
+user's own modified `029-DATATYPES.hal` end-to-end again too, to confirm
+this broader change didn't disturb the original error-27 fix. Full
+`run_all.sh` suite passes.
 
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 

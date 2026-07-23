@@ -50,6 +50,13 @@ literal 16-bit bounds. Also fixes a latent undefined-behavior bug: the
 previous plain `(int32_t)round(...)` cast was UB in C for any double
 outside `int32_t`'s range. See `STATUS.md`'s Class 0 section;
 `src/tests/hal/test_errfix_trig.hal` is the regression fixture.
+`OP_STOI` also consults [ERON](../class-0/ERON.md)'s registered `ON
+ERROR` handler table before applying this fixup (follow-up session), via
+its own duplicated range check rather than reading it back out of
+`halmat_scalar_to_integer()` itself -- that function is a generic
+INTEGER coercion used by many unrelated call sites (array subscripts,
+etc.) that aren't the HAL/S-level `STOI` conversion error 15 is
+specifically about.
 
 **Rounding rule for in-range fractional values, empirically confirmed
 this session** against the reference yaHALMAT emulator (yaHALMAT2's own

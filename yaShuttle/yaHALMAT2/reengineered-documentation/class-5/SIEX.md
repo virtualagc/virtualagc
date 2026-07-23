@@ -31,6 +31,9 @@ result of zero — not the ordinary `0**0=1` convention, and critically
 not an aborting division-by-zero either, since a negative-exponent SIEX
 computes `1/base**|B|` and `base=0` would otherwise divide by zero.
 Implemented in a later session; see `STATUS.md`'s Class 0 section.
+Consults [ERON](../class-0/ERON.md)'s registered `ON ERROR` handler
+table before applying the fixup (follow-up session) — a `GO TO` handler
+registered for error 4:4 redirects execution there instead.
 
 ## Source Analysis & Reliability
 

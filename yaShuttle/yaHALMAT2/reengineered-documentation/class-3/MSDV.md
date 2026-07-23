@@ -29,6 +29,9 @@ result is the original matrix, unchanged — not a runtime abort. Shares
 its implementation (and this same fixup) with [VSDV](../class-4/VSDV.md)
 in `interp.c`'s combined `OP_MSPR`/`OP_MSDV`/`OP_VSPR`/`OP_VSDV` case.
 Implemented in a later session; see `STATUS.md`'s Class 0 section.
+Consults [ERON](../class-0/ERON.md)'s registered `ON ERROR` handler
+table before applying the fixup (follow-up session) — a `GO TO` handler
+registered for error 4:25 redirects execution there instead.
 
 ## Source Analysis & Reliability
 

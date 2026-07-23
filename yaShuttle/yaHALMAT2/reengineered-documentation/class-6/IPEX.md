@@ -94,7 +94,10 @@ integer exponent, `QUAL`=5=LIT. Same shape as [SPEX](../class-5/SPEX.md).
 reachable here, since IPEX's own exponent is always non-negative) gives
 a result of zero, not the ordinary `0**0=1` convention a zero-count
 repeated-multiplication loop would otherwise produce. Implemented in a
-later session; see `STATUS.md`'s Class 0 section.
+later session; see `STATUS.md`'s Class 0 section. Consults
+[ERON](../class-0/ERON.md)'s registered `ON ERROR` handler table before
+applying the fixup (follow-up session) — a `GO TO` handler registered
+for error 4:4 redirects execution there instead.
 
 ## Source Analysis & Reliability
 

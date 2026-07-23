@@ -123,6 +123,13 @@ out of scope until those selectors exist):
   `tan()` call itself returning a non-finite value, rather than
   replicating the primary source's own proximity-to-singularity test).
 
+**Follow-up session**: every one of the fixups above now consults
+[ERON](ERON.md)'s registered `ON ERROR` handler table first — a `GO TO`
+handler registered for the matching error redirects execution there
+instead of applying the fixup, per [ERON](ERON.md)'s own "Confirmed
+Runtime Behavior" section (which also covers every other App. C fixup
+site this project implements, not just this opcode's).
+
 See `STATUS.md`'s Class 0 section for the fuller citation and per-error
 trace; `src/tests/hal/test_errfix_matrix.hal`/`test_errfix_scalar.hal`/
 `test_errfix_trig.hal` are the regression fixtures.

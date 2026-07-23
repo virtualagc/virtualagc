@@ -118,6 +118,29 @@ run ./run_local_fixture.sh bfnc_det "$(printf -- '-1.9000000E+01\n 1.8000000E+01
 # matrix). Also exercises this session's MINV finding that the opcode is
 # general matrix exponentiation (`M**N`), not INVERSE-only -- N=0/2 here.
 run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00\n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
+# ON ERROR's user-statement (GOTO) form (class-0/ERON.md), USA003087 Sec.
+# 25 -- a user-reported bug against a modified 029-DATATYPES.hal (adding
+# ON ERROR/OFF ERROR around the INVERSE-of-a-singular-matrix section):
+# the statement immediately after `ON ERROR$(4:27) GO TO SKIPPED;` was
+# being skipped even though no error had occurred yet, as if ON ERROR
+# reacted to a *past* error rather than arming a handler for a *future*
+# one. Root cause: OP_ERON was a complete no-op, so the inline compiled
+# handler body (the `GO TO SKIPPED` itself, placed directly after ERON
+# in the HALMAT stream) executed unconditionally on normal fall-through
+# instead of being skipped past to the compiler's own "bookkeeping
+# label" -- exactly the branch ERON.md's own compiled trace already
+# showed as part of ERON's *own* object code ("BC 7,L#1 <- unconditional
+# branch skipping the handler code in normal flow"), not a separate
+# HALMAT instruction as an earlier session's comment here assumed.
+run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP      1.0000000E+00      0.0000000E+00\n                 0.0000000E+00      1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE      1.0000000E+00      0.0000000E+00\n                   0.0000000E+00      1.0000000E+00')"
+# Per direct instruction, every App. C fixup site implemented this
+# session now consults the ON ERROR table (not just INVERSE's error 27,
+# the one a bug report happened to exercise) -- spot-checks a GOTO
+# handler firing at four of them across three different opcode families
+# (BFNC's shared arithmetic case for SQRT/error 5, BFNC's UNIT/error 28,
+# the combined MSPR/MSDV/VSPR/VSDV case/error 25, and SPEX/error 4), plus
+# confirming SYSTEM correctly restores the ordinary fixup afterward.
+run ./run_local_fixture.sh eron_goto_appc "$(printf -- 'AFTER SQRT TRAP\nAFTER UNIT TRAP\nAFTER MDIV TRAP\nAFTER ZEROPOW TRAP\nRESTORED SQRT      2.0000000E+00')"
 # Same table, the plain-SCALAR-argument errors: 5 (SQRT<0 -> sqrt(|x|)),
 # 7 (LOG<=0 -> 0: -max value, else log(|x|)), 6 (EXP>174.673 -> max
 # value), 24 (negative-base exponentiation -> |A|**B, via SEXP), and 4

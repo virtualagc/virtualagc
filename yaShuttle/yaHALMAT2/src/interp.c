@@ -233,6 +233,30 @@
 #define HAL_S_MAX_REPRESENTABLE 7.2370051459731155e75 /* errors 6/7/9/12 */
 #define HAL_S_SIN_COS_OVERFLOW_RESULT 0.70710678118654752 /* sqrt(2)/2, error 8 */
 
+/* USA003090 Appendix C's error grouping/numbering (page 199: "classified
+ * as group 4 errors"; the table's own "ERROR NUMBER" column is the
+ * member number within that group) -- ON ERROR's group:member operand
+ * (state.h's halmat_error_handler_t) is specified against these same
+ * numbers by a HAL/S program, e.g. `ON ERROR$(4:27) ...;`. One constant
+ * per App. C error this interpreter actually implements the standard
+ * fixup for (every one now also consults arithmetic_error_should_apply_
+ * fixup() below before applying it, unlike the first session that wired
+ * only error 27 through, per direct instruction to cover every listed
+ * error, not just the one a bug report happened to exercise). */
+#define HAL_S_ERROR_GROUP_ARITHMETIC 4
+#define HAL_S_ERROR_ZERO_TO_NONPOSITIVE_POWER 4
+#define HAL_S_ERROR_SQRT_NEGATIVE 5
+#define HAL_S_ERROR_EXP_OVERFLOW 6
+#define HAL_S_ERROR_LOG_NONPOSITIVE 7
+#define HAL_S_ERROR_SIN_COS_OVERFLOW 8
+#define HAL_S_ERROR_TAN_OVERFLOW 11
+#define HAL_S_ERROR_TAN_SINGULARITY 12
+#define HAL_S_ERROR_SCALAR_TO_INTEGER_OVERFLOW 15
+#define HAL_S_ERROR_NEGATIVE_BASE_EXPONENT 24
+#define HAL_S_ERROR_VECTOR_MATRIX_DIVIDE_BY_ZERO 25
+#define HAL_S_ERROR_INVERSE_SINGULAR 27
+#define HAL_S_ERROR_UNIT_NULL_VECTOR 28
+
 typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR, RV_BITS } rv_kind_t;
 
 typedef struct {
@@ -427,6 +451,66 @@ static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, ui
     slot->field_syt = field_syt;
     slot->copy_index = copy_index;
     return &slot->value;
+}
+
+/* Finds the active ON ERROR-registered handler for (group, member), or
+ * NULL if none is registered (the default/SYSTEM "standard fixup"
+ * applies -- USA003090 Appendix C). USA003087 Sec. 25.2's confirmed
+ * precedence order: an exact group:member entry beats a group-only
+ * entry beats an all-errors entry (halmat_error_handler_t's group/
+ * member == -1 conventions, state.h). Only a flat/global table is
+ * searched -- see halmat_error_handler_t's own comment on the missing
+ * per-block dynamic-scoping rule. */
+static halmat_error_handler_t *find_error_handler(halmat_state_t *state, int group, int member) {
+    halmat_error_handler_t *exact = NULL, *by_group = NULL, *all = NULL;
+    for (size_t i = 0; i < state->error_handler_count; i++) {
+        halmat_error_handler_t *h = &state->error_handlers[i];
+        if (h->group == group && h->member == member) exact = h;
+        else if (h->group == group && h->member == -1) by_group = h;
+        else if (h->group == -1) all = h;
+    }
+    if (exact) return exact;
+    if (by_group) return by_group;
+    return all;
+}
+
+/* Registers an ON ERROR modification for (group, member) -- USA003087
+ * Sec. 25.2: re-registering the same specification replaces the
+ * existing entry ("erasing memory of the previous recovery action")
+ * rather than adding a second one. */
+static void register_error_handler(halmat_state_t *state, int group, int member, halmat_error_action_t action, size_t goto_pc) {
+    for (size_t i = 0; i < state->error_handler_count; i++) {
+        halmat_error_handler_t *h = &state->error_handlers[i];
+        if (h->group == group && h->member == member) {
+            h->action = action;
+            h->goto_pc = goto_pc;
+            return;
+        }
+    }
+    if (state->error_handler_count >= state->error_handler_capacity) {
+        size_t new_cap = state->error_handler_capacity ? state->error_handler_capacity * 2 : 8;
+        state->error_handlers = realloc(state->error_handlers, new_cap * sizeof(halmat_error_handler_t));
+        state->error_handler_capacity = new_cap;
+    }
+    halmat_error_handler_t *h = &state->error_handlers[state->error_handler_count++];
+    h->group = group;
+    h->member = member;
+    h->action = action;
+    h->goto_pc = goto_pc;
+}
+
+/* OFF ERROR (USA003087 Sec. 25.2): removes a previously-registered
+ * modification with the same group:member specification, a no-op if
+ * none exists. */
+static void unregister_error_handler(halmat_state_t *state, int group, int member) {
+    for (size_t i = 0; i < state->error_handler_count; i++) {
+        if (state->error_handlers[i].group == group && state->error_handlers[i].member == member) {
+            memmove(&state->error_handlers[i], &state->error_handlers[i + 1],
+                    (state->error_handler_count - i - 1) * sizeof(halmat_error_handler_t));
+            state->error_handler_count--;
+            return;
+        }
+    }
 }
 
 /* Resolves a QUAL_XPT operand (class-0/EXTN.md's "extended pointer",
@@ -886,6 +970,27 @@ static void fill_identity_matrix(const halmat_scalar_t *in, int n, halmat_scalar
     for (int r = 0; r < n; r++)
         for (int c = 0; c < n; c++)
             out[r * n + c] = (r == c) ? halmat_scalar_from_integer(1, dbl) : halmat_scalar_zero(dbl);
+}
+
+/* Consults the ON ERROR table (state.h's halmat_error_handler_t, OP_ERON)
+ * for group-4 (USA003090 Appendix C) `member` on a fixup-eligible
+ * runtime error -- shared by every App. C "standard fixup" call site
+ * this interpreter implements. If a GOTO handler is registered,
+ * redirects `*pc`/`*branched` there and returns false -- the caller must
+ * not write any result (the interrupted assignment/expression never
+ * completes, matching USA003087 Sec. 25.2 Figure 25-3) and should just
+ * `break` out of its own case without producing a value. Otherwise
+ * (SYSTEM, IGNORE, or no handler -- see OP_ERON's own comment on
+ * IGNORE's unconfirmed exact semantics here) returns true: the caller
+ * should apply its own standard fixup and continue as before. */
+static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int member, size_t *pc, bool *branched) {
+    halmat_error_handler_t *h = find_error_handler(state, HAL_S_ERROR_GROUP_ARITHMETIC, member);
+    if (h && h->action == HALMAT_ERRACT_GOTO) {
+        *pc = h->goto_pc;
+        *branched = true;
+        return false;
+    }
+    return true;
 }
 
 /* Square n x n matrix product, out = a * b -- shared by OP_MMPR (below)
@@ -1609,6 +1714,11 @@ void interp_cleanup(halmat_state_t *state) {
     state->struct_fields = NULL;
     state->struct_field_count = 0;
     state->struct_field_capacity = 0;
+
+    free(state->error_handlers);
+    state->error_handlers = NULL;
+    state->error_handler_count = 0;
+    state->error_handler_capacity = 0;
 }
 
 /* Emits one already-formatted WRITE data field, honoring the standard
@@ -2003,31 +2113,109 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * "brackets no HALMAT loop body at all". */
                 break;
 
-            case OP_ERON:
             case OP_ERSE:
-                /* ON ERROR/OFF ERROR (ERON, class-0/ERON.md) and SEND
-                 * ERROR (ERSE, class-0/ERSE.md) register/simulate error-
-                 * handling metadata for HAL/S's ERROR CONDITION recovery
-                 * mechanism (per the user-supplied-statement form's own
-                 * confirmed trace, the handler code itself is skipped in
-                 * normal flow by an ordinary BRA already emitted right
-                 * after ERON -- not something ERON needs to act on). A
-                 * genuine no-op here is therefore correct for normal
-                 * (no-runtime-error) execution. What's NOT implemented:
-                 * this interpreter's existing runtime-error path (fail(),
-                 * used uniformly for divide-by-zero, singular MINV, out-
-                 * of-range subscripts, etc.) never consults an ON ERROR
-                 * table -- every runtime error is unconditionally fatal
-                 * regardless of any ON ERROR IGNORE/SYSTEM/handler-
-                 * statement modification a program may have set up, and
-                 * ERSE's SEND ERROR doesn't actually simulate a
-                 * recovery action. USA003090 Appendix C is understood to
-                 * document HAL/S's execution-time-error response
-                 * conventions in detail, but wasn't available to consult
-                 * in this session -- wiring real ON ERROR dispatch into
-                 * every existing fail() call site is deferred rather
-                 * than guessed at. */
+                /* SEND ERROR (ERSE, class-0/ERSE.md) -- which opcode this
+                 * project's own compiler actually emits it as remains
+                 * genuinely unresolved (see ERSE.md; every tested ON/OFF
+                 * ERROR variation, 11 total, turned out to compile to
+                 * ERON instead). Not implemented -- a no-op here doesn't
+                 * simulate a recovery action, but nothing currently
+                 * reaches this case at all. */
                 break;
+
+            case OP_ERON: {
+                /* ON ERROR/OFF ERROR (class-0/ERON.md). `ins->tag` is a
+                 * 4-way discriminant confirmed against real compiled
+                 * HALMAT: 0=user-statement (GOTO) form, 1=SYSTEM,
+                 * 2=IGNORE, 3=OFF. operand[0] is the packed error
+                 * group:member specification (DATA=group, 255="all
+                 * groups"; TAG1=member, 63="all members in group").
+                 *
+                 * **Session finding, correcting an earlier session's
+                 * documentation error**: for the user-statement (GOTO)
+                 * form, ERON.md's own compiled trace already shows
+                 * "BC 7,L#1 <- unconditional branch skipping the handler
+                 * code in normal flow" as part of ERON's *own* generated
+                 * object code -- not a separate BRA HALMAT instruction
+                 * emitted after it, as an earlier session's comment here
+                 * mistakenly assumed (no such separate BRA exists in the
+                 * HALMAT stream; confirmed by decoding a real compile of
+                 * `ON ERROR$(4:27) GO TO SKIPPED;` directly). That
+                 * mistaken assumption made this whole case a no-op,
+                 * which left the inline handler body (the compiled GOTO
+                 * itself, sitting directly after ERON) executing
+                 * unconditionally on every pass through normal flow --
+                 * exactly the "line after ON ERROR never runs" bug a
+                 * user report against a modified `029-DATATYPES.hal`
+                 * (USA003087 Sec. 25 example) diagnosed. Fixed by having
+                 * this form perform that same unconditional skip itself,
+                 * identically to OP_BRA/OP_FBRA's own `state->label_pos[]`
+                 * lookup (populated by precompute_labels() from *any*
+                 * OP_LBL instruction regardless of its operand's SYT/INL
+                 * qualifier, so the compiler's internal "bookkeeping
+                 * label" numbering -- confirmed distinct from ordinary
+                 * SYT-indexed statement labels like the `SKIPPED:` in
+                 * the trace above -- resolves through the exact same
+                 * table BRA already uses).
+                 *
+                 * **Still not implemented**: USA003087 Sec. 25.1's per-
+                 * block dynamic-scoping rule (a modification made inside
+                 * a PROCEDURE/FUNCTION is unwound on return from it) --
+                 * this table is flat/global for the whole run. Consulted
+                 * by only one App. C "standard fixup" site so far (BFNC
+                 * INVERSE selector 49 and MINV's `M**(-1)`, error 27 --
+                 * the specific case the bug report exercised); every
+                 * other fixup site (UNIT null vector, SQRT<0, etc.)
+                 * still always applies its own fixup unconditionally,
+                 * not yet consulting this table. IGNORE's exact
+                 * semantics for a *value-producing* built-in (as opposed
+                 * to a procedural side-effect error) aren't spelled out
+                 * by the primary source's examples, so it's treated the
+                 * same as SYSTEM (apply the standard fixup) pending a
+                 * clearer primary-source citation or test case. The
+                 * `AND SET/RESET/SIGNAL` event-modification clause fails
+                 * loudly rather than silently dropping it. */
+                if (ins->operand_count < 1) { fail(state, "ERON: expected at least 1 operand"); break; }
+                int group = ins->operands[0].data == 255 ? -1 : (int)ins->operands[0].data;
+                int member = ins->operands[0].tag1 == 63 ? -1 : (int)ins->operands[0].tag1;
+                if (ins->tag == 0) {
+                    if (ins->operand_count != 2) { fail(state, "ERON: expected 2 operands for the user-statement form"); break; }
+                    uint16_t label = ins->operands[1].data;
+                    if (label >= HALMAT_LABEL_MAX || state->label_pos[label] == NO_TARGET) {
+                        fail(state, "ERON: undefined bookkeeping label %u", label);
+                        break;
+                    }
+                    /* Two distinct targets, easy to conflate: the
+                     * handler's own goto_pc (consulted only when a
+                     * matching error later actually occurs) must be
+                     * where the inline handler body *starts* -- the very
+                     * next instruction after this ERON, exactly where
+                     * ordinary fall-through would have gone had ERON not
+                     * skipped it -- not the bookkeeping label's position,
+                     * which is where fall-through *lands after* the
+                     * handler body. Using the bookkeeping-label position
+                     * for both (an earlier version of this fix did)
+                     * makes the registered handler jump back into the
+                     * middle of its own "normal continuation" code
+                     * instead of the handler body, an infinite loop the
+                     * first time it actually fires. */
+                    register_error_handler(state, group, member, HALMAT_ERRACT_GOTO, state->pc + 1);
+                    state->pc = state->label_pos[label];
+                    branched = true;
+                } else if (ins->tag == 1 || ins->tag == 2) {
+                    if (ins->operand_count == 2) {
+                        fail(state, "ERON: AND SET/RESET/SIGNAL clause is not yet implemented");
+                        break;
+                    }
+                    register_error_handler(state, group, member,
+                                            ins->tag == 1 ? HALMAT_ERRACT_SYSTEM : HALMAT_ERRACT_IGNORE, 0);
+                } else if (ins->tag == 3) {
+                    unregister_error_handler(state, group, member);
+                } else {
+                    fail(state, "ERON: unrecognized opcode-line tag %u", ins->tag);
+                }
+                break;
+            }
 
             case OP_TASN: {
                 /* Structure assign, class-0/TASN.md: source-first,
@@ -2673,6 +2861,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     /* USA003090 App. C error 25 ("VECTOR/MATRIX division
                      * by zero"): standard fixup is the original vector/
                      * matrix, unchanged -- not an abort. */
+                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_VECTOR_MATRIX_DIVIDE_BY_ZERO, &state->pc, &branched)) break;
                     for (size_t i = 0; i < count; i++) result[i] = ca[i];
                 } else if (is_div) {
                     for (size_t i = 0; i < count; i++) halmat_scalar_divide(ca[i], scalar_operand, &result[i]);
@@ -2734,7 +2923,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                              * fixup is the identity matrix, not an abort
                              * -- applies here too, since a negative-
                              * exponent M**N still inverts M as its first
-                             * step. */
+                             * step. Same GOTO-handler check as BFNC's
+                             * INVERSE selector (49) above. */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_INVERSE_SINGULAR, &state->pc, &branched)) break;
                             fill_identity_matrix(src, rows, base);
                         }
                     } else {
@@ -3163,8 +3354,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (exponent < 0) { fail(state, "IPEX: negative exponent (expected non-negative literal)"); break; }
                 /* USA003090 App. C error 4: 0**0 is a documented runtime
                  * fixup of zero, not the ordinary 0**0=1 convention the
-                 * loop below would otherwise produce. */
-                int32_t result = (base == 0 && exponent == 0) ? 0 : 1;
+                 * loop below would otherwise produce -- unless a GOTO
+                 * handler is registered for it. */
+                bool zero_to_zero = (base == 0 && exponent == 0);
+                if (zero_to_zero && !arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ZERO_TO_NONPOSITIVE_POWER, &state->pc, &branched)) break;
+                int32_t result = zero_to_zero ? 0 : 1;
                 for (int32_t i = 0; i < exponent; i++) result *= base;
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
@@ -3242,7 +3436,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * ordinary 0**0=1 convention the loop below would
                      * otherwise produce for SPEX/an exponent==0 SIEX, nor
                      * SIEX's own reciprocal-of-zero division for a
-                     * negative exponent. */
+                     * negative exponent -- unless a GOTO handler is
+                     * registered for it. */
+                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ZERO_TO_NONPOSITIVE_POWER, &state->pc, &branched)) break;
                     result = halmat_scalar_zero(dbl);
                 } else {
                     result = halmat_scalar_from_integer(1, dbl);
@@ -3289,8 +3485,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * negative exponent) feed +Inf into
                      * halmat_scalar_from_double, whose normalization loop
                      * never terminates for a non-finite input. */
+                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ZERO_TO_NONPOSITIVE_POWER, &state->pc, &branched)) break;
                     result = 0.0;
-                } else {
+                } else if (base_d < 0.0) {
                     /* USA003090 App. C error 24 ("negative base in
                      * exponentiation"): standard fixup is |A|**B --
                      * pow()'s underlying log/exp implementation is
@@ -3298,7 +3495,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * non-integer exponent, and this rule applies
                      * unconditionally (integer exponents too) per the
                      * primary source, not just the domain-error cases. */
+                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_NEGATIVE_BASE_EXPONENT, &state->pc, &branched)) break;
                     result = pow(fabs(base_d), exponent_d);
+                } else {
+                    result = pow(base_d, exponent_d);
                 }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
@@ -3362,13 +3562,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * 8.2 rule 10: rounds to nearest, ties away from zero
                  * (halmat_scalar_to_integer's documented behavior,
                  * value.h -- confirmed against the reference emulator,
-                 * NOT truncation) -- the real out-of-range ERROR
-                 * CONDITION isn't implemented, no fixture exercises it
-                 * (same documented gap as halmat_scalar_to_integer
-                 * itself). */
+                 * NOT truncation). USA003090 App. C error 15 ("SCALAR too
+                 * large for INTEGER conversion"): out-of-range clamps to
+                 * INT32_MAX/INT32_MIN (halmat_scalar_to_integer's own
+                 * documented fixup, value.c) rather than the real 16-bit
+                 * halfword bounds this emulator doesn't model -- see that
+                 * function's comment. The range check here is
+                 * deliberately duplicated (not read back out of
+                 * halmat_scalar_to_integer, a generic coercion used by
+                 * many unrelated call sites too, e.g. array subscripts,
+                 * that aren't the HAL/S-level STOI conversion this error
+                 * is specifically about) so only *this* opcode consults
+                 * the ON ERROR table for it. */
                 if (ins->operand_count != 1) { fail(state, "STOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (a.kind == RV_SCALAR) {
+                    double d = round(halmat_scalar_to_double(a.scalar));
+                    if (d > 2147483647.0 || d < -2147483648.0) {
+                        if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SCALAR_TO_INTEGER_OVERFLOW, &state->pc, &branched)) break;
+                    }
+                }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = rv_to_integer(&a);
@@ -3898,23 +4112,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         double x = halmat_scalar_to_double(rv_to_scalar(&a));
                         bool dbl = rv_to_scalar(&a).double_precision;
                         double r;
+                        /* Set (and `break`s out of the inner switch below)
+                         * whenever a GOTO handler redirects execution away
+                         * from one of these fixups -- checked once after
+                         * the inner switch closes, since a plain `break`
+                         * there only exits that switch, not this whole
+                         * case, and no result may be written in that case
+                         * (USA003087 Sec. 25.2 Figure 25-3: the
+                         * interrupted expression never completes). */
+                        bool redirected = false;
                         switch (ins->tag) {
                             case 1: r = fabs(x); break;
                             case 2: case 13: { /* COS/SIN: error 8 */
                                 double v = (ins->tag == 2) ? cos(x) : sin(x);
-                                r = (fabs(x) > 823296.0) ? HAL_S_SIN_COS_OVERFLOW_RESULT : v;
+                                if (fabs(x) > 823296.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SIN_COS_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
+                                    r = HAL_S_SIN_COS_OVERFLOW_RESULT;
+                                } else {
+                                    r = v;
+                                }
                                 break;
                             }
                             case 5: /* EXP: error 6 */
-                                r = (x > 174.673) ? HAL_S_MAX_REPRESENTABLE : exp(x);
+                                if (x > 174.673) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_EXP_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
+                                    r = HAL_S_MAX_REPRESENTABLE;
+                                } else {
+                                    r = exp(x);
+                                }
                                 break;
                             case 6: /* LOG (natural log): error 7 */
-                                r = (x == 0.0) ? -HAL_S_MAX_REPRESENTABLE : log(fabs(x));
+                                if (x <= 0.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_LOG_NONPOSITIVE, &state->pc, &branched)) { redirected = true; break; }
+                                    r = (x == 0.0) ? -HAL_S_MAX_REPRESENTABLE : log(fabs(x));
+                                } else {
+                                    r = log(x);
+                                }
                                 break;
                             case 15: { /* TAN: errors 11/12 */
                                 double sp_limit = 823549.625, dp_limit = 3.537e15;
                                 if (fabs(x) > (dbl ? dp_limit : sp_limit)) {
-                                    r = 1.0; /* error 11: argument magnitude too large */
+                                    /* error 11: argument magnitude too large */
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
+                                    r = 1.0;
                                 } else {
                                     double v = tan(x);
                                     /* error 12: argument too close to an odd
@@ -3924,14 +4164,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                      * condition by its effect (tan()
                                      * approaching the singularity, i.e. no
                                      * longer finite/representable). */
-                                    r = isfinite(v) ? v : HAL_S_MAX_REPRESENTABLE;
+                                    if (!isfinite(v)) {
+                                        if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_SINGULARITY, &state->pc, &branched)) { redirected = true; break; }
+                                        r = HAL_S_MAX_REPRESENTABLE;
+                                    } else {
+                                        r = v;
+                                    }
                                 }
                                 break;
                             }
                             case 21: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break;
-                            case 24: r = sqrt(fabs(x)); break; /* SQRT: error 5 */
+                            case 24: /* SQRT: error 5 */
+                                if (x < 0.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SQRT_NEGATIVE, &state->pc, &branched)) { redirected = true; break; }
+                                    r = sqrt(fabs(x));
+                                } else {
+                                    r = sqrt(x);
+                                }
+                                break;
                             case 33: default: r = round(x); break;
                         }
+                        if (redirected) break;
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_scalar = true;
                         state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl);
@@ -3978,7 +4231,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                              * component of a null vector is already zero,
                              * so this is just the input passed through
                              * unnormalized rather than a division-by-zero
-                             * abort. */
+                             * abort. Unless a GOTO handler is registered
+                             * for it, in which case execution redirects
+                             * there and UNIT produces no result at all. */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_UNIT_NULL_VECTOR, &state->pc, &branched)) break;
                             for (size_t i = 0; i < count; i++) result[i] = ca[i];
                         } else {
                             for (size_t i = 0; i < count; i++) {
@@ -4016,7 +4272,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (!matrix_invert(ca, rows, result)) {
                             /* USA003090 App. C error 27 ("argument of
                              * INVERSE is a singular matrix"): standard
-                             * fixup is the identity matrix, not an abort. */
+                             * fixup is the identity matrix, not an abort
+                             * -- unless a GOTO handler is registered for
+                             * it (ON ERROR$(4:27) ...), in which case
+                             * execution redirects there instead and this
+                             * BFNC call produces no result at all. */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_INVERSE_SINGULAR, &state->pc, &branched)) break;
                             fill_identity_matrix(ca, rows, result);
                         }
                         if (!store_container_result(state, ins->index, result, count, rows, cols)) break;

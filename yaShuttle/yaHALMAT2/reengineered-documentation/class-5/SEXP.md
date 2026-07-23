@@ -41,6 +41,10 @@ the fuller citation):
   result either, which would otherwise feed a non-finite value into
   `halmat_scalar_from_double`'s normalization loop and hang.
 
+Both consult [ERON](../class-0/ERON.md)'s registered `ON ERROR` handler
+table before applying the fixup (follow-up session) — a `GO TO` handler
+registered for the matching error redirects execution there instead.
+
 ## Source Analysis & Reliability
 
 Opcode (0x5AF) confirmed primary-source: `XSEXP BIT(16) INITIAL("05AF")`

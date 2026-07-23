@@ -67,7 +67,9 @@ matrix"), the standard fixup is the identity matrix, not a runtime abort
 singular 2x2) and `src/tests/hal/test_errfix_matrix.hal`. Same
 disposition as [BFNC](../class-0/BFNC.md)'s `INVERSE` selector (49),
 since both spellings route through the same `matrix_invert()` routine
-and singular-matrix case.
+and singular-matrix case -- including consulting [ERON](../class-0/ERON.md)'s
+registered `ON ERROR` handler table before applying the fixup, so a `GO
+TO` handler registered for error 4:27 redirects execution there instead.
 
 ## Source Analysis & Reliability
 

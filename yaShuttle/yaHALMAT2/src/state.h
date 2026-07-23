@@ -282,6 +282,24 @@ typedef struct {
     halmat_syt_entry_t value;
 } halmat_struct_field_t;
 
+/* One ON ERROR-registered error-environment modification (class-0/
+ * ERON.md, USA003087 Sec. 25.2). `group`/`member` are -1 for the
+ * unsubscripted "all groups"/"all members in group" forms (ERON's own
+ * 255/63 wire sentinels are translated to -1 at registration time so a
+ * real group/member number can never collide with the wildcard). Only
+ * flat, un-scoped registration is implemented -- USA003087 Sec. 25.1's
+ * per-block dynamic-scoping rule (a modification make in a PROCEDURE/
+ * FUNCTION is unwound on return from it) is not; see interp.c's OP_ERON
+ * comment for the resulting limitation. */
+typedef enum { HALMAT_ERRACT_SYSTEM, HALMAT_ERRACT_IGNORE, HALMAT_ERRACT_GOTO } halmat_error_action_t;
+
+typedef struct {
+    int group;  /* -1 = all groups */
+    int member; /* -1 = all members in group */
+    halmat_error_action_t action;
+    size_t goto_pc; /* valid only if action == HALMAT_ERRACT_GOTO */
+} halmat_error_handler_t;
+
 #define HALMAT_MAX_TASKS 32
 
 typedef enum {
@@ -530,6 +548,15 @@ struct halmat_state {
     halmat_struct_field_t *struct_fields;
     size_t struct_field_count;
     size_t struct_field_capacity;
+
+    /* ON ERROR-registered error-environment modifications, see
+     * halmat_error_handler_t above. Growable (realloc'd in interp.c's
+     * register_error_handler); OP_ERON's OFF/tag==3 case removes an
+     * entry by shifting the tail down rather than leaving a hole, so
+     * error_handler_count is always exactly the live entry count. */
+    halmat_error_handler_t *error_handlers;
+    size_t error_handler_count;
+    size_t error_handler_capacity;
 
     bool halted;
     int exit_code;
