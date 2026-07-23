@@ -4862,7 +4862,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.INLINE_LABEL = g.INLINE_LABEL + 1;
         g.VAR[g.MP] = l.INLINE_NAME + str(g.INLINE_LABEL);
         g.NAME_HASH = HASH(g.VAR[g.MP], g.SYT_HASHSIZE);
-        g.FIXL[g.MP] = ENTER(g.VAR[g.MP], g.FUNC_CLASS);
+        g.I = ENTER(g.VAR[g.MP], g.FUNC_CLASS);
         g.FIXL[g.MP] = g.I
         if 0 != (g.SIMULATING & 1): 
             STAB_LAB(g.I);

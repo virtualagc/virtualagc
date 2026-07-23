@@ -72,7 +72,7 @@ def EMIT_SMRK(T=3):
     if g.INLINE_STMT_RESET>0:
         g.STMT_NUM(g.INLINE_STMT_RESET);
         g.INLINE_STMT_RESET=0;
-    if T & 1: 
+    elif T & 1:
         g.STMT_NUM(g.STMT_NUM()+1);
     T=3;
     g.SMRK_FLAG = 0;
