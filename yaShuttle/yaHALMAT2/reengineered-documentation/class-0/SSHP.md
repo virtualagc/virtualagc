@@ -41,6 +41,22 @@ and a result length of `2`.
   handled entirely by the preceding [SFAR](SFAR.md) arguments' own
   conversion, is unconfirmed.
 
+## Confirmed Runtime Behavior
+
+**A pending SFAR argument may itself be a whole VECTOR/MATRIX, not just
+a plain scalar/integer expression — confirmed in a later session** (a
+latent gap caught while fixing [MSHP](MSHP.md)'s "not yet implemented"
+stub, not user-reported directly for SSHP specifically): [USA003088]
+Sec. 6.5.1's general `<arith conversion>` rule ("[t]he data elements in
+each `<expression>` are unraveled in their natural sequence") applies to
+`SCALAR(...)`'s list form the same as it does to `MATRIX(...)`'s — a
+whole-container argument contributes its own elements to the flat
+result, not just one. yaHALMAT2's `OP_SSHP` handler previously only
+handled plain-scalar `SFAR` arguments (silently wrong for a
+whole-container one); it now shares `MSHP`'s `unravel_shaping_argument()`
+helper (`interp.c`), correctly unraveling either shape into the
+resulting flat array.
+
 ## Source Analysis & Reliability
 
 Opcode (0x042) confirmed primary-source: `XMSHP` array element 2 in

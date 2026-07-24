@@ -80,6 +80,37 @@ Confirmed this session in two distinct roles:
    purely as after-the-fact copy-count metadata for PASS2/the optimizer
    rather than a real bracket around repeated HALMAT.
 
+4. **Whole SCALAR/INTEGER ARRAY assignment replay** — **confirmed in a
+   later session**, found via a user-reported bug (`SA = SCALAR(S1,
+   S2);`, `SA` a `SCALAR ARRAY(2)`, silently writing zeros — see
+   [SASN](../class-5/SASN.md)/[IASN](../class-6/IASN.md)'s own
+   "Confirmed Runtime Behavior" for the full account). `ARRAY` has no
+   dedicated whole-container assign opcode the way `VECTOR`/`MATRIX` get
+   `VASN`/`MASN` — HALSFC instead emits the *ordinary* single-value
+   SASN/IASN, followed by an `ADLP`/`DLPE` pair whose operand is the
+   array's element count. Structurally this looks exactly like role 3
+   (`ADLP`/`DLPE` *after*, not before, the instruction it modifies,
+   `DLPE` following immediately with nothing textually between them) —
+   but unlike role 3, this is **not** just after-the-fact metadata for a
+   runtime routine that already did the whole job: `yaHALMAT2`'s own
+   interpreter genuinely *replays* the single preceding SASN/IASN once
+   per array element (confirmed via a debug trace: two real destination
+   writes for the same SYT, the replay's own per-element index
+   correctly cycling 0,1). A *linear* HALMAT listing is actively
+   misleading here — nothing textually between `ADLP` and `DLPE` reads
+   as "replays the immediately preceding instruction, once per element
+   named by this operand," which is the opposite of role 1's "brackets
+   the following paragraph" shape, and easy to misread as a genuinely
+   empty/no-op bracket (which is exactly what happened before this was
+   diagnosed). Whether this is a fourth genuinely distinct compiler
+   *role* or actually the same runtime mechanism as role 3 (structureness)
+   applied to a different data kind is not resolved — both share the
+   "after, immediately closed, real work happens via replaying/
+   delegating to what precedes" shape, but role 3's own text explicitly
+   describes the copy loop as delegated to a `#QCSTRUC` *runtime library
+   call*, not a real HALMAT-level replay, which is a different
+   mechanism than what's confirmed here.
+
 ## Operand-Word Format (confirmed empirically, roles 2 and 3)
 
 **Role 2**: one operand: `DATA`=the array's total element count,
@@ -107,6 +138,15 @@ specifically decoded this session.
 
 ## Unresolved Questions
 
+- Whether role 4 (whole SCALAR/INTEGER ARRAY assignment replay, above)
+  is a genuinely distinct compiler role from role 3 (structureness) or
+  the same underlying mechanism applied to a different data kind is
+  unresolved — both share the "after, immediately closed" shape, but
+  role 3's own confirmed text describes its copy loop as delegated to a
+  `#QCSTRUC` runtime library call, whereas role 4's replay is confirmed
+  to happen at the HALMAT/interpreter level (real repeated
+  instruction execution, not a call to a library routine) — not yet
+  reconciled against the compiler's own source.
 - Role 1's own operand-word format (what exactly ADLP's operand encodes
   for a general arrayed-expression loop — a symbol reference, a
   dimension count, or something else) remains unconfirmed; only roles 2

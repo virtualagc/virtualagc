@@ -30,9 +30,22 @@ as a whole — see [IDLP](IDLP.md) for the full worked trace (no separate
 whole-sequence closer was observed in that role, unlike
 [ETRI](../class-8/ETRI.md) in the `n#value` repetition mechanism).
 
+Also appears in [ADLP](ADLP.md)'s role 3 (structureness) and role 4
+(whole SCALAR/INTEGER ARRAY assignment replay, confirmed in a later
+session) immediately after its own `ADLP`, with no instructions between
+them at all — a *linear* HALMAT listing can make this look like an
+empty/no-op bracket, which is misleading for role 4 specifically: the
+real work is `yaHALMAT2`'s interpreter replaying the single instruction
+*preceding* the `ADLP`, once per element named by `ADLP`'s own operand,
+not anything textually bracketed by `ADLP`/`DLPE` themselves. See
+[ADLP](ADLP.md)'s Usage Context for the full account.
+
 ## Unresolved Questions
 
-- None specific to DLPE beyond the general caveats noted for
+- See [ADLP](ADLP.md)'s own Unresolved Questions for role 4's open
+  question (whether it's a genuinely distinct role from role 3, or the
+  same mechanism applied to a different data kind) — nothing DLPE-
+  specific beyond that and the general caveats noted for
   [ADLP](ADLP.md)/[IDLP](IDLP.md).
 
 ## Source Analysis & Reliability

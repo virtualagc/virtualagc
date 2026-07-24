@@ -63,6 +63,52 @@ function argument passing instead).
   through as IASN regardless of the receiver's actual declared type; not
   fully explained at the bit level.
 
+## Confirmed Runtime Behavior
+
+**Whole VECTOR/MATRIX receiver assigned literal 0 ("null matrix"/"null
+vector"), fixed in a later session.** IASN's own whole-number-literal
+leak (this file's Unresolved Questions above) turns out not to be
+confined to SCALAR receivers: PASS1 folds a literal `0` assigned to a
+whole `VECTOR`/`MATRIX` variable into a plain IASN too, with the
+receiver's own SYT as IASN's second operand — no `VASN`/`MASN` and no
+`ADLP`/`DLPE` wrapping. Confirmed via real compiled HALMAT (039-CORNERS.hal's
+`AB = 0;`, `AB` a `VECTOR(2)`): `HALMAT #60 IASN`, operand 2 = Symbol AB
+(VECTOR) directly. Previously fatal — `write_destination`'s whole-array
+`QUAL_SYT` branch (`interp.c`) unconditionally required an active
+arrayed-paragraph replay (`arrayed_index >= 0`), which this shape never
+has. [USA003087] §8.2 rule 3 (MATRIX)/rule 3 (VECTOR): "The only
+condition under which the R-type is integer is if it is the literal
+value zero. The assignment then creates a null matrix" (VECTOR:
+"...null vector") — any other integer/scalar value assigned this way is
+illegal HAL/S rejected by the real compiler already (confirmed: `M3 =
+1;` fails to compile), so it's never expected to reach the interpreter.
+Fixed with a `syt_is_vector_or_matrix_shaped()` helper (deliberately
+excludes `ARRAY`, which has no documented equivalent idiom) gating a
+zero-fill loop ahead of the existing arrayed-paragraph-replay fail path.
+`src/tests/hal/test_vecmat_null_assign.hal` is the regression fixture;
+confirmed against a real `039-CORNERS.hal` run.
+
+**Whole SCALAR/INTEGER ARRAY receiver, source a shaping-function
+result, fixed in a later session.** `ARRAY` has no dedicated
+whole-container assign opcode the way `VECTOR`/`MATRIX` get
+`VASN`/`MASN` — assigning e.g. `SA = SCALAR(S1, S2);` (`SA` a `SCALAR
+ARRAY(2)`) instead emits the *ordinary* single-value IASN/SASN, wrapped
+in an [ADLP](../class-0/ADLP.md)/[DLPE](../class-0/DLPE.md) pair that
+re-executes that same instruction once per array element (confirmed via
+a debug trace: two real `write_destination` calls for the same
+destination SYT, `arrayed_index` correctly cycling 0,1 each time — see
+[ADLP](../class-0/ADLP.md)'s own note on why this looks like an *empty*
+bracket in a linear HALMAT listing). The bug wasn't in this replay
+mechanism, which already worked correctly, but on the read side:
+`resolve_operand`'s `QUAL_VAC` case (`interp.c`) never checked
+`slot->is_container` at all, so reading a shaping-function's VAC result
+this way fell through to a stale-zero default instead of indexing the
+container by `arrayed_index` — user-reported (`SA`/`IA` silently ended
+up all zeros, no error). Fixed by adding that `is_container` branch,
+mirroring `resolve_operand`'s own whole-array-during-replay handling of
+a plain `QUAL_SYT` reference. `src/tests/hal/test_sshp_ishp.hal` is the
+regression fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x601) confirmed primary-source: base of the `XXASN` array

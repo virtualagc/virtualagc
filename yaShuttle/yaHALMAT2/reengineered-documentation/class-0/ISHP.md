@@ -47,6 +47,22 @@ HALMAT: 046(0),1,0            <- SFND
 - The `@SINGLE`/`@DOUBLE` precision-forcing forms ([USA003087] §21.2)
   were not tested.
 
+## Confirmed Runtime Behavior
+
+**A pending SFAR argument may itself be a whole VECTOR/MATRIX, not just
+a plain scalar/integer expression — confirmed in a later session** (a
+latent gap caught while fixing [MSHP](MSHP.md)'s "not yet implemented"
+stub, not user-reported directly for ISHP specifically): [USA003088]
+Sec. 6.5.1's general `<arith conversion>` rule ("[t]he data elements in
+each `<expression>` are unraveled in their natural sequence") applies to
+`INTEGER(...)`'s list form the same as it does to `MATRIX(...)`'s — a
+whole-container argument contributes its own elements to the flat
+result, not just one. yaHALMAT2's `OP_ISHP` handler previously only
+handled plain-scalar `SFAR` arguments (silently wrong for a
+whole-container one); it now shares `MSHP`'s `unravel_shaping_argument()`
+helper (`interp.c`), correctly unraveling either shape into the
+resulting flat array.
+
 ## Source Analysis & Reliability
 
 Opcode (0x043) confirmed primary-source: `XMSHP` array element 3 in

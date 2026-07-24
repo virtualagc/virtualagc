@@ -42,6 +42,28 @@ other opcode families (`MADD`, `VADD`, etc.). Numerically confirmed with
 `165`, i.e. `B1` shifted left by `B2`'s declared width (4) and OR'd with
 `B2` — matches `(10 << 4) | 5`.
 
+## Confirmed Runtime Behavior
+
+**`symtab.c` was silently discarding a BIT symbol's declared width
+whenever it was also ARRAY-shaped — fixed in a later session.** Found
+not via BCAT itself but while implementing [WRIT](../class-0/WRIT.md)'s
+"WRITE of a raw BIT value" (which reuses this file's own declared-width
+symtab-lookup technique, described above, for that unrelated problem):
+`symtab.c`'s `SYM_TYPE`/`SYM_ARRAY`-based shape-resolution logic used an
+`if`/`else if` chain that treated "has an `ARRAY` shape" (from
+`SYM_ARRAY != 0`) and "is `BIT`-typed with a declared width" (from
+`SYM_TYPE==1`) as mutually exclusive — when a symbol can genuinely be
+both (confirmed via a real compiled `B ARRAY(3) BIT(4)`: `SYM_TYPE=01`,
+`SYM_LENGTH=0004`, `SYM_ARRAY`=a nonzero `EXTuARRAY` index, all three
+together in the same symbol record). This didn't affect `BCAT` itself in practice (no fixture concatenates a
+`BIT ARRAY` element directly), but did silently break any other code
+path relying on `bit_width` for a
+`BIT ARRAY` element, including the newly-implemented `WRITE`-of-`BIT`
+case. Fixed by capturing `bit_width` unconditionally whenever
+`SYM_TYPE==1`, before (not inside) the shape-resolving `if`/`else if`
+chain — see `symtab.h`'s own `bit_width` field comment for the
+corrected description.
+
 ## Unresolved Questions
 
 - The catenation direction (which operand becomes the high-order bits)

@@ -47,6 +47,19 @@ day-to-day work should only need this file plus `reengineered-documentation/`.
   evidence).
 - `/home/rburkey/temp/` — default location to check for a HAL/S file the user
   mentions without a path.
+- `compileLinkRun --filename=FILENAME.hal` — a locally-installed tool, separate
+  from anything in this repo, that compiles `FILENAME.hal` with both `HALSFC`
+  and `HAL_S_FC.py`, links the AP-101S object code, and runs it in an AP-101S
+  emulator. Because `HAL_S_FC.py` runs as part of this, the same compiled
+  program can immediately also be run through `yaHALMAT2` via
+  `yaHALMAT2 @CURRENT`, giving a second independent ground truth (real
+  AP-101S machine-code execution) beyond `unHALMAT.py` static inspection and
+  the `Halmat/` reference OCaml emulator — this is how the SCALAR/SCALAR
+  DOUBLE `0.0` output-formatting bug (`class-2/STOC.md`) was found. Don't run
+  this routinely (extra time cost, and the AP-101S emulator itself is neither
+  feature-complete nor bug-free, so a mismatch isn't automatically
+  `yaHALMAT2`'s bug) — reach for it only when a specific behavior is
+  suspicious enough to warrant an independent cross-check.
 
 ## The bug-fix / feature loop
 
@@ -103,7 +116,11 @@ maintenance phase so far:
   `make` command line); no GUI; arithmetic is bit-exact AP-101S single/double
   precision, not native-double approximation; `--debug` mode mimics a useful
   `gdb` subset; device-mapping options (`--ddi`/`--ddo`/`--raf`) follow
-  the historical HALSFC runtime's own option shapes; the real-time scheduler
+  the historical HALSFC runtime's own option shapes; `--unpaged N` (repeatable,
+  independent per device) is this interpreter's runtime substitute for the
+  compile-time `DEVICE CHANNEL=n UNPAGED` source directive real HAL/S-FC uses
+  (USA003090 Sec. 5.2) — not visible in compiled HALMAT, so it can't be
+  auto-detected; the real-time scheduler
   (`SCHEDULE`/`WAIT`/priority/`REPEAT`) runs on a virtual/logical clock, with
   `--time-scale` only affecting wall-clock pacing, never tick arithmetic or
   program output.

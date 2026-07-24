@@ -1894,6 +1894,110 @@ Class 0 control-flow instructions (IFHD/DFOR/WAIT family) and Class 1/2/7
 are also no longer outstanding — see those classes' sections above, all
 marked empirically confirmed.
 
+## Whole VECTOR/MATRIX null-assign, and whole-ARRAY assign via a replayed IASN/SASN
+
+Two related IASN/SASN gaps, both user-reported (the first) or found
+while regression-testing it (the second — see [IASN](class-6/IASN.md)
+for the full writeup of both). `AB = 0;` (`AB` a `VECTOR(2)`,
+039-CORNERS.hal) failed outright: PASS1 folds a literal `0` assigned to
+a whole `VECTOR`/`MATRIX` into a plain (unreplayed) IASN, which
+`write_destination`'s whole-array `QUAL_SYT` branch unconditionally
+required an arrayed-paragraph replay for. [USA003087] §8.2 rule 3
+(MATRIX)/rule 3 (VECTOR) documents exactly this as the "null
+matrix"/"null vector" idiom — zero every element — fixed by special-
+casing it ahead of the existing fail path.
+
+Separately, `SA = SCALAR(S1, S2);` (`SA` a `SCALAR ARRAY(2)`) silently
+wrote zeros instead of the real values, no error. `ARRAY` has no
+dedicated whole-container assign opcode the way `VECTOR`/`MATRIX` get
+`VASN`/`MASN` — HALSFC instead wraps an ordinary IASN/SASN in an
+[ADLP](class-0/ADLP.md)/[DLPE](class-0/DLPE.md) pair that re-executes
+it once per element. The replay mechanism itself worked correctly; the
+bug was that `resolve_operand`'s `QUAL_VAC` case never checked for a
+whole-container VAC slot, silently defaulting to zero instead of
+indexing it by the replay's own `arrayed_index`.
+
+## READ into a whole VECTOR/MATRIX destination
+
+User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, `X` a `VECTOR(3)`):
+`READ` against a whole `VECTOR`/`MATRIX` destination failed with "only
+CHARACTER/SCALAR/INTEGER arguments are implemented." [XXAR](class-0/XXAR.md)
+had already confirmed (an earlier session) that such an argument
+compiles as a single unreplayed `XXAR` (`TAG1`∈{3,4}, no `ADLP`/`DLPE`)
+— the same shape already handled for `WRITE`/`CALL` whole-container
+arguments — but the `READ`-side runtime implementation was never done.
+[USA003087] §12.3: a `VECTOR` argument reads one field per element, a
+`MATRIX` argument row by row — the same order `WRITE`/`INITIAL` already
+use. `OP_READ` now unrolls such a destination into one field read per
+element, sharing the same null-field/semicolon-terminate rules as any
+other item; this needed `read_skip_separator`'s separator-requirement
+state threaded as "has any field of the whole statement been read yet"
+rather than "item index > 0," since a single item can now expand into
+several fields. `ARRAY` needed no equivalent change — it stays
+`ADLP`/`DLPE`-replayed even when read whole, so each element already
+arrives as its own ordinary item. See [READ](class-0/READ.md) for the
+full writeup.
+
+## List-form MATRIX/VECTOR/SCALAR/INTEGER shaping functions, and --unpaged WRITE formatting
+
+Three related findings from one investigative thread, starting from a
+user-reported `WRITE`-formatting discrepancy against a real AP-101S
+emulator (`compileLinkRun`) and ending in a genuine feature addition.
+
+**MSHP (list-form `MATRIX(...)`) implemented.** Previously a hard
+stub. [USA003087] §7.5/[USA003088] §6.5.1 give the real general rule:
+every shaping-function argument is "unraveled" into a flat sequence of
+scalar elements (a whole `VECTOR`/`MATRIX` argument contributes its own
+elements, not just one), then "reraveled" into the result shape.
+Confirmed empirically that the flat-scalar-list form
+(`MATRIX(1,2,...,9)`) and the row-vector form (`MATRIX(X,Y,Z)`,
+044-ORTHONORMAL.hal's actual call site) compile to the *identical* MSHP
+operand value, ruling out inferring the result shape from the argument
+list itself — the operand is decoded directly instead (high-byte=rows/
+low-byte=cols). `VSHP`/`SSHP`/`ISHP` had the identical latent gap
+(plain-scalar arguments only) and now share the same unraveling logic.
+See [MSHP](class-0/MSHP.md) for the full writeup, including why the
+explicit `MATRIXm,n(...)` subscript form's real source syntax remains
+unconfirmed.
+
+**The original `WRITE`-formatting question resolved as "no bug."**
+There is no documented exception forcing a newline before a `VECTOR`/
+`MATRIX` `WRITE` argument — [USA003087]'s own Figure 12-3 and
+"Programming in HAL/S" §8.1 both confirm a `WRITE` statement packs onto
+as few lines as possible regardless of argument type. The `compileLinkRun`
+discrepancy is most likely a quirk of that specific AP-101S emulator,
+not real HAL/S behavior.
+
+**`--unpaged N` added.** Chasing the above surfaced [USA003090] §5.2's
+real default-channel-mode rule (a channel used only in `WRITE`
+statements defaults to `PAGED`, not `UNPAGED` — confirming `yaHALMAT2`'s
+existing unquoted `CHARACTER` output was already correct) and the fact
+that this interpreter has no way to see a source-level `DEVICE`
+directive at all (just compiled HALMAT). `--unpaged N` (main.c,
+repeatable, independent per device) is the runtime substitute;
+`CHARACTER` fields get apostrophe-quoted (embedded apostrophes doubled)
+per [USA003087] Appendix F/[USA003090] §6.1.3 when the target device is
+marked `UNPAGED`.
+
+**`WRITE` of a raw `BIT` value implemented.** A related, previously-
+undiscovered gap: `WRITE` of a `BIT`-typed expression silently
+misformatted as decimal `INTEGER` instead of Appendix F's binary-
+digit-string format, since `resolved_value_t`'s `RV_BITS` carries no
+declared width. Per user direction and citation ("Programming in
+HAL/S" p. 255: the `BIT` conversion function's result is "always of the
+maximum legal length for bit strings," i.e. 32, [USA003090] §8.2 rule
+6's documented range): a plain declared `BIT(n)` variable now looks up
+its real width via the symbol table (reusing [BCAT](class-1/BCAT.md)'s
+own established technique for this identical problem), falling back to
+32 only when no declared width is available. Building this fixture also
+caught a separate, pre-existing bug in `symtab.c`: a `BIT` symbol's
+declared per-element width was being silently discarded whenever it was
+*also* `ARRAY`-shaped (the shape-resolution code treated the two as
+mutually exclusive) — see [BCAT](class-1/BCAT.md) for the symbol-table
+mechanism this affected.
+
+See [WRIT](class-0/WRIT.md) for the full `WRITE`-formatting writeup.
+
 ## Next steps (suggested)
 
 1. A systematic sweep of USA003087 syntax patterns against previously-

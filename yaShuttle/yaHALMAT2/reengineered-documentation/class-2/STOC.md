@@ -38,15 +38,28 @@ scientific notation:
   character result unless the literal's precision is explicitly pinned
   (`CONSTANT` declare, or a shaping function).
 
-**This resolves the "zero-value edge case" flagged earlier**: `0.0` is
-*not* a special case at all — it's simply a non-negative value, so it
-gets the ordinary blank sign character (`s`=blank) like any other
-non-negative scalar, followed by the full fixed-digit-count scientific
-notation (e.g. single-precision `0.0` renders as `" 0.00000000E+00"`,
-not merely `" 0.0"` — the earlier secondhand summary's `" 0.0"` was
-evidently a shorthand paraphrase, not the literal output). No
-zero-specific branch or padding rule is needed beyond the uniform
-sign/field-width rule that applies to every value.
+**Correction, a later session: the "zero-value edge case" conclusion
+above was wrong.** `0.0` *is* a special case, and the earlier "not
+merely `" 0.0"`" reasoning was an unverified assumption, not a real
+citation — it was reached from [USA003090]'s apparent silence on the
+zero case at a time when `USA003090.txt` wasn't actually available in
+this project to check directly (it says so in its own text, quoted
+above). Directly reading it now: [USA003090] §6.1.3/§8.2 rules 13–14
+only describe the general *nonzero* field layout and never address zero
+either way — they don't actually contradict anything. [USA003087]
+Appendix F ("Scalar Type") states explicitly: "If the value is exactly
+zero, it is represented as `0.0`." Independently confirmed by that same
+document's Figure 12-3, a worked `WRITE` example with a genuine `0.0`
+matrix element rendered as bare `0.0` beside full-width fields like
+`5.0000000E-01`, and by "Programming in HAL/S" §8.1's own scalar output
+table, which lists `0` → `0.0` as an explicit special case alongside
+the ordinary scientific-notation entries. `halmat_scalar_format()`
+(`value.c`) now formats an exact-zero value as `" 0.0"` — left-
+justified, blank-padded (not zero-padded) to the same fixed field width
+as any other value (14 single-precision/23 double-precision), decimal
+point aligned to the same column nonzero values use (one leading
+blank). User-reported; confirmed against a real `039-CORNERS.hal` run
+(`AB = 0;`, a `VECTOR(2)`, prints `" 0.0"` per element).
 
 ## Unresolved Questions
 

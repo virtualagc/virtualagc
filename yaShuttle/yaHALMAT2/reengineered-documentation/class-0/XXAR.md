@@ -170,6 +170,21 @@ checked per Sec. 11.2/11.4's "rows and columns... must be the same"
 rule) rather than expanding it into data fields — see
 [PCAL](PCAL.md)/[FCAL](FCAL.md) for the call-side details.
 
+**The identical shape is also `READ`'s target, not just `WRITE`/`CALL`
+sources — implemented in a later session** (user-reported,
+044-ORTHONORMAL.hal's `READ(5) X;`, `X` a `VECTOR(3)`): the compiled
+shape was already fully documented above (this file already showed the
+`READ(5) V1;`/`READ(5) M1;` traces in the `TAG1` enumeration), but
+yaHALMAT2's runtime only implemented the `WRITE`/`CALL` read side of it,
+failing loudly ("only CHARACTER/SCALAR/INTEGER arguments are
+implemented") when this exact same operand shape appeared as a `READ`
+*destination* instead. `OP_XXAR`'s `READ`-destination branch now
+recognizes it (`TAG1`∈{3,4}, `state->arrayed_index < 0`) and `OP_READ`
+unrolls it into one field read per element, per USA003087 Sec. 12.3's
+documented per-element `READ` order (the same order this file's own
+`WRITE`-side reasoning above already uses) — see [READ](READ.md)'s
+Confirmed Runtime Behavior section for the full writeup.
+
 ## Unresolved Questions
 
 - ~~Whether an *arrayed* argument of any type (not just a structure)

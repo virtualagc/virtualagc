@@ -56,6 +56,32 @@ instruction comes first, `S3`'s `SYT` operand second.
   receiver. See [IASN](../class-6/IASN.md)'s Unresolved Questions for
   the same note from the other side.
 
+## Confirmed Runtime Behavior
+
+**Whole SCALAR ARRAY receiver, source a shaping-function result, fixed
+in a later session.** `ARRAY` has no dedicated whole-container assign
+opcode the way `VECTOR`/`MATRIX` get `VASN`/`MASN` — assigning e.g.
+`SA = SCALAR(S1, S2);` (`SA` a `SCALAR ARRAY(2)`) instead emits the
+*ordinary* single-value SASN, wrapped in an
+[ADLP](../class-0/ADLP.md)/[DLPE](../class-0/DLPE.md) pair that
+re-executes that same instruction once per array element (confirmed via
+a debug trace: two real `write_destination` calls for the same
+destination SYT, `arrayed_index` correctly cycling 0,1 each time — see
+[ADLP](../class-0/ADLP.md)'s own note on why this looks like an *empty*
+bracket in a linear HALMAT listing, not a real one). The bug wasn't in
+this replay mechanism, which already worked correctly, but on the read
+side: `resolve_operand`'s `QUAL_VAC` case (`interp.c`) never checked for
+a whole-container VAC slot, silently defaulting a shaping-function
+result read this way to zero instead of indexing it by `arrayed_index`
+— user-reported (`SA` ended up all zeros instead of the real values, no
+error). Fixed by adding that `is_container` branch, mirroring
+`resolve_operand`'s own whole-array-during-replay handling of a plain
+`QUAL_SYT` reference. The identical fix applies to the INTEGER-receiver
+case — see [IASN](../class-6/IASN.md), whose own "Confirmed Runtime
+Behavior" section has the fuller writeup (both opcodes share the exact
+same `resolve_operand` code path). `src/tests/hal/test_sshp_ishp.hal` is
+the regression fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x501) confirmed primary-source: base of the `XSASN`/array

@@ -157,6 +157,43 @@ iterations, the second semicolon-terminated) is the regression fixture;
 confirmed additionally against a real `037-ROOTS.hal` run reproducing
 the user's exact reported sequence.
 
+**Whole VECTOR/MATRIX destination, implemented in a follow-up session.**
+User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, `X` a `VECTOR(3)`):
+failed outright with "only CHARACTER/SCALAR/INTEGER arguments are
+implemented (got HALMAT class 4)." User correctly pointed out, before
+any investigation, that multi-element `READ` targets should "unroll"
+the same way `WRITE` output and `INITIAL` clauses already do — confirmed
+exactly right. [USA003087] Sec. 12.3: "Multi-valued data items cause a
+series of data fields to be read sequentially... [a] vector data item
+causes one data field per vector element to be read... [a] matrix...
+row by row" — the identical per-element order already used for `WRITE`
+output (this file's "Data Formats" reasoning) and `INITIAL`
+(`STRI`/`SLRI` machinery). [XXAR](XXAR.md) already documented (an
+earlier session) that a whole `VECTOR(4)`/`MATRIX(3)` `READ` argument
+compiles as a single unreplayed `XXAR` (`QUAL`=SYT, `TAG1`=the class
+number, no `ADLP`/`DLPE` wrapping) — the same shape already handled for
+`WRITE`/`CALL` whole-container arguments — but the runtime side of that
+finding was never implemented for `READ` specifically. Fixed: `OP_XXAR`'s
+`READ`-destination branch now recognizes `TAG1`∈{3,4} with
+`state->arrayed_index < 0` as a whole-container destination (new
+`dest_is_container` flag, `state.h`) instead of failing; `OP_READ`
+unrolls it into one field read per element (`ensure_container` + direct
+`e->elements[k]` writes), sharing the exact same null-field/semicolon-
+terminate rules as any other item — including across item boundaries: a
+container sandwiched between two ordinary scalar items in the same
+`READ` statement needed `read_skip_separator()`'s `require_separator`
+threading changed from "item index > 0" to "has any field of the whole
+statement been read yet," since a single item can now expand into
+several fields. `ARRAY` needed no equivalent change — confirmed
+([XXAR](XXAR.md)) it stays `ADLP`/`DLPE`-replayed even when read whole,
+so each element already arrives as its own ordinary-shaped item via the
+existing per-element replay path. Regression fixtures:
+`src/tests/hal/test_read_vecmat.hal` (plain `VECTOR`+`MATRIX`
+read/write round trip) and `test_read_vecmat_edge.hal` (scalar-
+container-scalar sequencing plus semicolon-mid-container termination);
+also confirmed against a real `044-ORTHONORMAL.hal` run (its
+`READ(5) X/Y/Z;` statements now succeed).
+
 ## Source Analysis & Reliability
 
 Opcode (0x01F) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
