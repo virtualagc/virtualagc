@@ -180,6 +180,23 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
                     st->entries[i].array_dims[d] = (int)st->extarray[base + 1 + d];
                 }
             }
+            /* ARRAY-of-VECTOR/MATRIX (`ARRAY(n) VECTOR`, `ARRAY(n)
+             * MATRIX(r,c)`): SYM_LENGTH still packs the *element*'s own
+             * VECTOR/MATRIX shape, exactly like the plain (unarrayed)
+             * VECTOR/MATRIX branches below -- confirmed against
+             * 117-EXAMPLE_8.hal's `POSITIONS ARRAY(5) VECTOR` (SYM_TYPE=
+             * 04, SYM_LENGTH=0003, SYM_ARRAY=0001, i.e. an ARRAY(5) of
+             * VECTOR(3)). rows/cols are otherwise unused when shape==
+             * ARRAY (array_dims/array_dim_count carry the outer shape
+             * instead), so reused here for the element shape rather than
+             * adding new fields -- interp.c's ensure_container() is what
+             * actually turns this into real container storage. */
+            if (st->raw[i].sym_type == 3) {
+                st->entries[i].rows = (int)((st->raw[i].sym_length >> 8) & 0xFF);
+                st->entries[i].cols = (int)(st->raw[i].sym_length & 0xFF);
+            } else if (st->raw[i].sym_type == 4) {
+                st->entries[i].cols = (int)st->raw[i].sym_length;
+            }
         } else if (st->raw[i].sym_type == 3) { /* MATRIX, HALMAT class number */
             st->entries[i].shape = HALMAT_SHAPE_MATRIX;
             st->entries[i].rows = (int)((st->raw[i].sym_length >> 8) & 0xFF);

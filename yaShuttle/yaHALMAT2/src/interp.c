@@ -1070,6 +1070,7 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     int rows = 0, cols = 0;
     size_t count = 0;
     int elem_kind = 0; /* 0=numeric, 1=BIT, 2=CHARACTER */
+    bool array_of_vector = false;
     if (state->symtab) {
         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
         if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->cols > 0) {
@@ -1079,6 +1080,37 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
         } else if (sym && sym->shape == HALMAT_SHAPE_VECTOR && sym->cols > 0) {
             cols = sym->cols;
             count = (size_t)cols;
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count == 1 &&
+                   sym->hal_class == 4 && sym->cols > 0 && sym->array_dims[0] > 0) {
+            /* ARRAY(n) VECTOR(m) -- an ARRAY-of-VECTOR, not a true MATRIX,
+             * but stored identically (row-major, n*m elements: n groups of
+             * m) and subscripted the same way for the "one plain index +
+             * one asterisk" case (`V(N)`/`POSITIONS$(I:*)`, DSUB's own
+             * `base->rows > 0` branch below picks this up for free, same
+             * as the 2D-ARRAY-of-SCALAR case above) -- confirmed
+             * user-reported, 117-EXAMPLE_8.hal (`POSITIONS ARRAY(5)
+             * VECTOR`, indexed as `POSITIONS$(I:*)`; symtab.c's own fix
+             * decodes SYM_LENGTH into sym->cols here even though
+             * SYM_ARRAY made shape==ARRAY, same as the MATRIX/VECTOR
+             * branches just above). Previously fell through to the
+             * generic single-dimension branch below, which read only
+             * array_dims[0] (5) as the *whole* element count, discarding
+             * the VECTOR's own 3 components entirely and undersizing the
+             * container by 3x -- silent corruption, not just DSUB's loud
+             * "asterisk subscript with 2 indices not yet implemented"
+             * failure. Also flagged array_of_vector (state.h) so
+             * resolve_container() knows to slice by arrayed_index during
+             * an ADLP/DLPE-driven whole-array-expression replay
+             * (`[VELOCITY] = ([POSITIONS] - [OLD_POSN]) / DELTA_T;`),
+             * rather than treating this like a real MATRIX. ARRAY-of-
+             * MATRIX isn't handled here (no confirmed real-corpus case
+             * yet) -- deliberately scoped to hal_class==4 (VECTOR) only,
+             * same conservative "exactly this shape, not a guess at the
+             * generalization" precedent as the 2D-ARRAY fix. */
+            rows = sym->array_dims[0];
+            cols = sym->cols;
+            count = (size_t)rows * (size_t)cols;
+            array_of_vector = true;
         } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count == 2 &&
                    sym->array_dims[0] > 0 && sym->array_dims[1] > 0) {
             /* Genuinely 2-dimensional ARRAY(r,c) -- HAL/S allows
@@ -1128,6 +1160,7 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     e->element_count = count;
     e->rows = rows;
     e->cols = cols;
+    e->array_of_vector = array_of_vector;
 }
 
 /* Matrix inverse (MINV, class-3/MINV.md; BFNC's INVERSE selector), via
@@ -1309,6 +1342,23 @@ static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
         if (op->data >= HALMAT_SYT_MAX) { fail(state, "SYT index %u out of range", op->data); return false; }
         ensure_container(state, op->data);
         halmat_syt_entry_t *e = &state->syt[op->data];
+        /* An ARRAY-of-VECTOR operand (state.h's array_of_vector comment)
+         * inside an ADLP/DLPE-driven whole-array-expression replay
+         * resolves to just the *one* VECTOR at the current arrayed_index,
+         * not the whole flat container -- user-reported, 117-EXAMPLE_8.hal
+         * (`ABVAL([POSITIONS] - MY_POSN)`, POSITIONS an ARRAY(5) VECTOR,
+         * MY_POSN a plain VECTOR(3): each replay must pair MY_POSN's full
+         * 3 elements against exactly one of POSITIONS' 5 VECTORs, not all
+         * 15 at once). Outside a replay (arrayed_index < 0) falls through
+         * to the whole-container form below, unchanged. */
+        if (e->array_of_vector && state->arrayed_index >= 0 && e->rows > 0) {
+            size_t i = (size_t)state->arrayed_index % (size_t)e->rows;
+            *out_elems = &e->elements[i * (size_t)e->cols];
+            *out_count = (size_t)e->cols;
+            *out_rows = 0;
+            *out_cols = e->cols;
+            return true;
+        }
         *out_elems = e->elements;
         *out_count = e->element_count;
         *out_rows = e->rows;
@@ -3559,35 +3609,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * `V(N)` where V is declared ARRAY(n) VECTOR(m) --
                          * an ARRAY-of-VECTOR, not a true MATRIX -- compiling
                          * to the same "one plain index + one asterisk"
-                         * DSUB shape as M$(i,*), but this interpreter's
-                         * container model (halmat_syt_entry_t's elements/
-                         * rows/cols, state.h) has no way to distinguish
-                         * "ARRAY(3) VECTOR(3)" (9 flat elements, indexed as
-                         * 3 groups of 3) from a real MATRIX(3,3) (also 9
-                         * flat elements, but row-major 2D) -- both end up
-                         * rows==cols==0 via ensure_container(), since only
-                         * MATRIX gets real shape metadata from the symtab
-                         * today. Confirmed as the actual real-corpus
-                         * blocker this session (141-VSUM.hal's `TOTAL =
+                         * DSUB shape as M$(i,*). A *concrete*-size ARRAY(n)
+                         * VECTOR(m) (n a literal, known at DECLARE time) is
+                         * now handled: ensure_container() gives it real
+                         * rows/cols (n, m) plus the array_of_vector flag
+                         * (state.h), same as the 2D-ARRAY-of-SCALAR fix
+                         * above, so it lands in the `base->rows > 0` branch
+                         * just above instead of down here -- confirmed
+                         * user-reported, 117-EXAMPLE_8.hal's `POSITIONS
+                         * ARRAY(5) VECTOR`, indexed `POSITIONS$(I:*)`.
+                         * Still reached for an *assumed-size* `ARRAY(*)
+                         * VECTOR` formal parameter (its real length only
+                         * known at the call site, not DECLARE time) --
+                         * confirmed as the actual real-corpus blocker for
+                         * that case this session (141-VSUM.hal's `TOTAL =
                          * TOTAL + V(N);` inside `VSUM: FUNCTION(V) VECTOR;
-                         * DECLARE V ARRAY(*) VECTOR;`) -- and that same
-                         * file goes on to need at least two more currently-
-                         * unimplemented things even once this one's fixed:
-                         * ARRAY(*) assumed-size parameter binding (the
-                         * formal parameter's real length comes from
-                         * whatever's passed at the call site, not a fixed
-                         * declared size) and a whole-VECTOR FUNCTION RETURN
-                         * (already identified as a separate, deeper OP_RTRN
-                         * gap -- see that opcode's own comment, added
-                         * investigating external function return values).
-                         * All three are facets of the same missing "ARRAY-
-                         * of-VECTOR/MATRIX" shape-modeling architecture,
-                         * deliberately deferred together rather than
-                         * partially implemented -- new symtab shape
-                         * metadata (distinguishing this case from MATRIX)
-                         * would be needed before any of them could be
-                         * fixture-verified against a real compiled
-                         * program. */
+                         * DECLARE V ARRAY(*) VECTOR;`) -- tracked
+                         * separately (task #29) since it needs the
+                         * parameter's real bound threaded in from the call
+                         * site, not just a symtab decode. That same file
+                         * also still needs a whole-VECTOR FUNCTION RETURN
+                         * (a separate, deeper OP_RTRN gap -- see that
+                         * opcode's own comment, added investigating
+                         * external function return values) even once
+                         * ARRAY(*) binding is fixed. */
                         fail(state, "DSUB: asterisk subscript with %u indices not yet implemented", num_indices);
                         break;
                     }
@@ -3736,6 +3781,26 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: SYT index out of range"); break; }
                 ensure_container(state, dest_syt);
                 halmat_syt_entry_t *dest = &state->syt[dest_syt];
+                if (dest->array_of_vector && state->arrayed_index >= 0 && dest->rows > 0) {
+                    /* ARRAY(n) VECTOR(m) destination, mid ADLP/DLPE replay
+                     * (state.h's array_of_vector comment; user-reported,
+                     * 117-EXAMPLE_8.hal's `[VELOCITY] = ([POSITIONS] -
+                     * [OLD_POSN]) / DELTA_T;` and `[OLD_POSN] =
+                     * [POSITIONS];`) -- write just the current
+                     * arrayed_index's own VECTOR(m), not the whole
+                     * container; `src` is already sliced to exactly one
+                     * VECTOR by resolve_container's matching array_of_vector
+                     * case above when the source is itself an ARRAY-of-
+                     * VECTOR SYT, or is already a single VECTOR-shaped VAC
+                     * result (an arithmetic chain rooted at one) otherwise. */
+                    if (src_count != (size_t)dest->cols) {
+                        fail(state, "MASN/VASN: shape mismatch (%zu vs %d elements)", src_count, dest->cols);
+                        break;
+                    }
+                    size_t i = (size_t)state->arrayed_index % (size_t)dest->rows;
+                    memcpy(&dest->elements[i * (size_t)dest->cols], src, src_count * sizeof(halmat_scalar_t));
+                    break;
+                }
                 if (dest->element_count != src_count) {
                     fail(state, "MASN/VASN: shape mismatch (%zu vs %zu elements)", src_count, dest->element_count);
                     break;

@@ -161,8 +161,29 @@ typedef struct {
                             * as ""), so reads never need a NULL check. */
     int rows, cols; /* MATRIX(r,c): both set (row-major, r*c elements). VECTOR(n): cols=n, rows=0.
                       * Plain ARRAY(n): both 0 (element_count is authoritative, single dimension).
+                      * A genuinely 2-dimensional ARRAY(r,c) of SCALAR/INTEGER, or an ARRAY(r) of
+                      * VECTOR(c) (see array_of_vector below), both reuse this same rows/cols
+                      * convention so DSUB's MATRIX-shaped indexing logic applies to them for free.
                       * Set by ensure_container() the first time the symbol's elements are
                       * allocated -- 0/0 also means "not yet allocated" together with elements==NULL. */
+    bool array_of_vector; /* true only for the ARRAY(r) VECTOR(c) case above (rows=r, cols=c) --
+                            * distinguishes it from a genuine MATRIX(r,c), which shares the same
+                            * rows/cols encoding but must NOT be sliced by arrayed_index below.
+                            * Set by ensure_container(); consulted by resolve_container()'s
+                            * QUAL_SYT case, user-reported (117-EXAMPLE_8.hal's `[VELOCITY] =
+                            * ([POSITIONS] - [OLD_POSN]) / DELTA_T;`, POSITIONS/OLD_POSN/VELOCITY
+                            * all ARRAY(5) VECTOR): a whole-container arithmetic op (VSUB/VSDV/
+                            * VASN/VDOT/BFNC's ABVAL/UNIT) on an ARRAY-of-VECTOR SYT operand,
+                            * replayed once per array index by the ADLP/DLPE mechanism
+                            * (arrayed_index, see below), must resolve to just the *one* VECTOR
+                            * slice at the current arrayed_index each time -- not the whole flat
+                            * container -- so it can combine correctly with a plain (un-arrayed)
+                            * VECTOR operand on the other side (`ABVAL([POSITIONS] - MY_POSN)`,
+                            * MY_POSN a plain VECTOR(3): a same-shape ARRAY-of-VECTOR pair would
+                            * *coincidentally* still come out right if resolved as one flat whole-
+                            * container op instead, elementwise math not caring about the VECTOR
+                            * grouping, but the mixed-shape ABVAL/UNIT/VDOT cases in this same file
+                            * prove that coincidence can't be relied on generally). */
     char *char_value; /* SYT_TYPE_CHARACTER; owned, malloc'd, NUL-terminated. No
                         * fixed-length/VARYING-vs-fixed truncation-or-padding
                         * behavior is implemented yet (class-2/CASN.md's

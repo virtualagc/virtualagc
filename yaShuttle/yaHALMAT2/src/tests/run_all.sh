@@ -967,6 +967,42 @@ run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2
 # real-world timing.
 run ./run_walltime_fixture.sh date_clocktime
 
+# User-reported (117-EXAMPLE_8.hal): `POSITIONS ARRAY(5) VECTOR`, indexed
+# `POSITIONS$(I:*)`, failed with "DSUB: asterisk subscript with 2 indices
+# not yet implemented" -- the same generic-ARRAY-shape gap task #16 had
+# deferred (ensure_container() had no shape metadata distinguishing an
+# ARRAY-of-VECTOR from a real MATRIX, so it fell back to a 1-dimensional
+# element count that also silently undersized the container by 3x,
+# discarding each VECTOR's own components). Fixed in two parts: (1)
+# symtab.c now decodes SYM_LENGTH into the element's own VECTOR shape
+# even when SYM_ARRAY made the symbol's shape==ARRAY (previously only
+# read for the plain, unarrayed VECTOR/MATRIX case); (2) ensure_container()
+# gives a confirmed ARRAY(n) VECTOR(m) the same rows/cols treatment the
+# 2D-ARRAY-of-SCALAR fix gave a real MATRIX, plus a new array_of_vector
+# flag (state.h) so DSUB's existing MATRIX-shaped asterisk-select logic
+# picks it up "for free" like the 2D-ARRAY case did. A second, deeper bug
+# surfaced verifying the file's whole-array vector arithmetic
+# (`[VELOCITY] = ([POSITIONS] - [OLD_POSN]) / DELTA_T;`, `[DISTANCE] =
+# ABVAL([POSITIONS] - MY_POSN);`, both compiled as VSUB/VSDV/VASN/BFNC
+# wrapped in an ADLP/DLPE per-array-index replay): resolve_container()
+# always returned an ARRAY-of-VECTOR SYT operand's *whole* flat container,
+# never slicing by the replay's own arrayed_index -- happened to still
+# give the right final answer when both VSUB operands were same-shaped
+# ARRAY-of-VECTORs (pure elementwise math doesn't care about the VECTOR
+# grouping), but broke the mixed-shape ABVAL/VDOT cases (`POSITIONS`, an
+# ARRAY(5) VECTOR, combined with `MY_POSN`, a plain VECTOR(3) broadcast
+# across every array index) with a shape-mismatch failure. Fixed by making
+# resolve_container's QUAL_SYT case (and OP_VASN's own dest-SYT write,
+# which has its own hand-rolled write path rather than going through
+# write_destination) consult the new array_of_vector flag and slice to
+# just the current arrayed_index's own VECTOR when set, leaving a plain
+# (non-array_of_vector) VECTOR/MATRIX operand's whole-container resolution
+# untouched -- exactly the automatic "broadcast" behavior the mixed-shape
+# case needs. All values independently hand-verified (vector subtraction/
+# magnitude/dot-product arithmetic), not just cross-checked against
+# compileLinkRun.
+run ./run_local_fixture.sh array_of_vector "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488088E+01\n 5.3851643E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
