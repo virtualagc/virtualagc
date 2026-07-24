@@ -1926,9 +1926,13 @@ typedef enum { HALMAT_READ_FIELD_DATA, HALMAT_READ_FIELD_NULL, HALMAT_READ_FIELD
  * discard_to_eol call below) -- this function only needs to decide *this*
  * statement's own outcome, not clean up after itself.
  *
- * `require_separator` (pass `i > 0`, the item's own index in the READ
- * list) distinguishes two call shapes, both needed to get this right
- * without misaligning the whole remaining list (an earlier version of
+ * `require_separator` (pass whether any data field of the whole READ
+ * statement has already been consumed yet -- OP_READ's own
+ * `any_field_read`, not simply an item's index, since a single item can
+ * itself expand into several fields for a whole VECTOR/MATRIX
+ * destination) distinguishes two call shapes, both needed to get this
+ * right without misaligning the whole remaining list (an earlier version
+ * of
  * this fix used one shape for every item and *consumed* the first
  * comma it found unconditionally, which shifted every subsequent field
  * over by one whenever a leading comma appeared, instead of nulling
@@ -4526,24 +4530,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * means an I/O control specifier (TAB/COLUMN/SKIP/
                      * LINE/PAGE); TAG1 outside {2=CHARACTER,5=SCALAR,
                      * 6=INTEGER} means a type this interpreter doesn't
-                     * store yet (BIT/MATRIX/VECTOR/structure) -- both
-                     * fail loudly rather than misbehave, no fixture needs
-                     * them yet. (CHARACTER matters in practice: real
-                     * HAL/S's READALL requires CHARACTER-typed targets --
-                     * confirmed via a real HALSFC compile rejecting an
-                     * INTEGER/SCALAR READALL with "VARIABLE IN READALL IS
-                     * NOT OF CHARACTER TYPE".) */
+                     * store yet as a single field (BIT/structure) -- fails
+                     * loudly rather than misbehave, no fixture needs them
+                     * yet. (CHARACTER matters in practice: real HAL/S's
+                     * READALL requires CHARACTER-typed targets -- confirmed
+                     * via a real HALSFC compile rejecting an INTEGER/SCALAR
+                     * READALL with "VARIABLE IN READALL IS NOT OF
+                     * CHARACTER TYPE".) */
                     if (ins->operands[0].tag2 != 0) {
                         fail(state, "READ: I/O control specifiers (TAB/COLUMN/SKIP/LINE/PAGE) not yet implemented");
                         break;
                     }
                     uint8_t cls = ins->operands[0].tag1;
+                    /* Whole VECTOR(4)/MATRIX(3) READ destination -- same
+                     * unreplayed QUAL=SYT/TAG1=class shape as the WRITE/
+                     * CALL whole-container case below (class-0/XXAR.md's
+                     * "Whole VECTOR/MATRIX/ARRAY argument" section), not
+                     * wrapped in an ADLP/DLPE per-element replay the way a
+                     * whole ARRAY is -- so `state->arrayed_index < 0` here
+                     * genuinely means "this XXAR names the whole
+                     * container," not merely "no replay is active yet."
+                     * USA003087 Sec. 12.3's "[a] vector data item causes
+                     * one data field per vector element to be read... [a]
+                     * matrix... row by row" (the same unrolled order as
+                     * WRITE output/INITIAL) governs the field count; OP_READ
+                     * does the actual per-element unrolling. User-reported
+                     * (044-ORTHONORMAL.hal's `READ(5) X;`, X a VECTOR(3)). */
+                    if ((cls == 3 || cls == 4) && ins->operands[0].qual == QUAL_SYT &&
+                        state->arrayed_index < 0 && syt_is_array_shaped(state, ins->operands[0].data)) {
+                        state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
+                        state->io_pending.items[state->io_pending.item_count].dest_is_container = true;
+                        state->io_pending.item_count++;
+                        break;
+                    }
                     if (cls != 2 && cls != 5 && cls != 6) {
                         fail(state, "READ: only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
                         break;
                     }
                     state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                     state->io_pending.items[state->io_pending.item_count].dest_class = cls;
+                    state->io_pending.items[state->io_pending.item_count].dest_is_container = false; /* items[]
+                        * slots are reused across READ statements without zeroing -- a stale true from a
+                        * previous statement's whole-container item at this same slot must be cleared,
+                        * same convention as the WRITE-side is_container reset just below. */
                     state->io_pending.item_count++;
                     break;
                 }
@@ -4805,8 +4834,60 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * in state.h. */
                 if (state->device_read_started[device]) discard_to_eol(in);
                 else state->device_read_started[device] = true;
+                /* Tracks "has any data field of this whole READ statement
+                 * already been consumed yet" -- read_skip_separator's
+                 * `require_separator` needs this, not simply "am I past
+                 * item 0," now that a single item can itself expand into
+                 * several fields (the whole-VECTOR/MATRIX case just
+                 * below): the 2nd/3rd element of a VECTOR(3) destination
+                 * still needs `require_separator=true` even though both
+                 * belong to outer item index 0. */
+                bool any_field_read = false;
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
+                    if (state->io_pending.items[i].dest_is_container) {
+                        /* Whole VECTOR/MATRIX destination (state.h's
+                         * dest_is_container comment) -- USA003087 Sec.
+                         * 12.3: "a vector data item causes one data field
+                         * per vector element to be read... a matrix...
+                         * row by row," the same element order WRITE/
+                         * INITIAL already use, so a plain sequential
+                         * elements[] walk is correct for both shapes.
+                         * Every element still goes through the ordinary
+                         * null-field/terminate rules below, same as any
+                         * other item -- a semicolon mid-VECTOR leaves the
+                         * rest of *this* container AND every later item
+                         * unchanged, matching a semicolon between two
+                         * ordinary items. User-reported (044-ORTHONORMAL.
+                         * hal's `READ(5) X;`, X a VECTOR(3)). */
+                        uint16_t syt_index = state->io_pending.items[i].dest_operand.data;
+                        ensure_container(state, syt_index);
+                        halmat_syt_entry_t *e = &state->syt[syt_index];
+                        bool stop = false;
+                        for (size_t k = 0; k < e->element_count; k++) {
+                            halmat_read_field_t field = read_skip_separator(in, any_field_read);
+                            any_field_read = true;
+                            if (field == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
+                            if (field == HALMAT_READ_FIELD_NULL) continue;
+                            double v;
+                            if (fscanf(in, "%lf", &v) != 1) {
+                                fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                stop = true;
+                                break;
+                            }
+                            /* Always single precision, matching the
+                             * ordinary plain-SCALAR item branch below
+                             * (rv.scalar = halmat_scalar_from_double(v,
+                             * false)) -- READ doesn't otherwise consult a
+                             * destination's declared precision anywhere
+                             * in this interpreter yet, so this stays
+                             * consistent rather than special-casing
+                             * containers alone. */
+                            e->elements[k] = halmat_scalar_from_double(v, false);
+                        }
+                        if (stop) break;
+                        continue;
+                    }
                     /* USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 rules 5-6
                      * (also "Programming in HAL/S" Sec. 8.3, p. 153):
                      * fields are separated by "a comma and/or at least
@@ -4821,10 +4902,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * after it stay untouched) -- user-reported,
                      * previously a hard parse error rather than the
                      * documented "process a variable number of input
-                     * values" idiom. See read_skip_separator's own
-                     * comment for why it needs `i > 0` to know which of
-                     * its two call shapes to use here. */
-                    halmat_read_field_t field = read_skip_separator(in, i > 0);
+                     * values" idiom. */
+                    halmat_read_field_t field = read_skip_separator(in, any_field_read);
+                    any_field_read = true;
                     if (field == HALMAT_READ_FIELD_TERMINATE) break;
                     if (field == HALMAT_READ_FIELD_NULL) continue;
                     if (state->io_pending.items[i].dest_class == 6) {

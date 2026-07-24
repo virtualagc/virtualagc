@@ -532,10 +532,24 @@ struct halmat_state {
              * captured raw by XXAR rather than resolved to a value, plus
              * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
              * tells READ's handler which format to parse from the device.
-             * Only INTEGER(6)/SCALAR(5) are implemented -- see interp.c's
-             * OP_READ case. */
+             * Only INTEGER(6)/SCALAR(5)/CHARACTER(2) are implemented as
+             * single-field destinations -- see interp.c's OP_READ case. */
             halmat_operand_t dest_operand;
             uint8_t dest_class;
+            /* True when dest_operand is a whole VECTOR/MATRIX SYT
+             * reference (TAG1=4/3, class-0/XXAR.md's confirmed "no ADLP/
+             * DLPE replay" shape -- same unreplayed pattern as the WRITE/
+             * CALL whole-container case above, `is_container`) rather
+             * than a single scalar/integer/character destination. OP_READ
+             * unrolls this into one field read per element (dest_operand.
+             * data is the container's own SYT index) instead of the
+             * ordinary single-value write_destination path. ARRAY has no
+             * equivalent here -- confirmed (class-0/XXAR.md) it stays
+             * ADLP/DLPE-replayed even when whole, so each element already
+             * arrives as its own ordinary-shaped XXAR/dest_class item via
+             * the ordinary ADLP replay this struct's other fields already
+             * handle, cycling arrayed_index -- no separate case needed. */
+            bool dest_is_container;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
     } io_pending, io_pending_stack[8];

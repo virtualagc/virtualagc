@@ -144,6 +144,31 @@ run ./run_read_fixture.sh read_semicolon "$(printf '1.5, 2.6;\n')" "$(printf -- 
 # its own field scan. This fixture's second iteration (input "4,5,6")
 # only reads correctly if that discard happens.
 run ./run_read_fixture.sh read_semicolon_loop "$(printf '1,2;\n4,5,6\n')" "$(printf -- ' 1.0000000E+00      2.0000000E+00     -9.5000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+# User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, X a VECTOR(3)):
+# READ against a whole VECTOR/MATRIX destination failed outright
+# ("only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT
+# class 4)") -- XXAR's TAG1=4=VECTOR/3=MATRIX arrives as a single
+# unreplayed whole-SYT operand (class-0/XXAR.md's confirmed "no ADLP/
+# DLPE replay" shape, same as the already-handled WRITE/CALL
+# whole-container case), not a per-element list this interpreter already
+# understood. Fixed per USA003087 Sec. 12.3 ("a vector data item causes
+# one data field per vector element to be read... a matrix... row by
+# row" -- the same unrolled order WRITE/INITIAL already use): OP_READ
+# now unrolls a whole-container destination into one field read per
+# element directly, sharing the exact same null-field/semicolon-
+# terminate rules as any other item.
+run ./run_read_fixture.sh read_vecmat "$(printf '1,2,3\n4,5,6,7\n')" "$(printf -- ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00\n 6.0000000E+00      7.0000000E+00')"
+# Edge case the plain read_vecmat fixture above doesn't exercise: a
+# whole-container item sandwiched between two ordinary scalar items in
+# the same READ statement (`READ(5) A, V, B;`), confirming (1) the
+# separator between A and V's first element is still correctly required
+# (any_field_read, not simply "item index > 0", now that a single item
+# can expand into several fields -- see OP_READ's own comment) and (2) a
+# semicolon reached mid-container terminates the *whole remaining
+# statement*, leaving both the rest of V (its 3rd element) and the later
+# scalar B untouched, exactly like a semicolon between two ordinary
+# items.
+run ./run_read_fixture.sh read_vecmat_edge "$(printf '1,2,3;\n')" "$(printf -- ' 1.0000000E+00\n 2.0000000E+00      3.0000000E+00     -9.5000000E+00\n-7.5000000E+00')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
