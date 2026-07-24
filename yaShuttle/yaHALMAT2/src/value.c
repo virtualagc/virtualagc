@@ -167,17 +167,40 @@ void halmat_scalar_format(halmat_scalar_t s, char *buf, size_t buf_size) {
      * off by one relative to its own total-width claim -- see the
      * Phase 3 follow-up note added there. */
     int frac_digits = s.double_precision ? 16 : 7;
+    int width = s.double_precision ? 23 : 14;
     double value = halmat_scalar_to_double(s);
+
+    if (value == 0.0) {
+        /* [USA003087] Appendix F ("Scalar Type"): "If the value is
+         * exactly zero, it is represented as 0.0" -- not the full
+         * zero-padded scientific-notation form every other value gets
+         * below. Confirmed by Figure 12-3's own worked WRITE example, a
+         * 3x3 matrix with a genuine 0.0 element rendered as bare "0.0"
+         * beside fields like "5.0000000E-01" of the same nominal width.
+         * Field width stays the usual fixed 14/23 ([USA003090] Sec.
+         * 6.1.3/Sec. 8.2 rules 13-14, matching the nonzero case just
+         * below); the decimal point aligns to the same fixed column
+         * nonzero values use (one leading blank, matching the sign
+         * position), remainder blank-padded rather than zero-padded.
+         * User-reported: previously formatted identically to a nonzero
+         * value (e.g. " 0.0000000E+00"). class-2/STOC.md previously
+         * concluded zero *wasn't* special-cased, reasoned from
+         * [USA003090]'s silence on the zero case -- but that was written
+         * when USA003090.txt wasn't actually available to check; a
+         * direct read of Sec. 6.1.3/Sec. 8.2 rules 13-14 confirms they
+         * only describe the general nonzero layout and don't address
+         * zero at all, so they don't actually contradict USA003087's
+         * explicit rule. */
+        snprintf(buf, buf_size, "%-*s", width, " 0.0");
+        return;
+    }
+
     char sign = (value < 0.0) ? '-' : ' ';
     double mag = (value < 0.0) ? -value : value;
-    int exponent = 0;
-
-    if (mag != 0.0) {
-        exponent = (int)floor(log10(mag));
-        mag = mag / pow(10.0, exponent);
-        if (mag >= 10.0) { mag /= 10.0; exponent++; }  /* guard rounding at the boundary */
-        if (mag < 1.0) { mag *= 10.0; exponent--; }
-    }
+    int exponent = (int)floor(log10(mag));
+    mag = mag / pow(10.0, exponent);
+    if (mag >= 10.0) { mag /= 10.0; exponent++; }  /* guard rounding at the boundary */
+    if (mag < 1.0) { mag *= 10.0; exponent--; }
 
     snprintf(buf, buf_size, "%c%.*fE%c%02d", sign, frac_digits, mag, (exponent < 0) ? '-' : '+',
              (exponent < 0) ? -exponent : exponent);

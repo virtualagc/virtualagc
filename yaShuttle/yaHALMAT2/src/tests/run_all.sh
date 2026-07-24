@@ -169,7 +169,7 @@ run ./run_local_fixture.sh bfnc_det "$(printf -- '-1.9000000E+01\n 1.8000000E+01
 # itself), and 25 (MATRIX/scalar division by zero -> the original
 # matrix). Also exercises this session's MINV finding that the opcode is
 # general matrix exponentiation (`M**N`), not INVERSE-only -- N=0/2 here.
-run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00\n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
+run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 0.0                0.0                0.0          \n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
 # ON ERROR's user-statement (GOTO) form (class-0/ERON.md), USA003087 Sec.
 # 25 -- a user-reported bug against a modified 029-DATATYPES.hal (adding
 # ON ERROR/OFF ERROR around the INVERSE-of-a-singular-matrix section):
@@ -184,7 +184,7 @@ run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.000
 # showed as part of ERON's *own* object code ("BC 7,L#1 <- unconditional
 # branch skipping the handler code in normal flow"), not a separate
 # HALMAT instruction as an earlier session's comment here assumed.
-run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP      1.0000000E+00      0.0000000E+00\n                 0.0000000E+00      1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE      1.0000000E+00      0.0000000E+00\n                   0.0000000E+00      1.0000000E+00')"
+run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP      1.0000000E+00      0.0          \n                 0.0                1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE      1.0000000E+00      0.0          \n                   0.0                1.0000000E+00')"
 # Per direct instruction, every App. C fixup site implemented this
 # session now consults the ON ERROR table (not just INVERSE's error 27,
 # the one a bug report happened to exercise) -- spot-checks a GOTO
@@ -199,7 +199,7 @@ run ./run_local_fixture.sh eron_goto_appc "$(printf -- 'AFTER SQRT TRAP\nAFTER U
 # (0**B, B<=0 -> 0, across SEXP/SPEX/SIEX's three different HALMAT
 # opcodes for "non-literal", "literal>=0", and "literal any-sign"
 # exponents respectively).
-run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0000000E+00\n 0.0000000E+00\n 0.0000000E+00')"
+run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          ')"
 # Errors 11 (TAN |arg| too large -> 1), 8 (SIN/COS |arg| too large ->
 # sqrt(2)/2), and 15 (SCALAR too large for INTEGER conversion -> the
 # maximum representable value -- this emulator's own INT32 range, since
@@ -250,7 +250,7 @@ run ./run_local_fixture.sh arrinit_types "$(printf 'AB     CD     EF\n          
 # Every previously-tested fixture had only one SLRI...ELRI pair with
 # nothing else before the group's ETRI, so this had no observable effect
 # until a source combining more than one segment was tried.
-run ./run_local_fixture.sh matrix_identity_init "$(printf ' 1.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      1.0000000E+00')"
+run ./run_local_fixture.sh matrix_identity_init "$(printf ' 1.0000000E+00      0.0                0.0          \n 0.0                1.0000000E+00      0.0          \n 0.0                0.0                1.0000000E+00')"
 # Nested repetition-factor form (USA003087 Sec. 16.2, "The factored form
 # may be nested if necessary"), user-reported: `INITIAL(4#(1,5#0),1)`
 # (a 5x5 identity matrix) -- a second, deeper bug than the one just
@@ -266,7 +266,7 @@ run ./run_local_fixture.sh matrix_identity_init "$(printf ' 1.0000000E+00      0
 # offset. --line-length 200 keeps this fixture's expected output
 # focused on the INITIAL()-value correctness rather than also
 # depending on line-wrap arithmetic (covered separately by write_wrap).
-run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      0.0                0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
 # User-reported bug: `CALL some_procedure(a_whole_matrix);` failed with
 # the same "outside an arrayed-paragraph replay" error as the whole-
 # VECTOR/MATRIX WRITE-argument bug above, for the same reason -- a
@@ -277,7 +277,7 @@ run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      
 # interp_prepare_external_call) to copy such an argument's elements into
 # the callee's own parameter storage by value, shape-checked against the
 # parameter's declared dimensions (USA003087 Sec. 11.2/11.4-11.5).
-run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
 # User-reported bug (039-CORNERS.hal's `AB = 0;`, AB a VECTOR(2)): a
 # third distinct trigger for the same "outside an arrayed-paragraph
 # replay" error as the two fixtures above, this time via a plain scalar
@@ -295,7 +295,7 @@ run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0
 # zero-valued source against a VECTOR/MATRIX (not ARRAY, which has no
 # documented equivalent idiom) receiver zeros every element directly
 # instead of requiring arrayed_index >= 0.
-run ./run_local_fixture.sh vecmat_null_assign "$(printf ' 0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00')"
+run ./run_local_fixture.sh vecmat_null_assign "$(printf ' 0.0                0.0          \n 0.0                0.0          \n 0.0                0.0          ')"
 # USA003087 Sec. 11.2/11.4's "precision conversion is allowed" MATRIX/
 # VECTOR argument-transmission rule: a SINGLE MATRIX argument (A) passed
 # to a DOUBLE parameter widens (scale_precision, the same exact bit-level
@@ -318,7 +318,7 @@ run ./run_local_fixture.sh proc_matrix_precision "$(printf ' 1.5000000000000000E
 # from inside a TASK block too (not just PROCEDURE/FUNCTION), so the fix
 # (being purely symbol-table-driven, not block-kind-specific) covers that
 # case the same way, though no TASK-based fixture is included here.
-run ./run_local_fixture.sh nest_call "$(printf '      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+run ./run_local_fixture.sh nest_call "$(printf '      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
 # WRITE of a whole VECTOR/MATRIX argument (`WRITE(6) V;`): confirmed this
 # session that -- unlike a plain ARRAY, which the ADLP/DLPE per-element
 # replay above already covered -- this compiles as a single, unreplayed
