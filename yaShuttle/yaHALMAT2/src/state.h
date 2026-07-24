@@ -540,9 +540,27 @@ struct halmat_state {
         struct {
             bool is_string;
             bool is_scalar;
+            bool is_bits;   /* WRITE only (kind == 2): a raw BIT-typed argument -- see
+                              * OP_XXAR's capture logic (interp.c) and bit_width just below. */
             char *string;   /* borrowed from the literal table; not owned */
             int32_t integer;
             halmat_scalar_t scalar;
+            uint32_t bits;   /* is_bits only */
+            int bit_width;   /* is_bits only: the declared BIT(n) width to format `bits` at --
+                               * looked up from the symbol table (state->symtab) for a plain
+                               * QUAL_SYT variable reference, same technique BCAT (class-1/
+                               * BCAT.md) already established for the identical "resolved_
+                               * value_t's RV_BITS carries no width of its own" problem; falls
+                               * back to 32 (the documented maximum legal BIT string length,
+                               * USA003090 Sec. 8.2 rule 6) for anything else -- an expression
+                               * result, a literal, or no symbol table available -- per
+                               * ["Programming in HAL/S"] p. 255: "[t]he value returned by the
+                               * BIT function is always of the maximum legal length for bit
+                               * strings, as defined for the compiler version in use," the
+                               * closest primary/secondary-source statement about what width a
+                               * BIT value with no better-known width should be treated as
+                               * (direct user citation, confirmed against USA003090's own 1-32
+                               * range for this specific compiler). */
             /* WRITE only (kind == 2): a whole VECTOR/MATRIX/ARRAY argument
              * (`WRITE(6) V;`, or a MATRIX row/column slice like
              * `WRITE(6) M$(1,*);`) -- confirmed this session against real

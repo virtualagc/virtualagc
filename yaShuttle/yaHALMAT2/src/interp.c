@@ -1921,6 +1921,29 @@ static char *quote_character_for_unpaged(const char *s) {
     return buf;
 }
 
+/* BIT WRITE field formatting (USA003087 Appendix F): "a series of ones
+ * and zeros... [l]eading binary zeroes are not suppressed[;] the field
+ * width is equal to the number of binary digits in the string plus an
+ * inserted blank following every fourth digit (to enhance readability)."
+ * Confirmed via "Programming in HAL/S" Sec. 8.1's own worked example,
+ * HEX'1234' (16 bits) -> "0001 0010 0011 0100": the inserted blank is a
+ * readability grouping between groups, not a trailing field separator
+ * (no blank after the last group, whether or not width is a multiple of
+ * 4). Most-significant bit first. `buf` must be at least
+ * width + width/4 + 1 bytes (a blank per interior group boundary, plus
+ * NUL) -- width is capped at 32 (state.h's bit_width comment; also
+ * USA003090 Sec. 8.2 rule 6's documented legal maximum) everywhere this
+ * is called, so a 48-byte stack buffer is always enough. */
+static void format_bit_field(uint32_t bits, int width, char *buf) {
+    int o = 0;
+    for (int i = 0; i < width; i++) {
+        int bit_index = width - 1 - i;
+        buf[o++] = ((bits >> bit_index) & 1u) ? '1' : '0';
+        if ((i + 1) % 4 == 0 && (i + 1) != width) buf[o++] = ' ';
+    }
+    buf[o] = '\0';
+}
+
 static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
     int col = 0;
     bool need_sep = false;
@@ -1988,6 +2011,18 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
             char buf[32];
             halmat_scalar_format(state->io_pending.items[i].scalar, buf, sizeof(buf));
             emit_write_field(state, out, buf, &col, &need_sep);
+        } else if (state->io_pending.items[i].is_bits) {
+            /* Binary-digit-string field, state.h's bit_width comment /
+             * format_bit_field's own comment above. */
+            char buf[48];
+            format_bit_field(state->io_pending.items[i].bits, state->io_pending.items[i].bit_width, buf);
+            if (unpaged) {
+                char *quoted = quote_character_for_unpaged(buf);
+                emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep);
+                free(quoted);
+            } else {
+                emit_write_field(state, out, buf, &col, &need_sep);
+            }
         } else {
             /* INTEGER WRITE field: 11-char right-justified, empirically
              * confirmed against a real HALSFC compile + yaHALMAT run
@@ -4863,9 +4898,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     * previous statement's whole-container item at this same slot must be cleared. */
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
+                state->io_pending.items[state->io_pending.item_count].is_bits = (a.kind == RV_BITS);
                 state->io_pending.items[state->io_pending.item_count].string = a.string;
                 if (a.kind == RV_SCALAR) {
                     state->io_pending.items[state->io_pending.item_count].scalar = a.scalar;
+                } else if (a.kind == RV_BITS) {
+                    /* state.h's bit_width comment: the real declared width
+                     * for a plain variable reference (BCAT's own
+                     * established technique for this identical problem),
+                     * falling back to 32 (USA003090 Sec. 8.2 rule 6's
+                     * documented maximum legal BIT string length) for
+                     * anything else -- user-confirmed against
+                     * ["Programming in HAL/S"] p. 255. */
+                    int width = 32;
+                    if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
+                        const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (sym && sym->bit_width > 0) width = sym->bit_width;
+                    }
+                    state->io_pending.items[state->io_pending.item_count].bits = a.bits;
+                    state->io_pending.items[state->io_pending.item_count].bit_width = width;
                 } else if (a.kind != RV_STRING) {
                     state->io_pending.items[state->io_pending.item_count].integer = rv_to_integer(&a);
                 }

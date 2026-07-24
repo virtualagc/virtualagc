@@ -311,8 +311,21 @@ run ./run_local_fixture.sh vecinit_split "$(printf ' 1.0000000E+00\n-5.0000000E+
 # element storage (state.h's bit_elements/char_elements, dispatched by
 # ensure_container from the symbol table's declared ARRAY element type)
 # is exercised on both the write (INITIAL()) and read (unsubscripted
-# whole-ARRAY WRITE, which enumerates every element) sides.
-run ./run_local_fixture.sh arrinit_types "$(printf 'AB     CD     EF\n          1               2               3')"
+# whole-ARRAY WRITE, which enumerates every element) sides. Expected
+# value for B (a BIT ARRAY(3) BIT(4)) updated this session: previously
+# "1 2 3" was the *old bug's* output (a BIT WRITE field silently
+# misformatted as plain INTEGER -- see CLAUDE_LOG.md's BIT-WRITE-
+# formatting entries -- coincidentally numeric-looking here since
+# BIN'0001'/'0010'/'0011' also equal 1/2/3 as plain integers, which is
+# exactly why this discrepancy went unnoticed until BIT WRITE formatting
+# was actually implemented); "0001 0010 0011" is the correct binary-
+# digit-string format at B's real declared per-element width (4), not
+# the fallback 32 -- this fixture is also what caught symtab.c's own
+# separate bug (BIT ARRAY per-element width was silently discarded
+# whenever a BIT symbol was also ARRAY-shaped, since the shape-resolving
+# if/else chain treated "has an ARRAY shape" and "is BIT-typed" as
+# mutually exclusive when a symbol can genuinely be both).
+run ./run_local_fixture.sh arrinit_types "$(printf 'AB     CD     EF\n0001     0010     0011')"
 # INITIAL() list mixing a bare literal with n#value repeats in the same
 # clause (`INITIAL(1, 3#0, 1, 3#0, 1)`, a 3x3 identity matrix): user-
 # reported bug -- precompute_arrayed_paragraphs' SLRI branch scanned
@@ -431,6 +444,29 @@ run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+
 # literal `'` character) gets doubled only in the UNPAGED form.
 run ./run_local_fixture.sh unpaged "$(printf 'THE ANSWER IS      7.5836206E+05\nIT'"'"'S HERE')"
 run ./run_local_fixture.sh unpaged "$(printf '\x27THE ANSWER IS\x27      7.5836206E+05\n\x27IT\x27\x27S HERE\x27')" --unpaged 6
+# WRITE of a raw BIT-typed expression (not first converted via a shaping
+# function) previously misformatted as plain decimal INTEGER instead of
+# USA003087 Appendix F's binary-digit-string format -- found while
+# implementing --unpaged above (the fixture right above this one), user-
+# confirmed and directed to fix per ["Programming in HAL/S"] p. 255 ("The
+# value returned by the BIT function is always of the maximum legal
+# length for bit strings" -- the closest available primary/secondary
+# source statement for what width to use when no better one is known).
+# B1 (a declared BIT(8)) formats at its real declared width (8, looked
+# up from the symbol table -- same technique BCAT already established
+# for this identical "no width in resolved_value_t" problem); the bare
+# HEX'1234' literal has no declared width to look up, so falls back to
+# 32 (the documented legal maximum, USA003090 Sec. 8.2 rule 6),
+# confirming both the declared-width and fallback paths in one fixture.
+# Also caught a second, separate bug along the way: symtab.c was
+# silently discarding a BIT symbol's own declared per-element width
+# whenever it was *also* ARRAY-shaped (the shape-resolution code treated
+# "has an ARRAY shape" and "is BIT-typed" as mutually exclusive) --
+# fixed there directly (the arrinit_types fixture elsewhere in this file
+# independently exercises the ARRAY-of-BIT angle specifically -- its own
+# expected value needed updating this session too, for the same reason).
+run ./run_local_fixture.sh bit_write "$(printf '0000 1100\n0000 0000 0000 0000 0001 0010 0011 0100')"
+run ./run_local_fixture.sh bit_write "$(printf '\x270000 1100\x27\n\x270000 0000 0000 0000 0001 0010 0011 0100\x27')" --unpaged 6
 # --time-scale 1000000 keeps these WAIT-using fixtures' now-real-time-
 # throttled runs fast (see interp_run()'s wall-clock pacing, state.h's
 # scheduler comment) -- it's a pure sleep-duration divisor, so the tick

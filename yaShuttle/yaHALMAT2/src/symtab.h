@@ -76,7 +76,10 @@ typedef struct {
     int rows, cols; /* HALMAT_SHAPE_MATRIX: rows x cols. HALMAT_SHAPE_VECTOR: cols = dimension, rows unused. */
     int array_dims[HALMAT_SYM_MAX_ARRAY_DIMS]; /* HALMAT_SHAPE_ARRAY: each dimension's bound, in order */
     int array_dim_count;
-    int bit_width; /* declared width for a BIT(n) symbol (hal_class==1), 0 if not a BIT or unknown */
+    int bit_width; /* declared per-element width for a BIT(n) symbol (hal_class==1), 0 if
+                     * not a BIT or unknown -- set independent of shape, so this is valid
+                     * for a BIT ARRAY(n) element width too, not just an unarrayed BIT(n)
+                     * (symtab.c's symtab_finalize) */
     int struct_copies; /* hal_class==0x0A (MAJ_STRUC) only: declared copy count for `Q-STRUCTURE(n)`,
                          * 0 for a plain single-instance `Q-STRUCTURE` (no `(n)`) -- see above */
     int sym_ptr; /* raw SYM_PTR field, meaning depends on hal_class (SYM_TYPE) -- confirmed this

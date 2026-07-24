@@ -150,6 +150,23 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
     for (size_t i = 0; i < st->count; i++) {
         st->entries[i].hal_class = (uint8_t)st->raw[i].sym_type;
         st->entries[i].sym_ptr = (int)st->raw[i].sym_ptr;
+        /* BIT (hal_class==1): SYM_LENGTH is the per-element declared
+         * width, independent of whether this symbol is *also* ARRAY-
+         * shaped below -- unlike MATRIX/VECTOR (whose own dimensions
+         * only make sense for the unarrayed case, SYM_LENGTH packing
+         * rows/cols or the vector length directly), a BIT ARRAY has
+         * both a shape (ARRAY, from SYM_ARRAY) and a per-element width
+         * (BIT(n), from this same SYM_LENGTH) that need to coexist --
+         * confirmed empirically this session (test_arrinit_types.hal's
+         * `B ARRAY(3) BIT(4)`: SYM_TYPE=01, SYM_LENGTH=0004, SYM_ARRAY=
+         * 0001, i.e. genuinely both). Checked unconditionally, before
+         * the shape if/else chain below (which was silently discarding
+         * this for any BIT symbol that also happened to be an ARRAY --
+         * user-reported via a WRITE(6) of such an array formatting with
+         * the wrong width). */
+        if (st->raw[i].sym_type == 1) {
+            st->entries[i].bit_width = (int)st->raw[i].sym_length;
+        }
         if (st->raw[i].sym_type == 0x0A) { /* MAJ_STRUC: SYM_ARRAY is a direct copy count, not an EXTuARRAY index -- see symtab.h */
             st->entries[i].struct_copies = (int)st->raw[i].sym_array;
         } else if (st->raw[i].sym_array != 0) {
@@ -170,8 +187,6 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
         } else if (st->raw[i].sym_type == 4) { /* VECTOR */
             st->entries[i].shape = HALMAT_SHAPE_VECTOR;
             st->entries[i].cols = (int)st->raw[i].sym_length;
-        } else if (st->raw[i].sym_type == 1) { /* BIT */
-            st->entries[i].bit_width = (int)st->raw[i].sym_length;
         }
     }
 
