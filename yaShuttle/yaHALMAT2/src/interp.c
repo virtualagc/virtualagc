@@ -788,15 +788,18 @@ static bool write_syt_entry(halmat_state_t *state, halmat_syt_entry_t *e, const 
  * bit_elements/char_elements, state.h -- exactly one is non-NULL on a
  * given entry, per ensure_container()'s own dispatch), shared by
  * write_destination's QUAL_SYT/QUAL_VAC/QUAL_OFF array-element write
- * paths below. `idx` is assumed already in range. char_elements'
- * strings are owned, so the old one is freed before the new one is
- * dup'd in, same convention as write_syt_entry's SYT_TYPE_CHARACTER
- * case for a non-subscripted CHARACTER variable. A value/container kind
- * mismatch (e.g. a BIT literal into a numeric-only container, which
- * happens when no symbol table was available to tell ensure_container
- * the real declared element type -- see its own comment) fails loudly
- * rather than silently storing zero/corrupting. */
-static bool write_container_element(halmat_state_t *state, halmat_syt_entry_t *e, size_t idx, const resolved_value_t *val) {
+ * paths below. `idx` is assumed already in range. `dest_syt` is the
+ * SYT index `e` itself lives at (every call site already has it handy)
+ * -- needed only for the numeric-element precision lookup below, not
+ * for indexing `e`. char_elements' strings are owned, so the old one is
+ * freed before the new one is dup'd in, same convention as
+ * write_syt_entry's SYT_TYPE_CHARACTER case for a non-subscripted
+ * CHARACTER variable. A value/container kind mismatch (e.g. a BIT
+ * literal into a numeric-only container, which happens when no symbol
+ * table was available to tell ensure_container the real declared
+ * element type -- see its own comment) fails loudly rather than
+ * silently storing zero/corrupting. */
+static bool write_container_element(halmat_state_t *state, uint16_t dest_syt, halmat_syt_entry_t *e, size_t idx, const resolved_value_t *val) {
     if (e->bit_elements) {
         if (val->kind != RV_BITS) {
             fail(state, "cannot assign a non-BIT value to a BIT ARRAY element");
@@ -818,7 +821,36 @@ static bool write_container_element(halmat_state_t *state, halmat_syt_entry_t *e
         fail(state, "BIT/CHARACTER ARRAY element write with no symbol table available to determine element storage");
         return false;
     }
-    e->elements[idx] = rv_to_scalar(val);
+    /* Normalize to the ARRAY/VECTOR/MATRIX's own declared SINGLE/DOUBLE
+     * precision (USA00309 Sec. 8.2 rules 7/12), user-reported
+     * (107-EXAMPLE_4.hal's `DECLARE A ARRAY(5) SCALAR DOUBLE
+     * INITIAL(1,2,3,4,5);`, then `A(T) = A(T+1);` element-to-element
+     * shifts): neither a literal (single-precision-encoded in litfile,
+     * literal.c) nor an ordinary expression result is otherwise tagged
+     * to the *container's* declared precision anywhere upstream, so
+     * without this, elements populated via INITIAL() or a plain
+     * element-to-element copy silently stayed single-precision --
+     * printing with single-precision (8-significant-digit) formatting
+     * instead of double's 17 -- while only an element that happened to
+     * pass through an *already-correctly-normalized* plain SCALAR
+     * DOUBLE variable (this file's own `TEMP`) picked up the right
+     * precision, incidentally. Exact same rule, and same rationale, as
+     * the plain (non-subscripted) SCALAR destination case already
+     * applied in OP_IASN/OP_SASN's own dest_sym lookup -- this is that
+     * fix's container-element counterpart, applied at the one shared
+     * choke point every numeric container write already funnels
+     * through, so it covers every caller (element assign, DSUB-element-
+     * to-element copy, and STRI/SINT's own ARRAY INITIAL() population)
+     * in one place rather than needing a fix at each one. */
+    halmat_scalar_t sv = rv_to_scalar(val);
+    if (state->symtab) {
+        const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dest_syt);
+        if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+            bool want_double = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+            if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+        }
+    }
+    e->elements[idx] = sv;
     return true;
 }
 
@@ -867,7 +899,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             ensure_container(state, op->data);
             halmat_syt_entry_t *e = &state->syt[op->data];
             size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
-            return write_container_element(state, e, idx, val);
+            return write_container_element(state, op->data, e, idx, val);
         }
         return write_syt_entry(state, &state->syt[op->data], val);
     }
@@ -945,7 +977,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             fail(state, "subscript destination out of range");
             return false;
         }
-        return write_container_element(state, base, slot->ref_offset, val);
+        return write_container_element(state, slot->ref_syt, base, slot->ref_offset, val);
     }
     if (op->qual == QUAL_OFF) {
         /* OFFSET-addressed element write, used by SINT inside a
@@ -972,7 +1004,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         ensure_container(state, base_syt);
         halmat_syt_entry_t *e = &state->syt[base_syt];
         size_t idx = (size_t)(base + (int32_t)op->data) % (e->element_count ? e->element_count : 1);
-        return write_container_element(state, e, idx, val);
+        return write_container_element(state, base_syt, e, idx, val);
     }
     fail(state, "unsupported assignment destination qualifier %s", halmat_qual_name(op->qual));
     return false;

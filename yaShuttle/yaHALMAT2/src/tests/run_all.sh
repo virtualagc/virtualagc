@@ -301,6 +301,23 @@ run ./run_local_fixture.sh matrix_sub "$(printf ' 5.0000000E+00\n 3.0000000E+00\
 # handle it for free. Output is the verified-correct 3x3 matrix product
 # of M2={1..9} and M3={11..19}.
 run ./run_local_fixture.sh array2d "$(printf ' 9.0000000E+01      9.6000000E+01      1.0200000E+02\n 2.1600000E+02      2.3100000E+02      2.4600000E+02\n 3.4200000E+02      3.6600000E+02      3.9000000E+02')"
+# User-reported (107-EXAMPLE_4.hal): `DECLARE A ARRAY(5) SCALAR DOUBLE
+# INITIAL(1,2,3,4,5);`, rotated left by one via `TEMP=A(1); A(T)=A(T+1)
+# for T=1..4; A(5)=TEMP;`. WRITE(6) A printed the first 4 elements in
+# SINGLE-precision format and only the 5th (the one that happened to
+# pass through the already-precision-normalized plain SCALAR DOUBLE
+# `TEMP`) in DOUBLE format. Root cause: write_container_element() (the
+# one shared choke point every numeric ARRAY/VECTOR/MATRIX element
+# write funnels through -- INITIAL() population via STRI/SINT, DSUB
+# element-to-element copies, and ordinary subscripted assignment alike)
+# never normalized to the container's own declared SINGLE/DOUBLE
+# precision the way the equivalent plain-SCALAR-destination path
+# already did -- so every element wrote through single-precision except
+# ones that happened to already carry DOUBLE from elsewhere. Fixed by
+# giving write_container_element() the same symtab-driven
+# scale_precision() normalization OP_IASN/OP_SASN's own dest_sym check
+# already uses for a plain destination.
+run ./run_local_fixture.sh array_double "$(printf ' 2.0000000000000000E+00      3.0000000000000000E+00      4.0000000000000000E+00      5.0000000000000000E+00\n 1.0000000000000000E+00')" --line-length 132
 # User-reported (047-ROWS.hal's `M$(I,*) = C * MM$(I,*);`): a MATRIX
 # row-partition select used as an *assignment receiver* failed with
 # "MASN/VASN: receiver must be SYT" -- OP_MASN/OP_VASN only ever accepted
