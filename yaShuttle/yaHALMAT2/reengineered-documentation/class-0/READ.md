@@ -67,25 +67,31 @@ number* sits on).
 **Data-field separator, fixed in a later session.** [USA003087] Sec.
 12.3 (PDF p. 12-7): "Data fields are read from left to right along the
 line. The device expects each data field to be separated from the next
-by a comma and/or at least one blank." yaHALMAT2's `OP_READ`/`OP_RDAL`
-handler (`interp.c`) reads each field with a plain `fscanf("%lf"/"%ld"/
-"%s", ...)` — those conversions skip leading whitespace on their own,
-but not a leading comma, so any comma-involving input (`"1,2,3"`,
-`"1, 2, 3"`, etc. — anything other than pure blank-separated) failed
-outright with "end of input or malformed SCALAR/INTEGER" the moment
-`fscanf` hit the comma. Found via a user report against
-`037-ROOTS.hal`'s `READ(5) A, B, C;`. Fixed with a small
-`read_skip_separator()` helper, called before every field except the
-first, that consumes optional whitespace, then at most one comma, then
-whitespace again. Also implements that same section's "two consecutive
-separating commas" rule ("the value of the data item which would have
-been changed by reading a data field between the commas, is instead
-left untouched"): a second comma immediately following the first (no
-value in between) leaves the current item's destination unmodified and
-is pushed back for the *next* field's own separator to consume. See
-`STATUS.md`'s Class 0 section for the fuller trace;
-`src/tests/hal/test_read_comma.hal` is the regression fixture (covers
-both the plain-comma case and the double-comma "leave unchanged" rule).
+by a comma and/or at least one blank." [USA003088] Sec. 10.1.1 rule 6
+(PDF p. 10-3) gives the more precise mechanism: "a null field is
+transmitted whenever a comma or semicolon is detected when data is
+expected. This occurs when a comma or semicolon is: preceded by a comma
+or semicolon; [or] preceded by one or more blanks following the last
+comma or semicolon. ... A null field causes the corresponding variable
+element to remain unchanged following transmission." yaHALMAT2's
+`OP_READ`/`OP_RDAL` handler (`interp.c`) reads each field with a plain
+`fscanf("%lf"/"%ld"/"%s", ...)` — those conversions skip leading
+whitespace on their own, but not a leading comma, so any comma-
+involving input (`"1,2,3"`, `"1, 2, 3"`, etc. — anything other than
+pure blank-separated) failed outright with "end of input or malformed
+SCALAR/INTEGER" the moment `fscanf` hit the comma. Found via a user
+report against `037-ROOTS.hal`'s `READ(5) A, B, C;`. Fixed with a
+`read_skip_separator()` helper implementing rule 6's null-field
+mechanism directly, called before *every* field of the list (see its
+own comment for the two distinct call shapes this needs — a doubled
+mid-list comma like `"1,,3"` and a *leading* comma before the very
+first field like `",2,3"` both null the field they precede, but a naive
+single-shape implementation that just consumed one comma unconditionally
+before every item shifted the whole remaining list over by one instead
+of nulling only the first item — caught before the fix was considered
+done). See `STATUS.md`'s Class 0 section for the fuller trace;
+`src/tests/hal/test_read_comma.hal` (mid-list) and
+`test_read_leading_comma.hal` (leading) are the regression fixtures.
 
 ## Source Analysis & Reliability
 

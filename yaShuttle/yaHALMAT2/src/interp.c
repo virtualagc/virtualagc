@@ -1846,30 +1846,58 @@ static void flush_write(halmat_state_t *state, FILE *out) {
     state->io_pending.item_count = 0;
 }
 
-/* Consumes the separator USA003087 Sec. 12.3 requires between two READ
- * data fields ("a comma and/or at least one blank") before the *next*
- * field is read -- not called before the very first field of a READ
- * list, which needs none. `fscanf`'s own "%lf"/"%ld"/"%s" conversions
- * already skip leading whitespace, but not a leading comma, so
- * "1,2,3" previously failed outright on the comma right after the "1"
- * (a real user-reported bug: yaHALMAT2 accepted "1 2 3" but not any
- * format involving a comma at all). Skips whitespace, then at most one
- * comma, then whitespace again. Also implements that section's "two
- * consecutive separating commas" rule ("the value of the data item
- * which would have been changed...is instead left untouched"): if a
- * second comma immediately follows the first (only whitespace between
- * them), it's pushed back for the *next* field's own separator to
- * consume, and this function returns true so the caller skips reading
- * a value for the current field entirely, leaving its destination at
- * whatever value it already held. */
-static bool read_skip_separator(FILE *in) {
+/* Consumes the separator USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 (rule
+ * 6) allows before a READ data field ("a comma and/or at least one
+ * blank"), and detects a *null field* -- rule 6: "a null field is
+ * transmitted whenever a comma or semicolon is detected when data is
+ * expected," which "occurs when a comma or semicolon is: preceded by a
+ * comma or semicolon; [or] preceded by one or more blanks following the
+ * last comma or semicolon" -- returning true (caller must leave this
+ * item's destination untouched and not read a value) rather than false
+ * (an ordinary field follows, go read it) in that case.
+ *
+ * `require_separator` (pass `i > 0`, the item's own index in the READ
+ * list) distinguishes two call shapes, both needed to get this right
+ * without misaligning the whole remaining list (an earlier version of
+ * this fix used one shape for every item and *consumed* the first
+ * comma it found unconditionally, which shifted every subsequent field
+ * over by one whenever a leading comma appeared, instead of nulling
+ * just the first item):
+ *
+ *   - `true` (every item after the first): an ordinary separator is
+ *     *expected* here, closing the previous item's field -- skip
+ *     blanks, consume exactly one comma if present (space-only
+ *     separation like "1 2 3" is also legal and consumes no comma),
+ *     skip trailing blanks, then peek for a *second* comma immediately
+ *     following (rule 6's "preceded by a comma...following the last
+ *     comma" case) -- a doubled mid-list comma ("1,,3") nulls the
+ *     field in between, leaving its own trailing comma unconsumed so
+ *     the *next* item's own `require_separator=true` call treats it as
+ *     an ordinary preceding separator in turn (this is what makes a run
+ *     of several consecutive nulls, e.g. ",,3", null every field up to
+ *     the first one that finds real data).
+ *   - `false` (the very first item only): no separator is expected to
+ *     precede it at all, so only *peek* at the next non-blank
+ *     character rather than requiring/consuming a comma first; a comma
+ *     found here means the field the caller is about to read is itself
+ *     null-preceded-by-nothing (a *leading* comma, e.g. "READ(5)
+ *     A,B,C;" fed ",2,3" -- user-reported, since rule 6's text doesn't
+ *     special-case "nothing precedes the first field" out of the
+ *     general null-field mechanism, and there's no principled reason
+ *     for the first item to behave differently from any other) -- left
+ *     unconsumed for the *second* item's own `require_separator=true`
+ *     call to treat as its ordinary preceding separator, exactly like
+ *     the doubled-comma case above. */
+static bool read_skip_separator(FILE *in, bool require_separator) {
     int c;
     while ((c = fgetc(in)) != EOF && isspace(c)) {}
-    if (c != ',') {
-        if (c != EOF) ungetc(c, in);
-        return false;
+    if (require_separator) {
+        if (c != ',') {
+            if (c != EOF) ungetc(c, in);
+            return false;
+        }
+        while ((c = fgetc(in)) != EOF && isspace(c)) {}
     }
-    while ((c = fgetc(in)) != EOF && isspace(c)) {}
     if (c == ',') {
         ungetc(c, in);
         return true;
@@ -4675,12 +4703,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 FILE *in = state->devices[device];
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
-                    /* USA003087 Sec. 12.3: fields are separated by "a
-                     * comma and/or at least one blank" -- not needed
-                     * before the first field, and a double comma leaves
-                     * this item's destination untouched (see
-                     * read_skip_separator's own comment). */
-                    if (i > 0 && read_skip_separator(in)) continue;
+                    /* USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 rule 6:
+                     * fields are separated by "a comma and/or at least
+                     * one blank," and a comma/semicolon is a *null
+                     * field* (leaves the destination untouched) whenever
+                     * it's found where data was expected rather than
+                     * preceded by real data -- checked before every
+                     * item, including the first (a leading comma, e.g.
+                     * "READ(5) A,B,C;" fed ",2,3", nulls A the same way
+                     * a doubled mid-list comma nulls a later item, not a
+                     * parse error -- user-reported). See
+                     * read_skip_separator's own comment for why it needs
+                     * `i > 0` to know which of its two call shapes to
+                     * use here, not just whether to null this item. */
+                    if (read_skip_separator(in, i > 0)) continue;
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {

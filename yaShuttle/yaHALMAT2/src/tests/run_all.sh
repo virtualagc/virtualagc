@@ -102,6 +102,19 @@ run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"
 # zero/blank) -- S2 stays at its pre-READ value (99.5) across the "1,,3"
 # double comma.
 run ./run_read_fixture.sh read_comma "$(printf '1,,3\n42\n')" "$(printf -- ' 1.0000000E+00      9.9500000E+01      3.0000000E+00              42')"
+# USA003088 Sec. 10.1.1 rule 6's null-field mechanism doesn't special-
+# case "nothing precedes the first field" out of its general definition
+# -- a *leading* comma (before any field has been read at all) nulls
+# the first item exactly like a doubled mid-list comma nulls a later
+# one (user-reported, extending the read_comma fixture above). This
+# needed a real fix, not just a guard removal: naively calling the same
+# "consume one comma, then peek for a second" logic for the first item
+# too shifts every subsequent field over by one instead of nulling just
+# the first (A=2, B=3, C starves) -- read_skip_separator's `i > 0`
+# parameter distinguishes "a separator is expected here" (every item
+# after the first) from "only peek, nothing is expected to precede this
+# one" (the first item only).
+run ./run_read_fixture.sh read_leading_comma "$(printf ',2,3\n')" "$(printf -- '-1.5000000E+00      2.0000000E+00      3.0000000E+00')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"

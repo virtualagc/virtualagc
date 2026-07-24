@@ -35,7 +35,8 @@ found elsewhere.
 | [IR-60-5] | PDF pages 108–134 (of 134) | Covers (at least) printed pages A-3–A-8, A-93–A-94, A-103–A-104, A-109, A-110–A-118. This is believed to be the entirety of the HALMAT-relevant material in this partial copy; pages 1–107 were not reviewed (front matter / unrelated compiler chapters, per the document's own page numbering and the source URL's `#page=114` anchor) and should be spot-checked in a future session before being ruled out entirely. |
 | [Halmat.pdf] | PDF pages 1–15 (of 114) | Covers title page, foreword, Word Format, Block Structure/Large-Scale Organisation summary, and Class 0 entries NOP through BRA (partial — BRA's own detail page not yet read). Pages 16–114 (remainder of Class 0, and all of Classes 1–8) not yet reviewed. |
 | [MSC-01847] | **Complete**: part1 pp. 1–42 (all), part2 pp. 1–42 (all), part3 pp. 1–41 (all) | The original file (105 MB) exceeds the Read tool's 100 MB text-extraction limit. Fixed by splitting with `pdftk`: `source-documentation/MSC-01847.part1.pdf` (pp. 1–42), `.part2.pdf` (pp. 43–84), `.part3.pdf` (pp. 85–125) — each well under the cap and directly readable. These split files are untracked/gitignored (under `source-documentation/`). The original 105 MB file (`HALMAT - An Intermediate Language.pdf`) was removed from `source-documentation/` as a duplicate — it's available at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HALMAT - An Intermediate Language.pdf` (see the "Alternate source locations" note below); if the split files are ever missing, regenerate from that path with `pdftk ".../HALMAT - An Intermediate Language.pdf" cat 1-42 output MSC-01847.part1.pdf` (and similarly 43-84 → part2, 85-125 → part3). Covers: front matter/foreword/TOC; **Chapter 1** (§1.1–1.8: symbolic/physical instruction format, notation — see "Notation reference" below); Chapter 2 (§2.1–2.24, full, no gaps: Code Markers, Labels, Branches, Arrayness/Structureness Specifiers, Subscript Allocators, Terminal/Array/Structure Subscript Specifiers, Precision Conversion, Static Initialization Flow Specifiers, Argument List Specifiers, I/O Specifiers, Subprogram Specifiers, Auxiliary Shaping Function Specifiers, Structure Operations, Bit String, Character, Matrix, Vector, Scalar, Integer, Conditional, Initialization Operations, DO FOR Specifiers) with full instruction-level bit diagrams and prose in the predecessor language's own physical format; Chapter 3 (§3.1–3.8, full: worked HALMAT-construct examples for arithmetic, flow-control, I/O, procedure, function, shaping-function, and initialization statements); Appendix A (symbol/literal table layout); **Appendix B** (complete alphabetical mnemonic→opcode→one-line-description table for the full HAL 1971 instruction set, ~150 entries); **Appendix C** (the same data as a full opcode→mnemonic lookup table, cross-confirming B); Appendix D (numeric codes for qualifier/optimization/operand-type subfields); Appendix E (shaping-function numeric codes); and an **ADDENDUM** (p. 125, the document's final page) listing three instructions omitted from the main text due to incomplete 1971-era implementation — see the "ZDLP/PFST/PFND addendum" note below. **This document is now considered fully reviewed, page for page, with no remaining gaps.** This document describes the *predecessor* language HAL (1971), not HAL/S (1977) — see the cross-reference notes throughout this file for how it's being used. Diagnostic note: an independent `pdftotext -layout` dump of a page range is a cheap way to check what's actually on those pages before spending a Read call, though badly-OCR'd bit-diagram pages (like the ADDENDUM) are worth re-rendering as an image (`pdftoppm -r 300 -png`) and reading visually when the text extraction looks scrambled. |
-| [USA003087] | **Full text extracted** (441 pages); individual sections read as needed, not all reviewed yet | "HAL/S Programmer's Guide." Rather than re-rendering page ranges from the PDF on every lookup, the entire document was run once through `pdftotext -layout` into `source-documentation/USA003087.txt` — spot-checked against p. 143's WRITE-statement DATA FORMATS text (word-for-word identical to an independent PDF-page Read) to confirm extraction fidelity. Pages are separated by form-feed (`\f`) characters, so `awk 'BEGIN{RS="\f"}'`-style page-indexed lookups or plain `grep` both work directly on the text file — much cheaper than a Read-tool PDF-page call for prose lookups. **Caveat**: this is a born-digital PDF, so prose extracts cleanly, but the hand-drawn figures (e.g. Figure 12-3/12-4's WRITE-mechanism zigzag diagrams) don't — those still need `pdftoppm -r 300 -png` + a visual Read of the rendered image, same as already noted for [MSC-01847]'s ADDENDUM below. Sections consulted so far: §12.2 (WRITE statement DATA FORMATS, "unpaged output: [80 columns/line]" — see the WRITE-array/line-wrapping fix in the "HAL/S I/O device numbers" section above). **Session update**: `USA003087.txt`, and the analogous `USA003090.txt` (see below), are tracked in git despite `source-documentation/`'s general PDF-dedup gitignore policy — small, durable derived text worth keeping versioned alongside the reengineered-documentation that cites them, unlike the large third-party PDFs themselves. |
+| [USA003087] | **Full text extracted** (441 pages); individual sections read as needed, not all reviewed yet | "HAL/S Programmer's Guide." Rather than re-rendering page ranges from the PDF on every lookup, the entire document was run once through `pdftotext -layout` into `source-documentation/USA003087.txt` — spot-checked against p. 143's WRITE-statement DATA FORMATS text (word-for-word identical to an independent PDF-page Read) to confirm extraction fidelity. Pages are separated by form-feed (`\f`) characters, so `awk 'BEGIN{RS="\f"}'`-style page-indexed lookups or plain `grep` both work directly on the text file — much cheaper than a Read-tool PDF-page call for prose lookups. **Caveat**: this is a born-digital PDF, so prose extracts cleanly, but the hand-drawn figures (e.g. Figure 12-3/12-4's WRITE-mechanism zigzag diagrams) don't — those still need `pdftoppm -r 300 -png` + a visual Read of the rendered image, same as already noted for [MSC-01847]'s ADDENDUM below. Sections consulted so far: §12.2 (WRITE statement DATA FORMATS, "unpaged output: [80 columns/line]" — see the WRITE-array/line-wrapping fix in the "HAL/S I/O device numbers" section above). **Session update**: `USA003087.txt`, and the analogous `USA003088.txt`/`USA003090.txt` (see below), are tracked in git despite `source-documentation/`'s general PDF-dedup gitignore policy — small, durable derived text worth keeping versioned alongside the reengineered-documentation that cites them, unlike the large third-party PDFs themselves. |
+| [USA003088] | **Full text extracted** (237 pages); §10.1.1 ("The READ and READALL Statements," pp. 10-1–10-4) read in full, remainder not yet reviewed | "HAL/S Language Specification" (2005) — the formal syntax/semantics companion to [USA003087]'s Programmer's Guide, cited *by* [USA003087] itself (its Sec. 12.3 READ discussion points here for "further clarification," Sec. 10.1.1). User-supplied pointer, prompted by a follow-up question about [READ](class-0/READ.md)'s comma-separator fix (a *leading* comma, e.g. `READ(5) A,B,C;` fed `",2,3"`) — extracted the same way as [USA003087]/[USA003090] into `source-documentation/USA003088.txt`. Local copy found at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HAL_S Language Specification Nov 2005.pdf` (same mirror as other sources — see "Alternate source locations" above); also at `https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf`. §10.1.1 gives a considerably more precise, rule-numbered account of READ's field-separator/null-field mechanism than [USA003087] §12.3's prose summary — see the "READ leading-comma null field" section below for what this settled. **Discrepancy noted, not yet resolved**: §10.1.1 rule 4 states "Fields may not cross line boundaries except when reading character strings," which appears to conflict with [USA003087] §12.3's "Data fields may be broken over the line boundary" — flagged here rather than silently favoring one source, since it bears on the still-open "missing trailing item(s)" question in the same section below. |
 | [USA003090] | **Full text extracted** (225 pages); Appendix C (pp. 199-201, "EXECUTION-TIME ERRORS") read in full, remainder not yet reviewed | "HAL/S-FC User's Manual" (2005) — despite the different-looking document ID, this is the **same document** this project's earlier sessions cited as `[USA00309]` (missing the trailing digit; that citation predates this session and is left as-is throughout the existing docs rather than mass-renamed). Extracted the same way as [USA003087] into `source-documentation/USA003090.txt`. Local copy found at `../../Desktop/sandroid.org/public_html/apollo/Shuttle/HAL_S-FC User's Manual Nov 2005.pdf` (same mirror as other sources — see "Alternate source locations" above); also at `https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf`. Appendix C tabulates every "group 4" execution-time runtime error (detected by the HAL/S-FC library/emitted code) with its "standard fixup" — the runtime's documented recovery behavior instead of aborting. A user pointer to error 27 ("argument of INVERSE is a singular matrix" → "the result is the identity matrix," not yaHALMAT2's prior abort) prompted extracting the whole appendix and auditing every yaHALMAT2-implemented function against it — see the dedicated "USA003090 Appendix C execution-time-error fixups" section below for the full audit and fix list. Two of the appendix's table cells needed a rendered-page visual check (`pdftoppm -r 300 -png`) rather than trusting `pdftotext -layout` directly: error 8's fixup value (a stacked fraction, √2⁄2, that extracted as garbled "2/...2" text) and error 11's fixup (plain-text "The result is set to one," which *did* extract correctly but was initially misread during a fast skim as another "maximum representable value" case — a reminder to read the actual extracted text carefully rather than pattern-matching against a neighboring row). |
 | [##DRIVER.xpl] | `PASS1.PROCS/##DRIVER.xpl` lines ~2052–2258 | **Phase 2 primary source.** `../virtualagc/yaShuttle/Source Code/PASS.REL32V0/PASS1.PROCS/##DRIVER.xpl` declares every HALMAT opcode as a named XPL/I constant (`X`-prefixed, e.g. `XSMRK BIT(16) INITIAL("004")`), for direct use by the compiler itself — the single most authoritative source available for HAL/S opcode numbers, since it's what the real compiler actually uses. Also declares the operand-qualifier constants (`XSYT`=1, `XINL`=2, `XVAC`=3, `XXPT`=4, `XLIT`=5, `XIMD`=6, `XAST`=7, `XCSZ`=8, `XASZ`=9, `XOFF`=10 — an exact match to the QUAL table already in [HALMAT.md](HALMAT.md), now primary-source-confirmed for HAL/S itself rather than only via [IR-60-5]) and the two Optimizer-HALMAT code-optimizer tag bits (`XCO_N`="01", `XCO_D`="02"). Confirms essentially every opcode already in this file's Class 0 and Class 8 tables, corrects a couple of values inferred from [MSC-01847] (see Class 4/5 notes below), and gives confirmed opcodes for many previously-undocumented Class 0/1/2/3/4/5/6/7 entries. Not yet exhaustively cross-referenced against emission/consumption sites elsewhere in the source (that's a good next step — see "Next steps" below) — what's recorded here so far is the opcode table itself, read directly, not yet validated against actual compiled HALMAT binaries. Some array-valued declarations (e.g. `XBTOI(5)`) use a comment convention where only the first element has a real variable name and subsequent elements' conceptual names are given in trailing comments (`/* INDEXED OFF OF XCTOI */`); those are recorded below with the same care but flagged where the convention made attribution ambiguous. |
 | Compiler report switches | Tested empirically (see below) | Confirmed: PASS1's compile-time option `HALMAT` (abbreviated `HM`, bit `0x00040000` in `OPTIONS_CODE`, declared in `MONITOR.ASM/COMPOPT.bal`) makes `pass1.rpt` print each HALMAT instruction (`HALMAT LINE N: <opcode>(<numop>),<tag>,<extra>` plus its operand(s)) interleaved with the original HAL/S source listing — verified by compiling `PASS.REL32V0/regression/HELLO.hal` locally with `HALSFC --parms="HALMAT,LIST,LISTING2" HELLO.hal`. The report is very noisy (a full scanner/parser production trace prints regardless of the `TRACE` option and regardless of debug- vs. production-build; cause not yet identified — worth investigating further, or just filtering with `grep`). **PASS2**: per a secondary source (https://www.ibiblio.org/apollo/HAL.html#moron, the historical HAL/S option reference), the compile-time option `LSTALL` makes PASS2's report include HALMAT, generated AP-101S object code, and HAL/S source statements together — statements are identified there only by *statement number*, so cross-referencing back to source text requires consulting the PASS1 report (which does show statement numbers against source lines) as well.
@@ -1101,6 +1102,91 @@ See [BRA](class-0/BRA.md)/[ETST](class-0/ETST.md) for the full detail;
 complete `037-ROOTS.hal` end-to-end (all five comma/blank format
 variants from the bug report, plus the real-roots code path) to confirm
 both fixes together produce a clean exit with no diagnostics.
+
+## READ leading-comma null field, and a genuine cross-source discrepancy
+
+Direct follow-up to the READ comma-separator fix above, citing
+[USA003087] Sec. 12.3's own pointer to [USA003088] Sec. 10.1.1 "for
+further clarification": a *leading* comma (nothing read yet at all,
+e.g. `READ(5) A,B,C;` fed `",2,3"`) still failed, even though a doubled
+*mid-list* comma (`"1,,3"`) already correctly nulled a field. [USA003088]
+§10.1.1 rule 6 (extracted this session, see the "Source material
+reviewed so far" table above) gives the null-field mechanism in more
+precise, rule-numbered form than [USA003087]'s prose: "a null field is
+transmitted whenever a comma or semicolon is detected when data is
+expected" — the rule's text doesn't carve out "nothing precedes the
+first field" as an exception, and there's no principled reason the
+first item should behave differently from any other, so the fix treats
+a leading comma as nulling the first item exactly like a doubled comma
+nulls a later one.
+
+**Getting this right (not just removing the old `i > 0` guard) needed
+real care**, caught before considering the fix done: `read_skip_separator()`
+was designed around "consume the one separator expected between two
+already-successfully-read fields, then peek for a second comma
+indicating the field in between was empty." Calling that *same* logic
+unconditionally for the first item — i.e., treating a leading comma as
+"the normal expected separator" and consuming it — shifts the *whole
+remaining list* over by one instead of nulling only the first item
+(`",2,3"` would give A=2, B=3, then C starves for lack of any remaining
+input, itself failing with "end of input"). Fixed by giving
+`read_skip_separator()` a `require_separator` parameter: `false` only
+for the very first item (no separator expected to precede it at all,
+so only *peek* — a comma found there means *this* field is null,
+without consuming it), `true` for every item after (an ordinary
+separator *is* expected, consume it, then peek for a *second* comma
+the same as before). Both call shapes leave a detected null-triggering
+comma unconsumed, so a *run* of several consecutive commas (`",,3"`)
+correctly nulls every field up to the first one that finds real data,
+not just the first pair. `src/tests/hal/test_read_leading_comma.hal` is
+the regression fixture; see [READ](class-0/READ.md) for the full
+mechanism writeup.
+
+**A separate, harder question raised alongside this, not yet resolved**:
+should a *missing trailing item* — the READ list not yet exhausted when
+the current physical input line runs out — get the same "leave
+unchanged" treatment, rather than rolling over to read from whatever
+the *next* line of input happens to contain? The concern: on an
+interactive/piped stream (not a genuine fixed-width card-image file,
+which is what [USA003087]/[USA003088] both describe), a user typing
+`"1,2"` for a 3-item `READ` and pressing Enter would currently have the
+3rd item silently filled from the *first token of the next line* —
+plausibly a different prompt's data entirely — rather than being left
+alone. Investigated but **left unimplemented pending further
+discussion**, because the primary-source evidence cuts both ways and
+directly conflicts with itself:
+- [USA003088] §10.1.1 rule 4 states "Fields may not cross line
+  boundaries except when reading character strings" — read narrowly
+  (only a single field's *own* characters can't straddle a line break),
+  this doesn't say a multi-item READ list can't legitimately continue
+  onto a following line for an entirely new field; read broadly, it
+  could be taken to support treating a line boundary as a hard stop for
+  the whole remaining list.
+- [USA003088] rule 4 (READ semantic rules) separately states "An
+  unexpected end of file reached during the reading of data...causes a
+  runtime error" — i.e. *true* end-of-stream with items still unfilled
+  is explicitly a hard error, not a silent "leave unchanged," which
+  argues against extending the null-field treatment to *that* case at
+  least.
+- Most directly contradicting the "leave unchanged" idea: [USA003087]
+  §12.3's own worked example (Figure 12-4) reads a `MATRIX`/`ARRAY`/
+  `CHARACTER` list (`READ(5) M,I,C;`) from data laid out across
+  *several separate physical lines*, several of which end with no
+  trailing comma at all (e.g. a line reading just `0 0.1 0`) and the
+  read demonstrably continues onto the next line regardless — directly
+  confirming that plain end-of-line, by itself, is *not* an end-of-list
+  signal in the primary source's own canonical example, which weighs
+  against implementing "short line -> leave the rest unchanged" as
+  originally proposed.
+
+Net effect: implementing this as broadly as first proposed risks
+breaking the exact multi-line-continuation behavior Figure 12-4
+documents as correct. A narrower version (only for a genuinely
+interactive stream, or only exactly at true EOF rather than any line
+boundary, or some other distinguishing signal not yet identified) may
+still be right, but wasn't implemented this session absent a clearer
+resolution of which of the above readings should win. Flagged here for
+a future session or a clearer citation/decision rather than guessed at.
 
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 
