@@ -1042,6 +1042,36 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
         } else if (sym && sym->shape == HALMAT_SHAPE_VECTOR && sym->cols > 0) {
             cols = sym->cols;
             count = (size_t)cols;
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count == 2 &&
+                   sym->array_dims[0] > 0 && sym->array_dims[1] > 0) {
+            /* Genuinely 2-dimensional ARRAY(r,c) -- HAL/S allows
+             * subscripting one exactly like MATRIX (row-major storage,
+             * 2-index/asterisk-partition/at-partition access), confirmed
+             * user-reported via 107-EXAMPLE_3.hal (`DECLARE ARRAY(3,3),
+             * M1, M2, M3;`, subscripted throughout as `M1(ROW,COL)` and
+             * `M1$(ROW,*)`). Setting rows/cols here (the same fields
+             * HALMAT_SHAPE_MATRIX uses) is what lets DSUB's existing
+             * `base->rows > 0` MATRIX-shaped logic pick this up for free
+             * -- previously left rows==cols==0 for *any* ARRAY shape
+             * (only array_dims[0] was ever read, silently discarding a
+             * second dimension entirely), which broke two different
+             * things: DSUB's 2-index asterisk-partition case failed
+             * loudly ("asterisk subscript with 2 indices not yet
+             * implemented"), and -- more seriously, no error at all --
+             * the *plain* 2-index case (`M1(ROW,COL) = ...;`) silently
+             * fell through to the generic placeholder-stride fallback
+             * (`offset*16+idx`) instead of real row-major addressing
+             * (`row*cols+col`), corrupting every element write throughout
+             * the whole matrix-multiply loop. 3+ dimensional ARRAYs don't
+             * get this treatment -- MATRIX's own 2-index convention has
+             * no defined generalization beyond 2D, so they still fall
+             * through to the single-dimension/placeholder-stride path
+             * below, unchanged. */
+            rows = sym->array_dims[0];
+            cols = sym->array_dims[1];
+            count = (size_t)rows * (size_t)cols;
+            if (sym->hal_class == 1) elem_kind = 1;
+            else if (sym->hal_class == 2) elem_kind = 2;
         } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1) {
             count = (size_t)sym->array_dims[0]; /* only a single dimension is used -- see symtab.h */
             if (sym->hal_class == 1) elem_kind = 1;

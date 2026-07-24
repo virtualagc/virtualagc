@@ -285,6 +285,22 @@ run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
 run ./run_local_fixture.sh matrix_sub "$(printf ' 5.0000000E+00\n 3.0000000E+00\n 4.0000000E+00')"
+# User-reported (107-EXAMPLE_3.hal): `DECLARE ARRAY(3,3), M1...;`, a
+# genuinely 2-dimensional ARRAY (not MATRIX), subscripted throughout as
+# `M1(ROW,COL)` and `M1$(ROW,*)`. `WRITE(6) M1$(ROW,*);` failed loudly
+# ("DSUB: asterisk subscript with 2 indices not yet implemented"), but
+# ensure_container() had a deeper, silent bug too: it only ever read
+# array_dims[0] for any ARRAY shape, discarding a second dimension
+# entirely and leaving rows/cols at 0 -- so the *plain* 2-index case
+# (`M1(ROW,COL) = ...;`, used throughout the matrix-multiply loop) was
+# ALSO silently using a generic placeholder-stride offset formula
+# instead of real row-major addressing, corrupting every element write
+# with no error at all. Fixed by giving a confirmed 2-dimensional ARRAY
+# the same rows/cols treatment MATRIX already gets, letting DSUB's
+# existing MATRIX-shaped logic (index/asterisk-partition/at-partition)
+# handle it for free. Output is the verified-correct 3x3 matrix product
+# of M2={1..9} and M3={11..19}.
+run ./run_local_fixture.sh array2d "$(printf ' 9.0000000E+01      9.6000000E+01      1.0200000E+02\n 2.1600000E+02      2.3100000E+02      2.4600000E+02\n 3.4200000E+02      3.6600000E+02      3.9000000E+02')"
 # User-reported (047-ROWS.hal's `M$(I,*) = C * MM$(I,*);`): a MATRIX
 # row-partition select used as an *assignment receiver* failed with
 # "MASN/VASN: receiver must be SYT" -- OP_MASN/OP_VASN only ever accepted
