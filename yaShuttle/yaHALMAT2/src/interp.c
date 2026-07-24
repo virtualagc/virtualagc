@@ -2814,13 +2814,34 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * find_or_create_struct_field's possible realloc (which
                      * would invalidate a pointer into struct_fields[i]). */
                     halmat_syt_entry_t src_snapshot = state->struct_fields[i].value;
-                    if (src_snapshot.elements) {
-                        /* ARRAY/MATRIX/VECTOR structure terminal: deep-copying
-                         * correctly needs element_count, which is on the
-                         * snapshot already -- but no fixture exercises this,
-                         * so fail loudly rather than risk a silent aliasing
-                         * bug in an unverified path. */
-                        fail(state, "TASN: copying a structure terminal with ARRAY/MATRIX/VECTOR type is not yet implemented");
+                    if (src_snapshot.elements || src_snapshot.bit_elements || src_snapshot.char_elements) {
+                        /* ARRAY/MATRIX/VECTOR structure terminal. Investigated
+                         * this session (task sweep item): a correct deep copy
+                         * is mechanically straightforward -- element_count is
+                         * right there on the snapshot, and the pattern is the
+                         * same three-way storage-kind dispatch (numeric/BIT/
+                         * CHARACTER) already used for whole-ARRAY ASSIGN
+                         * write-back (OP_XXND) and WRITE arguments (OP_XXAR).
+                         * But it turns out to be currently *unreachable* by
+                         * any real compiled program: every other opcode that
+                         * can write a whole array/vector/matrix value --
+                         * VASN/MASN (`ZQ1.QV = SRC;`), the ASSIGN write-back
+                         * path (`CALL P ASSIGN(ZQ1.QV);`), and DSUB
+                         * (subscripted element assignment, `ZQ1.QV(1) =
+                         * ...;`) -- all reject an XPT (structure-terminal)
+                         * receiver outright, requiring a plain SYT. TINT
+                         * (structure-terminal INITIAL) only handles scalar/
+                         * integer terminals, not multi-slot ARRAY/MATRIX/
+                         * VECTOR ones (see its own comment). So no HALSFC-
+                         * compilable program can get non-zero per-element
+                         * data into a structure-terminal array field in the
+                         * first place for TASN to ever copy -- confirmed by
+                         * direct compile probes this session. Failing loudly
+                         * here rather than shipping a deep-copy that can
+                         * never be fixture-verified until at least one of
+                         * those three prerequisite gaps is closed first. */
+                        fail(state, "TASN: copying a structure terminal with ARRAY/MATRIX/VECTOR type is not yet implemented "
+                                     "(blocked on VASN/MASN, ASSIGN write-back, or DSUB gaining structure-terminal/XPT receiver support first)");
                         ok = false;
                         break;
                     }
