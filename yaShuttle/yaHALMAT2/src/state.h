@@ -223,20 +223,31 @@ typedef struct {
     /* Set *in addition to* is_container above (not exclusive with it --
      * deliberately additive, so the existing is_container-only read path
      * above is completely unaffected) when this container is also a
-     * contiguous *live view* into another SYT's own storage, rather than
-     * a fully independent computed result -- currently only DSUB's
-     * asterisk-partition row-select (`M$(i,*)`) and whole-vector
-     * (`V$(*)`) cases set this; a column select (`M$(*,j)`) isn't
-     * contiguous in row-major storage and leaves this false. Lets
-     * MASN/VASN (interp.c) write straight back into the selected
-     * row/vector when such a slot is used as an *assignment receiver*
-     * (`M$(I,*) = ...;`) instead of only ever being readable -- user-
-     * reported (047-ROWS.hal). container_count above is reused as the
-     * write's own element count (the two are always identical: this is
-     * the same slot the read-side count already describes). */
+     * *live view* into another SYT's own storage -- possibly strided --
+     * rather than a fully independent computed result. Currently set by
+     * DSUB's asterisk-partition row-select (`M$(i,*)`, stride=1),
+     * whole-vector (`V$(*)`, stride=1), and column-select (`M$(*,j)`,
+     * stride=cols) cases. Lets MASN/VASN (interp.c) write straight back
+     * into the selected row/column/vector when such a slot is used as an
+     * *assignment receiver* (`M$(I,*) = ...;`) instead of only ever being
+     * readable -- user-reported (047-ROWS.hal for the row/whole-vector
+     * cases; column-select generalized in the same follow-up). The
+     * component at-partition VECTOR-slice case (`V$(n AT p)`) deliberately
+     * does NOT set this: confirmed via HALSFC that real HAL/S rejects
+     * `V$(n AT p) = ...;` as a compile-time error (it type-checks the
+     * partition against the whole vector's declared length, not the
+     * slice), so no real program can ever exercise a writable form of it.
+     * container_count above is reused as the write's own element count
+     * (the two are always identical: this is the same slot the read-side
+     * count already describes). */
     bool is_container_ref;
     uint16_t container_ref_syt;
     size_t container_ref_offset;
+    size_t container_ref_stride; /* is_container_ref: element stride between
+                                   * successive written values, in `rbase->
+                                   * elements` units; 1 for every case except
+                                   * column-select, where it's the MATRIX's
+                                   * column count. */
     bool is_struct_ref;      /* is_ref=false, !is_string, !is_bits, !is_container: true if this slot
                                * holds an EXTN-resolved structure reference (class-0/EXTN.md) --
                                * (struct_base_syt, struct_field_syt), consumed by a following TASN/

@@ -3030,17 +3030,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ast_axis >= 0) {
                     halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
                     size_t count;
-                    /* Set for the two cases below that select a genuinely
-                     * *contiguous* run of `base`'s own row-major storage
-                     * (offset..offset+count-1) -- lets this VAC slot also
-                     * be used as an assignment *receiver* later
-                     * (`M$(I,*) = ...;`, user-reported, 047-ROWS.hal),
-                     * writing straight back into `base` instead of only
-                     * ever being readable. A column select isn't
-                     * contiguous (stride = cols), so it's deliberately
-                     * left non-writable below. */
+                    /* Set for every case below, since all of them select a
+                     * regularly-strided run of `base`'s own row-major
+                     * storage (offset, offset+stride, offset+2*stride, ...)
+                     * -- lets this VAC slot also be used as an assignment
+                     * *receiver* later (`M$(I,*) = ...;`, user-reported,
+                     * 047-ROWS.hal; `M$(*,j) = ...;` generalized in the
+                     * same follow-up), writing straight back into `base`
+                     * instead of only ever being readable. stride=1 for
+                     * the row-select/whole-vector cases (genuinely
+                     * contiguous); a column select has stride=cols
+                     * instead, since row-major storage places successive
+                     * column entries `cols` elements apart. */
                     bool writable_ref = false;
                     size_t ref_offset = 0;
+                    size_t ref_stride = 1;
                     if (num_indices == 1) {
                         /* V$(*): the whole vector, unchanged. */
                         count = base->element_count;
@@ -3066,6 +3070,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             int c = n % base->cols;
                             count = (size_t)base->rows;
                             for (int r = 0; r < base->rows; r++) buf[r] = base->elements[(size_t)r * base->cols + c];
+                            writable_ref = true;
+                            ref_offset = (size_t)c;
+                            ref_stride = (size_t)base->cols;
                         }
                     } else {
                         fail(state, "DSUB: asterisk subscript with %u indices not yet implemented", num_indices);
@@ -3076,6 +3083,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->vac[ins->index].is_container_ref = true;
                         state->vac[ins->index].container_ref_syt = base_syt;
                         state->vac[ins->index].container_ref_offset = ref_offset;
+                        state->vac[ins->index].container_ref_stride = ref_stride;
                     }
                     break;
                 }
@@ -3098,7 +3106,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * will fail loudly on the unexpected TAG1 rather than
                  * silently misreading length/position as raw indices).
                  * User-reported (046-XYZ_TO_POLAR.hal's
-                 * `ABVAL(P$(2 AT 1))`, `P` a `VECTOR`). */
+                 * `ABVAL(P$(2 AT 1))`, `P` a `VECTOR`). Deliberately NOT
+                 * marked `is_container_ref` (unlike the asterisk-partition
+                 * cases above): confirmed via HALSFC that real HAL/S
+                 * rejects `V$(n AT p) = ...;` outright at compile time
+                 * (QD1/AV3: it type-checks the partition against the
+                 * *whole* vector's declared length, not the slice, so no
+                 * source shape can ever satisfy it) -- not a construct any
+                 * real compiled program can produce, so left read-only. */
                 if (num_indices == 2 && base->rows == 0 &&
                     ins->operands[1].tag1 == 3 && ins->operands[2].tag1 == 3) {
                     resolved_value_t lenv, posv;
@@ -3161,13 +3176,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * branch marks such a VAC slot `is_container_ref`
                  * (additively, alongside the `is_container` it already
                  * sets for the read direction, which this doesn't touch)
-                 * with the base SYT/offset the selected row/vector
-                 * actually lives at, letting this write straight back
-                 * into it instead of discarding an orphaned copy. Only
-                 * the contiguous row-select/whole-vector cases are marked
-                 * this way -- a column select (`M$(*,j)`) isn't
-                 * contiguous in row-major storage and still correctly
-                 * fails below, same as before this fix. */
+                 * with the base SYT/offset/stride the selected
+                 * row/column/vector/slice actually lives at, letting this
+                 * write straight back into it instead of discarding an
+                 * orphaned copy -- generalized to a per-element stride
+                 * (`container_ref_stride`) so the column-select case
+                 * (`M$(*,j)`, stride = column count, not contiguous in
+                 * row-major storage) writes correctly too, not just the
+                 * originally-implemented contiguous (stride=1) cases. */
                 if (ins->operand_count != 2) { fail(state, "MASN/VASN: expected 2 operands"); break; }
                 halmat_scalar_t *src; size_t src_count; int src_rows, src_cols;
                 if (!resolve_container(state, &ins->operands[0], &src, &src_count, &src_rows, &src_cols)) break;
@@ -3178,11 +3194,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (slot->container_ref_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: receiver SYT index out of range"); break; }
                     halmat_syt_entry_t *rbase = &state->syt[slot->container_ref_syt];
                     if (src_count != slot->container_count ||
-                        slot->container_ref_offset + src_count > rbase->element_count) {
+                        (src_count > 0 &&
+                         slot->container_ref_offset + (src_count - 1) * slot->container_ref_stride >= rbase->element_count)) {
                         fail(state, "MASN/VASN: shape mismatch (%zu vs %zu elements)", src_count, slot->container_count);
                         break;
                     }
-                    memcpy(&rbase->elements[slot->container_ref_offset], src, src_count * sizeof(halmat_scalar_t));
+                    for (size_t k = 0; k < src_count; k++) {
+                        rbase->elements[slot->container_ref_offset + k * slot->container_ref_stride] = src[k];
+                    }
                     break;
                 }
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "MASN/VASN: receiver must be SYT"); break; }

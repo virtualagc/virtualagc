@@ -1,0 +1,12 @@
+ TEST_MATRIX_COL_ASSIGN:
+ PROGRAM;
+    DECLARE MM MATRIX INITIAL(11, 12, 13, 21, 22, 23, 31, 32, 33),
+            M MATRIX,
+            C SCALAR INITIAL(2),
+            J INTEGER INITIAL(2);
+
+    M = MM;
+M    M    = C MM   ;
+S     *,J       *,J
+    WRITE(6) M;
+ CLOSE TEST_MATRIX_COL_ASSIGN;

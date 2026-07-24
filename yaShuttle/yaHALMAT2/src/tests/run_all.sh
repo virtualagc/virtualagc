@@ -184,12 +184,25 @@ run ./run_local_fixture.sh matrix_sub "$(printf ' 5.0000000E+00\n 3.0000000E+00\
 # writable view into the base MATRIX/VECTOR's own storage (new
 # is_container_ref/container_ref_syt/container_ref_offset fields,
 # state.h), which MASN/VASN now recognizes and writes straight back
-# into instead of failing. A column select (`M$(*,j)`) isn't contiguous
-# and is deliberately left unmarked, so it still correctly fails the
-# same way. Exercises all three idioms from the real program: scaling a
-# row by a constant, adding a scaled row to another row, and swapping
-# two rows via a VECTOR temporary.
+# into instead of failing. Exercises all three idioms from the real
+# program: scaling a row by a constant, adding a scaled row to another
+# row, and swapping two rows via a VECTOR temporary.
 run ./run_local_fixture.sh matrix_row_assign "$(printf ' 2.2000000E+01      2.4000000E+01      2.6000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 1.1000000E+01      1.2000000E+01      1.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01')"
+# Follow-up to the row-select fix above, same user report (047-ROWS.hal):
+# a column select (`M$(*,j) = C * MM$(*,j);`) was originally left
+# deliberately unmarked/read-only, since row-major storage makes it
+# non-contiguous (stride = column count, not 1). Generalized the
+# is_container_ref mechanism with a new container_ref_stride field
+# (state.h) -- 1 for the row-select/whole-vector cases, cols for a
+# column select -- so MASN/VASN's write-back loop (interp.c) now
+# handles both uniformly instead of memcpy-ing a fixed contiguous run.
+# (Also considered making the same generalization apply to DSUB's
+# component at-partition VECTOR-slice case, `V$(n AT p)`, as a related
+# "other issue" -- but confirmed via HALSFC that real HAL/S rejects
+# `V$(n AT p) = ...;` at compile time regardless of source shape, so
+# that case is intentionally left read-only; no real program can ever
+# reach a writable form of it.)
+run ./run_local_fixture.sh matrix_col_assign "$(printf ' 1.1000000E+01      2.4000000E+01      1.3000000E+01\n 2.1000000E+01      4.4000000E+01      2.3000000E+01\n 3.1000000E+01      6.4000000E+01      3.3000000E+01')"
 run ./run_local_fixture.sh matvec "$(printf ' 6.0000000E+00\n 8.0000000E+00\n 1.0000000E+01\n 1.2000000E+01\n 1.9000000E+01\n 2.2000000E+01\n 4.3000000E+01\n 5.0000000E+01')"
 run ./run_local_fixture.sh vec "$(printf ' 3.2000000E+01\n-3.0000000E+00\n 6.0000000E+00\n-3.0000000E+00')"
 run ./run_local_fixture.sh bit_conv "$(printf ' 1.2000000E+01\n12\nBEQU-TRUE\n         12')"
