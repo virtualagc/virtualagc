@@ -64,6 +64,28 @@ run ./run_fixture.sh nested "K=             150"        # reference tool's "40" 
 # interest in replicating -- falling through to ECAS is the safe,
 # well-defined choice instead.
 run ./run_local_fixture.sh case_else "$(printf '          0      1.0000000E+02\n          1      2.0000000E+02\n          2      3.0000000E+02\n          3      4.0000000E+02\n          4      5.0000000E+02\n          5      1.0000000E+02')"
+# User-reported (104-EXAMPLE_1.hal): `TMAX, TMEAN, TMIN = TIME(1);`, a
+# multiple-assignment statement (USA003087 Sec. 8.5: "the value of the
+# R-expression is assigned to all L1...Ln in turn"), failed with "IASN/
+# SASN: expected 2 operands" -- confirmed via --disasm that same-class
+# multi-assignment compiles to a single IASN/SASN with the source plus
+# every receiver as its own trailing operand (operand_count = 1+N, not
+# always 2). Fixed by looping over every receiver operand instead of
+# hard-requiring exactly one.
+run ./run_local_fixture.sh multi_assign "$(printf ' 3.5000000E+00      3.5000000E+00      3.5000000E+00\n          7               7')"
+# While validating the fix above directly against USA003087 Sec. 8.5's
+# own worked example (`C, I = 127.2;`, CHARACTER + INTEGER receivers,
+# neither SCALAR): found that a *mixed-type* multi-assignment compiles
+# to a single instruction too (here SASN, confirmed via --disasm) whose
+# receivers can have completely different declared types unrelated to
+# the opcode's own nominal class -- previously would have silently
+# mis-formatted C as a raw SCALAR (matching I's own wrong scientific-
+# notation output) instead of the CHARACTER rendering Sec. 8.5 itself
+# documents (`C ≡ '1.2720000E+02'`, `I ≡ 127`). Fixed by having each
+# receiver's own coercion consult its *own* declared symtab class
+# (SCALAR/CHARACTER/INTEGER) rather than trusting the opcode's class for
+# every receiver alike; CHARACTER reuses OP_STOC's own formatting.
+run ./run_local_fixture.sh multi_assign_mixed " 1.2720000E+02             127"
 run ./run_fixture.sh proc "$(derive_expected proc)"
 run ./run_fixture.sh array ""
 run ./run_fixture.sh matrix ""

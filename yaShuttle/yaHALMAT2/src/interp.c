@@ -4515,28 +4515,85 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * without this a SCALAR DOUBLE variable assigned a plain
                  * literal (`ANGULAR_SHIFT = 0.5;`) stayed single-
                  * precision-formatted even via ordinary SASN. */
-                if (ins->operand_count != 2) { fail(state, "IASN/SASN: expected 2 operands"); break; }
+                /* Multiple assignment ([USA003087] Sec. 8.5, user-reported
+                 * against 104-EXAMPLE_1.hal's `TMAX, TMEAN, TMIN = TIME(1);`):
+                 * "several data items may be assigned to the same
+                 * R-expression in the same statement... [t]he value of the
+                 * R-expression is assigned to all L1...Ln in turn... [n]o
+                 * particular order of assignment is guaranteed. Any L-type
+                 * must be compatible with the R-type" (rule 2 -- each
+                 * receiver's *own* declared type governs its own coercion,
+                 * independently of every other receiver's). Confirmed
+                 * empirically that multi-assignment compiles to one IASN or
+                 * SASN instruction (whichever the compiler happens to pick
+                 * for the group -- confirmed NOT always tied to any one
+                 * receiver's own type, see below) with the source as
+                 * operand 0 and every receiver as its own trailing operand
+                 * (operand_count = 1 + N receivers, not always 2) --
+                 * previously unhandled, failing loudly on any N != 1.
+                 *
+                 * Sec. 8.5's own worked example, directly compiled and
+                 * cross-checked: `C, I = 127.2;` (`C` CHARACTER, `I`
+                 * INTEGER) -- despite mixing two receiver types neither of
+                 * which is SCALAR -- compiles to a *single* SASN carrying
+                 * both `C` and `I` as operands (confirmed via --disasm: one
+                 * SASN, numop=3, LIT source + both receiver SYTs). So the
+                 * opcode chosen for the whole group is not a reliable guide
+                 * to any individual receiver's own real type at all here --
+                 * unlike the single-receiver case above (where the
+                 * *destination's* declared class already overrides the
+                 * opcode's nominal one when available, this just extends
+                 * that same "symtab is ground truth over opcode class" rule
+                 * to every receiver type this project has a confirmed
+                 * conversion for, not just SCALAR: CHARACTER (hal_class=2,
+                 * via the same fixed-width scientific-notation rendering
+                 * OP_STOC uses -- confirmed to match Sec. 8.5's own stated
+                 * result, `C` = `'1.2720000E+02'`) and INTEGER (hal_class=6,
+                 * truncating rv_to_integer()). A receiver whose class isn't
+                 * one of these three (or with no symtab available at all)
+                 * falls back to the opcode's own nominal class, same as the
+                 * pre-existing single-receiver behavior. Source is resolved
+                 * once, then each receiver gets its own independent
+                 * coercion pass on a fresh copy (the coercion below mutates
+                 * it), since a later receiver must never see an earlier
+                 * receiver's own coerced kind. */
+                if (ins->operand_count < 2) { fail(state, "IASN/SASN: expected at least 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                const halmat_symtab_entry_t *dest_sym = (ins->operands[1].qual == QUAL_SYT && state->symtab)
-                    ? halmat_symtab_find_by_index(state->symtab, ins->operands[1].data) : NULL;
-                if (dest_sym && dest_sym->hal_class == 5) {
-                    halmat_scalar_t sv = rv_to_scalar(&a);
-                    if (dest_sym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE)) {
-                        bool want_double = (dest_sym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
-                        if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+                for (uint8_t ri = 1; ri < ins->operand_count; ri++) {
+                    resolved_value_t coerced = a;
+                    const halmat_symtab_entry_t *dest_sym = (ins->operands[ri].qual == QUAL_SYT && state->symtab)
+                        ? halmat_symtab_find_by_index(state->symtab, ins->operands[ri].data) : NULL;
+                    int dest_class = dest_sym ? dest_sym->hal_class : -1;
+                    if (dest_class == 5) {
+                        halmat_scalar_t sv = rv_to_scalar(&coerced);
+                        if (dest_sym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE)) {
+                            bool want_double = (dest_sym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                            if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+                        }
+                        coerced.kind = RV_SCALAR;
+                        coerced.scalar = sv;
+                    } else if (dest_class == 2) {
+                        char buf[32];
+                        halmat_scalar_format(rv_to_scalar(&coerced), buf, sizeof(buf));
+                        coerced.kind = RV_STRING;
+                        coerced.string = buf; /* write_destination copies out (write_syt_entry's dup_string) before this scope ends */
+                        if (!write_destination(state, &ins->operands[ri], &coerced)) break;
+                        continue;
+                    } else if (dest_class == 6) {
+                        int32_t iv = rv_to_integer(&coerced);
+                        coerced.kind = RV_INTEGER;
+                        coerced.integer = iv;
+                    } else if (ins->opcode == OP_IASN) {
+                        int32_t iv = rv_to_integer(&coerced);
+                        coerced.kind = RV_INTEGER;
+                        coerced.integer = iv;
+                    } else {
+                        halmat_scalar_t sv = rv_to_scalar(&coerced);
+                        coerced.kind = RV_SCALAR;
+                        coerced.scalar = sv;
                     }
-                    a.kind = RV_SCALAR;
-                    a.scalar = sv;
-                } else if (ins->opcode == OP_IASN) {
-                    int32_t iv = rv_to_integer(&a);
-                    a.kind = RV_INTEGER;
-                    a.integer = iv;
-                } else {
-                    halmat_scalar_t sv = rv_to_scalar(&a);
-                    a.kind = RV_SCALAR;
-                    a.scalar = sv;
+                    if (!write_destination(state, &ins->operands[ri], &coerced)) break;
                 }
-                if (!write_destination(state, &ins->operands[1], &a)) break;
                 break;
             }
 
