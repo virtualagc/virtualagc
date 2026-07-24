@@ -93,6 +93,33 @@ done). See `STATUS.md`'s Class 0 section for the fuller trace;
 `src/tests/hal/test_read_comma.hal` (mid-list) and
 `test_read_leading_comma.hal` (leading) are the regression fixtures.
 
+**Semicolon list-terminator, fixed in a follow-up session.** Distinct
+from (and a stronger effect than) a comma's null-field behavior above:
+[USA003088] Sec. 10.1.1 rule 5 (PDF p. 10-3) — "a semicolon field
+separator encountered during a normal sequential scan to fill a
+variable element terminates the READ statement...[t]he current
+`<variable>` element is left unchanged; [a]ll remaining `<variable>`s in
+the statement are unchanged." Independently confirmed by ["Programming
+in HAL/S"] Sec. 8.3 (p. 153, user-supplied, not previously extracted —
+a non-primary but influential textbook, "generally the first HAL/S
+material encountered by students"), whose own worked example is this
+project's regression fixture almost verbatim: `READ(5) A,B,C;` fed
+`"1.5, 2.6;"` reads only `A`/`B`, leaving `C` untouched — "This fact can
+be useful when a program must process a variable number of input
+values," illustrated there with an `ARRAY`-sum idiom that reads a
+semicolon-terminated list into an array, leaving its unfilled tail at
+initial value. Previously a hard parse error in yaHALMAT2 (`fscanf`
+choking on `;` as invalid numeric/token data) — user-reported.
+Implemented by widening `read_skip_separator()`'s return from a bool
+into `halmat_read_field_t` (`DATA`/`NULL`/`TERMINATE`); getting this
+right took two passes — the first attempt's "no comma found, must be
+space-only separation" early-return path skipped the semicolon check
+entirely, so a comma-then-semicolon input (`"1.5, 2.6;"`, the exact
+regression fixture) still failed even though a *bare* leading semicolon
+alone already worked, caught by testing the primary source's own
+worked example directly rather than a simplified toy case.
+`src/tests/hal/test_read_semicolon.hal` is the regression fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x01F) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.

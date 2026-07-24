@@ -1846,15 +1846,39 @@ static void flush_write(halmat_state_t *state, FILE *out) {
     state->io_pending.item_count = 0;
 }
 
+/* Three things a READ field's own leading position (skipping any
+ * ordinary separator first) can turn out to hold, per USA003087 Sec.
+ * 12.3/USA003088 Sec. 10.1.1 rules 5-6 and "Programming in HAL/S" Sec.
+ * 8.3 (all three agree): ordinary data (go read it normally); a *null
+ * field* (a comma/semicolon found where data was expected because it's
+ * immediately adjacent to another separator -- leave *this* item's
+ * destination untouched, move on to the next item); or a semicolon
+ * found as this field's own leading character, which is a stronger,
+ * distinct effect from an ordinary null field -- USA003088 rule 5:
+ * "a semicolon field separator encountered during a normal sequential
+ * scan to fill a variable element terminates the READ statement...
+ * [t]he current <variable> element is left unchanged; [a]ll remaining
+ * <variable>s in the statement are unchanged" -- i.e. not just this
+ * item but the *entire rest of the list*, matching "Programming in
+ * HAL/S" p. 153's own worked example ("1.5, 2.6;" into a 3-item list
+ * leaves the third untouched) and its array-sum idiom (reading a
+ * variable-length list terminated by `;`, leaving the unused tail of
+ * an ARRAY at its initial value). */
+typedef enum { HALMAT_READ_FIELD_DATA, HALMAT_READ_FIELD_NULL, HALMAT_READ_FIELD_TERMINATE } halmat_read_field_t;
+
 /* Consumes the separator USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 (rule
  * 6) allows before a READ data field ("a comma and/or at least one
- * blank"), and detects a *null field* -- rule 6: "a null field is
- * transmitted whenever a comma or semicolon is detected when data is
- * expected," which "occurs when a comma or semicolon is: preceded by a
- * comma or semicolon; [or] preceded by one or more blanks following the
- * last comma or semicolon" -- returning true (caller must leave this
- * item's destination untouched and not read a value) rather than false
- * (an ordinary field follows, go read it) in that case.
+ * blank"), classifying what's actually found there as one of the three
+ * halmat_read_field_t outcomes above. A semicolon is left unconsumed in
+ * the `TERMINATE` case -- confirmed necessary by "Programming in
+ * HAL/S" p. 154's own worked example, `READ(5) SKIP(0), TAB(0), X;`,
+ * used specifically to read data positioned *after* a semicolon that
+ * terminated the previous READ; leaving it in the stream lets
+ * USA003087 Sec. 12.3's ordinary "device mechanism is left positioned
+ * one column to the right of the end of the last data field read in"
+ * rule naturally put the next I/O operation right at it, ready for an
+ * explicit override to skip past it. A null-triggering comma is left
+ * unconsumed for the same reason, one level down (see below).
  *
  * `require_separator` (pass `i > 0`, the item's own index in the READ
  * list) distinguishes two call shapes, both needed to get this right
@@ -1868,14 +1892,14 @@ static void flush_write(halmat_state_t *state, FILE *out) {
  *     *expected* here, closing the previous item's field -- skip
  *     blanks, consume exactly one comma if present (space-only
  *     separation like "1 2 3" is also legal and consumes no comma),
- *     skip trailing blanks, then peek for a *second* comma immediately
- *     following (rule 6's "preceded by a comma...following the last
- *     comma" case) -- a doubled mid-list comma ("1,,3") nulls the
- *     field in between, leaving its own trailing comma unconsumed so
- *     the *next* item's own `require_separator=true` call treats it as
- *     an ordinary preceding separator in turn (this is what makes a run
- *     of several consecutive nulls, e.g. ",,3", null every field up to
- *     the first one that finds real data).
+ *     skip trailing blanks, then peek for a comma or semicolon
+ *     immediately following (rule 6's "preceded by a comma...following
+ *     the last comma" case) -- a doubled mid-list comma ("1,,3") nulls
+ *     the field in between, leaving its own trailing comma unconsumed
+ *     so the *next* item's own `require_separator=true` call treats it
+ *     as an ordinary preceding separator in turn (this is what makes a
+ *     run of several consecutive nulls, e.g. ",,3", null every field up
+ *     to the first one that finds real data).
  *   - `false` (the very first item only): no separator is expected to
  *     precede it at all, so only *peek* at the next non-blank
  *     character rather than requiring/consuming a comma first; a comma
@@ -1887,23 +1911,33 @@ static void flush_write(halmat_state_t *state, FILE *out) {
  *     for the first item to behave differently from any other) -- left
  *     unconsumed for the *second* item's own `require_separator=true`
  *     call to treat as its ordinary preceding separator, exactly like
- *     the doubled-comma case above. */
-static bool read_skip_separator(FILE *in, bool require_separator) {
+ *     the doubled-comma case above. A semicolon found here terminates
+ *     the whole list starting from item 0, same as any other item. */
+static halmat_read_field_t read_skip_separator(FILE *in, bool require_separator) {
     int c;
     while ((c = fgetc(in)) != EOF && isspace(c)) {}
-    if (require_separator) {
-        if (c != ',') {
-            if (c != EOF) ungetc(c, in);
-            return false;
-        }
+    /* Consume one expected ordinary-separator comma, if present -- but
+     * unlike an earlier version of this function, don't early-return
+     * just because there wasn't one (space-only separation, "1 2 3",
+     * legitimately has none): USA003088 Sec. 10.1.1 rule 4 describes
+     * the scan as "looking for fields...separated by commas,
+     * semicolons, or blanks," so a semicolon reached via plain blanks
+     * alone, with no comma at all, still terminates the list -- the
+     * checks below must run either way, not just when a comma was
+     * found first. */
+    if (require_separator && c == ',') {
         while ((c = fgetc(in)) != EOF && isspace(c)) {}
+    }
+    if (c == ';') {
+        ungetc(c, in);
+        return HALMAT_READ_FIELD_TERMINATE;
     }
     if (c == ',') {
         ungetc(c, in);
-        return true;
+        return HALMAT_READ_FIELD_NULL;
     }
     if (c != EOF) ungetc(c, in);
-    return false;
+    return HALMAT_READ_FIELD_DATA;
 }
 
 /* Binds `state`'s currently-open io_pending call arguments into
@@ -4703,20 +4737,26 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 FILE *in = state->devices[device];
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
-                    /* USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 rule 6:
+                    /* USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 rules 5-6
+                     * (also "Programming in HAL/S" Sec. 8.3, p. 153):
                      * fields are separated by "a comma and/or at least
-                     * one blank," and a comma/semicolon is a *null
-                     * field* (leaves the destination untouched) whenever
-                     * it's found where data was expected rather than
-                     * preceded by real data -- checked before every
-                     * item, including the first (a leading comma, e.g.
-                     * "READ(5) A,B,C;" fed ",2,3", nulls A the same way
-                     * a doubled mid-list comma nulls a later item, not a
-                     * parse error -- user-reported). See
-                     * read_skip_separator's own comment for why it needs
-                     * `i > 0` to know which of its two call shapes to
-                     * use here, not just whether to null this item. */
-                    if (read_skip_separator(in, i > 0)) continue;
+                     * one blank"; a comma found where data was expected
+                     * is a *null field* (leaves just that destination
+                     * untouched, e.g. a leading comma -- "READ(5)
+                     * A,B,C;" fed ",2,3" -- nulls A the same way a
+                     * doubled mid-list comma nulls a later item, not a
+                     * parse error -- user-reported); a *semicolon* found
+                     * where data was expected instead terminates the
+                     * *entire remaining list* (this item and every item
+                     * after it stay untouched) -- user-reported,
+                     * previously a hard parse error rather than the
+                     * documented "process a variable number of input
+                     * values" idiom. See read_skip_separator's own
+                     * comment for why it needs `i > 0` to know which of
+                     * its two call shapes to use here. */
+                    halmat_read_field_t field = read_skip_separator(in, i > 0);
+                    if (field == HALMAT_READ_FIELD_TERMINATE) break;
+                    if (field == HALMAT_READ_FIELD_NULL) continue;
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {

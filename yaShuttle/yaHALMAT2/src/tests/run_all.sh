@@ -115,6 +115,19 @@ run ./run_read_fixture.sh read_comma "$(printf '1,,3\n42\n')" "$(printf -- ' 1.0
 # after the first) from "only peek, nothing is expected to precede this
 # one" (the first item only).
 run ./run_read_fixture.sh read_leading_comma "$(printf ',2,3\n')" "$(printf -- '-1.5000000E+00      2.0000000E+00      3.0000000E+00')"
+# USA003088 Sec. 10.1.1 rule 5, confirmed by "Programming in HAL/S" Sec.
+# 8.3 p. 153's own worked example (this fixture's exact input/values,
+# user-reported): a semicolon reached where READ data was expected
+# terminates the *entire remaining list* (not just the one field a
+# comma would null) -- the documented mechanism for "process a variable
+# number of input values," previously a hard parse error in yaHALMAT2
+# rather than a legal, useful idiom. Also caught a real bug in the
+# first attempt at this fix before considering it done: the function's
+# "no comma found, must be space-only separation" early-return path
+# skipped the semicolon check entirely, so this exact fixture's input
+# still failed even after "leading semicolon with nothing else" alone
+# appeared to work.
+run ./run_read_fixture.sh read_semicolon "$(printf '1.5, 2.6;\n')" "$(printf -- ' 1.5000000E+00      2.5999994E+00     -3.5000000E+00')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
