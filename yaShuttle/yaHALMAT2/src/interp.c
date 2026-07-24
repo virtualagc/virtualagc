@@ -3984,7 +3984,22 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* NAME (pointer) initialize, class-8/NINT.md: operand 1
                  * = the NAME variable, operand 2 = SYT target (real
                  * pointer) or IMD (NULL) -- same raw-index handling as
-                 * NASN, bypassing resolve_operand. */
+                 * NASN, bypassing resolve_operand.
+                 *
+                 * Investigated this session (task sweep item): NINT.md's
+                 * own confirmed operand-word trace only ever shows
+                 * QUAL_SYT for operand 1 (both the real-pointer and NULL
+                 * cases); an OFFSET form was never observed, only
+                 * speculatively guarded against (mirroring SINT/BINT/
+                 * CINT's genuinely-confirmed OFFSET form for ARRAY
+                 * INITIAL lists). Tried to construct the analogous
+                 * trigger -- an ARRAY of NAME with an INITIAL list -- via
+                 * direct HALSFC compile probes; hit a real, unrelated
+                 * compiler-level obstacle ("ARRAYNESS/MULTI-COPINESS
+                 * CONFLICT", PASS2 DI110) before ever producing a HALMAT
+                 * trace to confirm or refute the OFFSET hypothesis
+                 * either way. Left failing loudly -- still no primary-
+                 * source or empirical basis to implement against. */
                 if (ins->operand_count != 2) { fail(state, "NINT: expected 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "NINT: OFFSET-addressed form not yet implemented"); break; }
                 {
@@ -3999,7 +4014,24 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* Uniform fill: every element of the MATRIX/VECTOR gets
                  * the same literal value (class-8/MINT.md/VINT.md);
                  * per-element INITIAL() lists instead use repeated SINT,
-                 * already handled by SINT's own direct-SYT case. */
+                 * already handled by SINT's own direct-SYT case.
+                 *
+                 * Investigated this session (task sweep item): MINT.md/
+                 * VINT.md's own "OFFSET" mention is carried over from the
+                 * HAL-1971 predecessor-language instruction only ("HAL/S
+                 * operand-word format is unconfirmed" -- their own
+                 * Unresolved Questions); no real HALSFC trace has ever
+                 * shown it. Tried both realistic real-HAL/S triggers this
+                 * session: `ARRAY(n) VECTOR(m) INITIAL(uniform-value)`
+                 * compiles to plain-SYT VINT wrapped in IDLP/DLPE replay
+                 * (already handled, no OFFSET involved); `ARRAY(n)
+                 * VECTOR(m) INITIAL(v1,v2,...,distinct-per-element)`
+                 * compiles to STRI + repeated SINT with OFFSET addressing
+                 * across the whole flattened element run (already handled
+                 * by SINT's own case) -- MINT/VINT itself never appears
+                 * with anything but QUAL_SYT in either case. Left failing
+                 * loudly -- no confirmed trigger exists to implement
+                 * against. */
                 if (ins->operand_count != 2) { fail(state, "MINT/VINT: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "MINT/VINT: OFFSET-addressed form not yet implemented"); break; }
