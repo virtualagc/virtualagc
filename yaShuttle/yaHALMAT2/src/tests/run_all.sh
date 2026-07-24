@@ -512,6 +512,34 @@ run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 run ./run_local_fixture.sh subbit_assign "$(printf '      61680\n1010 1010 1010 1010')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"
+# User-reported (113-EXAMPLE_7.hal): a range-form `DO FOR J = I+1 TO 4;`
+# with I=4 (start=5, already past end=4) still ran its body once, with
+# J=5 -- corrupting an unrelated array element (MISMATCH$(1,1)) via a
+# wrapped out-of-bounds DSUB offset. OP_DFOR's own comment claimed "the
+# range form always runs its first in-range cycle without a pre-test",
+# but a real `HALSFC --parms=LSTALL` trace shows DFOR's initial branch
+# actually lands on EFOR's own store+compare code (skipping only the
+# increment, not the bounds check) -- confirmed independently via
+# compileLinkRun giving the correct zero-iteration result. Fixed by
+# giving DFOR the same in-range check EFOR already does each cycle,
+# applied once up front (new dfor_efor_pos[] reverse mapping so DFOR can
+# find its own matching EFOR's exit target).
+run ./run_local_fixture.sh dfor_zero "$(printf '          0\n          1')"
+# Same file, a second bug found while fixing the first: WRITE(6)
+# MISMATCH$(I,*); (MISMATCH a confirmed-2D `ARRAY(4,4) INTEGER`) printed
+# every element in SCALAR format instead of INTEGER. Root cause: the
+# whole-container WRITE path's own container_is_integer flag was only
+# ever set for a plain whole-SYT reference, never a VAC-carried DSUB
+# row-select result -- and separately, resolve_operand()'s per-element
+# read from such a container (used once this WRITE argument gets
+# expanded into its own ADLP/DLPE replay) had no INTEGER awareness at
+# all, always producing RV_SCALAR. Fixed both: the first by dropping the
+# whole-SYT restriction (DSUB's own TAG1=6 already marks an INTEGER
+# result either way), the second with a new container_is_integer flag on
+# the VAC slot itself, set from DSUB's own operator-word TAG and
+# consulted by resolve_operand. Fixture reuses 113-EXAMPLE_7.hal's own
+# ATTITUDE-comparison logic (needs --line-length 132 like the original).
+run ./run_local_fixture.sh mismatch_array "$(printf '          0               1               0               1\n          1               0               1               0\n          0               1               0               1\n          1               0               1               0')" --line-length 132
 # EXIT loop-label; (found while chasing the READ comma-separator bug
 # above, against the same user-supplied 037-ROOTS.hal): compiles to a
 # plain BRA targeting the enclosing DTST/ETST pair's own bookkeeping-

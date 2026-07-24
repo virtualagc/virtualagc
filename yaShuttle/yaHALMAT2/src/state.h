@@ -220,6 +220,21 @@ typedef struct {
                                   * final value per slot freed again in bulk by interp_cleanup(). */
     size_t container_count;
     int container_rows, container_cols; /* is_container: shape, same convention as halmat_syt_entry_t's rows/cols */
+    bool container_is_integer; /* is_container: true if this container's elements represent an INTEGER
+                                 * ARRAY subscript result (e.g. `MISMATCH$(J,*)`, MISMATCH a 2D
+                                 * `ARRAY(r,c) INTEGER` -- user-reported, 113-EXAMPLE_7.hal) rather than
+                                 * SCALAR/VECTOR/MATRIX data (HAL/S has no INTEGER MATRIX/VECTOR, so this
+                                 * is always false for a genuine MATRIX/VECTOR result). Set only by
+                                 * OP_DSUB's own row/column/whole-vector asterisk-select branch, from the
+                                 * DSUB instruction's own operator-word TAG (class-0/DSUB.md: "the HALMAT
+                                 * class number of the subscripted result's type", 6=INTEGER) -- every
+                                 * other store_container_result() caller leaves this at its default
+                                 * (false), since none of them can ever legitimately produce INTEGER
+                                 * data. Consulted by resolve_operand()'s own is_container per-element
+                                 * read (below), the path an ADLP/DLPE replay uses to expand this
+                                 * container into individual WRITE fields -- without this, every element
+                                 * silently read back as RV_SCALAR regardless of the container's real
+                                 * declared type. */
     /* Set *in addition to* is_container above (not exclusive with it --
      * deliberately additive, so the existing is_container-only read path
      * above is completely unaffected) when this container is also a
@@ -661,9 +676,18 @@ struct halmat_state {
              * USA003087 Sec. 12.2) from the flat sequential layout shared
              * by VECTOR and ARRAY. `container_is_integer` selects the
              * 11-column INTEGER field format over the default 14-column
-             * SCALAR one (from the whole-SYT case's own TAG1, class-0/
-             * XXAR.md; a MATRIX/VECTOR or slice-of-one is always SCALAR,
-             * HAL/S has no INTEGER MATRIX/VECTOR). */
+             * SCALAR one, from the capturing XXAR's own TAG1 (class-0/
+             * XXAR.md: "literally the argument's HALMAT class number"),
+             * which is set the same way -- 6=INTEGER -- whether the
+             * argument is a plain whole-SYT reference or a VAC-carried
+             * container result (e.g. `MISMATCH$(J,*)`, a DSUB row-select
+             * out of a confirmed-2-dimensional INTEGER ARRAY -- user-
+             * reported, 113-EXAMPLE_7.hal; DSUB's own operator-word TAG
+             * already carries this class number for exactly this reason,
+             * see class-0/DSUB.md). A true MATRIX/VECTOR slice is always
+             * SCALAR (HAL/S has no INTEGER MATRIX/VECTOR) and naturally
+             * gets TAG1=5 there, so this check needs no separate case for
+             * it. */
             bool is_container;
             const halmat_scalar_t *container;
             size_t container_count;
@@ -859,14 +883,25 @@ struct halmat_state {
 
     /* Range-form DO FOR (DFOR with 4-5 operands: construct id, control
      * var, initial, final, [increment]). DFOR assigns the control
-     * variable directly and falls straight into the body (the range
-     * form always runs its first in-range cycle without a pre-test,
-     * per class-0/DFOR.md); EFOR increments, compares against the final
-     * value (direction per the increment's sign), and either branches
-     * back to just past DFOR (re-running the body) or falls through
-     * (loop exit). Per-EFOR position: its matching DFOR's position, so
-     * the increment/final/[step] operands can be read straight from it. */
+     * variable directly, then -- corrected after a user-reported bug,
+     * see OP_DFOR's own comment in interp.c -- performs the *same*
+     * in-range check EFOR does before ever entering the body, skipping
+     * straight to the loop exit if the initial value is already out of
+     * range (`DO FOR J = 5 TO 4;` must run zero times, not one; a real
+     * compiled AP-101S trace confirms DFOR's own initial branch lands on
+     * EFOR's store+compare code, not directly on the body -- only the
+     * increment step is actually skipped on the first pass, not the
+     * bounds check). EFOR increments, compares against the final value
+     * (direction per the increment's sign), and either branches back to
+     * just past DFOR (re-running the body) or falls through (loop exit).
+     * Per-EFOR position: its matching DFOR's position, so the increment/
+     * final/[step] operands can be read straight from it. */
     size_t *efor_dfor_pos;
+    size_t *dfor_efor_pos; /* per-DFOR: its matching EFOR's position (the reverse of efor_dfor_pos
+                             * above), so DFOR's own initial out-of-range case can skip straight to
+                             * the loop exit (dfor_efor_pos[dfor_pos] + 1) without a separate
+                             * forward search. NO_TARGET for a list-form DFOR (no matching-EFOR
+                             * bounds check applies there -- see OP_DFOR). */
     size_t for_return_stack[64];
     int for_return_sp;
 

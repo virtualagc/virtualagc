@@ -734,8 +734,13 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                     return false;
                 }
                 size_t idx = (size_t)state->arrayed_index % slot->container_count;
-                out->kind = RV_SCALAR;
-                out->scalar = slot->container[idx];
+                if (slot->container_is_integer) {
+                    out->kind = RV_INTEGER;
+                    out->integer = halmat_scalar_to_integer(slot->container[idx]);
+                } else {
+                    out->kind = RV_SCALAR;
+                    out->scalar = slot->container[idx];
+                }
             } else {
                 out->kind = RV_INTEGER;
                 out->integer = slot->integer;
@@ -1380,6 +1385,7 @@ static bool store_container_result(halmat_state_t *state, size_t vac_index,
     slot->container_count = count;
     slot->container_rows = rows;
     slot->container_cols = cols;
+    slot->container_is_integer = false; /* default; only OP_DSUB's own asterisk-select branch overrides this */
     return true;
 }
 
@@ -1838,11 +1844,13 @@ static void precompute_for_loops(halmat_state_t *state) {
     state->afor_control_var = calloc(n, sizeof(uint16_t));
     state->efor_is_list_form = calloc(n, sizeof(bool));
     state->efor_dfor_pos = malloc(n * sizeof(size_t));
+    state->dfor_efor_pos = malloc(n * sizeof(size_t));
     state->cfor_exit_target = malloc(n * sizeof(size_t));
     for (size_t i = 0; i < n; i++) {
         state->afor_body_target[i] = NO_TARGET;
         state->afor_return_target[i] = NO_TARGET;
         state->efor_dfor_pos[i] = NO_TARGET;
+        state->dfor_efor_pos[i] = NO_TARGET;
         state->cfor_exit_target[i] = NO_TARGET;
     }
 
@@ -1891,6 +1899,7 @@ static void precompute_for_loops(halmat_state_t *state) {
                     }
                 } else {
                     state->efor_dfor_pos[i] = stack[sp].dfor_pos;
+                    state->dfor_efor_pos[stack[sp].dfor_pos] = i;
                     for (size_t k = 0; k < stack[sp].cfor_count; k++) {
                         state->cfor_exit_target[stack[sp].cfor_positions[k]] = i + 1;
                     }
@@ -2103,6 +2112,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->afor_control_var);
     free(state->efor_is_list_form);
     free(state->efor_dfor_pos);
+    free(state->dfor_efor_pos);
     free(state->cfor_exit_target);
     free(state->dcas_case_target);
     free(state->dcas_case_count);
@@ -2126,6 +2136,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->afor_control_var = NULL;
     state->efor_is_list_form = NULL;
     state->efor_dfor_pos = NULL;
+    state->dfor_efor_pos = NULL;
     state->cfor_exit_target = NULL;
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
@@ -3099,19 +3110,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 break;
 
-            case OP_DFOR:
+            case OP_DFOR: {
                 if (ins->operand_count == 2) {
                     break; /* list-form: no-op, AFOR does the real work */
                 }
                 if (ins->operand_count < 4) { fail(state, "DFOR: expected 2 (list) or 4-5 (range) operands"); break; }
                 if (!resolve_operand(state, &ins->operands[2], &a)) break; /* initial value */
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "DFOR: control variable must be SYT"); break; }
-                /* Range form always runs its first in-range cycle
-                 * without a pre-test (class-0/DFOR.md) -- just set the
-                 * control variable and fall through into the body. */
                 state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
-                state->syt[ins->operands[1].data].value = rv_to_integer(&a);
+                int32_t initial = rv_to_integer(&a);
+                state->syt[ins->operands[1].data].value = initial;
+                /* Range form's initial in-range check (user-reported,
+                 * 113-EXAMPLE_7.hal's `DO FOR J = I+1 TO 4;`, silently
+                 * running one bogus body pass with J=5 when I=4, since
+                 * 5>4 should mean zero iterations -- corrupted an
+                 * unrelated array element via a wrapped out-of-bounds
+                 * DSUB offset). class-0/DFOR.md's own prior "always runs
+                 * its first in-range cycle without a pre-test" reading
+                 * was wrong: a real compiled trace (`HALSFC
+                 * --parms=LSTALL`) shows DFOR's initial branch lands
+                 * squarely on EFOR's own STH+CHI+BC sequence (`L#5` in
+                 * the trace), *after* the AH increment step but *before*
+                 * anything else -- i.e. only the increment is skipped on
+                 * the first pass, not the bounds check, exactly
+                 * mirroring what EFOR itself already does on every
+                 * subsequent cycle (case OP_EFOR below) -- this is that
+                 * exact same check, just without the increment, applied
+                 * once up front. Confirmed independently against a real
+                 * AP-101S run (`compileLinkRun`, user-verified) giving
+                 * the correct (zero-iteration) result. */
+                resolved_value_t final_val, incr_val;
+                if (!resolve_operand(state, &ins->operands[3], &final_val)) break;
+                if (ins->operand_count == 5) {
+                    if (!resolve_operand(state, &ins->operands[4], &incr_val)) break;
+                } else {
+                    incr_val.kind = RV_INTEGER;
+                    incr_val.integer = 1; /* implicit default increment (class-0/DFOR.md) */
+                }
+                int32_t incr = rv_to_integer(&incr_val);
+                int32_t final = rv_to_integer(&final_val);
+                bool in_range = (incr >= 0) ? (initial <= final) : (initial >= final);
+                if (!in_range) {
+                    size_t efor_pos = state->dfor_efor_pos[state->pc];
+                    if (efor_pos == NO_TARGET) { fail(state, "DFOR has no matching EFOR"); break; }
+                    state->pc = efor_pos + 1;
+                    branched = true;
+                }
+                /* else: fall through into CFOR (if any)/the body, unchanged. */
                 break;
+            }
 
             case OP_BRA:
             case OP_FBRA: {
@@ -3545,6 +3592,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         break;
                     }
                     if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
+                    /* User-reported (113-EXAMPLE_7.hal's `MISMATCH$(J,*)`,
+                     * MISMATCH a confirmed-2D `ARRAY(4,4) INTEGER`):
+                     * DSUB's own operator-word TAG is the subscripted
+                     * result's real HALMAT class (class-0/DSUB.md,
+                     * confirmed empirically -- 6=INTEGER); propagate it
+                     * onto this VAC slot so a later per-element read
+                     * (resolve_operand's own is_container branch, reached
+                     * via the ADLP/DLPE replay this WRITE argument gets
+                     * expanded into) knows to format as INTEGER rather
+                     * than defaulting to SCALAR. A genuine MATRIX/VECTOR
+                     * result always has TAG=5/4 here, never 6 -- HAL/S has
+                     * no INTEGER MATRIX/VECTOR -- so this is safe to set
+                     * unconditionally for every asterisk-select shape. */
+                    state->vac[ins->index].container_is_integer = (ins->tag == 6);
                     if (writable_ref) {
                         state->vac[ins->index].is_container_ref = true;
                         state->vac[ins->index].container_ref_syt = base_syt;
@@ -6121,8 +6182,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->io_pending.items[state->io_pending.item_count].container_count = count;
                         state->io_pending.items[state->io_pending.item_count].container_rows = rows;
                         state->io_pending.items[state->io_pending.item_count].container_cols = cols;
+                        /* User-reported (113-EXAMPLE_7.hal's `WRITE(6)
+                         * MISMATCH$(J,*);`, MISMATCH a confirmed-2D
+                         * `ARRAY(4,4) INTEGER`): previously restricted to
+                         * `whole_syt` (a plain whole-array reference like
+                         * `WRITE(6) MISMATCH;`), silently formatting as
+                         * SCALAR instead -- a VAC-carried container result
+                         * (`whole_vac`, e.g. this DSUB row-select) carries
+                         * the identical TAG1=6 INTEGER-class marking on
+                         * its own capturing XXAR operand (confirmed via
+                         * --disasm), it just wasn't being consulted for
+                         * that case. See state.h's own comment. */
                         state->io_pending.items[state->io_pending.item_count].container_is_integer =
-                            whole_syt && ins->operands[0].tag1 == 6;
+                            ins->operands[0].tag1 == 6;
                         state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
                         state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                         state->io_pending.item_count++;
