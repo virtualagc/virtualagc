@@ -4028,7 +4028,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_IASN:
-            case OP_SASN:
+            case OP_SASN: {
                 /* Resolve the source, then coerce it to the kind the
                  * opcode's own class asserts (IASN=INTEGER, SASN=SCALAR)
                  * *before* write_destination() sees it. This matters
@@ -4043,10 +4043,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * IASN-sourced INTEGER value into an already-SCALAR
                  * destination (e.g. out_array's ARR=I into a SCALAR
                  * array element) via its own coercion -- only the
-                 * *kind tag* changes here, not any value. */
+                 * *kind tag* changes here, not any value.
+                 *
+                 * EXCEPT: class-6/IASN.md's own Unresolved-Questions note
+                 * documents that PASS1 emits IASN -- not SASN -- for a
+                 * genuinely SCALAR receiver whenever the literal being
+                 * assigned happens to be whole-valued (`S1 = 4;`, even
+                 * `S1 = 1.0;`), even though "the generated machine code
+                 * still stores the value as a float"; that quirk was
+                 * previously only noted, never corrected here, so a plain
+                 * (QUAL_SYT) SCALAR destination silently got mistyped
+                 * SYT_TYPE_INTEGER (write_syt_entry's first-write
+                 * inference trusts `a.kind`) on exactly this input shape
+                 * -- discarding its SCALAR-ness (and, for a DOUBLE
+                 * receiver, its precision) for the rest of the program.
+                 * User-reported (GOOGLE-PARALLAX.hal's SCALAR DOUBLE
+                 * `DISTANCE` printing with single-precision formatting,
+                 * traced back to `EOR = 93000000.0;`, a whole-valued
+                 * literal into SCALAR DOUBLE `EOR`, silently losing its
+                 * SCALAR/DOUBLE-ness this same way and poisoning every
+                 * computation downstream). The symbol table's own
+                 * declared class -- already the established source of
+                 * truth for this exact ambiguity elsewhere (TINT's
+                 * identical per-field correction, OP_TINT above; call-
+                 * argument precision, bind_call_argument's `psym` check)
+                 * -- overrides the opcode's nominal class here too when
+                 * the destination is a plain symbol. This same symtab
+                 * lookup also normalizes a SCALAR destination's precision
+                 * to its own declared SINGLE/DOUBLE (scale_precision(),
+                 * USA00309 Sec. 8.2 rules 7/12) on *every* write, not
+                 * just the first -- neither a literal (always single-
+                 * precision-encoded in litfile, literal.c) nor an
+                 * expression result is otherwise tagged to the
+                 * *receiver's* declared precision anywhere upstream, so
+                 * without this a SCALAR DOUBLE variable assigned a plain
+                 * literal (`ANGULAR_SHIFT = 0.5;`) stayed single-
+                 * precision-formatted even via ordinary SASN. */
                 if (ins->operand_count != 2) { fail(state, "IASN/SASN: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->opcode == OP_IASN) {
+                const halmat_symtab_entry_t *dest_sym = (ins->operands[1].qual == QUAL_SYT && state->symtab)
+                    ? halmat_symtab_find_by_index(state->symtab, ins->operands[1].data) : NULL;
+                if (dest_sym && dest_sym->hal_class == 5) {
+                    halmat_scalar_t sv = rv_to_scalar(&a);
+                    if (dest_sym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE)) {
+                        bool want_double = (dest_sym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                        if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+                    }
+                    a.kind = RV_SCALAR;
+                    a.scalar = sv;
+                } else if (ins->opcode == OP_IASN) {
                     int32_t iv = rv_to_integer(&a);
                     a.kind = RV_INTEGER;
                     a.integer = iv;
@@ -4057,6 +4102,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (!write_destination(state, &ins->operands[1], &a)) break;
                 break;
+            }
 
             case OP_BASN:
                 /* Bit-string assign, source-first/receiver-second like

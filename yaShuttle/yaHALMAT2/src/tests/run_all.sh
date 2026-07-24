@@ -54,6 +54,20 @@ run ./run_local_fixture.sh int_arith2 "P=              12     N=              -3
 run ./run_local_fixture.sh scalar_cmp "$(printf 'LESS\nEQUAL\nAND-TRUE\nNOT-TRUE')"
 run ./run_local_fixture.sh logical_or "OR-TRUE"
 run ./run_local_fixture.sh mixed_type "S2=      5.5000000E+00"
+# User-reported (GOOGLE-PARALLAX.hal's SCALAR DOUBLE `DISTANCE` printing
+# with single-precision formatting). Traced to two compounding bugs in
+# OP_IASN/OP_SASN (interp.c): (1) class-6/IASN.md's long-documented-but-
+# never-fixed "whole-valued literal" quirk -- PASS1 emits IASN, not SASN,
+# for a genuinely SCALAR receiver whenever the literal happens to be
+# whole-valued (`EOR = 93000000.0;`), silently mistyping the destination
+# SYT_TYPE_INTEGER; (2) even via ordinary SASN, a literal's own encoded
+# precision (always single, litfile) was never widened to a DOUBLE
+# receiver's declared precision on assignment. Both fixed the same way:
+# consult the symbol table's declared class/precision (same technique as
+# TINT's per-field correction and bind_call_argument's parameter-
+# precision conversion) and let it override the opcode's nominal class
+# and normalize precision on every write to a plain SCALAR destination.
+run ./run_local_fixture.sh scalar_double "$(printf ' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535811925805E+08')"
 # This WRITE statement's 8 fields ('I1=',I1,'I2=',I2,'I3=',I3,'I4=',I4)
 # total 91 columns -- past the 80-column line_length default added this
 # session (--line-length, USA003087 Sec. 12.2's "unpaged output: [80
