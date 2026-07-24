@@ -99,6 +99,24 @@ run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=     
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
 run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
 run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
+# User-reported sweep item: an external (cross-unit) FUNCTION returning a
+# CHARACTER value previously failed loudly -- interp_copy_external_call_
+# result() was copying the whole VAC-slot struct verbatim from the
+# callee's own state into the caller's, which would alias the owned
+# char*/container heap pointer between two independently-cleaned-up
+# interp_state_t's (a double-free waiting to happen), so it refused to
+# even try. Fixed with a deep copy (dup_string), same convention used
+# throughout this file for every other owned-string handoff. (The
+# MATRIX/VECTOR half of this is still blocked -- turned out to be a much
+# deeper, pre-existing gap: OP_RTRN always resolves its return value via
+# resolve_operand(), which has no representation for a whole array at
+# all, so `RETURN <whole VECTOR/MATRIX>;` fails identically even for a
+# same-unit call, external or not -- comparable in depth to task #16's
+# already-deferred ARRAY-of-VECTOR/MATRIX gap, not something this fix
+# alone can close. The container-copy half of interp_copy_external_call_
+# result() is implemented and ready for whenever RTRN itself gains that
+# capability.)
+run ./run_ext_func_fixture.sh "$(printf 'ONE\nOTHER')" ext_charfunc_prog ext_charfunc
 
 # --link-only / linked-archive-container round trips (self-contained
 # compressed file built from an @list, run positionally with no @list

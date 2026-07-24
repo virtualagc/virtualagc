@@ -2464,17 +2464,27 @@ bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *tar
         fail(state, "external function returned no value");
         return false;
     }
-    if (target->external_call_result.is_string || target->external_call_result.is_container) {
-        /* Both carry owned heap pointers -- copying the slot verbatim
-         * would alias ownership between this caller's own VAC array and
-         * the callee's, risking a double-free when both states are
-         * eventually cleaned up. Neither case is confirmed to even be
-         * legal for a FUNCTION return anyway, so fail loudly rather than
-         * risk silent corruption for an untested path. */
-        fail(state, "external function: CHARACTER/MATRIX/VECTOR return values are not yet implemented");
-        return false;
-    }
     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); return false; }
+    if (target->external_call_result.is_string) {
+        /* Owned heap pointer (char*) -- copying the slot verbatim would
+         * alias ownership between this caller's own VAC array and the
+         * callee's, risking a double-free when both states are eventually
+         * cleaned up. Deep-copy instead, same dup_string convention used
+         * throughout this file for every other owned-string handoff. */
+        state->vac[ins->index] = target->external_call_result;
+        state->vac[ins->index].string = dup_string(target->external_call_result.string);
+        return true;
+    }
+    if (target->external_call_result.is_container) {
+        /* Same aliasing concern as is_string above, for the owned
+         * halmat_scalar_t* container pointer (MATRIX/VECTOR return
+         * value) -- deep-copy via a fresh malloc+memcpy. */
+        state->vac[ins->index] = target->external_call_result;
+        size_t n = target->external_call_result.container_count;
+        state->vac[ins->index].container = malloc(n * sizeof(halmat_scalar_t));
+        memcpy(state->vac[ins->index].container, target->external_call_result.container, n * sizeof(halmat_scalar_t));
+        return true;
+    }
     state->vac[ins->index] = target->external_call_result;
     return true;
 }
