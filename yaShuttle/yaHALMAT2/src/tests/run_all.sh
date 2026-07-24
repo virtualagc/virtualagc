@@ -671,6 +671,16 @@ run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nW
 run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000
 run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
+# User-reported sweep item: SCHEDULE's STOPPING-only form (WHILE/UNTIL
+# with no REPEAT/TIMING at all, `<SCHEDULE CONTROL> ::= <STOPPING>`) --
+# grammatically legal and HALSFC compiles it, but its runtime semantics
+# are genuinely undocumented in the primary source (see class-0/SCHD.md's
+# Unresolved Questions). Resolved as a documented no-op: SYNTHESI.xpl's
+# own grammar action here is itself a bare no-op, and a non-repeating
+# task's stop_kind is stored but never consulted (OP_CLOS only reads it
+# when repeat_kind != NONE) -- so WORKER simply runs once (N=1) and
+# terminates normally, regardless of EV1 never being signaled.
+run ./run_local_fixture.sh sched_stopping_only "N=               1" --time-scale 1000000
 run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
 # User-reported bug: a TASK rescheduling *itself* from inside its own
 # body (`SCHEDULE NEST IN 1.0 PRIORITY(80);` executed by NEST, right

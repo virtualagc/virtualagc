@@ -6575,29 +6575,36 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 bool dependent = (ins->tag & 0x8) != 0;
                 uint8_t repeat_bits = (ins->tag & 0x30) >> 4; /* 0=none, 1=bare, 2=EVERY, 3=AFTER -- matches halmat_schd_repeat_t's own numbering */
                 uint8_t stop_bits = (ins->tag & 0xC0) >> 6;   /* 0=none, 1=UNTIL-time, 2=WHILE-bit, 3=UNTIL-bit -- matches halmat_schd_stop_t's own numbering */
-                if (repeat_bits == 0 && stop_bits != 0) {
-                    /* Grammatically legal per SCHD.md's <SCHEDULE CONTROL>
-                     * ::= <STOPPING> alternative (WHILE/UNTIL with no
-                     * REPEAT at all) -- confirmed HALSFC really does
-                     * accept and compile it (three SCHEDULE HEAD variants
-                     * tried: AT+UNTIL, ON+WHILE, and plain immediate+
-                     * WHILE, each producing exactly the tag/operand-order
-                     * this decode already expects). But its *runtime*
-                     * semantics are genuinely undocumented, not just
-                     * unconfirmed by this project: SYNTHESI.xpl's own
-                     * grammar action for this case is a bare no-op (no
-                     * special-casing vs. the cyclic <TIMING><STOPPING>
-                     * form), and USA003087 discusses WHILE/UNTIL stopping
-                     * conditions exclusively as a cyclic-process
-                     * ("cancel the next cycle") concept (Sec. 23.4-23.5)
-                     * that has no defined meaning for a process with no
-                     * next cycle. See SCHD.md's Unresolved Questions for
-                     * the full writeup -- failing loudly here reflects an
-                     * actually-researched open question, not an
-                     * unexplored one. */
-                    fail(state, "SCHEDULE: WHILE/UNTIL without REPEAT is not implemented (tag 0x%X) -- see class-0/SCHD.md", ins->tag);
-                    break;
-                }
+                /* repeat_bits==0 && stop_bits!=0 (STOPPING with no
+                 * REPEAT/TIMING at all) is grammatically legal per SCHD.md's
+                 * <SCHEDULE CONTROL> ::= <STOPPING> alternative, and HALSFC
+                 * really does accept and compile it. SCHD.md's Unresolved
+                 * Questions section researched its *runtime* semantics at
+                 * length and found them genuinely undocumented in the
+                 * primary source -- but that research also settles what
+                 * this interpreter should do: SYNTHESI.xpl's own grammar
+                 * action for this case is a bare no-op (no special-casing
+                 * vs. the cyclic <TIMING><STOPPING> form -- it just ORs in
+                 * whatever bits <STOPPING> contributes), and USA003087
+                 * frames a stopping condition exclusively as "cancel the
+                 * next cycle" (Sec. 23.4-23.5), a concept with no meaning
+                 * for a process that has no next cycle to begin with. This
+                 * interpreter already implements exactly that: below, a
+                 * freshly scheduled (non-self, non-repeating) task gets
+                 * repeat_kind==SCHD_REPEAT_NONE, and OP_CLOS's rearm check
+                 * only ever consults stop_kind when repeat_kind !=
+                 * SCHD_REPEAT_NONE (defaulting to "stop" unconditionally
+                 * otherwise) -- so simply falling through here, parsing and
+                 * storing the stop-exp-or-event operand like any other
+                 * clause, reproduces the bare-no-op behavior precisely: the
+                 * condition is accepted and stored but never consulted, and
+                 * the task terminates normally at its first CLOS regardless
+                 * of it. (A *self*-reschedule with no REPEAT is a different
+                 * case, already handled below: it synthesizes an implicit
+                 * one-shot repeat_kind of its own, so a STOPPING clause
+                 * paired with it becomes a genuine, well-defined cyclic
+                 * stop check -- not a guess either, just the existing
+                 * self-rearm mechanism composing naturally with this one.) */
 
                 int64_t at_in_value = 0;
                 uint16_t on_event_syt = 0;

@@ -927,11 +927,12 @@ struct halmat_state {
      * repeat_kind/stop_kind fields and interp.c's OP_SCHD/OP_CLOS. PRIO is
      * BFNC's selector-19 built-in, not a standalone opcode. A STOPPING
      * clause (WHILE/UNTIL) with no REPEAT at all -- grammatically legal per
-     * class-0/SCHD.md's <SCHEDULE CONTROL> ::= <STOPPING> alternative, which
-     * would presumably cancel a still-pending delayed AT/IN/ON activation
-     * rather than end a cycle -- is not implemented; no fixture exercises
-     * it and its semantics were never empirically confirmed, so OP_SCHD
-     * fails loudly on that combination rather than guessing). virtual_time
+     * class-0/SCHD.md's <SCHEDULE CONTROL> ::= <STOPPING> alternative -- is
+     * implemented as a documented no-op (see OP_SCHD's own comment):
+     * SYNTHESI.xpl's grammar action for this case is itself a bare no-op,
+     * and a non-repeating task's stop_kind is stored but never consulted
+     * (OP_CLOS's rearm check only reads it when repeat_kind != NONE), so
+     * the task simply runs once and terminates normally. virtual_time
      * itself still ticks 1:1 per HALMAT instruction executed (interp_step's
      * own per-instruction granularity, unchanged) -- but WAIT's duration and
      * SCHD's AT/IN/EVERY/AFTER/stopping-deadline expressions are no longer
