@@ -5491,16 +5491,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->io_pending.item_count++;
                     break;
                 }
-                if (state->io_pending.is_call && ins->operands[0].tag2 != 0) {
-                    /* ASSIGN-form CALL argument (class-0/XXST.md's `CALL
-                     * TWO(I1) ASSIGN(I1);` trace): the callee's parameter
-                     * value must be written back into the caller's
-                     * variable after the procedure returns. Not
-                     * implemented -- fail loudly rather than silently
-                     * dropping the write-back; no fixture needs it yet. */
-                    fail(state, "PCAL: ASSIGN-form arguments are not yet implemented");
-                    break;
-                }
+                /* ASSIGN-form CALL argument (class-0/XXST.md's `CALL
+                 * TWO(I1) ASSIGN(I1);` trace, state.h's is_assign
+                 * comment): still captured/bound exactly like an ordinary
+                 * argument below (by-value positional binding doesn't
+                 * change), just additionally marked so OP_XXND can write
+                 * the callee's corresponding parameter's final value back
+                 * into this operand once the call returns. */
+                bool is_assign_arg = state->io_pending.is_call && ins->operands[0].tag2 != 0;
                 if ((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) {
                     /* A whole VECTOR/MATRIX reference (QUAL=SYT, confirmed
                      * via a real HALSFC compile of `WRITE(6) V;`/
@@ -5562,6 +5560,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->io_pending.items[state->io_pending.item_count].container_cols = cols;
                         state->io_pending.items[state->io_pending.item_count].container_is_integer =
                             whole_syt && ins->operands[0].tag1 == 6;
+                        state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
+                        state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                         state->io_pending.item_count++;
                         break;
                     }
@@ -5615,6 +5615,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 } else if (a.kind != RV_STRING) {
                     state->io_pending.items[state->io_pending.item_count].integer = rv_to_integer(&a);
                 }
+                state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
+                state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                 state->io_pending.item_count++;
                 break;
 
@@ -5877,7 +5879,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
-            case OP_XXND:
+            case OP_XXND: {
+                /* ASSIGN-form call arguments (state.h's is_assign
+                 * comment): this is the exact point control lands back on
+                 * after a completed PCAL/FCAL call -- RTRN/CLOS's return
+                 * jump always targets PCAL/FCAL's own stream position + 1,
+                 * which per class-0/XXST.md's bracket shape (XXAR...XXAR,
+                 * PCAL/FCAL, XXND) is always this closing XXND. This
+                 * frame's own io_pending (items[]/call_target) is still
+                 * exactly as OP_XXAR/OP_PCAL/OP_FCAL left it -- untouched
+                 * by anything the callee itself did in between, since any
+                 * I/O or further calls *it* made would have pushed/popped
+                 * their own frame via io_pending_stack around themselves
+                 * (see OP_XXST above) -- so the callee's finished
+                 * parameter values are read here, before this frame itself
+                 * gets popped/reset below. Each ASSIGN argument's
+                 * parameter binds to the same positional SYT slot
+                 * (call_target+1+item_index) ordinary arguments already
+                 * use (OP_PCAL/OP_FCAL's binding loop), so no separate
+                 * bookkeeping of *which* parameter was tracked at call
+                 * time -- just the item's own position in this list. */
+                if (state->io_pending.active && state->io_pending.is_call) {
+                    for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                        if (!state->io_pending.items[i].is_assign) continue;
+                        uint32_t param_syt = (uint32_t)state->io_pending.call_target + 1 + i;
+                        if (param_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: parameter SYT out of range"); break; }
+                        halmat_operand_t param_op = {0};
+                        param_op.qual = QUAL_SYT;
+                        param_op.data = (uint16_t)param_syt;
+                        resolved_value_t rv;
+                        if (!resolve_operand(state, &param_op, &rv)) break;
+                        if (!write_destination(state, &state->io_pending.items[i].dest_operand, &rv)) break;
+                    }
+                }
                 /* Closes whichever bracket was most recently opened. If
                  * that bracket was nested inside an enclosing one (e.g. a
                  * function-call argument list nested inside a WRITE's own
@@ -5890,6 +5924,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->io_pending.active = false;
                 }
                 break;
+            }
 
             case OP_FDEF:
             case OP_TDEF:
@@ -5936,6 +5971,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
                         uint16_t param_syt = proc + 1 + i;
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
+                        /* ASSIGN-only parameter (state.h's is_assign
+                         * comment): no real input value exists for it
+                         * (`CALL P(...) ASSIGN(Y);` transmits nothing in
+                         * for the parameter Y binds to -- only the
+                         * write-*back* after return, at OP_XXND). Binding
+                         * one anyway -- from the caller's own possibly-
+                         * never-assigned ASSIGN-argument variable --
+                         * previously pre-typed the parameter's SYT entry
+                         * (write_syt_entry's first-write inference) before
+                         * the procedure body's own first real assignment
+                         * to it ever ran, permanently locking in the wrong
+                         * kind whenever that first real assignment was
+                         * itself a whole-valued-VAC-sourced IASN (this
+                         * project's own already-known IASN quirk, class-6/
+                         * IASN.md) -- the procedure-local destination's
+                         * correct SCALAR type IS available via the symbol
+                         * table by the time IASN's own fix-up runs, but
+                         * only helps on a genuine *first* write. Skipping
+                         * the bind entirely leaves the parameter fresh
+                         * (SYT_TYPE_UNKNOWN) each call, exactly like any
+                         * other never-yet-written procedure-local
+                         * variable, letting that first real assignment
+                         * establish its type correctly on its own. */
+                        if (state->io_pending.items[i].is_assign) continue;
                         bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
                     if (!bind_ok) break;
@@ -5979,6 +6038,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
                         uint16_t param_syt = callee + 1 + i;
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
+                        /* ASSIGN-only parameter: see OP_PCAL's own,
+                         * identical comment above -- same reasoning
+                         * applies unchanged to a FUNCTION with its own
+                         * ASSIGN/output parameter(s). */
+                        if (state->io_pending.items[i].is_assign) continue;
                         bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
                     if (!bind_ok) break;

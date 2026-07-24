@@ -638,6 +638,28 @@ struct halmat_state {
              * the ordinary ADLP replay this struct's other fields already
              * handle, cycling arrayed_index -- no separate case needed. */
             bool dest_is_container;
+            /* Call-only (is_call == true, so never set alongside the
+             * READ/READALL dest_* fields above -- they share dest_operand,
+             * the two contexts are mutually exclusive): true when this
+             * argument's XXAR had a nonzero TAG2, i.e. an ASSIGN-form call
+             * argument (`CALL P(X) ASSIGN(Y);`, class-0/XXST.md's own
+             * confirmed `CALL TWO(I1) ASSIGN(I1);` trace) -- the callee's
+             * corresponding parameter's *final* value must be written back
+             * into dest_operand (the caller's own variable) once the call
+             * returns, not just transmitted in like an ordinary argument.
+             * Still participates in the normal by-value positional binding
+             * on the way in (OP_PCAL/OP_FCAL's existing binding loop
+             * doesn't need to know or care that an item is also
+             * ASSIGN-tagged) -- this only adds the write-*back* half.
+             * Handled at OP_XXND, the exact point control lands back on
+             * after the callee returns (RTRN/CLOS's jump always targets
+             * PCAL/FCAL's own position + 1, i.e. this closing XXND) and
+             * this frame's own items[]/call_target are still intact
+             * (io_pending_stack correctly shields them from any of the
+             * callee's *own* I/O/call activity in between). User-reported
+             * (140-STATISTICS.hal/138-FILTER.hal/120-EXAMPLE_A.hal, all
+             * three real corpus programs using PROCEDURE...ASSIGN(...)). */
+            bool is_assign;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
     } io_pending, io_pending_stack[8];

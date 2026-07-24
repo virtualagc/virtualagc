@@ -474,6 +474,32 @@ run ./run_local_fixture.sh vecmat_null_assign "$(printf ' 0.0                0.0
 # SINGLE parameter narrows -- both directions bind by the *parameter's*
 # own declared precision (dest_state's symbol table), not the argument's.
 run ./run_local_fixture.sh proc_matrix_precision "$(printf ' 1.5000000000000000E+00      2.5000000000000000E+00\n 3.5000000000000000E+00      4.5000000000000000E+00\n 1.0500000E+01      2.0500000E+01\n 3.0500000E+01      4.0500000E+01')"
+# User-reported (140-STATISTICS.hal/138-FILTER.hal/120-EXAMPLE_A.hal, all
+# three real corpus programs using `PROCEDURE(...) ASSIGN(...)`): a
+# CALL's ASSIGN-form argument failed loudly ("PCAL: ASSIGN-form arguments
+# are not yet implemented"). class-0/XXST.md's own confirmed `CALL
+# TWO(I1) ASSIGN(I1);` trace shows an ASSIGN argument as its own separate
+# XXAR entry (TAG2=1) occupying the *same* positional slot scheme as
+# ordinary arguments (`callee+1+i`) -- so the callee's corresponding
+# parameter must be `PROCEDURE(...) ASSIGN(param_list)`'s own declared
+# parameter, contiguous immediately after the ordinary ones. Fixed with a
+# new is_assign flag on each io_pending item (state.h), set by OP_XXAR
+# when TAG2!=0, and a write-back loop added to OP_XXND -- the exact point
+# control lands back on after a completed PCAL/FCAL (RTRN/CLOS's return
+# jump always targets PCAL/FCAL's position+1) -- reading the finished
+# parameter's value and writing it into the caller's own ASSIGN-tagged
+# operand. A second bug found while verifying this end-to-end against a
+# real corpus program: ASSIGN-only parameters were initially still given
+# an ordinary *input* bind (the caller's pre-call variable value) before
+# the call, which pre-typed the parameter's SYT entry and silently broke
+# this project's own existing IASN whole-valued-literal-into-SCALAR fix
+# for the procedure body's own first real assignment to it (write_syt_
+# entry's first-write type inference only fires once). Fixed by skipping
+# the ordinary bind entirely for ASSIGN-only items -- they have no real
+# input value anyway, so leaving the parameter fresh each call lets the
+# procedure body's own first assignment establish its type correctly, the
+# same as any other never-yet-written procedure-local variable.
+run ./run_local_fixture.sh pcal_assign "$(printf ' 1.0000000E+01\n 1.0000000E+01')"
 # User-reported bug: a PROCEDURE calling a *sibling* PROCEDURE (both
 # nested directly in the same enclosing PROGRAM) failed with "call to
 # undefined procedure" -- USA003087 p. 22ff's block-name scoping rules
