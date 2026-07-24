@@ -10,15 +10,15 @@ extraParms = ""
 def getParms(filename):
     parmBase = extraParms + "LIST,NOTABLES,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE="
     cardtypesBySourceFile = {
-        "CS2INI" : "ACFCRM",
-        "CS4INI" : "ACFCRM",
-        "CPTOSV" : "ACBDFCRM",
-        "CPUSLS" : "ACBDFCRM",
-        "GKDASC": "AMOCNCRMFDGCHC",
-        "GKRORB": "ACOMNCRCFCGDHC",
-        "GKGMNV": "ACOCNMRMFCGCHD"
+        "CS2INI" : "ACFCRMYC",
+        "CS4INI" : "ACFCRMYC",
+        "CPTOSV" : "ACBDFCRMYC",
+        "CPUSLS" : "ACBDFCRMYC",
+        "GKDASC": "AMOCNCRMFDGCHCYC",
+        "GKRORB": "ACOMNCRCFCGDHCYC",
+        "GKGMNV": "ACOCNMRMFCGCHDYC"
         }
-    cardtype = "FCRM"
+    cardtype = "FCRMYC"
     for name in cardtypesBySourceFile:
         if name in filename:
             cardtype = cardtypesBySourceFile[name]
