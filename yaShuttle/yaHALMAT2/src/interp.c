@@ -670,6 +670,49 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             } else if (slot->is_scalar) {
                 out->kind = RV_SCALAR;
                 out->scalar = slot->scalar;
+            } else if (slot->is_container) {
+                /* A whole-container shaping-function result (VSHP/SSHP/
+                 * ISHP/MSHP, or MADD/VADD/etc.) assigned element-by-
+                 * element into a whole SCALAR/INTEGER ARRAY destination
+                 * via a plain SASN/IASN -- ARRAY has no dedicated whole-
+                 * container assign opcode of its own the way VECTOR/
+                 * MATRIX get VASN/MASN (which read this same is_container
+                 * slot via resolve_container instead, never reaching
+                 * here), so HALSFC instead wraps the ordinary SASN/IASN
+                 * in an ADLP/DLPE replay and re-executes it once per
+                 * element -- confirmed empirically this session
+                 * (`SA = SCALAR(S1, S2);`, SA a SCALAR ARRAY(2)): the
+                 * SASN instruction genuinely appears only once in the
+                 * HALMAT stream, immediately followed by what looks like
+                 * an *empty* ADLP(2)/DLPE bracket in a plain linear
+                 * listing, but this interpreter's own arrayed-paragraph
+                 * replay mechanism re-enters and re-executes that
+                 * preceding SASN once per array element, cycling
+                 * arrayed_index 0,1 -- matching this function's own
+                 * QUAL_SYT whole-array-during-replay case above, which
+                 * already uses arrayed_index the same way. Before this
+                 * fix, this branch didn't exist at all, so a container
+                 * slot fell through to the plain-INTEGER default just
+                 * below, silently reading whatever stale
+                 * state->vac[...].integer happened to hold (0, since
+                 * store_container_result never touches that field) --
+                 * user-reported: SA ended up all zeros instead of
+                 * S1/S2's actual values, no error at all. Only ever
+                 * reached inside a replay in practice (arrayed_index
+                 * picks which element) -- outside one there's no way to
+                 * choose an element, so that's a genuine error rather
+                 * than a default-to-zero guess. */
+                if (state->arrayed_index < 0) {
+                    fail(state, "VAC whole-container result referenced outside an arrayed-paragraph replay");
+                    return false;
+                }
+                if (slot->container_count == 0) {
+                    fail(state, "VAC whole-container result is empty");
+                    return false;
+                }
+                size_t idx = (size_t)state->arrayed_index % slot->container_count;
+                out->kind = RV_SCALAR;
+                out->scalar = slot->container[idx];
             } else {
                 out->kind = RV_INTEGER;
                 out->integer = slot->integer;

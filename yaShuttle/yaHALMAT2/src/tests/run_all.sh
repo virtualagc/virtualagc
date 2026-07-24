@@ -206,6 +206,26 @@ run ./run_local_fixture.sh vshp "$(printf ' 1.0000000E+00\n 2.0000000E+00\n 3.00
 # remains unconfirmed (several plausible spellings tried, all rejected by
 # the real compiler) -- not needed for either form this fixture covers.
 run ./run_local_fixture.sh mshp "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
+# Found while testing SSHP/ISHP after fixing MSHP above (not itself
+# user-reported, but the user asked to fix "anything else... encountered
+# along the way"): `SA = SCALAR(S1, S2);` (SA a SCALAR ARRAY(2)) silently
+# wrote 0.0 into every element instead of S1/S2's real values, no error
+# at all. ARRAY has no dedicated whole-container assign opcode the way
+# VECTOR/MATRIX get VASN/MASN (which read a shaping-function's VAC result
+# via resolve_container and already worked correctly) -- HALSFC instead
+# emits a plain SASN/IASN wrapped in an ADLP/DLPE replay, re-executing it
+# once per element (confirmed via a debug trace this session: the
+# replay's own arrayed_index correctly cycled 0,1 across two real
+# write_destination calls, both correctly identifying SA as array-shaped
+# -- the *source* side was the actual bug). resolve_operand's QUAL_VAC
+# case never checked slot->is_container at all, so a shaping-function
+# result read this way fell through to the plain-INTEGER default branch,
+# silently returning a stale zero (state->vac[...].integer, never set by
+# store_container_result) instead of failing or reading the right
+# element. Fixed by adding an is_container branch that indexes the
+# container by arrayed_index (mod element count), matching this same
+# function's own QUAL_SYT whole-array-during-replay case.
+run ./run_local_fixture.sh sshp_ishp "$(printf ' 1.5000000E+00      2.5000000E+00\n 1.0000000E+01      2.0000000E+01')"
 run ./run_local_fixture.sh bfnc "$(printf ' 1.4142132E+00\n 3.5000000E+00\n-1.0000000E+00\n 2.0000000E+00\n 5.0000000E+00')"
 run ./run_local_fixture.sh minv "$(printf ' 5.9999996E-01\n-6.9999999E-01\n-1.9999999E-01\n 3.9999998E-01')"
 run ./run_local_fixture.sh bfnc_inv "$(printf ' 5.9999996E-01\n 3.9999998E-01')"
