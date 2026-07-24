@@ -338,7 +338,27 @@ wire format above — remain uninterpreted.
   The one open item is the exact bit encoding distinguishing `+`
   vs. `−` in the `CSZ`/`# ± expression` case (a `DATA`=2 value was
   observed for `# - 2`, but the `+` case and a non-literal expression
-  were not tested).
+  were not tested). **Still open after a further Maintenance-phase
+  session, now with a concrete non-literal real-program case on
+  record**: `160-REFORMAT.hal`'s `RETURN RJUST(S||C(1 TO #-DECIMALS)||
+  '.'||C(#-DECIMALS-1 TO #), WIDTH);` gives two real traces. `C(1 TO
+  #-DECIMALS)`'s end bound fits the prior "`DATA`=2 means `#-expr`"
+  reading exactly (`CSZ` `DATA`=2, subsidiary operand=plain `SYT`
+  reference to `DECIMALS` — confirming the subsidiary need not be a
+  literal, just any ordinarily-resolvable operand). But `C(#-DECIMALS-1
+  TO #)`'s *start* bound doesn't cleanly resolve against the same
+  formula: its subsidiary operand is itself a computed `VAC` reference
+  (an `IADD` of `DECIMALS` and a literal, not a bare `SYT`), and
+  algebraically the source expression `#-DECIMALS-1` needs `# -
+  (DECIMALS+1)`, not `# - (DECIMALS-1)` — i.e. either the `+`/`-` case
+  distinguished by `DATA` isn't simply "the outer sign for the whole
+  `CSZ` term" the way the `# - 2` case suggested, or the literal folded
+  into that `IADD` has a sign this session didn't independently confirm.
+  DSUB opcode dispatch for the to-partition subscript kind itself is
+  *also* still unimplemented in `yaHALMAT2` (only index/asterisk/
+  component-at-partition are — see `interp.c`'s `OP_DSUB`), so this
+  remains a documented, deferred gap rather than a fixed one; see that
+  file's own comment for the full trace and reasoning.
 - ~~The "detailed" table's array/component split may not be the whole
   picture — `α` for at least the "index" kind may also depend on the
   container type (`ARRAY` vs `MATRIX`/`VECTOR`).~~ **Resolved in a full
@@ -368,6 +388,25 @@ wire format above — remain uninterpreted.
   single-element access tested earlier; `4`=`VECTOR` for `V1(*)` and
   `M1(1,*)`, which don't reduce dimensionality) — not a
   subscript-kind-specific tag as earlier phrasing implied.
+- **`yaHALMAT2` implementation gap identified (Maintenance phase, not a
+  wire-format question)**: an `ARRAY(n) VECTOR(m)`-declared variable
+  (an *array of vectors*, distinct from a `MATRIX(n,m)`) compiles `V(i)`
+  (select the whole `i`-th vector) to the identical "one plain index +
+  one asterisk" two-operand `DSUB` shape as `M(i,*)` (row select) — but
+  `yaHALMAT2`'s own container model (`halmat_syt_entry_t`'s `elements`/
+  `rows`/`cols`, `state.h`) has no way to distinguish the two cases: both
+  end up `rows==cols==0` via `ensure_container()`, since only a true
+  `MATRIX` symbol gets real shape metadata from the symbol table today.
+  Confirmed as a real-corpus blocker via `141-VSUM.hal` (`VSUM: FUNCTION
+  (V) VECTOR; DECLARE V ARRAY(*) VECTOR; ...; TOTAL = TOTAL + V(N);`),
+  which also needs at least two more currently-unimplemented things once
+  this one's fixed: `ARRAY(*)` assumed-size parameter binding, and a
+  whole-`VECTOR` `FUNCTION` `RETURN` (a separate `OP_RTRN` gap — see
+  [RTRN](RTRN.md)). All three are facets of one missing "ARRAY-of-
+  VECTOR/MATRIX" shape-modeling architecture; deferred together as a
+  dedicated future feature rather than partially implemented — see
+  `interp.c`'s `OP_DSUB` 2-index-asterisk-fallback comment for the full
+  trace.
 
 ## Source Analysis & Reliability
 

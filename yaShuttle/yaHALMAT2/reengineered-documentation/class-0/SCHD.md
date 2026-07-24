@@ -234,11 +234,22 @@ time-valued `STOPPING`=0x40), confirming the table needed no correction.
 
   Net: the compiler's grammar is more permissive than the language
   guide's documented behavior here, and nothing in either source
-  defines what should happen at runtime. Per this project's standing
-  discipline, `yaHALMAT2` continues to fail loudly on this tag
-  combination (`repeat_bits==0 && stop_bits!=0`) in `OP_SCHD` rather
-  than guessing — this is now a confirmed-open question, not an
-  unexplored one.
+  defines what should happen at runtime.
+
+  **Resolved (Maintenance phase)**: that same "grammar more permissive
+  than documented behavior" research turns out to settle the runtime
+  question too, rather than leaving it open. `SYNTHESI.xpl`'s own
+  semantic action being a bare no-op (point 1 above) is itself the
+  answer: this interpreter already has a `repeat_kind==SCHD_REPEAT_NONE`
+  state for a freshly scheduled non-repeating task, and `OP_CLOS`'s own
+  rearm check only ever consults `stop_kind` when `repeat_kind != NONE`
+  (defaulting to unconditional termination otherwise) — so simply
+  letting this tag combination fall through to the existing operand-
+  parsing/task-creation code (rather than failing loudly on it)
+  reproduces the bare-no-op reading exactly: the stopping condition is
+  accepted and stored but never consulted, and the task just runs once
+  and terminates normally, regardless of it. `yaHALMAT2` now implements
+  this. See `src/tests/hal/test_sched_stopping_only.hal`.
 
 ## Real-Time Calibration (yaHALMAT2's interpreter, not HALSFC)
 
@@ -371,11 +382,25 @@ of `DEPENDENT`/independent status between the tasks themselves).
 Genuinely still unsupported, and still correctly rejected: a *different*
 process targeting a task that's still active (not self-rescheduling) —
 there's no "rearm in place" reading available there, since the calling
-process isn't the one occupying that task's sole queue entry; and
-self-rescheduling with an `ON <event>` condition (rather than a
-time-based `AT`/`IN`/immediate/`REPEAT`), which doesn't cleanly map onto
-the existing time-based rearm mechanism. See
-`src/tests/hal/test_nested_task_schedule.hal` for the regression fixture.
+process isn't the one occupying that task's sole queue entry. This is a
+genuine [USA003087] Sec. 13.4 language constraint ("only one process
+derived from a given task block may be active at any given time"), not
+an implementation gap — `OP_SCHD`'s rejection message was reworded in
+the Maintenance phase to say so explicitly, away from earlier "not yet
+implemented" phrasing that misleadingly implied a missing feature. See
+`src/tests/hal/test_nested_task_schedule.hal` for the self-reschedule
+regression fixture.
+
+**Self-rescheduling with `ON <event>` (Maintenance phase)**: also
+resolved, using the same imperative/declarative equivalence as the
+time-based case above. `SCHEDULE <self> ON <event>;` with no `REPEAT`
+clause now synthesizes a new interpreter-internal rearm kind,
+`SCHD_REPEAT_ON` (`state.h` — never produced by a real HALMAT tag,
+since `repeat_bits` is a 2-bit tag field with only values 0-3), which
+`OP_CLOS`'s existing rearm switch handles by putting the task back into
+`TASK_WAITING_ON` — the same minor state and `sched_wake_on_events()`
+re-check-every-tick mechanism a brand-new `ON`-initiated task already
+uses. See `src/tests/hal/test_sched_self_on.hal`.
 
 ## Waiting For Dependents At CLOSE
 

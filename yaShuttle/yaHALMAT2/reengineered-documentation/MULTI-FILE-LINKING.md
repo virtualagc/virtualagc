@@ -122,6 +122,24 @@ State persists across repeated calls to the same unit — matching this
 interpreter's existing same-unit call semantics, i.e. no "fresh locals per
 call."
 
+**`CHARACTER` return values implemented (Maintenance phase)**; `MATRIX`/
+`VECTOR` still not. `interp_copy_external_call_result()` was copying the
+whole VAC-slot struct verbatim from the callee's own `interp_state_t`
+into the caller's — for a `CHARACTER`/container-valued result, that
+would alias the owned `char*`/`halmat_scalar_t*` heap pointer between
+two independently-`interp_cleanup()`'d states (a double-free waiting to
+happen), so it refused to even try. Fixed the `CHARACTER` case with a
+deep copy (same `dup_string()` convention `interp.c` uses everywhere
+else for an owned-string handoff); the `MATRIX`/`VECTOR` case turned out
+to need more than this function's own scope can fix — `OP_RTRN` itself
+always resolves its return value via `resolve_operand()`, which has no
+representation for a whole array at all, so `RETURN <whole VECTOR>;`
+fails identically even for an ordinary *same-unit* call, external or
+not (see [RTRN](class-0/RTRN.md)). The container deep-copy is
+implemented here regardless, ready for whenever `RTRN` gains that
+capability. Fixture: `src/tests/hal/test_ext_charfunc.hal` +
+`test_ext_charfunc_prog.hal`.
+
 One symbol-table wrinkle specific to comsubs: `INCLUDE TEMPLATE NAME` on
 a `PROCEDURE` referenced via `CALL` produces *two* symtab entries sharing
 that name — an unused "template stub" (carrying the `EXTERNAL` flag) plus
@@ -155,10 +173,6 @@ and `test_ext_pcal_prog.hal` + `test_ext_double.hal` (the `PROCEDURE`/
   attempted yet). This also bounds the comsub support above: a linked
   `FUNCTION`/`PROCEDURE` unit is invoked synchronously to completion of
   one call and never itself `SCHEDULE`s a task that outlives that call.
-- `ARRAY`/`MATRIX`-typed `EXTERNAL COMPOOL` variables (only plain
-  `INTEGER`/`SCALAR` values are imported; safely transferring an element
-  buffer's ownership across the auxiliary unit's cleanup needs more than
-  a struct copy).
 - A `PROGRAM`-headed (`MDEF`) auxiliary unit referenced as if callable.
   `--parms=TEMPLATE` will happily produce an `EXTERNAL PROGRAM` template
   for one (see above) — HALSFC's templating step doesn't know or care
@@ -173,6 +187,29 @@ produces `Y=43` (`SHARED_X`=42, imported from the separately-compiled
 `COMPOOL`, `+1`), and omitting the `COMPOOL` unit from the `@list`
 correctly fails with `unresolved external 'POOL'` rather than silently
 defaulting `SHARED_X` to `0`.
+
+**`ARRAY`/`MATRIX`/`CHARACTER`-typed `EXTERNAL COMPOOL` variables
+implemented (Maintenance phase).** Previously scoped out above as "only
+plain `INTEGER`/`SCALAR` values are imported" — confirmed during
+implementation that this was actually worse than an honest gap: the
+import loop (`main.c`) hardcoded `elements=NULL` for every variable
+regardless of type, and separately never copied `bit_value`/
+`char_value` at all, so a `BIT`/`CHARACTER` scalar external was
+silently broken too (not just `ARRAY`/`MATRIX` ones) — an `ARRAY`
+external read back as all zeros with no error at all, not a loud
+failure. Root cause was real, not just unattempted: the auxiliary
+unit's own owned heap storage (element buffers, `char_value` strings)
+doesn't survive its `interp_cleanup()` a few lines later, so a plain
+struct-field copy would either alias freed memory or (as coded) just
+skip the field. Fixed with a proper deep copy out of the aux unit's
+`SYT` entry before cleanup — `elements`/`bit_elements`/`char_elements`
+(mutually exclusive, mirroring `write_container_element`'s own
+three-way dispatch) via `malloc`+`memcpy` or a duplicated string per
+element, and `char_value` via a new `main_dup_string()` helper (plain
+`strdup()` isn't declared in strict C99 without `_POSIX_C_SOURCE`/
+`_GNU_SOURCE`, so this mirrors `interp.c`'s own existing static
+`dup_string()`). Fixture: `src/tests/hal/test_link_pool_array.hal` +
+`test_link_prog_array.hal` (`ARRAY(3) INTEGER` via `EXTERNAL COMPOOL`).
 
 ## Linked-archive containers (`--link-only`): one self-contained file instead of a directory tree
 

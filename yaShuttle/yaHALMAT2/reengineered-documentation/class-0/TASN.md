@@ -54,6 +54,31 @@ ZQ1;`, per [TSUB](TSUB.md)'s worked trace) — same TASN shape, with one
 `XPT` operand instead resolved from an [EXTN](EXTN.md) that itself
 consumed [TSUB](TSUB.md)'s subscripted-copy result.
 
+## Confirmed Runtime Behavior
+
+**Copying a structure terminal with `ARRAY`/`MATRIX`/`VECTOR` type:
+investigated (Maintenance phase), deferred, not implemented.** A
+correct deep copy for this case is mechanically straightforward — same
+three-way storage-kind dispatch (numeric/`BIT`/`CHARACTER`) already
+used for whole-`ARRAY` `ASSIGN` write-back and `WRITE` arguments (see
+[WRIT](WRIT.md)) — but turns out to be currently *unreachable* by any
+real HALSFC-compiled program: every other opcode that can write a whole
+array/vector/matrix value — `VASN`/`MASN` (`ZQ1.QV = SRC;`), the
+`ASSIGN` write-back path (`CALL P ASSIGN(ZQ1.QV);`), and [DSUB](DSUB.md)
+(subscripted element assignment, `ZQ1.QV(1) = ...;`) — all reject a
+structure-terminal (`XPT`) receiver outright, requiring a plain `SYT`.
+[TINT](../class-8/TINT.md) (structure-terminal `INITIAL`) only handles
+scalar terminals, not multi-slot `ARRAY`/`MATRIX`/`VECTOR` ones.
+Confirmed by direct HALSFC compile probes: no way currently exists to
+get real per-element data into a structure-terminal array field for
+`TASN` to ever copy. Per this project's own standing discipline, the
+existing `fail()` was left in place (broadened to also guard
+`BIT`/`CHARACTER`-array terminals, not just numeric, closing a latent
+silent-aliasing hole in the old guard) rather than ship a deep copy that
+can't be fixture-verified — deferred alongside [DSUB](DSUB.md)'s
+ARRAY-of-VECTOR/MATRIX gap and [RTRN](RTRN.md)'s whole-array-return gap,
+all facets of one missing architecture.
+
 ## Unresolved Questions
 
 - Multiple structure assignment (`L1,L2,...Ln = R;`, [USA003087] §19.8)

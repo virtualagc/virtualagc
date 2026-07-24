@@ -73,16 +73,27 @@ closing [ECAS](ECAS.md).
 - The exact runtime mechanics of the jump-table lookup (`AHI`/`LH`/`BCR`
   sequence) — e.g. where the table itself is emitted/addressed — are not
   traced in detail.
-- Behavior when the selector value is out of range (per [USA003087]
-  §10.3 rule 3, a runtime error, or branches to an `ELSE` clause if
-  present) was not tested — the test program had no `ELSE` clause. A
-  final [CLBL](CLBL.md), distinguished from the ordinary per-case ones
-  only by its trailing header field (not by operand count — see
-  [CLBL](CLBL.md), corrected this session), appears immediately before
-  [ECAS](ECAS.md) in the no-`ELSE` case; it's a plausible guess that this
-  marks a runtime-error trap or the implicit fallthrough point for
-  out-of-range indices, but this is untested — see [CLBL](CLBL.md)'s
-  Unresolved Questions.
+- ~~Behavior when the selector value is out of range... was not
+  tested~~ **Resolved (Maintenance phase, user-reported against
+  080-EXAMPLE_4A.hal)**: DCAS's own computed jump only ever targets an
+  in-range case's [CLBL](CLBL.md) — for an out-of-range selector it
+  simply doesn't jump at all, and ordinary sequential fall-through does
+  the rest. An `ELSE` clause ([USA003087] §10.3 rule 3's escape from the
+  runtime-error default) compiles as plain in-line code placed
+  immediately after DCAS itself, *before* the first ordinary case's
+  CLBL — not as an extra trailing CLBL the way this file's own prior
+  reading had speculated. With no `ELSE` present, fall-through instead
+  lands directly on case 1's own CLBL, which (reached this way rather
+  than via a DCAS landing) immediately acts as its implicit branch to
+  [ECAS](ECAS.md) — i.e. a silent no-op, no case body executed. Cross-
+  checked against a real AP-101S emulator (`compileLinkRun`): the real
+  runtime actually hangs in an infinite loop for that exact no-`ELSE`
+  out-of-range input, rather than either aborting per rule 3's prose or
+  falling through cleanly — an apparent bug in the real runtime library
+  this project has no interest in replicating; falling through to ECAS
+  is `yaHALMAT2`'s own deliberate, well-defined choice instead. See
+  `src/interp.c`'s `OP_DCAS`/`OP_CLBL` and
+  `src/tests/hal/test_case_else.hal`.
 - Whether a SCALAR selector (as opposed to the INTEGER one tested)
   changes the encoding (e.g. requires an explicit rounding/STOI-style
   conversion beforehand) is untested.

@@ -27,6 +27,11 @@ instructions.
 ## Unresolved Questions
 
 - HAL/S operand-word format is unconfirmed; see [STRI](STRI.md).
+- The predecessor-language "OFFSET" operand form: investigated
+  (Maintenance phase), still no confirmed real-HAL/S trigger — see
+  [MINT](MINT.md)'s own Unresolved Questions for the shared writeup
+  (both opcodes were probed together; neither ever appeared with
+  anything but `QUAL`=`SYT` in any real trace found).
 
 ## Source Analysis & Reliability
 

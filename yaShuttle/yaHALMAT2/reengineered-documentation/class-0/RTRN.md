@@ -33,6 +33,20 @@ end of the subprogram body. See [PDEF](PDEF.md)/[FDEF](FDEF.md)/
 - HAL/S operand-word format is unconfirmed; see [STRI](../class-8/STRI.md).
 - Whether HAL/S retains the two-version (task/procedure vs. function)
   structure is unconfirmed.
+- **`yaHALMAT2` implementation gap identified (Maintenance phase)**: a
+  scalar/string/bit `RETURN` value works (`OP_RTRN`, `interp.c`, always
+  resolves its operand via `resolve_operand()`), but a whole `VECTOR`/
+  `MATRIX`/`ARRAY` `RETURN` value does not — `resolve_operand()`'s own
+  `resolved_value_t` has no representation for a whole array at all
+  (only `STRING`/`INTEGER`/`SCALAR`/`BITS`), so `RETURN <whole
+  VECTOR>;` fails the same way for a same-unit call as for an external
+  one. Found while implementing external-function `CHARACTER` return
+  values (which *does* work, since a string isn't gated by this) and
+  confirmed directly against a same-unit `VECTOR`-returning `FUNCTION`
+  probe. Part of the same missing "ARRAY-of-VECTOR/MATRIX" architecture
+  as [DSUB](DSUB.md)'s own multi-index-asterisk gap — see that file's
+  Unresolved Questions for the fuller picture (also needs `ARRAY(*)`
+  assumed-size parameter binding); deferred together.
 
 ## Source Analysis & Reliability
 

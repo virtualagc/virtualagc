@@ -61,6 +61,23 @@ see [ETST](ETST.md)'s own note on why. `src/tests/hal/test_exit_loop.hal`
 is the regression fixture; see `STATUS.md`'s Class 0 section for the
 fuller trace.
 
+**Bare `REPEAT;` also compiles to a plain BRA, found in a later session
+via a user report against `095-TAN_SUMS.hal`.** Unlike `EXIT` above,
+its target is *not* the enclosing loop's own DTST/ETST label number —
+it's that number **plus one**, traced to
+`PASS1.PROCS/SYNTHESI.xpl`'s own `REPEAT` synthesis (`REPEATING:`),
+which emits `DO_LOC(TEMP)+1` versus `EXIT`'s plain `DO_LOC(TEMP)`. No
+[LBL](LBL.md) (or any other instruction) ever materializes this "+1"
+value in the HALMAT stream; it's meant to be resolved structurally by
+Pass 2's real code generator. Fixed the same way as `EXIT` above:
+`precompute_labels()` now also registers `label+1` (alongside the plain
+`label` it already registers for `ETST`), pointing it at
+`etst_back_target[i]` — the loop's own per-cycle retest position
+(`dtst_pos+1`), exactly matching `REPEAT`'s "abandon this cycle, retest
+for the next one" semantics. See [ETST](ETST.md)'s own note for the
+fuller account; `src/tests/hal/test_repeat.hal` is the regression
+fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x009) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.

@@ -57,6 +57,30 @@ identical "loop actually exited" position [CTST](CTST.md)'s own
 "Confirmed Runtime Behavior" for the fuller trace;
 `src/tests/hal/test_exit_loop.hal` is the regression fixture.
 
+**Bare `REPEAT;` targets this construct's label number *plus one*,
+found in a later session via a user report against `095-TAN_SUMS.hal`.**
+Traced directly to `PASS1.PROCS/SYNTHESI.xpl`'s own `REPEAT` synthesis
+(search `REPEATING:` in that file): unlike `EXIT` (which emits
+`DO_LOC(TEMP)` verbatim, matching this instruction's own label operand
+— see above), `REPEAT` emits a `BRA` whose `INL` operand is
+`DO_LOC(TEMP)+1` — one more than the same value, referencing the same
+enclosing loop, but a number no [LBL](LBL.md) (or any other
+instruction) ever separately materializes anywhere in the HALMAT
+stream. Real Pass 2 code generation resolves it structurally from the
+compiler's own loop-nesting bookkeeping, which this project's
+Pass-1-level interpreter doesn't have. Fixed by synthesizing it: when
+`interp.c`'s `precompute_labels()` registers an ETST's own label
+(above), it now *also* registers `label+1`, pointing it at
+`etst_back_target[i]` — the exact same per-cycle retest position
+(`dtst_pos+1`) this instruction's own ordinary fall-through back-edge
+already computes. This is precisely `REPEAT`'s intended semantics
+("abandon the rest of this cycle's body, retest for the next one") —
+exactly what `ETST` itself already does on fall-through, just triggered
+explicitly instead of by reaching the bottom of the loop body normally.
+`precompute_loop_targets()` (which computes `etst_back_target`) already
+runs before `precompute_labels()` in `interp_init()`, so this needed no
+reordering. `src/tests/hal/test_repeat.hal` is the regression fixture.
+
 ## Source Analysis & Reliability
 
 Opcode (0x00F) confirmed primary-source: `XETST BIT(16) INITIAL("00F")`

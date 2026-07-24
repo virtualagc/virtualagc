@@ -182,11 +182,25 @@ families).
 `IGNORE`'s exact effect on a *value-producing* built-in (as opposed to a
 procedural side-effect error) isn't spelled out by [USA003087]'s own
 examples, so it's treated identically to `SYSTEM` pending a clearer
-citation. `AND SET`/`RESET`/`SIGNAL` fails loudly rather than silently
-dropping the event modification. [USA003087] Sec. 25.1's per-block
-dynamic-scoping rule (a modification made inside a `PROCEDURE`/
-`FUNCTION` is unwound on return from it) is not implemented — the
-handler table is flat/global for the whole run.
+citation. [USA003087] Sec. 25.1's per-block dynamic-scoping rule (a
+modification made inside a `PROCEDURE`/`FUNCTION` is unwound on return
+from it) is not implemented — the handler table is flat/global for the
+whole run.
+
+**`AND SET`/`RESET`/`SIGNAL` implemented (Maintenance phase).** Applied
+at the one site that actually detects a matching group-4 (App. C) error
+— `arithmetic_error_should_apply_fixup()` (`interp.c`) — regardless of
+whether the main action is `SYSTEM` or `IGNORE`: `SET`/`SIGNAL` both do
+the same direct `BIT` write [SGNL](SGNL.md)'s own opcode uses
+(`bit_value=1`; this interpreter doesn't model the persistent/latched-
+vs-transient nuance between the two), `RESET` writes `0`. A real
+language constraint surfaced during testing, not previously documented
+here: `SET`/`RESET` require a **`LATCHED` `EVENT`** declaration —
+HALSFC rejects them against a plain (unlatched) `EVENT` outright
+("`AN UNLATCHED EVENT MAY NOT BE SET OR RESET`", `RT10` error, severity
+2) — while plain `SIGNAL` works on either latched or unlatched. See
+`src/tests/hal/test_eron_event.hal` (exercises all three: `SIGNAL` on
+an unlatched event, `RESET`/`SET` on latched ones).
 
 ## Unresolved Questions
 

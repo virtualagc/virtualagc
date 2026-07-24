@@ -56,6 +56,36 @@ HALMAT: 101(2),0,0            <- BASN: <ITOQ's VAC result> = the literal
 LHI 5,-3856 / STH 5,I1           <- the literal's bit pattern copied directly into I1
 ```
 
+## Confirmed Runtime Behavior
+
+**Assignment context (`TAG`=1) implemented (Maintenance phase).**
+Reference context (`TAG`=0) already worked; `SUBBIT(x) = ...;` itself
+previously failed loudly with no runtime implementation at all. The
+compiled trace above already showed the full shape needed: the `xTOQ`
+opcode's own `VAC` result supplies the *receiver* for a following
+[BASN](BASN.md), not a value — since `SUBBIT` always routes its actual
+write through a bit-string intermediary, `BASN` is the only assign
+opcode it ever chains into, regardless of the receiver's real
+underlying type. Implemented with a new `is_subbit_ref`/
+`subbit_target_syt` field pair on the `VAC` slot (`halmat_vac_slot_t`,
+`state.h`), set by the `TAG`=1 branch and consumed by
+`write_destination`'s `QUAL_VAC` case: the assigned bit pattern is
+written directly into the target's own storage, reinterpreted per its
+*declared* type. Only `SYT_TYPE_INTEGER` and `SYT_TYPE_BIT` have a
+confirmed, lossless raw-bit mapping in this interpreter (`BIT`
+trivially; `INTEGER` via the same reinterpret-cast the reference-
+context branch already uses in the opposite direction) — `SCALAR`/
+`CHARACTER` targets still fail loudly, no hardware byte-layout modeled
+for them. One wrinkle found empirically: `SUBBIT` deliberately bypasses
+the ordinary "first write infers the type" mechanism this interpreter
+otherwise uses for an untyped `SYT` entry (it's writing bits into an
+*already, if only declaratively, typed* variable's storage, not a value
+whose kind should dictate the type) — so a target never written before
+reaching `SUBBIT` needs its real declared type pulled from the symbol
+table (`hal_class`) instead. Fixture: `src/tests/hal/test_subbit_assign.hal`
+(the exact `SUBBIT(I1) = BIN'1111000011110000';` case from the trace
+above, on a never-written `INTEGER`, plus a `BIT`-target case).
+
 ## Unresolved Questions
 
 - The subscripted forms (`SUBBITn TO m(argument)`, selecting a bit

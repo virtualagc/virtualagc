@@ -142,9 +142,10 @@ one line from its current position and repositions itself at column 1."
 default as "a `SKIP(1), COLUMN(1)` operation is implied at the beginning
 of each READ statement," overridable by an explicit `SKIP(0)`/`TAB(0)`
 to read data positioned after a semicolon that terminated the previous
-READ — not reachable in yaHALMAT2 today since I/O control specifiers
-(`TAB`/`COLUMN`/`SKIP`/`LINE`/`PAGE`) aren't implemented (`OP_READ` fails
-loudly if one appears), making the default line-advance unconditional
+READ — at the time of this fix, not reachable in yaHALMAT2 since I/O
+control specifiers (`TAB`/`COLUMN`/`SKIP`/`LINE`/`PAGE`) weren't
+implemented yet (`OP_READ` failed loudly if one appeared; `SKIP`/`COLUMN`
+now are — see below), making the default line-advance unconditional
 for every `READ`/`READALL` but a device's first. Fixed with a
 `discard_to_eol()` helper (`interp.c`), called at the start of
 `OP_READ`/`OP_RDAL` whenever `state->device_read_started[device]` is
@@ -193,6 +194,22 @@ read/write round trip) and `test_read_vecmat_edge.hal` (scalar-
 container-scalar sequencing plus semicolon-mid-container termination);
 also confirmed against a real `044-ORTHONORMAL.hal` run (its
 `READ(5) X/Y/Z;` statements now succeed).
+
+**`SKIP(n)`/`COLUMN(n)` I/O control specifiers implemented (Maintenance
+phase).** User-reported real-corpus idiom (`164-OUTER.hal`: `READALL(5)
+VNAME; ...; IF VNAME='PHI' THEN READ(5) SKIP(0), COLUMN(9), PHI;`).
+`OP_XXAR`'s `READ`/`READALL` branch now captures `TAG2`=3 (`SKIP`) and
+`TAG2`=2 (`COLUMN`) into new `io_pending` fields
+(`has_skip`/`skip_n`/`has_column`/`column_n`, `state.h`); `OP_READ`/
+`OP_RDAL` replace their previous unconditional single
+`discard_to_eol()` call with a loop of `skip_n` line-discards (default
+1, matching the always-implied `SKIP(1)` described above) followed by a
+`COLUMN`-based `fseek` when present, using a new per-device
+`device_line_start[]` array to know where the current line began.
+`TAB(n)`/`LINE(n)`/`PAGE(n)` still fail loudly — not exercised by any
+real-corpus program encountered so far, so left unimplemented rather
+than guessed. Fixture: `src/tests/hal/test_read_skip_column.hal` (via
+`run_read_fixture.sh`).
 
 ## Source Analysis & Reliability
 

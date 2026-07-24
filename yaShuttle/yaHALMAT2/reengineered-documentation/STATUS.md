@@ -1998,6 +1998,137 @@ mechanism this affected.
 
 See [WRIT](class-0/WRIT.md) for the full `WRITE`-formatting writeup.
 
+## DO CASE out-of-range selector and ELSE clause resolved
+
+User-reported against `080-EXAMPLE_4A.hal`: a `DO CASE` selector outside
+the legal `1..N` range failed loudly ("out-of-range/ELSE handling not
+yet implemented") instead of taking the `ELSE` clause. Traced via a
+direct `--disasm` of the real compiled program: [DCAS](class-0/DCAS.md)
+simply doesn't branch at all for an out-of-range selector — ordinary
+sequential fall-through handles the rest — and an `ELSE` clause compiles
+as plain in-line code placed immediately after `DCAS` itself, before the
+first ordinary case's [CLBL](class-0/CLBL.md), not as a trailing CLBL as
+earlier sessions' documentation had speculated. Cross-checked against a
+real AP-101S emulator (`compileLinkRun`): the real runtime actually
+hangs in an infinite loop for the no-`ELSE` out-of-range case, an
+apparent bug in the real runtime library this project has no interest
+in replicating; falling through to [ECAS](class-0/ECAS.md) is
+`yaHALMAT2`'s own well-defined choice instead. This also resolved
+[DCAS](class-0/DCAS.md)/[CLBL](class-0/CLBL.md)/[ECAS](class-0/ECAS.md)'s
+own long-standing Unresolved Questions about the final CLBL's purpose,
+and corrected a stale cross-reference in [ECAS](class-0/ECAS.md) left
+over from an earlier CLBL operand-count correction. Fixture:
+`src/tests/hal/test_case_else.hal`.
+
+## A sweep of remaining "not implemented yet" runtime gaps
+
+Combined with the DO CASE report above, direct user instruction: grep
+`yaHALMAT2` for "not implemented yet"-style phrases and work through the
+resulting list systematically, same discipline as every fix above
+(reproduce for real, cross-reference the compiler source, fix, add a
+fixture, update documentation). About a dozen items, several genuine
+fixes and several confirmed-and-deferred investigations:
+
+**Implemented:**
+
+- **[PCAL](class-0/PCAL.md)/[FCAL](class-0/FCAL.md) `ASSIGN`-form call
+  arguments.** Runtime binding/write-back was never implemented despite
+  the wire format being confirmed; fixing it surfaced a related bug
+  where an `ASSIGN`-only parameter got a premature bind from the
+  caller's own (possibly uninitialized) pre-call variable, corrupting
+  its `SYT` type before the procedure body could assign it correctly.
+  See [PCAL](class-0/PCAL.md)'s "Confirmed Runtime Behavior".
+- **[READ](class-0/READ.md)'s `SKIP(n)`/`COLUMN(n)` I/O control
+  specifiers**, user-reported idiom from `164-OUTER.hal`.
+  `TAB`/`LINE`/`PAGE` still fail loudly — no real-corpus program
+  encountered needs them yet.
+- **Whole `BIT`/`CHARACTER ARRAY` `WRITE`/`CALL`/`ASSIGN` arguments**,
+  user-reported from `120-EXAMPLE_A.hal` — see [WRIT](class-0/WRIT.md).
+  Uncovered and fixed a real, previously-unnoticed bug along the way in
+  `precompute_arrayed_paragraphs()`'s replay-range computation, affecting
+  any statement where an arrayed reference isn't the first thing in its
+  statement or needs a computed (not just plain-value) expression
+  replayed — full account in [WRIT](class-0/WRIT.md).
+- **[SCHD](class-0/SCHD.md)'s `STOPPING`-only form** (`WHILE`/`UNTIL`
+  with no `REPEAT`) — resolved as a documented no-op, per this file's
+  own prior research into `SYNTHESI.xpl`'s grammar action.
+- **[SCHD](class-0/SCHD.md) self-rescheduling with `ON <event>`** — the
+  same imperative/declarative rearm-in-place equivalence already used
+  for the time-based self-reschedule case, extended with a new
+  interpreter-internal `SCHD_REPEAT_ON` rearm kind.
+- **[ERON](class-0/ERON.md)'s `AND SET`/`RESET`/`SIGNAL` clause** —
+  applied at the one site that actually detects a matching group-4
+  error. New primary-source finding: `SET`/`RESET` require a `LATCHED`
+  `EVENT` declaration (confirmed via a real HALSFC rejection, `RT10`),
+  not previously documented.
+- **[ITOQ](class-1/ITOQ.md)'s (`SUBBIT`) assignment context**
+  (`SUBBIT(x) = ...;`) — the wire format was already fully confirmed;
+  only the runtime write-through was missing.
+- **External `FUNCTION` `CHARACTER` return values** — see
+  [MULTI-FILE-LINKING.md](MULTI-FILE-LINKING.md). `MATRIX`/`VECTOR`
+  return values remain unimplemented, traced to a deeper, more general
+  gap (below).
+- **`ARRAY`/`MATRIX`/`CHARACTER`-typed `EXTERNAL COMPOOL` variables** —
+  see [MULTI-FILE-LINKING.md](MULTI-FILE-LINKING.md). The old behavior
+  was confirmed *silently wrong* (read back as all zeros, no error), not
+  just an honest unimplemented gap.
+
+**Investigated and deferred**, each for a documented reason rather than
+left unexplored:
+
+- **[TASN](class-0/TASN.md) copying a structure terminal with `ARRAY`/
+  `MATRIX`/`VECTOR` type** — mechanically straightforward, but currently
+  *unreachable*: no other opcode that can write a whole array value
+  accepts a structure-terminal receiver, so no real program can ever
+  populate the field TASN would need to copy. See
+  [TASN](class-0/TASN.md)'s "Confirmed Runtime Behavior".
+- **[NINT](class-8/NINT.md)/[MINT](class-8/MINT.md)/[VINT](class-8/VINT.md)'s
+  "OFFSET-addressed form"** — traces to the HAL-1971 predecessor
+  language only; every realistic real-HAL/S trigger probed routes
+  through an already-working mechanism instead. See
+  [MINT](class-8/MINT.md)'s Unresolved Questions.
+- **`CSZ` / [DSUB](class-0/DSUB.md) to-partition** (`160-REFORMAT.hal`'s
+  `C(1 TO #-DECIMALS)`) — the `±`-expression bit encoding this file's
+  own prior research had already flagged as unresolved is still
+  unresolved even against a new, concrete non-literal real-program
+  trace. See [DSUB](class-0/DSUB.md)'s Unresolved Questions.
+- **[DSUB](class-0/DSUB.md) multi-index asterisk for ARRAY-of-VECTOR/
+  MATRIX, `ARRAY(*)` assumed-size parameter binding, and whole-`VECTOR`
+  `FUNCTION` `RETURN`** — confirmed via `141-VSUM.hal` to be three
+  facets of one missing architecture (this interpreter's container model
+  can't distinguish an `ARRAY(n) VECTOR(m)` from a true `MATRIX(n,m)`).
+  Needs new symbol-table shape metadata before any of the three can be
+  fixture-verified; deferred together as a dedicated future feature
+  rather than partially implemented. See [DSUB](class-0/DSUB.md) and
+  [RTRN](class-0/RTRN.md)'s own Unresolved Questions.
+- **Concurrent re-scheduling of an already-active [SCHD](class-0/SCHD.md)
+  task** — turned out not to be a gap at all: this file's own prior
+  research had already concluded it's a genuine [USA003087] Sec. 13.4
+  language constraint, correctly rejected. Only the rejection message's
+  wording was corrected, away from "not yet implemented" phrasing that
+  misleadingly implied a missing feature.
+
+## Bare REPEAT; inside a DO UNTIL loop fixed
+
+User-reported against `095-TAN_SUMS.hal`: `REPEAT;` inside a `DO UNTIL`
+loop's conditional body failed with "branch to undefined label N"
+whenever the condition was actually taken. Traced directly to
+`PASS1.PROCS/SYNTHESI.xpl`'s real `REPEAT` synthesis (search
+`REPEATING:`): `REPEAT` emits a `BRA` targeting the enclosing loop's own
+[DTST](class-0/DTST.md)/[ETST](class-0/ETST.md) bookkeeping-label value
+**plus one** — a number no [LBL](class-0/LBL.md) (or any other
+instruction) ever separately materializes anywhere in the HALMAT
+stream; real Pass 2 code generation resolves it structurally from the
+compiler's own loop-nesting state, which this Pass-1-level interpreter
+doesn't have. Fixed by synthesizing it directly in `precompute_labels()`
+(`interp.c`): the "+1" label now resolves to the exact same position
+[ETST](class-0/ETST.md)'s own ordinary fall-through back-edge already
+computes — the loop's per-cycle retest entry — which is precisely what
+`REPEAT` itself is supposed to do ("abandon the rest of this cycle's
+body, retest for the next one"). See [ETST](class-0/ETST.md)/
+[BRA](class-0/BRA.md)'s own "Confirmed Runtime Behavior" for the fuller
+account; `src/tests/hal/test_repeat.hal` is the regression fixture.
+
 ## Next steps (suggested)
 
 1. A systematic sweep of USA003087 syntax patterns against previously-

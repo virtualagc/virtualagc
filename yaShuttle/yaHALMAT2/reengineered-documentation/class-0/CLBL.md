@@ -22,8 +22,17 @@ Appears once per case/alternate at each possible destination of a
 group, in source order — plus, in the (no-`ELSE`) case tested, one final
 CLBL immediately before the closing [ECAS](ECAS.md), distinguished from
 the ordinary ones only by its trailing header field (see Operand-Word
-Format — **corrected this session**: this final CLBL is not actually a
-distinct one-operand form, see below).
+Format — this final CLBL is not actually a distinct one-operand form,
+see below). **Resolved in the Maintenance phase**: this final CLBL is
+not a runtime-error trap — [DCAS](DCAS.md) never jumps to it via the
+selector at all (an out-of-range selector simply doesn't branch); it's
+reached only by ordinary sequential fall-through when no `ELSE` clause
+is present, at which point it acts as any other CLBL would if fallen
+into rather than jumped to — an immediate implicit branch to
+[ECAS](ECAS.md), i.e. a no-op. See [DCAS](DCAS.md)'s own Unresolved
+Questions for the full account, including the `ELSE`-clause case (which
+compiles as plain in-line code before case 1's CLBL, not as a CLBL at
+all).
 
 ## Operand-Word Format (confirmed empirically)
 
@@ -71,13 +80,9 @@ including the trailing one, each followed by exactly two operand lines.
 
 ## Unresolved Questions
 
-- The final CLBL's *purpose* is still not fully understood — plausibly a
-  runtime-error trap / implicit fallthrough target for selector values
-  outside the legal range (per [USA003087] §10.3 rule 3), given it
-  appears exactly where such a trap would be needed and the tested
-  construct had no `ELSE` clause; the operand-*count* question is now
-  resolved (see above), but whether an `ELSE` clause changes this final
-  CLBL's role or count is untested.
+- ~~The final CLBL's *purpose* is still not fully understood~~
+  **Resolved (Maintenance phase)** — see Usage Context above and
+  [DCAS](DCAS.md)'s Unresolved Questions for the full account.
 - Whether CLBL is used for any other kind of computed branch besides
   `DO CASE` is unconfirmed — no other DCAS-like header instruction is
   currently known.

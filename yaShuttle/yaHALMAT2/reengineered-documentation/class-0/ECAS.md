@@ -18,11 +18,12 @@ case was originally selected.
 ## Usage Context
 
 Appears once per `DO CASE` construct, at the end of the statement group
-(the `END;` that closes it). Immediately preceded, in the tested case, by
-a final [CLBL](CLBL.md) instruction with an atypical single-operand form
-(see [DCAS](DCAS.md)'s and [CLBL](CLBL.md)'s Unresolved Questions —
-possibly a runtime-error trap for out-of-range selector values, since no
-`ELSE` clause was present in the tested construct).
+(the `END;` that closes it). Immediately preceded, when no `ELSE` clause
+is present, by a final [CLBL](CLBL.md) instruction (ordinary two-operand
+shape, not the atypical single-operand form an earlier reading had
+suggested) reached only by fall-through when the selector was out of
+range — see [DCAS](DCAS.md)'s and [CLBL](CLBL.md)'s own write-ups for
+the full, now-resolved account.
 
 ## Operand-Word Format (confirmed empirically)
 
@@ -44,9 +45,14 @@ exactly this label, confirming ECAS marks the convergence point.
 
 ## Unresolved Questions
 
-- Whether an `ELSE` clause (per [USA003087] §10.3, executed when the
-  selector is out of range) changes ECAS's own encoding, or only affects
-  the preceding [CLBL](CLBL.md)/branch-table structure, is untested.
+- ~~Whether an `ELSE` clause... changes ECAS's own encoding~~
+  **Resolved (Maintenance phase, user-reported against
+  080-EXAMPLE_4A.hal)**: no — an `ELSE` clause compiles as plain in-line
+  code placed immediately after [DCAS](DCAS.md) itself (before case 1's
+  own [CLBL](CLBL.md)), leaving ECAS itself unaffected; it still just
+  marks the same join point every case body's end-of-case branch
+  converges on, `ELSE`'s body included. See [DCAS](DCAS.md)'s Unresolved
+  Questions for the full account.
 
 ## Source Analysis & Reliability
 

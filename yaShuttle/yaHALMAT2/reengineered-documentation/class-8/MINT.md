@@ -28,6 +28,22 @@ one per element.
 ## Unresolved Questions
 
 - HAL/S operand-word format is unconfirmed; see [STRI](STRI.md).
+- **The predecessor-language "OFFSET" operand form: investigated
+  (Maintenance phase), still no confirmed real-HAL/S trigger.** The
+  "(or OFFSET)" mention above traces to the HAL 1971 instruction only —
+  never independently confirmed for HAL/S. Compile-probed both
+  plausible real triggers: `ARRAY(n) VECTOR(m) INITIAL(uniform-value)`
+  compiles to a plain-`SYT` `VINT`/`MINT` wrapped in
+  [IDLP](../class-0/IDLP.md)/[DLPE](../class-0/DLPE.md) replay (no
+  `OFFSET` involved); `ARRAY(n) VECTOR(m) INITIAL(v1,v2,...)` with
+  distinct per-element values compiles to [STRI](STRI.md) + repeated
+  [SINT](SINT.md) with `OFFSET` addressing across the flattened element
+  run (also not `MINT`/`VINT`) — matching this file's own note above
+  that per-element initialization uses repeated `SINT`, not `MINT`.
+  `MINT`/`VINT` never appeared with anything but `QUAL`=`SYT` in either
+  trace. `yaHALMAT2`'s `OP_MINT`/`OP_VINT` still fails loudly on a
+  non-`SYT` first operand — no primary-source or empirical basis exists
+  to implement against yet.
 
 ## Source Analysis & Reliability
 

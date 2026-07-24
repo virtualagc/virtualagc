@@ -151,6 +151,53 @@ fixture. Building it also caught a separate, pre-existing `symtab.c` bug
 — see [BCAT](../class-1/BCAT.md)'s own "Confirmed Runtime Behavior" for
 that account.
 
+## Whole BIT/CHARACTER ARRAY WRITE and CALL/ASSIGN arguments
+
+User-reported (`120-EXAMPLE_A.hal`): a whole `BIT ARRAY`/`CHARACTER
+ARRAY` `WRITE` argument, or the same as a `CALL ... ASSIGN(...)`
+argument, failed with "whole BIT/CHARACTER ARRAY WRITE/call arguments
+are not yet implemented." [XXAR](XXAR.md) already documented that such
+an argument compiles as a single unreplayed entry (`TAG1`=1 for `BIT
+ARRAY`, `2` for `CHARACTER ARRAY`) — the same shape already handled for
+numeric whole-container arguments — but the runtime side wasn't done
+for these two element kinds. Fixed with a new sub-branch (`OP_XXAR`'s
+`WRIT`/`CALL` whole-container handling) that uses `ensure_container()`
++ direct `bit_elements`/`char_elements` access, mirroring the existing
+numeric path; `flush_write()` gained matching `is_bit_array`/
+`is_char_array` VAC-slot branches (`format_bit_field`/plain string
+emission, both `UNPAGED`-quoting-aware per the `--unpaged` section
+above). The `ASSIGN` side needed a companion fix at [XXND](XXND.md):
+whole-array `ASSIGN` parameter write-back was missing from its per-item
+write-back loop entirely (added, with a bulk `memcpy`/`dup_string`-loop
+copy keyed on the parameter's storage kind). Fixtures:
+`src/tests/hal/test_write_bit_array.hal`, `test_assign_array.hal`.
+
+Chasing this surfaced a separate, pre-existing bug in
+`precompute_arrayed_paragraphs()` (`interp.c`) — the function that
+determines an [ADLP](ADLP.md)/[IDLP](IDLP.md)/[DLPE](DLPE.md)-bracketed
+"paragraph"'s replay range. The original rule (always the whole
+enclosing statement, back to the last `SMRK`) broke
+`WRITE(6) AVERAGE, FLAGS;` (a plain scalar followed by a `BIT ARRAY`,
+`AVERAGE` incorrectly re-emitted once per `FLAGS` element) whenever an
+arrayed reference wasn't the *first* thing in its statement. The
+correct rule, arrived at after three iterations (see the function's own
+`interp.c` comment for the full account of what each intermediate fix
+broke): the paragraph start is the single instruction immediately
+preceding the `ADLP`/`IDLP` chain, extended backward only through
+confirmed same-statement `QUAL_VAC` operand dependencies (so a computed
+expression like `A3 = A1 + A2;`'s `SADD` gets pulled in behind its own
+`SASN`), and excluding a chain preceded by [SFAR](SFAR.md) entirely
+(`SFAR` must never itself be replayed — it's `MAX`/`MIN`/`SUM`/`PROD`/
+`SIZE`'s own declarative element-count metadata, not a "replay N times"
+directive, when wrapped in `ADLP`/`DLPE` around a single occurrence).
+Resolving a `QUAL_VAC` operand's target required converting its raw
+HALMAT *word position* (`.index`) into the matching `instrs[]` *logical
+index* via each candidate instruction's own `.index` field — the two
+are different numbering schemes (confirmed via `fail()`'s own error
+messages, which report `.index`), and comparing them directly silently
+made the whole backward-walk never trigger. After this fix, the full
+regression suite passed with no further regressions.
+
 ## Unresolved Questions
 
 - None remaining specific to this instruction. The device-number

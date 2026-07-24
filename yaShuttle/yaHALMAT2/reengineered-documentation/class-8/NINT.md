@@ -50,6 +50,20 @@ HALMAT: 8E1(2),133,0          <- NINT: NS2 initialized to NULL
   decoded at the bit level.
 - Initialization of `NAME` structure terminals, and `NAME PROGRAM`/`NAME
   TASK` pointer variables, were not tested.
+- **`yaHALMAT2`'s own "OFFSET-addressed form" guard: investigated
+  (Maintenance phase), still no confirmed trigger.** `OP_NINT` fails
+  loudly if operand 1 isn't `QUAL`=`SYT`, defensively guarding against
+  an `ARRAY`-of-`NAME` `INITIAL` list the way [SINT](SINT.md)/
+  [BINT](BINT.md)/[CINT](CINT.md) use `OFFSET` for `ARRAY INITIAL`
+  lists — but the trace above already only ever shows `QUAL`=`SYT` for
+  both tested cases, and no such `OFFSET` form was ever independently
+  confirmed here. Tried to construct the analogous
+  `DECLARE ARRAY(n), NSARR NAME SCALAR INITIAL(NAME(S1), NAME(S2));`
+  trigger via direct HALSFC compile probes; hit a real, unrelated
+  compiler-level obstacle ("`ARRAYNESS/MULTI-COPINESS CONFLICT`", PASS2
+  error `DI110`) before ever producing a HALMAT trace to confirm or
+  refute the `OFFSET` hypothesis either way. No primary-source or
+  empirical basis exists to implement against yet.
 
 ## Source Analysis & Reliability
 

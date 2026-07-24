@@ -67,6 +67,27 @@ real compile.
   implicit in the number and sub-flags of the preceding [XXAR](XXAR.md)
   instructions.
 
+## Confirmed Runtime Behavior
+
+**`ASSIGN` argument runtime binding/write-back implemented (Maintenance
+phase).** The wire format above (`TAG2`=1 distinguishing an assign
+argument) was already confirmed, but `yaHALMAT2`'s own runtime handling
+of it wasn't: `PCAL`/`FCAL`'s parameter-binding loop was calling the
+same `bind_call_argument()` used for ordinary input arguments on
+`ASSIGN` items too, giving the callee's parameter a premature initial
+bind from the caller's own (possibly uninitialized) pre-call variable —
+which then corrupted the parameter's `SYT` type before the procedure
+body's own real assignment could establish it correctly (interacting
+badly with `IASN`'s whole-numeric-literal type-inference fix
+documented elsewhere). Fixed by skipping `bind_call_argument()` entirely
+for `is_assign` items — an `ASSIGN` parameter should start unbound,
+same as any other never-yet-written `SYT` entry, and only receive a
+value via the callee's own body or the post-call write-back (`OP_XXND`,
+which copies each `is_assign` item's final parameter value back into
+the caller's own destination operand, including a whole-array bulk-copy
+path for `ARRAY`/`VECTOR`/`MATRIX`-typed `ASSIGN` parameters). Fixture:
+`src/tests/hal/test_pcal_assign.hal`.
+
 ## Source Analysis & Reliability
 
 Opcode (0x01D) and mnemonic PCAL are primary-sourced from [IR-60-5] A.2
