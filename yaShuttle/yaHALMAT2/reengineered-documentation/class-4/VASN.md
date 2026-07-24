@@ -26,9 +26,13 @@ bracketed by [ADLP](../class-0/ADLP.md)/[DLPE](../class-0/DLPE.md).
 ## Operand-Word Format (confirmed empirically)
 
 Two operands: operand 1 = **source value**, `QUAL`=3=VAC when the
-right-hand side is an expression; operand 2 = **receiver**, `DATA`=its
-symbol-table index, `QUAL`=1=SYT. **Order corrected in a later session**
-via a direct `unHALMAT.py` binary read of `V3 = V1 + V2` (compiled with
+right-hand side is an expression; operand 2 = **receiver**, ordinarily
+`DATA`=its symbol-table index, `QUAL`=1=SYT — but see "Confirmed Runtime
+Behavior" below for a second, `QUAL`=3=VAC receiver shape (a whole
+`VECTOR`, or a `MATRIX` row/column-partition select — this same opcode
+handles both since `M$(i,*)`/`M$(*,j)` produce a `VECTOR`-shaped `VAC`
+result) that's also valid. **Order corrected in a later session** via a
+direct `unHALMAT.py` binary read of `V3 = V1 + V2` (compiled with
 `HALSFC --parms="LISTING2,LSTALL"`) — an earlier reading had receiver
 first, source second; same correction applied to
 [SASN](../class-5/SASN.md)/[IASN](../class-6/IASN.md)/[MASN](../class-3/MASN.md),
@@ -37,6 +41,18 @@ see [SASN](../class-5/SASN.md) for the general account.
 ## Unresolved Questions
 
 - None remaining for the base vector-assign case.
+
+## Confirmed Runtime Behavior
+
+**`QUAL`=3=`VAC` receiver — a whole `VECTOR` or `MATRIX` row/column-
+partition select used as an assignment target.** `OP_MASN`/`OP_VASN`
+share a single handler in `interp.c`, so this is the exact same fix
+described in [MASN](../class-3/MASN.md)'s own "Confirmed Runtime
+Behavior" section (user-reported via `047-ROWS.hal`'s `M$(I,*) =
+C * MM$(I,*);`) — see that file for the full writeup, the
+`container_ref_stride` write-back mechanism, and the regression
+fixtures. Nothing VASN-specific was needed beyond MASN's own fix, since
+both opcodes go through the identical code path.
 
 ## Source Analysis & Reliability
 

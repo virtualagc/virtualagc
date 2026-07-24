@@ -27,17 +27,61 @@ HALMAT inline-vector/matrix-loop note in
 ## Operand-Word Format (confirmed empirically)
 
 Two operands: operand 1 = **source value**, `QUAL`=3=VAC when the
-right-hand side is an expression; operand 2 = **receiver**, `DATA`=its
-symbol-table index, `QUAL`=1=SYT. **Order corrected in a later session**
-via a direct `unHALMAT.py` binary read of `M3 = M1 + M2` (compiled with
-`HALSFC --parms="LISTING2,LSTALL"`) — an earlier reading had receiver
-first, source second; same correction applied to
+right-hand side is an expression; operand 2 = **receiver**, ordinarily
+`DATA`=its symbol-table index, `QUAL`=1=SYT — but see "Confirmed Runtime
+Behavior" below for a second, `QUAL`=3=VAC receiver shape (a `MATRIX`
+row/column-partition select or whole `VECTOR`, produced by
+[DSUB](../class-0/DSUB.md)'s asterisk-partition handling) that's also
+valid. **Order corrected in a later session** via a direct `unHALMAT.py`
+binary read of `M3 = M1 + M2` (compiled with `HALSFC
+--parms="LISTING2,LSTALL"`) — an earlier reading had receiver first,
+source second; same correction applied to
 [SASN](../class-5/SASN.md)/[IASN](../class-6/IASN.md)/[VASN](../class-4/VASN.md),
 see [SASN](../class-5/SASN.md) for the general account.
 
 ## Unresolved Questions
 
 - None remaining for the base matrix-assign case.
+
+## Confirmed Runtime Behavior
+
+**`QUAL`=3=`VAC` receiver — a `MATRIX` row/column-partition select or
+whole `VECTOR` used as an assignment target.** User-reported
+(`047-ROWS.hal`'s `M    = C MM   ;` / `S     I,*       I,*`
+continuation-line form, i.e. `M$(I,*) = C * MM$(I,*);` — scaling one row
+of a `MATRIX` by a constant, written directly into that row of a
+*different* `MATRIX`): previously rejected outright with "MASN/VASN:
+receiver must be SYT", since `OP_MASN`/`OP_VASN` (`interp.c`) only ever
+accepted a plain whole-`SYT` destination operand. Fixed by having
+[DSUB](../class-0/DSUB.md)'s asterisk-partition cases (`M$(i,*)`,
+`M$(*,j)`, `V$(*)`) additionally mark their produced `VAC` result as a
+live, writable view into the base `MATRIX`/`VECTOR`'s own element
+storage — new `is_container_ref`/`container_ref_syt`/
+`container_ref_offset`/`container_ref_stride` fields on the `VAC` slot
+(`state.h`), set *in addition to* the existing `is_container` flag the
+read direction already relies on, so that path is completely
+unaffected. `MASN`/`VASN` now recognize this and write straight back
+into the base container's storage instead of failing, via a
+stride-aware loop (`container_ref_stride` is 1 for the genuinely-
+contiguous row-select/whole-vector cases, the column count for a column
+select — row-major storage places successive column entries `cols`
+elements apart) rather than a flat `memcpy`, with a bounds check on the
+*last* strided index actually touched
+(`offset + (count-1)*stride < element_count`). All three asterisk-
+partition shapes are covered, including column-select, which was
+initially left read-only in a first pass and then generalized to writable
+too, once a stride concept existed to express it correctly.
+
+Regression fixtures: `src/tests/hal/test_matrix_row_assign.hal`
+(row-scale-by-constant and row-swap-via-temporary-vector, two of the
+three idioms `047-ROWS.hal` itself demonstrates — the third,
+add-a-scaled-row-to-another-row, is the same mechanism exercised twice
+over, in the real program's own second `WRITE`) and
+`src/tests/hal/test_matrix_col_assign.hal` (the column-select
+generalization); both confirmed to fail on pre-fix code with the exact
+"MASN/VASN: receiver must be SYT" error, and the row-select fixture
+additionally confirmed against a real `047-ROWS.hal` run (all three of
+its own worked examples produce correct matrices).
 
 ## Source Analysis & Reliability
 

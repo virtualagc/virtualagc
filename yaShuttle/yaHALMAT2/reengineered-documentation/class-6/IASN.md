@@ -60,8 +60,11 @@ function argument passing instead).
   full detail. The generated machine code in that case still stores the
   value as a float (`LFLI`/`STE`), so this looks like PASS1 folding
   whole-valued literals into a shared representation whose type leaks
-  through as IASN regardless of the receiver's actual declared type; not
-  fully explained at the bit level.
+  through as IASN regardless of the receiver's actual declared type —
+  **the compiler-side "why" is still not fully explained at the bit
+  level, but the interpreter-side consequence (a SCALAR/SCALAR DOUBLE
+  destination silently mistyped INTEGER when hit this way) is now
+  corrected** — see "Confirmed Runtime Behavior" below.
 
 ## Confirmed Runtime Behavior
 
@@ -108,6 +111,38 @@ up all zeros, no error). Fixed by adding that `is_container` branch,
 mirroring `resolve_operand`'s own whole-array-during-replay handling of
 a plain `QUAL_SYT` reference. `src/tests/hal/test_sshp_ishp.hal` is the
 regression fixture.
+
+**Whole-valued-literal leak into a SCALAR/SCALAR DOUBLE receiver,
+corrected at the interpreter level.** User-reported
+(`GOOGLE-PARALLAX.hal`): `DISTANCE`, a `SCALAR DOUBLE`, printed with
+single-precision `WRITE` formatting instead of double, traced back to
+`EOR = 93000000.0;` — a whole-valued literal assigned to a plain
+`SCALAR DOUBLE` `EOR`, which this file's own Unresolved Questions above
+already documented compiles to `IASN`, not `SASN`. `OP_IASN`'s handler
+(`interp.c`) previously forced the resolved value to `RV_INTEGER`
+unconditionally before the write, and `write_syt_entry`'s first-write
+type inference trusted that blindly — so the destination got silently
+mistyped `SYT_TYPE_INTEGER`, discarding its SCALAR-ness (and, for a
+DOUBLE receiver, its precision) for the rest of the program. Fixed by
+having `OP_IASN`/`OP_SASN` consult the symbol table for the destination's
+*declared* class when it's a plain (`QUAL_SYT`) reference — the same
+established technique as [TINT](../class-8/TINT.md)'s identical
+per-field class correction and `bind_call_argument`'s parameter-
+precision conversion — and letting the declared class override the
+opcode's nominal one whenever they disagree (i.e. whenever this exact
+IASN-into-SCALAR quirk fires). The same symbol-table lookup also
+normalizes the resolved value's precision to the destination's declared
+`SINGLE`/`DOUBLE` on *every* write, not just the first — needed because
+neither a literal (always single-precision-encoded in the litfile) nor
+an expression result is otherwise tagged to the *receiver's* declared
+precision anywhere upstream (see [SASN](../class-5/SASN.md)'s own
+"Confirmed Runtime Behavior" for that second, independent half of the
+bug). Regression fixture: `src/tests/hal/test_scalar_double.hal`
+(mirrors `EOR`/`ANGULAR_SHIFT`/`DISTANCE` from the real program);
+confirmed to fail on pre-fix code reproducing the exact symptom (`EOR`
+printed as a bare integer) and confirmed against a real
+`GOOGLE-PARALLAX.hal` run (`DISTANCE` now prints with full double-
+precision formatting).
 
 ## Source Analysis & Reliability
 

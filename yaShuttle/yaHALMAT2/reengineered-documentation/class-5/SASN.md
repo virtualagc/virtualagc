@@ -82,6 +82,37 @@ Behavior" section has the fuller writeup (both opcodes share the exact
 same `resolve_operand` code path). `src/tests/hal/test_sshp_ishp.hal` is
 the regression fixture.
 
+**Precision normalization to the destination's declared SINGLE/DOUBLE,
+fixed in a later session.** User-reported (`GOOGLE-PARALLAX.hal`):
+`DISTANCE`, a `SCALAR DOUBLE`, printed with single-precision `WRITE`
+formatting. Root cause had two independent halves — this file covers the
+second: even via an *ordinary* SASN (a non-whole-valued literal, e.g.
+`ANGULAR_SHIFT = 0.5;`, which correctly compiles to SASN per this file's
+own Unresolved Questions above, not the IASN quirk), the literal's own
+litfile-encoded precision (always single — `literal.c` has no
+per-context double form) was never widened to match a DOUBLE-declared
+receiver; assignment performed no automatic precision conversion at all,
+so a `SCALAR DOUBLE` variable assigned a plain literal stayed single-
+precision-tagged indefinitely. (Once a value *is* correctly tagged
+double, arithmetic itself already propagates precision correctly —
+`halmat_scalar_add`/etc.'s `dbl = a.double_precision || b.double_precision`
+— so this was purely an assignment-time gap, not an arithmetic one; see
+[IASN](../class-6/IASN.md)'s own "Confirmed Runtime Behavior" for the
+first half of the same bug, the whole-valued-literal type leak.) Fixed
+together with that first half: `OP_IASN`/`OP_SASN` now looks up the
+destination's declared class/precision via the symbol table
+(`HALMAT_SYM_FLAG_SINGLE`/`_DOUBLE`, `scale_precision()` — the same
+technique [TINT](../class-8/TINT.md) and `bind_call_argument` already
+use) and normalizes the resolved value's precision to the declared one
+on *every* write to a plain (`QUAL_SYT`) SCALAR destination, not just
+the first. Regression fixture: `src/tests/hal/test_scalar_double.hal`;
+confirmed to fail on pre-fix code (`ANGULAR_SHIFT` single-precision-
+formatted despite its DOUBLE declaration) and confirmed against a real
+`GOOGLE-PARALLAX.hal` run (the computed `DISTANCE` value itself also
+shifts slightly in its low digits versus the old single-precision-
+computed result, as expected once the whole chain is genuinely computed
+in double).
+
 ## Source Analysis & Reliability
 
 Opcode (0x501) confirmed primary-source: base of the `XSASN`/array

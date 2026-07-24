@@ -265,18 +265,48 @@ AASB/AIDX/ATSB/SASB/SIDX/STSB have a corresponding entry in [IR-60-5]'s
 Class 0 mnemonic index, consistent with this consolidation (i.e. they were
 not simply renamed and kept as separate HAL/S opcodes).
 
-**yaHALMAT2 implementation status** (this session): the asterisk
-partition kind is now interpreted, not just recognized in the wire
-format — `V$(*)` (whole `VECTOR`), `M$(i,*)` (a `MATRIX` row), and
-`M$(*,j)` (a `MATRIX` column) all produce a `VECTOR`-shaped `VAC`
-container result (the same mechanism `MADD`/`VADD`/etc. already use for
-their own computed results), consumed by a following `WRITE` argument
-([XXAR](XXAR.md)'s whole-container handling) or `MASN`/`VASN` the same
-way. Motivated by `WRITE(6) M$(1,*);` previously failing outright (no
-asterisk handling existed at all). The plain "index" subscript kind
-(single-element access) was already implemented and is unaffected.
-To-partition/at-partition/`CSZ`/`ASZ` subscript kinds — all fully
-confirmed in the wire format above — remain uninterpreted.
+**yaHALMAT2 implementation status**: the asterisk partition kind is
+interpreted, not just recognized in the wire format — `V$(*)` (whole
+`VECTOR`), `M$(i,*)` (a `MATRIX` row), and `M$(*,j)` (a `MATRIX` column)
+all produce a `VECTOR`-shaped `VAC` container result (the same mechanism
+`MADD`/`VADD`/etc. already use for their own computed results), consumed
+by a following `WRITE` argument ([XXAR](XXAR.md)'s whole-container
+handling) or `MASN`/`VASN` the same way. Motivated by `WRITE(6) M$(1,*);`
+previously failing outright (no asterisk handling existed at all). The
+plain "index" subscript kind (single-element access) was already
+implemented and is unaffected.
+
+**Asterisk-partition write-back** (later session, user-reported
+`047-ROWS.hal`): all three asterisk-partition cases — `V$(*)`, `M$(i,*)`,
+and `M$(*,j)` — can now also be used as an assignment *receiver*
+(`M$(I,*) = C * MM$(I,*);`), not just a readable value, by additionally
+marking the produced `VAC` result a live, writable view into the base
+`MATRIX`/`VECTOR`'s own storage (`is_container_ref`/`container_ref_syt`/
+`container_ref_offset`/`container_ref_stride`, `state.h`) that
+[MASN](../class-3/MASN.md)/[VASN](../class-4/VASN.md) recognize and
+write straight back into. `V$(*)`/`M$(i,*)` are genuinely contiguous in
+row-major storage (stride 1); `M$(*,j)` is not (stride = column count) —
+generalized to a per-element stride specifically to cover it too, not
+left read-only. See [MASN](../class-3/MASN.md)'s own "Confirmed Runtime
+Behavior" section for the fuller writable-view mechanism.
+
+**Component at-partition** (`V1(2 AT 1)`, a `VECTOR`/`ARRAY` slice) is
+also now interpreted, not just confirmed in the wire format — produces a
+`VECTOR`-shaped `VAC` container result via the same mechanism as the
+asterisk cases above. **Deliberately left read-only**, unlike the
+asterisk-partition cases: confirmed via a direct `HALSFC` compile that
+real HAL/S rejects `V$(n AT p) = ...;` as an assignment target outright
+at compile time (`QD1`/`AV3` errors), regardless of the source's shape —
+it type-checks the partition against the *whole* vector's declared
+length, not the slice, so no real compiled program can ever reach a
+writable form of it; not a gap, a confirmed limit of the language
+construct itself. Only the single-dimension `VECTOR`/`ARRAY` case
+(`base->rows == 0`) is implemented — a `MATRIX` at-partition
+(`M1(2 AT 1,1)`) needs a third operand for the other, plainly-indexed
+dimension and isn't handled, so it deliberately falls through to fail
+loudly rather than misreading length/position as raw indices.
+To-partition/`CSZ`/`ASZ` subscript kinds — all fully confirmed in the
+wire format above — remain uninterpreted.
 
 ## Unresolved Questions
 
