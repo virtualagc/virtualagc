@@ -97,6 +97,15 @@ run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=          
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
 run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
+# User-reported sweep item: ARRAY/MATRIX-typed EXTERNAL COMPOOL variables
+# were silently dropped to a null/empty container (main.c's import loop
+# hardcoded elements=NULL, "not yet supported") -- previously masked by
+# the same missing-field bug also affecting BIT/CHARACTER scalars
+# (bit_value/char_value were never copied either, only value/scalar).
+# Both fixed with a proper deep copy out of the auxiliary unit's SYT
+# entry before it's interp_cleanup()'d. SHARED_ARR (ARRAY(3) INTEGER)
+# comes across the COMPOOL link intact.
+run ./run_link_fixture.sh "$(printf ' 1.0000000E+01      2.0000000E+01      3.0000000E+01')" link_pool_array link_prog_array
 run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
 run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
 # User-reported sweep item: an external (cross-unit) FUNCTION returning a

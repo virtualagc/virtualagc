@@ -392,10 +392,10 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
  * multiple concurrently-*executing* PROGRAM units sharing live mutable
  * compool state (each would need to observe the others' writes in real
  * time, which needs the full per-unit VAC/scheduler plumbing this scope
- * deliberately avoids); ARRAY/MATRIX-typed EXTERNAL COMPOOL variables
- * (only plain INTEGER/SCALAR values are imported -- copying an element
- * buffer's ownership across the aux unit's interp_cleanup() safely needs
- * more than a struct copy, deferred until a test needs it). */
+ * deliberately avoids). ARRAY/MATRIX/CHARACTER-typed EXTERNAL COMPOOL
+ * variables *are* imported (deep-copied -- see the import loop below --
+ * since the aux unit's own owned heap storage doesn't survive its
+ * interp_cleanup() otherwise). */
 
 typedef enum { UNIT_MODE_HALMAT, UNIT_MODE_OPT, UNIT_MODE_PY } unit_mode_t;
 
@@ -412,6 +412,17 @@ typedef struct {
     char name[128];
     halmat_syt_entry_t value;
 } pending_import_t;
+
+/* Plain main_dup_string() isn't declared in strict C99 (needs _POSIX_C_SOURCE/
+ * _GNU_SOURCE) -- same small local helper interp.c already has its own
+ * copy of, used below to deep-copy an EXTERNAL COMPOOL import's owned
+ * string storage out of an auxiliary unit before it's interp_cleanup()'d. */
+static char *main_dup_string(const char *s) {
+    size_t n = strlen(s) + 1;
+    char *r = malloc(n);
+    memcpy(r, s, n);
+    return r;
+}
 
 static bool find_leading_def(const halmat_program_t *prog, uint16_t *opcode_out, uint16_t *symbol_out) {
     for (size_t i = 0; i < prog->count && i < 5; i++) {
@@ -690,11 +701,38 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
                 if (aux_index >= HALMAT_SYT_MAX || primary_ref->index >= HALMAT_SYT_MAX) continue;
                 if (import_count >= HALMAT_SYT_MAX) break;
                 strncpy(imports[import_count].name, name, sizeof(imports[import_count].name) - 1);
-                imports[import_count].value.type = aux.syt[aux_index].type;
-                imports[import_count].value.value = aux.syt[aux_index].value;
-                imports[import_count].value.scalar = aux.syt[aux_index].scalar;
-                imports[import_count].value.elements = NULL; /* ARRAY/MATRIX EXTERNAL values not yet supported -- see comment above */
-                imports[import_count].value.element_count = 0;
+                const halmat_syt_entry_t *src = &aux.syt[aux_index];
+                halmat_syt_entry_t *dst = &imports[import_count].value;
+                dst->type = src->type;
+                dst->value = src->value;
+                dst->scalar = src->scalar;
+                dst->bit_value = src->bit_value;
+                /* Deep-copy owned heap storage (char_value scalar string,
+                 * and ARRAY/MATRIX/VECTOR element buffers) rather than
+                 * aliasing `aux`'s own pointers -- `aux` is interp_cleanup()'d
+                 * right after this loop, which would free them out from
+                 * under primary_state's later seeding (line ~746) otherwise.
+                 * Exactly one of elements/bit_elements/char_elements is ever
+                 * non-NULL at a time (ensure_container()'s own convention,
+                 * interp.c/state.h) -- mirrors write_container_element's
+                 * three-way storage-kind dispatch. */
+                dst->char_value = src->char_value ? main_dup_string(src->char_value) : NULL;
+                dst->element_count = src->element_count;
+                dst->rows = src->rows;
+                dst->cols = src->cols;
+                dst->elements = NULL;
+                dst->bit_elements = NULL;
+                dst->char_elements = NULL;
+                if (src->elements) {
+                    dst->elements = malloc(src->element_count * sizeof(halmat_scalar_t));
+                    memcpy(dst->elements, src->elements, src->element_count * sizeof(halmat_scalar_t));
+                } else if (src->bit_elements) {
+                    dst->bit_elements = malloc(src->element_count * sizeof(uint32_t));
+                    memcpy(dst->bit_elements, src->bit_elements, src->element_count * sizeof(uint32_t));
+                } else if (src->char_elements) {
+                    dst->char_elements = malloc(src->element_count * sizeof(char *));
+                    for (size_t ci = 0; ci < src->element_count; ci++) dst->char_elements[ci] = main_dup_string(src->char_elements[ci]);
+                }
                 import_count++;
             }
         }
