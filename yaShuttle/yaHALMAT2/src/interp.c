@@ -4726,15 +4726,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * INTEGER vs. SCALAR by argument type, so these don't
                  * either, for consistency with the existing group rather
                  * than introducing a distinction nothing else here makes.
+                 * DATE(18)/CLOCKTIME(54): user-clarified these mean real
+                 * OS wall-clock time in the system's configured local
+                 * timezone, not the interpreter's own simulated virtual
+                 * clock (unlike RUNTIME/NEXTIME, [USA00309] Sec. 8.2 rule
+                 * 18 explicitly calls those the *simulated* elapsed
+                 * time) -- see their own case bodies below for the exact
+                 * format ([USA00309] Sec. 8.2 rule 17 pins DATE down
+                 * precisely; CLOCKTIME's unit is a documented judgment
+                 * call, Appendix B's "time of day" being the only prose
+                 * describing it).
                  * Deliberately NOT implemented, and documented as such
-                 * rather than guessed at: DATE(18)/CLOCKTIME(54) (no
-                 * calendar/wall-clock model exists anywhere in this
-                 * interpreter, and "implementation-dependent format" per
-                 * Appendix B gives no way to pick a value that's both
-                 * meaningful and reproducible for a regression fixture);
-                 * NEXTIME(50) (would need deep scheduler-internals
-                 * introspection -- state->tasks[]'s IN/AT-scheduled wake
-                 * time -- not undertaken this pass); and BIT(57)/
+                 * rather than guessed at: NEXTIME(50) (would need deep
+                 * scheduler-internals introspection -- state->tasks[]'s
+                 * IN/AT-scheduled wake time -- not undertaken this
+                 * pass); and BIT(57)/
                  * SUBBIT(58)/INTEGER(59)/SCALAR(60)/VECTOR(61)/
                  * MATRIX(62)/CHARACTER(63) (these BI_NAME slots almost
                  * certainly back the explicit-conversion/shaping-function
@@ -4782,12 +4788,66 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].scalar = halmat_scalar_from_double(r, false);
                     break;
                 }
-                if (ins->tag == 52) { /* RUNTIME: no argument, virtual Real Time Executive clock (Sec. 8) in seconds */
+                if (ins->tag == 52) {
+                    /* RUNTIME: no argument, virtual Real Time Executive
+                     * clock (Sec. 8) in seconds -- [USA00309] Sec. 8.2
+                     * rule 18: "double precision scalar" (fixed here
+                     * alongside adding DATE/CLOCKTIME below: this
+                     * previously returned single precision). */
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                     double seconds = (double)state->virtual_time / (double)HALMAT_TICKS_PER_SECOND;
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = true;
-                    state->vac[ins->index].scalar = halmat_scalar_from_double(seconds, false);
+                    state->vac[ins->index].scalar = halmat_scalar_from_double(seconds, true);
+                    break;
+                }
+                if (ins->tag == 18 || ins->tag == 54) {
+                    /* DATE/CLOCKTIME: no argument, real OS wall-clock
+                     * time in the system's own configured local
+                     * timezone (user-clarified) -- plain standard-C
+                     * time()/localtime() (identically portable across
+                     * this project's POSIX/MSVC targets, unlike
+                     * interp_run_signal()'s platform-split
+                     * monotonic_seconds() a few thousand lines down,
+                     * which needs CLOCK_MONOTONIC precision this doesn't).
+                     * localtime() already honors TZ/the OS's configured
+                     * zone with no extra code. */
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    time_t now = time(NULL);
+                    struct tm local_tm = *localtime(&now);
+                    if (ins->tag == 18) {
+                        /* DATE: [USA00309] Sec. 8.2 rule 17, confirmed
+                         * exact format -- "a double precision integer
+                         * whose decimal value is YYDDD where YY are the
+                         * year and DDD represents the day of the year
+                         * (i.e., February 1, 1978=78032)": two-digit
+                         * year, 1-indexed day-of-year (tm_yday is
+                         * 0-indexed; tm_year is years since 1900).
+                         * "Double precision integer" is this project's
+                         * ordinary 32-bit INTEGER -- no INTEGER SINGLE/
+                         * DOUBLE distinction is modeled anywhere else
+                         * either (STATUS.md's error-15 fixup note). */
+                        int32_t yy = (local_tm.tm_year + 1900) % 100;
+                        int32_t ddd = local_tm.tm_yday + 1;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = yy * 1000 + ddd;
+                    } else {
+                        /* CLOCKTIME: rule 18 confirms "double precision
+                         * scalar" and Appendix B says "time of day", but
+                         * neither pins down a unit the way DATE's rule
+                         * 17 does -- seconds since local midnight is
+                         * used here, the natural "time of day as a
+                         * single number" reading and consistent with
+                         * RUNTIME's own seconds convention; a documented
+                         * judgment call, not primary-source-confirmed
+                         * the way DATE's format is. */
+                        double seconds_since_midnight =
+                            local_tm.tm_hour * 3600.0 + local_tm.tm_min * 60.0 + local_tm.tm_sec;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(seconds_since_midnight, true);
+                    }
                     break;
                 }
                 if (ins->tag == 38 || ins->tag == 39) {

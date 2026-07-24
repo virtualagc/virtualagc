@@ -676,6 +676,30 @@ run ./run_local_fixture.sh lfnc_array "$(printf ' 7.0000000E+00\n 1.0000000E+00\
 run ./run_local_fixture.sh random "$(printf ' 7.8263693E-06\n 1.3153774E-01\n-7.2352159E-01')"
 run ./run_local_fixture.sh runtime "$(printf ' 1.8115941E-05\n 5.0000534E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
+# Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
+# (BFNC selectors 18/54) were initially left unimplemented ("no calendar/
+# wall-clock model... 'implementation-dependent format' gives no way to
+# pick a reproducible value") -- the user clarified these mean real OS
+# wall-clock time in the system's configured local timezone, not a
+# fabrication this interpreter would need to invent. [USA00309] Sec. 8.2
+# rule 17 turned out to pin DATE's exact format down precisely (YYDDD,
+# confirmed against its own worked example, "February 1, 1978=78032");
+# CLOCKTIME's unit isn't primary-source-specified beyond "double
+# precision scalar"/"time of day" (Appendix B), so seconds-since-local-
+# midnight was chosen as a documented judgment call, consistent with
+# RUNTIME's own seconds convention. Implemented via plain standard-C
+# time()/localtime() (portable across every platform this project
+# targets with no #ifdef, unlike interp_run_signal()'s platform-split
+# monotonic_seconds()). Also fixed a related bug noticed while touching
+# this code: RUNTIME (already implemented) returned single precision
+# despite rule 18 explicitly calling it "double precision scalar" too.
+# Can't use a fixed expected string (the value is different every run) --
+# uses a dedicated bounds-checking fixture runner instead,
+# run_walltime_fixture.sh, computing the same values independently via
+# `date` right around the yaHALMAT2 invocation, the same approach
+# run_realtime_fixture.sh already uses for identically un-hardcodable
+# real-world timing.
+run ./run_walltime_fixture.sh date_clocktime
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
