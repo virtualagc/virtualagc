@@ -3315,18 +3315,42 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break; /* join point; no-op */
 
             case OP_DSUB: {
-                /* Only the single-index "index" subscript kind, and
-                 * (added this session) the asterisk ("*") partition kind,
-                 * are implemented (alpha=5/1 array-dimension/component
-                 * index rows; alpha=4/0 array-dimension/component
-                 * asterisk rows -- see class-0/DSUB.md's confirmed
-                 * table). To-partition/at-partition/CSZ/ASZ forms still
-                 * aren't handled. Two-index (MATRIX) flattening uses the
-                 * real declared row-major shape when the symbol table
-                 * confirms it (ensure_container/symtab.h); otherwise (no
-                 * symtab, or more than 2 indices) falls back to a
-                 * placeholder stride -- unobserved by any fixture that
-                 * doesn't also have its COMMON*.out available. */
+                /* Only the single-index "index" subscript kind, the
+                 * asterisk ("*") partition kind, and the component
+                 * at-partition kind are implemented (see class-0/DSUB.md's
+                 * confirmed table). To-partition (CHARACTER substring,
+                 * `C1(a TO b)`) and ASZ forms still aren't handled. Two-
+                 * index (MATRIX) flattening uses the real declared
+                 * row-major shape when the symbol table confirms it
+                 * (ensure_container/symtab.h); otherwise (no symtab, or
+                 * more than 2 indices) falls back to a placeholder stride
+                 * -- unobserved by any fixture that doesn't also have its
+                 * COMMON*.out available.
+                 *
+                 * Investigated CSZ (task sweep item, real corpus target
+                 * 160-REFORMAT.hal, `RETURN RJUST(S||C(1 TO #-DECIMALS)||
+                 * '.'||C(#-DECIMALS-1 TO #), WIDTH);`) further this
+                 * session: implementing CHARACTER to-partition correctly
+                 * needs both a new subscript-kind branch here (TAG1=2 on
+                 * both range operands per DSUB.md's table; not yet added)
+                 * *and* CSZ's own arithmetic, which real traces from this
+                 * exact file show is genuinely richer than DSUB.md's own
+                 * prior two-session research had pinned down:
+                 *   C(1 TO #-DECIMALS):     end   = CSZ, DATA=2, subsidiary=SYT(DECIMALS)
+                 *   C(#-DECIMALS-1 TO #):   start = CSZ, DATA=2, subsidiary=VAC(DECIMALS + LIT) -- a *computed* expression, not a bare SYT
+                 *                           end   = CSZ, DATA=0 (bare "#"), no subsidiary
+                 * The start bound's own arithmetic doesn't cleanly resolve
+                 * against DSUB.md's "tag = 1+expression, or 2-expression"
+                 * formula (algebraically `#-DECIMALS-1` needs `# -
+                 * (DECIMALS+1)`, not `# - (DECIMALS-1)`, if DATA=2 means
+                 * literal "# minus subsidiary" -- the sign of the LIT
+                 * folded into that IADD wasn't independently confirmed).
+                 * DSUB.md's own Unresolved Questions already flags this
+                 * exact ambiguity ("the +-vs-- encoding... not fully
+                 * pinned down bit-for-bit") -- still true, now with a
+                 * concrete real-program case on record for whoever
+                 * resolves it next. Left failing loudly (resolve_operand's
+                 * generic default case) rather than guess. */
                 if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
                 uint16_t base_syt = ins->operands[0].data;
