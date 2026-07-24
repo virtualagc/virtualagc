@@ -173,6 +173,23 @@ run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
 run ./run_local_fixture.sh matrix_sub "$(printf ' 5.0000000E+00\n 3.0000000E+00\n 4.0000000E+00')"
+# User-reported (047-ROWS.hal's `M$(I,*) = C * MM$(I,*);`): a MATRIX
+# row-partition select used as an *assignment receiver* failed with
+# "MASN/VASN: receiver must be SYT" -- OP_MASN/OP_VASN only ever accepted
+# a plain whole-SYT destination, never a QUAL_VAC row-select result (the
+# same DSUB asterisk-partition mechanism already readable as a WRITE/CALL
+# source, class-0/DSUB.md). Fixed by having DSUB's row-select (`M$(i,*)`)
+# and whole-vector (`V$(*)`) cases -- both genuinely *contiguous* in
+# row-major storage -- additionally mark their VAC result as a live,
+# writable view into the base MATRIX/VECTOR's own storage (new
+# is_container_ref/container_ref_syt/container_ref_offset fields,
+# state.h), which MASN/VASN now recognizes and writes straight back
+# into instead of failing. A column select (`M$(*,j)`) isn't contiguous
+# and is deliberately left unmarked, so it still correctly fails the
+# same way. Exercises all three idioms from the real program: scaling a
+# row by a constant, adding a scaled row to another row, and swapping
+# two rows via a VECTOR temporary.
+run ./run_local_fixture.sh matrix_row_assign "$(printf ' 2.2000000E+01      2.4000000E+01      2.6000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 1.1000000E+01      1.2000000E+01      1.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01')"
 run ./run_local_fixture.sh matvec "$(printf ' 6.0000000E+00\n 8.0000000E+00\n 1.0000000E+01\n 1.2000000E+01\n 1.9000000E+01\n 2.2000000E+01\n 4.3000000E+01\n 5.0000000E+01')"
 run ./run_local_fixture.sh vec "$(printf ' 3.2000000E+01\n-3.0000000E+00\n 6.0000000E+00\n-3.0000000E+00')"
 run ./run_local_fixture.sh bit_conv "$(printf ' 1.2000000E+01\n12\nBEQU-TRUE\n         12')"

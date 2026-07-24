@@ -1,0 +1,23 @@
+ TEST_MATRIX_ROW_ASSIGN:
+ PROGRAM;
+    DECLARE MM MATRIX INITIAL(11, 12, 13, 21, 22, 23, 31, 32, 33),
+            M MATRIX,
+            TEMP VECTOR,
+            C SCALAR INITIAL(2),
+            I INTEGER INITIAL(1),
+            J INTEGER INITIAL(2);
+
+    M = MM;
+M    M    = C MM   ;
+S     I,*       I,*
+    WRITE(6) M;
+
+    M = MM;
+M    TEMP = M   ;
+S            I,*
+M    M    = M   ;
+S     I,*    J,*
+M    M    = TEMP;
+S     J,*
+    WRITE(6) M;
+ CLOSE TEST_MATRIX_ROW_ASSIGN;

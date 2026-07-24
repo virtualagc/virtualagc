@@ -220,6 +220,23 @@ typedef struct {
                                   * final value per slot freed again in bulk by interp_cleanup(). */
     size_t container_count;
     int container_rows, container_cols; /* is_container: shape, same convention as halmat_syt_entry_t's rows/cols */
+    /* Set *in addition to* is_container above (not exclusive with it --
+     * deliberately additive, so the existing is_container-only read path
+     * above is completely unaffected) when this container is also a
+     * contiguous *live view* into another SYT's own storage, rather than
+     * a fully independent computed result -- currently only DSUB's
+     * asterisk-partition row-select (`M$(i,*)`) and whole-vector
+     * (`V$(*)`) cases set this; a column select (`M$(*,j)`) isn't
+     * contiguous in row-major storage and leaves this false. Lets
+     * MASN/VASN (interp.c) write straight back into the selected
+     * row/vector when such a slot is used as an *assignment receiver*
+     * (`M$(I,*) = ...;`) instead of only ever being readable -- user-
+     * reported (047-ROWS.hal). container_count above is reused as the
+     * write's own element count (the two are always identical: this is
+     * the same slot the read-side count already describes). */
+    bool is_container_ref;
+    uint16_t container_ref_syt;
+    size_t container_ref_offset;
     bool is_struct_ref;      /* is_ref=false, !is_string, !is_bits, !is_container: true if this slot
                                * holds an EXTN-resolved structure reference (class-0/EXTN.md) --
                                * (struct_base_syt, struct_field_syt), consumed by a following TASN/
