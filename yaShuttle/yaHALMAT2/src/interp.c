@@ -6754,11 +6754,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (state->symbol_active_task[task_sym] != -1) {
                     /* A *different* process targeting a task that's still
                      * active (not the self-reschedule case just above) --
-                     * genuinely still unsupported: there's no "rearm in
-                     * place" reading available here, since this calling
-                     * process isn't the one occupying that task's sole
-                     * queue entry. */
-                    fail(state, "task already active (concurrent re-scheduling of the same task by a different process not yet implemented)");
+                     * this is not a placeholder gap, it's a genuine HAL/S
+                     * language constraint violation, correctly rejected:
+                     * USA003087 Sec. 13.4 (p. 160/13-2) states "only one
+                     * process derived from a given task block may be
+                     * active at any given time", where "active" means "in
+                     * the process queue" (the same definition that made
+                     * the self-reschedule case above legal -- that case
+                     * doesn't add a second queue entry, this one would).
+                     * There's no "rearm in place" reading available here
+                     * the way there is for self-reschedule, since this
+                     * calling process isn't the one occupying that task's
+                     * sole queue entry -- see class-0/SCHD.md's
+                     * "Self-Rescheduling Tasks" section, "Genuinely still
+                     * unsupported, and still correctly rejected". */
+                    fail(state, "SCHEDULE: task is already active -- only one process derived from a given task block may be active at any given time (USA003087 Sec. 13.4)");
                     break;
                 }
                 if (state->task_count >= HALMAT_MAX_TASKS) { fail(state, "too many concurrent tasks"); break; }
