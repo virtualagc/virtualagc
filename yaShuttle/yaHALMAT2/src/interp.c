@@ -3060,6 +3060,44 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
 
+                /* Component at-partition ("length AT position") subscript
+                 * on a whole VECTOR -- DSUB.md's confirmed table: TAG1=3 on
+                 * both subscript operand words (the "component" column's
+                 * at-partition row, distinct from TAG1=7's ARRAY-dimension
+                 * at-partition, which isn't implemented here), argument
+                 * order confirmed "length AT position" (`V1(2 AT 2)` means
+                 * 2 elements starting at 1-indexed position 2), matching
+                 * the already-confirmed ARRAY-dimension case's own operand
+                 * order. Produces a VECTOR-shaped VAC container result,
+                 * same mechanism as the asterisk case just above. Only the
+                 * single-dimension VECTOR/ARRAY case (`base->rows == 0`) is
+                 * implemented -- a MATRIX at-partition (`M1(2 AT 1,1)`)
+                 * needs a third operand for the other, plainly-indexed
+                 * dimension and isn't handled, so it deliberately falls
+                 * through to the ordinary per-dimension path below (which
+                 * will fail loudly on the unexpected TAG1 rather than
+                 * silently misreading length/position as raw indices).
+                 * User-reported (046-XYZ_TO_POLAR.hal's
+                 * `ABVAL(P$(2 AT 1))`, `P` a `VECTOR`). */
+                if (num_indices == 2 && base->rows == 0 &&
+                    ins->operands[1].tag1 == 3 && ins->operands[2].tag1 == 3) {
+                    resolved_value_t lenv, posv;
+                    if (!resolve_operand(state, &ins->operands[1], &lenv)) break;
+                    if (!resolve_operand(state, &ins->operands[2], &posv)) break;
+                    int32_t len = rv_to_integer(&lenv);
+                    int32_t pos = rv_to_integer(&posv) - 1; /* HAL/S is 1-indexed */
+                    if (len < 0) len = 0;
+                    if (pos < 0) pos = 0;
+                    if (len > HALMAT_CONTAINER_CAPACITY || (size_t)pos + (size_t)len > base->element_count) {
+                        fail(state, "DSUB: at-partition subscript out of range");
+                        break;
+                    }
+                    halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
+                    for (int32_t k = 0; k < len; k++) buf[k] = base->elements[(size_t)pos + k];
+                    if (!store_container_result(state, ins->index, buf, (size_t)len, 0, len)) break;
+                    break;
+                }
+
                 bool ok = true;
                 size_t offset = 0;
                 if (base->rows > 0 && num_indices == 2) {
@@ -4502,9 +4540,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
 
                 switch (ins->tag) {
-                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: {
-                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND: through
-                         * double via libm, same documented precision
+                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: case 37: {
+                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND/ARCTAN:
+                         * through double via libm, same documented precision
                          * compromise as SEXP (no hex-float algorithm for
                          * these in the extracted AP-101S material). Domain/
                          * overflow guards on EXP/LOG/SIN/COS/TAN/SQRT below
@@ -4513,7 +4551,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * libm's NaN/Inf for out-of-domain input silently
                          * propagate into the packed result -- see
                          * STATUS.md's Class 0 section for the fuller
-                         * per-error trace and citation. */
+                         * per-error trace and citation. ARCTAN needs no such
+                         * guard: [USA003087] Appendix B gives it no
+                         * restricted domain ("ARCTAN(α) tan-1 α", unlike
+                         * ARCSIN/ARCCOS/ARCTANH's documented |α|<1 limits),
+                         * and USA003090 Appendix C's error table has no
+                         * ARCTAN-specific entry either (only ARCTANH/
+                         * ARCTAN2 do) -- libm's plain `atan()` is total over
+                         * every representable double already. */
                         double x = halmat_scalar_to_double(rv_to_scalar(&a));
                         bool dbl = rv_to_scalar(&a).double_precision;
                         double r;
@@ -4587,7 +4632,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     r = sqrt(x);
                                 }
                                 break;
-                            case 33: default: r = round(x); break;
+                            case 33: r = round(x); break;
+                            case 37: r = atan(x); break;
+                            default: r = round(x); break;
                         }
                         if (redirected) break;
                         state->vac[ins->index].is_ref = false;

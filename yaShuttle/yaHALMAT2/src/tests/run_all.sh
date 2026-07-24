@@ -227,6 +227,30 @@ run ./run_local_fixture.sh mshp "$(printf ' 1.0000000E+00      2.0000000E+00    
 # function's own QUAL_SYT whole-array-during-replay case.
 run ./run_local_fixture.sh sshp_ishp "$(printf ' 1.5000000E+00      2.5000000E+00\n 1.0000000E+01      2.0000000E+01')"
 run ./run_local_fixture.sh bfnc "$(printf ' 1.4142132E+00\n 3.5000000E+00\n-1.0000000E+00\n 2.0000000E+00\n 5.0000000E+00')"
+# User-reported (046-XYZ_TO_POLAR.hal's `ARCTAN(P$2 / P$1) DEGREES_PER_RADIAN`):
+# BFNC selector 37 (ARCTAN, class-0/BFNC.md's alphabetical XMSHP... no, BI_NAME
+# built-in-function table -- ABS=1,...,ARCCOS=35,ARCSIN=36,ARCTAN=37) was
+# entirely unimplemented ("unknown/unimplemented built-in function selector
+# 37"). USA003087 Appendix B: ARCTAN(a) = tan^-1(a), no restricted domain
+# (unlike ARCSIN/ARCCOS/ARCTANH's documented |a|<1 limits) and no
+# USA003090 Appendix C error-fixup entry either -- a plain libm atan() call
+# is correct with no guard needed, added alongside the existing ABS/COS/
+# EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND selector group.
+run ./run_local_fixture.sh arctan " 7.8539813E-01"
+# Same 046-XYZ_TO_POLAR.hal report, second bug hit immediately after fixing
+# ARCTAN above: `ABVAL(P$(2 AT 1))` ("2 elements starting at position 1", a
+# VECTOR sub-vector slice) failed with "operand is not a MATRIX/VECTOR
+# intermediate result". class-0/DSUB.md already fully documented this wire
+# shape from an earlier session (TAG1=3 on both subscript operand words --
+# the "component" at-partition row, distinct from TAG1=7's ARRAY-dimension
+# at-partition -- argument order confirmed "length AT position") but the
+# interpreter never implemented it, only the asterisk/plain-index kinds.
+# Fixed with a dedicated OP_DSUB branch (single-dimension VECTOR/ARRAY
+# only, matching what's confirmed/needed -- a MATRIX at-partition needs a
+# third operand for the other, plainly-indexed dimension and isn't
+# handled) producing a VECTOR-shaped VAC container result, same mechanism
+# the existing asterisk-partition case already uses.
+run ./run_local_fixture.sh vec_atpartition "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.6055508E+00')"
 run ./run_local_fixture.sh minv "$(printf ' 5.9999996E-01\n-6.9999999E-01\n-1.9999999E-01\n 3.9999998E-01')"
 run ./run_local_fixture.sh bfnc_inv "$(printf ' 5.9999996E-01\n 3.9999998E-01')"
 # BFNC selector 3 (DET, class-0/BFNC.md): a whole-MATRIX argument (`WRITE(6)
