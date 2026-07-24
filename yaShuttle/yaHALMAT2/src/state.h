@@ -635,6 +635,29 @@ struct halmat_state {
             size_t container_count;
             int container_rows, container_cols;
             bool container_is_integer;
+            /* WRITE only (kind == 2): a whole BIT or CHARACTER ARRAY
+             * argument (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
+             * `ARRAY(4) BOOLEAN`) -- the same unreplayed QUAL=SYT/TAG1=
+             * class shape as `is_container` just above (TAG1=1=BIT/
+             * 2=CHARACTER instead of 3=MATRIX/4=VECTOR/6=INTEGER), but a
+             * genuinely different storage kind (`bit_elements`/
+             * `char_elements`, not `elements`/halmat_scalar_t) so it
+             * can't share that field. At most one of is_container/
+             * is_bit_array/is_char_array is ever true for a given item.
+             * `bit_array`/`char_array` borrow the SYT's own storage, same
+             * non-owned/valid-until-flush_write convention as `container`.
+             * `container_count` (shared) gives the element count either
+             * way. `bit_array_width` is the declared per-element BIT(n)
+             * width (symtab lookup, same technique as the existing
+             * single-BIT-value `bit_width` field just below) -- needed
+             * per element the same way a lone BIT value needs it.
+             * User-reported (120-EXAMPLE_A.hal's `WRITE(6) AVERAGE,
+             * DATA_VALID;`). */
+            bool is_bit_array;
+            const uint32_t *bit_array;
+            int bit_array_width;
+            bool is_char_array;
+            char *const *char_array;
             /* READ/READALL only (kind != 2): the destination operand,
              * captured raw by XXAR rather than resolved to a value, plus
              * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that

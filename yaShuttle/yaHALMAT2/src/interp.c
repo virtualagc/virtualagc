@@ -1398,10 +1398,14 @@ static void precompute_loop_targets(halmat_state_t *state) {
  * same way: a paragraph of zero or more instructions, replayed N times,
  * is a correct no-op replay when N-times-replaying an empty or already-
  * scalar paragraph doesn't change anything) and records the preceding
- * paragraph (from the last statement boundary up to the ADLP) as
- * replayable. Multiple consecutive ADLPs before one DLPE (the multi-
- * dimensional-array case) use only the last ADLP's element count --
- * documented simplification, not exercised by any fixture. */
+ * paragraph as replayable -- corrected in a later session; see the
+ * ADLP/IDLP branch's own comment below for the full account of what was
+ * wrong with the original single-fixed-rule version (always the whole
+ * enclosing statement, back to the last SMRK) and the two different,
+ * independent ways real programs broke it. Multiple consecutive ADLPs
+ * before one DLPE (the multi-dimensional-array case) use only the last
+ * ADLP's element count -- documented simplification, not exercised by
+ * any fixture. */
 static void precompute_arrayed_paragraphs(halmat_state_t *state) {
     size_t n = state->prog->count;
     state->arrayed_paragraph_end = malloc(n * sizeof(size_t));
@@ -1437,9 +1441,101 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                 }
                 j++;
             }
-            if (j < n && state->prog->instrs[j].opcode == OP_DLPE && count > 0) {
-                state->arrayed_paragraph_end[boundary] = j + 1;
-                state->arrayed_paragraph_count[boundary] = count;
+            if (j < n && state->prog->instrs[j].opcode == OP_DLPE && count > 0 && i > 0 &&
+                state->prog->instrs[i - 1].opcode != OP_SFAR) {
+                /* The paragraph ADLP/IDLP trails and replays *starts* at
+                 * the single instruction immediately before this chain
+                 * (i-1) -- confirmed by every "one XXAR/SINT/VINT/BASN,
+                 * then ADLP(count), then DLPE" trace seen throughout
+                 * this project, including the multi-item-statement case
+                 * (`WRITE(6) AVERAGE, DATA_VALID;`, `DATA_VALID` an
+                 * `ARRAY(4) BOOLEAN`): `DATA_VALID`'s own XXAR is *at*
+                 * i-1, immediately preceding its own ADLP, so this rule
+                 * already correctly excludes `AVERAGE`'s separate,
+                 * earlier XXAR without any special-casing -- user-
+                 * reported, 120-EXAMPLE_A.hal, found investigating a
+                 * related whole-BIT-ARRAY-argument fix. (An intermediate
+                 * version of this fix instead tracked "position after
+                 * the most recently-seen XXAR/SFAR" as an alternate,
+                 * *later* boundary candidate than i-1 -- wrong: for a
+                 * whole-ARRAY/structure-copy WRITE argument, or the
+                 * `TSUB`/structure-copy-initialization shape, the item's
+                 * own XXAR sitting at i-1 must stay *included* in its
+                 * own replay, not be treated as an exclusion marker
+                 * merely for occupying that position -- confirmed
+                 * regressing test_tsub/test_structcopy_init before this
+                 * was caught and reverted back to the simpler, correct
+                 * i-1 rule below.)
+                 *
+                 * `!= OP_SFAR`: the one confirmed exception to "i-1
+                 * always starts the paragraph" -- a shaping-function
+                 * whole-array argument's own SFAR (`MAX(SA1)`/`SUM(SA1)`/
+                 * etc., class-0/LFNC.md) also trails an ADLP/DLPE pair,
+                 * but SFAR's own handler always appends exactly one
+                 * entry to shape_pending.items[] no matter how many
+                 * times it fires (correct as-is for other shaping
+                 * functions' genuinely-repeated, *separate* SFAR calls,
+                 * e.g. `SCALAR(S1, S2)`'s two real SFAR instructions --
+                 * one call each, not a replay of one) and LFNC's own
+                 * handler expects to see it exactly once, resolving the
+                 * whole array itself via resolve_container rather than
+                 * accumulating per-element replay results -- so
+                 * excluded here entirely (no arrayed_paragraph_end entry
+                 * at all, i.e. genuinely not replayed, confirmed
+                 * regressing test_lfnc_array otherwise).
+                 *
+                 * Beyond i-1: a genuine computed *expression* assigned to
+                 * a whole ARRAY (`A3 = A1 + A2;`: SADD computing each
+                 * element's sum, immediately followed by SASN storing
+                 * it, both wrapped in the *same* ADLP/DLPE) needs more
+                 * than the single instruction at i-1 replayed -- SASN's
+                 * own source operand is a `QUAL_VAC` reference to SADD's
+                 * freshly-computed result, so replaying SASN alone would
+                 * just copy the *same* stale value N times instead of
+                 * recomputing it fresh per element (confirmed regressing
+                 * test_adlp otherwise). Handled generally, not just for
+                 * this one shape: walk backward from i-1, and whenever
+                 * the instruction at the current `start` has a
+                 * `QUAL_VAC` operand pointing to an *earlier* position
+                 * still within this same statement, extend `start` back
+                 * to that position and keep walking from there --
+                 * correctly pulls SADD in behind SASN, and generalizes
+                 * to deeper same-statement VAC dependency chains the
+                 * same way, while never reaching past `boundary` into a
+                 * genuinely separate, earlier statement or list item.
+                 *
+                 * A `QUAL_VAC` operand's own `data` is the *raw HALMAT
+                 * word position* of its producing instruction (this
+                 * project's own established VAC-addressing convention --
+                 * `state->vac[]` is indexed the same way, via each
+                 * instruction's own `.index` field, not by `instrs[]`'s
+                 * *logical* array position used everywhere else in this
+                 * function/`state->pc`) -- so it can't be compared
+                 * against `start`/`boundary` directly; the inner
+                 * backward scan below converts it to the matching
+                 * `instrs[]` logical index by comparing against each
+                 * candidate entry's own `.index` (monotonically
+                 * increasing with logical position, so a plain linear
+                 * walk suffices). */
+                size_t start = i - 1;
+                bool progress = true;
+                while (progress && start > boundary) {
+                    progress = false;
+                    const halmat_instr_t *cur = &state->prog->instrs[start];
+                    for (uint8_t k = 0; k < cur->operand_count; k++) {
+                        if (cur->operands[k].qual != QUAL_VAC) continue;
+                        size_t target_word = cur->operands[k].data;
+                        size_t candidate = start;
+                        while (candidate > boundary && state->prog->instrs[candidate - 1].index >= target_word) candidate--;
+                        if (candidate < start && candidate >= boundary && state->prog->instrs[candidate].index == target_word) {
+                            start = candidate;
+                            progress = true;
+                            break;
+                        }
+                    }
+                }
+                state->arrayed_paragraph_end[start] = j + 1;
+                state->arrayed_paragraph_count[start] = count;
             }
         } else if (opcode == OP_SLRI) {
             /* STRI/SLRI/ELRI/ETRI: repeated-initialize group for the
@@ -2036,6 +2132,42 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                         halmat_scalar_format(elems[k], buf, sizeof(buf));
                     }
                     emit_write_field(state, out, buf, &col, &need_sep);
+                }
+            }
+        } else if (state->io_pending.items[i].is_bit_array) {
+            /* Whole BIT ARRAY WRITE argument (OP_XXAR above, state.h's
+             * is_bit_array comment): one binary-digit-string field per
+             * element, same per-element format as a lone BIT value
+             * (format_bit_field) -- flat sequential layout like VECTOR/
+             * plain-ARRAY above (BIT ARRAY has no MATRIX-like row
+             * grouping). */
+            size_t count = state->io_pending.items[i].container_count;
+            const uint32_t *bits = state->io_pending.items[i].bit_array;
+            int width = state->io_pending.items[i].bit_array_width;
+            for (size_t k = 0; k < count; k++) {
+                char buf[48];
+                format_bit_field(bits[k], width, buf);
+                if (unpaged) {
+                    char *quoted = quote_character_for_unpaged(buf);
+                    emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep);
+                    free(quoted);
+                } else {
+                    emit_write_field(state, out, buf, &col, &need_sep);
+                }
+            }
+        } else if (state->io_pending.items[i].is_char_array) {
+            /* Whole CHARACTER ARRAY WRITE argument (OP_XXAR above,
+             * state.h's is_char_array comment): one field per element,
+             * same per-element format as a lone CHARACTER value. */
+            size_t count = state->io_pending.items[i].container_count;
+            char *const *strs = state->io_pending.items[i].char_array;
+            for (size_t k = 0; k < count; k++) {
+                if (unpaged) {
+                    char *quoted = quote_character_for_unpaged(strs[k]);
+                    emit_write_field(state, out, quoted ? quoted : strs[k], &col, &need_sep);
+                    free(quoted);
+                } else {
+                    emit_write_field(state, out, strs[k], &col, &need_sep);
                 }
             }
         } else if (state->io_pending.items[i].is_string) {
@@ -5576,12 +5708,48 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                       state->vac[ins->operands[0].data].is_container;
                     if (whole_syt || whole_vac) {
                         if (whole_syt && (ins->operands[0].tag1 == 1 || ins->operands[0].tag1 == 2)) {
-                            fail(state, "whole BIT/CHARACTER ARRAY WRITE/call arguments are not yet implemented");
+                            /* Whole BIT/CHARACTER ARRAY argument
+                             * (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
+                             * `ARRAY(4) BOOLEAN`) -- genuinely different
+                             * storage (bit_elements/char_elements, not
+                             * elements/halmat_scalar_t), so captured
+                             * separately from the numeric is_container
+                             * path below (state.h's is_bit_array/
+                             * is_char_array comment). User-reported
+                             * (120-EXAMPLE_A.hal's `WRITE(6) AVERAGE,
+                             * DATA_VALID;`). */
+                            ensure_container(state, ins->operands[0].data);
+                            halmat_syt_entry_t *e = &state->syt[ins->operands[0].data];
+                            state->io_pending.items[state->io_pending.item_count].is_container = false; /* stale-flag clear, same reason as elsewhere in this function */
+                            state->io_pending.items[state->io_pending.item_count].is_bit_array = false;
+                            state->io_pending.items[state->io_pending.item_count].is_char_array = false;
+                            if (ins->operands[0].tag1 == 1) {
+                                if (!e->bit_elements) { fail(state, "WRITE/call argument: expected a BIT ARRAY"); break; }
+                                int width = 1;
+                                if (state->symtab) {
+                                    const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                                    if (sym && sym->bit_width > 0) width = sym->bit_width;
+                                }
+                                state->io_pending.items[state->io_pending.item_count].is_bit_array = true;
+                                state->io_pending.items[state->io_pending.item_count].bit_array = e->bit_elements;
+                                state->io_pending.items[state->io_pending.item_count].bit_array_width = width;
+                            } else {
+                                if (!e->char_elements) { fail(state, "WRITE/call argument: expected a CHARACTER ARRAY"); break; }
+                                state->io_pending.items[state->io_pending.item_count].is_char_array = true;
+                                state->io_pending.items[state->io_pending.item_count].char_array = e->char_elements;
+                            }
+                            state->io_pending.items[state->io_pending.item_count].container_count = e->element_count;
+                            state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
+                            state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
+                            state->io_pending.item_count++;
                             break;
                         }
                         halmat_scalar_t *elems; size_t count; int rows, cols;
                         if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
                         state->io_pending.items[state->io_pending.item_count].is_container = true;
+                        state->io_pending.items[state->io_pending.item_count].is_bit_array = false; /* stale-flag
+                            * clear, same reason as the plain-value path's own is_container reset below */
+                        state->io_pending.items[state->io_pending.item_count].is_char_array = false;
                         state->io_pending.items[state->io_pending.item_count].container = elems;
                         state->io_pending.items[state->io_pending.item_count].container_count = count;
                         state->io_pending.items[state->io_pending.item_count].container_rows = rows;
@@ -5619,6 +5787,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->io_pending.items[state->io_pending.item_count].is_container = false; /* items[] slots
                     * are reused across WRITE statements without zeroing -- a stale true from a
                     * previous statement's whole-container item at this same slot must be cleared. */
+                state->io_pending.items[state->io_pending.item_count].is_bit_array = false;
+                state->io_pending.items[state->io_pending.item_count].is_char_array = false;
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].is_bits = (a.kind == RV_BITS);
@@ -5956,6 +6126,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (!state->io_pending.items[i].is_assign) continue;
                         uint32_t param_syt = (uint32_t)state->io_pending.call_target + 1 + i;
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: parameter SYT out of range"); break; }
+                        if (syt_is_array_shaped(state, (uint16_t)param_syt)) {
+                            /* Whole ARRAY/VECTOR/MATRIX ASSIGN parameter
+                             * (`PROCEDURE(...) ASSIGN(WHOLE_ARRAY);`) --
+                             * resolve_operand/write_destination below are
+                             * for a single value; this needs a bulk
+                             * element-storage copy instead, same three
+                             * storage kinds ensure_container itself
+                             * distinguishes (numeric/BIT/CHARACTER).
+                             * User-reported (120-EXAMPLE_A.hal's `CALL
+                             * ... ASSIGN(DATA_VALID, AVERAGE);`,
+                             * `DATA_VALID` an `ARRAY(4) BOOLEAN`). */
+                            if (state->io_pending.items[i].dest_operand.qual != QUAL_SYT) {
+                                fail(state, "ASSIGN: whole-ARRAY receiver must be a plain SYT variable");
+                                break;
+                            }
+                            ensure_container(state, (uint16_t)param_syt);
+                            halmat_syt_entry_t *pe = &state->syt[param_syt];
+                            uint16_t dest_syt = state->io_pending.items[i].dest_operand.data;
+                            if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: receiver SYT out of range"); break; }
+                            ensure_container(state, dest_syt);
+                            halmat_syt_entry_t *de = &state->syt[dest_syt];
+                            if (pe->element_count != de->element_count) {
+                                fail(state, "ASSIGN: whole-ARRAY shape mismatch (%zu vs %zu elements)",
+                                     pe->element_count, de->element_count);
+                                break;
+                            }
+                            if (pe->elements && de->elements) {
+                                memcpy(de->elements, pe->elements, pe->element_count * sizeof(halmat_scalar_t));
+                                de->rows = pe->rows;
+                                de->cols = pe->cols;
+                            } else if (pe->bit_elements && de->bit_elements) {
+                                memcpy(de->bit_elements, pe->bit_elements, pe->element_count * sizeof(uint32_t));
+                            } else if (pe->char_elements && de->char_elements) {
+                                for (size_t k = 0; k < pe->element_count; k++) {
+                                    free(de->char_elements[k]);
+                                    de->char_elements[k] = dup_string(pe->char_elements[k]);
+                                }
+                            } else {
+                                fail(state, "ASSIGN: whole-ARRAY receiver's storage kind doesn't match the parameter's");
+                                break;
+                            }
+                            continue;
+                        }
                         halmat_operand_t param_op = {0};
                         param_op.qual = QUAL_SYT;
                         param_op.data = (uint16_t)param_syt;

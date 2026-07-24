@@ -518,6 +518,38 @@ run ./run_local_fixture.sh proc_matrix_precision "$(printf ' 1.5000000000000000E
 # procedure body's own first assignment establish its type correctly, the
 # same as any other never-yet-written procedure-local variable.
 run ./run_local_fixture.sh pcal_assign "$(printf ' 1.0000000E+01\n 1.0000000E+01')"
+# User-reported (120-EXAMPLE_A.hal's `WRITE(6) AVERAGE, DATA_VALID;`,
+# `DATA_VALID` an `ARRAY(4) BOOLEAN`): a whole BIT/CHARACTER ARRAY WRITE
+# or CALL argument failed loudly, entirely unimplemented -- new
+# is_bit_array/is_char_array io_pending item fields (state.h) borrow the
+# SYT's own bit_elements/char_elements storage, rendered in flush_write
+# the same per-element way a lone BIT/CHARACTER value already is.
+# Verifying this against the real corpus program surfaced two further,
+# genuinely separate bugs found and fixed in the same pass:
+# (1) the CALL/ASSIGN write-back mechanism (the batch's earlier PCAL
+# ASSIGN-form fix) didn't handle a whole-ARRAY ASSIGN parameter at all
+# (`CALL ... ASSIGN(DATA_VALID, AVERAGE);`) -- extended OP_XXND's
+# write-back loop with a bulk element-storage copy for that case,
+# alongside the existing single-value path.
+# (2) A genuine pre-existing, unrelated bug in precompute_arrayed_
+# paragraphs(): the ADLP/IDLP-trailed replay paragraph's start position
+# was computed from the *whole enclosing statement's* own start (the
+# last SMRK) unconditionally, which happens to be correct only when the
+# arrayed reference is the *first* thing in its statement -- for
+# `WRITE(6) AVERAGE, DATA_VALID;` specifically, that swept AVERAGE's own
+# earlier, unrelated XXAR into DATA_VALID's replay too, re-emitting
+# AVERAGE once per array element instead of once. Corrected to start
+# from the single instruction immediately preceding the ADLP/IDLP chain,
+# walking further back only through confirmed QUAL_VAC same-statement
+# dependencies (needed for e.g. `A3 = A1 + A2;`'s SADD+SASN pair, both
+# needing to replay together) and excluding a SFAR-preceded chain
+# entirely (a shaping-function whole-array argument, `MAX(SA1)`/etc.,
+# which must never be replayed) -- found via two real regression
+# fixtures (test_lfnc_array, test_adlp) this change itself initially
+# broke before landing on the general fix; see
+# precompute_arrayed_paragraphs()'s own comment for the full account.
+run ./run_local_fixture.sh write_bit_array "$(printf ' 3.5000000E+00     0     1     0     1')"
+run ./run_local_fixture.sh assign_array "$(printf ' 3.5000000E+00\n0     0     0     0')"
 # User-reported bug: a PROCEDURE calling a *sibling* PROCEDURE (both
 # nested directly in the same enclosing PROGRAM) failed with "call to
 # undefined procedure" -- USA003087 p. 22ff's block-name scoping rules
