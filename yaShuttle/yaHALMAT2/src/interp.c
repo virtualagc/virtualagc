@@ -1116,6 +1116,43 @@ static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
     return false;
 }
 
+/* Unravels one shaping-function argument (SFAR, class-0/SFAR.md) into
+ * `out`'s flat result buffer, per [USA003088] Sec. 6.6's general <arith
+ * conversion> rule 3: "[t]he data elements in each <expression> are
+ * unraveled in their natural sequence... The result of doing this for
+ * each argument in turn is a single linear string of data elements[,
+ * which] is then reformed or 'reraveled' to generate the result." A
+ * whole VECTOR/MATRIX/ARRAY argument (VECTOR/MATRIX's own rule 5:
+ * "VECTOR and MATRIX may have arguments of integer, scalar, vector, and
+ * matrix types only") contributes its own element_count elements in
+ * natural order; anything else (a plain scalar/integer expression, the
+ * only case VSHP/SSHP/ISHP/MSHP's callers previously assumed
+ * exclusively) contributes exactly one. Shared by OP_VSHP/SSHP/ISHP/MSHP
+ * below -- confirmed necessary for MSHP specifically (`MATRIX(X, Y, Z)`,
+ * each of X/Y/Z a whole VECTOR, 044-ORTHONORMAL.hal, user-reported), but
+ * the same unraveling rule is written generally for all four shaping
+ * functions, not just MSHP, so it isn't special-cased to MSHP alone.
+ * Returns the number of elements appended (0 on failure -- fail() is
+ * already called; genuinely zero-element arguments don't occur in this
+ * grammar, so 0 is an unambiguous error sentinel). */
+static size_t unravel_shaping_argument(halmat_state_t *state, const halmat_operand_t *op,
+                                        halmat_scalar_t *out, size_t out_capacity, size_t out_used) {
+    bool whole_syt = op->qual == QUAL_SYT && syt_is_array_shaped(state, op->data);
+    bool whole_vac = op->qual == QUAL_VAC && op->data < HALMAT_VAC_MAX && state->vac[op->data].is_container;
+    if (whole_syt || whole_vac) {
+        halmat_scalar_t *elems; size_t count; int rows, cols;
+        if (!resolve_container(state, op, &elems, &count, &rows, &cols)) return 0;
+        if (out_used + count > out_capacity) { fail(state, "shaping function: result too large"); return 0; }
+        memcpy(&out[out_used], elems, count * sizeof(halmat_scalar_t));
+        return count;
+    }
+    resolved_value_t item;
+    if (!resolve_operand(state, op, &item)) return 0;
+    if (out_used + 1 > out_capacity) { fail(state, "shaping function: result too large"); return 0; }
+    out[out_used] = rv_to_scalar(&item);
+    return 1;
+}
+
 /* Stores a computed MATRIX/VECTOR result (elems/count, freshly built by
  * the caller into a stack buffer -- copied here, not aliased) into a VAC
  * slot, for a following MASN/VASN or chained arithmetic op to consume.
@@ -4174,37 +4211,108 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->shape_pending.active = false;
                 break;
 
-            case OP_VSHP: {
-                /* List-form VECTOR(...) construction (class-0/VSHP.md):
-                 * own operand is the resulting length (IMD literal);
-                 * each pending SFAR argument resolves as a plain SCALAR
-                 * (unlike MSHP, whose arguments are themselves VECTORs
-                 * -- not implemented, see state.h). */
-                if (ins->operand_count != 1) { fail(state, "VSHP: expected 1 operand"); break; }
+            case OP_VSHP:
+            case OP_SSHP:
+            case OP_ISHP: {
+                /* List-form VECTOR(...)/SCALAR(...)/INTEGER(...)
+                 * construction (class-0/VSHP.md, SSHP.md, ISHP.md): own
+                 * operand = the resulting flat length (IMD literal); each
+                 * pending SFAR argument is unraveled via
+                 * unravel_shaping_argument (a whole VECTOR/MATRIX/ARRAY
+                 * argument contributes more than one element -- not just
+                 * plain scalars, [USA003088] Sec. 6.6 rule 5's "VECTOR
+                 * and MATRIX may have arguments of integer, scalar,
+                 * vector, and matrix types"; the *result* here is always
+                 * flat/1-D regardless, matching these three opcodes'
+                 * "linear array" semantic rule). Result is a flat
+                 * container of boxed halmat_scalar_t -- which HAL/S type
+                 * (VECTOR vs SCALAR ARRAY vs INTEGER ARRAY) this is
+                 * ultimately assigned into is entirely the destination's
+                 * own declared shape, not something this container
+                 * itself needs to tag (state.h's elements comment). MSHP
+                 * (matrix result, 2-D reraveling) gets its own case
+                 * below. */
+                if (ins->operand_count != 1) { fail(state, "VSHP/SSHP/ISHP: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 size_t length = (size_t)rv_to_integer(&a);
-                if (length != state->shape_pending.item_count) {
-                    fail(state, "VSHP: declared length %zu doesn't match %u arguments", length, state->shape_pending.item_count);
-                    break;
-                }
-                if (length > HALMAT_CONTAINER_CAPACITY) { fail(state, "VSHP: result too large"); break; }
+                if (length > HALMAT_CONTAINER_CAPACITY) { fail(state, "VSHP/SSHP/ISHP: result too large"); break; }
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                size_t used = 0;
                 bool ok = true;
-                for (size_t i = 0; ok && i < length; i++) {
-                    resolved_value_t item;
-                    if (!resolve_operand(state, &state->shape_pending.items[i], &item)) { ok = false; break; }
-                    result[i] = rv_to_scalar(&item);
+                for (uint8_t i = 0; ok && i < state->shape_pending.item_count; i++) {
+                    size_t added = unravel_shaping_argument(state, &state->shape_pending.items[i], result, HALMAT_CONTAINER_CAPACITY, used);
+                    if (added == 0) { ok = false; break; }
+                    used += added;
                 }
                 if (!ok) break;
+                if (used != length) {
+                    fail(state, "VSHP/SSHP/ISHP: declared length %zu doesn't match %zu unraveled elements", length, used);
+                    break;
+                }
                 if (!store_container_result(state, ins->index, result, length, 0, (int)length)) break;
                 break;
             }
 
-            case OP_MSHP:
-            case OP_SSHP:
-            case OP_ISHP:
-                fail(state, "list-form MATRIX(...)/SCALAR(...)/INTEGER(...) shaping functions are not yet implemented");
+            case OP_MSHP: {
+                /* List-form MATRIX(...) construction (class-0/MSHP.md):
+                 * [USA003088] Sec. 6.6's general <arith conversion> rule
+                 * governs this the same as VSHP/SSHP/ISHP above (unravel
+                 * every SFAR argument -- plain scalar/integer or whole
+                 * VECTOR/MATRIX alike -- into one flat sequence), but
+                 * MATRIX reravels that sequence into a genuinely 2-D
+                 * (row-major) result instead of a flat one (Sec. 6.6
+                 * semantic rule 4: "the row and column dimensions...
+                 * [t]heir product must therefore match the total number
+                 * of data elements implied by the argument(s)"). Two
+                 * confirmed real forms both reach here (`MATRIX(1,2,...,
+                 * 9)`, 9 separate plain-scalar SFARs; `MATRIX(X,Y,Z)`,
+                 * 044-ORTHONORMAL.hal's real call site, 3 whole-VECTOR
+                 * SFARs, user-reported gap) -- both compile to the
+                 * *identical* MSHP operand value (empirically confirmed
+                 * this session, `unHALMAT.py` against both), which rules
+                 * out inferring the result shape from shape_pending's own
+                 * item count/shape (right for the second form only, by
+                 * coincidence, and silently wrong for the first). Instead
+                 * MSHP's own operand -- an encoded dimension descriptor,
+                 * confirmed decimal 771=0x0303 for the unsubscripted
+                 * "assumed 3 by 3" default (Sec. 6.6 semantic rule 1) --
+                 * is decoded directly as high-byte=rows/low-byte=cols
+                 * (0x03,0x03 -> 3,3): the cleanest reading of a value
+                 * that's obviously an intentional byte-packed pair, not
+                 * an opaque bitfield. Only independently confirmed for
+                 * this one default-3x3 data point -- the explicit
+                 * `MATRIXm,n(...)` subscript form's real HAL/S-FC source
+                 * syntax wasn't found this session (several plausible
+                 * spellings from [USA003088]'s own typeset examples, e.g.
+                 * `MATRIX2,3(...)`/`MATRIX 2,3 (...)`, both rejected by
+                 * the real compiler) -- so this decode is untested
+                 * against any non-default shape; flagged here rather than
+                 * silently assumed reliable. */
+                if (ins->operand_count != 1) { fail(state, "MSHP: expected 1 operand"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                uint32_t descriptor = (uint32_t)rv_to_integer(&a);
+                size_t rows = (descriptor >> 8) & 0xFF;
+                size_t cols = descriptor & 0xFF;
+                if (rows == 0 || cols == 0 || rows * cols > HALMAT_CONTAINER_CAPACITY) {
+                    fail(state, "MSHP: unrecognized dimension descriptor %u (decoded %zux%zu)", descriptor, rows, cols);
+                    break;
+                }
+                halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                size_t used = 0;
+                bool ok = true;
+                for (uint8_t i = 0; ok && i < state->shape_pending.item_count; i++) {
+                    size_t added = unravel_shaping_argument(state, &state->shape_pending.items[i], result, HALMAT_CONTAINER_CAPACITY, used);
+                    if (added == 0) { ok = false; break; }
+                    used += added;
+                }
+                if (!ok) break;
+                if (used != rows * cols) {
+                    fail(state, "MSHP: %zux%zu result needs %zu elements, got %zu", rows, cols, rows * cols, used);
+                    break;
+                }
+                if (!store_container_result(state, ins->index, result, rows * cols, (int)rows, (int)cols)) break;
                 break;
+            }
 
             case OP_LFNC: {
                 /* MAX(array)/MIN(array), class-0/LFNC.md: selector 7=MAX,

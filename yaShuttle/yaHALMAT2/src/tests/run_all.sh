@@ -178,6 +178,34 @@ run ./run_local_fixture.sh vec "$(printf ' 3.2000000E+01\n-3.0000000E+00\n 6.000
 run ./run_local_fixture.sh bit_conv "$(printf ' 1.2000000E+01\n12\nBEQU-TRUE\n         12')"
 run ./run_local_fixture.sh init8 "$(printf '      43690\n 9.0000000E+00\n 9.0000000E+00\n 4.0000000E+00')"
 run ./run_local_fixture.sh vshp "$(printf ' 1.0000000E+00\n 2.0000000E+00\n 3.0000000E+00')"
+# User-reported (044-ORTHONORMAL.hal's `DETERMINANT = DET(MATRIX(X, Y,
+# Z));`/`V = MATRIX(A1, A2, A3) V;`): MSHP (list-form MATRIX(...)) was a
+# hard "not yet implemented" stub. [USA003088] Sec. 6.6's general <arith
+# conversion> rule governs MATRIX/VECTOR/SCALAR/INTEGER shaping functions
+# uniformly: every SFAR argument is "unraveled" into a flat sequence of
+# scalar elements (a whole VECTOR/MATRIX argument contributes its own
+# elements, not just one; a plain scalar/integer expression contributes
+# one), which is then "reraveled" into the result shape. Two real forms
+# both compile to the *identical* MSHP operand value (confirmed this
+# session via unHALMAT.py): the row-vector form 044-ORTHONORMAL.hal
+# actually uses (`MATRIX(X, Y, Z)`, 3 whole-VECTOR SFARs) and the flat
+# scalar-list form USA003087's own worked example shows
+# (`MATRIX(1,2,...,9)`, 9 plain-scalar SFARs) -- ruling out inferring the
+# result shape from the SFAR list's own count/shape (right for the first
+# form only, by coincidence). Fixed by decoding MSHP's own operand
+# directly instead (confirmed decimal 771=0x0303 for the unsubscripted
+# "assumed 3 by 3" default, [USA003088] Sec. 6.6 semantic rule 1 --
+# high-byte=rows/low-byte=cols) and unraveling every SFAR argument
+# uniformly via a new unravel_shaping_argument() helper, shared with
+# VSHP/SSHP/ISHP (which needed the same generalization -- they previously
+# only handled plain-scalar arguments, silently wrong for a
+# whole-VECTOR/MATRIX argument even though the same Sec. 6.6 rules cover
+# that case for them too). This fixture exercises both confirmed forms
+# into the same 3x3 result. See MSHP.md's own comment in interp.c for
+# why the explicit MATRIXm,n(...) subscript form's real source syntax
+# remains unconfirmed (several plausible spellings tried, all rejected by
+# the real compiler) -- not needed for either form this fixture covers.
+run ./run_local_fixture.sh mshp "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
 run ./run_local_fixture.sh bfnc "$(printf ' 1.4142132E+00\n 3.5000000E+00\n-1.0000000E+00\n 2.0000000E+00\n 5.0000000E+00')"
 run ./run_local_fixture.sh minv "$(printf ' 5.9999996E-01\n-6.9999999E-01\n-1.9999999E-01\n 3.9999998E-01')"
 run ./run_local_fixture.sh bfnc_inv "$(printf ' 5.9999996E-01\n 3.9999998E-01')"
