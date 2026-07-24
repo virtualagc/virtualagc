@@ -5418,6 +5418,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     state->io_pending.active = true;
                     state->io_pending.item_count = 0;
+                    state->io_pending.has_skip = false;
+                    state->io_pending.has_column = false;
                     state->io_pending.start_pc = state->pc;
                     if (ins->operands[0].qual == QUAL_SYT) {
                         state->io_pending.is_call = true;
@@ -5453,7 +5455,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * READALL with "VARIABLE IN READALL IS NOT OF
                      * CHARACTER TYPE".) */
                     if (ins->operands[0].tag2 != 0) {
-                        fail(state, "READ: I/O control specifiers (TAB/COLUMN/SKIP/LINE/PAGE) not yet implemented");
+                        /* I/O control specifier (class-0/XXAR.md's
+                         * confirmed TAG2 encoding: 1=TAB, 2=COLUMN,
+                         * 3=SKIP, 4=LINE, 5=PAGE) -- a specifier in its
+                         * own right, not a real destination, so captured
+                         * into io_pending's dedicated has_skip/skip_n /
+                         * has_column/column_n fields (state.h) instead of
+                         * items[]/item_count. Only SKIP/COLUMN are
+                         * implemented, applied by OP_READ/OP_RDAL before
+                         * processing the ordinary destination items --
+                         * user-reported (164-OUTER.hal's `READ(INFILE)
+                         * SKIP(0), COLUMN(9), PHI;` idiom). TAB/LINE/PAGE
+                         * have no confirmed READ-context meaning tested
+                         * against any fixture or corpus program, so they
+                         * still fail loudly rather than guessing. */
+                        if (ins->operands[0].tag2 != 2 && ins->operands[0].tag2 != 3) {
+                            fail(state, "READ: TAB/LINE/PAGE control specifiers are not yet implemented");
+                            break;
+                        }
+                        if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                        int32_t n = rv_to_integer(&a);
+                        if (ins->operands[0].tag2 == 3) {
+                            state->io_pending.has_skip = true;
+                            state->io_pending.skip_n = n;
+                        } else {
+                            state->io_pending.has_column = true;
+                            state->io_pending.column_n = n;
+                        }
                         break;
                     }
                     uint8_t cls = ins->operands[0].tag1;
@@ -5764,9 +5792,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 FILE *in = state->devices[device];
                 /* USA003087 Sec. 12.3 default positioning -- see
                  * discard_to_eol's own comment and device_read_started's
-                 * in state.h. */
-                if (state->device_read_started[device]) discard_to_eol(in);
-                else state->device_read_started[device] = true;
+                 * in state.h. SKIP(n) (state.h's has_skip/skip_n comment)
+                 * overrides the default single-line advance: SKIP(0)
+                 * suppresses it entirely -- re-read the current,
+                 * not-yet-fully-consumed line, 164-OUTER.hal's own idiom
+                 * (peek a line's leading token via READALL, then re-read
+                 * that same line's remaining fixed-column fields) -- and
+                 * (since no new line is being entered) device_line_start
+                 * deliberately stays whatever the *previous* read call on
+                 * this device already established it as. SKIP(n>=1)
+                 * advances n lines instead of the usual one. */
+                int skip_lines = state->io_pending.has_skip ? state->io_pending.skip_n : 1;
+                if (state->device_read_started[device]) {
+                    for (int s = 0; s < skip_lines; s++) discard_to_eol(in);
+                    if (skip_lines > 0) state->device_line_start[device] = ftell(in);
+                } else {
+                    state->device_read_started[device] = true;
+                    state->device_line_start[device] = ftell(in);
+                }
+                if (state->io_pending.has_column) {
+                    /* COLUMN(n) (state.h's has_column/column_n comment):
+                     * 1-indexed absolute column within the *current*
+                     * line, per [USA003087] Sec. 12.3 -- reposition
+                     * relative to this device's own tracked line-start
+                     * offset rather than wherever the previous field's
+                     * own fscanf happened to leave the cursor. */
+                    fseek(in, state->device_line_start[device] + (state->io_pending.column_n - 1), SEEK_SET);
+                }
                 /* Tracks "has any data field of this whole READ statement
                  * already been consumed yet" -- read_skip_separator's
                  * `require_separator` needs this, not simply "am I past

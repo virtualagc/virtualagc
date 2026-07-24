@@ -175,6 +175,24 @@ run ./run_read_fixture.sh read_semicolon "$(printf '1.5, 2.6;\n')" "$(printf -- 
 # its own field scan. This fixture's second iteration (input "4,5,6")
 # only reads correctly if that discard happens.
 run ./run_read_fixture.sh read_semicolon_loop "$(printf '1,2;\n4,5,6\n')" "$(printf -- ' 1.0000000E+00      2.0000000E+00     -9.5000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+# User-reported (164-OUTER.hal's `READALL(INFILE) VNAME; ... READ(INFILE)
+# SKIP(0), COLUMN(9), PHI;` idiom -- peek a line's leading fixed-column
+# token via READALL, then conditionally re-read that same line's
+# remaining fixed-column data): READ's TAB/COLUMN/SKIP/LINE/PAGE control
+# specifiers (class-0/XXAR.md's confirmed TAG2 encoding) failed loudly,
+# entirely unimplemented. Implemented SKIP(n)/COLUMN(n) only (TAB/LINE/
+# PAGE have no confirmed READ-context meaning and no fixture/corpus
+# program needs them -- still fail loudly): a new per-device
+# device_line_start ftell() offset (state.h), updated whenever a newline
+# is actually consumed, lets COLUMN(n) seek to an absolute column within
+# the *current* line (not wherever the previous field's own fscanf
+# happened to leave the cursor); SKIP(0) suppresses the usual single-
+# line advance entirely (deliberately leaving device_line_start
+# untouched -- still the same line), SKIP(n>=1) advances n lines. Works
+# even over a genuine non-seekable pipe (glibc's stdio buffering permits
+# an already-buffered-data-only fseek/ftell without a real lseek()
+# syscall), confirmed directly against this exact fixture.
+run ./run_read_fixture.sh read_skip_column "$(printf 'PHI     1.5\nALPHA   2.5\nMODE    3\nEND\n')" "$(printf ' 1.5000000E+00      2.5000000E+00               3')"
 # User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, X a VECTOR(3)):
 # READ against a whole VECTOR/MATRIX destination failed outright
 # ("only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT

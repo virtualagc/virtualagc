@@ -529,6 +529,25 @@ struct halmat_state {
      * discard, matching the "first...positions at line 1" case above. */
     bool device_read_started[HALMAT_DEVICE_MAX];
 
+    /* `ftell()` offset of the start of the line the device is currently
+     * positioned within -- used by READ's COLUMN(n) control specifier
+     * ([USA003087] Sec. 12.3/12.4's TAB/COLUMN/SKIP/LINE/PAGE "pseudo-
+     * functions") to reposition to an absolute column within the
+     * *current* line rather than wherever the previous field's `fscanf`
+     * happened to leave the cursor. Updated every time a newline is
+     * actually consumed (OP_READ/OP_RDAL, right after discard_to_eol());
+     * 0 is the correct initial value (matches device_read_started's own
+     * "not yet read from" default, memset-zeroed by interp_init -- the
+     * first read starts at the file's own beginning, offset 0). Only
+     * COLUMN(n) is implemented (state.h's own scope note doesn't extend
+     * to TAB/LINE/PAGE, which have no confirmed READ-context meaning and
+     * no fixture/corpus program needing them); WRITE's own pseudo-
+     * functions remain entirely unimplemented (no fixture needs them
+     * either). User-reported (164-OUTER.hal's `READ(INFILE) SKIP(0),
+     * COLUMN(9), PHI;` idiom -- peek a line's leading token via READALL,
+     * then re-read the same line's remaining fixed-column data). */
+    long device_line_start[HALMAT_DEVICE_MAX];
+
     /* --raf=I,R,N,F ("random-access file", per the historical HAL/S-FC
      * runtime's own option of the same name/shape -- see class-0/FILE.md)
      * device table. A *separate* device-number namespace from `devices`
@@ -662,6 +681,19 @@ struct halmat_state {
             bool is_assign;
         } items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
+        /* READ/READALL only (kind != 2, !is_call): SKIP(n)/COLUMN(n)
+         * control specifiers (class-0/XXAR.md's confirmed TAG2=2=COLUMN/
+         * 3=SKIP encoding -- an XXAR entry in its own right, not a real
+         * destination item, so captured here instead of in items[]/
+         * item_count). Frame-level (one SKIP/COLUMN per READ statement,
+         * not per-item) since every corpus/primary-source example has
+         * them appear once, "at the beginning of a READ" ([USA003087]
+         * Sec. 12.3) -- mid-list placement isn't modeled. See OP_READ's
+         * own comment (interp.c) for how these are applied. */
+        bool has_skip;
+        int32_t skip_n;
+        bool has_column;
+        int32_t column_n;
     } io_pending, io_pending_stack[8];
     uint8_t io_pending_sp; /* # of saved frames in io_pending_stack (the enclosing
                              * brackets of whatever nested XXST is active in io_pending
