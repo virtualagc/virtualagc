@@ -30,6 +30,20 @@ derive_expected() {
 run ./run_fixture.sh simple_do "$(derive_expected simple_do)"
 run ./run_fixture.sh ifelse "$(printf 'C IS FIVE\nDONE')"
 run ./run_fixture.sh while "TOTAL=              45"
+# User-reported (095-TAN_SUMS.hal): a bare `REPEAT;` statement inside a
+# DO UNTIL loop failed with "branch to undefined label 2". Traced to
+# PASS1.PROCS/SYNTHESI.xpl's actual REPEAT synthesis ("REPEATING:"):
+# REPEAT emits a BRA whose INL operand is the enclosing loop's own
+# DTST/ETST bookkeeping-label value PLUS ONE -- a number no LBL (or any
+# other instruction) ever separately materializes in the HALMAT stream;
+# real Pass 2 code generation resolves it structurally from loop-nesting
+# state this interpreter doesn't have. Fixed by synthesizing it in
+# precompute_labels(): label+1 now resolves to the exact same position
+# OP_ETST's own fall-through back-edge already computes
+# (etst_back_target -- the loop's per-cycle retest entry), since
+# REPEAT's "abandon this cycle, retest for the next" is exactly what
+# ETST itself already does on ordinary fall-through.
+run ./run_local_fixture.sh repeat "          6               5"
 run ./run_fixture.sh discrete_for "RESULT=              63"
 run ./run_fixture.sh case "RESULT=              20"    # reference tool's "30" is its own bug -- YERRORS.md
 run ./run_fixture.sh nested "K=             150"        # reference tool's "40" is its own bug -- YERRORS.md

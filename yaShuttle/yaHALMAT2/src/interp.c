@@ -1738,6 +1738,26 @@ static void precompute_labels(halmat_state_t *state) {
         } else if (ins->opcode == OP_ETST && ins->operand_count == 1) {
             uint16_t label = ins->operands[0].data;
             if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i + 1;
+            /* REPEAT's own target (user-reported, 095-TAN_SUMS.hal): confirmed
+             * against PASS1.PROCS/SYNTHESI.xpl's actual REPEAT synthesis
+             * (search "REPEATING:") that REPEAT emits a BRA whose INL operand
+             * is DO_LOC(TEMP)+1 -- one more than the *same* DO_LOC value EXIT
+             * emits verbatim (matching this enclosing loop's own DTST/ETST-
+             * shared label, registered just above). No LBL (or any other
+             * instruction) ever carries this "+1" value in the HALMAT stream
+             * itself -- Pass 2's real code generator resolves it structurally
+             * from DO_LOC's own loop-nesting bookkeeping, which this
+             * interpreter doesn't have, so it's synthesized here instead:
+             * REPEAT's intended landing spot ("abandon the rest of this
+             * cycle's body, retest for the next one") is exactly the same
+             * position OP_ETST's own fall-through back-edge already computes
+             * (etst_back_target, precompute_loop_targets() above, called
+             * before this function) -- dtst_pos+1, the loop's per-cycle
+             * retest entry, not dtst_pos itself (landing exactly on DTST
+             * would just redundantly re-run its own one-time setup). Without
+             * this, every real REPEAT statement failed with "branch to
+             * undefined label N". */
+            if (label < HALMAT_LABEL_MAX - 1) state->label_pos[label + 1] = state->etst_back_target[i];
         }
     }
 }

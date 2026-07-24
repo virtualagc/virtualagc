@@ -1,0 +1,13 @@
+ TEST_REPEAT:
+ PROGRAM;
+    DECLARE INTEGER, I INITIAL(0);
+    DECLARE INTEGER, COUNT INITIAL(0);
+    DO UNTIL I > 5;
+       I = I + 1;
+       IF I = 3 THEN DO;
+          REPEAT;
+       END;
+       COUNT = COUNT + 1;
+    END;
+    WRITE(6) I, COUNT;
+ CLOSE TEST_REPEAT;
