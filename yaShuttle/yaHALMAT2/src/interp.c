@@ -3426,6 +3426,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             ref_stride = (size_t)base->cols;
                         }
                     } else {
+                        /* Also reached (num_indices==2, base->rows==0) for
+                         * `V(N)` where V is declared ARRAY(n) VECTOR(m) --
+                         * an ARRAY-of-VECTOR, not a true MATRIX -- compiling
+                         * to the same "one plain index + one asterisk"
+                         * DSUB shape as M$(i,*), but this interpreter's
+                         * container model (halmat_syt_entry_t's elements/
+                         * rows/cols, state.h) has no way to distinguish
+                         * "ARRAY(3) VECTOR(3)" (9 flat elements, indexed as
+                         * 3 groups of 3) from a real MATRIX(3,3) (also 9
+                         * flat elements, but row-major 2D) -- both end up
+                         * rows==cols==0 via ensure_container(), since only
+                         * MATRIX gets real shape metadata from the symtab
+                         * today. Confirmed as the actual real-corpus
+                         * blocker this session (141-VSUM.hal's `TOTAL =
+                         * TOTAL + V(N);` inside `VSUM: FUNCTION(V) VECTOR;
+                         * DECLARE V ARRAY(*) VECTOR;`) -- and that same
+                         * file goes on to need at least two more currently-
+                         * unimplemented things even once this one's fixed:
+                         * ARRAY(*) assumed-size parameter binding (the
+                         * formal parameter's real length comes from
+                         * whatever's passed at the call site, not a fixed
+                         * declared size) and a whole-VECTOR FUNCTION RETURN
+                         * (already identified as a separate, deeper OP_RTRN
+                         * gap -- see that opcode's own comment, added
+                         * investigating external function return values).
+                         * All three are facets of the same missing "ARRAY-
+                         * of-VECTOR/MATRIX" shape-modeling architecture,
+                         * deliberately deferred together rather than
+                         * partially implemented -- new symtab shape
+                         * metadata (distinguishing this case from MATRIX)
+                         * would be needed before any of them could be
+                         * fixture-verified against a real compiled
+                         * program. */
                         fail(state, "DSUB: asterisk subscript with %u indices not yet implemented", num_indices);
                         break;
                     }
