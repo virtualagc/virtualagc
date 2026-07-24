@@ -430,13 +430,30 @@ struct halmat_state {
     halmat_vac_slot_t vac[HALMAT_VAC_MAX];
 
     int num_blanks; /* WRITE-item separator, Plan.md Phase 3 default 5 */
-    int line_length; /* WRITE data-field wrap column, USA003087 Sec. 12.2
-                       * ("unpaged output: [80 columns/line]") -- default 80,
+    int line_length; /* WRITE data-field wrap column -- default 80,
                        * overridable via --line-length (main.c). A field that
                        * wouldn't fit within this many columns starts a fresh
                        * line instead (flush_write, interp.c); MATRIX rows
                        * additionally force a new line unconditionally at
-                       * each row boundary regardless of this limit. */
+                       * each row boundary regardless of this limit.
+                       * *Correction (2026-07-23 session)*: an earlier
+                       * comment here cited this as USA003087 Sec. 12.2's
+                       * "unpaged output: [80 columns/line]" default, but
+                       * that citation doesn't actually apply to this
+                       * project's fixtures -- USA003090 Sec. 5.2's default-
+                       * channel-mode rule ("[c]hannels used only in WRITE
+                       * statements are presumed to be PAGED... if output
+                       * channel 6 is referred to by WRITE(6) statements
+                       * only, it will be PAGED by default") means channel 6
+                       * (used write-only, no DEVICE directive, in every
+                       * fixture checked) is actually PAGED by default, whose
+                       * own documented default LRECL is 133, not 80
+                       * (USA003090 Sec. 6.1.4's JCL defaults). 80 is kept
+                       * as-is here since it's not a demonstrated behavioral
+                       * bug and changing it would ripple through most of
+                       * the test suite's expected wrap points -- flagged
+                       * for the project owner to decide, not silently
+                       * changed. */
 
     /* Logical device number -> open file, see HALMAT_DEVICE_MAX above.
      * NULL = unmapped (READ/WRITE against it fails loudly). Not owned by
