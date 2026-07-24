@@ -278,6 +278,24 @@ run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      
 # the callee's own parameter storage by value, shape-checked against the
 # parameter's declared dimensions (USA003087 Sec. 11.2/11.4-11.5).
 run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00      0.0000000E+00\n      0.0000000E+00      0.0000000E+00      0.0000000E+00      0.0000000E+00      1.0000000E+00')" --line-length 200
+# User-reported bug (039-CORNERS.hal's `AB = 0;`, AB a VECTOR(2)): a
+# third distinct trigger for the same "outside an arrayed-paragraph
+# replay" error as the two fixtures above, this time via a plain scalar
+# assignment rather than a WRITE/CALL argument. [USA003087] Sec. 8.2
+# rule 3 (MATRIX)/rule 3 (VECTOR): the *only* legal non-container R-value
+# for a whole VECTOR/MATRIX receiver is the literal INTEGER 0, which
+# "creates a null matrix"/"creates a null vector" (every element
+# zeroed) -- confirmed by compiling `V = 0;`/`M = 0;` and reading the
+# real HALMAT: both compile as a single plain IASN (not VASN/MASN) with
+# the whole VECTOR/MATRIX SYT as the receiver, no ADLP wrapping, since
+# IASN also fires for a whole-number-literal source regardless of the
+# receiver's real declared type (class-6/IASN.md's already-documented
+# "leaking" behavior, here extended to VECTOR/MATRIX receivers too).
+# Fixed in write_destination's whole-array-shaped QUAL_SYT branch: a
+# zero-valued source against a VECTOR/MATRIX (not ARRAY, which has no
+# documented equivalent idiom) receiver zeros every element directly
+# instead of requiring arrayed_index >= 0.
+run ./run_local_fixture.sh vecmat_null_assign "$(printf ' 0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00\n 0.0000000E+00      0.0000000E+00')"
 # USA003087 Sec. 11.2/11.4's "precision conversion is allowed" MATRIX/
 # VECTOR argument-transmission rule: a SINGLE MATRIX argument (A) passed
 # to a DOUBLE parameter widens (scale_precision, the same exact bit-level

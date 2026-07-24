@@ -548,6 +548,18 @@ static bool syt_is_array_shaped(halmat_state_t *state, uint16_t syt_index) {
     return sym && (sym->shape == HALMAT_SHAPE_ARRAY || sym->shape == HALMAT_SHAPE_VECTOR || sym->shape == HALMAT_SHAPE_MATRIX);
 }
 
+/* Narrower than syt_is_array_shaped above -- true only for VECTOR/MATRIX,
+ * excluding ARRAY. Used by write_destination's "null VECTOR/MATRIX"
+ * special case just below, which is confirmed by [USA003087] Sec. 8.2
+ * for VECTOR/MATRIX receivers specifically; ARRAY has no equivalent
+ * documented idiom, so it's deliberately excluded rather than assumed to
+ * work the same way. */
+static bool syt_is_vector_or_matrix_shaped(halmat_state_t *state, uint16_t syt_index) {
+    if (!state->symtab) return false;
+    const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
+    return sym && (sym->shape == HALMAT_SHAPE_VECTOR || sym->shape == HALMAT_SHAPE_MATRIX);
+}
+
 static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, resolved_value_t *out) {
     memset(out, 0, sizeof(*out));
     switch (op->qual) {
@@ -752,6 +764,37 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
         }
         if (syt_is_array_shaped(state, op->data)) {
             if (state->arrayed_index < 0) {
+                /* [USA003087] Sec. 8.2 rule 3 (MATRIX) / rule 3 (VECTOR):
+                 * "The only condition under which the R-type is integer
+                 * is if it is the literal value zero. The assignment
+                 * then creates a null matrix [vector]" -- e.g. `M3 = 0;`/
+                 * `V2 = 0;` zero every element in one shot; any other
+                 * integer/scalar value (`M3 = 1;`) is illegal and
+                 * rejected by the real compiler, so it's never expected
+                 * to reach here. This is genuinely different from an
+                 * arrayed-paragraph replay's per-element write (which
+                 * still requires arrayed_index >= 0 below) -- it compiles
+                 * as one plain IASN/SASN with the whole VECTOR/MATRIX SYT
+                 * as the receiver, no ADLP wrapping at all, confirmed
+                 * against real compiled HALMAT (039-CORNERS.hal's
+                 * `AB = 0;`, AB a VECTOR(2) -- user-reported). IASN's own
+                 * OP_IASN normalization (this file) always yields
+                 * RV_INTEGER for a whole-number literal regardless of the
+                 * receiver's real declared type, which is how a VECTOR
+                 * receiver ends up going through plain IASN rather than
+                 * VASN here. ARRAY has no documented equivalent, so it's
+                 * excluded (syt_is_vector_or_matrix_shaped) and still
+                 * falls through to the fail() below. */
+                bool is_zero = (val->kind == RV_INTEGER && val->integer == 0) ||
+                                (val->kind == RV_SCALAR && halmat_scalar_to_double(val->scalar) == 0.0);
+                if (is_zero && syt_is_vector_or_matrix_shaped(state, op->data)) {
+                    ensure_container(state, op->data);
+                    halmat_syt_entry_t *e = &state->syt[op->data];
+                    for (size_t i = 0; i < e->element_count; i++) {
+                        e->elements[i] = halmat_scalar_zero(e->elements[i].double_precision);
+                    }
+                    return true;
+                }
                 fail(state, "SYT index %u is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph replay", op->data);
                 return false;
             }
