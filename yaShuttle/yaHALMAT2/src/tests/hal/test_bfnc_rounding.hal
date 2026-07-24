@@ -1,0 +1,27 @@
+ TEST_BFNC_ROUNDING:
+ PROGRAM;
+    DECLARE SCALAR, S1, S2, S3, S4;
+    S1 = 2.7;
+    S2 = FLOOR(S1);
+    WRITE(6) S2;
+    S2 = CEILING(S1);
+    WRITE(6) S2;
+    S2 = TRUNCATE(S1);
+    WRITE(6) S2;
+    S2 = SIGNUM(S1);
+    WRITE(6) S2;
+    S1 = -2.7;
+    S2 = FLOOR(S1);
+    WRITE(6) S2;
+    S2 = CEILING(S1);
+    WRITE(6) S2;
+    S2 = TRUNCATE(S1);
+    WRITE(6) S2;
+    S2 = SIGNUM(S1);
+    WRITE(6) S2;
+    S1 = 5.0;
+    S2 = 2.0;
+    S3 = 8.0;
+    S4 = MIDVAL(S1, S2, S3);
+    WRITE(6) S4;
+ CLOSE TEST_BFNC_ROUNDING;

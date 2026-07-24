@@ -632,6 +632,51 @@ py_exp=$(./../yaHALMAT2 --py "$workdir/FILE1.bin")
 rm -rf "$workdir"
 run ./run_py_fixture.sh simple_do "$py_exp"
 
+# User-reported (071-DARTBOARD_APPROXIMATION.hal's `X = RANDOM;` failing
+# "BFNC: expected 1 operand (selector 42)"), broadened per direct request
+# into a full sweep of every remaining unimplemented BFNC/LFNC selector
+# rather than fixing them one bug report at a time -- [USA003087] Appendix
+# B's complete built-in-function catalog cross-checked against class-0/
+# BFNC.md's confirmed BI_NAME-position selector table. Implemented this
+# batch: COSH/SINH/TANH/ARCCOS/ARCSIN/ARCCOSH/ARCSINH/ARCTANH/ARCTAN2
+# (with every USA003090 Appendix C domain-error fixup that applies --
+# errors 9/10/59/60/62 -- alongside the already-implemented group's
+# errors 5-8/11-12/24/25/27/28), FLOOR/CEILING/TRUNCATE/SIGNUM/MIDVAL,
+# DIV/MOD/REMAINDER (errors 16/19/33)/ODD/SHL/SHR/XOR, INDEX/LJUST/RJUST
+# (error 18), TRANSPOSE/TRACE, RANDOM/RANDOMG (state.h's rng_state
+# comment: a from-scratch deterministic Park-Miller generator, no
+# primary-source algorithm mandated, same compromise as MINV/DET's
+# Gaussian elimination), RUNTIME (the existing virtual-clock model), and
+# ERRGRP/ERRNUM (new last_error_group/last_error_member state, updated at
+# arithmetic_error_should_apply_fixup's single existing choke point).
+# Deliberately NOT implemented, documented instead of guessed at:
+# DATE/CLOCKTIME (no calendar/wall-clock model anywhere in this
+# interpreter), NEXTIME (needs scheduler-internals introspection not
+# undertaken this pass), and BFNC selectors 57-63 (BIT/SUBBIT/INTEGER/
+# SCALAR/VECTOR/MATRIX/CHARACTER -- almost certainly back the explicit-
+# conversion/shaping-function *syntax*, already confirmed elsewhere to
+# compile to dedicated opcodes, not a raw BFNC call; no real compiled
+# HALMAT hitting these selectors has been observed). A significant
+# mid-batch correction: MAX(7)/MIN(8)/SUM(14)/PROD(20)/SIZE(23) were
+# initially added to BFNC too, but empirical cross-checking (real
+# 141-VSUM.hal hitting selector 23 unexpectedly, then two direct
+# HALSFC compile+--disasm probes) found all five actually route through
+# the *separate* LFNC ("L-FUNC") opcode instead -- already handling
+# MAX/MIN before this session, now extended for SUM/PROD/SIZE too (same
+# BI_NAME-position selector numbers, just a different dispatch opcode);
+# the dead BFNC cases for these five were removed once this was
+# confirmed, not left in as unreachable code.
+run ./run_local_fixture.sh bfnc_hyperbolic "$(printf ' 1.5430803E+00\n 1.1752005E+00\n 7.6159412E-01\n 1.3169575E+00\n 1.4436350E+00\n 5.4930609E-01\n 0.0          ')"
+run ./run_local_fixture.sh bfnc_invtrig "$(printf ' 1.0471973E+00\n 5.2359873E-01\n 0.0          \n 1.5707960E+00\n 3.1415920E+00\n-1.5707960E+00\n 7.8539813E-01\n 0.0          ')"
+run ./run_local_fixture.sh bfnc_rounding "$(printf ' 2.0000000E+00\n 3.0000000E+00\n 2.0000000E+00\n 1.0000000E+00\n-3.0000000E+00\n-2.0000000E+00\n-2.0000000E+00\n-1.0000000E+00\n 5.0000000E+00')"
+run ./run_local_fixture.sh bfnc_intops "$(printf '          3\n          2\n 2.0000000E+00\n 3.0000000E+00\n          1\n          0\n         48\n         16\n        188')"
+run ./run_local_fixture.sh bfnc_char "$(printf '          6\n          0\nAB   \n   AB')"
+run ./run_local_fixture.sh bfnc_matrix2 "$(printf ' 1.0000000E+00      4.0000000E+00\n 2.0000000E+00      5.0000000E+00\n 3.0000000E+00      6.0000000E+00\n 1.5000000E+01')"
+run ./run_local_fixture.sh lfnc_array "$(printf ' 7.0000000E+00\n 1.0000000E+00\n 1.5000000E+01\n 8.4000000E+01\n          4')"
+run ./run_local_fixture.sh random "$(printf ' 7.8263693E-06\n 1.3153774E-01\n-7.2352159E-01')"
+run ./run_local_fixture.sh runtime "$(printf ' 1.8115941E-05\n 5.0000534E+00')"
+run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

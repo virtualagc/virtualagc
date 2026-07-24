@@ -1,0 +1,17 @@
+ TEST_BFNC_CHAR:
+ PROGRAM;
+    DECLARE CHARACTER(10), C1, C2;
+    DECLARE INTEGER, I1;
+    C1 = 'HELLOWORLD';
+    C2 = 'WORLD';
+    I1 = INDEX(C1, C2);
+    WRITE(6) I1;
+    C2 = 'ZZZ';
+    I1 = INDEX(C1, C2);
+    WRITE(6) I1;
+    C1 = 'AB';
+    C2 = LJUST(C1, 5);
+    WRITE(6) C2;
+    C2 = RJUST(C1, 5);
+    WRITE(6) C2;
+ CLOSE TEST_BFNC_CHAR;

@@ -926,6 +926,29 @@ struct halmat_state {
                          * interp_run_burst() and interp_run_signal() (interp.c); orthogonal to
                          * time_scale, which either implementation still honors identically. */
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
+
+    /* BFNC selector 42/51 (RANDOM/RANDOMG, class-0/BFNC.md): a Park-Miller
+     * "minimal standard" Lehmer generator (state = state*16807 mod
+     * 2^31-1; result = state/(2^31-1)), a simple, fully-specified,
+     * deterministic PRNG chosen for exact reproducibility across runs and
+     * platforms -- no primary source documents the real AP-101S runtime
+     * library's actual RANDOM algorithm (same "no bit-exact algorithm
+     * mandated" situation as MINV/DET's Gaussian elimination), so this is
+     * a documented compromise, not a confirmed match. Seeded to a fixed
+     * non-zero value (interp_init) rather than a real entropy source, so
+     * every run/regression fixture is byte-for-byte repeatable. */
+    uint32_t rng_state;
+
+    /* BFNC selectors 38/39 (ERRGRP/ERRNUM, class-0/BFNC.md): "returns
+     * group/number of last error detected, or zero" [USA003087] Appendix
+     * B -- updated at the single choke point every already-implemented
+     * App. C arithmetic-error fixup site already routes through
+     * (arithmetic_error_should_apply_fixup, interp.c), so this covers
+     * every group-4 error this interpreter detects, not just the ones
+     * added alongside ERRGRP/ERRNUM themselves. Zero (the memset default)
+     * means "no error detected yet," matching the documented default. */
+    int32_t last_error_group;
+    int32_t last_error_member;
 };
 
 #define HALMAT_MAX_CASES 64

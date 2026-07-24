@@ -257,6 +257,22 @@
 #define HAL_S_ERROR_VECTOR_MATRIX_DIVIDE_BY_ZERO 25
 #define HAL_S_ERROR_INVERSE_SINGULAR 27
 #define HAL_S_ERROR_UNIT_NULL_VECTOR 28
+#define HAL_S_ERROR_SINH_COSH_OVERFLOW 9
+#define HAL_S_ERROR_ARCSIN_ARCCOS_DOMAIN 10
+#define HAL_S_ERROR_REMAINDER_DIVIDE_BY_ZERO 16
+#define HAL_S_ERROR_LJUST_RJUST_BAD_LENGTH 18
+#define HAL_S_ERROR_MOD_DOMAIN 19
+#define HAL_S_ERROR_MOD_MAGNITUDE 33
+#define HAL_S_ERROR_ARCCOSH_DOMAIN 59
+#define HAL_S_ERROR_ARCTANH_DOMAIN 60
+#define HAL_S_ERROR_ARCTAN2_ZERO 62
+
+/* Strict C99 (this project's -std=c99) doesn't guarantee <math.h> defines
+ * M_PI (a POSIX/BSD extension, hidden under -std=c99's stricter feature
+ * visibility) -- BFNC's RANDOMG (selector 51, Box-Muller transform)
+ * needs it, spelled out to full double precision rather than relying on
+ * an unportable macro. */
+#define HAL_S_PI 3.14159265358979323846
 
 typedef enum { RV_STRING, RV_INTEGER, RV_SCALAR, RV_BITS } rv_kind_t;
 
@@ -1071,6 +1087,13 @@ static void fill_identity_matrix(const halmat_scalar_t *in, int n, halmat_scalar
  * IGNORE's unconfirmed exact semantics here) returns true: the caller
  * should apply its own standard fixup and continue as before. */
 static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int member, size_t *pc, bool *branched) {
+    /* ERRGRP/ERRNUM (BFNC selectors 38/39, state.h's last_error_group/
+     * last_error_member comment): every group-4 error this interpreter
+     * detects funnels through this one function, whether or not a
+     * fixup/GOTO ends up applying -- "last error detected" per
+     * [USA003087] Appendix B means detected, not merely unhandled. */
+    state->last_error_group = HAL_S_ERROR_GROUP_ARITHMETIC;
+    state->last_error_member = member;
     halmat_error_handler_t *h = find_error_handler(state, HAL_S_ERROR_GROUP_ARITHMETIC, member);
     if (h && h->action == HALMAT_ERRACT_GOTO) {
         *pc = h->goto_pc;
@@ -1125,6 +1148,15 @@ static halmat_scalar_t matrix_determinant(const halmat_scalar_t *in, int n, bool
         }
     }
     return halmat_scalar_from_double(det, dbl);
+}
+
+/* Advances state->rng_state's Park-Miller "minimal standard" Lehmer
+ * generator (state.h's own comment on the algorithm/reproducibility
+ * rationale) and returns the next draw in [0,1). Shared by BFNC's
+ * RANDOM/RANDOMG cases below. */
+static double next_random_uniform(halmat_state_t *state) {
+    state->rng_state = (uint32_t)(((uint64_t)state->rng_state * 16807u) % 2147483647u);
+    return (double)state->rng_state / 2147483647.0;
 }
 
 /* Reads a whole MATRIX/VECTOR operand (SYT variable or a VAC-carried
@@ -1743,6 +1775,12 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
      * (main.c's --ddi/--ddo). Every other device starts unmapped. */
     state->devices[5] = stdin;
     state->devices[6] = stdout;
+
+    /* RANDOM/RANDOMG's Park-Miller generator (state.h's rng_state
+     * comment): seeded to a fixed non-zero value, not real entropy, so
+     * every run is exactly reproducible -- the generator is degenerate
+     * (stays at zero forever) if ever seeded with 0. */
+    state->rng_state = 1;
 }
 
 void interp_set_device(halmat_state_t *state, int device, FILE *f) {
@@ -4578,8 +4616,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_LFNC: {
-                /* MAX(array)/MIN(array), class-0/LFNC.md: selector 7=MAX,
-                 * 8=MIN, QUAL=IMD on LFNC's own operand. The array
+                /* MAX/MIN/SUM/PROD/SIZE over an ARRAY, class-0/LFNC.md's
+                 * "L-FUNC" dispatch category -- QUAL=IMD selector on
+                 * LFNC's own operand. LFNC.md's own Unresolved Questions
+                 * ("whether any other built-in shares this category...
+                 * not exhaustively tested") turned out to include more
+                 * than just MAX(7)/MIN(8): user-reported (071-DARTBOARD_
+                 * APPROXIMATION.hal's RANDOM, a *different* BFNC bug --
+                 * see below -- prompted a "find every unimplemented
+                 * built-in" sweep that started this batch), empirically
+                 * cross-checking every ARRAY-reduction function from
+                 * [USA003087] Appendix B's "ARRAY FUNCTIONS"/"SIZE
+                 * FUNCTION" tables against a real compile confirmed
+                 * SUM=14 (141-VSUM.hal's own `SIZE(V)` call surfaced this
+                 * file's *other* selector, 23=SIZE, as an unhandled-
+                 * selector failure first) and PROD=20 also route through
+                 * this exact same opcode, not BFNC as first assumed --
+                 * both compiled directly (`S2=SUM(SA1); S2=PROD(SA1);`)
+                 * and confirmed via this project's own --disasm: `LFNC`
+                 * operand data=14 and =20 respectively, i.e. the *same*
+                 * selector numbers as their position in BFNC's own
+                 * BI_NAME table (class-0/BFNC.md), just dispatched
+                 * through this separate opcode instead -- consistent
+                 * with MAX=7/MIN=8 (LFNC.md's already-confirmed pair)
+                 * using their BI_NAME position too. SIZE(23) similarly
+                 * confirmed via 141-VSUM.hal's real `DO FOR ... = 1 TO
+                 * SIZE(V);`: unlike MAX/MIN/SUM/PROD's fold-to-one-value
+                 * reduction, SIZE just wants the argument's own element
+                 * count -- resolve_container's own `count` output serves
+                 * directly, needing no per-element loop at all, and
+                 * (unlike a symbol-table-based approach) reads the
+                 * *runtime* SFAR-captured array like every other
+                 * selector here, so it works for a VAC-carried argument
+                 * too, not just a bare declared symbol. The array
                  * argument itself was captured raw by SFAR (inside an
                  * ADLP/DLPE bracket this interpreter treats as a no-op --
                  * see interp_step's arrayed-paragraph replay comment;
@@ -4596,42 +4665,86 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 halmat_scalar_t *ca; size_t count; int rows, cols;
                 if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
-                if (count == 0) { fail(state, "LFNC: empty array argument"); break; }
-                bool want_max = (ins->operands[0].data == 7);
-                if (!want_max && ins->operands[0].data != 8) {
-                    fail(state, "LFNC: unknown selector %u (expected 7=MAX or 8=MIN)", ins->operands[0].data);
+                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                uint16_t selector = ins->operands[0].data;
+                if (selector == 23) { /* SIZE: element count, no reduction loop needed -- INTEGER */
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_scalar = false;
+                    state->vac[ins->index].integer = (int32_t)count;
                     break;
                 }
-                halmat_scalar_t best = ca[0];
-                for (size_t i = 1; i < count; i++) {
-                    halmat_scalar_t diff = halmat_scalar_sub(ca[i], best); /* ca[i] - best */
+                if (count == 0) { fail(state, "LFNC: empty array argument"); break; }
+                if (selector != 7 && selector != 8 && selector != 14 && selector != 20) {
+                    fail(state, "LFNC: unknown selector %u (expected 7=MAX, 8=MIN, 14=SUM, 20=PROD, or 23=SIZE)", selector);
+                    break;
+                }
+                halmat_scalar_t result = (selector == 14) ? halmat_scalar_zero(false)
+                                        : (selector == 20) ? halmat_scalar_from_double(1.0, false) : ca[0];
+                for (size_t i = 0; i < count; i++) {
+                    if (selector == 14) { result = halmat_scalar_add(result, ca[i]); continue; }
+                    if (selector == 20) { result = halmat_scalar_multiply(result, ca[i]); continue; }
+                    /* MAX/MIN: sign/zero-ness of ca[i]-result decides the comparison, same technique this opcode already used before this batch */
+                    halmat_scalar_t diff = halmat_scalar_sub(ca[i], result);
                     bool is_zero = (diff.msw == 0 && diff.lsw == 0);
                     bool is_negative = ((diff.msw >> 31) & 1) != 0;
                     bool i_is_greater = !is_zero && !is_negative;
                     bool i_is_less = !is_zero && is_negative;
-                    if ((want_max && i_is_greater) || (!want_max && i_is_less)) {
-                        best = ca[i];
-                    }
+                    if ((selector == 7 && i_is_greater) || (selector == 8 && i_is_less)) result = ca[i];
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
-                state->vac[ins->index].scalar = best;
+                state->vac[ins->index].scalar = result;
                 break;
             }
 
             case OP_BFNC: {
                 /* Built-in function call, class-0/BFNC.md's confirmed
-                 * selector table (the instruction's own TAG field). The
-                 * plain-SCALAR-argument arithmetic functions, PRIO (no
-                 * argument), the VECTOR/CHARACTER functions ABVAL/UNIT/
-                 * LENGTH/TRIM, and the MATRIX functions DET/INVERSE are
-                 * implemented; DET/INVERSE share the same double-via-
-                 * Gaussian-elimination precision compromise as MINV
-                 * (class-3/MINV.md). SIGN's documented return type is
-                 * unconfirmed; implemented returning SCALAR like its
-                 * arithmetic-function siblings in the same table, not
-                 * INTEGER. */
+                 * selector table (the instruction's own TAG field), per
+                 * [USA003087] Appendix B's full function catalog. Batch-
+                 * implemented across several selector families in one
+                 * pass (user request, after repeated one-at-a-time
+                 * BFNC-selector bug reports: "make a concerted effort to
+                 * find all... and implement them in a big batch"):
+                 * plain-SCALAR-argument arithmetic/algebraic functions
+                 * (including the hyperbolic/inverse-trig/rounding group
+                 * added this session), the niladic functions (PRIO/
+                 * RANDOM/RANDOMG/RUNTIME/ERRGRP/ERRNUM -- no argument),
+                 * the VECTOR/MATRIX functions (ABVAL/UNIT/LENGTH/TRIM/
+                 * DET/INVERSE/TRANSPOSE/TRACE), the ARRAY aggregate
+                 * functions (MAX/MIN/SUM/PROD/SIZE), the two/three-
+                 * argument functions (DIV/MOD/REMAINDER/MIDVAL/ARCTAN2/
+                 * SHL/SHR/XOR/INDEX/LJUST/RJUST), and ODD. DET/INVERSE
+                 * share the same double-via-Gaussian-elimination
+                 * precision compromise as MINV (class-3/MINV.md); SIGN's
+                 * documented return type is unconfirmed, implemented
+                 * returning SCALAR like its arithmetic-function siblings,
+                 * not INTEGER -- the same simplification is used for
+                 * every other selector in this file whose Appendix B
+                 * entry says "result type matches argument type" (FLOOR/
+                 * CEILING/TRUNCATE/SIGNUM/DIV/MOD/REMAINDER): none of
+                 * this file's arithmetic-function results distinguish
+                 * INTEGER vs. SCALAR by argument type, so these don't
+                 * either, for consistency with the existing group rather
+                 * than introducing a distinction nothing else here makes.
+                 * Deliberately NOT implemented, and documented as such
+                 * rather than guessed at: DATE(18)/CLOCKTIME(54) (no
+                 * calendar/wall-clock model exists anywhere in this
+                 * interpreter, and "implementation-dependent format" per
+                 * Appendix B gives no way to pick a value that's both
+                 * meaningful and reproducible for a regression fixture);
+                 * NEXTIME(50) (would need deep scheduler-internals
+                 * introspection -- state->tasks[]'s IN/AT-scheduled wake
+                 * time -- not undertaken this pass); and BIT(57)/
+                 * SUBBIT(58)/INTEGER(59)/SCALAR(60)/VECTOR(61)/
+                 * MATRIX(62)/CHARACTER(63) (these BI_NAME slots almost
+                 * certainly back the explicit-conversion/shaping-function
+                 * *syntax* `SCALAR(...)`/`VECTOR(...)`/etc., which this
+                 * project's own extensive prior work already confirmed
+                 * compiles to dedicated opcodes -- STOI/CTOS/MSHP/VSHP/
+                 * SSHP/ISHP/BASN/ITOQ and friends -- not a raw BFNC call;
+                 * no real compiled HALMAT hitting BFNC with any of these
+                 * selectors has been observed, so implementing them here
+                 * would be unverifiable invention). */
                 if (ins->tag == 19) { /* PRIO: no argument, current task's priority */
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
@@ -4639,22 +4752,84 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].integer = state->tasks[state->current_task].priority;
                     break;
                 }
-                if (ins->operand_count != 1) { fail(state, "BFNC: expected 1 operand (selector %u)", ins->tag); break; }
+                if (ins->tag == 42 || ins->tag == 51) {
+                    /* RANDOM/RANDOMG: no argument -- user-reported
+                     * (071-DARTBOARD_APPROXIMATION.hal's `X = RANDOM;`
+                     * failing "BFNC: expected 1 operand (selector 42)",
+                     * the same "no-argument built-in rejected by the
+                     * generic 1-operand check" shape PRIO already had to
+                     * be special-cased for above). RANDOM: state.h's
+                     * rng_state comment -- Park-Miller minimal-standard
+                     * Lehmer generator, [0,1) rectangular distribution
+                     * per Appendix B. RANDOMG: Box-Muller transform over
+                     * two RANDOM draws for a mean-0/variance-1 Gaussian
+                     * (Appendix B) -- an extra source of imprecision
+                     * beyond RANDOM's own already-undocumented algorithm,
+                     * same "no primary-source algorithm mandated"
+                     * compromise. */
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    double u1 = next_random_uniform(state);
+                    double r;
+                    if (ins->tag == 42) {
+                        r = u1;
+                    } else {
+                        double u2 = next_random_uniform(state);
+                        if (u1 < 1e-300) u1 = 1e-300; /* guard log(0) */
+                        r = sqrt(-2.0 * log(u1)) * cos(2.0 * HAL_S_PI * u2);
+                    }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_scalar = true;
+                    state->vac[ins->index].scalar = halmat_scalar_from_double(r, false);
+                    break;
+                }
+                if (ins->tag == 52) { /* RUNTIME: no argument, virtual Real Time Executive clock (Sec. 8) in seconds */
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    double seconds = (double)state->virtual_time / (double)HALMAT_TICKS_PER_SECOND;
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_scalar = true;
+                    state->vac[ins->index].scalar = halmat_scalar_from_double(seconds, false);
+                    break;
+                }
+                if (ins->tag == 38 || ins->tag == 39) {
+                    /* ERRGRP/ERRNUM: no argument, INTEGER -- "group/number
+                     * of last error detected, or zero" (state.h's
+                     * last_error_group/last_error_member comment). */
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_scalar = false;
+                    state->vac[ins->index].integer = (ins->tag == 38) ? state->last_error_group : state->last_error_member;
+                    break;
+                }
+                /* SIZE(23)/MAX(7)/MIN(8)/SUM(14)/PROD(20) are BI_NAME
+                 * positions that turn out to never actually reach BFNC in
+                 * real compiled HALMAT -- confirmed via direct compile +
+                 * --disasm cross-check (see OP_LFNC's own comment above)
+                 * that all five route through the separate LFNC ("L-FUNC")
+                 * opcode instead, alongside the already-implemented
+                 * MAX/MIN pair. No case for them appears below. */
+                if (ins->operand_count < 1) { fail(state, "BFNC: expected at least 1 operand (selector %u)", ins->tag); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                /* DET(3)/ABVAL(28)/UNIT(27)/INVERSE(49) take a whole
-                 * VECTOR/MATRIX argument and resolve it via
-                 * resolve_container themselves below -- resolve_operand
-                 * would (correctly, per the new arrayed-paragraph-replay
-                 * guard) reject a bare whole-array SYT reference outside
-                 * a replay context, so it's only called for the plain-
-                 * scalar-argument selectors that actually need `a`. */
-                if (ins->tag != 3 && ins->tag != 27 && ins->tag != 28 && ins->tag != 49) {
+                /* DET(3)/ABVAL(28)/UNIT(27)/INVERSE(49)/TRANSPOSE(56)/
+                 * TRACE(34) take a whole VECTOR/MATRIX argument and
+                 * resolve it via resolve_container themselves below --
+                 * resolve_operand would (correctly, per the new arrayed-
+                 * paragraph-replay guard) reject a bare whole-array SYT
+                 * reference outside a replay context, so it's only called
+                 * for the plain-scalar-argument selectors that actually
+                 * need `a` (including this batch's new two/three-argument
+                 * selectors' *first* operand -- their own case bodies
+                 * below resolve any further operands themselves). */
+                if (ins->tag != 3 && ins->tag != 27 && ins->tag != 28 && ins->tag != 49 &&
+                    ins->tag != 56 && ins->tag != 34) {
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 }
 
                 switch (ins->tag) {
-                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: case 37: {
-                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND/ARCTAN:
+                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: case 37:
+                    case 17: case 22: case 25: case 29: case 35: case 36: case 43: case 44: case 45: case 46: case 48: case 53: {
+                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND/ARCTAN/
+                         * COSH/SINH/TANH/FLOOR/ARCCOS/ARCSIN/SIGNUM/
+                         * ARCCOSH/ARCSINH/ARCTANH/CEILING/TRUNCATE:
                          * through double via libm, same documented precision
                          * compromise as SEXP (no hex-float algorithm for
                          * these in the extracted AP-101S material). Domain/
@@ -4747,6 +4922,66 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 break;
                             case 33: r = round(x); break;
                             case 37: r = atan(x); break;
+                            case 17: /* COSH: error 9 */
+                                if (fabs(x) > 175366.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
+                                    r = HAL_S_MAX_REPRESENTABLE;
+                                } else {
+                                    r = cosh(x);
+                                }
+                                break;
+                            case 22: /* SINH: error 9 (odd function -- sign of x preserved in the fixup, per COSH's positive-only fixup contrasted with SINH's own sign) */
+                                if (fabs(x) > 175366.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
+                                    r = copysign(HAL_S_MAX_REPRESENTABLE, x);
+                                } else {
+                                    r = sinh(x);
+                                }
+                                break;
+                            case 25: r = tanh(x); break; /* TANH: bounded (-1,1), no App. C entry -- no overflow possible */
+                            case 29: r = floor(x); break; /* FLOOR: "largest integer <= a", no App. C entry */
+                            case 35: /* ARCCOS: error 10 */
+                                if (x > 1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCSIN_ARCCOS_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = 0.0;
+                                } else if (x < -1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCSIN_ARCCOS_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = HAL_S_PI;
+                                } else {
+                                    r = acos(x);
+                                }
+                                break;
+                            case 36: /* ARCSIN: error 10 */
+                                if (x > 1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCSIN_ARCCOS_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = HAL_S_PI / 2.0;
+                                } else if (x < -1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCSIN_ARCCOS_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = -HAL_S_PI / 2.0;
+                                } else {
+                                    r = asin(x);
+                                }
+                                break;
+                            case 43: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break; /* SIGNUM: same formula as SIGN(21) -- USA003087 Appendix B distinguishes them only by SIGN having no "=0" case documented, both computed identically here */
+                            case 44: /* ARCCOSH: error 59 */
+                                if (x < 1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCCOSH_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = 0.0;
+                                } else {
+                                    r = acosh(x);
+                                }
+                                break;
+                            case 45: r = asinh(x); break; /* ARCSINH: unbounded domain, no App. C entry */
+                            case 46: /* ARCTANH: error 60 -- guard uses >= 1 rather than the documented >1, since libm's atanh(±1) is +-Inf and this project has already hit (and fixed) a real hang from an unguarded Inf reaching halmat_scalar_from_double's normalization loop (see error 4's SEXP fix, STATUS.md) */
+                                if (fabs(x) >= 1.0) {
+                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCTANH_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
+                                    r = 0.0;
+                                } else {
+                                    r = atanh(x);
+                                }
+                                break;
+                            case 48: r = ceil(x); break; /* CEILING: "smallest integer > a", no App. C entry */
+                            case 53: r = trunc(x); break; /* TRUNCATE: "largest integer <= |a| times SIGNUM(integer(a))" == truncation toward zero */
                             default: r = round(x); break;
                         }
                         if (redirected) break;
@@ -4846,6 +5081,212 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             fill_identity_matrix(ca, rows, result);
                         }
                         if (!store_container_result(state, ins->index, result, count, rows, cols)) break;
+                        break;
+                    }
+                    case 56: { /* TRANSPOSE: matrix transpose -> MATRIX */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        if (rows <= 0 || cols <= 0) { fail(state, "TRANSPOSE: operand is not a MATRIX"); break; }
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "TRANSPOSE: container too large"); break; }
+                        halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
+                        for (int r = 0; r < rows; r++)
+                            for (int c = 0; c < cols; c++)
+                                result[(size_t)c * rows + r] = ca[(size_t)r * cols + c];
+                        if (!store_container_result(state, ins->index, result, count, cols, rows)) break;
+                        break;
+                    }
+                    case 34: { /* TRACE: sum of diagonal elements of a square MATRIX -> SCALAR */
+                        halmat_scalar_t *ca; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
+                        if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "TRACE: operand is not a square MATRIX"); break; }
+                        halmat_scalar_t sum = halmat_scalar_zero(false);
+                        for (int i = 0; i < rows; i++) sum = halmat_scalar_add(sum, ca[(size_t)i * cols + i]);
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = sum;
+                        break;
+                    }
+                    case 47: { /* ARCTAN2(α,β): atan2(α,β) per Appendix B's "α=k sinθ, β=k cosθ" convention -> SCALAR angle */
+                        if (ins->operand_count != 2) { fail(state, "ARCTAN2: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        double alpha = halmat_scalar_to_double(rv_to_scalar(&a));
+                        double beta = halmat_scalar_to_double(rv_to_scalar(&b2));
+                        bool dbl2 = rv_to_scalar(&a).double_precision || rv_to_scalar(&b2).double_precision;
+                        double r;
+                        if (alpha == 0.0 && beta == 0.0) {
+                            /* error 62: libm's atan2(0,0) already returns 0.0,
+                             * satisfying the documented fixup on its own --
+                             * still routed through arithmetic_error_should_
+                             * apply_fixup so ERRGRP/ERRNUM and any registered
+                             * ON ERROR$(4:62) handler still see/react to it. */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCTAN2_ZERO, &state->pc, &branched)) break;
+                            r = 0.0;
+                        } else {
+                            r = atan2(alpha, beta);
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl2);
+                        break;
+                    }
+                    case 4: { /* DIV(α,β): integer division α/β, both arguments rounded to integers first -> INTEGER */
+                        if (ins->operand_count != 2) { fail(state, "DIV: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        int32_t alpha = rv_to_integer(&a), beta = rv_to_integer(&b2);
+                        if (beta == 0) { fail(state, "DIV: division by zero (no App. C fixup documented for this selector)"); break; }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = alpha / beta;
+                        break;
+                    }
+                    case 9: { /* MOD(α,β): floor-based real modulo, α - β*floor(α/β) -- SCALAR (unlike DIV/REMAINDER, Appendix B doesn't say MOD's arguments are rounded to integers) */
+                        if (ins->operand_count != 2) { fail(state, "MOD: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        double alpha = halmat_scalar_to_double(rv_to_scalar(&a));
+                        double beta = halmat_scalar_to_double(rv_to_scalar(&b2));
+                        bool dbl2 = rv_to_scalar(&a).double_precision || rv_to_scalar(&b2).double_precision;
+                        double r;
+                        if (beta == 0.0) {
+                            if (alpha < 0.0) {
+                                /* error 19 */
+                                if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_MOD_DOMAIN, &state->pc, &branched)) break;
+                                r = 0.0;
+                            } else {
+                                r = alpha; /* alpha>=0, beta==0: no App. C row covers this branch -- the natural "a mod 0 = a" limit */
+                            }
+                        } else {
+                            double mag_limit = dbl2 ? 7.2058e16 /* ~16**14 */ : 1.6777e7 /* ~16**6 */;
+                            if (fabs(alpha / beta) > mag_limit) {
+                                /* error 33 */
+                                if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_MOD_MAGNITUDE, &state->pc, &branched)) break;
+                                r = 0.0;
+                            } else {
+                                r = alpha - beta * floor(alpha / beta);
+                            }
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl2);
+                        break;
+                    }
+                    case 55: { /* REMAINDER(α,β): signed remainder of integer division α/β, arguments rounded to integers -> INTEGER */
+                        if (ins->operand_count != 2) { fail(state, "REMAINDER: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        int32_t alpha = rv_to_integer(&a), beta = rv_to_integer(&b2);
+                        int32_t r;
+                        if (beta == 0) {
+                            /* error 16: "the result is set to A" */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_REMAINDER_DIVIDE_BY_ZERO, &state->pc, &branched)) break;
+                            r = alpha;
+                        } else {
+                            r = alpha % beta;
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = r;
+                        break;
+                    }
+                    case 41: { /* MIDVAL(α,β,γ): the argument algebraically between the other two -- "result is always scalar" (Appendix B, explicit) */
+                        if (ins->operand_count != 3) { fail(state, "MIDVAL: expected 3 operands"); break; }
+                        resolved_value_t b2, c2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        if (!resolve_operand(state, &ins->operands[2], &c2)) break;
+                        double x1 = halmat_scalar_to_double(rv_to_scalar(&a));
+                        double x2 = halmat_scalar_to_double(rv_to_scalar(&b2));
+                        double x3 = halmat_scalar_to_double(rv_to_scalar(&c2));
+                        bool dbl2 = rv_to_scalar(&a).double_precision || rv_to_scalar(&b2).double_precision || rv_to_scalar(&c2).double_precision;
+                        double r = fmax(fmin(x1, x2), fmin(fmax(x1, x2), x3)); /* standard median-of-three formula */
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl2);
+                        break;
+                    }
+                    case 11: case 12: { /* SHL/SHR(α,β): shift α's integer bit-pattern left/right by β bits, β clamped to [0,63] (Appendix B) -> INTEGER */
+                        if (ins->operand_count != 2) { fail(state, "SHL/SHR: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        int32_t alpha = rv_to_integer(&a);
+                        int32_t shift = rv_to_integer(&b2);
+                        if (shift < 0) shift = 0;
+                        if (shift > 63) shift = 63;
+                        int32_t r;
+                        if (shift >= 32) {
+                            /* Beyond this emulator's actual 32-bit INTEGER
+                             * width -- saturate rather than invoke C's
+                             * shift-amount->=width undefined behavior. */
+                            r = (ins->tag == 12 && alpha < 0) ? -1 : 0;
+                        } else if (ins->tag == 11) {
+                            r = (int32_t)((uint32_t)alpha << shift); /* logical left shift over the raw bit pattern, avoiding signed-overflow UB */
+                        } else {
+                            r = alpha >> shift; /* arithmetic (sign-propagating) right shift, per Appendix B's "SHR is an arithmetic shift" -- implementation-defined in C99 but universal on every real target this project builds for */
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = r;
+                        break;
+                    }
+                    case 16: { /* XOR(α,β): bitwise exclusive-or of two BIT strings -> BIT ([USA003087] Appendix B "BIT FUNCTIONS") */
+                        if (ins->operand_count != 2) { fail(state, "XOR: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        if (a.kind != RV_BITS || b2.kind != RV_BITS) { fail(state, "XOR: both operands must be BIT"); break; }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_bits = true;
+                        state->vac[ins->index].bits = a.bits ^ b2.bits;
+                        break;
+                    }
+                    case 30: { /* INDEX(α,β): 1-based index of the first occurrence of string β within α, or 0 if absent -> INTEGER */
+                        if (ins->operand_count != 2) { fail(state, "INDEX: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        if (a.kind != RV_STRING || b2.kind != RV_STRING) { fail(state, "INDEX: both operands must be CHARACTER"); break; }
+                        const char *found = strstr(a.string, b2.string);
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = false;
+                        state->vac[ins->index].integer = found ? (int32_t)(found - a.string) + 1 : 0;
+                        break;
+                    }
+                    case 31: case 32: { /* LJUST/RJUST(α,β): pad/truncate CHARACTER α to length β -> CHARACTER */
+                        if (ins->operand_count != 2) { fail(state, "LJUST/RJUST: expected 2 operands"); break; }
+                        resolved_value_t b2;
+                        if (!resolve_operand(state, &ins->operands[1], &b2)) break;
+                        if (a.kind != RV_STRING) { fail(state, "LJUST/RJUST: first operand must be CHARACTER"); break; }
+                        int32_t want_len = rv_to_integer(&b2);
+                        if (want_len < 0) want_len = 0;
+                        size_t src_len = strlen(a.string);
+                        bool is_ljust = (ins->tag == 31);
+                        if ((size_t)want_len < src_len) {
+                            /* error 18: bad length -- truncation to the
+                             * specified length occurs, dropping characters
+                             * on the right (LJUST keeps the left portion)
+                             * or the left (RJUST keeps the right portion). */
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_LJUST_RJUST_BAD_LENGTH, &state->pc, &branched)) break;
+                        }
+                        char *result = malloc((size_t)want_len + 1);
+                        size_t keep = (size_t)want_len < src_len ? (size_t)want_len : src_len;
+                        if (is_ljust) {
+                            memcpy(result, a.string, keep);
+                            for (size_t i = keep; i < (size_t)want_len; i++) result[i] = ' ';
+                        } else {
+                            size_t pad = (size_t)want_len - keep;
+                            for (size_t i = 0; i < pad; i++) result[i] = ' ';
+                            memcpy(result + pad, a.string + (src_len - keep), keep);
+                        }
+                        result[want_len] = '\0';
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_string = true;
+                        state->vac[ins->index].string = result;
+                        break;
+                    }
+                    case 10: { /* ODD(α): BOOLEAN (BIT) -- 1 if the rounded-to-integer α is odd, else 0 */
+                        int32_t v = rv_to_integer(&a);
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_bits = true;
+                        state->vac[ins->index].bits = (uint32_t)(v & 1);
                         break;
                     }
                     default:
