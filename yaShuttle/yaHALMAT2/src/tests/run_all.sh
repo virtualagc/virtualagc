@@ -128,6 +128,22 @@ run ./run_read_fixture.sh read_leading_comma "$(printf ',2,3\n')" "$(printf -- '
 # still failed even after "leading semicolon with nothing else" alone
 # appeared to work.
 run ./run_read_fixture.sh read_semicolon "$(printf '1.5, 2.6;\n')" "$(printf -- ' 1.5000000E+00      2.5999994E+00     -3.5000000E+00')"
+# User-reported, found while re-checking read_semicolon against a real
+# multi-iteration loop (037-ROOTS.hal): read_skip_separator deliberately
+# leaves a terminating semicolon unconsumed in the stream (see its own
+# comment), but nothing was discarding it before the *next* READ
+# statement -- so that next READ saw the leftover semicolon as its own
+# first character, terminated instantly without reading any of the
+# second line's data, and left A/B/C unchanged. In a real DO WHILE TRUE
+# input loop this repeats forever: the same stale values get reused every
+# iteration and the program never actually blocks for new user input
+# again. Fixed per USA003087 Sec. 12.3's own documented default: "the
+# device mechanism moves down one line from its current position" at the
+# start of every READ but a device's very first -- discarding whatever
+# the previous READ left unconsumed (the semicolon here) before starting
+# its own field scan. This fixture's second iteration (input "4,5,6")
+# only reads correctly if that discard happens.
+run ./run_read_fixture.sh read_semicolon_loop "$(printf '1,2;\n4,5,6\n')" "$(printf -- ' 1.0000000E+00      2.0000000E+00     -9.5000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
 run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"

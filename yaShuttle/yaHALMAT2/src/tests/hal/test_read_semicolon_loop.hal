@@ -1,0 +1,10 @@
+ TEST_READ_SEMICOLON_LOOP:
+ PROGRAM;
+    DECLARE SCALAR, A, B, C;
+    DECLARE INTEGER, I;
+    DO FOR I = 1 TO 2;
+        A = -9.5; B = -9.5; C = -9.5;
+        READ(5) A, B, C;
+        WRITE(6) A, B, C;
+    END;
+ CLOSE TEST_READ_SEMICOLON_LOOP;

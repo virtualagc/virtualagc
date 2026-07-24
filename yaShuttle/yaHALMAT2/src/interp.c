@@ -1870,15 +1870,18 @@ typedef enum { HALMAT_READ_FIELD_DATA, HALMAT_READ_FIELD_NULL, HALMAT_READ_FIELD
  * 6) allows before a READ data field ("a comma and/or at least one
  * blank"), classifying what's actually found there as one of the three
  * halmat_read_field_t outcomes above. A semicolon is left unconsumed in
- * the `TERMINATE` case -- confirmed necessary by "Programming in
- * HAL/S" p. 154's own worked example, `READ(5) SKIP(0), TAB(0), X;`,
- * used specifically to read data positioned *after* a semicolon that
- * terminated the previous READ; leaving it in the stream lets
- * USA003087 Sec. 12.3's ordinary "device mechanism is left positioned
- * one column to the right of the end of the last data field read in"
- * rule naturally put the next I/O operation right at it, ready for an
- * explicit override to skip past it. A null-triggering comma is left
- * unconsumed for the same reason, one level down (see below).
+ * the `TERMINATE` case (and a null-triggering comma likewise, one level
+ * down -- see below) rather than consumed here, for the reason given next.
+ *
+ * A semicolon (or any other leftover un-consumed data) found here is
+ * left in the stream for a different reason than it might first appear:
+ * not because a later part of *this* statement will pick it back up, but
+ * because it's the *next* READ/READALL statement's job to discard it, as
+ * part of the "device mechanism moves down one line" default positioning
+ * USA003087 Sec. 12.3 mandates at the start of every READ but a device's
+ * first (see device_read_started's comment in state.h, and OP_READ's own
+ * discard_to_eol call below) -- this function only needs to decide *this*
+ * statement's own outcome, not clean up after itself.
  *
  * `require_separator` (pass `i > 0`, the item's own index in the READ
  * list) distinguishes two call shapes, both needed to get this right
@@ -1938,6 +1941,25 @@ static halmat_read_field_t read_skip_separator(FILE *in, bool require_separator)
     }
     if (c != EOF) ungetc(c, in);
     return HALMAT_READ_FIELD_DATA;
+}
+
+/* USA003087 Sec. 12.3's "the device mechanism moves down one line from
+ * its current position and repositions itself at column 1," performed by
+ * OP_READ at the start of every READ/READALL but a device's first (see
+ * device_read_started's comment in state.h). Discards whatever the
+ * *previous* statement against this device left unconsumed on the
+ * current line -- most notably a `;`-terminated list's own leftover
+ * semicolon (read_skip_separator leaves it unconsumed deliberately, for
+ * this to clean up) -- so it can't be misread as this statement's own
+ * first field. User-reported: without this, a semicolon left in the
+ * stream by one READ(5) A,B,C; iteration of a loop caused every
+ * subsequent iteration's READ to see that same semicolon immediately,
+ * terminate instantly without reading any new input, and leave A/B/C at
+ * their previous values -- an infinite loop that silently reused stale
+ * data instead of prompting for more. */
+static void discard_to_eol(FILE *in) {
+    int c;
+    while ((c = fgetc(in)) != EOF && c != '\n') {}
 }
 
 /* Binds `state`'s currently-open io_pending call arguments into
@@ -4735,6 +4757,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 FILE *in = state->devices[device];
+                /* USA003087 Sec. 12.3 default positioning -- see
+                 * discard_to_eol's own comment and device_read_started's
+                 * in state.h. */
+                if (state->device_read_started[device]) discard_to_eol(in);
+                else state->device_read_started[device] = true;
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
                     /* USA003087 Sec. 12.3/USA003088 Sec. 10.1.1 rules 5-6

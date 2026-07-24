@@ -1246,6 +1246,53 @@ terminating as one reached via a comma). See
 writeup; `src/tests/hal/test_read_semicolon.hal` (the §8.3 example
 itself) is the regression fixture.
 
+## READ missing default line-advance between statements
+
+Direct follow-up, found while re-verifying the semicolon fix above
+against a full real program (`037-ROOTS.hal`) rather than the isolated
+fixture — user-reported. A `;`-terminated `READ(5) A, B, C;` correctly
+left the trailing item(s) unchanged, but running the *same* statement
+again on the next loop iteration reused the exact same stale values
+forever instead of reading the fresh line the user had just typed —
+effectively an infinite loop that never blocked for input again.
+
+Root cause: `read_skip_separator()` (`interp.c`) deliberately leaves a
+terminating semicolon unconsumed in the stream rather than consuming it
+itself — correct in isolation, but nothing was ever picking it back up
+before the *next* `READ` statement began. That next statement's first
+field scan saw the leftover semicolon immediately (it's still sitting
+right where the previous statement left it) and terminated on the spot,
+without reading any of the new line at all.
+
+[USA003087] §12.3 (PDF p. 12-7) states the rule that was missing: "If
+the READ statement is the first to be executed for the specified
+device, the device mechanism positions itself at column 1 of line 1.
+Otherwise, the device mechanism moves down one line from its current
+position and repositions itself at column 1." ["Programming in HAL/S"]
+§8.3 (p. 154) independently states the same default in equivalent terms
+— "a `SKIP(1), COLUMN(1)` operation is implied at the beginning of each
+READ statement" — and notes it can be overridden by an explicit
+`SKIP(0)`/`TAB(0)` specifically to continue reading data positioned
+after a semicolon that terminated the previous READ. That override path
+isn't reachable in yaHALMAT2 today (`OP_READ` fails loudly on any I/O
+control specifier — `TAB`/`COLUMN`/`SKIP`/`LINE`/`PAGE` aren't
+implemented), which makes the *default* line-advance unconditional in
+practice for every `READ`/`READALL` but a device's very first.
+
+Fixed with a `discard_to_eol()` helper, called at the start of
+`OP_READ`/`OP_RDAL` (`interp.c`) whenever a new per-device flag
+(`state->device_read_started[device]`, `state.h`, false until that
+device's first READ/READALL) is already true — discards whatever the
+previous statement left unconsumed on the current line (the leftover
+semicolon here, or in general any un-listed trailing values) before the
+new statement's own field scan begins, matching the "device's very
+first READ doesn't skip a line" exception directly.
+`src/tests/hal/test_read_semicolon_loop.hal` (two loop iterations, the
+second semicolon-terminated) is the regression fixture; also confirmed
+against a real `037-ROOTS.hal` run reproducing the user's exact reported
+input sequence. See [READ](class-0/READ.md) for the full mechanism
+writeup.
+
 ## DO CASE construct — DCAS/CLBL/ECAS resolved
 
 Per direct user suggestion (opcode-name pattern-matching: "DCAS"/"ECAS"

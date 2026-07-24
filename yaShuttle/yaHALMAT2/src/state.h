@@ -444,6 +444,21 @@ struct halmat_state {
      * owns stdin/stdout, so interp_cleanup() must not fclose() these. */
     FILE *devices[HALMAT_DEVICE_MAX];
 
+    /* Per-device: has a READ/READALL already executed against this device?
+     * USA003087 Sec. 12.3: "If the READ statement is the first to be
+     * executed for the specified device, the device mechanism positions
+     * itself at column 1 of line 1. Otherwise, the device mechanism moves
+     * down one line from its current position and repositions itself at
+     * column 1" -- i.e. every READ/READALL but a device's first discards
+     * whatever the *previous* one left unconsumed on the current line
+     * (extra un-listed values, or a `;`-terminated list's own leftover
+     * semicolon -- see read_skip_separator's comment) before starting its
+     * own field scan; interp.c's OP_READ does the discard. False (memset-
+     * zeroed by interp_init) is the correct initial state for every
+     * device: "not yet read from," so the very first READ skips the
+     * discard, matching the "first...positions at line 1" case above. */
+    bool device_read_started[HALMAT_DEVICE_MAX];
+
     /* --raf=I,R,N,F ("random-access file", per the historical HAL/S-FC
      * runtime's own option of the same name/shape -- see class-0/FILE.md)
      * device table. A *separate* device-number namespace from `devices`

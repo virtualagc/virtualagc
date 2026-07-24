@@ -120,6 +120,43 @@ alone already worked, caught by testing the primary source's own
 worked example directly rather than a simplified toy case.
 `src/tests/hal/test_read_semicolon.hal` is the regression fixture.
 
+**Missing default line-advance between statements, fixed in a follow-up
+session.** User-reported against `037-ROOTS.hal`'s real `DO WHILE TRUE`
+input loop: feeding a semicolon-terminated list (e.g. `"1,2;"`) to one
+iteration's `READ(5) A, B, C;` correctly left `C` unchanged per the
+semicolon fix above, but every *subsequent* iteration's `READ` then
+silently reused the same stale `A`/`B`/`C` forever, never blocking for
+more user input — an infinite loop with no visible read failure.
+Root cause: `read_skip_separator()` deliberately leaves a terminating
+semicolon unconsumed in the stream (needed so a later statement, not
+itself, can decide what to do with it — see that function's own
+comment), but nothing was ever discarding it before the next `READ`
+began; that next `READ`'s first field scan saw the leftover semicolon
+immediately and terminated instantly, without reading any of the new
+line the user had just typed. [USA003087] Sec. 12.3 (PDF p. 12-7) gives
+the exact rule that was missing: "If the READ statement is the first to
+be executed for the specified device, the device mechanism positions
+itself at column 1 of line 1. Otherwise, the device mechanism moves down
+one line from its current position and repositions itself at column 1."
+["Programming in HAL/S"] Sec. 8.3 (p. 154) independently states the same
+default as "a `SKIP(1), COLUMN(1)` operation is implied at the beginning
+of each READ statement," overridable by an explicit `SKIP(0)`/`TAB(0)`
+to read data positioned after a semicolon that terminated the previous
+READ — not reachable in yaHALMAT2 today since I/O control specifiers
+(`TAB`/`COLUMN`/`SKIP`/`LINE`/`PAGE`) aren't implemented (`OP_READ` fails
+loudly if one appears), making the default line-advance unconditional
+for every `READ`/`READALL` but a device's first. Fixed with a
+`discard_to_eol()` helper (`interp.c`), called at the start of
+`OP_READ`/`OP_RDAL` whenever `state->device_read_started[device]` is
+already true (a new per-device flag, `state.h`, false until a device's
+first READ/READALL) — discards whatever the previous statement left
+unconsumed on the current line (the leftover semicolon, or any
+un-listed trailing values) before the new statement's own field scan
+begins. `src/tests/hal/test_read_semicolon_loop.hal` (two loop
+iterations, the second semicolon-terminated) is the regression fixture;
+confirmed additionally against a real `037-ROOTS.hal` run reproducing
+the user's exact reported sequence.
+
 ## Source Analysis & Reliability
 
 Opcode (0x01F) and mnemonic are primary-sourced from [IR-60-5] A.2 (p.
