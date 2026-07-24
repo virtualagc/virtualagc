@@ -1,0 +1,19 @@
+ TEST_CASE_ELSE:
+ PROGRAM;
+    DECLARE I INTEGER;
+    DECLARE SCALAR, VALUE;
+
+    DO FOR I = 0 TO 5;
+       DO CASE I;
+          ELSE
+             VALUE = 100;
+          VALUE = 200;
+          VALUE = 300;
+          VALUE = 400;
+          DO;
+             VALUE = 500;
+          END;
+       END;
+       WRITE(6) I, VALUE;
+    END;
+ CLOSE TEST_CASE_ELSE;

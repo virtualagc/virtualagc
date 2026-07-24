@@ -1690,7 +1690,10 @@ static void precompute_case_dispatch(halmat_state_t *state) {
                 sp--;
                 size_t dcas_pos = stack[sp].dcas_pos;
                 size_t clbl_count = stack[sp].clbl_count;
-                size_t ordinary_count = clbl_count > 0 ? clbl_count - 1 : 0; /* last CLBL is the trap */
+                size_t ordinary_count = clbl_count > 0 ? clbl_count - 1 : 0; /* last CLBL is a
+                    trailing bookkeeping label, not a jump target of its own (OP_DCAS's own
+                    comment: an ELSE clause, if present, compiles as plain in-line code right
+                    after DCAS itself, not as an extra trailing CLBL) */
                 state->dcas_case_count[dcas_pos] = ordinary_count;
                 for (size_t k = 0; k < clbl_count; k++) {
                     size_t clbl_pos = stack[sp].clbl_positions[k];
@@ -2996,13 +2999,44 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_DCAS: {
+                /* [USA003087] §10.3 rule 3: "a run time error results if
+                 * k < 0 or k is greater than the number of statements in
+                 * the group" -- "unless an ELSE clause... is executed if
+                 * the value of the case variable is outside the legal
+                 * range." Confirmed directly against real compiled HALMAT
+                 * (080-EXAMPLE_4A.hal, user-reported): an `ELSE` clause's
+                 * body compiles to plain in-line code placed immediately
+                 * after DCAS itself, *before* the first ordinary case's
+                 * CLBL -- not as an extra CLBL appended at the end the
+                 * way an initial reading of DCAS.md/CLBL.md's own
+                 * Unresolved Questions had suggested. DCAS's own computed
+                 * jump only ever targets an in-range ordinary case's
+                 * CLBL; for an out-of-range selector it simply doesn't
+                 * jump at all, so ordinary sequential fall-through
+                 * (interp_step's `if (!branched) state->pc++`) does the
+                 * rest on its own: falls into the ELSE body when one
+                 * exists, or straight into case 1's own CLBL when it
+                 * doesn't -- which, reached by fall-through rather than a
+                 * DCAS landing, immediately acts as this construct's
+                 * implicit branch to ECAS (see this file's own
+                 * precompute_case_dispatch()/CLBL comment), i.e. a silent
+                 * no-op with no case body executed. That no-ELSE
+                 * no-op reading was cross-checked directly against the
+                 * real AP-101S emulator (`compileLinkRun`): the real
+                 * runtime actually hangs in an infinite loop for that
+                 * exact input, rather than either aborting per rule 3's
+                 * prose or falling through cleanly -- an apparent bug in
+                 * the real runtime library that this project has no
+                 * interest in replicating; falling through to ECAS is
+                 * the safe, well-defined behavior instead. */
                 if (ins->operand_count != 2) { fail(state, "DCAS: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 int32_t sel = rv_to_integer(&a);
                 size_t count = state->dcas_case_count[state->pc];
                 if (sel < 1 || (size_t)sel > count) {
-                    fail(state, "DO CASE selector %d out of range 1..%zu (out-of-range/ELSE handling not yet implemented)",
-                         sel, count);
+                    /* Out of range: no jump: fall straight through to
+                     * whatever instruction follows DCAS (the ELSE body,
+                     * or case 1's own CLBL if there's no ELSE). */
                     break;
                 }
                 state->pc = state->dcas_case_target[state->pc * HALMAT_MAX_CASES + (sel - 1)];

@@ -33,6 +33,23 @@ run ./run_fixture.sh while "TOTAL=              45"
 run ./run_fixture.sh discrete_for "RESULT=              63"
 run ./run_fixture.sh case "RESULT=              20"    # reference tool's "30" is its own bug -- YERRORS.md
 run ./run_fixture.sh nested "K=             150"        # reference tool's "40" is its own bug -- YERRORS.md
+# User-reported (080-EXAMPLE_4A.hal): a DO CASE selector outside the
+# legal 1..N range failed loudly ("out-of-range/ELSE handling not yet
+# implemented") instead of taking the ELSE clause. Traced via a direct
+# --disasm of the real program: an ELSE clause compiles as plain in-line
+# code placed immediately after DCAS itself, *before* the first ordinary
+# case's CLBL -- not as an extra CLBL appended at the end, as DCAS.md/
+# CLBL.md's own Unresolved Questions had speculated. Fixed by having
+# OP_DCAS simply not branch at all for an out-of-range selector, letting
+# ordinary sequential fall-through do the rest (falls into the ELSE body
+# when one exists; falls straight into case 1's own CLBL, which
+# immediately redirects to ECAS as a no-op, when it doesn't). The
+# no-ELSE reading was cross-checked directly against the real AP-101S
+# emulator (compileLinkRun): that specific input actually hangs the real
+# runtime in an infinite loop, an apparent bug this project has no
+# interest in replicating -- falling through to ECAS is the safe,
+# well-defined choice instead.
+run ./run_local_fixture.sh case_else "$(printf '          0      1.0000000E+02\n          1      2.0000000E+02\n          2      3.0000000E+02\n          3      4.0000000E+02\n          4      5.0000000E+02\n          5      1.0000000E+02')"
 run ./run_fixture.sh proc "$(derive_expected proc)"
 run ./run_fixture.sh array ""
 run ./run_fixture.sh matrix ""
