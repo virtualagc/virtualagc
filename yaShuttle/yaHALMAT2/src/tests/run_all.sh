@@ -384,6 +384,19 @@ run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.237005
 # default; see value.c's halmat_scalar_to_integer).
 run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n 2147483647')"
 run ./run_local_fixture.sh eron "I1=               1"
+# User-reported sweep item: ERON's "AND SET/RESET/SIGNAL var" clause
+# (class-0/ERON.md's confirmed 3-way TAG2 sub-flag) previously failed
+# loudly whenever a second operand was present. Applied at the one site
+# that actually detects a matching group-4 (App. C) error --
+# arithmetic_error_should_apply_fixup() -- regardless of whether the main
+# action is SYSTEM or IGNORE. HALSFC confirms SET/RESET require a
+# LATCHED EVENT ("AN UNLATCHED EVENT MAY NOT BE SET OR RESET", RT10
+# error) while plain SIGNAL works on either: EV1 (unlatched) goes from
+# unset to SET via AND SIGNAL; EV2 (latched, pre-signaled TRUE) goes back
+# to NOT SET via AND RESET; EV3 (latched, starts FALSE) goes to SET via
+# AND SET -- each triggered by the same SQRT(-4.0) (error 4:5) fixup site
+# eron_goto_appc above already exercises.
+run ./run_local_fixture.sh eron_event "$(printf 'EV1 SET\nEV2 NOT SET\nEV3 SET')"
 run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"

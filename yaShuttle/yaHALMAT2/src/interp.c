@@ -495,12 +495,16 @@ static halmat_error_handler_t *find_error_handler(halmat_state_t *state, int gro
  * Sec. 25.2: re-registering the same specification replaces the
  * existing entry ("erasing memory of the previous recovery action")
  * rather than adding a second one. */
-static void register_error_handler(halmat_state_t *state, int group, int member, halmat_error_action_t action, size_t goto_pc) {
+static void register_error_handler(halmat_state_t *state, int group, int member, halmat_error_action_t action, size_t goto_pc,
+                                    bool has_event_action, uint16_t event_syt, halmat_error_event_action_t event_action) {
     for (size_t i = 0; i < state->error_handler_count; i++) {
         halmat_error_handler_t *h = &state->error_handlers[i];
         if (h->group == group && h->member == member) {
             h->action = action;
             h->goto_pc = goto_pc;
+            h->has_event_action = has_event_action;
+            h->event_syt = event_syt;
+            h->event_action = event_action;
             return;
         }
     }
@@ -514,6 +518,9 @@ static void register_error_handler(halmat_state_t *state, int group, int member,
     h->member = member;
     h->action = action;
     h->goto_pc = goto_pc;
+    h->has_event_action = has_event_action;
+    h->event_syt = event_syt;
+    h->event_action = event_action;
 }
 
 /* OFF ERROR (USA003087 Sec. 25.2): removes a previously-registered
@@ -1095,6 +1102,21 @@ static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int membe
     state->last_error_group = HAL_S_ERROR_GROUP_ARITHMETIC;
     state->last_error_member = member;
     halmat_error_handler_t *h = find_error_handler(state, HAL_S_ERROR_GROUP_ARITHMETIC, member);
+    if (h && h->has_event_action && h->event_syt < HALMAT_SYT_MAX) {
+        /* ERON's `AND SET/RESET/SIGNAL var` clause (class-0/ERON.md):
+         * applied here, at the one place that actually detects a matching
+         * error, regardless of which of GOTO/SYSTEM/IGNORE the main
+         * action is (though in practice only SYSTEM/IGNORE ever carry an
+         * event action -- the user-statement/GOTO form has no such clause
+         * in the grammar). SET and SIGNAL are both modeled as the same
+         * direct BIT write OP_SGNL itself uses (bit_value=1) -- this
+         * interpreter doesn't model the persistent/latched-vs-transient
+         * distinction between them (see OP_SGNL's own comment); RESET is
+         * the same write with 0 instead of 1. */
+        halmat_syt_entry_t *e = &state->syt[h->event_syt];
+        e->type = SYT_TYPE_BIT;
+        e->bit_value = (h->event_action == HALMAT_EVENT_RESET) ? 0 : 1;
+    }
     if (h && h->action == HALMAT_ERRACT_GOTO) {
         *pc = h->goto_pc;
         *branched = true;
@@ -2680,8 +2702,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * by the primary source's examples, so it's treated the
                  * same as SYSTEM (apply the standard fixup) pending a
                  * clearer primary-source citation or test case. The
-                 * `AND SET/RESET/SIGNAL` event-modification clause fails
-                 * loudly rather than silently dropping it. */
+                 * `AND SET/RESET/SIGNAL` event-modification clause is now
+                 * implemented -- see the tag==1/2 branch below and
+                 * arithmetic_error_should_apply_fixup()'s own comment. */
                 if (ins->operand_count < 1) { fail(state, "ERON: expected at least 1 operand"); break; }
                 int group = ins->operands[0].data == 255 ? -1 : (int)ins->operands[0].data;
                 int member = ins->operands[0].tag1 == 63 ? -1 : (int)ins->operands[0].tag1;
@@ -2706,16 +2729,36 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * middle of its own "normal continuation" code
                      * instead of the handler body, an infinite loop the
                      * first time it actually fires. */
-                    register_error_handler(state, group, member, HALMAT_ERRACT_GOTO, state->pc + 1);
+                    register_error_handler(state, group, member, HALMAT_ERRACT_GOTO, state->pc + 1, false, 0, HALMAT_EVENT_SIGNAL);
                     state->pc = state->label_pos[label];
                     branched = true;
                 } else if (ins->tag == 1 || ins->tag == 2) {
+                    /* AND SET/RESET/SIGNAL var (class-0/ERON.md's confirmed
+                     * 3-way TAG2 sub-flag on the event operand: 0=SIGNAL,
+                     * 1=SET, 2=RESET) -- stored alongside the SYSTEM/IGNORE
+                     * action itself, and applied (SGNL-style direct BIT
+                     * write; RESET is the same write with 0 instead of 1,
+                     * there being no other runtime difference this
+                     * interpreter models between a plain/latched event or
+                     * SET-vs-SIGNAL's "persistent" vs "transient" nuance --
+                     * see OP_SGNL's own comment) at the one site that
+                     * actually detects a matching error and consults this
+                     * table: arithmetic_error_should_apply_fixup(). */
+                    bool has_event_action = false;
+                    uint16_t event_syt = 0;
+                    halmat_error_event_action_t event_action = HALMAT_EVENT_SIGNAL;
                     if (ins->operand_count == 2) {
-                        fail(state, "ERON: AND SET/RESET/SIGNAL clause is not yet implemented");
-                        break;
+                        if (ins->operands[1].qual != QUAL_SYT) {
+                            fail(state, "ERON: AND SET/RESET/SIGNAL expects a plain EVENT symbol operand");
+                            break;
+                        }
+                        has_event_action = true;
+                        event_syt = ins->operands[1].data;
+                        event_action = (halmat_error_event_action_t)ins->operands[1].tag2;
                     }
                     register_error_handler(state, group, member,
-                                            ins->tag == 1 ? HALMAT_ERRACT_SYSTEM : HALMAT_ERRACT_IGNORE, 0);
+                                            ins->tag == 1 ? HALMAT_ERRACT_SYSTEM : HALMAT_ERRACT_IGNORE, 0,
+                                            has_event_action, event_syt, event_action);
                 } else if (ins->tag == 3) {
                     unregister_error_handler(state, group, member);
                 } else {

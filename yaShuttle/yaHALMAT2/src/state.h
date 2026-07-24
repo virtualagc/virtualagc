@@ -321,11 +321,20 @@ typedef struct {
  * comment for the resulting limitation. */
 typedef enum { HALMAT_ERRACT_SYSTEM, HALMAT_ERRACT_IGNORE, HALMAT_ERRACT_GOTO } halmat_error_action_t;
 
+/* ERON's "AND SET/RESET/SIGNAL var" clause (class-0/ERON.md): confirmed
+ * wire encoding of the event operand's own TAG2 sub-flag -- 0=SIGNAL,
+ * 1=SET, 2=RESET. Only ever paired with HALMAT_ERRACT_SYSTEM/IGNORE (the
+ * GOTO/user-statement form has no such clause in the grammar). */
+typedef enum { HALMAT_EVENT_SIGNAL = 0, HALMAT_EVENT_SET = 1, HALMAT_EVENT_RESET = 2 } halmat_error_event_action_t;
+
 typedef struct {
     int group;  /* -1 = all groups */
     int member; /* -1 = all members in group */
     halmat_error_action_t action;
     size_t goto_pc; /* valid only if action == HALMAT_ERRACT_GOTO */
+    bool has_event_action;  /* AND SET/RESET/SIGNAL clause was present */
+    uint16_t event_syt;     /* valid iff has_event_action */
+    halmat_error_event_action_t event_action; /* valid iff has_event_action */
 } halmat_error_handler_t;
 
 #define HALMAT_MAX_TASKS 32
