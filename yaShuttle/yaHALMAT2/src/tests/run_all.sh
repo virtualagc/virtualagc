@@ -408,13 +408,29 @@ run ./run_local_fixture.sh write_vector "$(printf ' 1.0000000E+00      2.0000000
 # partition selects -- OP_DSUB's new asterisk-subscript handling,
 # producing a VECTOR-shaped VAC container consumed the same way.
 run ./run_local_fixture.sh write_matrix "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 2.0000000E+00      4.0000000E+00')"
-# WRITE data-field line wrapping (USA003087 Sec. 12.2, "unpaged output:
-# [80 columns/line]"): an 8-element VECTOR's fields total 8*19-5=147
-# columns (14-col SCALAR field + 5-blank separator each, no leading
-# separator on the first) -- wraps after 4 elements at the 80-column
-# default, after 2 at an explicit --line-length 40.
+# WRITE data-field line wrapping (default 80-column wrap point -- see
+# state.h's line_length comment for why "unpaged output: 80 columns" is
+# not actually why this project uses 80): an 8-element VECTOR's fields
+# total 8*19-5=147 columns (14-col SCALAR field + 5-blank separator
+# each, no leading separator on the first) -- wraps after 4 elements at
+# the 80-column default, after 2 at an explicit --line-length 40.
 run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00')"
 run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00')" --line-length 40
+# User-asked follow-up (044-ORTHONORMAL.hal's WRITE-formatting
+# discrepancy investigation): PAGED vs UNPAGED is normally chosen by a
+# compile-time DEVICE directive or JCL DD card (USA003090 Sec. 5.2),
+# neither of which this interpreter has access to (just compiled
+# HALMAT) -- --unpaged N is the runtime substitute, independent per
+# device number (not a single global switch: a real program can mix
+# PAGED and UNPAGED channels). Confirms CHARACTER WRITE output is
+# identical either way except for apostrophe-quoting (USA003087 Appendix
+# F / USA003090 Sec. 6.1.3, matching "Programming in HAL/S" Sec. 8.1's
+# own worked example almost verbatim -- this fixture's first line is
+# that exact example) -- SCALAR fields are unaffected, and an embedded
+# apostrophe (`'IT''S HERE'`, HAL/S's own literal-escaping syntax for a
+# literal `'` character) gets doubled only in the UNPAGED form.
+run ./run_local_fixture.sh unpaged "$(printf 'THE ANSWER IS      7.5836206E+05\nIT'"'"'S HERE')"
+run ./run_local_fixture.sh unpaged "$(printf '\x27THE ANSWER IS\x27      7.5836206E+05\n\x27IT\x27\x27S HERE\x27')" --unpaged 6
 # --time-scale 1000000 keeps these WAIT-using fixtures' now-real-time-
 # throttled runs fast (see interp_run()'s wall-clock pacing, state.h's
 # scheduler comment) -- it's a pure sleep-duration divisor, so the tick

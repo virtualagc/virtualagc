@@ -18,6 +18,14 @@ void interp_cleanup(halmat_state_t *state);
  * (main.c, for --ddi/--ddo) owns their lifetime. */
 void interp_set_device(halmat_state_t *state, int device, FILE *f);
 
+/* Marks a device as UNPAGED (true) or PAGED (false, the interp_init
+ * default) for WRITE's CHARACTER/BIT output formatting -- state.h's
+ * device_unpaged comment explains why this is a runtime override
+ * (--unpaged, main.c) rather than something read off the HALMAT stream
+ * itself. Independent per device -- call once per device number that
+ * needs to differ from the PAGED default. */
+void interp_set_device_unpaged(halmat_state_t *state, int device, bool unpaged);
+
 /* Maps a --raf random-access-file channel number (0-9, HALMAT_DEVICE_MAX,
  * a namespace distinct from interp_set_device's) to an already-open file
  * plus its fixed record size, for the FILE opcode (class-0/FILE.md).
@@ -71,10 +79,10 @@ void interp_set_time_scale(halmat_state_t *state, double scale);
  * identically; see state.h's halmat_pacing_mode_t comment. */
 void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode);
 
-/* Overrides interp_init's default line_length of 80 (state.h, USA003087
- * Sec. 12.2's "unpaged output: [80 columns/line]") -- the WRITE
- * data-field wrap column (--line-length, main.c). Only affects where
- * flush_write (interp.c) starts a new output line; never affects any
+/* Overrides interp_init's default line_length of 80 (state.h's own
+ * comment explains the citation this used to carry doesn't actually
+ * apply) -- the WRITE data-field wrap column (--line-length, main.c).
+ * Only affects where flush_write (interp.c) starts a new output line; never affects any
  * computed program value. */
 void interp_set_line_length(halmat_state_t *state, int line_length);
 

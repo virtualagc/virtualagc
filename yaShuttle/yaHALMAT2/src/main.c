@@ -97,6 +97,15 @@ static void usage(const char *prog) {
             "                   (auto-detected if exactly one directory holds a PROGRAM)\n"
             "  --ddi N:PATH     map READ(N)/READALL(N) to PATH (default: device 5=stdin)\n"
             "  --ddo N:PATH     map WRITE(N) to PATH (default: device 6=stdout)\n"
+            "  --unpaged N      mark device N's WRITE output UNPAGED instead of the default\n"
+            "                   PAGED (USA003090 Sec. 5.2 -- real HAL/S-FC picks this per\n"
+            "                   channel via a compile-time DEVICE directive not visible in\n"
+            "                   compiled HALMAT, or a WRITE-only-vs-READ/READALL-use default\n"
+            "                   this interpreter can't detect either without re-scanning the\n"
+            "                   whole program; this flag is the runtime substitute). Repeatable\n"
+            "                   (once per device number); independent per device -- affects\n"
+            "                   only CHARACTER (and BIT) field formatting (apostrophe-quoted\n"
+            "                   when UNPAGED), not SCALAR/INTEGER\n"
             "  --raf=I,R,N,F    attach random-access file F to FILE(N,...) (class-0/FILE.md),\n"
             "                   record size R bytes; I is I/O/B (accepted, not enforced --\n"
             "                   matches the historical HAL/S-FC runtime option of the same\n"
@@ -210,7 +219,8 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
                        const char *litfile_opt, const char *memory_opt, int num_blanks, int line_length,
                        const device_map_t *maps, int num_maps,
                        const raf_map_t *raf_maps, int num_raf_maps,
-                       const debug_colors_t *colors, double time_scale, halmat_pacing_mode_t pacing_mode) {
+                       const debug_colors_t *colors, double time_scale, halmat_pacing_mode_t pacing_mode,
+                       const bool *unpaged_devices) {
     halmat_program_t prog;
     char errbuf[512];
     if (!halmat_load(path, &prog, errbuf, sizeof(errbuf))) {
@@ -322,6 +332,9 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
         if (have_literals) halmat_literal_free(&literals);
         halmat_program_free(&prog);
         return 1;
+    }
+    for (int d = 0; d < HALMAT_DEVICE_MAX; d++) {
+        if (unpaged_devices[d]) interp_set_device_unpaged(&state, d, true);
     }
     FILE *opened_raf[MAX_DEVICE_MAPS];
     if (!apply_raf_maps(&state, raf_maps, num_raf_maps, opened_raf, "yaHALMAT2")) {
@@ -544,7 +557,8 @@ static bool find_primary_unit(unit_t *units, int num_units, const char *entry_di
  * (e.g. via find_primary_unit()). */
 static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks, int line_length,
                              const device_map_t *maps, int num_maps, double time_scale,
-                             halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors) {
+                             halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors,
+                             const bool *unpaged_devices) {
     if (disasm) {
         for (int i = 0; i < num_units; i++) {
             printf("=== %s ===\n", units[i].dir);
@@ -739,6 +753,9 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         for (int j = 0; j < num_units; j++) free_unit(&units[j]);
         return 1;
     }
+    for (int d = 0; d < HALMAT_DEVICE_MAX; d++) {
+        if (unpaged_devices[d]) interp_set_device_unpaged(&primary_state, d, true);
+    }
 
     /* Same pass1.rpt-based source correlation run_single() loads for
      * --debug (see its own comment) -- here the unit's own directory is
@@ -801,7 +818,7 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
                        bool disasm, int num_blanks, int line_length, const device_map_t *maps, int num_maps,
                        double time_scale, halmat_pacing_mode_t pacing_mode, bool debug_mode,
-                       const debug_colors_t *colors) {
+                       const debug_colors_t *colors, const bool *unpaged_devices) {
     if (num_dirs > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in @list (max %d)\n", MAX_UNITS);
         return 1;
@@ -826,7 +843,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
     }
 
     return run_linked_units(units, num_dirs, primary, disasm, num_blanks, line_length, maps, num_maps, time_scale,
-                             pacing_mode, debug_mode, colors);
+                             pacing_mode, debug_mode, colors, unpaged_devices);
 }
 
 /* Builds each unit_t from a linked-archive container's already-in-memory
@@ -837,7 +854,7 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
  * instead of a directory tree. */
 static int run_linked_container(halmat_container_t *c, int num_blanks, int line_length, const device_map_t *maps,
                                  int num_maps, bool disasm, double time_scale, halmat_pacing_mode_t pacing_mode,
-                                 bool debug_mode, const debug_colors_t *colors) {
+                                 bool debug_mode, const debug_colors_t *colors, const bool *unpaged_devices) {
     if (c->num_units > MAX_UNITS) {
         fprintf(stderr, "yaHALMAT2: too many units in linked-archive container (max %d)\n", MAX_UNITS);
         return 1;
@@ -881,7 +898,7 @@ static int run_linked_container(halmat_container_t *c, int num_blanks, int line_
     }
 
     return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, line_length, maps, num_maps,
-                             time_scale, pacing_mode, debug_mode, colors);
+                             time_scale, pacing_mode, debug_mode, colors, unpaged_devices);
 }
 
 /* Builds a --link-only container from @list: loads every unit the
@@ -1049,6 +1066,7 @@ int main(int argc, char **argv) {
     halmat_pacing_mode_t pacing_mode = HALMAT_PACING_BURST;
     device_map_t maps[MAX_DEVICE_MAPS];
     int num_maps = 0;
+    bool unpaged_devices[HALMAT_DEVICE_MAX] = {0}; /* --unpaged, per device number -- state.h's device_unpaged comment */
     raf_map_t raf_maps[MAX_DEVICE_MAPS];
     int num_raf_maps = 0;
     static char raf_paths[MAX_DEVICE_MAPS][1024];
@@ -1112,6 +1130,13 @@ int main(int argc, char **argv) {
             maps[num_maps].path = colon + 1;
             maps[num_maps].is_output = is_output;
             num_maps++;
+        } else if (strcmp(argv[i], "--unpaged") == 0 && i + 1 < argc) {
+            int device = atoi(argv[++i]);
+            if (device < 0 || device >= HALMAT_DEVICE_MAX) {
+                fprintf(stderr, "%s: --unpaged device number %d out of range (0-%d)\n", argv[0], device, HALMAT_DEVICE_MAX - 1);
+                return 1;
+            }
+            unpaged_devices[device] = true;
         } else if (strncmp(argv[i], "--raf=", 6) == 0) {
             if (num_raf_maps >= MAX_DEVICE_MAPS) {
                 fprintf(stderr, "%s: too many --raf mappings (max %d)\n", argv[0], MAX_DEVICE_MAPS);
@@ -1225,7 +1250,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         int rc = run_linked_container(&c, num_blanks, line_length, maps, num_maps, disasm, time_scale, pacing_mode,
-                                       debug_mode, &colors);
+                                       debug_mode, &colors, unpaged_devices);
         halmat_container_free(&c);
         return rc;
     }
@@ -1244,9 +1269,9 @@ int main(int argc, char **argv) {
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
         return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, line_length, maps, num_maps,
-                           time_scale, pacing_mode, debug_mode, &colors);
+                           time_scale, pacing_mode, debug_mode, &colors, unpaged_devices);
     }
 
     return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, line_length,
-                       maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode);
+                       maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode, unpaged_devices);
 }

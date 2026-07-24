@@ -1750,6 +1750,11 @@ void interp_set_device(halmat_state_t *state, int device, FILE *f) {
     state->devices[device] = f;
 }
 
+void interp_set_device_unpaged(halmat_state_t *state, int device, bool unpaged) {
+    if (device < 0 || device >= HALMAT_DEVICE_MAX) return;
+    state->device_unpaged[device] = unpaged;
+}
+
 void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int record_size) {
     if (channel < 0 || channel >= HALMAT_DEVICE_MAX) return;
     state->raf_devices[channel] = f;
@@ -1893,7 +1898,30 @@ static void emit_write_field(halmat_state_t *state, FILE *out, const char *text,
     *need_sep = true;
 }
 
-static void flush_write(halmat_state_t *state, FILE *out) {
+/* UNPAGED CHARACTER-string WRITE formatting (USA003087 Appendix F /
+ * USA003090 Sec. 6.1.3, both confirmed against "Programming in HAL/S"
+ * Sec. 8.1's direct worked example): "the string of characters is
+ * enclosed in apostrophes, and all internal apostrophes are converted
+ * to apostrophe pairs." Returns a malloc'd buffer the caller must
+ * free(); sized exactly for the worst case (every character an
+ * apostrophe) rather than a fixed guess, so an unusually long CHARACTER
+ * literal can't overflow it. */
+static char *quote_character_for_unpaged(const char *s) {
+    size_t len = strlen(s);
+    char *buf = malloc(len * 2 + 3); /* 2 enclosing quotes + NUL, each char doubled worst-case */
+    if (!buf) return NULL;
+    size_t o = 0;
+    buf[o++] = '\'';
+    for (size_t k = 0; k < len; k++) {
+        buf[o++] = s[k];
+        if (s[k] == '\'') buf[o++] = '\'';
+    }
+    buf[o++] = '\'';
+    buf[o] = '\0';
+    return buf;
+}
+
+static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
     int col = 0;
     bool need_sep = false;
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
@@ -1947,7 +1975,13 @@ static void flush_write(halmat_state_t *state, FILE *out) {
                 }
             }
         } else if (state->io_pending.items[i].is_string) {
-            emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep);
+            if (unpaged) {
+                char *quoted = quote_character_for_unpaged(state->io_pending.items[i].string);
+                emit_write_field(state, out, quoted ? quoted : state->io_pending.items[i].string, &col, &need_sep);
+                free(quoted);
+            } else {
+                emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep);
+            }
         } else if (state->io_pending.items[i].is_scalar) {
             /* Fixed-width scientific-notation field per class-2/STOC.md
              * (USA00309 Sec. 6.1.3). */
@@ -4847,7 +4881,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "WRITE(%d): device not mapped (use --ddo)", device);
                     break;
                 }
-                flush_write(state, state->devices[device]);
+                flush_write(state, state->devices[device], state->device_unpaged[device]);
                 break;
             }
 

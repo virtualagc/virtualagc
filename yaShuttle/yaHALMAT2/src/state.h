@@ -461,6 +461,31 @@ struct halmat_state {
      * owns stdin/stdout, so interp_cleanup() must not fclose() these. */
     FILE *devices[HALMAT_DEVICE_MAX];
 
+    /* Per-device PAGED (false, the default)/UNPAGED (true) mode --
+     * USA003090 Sec. 5.2: real HAL/S-FC determines this per channel via a
+     * `D DEVICE CHANNEL=n [UN]PAGED` *compile-time* source directive
+     * (falling back to a channel-usage-based default: WRITE-only ->
+     * PAGED, any READ/READALL use -> UNPAGED), never anything runtime or
+     * JCL-DD-card-driven the way this comment previously assumed device
+     * *mapping* itself was (see devices[] above, and --ddi/--ddo, main.c)
+     * -- but this interpreter has no access to the original HAL/S source
+     * at all (just compiled HALMAT), so there's no way to see a DEVICE
+     * directive even if the program had one. Exposed instead as a
+     * runtime override, --unpaged N (main.c, repeatable, one device
+     * number per flag -- independent per device, not a single global
+     * on/off switch: a real program can and does mix PAGED and UNPAGED
+     * channels, e.g. an UNPAGED channel feeding data to a later READ
+     * alongside a PAGED one for human-readable diagnostics). Only
+     * observably affects CHARACTER (and BIT, once WRITE of a raw BIT
+     * value is implemented -- not yet, see interp.c's flush_write)
+     * output: UNPAGED encloses the value in apostrophes, doubling any
+     * embedded ones (USA003087 Appendix F / USA003090 Sec. 6.1.3, both
+     * confirmed against "Programming in HAL/S" Sec. 8.1's direct worked
+     * example, `WRITE(6) 'THE ANSWER IS', V;` printing `THE ANSWER IS
+     * 7.5836210E+05` PAGED vs. `'THE ANSWER IS' 7.5836210E+05` UNPAGED)
+     * -- SCALAR/INTEGER field formatting is identical either way. */
+    bool device_unpaged[HALMAT_DEVICE_MAX];
+
     /* Per-device: has a READ/READALL already executed against this device?
      * USA003087 Sec. 12.3: "If the READ statement is the first to be
      * executed for the specified device, the device mechanism positions
