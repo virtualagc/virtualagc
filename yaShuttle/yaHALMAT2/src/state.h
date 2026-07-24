@@ -362,6 +362,12 @@ typedef enum {
     SCHD_REPEAT_BARE = 1,  /* ", REPEAT" alone -- rearm immediately (tag 0x10) */
     SCHD_REPEAT_EVERY = 2, /* ", REPEAT EVERY <exp>" -- fixed period, chained off the previous target (tag 0x20) */
     SCHD_REPEAT_AFTER = 3, /* ", REPEAT AFTER <exp>" -- delay measured from this cycle's completion (tag 0x30) */
+    SCHD_REPEAT_ON = 4,    /* Interpreter-internal only -- never produced by a real HALMAT tag (repeat_bits is
+                             * a 2-bit tag field, values 0-3 only). Synthesized solely for a task
+                             * self-rescheduling itself with `SCHEDULE <self> ON <event>;` and no explicit
+                             * REPEAT clause (interp.c's OP_SCHD self-reschedule branch): rearm by waiting on
+                             * the event again, the same TASK_WAITING_ON minor state a brand-new ON-initiated
+                             * task uses (has_on_event/on_event_syt below), rather than a fixed-deadline wait. */
 } halmat_schd_repeat_t;
 
 typedef enum {

@@ -6496,6 +6496,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 cur->wake_deadline = state->virtual_time + cur->repeat_interval;
                                 cur->task_state = TASK_WAITING;
                                 break;
+                            case SCHD_REPEAT_ON:
+                                /* Self-reschedule ON <event>, synthesized
+                                 * above -- has_on_event/on_event_syt are
+                                 * already set from that SCHD call; just wait
+                                 * on the event again, same as a brand-new
+                                 * ON-initiated task. */
+                                cur->task_state = TASK_WAITING_ON;
+                                break;
                             default:
                                 break;
                         }
@@ -6705,8 +6713,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         cur->repeat_kind = (halmat_schd_repeat_t)repeat_bits;
                         cur->repeat_interval = repeat_interval;
                     } else if (init_kind == 3) {
-                        fail(state, "SCHEDULE: self-rescheduling with ON <event> is not yet implemented");
-                        break;
+                        /* Self-reschedule via ON <event>, no explicit REPEAT
+                         * clause -- same "spelled imperatively instead of
+                         * declaratively" equivalence as the AT/IN case just
+                         * below, but for the ON initiation form: synthesize
+                         * a rearm that waits on the event again rather than
+                         * a fixed deadline. SCHD_REPEAT_ON (state.h) is an
+                         * interpreter-internal rearm kind for exactly this;
+                         * CLOS's rearm switch further down sets task_state
+                         * back to TASK_WAITING_ON using has_on_event/
+                         * on_event_syt, the same fields/mechanism a
+                         * brand-new ON-initiated task uses
+                         * (sched_wake_on_events() re-checks every tick). */
+                        cur->repeat_kind = SCHD_REPEAT_ON;
+                        cur->has_on_event = true;
+                        cur->on_event_syt = on_event_syt;
                     } else {
                         /* No REPEAT clause -- synthesize the equivalent
                          * one-shot rearm from the plain immediate/AT/IN

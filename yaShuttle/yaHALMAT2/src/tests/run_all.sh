@@ -681,6 +681,16 @@ run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
 # when repeat_kind != NONE) -- so WORKER simply runs once (N=1) and
 # terminates normally, regardless of EV1 never being signaled.
 run ./run_local_fixture.sh sched_stopping_only "N=               1" --time-scale 1000000
+# User-reported sweep item: a task rescheduling *itself* with `SCHEDULE
+# <self> ON <event>;` (no REPEAT clause) previously failed loudly. Same
+# "spelled imperatively instead of declaratively" equivalence already
+# used for the AT/IN self-reschedule case (see sched-self-reschedule
+# comment above): synthesizes SCHD_REPEAT_ON, an interpreter-internal
+# rearm kind that waits on the event again via TASK_WAITING_ON, the same
+# mechanism a brand-new ON-initiated task already uses. NEST reschedules
+# itself ON EV1 (never reset -- deliberately, to prove the rearm actually
+# re-fires) up to 3 times, then self-CANCELs.
+run ./run_local_fixture.sh sched_self_on "COUNT=               3" --time-scale 1000000
 run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
 # User-reported bug: a TASK rescheduling *itself* from inside its own
 # body (`SCHEDULE NEST IN 1.0 PRIORITY(80);` executed by NEST, right
