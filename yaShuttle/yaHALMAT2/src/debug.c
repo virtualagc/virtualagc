@@ -388,6 +388,11 @@ static void print_help(FILE *out) {
             "                has explicitly stepped into before\n"
             "run, r          same as continue (execution is already loaded/paused, not\n"
             "                restarted -- there is no separate \"not yet started\" state)\n"
+            "htrace on|off   off (default): continue/run behave as above, no per-instruction\n"
+            "                output. on: continue/run print the same message `step` would after\n"
+            "                every single instruction executed, as if you'd `step`ped through\n"
+            "                each one by hand -- everything else about continue/run (breakpoints,\n"
+            "                Ctrl-C) is unchanged\n"
             "kill, k         stop execution without exiting the debugger (applies to whichever\n"
             "                frame is currently active)\n"
             "print NAME, p   show a variable's current value by name, in the active frame\n"
@@ -562,9 +567,21 @@ static void cmd_step(debug_frame_t *frames, int *frame_count, const debug_unit_i
  * so continuing after a `step`-into and its breakpoint naturally resumes
  * the caller once that nested call finishes. Returns once a breakpoint
  * is hit in the (possibly now-different, post-auto-pop) top frame, the
- * *outermost* frame's own program ends, or SIGINT arrives. */
+ * *outermost* frame's own program ends, or SIGINT arrives.
+ *
+ * `htrace`: when set, prints the same per-instruction message `step`
+ * would after *every* instruction executed here, not just once at the
+ * end -- i.e. `continue`/`run` behave observably like a rapid series of
+ * `step`s. Deliberately skipped for the final instruction that halts
+ * the outermost frame: the caller's own post-call `print_current()` (run
+ * unconditionally, htrace or not) already shows that exact "(program has
+ * ended)" state, so printing it here too would just duplicate it --
+ * for every *other* instruction, this is the only place that state ever
+ * gets shown, since the loop moves straight on to the next iteration
+ * without the caller seeing it otherwise. */
 static void run_until_stop(debug_frame_t *frames, int *frame_count, const breakpoints_t *bp, long *last_stmt_shown,
-                            FILE *out, bool *out_done, bool *out_hit_bp, bool *out_interrupted) {
+                            const debug_colors_t *colors, bool htrace, FILE *out,
+                            bool *out_done, bool *out_hit_bp, bool *out_interrupted) {
     *out_done = false;
     *out_hit_bp = false;
     *out_interrupted = false;
@@ -588,6 +605,19 @@ static void run_until_stop(debug_frame_t *frames, int *frame_count, const breakp
             *out_done = true;
             break;
         }
+        if (htrace) {
+            /* Same duplicate-avoidance as the halt case above, for the
+             * same reason: if the instruction this step just landed on
+             * is itself a breakpoint, the top of the *next* iteration is
+             * about to break out (without stepping) and the caller's own
+             * unconditional post-call print_current() will show this
+             * exact "next instruction" state right after -- printing it
+             * here too would duplicate it. Only print when the loop is
+             * actually going to keep stepping past it. */
+            const halmat_instr_t *pending = interp_peek_next(top->state);
+            bool will_stop_here = pending && bp->count > 0 && is_breakpoint(bp, pending->index, top->state);
+            if (!will_stop_here) print_current(top, last_stmt_shown, colors, out);
+        }
     }
     signal(SIGINT, prev_handler);
 }
@@ -596,6 +626,12 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat
               const char *label, const debug_unit_info_t *units, int num_units,
               const debug_colors_t *colors, FILE *out) {
     breakpoints_t bp = {0};
+    bool htrace = false; /* `htrace on`/`htrace off` -- off (the default) leaves `continue`/`run`
+                           * exactly as before; on, they print the same per-instruction message
+                           * `step` would, as if every instruction along the way had been `step`ped
+                           * individually. Session-scoped state, like `bp` above -- not part of
+                           * halmat_state_t, since it's a debugger display preference, not
+                           * interpreter state. */
     char line[256];
     char last_line[256] = "";
     bool have_last = false;
@@ -735,11 +771,18 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat
         } else if (strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0 ||
                    strcmp(cmd, "run") == 0 || strcmp(cmd, "r") == 0) {
             bool done, hit_bp, interrupted;
-            run_until_stop(frames, &frame_count, &bp, &last_stmt_shown, out, &done, &hit_bp, &interrupted);
+            run_until_stop(frames, &frame_count, &bp, &last_stmt_shown, colors, htrace, out, &done, &hit_bp, &interrupted);
             print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
             if (interrupted) fprintf(out, "interrupted\n");
             if (hit_bp) fprintf(out, "breakpoint hit\n");
             if (done) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
+        } else if (strcmp(cmd, "htrace") == 0) {
+            if (!arg || (strcmp(arg, "on") != 0 && strcmp(arg, "off") != 0)) {
+                fprintf(out, "usage: htrace on | htrace off\n");
+            } else {
+                htrace = (strcmp(arg, "on") == 0);
+                fprintf(out, "htrace %s\n", htrace ? "on" : "off");
+            }
         } else if (strcmp(cmd, "kill") == 0 || strcmp(cmd, "k") == 0) {
             if (top->state->halted) {
                 fprintf(out, "(program has already ended)\n");

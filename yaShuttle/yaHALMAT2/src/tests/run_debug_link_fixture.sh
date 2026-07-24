@@ -130,4 +130,56 @@ else
     fail=1
 fi
 
+# --- htrace on/off -------------------------------------------------------
+# `htrace off` (the default) leaves `continue` exactly as before: only the
+# debugger's own startup banner ever prints a per-instruction "t~...s
+# [task N] #<word>  <disasm>" line (print_current(), called once before
+# the REPL loop starts) -- `continue` itself produces none. `htrace on`
+# makes `continue` print that same line after every instruction actually
+# executed, as if each had been `step`ped individually; also checks the
+# final "(program has ended)" line (always printed once, htrace or not,
+# by debug_run()'s own unconditional post-command print_current()) isn't
+# doubled by htrace's own per-instruction printing for that same last
+# instruction (run_until_stop()'s dedup logic).
+workdir3=$(mktemp -d)
+unitdir3="$workdir3/prog"
+mkdir -p "$unitdir3"
+cp "$HAL_SRC_DIR/test_int_arith2.hal" "$unitdir3/"
+( cd "$unitdir3" && "$HALSFC" test_int_arith2.hal >/dev/null )
+listfile3="$workdir3/list.txt"
+echo "$unitdir3" > "$listfile3"
+
+off_transcript=$(printf 'continue\nquit\n' | "$YAHALMAT2" --debug "@$listfile3" 2>&1)
+on_transcript=$(printf 'htrace on\ncontinue\nquit\n' | "$YAHALMAT2" --debug "@$listfile3" 2>&1)
+rm -rf "$workdir3"
+
+off_count=$(echo "$off_transcript" | grep -c '^t~')
+on_count=$(echo "$on_transcript" | grep -c '^t~')
+on_ended_count=$(echo "$on_transcript" | grep -c '^(program has ended)$')
+
+htrace_ok=1
+if [ "$off_count" -ne 1 ]; then
+    echo "FAIL: debug_link(htrace-off): expected exactly 1 instruction-dump line (the startup banner), got $off_count"
+    htrace_ok=0
+fi
+if [ "$on_count" -le "$off_count" ]; then
+    echo "FAIL: debug_link(htrace-on): expected more instruction-dump lines than htrace-off ($off_count), got $on_count"
+    htrace_ok=0
+fi
+if [ "$on_ended_count" -ne 1 ]; then
+    echo "FAIL: debug_link(htrace-on): expected exactly 1 '(program has ended)' line, got $on_ended_count (htrace's own per-instruction print must not duplicate the final one)"
+    htrace_ok=0
+fi
+if ! echo "$on_transcript" | grep -qF "P=              12     N=              -3     E=              27"; then
+    echo "FAIL: debug_link(htrace-on): missing expected program output"
+    htrace_ok=0
+fi
+if [ "$htrace_ok" -eq 1 ]; then
+    echo "PASS: debug_link(htrace)"
+else
+    echo "  off transcript: $(printf '%q' "$off_transcript")"
+    echo "  on transcript:  $(printf '%q' "$on_transcript")"
+    fail=1
+fi
+
 exit $fail
