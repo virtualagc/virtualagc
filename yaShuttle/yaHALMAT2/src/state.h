@@ -276,6 +276,25 @@ typedef struct {
     halmat_scalar_t scalar; /* is_ref=false, is_scalar */
     uint16_t ref_syt;       /* is_ref=true */
     size_t ref_offset;      /* is_ref=true */
+    bool is_subbit_ref;     /* is_ref=false: true if this slot holds a SUBBIT
+                               * pseudo-conversion assignment-context reference
+                               * (class-1/ITOQ.md's shared XBTOQ family, TAG=1
+                               * form: `SUBBIT(x) = ...;`), consumed by a
+                               * following BASN (the only assign opcode SUBBIT
+                               * ever chains into, since its whole point is
+                               * routing the write through a bit-string
+                               * intermediary) via a QUAL_VAC operand
+                               * referencing the xTOQ instruction's own stream
+                               * position. */
+    uint16_t subbit_target_syt; /* is_subbit_ref: the plain SYT variable whose
+                               * raw storage gets overwritten with the
+                               * assigned bit pattern -- interp.c's
+                               * write_destination dispatches on this target's
+                               * *own* declared type (only SYT_TYPE_INTEGER/
+                               * SYT_TYPE_BIT have a confirmed, lossless raw-
+                               * bit-pattern mapping in this interpreter; any
+                               * other type fails loudly rather than guess an
+                               * unmodeled byte layout). */
 } halmat_vac_slot_t;
 
 /* Structure-field "shadow slot" storage: HAL/S structure fields (class-0/

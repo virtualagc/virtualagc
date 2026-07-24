@@ -398,6 +398,22 @@ run ./run_local_fixture.sh eron "I1=               1"
 # eron_goto_appc above already exercises.
 run ./run_local_fixture.sh eron_event "$(printf 'EV1 SET\nEV2 NOT SET\nEV3 SET')"
 run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
+# User-reported sweep item: SUBBIT's assignment context (`SUBBIT(x) =
+# ...;`, class-1/ITOQ.md's shared XBTOQ family, TAG=1) previously failed
+# loudly. ITOQ.md's own confirmed trace shows this opcode's VAC result
+# supplies the *receiver* for a following BASN rather than a value (the
+# same "produces a reference for the next instruction to write through"
+# shape DSUB already uses, but targeting a plain SYT's own raw storage
+# instead of a container element) -- new is_subbit_ref VAC-slot field
+# (state.h) plus a write_destination case (interp.c) that reinterprets
+# the assigned bit pattern per the target's declared type (only
+# INTEGER/BIT have a confirmed lossless mapping; SCALAR/CHARACTER still
+# fail loudly, no hardware byte-layout modeled). I1 (never written
+# before, so its type must be pulled from the symbol table rather than
+# write_syt_entry's usual first-write inference) becomes 61680 (BIN
+# '1111000011110000' as an unsigned pattern); B1 becomes the same bits
+# verbatim.
+run ./run_local_fixture.sh subbit_assign "$(printf '      61680\n1010 1010 1010 1010')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"
 # EXIT loop-label; (found while chasing the READ comma-separator bug

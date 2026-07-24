@@ -882,6 +882,55 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             return false;
         }
         halmat_vac_slot_t *slot = &state->vac[op->data];
+        if (slot->is_subbit_ref) {
+            /* SUBBIT(x) = ...; (class-1/ITOQ.md's assignment-context
+             * form, OP_ITOQ/BTOQ/CTOQ/STOQ's TAG=1 case above) -- writes
+             * `val`'s raw bit pattern directly into x's own storage,
+             * bypassing ordinary type coercion (val is already guaranteed
+             * RV_BITS here: BASN, the only opcode that ever consumes this
+             * kind of slot, checks that before calling write_destination
+             * at all). Only SYT_TYPE_INTEGER and SYT_TYPE_BIT have a
+             * confirmed, lossless raw-bit-pattern representation already
+             * modeled by this interpreter (BIT trivially; INTEGER via the
+             * same reinterpret-cast the reference-context branch above
+             * already uses in the opposite direction). SCALAR/CHARACTER
+             * targets would need actual IEEE-754/byte-layout modeling
+             * this interpreter doesn't have (see BTOB's own comment on
+             * declared-width tracking) -- fail loudly rather than guess. */
+            if (slot->subbit_target_syt >= HALMAT_SYT_MAX) {
+                fail(state, "SUBBIT assignment: target SYT out of range");
+                return false;
+            }
+            halmat_syt_entry_t *e = &state->syt[slot->subbit_target_syt];
+            halmat_syt_type_t subbit_type = e->type;
+            if (subbit_type == SYT_TYPE_UNKNOWN && state->symtab) {
+                /* SUBBIT deliberately bypasses write_syt_entry's ordinary
+                 * first-write type inference (it writes a bit pattern into
+                 * an *already, if only declaratively, typed* variable's
+                 * storage, not a value whose kind should itself dictate
+                 * the type) -- so a target never written before this point
+                 * still has e->type==UNKNOWN even though its real type was
+                 * fixed at DECLARE time. Consult the symbol table for the
+                 * declared class instead, same hal_class convention
+                 * ensure_container() and IASN/SASN's own dest_sym lookup
+                 * already use (1=BIT, 6=INTEGER). */
+                const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, slot->subbit_target_syt);
+                if (dsym && dsym->hal_class == 6) subbit_type = SYT_TYPE_INTEGER;
+                else if (dsym && dsym->hal_class == 1) subbit_type = SYT_TYPE_BIT;
+            }
+            if (subbit_type == SYT_TYPE_INTEGER) {
+                e->type = SYT_TYPE_INTEGER;
+                e->value = (int32_t)val->bits;
+                return true;
+            }
+            if (subbit_type == SYT_TYPE_BIT) {
+                e->type = SYT_TYPE_BIT;
+                e->bit_value = val->bits;
+                return true;
+            }
+            fail(state, "SUBBIT assignment: target type has no confirmed raw-bit-pattern mapping (only INTEGER/BIT are implemented)");
+            return false;
+        }
         if (!slot->is_ref) {
             fail(state, "assignment destination is not a subscript reference");
             return false;
@@ -4592,13 +4641,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * identical in effect to BTOB/CTOB/STOB/ITOB's own
                  * conversions, per ITOQ.md's confirmed "I1's raw bit
                  * pattern copied directly into B1" trace); TAG=1 is
-                 * assignment context (`SUBBIT(x) = ...;`, where this
-                 * opcode's result instead supplies a *destination* for
-                 * the following assign) -- not implemented, no fixture
-                 * needs it, fails loudly rather than silently dropping
-                 * the write-through. */
+                 * assignment context (`SUBBIT(x) = ...;`, ITOQ.md's own
+                 * confirmed trace: this opcode's VAC result supplies the
+                 * *receiver* for a following BASN, rather than a value --
+                 * SUBBIT always routes the actual write through a bit-
+                 * string intermediary, so BASN is the only assign opcode
+                 * it ever chains into, confirmed operand-for-operand
+                 * against `SUBBIT(I1) = BIN'...';`). Only a plain SYT
+                 * argument is confirmed (the subscripted `SUBBITn TO
+                 * m(...)` window form is an ITOQ.md Unresolved Question,
+                 * not implemented here either). */
+                if (ins->tag == 1) {
+                    if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_SYT) {
+                        fail(state, "SUBBIT assignment: expected a plain SYT operand");
+                        break;
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_subbit_ref = true;
+                    state->vac[ins->index].subbit_target_syt = ins->operands[0].data;
+                    break;
+                }
                 if (ins->tag != 0) {
-                    fail(state, "SUBBIT assignment context (TAG=%u) is not yet implemented", ins->tag);
+                    fail(state, "SUBBIT: unrecognized TAG %u (expected 0=reference or 1=assignment)", ins->tag);
                     break;
                 }
                 if (ins->operand_count != 1) { fail(state, "BTOQ/CTOQ/STOQ/ITOQ: expected 1 operand"); break; }
