@@ -1135,6 +1135,35 @@ run ./run_local_fixture.sh subbit_scalar "$(printf ' 1093140480\n 2.5000000E+00\
 # (mirroring write_container_element's existing dest_syt convention) and
 # applying the same symtab-driven scale_precision() normalization.
 run ./run_local_fixture.sh scalar_double_initial " 2.5000000000000000E+00"
+# User-reported (128-MASS.hal's `WRITE(6) MASS(REST_MASS, SPEED);`, MASS
+# a same-unit, non-inline SCALAR-returning FUNCTION -- containing its own
+# nested FUNCTION TAU, called via an ordinary FCAL/RTRN pair): always
+# printed a constant INTEGER "1" regardless of input. Root cause:
+# OP_RTRN's genuine same-unit-call-frame branch (`state->call_return_sp >
+# 0`, as opposed to the inline-FUNCTION or external-call forms just
+# above it, both already correct) unconditionally forced the return
+# value through rv_to_integer() and stored only `.integer` on the FCAL's
+# own VAC slot -- discarding the function's real declared return type
+# (SCALAR here) entirely. MASS's own relativistic-mass result happens to
+# stay close enough to 1.0 for any realistic input that rv_to_integer()
+# rounds it to a constant 1 every time, which is what made the bug read
+# as "always exactly 1" rather than an obviously wrong value. Fixed by
+# routing through store_resolved_to_vac() (the same kind-preserving
+# helper the inline-FUNCTION case a few lines above already uses
+# correctly) instead of hand-rolling an INTEGER-only write. Apparently
+# never exercised by any prior fixture: every existing SCALAR/CHARACTER-
+# returning FUNCTION fixture is either EXTERNAL (a separate cross-unit
+# result-copy path) or INLINE (the IDEF/ICLS branch) -- this was the
+# first real corpus program found to call an ordinary same-unit FUNCTION
+# and look at its own non-INTEGER return value. Output independently
+# hand-verified against the relativistic mass formula
+# (1/sqrt(1-(v/c)^2)) for two different speeds; a compileLinkRun
+# cross-check was attempted but the tool hung on interactive stdin
+# redirection, unrelated to this fix. Fixture: test_fcal_scalar_return.hal
+# (a minimal same-unit FUNCTION returning a non-integer SCALAR, isolating
+# the exact mechanism without 128-MASS.hal's own nested-FUNCTION and
+# READ-loop complexity).
+run ./run_local_fixture.sh fcal_scalar_return "$(printf ' 1.2500000E+00\n 3.2500000E+00')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

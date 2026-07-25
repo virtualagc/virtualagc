@@ -7142,8 +7142,32 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                     size_t vac_index = state->prog->instrs[fcal_pos].index;
                     if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                    state->vac[vac_index].is_ref = false;
-                    state->vac[vac_index].integer = rv_to_integer(&a);
+                    /* User-reported (128-MASS.hal's `WRITE(6)
+                     * MASS(REST_MASS, SPEED);`, MASS a same-unit,
+                     * non-inline SCALAR-returning FUNCTION called via an
+                     * ordinary FCAL/RTRN pair): this always forced the
+                     * return value through rv_to_integer() regardless of
+                     * the function's real declared return type, silently
+                     * rounding every SCALAR (or CHARACTER/BIT) result to
+                     * an INTEGER -- MASS's own relativistic-mass result
+                     * stayed close enough to 1.0 for any realistic input
+                     * that this rounded to a constant "1" every time,
+                     * masking the bug as "always prints 1" rather than an
+                     * obviously-wrong value. The inline-FUNCTION case just
+                     * above already gets this right via
+                     * store_resolved_to_vac() (kind-preserving: RV_SCALAR/
+                     * RV_STRING/RV_BITS/RV_INTEGER each land in their own
+                     * VAC slot field) -- this same-unit ordinary-call case
+                     * had simply never been given the same treatment.
+                     * Apparently never exercised by any prior fixture:
+                     * every existing SCALAR/CHARACTER-returning FUNCTION
+                     * fixture is either EXTERNAL (cross-unit, a completely
+                     * separate result-copy path, interp_copy_external_
+                     * call_result) or INLINE (the IDEF/ICLS branch just
+                     * above) -- this is the first real corpus program
+                     * found to call an ordinary same-unit FUNCTION and
+                     * actually look at its non-INTEGER return value. */
+                    store_resolved_to_vac(&state->vac[vac_index], &a);
                     state->pc = fcal_pos + 1;
                 } else {
                     size_t call_pos = state->call_return_stack[--state->call_return_sp];
