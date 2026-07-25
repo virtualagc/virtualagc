@@ -9,13 +9,20 @@
 ## Behavioral Description
 
 "Do for" — header for a `DO FOR var = initial TO final BY increment;`
-range-form loop ([USA003087] §10.2). Establishes the control variable,
-its initial/final/increment values, and generates the initial "skip the
-first re-test" branch straight into the loop body (since the range form
-always executes at least its first in-range cycle without a separate
-pre-test). Also used, in a reduced form, for the header of the
-alternate/list form `DO FOR var = exp1, exp2, ...expn;` — see
-[AFOR](AFOR.md), which carries the per-value data for that form.
+range-form loop ([USA003087] §10.2). Establishes the control variable
+and its initial/final/increment values. Also used, in a reduced form,
+for the header of the alternate/list form `DO FOR var = exp1, exp2,
+...expn;` — see [AFOR](AFOR.md), which carries the per-value data for
+that form.
+
+**Correction (Maintenance phase)**: an earlier claim here that the
+range form "always executes at least its first in-range cycle without a
+separate pre-test" was wrong. A real `HALSFC --parms=LSTALL` trace
+shows DFOR's own initial branch actually lands on [EFOR](EFOR.md)'s own
+store+compare code — only the *increment* is skipped on the first
+cycle, not the bounds check; an out-of-range initial value never runs
+the body at all. See [EFOR](EFOR.md)'s own Implementation Notes for the
+user-reported bug this wrong assumption caused in `yaHALMAT2`.
 
 ## Usage Context
 

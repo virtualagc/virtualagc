@@ -49,6 +49,19 @@ rules out an earlier hypothesis that the still-unresolved
 they don't; see those files for the current best guess (procedure/
 function argument passing instead).
 
+**Multiple-assignment runtime implementation (Maintenance phase)**: the
+wire format above was already fully confirmed, but `yaHALMAT2` itself
+only ever handled the base 2-operand case — user-reported
+(104-EXAMPLE_1.hal's `TMAX, TMEAN, TMIN = TIME(1);`): "IASN/SASN:
+expected 2 operands". Fixed by looping over all `n` receivers instead
+of assuming exactly one. Validating against [USA003087] §8.5's own `C,
+I = 127.2;` example surfaced a second bug: *mixed-type* multiple
+assignment (receivers of different declared types sharing one
+instruction, e.g. `CHARACTER` + `INTEGER`) needed each receiver's own
+coercion to consult its own symtab class, not the opcode's nominal
+class (`CHARACTER` reuses [CASN](../class-2/CASN.md)'s own formatting).
+Fixtures: `test_multi_assign.hal`, `test_multi_assign_mixed.hal`.
+
 ## Unresolved Questions
 
 - None remaining for the base integer-assign case (INTEGER receiver from
@@ -143,6 +156,25 @@ confirmed to fail on pre-fix code reproducing the exact symptom (`EOR`
 printed as a bare integer) and confirmed against a real
 `GOOGLE-PARALLAX.hal` run (`DISTANCE` now prints with full double-
 precision formatting).
+
+**Related precision-normalization fixes elsewhere (Maintenance phase),
+noted here for cross-reference**: the same "declared precision must
+override whatever a literal/expression result happens to carry" problem
+this section's own fix addresses for a plain `SCALAR`/`SCALAR DOUBLE`
+destination recurred at two other write sites, fixed the same way. (1)
+`write_container_element()` — the shared choke point every numeric
+`ARRAY`/`VECTOR`/`MATRIX` element write funnels through — never
+normalized to the container's own declared precision (user-reported,
+107-EXAMPLE_4.hal: an `ARRAY(5) SCALAR DOUBLE` rotated via
+element-to-element [DSUB](../class-0/DSUB.md) copies printed only one
+element in double precision, the rest single); fixture:
+`test_array_double.hal`. (2) `write_syt_entry()` — `SINT`'s own plain
+(non-array) destination-write path — never normalized a variable's own
+`INITIAL()` literal value to its declared precision, since real HALSFC
+emits the shortest exact literal encoding regardless of the
+destination's declared precision (found while implementing `SUBBIT` on
+a `SCALAR DOUBLE` target — see [ITOQ](../class-1/ITOQ.md)); fixture:
+`test_scalar_double_initial.hal`.
 
 ## Source Analysis & Reliability
 

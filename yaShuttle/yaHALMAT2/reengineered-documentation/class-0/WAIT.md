@@ -60,6 +60,32 @@ HALMAT: 034(0),0,0          <- WAIT, no operands, trailing field 0
 SVC 0,10(0,9)
 ```
 
+## `yaHALMAT2` Implementation Notes
+
+Implemented (Maintenance phase, same user-suggested sweep that found
+[PRIO](PRIO.md)'s own gap): only the plain interval form previously
+worked at runtime; `UNTIL`/`FOR DEPENDENT` were fully format-confirmed
+above but unimplemented.
+
+- **`WAIT UNTIL time;`**: reuses `schd_seconds_to_ticks()` with the
+  same "absolute virtual-time-in-seconds, not relative to now"
+  semantics [SCHD](SCHD.md)'s own `AT`/`STOPPING...UNTIL` clauses
+  already use (confirmed by that mechanism's `stop_deadline` comparing
+  directly against `virtual_time`, never adding it).
+- **`WAIT FOR DEPENDENT;`**: reuses the `has_active_dependents()`/
+  `sched_wake_dependents()` mechanism already built for the
+  `CLOSE`-triggered "wait for dependents" case — but that existing
+  mechanism unconditionally *terminates* the waiting task once
+  dependents clear, correct only when the task's own body is already
+  finished, wrong for a mid-body `WAIT` statement, which must resume
+  instead. Fixed with a new, distinct `TASK_WAITING_FOR_DEPENDENTS_
+  RESUME` state (`state.h`) that transitions back to `TASK_READY`
+  rather than terminating.
+
+Fixtures: `test_wait_until.hal`, `test_wait_dependent.hal`
+(demonstrates genuine blocking via one task's `WAIT` ordering its own
+`WRITE` before the primal's).
+
 ## Unresolved Questions
 
 - The exact `SVC` call-number-to-form mapping (6, 8, 10 in the trace

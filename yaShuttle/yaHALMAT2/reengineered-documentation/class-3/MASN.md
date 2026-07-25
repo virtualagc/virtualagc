@@ -72,6 +72,20 @@ partition shapes are covered, including column-select, which was
 initially left read-only in a first pass and then generalized to writable
 too, once a stride concept existed to express it correctly.
 
+**`ARRAY`-of-`VECTOR` operand slicing** (Maintenance phase, part of the
+same fix as [DSUB](../class-0/DSUB.md)'s own ARRAY-of-VECTOR shape-
+support gap, user-reported via 117-EXAMPLE_8.hal): `resolve_container()`
+— the shared read-side helper `MASN` and every other `xASN` opcode goes
+through for a whole-container source operand — previously always
+returned an `ARRAY`-of-`VECTOR` `SYT` operand's *whole* flat container
+regardless of an active `ADLP`/`DLPE` replay's own `arrayed_index`,
+correct only by coincidence when both operands of a same-shaped
+whole-array expression happened to line up element-for-element. Fixed
+by slicing to one `VECTOR` per `arrayed_index` instead — see
+[DSUB](../class-0/DSUB.md)'s Unresolved Questions for the fuller
+writeup (the read-side half of that fix; [VASN](../class-4/VASN.md)'s
+own hand-rolled write side needed the matching companion fix).
+
 Regression fixtures: `src/tests/hal/test_matrix_row_assign.hal`
 (row-scale-by-constant and row-swap-via-temporary-vector, two of the
 three idioms `047-ROWS.hal` itself demonstrates — the third,

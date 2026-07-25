@@ -308,6 +308,47 @@ loudly rather than misreading length/position as raw indices.
 To-partition/`CSZ`/`ASZ` subscript kinds — all fully confirmed in the
 wire format above — remain uninterpreted.
 
+## `yaHALMAT2` Implementation Notes (Maintenance phase)
+
+- **Genuinely 2-dimensional `ARRAY(r,c)` subscripting** (user-reported,
+  107-EXAMPLE_3.hal: `DECLARE ARRAY(3,3), M1...;`, subscripted as
+  `M1(ROW,COL)`/`M1$(ROW,*)`): `ensure_container()` only ever read
+  `array_dims[0]` for *any* `ARRAY` shape (`symtab.c` already parsed
+  every dimension correctly — an `interp.c` consumption bug), leaving
+  `rows`/`cols` at 0. This silently broke the *plain* 2-index case too
+  (a placeholder-stride offset instead of real row-major addressing),
+  not just the asterisk-partition `WRITE` that failed loudly. Fixed by
+  giving a confirmed-2D `ARRAY` the same `rows`/`cols` treatment
+  `MATRIX` gets, so this file's own `MATRIX`-shaped `DSUB` logic
+  (`base->rows > 0`) picks it up for free. 3+ dimensional `ARRAY`s still
+  fall through to the single-dimension/placeholder-stride path
+  unchanged — `MATRIX`'s own 2-index convention has no defined
+  generalization beyond 2D. Fixture: `test_array2d.hal`, output
+  independently verified against numpy.
+- **A `BIT`/`BOOLEAN` (or `CHARACTER`) `ARRAY` subscript wrongly treated
+  as a container-producing select** (user-reported, 120-EXAMPLE_A.hal's
+  `DATA_VALID$(J:) = FALSE;`, `DATA_VALID` an `ARRAY(4) BOOLEAN`):
+  "DSUB: asterisk subscript with 2 indices not yet implemented". This
+  subscript compiles through the identical "index + trailing asterisk"
+  shape `M$(i,*)` uses (this file's own `α`=4/0 asterisk row), but
+  unlike `VECTOR`/`MATRIX` the asterisk here selects no sub-range — a
+  `BIT`/`CHARACTER` element has nothing further to select "all of"; it's
+  just how the compiler always spells this particular subscript. Fixed
+  by treating it as an ordinary single-element writable reference (the
+  same generic per-dimension `is_ref` `VAC`-slot mechanism `DSUB`
+  already uses for the plain index case), not a container-producing
+  partition select. Fixture: `test_bit_array_dsub.hal`.
+- **An `INTEGER ARRAY` `WRITE` argument formatted as `SCALAR`**
+  (user-reported, 113-EXAMPLE_7.hal's `MISMATCH$(I,*)`, `MISMATCH` a
+  confirmed-2D `ARRAY INTEGER`): `container_is_integer` (the `VAC`-slot
+  flag that selects the 11-column `INTEGER` field format) was only ever
+  set for a plain whole-`SYT` reference, and `resolve_operand()`'s
+  per-element container read had no `INTEGER` awareness at all. Fixed
+  with a new per-`VAC`-slot `container_is_integer` flag sourced from
+  this instruction's own operator-word `TAG` (already documented above
+  as "the HALMAT class number of the subscripted result's type" — `6`
+  for `INTEGER`). Fixture: `test_mismatch_array.hal`.
+
 ## Unresolved Questions
 
 - The precise distinction between DSUB and TSUB is not yet established;
@@ -388,25 +429,38 @@ wire format above — remain uninterpreted.
   single-element access tested earlier; `4`=`VECTOR` for `V1(*)` and
   `M1(1,*)`, which don't reduce dimensionality) — not a
   subscript-kind-specific tag as earlier phrasing implied.
-- **`yaHALMAT2` implementation gap identified (Maintenance phase, not a
-  wire-format question)**: an `ARRAY(n) VECTOR(m)`-declared variable
-  (an *array of vectors*, distinct from a `MATRIX(n,m)`) compiles `V(i)`
-  (select the whole `i`-th vector) to the identical "one plain index +
-  one asterisk" two-operand `DSUB` shape as `M(i,*)` (row select) — but
-  `yaHALMAT2`'s own container model (`halmat_syt_entry_t`'s `elements`/
-  `rows`/`cols`, `state.h`) has no way to distinguish the two cases: both
-  end up `rows==cols==0` via `ensure_container()`, since only a true
-  `MATRIX` symbol gets real shape metadata from the symbol table today.
-  Confirmed as a real-corpus blocker via `141-VSUM.hal` (`VSUM: FUNCTION
-  (V) VECTOR; DECLARE V ARRAY(*) VECTOR; ...; TOTAL = TOTAL + V(N);`),
-  which also needs at least two more currently-unimplemented things once
-  this one's fixed: `ARRAY(*)` assumed-size parameter binding, and a
-  whole-`VECTOR` `FUNCTION` `RETURN` (a separate `OP_RTRN` gap — see
-  [RTRN](RTRN.md)). All three are facets of one missing "ARRAY-of-
-  VECTOR/MATRIX" shape-modeling architecture; deferred together as a
-  dedicated future feature rather than partially implemented — see
-  `interp.c`'s `OP_DSUB` 2-index-asterisk-fallback comment for the full
-  trace.
+- **`yaHALMAT2` implementation gap, now fixed**: an `ARRAY(n) VECTOR(m)`-
+  declared variable (an *array of vectors*, distinct from a
+  `MATRIX(n,m)`) compiles `V(i)` (select the whole `i`-th vector) to the
+  identical "one plain index + one asterisk" two-operand `DSUB` shape as
+  `M(i,*)` (row select) — but `yaHALMAT2`'s own container model
+  (`halmat_syt_entry_t`'s `elements`/`rows`/`cols`, `state.h`) had no way
+  to distinguish the two cases: both ended up `rows==cols==0` via
+  `ensure_container()`, since only a true `MATRIX` symbol got real shape
+  metadata from the symbol table. User-reported real-corpus trigger,
+  117-EXAMPLE_8.hal (`POSITIONS ARRAY(5) VECTOR`, indexed
+  `POSITIONS$(I:*)`): "DSUB: asterisk subscript with 2 indices not yet
+  implemented". Root cause: `symtab.c` discarded a `VECTOR`/`MATRIX`
+  symbol's own `SYM_LENGTH`-encoded element shape whenever `SYM_ARRAY`
+  also made it `ARRAY`-shaped. Fixed by decoding `SYM_LENGTH` into the
+  `ARRAY` branch too, and giving `ensure_container()` a new
+  `array_of_vector`-flagged `rows`/`cols` treatment (the same convention
+  as the 2D-`ARRAY`-of-`SCALAR` fix two bullets below) so `DSUB`'s
+  existing `MATRIX`-shaped logic ("`base->rows > 0`") picks it up for
+  free. A companion bug surfaced verifying the file's own whole-array
+  vector arithmetic (`[VELOCITY]=([POSITIONS]-[OLD_POSN])/DELTA_T;`,
+  ADLP/DLPE-replayed): `resolve_container()` always returned an
+  `ARRAY`-of-`VECTOR` operand's *whole* flat container regardless of the
+  replay's own `arrayed_index`, correct only when both operands happened
+  to be same-shaped; fixed by slicing to one `VECTOR` per
+  `arrayed_index` (both `resolve_container`'s read side and `VASN`'s own
+  hand-rolled write side). `ARRAY`-of-`MATRIX` and `ARRAY(*)`
+  assumed-size `VECTOR` parameters (`141-VSUM.hal`) remain a separate,
+  still-open gap (a plain positional-binding/shape-metadata limitation,
+  not this container-shape one) — the whole-`VECTOR`/`MATRIX` `RETURN`
+  half of the "ARRAY-of-VECTOR/MATRIX" architecture this bullet used to
+  describe as jointly deferred is now also fixed, see
+  [RTRN](RTRN.md). Fixture: `test_array_of_vector.hal`.
 
 ## Source Analysis & Reliability
 

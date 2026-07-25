@@ -54,6 +54,20 @@ C * MM$(I,*);`) — see that file for the full writeup, the
 fixtures. Nothing VASN-specific was needed beyond MASN's own fix, since
 both opcodes go through the identical code path.
 
+**`ARRAY`-of-`VECTOR` write-back** (Maintenance phase, user-reported via
+117-EXAMPLE_8.hal's `[VELOCITY]=([POSITIONS]-[OLD_POSN])/DELTA_T;`,
+`VELOCITY`/`POSITIONS`/`OLD_POSN` all `ARRAY(5) VECTOR`, `ADLP`/`DLPE`-
+replayed): unlike the read side (`resolve_container()`, shared by every
+`xASN` opcode — see [MASN](../class-3/MASN.md)'s own note), VASN's own
+*write*-back to an `ARRAY`-of-`VECTOR` receiver is hand-rolled and
+bypasses the general `write_destination()` path, so it needed its own,
+separate fix to slice by the replay's own `arrayed_index` (one
+`VECTOR`-worth of elements per pass) rather than writing the whole flat
+container on every pass. Output independently hand-verified (vector
+subtraction/magnitude/dot-product arithmetic across the whole file, not
+just cross-checked against `compileLinkRun`). Fixture:
+`test_array_of_vector.hal`.
+
 ## Source Analysis & Reliability
 
 Opcode (0x401) confirmed primary-source: `XVASN` (base of an array) in

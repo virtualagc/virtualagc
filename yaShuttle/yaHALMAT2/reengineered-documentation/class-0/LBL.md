@@ -35,6 +35,32 @@ instructions appear: one marking the `ELSE` branch's entry point
 statement following the whole `IF`/`ELSE` construct (target of the true
 part's own closing unconditional [BRA](BRA.md)).
 
+## A second, distinct QUAL=SYT form: user-declared statement labels
+
+**Confirmed this session** (user-reported, 119-EXAMPLE_9.hal's
+`INNER: DO FOR TEMPORARY J = 1 TO 3; ... EXIT INNER; ... END INNER;`):
+a *user-declared statement label* (`INNER:`, the target of a real `GO
+TO`/`EXIT` naming a source-level label rather than an ELSE/join point
+the compiler generated on its own) also compiles to this same LBL
+opcode, but with `QUAL`=1=`SYT` (keyed by the label's own symbol-table
+index) instead of `QUAL`=2=GLI/INL (keyed by an internal bookkeeping-
+label number, as in the ELSE/join-point case above). These are two
+genuinely independent numbering spaces that can coincidentally collide
+in a small enough program — a real `GO TO <label>;` uses the `QUAL`=`SYT`
+form (confirmed via `test_eron_goto.hal`/`test_eron_goto_appc.hal`).
+
+`yaHALMAT2`'s own label-precomputation pass originally registered every
+LBL into one flat table regardless of `QUAL`, silently mis-registering
+one numbering space as the other whenever a small program's own
+bookkeeping-label and symbol-table-index values happened to coincide —
+found while implementing `EXIT`-of-labeled-`DO FOR` (see
+[EFOR](EFOR.md)'s own Implementation Notes for that fix); the first
+attempted fix (registering only `QUAL`=`INL`) then broke real `GO TO`,
+which needs the `QUAL`=`SYT` form. Fixed properly by splitting into two
+parallel tables (`label_pos`/`label_pos_syt`, `state.h`), with
+[BRA](BRA.md)/[FBRA](FBRA.md) dispatching on their own operand's
+qualifier rather than assuming a shared namespace.
+
 ## Unresolved Questions
 
 - Whether HAL/S LBL is also the destination for a bit-string conditional

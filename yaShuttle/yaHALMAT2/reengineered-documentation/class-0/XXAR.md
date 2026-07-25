@@ -185,6 +185,77 @@ documented per-element `READ` order (the same order this file's own
 `WRITE`-side reasoning above already uses) — see [READ](READ.md)'s
 Confirmed Runtime Behavior section for the full writeup.
 
+**`yaHALMAT2` `WRITE`-context runtime gaps** (all in `OP_XXAR`, `interp.c`,
+found and fixed across several sessions):
+
+- **`TAG2` I/O-control-kind check was READ/READALL-only** (user-reported:
+  `WRITE(6) SKIP(0), C1, COLUMN(20), C2;` printed the literal numbers `0`
+  and `20` as ordinary data fields instead of repositioning anything).
+  The whole `TAG2`-dispatch branch documented above was gated to
+  `!is_call && kind != 2` — `kind==2` is `WRITE`, so it was skipped
+  entirely there, falling through to the plain-value capture path.
+  Fixed by adding a parallel `WRITE`-context branch (`kind == 2 &&
+  !is_call`) that captures the specifier into a new `is_ioctl`/
+  `ioctl_kind`/`ioctl_n` item (rather than READ/READALL's simpler
+  `has_skip`/`has_column` pre-pass fields, since a WRITE-context
+  specifier can appear *anywhere* in the item list, interleaved with
+  ordinary data items, per [USA003087] Sec. 12.4). This required a real
+  architecture change on the consuming side too — see [WRIT](WRIT.md)'s
+  own notes on the resulting `device_mech[]`/line-buffering mechanism.
+- **`BIT`-typed argument width lost for a `VAC`-carried value**
+  (user-reported, 129-ALMOST_EQUAL.hal): the WRITE-argument-capture
+  code's `bit_width` lookup only ever checked a `QUAL`=`SYT` operand's
+  symtab entry, never a `QUAL`=`VAC` operand carrying a same-unit
+  `FUNCTION`-call result — see [RTRN](RTRN.md)'s own notes on the
+  companion fix (stamping `bit_width` onto the `VAC` slot at `RTRN`
+  time) this capture code was updated to prefer.
+- **`items[]` fixed-size overflow** (user-reported, 134-DOTS.hal's
+  `DOTS(V1, V2)`, each an `ARRAY(10) VECTOR(3)` same-unit `FUNCTION`
+  argument: "I/O statement has too many items"). A same-unit call's own
+  `ARRAY` argument gets `ADLP`/`DLPE`-replayed per element (this file's
+  own already-documented per-element-replay rule) — 10 items per
+  argument, comfortably more than the fixed `HALMAT_MAX_OPERANDS`
+  (=16)-sized `items[]` array previously had room for.
+  `HALMAT_MAX_OPERANDS` is a correct, primary-sourced bound on a single
+  HALMAT *instruction's* own operand count — reusing it to size
+  `io_pending`'s own item *list*, which needs one entry per WRITE/CALL
+  data item and can genuinely scale with an argument's declared array
+  size, was always an architectural mismatch, not a real HAL/S limit.
+  Fixed by making `io_pending.items` a growable, heap-allocated array
+  (`halmat_io_item_t`, `state.h`; `io_pending_reserve_item()`,
+  `interp.c`) instead of a fixed inline one.
+- **A `VAC`-carried whole-container `CALL` argument silently zeroed**
+  (user-reported, 120-EXAMPLE_A.hal's `CALL EXAMPLE_A(SCALAR(9800, ...),
+  ...)`, the `SCALAR(...)` shaping function's own result fed to an
+  `ARRAY(4) SCALAR` parameter): `resolve_operand()`'s `QUAL`=`VAC` case
+  has no `is_container` fallback at all, so every `ADLP`/`DLPE` replay
+  pass silently left the parameter's storage at its zero-initialized
+  default, with no error. Fixed by letting a `VAC` container operand
+  bypass the ordinary `arrayed_index < 0` whole-container gate entirely
+  (a `VAC` container has no per-replay-pass ambiguity the way a plain
+  `SYT` reference does), captured once on the replay's first pass only.
+- **A plain `SYT` `ARRAY`/`ARRAY`-of-`VECTOR` `CALL` argument bound
+  positionally-wrong** (user-reported, 134-DOTS.hal follow-up, once the
+  `items[]`-capacity fix above let the file run further): unlike the
+  `VAC`-container case just above, a plain `SYT` `ARRAY` argument's
+  `ADLP`/`DLPE` replay passes were each captured as their *own* separate
+  `items[]` entry via the ordinary `resolve_operand()` path (one flat
+  scalar per pass, or — for `ARRAY`-of-`VECTOR` — just that pass's own
+  row), then bound by the callee's positional-binding loop to N
+  *different* parameter slots, when all N replay passes really belong
+  to ONE logical argument — corrupting the callee's other locals while
+  leaving the array parameter itself unpopulated or wrong. Fixed with a
+  new `call_array_replay` case: in a `CALL` context, a plain `SYT`
+  `ARRAY`-shaped operand under replay is now captured whole (via
+  `resolve_container()`, with `arrayed_index` temporarily forced to -1
+  to get its "outside a replay" whole-container behavior rather than
+  its per-row `array_of_vector` slicing) on the first replay pass only,
+  then skipped on subsequent passes.
+
+Fixtures: `test_bit_array_dsub.hal`, `test_fcal_boolean_return.hal`,
+`test_many_call_args.hal`, `test_dots.hal`, `test_tabcol.hal`,
+`test_skipline.hal`, `test_page.hal`.
+
 ## Unresolved Questions
 
 - ~~Whether an *arrayed* argument of any type (not just a structure)

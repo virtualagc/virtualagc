@@ -47,13 +47,13 @@ out row by row, with the second and subsequent rows forced onto a new
 line, aligned under the first row's own starting column, regardless of
 whether the line has room for more. Every WRITE data field, across the
 whole statement's argument list (not per-argument), also now wraps onto
-a new line once it would exceed the interpreter's line-length limit
-(default 80 columns, overridable with `--line-length`, main.c —
-**correction, a later session**: this default was previously mis-cited
-to USA003087 Sec. 12.2's *unpaged* 80-column figure; see "PAGED vs
-UNPAGED" below for why that citation doesn't actually apply to this
-project's own fixtures, and `src/state.h`'s `line_length` comment for
-the fuller correction). Previously,
+a new line once it would exceed the interpreter's line-length limit,
+overridable with `--line-length` (main.c) — **correction, a later
+session**: the per-device default is 132 columns for `PAGED`, 80 for
+`UNPAGED` (see "PAGED vs UNPAGED" below for the derivation; an earlier
+session had left this at a single flat 80 for both, a known-flagged
+discrepancy finally resolved once the project owner confirmed the
+132-column reading). Previously,
 a whole `VECTOR`/`MATRIX`/plain-`ARRAY`-shaped argument failed outright
 ("... referenced outside an arrayed-paragraph replay") rather than
 producing any output at all, and no line-wrapping existed regardless of
@@ -98,9 +98,19 @@ confirmed by ["Programming in HAL/S"] Sec. 8.1's own direct worked
 example: `WRITE(6) 'THE ANSWER IS', V;` prints `THE ANSWER IS
 7.5836210E+05` on a `PAGED` channel but `'THE ANSWER IS' 7.5836210E+05`
 on `UNPAGED`. `PAGED`'s own documented default record length is 133
-(Sec. 6.1.4), not the 80 this project actually uses by default — see
-`src/state.h`'s `line_length` comment for why that value was
-deliberately left as-is despite the citation correction above.
+(Sec. 6.1.4) — **correction, a later session** (user-reported, chasing
+an unrelated `--line-length` question): Sec. 6.1.4 also states a
+`PAGED` file with no `RECFM` supplied defaults to `FBA`, and the
+trailing "A" means an ANSI/ASA carriage-control character is
+*automatically generated* as byte 1 of every record — so the 133-byte
+`PAGED` default is 1 non-printing control byte plus 132 *printable*
+columns, not 133 printable columns (`UNPAGED` defaults to plain `FB`,
+no control byte, so its 80-byte default is fully printable as-is). 132
+also matches the IBM 1403 line printer's own documented print width —
+this runtime's own historical target hardware — independently
+corroborating the same number. `--line-length`'s per-device default is
+now 132 (`PAGED`)/80 (`UNPAGED`) accordingly; see `src/state.h`'s
+`line_length` comment for the full derivation.
 
 Since this interpreter only ever sees compiled HALMAT (never the
 original HAL/S source), it has no way to see a `DEVICE` directive even
@@ -197,6 +207,69 @@ are different numbering schemes (confirmed via `fail()`'s own error
 messages, which report `.index`), and comparing them directly silently
 made the whole backward-walk never trigger. After this fix, the full
 regression suite passed with no further regressions.
+
+## TAB/COLUMN/SKIP/LINE/PAGE runtime implementation
+
+The HALMAT-format side of the five I/O-control pseudo-functions
+([USA003087] Sec. 12.4) was already fully documented above (see
+[XXAR](XXAR.md)'s Usage Context) and implemented for `READ`/`READALL`,
+but user-reported: `WRITE(6) SKIP(0), C1, COLUMN(20), C2;` printed the
+literal numbers `0`/`20` as ordinary data fields instead of
+repositioning anything — [XXAR](XXAR.md)'s own `TAG2` dispatch was
+never wired up for a `WRITE`-context (`kind==2`) item at all.
+
+Implementing this for real (not just recognizing the specifier)
+required a genuine architecture change: the device mechanism's own
+position (page/line/column, Sec. 12.2's own term) now persists per
+device *across* WRITE statements (new `device_mech[HALMAT_DEVICE_MAX]`,
+`state.h` — previously each `flush_write` call started fresh, with no
+memory of where a prior statement left off), and the *current* line is
+buffered in memory (`line_buf`) rather than streamed straight to the
+output file, flushed only once something actually moves the mechanism
+down (the next WRITE's own vertical movement, or program-end cleanup).
+This buffering is what makes backward `TAB(-n)`/`COLUMN(n)` overstrike
+possible at all ([USA003087] Fig. 12-5's own worked example exercises
+exactly this) — a plain append-only stream can never move backward once
+a character has already reached the file, the way a real line printer's
+own physical carriage can move left and overstrike before advancing.
+
+Verified end-to-end against all three of Sec. 12.4's own worked
+examples (Figs. 12-5/12-6/12-7 — each reconstructed with a known
+starting position, since the book's own diagrams assume unshown prior
+context the surrounding text doesn't reproduce), which surfaced two
+further real gaps beyond the original bug:
+
+- A *leading* `TAB`/`COLUMN` (the very first item of a WRITE statement)
+  is relative to the column the mechanism was already at *before* the
+  statement began, not column 1 — despite the ordinary default vertical
+  movement still happening simultaneously (Sec. 12.4: "[i]f a TAB or
+  COLUMN pseudo-function appears at the beginning of a...WRITE
+  statement, it overrides the default positioning at column 1[; i]t
+  does not of itself inhibit movement onto the next line"). Fig. 12-5's
+  own `TAB(-50)` only makes sense read this way.
+- `SKIP(0)`/`LINE(gamma)` when already on line `gamma` are real,
+  meaningful zero-line-advance cases, not degenerate no-ops: Fig.
+  12-6's own labels show `SKIP(0)` "inhibits [the] default line
+  advance" (stays on the same line) while the following field still
+  "starts in column 1" — i.e. the column resets even though no line is
+  crossed.
+
+`PAGE(beta)` keeps the *relative line number unchanged* across the page
+break (Fig. 12-7: line 41 of page 5 -> `PAGE(1)` -> line 41 of page 6),
+implemented by padding with blank lines on the new page rather than
+resetting to line 1. The number of lines per page (`PAGE`/`LINE`'s own
+"L" bound, Sec. 12.4) is `--page-length` (default 66, the IBM 1403 line
+printer's own documented lines-per-page). The string emitted at each
+page break is `--ff` (default a bare ASCII form-feed, `0x0C`, matching
+a real line printer's own page-eject convention; a literal `%p`
+substring is replaced with the page number being advanced to; an
+implied trailing newline is added unless the string is empty, is a
+bare form-feed, or already ends in `\n` itself — project-owner-specified
+design, intended to support a page-heading template as well as the
+plain form-feed default).
+
+Fixtures: `test_tabcol.hal` (Fig. 12-5), `test_skipline.hal` (Fig.
+12-6), `test_page.hal` (Fig. 12-7, also exercises `--ff`).
 
 ## Unresolved Questions
 

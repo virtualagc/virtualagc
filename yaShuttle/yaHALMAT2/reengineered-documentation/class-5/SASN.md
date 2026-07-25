@@ -58,6 +58,18 @@ instruction comes first, `S3`'s `SYT` operand second.
 
 ## Confirmed Runtime Behavior
 
+**Multiple-assignment runtime implementation, fixed in a later
+session.** `yaHALMAT2` only ever handled the base 2-operand `xASN` case
+— user-reported (104-EXAMPLE_1.hal's `TMAX, TMEAN, TMIN = TIME(1);`,
+all three receivers `SCALAR`): "IASN/SASN: expected 2 operands". Fixed
+by looping over all `n` receivers instead of assuming exactly one; see
+[IASN](../class-6/IASN.md)'s own "Confirmed Runtime Behavior" for the
+fuller writeup (both opcodes are fixed identically, and the mixed-type
+case that surfaced validating against [USA003087] §8.5's own worked
+example needs a `CHARACTER` receiver too, which only IASN/SASN's shared
+loop — not this file specifically — handles). Fixtures:
+`test_multi_assign.hal`, `test_multi_assign_mixed.hal`.
+
 **Whole SCALAR ARRAY receiver, source a shaping-function result, fixed
 in a later session.** `ARRAY` has no dedicated whole-container assign
 opcode the way `VECTOR`/`MATRIX` get `VASN`/`MASN` — assigning e.g.
@@ -112,6 +124,17 @@ formatted despite its DOUBLE declaration) and confirmed against a real
 shifts slightly in its low digits versus the old single-precision-
 computed result, as expected once the whole chain is genuinely computed
 in double).
+
+**Related precision-normalization fixes elsewhere (Maintenance phase),
+noted here for cross-reference**: the same declared-precision-must-win
+principle this section's own fix establishes for a plain destination
+recurred at two other write sites — `write_container_element()` (every
+numeric `ARRAY`/`VECTOR`/`MATRIX` element write, user-reported via
+107-EXAMPLE_4.hal, fixture `test_array_double.hal`) and
+`write_syt_entry()` (`SINT`'s own `INITIAL()`-population path, found
+implementing `SUBBIT` on a `SCALAR DOUBLE` target, fixture
+`test_scalar_double_initial.hal`) — see [IASN](../class-6/IASN.md)'s
+own matching note for the fuller writeup of both.
 
 ## Source Analysis & Reliability
 

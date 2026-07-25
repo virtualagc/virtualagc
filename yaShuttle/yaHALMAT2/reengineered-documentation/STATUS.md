@@ -2129,6 +2129,131 @@ body, retest for the next one"). See [ETST](class-0/ETST.md)/
 [BRA](class-0/BRA.md)'s own "Confirmed Runtime Behavior" for the fuller
 account; `src/tests/hal/test_repeat.hal` is the regression fixture.
 
+## A further sweep of user-reported Maintenance-phase bugs (real "Programming in HAL/S" corpus)
+
+A run of user reports against real sample programs from the "Programming
+in HAL/S" corpus (104-EXAMPLE_1.hal through 120-EXAMPLE_A.hal), each
+following the established discipline (reproduce for real, root-cause
+against the compiler source or primary docs, fix, add a fixture):
+
+- **Multiple-assignment statements** (`L1,L2,...Ln = R;`, [USA003087]
+  §8.5) never implemented at runtime despite the wire format being
+  understood — "IASN/SASN: expected 2 operands." A follow-up mixed-type
+  case (different receiver types sharing one instruction) needed a
+  second fix. See [IASN](class-6/IASN.md)/[SASN](class-5/SASN.md).
+- **Genuinely 2-dimensional `ARRAY(r,c)` subscripting** silently
+  corrupted plain 2-index writes (not just the asterisk-partition form,
+  which at least failed loudly) — `ensure_container()` only ever read
+  the first array dimension for any `ARRAY` shape. See
+  [DSUB](class-0/DSUB.md).
+- **`SCALAR DOUBLE ARRAY` elements losing precision on write** — the
+  one shared choke point every numeric container element write funnels
+  through never normalized to the container's own declared precision.
+  See [IASN](class-6/IASN.md)'s cross-reference note.
+- **`DO FOR`'s missing initial-value bounds check**, silently corrupting
+  an out-of-bounds array element, plus an unrelated `INTEGER ARRAY`
+  `WRITE`-formatting bug found via the same report. See
+  [EFOR](class-0/EFOR.md), [DSUB](class-0/DSUB.md).
+- **`ARRAY`-of-`VECTOR` shape support** (an `ARRAY(n) VECTOR(m)`
+  declared variable, distinct from a true `MATRIX(n,m)`) — closes the
+  container-shape-modeling half of the architecture gap this file's own
+  "sweep" section above deferred; `ARRAY(*)` assumed-size parameter
+  binding remains separately open. See [DSUB](class-0/DSUB.md),
+  [MASN](class-3/MASN.md), [VASN](class-4/VASN.md).
+- **`EXIT <label>;` targeting a labeled `DO FOR`**, plus an independent
+  label-namespace-collision bug (a user-declared statement label and an
+  ordinary compiler-generated join-point label sharing one numbering
+  table) the fixture surfaced along the way. See
+  [EFOR](class-0/EFOR.md), [LBL](class-0/LBL.md).
+- **A `BIT`/`BOOLEAN ARRAY` subscript wrongly treated as a container-
+  producing select**, plus a second, independent bug (a `VAC`-carried
+  whole-container `CALL` argument silently zeroed) surfaced once
+  execution got further into the same file. See [DSUB](class-0/DSUB.md),
+  [XXAR](class-0/XXAR.md).
+
+## Real-time statements PRIO/WAIT implemented; SUBBIT SCALAR argument
+
+Direct user instruction to fix [PRIO](class-0/PRIO.md) and any other
+opcode "that can actually be fixed at the present time," after a
+grep-based sweep for remaining "not (yet) implemented" `fail()` sites
+in `interp.c` turned up several with fully format-confirmed operand
+shapes but zero runtime implementation:
+
+- **[PRIO](class-0/PRIO.md)** (`UPDATE PRIORITY`) and **two of
+  [WAIT](class-0/WAIT.md)'s three forms** (`WAIT UNTIL`/`WAIT FOR
+  DEPENDENT`) — both fully documented above at High confidence but
+  never wired into the interpreter. See those files' own Implementation
+  Notes.
+- **`SUBBIT`'s `SCALAR` argument, both directions** — the reference-
+  context read previously rounded to the nearest `INTEGER` instead of
+  reading the value's real raw bits (a latent bug, only ever exercised
+  via `SUBBIT(integer)` before); the assignment-context write had no
+  `SCALAR` case at all. `DOUBLE`-precision `SCALAR` remains a genuine,
+  documented ceiling (this interpreter's `BIT` representation is
+  `uint32_t` everywhere). A companion precision-normalization gap
+  (`SCALAR DOUBLE`'s own `INITIAL()` value) was found and fixed in the
+  same investigation. See [ITOQ](class-1/ITOQ.md),
+  [IASN](class-6/IASN.md)'s cross-reference note.
+
+## Same-unit FUNCTION RETURN type-preservation bugs (128-MASS/129-ALMOST_EQUAL/134-DOTS.hal)
+
+A run of three user reports against real corpus programs calling
+same-unit (non-`EXTERNAL`, non-`INLINE`) `FUNCTION`s and inspecting
+their own non-`INTEGER` return values — apparently never exercised by
+any prior fixture, since every earlier `SCALAR`/`CHARACTER`-returning
+`FUNCTION` fixture happened to be `EXTERNAL` or `INLINE`, both already
+correct via a different code path:
+
+- **128-MASS.hal**: a `SCALAR`-returning `FUNCTION`'s result always
+  printed as a constant `INTEGER` `1` — `OP_RTRN`'s genuine same-unit
+  call-frame branch unconditionally forced the return value to
+  `INTEGER`, discarding the real declared type for *every* same-unit
+  `FUNCTION` call in the interpreter.
+- **129-ALMOST_EQUAL.hal**: a `BOOLEAN`-returning `FUNCTION`'s result
+  printed as a full 32-bit binary field instead of the single digit it
+  actually is.
+- **134-DOTS.hal**: three further, compounding bugs chasing a single
+  `WRITE(6) 'DOTS:', DOTS(V1, V2);` (`DOTS` a same-unit `FUNCTION`
+  returning a whole `MATRIX(10,10)`, called with two `ARRAY(10)
+  VECTOR(3)` arguments) — a fixed-size `io_pending.items[]` array
+  overflowing on a same-unit call's own `ARRAY` arguments (fixed by
+  making it growable), `OP_RTRN` having no case at all for a whole
+  `VECTOR`/`MATRIX` return value, and a same-unit `CALL`'s own whole-
+  `ARRAY`-of-`VECTOR` arguments being bound to the wrong parameter
+  slots entirely (all N of an array argument's own `ADLP`/`DLPE` replay
+  passes bound positionally as N *separate* parameters instead of one).
+
+See [RTRN](class-0/RTRN.md) and [XXAR](class-0/XXAR.md)/
+[XXST](class-0/XXST.md) for the full, per-bug writeups. Fixtures:
+`test_fcal_scalar_return.hal`, `test_fcal_boolean_return.hal`,
+`test_many_call_args.hal`, `test_dots.hal`.
+
+## WRITE line-length PAGED default corrected; TAB/COLUMN/SKIP/LINE/PAGE implemented
+
+User investigation of an apparently-inert `--line-length` flag (a red
+herring, actually explained by `MATRIX` row-boundary formatting) led to
+two real, related fixes:
+
+- **The PAGED `--line-length` default was wrong**: [USA003090] Sec.
+  6.1.4's documented PAGED default LRECL (133) is 1 automatically-
+  generated ANSI/ASA carriage-control byte plus 132 *printable*
+  columns, not 133 printable columns as this project's own prior
+  documentation had assumed — independently corroborated by 132 also
+  being the IBM 1403 line printer's own documented print width. See
+  [WRIT](class-0/WRIT.md)'s "PAGED vs UNPAGED" section.
+- **USA003087 Sec. 12.4's five `WRITE`-context I/O-control pseudo-
+  functions** (`TAB`/`COLUMN`/`SKIP`/`LINE`/`PAGE`) were entirely
+  unimplemented despite the wire format being fully documented (see
+  [XXAR](class-0/XXAR.md)) — they printed their own numeric argument as
+  an ordinary data field. Implementing this required a genuine
+  architecture change: the device mechanism's own position now persists
+  per device across `WRITE` statements, with the *current* line
+  buffered in memory (not streamed straight to the output file) so
+  backward `TAB(-n)`/`COLUMN(n)` overstrike is possible at all. Verified
+  end-to-end against all three of Sec. 12.4's own worked examples. New
+  `--page-length`/`--ff` options. See [WRIT](class-0/WRIT.md)'s own new
+  section for the full writeup.
+
 ## Next steps (suggested)
 
 1. A systematic sweep of USA003087 syntax patterns against previously-

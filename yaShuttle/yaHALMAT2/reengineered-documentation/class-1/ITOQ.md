@@ -71,12 +71,11 @@ underlying type. Implemented with a new `is_subbit_ref`/
 `state.h`), set by the `TAG`=1 branch and consumed by
 `write_destination`'s `QUAL_VAC` case: the assigned bit pattern is
 written directly into the target's own storage, reinterpreted per its
-*declared* type. Only `SYT_TYPE_INTEGER` and `SYT_TYPE_BIT` have a
+*declared* type. `SYT_TYPE_INTEGER` and `SYT_TYPE_BIT` have a
 confirmed, lossless raw-bit mapping in this interpreter (`BIT`
 trivially; `INTEGER` via the same reinterpret-cast the reference-
-context branch already uses in the opposite direction) — `SCALAR`/
-`CHARACTER` targets still fail loudly, no hardware byte-layout modeled
-for them. One wrinkle found empirically: `SUBBIT` deliberately bypasses
+context branch already uses in the opposite direction). One wrinkle
+found empirically: `SUBBIT` deliberately bypasses
 the ordinary "first write infers the type" mechanism this interpreter
 otherwise uses for an untyped `SYT` entry (it's writing bits into an
 *already, if only declaratively, typed* variable's storage, not a value
@@ -85,6 +84,40 @@ reaching `SUBBIT` needs its real declared type pulled from the symbol
 table (`hal_class`) instead. Fixture: `src/tests/hal/test_subbit_assign.hal`
 (the exact `SUBBIT(I1) = BIN'1111000011110000';` case from the trace
 above, on a never-written `INTEGER`, plus a `BIT`-target case).
+
+**`SCALAR` argument, both directions, implemented (Maintenance phase)**
+— this family's shared reference-context code path (`OP_STOQ`/`OP_BTOQ`/
+`OP_CTOQ`/`OP_ITOQ`, `interp.c`) and `write_destination`'s
+`is_subbit_ref` branch above both gained a `SYT_TYPE_SCALAR` case
+(`STOQ` is the family member a `SCALAR` argument actually compiles
+through — see [STOQ](STOQ.md) — but the shared implementation lives
+here alongside the rest of the family's own writeup). User-corrected an
+initial wrong assumption ("needs IEEE-754 modeling this interpreter
+doesn't have"): AP-101S `SCALAR` is IBM hexadecimal floating point, not
+IEEE-754, and this project's own `halmat_scalar_t` (`value.h`) already
+stores the exact bit-for-bit wire format — no new modeling needed for
+`SINGLE`-precision `SUBBIT` at all. Two bugs found implementing it: (1)
+the reference-context read (`B = SUBBIT(a_scalar_var);`) previously
+rounded the scalar to its nearest `INTEGER` first (`rv_to_integer()`,
+borrowed from `STOI`/`STOB`'s semantically different ordinary
+conversion functions) instead of reading its real raw bits — a latent,
+previously-unexercised bug, since only `SUBBIT(integer)` had a fixture
+before. (2) the assignment-context write (`SUBBIT(a_scalar_var) =
+...;`) had no `SCALAR` case at all — added one that reinterprets the
+raw bits as the scalar's `msw` directly. `DOUBLE`-precision `SCALAR` (a
+genuine 64-bit pattern) still fails loudly both directions — this
+interpreter's `BIT` value representation is `uint32_t` everywhere, a
+project-wide ceiling, not something safe to guess past. `CHARACTER`
+remains unimplemented for a different, more specific reason per direct
+user clarification of AP-101S's real `CHARACTER` memory layout (a
+2-byte max/current-length header plus EBCDIC bytes) — this
+interpreter's own `char_value`/`char_elements` are plain malloc'd,
+already-ASCII-decoded, growable C strings with no such byte layout
+modeled at all (see [CASN](../class-2/CASN.md)'s own longstanding gap),
+so there's no accurate target to reinterpret bits into. Fixture:
+`test_subbit_scalar.hal` (round-trips a known scalar's raw bits through
+both `SUBBIT` directions; `1093140480` independently hand-verified as
+`0x41280000`, the correct IBM HFP encoding of `2.5`).
 
 ## Unresolved Questions
 

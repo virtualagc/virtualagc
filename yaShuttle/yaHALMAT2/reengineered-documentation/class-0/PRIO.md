@@ -41,6 +41,22 @@ HALMAT: 038(2),1,0          <- PRIO (UPDATE PRIORITY statement)
 SVC 0,23(0,9)                 <- runtime priority-update routine
 ```
 
+## `yaHALMAT2` Implementation Notes
+
+Implemented (Maintenance phase, prompted by a user-suggested sweep of
+remaining "not (yet) implemented" `fail()` sites in `interp.c` that
+turned up this opcode as fully format-confirmed above but with zero
+runtime implementation): writes the resolved value into the target
+task's own `priority` field, the same field `SCHEDULE...PRIORITY(...)`
+sets at task creation and `sched_pick_next()` already consults for
+scheduling decisions. The named-process form follows the confirmed
+trace above; the self/unlabeled form (1 operand) is inferred from
+[CANC](CANC.md)/[TERM](TERM.md)'s own already-confirmed self-vs-named
+pattern, not independently re-confirmed against a real compile — the
+Unresolved Questions bullet below about that form still stands.
+Fixture: `test_prio.hal` (demonstrates actual scheduler preemption via
+a live priority change).
+
 ## Unresolved Questions
 
 - The unlabeled/self form (`UPDATE PRIORITY TO α;`, no process name) was

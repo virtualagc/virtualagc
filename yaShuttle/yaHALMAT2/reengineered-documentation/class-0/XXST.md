@@ -97,6 +97,20 @@ alike, not an I/O-specific mechanism — and rules out an earlier
 hypothesis that a separate opcode family (`PMHD`/`PMAR`/`PMIN`) might be
 involved in argument passing; see [PMHD](PMHD.md).
 
+## `yaHALMAT2` Implementation Notes
+
+The nested nested-call frame `io_pending_stack` pushes at `OP_XXST`
+(one frame per bracketed construct, so a `CALL` argument that itself
+involves a nested I/O statement or call doesn't corrupt the outer
+frame's own in-progress item list) needed a fix alongside the
+`items[]`-capacity growable-array change (see [XXAR](XXAR.md)'s own
+notes, user-reported via 134-DOTS.hal's "I/O statement has too many
+items"): each freshly-pushed frame now resets its own `items`/
+`items_capacity` to `NULL`/`0` (rather than inheriting whatever the
+*previous* occupant of that stack slot had, from `state.h`'s growable-
+array refactor), with the corresponding `free()` moved to `OP_XXND`'s
+own pop.
+
 ## Unresolved Questions
 
 - ~~The exact enumeration of the I/O-statement-kind code~~ **Resolved**:
