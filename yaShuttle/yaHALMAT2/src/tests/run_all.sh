@@ -1692,6 +1692,30 @@ run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(prin
 # path yet, only ever reads the scalar union member) not exercised here.
 run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
 
+# Task #23: TASN (whole-structure assign, `DST = SRC;`) copying an
+# ARRAY/MATRIX/VECTOR structure terminal -- previously failed loudly as
+# unreachable ("no HALSFC-compilable program can get non-zero
+# per-element data into a structure-terminal array field... for TASN to
+# ever copy"), aborting the ENTIRE copy the moment it reached the first
+# such terminal (UTIL_PARM's own V VECTOR is declared *first*, so no
+# other field ever got copied either). Task #38's whole-structure READ
+# is the first mechanism that populates exactly this, unblocking the
+# deep copy TASN's own comment had already described as "mechanically
+# straightforward": same numeric/BIT/CHARACTER three-way storage-kind
+# dispatch used elsewhere (e.g. write_container_element), malloc+memcpy
+# (or dup_string per element for CHARACTER) instead of the plain-scalar
+# path's `*dst_field = src_snapshot`, which would alias the two
+# entries' elements/bit_elements/char_elements pointers together instead
+# of copying -- confirmed via a dedicated ASan+UBSan build (zero errors)
+# given the manual malloc/free bookkeeping involved. Fixture:
+# test_tasn_array_terminal.hal -- READ populates SRC (including its own
+# VECTOR terminal), `DST = SRC;` copies it, a second READ overwrites
+# SRC's own fields, and DST's scalar/integer/BOOLEAN terminals still
+# holding the *first* READ's values proves TASN performed a genuine
+# independent copy (not an aliased reference) despite the leading VECTOR
+# terminal that used to abort the whole operation.
+run ./run_read_fixture.sh tasn_array_terminal "$(printf '1 2 3 10.5 7 20.5 1\n99 98 97 999.9 88 888.8 0\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

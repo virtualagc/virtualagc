@@ -3835,38 +3835,61 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * find_or_create_struct_field's possible realloc (which
                      * would invalidate a pointer into struct_fields[i]). */
                     halmat_syt_entry_t src_snapshot = state->struct_fields[i].value;
-                    if (src_snapshot.elements || src_snapshot.bit_elements || src_snapshot.char_elements) {
-                        /* ARRAY/MATRIX/VECTOR structure terminal. Investigated
-                         * this session (task sweep item): a correct deep copy
-                         * is mechanically straightforward -- element_count is
-                         * right there on the snapshot, and the pattern is the
-                         * same three-way storage-kind dispatch (numeric/BIT/
-                         * CHARACTER) already used for whole-ARRAY ASSIGN
-                         * write-back (OP_XXND) and WRITE arguments (OP_XXAR).
-                         * But it turns out to be currently *unreachable* by
-                         * any real compiled program: every other opcode that
-                         * can write a whole array/vector/matrix value --
-                         * VASN/MASN (`ZQ1.QV = SRC;`), the ASSIGN write-back
-                         * path (`CALL P ASSIGN(ZQ1.QV);`), and DSUB
-                         * (subscripted element assignment, `ZQ1.QV(1) =
-                         * ...;`) -- all reject an XPT (structure-terminal)
-                         * receiver outright, requiring a plain SYT. TINT
-                         * (structure-terminal INITIAL) only handles scalar/
-                         * integer terminals, not multi-slot ARRAY/MATRIX/
-                         * VECTOR ones (see its own comment). So no HALSFC-
-                         * compilable program can get non-zero per-element
-                         * data into a structure-terminal array field in the
-                         * first place for TASN to ever copy -- confirmed by
-                         * direct compile probes this session. Failing loudly
-                         * here rather than shipping a deep-copy that can
-                         * never be fixture-verified until at least one of
-                         * those three prerequisite gaps is closed first. */
-                        fail(state, "TASN: copying a structure terminal with ARRAY/MATRIX/VECTOR type is not yet implemented "
-                                     "(blocked on VASN/MASN, ASSIGN write-back, or DSUB gaining structure-terminal/XPT receiver support first)");
-                        ok = false;
-                        break;
-                    }
                     halmat_syt_entry_t *dst_field = find_or_create_struct_field(state, dst_base, field, dst_copy_idx);
+                    if (src_snapshot.elements || src_snapshot.bit_elements || src_snapshot.char_elements) {
+                        /* ARRAY/MATRIX/VECTOR structure terminal -- deep
+                         * copy, same three-way numeric/BIT/CHARACTER
+                         * storage-kind dispatch already established
+                         * elsewhere (e.g. write_container_element).
+                         * Previously failed loudly here as unreachable
+                         * ("no HALSFC-compilable program can get non-zero
+                         * per-element data into a structure-terminal
+                         * array field... for TASN to ever copy") -- no
+                         * longer true: task #38's whole-structure READ
+                         * (`READ(5) ARG;`, a STRUCTURE with a VECTOR
+                         * terminal) is the first mechanism that populates
+                         * exactly this, unblocking the deep copy this
+                         * comment already described as "mechanically
+                         * straightforward." *dst_field = src_snapshot
+                         * (the plain-scalar path below) would alias the
+                         * two entries' elements/bit_elements/char_elements
+                         * pointers together instead of copying -- a
+                         * double-free/dangling-pointer bug the first time
+                         * either side's own storage is freed/reallocated,
+                         * so this can't reuse that shortcut the way the
+                         * scalar case does. */
+                        free(dst_field->elements);
+                        free(dst_field->bit_elements);
+                        if (dst_field->char_elements) {
+                            for (size_t k = 0; k < dst_field->element_count; k++) free(dst_field->char_elements[k]);
+                            free(dst_field->char_elements);
+                        }
+                        size_t n = src_snapshot.element_count;
+                        if (src_snapshot.elements) {
+                            halmat_scalar_t *copy = malloc(n * sizeof(halmat_scalar_t));
+                            memcpy(copy, src_snapshot.elements, n * sizeof(halmat_scalar_t));
+                            dst_field->elements = copy;
+                            dst_field->bit_elements = NULL;
+                            dst_field->char_elements = NULL;
+                        } else if (src_snapshot.bit_elements) {
+                            uint32_t *copy = malloc(n * sizeof(uint32_t));
+                            memcpy(copy, src_snapshot.bit_elements, n * sizeof(uint32_t));
+                            dst_field->elements = NULL;
+                            dst_field->bit_elements = copy;
+                            dst_field->char_elements = NULL;
+                        } else {
+                            char **copy = malloc(n * sizeof(char *));
+                            for (size_t k = 0; k < n; k++) copy[k] = dup_string(src_snapshot.char_elements[k]);
+                            dst_field->elements = NULL;
+                            dst_field->bit_elements = NULL;
+                            dst_field->char_elements = copy;
+                        }
+                        dst_field->element_count = n;
+                        dst_field->rows = src_snapshot.rows;
+                        dst_field->cols = src_snapshot.cols;
+                        dst_field->array_of_vector = src_snapshot.array_of_vector;
+                        continue;
+                    }
                     free(dst_field->char_value);
                     *dst_field = src_snapshot;
                     dst_field->char_value = src_snapshot.char_value ? dup_string(src_snapshot.char_value) : NULL;

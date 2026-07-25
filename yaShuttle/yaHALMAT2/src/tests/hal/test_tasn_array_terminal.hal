@@ -1,0 +1,28 @@
+C/ Verifies TASN (whole-structure assign, `DST = SRC;`) correctly deep-
+C/ copies a structure with a VECTOR terminal -- previously aborted
+C/ entirely the moment it reached the first ARRAY/MATRIX/VECTOR
+C/ terminal (UTIL_PARM's own V VECTOR is declared *first*, so before
+C/ this fix TASN would have failed before copying even the later
+C/ scalar/integer/BOOLEAN fields). SRC is READ once, copied to DST, then
+C/ SRC's own scalar fields are overwritten by a second READ -- DST's own
+C/ fields still holding the *first* READ's values proves TASN performed
+C/ a genuine independent copy, not an aliased reference (displaying the
+C/ VECTOR terminal's own copied value isn't possible yet -- a separate,
+C/ pre-existing gap -- so this checks every other terminal instead).
+
+  TTASNARR: PROGRAM;
+     STRUCTURE UTIL_PARM:
+        1 V VECTOR,
+        1 S1 SCALAR,
+        1 C INTEGER,
+        1 S2 SCALAR,
+        1 E BOOLEAN;
+     DECLARE SRC UTIL_PARM-STRUCTURE;
+     DECLARE DST UTIL_PARM-STRUCTURE;
+
+     READ(5) SRC;
+     DST = SRC;
+     READ(5) SRC;
+     WRITE(6) DST.S1, DST.C, DST.S2, DST.E;
+Y %SVCI(0);
+  CLOSE TTASNARR;
