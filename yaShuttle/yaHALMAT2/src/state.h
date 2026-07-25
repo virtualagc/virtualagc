@@ -224,6 +224,22 @@ typedef struct {
                                * only the final value per slot) by interp_cleanup(). */
     bool is_bits;            /* is_ref=false, !is_string: true if this slot holds a BIT result (e.g. BAND/BOR/BNOT); takes priority over is_scalar */
     uint32_t bits;           /* is_ref=false, is_bits */
+    int bit_width;           /* is_ref=false, is_bits: the value's real declared BIT(n) width, when
+                               * known -- 0 (the default, via store_resolved_to_vac's own memset) means
+                               * "unknown," the same "no declared-width tracking, default to 32"
+                               * fallback already used for a bare BIT literal/computed BAND/BOR/BNOT
+                               * result elsewhere in this file. Set only when the width genuinely is
+                               * known some other way: OP_RTRN's own same-unit-call-frame branch, for a
+                               * FUNCTION whose declared return type is BIT/BOOLEAN, sets this from the
+                               * callee's own symtab-declared bit_width (BOOLEAN is a synonym for
+                               * BIT(1), USA003087's own terminology) -- user-reported, 129-ALMOST_EQUAL.hal
+                               * (`ALMOST_EQUAL: FUNCTION(A,B) BOOLEAN; ...`): its call result's own VAC
+                               * slot carries no width of its own the way a plain SYT variable reference
+                               * does (WRITE's own argument-capture code, further down, already looks up
+                               * a plain SYT operand's declared width via the symbol table -- this is
+                               * the equivalent lookup for a QUAL_VAC operand that's a FUNCTION-call
+                               * result instead), so without this every BOOLEAN function's result
+                               * printed as a full 32-bit field regardless of its real declared width. */
     bool is_container;       /* is_ref=false, !is_string, !is_bits: true if this slot holds a whole
                                * MATRIX/VECTOR intermediate result (e.g. MADD/VADD), consumed by a
                                * following MASN/VASN or another MATRIX/VECTOR op -- class-3/MADD.md's

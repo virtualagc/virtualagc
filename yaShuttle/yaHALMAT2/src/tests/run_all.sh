@@ -1164,6 +1164,26 @@ run ./run_local_fixture.sh scalar_double_initial " 2.5000000000000000E+00"
 # the exact mechanism without 128-MASS.hal's own nested-FUNCTION and
 # READ-loop complexity).
 run ./run_local_fixture.sh fcal_scalar_return "$(printf ' 1.2500000E+00\n 3.2500000E+00')"
+# Same file, a second bug in the same fix's neighborhood, user-reported
+# (129-ALMOST_EQUAL.hal's `WRITE(6) ..., ALMOST_EQUAL(1.0, 1.0);`,
+# ALMOST_EQUAL a same-unit FUNCTION declared BOOLEAN -- a synonym for
+# BIT(1), USA003087's own terminology): printed every result as a full
+# 32-bit binary field ("0000 0000 0000 0000 0000 0000 0000 0001")
+# instead of the single-digit BIT(1) it actually is. Unlike a bare BIT
+# literal or a computed BAND/BOR/BNOT result (where the real width
+# genuinely isn't known, and defaulting to the documented legal maximum
+# of 32 is the correct, already-established fallback -- USA003090 Sec.
+# 8.2 rule 6), a FUNCTION-call result's width *is* knowable here, from
+# the callee's own declared return type -- WRITE's existing argument-
+# capture code already looks this up for a plain SYT variable reference
+# via the symbol table, but never for a QUAL_VAC operand carrying a
+# FUNCTION-call result. Fixed by having OP_RTRN's own genuine-call-frame
+# branch (the exact site the previous fcal_scalar_return fix touched)
+# stamp the callee's own symtab-declared bit_width onto the VAC slot
+# (new bit_width field, state.h) whenever the return value is BIT-typed,
+# for the WRITE-argument-capture code to prefer over the generic 32-bit
+# default. Fixture: test_fcal_boolean_return.hal.
+run ./run_local_fixture.sh fcal_boolean_return "$(printf '1\n0')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

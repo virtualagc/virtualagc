@@ -6556,11 +6556,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * falling back to 32 (USA003090 Sec. 8.2 rule 6's
                      * documented maximum legal BIT string length) for
                      * anything else -- user-confirmed against
-                     * ["Programming in HAL/S"] p. 255. */
+                     * ["Programming in HAL/S"] p. 255. A QUAL_VAC operand
+                     * carrying a same-unit FUNCTION-call result (OP_RTRN's
+                     * own genuine-call-frame branch, this file) may also
+                     * know its own real width -- a BOOLEAN-returning
+                     * FUNCTION's result, user-reported (129-ALMOST_EQUAL.hal) --
+                     * via the VAC slot's own bit_width field, checked
+                     * before falling back to 32 the same way the QUAL_SYT
+                     * case just above already does via the symbol table. */
                     int width = 32;
                     if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
                         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
                         if (sym && sym->bit_width > 0) width = sym->bit_width;
+                    } else if (ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX) {
+                        int vac_width = state->vac[ins->operands[0].data].bit_width;
+                        if (vac_width > 0) width = vac_width;
                     }
                     state->io_pending.items[state->io_pending.item_count].bits = a.bits;
                     state->io_pending.items[state->io_pending.item_count].bit_width = width;
@@ -7168,6 +7178,41 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * found to call an ordinary same-unit FUNCTION and
                      * actually look at its non-INTEGER return value. */
                     store_resolved_to_vac(&state->vac[vac_index], &a);
+                    if (a.kind == RV_BITS && state->symtab) {
+                        /* User-reported (129-ALMOST_EQUAL.hal's `WRITE(6)
+                         * ..., ALMOST_EQUAL(1.0, 1.0);`, ALMOST_EQUAL a
+                         * same-unit FUNCTION declared BOOLEAN -- a
+                         * synonym for BIT(1), USA003087's own
+                         * terminology): a FUNCTION-call result carries no
+                         * declared width of its own the way a plain SYT
+                         * variable reference does (WRITE's own argument-
+                         * capture code, further down, already looks up a
+                         * plain SYT operand's declared width via the
+                         * symbol table for exactly this reason -- see its
+                         * own comment) -- so every BOOLEAN function's
+                         * result printed as a full 32-bit binary field
+                         * (this project's own established "no declared
+                         * width known, default to 32" fallback,
+                         * appropriate for a bare BIT literal/computed
+                         * BAND/BOR/BNOT result, but wrong here: the real
+                         * width genuinely *is* known, from the callee's
+                         * own declared return type). Re-derives the
+                         * callee's SYT index the exact same way FCAL
+                         * itself did (resolve_call_target on the FCAL
+                         * instruction's own first operand, at fcal_pos --
+                         * handles the IND CALL LABEL alias case
+                         * identically too) and, if the symbol table gives
+                         * it a real declared bit_width, stamps it onto
+                         * this VAC slot for the WRITE-argument-capture
+                         * code (or any other BIT-consuming site) to
+                         * prefer over the generic 32-bit default. */
+                        uint16_t callee_op = state->prog->instrs[fcal_pos].operands[0].data;
+                        uint16_t callee = resolve_call_target(state, callee_op);
+                        const halmat_symtab_entry_t *csym = halmat_symtab_find_by_index(state->symtab, callee);
+                        if (csym && csym->bit_width > 0) {
+                            state->vac[vac_index].bit_width = csym->bit_width;
+                        }
+                    }
                     state->pc = fcal_pos + 1;
                 } else {
                     size_t call_pos = state->call_return_stack[--state->call_return_sp];
