@@ -1636,6 +1636,29 @@ run ./run_local_fixture.sh sched_on_compound_or "$(printf 'BEFORE ANY SIGNAL\nWO
 run ./run_local_fixture.sh sched_until_compound "$(printf 'CYCLE               1\nCYCLE               2\nDONE, N=               2')"
 run ./run_local_fixture.sh wait_for_compound "$(printf 'SETTER: E1 SIGNALED\nSETTER: E2 SIGNALED\nPRIMAL RESUMED')"
 
+# Task #35: 193-TEST_X.hal, `ON ERROR$(IO:5) GO TO DONE;` guarding a
+# `DO WHILE TRUE; READ(5) INPUT, EXPECTED; ...; END;` loop meant to run
+# until input is exhausted -- READ's own end-of-file case previously
+# always aborted via fail() regardless of any registered ON ERROR
+# handler. Group 10 member 5 ("the end of file error") is confirmed
+# directly against source-documentation/ProgrammingInHALS.txt's own
+# Sec. 10 discussion of this *exact* example (not guessed, and not
+# derivable from USA003090's Appendix C, which covers only group-4
+# arithmetic errors) -- doubly confirmed by the real compiled HALMAT
+# showing exactly one ERON with group=10/member=5 (the corpus file's own
+# apparently-duplicate bare `ON ERROR GO TO DONE;` line immediately
+# above it is a transcription artifact; the real book page and the
+# compiled output both show only the one specific registration). Fixed
+# via a new io_error_redirect_on_eof() helper (interp.c), mirroring
+# arithmetic_error_should_apply_fixup()'s established find_error_handler
+# GOTO-redirect pattern, wired into all 4 of READ's own end-of-input
+# fail() sites. Fixture: test_read_eof_onerror.hal (193-TEST_X.hal
+# verbatim -- X's own body is elided ("...") in the real book too, so it
+# never sets OUTPUT, always leaving it at 0; fed 3 pairs where EXPECTED
+# is never 0, independently verified as 0 correct/3 incorrect once the
+# loop correctly exhausts input and redirects to DONE).
+run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(printf 'RESULTS OF TESTING X\n          0      SAMPLES CORRECT,                3      SAMPLES INCORRECT')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

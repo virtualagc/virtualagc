@@ -267,6 +267,24 @@
 #define HAL_S_ERROR_ARCTANH_DOMAIN 60
 #define HAL_S_ERROR_ARCTAN2_ZERO 62
 
+/* Group 10, member 5: "the end of file error" -- confirmed directly
+ * against the primary source, not the group-4 Appendix C arithmetic
+ * catalog (which doesn't cover I/O at all): source-documentation/
+ * ProgrammingInHALS.txt's own Sec. 10 ("Error Recovery"), discussing
+ * this exact worked example (193-TEST_X.hal): "ON ERROR$(10:5) GO TO
+ * DONE; This is an executable statement which establishes 'GO TO DONE;'
+ * as a handler for the end of file error." -- verified twice over: the
+ * book's own prose states it explicitly, and the real compiled HALMAT
+ * for this exact program shows exactly one ERON registration with
+ * group=10 (operand[0].data), member=5 (operand[0].tag1) -- matching
+ * the book's `REPLACE IO BY "10"; ON ERROR$(IO:5) ...;` precisely (the
+ * corpus .hal file's own duplicate-looking bare `ON ERROR GO TO DONE;`
+ * line immediately before it is a transcription/OCR artifact -- the
+ * real book page shows only the one `ON ERROR$(10:5)` statement, and
+ * HALSFC compiles only one ERON either way). */
+#define HAL_S_ERROR_GROUP_IO 10
+#define HAL_S_ERROR_IO_END_OF_FILE 5
+
 /* Strict C99 (this project's -std=c99) doesn't guarantee <math.h> defines
  * M_PI (a POSIX/BSD extension, hidden under -std=c99's stricter feature
  * visibility) -- BFNC's RANDOMG (selector 51, Box-Muller transform)
@@ -1496,6 +1514,35 @@ static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int membe
         return false;
     }
     return true;
+}
+
+/* Redirects to a registered `ON ERROR$(10:5) ...;` (or a broader by-
+ * group/catch-all) handler for READ's own end-of-file condition --
+ * user-reported, 193-TEST_X.hal's `ON ERROR$(IO:5) GO TO DONE;` guarding
+ * a `DO WHILE TRUE; READ(5) ...; END;` loop meant to run until input is
+ * exhausted: this previously always aborted via fail() on the first
+ * end-of-file, regardless of any registered handler. Mirrors
+ * arithmetic_error_should_apply_fixup()'s own established GOTO-redirect
+ * shape (pc/branched out-parameters, same as OP_ERON's other consumer)
+ * but returns a plain bool (redirected or not) rather than
+ * "should the caller apply some fallback" -- there's no I/O-error
+ * equivalent of an arithmetic standard fixup to fall back to; the
+ * caller's only alternative when this returns false is its own ordinary
+ * fail(). Deliberately narrow: only READ's genuine end-of-file case
+ * (fscanf returning EOF) should ever be classified this specifically;
+ * a malformed-but-present value is a different condition this project
+ * has no primary-source classification for, but the two aren't
+ * distinguished by the caller today (see this function's own call
+ * sites) -- matches this interpreter's existing combined "end of input
+ * or malformed" error message, not a new gap introduced here. */
+static bool io_error_redirect_on_eof(halmat_state_t *state, size_t *pc, bool *branched) {
+    halmat_error_handler_t *h = find_error_handler(state, HAL_S_ERROR_GROUP_IO, HAL_S_ERROR_IO_END_OF_FILE);
+    if (h && h->action == HALMAT_ERRACT_GOTO) {
+        *pc = h->goto_pc;
+        *branched = true;
+        return true;
+    }
+    return false;
 }
 
 /* Square n x n matrix product, out = a * b -- shared by OP_MMPR (below)
@@ -7844,7 +7891,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             if (field == HALMAT_READ_FIELD_NULL) continue;
                             double v;
                             if (fscanf(in, "%lf", &v) != 1) {
-                                fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                    fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                }
                                 stop = true;
                                 break;
                             }
@@ -7883,7 +7932,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {
-                            fail(state, "READ(%d): end of input or malformed INTEGER", device);
+                            if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                fail(state, "READ(%d): end of input or malformed INTEGER", device);
+                            }
                             break;
                         }
                         rv.kind = RV_INTEGER;
@@ -7896,7 +7947,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * for the common case of reading a plain word. */
                         char buf[1024];
                         if (fscanf(in, "%1023s", buf) != 1) {
-                            fail(state, "READ(%d): end of input for CHARACTER", device);
+                            if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                fail(state, "READ(%d): end of input for CHARACTER", device);
+                            }
                             break;
                         }
                         rv.kind = RV_STRING;
@@ -7906,7 +7959,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     } else {
                         double v;
                         if (fscanf(in, "%lf", &v) != 1) {
-                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                            if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                            }
                             break;
                         }
                         rv.kind = RV_SCALAR;
