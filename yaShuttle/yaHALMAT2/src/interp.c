@@ -1845,12 +1845,39 @@ static void precompute_stmt_for_pc(halmat_state_t *state) {
  * exited" position CTST's own ctst_exit_target already uses. */
 static void precompute_labels(halmat_state_t *state) {
     state->label_pos = malloc(HALMAT_LABEL_MAX * sizeof(size_t));
+    state->label_pos_syt = malloc(HALMAT_SYT_MAX * sizeof(size_t));
     for (size_t i = 0; i < HALMAT_LABEL_MAX; i++) {
         state->label_pos[i] = NO_TARGET;
     }
+    for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
+        state->label_pos_syt[i] = NO_TARGET;
+    }
     for (size_t i = 0; i < state->prog->count; i++) {
         const halmat_instr_t *ins = &state->prog->instrs[i];
-        if (ins->opcode == OP_LBL && ins->operand_count == 1) {
+        if (ins->opcode == OP_LBL && ins->operand_count == 1 && ins->operands[0].qual == QUAL_SYT) {
+            /* A real `GO TO <label>;` targets a user-declared STATEMENT
+             * LABEL -- a *separate* LBL/BRA pairing from the INL-numbered
+             * bookkeeping-label case just below, keyed by SYT index
+             * instead (state.h's label_pos_syt comment). */
+            uint16_t syt = ins->operands[0].data;
+            if (syt < HALMAT_SYT_MAX) state->label_pos_syt[syt] = i;
+        } else if (ins->opcode == OP_LBL && ins->operand_count == 1 && ins->operands[0].qual == QUAL_INL) {
+            /* LBL.md's confirmed IF/ELSE-join-point shape: QUAL_INL,
+             * registered into label_pos[] (the bookkeeping-label table).
+             * Originally this branch had no qualifier check at all, and
+             * shared a single flat table with the QUAL_SYT case just
+             * above -- SYT indices and INL numbers are independent,
+             * both-near-zero numbering spaces that can coincidentally
+             * collide in a small enough program (found via a synthetic
+             * regression fixture for the EXIT-to-labeled-DFOR fix just
+             * below, whose labeled DO FOR's own STATEMENT LABEL SYT index
+             * happened to equal an unrelated INL number, silently
+             * mis-registering the INL target -- no error, just a branch
+             * landing somewhere wrong). Splitting the two into separate
+             * tables (state.h's label_pos_syt comment), with OP_BRA/
+             * OP_FBRA below choosing which one to consult from their own
+             * operand's qualifier, removes the collision risk entirely
+             * rather than just hiding it. */
             uint16_t label = ins->operands[0].data;
             if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i;
         } else if (ins->opcode == OP_ETST && ins->operand_count == 1) {
@@ -1876,6 +1903,31 @@ static void precompute_labels(halmat_state_t *state) {
              * this, every real REPEAT statement failed with "branch to
              * undefined label N". */
             if (label < HALMAT_LABEL_MAX - 1) state->label_pos[label + 1] = state->etst_back_target[i];
+        } else if (ins->opcode == OP_EFOR && ins->operand_count == 1) {
+            /* `EXIT <label>;` targeting a *labeled* `DO FOR` (range or
+             * list form) -- user-reported (119-EXAMPLE_9.hal's `INNER:
+             * DO FOR TEMPORARY J = 1 TO 3; ... EXIT INNER; ... END
+             * INNER;`): EXIT compiles to a plain BRA, same as the DTST/
+             * ETST case above, but targeting the INL construct-id number
+             * DFOR/EFOR share (class-0/DFOR.md/EFOR.md), which this
+             * function previously never registered at all (only OP_LBL
+             * and OP_ETST were), so every such EXIT failed with "branch
+             * to undefined label N". EFOR.md's own confirmed LSTALL
+             * trace settles the landing position: the real AP-101S label
+             * matching this construct id (`L#8`/`L#13` in that trace)
+             * sits immediately after EFOR's own generated logic (the
+             * store+compare+branch-back for range form, or the
+             * saved-return-address dispatch for list form) in both
+             * forms -- i.e. `i + 1`, the same "just past this
+             * instruction" convention ETST's own registration above
+             * uses, not EFOR's own position (which would re-run its
+             * increment/re-test, or list-form dispatch, instead of
+             * genuinely exiting). Registered from EFOR rather than DFOR
+             * since EFOR already carries the identical label directly as
+             * its own sole operand in both forms (EFOR.md), needing no
+             * separate DFOR-to-EFOR position lookup. */
+            uint16_t label = ins->operands[0].data;
+            if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i + 1;
         }
     }
 }
@@ -2157,6 +2209,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->ctst_exit_target);
     free(state->etst_back_target);
     free(state->label_pos);
+    free(state->label_pos_syt);
     free(state->afor_body_target);
     free(state->afor_return_target);
     free(state->afor_control_var);
@@ -2181,6 +2234,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->ctst_exit_target = NULL;
     state->etst_back_target = NULL;
     state->label_pos = NULL;
+    state->label_pos_syt = NULL;
     state->afor_body_target = NULL;
     state->afor_return_target = NULL;
     state->afor_control_var = NULL;
@@ -3221,11 +3275,31 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 uint16_t label = ins->operands[0].data;
-                if (label >= HALMAT_LABEL_MAX || state->label_pos[label] == NO_TARGET) {
+                /* Two independent target namespaces share this one branch
+                 * opcode (state.h's label_pos_syt comment, precompute_
+                 * labels() above): QUAL_INL for the ordinary IF/ELSE-join/
+                 * EXIT-of-loop bookkeeping-label case, QUAL_SYT for a real
+                 * `GO TO <label>;` targeting a user-declared STATEMENT
+                 * LABEL -- dispatched here on the operand's own qualifier
+                 * rather than assuming one shared table, which is what let
+                 * the two numbering spaces silently collide before this
+                 * fix (user-reported regression, test_eron_goto.hal, found
+                 * fixing 119-EXAMPLE_9.hal's EXIT-to-labeled-DFOR bug). */
+                size_t target;
+                if (ins->operands[0].qual == QUAL_SYT) {
+                    target = (label < HALMAT_SYT_MAX) ? state->label_pos_syt[label] : NO_TARGET;
+                } else if (ins->operands[0].qual == QUAL_INL) {
+                    target = (label < HALMAT_LABEL_MAX) ? state->label_pos[label] : NO_TARGET;
+                } else {
+                    fail(state, "%s: unsupported target operand qualifier %s",
+                         ins->opcode == OP_FBRA ? "FBRA" : "BRA", halmat_qual_name(ins->operands[0].qual));
+                    break;
+                }
+                if (target == NO_TARGET) {
                     fail(state, "branch to undefined label %u", label);
                     break;
                 }
-                state->pc = state->label_pos[label];
+                state->pc = target;
                 branched = true;
                 break;
             }

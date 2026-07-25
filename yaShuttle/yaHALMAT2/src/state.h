@@ -889,6 +889,28 @@ struct halmat_state {
      * HALMAT_LABEL_MAX; NO_TARGET where unset. See precompute_labels(). */
     size_t *label_pos;
 
+    /* A *second*, parallel LBL-destination table, keyed by SYT index
+     * instead of INL bookkeeping-label number -- a real `GO TO <label>;`
+     * targeting a user-declared STATEMENT LABEL (`SKIPPED: ...;`)
+     * compiles to a BRA/LBL pair whose shared operand is QUAL_SYT (the
+     * label's own symbol-table index), not QUAL_INL, confirmed against a
+     * real compiled `GO TO SKIPPED;` trace (user-reported,
+     * test_eron_goto.hal, found as a regression while fixing 119-
+     * EXAMPLE_9.hal's EXIT-to-labeled-DFOR bug below). SYT indices and
+     * INL bookkeeping numbers are independent, both-starting-near-zero
+     * numbering spaces that can coincidentally collide (small enough
+     * programs make this a real, not just theoretical, risk -- caught by
+     * a synthetic regression fixture whose labeled DO FOR's own STATEMENT
+     * LABEL SYT index happened to equal an unrelated INL bookkeeping
+     * number), so they can't safely share one flat table the way an
+     * earlier version of this fix tried; OP_BRA/OP_FBRA now pick which of
+     * the two tables to consult based on their own operand's qualifier,
+     * exactly mirroring how the operand was produced. Sized
+     * HALMAT_SYT_MAX (same convention as label_pos above, just keyed by
+     * the other namespace's own natural size); NO_TARGET where unset.
+     * See precompute_labels(). */
+    size_t *label_pos_syt;
+
     /* List-form DO FOR (AFOR): per class-0/AFOR.md's "call-and-computed-
      * return" mechanism -- each AFOR sets the control variable and jumps
      * into the (single, shared) loop body; EFOR jumps back to whichever

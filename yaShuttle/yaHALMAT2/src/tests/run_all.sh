@@ -1002,6 +1002,27 @@ run ./run_walltime_fixture.sh date_clocktime
 # magnitude/dot-product arithmetic), not just cross-checked against
 # compileLinkRun.
 run ./run_local_fixture.sh array_of_vector "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488088E+01\n 5.3851643E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
+# User-reported (119-EXAMPLE_9.hal's `INNER: DO FOR TEMPORARY J = 1 TO 3;
+# ... EXIT INNER; ... END INNER;`): "branch to undefined label 11" --
+# `EXIT <label>;` targeting a *labeled* `DO FOR` compiles to a plain BRA
+# whose INL operand is the same construct-id number DFOR/EFOR both carry
+# (like EXIT-of-DTST/ETST does), but precompute_labels() only ever
+# registered OP_LBL and OP_ETST, never DFOR/EFOR's own label. Fixed by
+# registering it from EFOR (which already carries the label directly,
+# needing no separate DFOR lookup), landing at EFOR's position + 1 per
+# EFOR.md's own confirmed LSTALL trace (same "just past this instruction"
+# convention as ETST's own registration, not landing on EFOR itself,
+# which would re-run its increment/re-test instead of exiting). Building
+# this fixture surfaced a second, latent bug: precompute_labels()'s own
+# OP_LBL branch never checked the operand's qualifier, so `INNER:`'s own
+# LBL (a STATEMENT LABEL declaration, QUAL_SYT) could numerically collide
+# with an unrelated QUAL_INL bookkeeping label elsewhere in the same
+# small unit, silently mis-registering it -- not observed against the
+# real corpus file (no collision there), but a real latent trap once
+# constructed. Fixed by requiring QUAL_INL on that branch too. Expected
+# output (top-3-by-magnitude selection: V has magnitudes 3,7,1,9,5)
+# independently hand-derived by tracing the algorithm by hand.
+run ./run_local_fixture.sh exit_dfor_label "$(printf ' 9.0000000E+00\n 7.0000000E+00\n 5.0000000E+00')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
