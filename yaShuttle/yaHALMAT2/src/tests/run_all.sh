@@ -1375,6 +1375,231 @@ run ./run_local_fixture.sh statistics "$(printf 'LO=      1.0000000E+01     HI= 
 # verbatim; output hand-derived from V's own INITIAL(1,0,0, 0,2,0,
 # 0,0,3): elementwise sum = (1,2,3)).
 run ./run_local_fixture.sh vsum "$(printf 'SUM=      1.0000000E+00      2.0000000E+00      3.0000000E+00')"
+# User-instructed corpus sweep ("test all such files which have not
+# already been reported to you as problematic"), 254-TEST1.hal: `OUTPUT =
+# 10*OUTPUT + INTEGER(INPUT$(4 AT I));` (INPUT a plain BIT(24), unpacking
+# it 4 bits at a time) failed with "VAC whole-container result referenced
+# outside an arrayed-paragraph replay". DSUB's own "VECTOR at-partition"
+# branch (046-XYZ_TO_POLAR.hal's earlier fix, `P$(2 AT 1)`) was gated only
+# on `base->rows == 0` -- true for ANY non-MATRIX base including a plain
+# scalar BIT variable, not just a VECTOR -- so it wrongly fired here too,
+# reading through `base->elements`, which a scalar BIT symbol doesn't
+# have (ensure_container()'s own generic "unknown shape" fallback
+# silently allocates a bogus 64-element placeholder for any unclassified
+# SYT entry regardless, letting this read through without an immediate
+# crash but producing nonsense). Fixed by gating that branch on
+# `ins->tag == 4` (this instruction's own confirmed "HALMAT class of the
+# result" convention -- 4=VECTOR, vs. 1=BIT for this file's own case) and
+# adding a new, dedicated branch for the BIT case: a native `B$(width AT
+# position)` bit-substring read directly on a scalar BIT/INTEGER/SCALAR
+# value's own raw bits (MSB-first, matching format_bit_field's own
+# established convention), computed immediately as a plain is_bits VAC
+# result rather than routed through the container machinery at all.
+# Output independently hand-verified: digit-by-digit hand-simulation
+# against the file's own WRITE(6) INPUT; bit-group dump matches the
+# computed OUTPUT=56525 exactly. Fixture: test_bit_at_partition.hal
+# (254-TEST1.hal plus one added WRITE(6) OUTPUT; line).
+run ./run_local_fixture.sh bit_at_partition "$(printf '      56525')"
+# 154-ADD.hal: `READ(5) A;`, A a plain flat ARRAY(100) SCALAR, wrapped in
+# an ADLP(100)/DLPE per-element replay at XXAR-capture time (unlike a
+# whole VECTOR/MATRIX READ destination, which is NOT replayed -- see
+# XXAR.md) -- failed with "SYT index N is a whole ARRAY/VECTOR/MATRIX
+# referenced outside an arrayed-paragraph replay". Root cause: OP_READ's
+# own per-item write loop runs *after* the whole ADLP replay (which only
+# wrapped the XXAR capture step) has already finished and reset
+# arrayed_index to -1, but write_destination's plain-SYT-ARRAY branch
+# needs arrayed_index >= 0 to know which element to write. Fixed by
+# substituting the loop's own item index i (items[] preserves the same
+# 0..N-1 order the real replay used during capture) as arrayed_index for
+# each item's own write_destination call, restored once after the whole
+# loop. Fixture: test_read_array.hal (154-ADD.hal verbatim; 100 values
+# via stdin, hand-derivable TOTAL=10+20+30=60 once the loop hits the
+# first 0 and its own UNTIL clause stops).
+run ./run_read_fixture.sh read_array "$(python3 -c "print(' '.join(['10','20','30'] + ['0']*97))")" "$(printf 'TOTAL IS       6.0000000E+01')"
+# 159-AGE.hal: `CASE_NUM = INTEGER(C$(1 TO 3));`/`SEX = INTEGER(C$(6));`
+# (`C` a plain, non-ARRAY `CHARACTER(80)`) failed with "CTOI: operand is
+# not CHARACTER". DSUB's own CHARACTER to-partition/single-index
+# substring kinds (`C$(a TO b)`/`C$(n)`, this instruction's own operator-
+# word TAG confirming a CHARACTER result -- 2=CHARACTER) were entirely
+# unimplemented (DSUB.md's own longstanding "To-partition (CHARACTER
+# substring)... still isn't handled" gap) -- both previously fell through
+# to the generic per-dimension index loop, which misreads a to-partition
+# pair as two unrelated indices (or a single index as a numeric offset),
+# producing a bogus numeric `is_ref` into a scalar CHARACTER symbol's own
+# nonexistent element array. Fixed with two new DSUB branches (plain-
+# literal-bounds only -- the `#`-relative/CSZ form, 160-REFORMAT.hal,
+# remains a separate, still-unresolved gap) reading the substring
+# directly from the base's own `char_value` string. Output independently
+# hand-verified against a probe with an added WRITE (X's own `7 TO 10`
+# bound wasn't otherwise exercised by the real corpus file, which has no
+# WRITE at all). Fixture: test_char_subscript.hal (159-AGE.hal plus one
+# added WRITE(6) line).
+run ./run_read_fixture.sh char_subscript "1234567890" "$(printf "CASE_NUM=             123     AGE=              45     SEX=               6     X=            7890")"
+# 254-TEST2.hal: `IF B$(1) THEN ...;`/`IF B$(#) THEN ...;` (`B` a plain
+# `BIT(16)`, used directly as a boolean condition after `B = BIT(I);`)
+# failed with "BTRU: operand is not BIT". A single-index BIT-string
+# subscript (implicit 1-bit width) on a plain, non-ARRAY BIT/INTEGER/
+# SCALAR base was entirely unhandled, falling through to the generic
+# per-dimension index loop the same way the at-partition case
+# (test_bit_at_partition.hal, above) did -- fixed the same way, a new
+# DSUB branch reading 1 bit directly via the same MSB-first shift-and-
+# mask. `B$(#)` turns out not to need CSZ at all here -- HALSFC folds a
+# *bare* `#` to a compile-time literal (B's own known declared width,
+# 16) whenever it's not part of a larger arithmetic expression, unlike
+# 160-REFORMAT.hal's still-deferred `#-DECIMALS` case. Output
+# independently hand-verified: I=5 (positive, odd) -> "ODD" only;
+# I=-3 (negative, odd, two's-complement) -> both "NEGATIVE" and "ODD".
+# Fixture: test_bit_index.hal (254-TEST2.hal verbatim).
+run ./run_read_fixture.sh bit_index "5" "$(printf 'VALUE OF I WAS ODD')"
+run ./run_read_fixture.sh bit_index "-3" "$(printf 'VALUE OF I WAS NEGATIVE\nVALUE OF I WAS ODD')"
+# 158-STATE.hal: `WRITE(6) STATE(TRUE, 1), STATE(FALSE, 1);` (`STATE` a
+# same-unit `FUNCTION(B, TYPE) CHARACTER(5)`, `B` declared `BOOLEAN` --
+# a synonym for `BIT(1)`) failed with "BTRU: operand is not BIT" inside
+# STATE's own `IF B THEN`. Root cause, unrelated to any DSUB subscript
+# this time: `bind_call_argument()`'s own non-container parameter-
+# binding path only ever distinguished SCALAR vs. "everything else
+# defaults to INTEGER" -- silently mis-binding a BIT/BOOLEAN argument
+# (and, it turns out, a CHARACTER one too) as INTEGER, reading a field
+# (`.integer`) a BIT-kind captured item never actually populates. Fixed
+# by adding the missing is_string/is_bits cases, mirroring store_
+# resolved_to_vac's own already-established kind-preserving convention.
+# Fixing *that* surfaced a second, independent bug once execution got
+# further: a same-unit FUNCTION's own CHARACTER RETURN value
+# (`RETURN YES$(TYPE:);`, YES a local, AUTOMATIC `ARRAY(4)
+# CHARACTER(5)`) was captured by *borrowing* resolve_operand's own
+# pointer into YES's own char_elements storage rather than copying it --
+# harmless for a single call, but a genuine use-after-free (confirmed
+# via ASan) once a *second* call to the same FUNCTION appears in the
+# same WRITE statement's own argument list: HAL/S locals are AUTOMATIC
+# (re-initialized fresh on every call) by default, and a same-unit call
+# shares SYT storage with its caller, so the second call's own
+# re-initialization of YES frees the exact string the first call's
+# result was still pointing at, before flush_write ever gets to read
+# either one. Fixed by having store_resolved_to_vac() dup_string() a
+# RV_STRING return value instead of borrowing it -- every one of that
+# function's 3 call sites is a RETURN-value capture, so this can't
+# regress anything that was relying on the borrow. Output independently
+# hand-verified against all 4 WRITE statements' own worked YES/NO
+# array values. Fixture: test_state_boolean.hal (158-STATE.hal verbatim).
+run ./run_local_fixture.sh state_boolean "$(printf 'TRUE     FALSE\nON     OFF\nOPEN     SHUT\nVALID     ERROR')"
+
+# Corpus sweep: 250-BITS.hal, `B$(1) = ON;` (`B` a plain BIT(8)) used as an
+# assignment target -- OP_DSUB's single-index BIT-string subscript branch
+# (added earlier for 254-TEST2.hal's read-only `IF B$(1) THEN ...;`) used
+# to eagerly resolve to a plain `is_bits` VAC value at DSUB-execution
+# time, correct for a read but not usable as BASN's own receiver operand:
+# write_destination's QUAL_VAC case only recognizes is_ref (ARRAY/MATRIX
+# element) and is_subbit_ref (SUBBIT(x)=...;), so this fell into the
+# generic "assignment destination is not a subscript reference" fallback.
+# Fixed by making this DSUB shape (and the sibling `B$(width AT
+# position)` at-partition shape, on general principle -- same mechanism,
+# no corpus program yet exercises it as a write target but there's no
+# reason it wouldn't work) deferred: state.h's new is_bitpart_ref VAC
+# slot kind stores (target_syt, position, width) instead of a resolved
+# value, so the same slot now works as either a read (resolve_operand's
+# QUAL_VAC case) or a write-through (write_destination's QUAL_VAC case,
+# merging the assigned bit into the target's current raw pattern via the
+# same MSB-first shift-and-mask this file's read-side extraction already
+# uses, preserving every other bit). Fixture: test_bit_index_assign.hal
+# (250-BITS.hal verbatim, but the real corpus file's own `DO WHILE ON;`
+# outer loop is genuinely infinite -- an illustrative textbook snippet,
+# not meant to run to completion standalone, same class as
+# 265-ENQUEUE.hal/269-STALL.hal -- so it's bounded to a single pass here,
+# plus a WRITE(6) B; added). Only C1/C2/C8's IF blocks are literally
+# present in the compilable source (the book elides C3-C7 with "..."
+# comments), so B's expected final value has just bits 1, 2, and 8 set:
+# BIN'11000001', independently hand-verified.
+run ./run_local_fixture.sh bit_index_assign "1100 0001"
+
+# Corpus sweep: 112-EXAMPLE_6.hal, `ATT_RATE(DEVICE,*) = GYRO_INPUT
+# (DEVICE,*) * SCALE + BIAS;` (`ATT_RATE`/`GYRO_INPUT` both ARRAY(4,3),
+# `SCALE` a plain ARRAY(3) SCALAR) -- a plain SASN (not MASN/VASN) whose
+# receiver is a DSUB row-partition select (`$(DEVICE,*)`, state.h's
+# is_container_ref), replayed once per row-element by an ADLP/DLPE wrap
+# (HALSFC's own documented workaround for ARRAY having no dedicated
+# whole-container assign opcode the way VECTOR/MATRIX get VASN/MASN).
+# write_destination's QUAL_VAC case only ever consulted is_container_ref
+# from inside OP_MASN/OP_VASN's own dedicated (whole-container-at-once)
+# handling -- an ordinary SASN's receiver operand fell into the generic
+# "assignment destination is not a subscript reference" fallback, since
+# nothing else recognized is_container_ref at all. Fixed by adding a
+# parallel is_container_ref case to write_destination itself, writing
+# just the *current* replay iteration's one element (container_ref_offset
+# + arrayed_index * container_ref_stride) via the existing
+# write_container_element() helper -- the exact write-side mirror of
+# resolve_operand's own is_container per-element replay-read case.
+# Fixture: test_row_container_write.hal (112-EXAMPLE_6.hal verbatim,
+# already has its own WRITE loop). Output independently hand-verified:
+# row i = GYRO_INPUT row i (INTEGER) elementwise * SCALE (.013,.026,.013)
+# + BIAS (57.296).
+run ./run_local_fixture.sh row_container_write "$(printf ' 5.7308975E+01      5.7347977E+01      5.7334976E+01\n 5.7347977E+01      5.7425980E+01      5.7373978E+01\n 5.7386978E+01      5.7503983E+01      5.7412979E+01\n 5.7425980E+01      5.7581985E+01      5.7451981E+01')"
+
+# Corpus sweep: 242-P.hal, `WAIT FOR DONE;`/`WAIT FOR DO_SOMETHING;` (both
+# a bare EVENT symbol) -- a WAIT form documented separately in USA003087
+# Sec. 24.6 ("Event Expressions in WAIT Statement": "causes a process to
+# remain in a waiting state until some event expression becomes TRUE"),
+# distinct from the three WAIT forms (interval/UNTIL/FOR DEPENDENT,
+# Sec. 13.5) already implemented -- OP_WAIT's own operand-shape check
+# rejected this fourth form's tag=3/one-SYT-operand encoding outright,
+# "WAIT: expected 1 operand (interval or UNTIL form) or 0 (FOR
+# DEPENDENT)". Fixed by adding a tag==3 case that reuses SCHD's own
+# `ON <bit exp>` mechanism (TASK_WAITING_ON/sched_wake_on_events,
+# has_on_event/on_event_syt) verbatim -- entered from a currently-running
+# task instead of at SCHD-creation time, but the same re-check-every-tick
+# "become READY once this plain EVENT SYT's bit_value is nonzero" logic
+# applies unchanged. Only the plain-SYT-operand case is implemented (same
+# scope as SCHD's own ON clause; compound BAND/BOR event expressions are
+# task #47's still-deferred gap, not independently reinvestigated here).
+# Fixture: test_wait_for_event.hal (242-P.hal verbatim, plus two added
+# WRITE statements to make the SIGNAL/WAIT FOR/SET interaction
+# independently checkable) -- output confirms the correct order (T's own
+# WAIT FOR DO_SOMETHING unblocks from the primal's SIGNAL, then T's own
+# SET DONE unblocks the primal's WAIT FOR DONE).
+run ./run_local_fixture.sh wait_for_event "$(printf 'T RAN\nMAIN RESUMED')"
+
+# Corpus sweep: 167-ASSORTEDIO.hal, `DECLARE FWDSENSORS IOPARM-STRUCTURE
+# INITIAL(16, HEX'0', NULL, 27);` (`BUFFER NAME ARRAY(10) INTEGER` is the
+# 3rd of 4 terminals) -- TINT's own coalesced-run mechanism only ever
+# handled a QUAL_LIT second operand (a run of literal-table entries);
+# NULL has no litfile entry to coalesce against (NASN/NINT's own
+# confirmed "NULL is QUAL=IMD" encoding, reused here by the compiler),
+# so it always breaks the coalescing and gets its own standalone TINT
+# instruction with a bare QUAL_IMD operand instead -- previously hit the
+# blanket "TINT: expected a LIT second operand" fallback. Fixed by adding
+# a QUAL_IMD case that writes SYT_TYPE_NAME/HALMAT_NAME_NULL directly
+# into the one affected terminal's shadow field slot, bypassing the
+# run/litfile machinery entirely (a NULL terminal is always exactly one
+# terminal, no run-count concept applies). Fixture:
+# test_tint_null_terminal.hal (167-ASSORTEDIO.hal's structure/INITIAL
+# construct in isolation -- the real corpus file also uses a %SVC macro
+# invocation later, deliberately out of this interpreter's scope, so
+# can't be used verbatim). Output confirms the numeric/BIT terminals
+# coalesced on either side of the NULL terminal (DEVICE=16, STATUS=
+# HEX'0', WORDS=27) all came through correctly despite the run-breaking
+# NULL terminal between them.
+run ./run_local_fixture.sh tint_null_terminal "         16     0000 0000 0000 0000 0000 0000 0000 0000              27"
+
+# Corpus sweep: 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal, `V.STATUS$(N)`/
+# `V.TIMETAG$(N)` (V a Q-STRUCTURE(3), N a plain loop-counter INTEGER --
+# a structure-copy select with a *variable*, not literal, copy index).
+# TSUB's own operand-shape check only ever accepted QUAL_IMD (a literal
+# copy number); the variable form's real compiled shape (confirmed
+# against this file's own HALMAT) is a plain QUAL_SYT operand referencing
+# the variable directly (tag1=0x09, distinct from the literal form's own
+# tag1) -- previously hit "TSUB: only a literal copy index is
+# implemented". Fixed by resolving a QUAL_SYT second operand the same way
+# any other integer-valued SYT read would be. (The corpus files
+# themselves can't be used as fixtures verbatim -- every PROCEDURE they
+# CALL through this construct has an elided "..." placeholder body, no
+# real executable content, the same illustrative-textbook-snippet pattern
+# as 265-ENQUEUE.hal/269-STALL.hal; the actual CALL...ASSIGN() write-back
+# additionally hits a separate, deeper whole-STRUCTURE-copy-receiver gap
+# related to task #23's own deferred TASN/structure-terminal-array
+# limitation, not investigated further here.) Fixture:
+# test_tsub_variable_index.hal, a minimal REC-STRUCTURE(3) isolating just
+# the variable-copy-index read/write, independently verified (Q.X$(N) =
+# 10+N for N=1,2,3 -> 11,12,13).
+run ./run_local_fixture.sh tsub_variable_index "$(printf '         11\n         12\n         13')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

@@ -347,6 +347,35 @@ typedef struct {
                                * bit-pattern mapping in this interpreter; any
                                * other type fails loudly rather than guess an
                                * unmodeled byte layout). */
+    bool is_bitpart_ref;    /* is_ref=false: true if this slot holds a native BIT-string
+                               * at-partition/single-index reference (`B$(width AT
+                               * position)` or `B$(n)`, OP_DSUB's TAG=1 "component"
+                               * cases), applied directly to a plain (non-ARRAY) BIT/
+                               * INTEGER/SCALAR SYT variable's own raw storage --
+                               * deferred (not resolved to a value at DSUB time) so the
+                               * exact same slot works as *either* a read (resolve_operand
+                               * dereferences it) *or* a write-through (write_destination
+                               * dereferences it), the same "produced by DSUB, consumed by
+                               * whichever operand position uses it" pattern is_ref already
+                               * establishes for ARRAY/MATRIX element references just above
+                               * -- user-reported, 250-BITS.hal's `B$(1) = ON;` (`B` a plain
+                               * `BIT(8)`): this DSUB shape was originally implemented
+                               * read-only (its own comment explicitly noted "no fixture...
+                               * needs this as an assignment target"), eagerly resolving to
+                               * an `is_bits` plain value -- correct for every read use seen
+                               * until this file, but wrong here since BASN's own receiver
+                               * operand needs a *destination*, not a value, and hit
+                               * write_destination's generic "assignment destination is not
+                               * a subscript reference" fallback (is_ref false, is_subbit_ref
+                               * false, nothing else recognized). */
+    uint16_t bitpart_target_syt; /* is_bitpart_ref: the plain SYT variable whose raw bit
+                               * pattern is read from/written into. */
+    int bitpart_position;   /* is_bitpart_ref: the 1-indexed HAL/S bit position (MSB-first
+                               * within the target's own declared width -- same convention
+                               * as OP_DSUB's read-side extraction, format_bit_field, etc). */
+    int bitpart_width;      /* is_bitpart_ref: the field width in bits (1 for the
+                               * single-index `B$(n)` form, the explicit "width" operand
+                               * for the at-partition `B$(width AT position)` form). */
 } halmat_vac_slot_t;
 
 /* Structure-field "shadow slot" storage: HAL/S structure fields (class-0/

@@ -1,0 +1,16 @@
+C/ Isolates 167-ASSORTEDIO.hal's structure-INITIAL()-with-a-NULL-terminal
+C/ construct (the file itself also uses a %SVC macro invocation later,
+C/ which is deliberately out of this interpreter's scope, so it can't be
+C/ used verbatim here) -- a WRITE statement added to check the numeric/
+C/ BIT terminals coalesced around the NULL terminal came through intact.
+
+  T167: PROGRAM;
+     STRUCTURE IOPARM:
+        1 DEVICE INTEGER,
+        1 STATUS BIT(16),
+        1 BUFFER NAME ARRAY(10) INTEGER,
+        1 WORDS INTEGER;
+     DECLARE FWDSENSORS IOPARM-STRUCTURE INITIAL(16, HEX'0', NULL, 27);
+     WRITE(6) FWDSENSORS.DEVICE, FWDSENSORS.STATUS, FWDSENSORS.WORDS;
+Y %SVCI(0);
+  CLOSE T167;

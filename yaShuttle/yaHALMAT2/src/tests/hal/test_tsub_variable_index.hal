@@ -1,0 +1,19 @@
+C/ Isolates 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal's `V.STATUS$(N)` construct
+C/ (a structure-copy select with a variable, not literal, copy index) --
+C/ the real corpus files' own called PROCEDUREs are all elided ("...")
+C/ placeholders with no real executable body, so this instead directly
+C/ exercises TSUB's variable-copy-index case with real reads/writes.
+
+  T180: PROGRAM;
+     STRUCTURE REC:
+        1 X INTEGER;
+     DECLARE Q REC-STRUCTURE(3);
+     DECLARE N INTEGER;
+     DO FOR N = 1 TO 3;
+        Q.X$(N) = 10 + N;
+     END;
+     DO FOR N = 1 TO 3;
+        WRITE(6) Q.X$(N);
+     END;
+Y %SVCI(0);
+  CLOSE T180;

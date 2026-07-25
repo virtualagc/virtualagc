@@ -1,0 +1,20 @@
+C/ Adapted from PDF p. 242 of "Programming in HAL/S", with two WRITE
+C/ statements added to make the WAIT FOR / SIGNAL / SET interaction
+C/ independently verifiable (the real corpus file has no WRITE at all).
+
+  P:
+  PROGRAM;
+     DECLARE DO_SOMETHING EVENT;
+     DECLARE DONE EVENT LATCHED INITIAL(OFF);
+     SCHEDULE T PRIORITY(50);
+     SIGNAL DO_SOMETHING;
+     WAIT FOR DONE;
+     WRITE(6) 'MAIN RESUMED';
+  T:
+  TASK;
+     WAIT FOR DO_SOMETHING;
+     WRITE(6) 'T RAN';
+     SET DONE;
+  CLOSE T;
+Y %SVCI(0);
+  CLOSE P;

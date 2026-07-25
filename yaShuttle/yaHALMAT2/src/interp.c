@@ -302,6 +302,7 @@ static halmat_scalar_t rv_to_scalar(const resolved_value_t *v) {
  * to a slot other than its own -- IDEF's, not RTRN's -- and must
  * preserve whatever type the inline function actually returns, unlike
  * the existing FCAL/RTRN path which always narrows to INTEGER). */
+static char *dup_string(const char *s); /* forward-declared -- defined below, needed here for the RV_STRING case's own copy */
 static void store_resolved_to_vac(halmat_vac_slot_t *slot, const resolved_value_t *val) {
     memset(slot, 0, sizeof(*slot));
     switch (val->kind) {
@@ -311,7 +312,27 @@ static void store_resolved_to_vac(halmat_vac_slot_t *slot, const resolved_value_
             break;
         case RV_STRING:
             slot->is_string = true;
-            slot->string = val->string;
+            /* Copied, not borrowed -- unlike most other VAC-slot string
+             * assignments in this file (which is why this function's own
+             * every caller is a RETURN-value capture, not an ordinary
+             * expression result), `val->string` here can be a pointer
+             * *into* a same-unit callee's own local storage (e.g.
+             * `RETURN YES$(TYPE:);`, YES a local `ARRAY(4) CHARACTER(5)`
+             * -- resolve_operand's own char_elements read returns that
+             * array's own element pointer directly, not a copy). Since a
+             * same-unit call shares SYT storage with its caller
+             * (dest_state == state) and HAL/S locals are AUTOMATIC
+             * (re-initialized fresh on every call) by default, that same
+             * storage gets freed and reallocated the *next* time this
+             * same FUNCTION is called -- a real crash (use-after-free,
+             * confirmed via ASan) when two calls to the same FUNCTION
+             * appear in one WRITE statement's own argument list
+             * (`WRITE(6) STATE(TRUE,1), STATE(FALSE,1);`, user-reported
+             * via 158-STATE.hal): the first call's own returned string
+             * gets freed out from under it by the second call's own
+             * AUTOMATIC re-initialization, before flush_write ever reads
+             * either one. */
+            slot->string = dup_string(val->string);
             break;
         case RV_BITS:
             slot->is_bits = true;
@@ -684,6 +705,35 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                     out->kind = RV_SCALAR;
                     out->scalar = base->elements[slot->ref_offset];
                 }
+            } else if (slot->is_bitpart_ref) {
+                /* Read side of a deferred BIT at-partition/single-index
+                 * reference (state.h's is_bitpart_ref) -- reads the
+                 * target SYT's *current* raw value (not whatever it held
+                 * when the DSUB executed; matters when the same VAC slot
+                 * is read after an intervening write to the same
+                 * variable elsewhere), same MSB-first shift-and-mask
+                 * extraction OP_DSUB's own read branches use. */
+                if (slot->bitpart_target_syt >= HALMAT_SYT_MAX) {
+                    fail(state, "VAC bitpart reference SYT out of range");
+                    return false;
+                }
+                const halmat_syt_entry_t *tsyt = &state->syt[slot->bitpart_target_syt];
+                uint32_t raw;
+                switch (tsyt->type) {
+                    case SYT_TYPE_BIT: raw = tsyt->bit_value; break;
+                    case SYT_TYPE_INTEGER: raw = (uint32_t)tsyt->value; break;
+                    case SYT_TYPE_SCALAR: raw = tsyt->scalar.msw; break;
+                    default: raw = 0; break;
+                }
+                int decl_width = 32;
+                if (state->symtab) {
+                    const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, slot->bitpart_target_syt);
+                    if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+                }
+                int shift = decl_width - slot->bitpart_position - slot->bitpart_width + 1;
+                uint32_t mask = (slot->bitpart_width == 32) ? 0xFFFFFFFFu : ((1u << slot->bitpart_width) - 1u);
+                out->kind = RV_BITS;
+                out->bits = (shift >= 0) ? ((raw >> shift) & mask) : 0;
             } else if (slot->is_string) {
                 out->kind = RV_STRING;
                 out->string = slot->string ? slot->string : "";
@@ -1032,6 +1082,90 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             }
             fail(state, "SUBBIT assignment: target type has no confirmed raw-bit-pattern mapping (only INTEGER/BIT/SINGLE-precision SCALAR are implemented)");
             return false;
+        }
+        if (slot->is_bitpart_ref) {
+            /* Write-through side of a deferred BIT at-partition/single-
+             * index reference (state.h's is_bitpart_ref) -- merges `val`'s
+             * bits into the target SYT's *current* raw pattern at the
+             * fixed (position, width) resolved back when the producing
+             * DSUB executed, preserving every other bit and the target's
+             * own declared type. User-reported, 250-BITS.hal's
+             * `B$(1) = ON;` (`B` a plain `BIT(8)`). */
+            if (slot->bitpart_target_syt >= HALMAT_SYT_MAX) {
+                fail(state, "BIT at-partition assignment: target SYT out of range");
+                return false;
+            }
+            if (val->kind != RV_BITS) {
+                fail(state, "BIT at-partition assignment: source is not BIT");
+                return false;
+            }
+            halmat_syt_entry_t *e = &state->syt[slot->bitpart_target_syt];
+            uint32_t raw;
+            switch (e->type) {
+                case SYT_TYPE_BIT: raw = e->bit_value; break;
+                case SYT_TYPE_INTEGER: raw = (uint32_t)e->value; break;
+                case SYT_TYPE_SCALAR: raw = e->scalar.msw; break;
+                default: raw = 0; break;
+            }
+            int decl_width = 32;
+            if (state->symtab) {
+                const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, slot->bitpart_target_syt);
+                if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+            }
+            int width = slot->bitpart_width;
+            int shift = decl_width - slot->bitpart_position - width + 1;
+            if (shift >= 0) {
+                uint32_t mask = (width == 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
+                raw = (raw & ~(mask << shift)) | ((val->bits & mask) << shift);
+            }
+            switch (e->type) {
+                case SYT_TYPE_BIT: e->bit_value = raw; break;
+                case SYT_TYPE_INTEGER: e->value = (int32_t)raw; break;
+                case SYT_TYPE_SCALAR: e->scalar.msw = raw; break;
+                default:
+                    /* Never written before -- default to BIT, matching
+                     * this same target's own declared class if the
+                     * variable really is a BIT string (the overwhelmingly
+                     * common case for this construct). */
+                    e->type = SYT_TYPE_BIT;
+                    e->bit_value = raw;
+                    break;
+            }
+            return true;
+        }
+        if (slot->is_container_ref) {
+            /* Plain-scalar write into one element of a row/column/vector
+             * container-reference slot (DSUB's asterisk-partition case,
+             * state.h's is_container_ref) via an ordinary SASN/IASN,
+             * *not* MASN/VASN's own whole-container-at-once path just
+             * below (which bypasses write_destination entirely) --
+             * state.h's own is_container_ref comment already notes ARRAY
+             * has no dedicated whole-container assign opcode the way
+             * VECTOR/MATRIX get VASN/MASN, so HALSFC instead wraps a
+             * plain SASN/IASN in an ADLP/DLPE replay and re-executes it
+             * once per element, cycling arrayed_index -- the exact
+             * mirror of resolve_operand's own is_container replay-read
+             * case, just for the write side. User-reported,
+             * 112-EXAMPLE_6.hal's `ATT_RATE(DEVICE,*) = GYRO_INPUT
+             * (DEVICE,*) * SCALE + BIAS;` (`ATT_RATE`/`GYRO_INPUT` both
+             * ARRAY(4,3)): previously fell into the generic "not a
+             * subscript reference" fallback below, since only MASN/VASN
+             * consulted is_container_ref at all. */
+            if (state->arrayed_index < 0) {
+                fail(state, "container-reference assignment used outside an arrayed-paragraph replay");
+                return false;
+            }
+            if (slot->container_ref_syt >= HALMAT_SYT_MAX) {
+                fail(state, "container-reference assignment: SYT index out of range");
+                return false;
+            }
+            halmat_syt_entry_t *rbase = &state->syt[slot->container_ref_syt];
+            size_t idx = slot->container_ref_offset + (size_t)state->arrayed_index * slot->container_ref_stride;
+            if (!rbase->elements || idx >= rbase->element_count) {
+                fail(state, "container-reference assignment out of range");
+                return false;
+            }
+            return write_container_element(state, slot->container_ref_syt, rbase, idx, val);
         }
         if (!slot->is_ref) {
             fail(state, "assignment destination is not a subscript reference");
@@ -1629,9 +1763,30 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
         pe->cols = state->io_pending.items[item_index].container_cols;
         return true;
     }
+    /* Kind-preserving parameter binding -- previously only ever
+     * distinguished SCALAR vs. "everything else defaults to INTEGER,"
+     * silently mis-binding both a CHARACTER and a BIT/BOOLEAN argument as
+     * INTEGER (reading `.integer`, which a `is_string`/`is_bits` item
+     * never populates -- garbage, not just the wrong declared type).
+     * User-reported (158-STATE.hal's `STATE(TRUE, 1)`, `STATE`'s own
+     * `B` parameter declared `BOOLEAN` -- a synonym for `BIT(1)`):
+     * "BTRU: operand is not BIT," since `B`'s own SYT entry ended up
+     * `SYT_TYPE_INTEGER` instead. Apparently never exercised before by
+     * any fixture passing a `BIT`/`CHARACTER` argument to a same-unit
+     * `PROCEDURE`/`FUNCTION` this way -- the same "first real corpus
+     * program to hit this exact combination" pattern as several other
+     * fixes this session. Mirrors `store_resolved_to_vac`'s own already-
+     * established kind-preserving convention. */
     if (state->io_pending.items[item_index].is_scalar) {
         dest_state->syt[param_syt].type = SYT_TYPE_SCALAR;
         dest_state->syt[param_syt].scalar = state->io_pending.items[item_index].scalar;
+    } else if (state->io_pending.items[item_index].is_string) {
+        dest_state->syt[param_syt].type = SYT_TYPE_CHARACTER;
+        free(dest_state->syt[param_syt].char_value);
+        dest_state->syt[param_syt].char_value = dup_string(state->io_pending.items[item_index].string);
+    } else if (state->io_pending.items[item_index].is_bits) {
+        dest_state->syt[param_syt].type = SYT_TYPE_BIT;
+        dest_state->syt[param_syt].bit_value = state->io_pending.items[item_index].bits;
     } else {
         dest_state->syt[param_syt].type = SYT_TYPE_INTEGER;
         dest_state->syt[param_syt].value = state->io_pending.items[item_index].integer;
@@ -2305,6 +2460,65 @@ void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int reco
 
 void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab) {
     state->symtab = symtab;
+    /* Pre-seed every plain (unarrayed, non-structure) declared symbol's
+     * SYT entry with the *declared* type's own zero-value, rather than
+     * leaving it at SYT_TYPE_UNKNOWN (memset-zero's default) until its
+     * first write. read_syt_entry() (this file) treats anything that
+     * isn't explicitly SCALAR/CHARACTER/BIT as INTEGER -- correct for a
+     * genuinely-INTEGER-declared variable, but wrong for a BIT/CHARACTER/
+     * SCALAR one that's read *before* ever being written: user-reported,
+     * 250-BITS.hal's `DECLARE B BIT(8); ... IF B = HEX'00' THEN ...;`
+     * (`B` has no `INITIAL()`, so no BINT/etc. instruction ever touches
+     * its SYT entry before this comparison) -- "BEQU/BNEQ: both operands
+     * must be BIT," since B's own type was still SYT_TYPE_UNKNOWN,
+     * silently read as RV_INTEGER instead. A real DECLARE with no
+     * INITIAL() defaults to all-zero-bits/empty-string/0.0/0 per HAL/S's
+     * own semantics -- exactly what this seeding produces, matching the
+     * *value* a real BINT(0)/CINT("")/SINT(0.0) would have set anyway,
+     * just without needing the source to spell it out. Harmless for a
+     * symbol that *does* have an explicit INITIAL() (or gets assigned
+     * before its first read some other way): that real init/assignment
+     * instruction runs after this and simply overwrites the seed.
+     * Function/procedure parameters are seeded the same way (harmless --
+     * bind_call_argument() overwrites this the moment the parameter is
+     * actually bound by a real call). Scoped to hal_class 1/2/5/6/9 (BIT/
+     * CHARACTER/SCALAR/INTEGER/EVENT) with no recognized ARRAY/VECTOR/
+     * MATRIX shape -- an arrayed or structure-shaped symbol's own storage
+     * is handled by ensure_container()/EDCL-time struct setup instead,
+     * not this scalar-only mechanism.
+     *
+     * hal_class==9 (EVENT, confirmed against 239-STARTUP.hal's own
+     * COMMON0.out symbol-table report -- SYM_TYPE=09 for `DECLARE ORBIT
+     * EVENT LATCHED;`/`DECLARE ORBIT3 EVENT;` alike, a class number not
+     * otherwise documented anywhere else in this codebase) is seeded the
+     * same way as BIT: an EVENT's runtime state is already modeled as a
+     * plain SYT_TYPE_BIT bit_value (0=not signaled, 1=signaled -- see
+     * this file's own SIGNAL/SET/RESET handling, `e->bit_value = ...`),
+     * just never given an explicit type at DECLARE time the way BINT
+     * would for a real BIT variable. 239-STARTUP.hal's own `SCHEDULE
+     * FREEFALL ON (ORBIT & (ORBIT2 & ORBIT3))` reads ORBIT2/ORBIT3
+     * directly in a BAND event-expression before either is ever
+     * SET/RESET/SIGNALed -- previously misread as RV_INTEGER by the same
+     * SYT_TYPE_UNKNOWN default this whole fix addresses, "BAND: both
+     * operands must be BIT." An EVENT genuinely defaults to "not
+     * signaled" until first set, matching plain BIT's own all-zero
+     * default here. */
+    if (!symtab) return;
+    for (size_t i = 0; i < symtab->count; i++) {
+        const halmat_symtab_entry_t *sym = &symtab->entries[i];
+        if (sym->index >= HALMAT_SYT_MAX) continue;
+        if (sym->shape != HALMAT_SHAPE_NONE) continue;
+        halmat_syt_entry_t *e = &state->syt[sym->index];
+        if (e->type != SYT_TYPE_UNKNOWN) continue;
+        switch (sym->hal_class) {
+            case 1: e->type = SYT_TYPE_BIT; e->bit_value = 0; break;
+            case 2: e->type = SYT_TYPE_CHARACTER; e->char_value = dup_string(""); break;
+            case 5: e->type = SYT_TYPE_SCALAR; e->scalar = halmat_scalar_zero(false); break;
+            case 6: e->type = SYT_TYPE_INTEGER; e->value = 0; break;
+            case 9: e->type = SYT_TYPE_BIT; e->bit_value = 0; break;
+            default: break;
+        }
+    }
 }
 
 void interp_set_external_units(halmat_state_t *state, const halmat_external_call_map_t *map, size_t count) {
@@ -3273,25 +3487,48 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* Structure-copy subscript specifier, single-copy-select
                  * form only (class-0/TSUB.md) -- range-select (3
                  * operands) fails loudly, untested. Two operands: the
-                 * multi-copy structure's own SYT, then the copy number
-                 * (confirmed QUAL_IMD for a literal index; an expression
-                 * operand, which per USA003087 Sec 19.6 should also be
-                 * legal, isn't implemented). Result consumed by a
-                 * following EXTN via a QUAL_VAC operand referencing
-                 * TSUB's own stream position (see OP_EXTN above), not
-                 * used directly by anything else. */
+                 * multi-copy structure's own SYT, then the copy number,
+                 * either a literal (QUAL_IMD) or an expression (per
+                 * USA003087 Sec 19.6, which documents both as legal) --
+                 * the expression case's own shape confirmed empirically
+                 * against real compiled HALMAT, user-reported
+                 * (180/184-EXAMPLE_N.hal's `V.STATUS$(N)`/`V.TIMETAG$(N)`,
+                 * N a plain loop-counter INTEGER, and 264-INITIALIZE.hal's
+                 * `TQ.NEXT$(N)`): a plain QUAL_SYT operand referencing the
+                 * variable directly (tag1=0x09, distinct from the literal
+                 * form's own tag1), not a VAC-qualified arithmetic chain
+                 * -- resolved the same way any other integer-valued SYT
+                 * read would be. A genuinely computed expression (e.g.
+                 * `V.STATUS$(N+1)`) would presumably show up as QUAL_VAC
+                 * instead; not exercised by any fixture yet, so not
+                 * handled here. Result consumed by a following EXTN via a
+                 * QUAL_VAC operand referencing TSUB's own stream position
+                 * (see OP_EXTN above), not used directly by anything
+                 * else. */
                 if (ins->operand_count != 2) { fail(state, "TSUB: only the single-copy-select form (2 operands) is implemented"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "TSUB: expected a SYT structure operand"); break; }
-                if (ins->operands[1].qual != QUAL_IMD) { fail(state, "TSUB: only a literal copy index is implemented"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                state->vac[ins->index].is_ref = false;
-                state->vac[ins->index].is_copy_ref = true;
-                state->vac[ins->index].copy_ref_base_syt = ins->operands[0].data;
-                /* Copy numbers are 1-based in HAL/S source (`copy 2`) but
-                 * this interpreter's copy_index is 0-based (matches
-                 * arrayed_index's own 0-based convention, and ADLP's
-                 * count directly, per state.h) -- subtract 1. */
-                state->vac[ins->index].copy_ref_copy_index = (int32_t)(int16_t)ins->operands[1].data - 1;
+                {
+                    int32_t copy_number;
+                    if (ins->operands[1].qual == QUAL_IMD) {
+                        copy_number = (int32_t)(int16_t)ins->operands[1].data;
+                    } else if (ins->operands[1].qual == QUAL_SYT) {
+                        resolved_value_t cv;
+                        if (!resolve_operand(state, &ins->operands[1], &cv)) break;
+                        copy_number = rv_to_integer(&cv);
+                    } else {
+                        fail(state, "TSUB: only a literal or plain-SYT copy index is implemented");
+                        break;
+                    }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_copy_ref = true;
+                    state->vac[ins->index].copy_ref_base_syt = ins->operands[0].data;
+                    /* Copy numbers are 1-based in HAL/S source (`copy 2`)
+                     * but this interpreter's copy_index is 0-based
+                     * (matches arrayed_index's own 0-based convention, and
+                     * ADLP's count directly, per state.h) -- subtract 1. */
+                    state->vac[ins->index].copy_ref_copy_index = copy_number - 1;
+                }
                 break;
 
             case OP_STRI:
@@ -4276,8 +4513,31 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * (QD1/AV3: it type-checks the partition against the
                  * *whole* vector's declared length, not the slice, so no
                  * source shape can ever satisfy it) -- not a construct any
-                 * real compiled program can produce, so left read-only. */
-                if (num_indices == 2 && base->rows == 0 &&
+                 * real compiled program can produce, so left read-only.
+                 *
+                 * Gated on `ins->tag == 4` (this instruction's own
+                 * operator-word TAG, confirmed elsewhere in this file to be
+                 * "the HALMAT class of the subscripted result" -- 4=VECTOR)
+                 * -- user-reported, 254-TEST1.hal's `INPUT$(4 AT I)`
+                 * (`INPUT` a plain `BIT(24)`, i.e. an ordinary SUBBIT-style
+                 * at-partition, `ins->tag`=1=BIT) previously *also* matched
+                 * this branch's old, looser condition (`base->rows == 0 &&`
+                 * both operands TAG1==3 -- true for ANY non-MATRIX base,
+                 * scalar included), reading through `base->elements` even
+                 * though a plain scalar `BIT` symbol has no real element
+                 * array at all -- `ensure_container()`'s own generic
+                 * "unknown shape" fallback (`HALMAT_CONTAINER_CAPACITY`
+                 * placeholder) silently allocates one anyway for *any*
+                 * unclassified `SYT` entry, scalar or not, so this branch
+                 * fired and produced a bogus whole-container result
+                 * ("VAC whole-container result referenced outside an
+                 * arrayed-paragraph replay" at the following BTOI, since
+                 * that result is never actually inside a replay -- a
+                 * plain `SUBBIT`-style at-partition is a *single* value,
+                 * not a container, so it correctly falls through to the
+                 * ordinary per-dimension `is_ref` path below instead once
+                 * this branch stops misfiring for it). */
+                if (num_indices == 2 && base->rows == 0 && ins->tag == 4 &&
                     ins->operands[1].tag1 == 3 && ins->operands[2].tag1 == 3) {
                     resolved_value_t lenv, posv;
                     if (!resolve_operand(state, &ins->operands[1], &lenv)) break;
@@ -4293,6 +4553,214 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
                     for (int32_t k = 0; k < len; k++) buf[k] = base->elements[(size_t)pos + k];
                     if (!store_container_result(state, ins->index, buf, (size_t)len, 0, len)) break;
+                    break;
+                }
+
+                /* Native BIT-string at-partition subscript (`B$(width AT
+                 * position)`), applied directly to a plain, non-array BIT
+                 * variable's own raw storage -- an ordinary bit-substring
+                 * read (HAL/S's own "component" at-partition kind, same
+                 * DSUB shape as the VECTOR-slice case just above, but on a
+                 * scalar rather than a container: distinguished by this
+                 * instruction's own operator-word TAG, confirmed
+                 * elsewhere in this file to be "the HALMAT class of the
+                 * subscripted result" -- 1=BIT here, vs. 4=VECTOR above).
+                 * User-reported, 254-TEST1.hal's `INTEGER(INPUT$(4 AT
+                 * I))` (`INPUT` a plain `BIT(24)`, unpacking it 4 bits at
+                 * a time into decimal digits): this used to fall into the
+                 * VECTOR-slice branch above (before that branch was
+                 * correctly gated on `ins->tag==4`), reading through
+                 * `base->elements` even though a plain scalar `BIT` symbol
+                 * has none -- `ensure_container()`'s own generic
+                 * "unknown shape" fallback silently allocates a bogus
+                 * placeholder container for *any* unclassified `SYT`
+                 * entry regardless, so this branch fired anyway and
+                 * produced nonsense.
+                 *
+                 * Deferred (not resolved to a value here): stores a
+                 * bitpart_ref (state.h) instead, so this same DSUB result
+                 * works as either a read (resolve_operand's QUAL_VAC case
+                 * dereferences it) or a write-through destination
+                 * (write_destination's QUAL_VAC case does) -- confirmed
+                 * both directions are needed by real corpus programs (see
+                 * bitpart_ref's own state.h comment for the write-side
+                 * case, 250-BITS.hal's `B$(1) = ON;`, found for the
+                 * sibling single-index branch just below but the same
+                 * fix applies here on general principle: real HAL/S may
+                 * equally allow `B$(width AT position) = ...;`, and there
+                 * is no cost to supporting it since the mechanism is
+                 * identical). Bit numbering is MSB-first within the
+                 * base's own declared width (USA003090 Sec. 8.2's
+                 * documented BIT-string convention, already relied on by
+                 * format_bit_field's identical "width-1-i" indexing
+                 * elsewhere in this file): HAL/S bit position `p`
+                 * (1-indexed) of a `W`-bit string is 0-indexed-from-LSB
+                 * position `W-p` in this interpreter's own right-
+                 * justified `uint32_t` BIT representation, so the `width`
+                 * bits starting at position `position` occupy 0-indexed-
+                 * from-LSB positions `[W-position-width+1, W-position]`
+                 * inclusive -- extracted via a single shift-and-mask once
+                 * the base's own full raw bit pattern is read (reusing
+                 * the exact same "read any resolvable kind's raw bits"
+                 * technique this opcode family's own reference-context
+                 * branch already established for `SUBBIT`, just above in
+                 * this same `case` group, since a plain `BIT`/`INTEGER`/
+                 * `SCALAR` base all resolve the same way here). */
+                if (num_indices == 2 && ins->tag == 1 &&
+                    ins->operands[1].tag1 == 3 && ins->operands[2].tag1 == 3) {
+                    resolved_value_t widthv, posv;
+                    if (!resolve_operand(state, &ins->operands[1], &widthv)) break;
+                    if (!resolve_operand(state, &ins->operands[2], &posv)) break;
+                    int width = rv_to_integer(&widthv);
+                    int position = rv_to_integer(&posv);
+                    int decl_width = 32;
+                    if (state->symtab) {
+                        const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, base_syt);
+                        if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+                    }
+                    if (width < 0 || width > 32 || position < 1 || position + width - 1 > decl_width) {
+                        fail(state, "DSUB: BIT at-partition subscript out of range");
+                        break;
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_bitpart_ref = true;
+                    state->vac[ins->index].bitpart_target_syt = base_syt;
+                    state->vac[ins->index].bitpart_position = position;
+                    state->vac[ins->index].bitpart_width = width;
+                    break;
+                }
+
+                /* Single-index BIT-string subscript (`B$(n)`, a single
+                 * 1-bit extraction), on a plain (non-array) BIT/INTEGER/
+                 * SCALAR base -- the same underlying "component" DSUB
+                 * shape as the at-partition case just above, with an
+                 * implicit width of 1 rather than an explicit "width AT
+                 * position" pair (index kind, TAG1=1, per this file's own
+                 * confirmed table, rather than TAG1=3). User-reported,
+                 * 254-TEST2.hal's `IF B$(1) THEN ...;`/`IF B$(#) THEN
+                 * ...;` (`B` a plain `BIT(16)`, used directly as a boolean
+                 * condition) and 158-STATE.hal's identical pattern:
+                 * "BTRU: operand is not BIT" -- previously fell through to
+                 * the generic per-dimension index loop below, producing a
+                 * bogus numeric `is_ref` into a scalar `BIT` symbol's own
+                 * nonexistent element array, the same class of bug as the
+                 * at-partition case above. Reuses that same MSB-first
+                 * shift-and-mask extraction with `width` fixed to 1.
+                 * Deferred (bitpart_ref), not resolved to a value here --
+                 * also user-reported as an *assignment* target,
+                 * 250-BITS.hal's `B$(1) = ON;`: BASN's own receiver
+                 * operand landed on write_destination's generic "not a
+                 * subscript reference" fallback before this, since the
+                 * old code eagerly stored a plain `is_bits` value instead
+                 * of something write-through-capable (see bitpart_ref's
+                 * own state.h comment). */
+                if (num_indices == 1 && ins->tag == 1 && ins->operands[1].tag1 == 1) {
+                    resolved_value_t posv;
+                    if (!resolve_operand(state, &ins->operands[1], &posv)) break;
+                    int position = rv_to_integer(&posv);
+                    int decl_width = 32;
+                    if (state->symtab) {
+                        const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, base_syt);
+                        if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+                    }
+                    if (position < 1 || position > decl_width) {
+                        fail(state, "DSUB: BIT index subscript out of range");
+                        break;
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_bitpart_ref = true;
+                    state->vac[ins->index].bitpart_target_syt = base_syt;
+                    state->vac[ins->index].bitpart_position = position;
+                    state->vac[ins->index].bitpart_width = 1;
+                    break;
+                }
+
+                /* CHARACTER to-partition substring (`C$(start TO end)`),
+                 * the plain-literal-bounds case -- DSUB.md's own "To-
+                 * partition (CHARACTER substring...) ... still isn't
+                 * handled" gap, confirmed empirically here (this
+                 * instruction's own operator-word TAG, the HALMAT class of
+                 * the result, is 2=CHARACTER; both subscript operands are
+                 * TAG1=2, the "component" column's to-partition row per
+                 * this file's already-confirmed table). User-reported,
+                 * 159-AGE.hal's `CASE_NUM = INTEGER(C$(1 TO 3));` (`C` a
+                 * plain `CHARACTER(80)`, not an ARRAY) -- previously fell
+                 * through to the generic per-dimension index loop below,
+                 * which misreads a to-partition's own (start, end) pair as
+                 * two unrelated plain indices, producing a bogus numeric
+                 * `is_ref` into a scalar CHARACTER symbol's own (nonexistent)
+                 * element array (`ensure_container()`'s generic "unknown
+                 * shape" fallback silently allocates a numeric placeholder
+                 * for any unclassified SYT entry) -- CTOI then failed
+                 * ("operand is not CHARACTER") since that phantom result
+                 * resolves as RV_SCALAR, not RV_STRING.
+                 *
+                 * Deliberately scoped to a plain (non-ARRAY) base and
+                 * literal-or-otherwise-plain-resolvable bounds -- the
+                 * `#`-relative (CSZ) form of this same subscript kind
+                 * (`C(1 TO #-DECIMALS)`, 160-REFORMAT.hal) is a separate,
+                 * still-unresolved gap (this file's own Unresolved
+                 * Questions on CSZ's own `+`/`-` bit encoding), unaffected
+                 * by this fix since a CSZ operand simply won't resolve
+                 * through the plain `resolve_operand()` calls below the
+                 * same way a literal or plain SYT bound does -- it'll
+                 * still fail loudly rather than silently misreading a CSZ
+                 * expression as some other value. Read-only (no fixture
+                 * or corpus program needs `C$(a TO b) = ...;` as an
+                 * assignment target yet). */
+                if (num_indices == 2 && ins->tag == 2 &&
+                    ins->operands[1].tag1 == 2 && ins->operands[2].tag1 == 2) {
+                    resolved_value_t startv, endv;
+                    if (!resolve_operand(state, &ins->operands[1], &startv)) break;
+                    if (!resolve_operand(state, &ins->operands[2], &endv)) break;
+                    int32_t start = rv_to_integer(&startv);
+                    int32_t end = rv_to_integer(&endv);
+                    const char *src = state->syt[base_syt].char_value ? state->syt[base_syt].char_value : "";
+                    int32_t srclen = (int32_t)strlen(src);
+                    if (start < 1) start = 1;
+                    if (end > srclen) end = srclen;
+                    int32_t width = end - start + 1;
+                    if (width < 0) width = 0;
+                    char *sub = malloc((size_t)width + 1);
+                    if (!sub) { fail(state, "out of memory"); break; }
+                    memcpy(sub, src + (start - 1), (size_t)width);
+                    sub[width] = '\0';
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_string = true;
+                    state->vac[ins->index].string = sub; /* deliberately not freeing any prior
+                        * value at this slot -- VAC string slots are reused across loop
+                        * iterations without freeing (state.h's own documented convention;
+                        * see e.g. CCAT), bounded by this run's own iteration count rather
+                        * than reference-counted, freed in bulk by interp_cleanup(). */
+                    break;
+                }
+
+                /* CHARACTER single-index substring (`C$(n)`, a single
+                 * 1-character extraction) on a plain (non-ARRAY) CHARACTER
+                 * base -- the exact same underlying gap as the to-partition
+                 * case just above, one operand instead of two. User-
+                 * reported, 159-AGE.hal's `SEX = INTEGER(C$(6));`. */
+                if (num_indices == 1 && ins->tag == 2 && ins->operands[1].tag1 == 1) {
+                    resolved_value_t idxv;
+                    if (!resolve_operand(state, &ins->operands[1], &idxv)) break;
+                    int32_t idx = rv_to_integer(&idxv);
+                    const char *src = state->syt[base_syt].char_value ? state->syt[base_syt].char_value : "";
+                    int32_t srclen = (int32_t)strlen(src);
+                    char *sub = malloc(2);
+                    if (!sub) { fail(state, "out of memory"); break; }
+                    if (idx >= 1 && idx <= srclen) {
+                        sub[0] = src[idx - 1];
+                        sub[1] = '\0';
+                    } else {
+                        sub[0] = '\0';
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_string = true;
+                    state->vac[ins->index].string = sub;
                     break;
                 }
 
@@ -4830,11 +5298,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * under-tested in general. */
                 if (ins->operand_count != 2) { fail(state, "TINT: expected 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_OFF) { fail(state, "TINT: expected an OFFSET first operand"); break; }
-                if (ins->operands[1].qual != QUAL_LIT) { fail(state, "TINT: expected a LIT second operand"); break; }
                 if (state->stri_target_syt < 0 || state->stri_target_template_syt < 0) {
                     fail(state, "TINT used without a preceding whole-structure STRI");
                     break;
                 }
+                if (ins->operands[1].qual == QUAL_IMD) {
+                    /* NULL initializer for a single NAME-typed structure
+                     * terminal (`1 BUFFER NAME ARRAY(10) INTEGER;` field
+                     * of `DECLARE FWDSENSORS IOPARM-STRUCTURE INITIAL(16,
+                     * HEX'0', NULL, 27);`) -- user-reported,
+                     * 167-ASSORTEDIO.hal. NULL has no litfile entry to
+                     * coalesce a run against (NASN/NINT's own confirmed
+                     * "NULL is QUAL=IMD" encoding, reused here), so this
+                     * terminal always gets its own standalone TINT rather
+                     * than joining the surrounding numeric/BIT terminals'
+                     * coalesced LIT run -- always exactly one terminal,
+                     * no run-count concept applies. */
+                    uint16_t base_syt = (uint16_t)state->stri_target_syt;
+                    uint16_t template_syt = (uint16_t)state->stri_target_template_syt;
+                    int32_t copy_idx = current_copy_index(state);
+                    uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data;
+                    if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); break; }
+                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, copy_idx);
+                    field->type = SYT_TYPE_NAME;
+                    field->name_target = HALMAT_NAME_NULL;
+                    break;
+                }
+                if (ins->operands[1].qual != QUAL_LIT) { fail(state, "TINT: expected a LIT second operand"); break; }
                 uint16_t base_syt = (uint16_t)state->stri_target_syt;
                 uint16_t template_syt = (uint16_t)state->stri_target_template_syt;
                 int run_count = ins->operands[1].tag1 > 0 ? ins->operands[1].tag1 : 1;
@@ -7297,8 +7787,36 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * still needs `require_separator=true` even though both
                  * belong to outer item index 0. */
                 bool any_field_read = false;
+                int32_t saved_arrayed_index_outer = state->arrayed_index;
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
+                    /* A plain (non-container) destination captured via an
+                     * ADLP/DLPE per-element replay at XXAR-capture time (a
+                     * flat ARRAY -- unlike the whole-VECTOR/MATRIX dest_is_
+                     * container case just below, which is NOT replayed)
+                     * needs write_destination's own arrayed_index-based
+                     * element indexing to know which element *this* item
+                     * corresponds to -- but by the time this loop runs, the
+                     * real replay (which only ever wrapped the XXAR capture
+                     * step, not OP_READ itself) has already finished and
+                     * arrayed_index reset to -1. Substituting this loop's
+                     * own item index recreates the exact same 0..N-1
+                     * sequence the real replay used during capture (items[]
+                     * preserves that order) -- user-reported, 154-ADD.hal's
+                     * `READ(5) A;`, A a plain ARRAY(100) SCALAR: "SYT index
+                     * N is a whole ARRAY/VECTOR/MATRIX referenced outside an
+                     * arrayed-paragraph replay". Harmless to set
+                     * unconditionally on every item regardless of its own
+                     * destination shape -- write_destination only consults
+                     * arrayed_index for a genuinely array-shaped plain SYT
+                     * destination in the first place, ignoring it entirely
+                     * for an ordinary scalar/integer/character one. Restored
+                     * once after the whole loop, not per-item, since nothing
+                     * else in this loop body depends on it. */
+                    if (state->io_pending.items[i].dest_operand.qual == QUAL_SYT &&
+                        syt_is_array_shaped(state, state->io_pending.items[i].dest_operand.data)) {
+                        state->arrayed_index = (int32_t)i;
+                    }
                     if (state->io_pending.items[i].dest_is_container) {
                         /* Whole VECTOR/MATRIX destination (state.h's
                          * dest_is_container comment) -- USA003087 Sec.
@@ -7395,6 +7913,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!write_destination(state, &state->io_pending.items[i].dest_operand, &rv)) break;
                 }
+                state->arrayed_index = saved_arrayed_index_outer;
                 state->io_pending.active = false;
                 state->io_pending.item_count = 0;
                 break;
@@ -8242,10 +8761,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_WAIT: {
-                /* Three forms, distinguished by operand count and the
+                /* Four forms, distinguished by operand count and the
                  * opcode line's own trailing tag field (class-0/WAIT.md's
-                 * confirmed encoding, all three forms' operand-word shape
-                 * verified against a real `HALSFC --parms=LSTALL` trace):
+                 * confirmed encoding, all three original forms' operand-
+                 * word shape verified against a real `HALSFC
+                 * --parms=LSTALL` trace):
                  * WAIT interval (tag=1, one VAC operand, relative to now);
                  * WAIT UNTIL time (tag=2, one VAC operand, an *absolute*
                  * virtual-time-in-seconds value -- same convention as
@@ -8260,14 +8780,45 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * TASK_WAITING_FOR_DEPENDENTS_RESUME state, which resumes
                  * (TASK_READY) rather than terminating the task the way
                  * the CLOSE-triggered TASK_WAITING_FOR_DEPENDENTS case
-                 * does -- this task's own body isn't finished yet. */
+                 * does -- this task's own body isn't finished yet.
+                 *
+                 * WAIT FOR <event expression> (tag=3, one SYT operand,
+                 * USA003087 Sec. 24.6 -- a *separate* WAIT form from all
+                 * three above, documented in its own later chapter rather
+                 * than alongside them in Sec. 13.5: "causes a process to
+                 * remain in a waiting state until some event expression
+                 * becomes TRUE" -- user-reported, 242-P.hal's plain
+                 * `WAIT FOR DONE;`/`WAIT FOR DO_SOMETHING;` (both a bare
+                 * EVENT symbol, the simplest case of "any event
+                 * expression"). Only the plain-SYT-operand case is
+                 * implemented, the same scope SCHD's own `ON <bit exp>`
+                 * clause is limited to (task #47's still-deferred compound
+                 * BAND/BOR event-expression gap applies equally here, not
+                 * independently reinvestigated). Reuses TASK_WAITING_ON/
+                 * sched_wake_on_events() verbatim -- the exact same "re-
+                 * check a plain EVENT SYT's bit_value every tick, become
+                 * READY once nonzero" mechanism SCHD's ON-initiation form
+                 * already established, just entered from a *currently
+                 * running* task instead of at SCHD-creation time (already
+                 * proven safe for that too -- see the ON-event self-
+                 * reschedule case elsewhere in this same file). */
                 halmat_task_t *cur = &state->tasks[state->current_task];
                 if (ins->tag == 0 && ins->operand_count == 0) {
                     cur->task_state = TASK_WAITING_FOR_DEPENDENTS_RESUME;
                     break;
                 }
+                if (ins->tag == 3 && ins->operand_count == 1) {
+                    if (ins->operands[0].qual != QUAL_SYT) {
+                        fail(state, "WAIT: FOR expects a plain EVENT symbol operand (compound bit exps unconfirmed)");
+                        break;
+                    }
+                    cur->task_state = TASK_WAITING_ON;
+                    cur->has_on_event = true;
+                    cur->on_event_syt = ins->operands[0].data;
+                    break;
+                }
                 if (ins->operand_count != 1 || (ins->tag != 1 && ins->tag != 2)) {
-                    fail(state, "WAIT: expected 1 operand (interval or UNTIL form) or 0 (FOR DEPENDENT)");
+                    fail(state, "WAIT: expected 1 operand (interval, UNTIL, or FOR form) or 0 (FOR DEPENDENT)");
                     break;
                 }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;

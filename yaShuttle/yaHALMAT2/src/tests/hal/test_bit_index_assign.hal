@@ -1,0 +1,61 @@
+C/ Adapted from PDF p. 250 of "Programming in HAL/S". The real corpus
+C/ file's own `DO WHILE ON;` outer loop is genuinely infinite (an
+C/ illustrative textbook snippet, not meant to run to completion
+C/ standalone -- same class as 265-ENQUEUE.hal/269-STALL.hal), so it's
+C/ bounded here to a single pass and a WRITE(6) B; is added, to make the
+C/ B$(n) = ON; single-bit-index assignment's own effect independently
+C/ checkable: each of the 8 IF Ci THEN B$(i) = ON; statements sets one
+C/ MSB-first bit of B, and C1..C8 are all BOOLEAN INITIAL(ON) (never
+C/ reassigned), so after one pass B should read all-ones, BIN'11111111'.
+
+ TEST250:
+ PROGRAM;
+
+     DECLARE I INTEGER;
+     DECLARE B BIT(8);
+     DECLARE BOOLEAN INITIAL(ON),
+                C1, C2, C3, C4, C5, C6, C7, C8;
+
+     DO FOR TEMPORARY REP = 1 TO 1;
+        DO FOR I = 1 TO 100;
+E             .
+M          IF B = HEX'00' THEN
+              DO;
+
+C               ...
+
+              END;
+           ELSE
+              DO;
+
+C               ...
+
+              END;
+        END;
+E          .
+M       IF C1 THEN
+E          .
+M          B  = ON;
+S           1
+
+E          .
+M       IF C2 THEN
+E          .
+M          B  = ON;
+S           2
+
+C          .
+C          .
+C          .
+
+E          .
+M       IF C8 THEN
+E          .
+M          B  = ON;
+S           8
+
+     END;
+     WRITE(6) B;
+
+Y %SVCI(0);
+ CLOSE TEST250;
