@@ -1209,6 +1209,42 @@ run ./run_local_fixture.sh fcal_boolean_return "$(printf '1\n0')"
 # arguments, no arrays/matrices involved) rather than reproducing
 # 134-DOTS.hal verbatim.
 run ./run_local_fixture.sh many_call_args " 2.1000000E+02"
+# User-reported, follow-up on the same file (134-DOTS.hal, "Fix it" after
+# the many_call_args fix above): once the item-capacity gap was fixed, the
+# file ran to completion but still hit two further bugs. (1) OP_RTRN's
+# genuine same-unit-call-frame branch had no handling at all for a whole
+# VECTOR/MATRIX RETURN value (`RETURN RESULT;`, RESULT a MATRIX(10,10)) --
+# only ever exercised RV_SCALAR/RV_STRING/RV_BITS/RV_INTEGER via
+# store_resolved_to_vac, which has no container case -- so it fell through
+# to the ordinary resolve_operand() path and failed loudly ("SYT index 7
+# is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph
+# replay"). Fixed by detecting a whole VECTOR/MATRIX (QUAL_SYT,
+# syt_is_vector_or_matrix_shaped) or VAC-container RETURN operand and
+# routing it through resolve_container()/store_container_result() instead,
+# mirroring the WRITE-argument whole-container capture's own established
+# pattern. (2) Even with that fix, DOTS's own RESULT matrix printed as all
+# zeros -- traced to OP_XXAR's plain-value capture path calling
+# resolve_operand() (one flat scalar per ADLP replay pass) for a same-unit
+# CALL's own whole-ARRAY-of-VECTOR argument (`DOTS(V1, V2)`, V1/V2 each
+# `ARRAY(10) VECTOR(3)`), which the compiler wraps in an ADLP(10)/DLPE
+# replay (confirmed via --disasm: ADLP's own count is 10, one per VECTOR
+# row, not 30) -- each of the resulting 10 replay-captured items[] entries
+# was then bound by bind_call_argument's positional loop to its own
+# separate parameter SYT slot (callee+1+i), when all 10 are really parts
+# of ONE logical argument (A1), corrupting DOTS's other locals while
+# leaving A1/A2 themselves unpopulated. Fixed with a new call_array_replay
+# case alongside the existing whole_vac_container one: in a CALL context, a
+# plain SYT ARRAY-shaped operand under replay is captured whole (via
+# resolve_container with arrayed_index temporarily forced to -1, reusing
+# its already-correct "outside a replay" whole-container path instead of
+# its per-row array_of_vector slicing) on the replay's first pass only,
+# then skipped on subsequent passes -- exactly the idempotent-skip pattern
+# whole_vac_container already established (120-EXAMPLE_A.hal fix). Fixture:
+# test_dots.hal (the real corpus file itself, copied verbatim -- its own
+# documented `V1(I)=(I,0,0), V2(J)=(1,0,0) => RESULT(I,J)=I` comment gives
+# an independently hand-verifiable expected result: each output row I is
+# constant, filled with I across all 10 columns).
+run ./run_local_fixture.sh dots "$(printf 'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

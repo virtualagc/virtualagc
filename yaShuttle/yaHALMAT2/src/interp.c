@@ -6442,8 +6442,48 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * own item_index against its real parameter position. */
                     break;
                 }
+                /* A plain ARRAY (including ARRAY-of-VECTOR) *CALL* argument
+                 * -- as opposed to a whole VECTOR/MATRIX argument, whole_syt's
+                 * own case just below, which is NOT replayed -- *is* wrapped
+                 * in an ADLP/DLPE replay by the compiler, confirmed via
+                 * 134-DOTS.hal's own real HALMAT: `CALL DOTS(V1, V2)`, V1/V2
+                 * both `ARRAY(10) VECTOR(3)`, compiles to XXAR(V1) then
+                 * ADLP(10)/DLPE -- ADLP's own count is 10 (one per VECTOR
+                 * row, matching resolve_container's array_of_vector-aware
+                 * per-row slicing), not 30. Unlike a WRITE argument (which
+                 * genuinely needs one flat data field per element for output
+                 * formatting -- the `state->arrayed_index < 0` guard's own
+                 * comment below, unchanged), a CALL argument's *whole* array
+                 * must land in the callee's single parameter SYT slot as one
+                 * container (bind_call_argument's existing is_container
+                 * branch) -- not bound piecemeal across N different
+                 * positional parameter slots, which is what the pre-fix
+                 * code did: each replay pass appended its own separate
+                 * items[] entry (one flat scalar, or -- for ARRAY-of-VECTOR
+                 * -- just the current row's 3 elements, from
+                 * resolve_operand's non-array_of_vector-aware QUAL_SYT
+                 * case), positionally misaligning every later argument's
+                 * own item_index against its real parameter position and
+                 * corrupting the callee's other locals, while the array
+                 * parameter itself ended up unpopulated or wrong (user-
+                 * reported, 134-DOTS.hal: `DOTS(V1, V2)`'s own formal
+                 * parameters A1/A2 read back as entirely zero). So a
+                 * CALL-context whole ARRAY/ARRAY-of-VECTOR argument (BIT/
+                 * CHARACTER excluded -- those use bit_elements/char_elements
+                 * storage, not this numeric elements[] path, and aren't
+                 * confirmed to be ADLP-wrapped the same way in a CALL
+                 * context) is captured once, in full, on the first replay
+                 * pass, then skipped on every subsequent pass -- the same
+                 * idempotent-skip pattern whole_vac_container above already
+                 * uses. */
+                bool call_array_replay = state->io_pending.is_call && ins->operands[0].qual == QUAL_SYT &&
+                                          ins->operands[0].tag1 != 1 && ins->operands[0].tag1 != 2 &&
+                                          syt_is_array_shaped(state, ins->operands[0].data);
+                if (call_array_replay && state->arrayed_index > 0) {
+                    break;
+                }
                 if (((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) ||
-                    whole_vac_container) {
+                    whole_vac_container || call_array_replay) {
                     /* A whole VECTOR/MATRIX reference (QUAL=SYT, confirmed
                      * via a real HALSFC compile of `WRITE(6) V;`/
                      * `WRITE(6) M;` -- class-0/XXAR.md's former "whether
@@ -6486,7 +6526,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * which already handled it correctly before this
                      * session; only the *unreplayed* whole-container
                      * shape is new here. */
-                    bool whole_syt = state->arrayed_index < 0 && ins->operands[0].qual == QUAL_SYT &&
+                    bool whole_syt = (state->arrayed_index < 0 || call_array_replay) &&
+                                      ins->operands[0].qual == QUAL_SYT &&
                                       syt_is_array_shaped(state, ins->operands[0].data);
                     bool whole_vac = whole_vac_container;
                     if (whole_syt || whole_vac) {
@@ -6528,7 +6569,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             break;
                         }
                         halmat_scalar_t *elems; size_t count; int rows, cols;
-                        if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
+                        /* call_array_replay means arrayed_index is
+                         * genuinely >= 0 here (we're on this replay's first
+                         * pass, not outside one) -- but resolve_container's
+                         * own array_of_vector branch treats any
+                         * arrayed_index >= 0 as "slice to just this one
+                         * row," which is exactly what must NOT happen here
+                         * (the whole point of this branch is capturing the
+                         * *entire* array as one item). Temporarily forcing
+                         * arrayed_index to -1 for this one call reuses
+                         * resolve_container's already-correct "outside a
+                         * replay" whole-container path instead of
+                         * duplicating it. */
+                        int32_t saved_arrayed_index = state->arrayed_index;
+                        if (call_array_replay) state->arrayed_index = -1;
+                        bool container_ok = resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols);
+                        state->arrayed_index = saved_arrayed_index;
+                        if (!container_ok) break;
                         state->io_pending.items[state->io_pending.item_count].is_container = true;
                         state->io_pending.items[state->io_pending.item_count].is_bit_array = false; /* stale-flag
                             * clear, same reason as the plain-value path's own is_container reset below */
@@ -7193,6 +7250,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operand_count == 1) {
+                    /* Whole VECTOR/MATRIX RETURN (`RETURN RESULT;`, RESULT
+                     * a whole VECTOR/MATRIX SYT reference, or a VAC-
+                     * carried container result of a chained VECTOR/MATRIX
+                     * expression like `RETURN A + B;`) -- user-reported
+                     * (134-DOTS.hal's `RETURN RESULT;`, RESULT a `MATRIX
+                     * (10,10)`, this file's own second bug once the
+                     * "I/O statement has too many items" fix let
+                     * execution get this far): resolve_operand's ordinary
+                     * QUAL_SYT case requires arrayed_index >= 0 (an
+                     * active ADLP/DLPE replay) and fails loudly on a bare
+                     * whole-array reference outside one -- exactly this
+                     * shape, since RETURN's own operand is never replay-
+                     * wrapped -- so a container must be resolved via
+                     * resolve_container() (no such restriction) and
+                     * stored via store_container_result() (the same
+                     * container-producing mechanism DSUB's own asterisk-
+                     * select and MADD/VADD/etc. use), not treated as a
+                     * scalar value at all. Checked and handled *before*
+                     * the ordinary resolve_operand() path below, mirroring
+                     * the identical whole_syt/whole_vac detection XXAR's
+                     * own WRITE/CALL-argument capture code already uses
+                     * for the same "unreplayed whole-container reference"
+                     * shape. Deliberately scoped to VECTOR/MATRIX only
+                     * (syt_is_vector_or_matrix_shaped, not the broader
+                     * syt_is_array_shaped -- HAL/S has no confirmed
+                     * whole-ARRAY FUNCTION return type/idiom), and to
+                     * this genuine same-unit call-frame branch only --
+                     * the inline-FUNCTION and external-call RTRN forms
+                     * just above still only handle resolved_value_t's
+                     * plain SCALAR/CHARACTER/BIT/INTEGER kinds
+                     * (store_resolved_to_vac has no container case
+                     * either), left as still-deferred, unconfirmed gaps
+                     * of their own (no corpus file found needing an
+                     * inline or cross-unit FUNCTION to return a whole
+                     * VECTOR/MATRIX) rather than guessed at now. */
+                    bool ret_whole_syt = ins->operands[0].qual == QUAL_SYT &&
+                                          syt_is_vector_or_matrix_shaped(state, ins->operands[0].data);
+                    bool ret_whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                          state->vac[ins->operands[0].data].is_container;
+                    if (ret_whole_syt || ret_whole_vac) {
+                        halmat_scalar_t *elems; size_t count; int rows, cols;
+                        if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
+                        size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                        size_t vac_index = state->prog->instrs[fcal_pos].index;
+                        if (!store_container_result(state, vac_index, elems, count, rows, cols)) break;
+                        state->pc = fcal_pos + 1;
+                        branched = true;
+                        break;
+                    }
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                     size_t vac_index = state->prog->instrs[fcal_pos].index;
