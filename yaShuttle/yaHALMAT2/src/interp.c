@@ -5950,10 +5950,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 uint16_t selector = ins->operands[0].data;
-                if (selector == 23) { /* SIZE: element count, no reduction loop needed -- INTEGER */
+                if (selector == 23) { /* SIZE: "length of array," no reduction loop needed -- INTEGER.
+                    * USA003087 Appendix B's own SIZE FUNCTION table: "alpha is an
+                    * unsubscripted arrayed variable with a one-dimensional array
+                    * specification -- function returns length of array." For a
+                    * plain flat ARRAY (rows==cols==0 via ensure_container), the
+                    * array's own length IS its flat element count (`count`,
+                    * already correct). But for an ARRAY-of-VECTOR (rows>0,
+                    * cols>0, array_of_vector-shaped -- ensure_container's own
+                    * comment) `count`/resolve_container's OUT_COUNT is the *flat
+                    * scalar* count (n*m, e.g. 9 for an ARRAY(3) VECTOR(3)), not
+                    * the array's own length (n, e.g. 3) -- user-reported,
+                    * 141-VSUM.hal's `DECLARE V ARRAY(*) VECTOR; ... DO FOR
+                    * TEMPORARY N = 1 TO SIZE(V); TOTAL = TOTAL + V$(N:); END;`:
+                    * SIZE(V) returning 9 instead of 3 ran the loop 3x too many
+                    * times, each of the 3 "extra" passes silently re-summing the
+                    * same 3 real VECTORs again (modulo-wrapping V$(N:)'s own
+                    * index), inflating the total exactly 3x (SUM=(3,6,9) instead
+                    * of the hand-derivable (1,2,3)). A genuinely 2-dimensional
+                    * ARRAY(r,c) of SCALAR also sets rows>0/cols>0 the same way
+                    * (the 2D-ARRAY-of-SCALAR fix, ensure_container's own
+                    * comment) but isn't "one-dimensional" in the first place, so
+                    * SIZE() on one isn't valid HAL/S to begin with (no confirmed
+                    * real-corpus case reaches here that way) -- rows>0 && cols>0
+                    * is therefore an unambiguous "this is the array-of-VECTOR
+                    * case, use the array's own length" signal in practice. */
+                    int32_t size = (rows > 0 && cols > 0) ? rows : (int32_t)count;
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = false;
-                    state->vac[ins->index].integer = (int32_t)count;
+                    state->vac[ins->index].integer = size;
                     break;
                 }
                 if (count == 0) { fail(state, "LFNC: empty array argument"); break; }

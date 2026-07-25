@@ -1354,6 +1354,27 @@ run ./run_local_fixture.sh page "$(printf '\n\n\n\nFIRST\n=== PAGE 2 ===\n\n\n\n
 # file itself, copied verbatim; LO=MIN=10, HI=MAX=50, MEAN=SUM/SIZE=
 # 150/5=30, all hand-derivable from DATA's own INITIAL(10,20,30,40,50)).
 run ./run_local_fixture.sh statistics "$(printf 'LO=      1.0000000E+01     HI=      5.0000000E+01     MEAN=      3.0000000E+01')"
+# User-instructed follow-up ("Fix 141-VSUM.hal's SIZE bug too"), flagged
+# as a separate finding during the ARRAY(*) fix above:
+# `DECLARE V ARRAY(*) VECTOR; ... DO FOR TEMPORARY N = 1 TO SIZE(V); TOTAL
+# = TOTAL + V$(N:); END;` computed SUM=(3,6,9) instead of the hand-
+# derivable (1,2,3) -- 3x too large. LFNC's SIZE selector (23) returned
+# an `array_of_vector`-shaped argument's *flat scalar* count (resolve_
+# container's own OUT_COUNT, e.g. 9 for an ARRAY(3) VECTOR(3)) rather
+# than the "length of array" USA003087 Appendix B's own SIZE FUNCTION
+# table specifies (3, the VECTOR count) -- inflating the loop bound 3x,
+# each of the 3 "extra" passes silently re-summing the same 3 real
+# VECTORs again via V$(N:)'s own modulo-wrapping index. Fixed by using
+# `rows` (the array's own length) instead of the flat count whenever
+# resolve_container reports a 2D shape (rows>0 && cols>0) -- unambiguous
+# in practice, since a genuinely 2-dimensional ARRAY(r,c) of SCALAR
+# shares that same rows/cols encoding but isn't "one-dimensional," so
+# SIZE() on one isn't valid HAL/S to begin with. A plain flat ARRAY (not
+# array-of-VECTOR) is unaffected -- its own flat count already equals
+# its "array length." Fixture: test_vsum.hal (141-VSUM.hal copied
+# verbatim; output hand-derived from V's own INITIAL(1,0,0, 0,2,0,
+# 0,0,3): elementwise sum = (1,2,3)).
+run ./run_local_fixture.sh vsum "$(printf 'SUM=      1.0000000E+00      2.0000000E+00      3.0000000E+00')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
