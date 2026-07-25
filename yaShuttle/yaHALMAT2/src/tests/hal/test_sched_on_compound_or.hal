@@ -1,0 +1,19 @@
+C/ Isolates 239-STARTUP.hal's `SCHEDULE ... ON (ORBIT | (ORBIT2 | ORBIT3))`
+C/ construct (a compound BOR event-expression) -- proves WORKER starts as
+C/ soon as ANY ONE of the three events becomes true, not needing all of
+C/ them (the OR-vs-AND counterpart of test_sched_on_compound.hal).
+
+  TSCHDOR: PROGRAM;
+     DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED, E3 EVENT LATCHED;
+
+  WORKER:
+  TASK;
+     WRITE(6) 'WORKER STARTED';
+  CLOSE WORKER;
+
+     SCHEDULE WORKER ON (E1 | (E2 | E3)) PRIORITY(70);
+     WRITE(6) 'BEFORE ANY SIGNAL';
+     SIGNAL E2;
+     WRITE(6) 'AFTER E2';
+Y %SVCI(0);
+  CLOSE TSCHDOR;

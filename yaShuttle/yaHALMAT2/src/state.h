@@ -552,8 +552,12 @@ typedef struct {
     bool dependent;    /* SCHEDULE ... DEPENDENT was specified; parsed but not yet behaviorally enforced beyond primal-exit ending the whole program */
 
     bool has_on_event;      /* SCHD's ON <bit exp> initiation form was used */
-    uint16_t on_event_syt;  /* valid iff has_on_event; only a plain (unsubscripted) EVENT SYT reference is
-                              * confirmed (class-0/SCHD.md's "QUAL=1=SYT, plain EVENT ref, no VAC needed") */
+    halmat_operand_t on_event_op; /* valid iff has_on_event: either a plain (unsubscripted) EVENT SYT
+                              * reference (class-0/SCHD.md's "QUAL=1=SYT, plain EVENT ref, no VAC needed")
+                              * or a QUAL_VAC reference to a compound BAND/BOR/BNOT event-expression chain
+                              * (`ON (ORBIT & (ORBIT2 & ORBIT3))`, USA003087 Sec. 24.6 -- 239-STARTUP.hal)
+                              * -- re-evaluated live via interp.c's reevaluate_live_bit_operand() every
+                              * time this is consulted (sched_wake_on_events()), never read directly. */
 
     halmat_schd_repeat_t repeat_kind;
     int32_t repeat_interval; /* ticks; valid iff repeat_kind is EVERY or AFTER. Resolved once, at the
@@ -567,9 +571,11 @@ typedef struct {
                                * cycle stops. Resolved once at SCHEDULE time (same reasoning as
                                * repeat_interval above -- the compiled operand is a VAC snapshot, not a
                                * live reference). */
-    uint16_t stop_event_syt; /* valid iff stop_kind==SCHD_STOP_WHILE_BIT/UNTIL_BIT: re-read live (a plain
-                               * SYT operand, unlike stop_deadline, needs no re-execution to get a fresh
-                               * value) each time a cycle completes -- see interp.c's OP_CLOS. */
+    halmat_operand_t stop_event_op; /* valid iff stop_kind==SCHD_STOP_WHILE_BIT/UNTIL_BIT: re-evaluated
+                               * live (either a plain SYT operand or a QUAL_VAC compound BAND/BOR/BNOT
+                               * chain, unlike stop_deadline, which is a one-time-resolved snapshot) each
+                               * time a cycle completes -- see interp.c's OP_CLOS and
+                               * reevaluate_live_bit_operand(). */
 } halmat_task_t;
 
 /* One WRITE/READ/READALL/call argument's captured state -- named (rather

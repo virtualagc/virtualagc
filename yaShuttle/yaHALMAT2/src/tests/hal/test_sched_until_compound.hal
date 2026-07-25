@@ -1,0 +1,25 @@
+C/ Isolates 238-P.hal's `REPEAT EVERY 1/6 UNTIL ORBIT AND ENGINE_OFF`
+C/ construct (a compound BAND event-expression as SCHEDULE's own STOPPING
+C/ clause) -- proves a cyclic task keeps rearming while the compound
+C/ condition is false, and stops rearming (its last cycle still runs to
+C/ completion, but no further one is scheduled) once it becomes true.
+
+  TSTOPCMP: PROGRAM;
+     DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED;
+     DECLARE N INTEGER INITIAL(0);
+
+  WORKER:
+  TASK;
+        N = N + 1;
+        WRITE(6) 'CYCLE', N;
+        IF N = 2 THEN DO;
+           SIGNAL E1;
+           SIGNAL E2;
+        END;
+  CLOSE WORKER;
+
+     SCHEDULE WORKER PRIORITY(70), REPEAT EVERY 0.01 UNTIL E1 AND E2;
+     WAIT 1;
+     WRITE(6) 'DONE, N=', N;
+Y %SVCI(0);
+  CLOSE TSTOPCMP;

@@ -1,0 +1,20 @@
+C/ WAIT FOR's own compound event-expression counterpart to
+C/ test_sched_on_compound.hal -- proves the primal's own `WAIT FOR
+C/ E1 AND E2;` blocks until BOTH events are true, not just the first.
+
+  TWAITCMP: PROGRAM;
+     DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED;
+
+  SETTER:
+  TASK;
+     SIGNAL E1;
+     WRITE(6) 'SETTER: E1 SIGNALED';
+     SIGNAL E2;
+     WRITE(6) 'SETTER: E2 SIGNALED';
+  CLOSE SETTER;
+
+     SCHEDULE SETTER PRIORITY(70);
+     WAIT FOR E1 AND E2;
+     WRITE(6) 'PRIMAL RESUMED';
+Y %SVCI(0);
+  CLOSE TWAITCMP;

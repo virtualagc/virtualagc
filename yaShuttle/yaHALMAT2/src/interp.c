@@ -303,6 +303,7 @@ static halmat_scalar_t rv_to_scalar(const resolved_value_t *v) {
  * preserve whatever type the inline function actually returns, unlike
  * the existing FCAL/RTRN path which always narrows to INTEGER). */
 static char *dup_string(const char *s); /* forward-declared -- defined below, needed here for the RV_STRING case's own copy */
+static bool reevaluate_live_bit_operand(halmat_state_t *state, const halmat_operand_t *op, uint32_t *out); /* forward-declared -- defined below (near sched_wake_on_events), needed here for OP_CLOS's own STOPPING WHILE/UNTIL <bit exp> check */
 static void store_resolved_to_vac(halmat_vac_slot_t *slot, const resolved_value_t *val) {
     memset(slot, 0, sizeof(*slot));
     switch (val->kind) {
@@ -8373,16 +8374,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             case SCHD_STOP_UNTIL_TIME:
                                 stop = (state->virtual_time >= cur->stop_deadline);
                                 break;
-                            case SCHD_STOP_WHILE_BIT:
+                            case SCHD_STOP_WHILE_BIT: {
                                 /* WHILE <bit exp>: keep cycling while true, stop once false. */
-                                stop = (cur->stop_event_syt >= HALMAT_SYT_MAX ||
-                                        state->syt[cur->stop_event_syt].bit_value == 0);
+                                uint32_t v;
+                                stop = !reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) || v == 0;
                                 break;
-                            case SCHD_STOP_UNTIL_BIT:
+                            }
+                            case SCHD_STOP_UNTIL_BIT: {
                                 /* UNTIL <bit exp>: keep cycling until true, stop once true. */
-                                stop = (cur->stop_event_syt < HALMAT_SYT_MAX &&
-                                        state->syt[cur->stop_event_syt].bit_value != 0);
+                                uint32_t v;
+                                stop = reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) && v != 0;
                                 break;
+                            }
                         }
                     }
                     if (!stop) {
@@ -8429,7 +8432,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 break;
                             case SCHD_REPEAT_ON:
                                 /* Self-reschedule ON <event>, synthesized
-                                 * above -- has_on_event/on_event_syt are
+                                 * above -- has_on_event/on_event_op are
                                  * already set from that SCHD call; just wait
                                  * on the event again, same as a brand-new
                                  * ON-initiated task. */
@@ -8546,19 +8549,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * self-rearm mechanism composing naturally with this one.) */
 
                 int64_t at_in_value = 0;
-                uint16_t on_event_syt = 0;
+                halmat_operand_t on_event_op = {0};
                 uint8_t operand_idx = 1;
                 if (init_kind == 1 || init_kind == 2) { /* AT or IN: VAC ref to the arith exp */
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing AT/IN operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
                     if (!schd_seconds_to_ticks(state, &a, "SCHD: AT/IN", false, &at_in_value)) break;
                     operand_idx++;
-                } else if (init_kind == 3) { /* ON: plain EVENT SYT ref (SCHD.md's confirmed "no VAC needed" case) */
-                    if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
-                        fail(state, "SCHD: ON expects a plain EVENT symbol operand (subscripted/latched bit exps unconfirmed)");
+                } else if (init_kind == 3) { /* ON <bit exp>: plain EVENT SYT ref (SCHD.md's confirmed "no
+                                               * VAC needed" case) or a QUAL_VAC compound BAND/BOR/BNOT
+                                               * event-expression chain (239-STARTUP.hal's `ON (ORBIT &
+                                               * (ORBIT2 & ORBIT3))`) -- either way, stored as-is and
+                                               * re-evaluated live by reevaluate_live_bit_operand()
+                                               * wherever it's actually consulted, never resolved here. */
+                    if (operand_idx >= ins->operand_count ||
+                        (ins->operands[operand_idx].qual != QUAL_SYT && ins->operands[operand_idx].qual != QUAL_VAC)) {
+                        fail(state, "SCHD: ON expects a plain EVENT symbol or BAND/BOR/BNOT event-expression operand");
                         break;
                     }
-                    on_event_syt = ins->operands[operand_idx].data;
+                    on_event_op = ins->operands[operand_idx];
                     operand_idx++;
                 }
 
@@ -8585,18 +8594,22 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
 
                 int64_t stop_deadline = 0;
-                uint16_t stop_event_syt = 0;
+                halmat_operand_t stop_event_op = {0};
                 if (stop_bits == 1) { /* UNTIL <ARITH EXP>: VAC ref to the time-valued exp */
                     if (operand_idx >= ins->operand_count) { fail(state, "SCHD: missing WHILE/UNTIL operand"); break; }
                     if (!resolve_operand(state, &ins->operands[operand_idx], &a)) break;
                     if (!schd_seconds_to_ticks(state, &a, "SCHD: WHILE/UNTIL <time>", false, &stop_deadline)) break;
                     operand_idx++;
-                } else if (stop_bits == 2 || stop_bits == 3) { /* WHILE/UNTIL <BIT EXP>: plain SYT ref, same as ON */
-                    if (operand_idx >= ins->operand_count || ins->operands[operand_idx].qual != QUAL_SYT) {
-                        fail(state, "SCHD: WHILE/UNTIL <bit exp> expects a plain event symbol operand (subscripted/latched bit exps unconfirmed)");
+                } else if (stop_bits == 2 || stop_bits == 3) { /* WHILE/UNTIL <BIT EXP>: plain SYT ref or a
+                                                                  * QUAL_VAC compound BAND/BOR/BNOT chain,
+                                                                  * same as ON above (238-P.hal's `REPEAT
+                                                                  * EVERY 1/6 UNTIL ORBIT AND ENGINE_OFF`). */
+                    if (operand_idx >= ins->operand_count ||
+                        (ins->operands[operand_idx].qual != QUAL_SYT && ins->operands[operand_idx].qual != QUAL_VAC)) {
+                        fail(state, "SCHD: WHILE/UNTIL <bit exp> expects a plain event symbol or BAND/BOR/BNOT event-expression operand");
                         break;
                     }
-                    stop_event_syt = ins->operands[operand_idx].data;
+                    stop_event_op = ins->operands[operand_idx];
                     operand_idx++;
                 }
 
@@ -8653,12 +8666,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * interpreter-internal rearm kind for exactly this;
                          * CLOS's rearm switch further down sets task_state
                          * back to TASK_WAITING_ON using has_on_event/
-                         * on_event_syt, the same fields/mechanism a
+                         * on_event_op, the same fields/mechanism a
                          * brand-new ON-initiated task uses
                          * (sched_wake_on_events() re-checks every tick). */
                         cur->repeat_kind = SCHD_REPEAT_ON;
                         cur->has_on_event = true;
-                        cur->on_event_syt = on_event_syt;
+                        cur->on_event_op = on_event_op;
                     } else {
                         /* No REPEAT clause -- synthesize the equivalent
                          * one-shot rearm from the plain immediate/AT/IN
@@ -8676,7 +8689,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (stop_bits != 0) {
                         cur->stop_kind = (halmat_schd_stop_t)stop_bits;
                         cur->stop_deadline = stop_deadline;
-                        cur->stop_event_syt = stop_event_syt;
+                        cur->stop_event_op = stop_event_op;
                     } else {
                         cur->stop_kind = SCHD_STOP_NONE;
                     }
@@ -8716,7 +8729,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 nt->repeat_interval = repeat_interval;
                 nt->stop_kind = (halmat_schd_stop_t)stop_bits;
                 nt->stop_deadline = stop_deadline;
-                nt->stop_event_syt = stop_event_syt;
+                nt->stop_event_op = stop_event_op;
                 /* every_phase_ref (state.h) holds REPEAT EVERY's own
                  * phase reference, kept separate from wake_deadline so an
                  * internal WAIT in the task's body can't corrupt it --
@@ -8744,7 +8757,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     case 3: /* ON <bit exp>: no fixed deadline, re-checked every tick (state.h's TASK_WAITING_ON) */
                         nt->task_state = TASK_WAITING_ON;
                         nt->has_on_event = true;
-                        nt->on_event_syt = on_event_syt;
+                        nt->on_event_op = on_event_op;
                         break;
                     default: /* immediate */
                         nt->task_state = TASK_READY;
@@ -8782,21 +8795,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the CLOSE-triggered TASK_WAITING_FOR_DEPENDENTS case
                  * does -- this task's own body isn't finished yet.
                  *
-                 * WAIT FOR <event expression> (tag=3, one SYT operand,
+                 * WAIT FOR <event expression> (tag=3, one operand,
                  * USA003087 Sec. 24.6 -- a *separate* WAIT form from all
                  * three above, documented in its own later chapter rather
                  * than alongside them in Sec. 13.5: "causes a process to
                  * remain in a waiting state until some event expression
                  * becomes TRUE" -- user-reported, 242-P.hal's plain
                  * `WAIT FOR DONE;`/`WAIT FOR DO_SOMETHING;` (both a bare
-                 * EVENT symbol, the simplest case of "any event
-                 * expression"). Only the plain-SYT-operand case is
-                 * implemented, the same scope SCHD's own `ON <bit exp>`
-                 * clause is limited to (task #47's still-deferred compound
-                 * BAND/BOR event-expression gap applies equally here, not
-                 * independently reinvestigated). Reuses TASK_WAITING_ON/
+                 * EVENT symbol) and, once task #47's compound-event-
+                 * expression support landed, a QUAL_VAC BAND/BOR/BNOT
+                 * chain operand works here too via the same
+                 * reevaluate_live_bit_operand() mechanism SCHD's ON/
+                 * WHILE/UNTIL clauses use. Reuses TASK_WAITING_ON/
                  * sched_wake_on_events() verbatim -- the exact same "re-
-                 * check a plain EVENT SYT's bit_value every tick, become
+                 * evaluate the live event expression every tick, become
                  * READY once nonzero" mechanism SCHD's ON-initiation form
                  * already established, just entered from a *currently
                  * running* task instead of at SCHD-creation time (already
@@ -8808,13 +8820,13 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->tag == 3 && ins->operand_count == 1) {
-                    if (ins->operands[0].qual != QUAL_SYT) {
-                        fail(state, "WAIT: FOR expects a plain EVENT symbol operand (compound bit exps unconfirmed)");
+                    if (ins->operands[0].qual != QUAL_SYT && ins->operands[0].qual != QUAL_VAC) {
+                        fail(state, "WAIT: FOR expects a plain EVENT symbol or BAND/BOR/BNOT event-expression operand");
                         break;
                     }
                     cur->task_state = TASK_WAITING_ON;
                     cur->has_on_event = true;
-                    cur->on_event_syt = ins->operands[0].data;
+                    cur->on_event_op = ins->operands[0];
                     break;
                 }
                 if (ins->operand_count != 1 || (ins->tag != 1 && ins->tag != 2)) {
@@ -9063,18 +9075,93 @@ static void sched_wake_waiting(halmat_state_t *state) {
     }
 }
 
+/* Live re-evaluation of a SCHEDULE ON/WHILE/UNTIL or WAIT FOR event
+ * expression, USA003087 Sec. 24.6: "the value of exp becomes TRUE...
+ * evaluations of EV1&EV2 by the RTE" -- the expression must be
+ * re-evaluated from the *current* state of every EVENT symbol it
+ * mentions each time it's consulted, not read once and cached, since
+ * any of those EVENTs can change after the original SCHEDULE/WAIT
+ * statement executed. `op` is either QUAL_SYT (a plain EVENT reference,
+ * read directly -- state->syt[...].bit_value is already always live) or
+ * QUAL_VAC referencing a BAND/BOR/BNOT instruction (`ORBIT & (ORBIT2 &
+ * ORBIT3)`, `ORBIT | ENGINE_OFF`, the only opcodes a compound HAL/S
+ * event bit-expression can compile to) -- looked up by its own stream
+ * position in state->prog->instrs[] (the same array random-access
+ * disasm.c/DSUB's "ins->index" convention already relies on) and
+ * recursively re-evaluated the same way, rather than reading the stale
+ * snapshot that instruction's own one-time execution left in
+ * state->vac[]. User-reported: 239-STARTUP.hal's `SCHEDULE FREEFALL ON
+ * (ORBIT & (ORBIT2 & ORBIT3))`, 238-P.hal's `REPEAT EVERY 1/6 UNTIL
+ * ORBIT AND ENGINE_OFF`. Fails loudly for any other node opcode rather
+ * than guessing -- HAL/S event expressions are documented as bit
+ * expressions built purely from BAND/BOR/BNOT of EVENT operands
+ * (Sec. 24.3/24.6), so nothing else should ever appear here. */
+static bool reevaluate_live_bit_operand(halmat_state_t *state, const halmat_operand_t *op, uint32_t *out) {
+    if (op->qual == QUAL_SYT) {
+        if (op->data >= HALMAT_SYT_MAX) { fail(state, "event expression: SYT index out of range"); return false; }
+        *out = state->syt[op->data].bit_value;
+        return true;
+    }
+    if (op->qual == QUAL_VAC) {
+        /* A QUAL_VAC operand's own `data` is the raw HALMAT *word*
+         * position of its producing instruction, not that instruction's
+         * logical array index into prog->instrs[] (which advances by
+         * one per instruction regardless of operand count, diverging
+         * from the word position after the first multi-operand
+         * instruction) -- this project's own established VAC-addressing
+         * convention (see the near-identical comment on the QUAL_VAC
+         * same-statement-dependency scan elsewhere in this file). Binary
+         * search rather than that scan's bounded linear walk, since an
+         * event-expression chain isn't confined to a nearby window the
+         * way same-statement VAC dependencies are -- .index is
+         * monotonically non-decreasing across the whole program. */
+        if (!state->prog) { fail(state, "event expression: no program loaded"); return false; }
+        size_t lo = 0, hi = state->prog->count;
+        while (lo < hi) {
+            size_t mid = lo + (hi - lo) / 2;
+            if (state->prog->instrs[mid].index < op->data) lo = mid + 1;
+            else hi = mid;
+        }
+        if (lo >= state->prog->count || state->prog->instrs[lo].index != op->data) {
+            fail(state, "event expression: no instruction at word #%u", op->data);
+            return false;
+        }
+        const halmat_instr_t *node = &state->prog->instrs[lo];
+        if (node->opcode == OP_BAND || node->opcode == OP_BOR) {
+            if (node->operand_count != 2) { fail(state, "event expression: BAND/BOR expected 2 operands"); return false; }
+            uint32_t l, r;
+            if (!reevaluate_live_bit_operand(state, &node->operands[0], &l)) return false;
+            if (!reevaluate_live_bit_operand(state, &node->operands[1], &r)) return false;
+            *out = (node->opcode == OP_BAND) ? (l & r) : (l | r);
+            return true;
+        }
+        if (node->opcode == OP_BNOT) {
+            if (node->operand_count != 1) { fail(state, "event expression: BNOT expected 1 operand"); return false; }
+            uint32_t v;
+            if (!reevaluate_live_bit_operand(state, &node->operands[0], &v)) return false;
+            *out = ~v;
+            return true;
+        }
+        fail(state, "event expression: unsupported node opcode 0x%03X at word #%zu", node->opcode, node->index);
+        return false;
+    }
+    fail(state, "event expression: unsupported operand qualifier %s", halmat_qual_name(op->qual));
+    return false;
+}
+
 /* SCHD's ON <bit exp> initiation (state.h's TASK_WAITING_ON): unlike
  * TASK_WAITING's fixed wake_deadline, there's no way to know in advance
  * *when* (or whether) some other task's SIGNAL will flip the event, so
- * this has to actually re-read the live SYT bit_value every tick rather
- * than being folded into sched_advance_to_next_wake's fast-forward --
- * see that function's comment for why TASK_WAITING_ON is deliberately
- * left out of it. */
+ * this has to actually re-evaluate the live expression every tick
+ * rather than being folded into sched_advance_to_next_wake's fast-
+ * forward -- see that function's comment for why TASK_WAITING_ON is
+ * deliberately left out of it. */
 static void sched_wake_on_events(halmat_state_t *state) {
     for (int i = 0; i < state->task_count; i++) {
         halmat_task_t *t = &state->tasks[i];
-        if (t->in_use && t->task_state == TASK_WAITING_ON &&
-            t->on_event_syt < HALMAT_SYT_MAX && state->syt[t->on_event_syt].bit_value != 0) {
+        if (!t->in_use || t->task_state != TASK_WAITING_ON) continue;
+        uint32_t v;
+        if (reevaluate_live_bit_operand(state, &t->on_event_op, &v) && v != 0) {
             t->task_state = TASK_READY;
         }
     }

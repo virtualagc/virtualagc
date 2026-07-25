@@ -1601,6 +1601,41 @@ run ./run_local_fixture.sh tint_null_terminal "         16     0000 0000 0000 00
 # 10+N for N=1,2,3 -> 11,12,13).
 run ./run_local_fixture.sh tsub_variable_index "$(printf '         11\n         12\n         13')"
 
+# Task #47: compound event-expressions in SCHEDULE ON/WHILE-UNTIL and
+# WAIT FOR (239-STARTUP.hal's `SCHEDULE FREEFALL ON (ORBIT & (ORBIT2 &
+# ORBIT3)))`/`SCHEDULE FREEFALL2 ON (ORBIT | (ORBIT2 | ORBIT3))`,
+# 238-P.hal's `REPEAT EVERY 1/6 UNTIL ORBIT AND ENGINE_OFF`) -- a
+# BAND/BOR/BNOT event-expression chain, USA003087 Sec. 24.6's "the value
+# of exp becomes TRUE... evaluations of EV1&EV2 by the RTE": this needs
+# LIVE re-evaluation of the underlying EVENT symbols every tick, not a
+# one-time captured snapshot, since the whole point is waiting for them
+# to change *after* the SCHEDULE/WAIT statement itself already executed.
+# SCHD's ON/WHILE/UNTIL clauses and WAIT's own FOR form previously only
+# accepted a plain SYT EVENT operand. Fixed with a new
+# reevaluate_live_bit_operand() helper (interp.c): a QUAL_SYT operand
+# reads state->syt[...].bit_value directly (always live); a QUAL_VAC
+# operand looks up the *original* producing BAND/BOR/BNOT instruction by
+# its own HALMAT word position (binary search over state->prog->instrs[],
+# since a QUAL_VAC operand's `data` is the raw word index, not that
+# instruction's logical array position -- they diverge after the first
+# multi-operand instruction) and recursively re-evaluates its own
+# operands the same way. halmat_task_t's on_event_syt/stop_event_syt
+# (uint16_t, plain-SYT-only) generalized to on_event_op/stop_event_op
+# (halmat_operand_t, either shape). Same mechanism covers all three call
+# sites (SCHD's ON, SCHD's STOPPING WHILE/UNTIL, WAIT's FOR) since they
+# all previously used the identical plain-SYT-only pattern. Fixtures:
+# test_sched_on_compound.hal (BAND -- WORKER starts only once E1,E2,E3
+# ALL true, output order independently confirms it waits for the third
+# SIGNAL, not the first), test_sched_on_compound_or.hal (BOR -- WORKER
+# starts on the FIRST signaled event, not needing all three),
+# test_sched_until_compound.hal (BAND as a STOPPING clause -- a REPEAT
+# EVERY cyclic task keeps rearming while false, stops once true: exactly
+# 2 cycles, not more), test_wait_for_compound.hal (WAIT FOR with BAND).
+run ./run_local_fixture.sh sched_on_compound "$(printf 'BEFORE ANY SIGNAL\nAFTER E1\nAFTER E2\nWORKER STARTED\nAFTER E3')"
+run ./run_local_fixture.sh sched_on_compound_or "$(printf 'BEFORE ANY SIGNAL\nWORKER STARTED\nAFTER E2')"
+run ./run_local_fixture.sh sched_until_compound "$(printf 'CYCLE               1\nCYCLE               2\nDONE, N=               2')"
+run ./run_local_fixture.sh wait_for_compound "$(printf 'SETTER: E1 SIGNALED\nSETTER: E2 SIGNALED\nPRIMAL RESUMED')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

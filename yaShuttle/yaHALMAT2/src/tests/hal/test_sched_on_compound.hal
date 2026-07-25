@@ -1,0 +1,24 @@
+C/ Isolates 239-STARTUP.hal's `SCHEDULE ... ON (ORBIT & (ORBIT2 & ORBIT3))`
+C/ construct (a compound BAND event-expression) -- proves WORKER only
+C/ starts once ALL THREE events are true, not as soon as the first one
+C/ is (verified by SIGNALing them one at a time, with a WRITE after each,
+C/ and WORKER itself WRITEing once it actually starts).
+
+  TSCHDAND: PROGRAM;
+     DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED, E3 EVENT LATCHED;
+
+  WORKER:
+  TASK;
+     WRITE(6) 'WORKER STARTED';
+  CLOSE WORKER;
+
+     SCHEDULE WORKER ON (E1 & (E2 & E3)) PRIORITY(70);
+     WRITE(6) 'BEFORE ANY SIGNAL';
+     SIGNAL E1;
+     WRITE(6) 'AFTER E1';
+     SIGNAL E2;
+     WRITE(6) 'AFTER E2';
+     SIGNAL E3;
+     WRITE(6) 'AFTER E3';
+Y %SVCI(0);
+  CLOSE TSCHDAND;
