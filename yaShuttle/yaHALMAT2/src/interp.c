@@ -761,8 +761,15 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
  * opcode; see class-0/FCAL.md-adjacent notes and the out_array/
  * out_matrix fixtures), or a DSUB-produced subscript reference (ARRAY/
  * MATRIX element, always SCALAR for now -- see class-0/DSUB.md). */
-/* Shared by QUAL_SYT and QUAL_XPT, mirroring read_syt_entry() above. */
-static bool write_syt_entry(halmat_state_t *state, halmat_syt_entry_t *e, const resolved_value_t *val) {
+/* Shared by QUAL_SYT and QUAL_XPT, mirroring read_syt_entry() above.
+ * `dest_syt` is the SYT index `e` itself lives at, for the same
+ * symtab-driven SINGLE/DOUBLE precision-normalization purpose
+ * write_container_element() already uses it for -- HALMAT_SYT_MAX means
+ * "no SYT index available" (the two structure-terminal call sites,
+ * OP_TASN's own field write and TINT's whole-structure INITIAL()
+ * population, neither of which this normalization has been extended to
+ * yet; not known to be exercised by any real corpus file). */
+static bool write_syt_entry(halmat_state_t *state, uint16_t dest_syt, halmat_syt_entry_t *e, const resolved_value_t *val) {
     if (e->type == SYT_TYPE_UNKNOWN) {
         e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
                 : (val->kind == RV_BITS) ? SYT_TYPE_BIT
@@ -782,7 +789,30 @@ static bool write_syt_entry(halmat_state_t *state, halmat_syt_entry_t *e, const 
         }
         e->bit_value = val->bits;
     } else if (e->type == SYT_TYPE_SCALAR) {
-        e->scalar = rv_to_scalar(val);
+        halmat_scalar_t sv = rv_to_scalar(val);
+        /* User-caught while cross-checking a SUBBIT(SCALAR DOUBLE) fix:
+         * a plain (non-array) SCALAR DOUBLE variable's INITIAL() literal
+         * (SINT -> write_destination -> here) silently kept SINGLE
+         * precision -- real HALSFC emits the shortest exact literal
+         * encoding regardless of the destination's own declared
+         * precision (2.5 compiles as a plain "Type FIXED"/SINGLE literal
+         * even into a SCALAR DOUBLE target), and nothing here ever
+         * normalized it up. OP_IASN/OP_SASN's own dest_sym coercion and
+         * write_container_element() both already apply this same
+         * symtab-driven scale_precision() fix at their own sites (this
+         * session, and an earlier one respectively) -- this was the one
+         * remaining plain-SCALAR-destination write path that had it,
+         * confirmed via `DECLARE S SCALAR DOUBLE INITIAL(2.5); WRITE(6)
+         * S;` printing in SINGLE format (7 significant digits) instead
+         * of DOUBLE's 16. */
+        if (dest_syt < HALMAT_SYT_MAX && state->symtab) {
+            const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dest_syt);
+            if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+                bool want_double = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+            }
+        }
+        e->scalar = sv;
     } else {
         e->value = rv_to_integer(val);
     }
@@ -906,12 +936,12 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
             return write_container_element(state, op->data, e, idx, val);
         }
-        return write_syt_entry(state, &state->syt[op->data], val);
+        return write_syt_entry(state, op->data, &state->syt[op->data], val);
     }
     if (op->qual == QUAL_XPT) {
         halmat_syt_entry_t *e = resolve_xpt_field(state, op);
         if (!e) return false;
-        return write_syt_entry(state, e, val);
+        return write_syt_entry(state, HALMAT_SYT_MAX, e, val);
     }
     if (op->qual == QUAL_VAC) {
         if (op->data >= HALMAT_VAC_MAX) {
@@ -926,20 +956,41 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
              * bypassing ordinary type coercion (val is already guaranteed
              * RV_BITS here: BASN, the only opcode that ever consumes this
              * kind of slot, checks that before calling write_destination
-             * at all). Only SYT_TYPE_INTEGER and SYT_TYPE_BIT have a
-             * confirmed, lossless raw-bit-pattern representation already
-             * modeled by this interpreter (BIT trivially; INTEGER via the
-             * same reinterpret-cast the reference-context branch above
-             * already uses in the opposite direction). SCALAR/CHARACTER
-             * targets would need actual IEEE-754/byte-layout modeling
-             * this interpreter doesn't have (see BTOB's own comment on
-             * declared-width tracking) -- fail loudly rather than guess. */
+             * at all). SYT_TYPE_INTEGER/BIT/SCALAR(SINGLE) all have a
+             * confirmed, lossless raw-bit-pattern representation this
+             * interpreter already models bit-for-bit (BIT trivially;
+             * INTEGER via the same reinterpret-cast the reference-context
+             * branch above already uses in the opposite direction;
+             * SINGLE-precision SCALAR because this project's own SCALAR
+             * representation, halmat_scalar_t, already stores the exact
+             * AP-101S/IBM hex-float wire format rather than a native
+             * double -- its `msw` field genuinely *is* the argument's own
+             * 32-bit in-memory pattern, direct user correction of an
+             * earlier wrong "needs IEEE-754 modeling" excuse here).
+             * DOUBLE-precision SCALAR's real width is 64 bits (msw+lsw),
+             * wider than this interpreter's uint32_t bits/RV_BITS
+             * representation supports anywhere (a project-wide ceiling on
+             * every BIT value, not SUBBIT-specific) -- fails loudly.
+             * CHARACTER also still fails loudly, but for a different,
+             * more specific reason than SCALAR ever did: per direct user
+             * clarification, real AP-101S CHARACTER storage is a fixed
+             * 2-byte length header (declared max, current) plus N
+             * EBCDIC-encoded bytes, left-justified -- this interpreter's
+             * own char_value/char_elements are plain malloc'd, growable,
+             * already-ASCII-decoded C strings (state.h's own char_value
+             * comment: "the string just grows/shrinks to fit whatever's
+             * assigned," no fixed-width/VARYING truncation modeled at
+             * all, class-2/CASN.md's own longstanding Unresolved
+             * Question) -- there is no byte layout to reinterpret bits
+             * into or out of at all, a genuinely deeper and separate gap
+             * from SCALAR's, not just an unwritten switch-case. */
             if (slot->subbit_target_syt >= HALMAT_SYT_MAX) {
                 fail(state, "SUBBIT assignment: target SYT out of range");
                 return false;
             }
             halmat_syt_entry_t *e = &state->syt[slot->subbit_target_syt];
             halmat_syt_type_t subbit_type = e->type;
+            bool dest_double_precision = (subbit_type == SYT_TYPE_SCALAR) && e->scalar.double_precision;
             if (subbit_type == SYT_TYPE_UNKNOWN && state->symtab) {
                 /* SUBBIT deliberately bypasses write_syt_entry's ordinary
                  * first-write type inference (it writes a bit pattern into
@@ -950,10 +1001,14 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
                  * fixed at DECLARE time. Consult the symbol table for the
                  * declared class instead, same hal_class convention
                  * ensure_container() and IASN/SASN's own dest_sym lookup
-                 * already use (1=BIT, 6=INTEGER). */
+                 * already use (1=BIT, 5=SCALAR, 6=INTEGER). */
                 const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, slot->subbit_target_syt);
                 if (dsym && dsym->hal_class == 6) subbit_type = SYT_TYPE_INTEGER;
                 else if (dsym && dsym->hal_class == 1) subbit_type = SYT_TYPE_BIT;
+                else if (dsym && dsym->hal_class == 5) {
+                    subbit_type = SYT_TYPE_SCALAR;
+                    dest_double_precision = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                }
             }
             if (subbit_type == SYT_TYPE_INTEGER) {
                 e->type = SYT_TYPE_INTEGER;
@@ -965,7 +1020,17 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
                 e->bit_value = val->bits;
                 return true;
             }
-            fail(state, "SUBBIT assignment: target type has no confirmed raw-bit-pattern mapping (only INTEGER/BIT are implemented)");
+            if (subbit_type == SYT_TYPE_SCALAR) {
+                if (dest_double_precision) {
+                    fail(state, "SUBBIT assignment: DOUBLE-precision SCALAR target needs a 64-bit bit-pattern window, "
+                                "wider than this interpreter's BIT value representation supports");
+                    return false;
+                }
+                e->type = SYT_TYPE_SCALAR;
+                e->scalar = halmat_scalar_from_ibm_words(val->bits, 0, false);
+                return true;
+            }
+            fail(state, "SUBBIT assignment: target type has no confirmed raw-bit-pattern mapping (only INTEGER/BIT/SINGLE-precision SCALAR are implemented)");
             return false;
         }
         if (!slot->is_ref) {
@@ -4391,7 +4456,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         }
                     }
                     halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, this_copy_idx);
-                    if (!write_syt_entry(state, field, &rv)) { ok = false; break; }
+                    if (!write_syt_entry(state, HALMAT_SYT_MAX, field, &rv)) { ok = false; break; }
                 }
                 if (!ok) break;
                 break;
@@ -5112,12 +5177,45 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTOQ/CTOQ/STOQ/ITOQ: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                /* RV_SCALAR (STOQ, `SUBBIT(a_scalar_var)`): SUBBIT "opens
+                 * a window on the [argument's] bit pattern" (USA003087
+                 * Sec. 21.5) -- a raw memory reinterpretation, NOT a
+                 * numeric conversion. This previously called
+                 * rv_to_integer(), which *rounds the scalar to its
+                 * nearest whole number first* (the same routine STOI/
+                 * STOB use for the ordinary, semantically different
+                 * `INTEGER(...)`/`BIT(...)` conversion functions) -- wrong
+                 * for SUBBIT specifically, silently returning "the
+                 * argument's value rounded to an integer, reinterpreted
+                 * as bits" instead of "the argument's own raw stored
+                 * bits." Fixed by reinterpreting halmat_scalar_t's own
+                 * `msw` directly: this project's SCALAR representation is
+                 * already the exact bit-for-bit AP-101S/IBM hexadecimal-
+                 * floating-point wire format (value.h), not a native
+                 * double approximated at read time, so `msw` genuinely
+                 * *is* the argument's real 32-bit in-memory pattern for a
+                 * SINGLE-precision SCALAR -- no reinterpret-cast trickery
+                 * needed, unlike INTEGER's C-level cast below. A DOUBLE-
+                 * precision SCALAR's real width is 64 bits (msw+lsw), which
+                 * doesn't fit this interpreter's uint32_t bits/RV_BITS
+                 * representation at all (a project-wide ceiling on every
+                 * BIT value, not something specific to SUBBIT) -- fails
+                 * loudly rather than silently truncating half the pattern
+                 * away. No fixture previously exercised SUBBIT on any
+                 * SCALAR argument at all (only INTEGER, test_subbit.hal),
+                 * so this was a latent, never-observed bug rather than a
+                 * regression. */
+                if (a.kind == RV_SCALAR && a.scalar.double_precision) {
+                    fail(state, "SUBBIT: DOUBLE-precision SCALAR argument needs a 64-bit bit-pattern window, "
+                                "wider than this interpreter's BIT value representation supports");
+                    break;
+                }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 switch (a.kind) {
                     case RV_BITS: state->vac[ins->index].bits = a.bits; break;
                     case RV_INTEGER: state->vac[ins->index].bits = (uint32_t)a.integer; break;
-                    case RV_SCALAR: state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a); break;
+                    case RV_SCALAR: state->vac[ins->index].bits = a.scalar.msw; break;
                     case RV_STRING: state->vac[ins->index].bits = (uint32_t)strtoul(a.string, NULL, 10); break;
                 }
                 break;

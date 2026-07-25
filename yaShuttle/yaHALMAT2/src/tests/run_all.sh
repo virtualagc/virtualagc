@@ -1097,6 +1097,44 @@ run ./run_local_fixture.sh wait_until "DONE" --time-scale 1000000
 # primal's own "PRIMAL DONE" only prints after WORKER's "WORKER DONE"
 # (WORKER itself does a 1-second WAIT first), not before.
 run ./run_local_fixture.sh wait_dependent "$(printf 'WORKER DONE\nPRIMAL DONE')" --time-scale 1000000
+# Direct user correction of an earlier wrong claim in this sweep ("SUBBIT
+# assignment to SCALAR needs IEEE-754 modeling this interpreter doesn't
+# have"): AP-101S SCALAR is IBM hexadecimal floating point, not IEEE-754,
+# and this project's own halmat_scalar_t (value.h) already stores the
+# exact bit-for-bit wire format -- SUBBIT(a_scalar_var) (SINGLE
+# precision) needs no new modeling at all, just reinterpreting `msw`
+# directly. Fixed two bugs: (1) the reference-context read (STOQ,
+# `B = SUBBIT(scalar_var);`) previously rounded the scalar to its
+# nearest INTEGER first (rv_to_integer(), the same routine STOI/STOB use
+# for the semantically different ordinary INTEGER()/BIT() conversion
+# functions) instead of reading its real raw bits -- a latent,
+# previously-unexercised bug (only SUBBIT(integer) had a fixture before).
+# (2) the assignment-context write (`SUBBIT(scalar_var) = ...;`) simply
+# had no SCALAR case at all. DOUBLE-precision SCALAR (a real 64-bit
+# pattern) still fails loudly both directions -- this interpreter's BIT
+# value representation is uint32_t everywhere, a project-wide ceiling,
+# not something safe to guess past. Fixture: test_subbit_scalar.hal
+# (round-trips a known scalar's raw bits out through SUBBIT-in-reference-
+# context and back in through SUBBIT-in-assignment-context, onto both an
+# already-scalar-typed and a never-before-written target -- 1093140480
+# independently hand-verified as 0x41280000, the correct IBM HFP encoding
+# of 2.5).
+run ./run_local_fixture.sh subbit_scalar "$(printf ' 1093140480\n 2.5000000E+00\n 2.5000000E+00')"
+# Found cross-checking the SUBBIT/SCALAR fix above against a genuinely
+# DOUBLE-precision variable: a plain (non-array) SCALAR DOUBLE's own
+# INITIAL() literal value silently kept SINGLE precision. Real HALSFC
+# emits the shortest exact literal encoding regardless of the
+# destination's declared precision (2.5 compiles as an ordinary "Type
+# FIXED"/SINGLE literal even when INITIAL()-assigned into a SCALAR DOUBLE
+# target) -- write_syt_entry() (SINT's own destination-write path for a
+# plain, non-array SCALAR SYT) never normalized to the destination's
+# declared SINGLE/DOUBLE precision the way OP_IASN/OP_SASN's own
+# dest_sym coercion and write_container_element() already do at their
+# own sites -- this was the one remaining plain-SCALAR-destination write
+# path missing it. Fixed by threading the destination SYT index through
+# (mirroring write_container_element's existing dest_syt convention) and
+# applying the same symtab-driven scale_precision() normalization.
+run ./run_local_fixture.sh scalar_double_initial " 2.5000000000000000E+00"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
