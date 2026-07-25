@@ -4391,7 +4391,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * pinned down bit-for-bit") -- still true, now with a
                  * concrete real-program case on record for whoever
                  * resolves it next. Left failing loudly (resolve_operand's
-                 * generic default case) rather than guess. */
+                 * generic default case) rather than guess.
+                 *
+                 * Follow-up attempt (later session): confirmed the LIT
+                 * feeding that IADD resolves to exactly 1 (litprobe of
+                 * 160-REFORMAT.hal's own litfile.bin, entry index 14,
+                 * numeric=1) -- so the subsidiary genuinely is
+                 * IADD(DECIMALS, 1) = DECIMALS+1 at runtime, and "DATA=2
+                 * means #-subsidiary" reconciles *algebraically* with the
+                 * book's own documented `#-DECIMALS-1` formula exactly
+                 * (#-(DECIMALS+1) ≡ #-DECIMALS-1). But reverse-engineering
+                 * REFORMAT's own worked example (source-documentation/
+                 * ProgrammingInHALS.txt, Ch. 8: `REFORMAT(SQRT(2),3,5)`
+                 * should yield `'1.414'`) needs the SECOND substring's
+                 * own start bound to land on position 2 of C="1414"
+                 * (`#-DECIMALS+1` = 4-3+1 = 2, selecting "414") for the
+                 * output to come out right -- not position 0 (`#-DECIMALS-1`
+                 * = 4-3-1 = 0, clamped to 1, selecting "1414", which is
+                 * wrong). These two derivations flatly disagree, and
+                 * nothing available resolves which is at fault: the
+                 * book's own OCR'd text (source-documentation/
+                 * ProgrammingInHALS.txt) is visibly corrupted throughout
+                 * this exact page (mis-scanned words, garbled formatting
+                 * columns), so "#-DECIMALS-1" may itself be a misread of
+                 * "#-DECIMALS+1" (a thin printed minus easily confused
+                 * with plus); equally possible the word-#139 DSUB/IADD
+                 * pair traced here was mis-attributed to the wrong
+                 * source statement inside REFORMAT's multi-part RETURN
+                 * expression (not independently re-verified against
+                 * statement markers this pass). Genuinely unresolved
+                 * without either a clean non-OCR source or the real
+                 * AP-101S object code to check directly -- still left
+                 * failing loudly rather than guess which derivation (if
+                 * either) is right. */
                 if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
                 uint16_t base_syt = ins->operands[0].data;
