@@ -48,6 +48,8 @@ typedef struct {
     uint32_t sym_length;
     uint32_t sym_array;
     uint32_t sym_ptr;
+    uint32_t sym_link1;
+    uint32_t sym_link2;
 } raw_shape_t;
 
 /* Shared mutable parse state, so the per-line body (symtab_process_line)
@@ -126,6 +128,10 @@ static void symtab_process_line(symtab_parse_state_t *st, char *line) {
             st->current_raw.sym_array = (uint32_t)strtoul(fields[4], NULL, 16);
         } else if (strcmp(fields[1], "SYM_PTR") == 0) {
             st->current_raw.sym_ptr = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_LINK1") == 0) {
+            st->current_raw.sym_link1 = (uint32_t)strtoul(fields[4], NULL, 16);
+        } else if (strcmp(fields[1], "SYM_LINK2") == 0) {
+            st->current_raw.sym_link2 = (uint32_t)strtoul(fields[4], NULL, 16);
         }
     } else if (strcmp(fields[0], "+") == 0 && n >= 5 && strcmp(fields[1], "EXTuARRAY") == 0) {
         size_t idx = (size_t)strtoul(fields[2], NULL, 10);
@@ -167,6 +173,19 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
         if (st->raw[i].sym_type == 1) {
             st->entries[i].bit_width = (int)st->raw[i].sym_length;
         }
+        /* Structure-field linked list (symtab.h's struct_first_field/
+         * struct_next_field comment): SYM_LINK1 (template only) and
+         * SYM_LINK2 (every field) are raw 16-bit values where a real
+         * forward reference is always a small, in-range, strictly-
+         * increasing-from-the-template SYT index, and "no next field"
+         * is consistently negative when reinterpreted as int16_t (every
+         * terminal value observed empirically -- 0xFFFC, 0xFFFB -- is
+         * negative this way, though the two aren't the same constant,
+         * so this checks sign rather than a specific sentinel). */
+        st->entries[i].struct_first_field = (int16_t)(uint16_t)st->raw[i].sym_link1;
+        if (st->entries[i].struct_first_field < 0) st->entries[i].struct_first_field = -1;
+        st->entries[i].struct_next_field = (int16_t)(uint16_t)st->raw[i].sym_link2;
+        if (st->entries[i].struct_next_field < 0) st->entries[i].struct_next_field = -1;
         if (st->raw[i].sym_type == 0x0A) { /* MAJ_STRUC: SYM_ARRAY is a direct copy count, not an EXTuARRAY index -- see symtab.h */
             st->entries[i].struct_copies = (int)st->raw[i].sym_array;
         } else if (st->raw[i].sym_array != 0) {

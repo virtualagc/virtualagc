@@ -7324,6 +7324,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->arrayed_index < 0 && syt_is_array_shaped(state, ins->operands[0].data)) {
                         state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                         state->io_pending.items[state->io_pending.item_count].dest_is_container = true;
+                        state->io_pending.items[state->io_pending.item_count].dest_is_structure = false;
+                        state->io_pending.item_count++;
+                        break;
+                    }
+                    if (cls == 10 && ins->operands[0].qual == QUAL_XPT) {
+                        if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "READ: XPT stream position out of range"); break; }
+                        const halmat_vac_slot_t *sref = &state->vac[ins->operands[0].data];
+                        if (!sref->is_struct_ref) { fail(state, "READ: XPT operand does not reference an EXTN result"); break; }
+                        /* Bare/unqualified structure reference: EXTN's own
+                         * struct_field_syt IS the template symbol itself
+                         * for this case (not a real field) -- confirmed by
+                         * checking the symbol table's own hal_class for
+                         * it, 0x3E, the TEMPLATE DEFINITION's own class
+                         * marker (distinct from 0x0A/MAJ_STRUC, which is
+                         * an *instance* variable's class -- e.g. ARG's own
+                         * entry -- confirmed empirically against two
+                         * different real templates' own COMMON0.out dumps,
+                         * 172-OUTER.hal's UTIL_PARM and 167-ASSORTEDIO.
+                         * hal's IOPARM, both SYM_TYPE=3E on the template
+                         * symbol itself), the same signal a qualified
+                         * single-field reference could never produce. */
+                        const halmat_symtab_entry_t *tsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, sref->struct_field_syt) : NULL;
+                        if (!tsym || tsym->hal_class != 0x3E) {
+                            fail(state, "READ: structure argument must be a whole (unqualified) structure reference");
+                            break;
+                        }
+                        state->io_pending.items[state->io_pending.item_count].dest_is_structure = true;
+                        state->io_pending.items[state->io_pending.item_count].dest_is_container = false;
+                        state->io_pending.items[state->io_pending.item_count].struct_base_syt = sref->struct_base_syt;
+                        state->io_pending.items[state->io_pending.item_count].struct_template_syt = sref->struct_field_syt;
+                        state->io_pending.items[state->io_pending.item_count].struct_copy_index = sref->struct_copy_index;
                         state->io_pending.item_count++;
                         break;
                     }
@@ -7337,6 +7368,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         * slots are reused across READ statements without zeroing -- a stale true from a
                         * previous statement's whole-container item at this same slot must be cleared,
                         * same convention as the WRITE-side is_container reset just below. */
+                    state->io_pending.items[state->io_pending.item_count].dest_is_structure = false;
                     state->io_pending.item_count++;
                     break;
                 }
@@ -7906,6 +7938,104 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                              * consistent rather than special-casing
                              * containers alone. */
                             e->elements[k] = halmat_scalar_from_double(v, false);
+                        }
+                        if (stop) break;
+                        continue;
+                    }
+                    if (state->io_pending.items[i].dest_is_structure) {
+                        /* Whole-structure destination (state.h's
+                         * dest_is_structure comment) -- one data field
+                         * per terminal, in declaration order (a VECTOR
+                         * terminal like any other whole-VECTOR
+                         * destination above, one field per component),
+                         * walked via the template's own symtab
+                         * struct_first_field/struct_next_field chain and
+                         * written directly into each terminal's own
+                         * shadow field slot (find_or_create_struct_field)
+                         * -- bypassing write_destination entirely, since
+                         * there's no QUAL_XPT operand naming any one
+                         * terminal individually here (this whole branch
+                         * exists precisely because HALSFC's own compiled
+                         * output never spells out per-terminal operands
+                         * for a *whole*-structure I/O argument the way
+                         * TINT's own OFFSET-driven INITIAL() does).
+                         * User-reported, 172-OUTER.hal's `READ(5) ARG;`. */
+                        uint16_t base_syt = state->io_pending.items[i].struct_base_syt;
+                        int32_t copy_idx = state->io_pending.items[i].struct_copy_index >= 0
+                            ? state->io_pending.items[i].struct_copy_index : current_copy_index(state);
+                        bool stop = false;
+                        int field_syt = -1;
+                        if (state->symtab) {
+                            const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, state->io_pending.items[i].struct_template_syt);
+                            field_syt = tsym ? tsym->struct_first_field : -1;
+                        }
+                        while (!stop && field_syt >= 0) {
+                            const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
+                            if (!fsym) break;
+                            halmat_syt_entry_t *fe = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt, copy_idx);
+                            if (fsym->hal_class == 4 && fsym->cols > 0) {
+                                /* VECTOR terminal (`V VECTOR`): allocate
+                                 * this shadow slot's own elements[] the
+                                 * first time it's touched, the same
+                                 * ensure_container() convention a plain
+                                 * VECTOR SYT uses -- never done before for
+                                 * a structure-field shadow slot (TASN's
+                                 * own comment flags writing array-shaped
+                                 * data into one as a previously-
+                                 * unreachable gap; this is the first
+                                 * confirmed real trigger). */
+                                if (!fe->elements) {
+                                    fe->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));
+                                    fe->element_count = (size_t)fsym->cols;
+                                    fe->cols = fsym->cols;
+                                    fe->rows = 0;
+                                }
+                                for (int k = 0; !stop && k < fsym->cols; k++) {
+                                    halmat_read_field_t rf = read_skip_separator(in, any_field_read);
+                                    any_field_read = true;
+                                    if (rf == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
+                                    if (rf == HALMAT_READ_FIELD_NULL) continue;
+                                    double v;
+                                    if (fscanf(in, "%lf", &v) != 1) {
+                                        if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                        }
+                                        stop = true;
+                                        break;
+                                    }
+                                    fe->elements[k] = halmat_scalar_from_double(v, false);
+                                }
+                            } else if (fsym->hal_class == 5 || fsym->hal_class == 6 || fsym->hal_class == 1) {
+                                /* Plain SCALAR/INTEGER/BIT(BOOLEAN) terminal. */
+                                halmat_read_field_t rf = read_skip_separator(in, any_field_read);
+                                any_field_read = true;
+                                if (rf == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
+                                if (rf != HALMAT_READ_FIELD_NULL) {
+                                    double v;
+                                    if (fscanf(in, "%lf", &v) != 1) {
+                                        if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                        }
+                                        stop = true;
+                                        break;
+                                    }
+                                    if (fsym->hal_class == 6) {
+                                        fe->type = SYT_TYPE_INTEGER;
+                                        fe->value = (int32_t)v;
+                                    } else if (fsym->hal_class == 1) {
+                                        fe->type = SYT_TYPE_BIT;
+                                        fe->bit_value = (uint32_t)(int32_t)v;
+                                    } else {
+                                        fe->type = SYT_TYPE_SCALAR;
+                                        fe->scalar = halmat_scalar_from_double(v, false);
+                                    }
+                                }
+                            } else {
+                                fail(state, "READ: structure terminal '%s' has an unsupported type for whole-structure READ", fsym->name ? fsym->name : "?");
+                                stop = true;
+                                break;
+                            }
+                            field_syt = fsym->struct_next_field;
                         }
                         if (stop) break;
                         continue;

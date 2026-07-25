@@ -1,0 +1,25 @@
+C/ Isolates 172-OUTER.hal's whole-structure READ construct
+C/ (`READ(5) ARG;`, ARG a UTIL_PARM-STRUCTURE with a VECTOR terminal
+C/ among its fields) -- writes the scalar/integer/BOOLEAN fields back
+C/ out individually afterward to verify READ populated every terminal's
+C/ own shadow slot correctly and in the right declaration order (S1
+C/ landing on the value right after V's own 3 components proves those 3
+C/ were correctly consumed, even though displaying a VECTOR-shaped
+C/ structure-field's own value is a separate, pre-existing gap --
+C/ resolve_operand's QUAL_XPT case has no elements[]-shaped read path,
+C/ only ever reads the scalar union member -- deliberately not
+C/ exercised here, out of this fixture's own scope).
+
+  TREADSTRUCT: PROGRAM;
+     STRUCTURE UTIL_PARM:
+        1 V VECTOR,
+        1 S1 SCALAR,
+        1 C INTEGER,
+        1 S2 SCALAR,
+        1 E BOOLEAN;
+     DECLARE ARG UTIL_PARM-STRUCTURE;
+
+     READ(5) ARG;
+     WRITE(6) ARG.S1, ARG.C, ARG.S2, ARG.E;
+Y %SVCI(0);
+  CLOSE TREADSTRUCT;

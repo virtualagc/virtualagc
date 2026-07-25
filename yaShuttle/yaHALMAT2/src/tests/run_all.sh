@@ -1659,6 +1659,39 @@ run ./run_local_fixture.sh wait_for_compound "$(printf 'SETTER: E1 SIGNALED\nSET
 # loop correctly exhausts input and redirects to DONE).
 run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(printf 'RESULTS OF TESTING X\n          0      SAMPLES CORRECT,                3      SAMPLES INCORRECT')"
 
+# Task #38: 172-OUTER.hal, `READ(5) ARG;` (ARG a UTIL_PARM-STRUCTURE with
+# fields `V VECTOR, S1 SCALAR, C INTEGER, S2 SCALAR, E BOOLEAN`) -- a
+# whole (bare/unqualified) STRUCTURE READ destination (HALMAT class 10),
+# previously "READ: only CHARACTER/SCALAR/INTEGER arguments are
+# implemented". USA003087 Sec. 12.3 governs the field order/count the
+# same way it does for a whole VECTOR/MATRIX destination (one field per
+# terminal, in declaration order; a VECTOR terminal contributes one
+# field per component) -- OP_READ now walks the terminals via a new
+# symtab.h struct_first_field/struct_next_field linked list (parsed from
+# the raw SYM_LINK1/SYM_LINK2 symbol-table fields, confirmed empirically
+# against two different real structure templates' own COMMON0.out dumps:
+# the template's SYM_LINK1 points to its first field, each field's own
+# SYM_LINK2 to the next, terminating in a raw value that's negative when
+# reinterpreted as int16_t) and writes each terminal directly into its
+# own shadow field slot (find_or_create_struct_field) -- bypassing
+# write_destination, since HALSFC's compiled output for a whole-
+# structure I/O argument never spells out per-terminal operands the way
+# TINT's own OFFSET-driven INITIAL() does. The VECTOR terminal's own
+# elements[]/cols allocation on first touch is new ground: no code path
+# had ever written array-shaped data into a structure-terminal shadow
+# slot before (TASN's own comment flags this as a previously-unreachable
+# gap). Fixture: test_read_structure.hal (172-OUTER.hal's own
+# STRUCTURE/DECLARE plus a minimal READ+WRITE, isolated since the real
+# corpus file's own remaining statements need whole-structure CALL-
+# argument passing and structure-terminal VECTOR RETURN/WRITE display --
+# separate, still-unimplemented gaps, not attempted here). Verifies S1/
+# C/S2/E all land on the correct values immediately after V's own 3
+# components, proving those were correctly consumed even though direct
+# display of a VECTOR-shaped structure field is a separate, pre-existing
+# gap (resolve_operand's QUAL_XPT case has no elements[]-shaped read
+# path yet, only ever reads the scalar union member) not exercised here.
+run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

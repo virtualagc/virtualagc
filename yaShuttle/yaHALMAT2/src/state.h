@@ -726,6 +726,27 @@ typedef struct {
      * the ordinary ADLP replay this struct's other fields already
      * handle, cycling arrayed_index -- no separate case needed. */
     bool dest_is_container;
+    /* True when dest_operand is a whole (bare/unqualified) STRUCTURE
+     * reference (TAG1=10/MAJ_STRUC, a QUAL_XPT operand referencing an
+     * EXTN result whose struct_field_syt is itself a template symbol --
+     * EXTN.md's "bare/unqualified reference" case) -- USA003087 Sec.
+     * 12.3's structure READ rule: one data field per terminal, in
+     * declaration order (a VECTOR terminal like any other whole-VECTOR
+     * destination, one field per component), same unrolled order WRITE/
+     * INITIAL use. OP_READ walks the terminals via the template's own
+     * symtab struct_first_field/struct_next_field chain (symtab.h) and
+     * writes each one directly into its shadow field slot
+     * (find_or_create_struct_field), not through the ordinary
+     * write_destination path -- user-reported, 172-OUTER.hal's `READ(5)
+     * ARG;` (ARG a `UTIL_PARM-STRUCTURE`, fields `V VECTOR, S1 SCALAR, C
+     * INTEGER, S2 SCALAR, E BOOLEAN`). */
+    bool dest_is_structure;
+    uint16_t struct_base_syt;    /* valid iff dest_is_structure: the structure instance itself */
+    uint16_t struct_template_syt; /* valid iff dest_is_structure: its own template symbol, for the
+                                    * struct_first_field/struct_next_field walk */
+    int32_t struct_copy_index;   /* valid iff dest_is_structure: -1 means "use the ambient
+                                    * current_copy_index()" (an explicit TSUB-selected copy
+                                    * overrides this the same way EXTN's own struct_copy_index does) */
     /* Call-only (is_call == true, so never set alongside the
      * READ/READALL dest_* fields above -- they share dest_operand,
      * the two contexts are mutually exclusive): true when this

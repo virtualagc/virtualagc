@@ -82,6 +82,27 @@ typedef struct {
                      * (symtab.c's symtab_finalize) */
     int struct_copies; /* hal_class==0x0A (MAJ_STRUC) only: declared copy count for `Q-STRUCTURE(n)`,
                          * 0 for a plain single-instance `Q-STRUCTURE` (no `(n)`) -- see above */
+    int struct_first_field; /* hal_class==0x0A (MAJ_STRUC) only: SYT index of the template's own
+                         * first field, from the raw SYM_LINK1 field -- -1 if none (shouldn't
+                         * happen for a real template with at least one field). Each field's own
+                         * struct_next_field (below) continues the chain; terminates at -1. */
+    int struct_next_field; /* Any structure-field entry (a symbol appearing between a MAJ_STRUC
+                         * template's own struct_first_field and the end of its field list): SYT
+                         * index of the *next* field in the same template's declaration order,
+                         * from the raw SYM_LINK2 field, or -1 for the last field. Meaningless
+                         * (harmless raw leftover, never consulted) on any entry that isn't
+                         * itself a structure field -- e.g. -1 or a stray 0. Confirmed empirically
+                         * against two different real structure templates' own COMMON0.out
+                         * dumps (167-ASSORTEDIO.hal's IOPARM, 172-OUTER.hal's UTIL_PARM):
+                         * template.SYM_LINK1 -> first_field.index; each field's own SYM_LINK2 ->
+                         * next_field.index, consecutively, ending in a raw value that's negative
+                         * when reinterpreted as int16_t (not the same constant across the two
+                         * files -- 0xFFFC vs 0xFFFB -- so "negative" is the actual terminator
+                         * signal, not one specific sentinel value). Used by interp.c's whole-
+                         * structure READ/WRITE argument handling (class-10 XXAR) to enumerate a
+                         * structure's own terminals in declaration order without the compiler
+                         * needing to spell out each one's offset explicitly the way TINT's own
+                         * OFFSET operand does for INITIAL(). */
     int sym_ptr; /* raw SYM_PTR field, meaning depends on hal_class (SYM_TYPE) -- confirmed this
                   * session for two cases: hal_class==0x47 (PROCEDURE LABEL) points to the
                   * procedure's own first-parameter SYT slot (consistent with FCAL.md's
