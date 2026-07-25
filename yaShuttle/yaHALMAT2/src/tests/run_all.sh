@@ -1321,6 +1321,39 @@ run ./run_local_fixture.sh page "$(printf '\n\n\n\nFIRST\n\f\n\n\n\nSECOND')" --
 # (so the heading lands on its own line rather than running into the
 # blank-line padding that follows it).
 run ./run_local_fixture.sh page "$(printf '\n\n\n\nFIRST\n=== PAGE 2 ===\n\n\n\n\nSECOND')" --page-length 10 --ff '=== PAGE %p ==='
+# User-reported (140-STATISTICS.hal's `CALL STATISTICS(DATA) ASSIGN(LO,
+# HI, MN);`, STATISTICS's own `DATA` parameter declared `ARRAY(*)
+# SCALAR` -- USA003087 Sec. 7.5/20.11's assumed-size parameter, whose
+# real size "may...vary from invocation to invocation"): "MATRIX/VECTOR/
+# ARRAY argument shape does not match parameter 7". Root-caused to two
+# compounding bugs. (1) symtab.c's own EXT_ARRAY dimension-bound parsing
+# never sign-extended from the field's real 16-bit width (confirmed via
+# the raw COMMON0.out dump: "EXTuARRAY n BIT xxxx", always 4 hex
+# digits) -- an assumed-size parameter's own bound is encoded as a
+# *negative* 16-bit sentinel (0xFFF9 = -7 here; cross-checked against
+# 141-VSUM.hal's own `ARRAY(*) VECTOR` case, which uses a *different*
+# magnitude, 0xFFFC = -4, confirming "any negative value" rather than
+# one fixed constant), previously misread as a huge unsigned "size"
+# (65529) instead. (2) Even with that fixed, ensure_container() had no
+# way to represent "this parameter's real size isn't known until a call
+# actually supplies one" -- it would still try to allocate *something*
+# from whatever bogus size fell out of the (still-visible-as-generic-
+# fallback) shape logic. Fixed by having ensure_container() leave an
+# assumed-size ARRAY parameter entirely unallocated, and bind_call_
+# argument() allocate it directly from the caller's own actual argument
+# shape instead of requiring a match against a declared size that
+# doesn't exist for this kind of parameter. Separately confirmed (same
+# investigation, not fixed -- a different, pre-existing gap unrelated to
+# assumed-size specifically): 141-VSUM.hal's own `ARRAY(*) VECTOR` case
+# no longer crashes with this fix, but still computes a wrong answer
+# (3x too large) -- LFNC's SIZE selector returns an array_of_vector-
+# shaped argument's flat scalar count (9) rather than the "length of
+# array" USA003087 Appendix B's SIZE FUNCTION table actually specifies
+# (3, the VECTOR count), inflating a `DO FOR N=1 TO SIZE(V)` loop bound
+# 3x. Fixture: test_statistics.hal (134-DOTS.hal-style: the real corpus
+# file itself, copied verbatim; LO=MIN=10, HI=MAX=50, MEAN=SUM/SIZE=
+# 150/5=30, all hand-derivable from DATA's own INITIAL(10,20,30,40,50)).
+run ./run_local_fixture.sh statistics "$(printf 'LO=      1.0000000E+01     HI=      5.0000000E+01     MEAN=      3.0000000E+01')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

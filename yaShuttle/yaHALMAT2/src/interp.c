@@ -1206,7 +1206,31 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
             count = (size_t)rows * (size_t)cols;
             if (sym->hal_class == 1) elem_kind = 1;
             else if (sym->hal_class == 2) elem_kind = 2;
-        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1) {
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1 &&
+                   sym->array_dims[0] < 0) {
+            /* `ARRAY(*)` assumed-size parameter (USA003087 Sec. 7.5/20.11):
+             * its own DECLARE inside the procedure/function body carries no
+             * real size at all -- symtab.c's own comment on this same
+             * sentinel (a negative 16-bit EXT_ARRAY dimension-bound entry,
+             * confirmed against two independent real-corpus cases,
+             * 140-STATISTICS.hal and 141-VSUM.hal, with two *different*
+             * negative magnitudes -- "any negative value," not one fixed
+             * constant) -- so there is nothing to allocate here at all.
+             * Left entirely unallocated (elements/element_count/etc. all
+             * stay at their zero-initialized default) -- bind_call_
+             * argument() detects this exact state (`!pe->elements`) and
+             * allocates the real container sized from the *caller's own*
+             * actual argument shape instead, the only place a size is
+             * ever actually known for this kind of parameter. If this
+             * function is reached for an assumed-size parameter that
+             * hasn't been bound by a call yet (shouldn't happen for valid
+             * HALMAT -- every parameter is bound before the callee's own
+             * body starts running), the caller of ensure_container() will
+             * simply see a NULL/zero-length container, the same as any
+             * other genuinely-unbound-yet SYT entry. */
+            return;
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count >= 1 &&
+                   sym->array_dims[0] > 0) {
             count = (size_t)sym->array_dims[0]; /* only a single dimension is used -- see symtab.h */
             if (sym->hal_class == 1) elem_kind = 1;
             else if (sym->hal_class == 2) elem_kind = 2;
@@ -1566,7 +1590,28 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
         ensure_container(dest_state, param_syt);
         halmat_syt_entry_t *pe = &dest_state->syt[param_syt];
         size_t count = state->io_pending.items[item_index].container_count;
-        if (!pe->elements || count != pe->element_count) {
+        if (!pe->elements) {
+            /* Either a genuinely unallocated (never-declared-shape) SYT
+             * entry, or -- confirmed the common real case, user-reported
+             * (140-STATISTICS.hal/141-VSUM.hal) -- an `ARRAY(*)` assumed-
+             * size parameter, which ensure_container() deliberately
+             * leaves unallocated (its own comment) since it has no
+             * declared size of its own to allocate from. An assumed-size
+             * parameter's real size is only ever known from the actual
+             * argument at each call site (that's the whole point of
+             * `ARRAY(*)` -- USA003087 Sec. 7.5/20.11: "size may...vary
+             * from invocation to invocation"), so it's allocated directly
+             * here instead, sized and shaped to match the caller's own
+             * container exactly -- no shape-conformance check needed (or
+             * possible) the way a normal, fixed-size parameter gets
+             * below, since there is no declared shape to conform to.
+             * Freed and reallocated on a later call if a *different*
+             * size is passed then, since a same-unit procedure's SYT
+             * storage (dest_state == state) persists across calls. */
+            free(pe->elements);
+            pe->elements = calloc(count, sizeof(halmat_scalar_t));
+            pe->element_count = count;
+        } else if (count != pe->element_count) {
             fail(state, "procedure/function call: MATRIX/VECTOR/ARRAY argument shape does not match parameter %u",
                  param_syt);
             return false;

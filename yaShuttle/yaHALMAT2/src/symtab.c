@@ -177,7 +177,28 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
                 if (dim_count > HALMAT_SYM_MAX_ARRAY_DIMS) dim_count = HALMAT_SYM_MAX_ARRAY_DIMS;
                 st->entries[i].array_dim_count = (int)dim_count;
                 for (uint32_t d = 0; d < dim_count && base + 1 + d < st->extarray_count; d++) {
-                    st->entries[i].array_dims[d] = (int)st->extarray[base + 1 + d];
+                    /* Each EXT_ARRAY dimension-bound entry is a 16-bit BIT
+                     * field (confirmed via the raw COMMON0.out dump --
+                     * "EXTuARRAY n BIT xxxx", always 4 hex digits), so it
+                     * must be sign-extended from int16_t, not read as a
+                     * plain unsigned value -- an `ARRAY(*)` (assumed-size)
+                     * parameter's own bound is encoded as a *negative*
+                     * 16-bit value (user-reported, 140-STATISTICS.hal's
+                     * `DECLARE DATA ARRAY(*) SCALAR;`: EXT_ARRAY entry
+                     * 0xFFF9 = -7, confirmed against a second real-corpus
+                     * case, 141-VSUM.hal's `ARRAY(*) VECTOR`: 0xFFFC = -4
+                     * -- a different magnitude, so the sentinel is "any
+                     * negative value," not one fixed constant). Read as
+                     * plain unsigned (the prior behavior), -7 became 65529
+                     * and -4 became 65532, both silently accepted as
+                     * enormous-but-"valid" array sizes by ensure_container
+                     * (falling through to its own generic 64-element
+                     * placeholder capacity instead), rather than being
+                     * recognized as the assumed-size marker they are --
+                     * see ensure_container()'s and bind_call_argument()'s
+                     * own comments (interp.c) for how a negative bound is
+                     * actually handled now. */
+                    st->entries[i].array_dims[d] = (int16_t)(uint16_t)st->extarray[base + 1 + d];
                 }
             }
             /* ARRAY-of-VECTOR/MATRIX (`ARRAY(n) VECTOR`, `ARRAY(n)
