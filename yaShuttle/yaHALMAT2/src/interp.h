@@ -86,6 +86,18 @@ void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode);
  * computed program value. */
 void interp_set_line_length(halmat_state_t *state, int line_length);
 
+/* Overrides interp_init's default page_length of 66 (the IBM 1403 line
+ * printer's own documented lines-per-page) -- PAGE(beta)/LINE(gamma)'s
+ * own "L" bound, USA003087 Sec. 12.4 (--page-length, main.c). Only
+ * meaningful for PAGED devices. */
+void interp_set_page_length(halmat_state_t *state, int page_length);
+
+/* Overrides interp_init's default page_break_string of a bare form-feed
+ * -- the string emitted between pages (--ff, main.c), with a literal
+ * "%p" substring replaced by the page number being advanced to at each
+ * emission. `s` is copied. */
+void interp_set_page_break_string(halmat_state_t *state, const char *s);
+
 /* Runs to completion (CLOS on the outermost program) or to the first
  * unimplemented/malformed instruction. Returns the process exit code:
  * 0 on a clean CLOS, nonzero (with a message on stderr) otherwise. */

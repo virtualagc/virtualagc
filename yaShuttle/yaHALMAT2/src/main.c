@@ -66,6 +66,17 @@ static void usage(const char *prog) {
             "                   LRECL defaults this is derived from); a WRITE data field\n"
             "                   that wouldn't fit within N columns starts a new output\n"
             "                   line instead\n"
+            "  --page-length N  lines per page for PAGE()/LINE() (USA003087 Sec. 12.4),\n"
+            "                   PAGED devices only (default: 66, the IBM 1403 line printer's\n"
+            "                   own documented lines-per-page)\n"
+            "  --ff STRING      string printed between pages (default: a bare form-feed,\n"
+            "                   '\\f'); a literal \"%%p\" is replaced with the page number\n"
+            "                   being advanced to (auto-incrementing from 1); a trailing\n"
+            "                   newline is implied unless STRING is empty, is a bare\n"
+            "                   form-feed, or already ends in '\\n' itself. Supports the\n"
+            "                   usual C backslash escapes (\\n \\t \\r \\f \\v \\\\); e.g.\n"
+            "                   --ff '' prints nothing between pages, --ff '=== PAGE %%p ===' \n"
+            "                   prints a heading\n"
             "  --time-scale FACTOR   wall-clock pacing divisor for SCHEDULE/WAIT real-time\n"
             "                   throttling (default: 1.0, genuine real time; FACTOR > 0).\n"
             "                   A larger FACTOR shrinks how long the interpreter actually\n"
@@ -219,6 +230,7 @@ static bool apply_raf_maps(halmat_state_t *state, const raf_map_t *maps, int num
 
 static int run_single(const char *path, bool disasm, bool debug_mode, bool use_py, bool use_opt,
                        const char *litfile_opt, const char *memory_opt, int num_blanks, int line_length,
+                       int page_length, const char *ff_string,
                        const device_map_t *maps, int num_maps,
                        const raf_map_t *raf_maps, int num_raf_maps,
                        const debug_colors_t *colors, double time_scale, halmat_pacing_mode_t pacing_mode,
@@ -325,6 +337,8 @@ static int run_single(const char *path, bool disasm, bool debug_mode, bool use_p
     interp_set_time_scale(&state, time_scale);
     interp_set_pacing_mode(&state, pacing_mode);
     interp_set_line_length(&state, line_length);
+    interp_set_page_length(&state, page_length);
+    interp_set_page_break_string(&state, ff_string);
     if (have_symtab) interp_set_symtab(&state, &symtab);
     FILE *opened_devices[MAX_DEVICE_MAPS];
     if (!apply_device_maps(&state, maps, num_maps, opened_devices, "yaHALMAT2")) {
@@ -569,6 +583,7 @@ static bool find_primary_unit(unit_t *units, int num_units, const char *entry_di
  * the pre-refactor run_linked(). `primary` must already be resolved
  * (e.g. via find_primary_unit()). */
 static int run_linked_units(unit_t *units, int num_units, int primary, bool disasm, int num_blanks, int line_length,
+                             int page_length, const char *ff_string,
                              const device_map_t *maps, int num_maps, double time_scale,
                              halmat_pacing_mode_t pacing_mode, bool debug_mode, const debug_colors_t *colors,
                              const bool *unpaged_devices) {
@@ -610,6 +625,8 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
             interp_set_time_scale(ext_states[i], time_scale);
             interp_set_pacing_mode(ext_states[i], pacing_mode);
             interp_set_line_length(ext_states[i], line_length);
+            interp_set_page_length(ext_states[i], page_length);
+            interp_set_page_break_string(ext_states[i], ff_string);
             if (units[i].have_symtab) interp_set_symtab(ext_states[i], &units[i].symtab);
 
             if (units[i].have_symtab && units[primary].have_symtab) {
@@ -674,6 +691,8 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
         interp_set_time_scale(&aux, time_scale);
         interp_set_pacing_mode(&aux, pacing_mode);
         interp_set_line_length(&aux, line_length);
+        interp_set_page_length(&aux, page_length);
+        interp_set_page_break_string(&aux, ff_string);
         if (units[i].have_symtab) interp_set_symtab(&aux, &units[i].symtab);
         interp_run(&aux, stdout);
 
@@ -776,6 +795,8 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
     interp_set_time_scale(&primary_state, time_scale);
     interp_set_pacing_mode(&primary_state, pacing_mode);
     interp_set_line_length(&primary_state, line_length);
+    interp_set_page_length(&primary_state, page_length);
+    interp_set_page_break_string(&primary_state, ff_string);
     if (units[primary].have_symtab) interp_set_symtab(&primary_state, &units[primary].symtab);
     if (ext_map_count > 0) interp_set_external_units(&primary_state, ext_map, ext_map_count);
 
@@ -856,7 +877,8 @@ static int run_linked_units(unit_t *units, int num_units, int primary, bool disa
  * resolves the primary PROGRAM unit, and hands off to run_linked_units()
  * for the actual wiring + run. */
 static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *entry_dir,
-                       bool disasm, int num_blanks, int line_length, const device_map_t *maps, int num_maps,
+                       bool disasm, int num_blanks, int line_length, int page_length, const char *ff_string,
+                       const device_map_t *maps, int num_maps,
                        double time_scale, halmat_pacing_mode_t pacing_mode, bool debug_mode,
                        const debug_colors_t *colors, const bool *unpaged_devices) {
     if (num_dirs > MAX_UNITS) {
@@ -882,8 +904,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
         return 1;
     }
 
-    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, line_length, maps, num_maps, time_scale,
-                             pacing_mode, debug_mode, colors, unpaged_devices);
+    return run_linked_units(units, num_dirs, primary, disasm, num_blanks, line_length, page_length, ff_string,
+                             maps, num_maps, time_scale, pacing_mode, debug_mode, colors, unpaged_devices);
 }
 
 /* Builds each unit_t from a linked-archive container's already-in-memory
@@ -892,7 +914,8 @@ static int run_linked(char **dirs, int num_dirs, unit_mode_t mode, const char *e
  * load_from_buffer), then hands off to run_linked_units() -- same wiring
  * logic as an @list run, just sourced from a single container file
  * instead of a directory tree. */
-static int run_linked_container(halmat_container_t *c, int num_blanks, int line_length, const device_map_t *maps,
+static int run_linked_container(halmat_container_t *c, int num_blanks, int line_length, int page_length,
+                                 const char *ff_string, const device_map_t *maps,
                                  int num_maps, bool disasm, double time_scale, halmat_pacing_mode_t pacing_mode,
                                  bool debug_mode, const debug_colors_t *colors, const bool *unpaged_devices) {
     if (c->num_units > MAX_UNITS) {
@@ -937,8 +960,8 @@ static int run_linked_container(halmat_container_t *c, int num_blanks, int line_
         }
     }
 
-    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, line_length, maps, num_maps,
-                             time_scale, pacing_mode, debug_mode, colors, unpaged_devices);
+    return run_linked_units(units, c->num_units, c->primary_idx, disasm, num_blanks, line_length, page_length,
+                             ff_string, maps, num_maps, time_scale, pacing_mode, debug_mode, colors, unpaged_devices);
 }
 
 /* Builds a --link-only container from @list: loads every unit the
@@ -1074,6 +1097,46 @@ static int write_container(char **dirs, int num_dirs, unit_mode_t mode, const ch
     return rc;
 }
 
+/* Interprets C-style backslash escapes in a CLI argument (--ff) --
+ * shell arguments arrive as literal ASCII (typing --ff '\f' passes the
+ * two characters backslash+f, not a raw 0x0C byte), so the common
+ * escapes need decoding by hand. Supports \n \t \r \f \v \\ (the ones
+ * with an obvious, unambiguous meaning for a short between-page string);
+ * any other backslash sequence (including a trailing lone backslash) is
+ * passed through verbatim rather than guessing. Returns a malloc'd
+ * buffer (never larger than the input, since every escape shrinks by
+ * exactly one byte); the caller doesn't need to free it for a CLI
+ * argument processed once per process lifetime, but may. */
+static char *unescape_c_string(const char *s) {
+    size_t len = strlen(s);
+    char *out = malloc(len + 1);
+    size_t o = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (s[i] == '\\' && i + 1 < len) {
+            char c = s[i + 1];
+            char decoded;
+            bool known = true;
+            switch (c) {
+                case 'n': decoded = '\n'; break;
+                case 't': decoded = '\t'; break;
+                case 'r': decoded = '\r'; break;
+                case 'f': decoded = '\f'; break;
+                case 'v': decoded = '\v'; break;
+                case '\\': decoded = '\\'; break;
+                default: known = false; decoded = 0;
+            }
+            if (known) {
+                out[o++] = decoded;
+                i++;
+                continue;
+            }
+        }
+        out[o++] = s[i];
+    }
+    out[o] = '\0';
+    return out;
+}
+
 static bool read_list_file(const char *path, char dirs[][900], int *count, int max) {
     FILE *f = fopen(path, "r");
     if (!f) return false;
@@ -1106,6 +1169,10 @@ int main(int argc, char **argv) {
                             * (USA003090 Sec. 6.1.4's LRECL defaults minus PAGED's own
                             * automatic ANSI-carriage-control byte, see interp_set_line_
                             * length's comment) */
+    int page_length = 66; /* IBM 1403 line printer default; --page-length overrides */
+    const char *ff_string = "\f"; /* between-page string, --ff overrides (unescape_c_string) --
+                                    * a bare form-feed by default, this runtime's own historical
+                                    * target hardware's own page-eject convention */
     double time_scale = 1.0;
     halmat_pacing_mode_t pacing_mode = HALMAT_PACING_BURST;
     device_map_t maps[MAX_DEVICE_MAPS];
@@ -1133,6 +1200,10 @@ int main(int argc, char **argv) {
             num_blanks = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--line-length") == 0 && i + 1 < argc) {
             line_length = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--page-length") == 0 && i + 1 < argc) {
+            page_length = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--ff") == 0 && i + 1 < argc) {
+            ff_string = unescape_c_string(argv[++i]); /* malloc'd; lives for the process's lifetime */
         } else if (strcmp(argv[i], "--time-scale") == 0 && i + 1 < argc) {
             char *endptr = NULL;
             time_scale = strtod(argv[++i], &endptr);
@@ -1293,8 +1364,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: %s\n", argv[0], cerrbuf);
             return 1;
         }
-        int rc = run_linked_container(&c, num_blanks, line_length, maps, num_maps, disasm, time_scale, pacing_mode,
-                                       debug_mode, &colors, unpaged_devices);
+        int rc = run_linked_container(&c, num_blanks, line_length, page_length, ff_string, maps, num_maps, disasm,
+                                       time_scale, pacing_mode, debug_mode, &colors, unpaged_devices);
         halmat_container_free(&c);
         return rc;
     }
@@ -1312,10 +1383,11 @@ int main(int argc, char **argv) {
         }
         char *dir_ptrs[MAX_UNITS];
         for (int i = 0; i < num_dirs; i++) dir_ptrs[i] = dirs[i];
-        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, line_length, maps, num_maps,
-                           time_scale, pacing_mode, debug_mode, &colors, unpaged_devices);
+        return run_linked(dir_ptrs, num_dirs, mode, entry_opt, disasm, num_blanks, line_length, page_length,
+                           ff_string, maps, num_maps, time_scale, pacing_mode, debug_mode, &colors, unpaged_devices);
     }
 
     return run_single(path, disasm, debug_mode, use_py, use_opt, litfile_opt, memory_opt, num_blanks, line_length,
-                       maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale, pacing_mode, unpaged_devices);
+                       page_length, ff_string, maps, num_maps, raf_maps, num_raf_maps, &colors, time_scale,
+                       pacing_mode, unpaged_devices);
 }

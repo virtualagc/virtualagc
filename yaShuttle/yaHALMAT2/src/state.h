@@ -569,6 +569,24 @@ typedef struct {
  * needing more than 134-DOTS.hal's own 20, so left as a smaller,
  * separately-fixable gap rather than guessed at now. */
 typedef struct {
+    /* WRITE only (kind == 2): one of the five USA003087 Sec. 12.4 device-
+     * mechanism-positioning pseudo-functions (TAB/COLUMN/SKIP/LINE/PAGE) --
+     * not a data value at all, so every other field below is meaningless
+     * when this is set. `ioctl_kind` mirrors OP_XXAR's own already-
+     * confirmed TAG2 encoding (class-0/XXAR.md): 1=TAB, 2=COLUMN, 3=SKIP,
+     * 4=LINE, 5=PAGE. `ioctl_n` is the resolved integer argument (alpha/
+     * beta/gamma in the spec's own notation). These can appear anywhere in
+     * a WRITE statement's item list, interleaved with ordinary data items
+     * (`WRITE(6) C1, SKIP(1), C2;`) -- flush_write (interp.c) applies each
+     * in original sequence rather than pulling them out to a separate
+     * pre-pass the way READ/READALL's simpler has_skip/has_column fields
+     * (below) do; user-reported (WRITE-context SKIP/COLUMN silently
+     * printing their own numeric argument as an ordinary data field
+     * instead of repositioning anything -- OP_XXAR's TAG2 check was only
+     * ever wired up for READ/READALL, never WRITE). */
+    bool is_ioctl;
+    int ioctl_kind;
+    int32_t ioctl_n;
     bool is_string;
     bool is_scalar;
     bool is_bits;   /* WRITE only (kind == 2): a raw BIT-typed argument -- see
@@ -697,6 +715,39 @@ typedef struct {
     bool is_assign;
 } halmat_io_item_t;
 
+/* Per-device "device mechanism" position, USA003087 Sec. 12.2/12.4's own
+ * term -- persists across WRITE statements to the same device (unlike
+ * io_pending, which is reset per-statement), since the mechanism's
+ * position at the end of one WRITE is exactly where the next one picks up
+ * ("[o]therwise, the device mechanism moves down one line from its
+ * current position" -- Sec. 12.2's execution-sequence rule). `line_buf`
+ * buffers the CURRENT (not yet finalized) line's content: a WRITE
+ * statement's own last line stays open/buffered, not flushed to the
+ * output file, until something actually moves the mechanism down (the
+ * *next* WRITE's own default or explicit vertical movement, or program-
+ * end cleanup) -- this is what makes backward TAB(-n)/COLUMN(n) overstrike
+ * possible at all (USA003087 Fig. 12-5's own worked example exercises
+ * exactly this), since a plain streaming write to the output FILE* could
+ * never move backward once a character is flushed. `col` is 1-based
+ * (matching the spec's own "must not move left past column 1" language)
+ * and names the column the *next* character will land at; it is
+ * independent of line_buf_len (a backward TAB followed by a short
+ * overwrite leaves col short of the buffer's true extent, exactly
+ * matching a real line printer's overstrike). */
+typedef struct {
+    bool started;         /* has this device had a WRITE issued yet? (Sec.
+                            * 12.2: the very first WRITE positions at
+                            * column 1/line 1[/page 1], no line finalized) */
+    int page;              /* current page number, 1-based (PAGED only) */
+    int line;               /* current line within the page, 1-based */
+    int col;                 /* column the next character will be written
+                               * at, 1-based */
+    char *line_buf;         /* growable buffer for the still-open current line */
+    size_t line_buf_len;    /* high-water content length (bytes actually
+                              * written or space-padded so far) */
+    size_t line_buf_cap;
+} halmat_device_mech_t;
+
 struct halmat_state {
     const halmat_program_t *prog;
     const halmat_literal_table_t *literals;
@@ -771,6 +822,45 @@ struct halmat_state {
      * 7.5836210E+05` PAGED vs. `'THE ANSWER IS' 7.5836210E+05` UNPAGED)
      * -- SCALAR/INTEGER field formatting is identical either way. */
     bool device_unpaged[HALMAT_DEVICE_MAX];
+
+    /* WRITE-only device mechanism state (halmat_device_mech_t's own
+     * comment) -- one entry per logical device number, independent of
+     * devices[]/device_unpaged[] above (READ/READALL use their own,
+     * simpler device_read_started/device_line_start tracking below,
+     * unaffected by this). */
+    halmat_device_mech_t device_mech[HALMAT_DEVICE_MAX];
+
+    /* PAGE(beta)/LINE(gamma)'s own "L" (USA003087 Sec. 12.4: "[t]he value
+     * of gamma must lie in the range 1 <= gamma <= L, where L is the
+     * number of lines per page[, which] is implementation dependent" --
+     * exposed as --page-length, main.c). Default 66, the IBM 1403 line
+     * printer's own documented lines-per-page (user-supplied, this
+     * runtime's own historical target hardware, matching the same
+     * reasoning as line_length's 132-column PAGED default above). Only
+     * meaningful for PAGED devices -- LINE(gamma) on an UNPAGED device has
+     * no page concept at all (Sec. 12.4 rule 4 vs. rule 5), and PAGE()
+     * itself is documented as usable "only in I/O via a paged device". */
+    int page_length;
+
+    /* The string emitted between pages (PAGE()/an automatic page-length
+     * overflow), user-facing as --page-length's companion --ff option
+     * (main.c) -- default a single ASCII form-feed (0x0C), matching a
+     * real line printer's own page-eject convention, but may be any
+     * string (a page-heading template, or '' to suppress the gap
+     * entirely). A literal "%p" substring is replaced with the page
+     * number being advanced *to* (1-based, auto-incrementing) at each
+     * emission -- expand_page_break_string(), interp.c. Owned (dup_string'd
+     * by interp_set_page_break_string()); freed by interp_cleanup(). */
+    char *page_break_string;
+
+    /* Whether page_break_string gets an implied trailing newline appended
+     * at each emission -- true unless the *configured* string (before %p
+     * substitution) is empty, is a bare single form-feed character, or
+     * already ends in '\n' itself (avoiding a doubled blank line in the
+     * common case of a user-supplied heading template that already ends
+     * with its own newline). Computed once by interp_set_page_break_
+     * string() rather than re-derived at every page break. */
+    bool page_break_implies_newline;
 
     /* Per-device: has a READ/READALL already executed against this device?
      * USA003087 Sec. 12.3: "If the READ statement is the first to be

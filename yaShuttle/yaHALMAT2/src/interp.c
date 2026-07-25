@@ -2202,6 +2202,9 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->num_blanks = num_blanks;
     state->line_length = -1; /* not explicitly set; flush_write picks the per-device
                                * PAGED(132)/UNPAGED(80) default -- see state.h's comment */
+    state->page_length = 66; /* IBM 1403 line printer default; --page-length overrides (main.c) */
+    state->page_break_string = dup_string("\f");
+    state->page_break_implies_newline = false; /* bare form-feed default -- see state.h's comment */
     precompute_loop_targets(state);
     precompute_labels(state);
     precompute_for_loops(state);
@@ -2279,6 +2282,23 @@ void interp_set_pacing_mode(halmat_state_t *state, halmat_pacing_mode_t mode) {
 
 void interp_set_line_length(halmat_state_t *state, int line_length) {
     state->line_length = line_length;
+}
+
+void interp_set_page_length(halmat_state_t *state, int page_length) {
+    state->page_length = page_length;
+}
+
+/* Sets the between-page string (--ff, main.c) and precomputes whether it
+ * gets an implied trailing newline (state.h's page_break_implies_newline
+ * comment: suppressed for "", a bare form-feed, or a string that already
+ * ends in '\n'). `s` is copied; the caller retains ownership of its own
+ * argument. */
+void interp_set_page_break_string(halmat_state_t *state, const char *s) {
+    free(state->page_break_string);
+    state->page_break_string = dup_string(s);
+    size_t len = strlen(s);
+    state->page_break_implies_newline =
+        !(len == 0 || (len == 1 && s[0] == '\f') || (len > 0 && s[len - 1] == '\n'));
 }
 
 /* Frees whichever of elements/bit_elements/char_elements (state.h) an
@@ -2375,32 +2395,240 @@ void interp_cleanup(halmat_state_t *state) {
     state->error_handlers = NULL;
     state->error_handler_count = 0;
     state->error_handler_capacity = 0;
+
+    /* A WRITE's own last line stays buffered (device_mech's own comment,
+     * state.h) until something moves the mechanism down -- for the very
+     * *last* WRITE issued to a device in the whole run, nothing ever does,
+     * so it must be flushed here or it's silently lost. Called before
+     * main.c's own fclose() of these files (interp_cleanup doesn't own
+     * them either way, same as devices[] itself). */
+    for (int d = 0; d < HALMAT_DEVICE_MAX; d++) {
+        halmat_device_mech_t *dm = &state->device_mech[d];
+        if (dm->started && state->devices[d]) {
+            if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, state->devices[d]);
+            fputc('\n', state->devices[d]);
+        }
+        free(dm->line_buf);
+        dm->line_buf = NULL;
+    }
+    free(state->page_break_string);
+    state->page_break_string = NULL;
 }
 
-/* Emits one already-formatted WRITE data field, honoring the standard
- * num_blanks separator and the line_length wrap column (USA003087 Sec.
- * 12.2: fields "separated from each other by the standard number of
- * blanks, ... overflowing onto succeeding lines as required") -- shared
- * by every field kind flush_write below produces, including each
- * individual element of an expanded whole-VECTOR/MATRIX/ARRAY item.
- * `*col` is the current 0-based output column; `*need_sep` is false only
- * for the very first field of the whole WRITE statement, or right after
- * a forced line break (a MATRIX row boundary, below) where alignment
- * itself takes the place of a separator. This interpreter doesn't model
- * TAB/COLUMN-adjusted starting positions (class-0/XXAR.md's I/O-control
- * specifiers), so column 0 is the only "un-adjusted" wrapped-line start
- * there is. */
-static void emit_write_field(halmat_state_t *state, FILE *out, const char *text, int *col, bool *need_sep, int wrap_col) {
-    int width = (int)strlen(text);
-    int sep = *need_sep ? state->num_blanks : 0;
-    if (*need_sep && *col + sep + width > wrap_col) {
-        fputc('\n', out);
-        *col = 0;
-        sep = 0;
+/* Writes `text` into `dm`'s current-line buffer starting at 1-based
+ * column `col`, growing the buffer as needed and space-padding any gap
+ * between the buffer's existing high-water content and `col` (so a
+ * forward jump past the end of what's been written so far reads as
+ * blanks, matching a real device mechanism moving right over untouched
+ * paper). Does NOT truncate or clear anything already in the buffer past
+ * `col + strlen(text)` -- an earlier COLUMN/TAB that jumped backward and
+ * is now being followed by a *shorter* field correctly leaves the
+ * remainder of whatever was there before untouched (overstrike, not
+ * replace-to-end-of-line; this is what makes Fig. 12-5's own `TAB(-50)`
+ * worked example -- moving left mid-line then writing more text -- come
+ * out right). Updates dm->col to just past the written text. */
+static void dm_write_at(halmat_device_mech_t *dm, int col, const char *text) {
+    size_t start = (size_t)(col - 1);
+    size_t len = strlen(text);
+    size_t need = start + len;
+    if (need > dm->line_buf_cap) {
+        size_t new_cap = dm->line_buf_cap ? dm->line_buf_cap * 2 : 128;
+        while (new_cap < need) new_cap *= 2;
+        dm->line_buf = realloc(dm->line_buf, new_cap);
+        dm->line_buf_cap = new_cap;
     }
-    for (int b = 0; b < sep; b++) fputc(' ', out);
-    fputs(text, out);
-    *col += sep + width;
+    if (start > dm->line_buf_len) {
+        memset(dm->line_buf + dm->line_buf_len, ' ', start - dm->line_buf_len);
+    }
+    if (len > 0) memcpy(dm->line_buf + start, text, len);
+    if (need > dm->line_buf_len) dm->line_buf_len = need;
+    dm->col = col + (int)len;
+}
+
+/* Commits `dm`'s current-line buffer to `out` with a trailing newline and
+ * resets it for the next line -- the device mechanism's own vertical
+ * movement (dm_advance_lines/dm_do_page/dm_do_line below) is what decides
+ * *when* this happens; flush_write itself never calls this at the end of
+ * a statement (state.h's device_mech comment: the last line of a WRITE
+ * stays open/buffered for whatever comes next, matching USA003087 Sec.
+ * 12.2's own "device mechanism is left positioned one column to the
+ * right of the end of the last data field written" -- not flushed to a
+ * fresh line). Does NOT touch dm->line/dm->page; the caller owns those. */
+static void dm_finalize_line(halmat_device_mech_t *dm, FILE *out) {
+    if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, out);
+    fputc('\n', out);
+    dm->line_buf_len = 0;
+    dm->col = 1;
+}
+
+/* Substitutes every literal "%p" in `tmpl` (state->page_break_string,
+ * --ff) with `page_num` in decimal -- the only substitution the user
+ * asked for; any other content (including a stray lone '%') passes
+ * through verbatim. Returns a malloc'd buffer the caller must free(). */
+static char *expand_page_break_string(const char *tmpl, int page_num) {
+    size_t cap = strlen(tmpl) + 16;
+    char *out = malloc(cap);
+    size_t o = 0;
+    for (const char *p = tmpl; *p; ) {
+        if (p[0] == '%' && p[1] == 'p') {
+            char numbuf[16];
+            int n = snprintf(numbuf, sizeof(numbuf), "%d", page_num);
+            if (o + (size_t)n + 1 > cap) { cap = (o + (size_t)n + 1) * 2; out = realloc(out, cap); }
+            memcpy(out + o, numbuf, (size_t)n);
+            o += (size_t)n;
+            p += 2;
+        } else {
+            if (o + 2 > cap) { cap *= 2; out = realloc(out, cap); }
+            out[o++] = *p++;
+        }
+    }
+    if (o + 1 > cap) { cap += 1; out = realloc(out, cap); }
+    out[o] = '\0';
+    return out;
+}
+
+/* Emits state->page_break_string (with "%p" resolved to `page_num`) to
+ * `out`, honoring page_break_implies_newline (state.h's comment). Called
+ * every time dm_advance_lines/dm_do_page/dm_do_line cross a page
+ * boundary on a PAGED device. */
+static void emit_page_break(halmat_state_t *state, FILE *out, int page_num) {
+    char *expanded = expand_page_break_string(state->page_break_string, page_num);
+    fputs(expanded, out);
+    if (state->page_break_implies_newline) fputc('\n', out);
+    free(expanded);
+}
+
+/* Moves `dm` down exactly `n` (>= 0) lines, finalizing each line crossed
+ * along the way (dm_finalize_line -- the first is whatever content was
+ * actually written on it, the rest are blank), and correctly turning the
+ * page (emit_page_break) whenever a PAGED device's line counter would
+ * exceed state->page_length. UNPAGED devices have no page concept at all
+ * (USA003087 Sec. 12.4 rule 4 vs. rule 5) so `unpaged` skips the page-
+ * length check entirely -- a flat, ever-increasing line counter. Shared
+ * by: the default 1-line advance at the start of every WRITE but a
+ * device's very first, an ordinary field-overflow wrap (a field that
+ * wouldn't fit within the line-length limit), and explicit SKIP(n)/
+ * LINE(gamma) (dm_do_line's own same-page branch). n is looped one line
+ * at a time rather than batch-computed -- n is always small in any real
+ * program (bounded by page_length at most, typically far less), and a
+ * straightforward per-line loop is far less error-prone than batching
+ * the page-crossing arithmetic.
+ *
+ * n == 0 is a real, meaningful case (SKIP(0), or LINE(gamma) when
+ * already on line gamma) -- Fig. 12-6's own worked example
+ * (`SKIP(0),C1, LINE(1),C2,C3;`) shows SKIP(0) "inhibits [the] default
+ * line advance" (so no line is finalized/no page-turn check happens)
+ * while C1 still "starts in column 1" -- i.e. the mechanism still gets
+ * *repositioned* to column 1 of the (unchanged) current line, it just
+ * doesn't move to a new one. The ordinary n>=1 loop below achieves this
+ * as a side effect of dm_finalize_line's own col=1 reset; n==0 needs it
+ * spelled out explicitly since the loop body never runs. */
+static void dm_advance_lines(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, int n, bool unpaged) {
+    if (n == 0) { dm->col = 1; return; }
+    for (int i = 0; i < n; i++) {
+        dm_finalize_line(dm, out);
+        if (!unpaged && dm->line >= state->page_length) {
+            dm->page++;
+            emit_page_break(state, out, dm->page);
+            dm->line = 1;
+        } else {
+            dm->line++;
+        }
+    }
+}
+
+/* PAGE(beta), USA003087 Sec. 12.4 rule 3: moves down `beta` (>= 0) pages,
+ * *keeping the relative line number unchanged* (Fig. 12-7's own worked
+ * example: line 41 of page 5 -> PAGE(1) -> line 41 of page 6) -- distinct
+ * from dm_advance_lines, which always lands on line 1 of a new page.
+ * Fails loudly on an UNPAGED device (Sec. 12.4: "PAGE can be used only in
+ * I/O via a paged device"). beta == 0 is a genuine no-op (mechanism
+ * completely unchanged) -- still meaningful at the start of a WRITE,
+ * where it suppresses the default 1-line advance the same way SKIP(0)
+ * does, without otherwise doing anything. */
+static bool dm_do_page(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, int beta, bool unpaged) {
+    if (unpaged) { fail(state, "PAGE: only valid for a PAGED device"); return false; }
+    if (beta < 0) { fail(state, "PAGE: argument must not be negative"); return false; }
+    if (beta == 0) return true;
+    int saved_line = dm->line;
+    dm_finalize_line(dm, out);
+    for (int i = 0; i < beta; i++) {
+        dm->page++;
+        emit_page_break(state, out, dm->page);
+    }
+    dm->line = 1;
+    if (saved_line > 1) {
+        for (int k = 1; k < saved_line; k++) fputc('\n', out);
+        dm->line = saved_line;
+    }
+    return true;
+}
+
+/* LINE(gamma), USA003087 Sec. 12.4 rule 4 (UNPAGED)/rule 5 (PAGED).
+ * PAGED: "[l]et the device mechanism be on line l prior to execution of
+ * LINE(gamma). If gamma < l then the device mechanism moves to line
+ * [gamma] on the next page. If gamma > l then the device mechanism moves
+ * to line gamma on the current page" -- user-corrected reading of the
+ * primary source's own text (USA003087.txt:6220ish literally says "moves
+ * to line l on the next page," which would mean LINE's own argument is
+ * ignored on a page-crossing move, an internally-inconsistent reading
+ * against the whole point of specifying gamma; the project owner
+ * confirmed this is presumed to be a source typo for "line gamma"). The
+ * gamma == l case is treated as "already there" (falls into the
+ * gamma >= l / same-page branch, zero lines to move) rather than forcing
+ * a page turn, since gamma < l is the only case Sec. 12.4 actually
+ * documents as needing one. UNPAGED: a flat line counter with no page
+ * concept at all -- gamma must not be less than the current line
+ * ("must not be such as to cause upward movement," rule 4), fails loudly
+ * otherwise (matching the project's established "fail loudly rather than
+ * misbehave" convention for a genuinely illegal request, same as a real
+ * HALSFC compile would reject it). */
+static bool dm_do_line(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, int gamma, bool unpaged) {
+    if (unpaged) {
+        if (gamma < dm->line) { fail(state, "LINE: illegal upward movement on an UNPAGED device"); return false; }
+        dm_advance_lines(state, dm, out, gamma - dm->line, true);
+        return true;
+    }
+    if (gamma < 1 || gamma > state->page_length) {
+        fail(state, "LINE: argument %d out of range 1..%d (--page-length)", gamma, state->page_length);
+        return false;
+    }
+    if (gamma >= dm->line) {
+        dm_advance_lines(state, dm, out, gamma - dm->line, false);
+    } else {
+        dm_finalize_line(dm, out);
+        dm->page++;
+        emit_page_break(state, out, dm->page);
+        dm->line = 1;
+        if (gamma > 1) {
+            for (int k = 1; k < gamma; k++) fputc('\n', out);
+        }
+        dm->line = gamma;
+    }
+    return true;
+}
+
+/* Emits one already-formatted WRITE data field into `dm`'s current line,
+ * honoring the standard num_blanks separator and the line_length wrap
+ * column (USA003087 Sec. 12.2: fields "separated from each other by the
+ * standard number of blanks, ... overflowing onto succeeding lines as
+ * required") -- shared by every field kind flush_write below produces,
+ * including each individual element of an expanded whole-VECTOR/MATRIX/
+ * ARRAY item. `*need_sep` is false only for the very first field of the
+ * whole WRITE statement, right after a forced line break (a MATRIX row
+ * boundary, or an ordinary overflow wrap, below), or right after an
+ * explicit TAB/COLUMN/SKIP/LINE/PAGE specifier (which "overrides the
+ * standard data field separation," Sec. 12.4) -- in each of those cases
+ * the field lands exactly at dm->col with no leading blanks. */
+static void dm_emit_field(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, const char *text, bool *need_sep, int wrap_col, bool unpaged) {
+    int width = (int)strlen(text);
+    int col = *need_sep ? dm->col + state->num_blanks : dm->col;
+    if (*need_sep && col - 1 + width > wrap_col) {
+        dm_advance_lines(state, dm, out, 1, unpaged);
+        col = dm->col; /* == 1, just reset by dm_advance_lines */
+        *need_sep = false;
+    }
+    dm_write_at(dm, col, text);
     *need_sep = true;
 }
 
@@ -2450,9 +2678,8 @@ static void format_bit_field(uint32_t bits, int width, char *buf) {
     buf[o] = '\0';
 }
 
-static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
-    int col = 0;
-    bool need_sep = false;
+static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpaged) {
+    halmat_device_mech_t *dm = &state->device_mech[device];
     /* state->line_length < 0 means --line-length wasn't explicitly given
      * (main.c) -- pick the per-device default derived from USA003090 Sec.
      * 6.1.4's LRECL defaults (state.h's line_length comment): 132 for
@@ -2460,7 +2687,101 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
      * carriage-control byte an FBA record format implies), 80 for UNPAGED
      * (plain FB, no control byte, the full LRECL is printable). */
     int wrap_col = state->line_length >= 0 ? state->line_length : (unpaged ? 80 : 132);
+
+    /* USA003087 Sec. 12.2's own execution-sequence rule: "[i]f the WRITE
+     * statement is the first to be executed for the specified device, the
+     * device mechanism positions itself at column 1 of line 1 (on page 1
+     * if the device is paged). Otherwise, the device mechanism moves down
+     * one line from its current position, and repositions itself at
+     * column 1" -- UNLESS an explicit SKIP/LINE/PAGE is the very first
+     * item, which "overrides the default downward movement of one line"
+     * entirely (that item does the real work in the loop below instead).
+     *
+     * Separately: Sec. 12.4's own "[i]f a TAB or COLUMN pseudo-function
+     * appears at the beginning of a...WRITE statement, it overrides the
+     * default positioning at column 1" -- confirmed via Fig. 12-5's own
+     * worked example (`WRITE(6)TAB(-50),C1,COLUMN(5),C2,C3,TAB(2);`,
+     * starting from an established column ~80 left over from whatever
+     * came before): a *leading* TAB is relative to the column the
+     * mechanism was already at before this statement began, NOT relative
+     * to column 1 -- despite the ordinary default vertical movement still
+     * happening (Fig. 12-5's own "MOVE DOWN 1 LINE BY DEFAULT" label,
+     * simultaneous with "TAB LEFT 50 COLUMNS"). So the pre-statement
+     * column is captured here, and restored (overriding the default
+     * advance's own col=1 reset) right before a leading TAB/COLUMN item
+     * gets its turn in the loop below. Scoped narrowly to items[0]
+     * specifically (the literal "at the beginning" case Fig. 12-5
+     * demonstrates) -- an explicit SKIP/LINE/PAGE followed by a TAB/
+     * COLUMN in items[1] is left as ordinary sequential application
+     * (relative to whatever column that vertical item's own move landed
+     * on), a reasonable default for a combination no fixture or corpus
+     * program is confirmed to need. */
+    int pre_stmt_col = dm->col;
+    bool leads_with_horizontal = state->io_pending.item_count > 0 &&
+        state->io_pending.items[0].is_ioctl &&
+        (state->io_pending.items[0].ioctl_kind == 1 || state->io_pending.items[0].ioctl_kind == 2);
+    bool need_sep = false;
+    if (!dm->started) {
+        dm->started = true;
+        dm->page = 1;
+        dm->line = 1;
+        dm->col = 1;
+        dm->line_buf_len = 0;
+    } else {
+        bool leads_with_vertical = state->io_pending.item_count > 0 &&
+            state->io_pending.items[0].is_ioctl &&
+            (state->io_pending.items[0].ioctl_kind == 3 || state->io_pending.items[0].ioctl_kind == 4 ||
+             state->io_pending.items[0].ioctl_kind == 5);
+        if (!leads_with_vertical) {
+            dm_advance_lines(state, dm, out, 1, unpaged);
+            if (leads_with_horizontal) dm->col = pre_stmt_col;
+        }
+    }
+
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+        if (state->io_pending.items[i].is_ioctl) {
+            /* USA003087 Sec. 12.4's five device-mechanism-positioning
+             * pseudo-functions (class-0/XXAR.md's confirmed TAG2 encoding,
+             * mirrored by ioctl_kind: 1=TAB, 2=COLUMN, 3=SKIP, 4=LINE,
+             * 5=PAGE) -- not a data value, so this branch never falls
+             * through to the ordinary field-formatting logic below. Each
+             * (per Sec. 12.4's own general rule) "overrides the standard
+             * data field separation" for whichever field follows it, so
+             * need_sep is forced false afterward -- except a no-op
+             * PAGE(0), which by definition changes nothing. */
+            int n = state->io_pending.items[i].ioctl_n;
+            switch (state->io_pending.items[i].ioctl_kind) {
+                case 1: { /* TAB(alpha): relative */
+                    int new_col = dm->col + n;
+                    if (new_col < 1) { fail(state, "TAB: would move left of column 1"); return; }
+                    if (new_col > wrap_col) { fail(state, "TAB: would move right of column %d", wrap_col); return; }
+                    dm->col = new_col;
+                    need_sep = false;
+                    break;
+                }
+                case 2: { /* COLUMN(beta): absolute */
+                    if (n < 1) { fail(state, "COLUMN: must be >= 1"); return; }
+                    if (n > wrap_col) { fail(state, "COLUMN: must be <= %d", wrap_col); return; }
+                    dm->col = n;
+                    need_sep = false;
+                    break;
+                }
+                case 3: /* SKIP(alpha) */
+                    if (n < 0) { fail(state, "SKIP: argument must not be negative"); return; }
+                    dm_advance_lines(state, dm, out, n, unpaged);
+                    need_sep = false;
+                    break;
+                case 4: /* LINE(gamma) */
+                    if (!dm_do_line(state, dm, out, n, unpaged)) return;
+                    need_sep = false;
+                    break;
+                case 5: /* PAGE(beta) */
+                    if (!dm_do_page(state, dm, out, n, unpaged)) return;
+                    if (n > 0) need_sep = false;
+                    break;
+            }
+            continue;
+        }
         if (state->io_pending.items[i].is_container) {
             /* Whole VECTOR/MATRIX/ARRAY WRITE argument (OP_XXAR above):
              * expand every element into its own data field, per
@@ -2478,19 +2799,18 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                  * generic "only when it doesn't fit" wrap rule used
                  * everywhere else), with the new line's starting column
                  * fixed to wherever row 0's own first field began. */
-                int align_col = 0;
+                int align_col = 1;
                 for (int r = 0; r < rows; r++) {
                     if (r > 0) {
-                        fputc('\n', out);
-                        for (int p = 0; p < align_col; p++) fputc(' ', out);
-                        col = align_col;
+                        dm_advance_lines(state, dm, out, 1, unpaged);
+                        dm->col = align_col;
                         need_sep = false;
                     }
                     for (int c = 0; c < cols; c++) {
                         char buf[32];
                         halmat_scalar_format(elems[(size_t)r * cols + c], buf, sizeof(buf));
-                        emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
-                        if (r == 0 && c == 0) align_col = col - (int)strlen(buf);
+                        dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
+                        if (r == 0 && c == 0) align_col = dm->col - (int)strlen(buf);
                     }
                 }
             } else {
@@ -2507,7 +2827,7 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                     } else {
                         halmat_scalar_format(elems[k], buf, sizeof(buf));
                     }
-                    emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
+                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
                 }
             }
         } else if (state->io_pending.items[i].is_bit_array) {
@@ -2525,10 +2845,10 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                 format_bit_field(bits[k], width, buf);
                 if (unpaged) {
                     char *quoted = quote_character_for_unpaged(buf);
-                    emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep, wrap_col);
+                    dm_emit_field(state, dm, out, quoted ? quoted : buf, &need_sep, wrap_col, unpaged);
                     free(quoted);
                 } else {
-                    emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
+                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
                 }
             }
         } else if (state->io_pending.items[i].is_char_array) {
@@ -2540,26 +2860,26 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
             for (size_t k = 0; k < count; k++) {
                 if (unpaged) {
                     char *quoted = quote_character_for_unpaged(strs[k]);
-                    emit_write_field(state, out, quoted ? quoted : strs[k], &col, &need_sep, wrap_col);
+                    dm_emit_field(state, dm, out, quoted ? quoted : strs[k], &need_sep, wrap_col, unpaged);
                     free(quoted);
                 } else {
-                    emit_write_field(state, out, strs[k], &col, &need_sep, wrap_col);
+                    dm_emit_field(state, dm, out, strs[k], &need_sep, wrap_col, unpaged);
                 }
             }
         } else if (state->io_pending.items[i].is_string) {
             if (unpaged) {
                 char *quoted = quote_character_for_unpaged(state->io_pending.items[i].string);
-                emit_write_field(state, out, quoted ? quoted : state->io_pending.items[i].string, &col, &need_sep, wrap_col);
+                dm_emit_field(state, dm, out, quoted ? quoted : state->io_pending.items[i].string, &need_sep, wrap_col, unpaged);
                 free(quoted);
             } else {
-                emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep, wrap_col);
+                dm_emit_field(state, dm, out, state->io_pending.items[i].string, &need_sep, wrap_col, unpaged);
             }
         } else if (state->io_pending.items[i].is_scalar) {
             /* Fixed-width scientific-notation field per class-2/STOC.md
              * (USA00309 Sec. 6.1.3). */
             char buf[32];
             halmat_scalar_format(state->io_pending.items[i].scalar, buf, sizeof(buf));
-            emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
+            dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
         } else if (state->io_pending.items[i].is_bits) {
             /* Binary-digit-string field, state.h's bit_width comment /
              * format_bit_field's own comment above. */
@@ -2567,10 +2887,10 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
             format_bit_field(state->io_pending.items[i].bits, state->io_pending.items[i].bit_width, buf);
             if (unpaged) {
                 char *quoted = quote_character_for_unpaged(buf);
-                emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep, wrap_col);
+                dm_emit_field(state, dm, out, quoted ? quoted : buf, &need_sep, wrap_col, unpaged);
                 free(quoted);
             } else {
-                emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
+                dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
             }
         } else {
             /* INTEGER WRITE field: 11-char right-justified, empirically
@@ -2579,10 +2899,17 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
              * cross-checked against USA00309's own text. */
             char buf[16];
             snprintf(buf, sizeof(buf), "%11d", state->io_pending.items[i].integer);
-            emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
+            dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
         }
     }
-    fputc('\n', out);
+    /* Deliberately does NOT finalize the current line here -- it stays
+     * open/buffered (dm->line_buf) for whatever the next vertical move is,
+     * whether that's the next WRITE to this same device (dm_advance_lines
+     * at the top of this function, next call) or program-end cleanup
+     * (interp_cleanup, state.h's device_mech comment) -- matching
+     * USA003087 Sec. 12.2's own "device mechanism is left positioned one
+     * column to the right of the end of the last data field written,"
+     * not "the line is terminated." */
     state->io_pending.active = false;
     state->io_pending.item_count = 0;
 }
@@ -6322,6 +6649,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!state->io_pending.active) { fail(state, "XXAR outside of an XXST...XXND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "XXAR: expected 1 operand"); break; }
                 if (!io_pending_reserve_item(state)) break;
+                state->io_pending.items[state->io_pending.item_count].is_ioctl = false; /* stale-flag
+                    clear, same reason as is_container/is_bit_array/is_char_array below --
+                    items[] slots are reused across statements without zeroing, and only the
+                    new WRITE-context ioctl branch just below ever sets this true */
                 if (!state->io_pending.is_call && state->io_pending.kind != 2) {
                     /* READ/READALL: the argument is a destination, not a
                      * value -- capture the raw operand for OP_READ to
@@ -6398,6 +6729,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         * slots are reused across READ statements without zeroing -- a stale true from a
                         * previous statement's whole-container item at this same slot must be cleared,
                         * same convention as the WRITE-side is_container reset just below. */
+                    state->io_pending.item_count++;
+                    break;
+                }
+                if (state->io_pending.kind == 2 && !state->io_pending.is_call && ins->operands[0].tag2 != 0) {
+                    /* WRITE-context I/O control specifier (class-0/XXAR.md's
+                     * confirmed TAG2 encoding, same as the READ/READALL
+                     * case above: 1=TAB, 2=COLUMN, 3=SKIP, 4=LINE, 5=PAGE)
+                     * -- user-reported: these previously fell straight
+                     * through to the ordinary "resolve and print as a data
+                     * value" path below (this whole check simply didn't
+                     * exist for WRITE), so `WRITE(6) SKIP(0), C1,
+                     * COLUMN(20), C2;` printed the literal numbers 0 and 20
+                     * as ordinary INTEGER fields instead of repositioning
+                     * anything. Unlike READ/READALL's simpler has_skip/
+                     * has_column pre-pass fields (only ever applied once,
+                     * before any destination item), these can appear
+                     * *anywhere* in a WRITE's item list, interleaved with
+                     * ordinary data items (USA003087 Sec. 12.4: "[i]f a TAB
+                     * or COLUMN appears between two expressions in a WRITE
+                     * statement, it overrides the standard data field
+                     * separation" -- SKIP/LINE/PAGE have the equivalent
+                     * vertical-movement version of this same rule) -- so
+                     * captured as an ordinary items[]/item_count entry
+                     * (is_ioctl, state.h) instead, applied in original
+                     * sequence by flush_write (interp.c). */
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    state->io_pending.items[state->io_pending.item_count].is_ioctl = true;
+                    state->io_pending.items[state->io_pending.item_count].ioctl_kind = ins->operands[0].tag2;
+                    state->io_pending.items[state->io_pending.item_count].ioctl_n = rv_to_integer(&a);
                     state->io_pending.item_count++;
                     break;
                 }
@@ -6696,7 +7056,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "WRITE(%d): device not mapped (use --ddo)", device);
                     break;
                 }
-                flush_write(state, state->devices[device], state->device_unpaged[device]);
+                flush_write(state, device, state->devices[device], state->device_unpaged[device]);
                 break;
             }
 

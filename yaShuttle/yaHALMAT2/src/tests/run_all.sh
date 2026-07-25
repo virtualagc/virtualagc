@@ -1266,6 +1266,61 @@ run ./run_local_fixture.sh many_call_args " 2.1000000E+02"
 # for the PAGED-default line-length fix below (132, was 80) -- each row's
 # first physical line now fits 6 fields before wrapping, was 3.
 run ./run_local_fixture.sh dots "$(printf 'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01')"
+# User-reported: WRITE-context SKIP/COLUMN/TAB/LINE/PAGE (USA003087 Sec.
+# 12.4's five device-mechanism-positioning pseudo-functions) printed their
+# own numeric argument as an ordinary data field instead of repositioning
+# anything -- OP_XXAR's TAG2 check for these specifiers was only ever
+# wired up for READ/READALL (task #17), never WRITE. Implementing this
+# properly required a genuine architecture change: the device mechanism's
+# position (page/line/col) now persists per-device across WRITE
+# statements (new device_mech[], state.h), and the *current* line stays
+# buffered in memory (not flushed to the output file) until something
+# actually moves the mechanism down -- this is what makes backward
+# TAB(-n)/COLUMN(n) overstrike possible at all, since a plain streaming
+# write can never move backward once a character reaches the file.
+# Verified end-to-end against all three of USA003087's own worked
+# examples (Sec. 12.4, Figs. 12-5/12-6/12-7), each independently
+# reconstructed with a known starting position (the book's own diagrams
+# assume unshown prior context, so exact page/line/column numbers differ
+# from the text, but the underlying mechanics match precisely):
+# - Fig. 12-5 (TAB/COLUMN): `TAB(-50),C1,COLUMN(5),C2,C3,TAB(2)` from an
+#   established column (via a preceding TAB(79) write) correctly produces
+#   C1 rightmost (overstrike after backward TAB), C2 leftmost (absolute
+#   COLUMN), C3 via the ordinary separator -- also surfaced a real
+#   modeling gap while chasing this: a *leading* TAB/COLUMN is relative
+#   to the column the mechanism was already at, not column 1 (Sec. 12.4:
+#   "it overrides the default positioning at column 1", despite the
+#   ordinary vertical movement still happening). Fixture: test_tabcol.hal.
+run ./run_local_fixture.sh tabcol "$(printf '                                                                               Q\n    SECOND     THIRD          FIRST')"
+# - Fig. 12-6 (SKIP/LINE): `SKIP(0),C1, LINE(1),C2,C3` -- SKIP(0)
+#   "inhibits [the] default line advance" (stays on the same line) while
+#   C1 still "starts in column 1" (Fig. 12-6's own label) -- surfaced a
+#   second gap: dm_advance_lines(n=0) is a real, meaningful case (SKIP(0),
+#   or LINE(gamma) when already on line gamma), not just a degenerate
+#   no-op skip; needed an explicit column-1 reset since n==0 means the
+#   per-line loop that normally does that never runs. LINE(1), gamma=1
+#   less than the current (established via a preceding SKIP(4)) line,
+#   correctly crosses to line 1 of the next page. Fixture:
+#   test_skipline.hal, run with --page-length 10.
+run ./run_local_fixture.sh skipline "$(printf '\n\n\n\nFIRST\n\fSECOND     THIRD')" --page-length 10
+# - Fig. 12-7 (PAGE): `SKIP(4),C1, PAGE(1),C2` -- PAGE(1) moves to the
+#   next page while keeping the *relative line number unchanged* (C1 and
+#   C2 land on the same line number, one page apart) -- confirmed via
+#   USA003090 Sec. 6.1.4's RECFM=FBA finding (this same session's
+#   line-length fix): the between-page string defaults to a bare
+#   ASCII form-feed (0x0C), matching a real line printer's own page-eject
+#   convention, exposed as --ff (with %p auto-substituted with the page
+#   number, an implied trailing newline unless the string is empty/a bare
+#   form-feed/already ends in '\n' -- user-specified design). Fixture:
+#   test_page.hal, run with --page-length 10.
+run ./run_local_fixture.sh page "$(printf '\n\n\n\nFIRST\n\f\n\n\n\nSECOND')" --page-length 10
+# Same fixture, --ff overridden to a page-heading template with a
+# literal "%p" (user-specified design): confirms the substitution (page 2,
+# the page being advanced *to*) and the implied trailing newline a
+# non-empty/non-bare-form-feed/non-newline-terminated --ff string gets
+# (so the heading lands on its own line rather than running into the
+# blank-line padding that follows it).
+run ./run_local_fixture.sh page "$(printf '\n\n\n\nFIRST\n=== PAGE 2 ===\n\n\n\n\nSECOND')" --page-length 10 --ff '=== PAGE %p ==='
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
