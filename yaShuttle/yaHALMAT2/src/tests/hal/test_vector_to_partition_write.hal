@@ -1,0 +1,16 @@
+C/ Verifies a VECTOR to-partition subscript (`V(4 TO 7)`) works as an
+C/ assignment receiver, not just a readable value -- `V(4 TO 7) = SUBV;`
+C/ (SUBV itself a VECTOR(4)) writes straight back into V's own storage.
+C/ A plain SCALAR RHS (`V(4 TO 7) = 5.0;`) is illegal HAL/S (confirmed
+C/ via a direct HALSFC compile: "TYPE OF V IS ILLEGAL FOR ASSIGNMENT
+C/ FROM GIVEN RIGHT-HAND SIDE"), so this is only ever reached with a
+C/ genuine VECTOR-shaped source.
+
+  VTOPART: PROGRAM;
+     DECLARE V VECTOR(10);
+     DECLARE SUBV VECTOR(4) INITIAL(5.0,5.0,5.0,5.0);
+M    V         = SUBV;
+S      4 TO 7
+     WRITE(6) V;
+Y %SVCI(0);
+  CLOSE VTOPART;

@@ -1738,6 +1738,27 @@ run ./run_read_fixture.sh tasn_array_terminal "$(printf '1 2 3 10.5 7 20.5 1\n99
 # C padded to "007" -> ".007", each then RJUST-padded to WIDTH=10).
 run ./run_local_fixture.sh reformat_csz "$(printf '     3.314\n   -42.425\n      .007')"
 
+# User-reported (investigating whether NINT/MINT/VINT relate to VECTOR
+# slice assignment turned up a genuine, separate bug instead): `V(4 TO
+# 7) = SUBV;` (V a VECTOR(10), SUBV a VECTOR(4)) -- a VECTOR to-partition
+# subscript used as an assignment receiver. DSUB's own to-partition
+# branch only ever produced a *readable* VAC container result; nothing
+# marked it is_container_ref the way the sibling asterisk-partition case
+# (`M$(I,*) = ...;`) already does, so MASN/VASN's own receiver check
+# rejected it outright ("MASN/VASN: receiver must be SYT"). Fixed by
+# adding the same is_container_ref/container_ref_syt/offset/stride
+# marking the asterisk-partition branch already sets, scoped to the
+# single-dimension VECTOR/ARRAY case only (matching the sibling
+# at-partition branch's own scope; MATRIX to-partition isn't handled).
+# Confirmed via a direct HALSFC compile that a plain SCALAR RHS
+# (`V(4 TO 7) = 5.0;`) is illegal HAL/S in the first place ("TYPE OF V
+# IS ILLEGAL FOR ASSIGNMENT FROM GIVEN RIGHT-HAND SIDE"), so this DSUB
+# shape is only ever reached with a genuine VECTOR-shaped source.
+# Fixture: test_vector_to_partition_write.hal -- output confirms V's
+# untouched positions (1-3, 8-10) stay 0.0 while exactly positions 4-7
+# become 5.0.
+run ./run_local_fixture.sh vector_to_partition_write "$(printf ' 0.0                0.0                0.0                5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 0.0                0.0                0.0          ')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

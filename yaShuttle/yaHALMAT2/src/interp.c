@@ -4656,6 +4656,46 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
 
+                /* Component to-partition ("start TO end") subscript on a
+                 * whole VECTOR (`V(4 TO 7)`, V a VECTOR(10)) -- DSUB.md's
+                 * confirmed table: TAG1=2 on both subscript operand words
+                 * (the "component" column's to-partition row, the same
+                 * marker CHARACTER to-partition uses -- distinguished by
+                 * this instruction's own operator-word TAG, 4=VECTOR here
+                 * vs. 2=CHARACTER). Produces a VECTOR-shaped VAC container
+                 * result, writable the same way the asterisk-partition
+                 * case above is (`V(4 TO 7) = SUBV;`, SUBV itself a
+                 * VECTOR(4)) -- confirmed via a direct HALSFC compile that
+                 * a plain SCALAR RHS is rejected outright at compile time
+                 * ("AV1: TYPE OF V IS ILLEGAL FOR ASSIGNMENT FROM GIVEN
+                 * RIGHT-HAND SIDE"), so this is only ever reached with a
+                 * genuine VECTOR-shaped source -- user-reported. Only the
+                 * single-dimension VECTOR/ARRAY case (`base->rows == 0`)
+                 * is implemented, mirroring the at-partition case just
+                 * below -- a MATRIX to-partition isn't handled. */
+                if (num_indices == 2 && base->rows == 0 && ins->tag == 4 &&
+                    ins->operands[1].tag1 == 2 && ins->operands[2].tag1 == 2) {
+                    resolved_value_t startv, endv;
+                    if (!resolve_operand(state, &ins->operands[1], &startv)) break;
+                    if (!resolve_operand(state, &ins->operands[2], &endv)) break;
+                    int32_t start = rv_to_integer(&startv);
+                    int32_t end = rv_to_integer(&endv);
+                    if (start < 1) start = 1;
+                    if (end > (int32_t)base->element_count) end = (int32_t)base->element_count;
+                    int32_t count32 = end - start + 1;
+                    if (count32 < 0) count32 = 0;
+                    size_t count = (size_t)count32;
+                    if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                    halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
+                    for (size_t k = 0; k < count; k++) buf[k] = base->elements[(size_t)(start - 1) + k];
+                    if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
+                    state->vac[ins->index].is_container_ref = true;
+                    state->vac[ins->index].container_ref_syt = base_syt;
+                    state->vac[ins->index].container_ref_offset = (size_t)(start - 1);
+                    state->vac[ins->index].container_ref_stride = 1;
+                    break;
+                }
+
                 /* Component at-partition ("length AT position") subscript
                  * on a whole VECTOR -- DSUB.md's confirmed table: TAG1=3 on
                  * both subscript operand words (the "component" column's
