@@ -1516,6 +1516,50 @@ static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int membe
     return true;
 }
 
+/* Resolves one DSUB to-partition subscript bound (class-0/DSUB.md), an
+ * ordinary literal/SYT/VAC-qualified value or the `#`-relative CSZ form
+ * (`C(1 TO #-DECIMALS)`, 160-REFORMAT.hal) -- advances `*oi` past
+ * whatever operand(s) it consumed: 1 for an ordinary bound, 2 for CSZ
+ * (DSUB.md's confirmed "CSZ operand optionally followed by one
+ * subsidiary operand word" shape -- controlled-compile-confirmed via
+ * `C1(2 TO # - 2)`, which produces exactly `DATA`=2 with a literal `2`
+ * subsidiary immediately after). `declared_len` is the CHARACTER base's
+ * own current working length -- HAL/S's own `#` value for this context
+ * (USA003087's "current working length L", not a fixed declared
+ * maximum).
+ *
+ * `DATA`=0 is a bare `#` (no subsidiary). `DATA`=2 is confirmed as
+ * `# − subsidiary` via the controlled compile above. `DATA`=1 (`# +
+ * subsidiary`) is inferred purely by symmetry with the primary source's
+ * own documented formula ("tag = 1 + expression, or 2 − expression")
+ * and has never been independently observed in any real or synthetic
+ * trace -- implemented anyway since the encoding is otherwise self-
+ * consistent, but if a real corpus program ever exercises it and
+ * disagrees, this inference (not the confirmed `DATA`=2 case) is where
+ * to look first. */
+static bool resolve_to_partition_bound(halmat_state_t *state, const halmat_instr_t *ins, uint8_t *oi, int32_t declared_len, int32_t *out) {
+    if (*oi >= ins->operand_count) { fail(state, "DSUB: to-partition bound operand missing"); return false; }
+    if (ins->operands[*oi].qual == QUAL_CSZ) {
+        uint16_t data = ins->operands[*oi].data;
+        (*oi)++;
+        if (data == 0) { *out = declared_len; return true; }
+        if (*oi >= ins->operand_count) { fail(state, "DSUB: CSZ missing subsidiary operand"); return false; }
+        resolved_value_t av;
+        if (!resolve_operand(state, &ins->operands[*oi], &av)) return false;
+        int32_t adj = rv_to_integer(&av);
+        (*oi)++;
+        if (data == 1) { *out = declared_len + adj; return true; }
+        if (data == 2) { *out = declared_len - adj; return true; }
+        fail(state, "DSUB: CSZ unsupported DATA=%u", data);
+        return false;
+    }
+    resolved_value_t v;
+    if (!resolve_operand(state, &ins->operands[*oi], &v)) return false;
+    *out = rv_to_integer(&v);
+    (*oi)++;
+    return true;
+}
+
 /* Redirects to a registered `ON ERROR$(10:5) ...;` (or a broader by-
  * group/catch-all) handler for READ's own end-of-file condition --
  * user-reported, 193-TEST_X.hal's `ON ERROR$(IO:5) GO TO DONE;` guarding
@@ -4368,63 +4412,84 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * -- unobserved by any fixture that doesn't also have its
                  * COMMON*.out available.
                  *
-                 * Investigated CSZ (task sweep item, real corpus target
-                 * 160-REFORMAT.hal, `RETURN RJUST(S||C(1 TO #-DECIMALS)||
-                 * '.'||C(#-DECIMALS-1 TO #), WIDTH);`) further this
-                 * session: implementing CHARACTER to-partition correctly
-                 * needs both a new subscript-kind branch here (TAG1=2 on
-                 * both range operands per DSUB.md's table; not yet added)
-                 * *and* CSZ's own arithmetic, which real traces from this
-                 * exact file show is genuinely richer than DSUB.md's own
-                 * prior two-session research had pinned down:
-                 *   C(1 TO #-DECIMALS):     end   = CSZ, DATA=2, subsidiary=SYT(DECIMALS)
-                 *   C(#-DECIMALS-1 TO #):   start = CSZ, DATA=2, subsidiary=VAC(DECIMALS + LIT) -- a *computed* expression, not a bare SYT
-                 *                           end   = CSZ, DATA=0 (bare "#"), no subsidiary
-                 * The start bound's own arithmetic doesn't cleanly resolve
-                 * against DSUB.md's "tag = 1+expression, or 2-expression"
-                 * formula (algebraically `#-DECIMALS-1` needs `# -
-                 * (DECIMALS+1)`, not `# - (DECIMALS-1)`, if DATA=2 means
-                 * literal "# minus subsidiary" -- the sign of the LIT
-                 * folded into that IADD wasn't independently confirmed).
-                 * DSUB.md's own Unresolved Questions already flags this
-                 * exact ambiguity ("the +-vs-- encoding... not fully
-                 * pinned down bit-for-bit") -- still true, now with a
-                 * concrete real-program case on record for whoever
-                 * resolves it next. Left failing loudly (resolve_operand's
-                 * generic default case) rather than guess.
-                 *
-                 * Follow-up attempt (later session): confirmed the LIT
-                 * feeding that IADD resolves to exactly 1 (litprobe of
-                 * 160-REFORMAT.hal's own litfile.bin, entry index 14,
-                 * numeric=1) -- so the subsidiary genuinely is
-                 * IADD(DECIMALS, 1) = DECIMALS+1 at runtime, and "DATA=2
-                 * means #-subsidiary" reconciles *algebraically* with the
-                 * book's own documented `#-DECIMALS-1` formula exactly
-                 * (#-(DECIMALS+1) ≡ #-DECIMALS-1). But reverse-engineering
-                 * REFORMAT's own worked example (source-documentation/
-                 * ProgrammingInHALS.txt, Ch. 8: `REFORMAT(SQRT(2),3,5)`
-                 * should yield `'1.414'`) needs the SECOND substring's
-                 * own start bound to land on position 2 of C="1414"
-                 * (`#-DECIMALS+1` = 4-3+1 = 2, selecting "414") for the
-                 * output to come out right -- not position 0 (`#-DECIMALS-1`
-                 * = 4-3-1 = 0, clamped to 1, selecting "1414", which is
-                 * wrong). These two derivations flatly disagree, and
-                 * nothing available resolves which is at fault: the
-                 * book's own OCR'd text (source-documentation/
-                 * ProgrammingInHALS.txt) is visibly corrupted throughout
-                 * this exact page (mis-scanned words, garbled formatting
-                 * columns), so "#-DECIMALS-1" may itself be a misread of
-                 * "#-DECIMALS+1" (a thin printed minus easily confused
-                 * with plus); equally possible the word-#139 DSUB/IADD
-                 * pair traced here was mis-attributed to the wrong
-                 * source statement inside REFORMAT's multi-part RETURN
-                 * expression (not independently re-verified against
-                 * statement markers this pass). Genuinely unresolved
-                 * without either a clean non-OCR source or the real
-                 * AP-101S object code to check directly -- still left
-                 * failing loudly rather than guess which derivation (if
-                 * either) is right. */
+                 * CSZ (`#`-relative CHARACTER subscript, 160-REFORMAT.hal's
+                 * `RETURN RJUST(S||C(1 TO #-DECIMALS)||'.'||
+                 * C(#-DECIMALS-1 TO #), WIDTH);`) is now implemented --
+                 * see resolve_to_partition_bound()'s own comment and the
+                 * CHARACTER to-partition branch below. Resolving this took
+                 * three real traces to pin down: DSUB.md's own controlled
+                 * compile (`C1(2 TO # - 2)`, a synthetic test, not a real
+                 * program) cleanly confirms `DATA`=2 means "# − subsidiary"
+                 * in isolation. 160-REFORMAT.hal's own real compiled trace
+                 * showed the *second* substring's subsidiary is a
+                 * *computed* VAC result, `IADD(DECIMALS, 1)` (the literal
+                 * confirmed as exactly 1 via a standalone litfile.bin
+                 * probe) -- reconciling algebraically with the corpus
+                 * file's own `#-DECIMALS-1` formula. That formula was
+                 * independently re-verified letter-for-letter against
+                 * *both* the 1st (NASA-CR-151872, Sept. 1978,
+                 * `~/Downloads/Programming in HAL_S Sept 1978.pdf`, p.160)
+                 * and 2nd (source-documentation/ProgrammingInHALS.txt, Ch.
+                 * 8) editions of "Programming in HAL/S" -- present in both,
+                 * ruling out an OCR artifact in either scan. What looked
+                 * like a contradiction in an earlier pass (hand-deriving
+                 * REFORMAT's own worked textbook example, `REFORMAT(SQRT(2)
+                 * ,3,5)` -> `'1.414'`, seemed to need the *opposite* sign)
+                 * turned out to rest on a wrong assumption about how the
+                 * pieces recombine -- the corpus .hal file itself doesn't
+                 * even call REFORMAT with those textbook values (it uses
+                 * `REFORMAT(3.14159,2,10)` and two others instead), so the
+                 * textbook's own prose claim was never actually
+                 * verifiable against this file's own compiled behavior in
+                 * the first place. This interpreter implements the
+                 * formula exactly as compiled, whatever behavior that
+                 * produces -- matching this project's own standing
+                 * principle of faithfully executing the real HALMAT
+                 * rather than second-guessing the source against a
+                 * secondary prose description. */
                 if (ins->operand_count < 2) { fail(state, "DSUB: expected at least 2 operands"); break; }
+                if (ins->operands[0].qual == QUAL_LIT) {
+                    /* CHARACTER to-partition subscript on a compile-time
+                     * CONSTANT base (`ZEROS(1 TO DECIMALS-LENGTH(C))`,
+                     * `ZEROS` a `CHARACTER(20) CONSTANT(CHAR(20)'0')` --
+                     * 160-REFORMAT.hal): the base itself is QUAL_LIT (a
+                     * literal-table string reference), not QUAL_SYT, since
+                     * a compile-time CONSTANT never gets its own SYT
+                     * storage the way an ordinary variable does. Handled
+                     * as its own narrow case rather than folding into the
+                     * generic base_syt/ensure_container machinery every
+                     * other DSUB kind below shares (a literal has no SYT
+                     * entry to look up at all). Scoped to exactly the
+                     * shape this corpus file needs (to-partition, CSZ or
+                     * plain) -- any other subscript kind on a literal base
+                     * fails loudly rather than guessing. */
+                    if (ins->tag != 2 || ins->operand_count < 3 || ins->operands[1].tag1 != 2) {
+                        fail(state, "DSUB: unsupported subscript shape on a literal/CONSTANT base");
+                        break;
+                    }
+                    resolved_value_t basev;
+                    if (!resolve_operand(state, &ins->operands[0], &basev)) break;
+                    if (basev.kind != RV_STRING) { fail(state, "DSUB: literal base is not a CHARACTER constant"); break; }
+                    const char *src = basev.string ? basev.string : "";
+                    int32_t srclen = (int32_t)strlen(src);
+                    uint8_t oi = 1;
+                    int32_t start, end;
+                    if (!resolve_to_partition_bound(state, ins, &oi, srclen, &start)) break;
+                    if (!resolve_to_partition_bound(state, ins, &oi, srclen, &end)) break;
+                    if (start < 1) start = 1;
+                    if (end > srclen) end = srclen;
+                    int32_t width = end - start + 1;
+                    if (width < 0) width = 0;
+                    char *sub = malloc((size_t)width + 1);
+                    if (!sub) { fail(state, "out of memory"); break; }
+                    if (width > 0) memcpy(sub, src + (start - 1), (size_t)width);
+                    sub[width] = '\0';
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_string = true;
+                    state->vac[ins->index].string = sub;
+                    break;
+                }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
                 uint16_t base_syt = ins->operands[0].data;
                 if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
@@ -4781,54 +4846,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
 
                 /* CHARACTER to-partition substring (`C$(start TO end)`),
-                 * the plain-literal-bounds case -- DSUB.md's own "To-
-                 * partition (CHARACTER substring...) ... still isn't
+                 * including the `#`-relative CSZ form -- DSUB.md's own
+                 * "To-partition (CHARACTER substring...) ... still isn't
                  * handled" gap, confirmed empirically here (this
                  * instruction's own operator-word TAG, the HALMAT class of
-                 * the result, is 2=CHARACTER; both subscript operands are
-                 * TAG1=2, the "component" column's to-partition row per
-                 * this file's already-confirmed table). User-reported,
-                 * 159-AGE.hal's `CASE_NUM = INTEGER(C$(1 TO 3));` (`C` a
-                 * plain `CHARACTER(80)`, not an ARRAY) -- previously fell
-                 * through to the generic per-dimension index loop below,
-                 * which misreads a to-partition's own (start, end) pair as
-                 * two unrelated plain indices, producing a bogus numeric
-                 * `is_ref` into a scalar CHARACTER symbol's own (nonexistent)
-                 * element array (`ensure_container()`'s generic "unknown
-                 * shape" fallback silently allocates a numeric placeholder
-                 * for any unclassified SYT entry) -- CTOI then failed
+                 * the result, is 2=CHARACTER; the start bound's own TAG1=2,
+                 * the "component" column's to-partition row per this
+                 * file's already-confirmed table -- true whether that
+                 * bound is an ordinary value or a CSZ operand, since
+                 * DSUB.md's own traces show TAG1=2 on the CSZ operand
+                 * itself too). User-reported, 159-AGE.hal's `CASE_NUM =
+                 * INTEGER(C$(1 TO 3));` (`C` a plain `CHARACTER(80)`, not
+                 * an ARRAY) -- previously fell through to the generic
+                 * per-dimension index loop below, which misreads a
+                 * to-partition's own (start, end) pair as two unrelated
+                 * plain indices, producing a bogus numeric `is_ref` into a
+                 * scalar CHARACTER symbol's own (nonexistent) element
+                 * array (`ensure_container()`'s generic "unknown shape"
+                 * fallback silently allocates a numeric placeholder for
+                 * any unclassified SYT entry) -- CTOI then failed
                  * ("operand is not CHARACTER") since that phantom result
                  * resolves as RV_SCALAR, not RV_STRING.
                  *
-                 * Deliberately scoped to a plain (non-ARRAY) base and
-                 * literal-or-otherwise-plain-resolvable bounds -- the
-                 * `#`-relative (CSZ) form of this same subscript kind
-                 * (`C(1 TO #-DECIMALS)`, 160-REFORMAT.hal) is a separate,
-                 * still-unresolved gap (this file's own Unresolved
-                 * Questions on CSZ's own `+`/`-` bit encoding), unaffected
-                 * by this fix since a CSZ operand simply won't resolve
-                 * through the plain `resolve_operand()` calls below the
-                 * same way a literal or plain SYT bound does -- it'll
-                 * still fail loudly rather than silently misreading a CSZ
-                 * expression as some other value. Read-only (no fixture
-                 * or corpus program needs `C$(a TO b) = ...;` as an
-                 * assignment target yet). */
-                if (num_indices == 2 && ins->tag == 2 &&
-                    ins->operands[1].tag1 == 2 && ins->operands[2].tag1 == 2) {
-                    resolved_value_t startv, endv;
-                    if (!resolve_operand(state, &ins->operands[1], &startv)) break;
-                    if (!resolve_operand(state, &ins->operands[2], &endv)) break;
-                    int32_t start = rv_to_integer(&startv);
-                    int32_t end = rv_to_integer(&endv);
+                 * CSZ (`C(1 TO #-DECIMALS)`, `C(#-DECIMALS-1 TO #)`,
+                 * 160-REFORMAT.hal) resolved via resolve_to_partition_
+                 * bound() (see its own comment for the confirmed `DATA`=0/
+                 * 2 encoding) -- each bound consumes 1 or 2 operand words,
+                 * so `num_indices` (a fixed `operand_count-1` computed
+                 * once for every DSUB kind) can't gate this branch the
+                 * way the old plain-literal-only version did; detected
+                 * instead by the start bound's own TAG1==2 marker plus at
+                 * least 3 total operands (base + at least 2 more),
+                 * regardless of how many CSZ subsidiary words follow.
+                 * Deliberately scoped to a plain (non-ARRAY) base. Read-
+                 * only (no fixture or corpus program needs `C$(a TO b) =
+                 * ...;` as an assignment target yet). */
+                if (ins->tag == 2 && ins->operand_count >= 3 && ins->operands[1].tag1 == 2) {
                     const char *src = state->syt[base_syt].char_value ? state->syt[base_syt].char_value : "";
                     int32_t srclen = (int32_t)strlen(src);
+                    uint8_t oi = 1;
+                    int32_t start, end;
+                    if (!resolve_to_partition_bound(state, ins, &oi, srclen, &start)) break;
+                    if (!resolve_to_partition_bound(state, ins, &oi, srclen, &end)) break;
                     if (start < 1) start = 1;
                     if (end > srclen) end = srclen;
                     int32_t width = end - start + 1;
                     if (width < 0) width = 0;
                     char *sub = malloc((size_t)width + 1);
                     if (!sub) { fail(state, "out of memory"); break; }
-                    memcpy(sub, src + (start - 1), (size_t)width);
+                    if (width > 0) memcpy(sub, src + (start - 1), (size_t)width);
                     sub[width] = '\0';
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
                     state->vac[ins->index].is_ref = false;

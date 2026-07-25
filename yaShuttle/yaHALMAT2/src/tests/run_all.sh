@@ -1716,6 +1716,28 @@ run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1
 # terminal that used to abort the whole operation.
 run ./run_read_fixture.sh tasn_array_terminal "$(printf '1 2 3 10.5 7 20.5 1\n99 98 97 999.9 88 888.8 0\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
 
+# Task #27: CSZ (`#`-relative CHARACTER to-partition subscript,
+# 160-REFORMAT.hal's `C(1 TO #-DECIMALS)`/`C(#-DECIMALS-1 TO #)`) --
+# resolved via a real (not synthetic) copy of the primary source. DATA=0
+# is a bare `#`; DATA=2 is `# - subsidiary` (a second operand word
+# immediately following) -- confirmed by a controlled compile in
+# DSUB.md, and separately re-confirmed letter-for-letter identical
+# against *both* the 1st (NASA-CR-151872, Sept. 1978) and 2nd editions
+# of "Programming in HAL/S", ruling out an OCR scanning artifact in
+# either copy. A related, separate gap surfaced once CSZ resolution
+# actually ran real code: `ZEROS(1 TO DECIMALS-LENGTH(C))` (ZEROS a
+# CHARACTER CONSTANT) uses a QUAL_LIT base operand, not QUAL_SYT --
+# a compile-time CONSTANT never gets its own SYT storage -- so DSUB
+# gained a narrow QUAL_LIT-base case for exactly this to-partition
+# shape. Fixture: test_reformat_csz.hal (160-REFORMAT.hal verbatim, all
+# 3 of its own real WRITE(6) REFORMAT(...) calls, not the textbook's own
+# different SQRT(2) example) -- every output independently hand-derived
+# and verified digit-by-digit (REFORMAT(3.14159,2,10) -> `C="314"`,
+# `#-DECIMALS=1` -> "3", `#-DECIMALS-1=0` clamped to 1 -> "314", giving
+# "3.314"; REFORMAT(-42.5,1,10) -> "-42.425"; REFORMAT(0.007,3,10) ->
+# C padded to "007" -> ".007", each then RJUST-padded to WIDTH=10).
+run ./run_local_fixture.sh reformat_csz "$(printf '     3.314\n   -42.425\n      .007')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
