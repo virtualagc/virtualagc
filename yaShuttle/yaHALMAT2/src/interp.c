@@ -2200,7 +2200,8 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->prog = prog;
     state->literals = literals;
     state->num_blanks = num_blanks;
-    state->line_length = 80; /* USA003087 Sec. 12.2 unpaged default; --line-length overrides (main.c) */
+    state->line_length = -1; /* not explicitly set; flush_write picks the per-device
+                               * PAGED(132)/UNPAGED(80) default -- see state.h's comment */
     precompute_loop_targets(state);
     precompute_labels(state);
     precompute_for_loops(state);
@@ -2389,10 +2390,10 @@ void interp_cleanup(halmat_state_t *state) {
  * TAB/COLUMN-adjusted starting positions (class-0/XXAR.md's I/O-control
  * specifiers), so column 0 is the only "un-adjusted" wrapped-line start
  * there is. */
-static void emit_write_field(halmat_state_t *state, FILE *out, const char *text, int *col, bool *need_sep) {
+static void emit_write_field(halmat_state_t *state, FILE *out, const char *text, int *col, bool *need_sep, int wrap_col) {
     int width = (int)strlen(text);
     int sep = *need_sep ? state->num_blanks : 0;
-    if (*need_sep && *col + sep + width > state->line_length) {
+    if (*need_sep && *col + sep + width > wrap_col) {
         fputc('\n', out);
         *col = 0;
         sep = 0;
@@ -2452,6 +2453,13 @@ static void format_bit_field(uint32_t bits, int width, char *buf) {
 static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
     int col = 0;
     bool need_sep = false;
+    /* state->line_length < 0 means --line-length wasn't explicitly given
+     * (main.c) -- pick the per-device default derived from USA003090 Sec.
+     * 6.1.4's LRECL defaults (state.h's line_length comment): 132 for
+     * PAGED (133-byte LRECL minus the automatically-generated ANSI/ASA
+     * carriage-control byte an FBA record format implies), 80 for UNPAGED
+     * (plain FB, no control byte, the full LRECL is printable). */
+    int wrap_col = state->line_length >= 0 ? state->line_length : (unpaged ? 80 : 132);
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
         if (state->io_pending.items[i].is_container) {
             /* Whole VECTOR/MATRIX/ARRAY WRITE argument (OP_XXAR above):
@@ -2481,7 +2489,7 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                     for (int c = 0; c < cols; c++) {
                         char buf[32];
                         halmat_scalar_format(elems[(size_t)r * cols + c], buf, sizeof(buf));
-                        emit_write_field(state, out, buf, &col, &need_sep);
+                        emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
                         if (r == 0 && c == 0) align_col = col - (int)strlen(buf);
                     }
                 }
@@ -2499,7 +2507,7 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                     } else {
                         halmat_scalar_format(elems[k], buf, sizeof(buf));
                     }
-                    emit_write_field(state, out, buf, &col, &need_sep);
+                    emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
                 }
             }
         } else if (state->io_pending.items[i].is_bit_array) {
@@ -2517,10 +2525,10 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
                 format_bit_field(bits[k], width, buf);
                 if (unpaged) {
                     char *quoted = quote_character_for_unpaged(buf);
-                    emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep);
+                    emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep, wrap_col);
                     free(quoted);
                 } else {
-                    emit_write_field(state, out, buf, &col, &need_sep);
+                    emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
                 }
             }
         } else if (state->io_pending.items[i].is_char_array) {
@@ -2532,26 +2540,26 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
             for (size_t k = 0; k < count; k++) {
                 if (unpaged) {
                     char *quoted = quote_character_for_unpaged(strs[k]);
-                    emit_write_field(state, out, quoted ? quoted : strs[k], &col, &need_sep);
+                    emit_write_field(state, out, quoted ? quoted : strs[k], &col, &need_sep, wrap_col);
                     free(quoted);
                 } else {
-                    emit_write_field(state, out, strs[k], &col, &need_sep);
+                    emit_write_field(state, out, strs[k], &col, &need_sep, wrap_col);
                 }
             }
         } else if (state->io_pending.items[i].is_string) {
             if (unpaged) {
                 char *quoted = quote_character_for_unpaged(state->io_pending.items[i].string);
-                emit_write_field(state, out, quoted ? quoted : state->io_pending.items[i].string, &col, &need_sep);
+                emit_write_field(state, out, quoted ? quoted : state->io_pending.items[i].string, &col, &need_sep, wrap_col);
                 free(quoted);
             } else {
-                emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep);
+                emit_write_field(state, out, state->io_pending.items[i].string, &col, &need_sep, wrap_col);
             }
         } else if (state->io_pending.items[i].is_scalar) {
             /* Fixed-width scientific-notation field per class-2/STOC.md
              * (USA00309 Sec. 6.1.3). */
             char buf[32];
             halmat_scalar_format(state->io_pending.items[i].scalar, buf, sizeof(buf));
-            emit_write_field(state, out, buf, &col, &need_sep);
+            emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
         } else if (state->io_pending.items[i].is_bits) {
             /* Binary-digit-string field, state.h's bit_width comment /
              * format_bit_field's own comment above. */
@@ -2559,10 +2567,10 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
             format_bit_field(state->io_pending.items[i].bits, state->io_pending.items[i].bit_width, buf);
             if (unpaged) {
                 char *quoted = quote_character_for_unpaged(buf);
-                emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep);
+                emit_write_field(state, out, quoted ? quoted : buf, &col, &need_sep, wrap_col);
                 free(quoted);
             } else {
-                emit_write_field(state, out, buf, &col, &need_sep);
+                emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
             }
         } else {
             /* INTEGER WRITE field: 11-char right-justified, empirically
@@ -2571,7 +2579,7 @@ static void flush_write(halmat_state_t *state, FILE *out, bool unpaged) {
              * cross-checked against USA00309's own text. */
             char buf[16];
             snprintf(buf, sizeof(buf), "%11d", state->io_pending.items[i].integer);
-            emit_write_field(state, out, buf, &col, &need_sep);
+            emit_write_field(state, out, buf, &col, &need_sep, wrap_col);
         }
     }
     fputc('\n', out);

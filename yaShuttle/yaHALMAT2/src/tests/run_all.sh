@@ -122,14 +122,16 @@ run ./run_local_fixture.sh mixed_type "S2=      5.5000000E+00"
 # and normalize precision on every write to a plain SCALAR destination.
 run ./run_local_fixture.sh scalar_double "$(printf ' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535811925805E+08')"
 # This WRITE statement's 8 fields ('I1=',I1,'I2=',I2,'I3=',I3,'I4=',I4)
-# total 91 columns -- past the 80-column line_length default added this
-# session (--line-length, USA003087 Sec. 12.2's "unpaged output: [80
-# columns/line]"), so the last field wraps onto its own line. The
-# reference yaHALMAT emulator (ground truth elsewhere in this file)
-# predates this feature and doesn't wrap at all -- not a discrepancy,
-# just untested behavior on its part; this fixture is the one that
-# happens to be long enough to exercise the new wrap.
-run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=               8     I3=              -8     I4=\n         -7')"
+# total 91 columns -- past the 80-column line_length UNPAGED default, so
+# under an UNPAGED device this wraps onto two lines. Channel 6 here is
+# PAGED by default though (USA003090 Sec. 5.2), whose own default is 132
+# columns (user-reported correction, 2026-07-25 session -- see state.h's
+# line_length comment: LRECL 133 minus the automatically-generated ANSI/
+# ASA carriage-control byte an FBA PAGED record implies, matching the IBM
+# 1403 line printer's 132-column width), comfortably fitting all 91
+# columns on one line -- no wrap. The reference yaHALMAT emulator (ground
+# truth elsewhere in this file) also doesn't wrap, consistent with this.
+run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=               8     I3=              -8     I4=              -7')"
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
 run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
@@ -735,14 +737,31 @@ run ./run_local_fixture.sh write_vector "$(printf ' 1.0000000E+00      2.0000000
 # partition selects -- OP_DSUB's new asterisk-subscript handling,
 # producing a VECTOR-shaped VAC container consumed the same way.
 run ./run_local_fixture.sh write_matrix "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 2.0000000E+00      4.0000000E+00')"
-# WRITE data-field line wrapping (default 80-column wrap point -- see
-# state.h's line_length comment for why "unpaged output: 80 columns" is
-# not actually why this project uses 80): an 8-element VECTOR's fields
-# total 8*19-5=147 columns (14-col SCALAR field + 5-blank separator
-# each, no leading separator on the first) -- wraps after 4 elements at
-# the 80-column default, after 2 at an explicit --line-length 40.
-run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00')"
+# WRITE data-field line wrapping (default wrap point -- see state.h's
+# line_length comment for the PAGED(132)/UNPAGED(80) per-device default
+# derivation): an 8-element VECTOR's fields total 8*19-5=147 columns
+# (14-col SCALAR field + 5-blank separator each, no leading separator on
+# the first) -- wraps after 7 elements at channel 6's PAGED-by-default
+# 132-column default, after 2 at an explicit --line-length 40.
+run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00      5.0000000E+00      6.0000000E+00      7.0000000E+00\n 8.0000000E+00')"
 run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00')" --line-length 40
+# User-reported (this same session, following the MATRIX-alignment
+# question above): --line-length 240 vs 300 looked identical, which led
+# to finding this real bug once the actual cause (134-DOTS.hal's MATRIX
+# row-boundary behavior) turned out to be a red herring -- confirmed via
+# USA003090 Sec. 6.1.4 that a PAGED file (channel 6's own default,
+# Sec. 5.2) defaults to RECFM=FBA, LRECL 133, but the trailing "A" means
+# an ANSI/ASA carriage-control byte is automatically generated as byte 1
+# of every record -- so only 132 of those 133 bytes are printable (also
+# the IBM 1403 line printer's own documented width, corroborating
+# independently). This project's own line_length default had been left
+# at a flat 80 for both PAGED and UNPAGED devices (state.h's line_length
+# comment, previously flagged but not fixed pending this decision).
+# Fixed by picking 132/80 per-device (flush_write, interp.c) instead of
+# one flat global default; --line-length still overrides either. This
+# same VECTOR(8) fixture (8*19-5=147 columns) demonstrates both defaults
+# side by side: wraps after 7 elements PAGED (above), after 4 UNPAGED.
+run ./run_local_fixture.sh write_wrap "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00')" --unpaged 6
 # User-asked follow-up (044-ORTHONORMAL.hal's WRITE-formatting
 # discrepancy investigation): PAGED vs UNPAGED is normally chosen by a
 # compile-time DEVICE directive or JCL DD card (USA003090 Sec. 5.2),
@@ -1243,8 +1262,10 @@ run ./run_local_fixture.sh many_call_args " 2.1000000E+02"
 # test_dots.hal (the real corpus file itself, copied verbatim -- its own
 # documented `V1(I)=(I,0,0), V2(J)=(1,0,0) => RESULT(I,J)=I` comment gives
 # an independently hand-verifiable expected result: each output row I is
-# constant, filled with I across all 10 columns).
-run ./run_local_fixture.sh dots "$(printf 'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01')"
+# constant, filled with I across all 10 columns). Expected string updated
+# for the PAGED-default line-length fix below (132, was 80) -- each row's
+# first physical line now fits 6 fields before wrapping, was 3.
+run ./run_local_fixture.sh dots "$(printf 'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

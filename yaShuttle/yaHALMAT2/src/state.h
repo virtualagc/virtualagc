@@ -711,30 +711,35 @@ struct halmat_state {
     halmat_vac_slot_t vac[HALMAT_VAC_MAX];
 
     int num_blanks; /* WRITE-item separator, Plan.md Phase 3 default 5 */
-    int line_length; /* WRITE data-field wrap column -- default 80,
-                       * overridable via --line-length (main.c). A field that
-                       * wouldn't fit within this many columns starts a fresh
-                       * line instead (flush_write, interp.c); MATRIX rows
-                       * additionally force a new line unconditionally at
-                       * each row boundary regardless of this limit.
-                       * *Correction (2026-07-23 session)*: an earlier
-                       * comment here cited this as USA003087 Sec. 12.2's
-                       * "unpaged output: [80 columns/line]" default, but
-                       * that citation doesn't actually apply to this
-                       * project's fixtures -- USA003090 Sec. 5.2's default-
-                       * channel-mode rule ("[c]hannels used only in WRITE
-                       * statements are presumed to be PAGED... if output
-                       * channel 6 is referred to by WRITE(6) statements
-                       * only, it will be PAGED by default") means channel 6
-                       * (used write-only, no DEVICE directive, in every
-                       * fixture checked) is actually PAGED by default, whose
-                       * own documented default LRECL is 133, not 80
-                       * (USA003090 Sec. 6.1.4's JCL defaults). 80 is kept
-                       * as-is here since it's not a demonstrated behavioral
-                       * bug and changing it would ripple through most of
-                       * the test suite's expected wrap points -- flagged
-                       * for the project owner to decide, not silently
-                       * changed. */
+    int line_length; /* WRITE data-field wrap column, or -1 for "not
+                       * explicitly set via --line-length" (main.c), in which
+                       * case flush_write (interp.c) picks a per-device
+                       * default from device_unpaged[] below: 132 for PAGED,
+                       * 80 for UNPAGED. A field that wouldn't fit within the
+                       * effective column count starts a fresh line instead;
+                       * MATRIX rows additionally force a new line
+                       * unconditionally at each row boundary regardless of
+                       * this limit.
+                       * *Correction (2026-07-25 session)*, resolving an
+                       * ambiguity an earlier session's comment here had
+                       * flagged but left unresolved: USA003090 Sec. 5.2's
+                       * default-channel-mode rule makes channel 6 (write-
+                       * only, no DEVICE directive, in every fixture checked)
+                       * PAGED by default, whose own documented default LRECL
+                       * (Sec. 6.1.4) is 133 -- but Sec. 6.1.4 also says a
+                       * PAGED file with no RECFM supplied defaults to FBA,
+                       * the trailing "A" meaning an ANSI/ASA carriage-control
+                       * character is *automatically generated* as byte 1 of
+                       * every record (UNPAGED defaults to plain FB instead,
+                       * no such byte) -- so PAGED's 133-byte LRECL is 1
+                       * non-printing control byte plus 132 *printable*
+                       * columns, not 133 printable columns. 132 is also the
+                       * IBM 1403 line printer's own documented print width
+                       * (this HAL/S-FC runtime's own historical target
+                       * hardware), independently corroborating the same
+                       * number. 80 (UNPAGED, no control byte, all of LRECL
+                       * 80 is printable) was already correct and unaffected
+                       * by this fix. */
 
     /* Logical device number -> open file, see HALMAT_DEVICE_MAX above.
      * NULL = unmapped (READ/WRITE against it fails loudly). Not owned by

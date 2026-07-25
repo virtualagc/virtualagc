@@ -60,10 +60,12 @@ static void usage(const char *prog) {
             "  --litfile F      literal file (default: auto-discovered alongside HALMAT_FILE)\n"
             "  --memory F       memory-image file for string literals (default: auto-discovered)\n"
             "  --num-blanks N   blanks between WRITE items (default: 5, per USA003087 Sec. 12.2)\n"
-            "  --line-length N  WRITE data-field wrap column (default: 80 -- see state.h's\n"
-            "                   line_length comment for why this isn't the USA003087/USA003090\n"
-            "                   PAGED default of 133; a WRITE data field that wouldn't fit\n"
-            "                   within N columns starts a new output line instead)\n"
+            "  --line-length N  WRITE data-field wrap column, overriding the per-device\n"
+            "                   default (132 for PAGED devices, 80 for UNPAGED -- see\n"
+            "                   state.h's line_length comment for USA003090 Sec. 6.1.4's\n"
+            "                   LRECL defaults this is derived from); a WRITE data field\n"
+            "                   that wouldn't fit within N columns starts a new output\n"
+            "                   line instead\n"
             "  --time-scale FACTOR   wall-clock pacing divisor for SCHEDULE/WAIT real-time\n"
             "                   throttling (default: 1.0, genuine real time; FACTOR > 0).\n"
             "                   A larger FACTOR shrinks how long the interpreter actually\n"
@@ -1099,7 +1101,11 @@ int main(int argc, char **argv) {
     bool use_opt = false;
     bool use_py = false;
     int num_blanks = 5;
-    int line_length = 80;
+    int line_length = -1; /* -1 = not explicitly set by --line-length; interp.c picks the
+                            * PAGED (132) or UNPAGED (80) default per device at WRITE time
+                            * (USA003090 Sec. 6.1.4's LRECL defaults minus PAGED's own
+                            * automatic ANSI-carriage-control byte, see interp_set_line_
+                            * length's comment) */
     double time_scale = 1.0;
     halmat_pacing_mode_t pacing_mode = HALMAT_PACING_BURST;
     device_map_t maps[MAX_DEVICE_MAPS];
