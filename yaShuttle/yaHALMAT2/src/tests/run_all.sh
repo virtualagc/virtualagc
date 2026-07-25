@@ -1184,6 +1184,31 @@ run ./run_local_fixture.sh fcal_scalar_return "$(printf ' 1.2500000E+00\n 3.2500
 # for the WRITE-argument-capture code to prefer over the generic 32-bit
 # default. Fixture: test_fcal_boolean_return.hal.
 run ./run_local_fixture.sh fcal_boolean_return "$(printf '1\n0')"
+# User-reported (134-DOTS.hal's `WRITE(6) 'DOTS:', DOTS(V1, V2);`, V1/V2
+# each `ARRAY(10) VECTOR(3)`): "I/O statement has too many items". A
+# same-unit FUNCTION call's own ARRAY arguments each get ADLP/DLPE-
+# replayed per element (XXAR's already-established "a plain (or BIT/
+# CHARACTER) ARRAY argument IS wrapped in a per-element replay" rule) --
+# 10 items for V1 plus 10 for V2, comfortably more than the fixed
+# HALMAT_MAX_OPERANDS(=16)-sized items[] array previously had room for.
+# HALMAT_MAX_OPERANDS is a correct, primary-sourced bound on a single
+# HALMAT *instruction's* own operand count -- reusing it to size
+# io_pending's own item *list*, which needs one entry per WRITE/CALL data
+# item and can genuinely scale with an array argument's declared size,
+# was always an architectural mismatch, not a real HAL/S limit. Fixed by
+# making io_pending.items a growable, heap-allocated array (new
+# halmat_io_item_t type, state.h; io_pending_reserve_item(), interp.c),
+# grown via realloc-doubling as needed instead of capped at a fixed
+# compile-time size -- also shrinks halmat_state_t itself slightly (a
+# pointer+size_t per frame instead of 16 full items inline, x9 frames
+# between io_pending and its own 8-deep nesting stack). 134-DOTS.hal
+# itself still doesn't fully run after this fix -- its own `RETURN
+# RESULT;` (RESULT a whole MATRIX(10,10)) hits the separate, already-
+# tracked "OP_RTRN's deeper whole-array-return gap" (task #26) -- so this
+# fixture isolates just the item-capacity mechanism (20 plain SCALAR call
+# arguments, no arrays/matrices involved) rather than reproducing
+# 134-DOTS.hal verbatim.
+run ./run_local_fixture.sh many_call_args " 2.1000000E+02"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

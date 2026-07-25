@@ -1481,6 +1481,33 @@ static size_t unravel_shaping_argument(halmat_state_t *state, const halmat_opera
     return 1;
 }
 
+/* Ensures state->io_pending.items has room for at least one more entry
+ * (i.e. index [item_count]), growing it (realloc-doubling, starting from
+ * 16 -- HALMAT_MAX_OPERANDS' own old value, now just the initial size
+ * rather than a hard ceiling) as needed -- see halmat_io_item_t's own
+ * comment (state.h) for why a plain fixed-size array sized to
+ * HALMAT_MAX_OPERANDS (a real HALMAT *instruction's* own small operand-
+ * count bound, not a real limit on how many WRITE/CALL data items one
+ * statement can have) was wrong. Capped at 255 (item_count's own uint8_t
+ * range) as a sanity ceiling -- fails loudly rather than silently
+ * wrapping if ever actually reached, which no confirmed corpus program
+ * has (134-DOTS.hal's own worst case needs 20). */
+static bool io_pending_reserve_item(halmat_state_t *state) {
+    if (state->io_pending.item_count >= 255) {
+        fail(state, "I/O statement has too many items");
+        return false;
+    }
+    if ((size_t)state->io_pending.item_count >= state->io_pending.items_capacity) {
+        size_t new_cap = state->io_pending.items_capacity ? state->io_pending.items_capacity * 2 : HALMAT_MAX_OPERANDS;
+        if (new_cap > 255) new_cap = 255;
+        halmat_io_item_t *grown = realloc(state->io_pending.items, new_cap * sizeof(halmat_io_item_t));
+        if (!grown) { fail(state, "out of memory"); return false; }
+        state->io_pending.items = grown;
+        state->io_pending.items_capacity = new_cap;
+    }
+    return true;
+}
+
 /* Stores a computed MATRIX/VECTOR result (elems/count, freshly built by
  * the caller into a stack buffer -- copied here, not aliased) into a VAC
  * slot, for a following MASN/VASN or chained arithmetic op to consume.
@@ -2271,6 +2298,14 @@ static void free_syt_container(halmat_syt_entry_t *e) {
 }
 
 void interp_cleanup(halmat_state_t *state) {
+    /* io_pending's own items buffer, plus any still-pending nested frames
+     * left on io_pending_stack (e.g. a fail()/halt reached mid-nested-
+     * call, before OP_XXND's own pop-and-free ever ran) -- best-effort,
+     * same convention as this function's other bulk frees. */
+    free(state->io_pending.items);
+    for (uint8_t i = 0; i < state->io_pending_sp; i++) {
+        free(state->io_pending_stack[i].items);
+    }
     free(state->ctst_exit_target);
     free(state->etst_back_target);
     free(state->label_pos);
@@ -6249,6 +6284,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (state->io_pending.active) {
                         if (state->io_pending_sp >= 8) { fail(state, "XXST nesting too deep"); break; }
                         state->io_pending_stack[state->io_pending_sp++] = state->io_pending;
+                        /* The enclosing frame's own items buffer (just
+                         * saved above, by value) is now owned by the
+                         * stack slot -- this new, genuinely nested frame
+                         * must start with its own fresh buffer, not
+                         * accidentally alias the just-saved one (state.h's
+                         * halmat_io_item_t comment). */
+                        state->io_pending.items = NULL;
+                        state->io_pending.items_capacity = 0;
                     }
                     state->io_pending.active = true;
                     state->io_pending.item_count = 0;
@@ -6270,10 +6313,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_XXAR:
                 if (!state->io_pending.active) { fail(state, "XXAR outside of an XXST...XXND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "XXAR: expected 1 operand"); break; }
-                if (state->io_pending.item_count >= HALMAT_MAX_OPERANDS) {
-                    fail(state, "I/O statement has too many items");
-                    break;
-                }
+                if (!io_pending_reserve_item(state)) break;
                 if (!state->io_pending.is_call && state->io_pending.kind != 2) {
                     /* READ/READALL: the argument is a destination, not a
                      * value -- capture the raw operand for OP_READ to
@@ -6948,6 +6988,11 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * enclosing frame so its own XXAR/WRIT/FCAL/PCAL/XXND see
                  * their own item list again instead of an empty one. */
                 if (state->io_pending_sp > 0) {
+                    /* This (nested) frame's own items buffer is about to
+                     * be discarded, overwritten by the restored outer
+                     * frame's own -- free it first, or it leaks (state.h's
+                     * halmat_io_item_t comment). */
+                    free(state->io_pending.items);
                     state->io_pending = state->io_pending_stack[--state->io_pending_sp];
                 } else {
                     state->io_pending.active = false;

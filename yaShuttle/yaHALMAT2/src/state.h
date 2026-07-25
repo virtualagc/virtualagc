@@ -543,6 +543,160 @@ typedef struct {
                                * value) each time a cycle completes -- see interp.c's OP_CLOS. */
 } halmat_task_t;
 
+/* One WRITE/READ/READALL/call argument's captured state -- named (rather
+ * than an anonymous nested struct) so halmat_io_pending_frame below can
+ * hold a growable, heap-allocated array of these (`items`/
+ * `items_capacity`) instead of a fixed-size inline one. User-reported
+ * (134-DOTS.hal's `WRITE(6) 'DOTS:', DOTS(V1, V2);`, V1/V2 each
+ * `ARRAY(10) VECTOR(3)` -- a same-unit FUNCTION call whose own two ARRAY
+ * arguments each get ADLP/DLPE-replayed per element, per XXAR's already-
+ * established "a plain (or BIT/CHARACTER) ARRAY argument IS wrapped in a
+ * per-element replay" rule): needs 10 items for V1 plus 10 for V2 -- 20
+ * total, comfortably more than the fixed HALMAT_MAX_OPERANDS(=16)-sized
+ * inline array items[] previously had room for, which failed loudly with
+ * "I/O statement has too many items" partway through V2's own replay.
+ * HALMAT_MAX_OPERANDS itself is a correct, primary-sourced bound on a
+ * single HALMAT *instruction's* own operand count (a small, fixed number
+ * the real wire format can carry) -- reusing it to size this *list*,
+ * which needs one entry per WRITE/CALL data item and can genuinely scale
+ * with an array argument's own declared size, was always an
+ * architectural mismatch, not a real HAL/S limit. Grown via realloc-
+ * doubling (interp.c's io_pending_reserve_item()) up to item_count's own
+ * uint8_t range (255) -- not widened further, since that would also
+ * require widening every `for (uint8_t i = 0; i < ...item_count; i++)`
+ * loop across interp.c to avoid a silent wraparound/infinite loop for a
+ * hypothetical >255-item statement; no corpus program has been found
+ * needing more than 134-DOTS.hal's own 20, so left as a smaller,
+ * separately-fixable gap rather than guessed at now. */
+typedef struct {
+    bool is_string;
+    bool is_scalar;
+    bool is_bits;   /* WRITE only (kind == 2): a raw BIT-typed argument -- see
+                      * OP_XXAR's capture logic (interp.c) and bit_width just below. */
+    char *string;   /* borrowed from the literal table; not owned */
+    int32_t integer;
+    halmat_scalar_t scalar;
+    uint32_t bits;   /* is_bits only */
+    int bit_width;   /* is_bits only: the declared BIT(n) width to format `bits` at --
+                       * looked up from the symbol table (state->symtab) for a plain
+                       * QUAL_SYT variable reference, same technique BCAT (class-1/
+                       * BCAT.md) already established for the identical "resolved_
+                       * value_t's RV_BITS carries no width of its own" problem; falls
+                       * back to 32 (the documented maximum legal BIT string length,
+                       * USA003090 Sec. 8.2 rule 6) for anything else -- an expression
+                       * result, a literal, or no symbol table available -- per
+                       * ["Programming in HAL/S"] p. 255: "[t]he value returned by the
+                       * BIT function is always of the maximum legal length for bit
+                       * strings, as defined for the compiler version in use," the
+                       * closest primary/secondary-source statement about what width a
+                       * BIT value with no better-known width should be treated as
+                       * (direct user citation, confirmed against USA003090's own 1-32
+                       * range for this specific compiler). */
+    /* WRITE only (kind == 2): a whole VECTOR/MATRIX/ARRAY argument
+     * (`WRITE(6) V;`, or a MATRIX row/column slice like
+     * `WRITE(6) M$(1,*);`) -- confirmed this session against real
+     * compiled HALMAT that such an argument is NOT wrapped in an
+     * ADLP/DLPE per-element replay (class-0/XXAR.md's former
+     * "Unresolved Questions" entry, now resolved), so it can't be
+     * captured as a single scalar/integer/string value the way
+     * every other item here is. `container` borrows either the
+     * SYT's own `elements` storage or a DSUB asterisk-subscript's
+     * VAC container result (interp.c's OP_DSUB) -- not owned,
+     * valid only until flush_write runs (no mutation of it can
+     * happen between this XXAR and the statement's own WRIT).
+     * `container_rows/cols` follow halmat_syt_entry_t's own
+     * convention (MATRIX: both set, row-major; VECTOR/ARRAY:
+     * rows=0) -- flush_write uses rows>0 to distinguish "lay out
+     * row by row, forcing a new aligned line per row" (MATRIX,
+     * USA003087 Sec. 12.2) from the flat sequential layout shared
+     * by VECTOR and ARRAY. `container_is_integer` selects the
+     * 11-column INTEGER field format over the default 14-column
+     * SCALAR one, from the capturing XXAR's own TAG1 (class-0/
+     * XXAR.md: "literally the argument's HALMAT class number"),
+     * which is set the same way -- 6=INTEGER -- whether the
+     * argument is a plain whole-SYT reference or a VAC-carried
+     * container result (e.g. `MISMATCH$(J,*)`, a DSUB row-select
+     * out of a confirmed-2-dimensional INTEGER ARRAY -- user-
+     * reported, 113-EXAMPLE_7.hal; DSUB's own operator-word TAG
+     * already carries this class number for exactly this reason,
+     * see class-0/DSUB.md). A true MATRIX/VECTOR slice is always
+     * SCALAR (HAL/S has no INTEGER MATRIX/VECTOR) and naturally
+     * gets TAG1=5 there, so this check needs no separate case for
+     * it. */
+    bool is_container;
+    const halmat_scalar_t *container;
+    size_t container_count;
+    int container_rows, container_cols;
+    bool container_is_integer;
+    /* WRITE only (kind == 2): a whole BIT or CHARACTER ARRAY
+     * argument (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
+     * `ARRAY(4) BOOLEAN`) -- the same unreplayed QUAL=SYT/TAG1=
+     * class shape as `is_container` just above (TAG1=1=BIT/
+     * 2=CHARACTER instead of 3=MATRIX/4=VECTOR/6=INTEGER), but a
+     * genuinely different storage kind (`bit_elements`/
+     * `char_elements`, not `elements`/halmat_scalar_t) so it
+     * can't share that field. At most one of is_container/
+     * is_bit_array/is_char_array is ever true for a given item.
+     * `bit_array`/`char_array` borrow the SYT's own storage, same
+     * non-owned/valid-until-flush_write convention as `container`.
+     * `container_count` (shared) gives the element count either
+     * way. `bit_array_width` is the declared per-element BIT(n)
+     * width (symtab lookup, same technique as the existing
+     * single-BIT-value `bit_width` field just below) -- needed
+     * per element the same way a lone BIT value needs it.
+     * User-reported (120-EXAMPLE_A.hal's `WRITE(6) AVERAGE,
+     * DATA_VALID;`). */
+    bool is_bit_array;
+    const uint32_t *bit_array;
+    int bit_array_width;
+    bool is_char_array;
+    char *const *char_array;
+    /* READ/READALL only (kind != 2): the destination operand,
+     * captured raw by XXAR rather than resolved to a value, plus
+     * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
+     * tells READ's handler which format to parse from the device.
+     * Only INTEGER(6)/SCALAR(5)/CHARACTER(2) are implemented as
+     * single-field destinations -- see interp.c's OP_READ case. */
+    halmat_operand_t dest_operand;
+    uint8_t dest_class;
+    /* True when dest_operand is a whole VECTOR/MATRIX SYT
+     * reference (TAG1=4/3, class-0/XXAR.md's confirmed "no ADLP/
+     * DLPE replay" shape -- same unreplayed pattern as the WRITE/
+     * CALL whole-container case above, `is_container`) rather
+     * than a single scalar/integer/character destination. OP_READ
+     * unrolls this into one field read per element (dest_operand.
+     * data is the container's own SYT index) instead of the
+     * ordinary single-value write_destination path. ARRAY has no
+     * equivalent here -- confirmed (class-0/XXAR.md) it stays
+     * ADLP/DLPE-replayed even when whole, so each element already
+     * arrives as its own ordinary-shaped XXAR/dest_class item via
+     * the ordinary ADLP replay this struct's other fields already
+     * handle, cycling arrayed_index -- no separate case needed. */
+    bool dest_is_container;
+    /* Call-only (is_call == true, so never set alongside the
+     * READ/READALL dest_* fields above -- they share dest_operand,
+     * the two contexts are mutually exclusive): true when this
+     * argument's XXAR had a nonzero TAG2, i.e. an ASSIGN-form call
+     * argument (`CALL P(X) ASSIGN(Y);`, class-0/XXST.md's own
+     * confirmed `CALL TWO(I1) ASSIGN(I1);` trace) -- the callee's
+     * corresponding parameter's *final* value must be written back
+     * into dest_operand (the caller's own variable) once the call
+     * returns, not just transmitted in like an ordinary argument.
+     * Still participates in the normal by-value positional binding
+     * on the way in (OP_PCAL/OP_FCAL's existing binding loop
+     * doesn't need to know or care that an item is also
+     * ASSIGN-tagged) -- this only adds the write-*back* half.
+     * Handled at OP_XXND, the exact point control lands back on
+     * after the callee returns (RTRN/CLOS's jump always targets
+     * PCAL/FCAL's own position + 1, i.e. this closing XXND) and
+     * this frame's own items[]/call_target are still intact
+     * (io_pending_stack correctly shields them from any of the
+     * callee's *own* I/O/call activity in between). User-reported
+     * (140-STATISTICS.hal/138-FILTER.hal/120-EXAMPLE_A.hal, all
+     * three real corpus programs using PROCEDURE...ASSIGN(...)). */
+    bool is_assign;
+} halmat_io_item_t;
+
 struct halmat_state {
     const halmat_program_t *prog;
     const halmat_literal_table_t *literals;
@@ -683,134 +837,8 @@ struct halmat_state {
                                 * (state->pc == start_pc) and must keep accumulating into this
                                 * frame, whereas a genuinely nested call's XXST is a different,
                                 * not-yet-seen instruction and must push a new frame instead. */
-        struct {
-            bool is_string;
-            bool is_scalar;
-            bool is_bits;   /* WRITE only (kind == 2): a raw BIT-typed argument -- see
-                              * OP_XXAR's capture logic (interp.c) and bit_width just below. */
-            char *string;   /* borrowed from the literal table; not owned */
-            int32_t integer;
-            halmat_scalar_t scalar;
-            uint32_t bits;   /* is_bits only */
-            int bit_width;   /* is_bits only: the declared BIT(n) width to format `bits` at --
-                               * looked up from the symbol table (state->symtab) for a plain
-                               * QUAL_SYT variable reference, same technique BCAT (class-1/
-                               * BCAT.md) already established for the identical "resolved_
-                               * value_t's RV_BITS carries no width of its own" problem; falls
-                               * back to 32 (the documented maximum legal BIT string length,
-                               * USA003090 Sec. 8.2 rule 6) for anything else -- an expression
-                               * result, a literal, or no symbol table available -- per
-                               * ["Programming in HAL/S"] p. 255: "[t]he value returned by the
-                               * BIT function is always of the maximum legal length for bit
-                               * strings, as defined for the compiler version in use," the
-                               * closest primary/secondary-source statement about what width a
-                               * BIT value with no better-known width should be treated as
-                               * (direct user citation, confirmed against USA003090's own 1-32
-                               * range for this specific compiler). */
-            /* WRITE only (kind == 2): a whole VECTOR/MATRIX/ARRAY argument
-             * (`WRITE(6) V;`, or a MATRIX row/column slice like
-             * `WRITE(6) M$(1,*);`) -- confirmed this session against real
-             * compiled HALMAT that such an argument is NOT wrapped in an
-             * ADLP/DLPE per-element replay (class-0/XXAR.md's former
-             * "Unresolved Questions" entry, now resolved), so it can't be
-             * captured as a single scalar/integer/string value the way
-             * every other item here is. `container` borrows either the
-             * SYT's own `elements` storage or a DSUB asterisk-subscript's
-             * VAC container result (interp.c's OP_DSUB) -- not owned,
-             * valid only until flush_write runs (no mutation of it can
-             * happen between this XXAR and the statement's own WRIT).
-             * `container_rows/cols` follow halmat_syt_entry_t's own
-             * convention (MATRIX: both set, row-major; VECTOR/ARRAY:
-             * rows=0) -- flush_write uses rows>0 to distinguish "lay out
-             * row by row, forcing a new aligned line per row" (MATRIX,
-             * USA003087 Sec. 12.2) from the flat sequential layout shared
-             * by VECTOR and ARRAY. `container_is_integer` selects the
-             * 11-column INTEGER field format over the default 14-column
-             * SCALAR one, from the capturing XXAR's own TAG1 (class-0/
-             * XXAR.md: "literally the argument's HALMAT class number"),
-             * which is set the same way -- 6=INTEGER -- whether the
-             * argument is a plain whole-SYT reference or a VAC-carried
-             * container result (e.g. `MISMATCH$(J,*)`, a DSUB row-select
-             * out of a confirmed-2-dimensional INTEGER ARRAY -- user-
-             * reported, 113-EXAMPLE_7.hal; DSUB's own operator-word TAG
-             * already carries this class number for exactly this reason,
-             * see class-0/DSUB.md). A true MATRIX/VECTOR slice is always
-             * SCALAR (HAL/S has no INTEGER MATRIX/VECTOR) and naturally
-             * gets TAG1=5 there, so this check needs no separate case for
-             * it. */
-            bool is_container;
-            const halmat_scalar_t *container;
-            size_t container_count;
-            int container_rows, container_cols;
-            bool container_is_integer;
-            /* WRITE only (kind == 2): a whole BIT or CHARACTER ARRAY
-             * argument (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
-             * `ARRAY(4) BOOLEAN`) -- the same unreplayed QUAL=SYT/TAG1=
-             * class shape as `is_container` just above (TAG1=1=BIT/
-             * 2=CHARACTER instead of 3=MATRIX/4=VECTOR/6=INTEGER), but a
-             * genuinely different storage kind (`bit_elements`/
-             * `char_elements`, not `elements`/halmat_scalar_t) so it
-             * can't share that field. At most one of is_container/
-             * is_bit_array/is_char_array is ever true for a given item.
-             * `bit_array`/`char_array` borrow the SYT's own storage, same
-             * non-owned/valid-until-flush_write convention as `container`.
-             * `container_count` (shared) gives the element count either
-             * way. `bit_array_width` is the declared per-element BIT(n)
-             * width (symtab lookup, same technique as the existing
-             * single-BIT-value `bit_width` field just below) -- needed
-             * per element the same way a lone BIT value needs it.
-             * User-reported (120-EXAMPLE_A.hal's `WRITE(6) AVERAGE,
-             * DATA_VALID;`). */
-            bool is_bit_array;
-            const uint32_t *bit_array;
-            int bit_array_width;
-            bool is_char_array;
-            char *const *char_array;
-            /* READ/READALL only (kind != 2): the destination operand,
-             * captured raw by XXAR rather than resolved to a value, plus
-             * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
-             * tells READ's handler which format to parse from the device.
-             * Only INTEGER(6)/SCALAR(5)/CHARACTER(2) are implemented as
-             * single-field destinations -- see interp.c's OP_READ case. */
-            halmat_operand_t dest_operand;
-            uint8_t dest_class;
-            /* True when dest_operand is a whole VECTOR/MATRIX SYT
-             * reference (TAG1=4/3, class-0/XXAR.md's confirmed "no ADLP/
-             * DLPE replay" shape -- same unreplayed pattern as the WRITE/
-             * CALL whole-container case above, `is_container`) rather
-             * than a single scalar/integer/character destination. OP_READ
-             * unrolls this into one field read per element (dest_operand.
-             * data is the container's own SYT index) instead of the
-             * ordinary single-value write_destination path. ARRAY has no
-             * equivalent here -- confirmed (class-0/XXAR.md) it stays
-             * ADLP/DLPE-replayed even when whole, so each element already
-             * arrives as its own ordinary-shaped XXAR/dest_class item via
-             * the ordinary ADLP replay this struct's other fields already
-             * handle, cycling arrayed_index -- no separate case needed. */
-            bool dest_is_container;
-            /* Call-only (is_call == true, so never set alongside the
-             * READ/READALL dest_* fields above -- they share dest_operand,
-             * the two contexts are mutually exclusive): true when this
-             * argument's XXAR had a nonzero TAG2, i.e. an ASSIGN-form call
-             * argument (`CALL P(X) ASSIGN(Y);`, class-0/XXST.md's own
-             * confirmed `CALL TWO(I1) ASSIGN(I1);` trace) -- the callee's
-             * corresponding parameter's *final* value must be written back
-             * into dest_operand (the caller's own variable) once the call
-             * returns, not just transmitted in like an ordinary argument.
-             * Still participates in the normal by-value positional binding
-             * on the way in (OP_PCAL/OP_FCAL's existing binding loop
-             * doesn't need to know or care that an item is also
-             * ASSIGN-tagged) -- this only adds the write-*back* half.
-             * Handled at OP_XXND, the exact point control lands back on
-             * after the callee returns (RTRN/CLOS's jump always targets
-             * PCAL/FCAL's own position + 1, i.e. this closing XXND) and
-             * this frame's own items[]/call_target are still intact
-             * (io_pending_stack correctly shields them from any of the
-             * callee's *own* I/O/call activity in between). User-reported
-             * (140-STATISTICS.hal/138-FILTER.hal/120-EXAMPLE_A.hal, all
-             * three real corpus programs using PROCEDURE...ASSIGN(...)). */
-            bool is_assign;
-        } items[HALMAT_MAX_OPERANDS];
+        halmat_io_item_t *items; /* heap-allocated, growable -- see halmat_io_item_t's own comment above */
+        size_t items_capacity;   /* allocated element count of items[]; independent of item_count below */
         uint8_t item_count;
         /* READ/READALL only (kind != 2, !is_call): SKIP(n)/COLUMN(n)
          * control specifiers (class-0/XXAR.md's confirmed TAG2=2=COLUMN/
