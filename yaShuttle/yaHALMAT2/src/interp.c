@@ -7486,11 +7486,32 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_WAIT: {
-                /* Only the interval form (WAIT <seconds>;, tag=1) is
-                 * implemented; WAIT UNTIL (tag=2) and WAIT FOR DEPENDENT
-                 * (tag=0, no operands) fail loudly -- see class-0/WAIT.md. */
-                if (ins->operand_count != 1 || ins->tag != 1) {
-                    fail(state, "WAIT: only the interval form is implemented");
+                /* Three forms, distinguished by operand count and the
+                 * opcode line's own trailing tag field (class-0/WAIT.md's
+                 * confirmed encoding, all three forms' operand-word shape
+                 * verified against a real `HALSFC --parms=LSTALL` trace):
+                 * WAIT interval (tag=1, one VAC operand, relative to now);
+                 * WAIT UNTIL time (tag=2, one VAC operand, an *absolute*
+                 * virtual-time-in-seconds value -- same convention as
+                 * SCHD's own AT clause and STOPPING...UNTIL's stop_deadline
+                 * just above, both of which compare directly against
+                 * state->virtual_time rather than adding it); WAIT FOR
+                 * DEPENDENT (tag=0, no operands, USA003087 Sec. 13.5 --
+                 * "wait until all dependent processes have terminated"),
+                 * reusing has_active_dependents()/sched_wake_dependents()'s
+                 * existing re-check-every-tick mechanism (state.h's
+                 * TASK_WAITING_FOR_DEPENDENTS comment) via the new
+                 * TASK_WAITING_FOR_DEPENDENTS_RESUME state, which resumes
+                 * (TASK_READY) rather than terminating the task the way
+                 * the CLOSE-triggered TASK_WAITING_FOR_DEPENDENTS case
+                 * does -- this task's own body isn't finished yet. */
+                halmat_task_t *cur = &state->tasks[state->current_task];
+                if (ins->tag == 0 && ins->operand_count == 0) {
+                    cur->task_state = TASK_WAITING_FOR_DEPENDENTS_RESUME;
+                    break;
+                }
+                if (ins->operand_count != 1 || (ins->tag != 1 && ins->tag != 2)) {
+                    fail(state, "WAIT: expected 1 operand (interval or UNTIL form) or 0 (FOR DEPENDENT)");
                     break;
                 }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
@@ -7506,9 +7527,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 int64_t ticks;
                 if (!schd_seconds_to_ticks(state, &a, "WAIT", false, &ticks)) break;
                 if (ticks < 0) ticks = 0;
-                halmat_task_t *cur = &state->tasks[state->current_task];
                 cur->task_state = TASK_WAITING;
-                cur->wake_deadline = state->virtual_time + ticks;
+                cur->wake_deadline = (ins->tag == 2) ? ticks : state->virtual_time + ticks;
                 break;
             }
 
@@ -7579,6 +7599,45 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             state->tasks[idx].task_state = TASK_TERMINATED;
                             state->symbol_active_task[sym] = -1;
                         }
+                    }
+                }
+                break;
+            }
+
+            case OP_PRIO: {
+                /* UPDATE PRIORITY [label] TO alpha; (class-0/PRIO.md,
+                 * USA003087 Sec. 13.5) -- changes an active process's
+                 * scheduling priority (sched_pick_next() picks the
+                 * highest task->priority among TASK_READY tasks, same
+                 * field SCHEDULE...PRIORITY(...) already sets at task
+                 * creation, OP_SCHD above). Confirmed operand order:
+                 * operand 0 = the new priority value (LIT in every
+                 * compiled trace seen; resolve_operand also covers a
+                 * VAC/SYT-expression form per PRIO.md's own "reasonable
+                 * but untested" note, so this doesn't hard-code LIT),
+                 * operand 1 = the named process's own SYT symbol,
+                 * present only for the named form -- unlabeled/self form
+                 * (operand_count==1, priority only) mirrors CANC/TERM's
+                 * already-confirmed self-vs-named distinction just below,
+                 * a reasonable inference from the same family of
+                 * statements though PRIO.md itself flags this specific
+                 * form as untested. Updating an inactive/already-finished
+                 * named process's priority is a no-op, not an error --
+                 * same disposition as TERM's own named form (there's
+                 * nothing left to schedule). */
+                if (ins->operand_count < 1 || ins->operand_count > 2) {
+                    fail(state, "PRIO: expected 1 (self) or 2 (named) operands");
+                    break;
+                }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                int32_t new_priority = rv_to_integer(&a);
+                if (ins->operand_count == 1) {
+                    state->tasks[state->current_task].priority = new_priority;
+                } else {
+                    if (ins->operands[1].qual != QUAL_SYT) { fail(state, "PRIO: expected SYT process operand"); break; }
+                    uint16_t sym = ins->operands[1].data;
+                    if (sym < HALMAT_SYT_MAX && state->symbol_active_task[sym] != -1) {
+                        state->tasks[state->symbol_active_task[sym]].priority = new_priority;
                     }
                 }
                 break;
@@ -7748,7 +7807,8 @@ static bool has_active_dependents(const halmat_state_t *state, int parent_task_i
 static void sched_wake_dependents(halmat_state_t *state) {
     for (int i = 0; i < state->task_count; i++) {
         halmat_task_t *t = &state->tasks[i];
-        if (t->in_use && t->task_state == TASK_WAITING_FOR_DEPENDENTS && !has_active_dependents(state, i)) {
+        if (!t->in_use || has_active_dependents(state, i)) continue;
+        if (t->task_state == TASK_WAITING_FOR_DEPENDENTS) {
             if (t->is_primal) {
                 state->halted = true;
                 state->exit_code = 0;
@@ -7756,6 +7816,11 @@ static void sched_wake_dependents(halmat_state_t *state) {
                 t->task_state = TASK_TERMINATED;
                 if (t->symbol < HALMAT_SYT_MAX) state->symbol_active_task[t->symbol] = -1;
             }
+        } else if (t->task_state == TASK_WAITING_FOR_DEPENDENTS_RESUME) {
+            /* `WAIT FOR DEPENDENT;` (state.h's own comment): unlike the
+             * CLOSE-triggered wait just above, this task's body isn't
+             * finished -- resume it, don't terminate it. */
+            t->task_state = TASK_READY;
         }
     }
 }

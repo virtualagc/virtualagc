@@ -416,6 +416,19 @@ typedef enum {
                                   * session via a user-reported bug (COUNTUP2.hal/NESTED_TASK_
                                   * SCHEDULE_TEST.hal): the primal previously halted unconditionally
                                   * at its own CLOSE, ignoring any still-active DEPENDENT task. */
+    TASK_WAITING_FOR_DEPENDENTS_RESUME, /* `WAIT FOR DEPENDENT;` (class-0/WAIT.md, tag=0, no
+                                          * operands), USA003087 Sec. 13.5 -- same "block until every
+                                          * DEPENDENT child has terminated" condition as
+                                          * TASK_WAITING_FOR_DEPENDENTS above, re-checked the same way
+                                          * (interp.c's sched_wake_dependents(), has_active_dependents()),
+                                          * but this task's own body isn't finished -- it must resume
+                                          * at its own next instruction (TASK_READY) once its
+                                          * dependents clear, not terminate/halt. A distinct enum value
+                                          * rather than a flag alongside TASK_WAITING_FOR_DEPENDENTS:
+                                          * sched_wake_dependents() branches on task_state already, and
+                                          * an explicit second value keeps that branch a plain
+                                          * exhaustive switch rather than a state+flag combination that
+                                          * would need its own separate invariant-checking. */
     TASK_TERMINATED,
 } halmat_task_state_t;
 

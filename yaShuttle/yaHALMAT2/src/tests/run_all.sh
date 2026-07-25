@@ -1054,6 +1054,49 @@ run ./run_local_fixture.sh exit_dfor_label "$(printf ' 9.0000000E+00\n 7.0000000
 # cancellation at VRUNTIM's 1e6 magnitude makes the "how recent" check
 # pass trivially for the tiny sub-1.0 TIMETAG offsets used here).
 run ./run_local_fixture.sh bit_array_dsub "$(printf ' 9.9500000E+03     1     1     1     1')"
+# User-suggested sweep of "not (yet) implemented" fail() sites still left
+# in interp.c: UPDATE PRIORITY (class-0/PRIO.md) had a fully primary-
+# source-confirmed operand-word format (a real HALSFC LSTALL trace) but
+# no runtime implementation at all -- every real compile of the statement
+# failed with "opcode 0x038 (PRIO) not yet implemented". Implemented by
+# writing the resolved new-priority value into the target task's own
+# `priority` field (the same field SCHEDULE...PRIORITY(...) already sets
+# at task creation, and sched_pick_next() already consults to choose the
+# next READY task to run) -- named-process form per the confirmed trace;
+# self/unlabeled form (operand_count==1, no process operand) is a
+# reasonable inference from CANC/TERM's own already-confirmed self-vs-
+# named distinction, though PRIO.md itself flags that specific form as
+# untested. Demonstrates actual preemption: WORKER is scheduled at a
+# priority (30) too low to preempt the primal's own default (50, same as
+# test_sched_low.hal), then UPDATE PRIORITY WORKER TO 90 raises it above
+# the primal's -- the very next scheduler tick switches to WORKER,
+# confirming the write actually reaches the field sched_pick_next() reads.
+run ./run_local_fixture.sh prio "$(printf 'BEFORE SCHEDULE\nBEFORE UPDATE\nWORKER RUNNING\nAFTER UPDATE')"
+# Same sweep: WAIT (class-0/WAIT.md) only had its interval form (tag=1)
+# implemented; WAIT UNTIL (tag=2) and WAIT FOR DEPENDENT (tag=0, no
+# operands) both failed loudly despite WAIT.md's own operand-word format
+# already being fully confirmed for all three forms. WAIT UNTIL reuses
+# the same schd_seconds_to_ticks() helper SCHD's AT/STOPPING...UNTIL
+# clauses already use, with the same "absolute virtual-time-in-seconds,
+# not relative to now" semantics (confirmed by SCHD's own stop_deadline
+# comparing directly against state->virtual_time, never adding it) --
+# WAIT.md's own "wait until a specified real time" wording matches this
+# directly.
+run ./run_local_fixture.sh wait_until "DONE" --time-scale 1000000
+# WAIT FOR DEPENDENT ("wait until all dependent processes have
+# terminated", USA003087 Sec. 13.5) reuses the existing has_active_
+# dependents()/sched_wake_dependents() mechanism already built for the
+# CLOSE-triggered TASK_WAITING_FOR_DEPENDENTS case (COUNTUP2.hal, earlier
+# session) -- but that existing mechanism unconditionally *terminates*
+# the waiting task once its dependents clear, which is correct for "this
+# task's own body is already finished" but wrong for a *mid-body* WAIT
+# statement, which must resume execution instead. Fixed with a new,
+# distinct TASK_WAITING_FOR_DEPENDENTS_RESUME state (state.h) that
+# sched_wake_dependents() transitions back to TASK_READY rather than
+# TASK_TERMINATED. Fixture confirms genuine blocking, not a no-op: the
+# primal's own "PRIMAL DONE" only prints after WORKER's "WORKER DONE"
+# (WORKER itself does a 1-second WAIT first), not before.
+run ./run_local_fixture.sh wait_dependent "$(printf 'WORKER DONE\nPRIMAL DONE')" --time-scale 1000000
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
