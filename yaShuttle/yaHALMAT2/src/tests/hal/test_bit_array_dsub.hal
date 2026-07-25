@@ -1,0 +1,60 @@
+  TEST_BIT_ARRAY_DSUB: PROGRAM;
+
+  DECLARE DATA_VALID ARRAY(4) BOOLEAN, AVERAGE SCALAR;
+     DECLARE VRUNTIM SCALAR INITIAL(1000000.0);
+
+    EXAMPLE_A:
+    PROCEDURE(ALT, TIMETAG) ASSIGN(DATA_VALID, AVERAGE);
+     DECLARE ARRAY(4),
+                ALT SCALAR,
+                TIMETAG SCALAR,
+                DATA_VALID BOOLEAN;
+     DECLARE SCALAR INITIAL(0),
+                TOTAL, NUMBER_GOOD;
+     DECLARE AVERAGE SCALAR;
+     DO FOR TEMPORARY J = 1 TO 4;
+M       IF VRUNTIM - TIMETAG  > .1 OR ALT  <=0 OR ALT  > 50000 THEN
+S                           J            J           J
+
+E           .
+M       DATA_VALID   = FALSE;
+S                 J:
+
+        ELSE
+           DO;
+E                 .
+M             DATA_VALID   = TRUE;
+S                       J:
+
+              NUMBER_GOOD = NUMBER_GOOD + 1;
+M             TOTAL = TOTAL + ALT ;
+S                                J
+
+           END;
+     END;
+     AVERAGE = TOTAL / NUMBER_GOOD;
+     DO FOR TEMPORARY I = 1 TO 4;
+E              .
+M       IF DATA_VALID   THEN
+S                    I:
+
+M          IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
+S                    I
+
+E                 .
+M             DATA_VALID   = FALSE;
+S                       I:
+
+     END;
+
+  CLOSE EXAMPLE_A;
+
+
+
+  CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100),
+                 SCALAR(VRUNTIM-0.01, VRUNTIM-0.02, VRUNTIM-0.03,
+                 VRUNTIM-0.04))
+                 ASSIGN(DATA_VALID, AVERAGE);
+  WRITE(6) AVERAGE, DATA_VALID;
+
+  CLOSE TEST_BIT_ARRAY_DSUB;

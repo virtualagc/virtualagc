@@ -3678,6 +3678,43 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             ref_offset = (size_t)c;
                             ref_stride = (size_t)base->cols;
                         }
+                    } else if (base->bit_elements || base->char_elements) {
+                        /* A BIT/BOOLEAN or CHARACTER ARRAY subscript
+                         * compiles through this same "index + trailing
+                         * asterisk" DSUB shape as M$(i,*) -- confirmed
+                         * user-reported (120-EXAMPLE_A.hal's
+                         * `DATA_VALID$(J:) = FALSE;`, DATA_VALID an
+                         * `ARRAY(4) BOOLEAN`, DSUB's own tag=1=BIT
+                         * confirming the element type). Unlike VECTOR/
+                         * MATRIX, where the asterisk selects a genuine
+                         * sub-range of several elements, a BIT/CHARACTER
+                         * element has no further internal structure to
+                         * select "all of" -- there is no plain-index-only
+                         * DSUB shape for these types, so the trailing
+                         * asterisk here is just how the compiler always
+                         * spells a BIT/CHARACTER array subscript, making
+                         * this exactly equivalent to an ordinary
+                         * single-index subscript (the generic per-
+                         * dimension `is_ref` path much further down in
+                         * this same case, reached for the num_indices==1
+                         * shape another ARRAY element type would use
+                         * instead) rather than a container-producing
+                         * partition select -- so this produces a plain
+                         * writable element reference, not a VAC container,
+                         * and returns immediately rather than falling
+                         * through to this block's shared store_container_
+                         * result() tail below (which assumes a numeric
+                         * `buf`/`count` this path never builds). */
+                        uint8_t other = 1 - (uint8_t)ast_axis;
+                        resolved_value_t idx;
+                        if (!resolve_operand(state, &ins->operands[1 + other], &idx)) break;
+                        int32_t n = rv_to_integer(&idx) - 1;
+                        if (n < 0) n = 0;
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        state->vac[ins->index].is_ref = true;
+                        state->vac[ins->index].ref_syt = base_syt;
+                        state->vac[ins->index].ref_offset = (size_t)n % base->element_count;
+                        break;
                     } else {
                         /* Also reached (num_indices==2, base->rows==0) for
                          * `V(N)` where V is declared ARRAY(n) VECTOR(m) --
@@ -6226,7 +6263,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the callee's corresponding parameter's final value back
                  * into this operand once the call returns. */
                 bool is_assign_arg = state->io_pending.is_call && ins->operands[0].tag2 != 0;
-                if ((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) {
+                /* A VAC operand already marked is_container (SSHP/VSHP/
+                 * MSHP/ISHP, VADD/VSUB/MADD/MSUB, a DSUB asterisk-select,
+                 * etc.) is unambiguously a whole-container *value* -- there
+                 * is no "per-element replay" reading of it the way a plain
+                 * SYT ARRAY reference can be ambiguous between "the whole
+                 * array" and "one element, index from arrayed_index"
+                 * (whole_syt's own case just below, which the arrayed_index
+                 * < 0 guard genuinely needs to disambiguate). So this
+                 * bypasses that guard entirely -- user-reported
+                 * (120-EXAMPLE_A.hal's `CALL EXAMPLE_A(SCALAR(9800, 9900,
+                 * 10000, 10100), ...)`: the SCALAR(...) shaping-function's
+                 * own SSHP result, fed to the ALT parameter via an XXAR the
+                 * compiler wraps in an ADLP(4)/DLPE exactly like a plain
+                 * per-element ARRAY argument would be -- previously fell
+                 * through to the ordinary per-element resolve_operand path
+                 * below on every replay pass since arrayed_index was
+                 * already >= 0 by the time this XXAR first ran, and
+                 * resolve_operand's QUAL_VAC case has no is_container
+                 * fallback at all, silently leaving ALT/TIMETAG's SYT
+                 * storage at its zero-initialized default -- corrupting
+                 * every element of this call's own IF-condition checks
+                 * (`ALT(J) <= 0` reading 0.0 unconditionally true) with no
+                 * error at all). Capturing the same already-computed whole
+                 * container once per replay pass is redundant but harmless
+                 * (idempotent), the same tolerance this file's own ADLP/
+                 * DLPE precompute step already documents elsewhere. */
+                bool whole_vac_container = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                            state->vac[ins->operands[0].data].is_container;
+                if (whole_vac_container && state->arrayed_index > 0) {
+                    /* Already captured on this same XXAR's first pass
+                     * (arrayed_index <= 0, i.e. either no replay or the
+                     * replay's own first iteration) -- unlike a plain SYT
+                     * ARRAY reference (which genuinely means something
+                     * different on each replay pass: element N, not "the
+                     * whole array" again), a VAC container's own value is
+                     * fixed for the whole replay, so passes 2+ must NOT
+                     * append a second (or third, or Nth) duplicate items[]
+                     * entry -- that would misalign every later argument's
+                     * own item_index against its real parameter position. */
+                    break;
+                }
+                if (((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) ||
+                    whole_vac_container) {
                     /* A whole VECTOR/MATRIX reference (QUAL=SYT, confirmed
                      * via a real HALSFC compile of `WRITE(6) V;`/
                      * `WRITE(6) M;` -- class-0/XXAR.md's former "whether
@@ -6269,10 +6348,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * which already handled it correctly before this
                      * session; only the *unreplayed* whole-container
                      * shape is new here. */
-                    bool whole_syt = ins->operands[0].qual == QUAL_SYT &&
+                    bool whole_syt = state->arrayed_index < 0 && ins->operands[0].qual == QUAL_SYT &&
                                       syt_is_array_shaped(state, ins->operands[0].data);
-                    bool whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
-                                      state->vac[ins->operands[0].data].is_container;
+                    bool whole_vac = whole_vac_container;
                     if (whole_syt || whole_vac) {
                         if (whole_syt && (ins->operands[0].tag1 == 1 || ins->operands[0].tag1 == 2)) {
                             /* Whole BIT/CHARACTER ARRAY argument

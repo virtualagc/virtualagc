@@ -1023,6 +1023,37 @@ run ./run_local_fixture.sh array_of_vector "$(printf ' 1.0000000E+00      2.0000
 # output (top-3-by-magnitude selection: V has magnitudes 3,7,1,9,5)
 # independently hand-derived by tracing the algorithm by hand.
 run ./run_local_fixture.sh exit_dfor_label "$(printf ' 9.0000000E+00\n 7.0000000E+00\n 5.0000000E+00')"
+# User-reported (120-EXAMPLE_A.hal's `DATA_VALID$(J:) = FALSE;`, DATA_VALID
+# an `ARRAY(4) BOOLEAN`): "DSUB: asterisk subscript with 2 indices not yet
+# implemented". A BIT/BOOLEAN (or CHARACTER) ARRAY subscript compiles
+# through the same "index + trailing asterisk" DSUB shape M$(i,*) uses --
+# confirmed via a real compiled trace (DSUB's own tag=1=BIT). Unlike
+# VECTOR/MATRIX, the asterisk here selects no sub-range (a BIT/CHARACTER
+# element has nothing further to select "all of"); it's just how the
+# compiler always spells this subscript. Fixed by treating it as an
+# ordinary single-element writable reference (the same is_ref VAC-slot
+# mechanism DSUB's generic per-dimension path already uses), not a
+# container-producing partition select. Fixing this surfaced a second,
+# independent bug once execution got further: `CALL EXAMPLE_A(SCALAR(...),
+# ...)`, an ARRAY(4) SCALAR procedure input parameter fed by a SCALAR(...)
+# shaping-function argument, silently bound as all-zero -- the compiler
+# wraps that argument's own XXAR in an ADLP(4)/DLPE per-element replay
+# (like a plain ARRAY WRITE argument), but the XXAR's operand is a VAC
+# slot already holding SSHP's own whole computed container, not a plain
+# per-index SYT reference -- resolve_operand's QUAL_VAC case has no
+# is_container fallback at all, so every replay pass silently left the
+# parameter's SYT storage at its zero-initialized default (`ALT(J) <= 0`
+# reading 0.0, unconditionally true, rejecting every element with no
+# error). Fixed by letting a VAC container operand bypass the
+# arrayed_index<0 whole-container gate entirely (unlike a plain SYT
+# reference, a VAC container has no per-replay-pass ambiguity to
+# disambiguate), captured once on the first pass only (later passes
+# skipped, avoiding duplicate items[] entries that would misalign later
+# arguments' own parameter binding). Output independently hand-verified
+# (AVERAGE = mean of 4 in-range readings; single-precision catastrophic
+# cancellation at VRUNTIM's 1e6 magnitude makes the "how recent" check
+# pass trivially for the tiny sub-1.0 TIMETAG offsets used here).
+run ./run_local_fixture.sh bit_array_dsub "$(printf ' 9.9500000E+03     1     1     1     1')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then
