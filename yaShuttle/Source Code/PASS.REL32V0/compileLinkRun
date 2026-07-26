@@ -55,6 +55,7 @@ The available OPTIONs are:
                     hopefully temporary in nature while development of it
                     proceeds.
     --no-test       Do not use HALSFC's --test option.
+    --yaGPC         Use `yaGPC ...` in place of `gpc run ...`.
 '''
 
 filename = None
@@ -62,6 +63,7 @@ parmList = None
 interactive = True
 extraPass1 = []
 noTest = False
+gpcCommand = ["gpc", "run"]
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):
         parmList = parameter[8:]
@@ -70,11 +72,13 @@ for parameter in sys.argv[1:]:
     elif parameter.startswith("--extra-pass1="):
         extraPass1 = parameter[14:].strip().split()
     elif parameter.startswith("--filename="):
-        filename = parameter[11:]
+        filename = parameter[11:].replace("~", "$HOME")
     elif parameter == "--interactive":
         interactive = True
     elif parameter == "--no-test":
         noTest = True
+    elif parameter == "--yaGPC":
+        gpcCommand = ["yaGPC"]
     else:
         print(helpMsg)
         sys.exit(1)
@@ -85,6 +89,7 @@ objfile = f"{basename}.obj"
 fcmfile = f"{basename}.fcm"
 symfile = f"{basename}-lnk101.json"
 print(f"For file {basename}.hal, producing {objfile}, {fcmfile}, {symfile}")
+filename = os.path.expanduser(os.path.expandvars(filename))
 
 # First step, compile.
 command = ["HALSFC", filename, f"--parms={parmList}", "-o", objfile]
@@ -124,7 +129,7 @@ except subprocess.CalledProcessError as e:
     os._exit(1)
 
 # Next, run it in the emulator.
-command = ["gpc", "run", "--interactive", 
+command = gpcCommand + ["--interactive", 
 	   "--no-trace", "--no-verbose", 
 	   "--symbols", symfile, 
 	   "--line-width", "240", fcmfile]
