@@ -47,19 +47,25 @@ S                                J
 
            END;
      END;
-     AVERAGE = TOTAL / NUMBER_GOOD;
-     DO FOR TEMPORARY I = 1 TO 4;
-E              .
-M       IF DATA_VALID   THEN
-S                    I:
+     IF NUMBER_GOOD = 0 THEN DO;
+        AVERAGE = 0;
+        DATA_VALID = BIT(0);
+     END;
+     ELSE DO;
+          AVERAGE = TOTAL / NUMBER_GOOD;
+          DO FOR TEMPORARY I = 1 TO 4;
+E                   .
+M            IF DATA_VALID   THEN
+S                         I:
 
-M          IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
-S                    I
+M               IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
+S                         I
 
-E                 .
-M             DATA_VALID   = FALSE;
-S                       I:
+E                      .
+M                  DATA_VALID   = FALSE;
+S                            I:
 
+          END;
      END;
      
 C  NOW WE HAVE SCREENED OUT DATA WHICH IS NEGATIVE OR ZERO,

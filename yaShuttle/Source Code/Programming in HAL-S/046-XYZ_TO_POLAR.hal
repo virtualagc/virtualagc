@@ -15,13 +15,13 @@ M       READ(5) P;
 M       IF P  = 0 AND P  = 0 AND P  = 0 THEN EXIT;
 S           1          2          3
 
-M       WRITE(6) 'BEARING =', ARCTAN(P  / P ) DEGREES_PER_RADIAN;
-S                                     2    1
+M       WRITE(6) 'BEARING   =', ARCTAN(P  / P ) DEGREES_PER_RADIAN;
+S                                       2    1
 
         WRITE(6) 'ELEVATION =', 
                  ARCTAN(P$3 / ABVAL(P$(2 AT 1))) DEGREES_PER_RADIAN;
 
-M       WRITE(6) 'DISTANCE =', ABVAL(P);
+M       WRITE(6) 'DISTANCE  =', ABVAL(P);
      END;
 Y %SVCI(0);
   CLOSE XYZ_TO_POLAR;

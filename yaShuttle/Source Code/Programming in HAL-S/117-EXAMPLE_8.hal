@@ -1,6 +1,4 @@
-C/ Adapted from PDF p. 117 of "Programming in HAL/S". Surrounding 
-C/ brackets have been removed from array variables, since they are not 
-C/ legal HAL/S syntax.
+C/ Adapted from PDF p. 117 of "Programming in HAL/S".
 
   EXAMPLE_8:
   PROGRAM;
@@ -26,14 +24,14 @@ C/ legal HAL/S syntax.
      WRITE(6)   '---------------------------------------',
                 '--------------------------------------';
 
-E       -            -          -
-M    VELOCITY = (POSITIONS - OLD_POSN) / DELTA_T;
-E                         -          -
-M    DISTANCE = ABVAL(POSITIONS - MY_POSN);
-E                       -                -          -
-M    APPROACH_RATE = VELOCITY . UNIT(POSITIONS - MY_POSN);
-E       -           -
-M    OLD_POSN = POSITIONS;
+E        -              -            -
+M    [VELOCITY] = ([POSITIONS] - [OLD_POSN]) / DELTA_T;
+E                            -           -
+M    [DISTANCE] = ABVAL([POSITIONS] - MY_POSN);
+E                          -                  -          -
+M    [APPROACH_RATE] = [VELOCITY] . UNIT([POSITIONS] - MY_POSN);
+E        -             -
+M    [OLD_POSN] = [POSITIONS];
      WRITE(6) 'VELOCITY =';
      DO FOR I = 1 TO 5; WRITE(6) '         ', VELOCITY$(I:*); END;
      WRITE(6) 'DISTANCE =';

@@ -6,6 +6,13 @@ C/ From PDF p. 159 of "Programming in HAL/S".
      DECLARE INTEGER,
                 CASE_NUM, AGE, SEX, X;
 
+     WRITE(6) 'Enter a line that will be interpreted as follows:';
+     WRITE(6) COLUMN(4), 'Columns 1-3    Case number';
+     WRITE(6) COLUMN(4), 'Columns 4-5    Age';
+     WRITE(6) COLUMN(4), 'Column  6      Sex';
+     WRITE(6) COLUMN(4), 'Columns 7-10   X';
+     WRITE(6) 'All are integers.';
+     WRITE(6) COLUMN(1);
 M    READALL(5) C;
 
 M    CASE_NUM = INTEGER(C      );
@@ -19,6 +26,13 @@ S                   6
 
 M    X = INTEGER(C       );
 S                 7 TO 10
+
+     WRITE(6) 'C = "', TAB(0), C, TAB(0), '"';
+     WRITE(6) 'CASE_BYN = "', TAB(0), TRIM(CASE_NUM), TAB(0), '"';
+     WRITE(6) 'AGE = "', TAB(0), TRIM(AGE), TAB(0), '"';
+     WRITE(6) 'SEX = "', TAB(0), TRIM(SEX), TAB(0), '"';
+     WRITE(6) 'X = "', TAB(0), TRIM(X), TAB(0), '"';
+     WRITE(6) '';
 
 Y %SVCI(0);
   CLOSE AGEP;

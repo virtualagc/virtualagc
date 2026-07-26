@@ -1,10 +1,24 @@
-C/ This sample was found on PDF p. 53 of "Programming in HAL/S".
-C/ It illustrates the use of double precision.  It reads a 
+C/ This sample was adapted from PDF p. 53 of "Programming in HAL/S".
+C/ It illustrates the use of double precision, `VECTOR` 
+C/ arithmetic, and trigonometric functions.  It reads a 
 C/ pair of angles for spring and another pair of angles for fall,
-C/ both in radians, and outputs single number representing the
-C/ distance of the object in miles. While it doesn't exactly
-C/ say what the angles represent, I suppose they must be right 
-C/ ascension and declination.
+C/ both in degrees, and outputs single number representing the
+C/ distance of an astronomical object in miles. While it doesn't 
+C/ say what the angles represent, some research tells us that 
+C/ they are the "apparent right ascension" and "apparent declination".
+C/ As a check, I've been told that typical numbers for the star
+C/ Sirius might be
+C/      101.28787917, -16.71614444
+C/      101.28797917, -16.71601389
+C/ and that the actual distance in miles is about 50.5E12.
+C/ The formula gives about 61E12, which is not too accurate, but
+C/ is at least in the ballpark.  Google explains that the simple
+C/ formula does not take into account "proper motion linear drift",
+C/ or in other words, that Sirius (or whatever object) has itself
+C/ moved between the two observations.  Curiously, the angular 
+C/ values it gave me are _not_ the same as the ones in the program 
+C/ GOOGLE-PARALLAX.hal, which it offered to write for me a couple 
+C/ of minutes later.
 
   PARALLAX:
   PROGRAM;
@@ -12,10 +26,15 @@ C/ ascension and declination.
      DECLARE VECTOR(2),
              SPRING_READING, FALL_READING;
      DECLARE DEVIATION SCALAR DOUBLE;
+     WRITE(6) 'Angles are "apparent right ascension" and';
+     WRITE(6) '"apparent declination" for some star whose';
+     WRITE(6) 'distance we want to measure.';
+     WRITE(6) 'Enter spring RA,DEC and fall RA,DEC :';
 E                  -              -
 M    READ(5) SPRING_READING, FALL_READING;
-E                            -               -
-M    DEVIATION = ABVAL(SPRING_READING - FALL_READING) / 2;
+E                                          -               -
+M    DEVIATION = ABVAL(3.1415926535 (SPRING_READING - FALL_READING)
+                                    / 180) / 2;
      WRITE(6) 'DISTANCE=', EARTH_ORBIT / TAN(DEVIATION), 'MILES';
 Y %SVCI(0);
   CLOSE PARALLAX;

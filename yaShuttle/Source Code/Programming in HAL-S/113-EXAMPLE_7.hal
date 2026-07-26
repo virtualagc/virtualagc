@@ -1,6 +1,7 @@
-C/ Adapted from PDF p. 113 in "Programming in HAL/S". Surrounding 
-C/ brackets have been removed from array variables, since they are not 
-C/ legal HAL/S syntax. 
+C/ Adapted from PDF p. 113 in "Programming in HAL/S".
+C/ The program compares slices of a 2D array called 
+C/ `ATTITUDE`, and stored the results of the comparisons
+C/ in `MISMATCH`.
 
   EXAMPLE_7:
   PROGRAM;
@@ -16,8 +17,8 @@ M       MISMATCH    = 0;
 S               I,I
 
         DO FOR J = I + 1 TO 4;
-M          IF ATTITUDE    ~= ATTITUDE    THEN
-S                     I,*            J,*
+M          IF [ATTITUDE]    ~= [ATTITUDE]    THEN
+S                       I,*              J,*
 
 M             MISMATCH   , MISMATCH    = 1;
 S                     J,I          I,J

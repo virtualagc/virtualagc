@@ -10,15 +10,15 @@ extraParms = ""
 def getParms(filename):
     parmBase = extraParms + "LIST,NOTABLES,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE="
     cardtypesBySourceFile = {
-        "CS2INI" : "ACFCRMYC",
-        "CS4INI" : "ACFCRMYC",
-        "CPTOSV" : "ACBDFCRMYC",
-        "CPUSLS" : "ACBDFCRMYC",
-        "GKDASC": "AMOCNCRMFDGCHCYC",
-        "GKRORB": "ACOMNCRCFCGDHCYC",
-        "GKGMNV": "ACOCNMRMFCGCHDYC"
+        "CS2INI" : "ACFCRMYCZM",
+        "CS4INI" : "ACFCRMYCZM",
+        "CPTOSV" : "ACBDFCRMYCZM",
+        "CPUSLS" : "ACBDFCRMYCZM",
+        "GKDASC": "AMOCNCRMFDGCHCYCZM",
+        "GKRORB": "ACOMNCRCFCGDHCYCZM",
+        "GKGMNV": "ACOCNMRMFCGCHDYCZM"
         }
-    cardtype = "FCRMYC"
+    cardtype = "FCRMYCZM"
     for name in cardtypesBySourceFile:
         if name in filename:
             cardtype = cardtypesBySourceFile[name]
@@ -147,4 +147,25 @@ else:
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
         #os._exit(1)
+# Cleanup:
+try:
+        os.remove(objfile)
+except:
+        pass
+try:
+        os.remove(fcmfile)
+except:
+        pass
+try:
+        symfile = f"{basename}-lnk101.json"
+except:
+        pass
+try:
+        symfile = f"{basename}-lnk101.repro.json"
+except:
+        pass
+try:
+        symfile = f"{fcmfile}.LIST"
+except:
+        pass
 
