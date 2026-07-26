@@ -202,6 +202,25 @@ HALSFC rejects them against a plain (unlatched) `EVENT` outright
 `src/tests/hal/test_eron_event.hal` (exercises all three: `SIGNAL` on
 an unlatched event, `RESET`/`SET` on latched ones).
 
+**`ON ERROR` redirect on `READ` end-of-file (193-TEST_X.hal).**
+User-reported: a registered `ON ERROR` handler never actually
+intercepted a `READ` hitting end-of-file — the interpreter's own
+end-of-input handling (`fail()`-based abort) never consulted the error
+handler table at all, so a real program relying on `ON ERROR` to
+recover from EOF (rather than crashing) had no way to. Confirmed
+against `source-documentation/ProgrammingInHALS.txt`'s own Sec. 10
+discussion of this exact worked example, doubly confirmed by the real
+compiled HALMAT showing exactly one `ERON` registered with group=10,
+member=5 (App. C's "the end of file error" — new `HAL_S_ERROR_GROUP_
+IO`=10/`HAL_S_ERROR_IO_END_OF_FILE`=5 constants, `interp.c`). Fixed via
+a new `io_error_redirect_on_eof()`, mirroring
+`arithmetic_error_should_apply_fixup()`'s existing GOTO-redirect
+pattern (`find_error_handler(state, HAL_S_ERROR_GROUP_IO,
+HAL_S_ERROR_IO_END_OF_FILE)`), wired into all four of `READ`'s own
+end-of-input `fail()` call sites — a registered handler now redirects
+execution there instead of aborting the run. Fixture:
+`test_read_eof_onerror.hal`.
+
 ## Unresolved Questions
 
 - None remaining for the base `ON ERROR`/`OFF ERROR` *compile-time

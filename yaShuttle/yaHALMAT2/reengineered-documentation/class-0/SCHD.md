@@ -471,6 +471,53 @@ program actually ends) — see `src/tests/run_all.sh`'s updated
 `sched_low` entry. See `src/tests/hal/test_countup2.hal` for the new
 regression fixture matching the user's own program.
 
+## PRIORITY range validation (241-P.hal)
+
+User-reported: `SCHEDULE ... PRIORITY(999);` (`241-P.hal`) ran without
+error, silently accepting an out-of-range priority. [USA003087] Sec.
+13.1–13.3 documents priority as bounded `0 < P < 255`; `241-P.hal`'s own
+`999` exceeds it outright — confirmed not a yaHALMAT2 bug but the
+corpus file itself using an intentionally out-of-spec illustrative
+value. `OP_SCHD` (`interp.c`) now rejects any resolved priority outside
+`0 < P < 255` (`fail(state, "SCHEDULE priority %d out of range
+0<P<255...")`), matching the primal process's own default-priority
+convention.
+
+## Compound event-expressions in ON/STOPPING WHILE/UNTIL (239-STARTUP.hal, 238-P.hal)
+
+User-reported, `239-STARTUP.hal`'s `SCHEDULE ... ON (ORBIT & (ORBIT2 &
+ORBIT3));` and `238-P.hal`'s `SCHEDULE ... REPEAT WHILE <compound bit
+exp>;`/`UNTIL <compound bit exp>;`: both the `ON` clause and the
+`STOPPING WHILE`/`UNTIL` clause previously only accepted a plain,
+unsubscripted `EVENT` symbol (`QUAL`=`SYT`) as their event-expression
+operand — a compiled `BAND`/`BOR`/`BNOT` compound expression instead
+produces a `QUAL`=`VAC` operand referencing the producing instruction's
+own stream position, rejected outright ("SCHD: ON/WHILE/UNTIL expects a
+plain EVENT symbol").
+
+Fixed by accepting `QUAL_VAC` alongside `QUAL_SYT` for both clauses'
+event operand (stored as a full `halmat_operand_t` — `on_event_op`/
+`stop_event_op` on `halmat_task_t`, generalized from a plain `uint16_t`
+SYT index, `state.h`) and evaluating it *live*, every time it's
+consulted, via a new `reevaluate_live_bit_operand()` (`interp.c`):
+a `QUAL_SYT` operand is read directly; a `QUAL_VAC` operand
+binary-searches `state->prog->instrs[]` by HALMAT word position (a VAC
+operand's `DATA` is a raw word position, not the producing
+instruction's own array index into `instrs[]` — the two diverge after
+the first multi-operand instruction) for the producing
+[BAND](../class-1/BAND.md)/`BOR`/`BNOT` instruction, then recurses on
+*that* instruction's own operands. This re-evaluates the expression
+against current `EVENT` states every time it's consulted, rather than
+reading a one-time-captured snapshot at `SCHEDULE`-time — essential
+since `E1 AND E2` must wait until *both* events are independently true,
+however far apart in real time each one is set. `OP_CLOS`'s own
+`STOPPING WHILE`/`UNTIL` re-check (for a cyclic task falling through to
+its own end) uses the same mechanism. See [WAIT](WAIT.md)'s own
+`WAIT FOR` form, which reuses this identical mechanism, and
+[BAND](../class-1/BAND.md)'s Implementation Notes. Fixtures:
+`test_sched_on_compound.hal`, `test_sched_on_compound_or.hal`,
+`test_sched_until_compound.hal`.
+
 ## Source Analysis & Reliability
 
 Opcode (0x039) confirmed primary-source: `XSCHD BIT(16) INITIAL("039")`

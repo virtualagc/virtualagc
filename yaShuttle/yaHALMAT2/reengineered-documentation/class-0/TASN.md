@@ -56,28 +56,34 @@ consumed [TSUB](TSUB.md)'s subscripted-copy result.
 
 ## Confirmed Runtime Behavior
 
-**Copying a structure terminal with `ARRAY`/`MATRIX`/`VECTOR` type:
-investigated (Maintenance phase), deferred, not implemented.** A
+**Copying a structure terminal with `ARRAY`/`MATRIX`/`VECTOR` type: was
+investigated (Maintenance phase), deferred as unreachable, then
+implemented once a later session provided real data to copy.** A
 correct deep copy for this case is mechanically straightforward — same
 three-way storage-kind dispatch (numeric/`BIT`/`CHARACTER`) already
 used for whole-`ARRAY` `ASSIGN` write-back and `WRITE` arguments (see
-[WRIT](WRIT.md)) — but turns out to be currently *unreachable* by any
-real HALSFC-compiled program: every other opcode that can write a whole
-array/vector/matrix value — `VASN`/`MASN` (`ZQ1.QV = SRC;`), the
-`ASSIGN` write-back path (`CALL P ASSIGN(ZQ1.QV);`), and [DSUB](DSUB.md)
-(subscripted element assignment, `ZQ1.QV(1) = ...;`) — all reject a
-structure-terminal (`XPT`) receiver outright, requiring a plain `SYT`.
-[TINT](../class-8/TINT.md) (structure-terminal `INITIAL`) only handles
-scalar terminals, not multi-slot `ARRAY`/`MATRIX`/`VECTOR` ones.
-Confirmed by direct HALSFC compile probes: no way currently exists to
-get real per-element data into a structure-terminal array field for
-`TASN` to ever copy. Per this project's own standing discipline, the
-existing `fail()` was left in place (broadened to also guard
-`BIT`/`CHARACTER`-array terminals, not just numeric, closing a latent
-silent-aliasing hole in the old guard) rather than ship a deep copy that
-can't be fixture-verified — deferred alongside [DSUB](DSUB.md)'s
-ARRAY-of-VECTOR/MATRIX gap and [RTRN](RTRN.md)'s whole-array-return gap,
-all facets of one missing architecture.
+[WRIT](WRIT.md)) — but was, at the time, unreachable by any real
+HALSFC-compiled program: every other opcode that can write a whole
+array/vector/matrix value rejected a structure-terminal (`XPT`)
+receiver outright, and [TINT](../class-8/TINT.md) (structure-terminal
+`INITIAL`) only handled scalar terminals. The existing `fail()` was
+left in place (broadened to also guard `BIT`/`CHARACTER`-array
+terminals) rather than ship an unverifiable deep copy.
+
+**Unblocked and implemented (`172-OUTER.hal`, whole-structure `READ`
+support).** Implementing whole-`STRUCTURE` `READ` arguments (new
+`symtab.h` `struct_first_field`/`struct_next_field` linked-list walk,
+allocating a `VECTOR`/`ARRAY` terminal's `elements[]` on first touch —
+see [EXTN](EXTN.md)) finally gave `TASN` real per-element data to copy,
+so its own `ARRAY`/`MATRIX`/`VECTOR`-terminal branch was implemented
+for real rather than left `fail()`-ing: a genuine deep copy
+(`malloc`+`memcpy` for numeric elements, `dup_string` per element for
+`CHARACTER`, direct copy for `BIT` elements — never aliasing the two
+entries' element-array pointers together), also copying `rows`/`cols`/
+`array_of_vector` shape metadata. Verified additionally under a
+dedicated ASan+UBSan instrumented build to confirm the manual
+malloc/free bookkeeping has no memory-safety issues. Fixture:
+`test_tasn_array_terminal.hal`.
 
 ## Unresolved Questions
 
