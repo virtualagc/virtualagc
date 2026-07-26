@@ -305,8 +305,57 @@ construct itself. Only the single-dimension `VECTOR`/`ARRAY` case
 (`M1(2 AT 1,1)`) needs a third operand for the other, plainly-indexed
 dimension and isn't handled, so it deliberately falls through to fail
 loudly rather than misreading length/position as raw indices.
-To-partition/`CSZ`/`ASZ` subscript kinds — all fully confirmed in the
-wire format above — remain uninterpreted.
+
+**Component at-partition and single-index on a plain scalar base**
+(Maintenance phase): the `VECTOR`/`ARRAY`-shaped at-partition branch
+above originally also (wrongly) matched a plain scalar `BIT` base's own
+at-partition subscript (`B$(4 AT I)`, `B` a `BIT(24)`) and single-bit
+index (`B$(1)`), since both shapes structurally coincide with the
+`VECTOR` case at the operand level — distinguished only by this
+instruction's own operator-word `TAG` (`4`=`VECTOR` vs. `1`=`BIT`),
+now correctly gated on it. Two new branches read/write a plain
+`BIT`/`INTEGER`/`SCALAR` symbol's own raw bit pattern directly (no
+container/`ensure_container()` involvement at all, unlike the
+`VECTOR`/`ARRAY` case): `B$(width AT position)` (native `BIT`
+at-partition) and `B$(n)` (single-bit index, implicit width 1) — both
+using the same MSB-first bit-numbering formula
+`format_bit_field`/`SUBBIT` already establish elsewhere in `interp.c`.
+The single-index form is now also a writable receiver (`B$(1) = ON;`),
+via a new deferred `is_bitpart_ref` `VAC`-slot kind (`state.h`) that
+re-derives the target's *current* raw value at write time rather than
+capturing a stale snapshot — the same "produced by `DSUB`, consumed by
+whichever operand position uses it" pattern `is_ref` already
+establishes. Similarly, plain (non-`ARRAY`) `CHARACTER` to-partition
+(`C$(start TO end)`) and single-index (`C$(n)`) substrings are now
+implemented, read directly from the base's own `char_value` string
+storage — the `#`-relative `CSZ` bound form is handled the same way for
+the to-partition case (see below).
+
+**Component to-partition** (`V1(4 TO 7)`, a `VECTOR`/`ARRAY` slice, and
+`C1(a TO b)`, a `CHARACTER` substring) is now interpreted for both
+result classes. `VECTOR`/`ARRAY` to-partition (`TAG`=4) produces a
+`VECTOR`-shaped `VAC` container result via the same mechanism as the
+asterisk/at-partition cases above, and — unlike at-partition — *is*
+writable (`V(4 TO 7) = SUBV;`, `SUBV` itself a `VECTOR`): confirmed via
+a direct `HALSFC` compile that a plain `SCALAR` RHS on a to-partition
+slice is rejected outright at compile time ("`AV1`: TYPE OF V IS
+ILLEGAL FOR ASSIGNMENT FROM GIVEN RIGHT-HAND SIDE" — no HALMAT is even
+produced), so a genuinely `VECTOR`-shaped source is the only real
+trigger, unlike at-partition's own confirmed-always-read-only limit.
+Only the single-dimension `VECTOR`/`ARRAY` case (`base->rows == 0`) is
+implemented; a `MATRIX` to-partition isn't handled. `CHARACTER`
+to-partition (`TAG`=2) reads directly from the base's own `char_value`
+string storage, and now also resolves the `#`-relative `CSZ` bound form
+(`C(1 TO #-DECIMALS)`) via a shared `resolve_to_partition_bound()`
+helper: `DATA`=0 is a bare `#` (the base's own current working length);
+`DATA`=2 is `# − subsidiary`, consuming the operand word immediately
+following. `DSUB` also gained a narrow `QUAL_LIT`-base case for this
+same to-partition shape, needed when the base itself is a compile-time
+`CONSTANT` (`ZEROS(1 TO DECIMALS-LENGTH(C))`, `ZEROS` a `CHARACTER
+CONSTANT` — a compile-time `CONSTANT` has no `SYT` storage of its own
+to look up). `ASZ` remains uninterpreted — see its own note above (never
+observed as a `DSUB` subscript operand in any traced case, array bounds
+always resolving to a compile-time-known literal instead).
 
 ## `yaHALMAT2` Implementation Notes (Maintenance phase)
 
@@ -348,6 +397,38 @@ wire format above — remain uninterpreted.
   this instruction's own operator-word `TAG` (already documented above
   as "the HALMAT class number of the subscripted result's type" — `6`
   for `INTEGER`). Fixture: `test_mismatch_array.hal`.
+- **`VECTOR` at-partition wrongly also matching a scalar `BIT` at-partition
+  or single-index subscript** (user-reported, 254-TEST1.hal's `INTEGER
+  (INPUT$(4 AT I))`, `INPUT` a plain `BIT(24)`; 254-TEST2.hal's
+  `IF B$(1) THEN ...;`, `B` a plain `BIT(16)`): both structurally coincide
+  with the `VECTOR`/`ARRAY` at-partition/index shape at the operand
+  level, previously read through `base->elements` even though a scalar
+  `BIT` symbol has none (`ensure_container()`'s generic "unknown shape"
+  fallback silently allocated a bogus placeholder container regardless).
+  Fixed by gating the `VECTOR` branch on this instruction's own
+  operator-word `TAG`==4, and adding two new branches for `TAG`==1
+  (`BIT`) that read/write the base's own raw bit pattern directly, no
+  container involved — see "Component at-partition and single-index on a
+  plain scalar base" in Usage Context above. Fixtures:
+  `test_bit_at_partition.hal`, `test_bit_index.hal`, `test_bit_index_assign.hal`.
+- **`CHARACTER` to-partition/single-index substrings on a plain scalar
+  base** (user-reported, 159-AGE.hal's `CASE_NUM = INTEGER(C$(1 TO 3));`,
+  `C` a plain `CHARACTER(80)`): previously fell through to the generic
+  per-dimension index loop, misreading the (start, end) pair as two
+  unrelated plain indices into a scalar `CHARACTER` symbol's own
+  nonexistent element array. Fixed with two new branches reading
+  directly from the base's own `char_value` string storage — see
+  "Component to-partition" in Usage Context above, which also covers the
+  later `CSZ`-bound and `QUAL_LIT`-base extensions to this same code
+  path. Fixtures: `test_char_subscript.hal`, `test_reformat_csz.hal`.
+- **`VECTOR` to-partition not usable as an assignment receiver**
+  (user-reported, `V(4 TO 7) = SUBV;`, `V` a `VECTOR(10)`, `SUBV` a
+  `VECTOR(4)`): "MASN/VASN: receiver must be SYT" — the to-partition
+  branch only ever produced a *readable* `VAC` container result; nothing
+  marked it `is_container_ref` the way the sibling asterisk-partition
+  case (`M$(I,*) = ...;`) already does. Fixed by adding the same
+  writable-view marking, scoped to the single-dimension `VECTOR`/`ARRAY`
+  case. Fixture: `test_vector_to_partition_write.hal`.
 
 ## Unresolved Questions
 
@@ -376,30 +457,37 @@ wire format above — remain uninterpreted.
   operand mechanism were not tested this session — only single-operand
   array-dimension index/asterisk forms were compiled.~~ **Resolved in a
   later session**: all of these are now confirmed — see Usage Context.
-  The one open item is the exact bit encoding distinguishing `+`
-  vs. `−` in the `CSZ`/`# ± expression` case (a `DATA`=2 value was
-  observed for `# - 2`, but the `+` case and a non-literal expression
-  were not tested). **Still open after a further Maintenance-phase
-  session, now with a concrete non-literal real-program case on
-  record**: `160-REFORMAT.hal`'s `RETURN RJUST(S||C(1 TO #-DECIMALS)||
-  '.'||C(#-DECIMALS-1 TO #), WIDTH);` gives two real traces. `C(1 TO
-  #-DECIMALS)`'s end bound fits the prior "`DATA`=2 means `#-expr`"
-  reading exactly (`CSZ` `DATA`=2, subsidiary operand=plain `SYT`
-  reference to `DECIMALS` — confirming the subsidiary need not be a
-  literal, just any ordinarily-resolvable operand). But `C(#-DECIMALS-1
-  TO #)`'s *start* bound doesn't cleanly resolve against the same
-  formula: its subsidiary operand is itself a computed `VAC` reference
-  (an `IADD` of `DECIMALS` and a literal, not a bare `SYT`), and
-  algebraically the source expression `#-DECIMALS-1` needs `# -
-  (DECIMALS+1)`, not `# - (DECIMALS-1)` — i.e. either the `+`/`-` case
-  distinguished by `DATA` isn't simply "the outer sign for the whole
-  `CSZ` term" the way the `# - 2` case suggested, or the literal folded
-  into that `IADD` has a sign this session didn't independently confirm.
-  DSUB opcode dispatch for the to-partition subscript kind itself is
-  *also* still unimplemented in `yaHALMAT2` (only index/asterisk/
-  component-at-partition are — see `interp.c`'s `OP_DSUB`), so this
-  remains a documented, deferred gap rather than a fixed one; see that
-  file's own comment for the full trace and reasoning.
+  ~~The one open item is the exact bit encoding distinguishing `+`
+  vs. `−` in the `CSZ`/`# ± expression` case.~~ **Fully resolved
+  (Maintenance phase, across two follow-up passes)**: `DATA`=0 is a
+  bare `#` (no subsidiary); `DATA`=2 is `# − subsidiary`, the subsidiary
+  being whatever operand word immediately follows (a plain `SYT`, or a
+  computed `VAC` result — need not be a literal). An intermediate pass
+  investigating `160-REFORMAT.hal`'s `RETURN RJUST(S||C(1 TO
+  #-DECIMALS)||'.'||C(#-DECIMALS-1 TO #), WIDTH);` seemed to find a
+  contradiction (`C(#-DECIMALS-1 TO #)`'s own subsidiary, a computed
+  `IADD(DECIMALS, 1)`, appeared to disagree with hand-deriving the
+  textbook's own separately-quoted worked example, `REFORMAT(SQRT(2),3,
+  5)` → `'1.414'`) — this turned out to be a dead end rather than a real
+  ambiguity: the corpus file doesn't actually call `REFORMAT` with those
+  textbook values at all (it uses three different, unrelated test
+  cases), so that reverse-engineering was never checkable against real
+  behavior in the first place, and the `DATA`=2 formula reconciles
+  algebraically with the corpus file's own compiled expression exactly.
+  The `#-DECIMALS-1` formula itself was independently re-verified
+  letter-for-letter identical against *both* the 1st (NASA-CR-151872,
+  Sept. 1978) and 2nd editions of "Programming in HAL/S", ruling out an
+  OCR scanning artifact in either copy as the source of the apparent
+  disagreement. `DATA`=1 (a `# + expression` form) remains inferred only
+  by symmetry with the primary source's own documented formula ("`tag` =
+  1 + expression, or 2 − expression") — never independently observed in
+  any real or synthetic trace. DSUB opcode dispatch for the to-partition
+  subscript kind, including `CSZ`, is now implemented in `yaHALMAT2` —
+  see `interp.c`'s `resolve_to_partition_bound()` and the CHARACTER/
+  VECTOR to-partition branches of `OP_DSUB`, and the Implementation
+  Notes below. All three of `160-REFORMAT.hal`'s own real `WRITE(6)
+  REFORMAT(...)` calls now produce output independently verified
+  digit-by-digit by hand.
 - ~~The "detailed" table's array/component split may not be the whole
   picture — `α` for at least the "index" kind may also depend on the
   container type (`ARRAY` vs `MATRIX`/`VECTOR`).~~ **Resolved in a full
@@ -454,12 +542,28 @@ wire format above — remain uninterpreted.
   replay's own `arrayed_index`, correct only when both operands happened
   to be same-shaped; fixed by slicing to one `VECTOR` per
   `arrayed_index` (both `resolve_container`'s read side and `VASN`'s own
-  hand-rolled write side). `ARRAY`-of-`MATRIX` and `ARRAY(*)`
-  assumed-size `VECTOR` parameters (`141-VSUM.hal`) remain a separate,
-  still-open gap (a plain positional-binding/shape-metadata limitation,
-  not this container-shape one) — the whole-`VECTOR`/`MATRIX` `RETURN`
-  half of the "ARRAY-of-VECTOR/MATRIX" architecture this bullet used to
-  describe as jointly deferred is now also fixed, see
+  hand-rolled write side). `ARRAY(*)` assumed-size `VECTOR` parameters
+  (`141-VSUM.hal`'s `VSUM: FUNCTION(V) VECTOR; DECLARE V ARRAY(*)
+  VECTOR;`) are now also fixed (Maintenance phase): the root cause was
+  two compounding bugs unrelated to this container-shape one — `symtab.c`'s
+  own `EXT_ARRAY` dimension-bound parsing never sign-extended from the
+  field's real 16-bit width (an assumed-size parameter's own bound is
+  encoded as a *negative* 16-bit sentinel, confirmed against two
+  different real files' own differing magnitudes — 0xFFF9=-7 and
+  0xFFFC=-4 — ruling out one fixed constant), and `ensure_container()`
+  had no way to represent "this parameter's real size isn't known until
+  a call actually supplies one." Fixed by correctly sign-extending the
+  bound, leaving an assumed-size `ARRAY` parameter unallocated until a
+  real call supplies its shape, and having `bind_call_argument()`
+  allocate directly from the caller's own actual argument shape.
+  Uncovered a second, independent bug in the same investigation: `LFNC`'s
+  `SIZE` selector returned an `array_of_vector`-shaped argument's *flat
+  scalar* count rather than the `VECTOR` count USA003087 Appendix B's own
+  SIZE FUNCTION table specifies — see [LFNC](LFNC.md). `ARRAY`-of-`MATRIX`
+  parameters remain unhandled (no real corpus trigger found). The
+  whole-`VECTOR`/`MATRIX` `RETURN` half of the "ARRAY-of-VECTOR/MATRIX"
+  architecture this bullet used to describe as jointly deferred is now
+  also fixed, see
   [RTRN](RTRN.md). Fixture: `test_array_of_vector.hal`.
 
 ## Source Analysis & Reliability

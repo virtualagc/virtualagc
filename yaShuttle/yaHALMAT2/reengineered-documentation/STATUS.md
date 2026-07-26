@@ -2100,7 +2100,10 @@ left unexplored:
   Needs new symbol-table shape metadata before any of the three can be
   fixture-verified; deferred together as a dedicated future feature
   rather than partially implemented. See [DSUB](class-0/DSUB.md) and
-  [RTRN](class-0/RTRN.md)'s own Unresolved Questions.
+  [RTRN](class-0/RTRN.md)'s own Unresolved Questions. **`ARRAY(*)`
+  assumed-size parameter binding is now fixed** — see "Assumed-size
+  `ARRAY(*)` parameter binding and the `LFNC` `SIZE` selector fixed"
+  below.
 - **Concurrent re-scheduling of an already-active [SCHD](class-0/SCHD.md)
   task** — turned out not to be a gap at all: this file's own prior
   research had already concluded it's a genuine [USA003087] Sec. 13.4
@@ -2253,6 +2256,60 @@ two real, related fixes:
   end-to-end against all three of Sec. 12.4's own worked examples. New
   `--page-length`/`--ff` options. See [WRIT](class-0/WRIT.md)'s own new
   section for the full writeup.
+
+## Assumed-size ARRAY(*) parameter binding and the LFNC SIZE selector fixed
+
+User-reported against `140-STATISTICS.hal` (`CALL STATISTICS(DATA)
+ASSIGN(LO, HI, MN);`, `STATISTICS`'s own `DATA` parameter declared
+`ARRAY(*) SCALAR` — [USA003087] Sec. 7.5/20.11's assumed-size parameter
+form): "procedure/function call: MATRIX/VECTOR/ARRAY argument shape does
+not match parameter" — task #29, previously deferred alongside the
+architecture gap noted above. Two compounding bugs:
+
+1. `symtab.c`'s own `EXT_ARRAY` dimension-bound parsing never
+   sign-extended from the field's real 16-bit width (confirmed via the
+   raw `COMMON0.out` dump: "EXT ARRAY n BIT xxxx", always 4 hex digits)
+   — an assumed-size parameter's own bound is encoded as a *negative*
+   16-bit sentinel (`0xFFF9` = -7 for `140-STATISTICS.hal`'s `DATA`;
+   cross-checked against `141-VSUM.hal`'s own `ARRAY(*) VECTOR` case,
+   which uses a *different* magnitude, `0xFFFC` = -4, confirming "any
+   negative value" rather than one fixed constant), previously misread
+   as a huge unsigned "size" (65529) instead.
+2. Even with that fixed, `ensure_container()` had no way to represent
+   "this parameter's real size isn't known until a call actually
+   supplies one" — fixed by having it leave an assumed-size `ARRAY`
+   parameter entirely unallocated, and `bind_call_argument()` allocate
+   it directly from the caller's own actual argument shape instead of
+   requiring a match against a declared size that doesn't exist for this
+   kind of parameter.
+
+Output independently hand-verified (`LO`=`MIN`=10, `HI`=`MAX`=50,
+`MEAN`=`SUM`/`SIZE`=150/5=30, from `DATA`'s own
+`INITIAL(10,20,30,40,50)`). Fixture: `test_statistics.hal`.
+
+Separately confirmed in the same investigation, a different,
+pre-existing gap unrelated to assumed-size specifically:
+`141-VSUM.hal`'s own `ARRAY(*) VECTOR` case no longer crashed with the
+above fix, but computed a wrong answer (3x too large, `SUM=3,6,9`
+instead of the hand-derivable `1,2,3`). Root cause:
+[LFNC](class-0/LFNC.md)'s `SIZE` selector (`interp.c`) returned an
+`array_of_vector`-shaped argument's *flat scalar* count (9) rather than
+the "length of array" [USA003087] Appendix B's own SIZE FUNCTION table
+specifies (3, the `VECTOR` count) — inflating a `DO FOR N=1 TO SIZE(V)`
+loop bound 3x, silently re-summing the same 3 vectors 3 times over.
+Fixed: `SIZE` now uses `rows` (the array's own length, from
+`resolve_container`'s own rows/cols output) instead of the flat count
+whenever a 2D shape (`rows>0 && cols>0`) is reported — unambiguous in
+practice, since a genuinely 2-dimensional `ARRAY(r,c)` of `SCALAR`
+shares that same `rows`/`cols` encoding but isn't "one-dimensional," so
+`SIZE()` on one isn't valid HAL/S to begin with. A plain flat `ARRAY`
+(not array-of-`VECTOR`) is unaffected. `MAX`/`MIN`/`SUM`/`PROD` were
+reviewed for the same class of bug: none found, since [USA003087]
+restricts those to `INTEGER`/`SCALAR` array arguments only. Fixture:
+`test_vsum.hal`.
+
+See [DSUB](class-0/DSUB.md), [RTRN](class-0/RTRN.md), and
+[LFNC](class-0/LFNC.md) for the per-file writeups.
 
 ## Next steps (suggested)
 

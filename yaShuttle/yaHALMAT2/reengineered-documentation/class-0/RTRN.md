@@ -73,8 +73,14 @@ through three fixes this project:
   own notes on the `call_array_replay` mechanism.
 
 Fixtures: `test_fcal_scalar_return.hal`, `test_fcal_boolean_return.hal`,
-`test_dots.hal`. `ARRAY(*)` assumed-size parameter binding remains a
-separate, still-open gap (see [DSUB](DSUB.md)'s Unresolved Questions).
+`test_dots.hal`. `ARRAY(*)` assumed-size parameter binding (140-STATISTICS.hal's
+`CALL STATISTICS(DATA) ASSIGN(LO, HI, MN);`, `DATA` declared `ARRAY(*)
+SCALAR`) is now fixed too — two compounding bugs, `symtab.c`'s missing
+sign-extension of the negative-sentinel assumed-size bound and
+`ensure_container()`/`bind_call_argument()`'s inability to allocate such
+a parameter from the caller's own actual argument shape — see
+[DSUB](DSUB.md)'s Unresolved Questions for the full trace. Fixture:
+`test_statistics.hal`.
 
 ## Unresolved Questions
 

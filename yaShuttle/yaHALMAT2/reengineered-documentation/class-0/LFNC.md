@@ -81,6 +81,30 @@ result, it just reports the count of elements the enclosing
 `MAX`/`MIN`/`SUM`/`PROD`, no reduction loop over the array's contents is
 needed at all.
 
+## yaHALMAT2 Implementation Notes (Maintenance phase)
+
+- `SIZE`'s selector handler (`interp.c`) originally returned the flat
+  scalar element count for *any* array argument, regardless of shape.
+  This is correct for a plain flat `ARRAY` of `SCALAR`/`INTEGER`, but
+  wrong for an array-of-`VECTOR`/`MATRIX` argument: [USA003087] Appendix
+  B's own SIZE FUNCTION table specifies the "length of array" (the
+  number of `VECTOR`/`MATRIX` elements), not the total count of
+  underlying numbers. Surfaced by a real corpus program, `141-VSUM.hal`
+  (`DO FOR TEMPORARY N = 1 TO SIZE(V);`, `V` an `ARRAY(3) VECTOR(3)`):
+  `SIZE(V)` returned 9 (3 vectors × 3 components each) instead of 3,
+  inflating the loop bound 3x and silently re-summing the same 3 vectors
+  three times over. Fixed by having `SIZE` report `rows` (from
+  `resolve_container`'s own `rows`/`cols` output) instead of the flat
+  count whenever a 2-dimensional shape (`rows>0 && cols>0`) is reported —
+  unambiguous in practice, since a genuinely 2-dimensional `ARRAY(r,c)`
+  of plain `SCALAR` shares that same `rows`/`cols` encoding but isn't
+  "one-dimensional," so calling `SIZE()` on one isn't valid HAL/S to
+  begin with. A plain flat `ARRAY` (not array-of-`VECTOR`/`MATRIX`) is
+  unaffected. `MAX`/`MIN`/`SUM`/`PROD` were reviewed for the same class
+  of bug and found clean, since [USA003087] restricts those four to
+  `INTEGER`/`SCALAR` array arguments only — no array-of-`VECTOR`/
+  `MATRIX` case can reach them. Fixture: `test_vsum.hal`.
+
 ## Unresolved Questions
 
 - The 2-argument forms of `MAX`/`MIN` (if any — [USA003087] Appendix B
