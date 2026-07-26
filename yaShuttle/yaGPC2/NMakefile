@@ -1,0 +1,183 @@
+# NMakefile — yaGPC build for native Windows (nmake + MSVC's cl.exe),
+# companion to the GNU `Makefile` used on Linux, macOS, and
+# Windows-under-MSYS2 (see that file's header comment for the split
+# rationale — nmake's syntax is different enough from GNU Make's that a
+# single file covering both isn't practical).
+#
+# Usage (from a "Developer Command Prompt for VS" / "x64 Native Tools"
+# shell, so cl.exe/nmake are on PATH):
+#   nmake /f NMakefile
+#   nmake /f NMakefile test
+#   nmake /f NMakefile CC=clang-cl      (override the compiler)
+#   nmake /f NMakefile clean
+#
+# Defaults to cl.exe. NMake's macro precedence already does what's
+# needed here for overriding it: command-line macros (`nmake CC=...`)
+# take precedence over macros set in this file, which take precedence
+# over environment variables — so `CC = cl` below is just the fallback
+# default, no special-casing needed (unlike the GNU Makefile, which has
+# to work around GNU Make's own pre-existing built-in `CC=cc` default
+# via `$(origin CC)`).
+#
+# NOT build-tested on an actual Windows/MSVC machine (this port was
+# developed entirely on Linux) — written carefully against documented
+# nmake/cl.exe behavior, but treat it as a first draft to debug against
+# a real `nmake` if something doesn't line up.
+#
+# Known simplifications versus the GNU Makefile:
+#   - No per-header incremental-rebuild tracking (GNU Make's
+#     -MMD -MP-generated .d files have no simple nmake equivalent without
+#     parsing cl.exe's /showIncludes output) — editing only a .h file
+#     without touching its .c file may require `nmake clean` first.
+#   - test/run_all.sh (CLI --help/error-message smoke tests) is a bash
+#     script and isn't invoked here; `nmake test` runs only the C unit
+#     test binaries. Run run_all.sh separately under WSL/MSYS2/Git Bash
+#     if needed.
+
+CC = cl
+
+# /std:c11 needs VS2019 16.8+. /W4 is the closest rough equivalent to the
+# GNU build's -Wall -Wextra (not a precise match — MSVC's warning set
+# differs from GCC/Clang's). /D_CRT_SECURE_NO_WARNINGS suppresses MSVC's
+# deprecation warnings (C4996) for standard functions like fopen/sscanf
+# in favor of its own nonstandard `_s` variants — this codebase
+# intentionally stays on portable standard C rather than splitting onto
+# MSVC-only APIs. /TC forces C mode regardless of how cl infers the
+# language from the file extension (defensive; .c files are already C by
+# default).
+CFLAGS = /nologo /std:c11 /W4 /O2 /Zi /TC /D_CRT_SECURE_NO_WARNINGS /I src
+LDFLAGS =
+LDLIBS =
+
+BUILD_DIR = build
+TEST_BIN_DIR = $(BUILD_DIR)\test
+BIN = yaGPC.exe
+
+OBJS = \
+	$(BUILD_DIR)\ageharness.obj \
+	$(BUILD_DIR)\ap101.obj \
+	$(BUILD_DIR)\compat.obj \
+	$(BUILD_DIR)\cpu.obj \
+	$(BUILD_DIR)\cpu_instr.obj \
+	$(BUILD_DIR)\ebcdic.obj \
+	$(BUILD_DIR)\floatIBM.obj \
+	$(BUILD_DIR)\halucp.obj \
+	$(BUILD_DIR)\iohost.obj \
+	$(BUILD_DIR)\iop.obj \
+	$(BUILD_DIR)\iop_bce_instr.obj \
+	$(BUILD_DIR)\iop_msc_instr.obj \
+	$(BUILD_DIR)\json.obj \
+	$(BUILD_DIR)\main.obj \
+	$(BUILD_DIR)\mcm.obj \
+	$(BUILD_DIR)\membus.obj \
+	$(BUILD_DIR)\opts.obj \
+	$(BUILD_DIR)\q31.obj \
+	$(BUILD_DIR)\regmem.obj \
+	$(BUILD_DIR)\run.obj \
+	$(BUILD_DIR)\strfmt.obj \
+	$(BUILD_DIR)\symboltable.obj \
+	$(BUILD_DIR)\trace.obj \
+	$(BUILD_DIR)\util.obj
+
+all: $(BIN)
+
+$(BIN): $(BUILD_DIR) $(OBJS)
+	$(CC) $(CFLAGS) /Fe:$(BIN) $(OBJS) $(LDLIBS) $(LDFLAGS)
+
+# Inference rule: build\X.obj from src\X.c.
+{src}.c{$(BUILD_DIR)}.obj:
+	$(CC) $(CFLAGS) /c /Fo:$@ $<
+
+$(BUILD_DIR):
+	if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+
+$(TEST_BIN_DIR):
+	if not exist "$(TEST_BIN_DIR)" mkdir "$(TEST_BIN_DIR)"
+
+# ---------------------------------------------------------------------
+# Unit tests — mirrors the GNU Makefile's per-test source lists exactly
+# (compiled+linked directly from source in one cl.exe invocation each,
+# same as the GNU build does for these, so there's no separate .obj step
+# to keep in sync here).
+# ---------------------------------------------------------------------
+
+UNIT_TESTS = \
+	$(TEST_BIN_DIR)\test_packedbits.exe \
+	$(TEST_BIN_DIR)\test_strfmt.exe \
+	$(TEST_BIN_DIR)\test_ebcdic.exe \
+	$(TEST_BIN_DIR)\test_q31.exe \
+	$(TEST_BIN_DIR)\test_regmem.exe \
+	$(TEST_BIN_DIR)\test_mcm_membus.exe \
+	$(TEST_BIN_DIR)\test_floatIBM.exe \
+	$(TEST_BIN_DIR)\test_cpu_ea.exe \
+	$(TEST_BIN_DIR)\test_cpu_instr_decode.exe \
+	$(TEST_BIN_DIR)\test_cpu_instr_exec.exe \
+	$(TEST_BIN_DIR)\test_iop_bce_exec.exe \
+	$(TEST_BIN_DIR)\test_iop_msc_exec.exe \
+	$(TEST_BIN_DIR)\test_instr_tostr.exe
+
+test: all $(TEST_BIN_DIR) $(UNIT_TESTS)
+	$(TEST_BIN_DIR)\test_packedbits.exe
+	$(TEST_BIN_DIR)\test_strfmt.exe
+	$(TEST_BIN_DIR)\test_ebcdic.exe
+	$(TEST_BIN_DIR)\test_q31.exe
+	$(TEST_BIN_DIR)\test_regmem.exe
+	$(TEST_BIN_DIR)\test_mcm_membus.exe
+	$(TEST_BIN_DIR)\test_floatIBM.exe
+	$(TEST_BIN_DIR)\test_cpu_ea.exe
+	$(TEST_BIN_DIR)\test_cpu_instr_decode.exe
+	$(TEST_BIN_DIR)\test_cpu_instr_exec.exe
+	$(TEST_BIN_DIR)\test_iop_bce_exec.exe
+	$(TEST_BIN_DIR)\test_iop_msc_exec.exe
+	$(TEST_BIN_DIR)\test_instr_tostr.exe
+
+$(TEST_BIN_DIR)\test_packedbits.exe: test\test_packedbits.c src\util.c src\util.h test\packedbits_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_packedbits.c src\util.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_strfmt.exe: test\test_strfmt.c src\strfmt.c src\strfmt.h test\strfmt_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_strfmt.c src\strfmt.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_ebcdic.exe: test\test_ebcdic.c src\ebcdic.c src\ebcdic.h test\ebcdic_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_ebcdic.c src\ebcdic.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_q31.exe: test\test_q31.c src\q31.c src\q31.h test\q31_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_q31.c src\q31.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_regmem.exe: test\test_regmem.c src\regmem.c src\regmem.h src\util.c test\regmem_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_regmem.c src\regmem.c src\util.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_mcm_membus.exe: test\test_mcm_membus.c src\mcm.c src\mcm.h src\membus.c src\membus.h test\mcm_membus_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_mcm_membus.c src\mcm.c src\membus.c $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_floatIBM.exe: test\test_floatIBM.c src\floatIBM.c src\floatIBM.h test\floatIBM_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_floatIBM.c src\floatIBM.c $(LDLIBS)
+
+IOP_DEPS = src\iop.c src\iop_bce_instr.c src\iop_msc_instr.c
+
+$(TEST_BIN_DIR)\test_cpu_ea.exe: test\test_cpu_ea.c src\cpu.c src\cpu.h src\regmem.c src\mcm.c src\membus.c src\util.c $(IOP_DEPS) test\cpu_ea_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_cpu_ea.c src\cpu.c src\regmem.c src\mcm.c src\membus.c src\util.c $(IOP_DEPS) $(LDLIBS)
+
+CPU_INSTR_DEPS = src\cpu_instr.c src\cpu.c src\regmem.c src\mcm.c src\membus.c src\util.c src\floatIBM.c src\q31.c src\strfmt.c $(IOP_DEPS)
+
+$(TEST_BIN_DIR)\test_cpu_instr_decode.exe: test\test_cpu_instr_decode.c $(CPU_INSTR_DEPS) src\cpu_instr.h test\cpu_instr_decode_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_cpu_instr_decode.c $(CPU_INSTR_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_cpu_instr_exec.exe: test\test_cpu_instr_exec.c $(CPU_INSTR_DEPS) src\cpu_instr.h test\cpu_instr_exec_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_cpu_instr_exec.c $(CPU_INSTR_DEPS) $(LDLIBS)
+
+IOP_TEST_DEPS = src\iop.c src\iop_bce_instr.c src\iop_msc_instr.c src\regmem.c src\mcm.c src\membus.c src\util.c src\cpu.c src\floatIBM.c src\q31.c
+
+$(TEST_BIN_DIR)\test_iop_bce_exec.exe: test\test_iop_bce_exec.c $(IOP_TEST_DEPS) src\iop.h test\iop_bce_exec_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_iop_bce_exec.c $(IOP_TEST_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_iop_msc_exec.exe: test\test_iop_msc_exec.c $(IOP_TEST_DEPS) src\iop.h test\iop_msc_exec_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_iop_msc_exec.c $(IOP_TEST_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_instr_tostr.exe: test\test_instr_tostr.c $(CPU_INSTR_DEPS) src\cpu_instr.h test\instr_tostr_fixtures.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_instr_tostr.c $(CPU_INSTR_DEPS) $(LDLIBS)
+
+clean:
+	if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
+	if exist "$(BIN)" del "$(BIN)"
+	if exist "*.pdb" del "*.pdb"
+	if exist "*.ilk" del "*.ilk"

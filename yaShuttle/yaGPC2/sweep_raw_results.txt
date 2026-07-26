@@ -1,0 +1,391 @@
+AGREE test_adlp
+AGREE test_arctan
+AGREE test_array2d
+DISCREPANCY-YAGPC-YAHALMAT2 test_array_double (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     \ 2.0000000000000000E+00\ \ \ \ \ \ 3.0000000000000000E+00\ \ \ \ \ \ 4.0000000000000000E+00\ \ \ \ \ \ 5.0000000000000000E+00\ \ \ \ \ \ 1.0000000000000000E+00
+  yaHALMAT2.out: $' 2.0000000000000000E+00      3.0000000000000000E+00      4.0000000000000000E+00      5.0000000000000000E+00\n 1.0000000000000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_array_of_vector (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488089E+01\n 5.3851652E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488088E+01\n 5.3851643E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00'
+AGREE test_arrinit_types
+AGREE test_assign_array
+AGREE test_bcat
+DISCREPANCY-YAGPC-YAHALMAT2 test_bfnc_char (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'          6\n         13\nAB   \n   AB'
+  yaHALMAT2.out: $'          6\n          0\nAB   \n   AB'
+AGREE test_bfnc_det
+AGREE test_bfnc
+DISCREPANCY-YAGPC-YAHALMAT2 test_bfnc_hyperbolic (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 1.5430803E+00\n 1.1752014E+00\n 7.6159418E-01\n 1.3169584E+00\n 1.4436359E+00\n 5.4930639E-01\n 0.0          '
+  yaHALMAT2.out: $' 1.5430803E+00\n 1.1752005E+00\n 7.6159412E-01\n 1.3169575E+00\n 1.4436350E+00\n 5.4930609E-01\n 0.0          '
+AGREE test_bfnc_intops
+AGREE test_bfnc_inv
+DISCREPANCY-YAGPC-YAHALMAT2 test_bfnc_invtrig (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 1.0471973E+00\n 5.2359873E-01\n 0.0          \n 1.5707960E+00\n 3.1415930E+00\n-1.5707960E+00\n 7.8539813E-01\n 0.0          '
+  yaHALMAT2.out: $' 1.0471973E+00\n 5.2359873E-01\n 0.0          \n 1.5707960E+00\n 3.1415920E+00\n-1.5707960E+00\n 7.8539813E-01\n 0.0          '
+DISCREPANCY-YAGPC-YAHALMAT2 test_bfnc_matrix2 (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      4.0000000E+00\n 2.0000000E+00      5.0000000E+00\n 3.0000000E+00      6.0000000E+00\n 1.5000000E+01'
+  yaHALMAT2.out: $' 1.0000000E+00      4.0000000E+00\n 2.0000000E+00      5.0000000E+00\n 3.0000000E+00      6.0000000E+00\n 1.5000000E+01'
+DISCREPANCY-YAGPC-YAHALMAT2 test_bfnc_rounding (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 2.0000000E+00\n 3.0000000E+00\n 2.0000000E+00\n 1.0000000E+00\n-3.0000000E+00\n-2.0000000E+00\n-2.0000000E+00\n-1.0000000E+00\n 8.0000000E+00'
+  yaHALMAT2.out: $' 2.0000000E+00\n 3.0000000E+00\n 2.0000000E+00\n 1.0000000E+00\n-3.0000000E+00\n-2.0000000E+00\n-2.0000000E+00\n-1.0000000E+00\n 5.0000000E+00'
+AGREE test_bit_array_dsub
+DISCREPANCY-YAGPC-YAHALMAT2 test_bit_at_partition (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     \ \ \ \ \ \ -9011
+  yaHALMAT2.out: \ \ \ \ \ \ 56525
+DISCREPANCY-YAGPC-YAHALMAT2 test_bit_conv (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 1.2000000E+01\n00001100\nBEQU-TRUE\n         12'
+  yaHALMAT2.out: $' 1.2000000E+01\n12\nBEQU-TRUE\n         12'
+DISCREPANCY-YAGPC-YAHALMAT2 test_bit (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     I1=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 8\ \ \ \ \ I2=\ \ \ \ \ \ \ \ \ \ \ \ \ \ 14\ \ \ \ \ I3=\ \ \ \ \ \ \ \ \ \ \ \ \ 243
+  yaHALMAT2.out: I1=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 8\ \ \ \ \ I2=\ \ \ \ \ \ \ \ \ \ \ \ \ \ 14\ \ \ \ \ I3=\ \ \ \ \ \ \ \ \ \ \ \ \ -13
+AGREE test_bit_index_assign
+MISMATCH-GPC-YAGPC test_bit_index (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_bit_index
+DISCREPANCY-YAGPC-YAHALMAT2 test_bit_write (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'0000 1100\n0001 0010 0011 0100'
+  yaHALMAT2.out: $'0000 1100\n0000 0000 0000 0000 0001 0010 0011 0100'
+DISCREPANCY-YAGPC-YAHALMAT2 test_canc_control (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+AGREE test_canc
+AGREE test_case_else
+AGREE test_cfor
+AGREE test_char_conv
+AGREE test_char
+MISMATCH-GPC-YAGPC test_char_subscript (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_char_subscript
+DISCREPANCY-YAGPC-YAHALMAT2 test_countup2 (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     ''
+  yaHALMAT2.out: $'          1\n          2\n          3\n          4\n          5\n          6\n          7\n          8\n          9\n         10'
+DISCREPANCY-YAGPC-YAHALMAT2 test_date_clocktime (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'          0\n 0.0          '
+  yaHALMAT2.out: $'      26207\n 4.4625000E+04'
+AGREE test_dfor_zero
+DISCREPANCY-YAGPC-YAHALMAT2 test_dots (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'DOTS:\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01'
+  yaHALMAT2.out: $'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01'
+AGREE test_eint
+DISCREPANCY-YAGPC-YAHALMAT2 test_eron_event (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'EV1 NOT SET\nEV2 NOT SET\nEV3 NOT SET'
+  yaHALMAT2.out: $'EV1 SET\nEV2 NOT SET\nEV3 SET'
+DISCREPANCY-YAGPC-YAHALMAT2 test_eron_goto_appc (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'SHOULD NOT PRINT (SQRT)      2.0000000E+00\nAFTER SQRT TRAP\n 0.0                0.0                0.0          \nSHOULD NOT PRINT (UNIT)\nAFTER UNIT TRAP\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\nSHOULD NOT PRINT (MDIV)\nAFTER MDIV TRAP\nSHOULD NOT PRINT (ZEROPOW)      0.0          \nAFTER ZEROPOW TRAP\nRESTORED SQRT      2.0000000E+00'
+  yaHALMAT2.out: $'AFTER SQRT TRAP\nAFTER UNIT TRAP\nAFTER MDIV TRAP\nAFTER ZEROPOW TRAP\nRESTORED SQRT      2.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_eron_goto (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE TRAP\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\nAFTER ON ERROR\nSHOULD NOT PRINT\n 1.6503236E+07     -8.2516180E+06\n-8.2516180E+06      4.1258090E+06\nAFTER SKIPPED LABEL\nAFTER RESTORE\n 1.5285470E+07     -7.6427350E+06\n-7.6427350E+06      3.8213670E+06'
+  yaHALMAT2.out: $'BEFORE TRAP      1.0000000E+00      0.0          \n                 0.0                1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE      1.0000000E+00      0.0          \n                   0.0                1.0000000E+00'
+AGREE test_eron
+DISCREPANCY-YAGPC-YAHALMAT2 test_errfix_matrix (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 0.0                0.0                0.0          \n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n-2.0000000E+00      1.0000000E+00\n 1.5000000E+00     -5.0000000E-01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 0.0                0.0                0.0          \n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_errfix_scalar (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 2.0000000E+00\n-7.2370051E+75\n 1.6094379E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          '
+  yaHALMAT2.out: $' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          '
+DISCREPANCY-YAGPC-YAHALMAT2 test_errfix_trig (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n          3'
+  yaHALMAT2.out: $' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n 2147483647'
+DISCREPANCY-YAGPC-YAHALMAT2 test_errgrp_errnum (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'          0\n          0\n 2.0000000E+00\n          3\n          3'
+  yaHALMAT2.out: $'          0\n          0\n 2.0000000E+00\n          4\n          5'
+SKIP-COMPILE test_exit_dfor_label
+AGREE test_exit_loop
+AGREE test_ext_charfunc
+SKIP-COMPILE test_ext_charfunc_prog
+DISCREPANCY-YAGPC-YAHALMAT2 test_ext_double (ya_rc=1 yh2_rc=1)
+  yaGPC.out:     $'          0               0\n          0               0\n          0               0\n          0               0\n          0               0\n          0               0\n          0               0'
+  yaHALMAT2.out: ''
+SKIP-COMPILE test_ext_mytable
+SKIP-COMPILE test_ext_pcal_prog
+AGREE test_ext_square
+AGREE test_ext_squroo
+AGREE test_fcal_boolean_return
+AGREE test_fcal_scalar_return
+SKIP-LINK test_file
+AGREE test_idef
+AGREE test_idlp
+DISCREPANCY-YAGPC-YAHALMAT2 test_init8 (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'     -21846\n 9.0000000E+00\n 9.0000000E+00\n 4.0000000E+00'
+  yaHALMAT2.out: $'      43690\n 9.0000000E+00\n 9.0000000E+00\n 4.0000000E+00'
+AGREE test_int_arith2
+AGREE test_lfnc_array
+AGREE test_lfnc
+AGREE test_link_lit
+AGREE test_link_pool_array
+AGREE test_link_pool
+DISCREPANCY-YAGPC-YAHALMAT2 test_link_prog_array (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: \ 0.0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \ \ \ \ \ \ \ \ \ 
+AGREE test_link_prog
+AGREE test_logical_or
+AGREE test_many_call_args
+DISCREPANCY-YAGPC-YAHALMAT2 test_matrix_col_assign (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.1000000E+01      2.4000000E+01      1.3000000E+01\n 2.1000000E+01      4.4000000E+01      2.3000000E+01\n 3.1000000E+01      6.4000000E+01      3.3000000E+01'
+  yaHALMAT2.out: $' 1.1000000E+01      2.4000000E+01      1.3000000E+01\n 2.1000000E+01      4.4000000E+01      2.3000000E+01\n 3.1000000E+01      6.4000000E+01      3.3000000E+01'
+DISCREPANCY-YAGPC-YAHALMAT2 test_matrix_identity5_init (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      0.0                0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                0.0                1.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      0.0                0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                0.0                1.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_matrix_identity_init (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      0.0                0.0          \n 0.0                1.0000000E+00      0.0          \n 0.0                0.0                1.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      0.0                0.0          \n 0.0                1.0000000E+00      0.0          \n 0.0                0.0                1.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_matrix_row_assign (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 2.2000000E+01      2.4000000E+01      2.6000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 1.1000000E+01      1.2000000E+01      1.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01'
+  yaHALMAT2.out: $' 2.2000000E+01      2.4000000E+01      2.6000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01\n 2.1000000E+01      2.2000000E+01      2.3000000E+01\n 1.1000000E+01      1.2000000E+01      1.3000000E+01\n 3.1000000E+01      3.2000000E+01      3.3000000E+01'
+AGREE test_matrix_sub
+AGREE test_matvec
+AGREE test_minv
+AGREE test_mismatch_array
+AGREE test_mixed_type
+DISCREPANCY-YAGPC-YAHALMAT2 test_mshp (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00'
+AGREE test_mtom
+AGREE test_multi_assign
+DISCREPANCY-YAGPC-YAHALMAT2 test_multi_assign_mixed (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     \ 1.271999E+02\ \ \ \ \ \ \ \ \ \ \ \ \ 127
+  yaHALMAT2.out: \ 1.2720000E+02\ \ \ \ \ \ \ \ \ \ \ \ \ 127
+AGREE test_name
+DISCREPANCY-YAGPC-YAHALMAT2 test_nest_call (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      0.0                0.0                0.0                0.0          \n\n 0.0                1.0000000E+00      0.0                0.0                0.0          \n\n 0.0                0.0                1.0000000E+00      0.0                0.0          \n\n 0.0                0.0                0.0                1.0000000E+00      0.0          \n\n 0.0                0.0                0.0                0.0                1.0000000E+00'
+  yaHALMAT2.out: $'      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_nested_task_schedule (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     ''
+  yaHALMAT2.out: $'          1\n          2\n          3\n          4'
+DISCREPANCY-YAGPC-YAHALMAT2 test_page (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n\n\n\nFIRST\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n     SECOND'
+  yaHALMAT2.out: $'\n\n\n\nFIRST\n\f\n\n\n\nSECOND'
+AGREE test_pcal_assign
+AGREE test_pcal
+DISCREPANCY-YAGPC-YAHALMAT2 test_prio (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE SCHEDULE\nBEFORE UPDATE\nAFTER UPDATE'
+  yaHALMAT2.out: $'BEFORE SCHEDULE\nBEFORE UPDATE\nWORKER RUNNING\nAFTER UPDATE'
+DISCREPANCY-YAGPC-YAHALMAT2 test_proc_matrix_arg (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      0.0                0.0                0.0                0.0          \n\n 0.0                1.0000000E+00      0.0                0.0                0.0          \n\n 0.0                0.0                1.0000000E+00      0.0                0.0          \n\n 0.0                0.0                0.0                1.0000000E+00      0.0          \n\n 0.0                0.0                0.0                0.0                1.0000000E+00'
+  yaHALMAT2.out: $'      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_proc_matrix_precision (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.5000000000000000E+00      2.5000000000000000E+00\n 3.5000000000000000E+00      4.5000000000000000E+00\n 1.0500000E+01      2.0500000E+01\n 3.0500000E+01      4.0500000E+01'
+  yaHALMAT2.out: $' 1.5000000000000000E+00      2.5000000000000000E+00\n 3.5000000000000000E+00      4.5000000000000000E+00\n 1.0500000E+01      2.0500000E+01\n 3.0500000E+01      4.0500000E+01'
+DISCREPANCY-YAGPC-YAHALMAT2 test_random (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 4.3794729E-02\n 2.6276231E-01\n 3.9709830E-01'
+  yaHALMAT2.out: $' 7.8263693E-06\n 1.3153774E-01\n-7.2352159E-01'
+MISMATCH-GPC-YAGPC test_rdal (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_rdal
+MISMATCH-GPC-YAGPC test_read_array (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_array
+MISMATCH-GPC-YAGPC test_read_comma (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_comma
+MISMATCH-GPC-YAGPC test_read_eof_onerror (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  $'RESULTS OF TESTING X\n          0      SAMPLES CORRECT,                0      SAMPLES INCORRECT'
+  gpc.err: ''
+  ya.err:  $'\n*** HAL/S PROGRAM HALT (SVC 0)'
+AGREE test_read_eof_onerror
+MISMATCH-GPC-YAGPC test_read_leading_comma (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_leading_comma
+MISMATCH-GPC-YAGPC test_read_semicolon (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_semicolon
+MISMATCH-GPC-YAGPC test_read_semicolon_loop (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_semicolon_loop
+MISMATCH-GPC-YAGPC test_read_skip_column (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_skip_column
+MISMATCH-GPC-YAGPC test_read_structure (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_structure
+MISMATCH-GPC-YAGPC test_read_vecmat_edge (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_vecmat_edge
+MISMATCH-GPC-YAGPC test_read_vecmat (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_vecmat
+MISMATCH-GPC-YAGPC test_read_write (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_read_write
+AGREE test_realtime_wait
+AGREE test_reformat_csz
+AGREE test_repeat
+AGREE test_row_container_write
+DISCREPANCY-YAGPC-YAHALMAT2 test_runtime (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 0.0          \n 5.0000000E+00'
+  yaHALMAT2.out: $' 1.8115941E-05\n 5.0000534E+00'
+AGREE test_scalar_arith
+AGREE test_scalar_cmp
+DISCREPANCY-YAGPC-YAHALMAT2 test_scalar_double (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535809041477E+08'
+  yaHALMAT2.out: $' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535811925805E+08'
+AGREE test_scalar_double_initial
+AGREE test_scalar_exp
+AGREE test_scalar_muldiv
+AGREE test_scalar_sub
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_after (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_at (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     $'BEFORE SCHEDULE\nAFTER SCHEDULE'
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_every (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_every_wait (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_high (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE SCHEDULE\nAFTER SCHEDULE'
+  yaHALMAT2.out: $'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_in (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     $'BEFORE SCHEDULE\nAFTER SCHEDULE'
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_low (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE SCHEDULE\nAFTER SCHEDULE'
+  yaHALMAT2.out: $'BEFORE SCHEDULE\nAFTER SCHEDULE\nWORKER RUNNING'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_on_compound (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE ANY SIGNAL\nAFTER E1\nAFTER E2\nAFTER E3'
+  yaHALMAT2.out: $'BEFORE ANY SIGNAL\nAFTER E1\nAFTER E2\nWORKER STARTED\nAFTER E3'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_on_compound_or (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE ANY SIGNAL\nAFTER E2'
+  yaHALMAT2.out: $'BEFORE ANY SIGNAL\nWORKER STARTED\nAFTER E2'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_on (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'BEFORE SCHEDULE\nBEFORE SIGNAL\nAFTER SIGNAL'
+  yaHALMAT2.out: $'BEFORE SCHEDULE\nBEFORE SIGNAL\nWORKER RUNNING\nAFTER SIGNAL'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_self_on (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     COUNT=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: COUNT=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_stopping_only (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_until_compound (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     DONE\,\ N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: $'CYCLE               1\nCYCLE               2\nDONE, N=               2'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sched_while (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     N=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+  yaHALMAT2.out: ''
+AGREE test_sgnl
+DISCREPANCY-YAGPC-YAHALMAT2 test_skipline (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n\n\n\nZFIRST\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n     SECOND     THIRD'
+  yaHALMAT2.out: $'\n\n\n\nFIRST\n\fSECOND     THIRD'
+DISCREPANCY-YAGPC-YAHALMAT2 test_sshp_ishp (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 1.5000000E+00      2.5000000E+00\n         10              20'
+  yaHALMAT2.out: $' 1.5000000E+00      2.5000000E+00\n 1.0000000E+01      2.0000000E+01'
+AGREE test_state_boolean
+AGREE test_statistics
+DISCREPANCY-YAGPC-YAHALMAT2 test_stoi (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     I1=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ \ \ I2=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ \ \ I3=\ \ \ \ \ \ \ \ \ \ \ \ \ \ -7\ \ \ \ \ I4=\ \ \ \ \ \ \ \ \ \ \ \ \ \ -7
+  yaHALMAT2.out: I1=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ \ \ I2=\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 8\ \ \ \ \ I3=\ \ \ \ \ \ \ \ \ \ \ \ \ \ -8\ \ \ \ \ I4=\ \ \ \ \ \ \ \ \ \ \ \ \ \ -7
+AGREE test_stos
+AGREE test_stri
+AGREE test_structcopy_init
+AGREE test_struct
+DISCREPANCY-YAGPC-YAHALMAT2 test_subbit_assign (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'      -3856\n1010 1010 1010 1010'
+  yaHALMAT2.out: $'      61680\n1010 1010 1010 1010'
+AGREE test_subbit
+DISCREPANCY-YAGPC-YAHALMAT2 test_subbit_scalar (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'          0\n 2.5000000E+00\n 2.5000000E+00'
+  yaHALMAT2.out: $' 1093140480\n 2.5000000E+00\n 2.5000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_tabcol (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'                                                                               Q\nFIRSTSECOND     THIRD  '
+  yaHALMAT2.out: $'                                                                               Q\n    SECOND     THIRD          FIRST'
+MISMATCH-GPC-YAGPC test_tasn_array_terminal (gpc_rc=0 ya_rc=0)
+  gpc.out: ''
+  ya.out:  ''
+  gpc.err: ''
+  ya.err:  $'\n*** HalUCP: READ exhausted input on channel 5 with no ON ERROR handler installed'
+AGREE test_tasn_array_terminal
+AGREE test_tdcl
+AGREE test_tint
+DISCREPANCY-YAGPC-YAHALMAT2 test_tint_null_terminal (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     \ \ \ \ \ \ \ \ \ 16\ \ \ \ \ 0000\ 0000\ 0000\ 0000\ \ \ \ \ \ \ \ \ \ \ \ \ \ 27
+  yaHALMAT2.out: \ \ \ \ \ \ \ \ \ 16\ \ \ \ \ 0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 0000\ \ \ \ \ \ \ \ \ \ \ \ \ \ 27
+AGREE test_tsub
+AGREE test_tsub_variable_index
+AGREE test_unpaged
+DISCREPANCY-YAGPC-YAHALMAT2 test_vec_atpartition (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00\n 3.6055517E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      2.0000000E+00\n 3.6055508E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_vec (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $' 3.2000000E+01\n-2.9999990E+00\n 6.0000000E+00\n-2.9999990E+00'
+  yaHALMAT2.out: $' 3.2000000E+01\n-3.0000000E+00\n 6.0000000E+00\n-3.0000000E+00'
+AGREE test_vecinit
+AGREE test_vecinit_split
+DISCREPANCY-YAGPC-YAHALMAT2 test_vecmat_null_assign (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 0.0                0.0          \n 0.0                0.0          \n 0.0                0.0          '
+  yaHALMAT2.out: $' 0.0                0.0          \n 0.0                0.0          \n 0.0                0.0          '
+DISCREPANCY-YAGPC-YAHALMAT2 test_vector_to_partition_write (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 0.0                0.0                0.0                5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      0.0                0.0                0.0          '
+  yaHALMAT2.out: $' 0.0                0.0                0.0                5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 0.0                0.0                0.0          '
+AGREE test_vshp
+DISCREPANCY-YAGPC-YAHALMAT2 test_vsum (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'SUM=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00'
+  yaHALMAT2.out: SUM=\ \ \ \ \ \ 1.0000000E+00\ \ \ \ \ \ 2.0000000E+00\ \ \ \ \ \ 3.0000000E+00
+AGREE test_vtov
+DISCREPANCY-YAGPC-YAHALMAT2 test_wait_dependent (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     PRIMAL\ DONE
+  yaHALMAT2.out: $'WORKER DONE\nPRIMAL DONE'
+DISCREPANCY-YAGPC-YAHALMAT2 test_wait_for_compound (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     PRIMAL\ RESUMED
+  yaHALMAT2.out: $'SETTER: E1 SIGNALED\nSETTER: E2 SIGNALED\nPRIMAL RESUMED'
+DISCREPANCY-YAGPC-YAHALMAT2 test_wait_for_event (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     MAIN\ RESUMED
+  yaHALMAT2.out: $'T RAN\nMAIN RESUMED'
+DISCREPANCY-YAGPC-YAHALMAT2 test_wait_until (ya_rc=0 yh2_rc=124)
+  yaGPC.out:     DONE
+  yaHALMAT2.out: ''
+AGREE test_write_bit_array
+AGREE test_write_lit
+DISCREPANCY-YAGPC-YAHALMAT2 test_write_matrix (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 2.0000000E+00      4.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 2.0000000E+00      4.0000000E+00'
+DISCREPANCY-YAGPC-YAHALMAT2 test_write_vector (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00      3.0000000E+00'
+  yaHALMAT2.out: \ 1.0000000E+00\ \ \ \ \ \ 2.0000000E+00\ \ \ \ \ \ 3.0000000E+00
+DISCREPANCY-YAGPC-YAHALMAT2 test_write_wrap (ya_rc=0 yh2_rc=0)
+  yaGPC.out:     $'\n 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00      5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00'
+  yaHALMAT2.out: $' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00      5.0000000E+00      6.0000000E+00      7.0000000E+00\n 8.0000000E+00'
+=== done: 169 tests processed ===
