@@ -39,6 +39,22 @@ HALMAT: 057(2),0,0
 LA 4,S2 / STH 4,NS2       <- loads S2's ADDRESS (not value) and stores it into NS2
 ```
 
+## Investigated and deferred: `264-INITIALIZE.hal`'s `NASN` failure
+
+User-reported: `264-INITIALIZE.hal` hit "NASN: receiver must be SYT."
+Investigating turned up that this corpus file doesn't actually compile
+at all under the current `HALSFC` build — it needs a multi-file
+`INCLUDE TEMPLATE`/COMPOOL prerequisite the installed tooling has no
+working `--templib` mechanism for (confirmed via `--help`), so no real
+compiled HALMAT for this file's own `NASN` failure could ever be
+produced to verify a fix against. A speculative fix (accepting a
+`QUAL`=`XPT` receiver operand, on the hypothesis that a bare
+`NAME`-typed structure reference might compile that way) was
+implemented, then reverted — `interp.c`'s `OP_NASN` still requires
+`QUAL`=`SYT` for the receiver, unchanged from this file's own confirmed
+encoding above. Left as a documented non-fix rather than shipping code
+that can't be checked against ground truth.
+
 ## Unresolved Questions
 
 - Multiple NAME assignment (`NAME(L1), NAME(L2),... = R;`, per

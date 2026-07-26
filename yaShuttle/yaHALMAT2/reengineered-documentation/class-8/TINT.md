@@ -276,6 +276,24 @@ precision) — confirming both the coalesced run's values land on the
 correct terminals, *and* the per-terminal type coercion above is
 necessary and correct.
 
+## `yaHALMAT2` Implementation Notes: NULL-terminal case
+
+User-reported, `167-ASSORTEDIO.hal`'s `DECLARE FWDSENSORS
+IOPARM-STRUCTURE INITIAL(16, HEX'0', NULL, 27);` (`IOPARM`'s own `1
+BUFFER NAME ARRAY(10) INTEGER;` field): failed with "TINT: expected a
+LIT second operand." A `NULL` initializer for a single `NAME`-typed
+structure terminal compiles operand 2 as `QUAL`=`IMD` instead of the
+ordinary `QUAL`=`LIT` — the same "`NULL` is `QUAL`=`IMD`" encoding
+already confirmed for [NASN](../class-0/NASN.md)/[NINT](NINT.md), reused
+here. `NULL` has no litfile entry to coalesce a run against, so this
+terminal always gets its own standalone `TINT` rather than joining the
+surrounding numeric/`BIT` terminals' coalesced `LIT` run — always
+exactly one terminal, no run-count concept applies. Fixed (`interp.c`)
+by special-casing a `QUAL_IMD` second operand: the computed field
+symbol (`template_syt + 1 + OFFSET`) is set `SYT_TYPE_NAME` with
+`name_target = HALMAT_NAME_NULL`, bypassing the ordinary LIT-run
+coalescing path entirely.
+
 ## Unresolved (still, after the above)
 
 - `ARRAY`/`MATRIX`/`VECTOR` structure terminals (which the non-coalesced

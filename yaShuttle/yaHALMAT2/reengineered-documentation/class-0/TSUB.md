@@ -55,14 +55,32 @@ In both cases, TSUB's result is subsequently consumed by an
 resolves the final structure pointer used by [TASN](TASN.md)/
 [TEQU](TEQU.md)/etc.
 
+## `yaHALMAT2` Implementation Notes: variable copy-select index
+
+**Resolved.** Only the literal (`QUAL`=`IMD`) copy-select form was
+implemented at first — user-reported, `180/184-EXAMPLE_N.hal`'s
+`V.STATUS$(N)`/`V.TIMETAG$(N)` and `264-INITIALIZE.hal`'s
+`TQ.NEXT$(N)` (`N` a plain loop-counter `INTEGER` variable, not a
+literal), failed with "TSUB: only a literal copy index is
+implemented." Confirmed against real compiled HALMAT: a plain-variable
+copy index compiles operand 2 as an ordinary `QUAL`=`SYT` operand
+(distinct `TAG1`=0x09 from the literal form's own tag) referencing the
+variable directly — not a `QUAL`=`VAC` arithmetic chain, since `N`
+itself needs no computation, just a direct symbol read. Fixed by
+resolving that operand the same way any other integer-valued `SYT`
+read would be. A genuinely computed expression (e.g. `V.STATUS$(N+1)`)
+would presumably show up as `QUAL`=`VAC` instead — not exercised by any
+fixture yet, so still unhandled; `TSUB` fails loudly on any other
+operand kind rather than guessing.
+
 ## Unresolved Questions
 
 - The exact meaning of the recurring trailing header value (`10`) is not
   decoded.
-- Whether an expression (rather than a literal) as the copy-select index
-  changes the operand's `QUAL` from `IMD` to `VAC` was not tested — per
-  [USA003087] §19.6, `α` in the single-copy form may be a general
-  integer expression, but the case tested here used a literal.
+- A genuinely *computed* copy-select expression (e.g. `V.STATUS$(N+1)`,
+  as opposed to a bare variable) would presumably compile operand 2 as
+  `QUAL`=`VAC` — not tested or implemented; see the Implementation Notes
+  above for the bare-variable case that *is* now handled.
 - Structure-and-terminal subscripting (combining a structure-copy
   subscript with a terminal's own type/array subscript, per
   [USA003087] §19.6) was not tested — only bare structure-copy selection.
