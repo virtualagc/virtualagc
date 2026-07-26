@@ -68,6 +68,45 @@ HALMAT: 001(2),0,0            <- EXTN, resolves ZQ2 (bare reference)
           2(1),0,1                <- op 2: Q (the TEMPLATE's own symbol), QUAL=1=SYT
 ```
 
+## `yaHALMAT2` Implementation Notes: whole-structure `READ` (172-OUTER.hal)
+
+User-reported: `172-OUTER.hal`'s `READ(5) OUTER;` (`OUTER` a bare,
+unqualified structure variable, no `.field` levels) failed — whole-
+structure `READ` arguments (class 10) weren't implemented at all. Two
+pieces from this file's own already-confirmed encoding made the fix
+possible:
+
+- **Distinguishing a bare structure-*instance* reference from the
+  structure's own TEMPLATE definition.** A bare EXTN's operand 2 is the
+  structure's `TEMPLATE` symbol (confirmed above) — but walking that
+  symbol's own fields required first confirming which symbol-table
+  `hal_class` value marks it as a template definition (`0x3E`) as
+  opposed to an ordinary structure-typed instance variable (`0x0A` =
+  `MAJ_STRUC`, [TINT](../class-8/TINT.md)'s own confirmed value for that
+  case) — the two are distinct class markers, confirmed empirically
+  against real `COMMON0.out` symbol dumps, letting the interpreter tell
+  "the base is a structure instance, operand 2 is its template" apart
+  from any other class-0x3E/0x0A combination it might otherwise
+  encounter.
+- **Enumerating the template's own fields.** New `symtab.h`/`symtab.c`
+  `struct_first_field`/`struct_next_field` fields on
+  `halmat_symtab_entry_t`, parsed from the raw `SYM_LINK1`/`SYM_LINK2`
+  symbol-table fields: a template's `SYM_LINK1` points to its first
+  field; each field's own `SYM_LINK2` points to the next, terminating in
+  a value that's negative when reinterpreted as `int16_t` (confirmed
+  empirically against two different real structure templates' own
+  `COMMON0.out` dumps).
+
+`OP_READ` (`interp.c`) uses both together: given a bare-EXTN-resolved
+structure operand, it walks the template's field chain and writes each
+terminal into its own shadow field slot (`find_or_create_struct_field()`),
+allocating a `VECTOR`/`ARRAY` terminal's `elements[]` on first touch —
+the first mechanism in this project to write array-shaped data into a
+structure-terminal shadow slot, which in turn unblocked
+[TASN](TASN.md)'s own `ARRAY`/`MATRIX`/`VECTOR` structure-terminal deep
+copy (previously unreachable for lack of real per-element data to
+copy). Fixture: `test_read_structure.hal`.
+
 ## Unresolved Questions
 
 - Whether a genuinely multi-level qualified reference (`A.B.C`) produces
