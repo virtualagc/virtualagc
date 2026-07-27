@@ -1834,6 +1834,35 @@ run ./run_read_fixture.sh return_on_error "$(printf '1 1\n2 3\n4 4\n')" "$(print
 # output for this exact fixture's own input.
 run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1.0500000E+01               7      2.0500000E+01     1"
 
+# Task #62 (yahalmat2_structure_read_write_all_zero): 172-OUTER.hal
+# verbatim (not the isolated subset above), exercising the three gaps
+# read_structure's own comment flagged as separate and unattempted: (1)
+# WRITE of a whole structure that contains a VECTOR terminal (previously
+# printed all zeros -- flush_write's is_structure branch now walks
+# struct_first_field/struct_next_field and formats each terminal by its
+# real hal_class, VECTOR emitting one field per component); (2) passing
+# a whole (bare/unqualified) structure as a FUNCTION argument by value
+# (UTIL(ARG) -- OP_XXAR gained an is_structure capture case keyed off
+# TAG1=10/QUAL_XPT with the EXTN target's own hal_class==0x3E "TEMPLATE
+# DEFINITION" marker distinguishing a whole-structure reference from a
+# qualified single-field one; bind_call_argument gained a matching
+# deep-copy case, walking the same terminal list into the callee's own
+# fresh copy-index-0 shadow slots); (3) RETURNing a structure's VECTOR
+# terminal (RETURN X.V -- OP_RTRN's whole-container-return detection
+# gained a QUAL_XPT case resolving through the VAC slot's struct_field_syt
+# to confirm the target field is itself hal_class==4/VECTOR before
+# treating it as a whole-container return). All 10 loop iterations
+# verified digit-by-digit against the fed input: WRITE(6) echoes ARG's
+# 7 fields (V's 3 components, S1, C, S2, E) exactly as read, and
+# UTIL(ARG) returns exactly ARG.V. No real-gpc cross-check was obtained
+# for this exact fixture (gpc's own interactive run of this file did not
+# complete within a practical wait even on a second attempt, apparently
+# genuine cycle-accurate-simulation slowness rather than a hang); this
+# was verified against yaHALMAT2's own before/after behavior and the
+# language-spec-level terminal-ordering rule task #38's own fixture
+# already confirmed against real gpc (USA003087 Sec. 12.3).
+run ./run_read_fixture.sh outer_struct "$(printf '1 2 3 10.5 7 20.5 1\n2 3 4 11.5 8 21.5 1\n3 4 5 12.5 9 22.5 1\n4 5 6 13.5 10 23.5 1\n5 6 7 14.5 11 24.5 1\n6 7 8 15.5 12 25.5 1\n7 8 9 16.5 13 26.5 1\n8 9 10 17.5 14 27.5 1\n9 10 11 18.5 15 28.5 1\n10 11 12 19.5 16 29.5 1\n')" "$(printf 'UTIL OF      1.0000000E+00      2.0000000E+00      3.0000000E+00      1.0500000E+01               7      2.0500000E+01     1     =\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nUTIL OF      2.0000000E+00      3.0000000E+00      4.0000000E+00      1.1500000E+01               8      2.1500000E+01     1     =\n 2.0000000E+00      3.0000000E+00      4.0000000E+00\nUTIL OF      3.0000000E+00      4.0000000E+00      5.0000000E+00      1.2500000E+01               9      2.2500000E+01     1     =\n 3.0000000E+00      4.0000000E+00      5.0000000E+00\nUTIL OF      4.0000000E+00      5.0000000E+00      6.0000000E+00      1.3500000E+01              10      2.3500000E+01     1     =\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\nUTIL OF      5.0000000E+00      6.0000000E+00      7.0000000E+00      1.4500000E+01              11      2.4500000E+01     1     =\n 5.0000000E+00      6.0000000E+00      7.0000000E+00\nUTIL OF      6.0000000E+00      7.0000000E+00      8.0000000E+00      1.5500000E+01              12      2.5500000E+01     1     =\n 6.0000000E+00      7.0000000E+00      8.0000000E+00\nUTIL OF      7.0000000E+00      8.0000000E+00      9.0000000E+00      1.6500000E+01              13      2.6500000E+01     1     =\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\nUTIL OF      8.0000000E+00      9.0000000E+00      1.0000000E+01      1.7500000E+01              14      2.7500000E+01     1     =\n 8.0000000E+00      9.0000000E+00      1.0000000E+01\nUTIL OF      9.0000000E+00      1.0000000E+01      1.1000000E+01      1.8500000E+01              15      2.8500000E+01     1     =\n 9.0000000E+00      1.0000000E+01      1.1000000E+01\nUTIL OF      1.0000000E+01      1.1000000E+01      1.2000000E+01      1.9500000E+01              16      2.9500000E+01     1     =\n 1.0000000E+01      1.1000000E+01      1.2000000E+01')"
+
 # Task #23: TASN (whole-structure assign, `DST = SRC;`) copying an
 # ARRAY/MATRIX/VECTOR structure terminal -- previously failed loudly as
 # unreachable ("no HALSFC-compilable program can get non-zero

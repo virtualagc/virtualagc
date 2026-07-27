@@ -704,6 +704,20 @@ typedef struct {
     int bit_array_width;
     bool is_char_array;
     char *const *char_array;
+    /* WRITE/CALL only (kind == 2 or is_call): a whole (bare/
+     * unqualified) STRUCTURE argument (TAG1=10/MAJ_STRUC, the same
+     * QUAL_XPT/EXTN shape as dest_is_structure below, just on the
+     * WRITE/CALL side instead of READ/READALL) -- reuses
+     * struct_base_syt/struct_template_syt/struct_copy_index below
+     * (never set alongside dest_is_structure on the same item;
+     * READ/READALL and WRITE/CALL are mutually exclusive per this
+     * struct's own established convention, see dest_operand's own
+     * comment). flush_write/bind_call_argument walk the template's
+     * own struct_first_field/struct_next_field chain to emit/copy
+     * each terminal in turn, mirroring OP_READ's own
+     * dest_is_structure handling. User-reported, 172-OUTER.hal's
+     * `WRITE(6) ARG;` and `UTIL(ARG)` (ARG a `UTIL_PARM-STRUCTURE`). */
+    bool is_structure;
     /* READ/READALL only (kind != 2): the destination operand,
      * captured raw by XXAR rather than resolved to a value, plus
      * the HALMAT class number (XXAR's TAG1, class-0/XXAR.md) that
@@ -741,10 +755,10 @@ typedef struct {
      * ARG;` (ARG a `UTIL_PARM-STRUCTURE`, fields `V VECTOR, S1 SCALAR, C
      * INTEGER, S2 SCALAR, E BOOLEAN`). */
     bool dest_is_structure;
-    uint16_t struct_base_syt;    /* valid iff dest_is_structure: the structure instance itself */
-    uint16_t struct_template_syt; /* valid iff dest_is_structure: its own template symbol, for the
+    uint16_t struct_base_syt;    /* valid iff dest_is_structure or is_structure: the structure instance itself */
+    uint16_t struct_template_syt; /* valid iff dest_is_structure or is_structure: its own template symbol, for the
                                     * struct_first_field/struct_next_field walk */
-    int32_t struct_copy_index;   /* valid iff dest_is_structure: -1 means "use the ambient
+    int32_t struct_copy_index;   /* valid iff dest_is_structure or is_structure: -1 means "use the ambient
                                     * current_copy_index()" (an explicit TSUB-selected copy
                                     * overrides this the same way EXTN's own struct_copy_index does) */
     /* Call-only (is_call == true, so never set alongside the

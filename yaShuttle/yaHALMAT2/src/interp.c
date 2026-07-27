@@ -1690,6 +1690,25 @@ static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
         *out_cols = slot->container_cols;
         return true;
     }
+    if (op->qual == QUAL_XPT) {
+        /* A qualified structure-field reference (e.g. `X.V`, V a VECTOR
+         * terminal) that happens to be VECTOR/MATRIX-shaped -- distinct
+         * from a bare/unqualified whole-structure reference (state.h's
+         * dest_is_structure/is_structure comments, which walk the whole
+         * template field chain instead): resolve_xpt_field() already
+         * returns the *one* target field's own shadow entry directly,
+         * with the identical elements/rows/cols shape every plain
+         * VECTOR/MATRIX SYT entry uses, so no extra unraveling is
+         * needed here. User-reported (172-OUTER.hal's `RETURN X.V;`,
+         * X a STRUCTURE-typed FUNCTION parameter). */
+        halmat_syt_entry_t *e = resolve_xpt_field(state, op);
+        if (!e) return false;
+        *out_elems = e->elements;
+        *out_count = e->element_count;
+        *out_rows = e->rows;
+        *out_cols = e->cols;
+        return true;
+    }
     fail(state, "unsupported MATRIX/VECTOR operand qualifier %s", halmat_qual_name(op->qual));
     return false;
 }
@@ -1812,6 +1831,66 @@ static bool store_container_result(halmat_state_t *state, size_t vac_index,
  * (each keeps its own source precision) -- the same graceful-degradation
  * pattern used elsewhere when the symbol table is unavailable. */
 static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state, uint16_t param_syt, uint8_t item_index) {
+    if (state->io_pending.items[item_index].is_structure) {
+        /* Whole STRUCTURE call argument (state.h's is_structure
+         * comment, WRITE/CALL-side XXAR capture): deep-copies each
+         * terminal from the caller's own shadow struct-field storage
+         * into the callee's, walking the same template field chain
+         * both the caller's instance and the callee's own STRUCTURE-
+         * typed parameter share (same symtab -- a same-unit call
+         * always shares template definitions), mirroring OP_TASN's
+         * own elements-aware per-terminal copy technique and OP_READ/
+         * flush_write's own field-chain walk for whole-structure I/O.
+         * Passed strictly by value (USA003087 Sec. 11.2's ordinary
+         * parameter-transmission rule; HAL/S has no structure-typed
+         * reference/OUTPUT parameter form), so the callee's own copy
+         * always lives at copy_index 0 (an ordinary parameter is
+         * never itself part of a Q-STRUCTURE(n) array). User-reported,
+         * 172-OUTER.hal's `UTIL(ARG)`. */
+        uint16_t src_base = state->io_pending.items[item_index].struct_base_syt;
+        int32_t src_copy = state->io_pending.items[item_index].struct_copy_index >= 0
+            ? state->io_pending.items[item_index].struct_copy_index : current_copy_index(state);
+        int field_syt = -1;
+        if (state->symtab) {
+            const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, state->io_pending.items[item_index].struct_template_syt);
+            field_syt = tsym ? tsym->struct_first_field : -1;
+        }
+        while (field_syt >= 0) {
+            const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
+            if (!fsym) break;
+            halmat_syt_entry_t *src_fe = find_or_create_struct_field(state, src_base, (uint16_t)field_syt, src_copy);
+            halmat_syt_entry_t *dst_fe = find_or_create_struct_field(dest_state, param_syt, (uint16_t)field_syt, 0);
+            if (fsym->hal_class == 4 && fsym->cols > 0) {
+                if (!dst_fe->elements) {
+                    dst_fe->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));
+                    dst_fe->element_count = (size_t)fsym->cols;
+                    dst_fe->cols = fsym->cols;
+                    dst_fe->rows = 0;
+                }
+                if (src_fe->elements) {
+                    memcpy(dst_fe->elements, src_fe->elements, (size_t)fsym->cols * sizeof(halmat_scalar_t));
+                }
+            } else if (fsym->hal_class == 6) {
+                dst_fe->type = SYT_TYPE_INTEGER;
+                dst_fe->value = src_fe->value;
+            } else if (fsym->hal_class == 1) {
+                dst_fe->type = SYT_TYPE_BIT;
+                dst_fe->bit_value = src_fe->bit_value;
+            } else if (fsym->hal_class == 5) {
+                dst_fe->type = SYT_TYPE_SCALAR;
+                dst_fe->scalar = src_fe->scalar;
+            }
+            /* Unsupported terminal types are silently skipped here
+             * rather than failing loudly -- matching flush_write/
+             * OP_READ's own whole-structure handling of every OTHER
+             * terminal kind this template actually uses; a genuinely
+             * unsupported kind will still surface loudly the first
+             * time it's actually read or written through some other
+             * path. */
+            field_syt = fsym->struct_next_field;
+        }
+        return true;
+    }
     if (state->io_pending.items[item_index].is_container) {
         ensure_container(dest_state, param_syt);
         halmat_syt_entry_t *pe = &dest_state->syt[param_syt];
@@ -3216,6 +3295,61 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
                 } else {
                     dm_emit_field(state, dm, out, strs[k], &need_sep, wrap_col, unpaged);
                 }
+            }
+        } else if (state->io_pending.items[i].is_structure) {
+            /* Whole STRUCTURE WRITE argument (OP_XXAR above, state.h's
+             * is_structure comment): one data field per terminal, in
+             * declaration order, same "walk struct_first_field/
+             * struct_next_field" technique OP_READ's own
+             * dest_is_structure handling uses -- a VECTOR terminal
+             * expands to one field per component (matching a lone
+             * whole-VECTOR WRITE argument, is_container's own flat-
+             * VECTOR branch above), everything else (SCALAR/INTEGER/
+             * BIT) is a single ordinary field, same formatting each
+             * already uses standalone. */
+            uint16_t base_syt = state->io_pending.items[i].struct_base_syt;
+            int32_t copy_idx = state->io_pending.items[i].struct_copy_index >= 0
+                ? state->io_pending.items[i].struct_copy_index : current_copy_index(state);
+            int field_syt = -1;
+            if (state->symtab) {
+                const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, state->io_pending.items[i].struct_template_syt);
+                field_syt = tsym ? tsym->struct_first_field : -1;
+            }
+            while (field_syt >= 0) {
+                const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
+                if (!fsym) break;
+                halmat_syt_entry_t *fe = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt, copy_idx);
+                if (fsym->hal_class == 4 && fsym->cols > 0) {
+                    for (int k = 0; k < fsym->cols; k++) {
+                        char buf[32];
+                        halmat_scalar_t v = fe->elements ? fe->elements[k] : halmat_scalar_zero(false);
+                        halmat_scalar_format(v, buf, sizeof(buf));
+                        dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
+                    }
+                } else if (fsym->hal_class == 6) {
+                    char buf[16];
+                    snprintf(buf, sizeof(buf), "%11d", fe->value);
+                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
+                } else if (fsym->hal_class == 1) {
+                    char buf[48];
+                    int width = fsym->bit_width > 0 ? fsym->bit_width : 32;
+                    format_bit_field(fe->bit_value, width, buf);
+                    if (unpaged) {
+                        char *quoted = quote_character_for_unpaged(buf);
+                        dm_emit_field(state, dm, out, quoted ? quoted : buf, &need_sep, wrap_col, unpaged);
+                        free(quoted);
+                    } else {
+                        dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
+                    }
+                } else if (fsym->hal_class == 5) {
+                    char buf[32];
+                    halmat_scalar_format(fe->scalar, buf, sizeof(buf));
+                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
+                } else {
+                    fail(state, "WRITE: structure terminal '%s' has an unsupported type for whole-structure WRITE", fsym->name ? fsym->name : "?");
+                    break;
+                }
+                field_syt = fsym->struct_next_field;
             }
         } else if (state->io_pending.items[i].is_string) {
             if (unpaged) {
@@ -7869,6 +8003,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the callee's corresponding parameter's final value back
                  * into this operand once the call returns. */
                 bool is_assign_arg = state->io_pending.is_call && ins->operands[0].tag2 != 0;
+                if ((state->io_pending.kind == 2 || state->io_pending.is_call) &&
+                    ins->operands[0].tag1 == 10 && ins->operands[0].qual == QUAL_XPT) {
+                    /* Whole (bare/unqualified) STRUCTURE WRITE/CALL
+                     * argument (TAG1=10/MAJ_STRUC) -- the WRITE/CALL-side
+                     * mirror of OP_XXAR's own READ/READALL dest_is_structure
+                     * case above (state.h's is_structure comment): not
+                     * wrapped in an ADLP/DLPE replay any more than the
+                     * READ-side XPT reference is, so this is always the
+                     * whole structure, unconditionally. Validated the same
+                     * way (bare EXTN reference confirmed via the template
+                     * symbol's own hal_class==0x3E marker). flush_write
+                     * (WRITE) and bind_call_argument (CALL) both walk the
+                     * template's own struct_first_field/struct_next_field
+                     * chain to emit/copy each terminal, mirroring OP_READ's
+                     * own walk. User-reported, 172-OUTER.hal's `WRITE(6)
+                     * ARG;` and `UTIL(ARG)` (previously fell through to the
+                     * generic resolve_operand/resolve_xpt_field path below,
+                     * which resolves the *template* symbol itself as a
+                     * bogus scalar "field" READ never populates -- printing/
+                     * passing zero regardless of ARG's real contents). */
+                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "WRITE/CALL: XPT stream position out of range"); break; }
+                    const halmat_vac_slot_t *sref = &state->vac[ins->operands[0].data];
+                    if (!sref->is_struct_ref) { fail(state, "WRITE/CALL: XPT operand does not reference an EXTN result"); break; }
+                    const halmat_symtab_entry_t *tsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, sref->struct_field_syt) : NULL;
+                    if (!tsym || tsym->hal_class != 0x3E) {
+                        fail(state, "WRITE/CALL: structure argument must be a whole (unqualified) structure reference");
+                        break;
+                    }
+                    state->io_pending.items[state->io_pending.item_count].is_container = false; /* stale-flag
+                        clear, same reason as elsewhere in this function */
+                    state->io_pending.items[state->io_pending.item_count].is_bit_array = false;
+                    state->io_pending.items[state->io_pending.item_count].is_char_array = false;
+                    state->io_pending.items[state->io_pending.item_count].is_structure = true;
+                    state->io_pending.items[state->io_pending.item_count].struct_base_syt = sref->struct_base_syt;
+                    state->io_pending.items[state->io_pending.item_count].struct_template_syt = sref->struct_field_syt;
+                    state->io_pending.items[state->io_pending.item_count].struct_copy_index = sref->struct_copy_index;
+                    state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
+                    state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
+                    state->io_pending.item_count++;
+                    break;
+                }
                 /* A VAC operand already marked is_container (SSHP/VSHP/
                  * MSHP/ISHP, VADD/VSUB/MADD/MSUB, a DSUB asterisk-select,
                  * etc.) is unambiguously a whole-container *value* -- there
@@ -8015,6 +8190,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             state->io_pending.items[state->io_pending.item_count].is_container = false; /* stale-flag clear, same reason as elsewhere in this function */
                             state->io_pending.items[state->io_pending.item_count].is_bit_array = false;
                             state->io_pending.items[state->io_pending.item_count].is_char_array = false;
+                            state->io_pending.items[state->io_pending.item_count].is_structure = false;
                             if (ins->operands[0].tag1 == 1) {
                                 if (!e->bit_elements) { fail(state, "WRITE/call argument: expected a BIT ARRAY"); break; }
                                 int width = 1;
@@ -8122,6 +8298,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     * previous statement's whole-container item at this same slot must be cleared. */
                 state->io_pending.items[state->io_pending.item_count].is_bit_array = false;
                 state->io_pending.items[state->io_pending.item_count].is_char_array = false;
+                state->io_pending.items[state->io_pending.item_count].is_structure = false;
                 state->io_pending.items[state->io_pending.item_count].is_string = (a.kind == RV_STRING);
                 state->io_pending.items[state->io_pending.item_count].is_scalar = (a.kind == RV_SCALAR);
                 state->io_pending.items[state->io_pending.item_count].is_bits = (a.kind == RV_BITS);
@@ -8985,7 +9162,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                           syt_is_vector_or_matrix_shaped(state, ins->operands[0].data);
                     bool ret_whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
                                           state->vac[ins->operands[0].data].is_container;
-                    if (ret_whole_syt || ret_whole_vac) {
+                    /* `RETURN X.V;` (V a VECTOR terminal of a STRUCTURE-
+                     * typed parameter/variable X) -- a *qualified*
+                     * structure-field reference, QUAL_XPT, distinct from
+                     * ret_whole_syt/ret_whole_vac's own plain-SYT/VAC
+                     * shapes. state->vac[...].struct_field_syt holds the
+                     * target *field's* own SYT index for a qualified
+                     * reference (as opposed to the *template's* index a
+                     * bare/unqualified whole-structure reference like
+                     * ARG carries -- OP_XXAR's dest_is_structure/
+                     * is_structure comments' own hal_class==0x3E check),
+                     * so this only needs to confirm that field is itself
+                     * VECTOR-shaped (class 4, cols>0) before routing
+                     * through the same resolve_container()/
+                     * store_container_result() path. User-reported,
+                     * 172-OUTER.hal's `UTIL: FUNCTION(X) VECTOR; ...
+                     * RETURN X.V; CLOSE UTIL;`. */
+                    bool ret_whole_xpt = false;
+                    if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                        state->vac[ins->operands[0].data].is_struct_ref && state->symtab) {
+                        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, state->vac[ins->operands[0].data].struct_field_syt);
+                        ret_whole_xpt = fsym && fsym->hal_class == 4 && fsym->cols > 0;
+                    }
+                    if (ret_whole_syt || ret_whole_vac || ret_whole_xpt) {
                         halmat_scalar_t *elems; size_t count; int rows, cols;
                         if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
                         size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
