@@ -50,14 +50,24 @@ halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision)
 }
 
 int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
-    /* Rounds to nearest, ties away from zero -- NOT truncation (an
-     * earlier, wrong assumption here, corrected after cross-checking
-     * `I1 = INTEGER(S1);` against the reference yaHALMAT emulator for
-     * 7.2/7.5/-7.5/-7.2, which produced 7/8/-8/-7 respectively; a ties-
-     * to-even reading can't be distinguished from this data (-8 is
-     * itself even) but round()'s ties-away-from-zero already matches
-     * every observed case exactly, so there's no evidence to prefer the
-     * more complex ties-to-even rule). See class-6/STOI.md.
+    /* Rounds to nearest, but exact-.5 ties round TOWARD zero (i.e.
+     * truncate), not away from it -- confirmed against real `gpc` output
+     * for the runtime library's actual ETOH.asm conversion routine
+     * (Source Code/PASS.REL32V0/RUNASM/ETOH.asm: CVFX, +0x7FFF, a
+     * conditional +1, then mask), compiling 24 separate `I = INTEGER(S);`
+     * probes across a range of magnitudes/signs: every exact-.5 case
+     * (0.5/1.5/2.5/3.5/4.5/100.5 and their negatives) truncated toward
+     * zero, while every other fractional value (0.9/2.9/7.6/7.9 and
+     * negatives) rounded to the nearer integer as expected -- e.g. 1.5->1
+     * (not 2), but 0.9->1 and 100.5->100 (not 101). An *earlier* version
+     * of this comment claimed "ties away from zero" (round()'s own
+     * behavior) based on cross-checking 7.2/7.5/-7.5/-7.2 against "the
+     * reference yaHALMAT emulator" (giving 7/8/-8/-7) -- but that
+     * reference emulator turns out to have the identical wrong-direction
+     * tie-breaking bug this project copied from it; real gpc gives
+     * 7/7/-7/-7 for that same probe (all non-ties or exact ties, so it
+     * doesn't even distinguish the two rules on its own -- the fuller
+     * probe set above does). See class-6/STOI.md.
      *
      * USA003090 App. C error 15 ("SCALAR too large for INTEGER
      * conversion"): standard fixup is "the maximum representable integer
@@ -70,8 +80,28 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
      * INTEGER opcode (IADD/ISUB/etc.) already treating values above
      * 32767 as ordinary, un-clamped 32-bit integers. Without this clamp,
      * the plain `(int32_t)round(...)` cast below is undefined behavior
-     * in C for any double outside int32_t's range. */
-    double d = round(halmat_scalar_to_double(s));
+     * in C for any double outside int32_t's range.
+     *
+     * Tried changing this to a 32767/-32768 clamp (matching the primary
+     * source's literal documented fixup value, on the theory that
+     * interp.c's WRITE-argument capture now truncates any non-DOUBLE
+     * INTEGER to 16 bits anyway, so this could just clamp to the *real*
+     * bounds directly) -- but real gpc output disproves it: compiling
+     * `IRESULT = INTEGER(HUGESCALAR);` (HUGESCALAR = 50000000000.0, a
+     * SINGLE-precision SCALAR far outside even int32_t's range) and
+     * running it produces IRESULT=3 with *no* error-15 SEND ERROR message
+     * at all -- unlike this same test file's TAN/SIN lines, which do
+     * print one. So error 15's documented "maximum representable value"
+     * fixup evidently doesn't even trigger for this input; real hardware
+     * instead falls through to some other (apparently undefined/hardware-
+     * truncation-dependent, not investigated further) behavior. Reverted;
+     * this emulator's own INT32_MAX/INT32_MIN clamp remains what it was,
+     * an internally-consistent choice rather than a primary-source-
+     * verified one. See problems-yaHALMAT2.md session notes. */
+    double raw = halmat_scalar_to_double(s);
+    double d = trunc(raw);
+    double frac = raw - d; /* signed remainder, |frac| < 1, same sign as raw (or zero) */
+    if (fabs(frac) > 0.5) d += (raw >= 0.0) ? 1.0 : -1.0;
     if (d >= 2147483647.0) return INT32_MAX;
     if (d <= -2147483648.0) return INT32_MIN;
     return (int32_t)d;

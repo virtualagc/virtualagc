@@ -131,7 +131,12 @@ run ./run_local_fixture.sh scalar_double "$(printf ' 9.3000000000000007E+07\n 5.
 # 1403 line printer's 132-column width), comfortably fitting all 91
 # columns on one line -- no wrap. The reference yaHALMAT emulator (ground
 # truth elsewhere in this file) also doesn't wrap, consistent with this.
-run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=               8     I3=              -8     I4=              -7')"
+# SCALAR->INTEGER rounding: round to nearest, but exact-.5 ties round
+# TOWARD zero (truncate), not away from it -- value.c's halmat_scalar_
+# to_integer comment. I2/I3 updated from 8/-8 to 7/-7 accordingly;
+# confirmed against real gpc output for this exact probe plus a fuller
+# 24-point sweep of the real ETOH.asm runtime-library conversion routine.
+run ./run_local_fixture.sh stoi "$(printf 'I1=               7     I2=               7     I3=              -7     I4=              -7')"
 run ./run_local_fixture.sh char "$(printf 'HELLOHELLO\nEQUAL\nLESS')"
 run ./run_local_fixture.sh char_conv "$(printf '42\n 3.5000000E+00\n42\nI2=             123\nS2=      7.5000000E+00')"
 run ./run_link_fixture.sh "Y=              43" link_pool link_prog
@@ -284,7 +289,12 @@ run ./run_read_fixture.sh read_vecmat "$(printf '1,2,3\n4,5,6,7\n')" "$(printf -
 # items.
 run ./run_read_fixture.sh read_vecmat_edge "$(printf '1,2,3;\n')" "$(printf -- ' 1.0000000E+00\n 2.0000000E+00      3.0000000E+00     -9.5000000E+00\n-7.5000000E+00')"
 run ./run_local_fixture.sh pcal "RESULT=              15"
-run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             -13"
+# I3's expected value updated from -13 to 243: BNOT (NOT B1, B1 declared
+# BIT(8)) must mask its complement to the operand's own declared width,
+# not complement the full 32-bit pattern -- confirmed against real gpc
+# output (`XHI R7,255` in the generated assembly, an 8-bit-masked XOR,
+# not a full-word complement). interp.c's OP_BNOT case fixed accordingly.
+run ./run_local_fixture.sh bit "I1=               8     I2=              14     I3=             243"
 run ./run_local_fixture.sh scalar_exp "$(printf ' 8.0000000E+00\n 8.0000000E+00\n 2.5000000E-01\n 1.4142132E+00')"
 run ./run_local_fixture.sh matrix_sub "$(printf ' 5.0000000E+00\n 3.0000000E+00\n 4.0000000E+00')"
 # User-reported (107-EXAMPLE_3.hal): `DECLARE ARRAY(3,3), M1...;`, a
@@ -352,8 +362,24 @@ run ./run_local_fixture.sh matrix_row_assign "$(printf ' 2.2000000E+01      2.40
 run ./run_local_fixture.sh matrix_col_assign "$(printf ' 1.1000000E+01      2.4000000E+01      1.3000000E+01\n 2.1000000E+01      4.4000000E+01      2.3000000E+01\n 3.1000000E+01      6.4000000E+01      3.3000000E+01')"
 run ./run_local_fixture.sh matvec "$(printf ' 6.0000000E+00\n 8.0000000E+00\n 1.0000000E+01\n 1.2000000E+01\n 1.9000000E+01\n 2.2000000E+01\n 4.3000000E+01\n 5.0000000E+01')"
 run ./run_local_fixture.sh vec "$(printf ' 3.2000000E+01\n-3.0000000E+00\n 6.0000000E+00\n-3.0000000E+00')"
-run ./run_local_fixture.sh bit_conv "$(printf ' 1.2000000E+01\n12\nBEQU-TRUE\n         12')"
-run ./run_local_fixture.sh init8 "$(printf '      43690\n 9.0000000E+00\n 9.0000000E+00\n 4.0000000E+00')"
+# Second line updated from "12" to "00001100": BTOC (simple-form
+# CHARACTER(<bit-expression>), no @DEC/@OCT/@HEX qualifier) must map each
+# bit to a literal '0'/'1' character, one character per declared bit
+# (USA003087 Sec. 21.4), not format the raw pattern as a decimal number
+# -- interp.c's OP_BTOC case fixed accordingly (problems-yaHALMAT2.md
+# item 5), confirmed against real gpc output. CTOB (BIT(<character-
+# expression>), the inverse conversion `B3 = BIT(C1);` a few lines later
+# in this same test) fixed to match -- its own final INTEGER(B3)=12
+# output is unchanged, confirming the round-trip still works correctly
+# through the corrected string representation.
+run ./run_local_fixture.sh bit_conv "$(printf ' 1.2000000E+01\n00001100\nBEQU-TRUE\n         12')"
+# First line updated from 43690 to -21846: `INTEGER(B1)` (B1 declared
+# BIT(16), exactly filling a single-precision INTEGER's own halfword
+# storage) must be truncated/reinterpreted as a signed 16-bit value when
+# printed, not left as this emulator's wider int32_t -- interp.c's
+# WRITE-argument capture now does this by default (a plain, non-DOUBLE
+# INTEGER symbol), matching real gpc output exactly.
+run ./run_local_fixture.sh init8 "$(printf '     -21846\n 9.0000000E+00\n 9.0000000E+00\n 4.0000000E+00')"
 run ./run_local_fixture.sh vshp "$(printf ' 1.0000000E+00\n 2.0000000E+00\n 3.0000000E+00')"
 # User-reported (044-ORTHONORMAL.hal's `DETERMINANT = DET(MATRIX(X, Y,
 # Z));`/`V = MATRIX(A1, A2, A3) V;`): MSHP (list-form MATRIX(...)) was a
@@ -480,7 +506,21 @@ run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.237005
 # INTEGER here is always a plain int32_t with no SINGLE/DOUBLE precision
 # distinction modeled, unlike the primary source's 16-bit halfword
 # default; see value.c's halmat_scalar_to_integer).
-run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n 2147483647')"
+# Last line updated from 2147483647 to -1: interp.c's WRITE-argument
+# capture now truncates any non-DOUBLE INTEGER to a signed 16-bit
+# halfword before printing (see the `init8`/`bit_at_partition`/
+# `subbit_assign` fixtures above/below, same fix) -- this emulator's own
+# INT32_MAX saturation value, once truncated the same way, becomes -1
+# (0x7FFFFFFF's low 16 bits, 0xFFFF, as signed). NOTE: this does *not*
+# match real gpc, which gives IRESULT=3 for this exact probe with no
+# error-15 SEND ERROR message at all -- the documented "maximum
+# representable value" fixup evidently doesn't even trigger for a SCALAR
+# this far outside int32_t's own range; real hardware's actual behavior
+# here needs deeper CVFX-truncation-semantics research not done this
+# session (see value.c's halmat_scalar_to_integer comment). -1 is this
+# emulator's own consistent-but-not-primary-source-verified answer, not
+# a claim of matching real hardware for this specific extreme input.
+run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n         -1')"
 run ./run_local_fixture.sh eron "I1=               1"
 # User-reported sweep item: ERON's "AND SET/RESET/SIGNAL var" clause
 # (class-0/ERON.md's confirmed 3-way TAG2 sub-flag) previously failed
@@ -511,7 +551,12 @@ run ./run_local_fixture.sh subbit "$(printf '          5\n         42')"
 # write_syt_entry's usual first-write inference) becomes 61680 (BIN
 # '1111000011110000' as an unsigned pattern); B1 becomes the same bits
 # verbatim.
-run ./run_local_fixture.sh subbit_assign "$(printf '      61680\n1010 1010 1010 1010')"
+# First line updated from 61680 to -3856: `SUBBIT(I1) = BIN'...';` stores
+# the raw bit pattern (0xF0F0) directly into I1's storage; since I1 is a
+# plain (single-precision, 16-bit) INTEGER, printing it must reinterpret
+# those bits as signed -- interp.c's WRITE-argument capture now does this
+# by default, matching real gpc output exactly.
+run ./run_local_fixture.sh subbit_assign "$(printf '      -3856\n1010 1010 1010 1010')"
 run ./run_local_fixture.sh name "$(printf 'NEQU-TRUE\nNNEQ-TRUE')"
 run ./run_local_fixture.sh cfor "LASTI=               5"
 # User-reported (113-EXAMPLE_7.hal): a range-form `DO FOR J = I+1 TO 4;`
@@ -1148,7 +1193,18 @@ run ./run_local_fixture.sh wait_dependent "$(printf 'WORKER DONE\nPRIMAL DONE')"
 # already-scalar-typed and a never-before-written target -- 1093140480
 # independently hand-verified as 0x41280000, the correct IBM HFP encoding
 # of 2.5).
-run ./run_local_fixture.sh subbit_scalar "$(printf ' 1093140480\n 2.5000000E+00\n 2.5000000E+00')"
+# First line updated from 1093140480 to 0: `WRITE(6) INTEGER(B2);` (B2 =
+# SUBBIT(S1), a bare BIT expression with no declared width of its own)
+# defaults to single-precision (16-bit signed) truncation like any other
+# non-DOUBLE INTEGER context -- interp.c's WRITE-argument capture (same
+# fix as `init8`/`subbit_assign`/`bit_at_partition`). B2's low 16 bits are
+# all zero here (S1=2.5's IBM-hex representation, 0x41280000, has zeros
+# throughout its own low half), so the truncated/reinterpreted result is
+# plain 0 -- matching real gpc output exactly (this was previously flagged
+# in problems-yaHALMAT2.md as "genuinely ambiguous," but it's the same
+# root cause as the other four items in that report, not a separate
+# unresolved question).
+run ./run_local_fixture.sh subbit_scalar "$(printf '          0\n 2.5000000E+00\n 2.5000000E+00')"
 # Found cross-checking the SUBBIT/SCALAR fix above against a genuinely
 # DOUBLE-precision variable: a plain (non-array) SCALAR DOUBLE's own
 # INITIAL() literal value silently kept SINGLE precision. Real HALSFC
@@ -1409,7 +1465,15 @@ run ./run_local_fixture.sh vsum "$(printf 'SUM=      1.0000000E+00      2.000000
 # against the file's own WRITE(6) INPUT; bit-group dump matches the
 # computed OUTPUT=56525 exactly. Fixture: test_bit_at_partition.hal
 # (254-TEST1.hal plus one added WRITE(6) OUTPUT; line).
-run ./run_local_fixture.sh bit_at_partition "$(printf '      56525')"
+# Updated from 56525 to -9011: the accumulated OUTPUT (`OUTPUT = 10
+# OUTPUT + INTEGER(...)`) already computed the exact right unsigned 16-bit
+# value (56525 = 0xDCCD); the fix is that a plain single-precision
+# INTEGER must be reinterpreted as *signed* 16-bit when finally printed,
+# not left as this emulator's own wider int32_t -- interp.c's
+# WRITE-argument capture (same fix as `init8`/`subbit_assign`/
+# `subbit_scalar`), matching real gpc output exactly (0xDCCD as signed
+# 16-bit is -9011).
+run ./run_local_fixture.sh bit_at_partition "$(printf '      -9011')"
 # 154-ADD.hal: `READ(5) A;`, A a plain flat ARRAY(100) SCALAR, wrapped in
 # an ADLP(100)/DLPE per-element replay at XXAR-capture time (unlike a
 # whole VECTOR/MATRIX READ destination, which is NOT replayed -- see
@@ -1587,7 +1651,15 @@ run ./run_local_fixture.sh wait_for_event "$(printf 'T RAN\nMAIN RESUMED')"
 # coalesced on either side of the NULL terminal (DEVICE=16, STATUS=
 # HEX'0', WORDS=27) all came through correctly despite the run-breaking
 # NULL terminal between them.
-run ./run_local_fixture.sh tint_null_terminal "         16     0000 0000 0000 0000 0000 0000 0000 0000              27"
+#
+# STATUS's field updated from 32 to 16 bits (0000 0000 0000 0000, not
+# ...0000 0000 0000 0000 0000 0000 0000): a WRITE argument that's a
+# QUAL_XPT structure-field reference (interp.c's WRITE-argument bit_width
+# lookup) previously fell through to the bare 32-bit default instead of
+# looking up STATUS's own declared BIT(16) width via the resolving EXTN's
+# struct_field_syt -- problems-yaHALMAT2.md item 4, confirmed against
+# real gpc output.
+run ./run_local_fixture.sh tint_null_terminal "         16     0000 0000 0000 0000              27"
 
 # Corpus sweep: 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal, `V.STATUS$(N)`/
 # `V.TIMETAG$(N)` (V a Q-STRUCTURE(3), N a plain loop-counter INTEGER --
@@ -1700,7 +1772,14 @@ run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(prin
 # display of a VECTOR-shaped structure field is a separate, pre-existing
 # gap (resolve_operand's QUAL_XPT case has no elements[]-shaped read
 # path yet, only ever reads the scalar union member) not exercised here.
-run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
+# E's field updated from 32 bits (0000...0001) to 1 bit ("1"): the same
+# QUAL_XPT structure-field bit_width lookup fix as problems-yaHALMAT2.md
+# item 4 (test_tint_null_terminal.hal's STATUS field) also applies here --
+# E is declared BOOLEAN (BIT(1)), and WRITE now looks up its real
+# declared width via the resolving EXTN's struct_field_syt instead of
+# falling through to the 32-bit default. Confirmed against real gpc
+# output for this exact fixture's own input.
+run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1.0500000E+01               7      2.0500000E+01     1"
 
 # Task #23: TASN (whole-structure assign, `DST = SRC;`) copying an
 # ARRAY/MATRIX/VECTOR structure terminal -- previously failed loudly as
@@ -1724,7 +1803,9 @@ run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1
 # holding the *first* READ's values proves TASN performed a genuine
 # independent copy (not an aliased reference) despite the leading VECTOR
 # terminal that used to abort the whole operation.
-run ./run_read_fixture.sh tasn_array_terminal "$(printf '1 2 3 10.5 7 20.5 1\n99 98 97 999.9 88 888.8 0\n')" " 1.0500000E+01               7      2.0500000E+01     0000 0000 0000 0000 0000 0000 0000 0001"
+# E's field updated from 32 bits to 1 bit -- same QUAL_XPT structure-
+# field bit_width fix as read_structure above (E is BOOLEAN = BIT(1)).
+run ./run_read_fixture.sh tasn_array_terminal "$(printf '1 2 3 10.5 7 20.5 1\n99 98 97 999.9 88 888.8 0\n')" " 1.0500000E+01               7      2.0500000E+01     1"
 
 # Task #27: CSZ (`#`-relative CHARACTER to-partition subscript,
 # 160-REFORMAT.hal's `C(1 TO #-DECIMALS)`/`C(#-DECIMALS-1 TO #)`) --

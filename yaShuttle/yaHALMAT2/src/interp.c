@@ -6128,15 +6128,44 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->vac[ins->index].bits = (ins->opcode == OP_BAND) ? (a.bits & b.bits) : (a.bits | b.bits);
                 break;
 
-            case OP_BNOT:
+            case OP_BNOT: {
                 if (ins->operand_count != 1) { fail(state, "BNOT: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BNOT: operand is not BIT"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                /* Real compiled code masks NOT to the operand's own
+                 * declared BIT(n) width (`XHI R7,255` for a BIT(8)
+                 * operand) rather than complementing the full 32-bit
+                 * pattern -- confirmed against test_bit.hal's `I3 =
+                 * INTEGER(NOT B1);` (B1 declared BIT(8)): real gpc output
+                 * is 243 (0xF3, the 8-bit-masked complement reinterpreted
+                 * as a non-negative INTEGER), not a full-32-bit
+                 * complement's -13. Same declared-width lookup convention
+                 * as the WRITE-argument BIT case below and BCAT's own
+                 * established technique; unlike BAND/BOR just above (whose
+                 * own comment already flags this as unconfirmed and whose
+                 * existing test coverage never exercises a case that would
+                 * distinguish the two), this one has direct, real-hardware
+                 * evidence. */
+                int width = 32;
+                if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
+                    const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                    if (sym && sym->bit_width > 0) width = sym->bit_width;
+                } else if (ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX) {
+                    int vac_width = state->vac[ins->operands[0].data].bit_width;
+                    if (vac_width > 0) width = vac_width;
+                } else if (ins->operands[0].qual == QUAL_LIT && state->literals &&
+                           ins->operands[0].data < state->literals->count) {
+                    const halmat_literal_t *lit = &state->literals->entries[ins->operands[0].data];
+                    if (lit->type == LIT_BIT && lit->bit_width > 0) width = lit->bit_width;
+                }
+                uint32_t mask = (width >= 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
-                state->vac[ins->index].bits = ~a.bits;
+                state->vac[ins->index].bits = (~a.bits) & mask;
+                state->vac[ins->index].bit_width = width;
                 break;
+            }
 
             case OP_ITOB:
                 /* Integer->bit, class-1/ITOB.md: raw bit pattern of the
@@ -6191,37 +6220,83 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
 
             case OP_BTOC: {
-                /* Bit->character, class-2/BTOC.md. No confirmed output
-                 * format (BIT has no declared-width tracking here to
-                 * inform how many digits to show either way -- see
-                 * state.h) -- matches the reference emulator's own
-                 * plain "%u" decimal-of-the-raw-pattern convention. */
+                /* Bit->character (simple form, no @DEC/@OCT/@HEX radix
+                 * qualifier), class-2/BTOC.md: USA003087 Sec. 21.4's own
+                 * worked example says "the number of characters is the
+                 * same as the number of bits" -- each bit becomes a
+                 * literal '0'/'1' character, most-significant first (the
+                 * same MSB-first convention as format_bit_field's WRITE
+                 * formatting just above, but with no inserted grouping
+                 * blanks -- confirmed against real gpc output: BIT(8)
+                 * value 12 (00001100) converts to the 8-character string
+                 * "00001100", not "12"). An earlier version of this case
+                 * instead did decimal-of-the-raw-pattern formatting
+                 * (`"%u"`), matching the reference emulator's own
+                 * behavior there rather than real hardware -- that was
+                 * simply wrong (problems-yaHALMAT2.md item 5), not a
+                 * @DEC-qualified radix form (that's a different,
+                 * separately-tagged conversion, not plain BTOC). Same
+                 * declared-width lookup convention as BNOT/BCAT/the
+                 * WRITE-argument BIT case, defaulting to 32 when
+                 * unknown. */
                 if (ins->operand_count != 1) { fail(state, "BTOC: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTOC: operand is not BIT"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                char buf[16];
-                snprintf(buf, sizeof(buf), "%u", a.bits);
+                int width = 32;
+                if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
+                    const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                    if (sym && sym->bit_width > 0) width = sym->bit_width;
+                } else if (ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX) {
+                    int vac_width = state->vac[ins->operands[0].data].bit_width;
+                    if (vac_width > 0) width = vac_width;
+                } else if (ins->operands[0].qual == QUAL_LIT && state->literals &&
+                           ins->operands[0].data < state->literals->count) {
+                    const halmat_literal_t *lit = &state->literals->entries[ins->operands[0].data];
+                    if (lit->type == LIT_BIT && lit->bit_width > 0) width = lit->bit_width;
+                }
+                char buf[33];
+                for (int i = 0; i < width; i++) {
+                    buf[i] = ((a.bits >> (width - 1 - i)) & 1u) ? '1' : '0';
+                }
+                buf[width] = '\0';
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_string = true;
                 state->vac[ins->index].string = dup_string(buf);
                 break;
             }
 
-            case OP_CTOB:
-                /* Character->bit, class-1/CTOB.md. No reference
-                 * implementation exists to cross-check (falls to
-                 * yaHALMAT's own "unknown popcode" default there) --
-                 * implemented as the natural inverse of BTOC's decimal-
-                 * of-raw-pattern convention above. */
+            case OP_CTOB: {
+                /* Character->bit (simple form), class-1/CTOB.md: the
+                 * natural inverse of BTOC's own simple-form fix above --
+                 * each character is one bit, most-significant first (a
+                 * non-'1' character, in particular '0', contributes a 0
+                 * bit; this project has no primary-source citation for
+                 * what a truly invalid character like 'X' should do, and
+                 * no fixture exercises it, so it's treated the same as
+                 * '0' rather than failing loudly). Confirmed against real
+                 * gpc output for test_bit_conv.hal's `B3 = BIT(C1);`
+                 * (C1 = "00001100" from the BTOC fix above): INTEGER(B3)
+                 * comes back as 12 (0b00001100), matching this decode,
+                 * not the previous decimal-string-parse convention
+                 * (which the two fixes' own comments already flagged as
+                 * an unverified, "natural inverse of a guess" pairing). */
                 if (ins->operand_count != 1) { fail(state, "CTOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOB: operand is not CHARACTER"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                size_t len = strlen(a.string);
+                if (len > 32) len = 32; /* project-wide 32-bit BIT ceiling, state.h's bit_width comment */
+                uint32_t bits = 0;
+                for (size_t i = 0; i < len; i++) {
+                    bits = (bits << 1) | (a.string[i] == '1' ? 1u : 0u);
+                }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
-                state->vac[ins->index].bits = (uint32_t)strtoul(a.string, NULL, 10);
+                state->vac[ins->index].bits = bits;
+                state->vac[ins->index].bit_width = (int)len;
                 break;
+            }
 
             case OP_STOB:
                 /* Scalar->bit, class-1/STOB.md. No reference
@@ -7836,7 +7911,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * compiler records in the literal table itself
                      * (litfile.h's bit_width comment; empirically confirmed
                      * against real compiled output's `LHI R6,20`/
-                     * `LFXI R6,7` immediately preceding the WRITE call). */
+                     * `LFXI R6,7` immediately preceding the WRITE call). A
+                     * QUAL_XPT structure-field reference (`WRITE(6)
+                     * FWDSENSORS.STATUS;`, STATUS declared BIT(16) inside
+                     * a STRUCTURE) similarly has a real declared width,
+                     * found the same way write_destination's own
+                     * structure-field paths do -- via the resolving EXTN's
+                     * VAC slot's struct_field_syt (the TEMPLATE's own
+                     * field symbol index), not ins->operands[0].data
+                     * itself (that's the EXTN's own stream position, not
+                     * a symbol index). Previously fell through to the
+                     * bare 32-bit default -- user-reported
+                     * (test_tint_null_terminal.hal, problems-yaHALMAT2.md
+                     * item 4), confirmed against real gpc output. */
                     int width = 32;
                     if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
                         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
@@ -7848,11 +7935,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                ins->operands[0].data < state->literals->count) {
                         const halmat_literal_t *lit = &state->literals->entries[ins->operands[0].data];
                         if (lit->type == LIT_BIT && lit->bit_width > 0) width = lit->bit_width;
+                    } else if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX && state->symtab) {
+                        const halmat_vac_slot_t *xpt_slot = &state->vac[ins->operands[0].data];
+                        if (xpt_slot->is_struct_ref) {
+                            const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, xpt_slot->struct_field_syt);
+                            if (sym && sym->bit_width > 0) width = sym->bit_width;
+                        }
                     }
                     state->io_pending.items[state->io_pending.item_count].bits = a.bits;
                     state->io_pending.items[state->io_pending.item_count].bit_width = width;
                 } else if (a.kind != RV_STRING) {
-                    state->io_pending.items[state->io_pending.item_count].integer = rv_to_integer(&a);
+                    /* HAL/S plain INTEGER (no DOUBLE qualifier) is a
+                     * genuine 16-bit signed halfword on real AP-101S
+                     * hardware; this project's own INTEGER representation
+                     * is a plain int32_t throughout with no single/double
+                     * precision distinction modeled (value.c's halmat_
+                     * scalar_to_integer's own comment, run_all.sh's
+                     * errfix_trig fixture comment), so a value whose
+                     * magnitude exceeds +-32767 -- from arithmetic
+                     * overflow, a full-width BIT(16) reinterpreted via
+                     * BTOI, or a raw SUBBIT(I1)=... store -- must still be
+                     * truncated/reinterpreted as signed 16-bit right here,
+                     * where it's finally read out for WRITE, to match real
+                     * hardware. Confirmed against real gpc output for
+                     * test_bit_at_partition.hal, test_subbit_assign.hal,
+                     * test_init8.hal, and test_subbit_scalar.hal: e.g. an
+                     * accumulated OUTPUT of 56525 (0xDCCD) prints as
+                     * -9011, not 56525. A confirmed DOUBLE INTEGER symbol
+                     * keeps its full 32-bit value; default to single/
+                     * 16-bit whenever precision can't be confirmed
+                     * (QUAL_VAC/QUAL_LIT operands have no symtab entry to
+                     * check) -- matching this project's usual "default to
+                     * the common case" convention (state.h's bit_width
+                     * comment) and the language's own default. */
+                    int32_t ival = rv_to_integer(&a);
+                    bool is_double_integer = false;
+                    if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
+                        const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (sym && (sym->flags & HALMAT_SYM_FLAG_DOUBLE)) is_double_integer = true;
+                    }
+                    if (!is_double_integer) ival = (int32_t)(int16_t)(ival & 0xFFFF);
+                    state->io_pending.items[state->io_pending.item_count].integer = ival;
                 }
                 state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
                 state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
