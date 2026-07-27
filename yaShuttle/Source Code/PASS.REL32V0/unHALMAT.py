@@ -62,12 +62,12 @@ Usage:
 
 The available OPTIONs are:
     --help          Displays this message.
-    --listing2=F    F is the name of a listing file as produced by the HAL/S
-                    compiler (HALSFC) when the HALMAT file was
-                    generated, and if present, is used to display HAL/S source
-                    code corresponding to HALMAT SMRK instructions.  It is
-                    acceptable for F to be either the PASS 1 report or the
-                    LISTING2 report.
+    --listing2=F    (Default is pass1.rpt.) F is the name of a file as produced 
+                    by the HAL/S when the HALMAT file itself was generated, 
+                    and if present, is used to display HAL/S source code
+                    corresponding to HALMAT SMRK instructions.  It is
+                    acceptable for F to be either a PASS 1 report or a
+                    LISTING2 report from either HALSFC or HAL_S_FC.py.
     --litfile=F     Specify a literal file for displaying values of literals.
                     Requires --memory (see below).
     --memory=F      Specify a memory file for use with --litfile (see above).
