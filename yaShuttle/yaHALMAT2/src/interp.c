@@ -3512,6 +3512,171 @@ static bool run_external_call(halmat_state_t *state, halmat_state_t *target, uin
     return interp_finish_external_call(state, target);
 }
 
+/* Ends the current process/task's execution -- extracted from OP_CLOS's
+ * own "no active call frame" branches (below) so OP_RTRN can reach the
+ * exact same logic when RETURN is executed with no active call frame,
+ * no open inline-FUNCTION, and not as an external-call target: RETURN
+ * reached inside an ON-ERROR/ERSE-triggered inline action body (which
+ * has no call frame of its own) previously fell straight through to
+ * OP_RTRN's own "no active call" fail() instead -- user-reported
+ * (194-TEST_X.hal's `ON ERROR ... DO; ...; RETURN; END;`, matching
+ * USA003087 p.194's own worked example). class-0/RTRN.md's "every
+ * subprogram body is terminated regardless" note makes no distinction
+ * between an explicit top-level RETURN and naturally falling through to
+ * CLOS -- USA003087 Sec. 13.3's task-vs-process closing rules apply
+ * identically either way, so this must be the same code, not a
+ * parallel reimplementation of it. */
+static void close_current_process(halmat_state_t *state, bool *branched) {
+    if (!state->tasks[state->current_task].is_primal) {
+        /* A scheduled task's body fell through to its own end
+         * without an explicit TERMINATE -- either genuine
+         * completion (class-0/RTRN.md's "every subprogram body
+         * is terminated regardless" note, TASK analog) or, for
+         * a cyclic (REPEAT) task, just the end of one cycle.
+         * Explicit TERMINATE/CANCEL (OP_TERM/OP_CANC below)
+         * always end the task outright and bypass this rearm
+         * check entirely -- only a *fallthrough* CLOS is
+         * eligible to rearm, matching REPEAT/WHILE/UNTIL's
+         * role as governing the task's own natural completion,
+         * not something an explicit mid-body CANCEL could be
+         * talked out of. */
+        halmat_task_t *cur = &state->tasks[state->current_task];
+        bool stop = true;
+        if (cur->repeat_kind != SCHD_REPEAT_NONE) {
+            /* Stopping-condition expressions are evaluated only
+             * here -- once per completed cycle, at the moment
+             * the task would otherwise be rearmed -- never
+             * continuously every tick. class-0/SCHD.md frames
+             * WHILE/UNTIL as governing *whether the cycle
+             * continues*, the same "test at the iteration
+             * boundary" shape HAL/S's own DO WHILE/DO UNTIL
+             * loops use (already this interpreter's CFOR
+             * pattern) -- there's no primary-source basis for
+             * treating it as an asynchronous mid-execution
+             * interrupt, and WAIT is already the language's
+             * only mechanism for a task to suspend mid-body. */
+            switch (cur->stop_kind) {
+                case SCHD_STOP_NONE:
+                    stop = false;
+                    break;
+                case SCHD_STOP_UNTIL_TIME:
+                    stop = (state->virtual_time >= cur->stop_deadline);
+                    break;
+                case SCHD_STOP_WHILE_BIT: {
+                    /* WHILE <bit exp>: keep cycling while true, stop once false. */
+                    uint32_t v;
+                    stop = !reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) || v == 0;
+                    break;
+                }
+                case SCHD_STOP_UNTIL_BIT: {
+                    /* UNTIL <bit exp>: keep cycling until true, stop once true. */
+                    uint32_t v;
+                    stop = reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) && v != 0;
+                    break;
+                }
+            }
+        }
+        if (!stop) {
+            /* Rearming jumps this task's own pc back to its
+             * body's start -- must go through the same state-
+             * >pc/branched mechanism TDEF/RTRN use (not a bare
+             * cur->saved_pc write), since exec_one's own tail
+             * ("if (!branched) state->pc++") and interp_step's
+             * post-exec_one "saved_pc = state->pc" would
+             * otherwise clobber it with CLOS's own position+1
+             * right after this case returns. */
+            state->pc = state->symbol_def_pos[cur->symbol] + 1;
+            *branched = true;
+            switch (cur->repeat_kind) {
+                case SCHD_REPEAT_BARE:
+                    /* No interval -- immediate back-to-back retrigger. */
+                    cur->task_state = TASK_READY;
+                    break;
+                case SCHD_REPEAT_EVERY:
+                    /* Fixed period, chained off the previous
+                     * target (not off "now") so a late-running
+                     * cycle doesn't push later ones out --
+                     * every_phase_ref already holds that
+                     * previous target (set at SCHD time, or by
+                     * the prior rearm), kept in its own field
+                     * (state.h) so it can't be clobbered by an
+                     * internal WAIT in the task's body (OP_WAIT
+                     * only ever touches wake_deadline). Assign
+                     * wake_deadline from the post-increment
+                     * value since sched_wake_waiting() only
+                     * ever reads wake_deadline, never this
+                     * field directly. */
+                    cur->every_phase_ref += cur->repeat_interval;
+                    cur->wake_deadline = cur->every_phase_ref;
+                    cur->task_state = TASK_WAITING;
+                    break;
+                case SCHD_REPEAT_AFTER:
+                    /* Delay measured from *this* completion,
+                     * so it does drift with however long the
+                     * cycle actually took -- the language-level
+                     * distinction from EVERY. */
+                    cur->wake_deadline = state->virtual_time + cur->repeat_interval;
+                    cur->task_state = TASK_WAITING;
+                    break;
+                case SCHD_REPEAT_ON:
+                    /* Self-reschedule ON <event>, synthesized
+                     * above -- has_on_event/on_event_op are
+                     * already set from that SCHD call; just wait
+                     * on the event again, same as a brand-new
+                     * ON-initiated task. */
+                    cur->task_state = TASK_WAITING_ON;
+                    break;
+                default:
+                    break;
+            }
+        } else if (has_active_dependents(state, state->current_task)) {
+            /* USA003087 Sec. 13.3: "If execution ends on a
+             * CLOSE or RETURN statement, the process goes
+             * into the inactive state directly only if it
+             * has no dependents. Otherwise, it goes into a
+             * waiting state until the dependents have in
+             * their turn terminated." Deferred, not
+             * abandoned -- sched_wake_dependents() (checked
+             * every tick) finalizes this once true, and
+             * symbol_active_task is deliberately left
+             * pointing at this task until then: it's still
+             * the sole active process for this task symbol
+             * (just in a different minor state), so a new
+             * SCHEDULE of the same symbol must still be
+             * rejected in the meantime. */
+            cur->task_state = TASK_WAITING_FOR_DEPENDENTS;
+        } else {
+            cur->task_state = TASK_TERMINATED;
+            if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+        }
+    } else if (has_active_dependents(state, state->current_task)) {
+        /* Primal process closing, but with a still-active
+         * DEPENDENT task (user-reported bug, COUNTUP2.hal/
+         * NESTED_TASK_SCHEDULE_TEST.hal) -- same Sec. 13.3
+         * rule as the non-primal branch above applies
+         * identically here (Sec. 13.3's own "programs and
+         * tasks are treated together since their
+         * representations at run time are in both cases real
+         * time processes"): the primal doesn't halt yet, it
+         * waits. Once sched_wake_dependents() finds no
+         * dependents left, it sets state->halted itself --
+         * that's still what finally ends the whole program,
+         * per Sec. 13.1's overriding "all other processes are
+         * always dependent on the primal process for their
+         * existence" rule (which cuts off anything else still
+         * running at that point, dependent or not). */
+        state->tasks[state->current_task].task_state = TASK_WAITING_FOR_DEPENDENTS;
+    } else {
+        /* Primal process closing with no active dependents --
+         * per USA003087 Sec. 13.3, ends the whole program
+         * immediately (Sec. 13.1's overriding dependency rule
+         * means nothing else could legitimately outlive this
+         * anyway). */
+        state->halted = true;
+        state->exit_code = 0;
+    }
+}
+
 /* Executes exactly one instruction for whatever task is current
  * (state->current_task, state->pc already set to its saved_pc by the
  * scheduler loop in interp_run). Split out from interp_run so the
@@ -3707,15 +3872,62 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * "brackets no HALMAT loop body at all". */
                 break;
 
-            case OP_ERSE:
-                /* SEND ERROR (ERSE, class-0/ERSE.md) -- which opcode this
-                 * project's own compiler actually emits it as remains
-                 * genuinely unresolved (see ERSE.md; every tested ON/OFF
-                 * ERROR variation, 11 total, turned out to compile to
-                 * ERON instead). Not implemented -- a no-op here doesn't
-                 * simulate a recovery action, but nothing currently
-                 * reaches this case at all. */
+            case OP_ERSE: {
+                /* SEND ERROR (ERSE, class-0/ERSE.md), USA003087 Sec. 25.3:
+                 * "the recovery action taking place on execution of a
+                 * SEND ERROR statement is as if the corresponding run
+                 * time error had really occurred." An earlier version of
+                 * this comment claimed the opcode itself was unreached/
+                 * unresolved -- wrong; compiling a real `SEND ERROR$(m:n);`
+                 * (199-P.hal, "Programming in HAL/S" p.199) confirms ERSE
+                 * IS what it compiles to, with one IMD operand carrying
+                 * DATA=group, TAG1=member (the same packed encoding
+                 * ERON's own group:member operand uses).
+                 *
+                 * real gpc's own runtime behavior for this statement was
+                 * cross-checked directly (three separate probes: the
+                 * 199-P.hal corpus file, a group-5/RETURN registration, a
+                 * group-5/IGNORE registration) and turned out to always
+                 * print a raw system message and fall through to the next
+                 * statement regardless of which handler was registered --
+                 * indistinguishable from an unimplemented stub, not real
+                 * dispatch (gpc is not authoritative here; see this
+                 * project's own notes on that). Implemented instead per
+                 * the language spec and independent confirmation from
+                 * yaGPC2 (a from-scratch reimplementation that does
+                 * dispatch correctly here): looks up the matching handler
+                 * the exact same way arithmetic_error_should_apply_fixup
+                 * does for real runtime errors (same shared table,
+                 * find_error_handler, same exact/group/all precedence),
+                 * branches on GOTO, applies any AND SET/RESET/SIGNAL event
+                 * action, and otherwise (SYSTEM, IGNORE, or no handler
+                 * registered) just falls through to the next statement --
+                 * there's no computed value to "fix up" for a simulated
+                 * error the way there is for e.g. SQRT<0, so SYSTEM's
+                 * "standard system recovery action" and IGNORE both reduce
+                 * to the same no-op-but-continue behavior here. Doesn't
+                 * print gpc's own "*** HAL/S SEND ERROR: RUNTIME: #N ERROR
+                 * M" message -- gpc's version didn't correlate cleanly
+                 * with group/member in testing, and no primary source
+                 * confirms real hardware's exact wording, so silence was
+                 * preferred over guessing at unverified text. */
+                if (ins->operand_count != 1) { fail(state, "ERSE: expected 1 operand"); break; }
+                int group = (int)ins->operands[0].data;
+                int member = (int)ins->operands[0].tag1;
+                state->last_error_group = group;
+                state->last_error_member = member;
+                halmat_error_handler_t *h = find_error_handler(state, group, member);
+                if (h && h->has_event_action && h->event_syt < HALMAT_SYT_MAX) {
+                    halmat_syt_entry_t *e = &state->syt[h->event_syt];
+                    e->type = SYT_TYPE_BIT;
+                    e->bit_value = (h->event_action == HALMAT_EVENT_RESET) ? 0 : 1;
+                }
+                if (h && h->action == HALMAT_ERRACT_GOTO) {
+                    state->pc = h->goto_pc;
+                    branched = true;
+                }
                 break;
+            }
 
             case OP_ERON: {
                 /* ON ERROR/OFF ERROR (class-0/ERON.md). `ins->tag` is a
@@ -8710,7 +8922,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->halted = true;
                         break;
                     }
-                    fail(state, "RTRN with no active call");
+                    /* No active call frame, no inline-FUNCTION, not an
+                     * external-call target: a top-level (PROGRAM- or
+                     * TASK-body-level) RETURN, most commonly reached as
+                     * the terminator of an ON-ERROR/ERSE-triggered inline
+                     * action body -- ends the process/task exactly like
+                     * naturally falling through to CLOS would (see
+                     * close_current_process's own comment). An earlier
+                     * version of this branch instead failed loudly here
+                     * ("RTRN with no active call") -- user-reported via a
+                     * real ON-ERROR-DO-block RETURN (194-TEST_X.hal,
+                     * matching USA003087 p.194's own worked example),
+                     * which also reported the process hanging afterward
+                     * rather than halting cleanly; the exact mechanism
+                     * for that second symptom wasn't independently
+                     * reproduced/traced this session (fail() itself
+                     * already sets state->halted, so it's not simply "the
+                     * same failing instruction re-executed forever" in
+                     * the single-task case this was checked against) --
+                     * this fix addresses the dispatch/termination gap
+                     * directly rather than the hang symptom specifically. */
+                    close_current_process(state, &branched);
                     break;
                 }
                 if (ins->operand_count == 1) {
@@ -8845,153 +9077,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                     state->pc = fcal_pos + 1;
                     branched = true;
-                } else if (!state->tasks[state->current_task].is_primal) {
-                    /* A scheduled task's body fell through to its own end
-                     * without an explicit TERMINATE -- either genuine
-                     * completion (class-0/RTRN.md's "every subprogram body
-                     * is terminated regardless" note, TASK analog) or, for
-                     * a cyclic (REPEAT) task, just the end of one cycle.
-                     * Explicit TERMINATE/CANCEL (OP_TERM/OP_CANC below)
-                     * always end the task outright and bypass this rearm
-                     * check entirely -- only a *fallthrough* CLOS is
-                     * eligible to rearm, matching REPEAT/WHILE/UNTIL's
-                     * role as governing the task's own natural completion,
-                     * not something an explicit mid-body CANCEL could be
-                     * talked out of. */
-                    halmat_task_t *cur = &state->tasks[state->current_task];
-                    bool stop = true;
-                    if (cur->repeat_kind != SCHD_REPEAT_NONE) {
-                        /* Stopping-condition expressions are evaluated only
-                         * here -- once per completed cycle, at the moment
-                         * the task would otherwise be rearmed -- never
-                         * continuously every tick. class-0/SCHD.md frames
-                         * WHILE/UNTIL as governing *whether the cycle
-                         * continues*, the same "test at the iteration
-                         * boundary" shape HAL/S's own DO WHILE/DO UNTIL
-                         * loops use (already this interpreter's CFOR
-                         * pattern) -- there's no primary-source basis for
-                         * treating it as an asynchronous mid-execution
-                         * interrupt, and WAIT is already the language's
-                         * only mechanism for a task to suspend mid-body. */
-                        switch (cur->stop_kind) {
-                            case SCHD_STOP_NONE:
-                                stop = false;
-                                break;
-                            case SCHD_STOP_UNTIL_TIME:
-                                stop = (state->virtual_time >= cur->stop_deadline);
-                                break;
-                            case SCHD_STOP_WHILE_BIT: {
-                                /* WHILE <bit exp>: keep cycling while true, stop once false. */
-                                uint32_t v;
-                                stop = !reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) || v == 0;
-                                break;
-                            }
-                            case SCHD_STOP_UNTIL_BIT: {
-                                /* UNTIL <bit exp>: keep cycling until true, stop once true. */
-                                uint32_t v;
-                                stop = reevaluate_live_bit_operand(state, &cur->stop_event_op, &v) && v != 0;
-                                break;
-                            }
-                        }
-                    }
-                    if (!stop) {
-                        /* Rearming jumps this task's own pc back to its
-                         * body's start -- must go through the same state-
-                         * >pc/branched mechanism TDEF/RTRN use (not a bare
-                         * cur->saved_pc write), since exec_one's own tail
-                         * ("if (!branched) state->pc++") and interp_step's
-                         * post-exec_one "saved_pc = state->pc" would
-                         * otherwise clobber it with CLOS's own position+1
-                         * right after this case returns. */
-                        state->pc = state->symbol_def_pos[cur->symbol] + 1;
-                        branched = true;
-                        switch (cur->repeat_kind) {
-                            case SCHD_REPEAT_BARE:
-                                /* No interval -- immediate back-to-back retrigger. */
-                                cur->task_state = TASK_READY;
-                                break;
-                            case SCHD_REPEAT_EVERY:
-                                /* Fixed period, chained off the previous
-                                 * target (not off "now") so a late-running
-                                 * cycle doesn't push later ones out --
-                                 * every_phase_ref already holds that
-                                 * previous target (set at SCHD time, or by
-                                 * the prior rearm), kept in its own field
-                                 * (state.h) so it can't be clobbered by an
-                                 * internal WAIT in the task's body (OP_WAIT
-                                 * only ever touches wake_deadline). Assign
-                                 * wake_deadline from the post-increment
-                                 * value since sched_wake_waiting() only
-                                 * ever reads wake_deadline, never this
-                                 * field directly. */
-                                cur->every_phase_ref += cur->repeat_interval;
-                                cur->wake_deadline = cur->every_phase_ref;
-                                cur->task_state = TASK_WAITING;
-                                break;
-                            case SCHD_REPEAT_AFTER:
-                                /* Delay measured from *this* completion,
-                                 * so it does drift with however long the
-                                 * cycle actually took -- the language-level
-                                 * distinction from EVERY. */
-                                cur->wake_deadline = state->virtual_time + cur->repeat_interval;
-                                cur->task_state = TASK_WAITING;
-                                break;
-                            case SCHD_REPEAT_ON:
-                                /* Self-reschedule ON <event>, synthesized
-                                 * above -- has_on_event/on_event_op are
-                                 * already set from that SCHD call; just wait
-                                 * on the event again, same as a brand-new
-                                 * ON-initiated task. */
-                                cur->task_state = TASK_WAITING_ON;
-                                break;
-                            default:
-                                break;
-                        }
-                    } else if (has_active_dependents(state, state->current_task)) {
-                        /* USA003087 Sec. 13.3: "If execution ends on a
-                         * CLOSE or RETURN statement, the process goes
-                         * into the inactive state directly only if it
-                         * has no dependents. Otherwise, it goes into a
-                         * waiting state until the dependents have in
-                         * their turn terminated." Deferred, not
-                         * abandoned -- sched_wake_dependents() (checked
-                         * every tick) finalizes this once true, and
-                         * symbol_active_task is deliberately left
-                         * pointing at this task until then: it's still
-                         * the sole active process for this task symbol
-                         * (just in a different minor state), so a new
-                         * SCHEDULE of the same symbol must still be
-                         * rejected in the meantime. */
-                        cur->task_state = TASK_WAITING_FOR_DEPENDENTS;
-                    } else {
-                        cur->task_state = TASK_TERMINATED;
-                        if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
-                    }
-                } else if (has_active_dependents(state, state->current_task)) {
-                    /* Primal process closing, but with a still-active
-                     * DEPENDENT task (user-reported bug, COUNTUP2.hal/
-                     * NESTED_TASK_SCHEDULE_TEST.hal) -- same Sec. 13.3
-                     * rule as the non-primal branch above applies
-                     * identically here (Sec. 13.3's own "programs and
-                     * tasks are treated together since their
-                     * representations at run time are in both cases real
-                     * time processes"): the primal doesn't halt yet, it
-                     * waits. Once sched_wake_dependents() finds no
-                     * dependents left, it sets state->halted itself --
-                     * that's still what finally ends the whole program,
-                     * per Sec. 13.1's overriding "all other processes are
-                     * always dependent on the primal process for their
-                     * existence" rule (which cuts off anything else still
-                     * running at that point, dependent or not). */
-                    state->tasks[state->current_task].task_state = TASK_WAITING_FOR_DEPENDENTS;
                 } else {
-                    /* Primal process closing with no active dependents --
-                     * per USA003087 Sec. 13.3, ends the whole program
-                     * immediately (Sec. 13.1's overriding dependency rule
-                     * means nothing else could legitimately outlive this
-                     * anyway). */
-                    state->halted = true;
-                    state->exit_code = 0;
+                    close_current_process(state, &branched);
                 }
                 break;
 

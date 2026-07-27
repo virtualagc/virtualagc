@@ -515,6 +515,18 @@ run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP      1.0000000E+0
 # the combined MSPR/MSDV/VSPR/VSDV case/error 25, and SPEX/error 4), plus
 # confirming SYSTEM correctly restores the ordinary fixup afterward.
 run ./run_local_fixture.sh eron_goto_appc "$(printf -- 'AFTER SQRT TRAP\nAFTER UNIT TRAP\nAFTER MDIV TRAP\nAFTER ZEROPOW TRAP\nRESTORED SQRT      2.0000000E+00')"
+# SEND ERROR (ERSE, class-0/ERSE.md), USA003087 Sec. 25.3 -- previously a
+# complete no-op ("which opcode this compiles to remains genuinely
+# unresolved," per an earlier session's comment; disproven by compiling
+# this exact test through the real toolchain). ERSE now dispatches
+# through the same find_error_handler table ON ERROR/ERON already uses
+# (cross-project-tracked as yahalmat2_send_error_no_dispatch). NOT
+# verified against real gpc -- gpc's own SEND ERROR looked like an
+# unimplemented stub in direct probing (always prints a raw message and
+# falls through to the next statement regardless of which handler is
+# registered); implemented per the language spec and yaGPC2's
+# independent (dispatching) behavior instead, per direct guidance.
+run ./run_local_fixture.sh send_error "$(printf ' 1.0000000E+01      1.1000000E+01      1.2000000E+01              13              14              15')"
 # Same table, the plain-SCALAR-argument errors: 5 (SQRT<0 -> sqrt(|x|)),
 # 7 (LOG<=0 -> 0: -max value, else log(|x|)), 6 (EXP>174.673 -> max
 # value), 24 (negative-base exponentiation -> |A|**B, via SEXP), and 4
@@ -1768,6 +1780,19 @@ run ./run_local_fixture.sh wait_for_compound "$(printf 'SETTER: E1 SIGNALED\nSET
 # is never 0, independently verified as 0 correct/3 incorrect once the
 # loop correctly exhausts input and redirects to DONE).
 run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(printf 'RESULTS OF TESTING X\n          0      SAMPLES CORRECT,                3      SAMPLES INCORRECT')"
+# 194-TEST_X.hal -- the same page-193 example rewritten (per the book's
+# own text) to use `ON ERROR ... DO; ...; RETURN; END;` instead of GO TO.
+# RETURN reached with no active call frame, no inline-FUNCTION, and not
+# an external-call target (i.e. as an ON-ERROR-triggered inline action
+# body's own terminator) previously failed loudly ("RTRN with no active
+# call") instead of ending the process -- cross-project-tracked as
+# return_from_on_error_do_hangs. Fixed by extracting OP_CLOS's own
+# process/task-closing logic into a shared close_current_process()
+# helper and reaching it from this OP_RTRN branch too, since
+# class-0/RTRN.md's "every subprogram body is terminated regardless"
+# note makes no real distinction between an explicit top-level RETURN
+# and naturally falling through to CLOS. Fixture: test_return_on_error.hal.
+run ./run_read_fixture.sh return_on_error "$(printf '1 1\n2 3\n4 4\n')" "$(printf 'TEST RESULTS FOLLOW\n          0               3')"
 
 # Task #38: 172-OUTER.hal, `READ(5) ARG;` (ARG a UTIL_PARM-STRUCTURE with
 # fields `V VECTOR, S1 SCALAR, C INTEGER, S2 SCALAR, E BOOLEAN`) -- a
