@@ -71,39 +71,52 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
      *
      * USA003090 App. C error 15 ("SCALAR too large for INTEGER
      * conversion"): standard fixup is "the maximum representable integer
-     * value" -- the primary source gives 32767/-32768 (HAL/S's 16-bit
-     * single-precision INTEGER), but this project has never modeled an
-     * INTEGER SINGLE/DOUBLE precision distinction (every INTEGER is a
-     * plain int32_t throughout interp.c/state.h), so INT32_MAX/INT32_MIN
-     * are this emulator's own actual representable range -- the
-     * literal 16-bit bounds would be inconsistent with every other
-     * INTEGER opcode (IADD/ISUB/etc.) already treating values above
-     * 32767 as ordinary, un-clamped 32-bit integers. Without this clamp,
-     * the plain `(int32_t)round(...)` cast below is undefined behavior
-     * in C for any double outside int32_t's range.
+     * value," 32767/-32768. An earlier version of this comment claimed
+     * real gpc output disproved this (compiling `IRESULT =
+     * INTEGER(HUGESCALAR);`, HUGESCALAR = 50000000000.0, gave IRESULT=3
+     * with no error message) and fell back to an internally-consistent
+     * INT32_MAX/INT32_MIN clamp instead. That conclusion was wrong --
+     * the real mechanism was simply invisible to a plain read of
+     * ETOH.asm (Source Code/PASS.REL32V0/RUNASM/ETOH.asm): `CVFX`
+     * raises a genuine CPU-level "convert overflow" program interrupt
+     * (confirmed against a primary source, the actual Shuttle flight-
+     * software OS: `workspace/PFS/OI340600/SSSRC/FCMZCONS.asm` declares
+     * the `FPMOVFL` interrupt vector, "CVFX OVERFLOW INTERRUPT";
+     * `FPMSDERR.asm`'s `FPMCVFX` handler, lines 206-253, decodes the
+     * faulting instruction's destination register, checks the source
+     * float's sign, and patches that register with `X'7FFF'` (32767) for
+     * positive overflow or **`X'8001'` (-32767, not -32768 -- the manual
+     * table's "-32768" is a simplification of an asymmetric real value)
+     * for negative** before resuming execution right after the `CVFX`
+     * that faulted -- entirely invisible in ETOH.asm's own straight-line
+     * code, which never needs to branch on it itself.
      *
-     * Tried changing this to a 32767/-32768 clamp (matching the primary
-     * source's literal documented fixup value, on the theory that
-     * interp.c's WRITE-argument capture now truncates any non-DOUBLE
-     * INTEGER to 16 bits anyway, so this could just clamp to the *real*
-     * bounds directly) -- but real gpc output disproves it: compiling
-     * `IRESULT = INTEGER(HUGESCALAR);` (HUGESCALAR = 50000000000.0, a
-     * SINGLE-precision SCALAR far outside even int32_t's range) and
-     * running it produces IRESULT=3 with *no* error-15 SEND ERROR message
-     * at all -- unlike this same test file's TAN/SIN lines, which do
-     * print one. So error 15's documented "maximum representable value"
-     * fixup evidently doesn't even trigger for this input; real hardware
-     * instead falls through to some other (apparently undefined/hardware-
-     * truncation-dependent, not investigated further) behavior. Reverted;
-     * this emulator's own INT32_MAX/INT32_MIN clamp remains what it was,
-     * an internally-consistent choice rather than a primary-source-
-     * verified one. See problems-yaHALMAT2.md session notes. */
+     * real gpc's own emulation of this specific interrupt path turns out
+     * to be unreliable (empirically order/state-dependent: the identical
+     * out-of-range SCALAR clamps correctly when it's the 3rd-6th
+     * conversion in a longer sequential test program, but returns 0 in
+     * an otherwise-identical isolated single-statement program, and
+     * large-enough magnitudes return -32768 regardless of sign later in
+     * the same sequence) -- not a reliable ground truth for this one
+     * corner case the way it has been for everything else this project
+     * has cross-checked against it. Per direct guidance, this clamps to
+     * the interrupt handler's own actual values (32767/-32767) rather
+     * than chasing gpc's inconsistent behavior or the manuals's
+     * simplified -32768. The exact trigger boundary (whether `CVFX`
+     * overflow is defined against the 16-bit result or something wider)
+     * is assumed to be plain int16 range, matching every gpc probe that
+     * *did* look consistent -- not independently confirmed against the
+     * CPU's own documented `CVFX` semantics (AP-101S Software Model PDF,
+     * "POO" pp. 51/160 per direct guidance, not read directly this
+     * session). Without some clamp, the plain `(int32_t)round(...)` cast
+     * below is undefined behavior in C for any double outside int32_t's
+     * range regardless. */
     double raw = halmat_scalar_to_double(s);
     double d = trunc(raw);
     double frac = raw - d; /* signed remainder, |frac| < 1, same sign as raw (or zero) */
     if (fabs(frac) > 0.5) d += (raw >= 0.0) ? 1.0 : -1.0;
-    if (d >= 2147483647.0) return INT32_MAX;
-    if (d <= -2147483648.0) return INT32_MIN;
+    if (d > 32767.0) return 32767;
+    if (d < -32768.0) return -32767; /* FPMCVFX's real X'8001', not the manual's -32768 */
     return (int32_t)d;
 }
 

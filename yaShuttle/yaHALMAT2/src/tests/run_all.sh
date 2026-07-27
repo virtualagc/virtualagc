@@ -524,25 +524,31 @@ run ./run_local_fixture.sh eron_goto_appc "$(printf -- 'AFTER SQRT TRAP\nAFTER U
 run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          ')"
 # Errors 11 (TAN |arg| too large -> 1), 8 (SIN/COS |arg| too large ->
 # sqrt(2)/2), and 15 (SCALAR too large for INTEGER conversion -> the
-# maximum representable value -- this emulator's own INT32 range, since
-# INTEGER here is always a plain int32_t with no SINGLE/DOUBLE precision
-# distinction modeled, unlike the primary source's 16-bit halfword
-# default; see value.c's halmat_scalar_to_integer).
-# Last line updated from 2147483647 to -1: interp.c's WRITE-argument
-# capture now truncates any non-DOUBLE INTEGER to a signed 16-bit
-# halfword before printing (see the `init8`/`bit_at_partition`/
-# `subbit_assign` fixtures above/below, same fix) -- this emulator's own
-# INT32_MAX saturation value, once truncated the same way, becomes -1
-# (0x7FFFFFFF's low 16 bits, 0xFFFF, as signed). NOTE: this does *not*
-# match real gpc, which gives IRESULT=3 for this exact probe with no
-# error-15 SEND ERROR message at all -- the documented "maximum
-# representable value" fixup evidently doesn't even trigger for a SCALAR
-# this far outside int32_t's own range; real hardware's actual behavior
-# here needs deeper CVFX-truncation-semantics research not done this
-# session (see value.c's halmat_scalar_to_integer comment). -1 is this
-# emulator's own consistent-but-not-primary-source-verified answer, not
-# a claim of matching real hardware for this specific extreme input.
-run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n         -1')"
+# maximum representable value, 32767/-32767 -- see value.c's
+# halmat_scalar_to_integer).
+#
+# Last line's history: this session went 2147483647 -> -1 -> 32767.
+# 2147483647 was this emulator's own INT32_MAX, an internally-consistent
+# but unverified choice (no SINGLE/DOUBLE INTEGER precision modeled). -1
+# came from a first attempt at matching real gpc directly, which for this
+# exact probe (IRESULT = INTEGER(HUGESCALAR), HUGESCALAR = 50000000000.0)
+# gives IRESULT=3 with no error-15 SEND ERROR message at all -- looking
+# like the documented fixup doesn't apply. That conclusion was wrong:
+# `CVFX` genuinely raises a CPU-level "convert overflow" interrupt
+# (confirmed against the actual Shuttle flight-software OS source,
+# workspace/PFS/OI340600/SSSRC/FPMSDERR.asm's FPMCVFX handler, direct
+# guidance) which patches in 32767 (positive) or -32767 (X'8001', not the
+# manual's -32768) before resuming -- entirely invisible in ETOH.asm's
+# own straight-line code, which never branches on it itself. real gpc's
+# own emulation of this specific interrupt turned out to be unreliable
+# (order/state-dependent in further probing -- the identical value
+# clamps correctly embedded as the 3rd-6th conversion in a longer test
+# program, but returns 0 in an otherwise-identical isolated program, and
+# large-enough magnitudes return -32768 regardless of sign later in a
+# sequence) -- not a trustworthy ground truth for this one corner case
+# the way it has been for everything else. Per direct guidance, this
+# clamps to the interrupt handler's own real values instead.
+run ./run_local_fixture.sh errfix_trig "$(printf ' 1.0000000E+00\n 7.0710677E-01\n 7.0710677E-01\n      32767')"
 run ./run_local_fixture.sh eron "I1=               1"
 # User-reported sweep item: ERON's "AND SET/RESET/SIGNAL var" clause
 # (class-0/ERON.md's confirmed 3-way TAG2 sub-flag) previously failed

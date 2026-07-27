@@ -5912,27 +5912,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
 
             case OP_STOI:
                 /* Scalar->integer, per class-6/STOI.md's USA00309 Sec.
-                 * 8.2 rule 10: rounds to nearest, ties away from zero
-                 * (halmat_scalar_to_integer's documented behavior,
-                 * value.h -- confirmed against the reference emulator,
-                 * NOT truncation). USA003090 App. C error 15 ("SCALAR too
-                 * large for INTEGER conversion"): out-of-range clamps to
-                 * INT32_MAX/INT32_MIN (halmat_scalar_to_integer's own
-                 * documented fixup, value.c) rather than the real 16-bit
-                 * halfword bounds this emulator doesn't model -- see that
-                 * function's comment. The range check here is
+                 * 8.2 rule 10: rounds to nearest, but exact-.5 ties round
+                 * TOWARD zero (halmat_scalar_to_integer's documented
+                 * behavior, value.c -- confirmed against real gpc output
+                 * for the runtime library's actual ETOH.asm, a 24-point
+                 * probe across magnitudes/signs; NOT the "ties away from
+                 * zero"/reference-emulator-derived rule this comment used
+                 * to claim). USA003090 App. C error 15 ("SCALAR too large
+                 * for INTEGER conversion"): out-of-range clamps to
+                 * 32767/-32767 (halmat_scalar_to_integer's own documented
+                 * fixup, value.c -- confirmed via the real CVFX-overflow
+                 * CPU interrupt handler, FPMSDERR.asm's FPMCVFX, not the
+                 * manual's simplified -32768). The range check here is
                  * deliberately duplicated (not read back out of
                  * halmat_scalar_to_integer, a generic coercion used by
                  * many unrelated call sites too, e.g. array subscripts,
                  * that aren't the HAL/S-level STOI conversion this error
                  * is specifically about) so only *this* opcode consults
-                 * the ON ERROR table for it. */
+                 * the ON ERROR table for it -- so it must apply the exact
+                 * same rounding rule and boundary as that function, or
+                 * this detects the error at the wrong threshold even
+                 * though the fixup value itself (computed via the shared
+                 * rv_to_integer/halmat_scalar_to_integer path below,
+                 * regardless of whether this check fires) would still
+                 * come out right. */
                 if (ins->operand_count != 1) { fail(state, "STOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 if (a.kind == RV_SCALAR) {
-                    double d = round(halmat_scalar_to_double(a.scalar));
-                    if (d > 2147483647.0 || d < -2147483648.0) {
+                    double raw = halmat_scalar_to_double(a.scalar);
+                    double d = trunc(raw);
+                    double frac = raw - d;
+                    if (fabs(frac) > 0.5) d += (raw >= 0.0) ? 1.0 : -1.0;
+                    if (d > 32767.0 || d < -32768.0) {
                         if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SCALAR_TO_INTEGER_OVERFLOW, &state->pc, &branched)) break;
                     }
                 }
