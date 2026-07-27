@@ -1,78 +1,124 @@
-# How `problems-yaHALMAT2.md` works
+# How yaGPC2/yaHALMAT2 issue tracking works now
 
-This file explains the convention for `problems-yaHALMAT2.md` (same
-directory) — a shared, ongoing issue tracker between the `yaGPC2` and
-`yaHALMAT2` projects. `yaGPC2` is a from-scratch AP-101S CPU emulator;
-`yaHALMAT2` is a HALMAT bytecode interpreter. Both aim for
-byte-identical `WRITE`/`FILE` output given the same HAL/S source, and
-each project's own Claude Code sessions occasionally find real bugs or
-discrepancies in the *other* project while testing that parity. This
-file is where those findings get written down and tracked to
-resolution, by whichever side is best positioned to act on them.
+This supersedes the earlier `problems-yaHALMAT2.md` / prior version of
+this file. Cross-project issues are now tracked in a **SQLite
+database**, not Markdown:
 
-## Per-item format
+    /home/rburkey/git/virtualagc/yaShuttle/yagpc2-yahalmat2-issues.db
 
-Every item's write-up starts with a status line:
+(sibling to both `yaGPC2/` and `yaHALMAT2/`). Query it directly with
+the `sqlite3` CLI — there is no document to read, parse, or sync.
 
+## Why the change
+
+The Markdown version worked but had two costs: reading it to check
+status meant loading the whole file (or at least a whole section) into
+context even for a one-line answer, and editing it required going
+through the "Full Documentation Sync" ritual since it's a `.md` file
+under the global no-md-edit-without-trigger-phrase rule. A SQLite
+database sidesteps both: a status check is a narrow `SELECT` that
+returns only the columns you ask for, and — importantly — **it isn't a
+Markdown file at all, so the no-md-edit rule simply doesn't apply to
+it**. Both projects can `INSERT`/`UPDATE` it directly, in real time, no
+sync needed. (This is a different situation from the standing exception
+that was tried and reverted for `.md` files — nothing is being excepted
+here, the rule never covered this file type to begin with.)
+
+## Schema
+
+```sql
+CREATE TABLE issues (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    key                TEXT UNIQUE NOT NULL,   -- stable slug, e.g. 'bit_integer_conversion'
+    title              TEXT NOT NULL,          -- one-line summary
+    status             TEXT NOT NULL CHECK (status IN
+                         ('open','fixed','not_a_bug','deferred','wontfix')),
+    found_in           TEXT NOT NULL CHECK (found_in IN ('yagpc2','yahalmat2')),
+    found_date         TEXT NOT NULL,          -- ISO date
+    resolved_in        TEXT CHECK (resolved_in IN ('yagpc2','yahalmat2')),
+    resolved_date      TEXT,
+    next_action_owner  TEXT CHECK (next_action_owner IN ('yagpc2','yahalmat2','either','none')),
+    severity           TEXT CHECK (severity IN ('low','medium','high')),
+    summary            TEXT NOT NULL,          -- 2-4 sentences; always cheap to read
+    detail             TEXT,                   -- full repro/root-cause/citations; pull on demand only
+    affected_tests     TEXT,                   -- space-separated test_* names sharing this root cause
+    last_verified_date TEXT,                   -- last time someone actually re-ran and confirmed this
+    updated_at         DATETIME DEFAULT CURRENT_TIMESTAMP  -- auto-updated by trigger on any UPDATE
+);
+
+CREATE TABLE project_status (
+    project    TEXT PRIMARY KEY CHECK (project IN ('yagpc2','yahalmat2')),
+    is_busy    INTEGER NOT NULL DEFAULT 0 CHECK (is_busy IN (0,1)),
+    busy_note  TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 ```
-**Status:** OPEN — found in yaGPC2 dev, 2026-07-26
-**Status:** FIXED — 2026-07-27 (yaHALMAT2)
-**Status:** DEFERRED — 2026-07-27 (yaHALMAT2): <one-line reason>
+
+Run `sqlite3 yagpc2-yahalmat2-issues.db .schema` for the authoritative
+definition (includes the `updated_at` triggers).
+
+One issue = one root cause, not one test file — several tests often
+turn out to share a single fix (see `affected_tests`), and giving each
+its own row would mean updating N rows for one real change.
+
+## Common operations
+
+**What's open and needs my project's attention:**
+```sql
+SELECT key, title, summary FROM issues
+WHERE status='open' AND next_action_owner IN ('yahalmat2','either');
 ```
 
-- **OPEN** — reported, not yet acted on. Full detail (repro steps,
-  primary-source citations, root-cause analysis) belongs here — this
-  is the state where a future session needs enough to actually
-  investigate and fix it.
-- **FIXED** — resolved. See "Condensing resolved items" below.
-- **DEFERRED** — looked at and deliberately not fixed (e.g. spec is
-  ambiguous, or it's out of scope). Give the reason; condense like
-  FIXED once the reasoning is captured.
+**Full detail on one item** (only pull this when you're actually about
+to work it):
+```sql
+SELECT * FROM issues WHERE key = 'compool_array_integer_type';
+```
 
-**Origin tag** (`found in yaGPC2 dev` / `found in yaHALMAT2 dev`):
-which project's testing surfaced the item. Whichever project's session
-resolves it updates the status line to say so, with the date and which
-project made the fix — the origin and resolver are often different
-projects, and both are worth keeping.
+**Report a new issue found while testing the other project:**
+```sql
+INSERT INTO issues
+  (key, title, status, found_in, found_date, next_action_owner, severity, summary, detail, affected_tests)
+VALUES
+  ('my_slug', 'one-line title', 'open', 'yagpc2', date('now'), 'yahalmat2', 'medium',
+   '2-4 sentence summary', 'full repro/root-cause detail', 'test_whatever');
+```
 
-Use the test's own name (e.g. `test_bit`, `test_stoi`) as the item's
-stable identifier — both projects' regression suites already share
-these names, so it doubles as the cross-reference.
+**Mark something resolved:**
+```sql
+UPDATE issues SET status='fixed', resolved_in='yahalmat2', resolved_date=date('now'),
+  next_action_owner='none', summary='what actually changed, condensed'
+WHERE key='my_slug';
+```
+(`detail` can stay as-is — nobody has to read it once `status != 'open'`,
+so there's no need to shrink it the way the old Markdown convention
+required.)
 
-## Condensing resolved items
+**Before trusting the other project's executable/behavior for
+cross-testing:**
+```sql
+SELECT is_busy, busy_note FROM project_status WHERE project='yagpc2';
+```
+This is a cooperative signal, not an enforced lock — it's only as good
+as whoever's mid-refactor remembering to set it. Also run `git status
+--short` in the other project's directory; that check is fully
+mechanical and catches incidental uncommitted state even if the flag
+wasn't set.
 
-Once an item is marked FIXED or DEFERRED, shrink its write-up to
-roughly 2-4 lines: what was wrong, what changed (or why it's staying
-as-is), and the status line itself. Drop the repro recipe, compiled-
-listing excerpts, and any hypothesis-chasing narrative — that detail's
-job was to get the fix made or the decision reached; keeping it around
-afterward is just future token cost with no remaining use. Move
-condensed items below a `## Resolved` heading (or similar) so the
-`## Open` items — the ones someone actually needs to act on — stay at
-the top of the file and cheap to read.
+**Setting your own busy flag** (do this yourself at the start of a
+multi-step, uncommitted change to core interpreter/emulator logic;
+clear it once committed and re-tested):
+```sql
+UPDATE project_status SET is_busy=1, busy_note='mid-refactor of X' WHERE project='yahalmat2';
+-- ... later, once stable and committed:
+UPDATE project_status SET is_busy=0, busy_note=NULL WHERE project='yahalmat2';
+```
 
-Once the file has enough resolved items that skimming them costs real
-tokens, add a top-of-file index table (`Item | Status | Found in |
-One-liner`) so old items can be scanned without reading their full
-(even condensed) write-ups.
+## `last_verified_date`
 
-## Editing this file
-
-`problems-yaHALMAT2.md` is a `.md` file, so it falls under the
-standing rule (each project's own `CLAUDE.md`) against editing
-Markdown files except via a "Full Documentation Sync": routine
-findings/status changes get appended as a dated bullet to that
-project's own `./CLAUDE_LOG.md` first, then actually applied to this
-file only when the user says the exact phrase "Full Documentation
-Sync" in that conversation. A sync can cover just one item — it
-doesn't need to wait for a backlog.
-
-This is deliberate, not an oversight: a **standing, permanent**
-exception to that rule was tried once before, for this exact project,
-and reverted — see `yaHALMAT2`'s own git history around the removal of
-a self-granted "CLAUDE.md exception" (committed 2026-07-23) for what
-went wrong (a one-time authorization got turned into a rule that
-silently applied across all future conversations). Please don't
-recreate that pattern here — if a standing exception is ever wanted,
-that's something the user would add to a `CLAUDE.md` themselves, not
-something either project's Claude session should self-authorize.
+Set this whenever you actually re-run and confirm a `fixed`/`not_a_bug`
+finding — not just when you edit an unrelated column. A finding that
+hasn't been re-checked in a long time is worth re-verifying before
+citing it as settled; this project's own history includes at least one
+case (`bit_integer_conversion`) where a status was asserted without
+re-running the test and turned out to be wrong.

@@ -148,7 +148,25 @@ run ./run_link_fixture.sh "Y=              43" link_pool link_prog
 # Both fixed with a proper deep copy out of the auxiliary unit's SYT
 # entry before it's interp_cleanup()'d. SHARED_ARR (ARRAY(3) INTEGER)
 # comes across the COMPOOL link intact.
-run ./run_link_fixture.sh "$(printf ' 1.0000000E+01      2.0000000E+01      3.0000000E+01')" link_pool_array link_prog_array
+#
+# Expected output updated from SCALAR-style (" 1.0000000E+01 ...") to
+# INTEGER-style ("10 ..."): cross-project-tracked as
+# compool_array_integer_type, found via yaGPC2 dev and confirmed against
+# real gpc. Turned out NOT to be COMPOOL-specific at all -- test_arrint_
+# write.hal below reproduces the identical bug with a plain local ARRAY(n)
+# INTEGER, no linking involved. Root cause: a whole ARRAY(n) INTEGER
+# WRITE argument is wrapped in an ADLP per-element replay (like any
+# other numeric/BIT/CHARACTER ARRAY), and resolve_operand's arrayed
+# QUAL_SYT branch always returns RV_SCALAR for a numeric array element
+# regardless of the array's own declared INTEGER/SCALAR type (elements[]
+# is shared storage for both -- state.h's own comment). The WRITE-
+# argument capture's tag1==6 "reclassify as INTEGER" check only looked
+# at QUAL_LIT operands (bare literals), not QUAL_SYT array-element reads
+# -- broadened in interp.c to cover both identically.
+run ./run_link_fixture.sh "$(printf '         10              20              30')" link_pool_array link_prog_array
+# Direct (non-COMPOOL) regression for the same root cause -- see the
+# comment above.
+run ./run_local_fixture.sh arrint_write "$(printf '         10              20              30')"
 run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
 run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
 # User-reported sweep item: an external (cross-unit) FUNCTION returning a
@@ -428,7 +446,11 @@ run ./run_local_fixture.sh mshp "$(printf ' 1.0000000E+00      2.0000000E+00    
 # element. Fixed by adding an is_container branch that indexes the
 # container by arrayed_index (mod element count), matching this same
 # function's own QUAL_SYT whole-array-during-replay case.
-run ./run_local_fixture.sh sshp_ishp "$(printf ' 1.5000000E+00      2.5000000E+00\n 1.0000000E+01      2.0000000E+01')"
+# IA's expected output updated from SCALAR-style to INTEGER-style
+# ("10 20"): another instance of the same ARRAY(n) INTEGER whole-WRITE
+# bug fixed above (compool_array_integer_type) -- confirmed against real
+# gpc.
+run ./run_local_fixture.sh sshp_ishp "$(printf ' 1.5000000E+00      2.5000000E+00\n         10              20')"
 run ./run_local_fixture.sh bfnc "$(printf ' 1.4142132E+00\n 3.5000000E+00\n-1.0000000E+00\n 2.0000000E+00\n 5.0000000E+00')"
 # User-reported (046-XYZ_TO_POLAR.hal's `ARCTAN(P$2 / P$1) DEGREES_PER_RADIAN`):
 # BFNC selector 37 (ARCTAN, class-0/BFNC.md's alphabetical XMSHP... no, BI_NAME

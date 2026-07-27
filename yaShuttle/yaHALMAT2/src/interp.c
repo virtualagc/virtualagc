@@ -680,7 +680,7 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                  * using the operand's own tag1 (the HALMAT class the
                  * compiler actually recorded for it), the same signal
                  * XXAR's READ/READALL destination-class case already
-                 * uses; see OP_XXAR's `literal_is_integer` below. */
+                 * uses; see OP_XXAR's `integer_class_scalar` below. */
                 out->kind = RV_SCALAR;
                 out->scalar = halmat_scalar_from_ibm_words(lit->msw, lit->lsw, lit->type == LIT_DOUBLE);
             } else if (lit->type == LIT_BIT) {
@@ -7869,13 +7869,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * used the same way just above for READ/READALL's
                  * dest_class -- is the actual source of truth for a
                  * literal's intended class, so use it to reclassify a
-                 * QUAL_LIT/RV_SCALAR resolution as INTEGER when tag1
-                 * says so. Not needed for non-literal operands (SYT reads
-                 * already carry the correct kind via the SYT entry's own
-                 * stored type, independent of tag1). */
-                bool literal_is_integer = (a.kind == RV_SCALAR) &&
-                    ins->operands[0].qual == QUAL_LIT && ins->operands[0].tag1 == 6;
-                if (literal_is_integer) {
+                 * RV_SCALAR resolution as INTEGER when tag1 says so.
+                 *
+                 * Originally thought unnecessary for non-literal operands
+                 * ("SYT reads already carry the correct kind via the SYT
+                 * entry's own stored type, independent of tag1") -- true
+                 * for a plain, unarrayed SYT_TYPE_INTEGER symbol, but NOT
+                 * for an ARRAY(n) INTEGER element read during an ADLP
+                 * per-element WRITE replay: resolve_operand's arrayed QUAL_
+                 * SYT branch always returns RV_SCALAR for a numeric array
+                 * regardless of declared element type (state.h's `elements`
+                 * comment: "INTEGER ARRAY elements are boxed as scalar" --
+                 * HALMAT itself never distinguishes the two at the storage
+                 * level). Confirmed against real gpc output for a plain
+                 * `WRITE(6) A;` (A an ARRAY(3) INTEGER, local or EXTERNAL
+                 * COMPOOL): yaHALMAT2 printed it SCALAR-style
+                 * (" 1.0000000E+01 ...") instead of INTEGER-style ("10
+                 * ..."). Dropping the QUAL_LIT restriction fixes both
+                 * cases identically -- a genuinely SCALAR-typed operand's
+                 * own tag1 is never 6, so this can't misfire. */
+                bool integer_class_scalar = (a.kind == RV_SCALAR) && ins->operands[0].tag1 == 6;
+                if (integer_class_scalar) {
                     a.integer = halmat_scalar_to_integer(a.scalar);
                     a.kind = RV_INTEGER;
                 }
