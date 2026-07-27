@@ -7829,7 +7829,14 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * FUNCTION's result, user-reported (129-ALMOST_EQUAL.hal) --
                      * via the VAC slot's own bit_width field, checked
                      * before falling back to 32 the same way the QUAL_SYT
-                     * case just above already does via the symbol table. */
+                     * case just above already does via the symbol table. A
+                     * bare QUAL_LIT HEX/OCT/BIN literal (`WRITE(6)
+                     * HEX'00123';`) similarly knows its own real width --
+                     * not 32, but the digit-count-derived BIT(n) the real
+                     * compiler records in the literal table itself
+                     * (litfile.h's bit_width comment; empirically confirmed
+                     * against real compiled output's `LHI R6,20`/
+                     * `LFXI R6,7` immediately preceding the WRITE call). */
                     int width = 32;
                     if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
                         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
@@ -7837,6 +7844,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     } else if (ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX) {
                         int vac_width = state->vac[ins->operands[0].data].bit_width;
                         if (vac_width > 0) width = vac_width;
+                    } else if (ins->operands[0].qual == QUAL_LIT && state->literals &&
+                               ins->operands[0].data < state->literals->count) {
+                        const halmat_literal_t *lit = &state->literals->entries[ins->operands[0].data];
+                        if (lit->type == LIT_BIT && lit->bit_width > 0) width = lit->bit_width;
                     }
                     state->io_pending.items[state->io_pending.item_count].bits = a.bits;
                     state->io_pending.items[state->io_pending.item_count].bit_width = width;

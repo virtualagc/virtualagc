@@ -147,6 +147,21 @@ for parm in sys.argv[1:]:
                     numLeft = 6
                     numRight = 11
                     final = 116
+                elif line[6] == '|' and line[108] == '|':
+                    # pass1.rpt's own "M|" source-echo format when compiled
+                    # *without* the SRN option (SRN widens the leading
+                    # statement-number field, shifting the two pipes to
+                    # columns 13/115 -- the branch just above). This is
+                    # actually the HAL/S-FC *default* (a bare `HALSFC
+                    # file.hal`, no --parms at all, still produces these
+                    # lines), so its total absence here meant --listing2=
+                    # pass1.rpt silently displayed zero source lines for
+                    # any compile that didn't happen to pass SRN --
+                    # confirmed empirically (HALSFC with no --parms).
+                    first = 0
+                    numLeft = 0
+                    numRight = 4
+                    final = 109
                 else:
                     continue
                 lineNumber = int(line[numLeft:numRight].lstrip())
@@ -227,7 +242,8 @@ def formatLiteral(index):
     elif type == 1:
         return ("FIXED", value)
     elif type == 2:
-        return ("BIT", "%08X" % value)
+        width = literal["width"]
+        return ("BIT", "%08X (%d)" % (value, width))
     else:
         return (f"{type}", "%08X,%08X" % (0xFFFFFFFF&(value>>32)|(0xFFFFFFFF&value)))
 

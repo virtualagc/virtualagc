@@ -233,6 +233,7 @@ static bool decode_literal_entries(const uint8_t *litfile, size_t lit_size, cons
                 case LIT_BIT: {
                     e->type = LIT_BIT;
                     e->bits = read_be32(c2);
+                    e->bit_width = (int)read_be32(c3); /* literal.h's bit_width comment */
                     break;
                 }
                 default: {

@@ -25,6 +25,16 @@ typedef struct {
     double numeric;      /* LIT_FIXED/LIT_DOUBLE: decoded IBM hex-float value (for INTEGER-context use) */
     uint32_t msw, lsw;    /* LIT_FIXED/LIT_DOUBLE: raw IBM hex-float words (for SCALAR-context use, avoiding a lossy double round-trip -- see value.h) */
     uint32_t bits;        /* LIT_BIT: raw value */
+    int bit_width;        /* LIT_BIT: the literal's own declared BIT(n) width -- for a HEX/OCT/BIN
+                            * literal this is the digit count times bits-per-digit (e.g. HEX'00123'
+                            * is BIT(20), BIN'0101010' is BIT(7)), not a flat 32-bit default. Read
+                            * from the litfile's own page-3 cell (empirically confirmed: PASS1's
+                            * "LOC n BIT <value> (<width>)" literal-table dump and the raw litfile
+                            * bytes agree, and PASS2's generated code loads this same width into a
+                            * register -- `LHI R6,20`/`LFXI R6,7` -- immediately before formatting
+                            * the literal for WRITE output). 0 if unavailable (e.g. a litfile decoded
+                            * without this cell for some other reason) -- callers should fall back to
+                            * the project's usual "unknown declared width" default in that case. */
 } halmat_literal_t;
 
 typedef struct {

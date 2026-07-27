@@ -798,8 +798,18 @@ run ./run_local_fixture.sh unpaged "$(printf '\x27THE ANSWER IS\x27      7.58362
 # fixed there directly (the arrinit_types fixture elsewhere in this file
 # independently exercises the ARRAY-of-BIT angle specifically -- its own
 # expected value needed updating this session too, for the same reason).
-run ./run_local_fixture.sh bit_write "$(printf '0000 1100\n0000 0000 0000 0000 0001 0010 0011 0100')"
-run ./run_local_fixture.sh bit_write "$(printf '\x270000 1100\x27\n\x270000 0000 0000 0000 0001 0010 0011 0100\x27')" --unpaged 6
+# `WRITE(6) HEX'1234';`'s own field width needed updating again this
+# session: a bare HEX/OCT/BIN literal's real declared width is BIT(n),
+# n = digit count * bits-per-digit (4 hex digits = BIT(16) here), not this
+# project's usual "unknown declared width" 32-bit fallback -- confirmed
+# against real compiled PASS2 output (`HALSFC --parms=LSTALL`, litfile.h's
+# bit_width comment): the literal table's own page-3 cell stores this
+# width directly (PASS1's own "LOC n BIT <value> (<width>)" report agrees),
+# and generated code loads it into R6 (`LHI R6,20`/`LFXI R6,7` for this
+# session's own HEX'00123'/BIN'0101010' probes) immediately before the
+# WRITE call -- literal.c now reads that cell instead of discarding it.
+run ./run_local_fixture.sh bit_write "$(printf '0000 1100\n0001 0010 0011 0100')"
+run ./run_local_fixture.sh bit_write "$(printf '\x270000 1100\x27\n\x270001 0010 0011 0100\x27')" --unpaged 6
 # --time-scale 1000000 keeps these WAIT-using fixtures' now-real-time-
 # throttled runs fast (see interp_run()'s wall-clock pacing, state.h's
 # scheduler comment) -- it's a pure sleep-duration divisor, so the tick

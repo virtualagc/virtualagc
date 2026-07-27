@@ -85,8 +85,15 @@ depends on the type of literal:
             floating point.  The more-significant word (i.e., the 
             single-precision value) is on the 2nd page, while the 
             less-significant word is on the 3rd page.
-    Type 2: BIT data is represented as big-endian unsigned integers on the 2nd
-            page.  The 3rd page is zeroes.
+    Type 2: BIT data is represented as a big-endian unsigned integer on the 2nd
+            page.  The 3rd page is *not* zero as originally assumed here -- it's
+            a big-endian integer giving the literal's own declared BIT(n) width
+            (e.g. HEX'00123' is BIT(20), BIN'0101010' is BIT(7): digit count
+            times bits-per-digit), confirmed empirically against real compiled
+            PASS2 output (HALSFC --parms=LSTALL): the same width appears in
+            PASS1's own literal-table report as "(n)" next to the value, and
+            PASS2 loads it into a register (LHI/LFXI) immediately before using
+            the literal in a BIT-typed context such as a WRITE argument.
     Other:  You got me!  We just print them as %08X,%08X for the values from the
             2nd and 3rd pages.
 '''
@@ -148,10 +155,14 @@ def getLiteralsFromFile(litfileName, memoryName):
                 #print("Literal %d: FIXED  %lf" % (literalNumber, value))
             elif type == 2:
                 value = formWord(page2, offset)
-                #print("Literal %d: BIT    %d" % (literalNumber, value))
+                width = formWord(page3, offset)
+                #print("Literal %d: BIT    %d (%d)" % (literalNumber, value, width))
             else:
                 value = (formWord(page2, offset) << 32) | formWord(page3, offset)
-            literals.append({ "type": type, "value": value })
+            entry = { "type": type, "value": value }
+            if type == 2:
+                entry["width"] = width
+            literals.append(entry)
         recordOffset += 1560
     
     return literals
@@ -189,7 +200,8 @@ if __name__ == "__main__":
             # DOUBLE found in a COMPOOL
             print("Literal %4d: DOUBLE %s" % (literalNumber, value))
         elif type == 2:
-            print("Literal %4d: BIT    %08X '%11d'" % (literalNumber, value, value))
+            width = literals[literalNumber]["width"]
+            print("Literal %4d: BIT    %08X (%2d) '%11d'" % (literalNumber, value, width, value))
         else:
             print("Literal %4d: %-2d     %08X,%08X" % (literalNumber, type, 
                                                       (value >> 32) & 0xFFFFFFFF, 
