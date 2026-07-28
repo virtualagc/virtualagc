@@ -380,6 +380,54 @@ static halmat_scalar_t scale_precision(halmat_scalar_t s, bool to_double) {
     return s;
 }
 
+/* Character->numeric conversion (CTOS/CTOI, DB id 55), per USA00309 Sec.
+ * 6.1.2/Sec. 8.2 rule 16: a character string converts "only if" it is in
+ * one of the standard input formats -- a whole-number form (optional
+ * leading sign, then decimal digits) or a floating-point form
+ * `ddd.ddddE(+/-)dd` (the B/H-exponent variants aren't implemented here,
+ * matching the pre-existing gap this function replaces -- no confirmed
+ * fixture/corpus use). Unlike strtod() (this function's own previous
+ * implementation), which happily parses just a leading numeric *prefix*
+ * and silently ignores anything after, real gpc requires the ENTIRE
+ * string to match end to end, with ONLY TRAILING blanks tolerated (never
+ * leading, never interspersed) -- confirmed empirically this session
+ * against 159-AGE.hal's `X = INTEGER(C(7 TO 10));` across a matrix of
+ * inputs (yagpc2-yahalmat2-issues.db id 55): "7890"->7890, "7   "->7
+ * (trailing blanks fine), but "  9 "->0 (leading blank invalidates it
+ * even though a valid digit follows), "7AAA"/"AA90"/"7_90"->0 (any
+ * interior non-blank non-digit character invalidates the WHOLE string,
+ * not just truncates at that point the way strtod does). Returns false
+ * (caller substitutes 0.0, matching every one of these confirmed-invalid
+ * cases) if the string doesn't match; `*out` is only written on success. */
+static bool ctoi_parse_scalar(const char *s, double *out) {
+    const char *p = s;
+    if (*p == '+' || *p == '-') p++;
+    const char *digits_start = p;
+    while (isdigit((unsigned char)*p)) p++;
+    bool has_digits = p > digits_start;
+    if (*p == '.') {
+        p++;
+        const char *frac_start = p;
+        while (isdigit((unsigned char)*p)) p++;
+        has_digits = has_digits || p > frac_start;
+    }
+    if (!has_digits) return false;
+    const char *mantissa_end = p;
+    if (*p == 'E' || *p == 'e') {
+        p++;
+        if (*p == '+' || *p == '-') p++;
+        const char *exp_start = p;
+        while (isdigit((unsigned char)*p)) p++;
+        if (p == exp_start) return false;
+    } else {
+        p = mantissa_end;
+    }
+    while (*p == ' ') p++;
+    if (*p != '\0') return false;
+    *out = strtod(s, NULL);
+    return true;
+}
+
 static void fail(halmat_state_t *state, const char *fmt, ...) {
     char buf[256];
     va_list ap;
@@ -8359,35 +8407,46 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 break;
             }
 
-            case OP_CTOS:
+            case OP_CTOS: {
                 /* Character->scalar, class-5/CTOS.md: parses the
-                 * standard input formats (USA00309 Sec. 6.1.2) --
-                 * strtod() covers the decimal and "dddEddd" forms
-                 * directly; the HAL/S-specific B(binary)/H(hex) exponent
-                 * suffixes aren't implemented (no fixture uses them). No
-                 * rounding step for SCALAR (unlike CTOI below). */
+                 * standard input formats (USA00309 Sec. 6.1.2) via
+                 * ctoi_parse_scalar() (DB id 55) -- the HAL/S-specific
+                 * B(binary)/H(hex) exponent suffixes still aren't
+                 * implemented (no fixture uses them). No rounding step
+                 * for SCALAR (unlike CTOI below). A string not in a
+                 * standard input format converts to 0.0 (confirmed for
+                 * CTOI against real gpc; assumed to apply identically
+                 * here per the doc's own "same parse" framing between
+                 * the two conversions, not independently reconfirmed for
+                 * CTOS specifically). */
                 if (ins->operand_count != 1) { fail(state, "CTOS: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOS: operand is not CHARACTER"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                double parsed = 0.0;
+                ctoi_parse_scalar(a.string, &parsed);
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
-                state->vac[ins->index].scalar = halmat_scalar_from_double(strtod(a.string, NULL), false);
+                state->vac[ins->index].scalar = halmat_scalar_from_double(parsed, false);
                 break;
+            }
 
-            case OP_CTOI:
+            case OP_CTOI: {
                 /* Character->integer, class-6/CTOI.md: same parse as
-                 * CTOS, then rounds to nearest (per the doc's explicit
-                 * "rounded to the nearest integral value" rule) rather
-                 * than truncating. */
+                 * CTOS (ctoi_parse_scalar(), DB id 55), then rounds to
+                 * nearest (per the doc's explicit "rounded to the
+                 * nearest integral value" rule) rather than truncating. */
                 if (ins->operand_count != 1) { fail(state, "CTOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOI: operand is not CHARACTER"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                double parsed = 0.0;
+                ctoi_parse_scalar(a.string, &parsed);
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
-                state->vac[ins->index].integer = (int32_t)lround(strtod(a.string, NULL));
+                state->vac[ins->index].integer = (int32_t)lround(parsed);
                 break;
+            }
 
             case OP_SFST:
                 /* Shaping-function argument-list start (class-0/SFST.md);

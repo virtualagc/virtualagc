@@ -1,0 +1,17 @@
+C DB id 55: INTEGER(CHARACTER) must validate the WHOLE substring as a
+C standard input format (optional sign, digits, ONLY TRAILING blanks) --
+C not parse a leading numeric prefix and silently ignore the rest the
+C way strtod() does. M/S continuation-card pair below spliced verbatim
+C from the real corpus repro (159-AGE.hal) to guarantee exact fixed-
+C column alignment for the `C(7 TO 10)` to-partition subscript.
+ T:
+ PROGRAM;
+    DECLARE C CHARACTER(10);
+    DECLARE X INTEGER;
+M    READALL(5) C;
+
+M    X = INTEGER(C       );
+S                 7 TO 10
+
+    WRITE(6) X;
+ CLOSE T;

@@ -2832,6 +2832,29 @@ run ./run_read_fixture_bytes.sh read_eof_no_trailing_blank "" $'A\nB\n'
 # MATRIX WRITE arguments extensively.
 run ./run_local_fixture.sh matrix_wildcard_write_rows "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
 
+# DB id 55 (ctoi_invalid_digit_substring_wrong_result): OP_CTOI/OP_CTOS
+# (character->integer/scalar conversion) used plain strtod(), which
+# parses a leading numeric *prefix* and silently ignores everything
+# after -- not what real gpc does. USA00309 Sec. 6.1.2/Sec. 8.2 rule 16
+# require the string to be in a standard input format "only if" it
+# converts at all; confirmed empirically against 159-AGE.hal's own
+# `X = INTEGER(C(7 TO 10));` across a matrix of inputs: valid whole-
+# number strings convert correctly (with ONLY TRAILING blanks
+# tolerated, e.g. "7   "->7), but ANY interior non-blank non-digit
+# character anywhere invalidates the WHOLE string to 0 -- including a
+# LEADING blank before an otherwise-valid digit ("  9 "->0, not 9),
+# which strtod()'s partial-prefix parsing can never produce. Fixed via
+# a new ctoi_parse_scalar() helper (interp.c) implementing strict
+# whole-string validation (optional sign, digits, optional decimal
+# point + digits, optional E-exponent, then only trailing blanks) --
+# any leftover non-blank character anywhere fails the whole conversion
+# to 0.0, matching every one of 10 confirmed real-gpc cross-check
+# cases. Applied to both OP_CTOI and OP_CTOS (the doc frames them as
+# sharing "the same parse"); only the CTOI/INTEGER side was
+# independently reconfirmed against real gpc.
+run ./run_read_fixture.sh ctoi_invalid_digit "1234567890" "       7890"
+run ./run_read_fixture.sh ctoi_invalid_digit "1234567AAA" "          0"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
