@@ -16,6 +16,14 @@ static void write_input_value(HalUCP *h, const char *text);
 static bool try_on_error_dispatch(HalUCP *h, int errGroup, int errNum);
 static bool match_error_handler(uint32_t fixv, int errGroup, int errNum);
 static bool handle_input(HalUCP *h);
+static void hal_newline(HalUCP *h, int ch);
+
+/* EVENT bit manipulation (SIGNAL/SET/RESET) -- see the definitions near
+ * try_on_error_dispatch() for the full derivation. Shared between plain
+ * SIGNAL/SET/RESET statements (handled directly in halucp_handle_svc,
+ * below) and the ON ERROR ... IGNORE AND <action> disposition. */
+typedef enum { IGNORE_EVENT_NONE, IGNORE_EVENT_SIGNAL, IGNORE_EVENT_SET, IGNORE_EVENT_RESET } IgnoreEventAction;
+static void apply_ignore_event_action(HalUCP *h, uint32_t eventAddr, IgnoreEventAction action);
 
 /* ---------------------------------------------------------------------
  * HAL/S Runtime Error Groups/Messages (AERROR macro GROUP/NUM params).
@@ -50,7 +58,7 @@ static const char *svc_error_message(int errNum, char *buf, size_t bufSize) {
         case 18: return "BAD LENGTH IN LJUST OR RJUST";
         case 19: return "MOD DOMAIN ERROR ";
         case 20: return "CHARACTER TO SCALAR CONVERSION";
-        case 22: return "CHARACTER TO INTEGEgpc/halUCP.coffeegpc/halUCP.coffeeR CONVERSION";
+        case 22: return "CHARACTER TO INTEGER CONVERSION";
         case 24: return "NEGATIVE BASE IN EXPONENTIATION";
         case 25: return "VECTOR/MATRIX DIVISION BY ZERO";
         case 27: return "ARGUMENT OF INVERSE IS A SINGULAR MATRIX";
@@ -80,12 +88,17 @@ void halucp_init(HalUCP *h, CPU *cpu) {
     h->trapSvcError = true;
     h->iobufAscii = false; /* ebcdic default */
     h->formatNumBlanks = 5;
-    h->lineWidth = 132;
+    h->lineWidth = -1; /* sentinel: no explicit override, use per-channel
+                         * PAGED(132)/UNPAGED(80) default -- see
+                         * effective_line_width() */
     h->linesPerPage = 60;
     h->inputBufferCap = 64;
     h->inputBuffer = malloc(h->inputBufferCap);
     h->inputBuffer[0] = '\0';
     h->inputBufferLen = 0;
+    h->inputColumn = 1;
+    h->readSkipPending = -1;
+    h->readColumnPending = -1;
     for (int i = 0; i < HALUCP_MAX_CHANNEL; i++) {
         h->column[i] = 1;
         h->lineNumber[i] = 1;
@@ -94,6 +107,7 @@ void halucp_init(HalUCP *h, CPU *cpu) {
 
 void halucp_free(HalUCP *h) {
     free(h->inputBuffer);
+    for (int i = 0; i < HALUCP_MAX_CHANNEL; i++) free(h->lineBuf[i]);
     memset(h, 0, sizeof(*h));
 }
 
@@ -153,8 +167,16 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
             h->inputBuffer[0] = '\0';
         }
         for (int ch = 0; ch < HALUCP_MAX_CHANNEL; ch++) {
-            if (h->hasWrittenBefore[ch] && h->outputCallback) {
-                h->outputCallback(h->cbCtx, "\n", ch);
+            if (h->lineBufLen[ch] > 0 && h->outputCallback) {
+                /* hal_newline(), not a bare "\n": the program is halting
+                 * with its last line's content possibly still sitting in
+                 * lineBuf[ch] (never yet flushed by an explicit
+                 * SKIP/LINE/PAGE), and a bare newline here would discard
+                 * it silently. Gated on lineBufLen (not just
+                 * hasWrittenBefore) so a channel some OTHER code path
+                 * (e.g. run.c's interactive-prompt logic) already
+                 * flushed doesn't get a second, spurious blank line. */
+                hal_newline(h, ch);
             }
         }
         const char *msg = "HAL/S PROGRAM HALT (SVC 0)";
@@ -172,6 +194,8 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         uint32_t errDesc = mcm_get16(&h->cpu->mainStorage, ea + 1);
         int errGroup = (int)((errDesc >> 8) & 0xff);
         int errNum = (int)(errDesc & 0xff);
+        h->lastErrGroup = errGroup;
+        h->lastErrNum = errNum;
         char gbuf[32], mbuf[32];
         const char *groupName = svc_error_group_name(errGroup, gbuf, sizeof gbuf);
         const char *errMsg = svc_error_message(errNum, mbuf, sizeof mbuf);
@@ -179,6 +203,41 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         snprintf(msg, sizeof msg, "HAL/S SEND ERROR: %s: #%d %s", groupName, errNum, errMsg);
         hal_report_error(h, msg);
         try_on_error_dispatch(h, errGroup, errNum);
+        return true;
+    }
+
+    /* ERRGRP/ERRNUM built-ins (USA003087: "returns group/number of last
+     * error detected, or zero") -- confirmed via a real HALSFC-compiled
+     * listing (test_errgrp_errnum.hal) to compile to these two fixed SVC
+     * codes (identical at every call site in the test, not a per-site
+     * literal like SEND ERROR's AERROR-macro-generated ones), with the
+     * result expected back in R5's upper halfword (the immediately
+     * following compiled instruction is always `STH 5,<dest>`, and
+     * exec_STH stores register_get32(...)>>16). Neither `gpc` nor
+     * `yaGPC` ever implemented these -- a genuine omission inherited
+     * into yaGPC2 until now, not a per-tool quirk. */
+    if (svcCode == 0x0117) {
+        register_set32(cpu_r(h->cpu, 5), (uint32_t)h->lastErrGroup << 16);
+        return true;
+    }
+    if (svcCode == 0x0217) {
+        register_set32(cpu_r(h->cpu, 5), (uint32_t)h->lastErrNum << 16);
+        return true;
+    }
+
+    /* Plain SIGNAL/SET/RESET <event> statements (not part of an ON ERROR
+     * IGNORE disposition -- see apply_ignore_event_action's own comment
+     * near try_on_error_dispatch() for the EVENT bit representation this
+     * relies on). Confirmed via a minimal compiled test: these compile
+     * directly to these three fixed SVC codes, with the event's own
+     * address as the second operand halfword (mem[ea+1]) -- the exact
+     * same convention SEND ERROR (0x0014) uses for its group/num data. */
+    if (svcCode == 0x000C || svcCode == 0x000D || svcCode == 0x000E) {
+        uint32_t eventAddr = mcm_get16(&h->cpu->mainStorage, ea + 1);
+        IgnoreEventAction action = svcCode == 0x000E ? IGNORE_EVENT_RESET
+                                  : svcCode == 0x000D ? IGNORE_EVENT_SET
+                                                       : IGNORE_EVENT_SIGNAL;
+        apply_ignore_event_action(h, eventAddr, action);
         return true;
     }
 
@@ -307,6 +366,22 @@ bool halucp_is_paged(HalUCP *h, int ch) {
     return strcmp(halucp_get_channel_mode(h, ch), "paged") == 0;
 }
 
+/* USA003090 Sec. 6.1.4: a channel with no RECFM/LRECL supplied defaults to
+ * LRECL 133 (PAGED) or 80 (UNPAGED). PAGED additionally defaults to RECFM
+ * FBA -- the "A" meaning an ANSI/ASA carriage-control character is
+ * automatically generated as byte 1 of every output record -- so PAGED's
+ * 133-byte LRECL is 1 non-printing control byte plus 132 *printable*
+ * columns (matching the IBM 1403 line printer's own documented print
+ * width, this runtime's historical target hardware), not 133 printable
+ * columns; UNPAGED has no such byte, so its 80-byte LRECL is fully
+ * printable. yaHALMAT2 independently reached the same conclusion (see its
+ * state.h). `--line-width` overrides this per-channel default uniformly
+ * for every channel, when explicitly passed (h->lineWidth >= 0). */
+static int effective_line_width(HalUCP *h, int ch) {
+    if (h->lineWidth >= 0) return h->lineWidth;
+    return halucp_is_paged(h, ch) ? 132 : 80;
+}
+
 /* ---------------------------------------------------------------------
  * Field formatting
  * ------------------------------------------------------------------- */
@@ -360,10 +435,25 @@ static void format_scalar(const FloatIBM *ibmFloat, int fracDigits, int totalWid
  * Output positioning / field emission
  * ------------------------------------------------------------------- */
 
+/* Flushes ch's buffered (not yet newline-terminated) line to
+ * outputCallback, then resets the buffer for the next line. Mirrors
+ * yaHALMAT2's dm_finalize_line (interp.c) — the buffer is what makes
+ * out-of-order/backward TAB/COLUMN placement possible (see halucp.h's
+ * lineBuf comment): fields are written into it at their target column
+ * regardless of call order, and only this flush commits the assembled
+ * bytes to the real output stream. */
 static void hal_newline(HalUCP *h, int ch) {
-    if (h->outputCallback) h->outputCallback(h->cbCtx, "\n", ch);
+    if (h->outputCallback) {
+        if (h->lineBufLen[ch] > 0) h->outputCallback(h->cbCtx, h->lineBuf[ch], ch);
+        h->outputCallback(h->cbCtx, "\n", ch);
+    }
+    h->lineBufLen[ch] = 0;
     h->lineNumber[ch] += 1;
     h->column[ch] = 1;
+}
+
+void halucp_flush_channel(HalUCP *h, int ch) {
+    hal_newline(h, ch);
 }
 
 void halucp_notify_interactive_input(HalUCP *h, int ch) {
@@ -372,40 +462,52 @@ void halucp_notify_interactive_input(HalUCP *h, int ch) {
     h->suppressNextAdvance[ch] = true;
 }
 
-static void emit_spaces(HalUCP *h, int ch, int n) {
-    if (n <= 0 || !h->outputCallback) return;
-    char *buf = malloc((size_t)n + 1);
-    memset(buf, ' ', (size_t)n);
-    buf[n] = '\0';
-    h->outputCallback(h->cbCtx, buf, ch);
-    free(buf);
-}
-
-static void emit_text_n(HalUCP *h, int ch, const char *text, int len) {
-    if (!h->outputCallback || len <= 0) return;
-    char *buf = malloc((size_t)len + 1);
-    memcpy(buf, text, (size_t)len);
-    buf[len] = '\0';
-    h->outputCallback(h->cbCtx, buf, ch);
-    free(buf);
+/* Writes `text` (length `len`) into ch's line buffer starting at 1-based
+ * column `col`, growing the buffer as needed and space-padding any gap
+ * between its current high-water content and `col` (so a forward jump
+ * past what's been written so far reads as blanks, matching a real
+ * device mechanism moving right over untouched paper). Does not touch
+ * anything already in the buffer beyond `col + len` — a COLUMN/TAB that
+ * jumps backward and writes a *shorter* field correctly leaves the
+ * remainder of what's already there untouched (overstrike, not
+ * replace-to-end-of-line — confirmed against yaHALMAT2's dm_write_at,
+ * which this mirrors, and against USA003087 Fig. 12-5's own worked
+ * example of exactly this scenario). */
+static void buf_write_at(HalUCP *h, int ch, int col, const char *text, int len) {
+    size_t start = (size_t)(col - 1);
+    size_t need = start + (size_t)len;
+    if (need > h->lineBufCap[ch]) {
+        size_t newCap = h->lineBufCap[ch] ? h->lineBufCap[ch] * 2 : 128;
+        while (newCap < need) newCap *= 2;
+        h->lineBuf[ch] = realloc(h->lineBuf[ch], newCap + 1);
+        h->lineBufCap[ch] = newCap;
+    }
+    if (start > h->lineBufLen[ch]) {
+        memset(h->lineBuf[ch] + h->lineBufLen[ch], ' ', start - h->lineBufLen[ch]);
+    }
+    if (len > 0) memcpy(h->lineBuf[ch] + start, text, (size_t)len);
+    if (need > h->lineBufLen[ch]) h->lineBufLen[ch] = need;
+    h->lineBuf[ch][h->lineBufLen[ch]] = '\0';
 }
 
 static void flush_positioning(HalUCP *h, int ch) {
     if (!h->deferred[ch].present) return;
     HalUCPDeferredPos pos = h->deferred[ch];
     h->deferred[ch].present = false;
-    if (pos.downLines > 0) {
-        for (int i = 0; i < pos.downLines; i++) hal_newline(h, ch);
-    }
-    if (pos.toCol > h->column[ch]) {
-        emit_spaces(h, ch, pos.toCol - h->column[ch]);
-        h->column[ch] = pos.toCol;
-    }
+    for (int i = 0; i < pos.downLines; i++) hal_newline(h, ch);
+    h->everEmittedField[ch] = true;
+    /* Unconditional, not just "if toCol > column": a leading COLUMN/TAB
+     * that lands *before* the default column-1 reset is exactly Fig.
+     * 12-5's scenario (fixes problems.md 2.5) — the actual byte
+     * placement happens lazily, via buf_write_at when the next field is
+     * emitted, which pads or overstrikes correctly either direction. */
+    h->column[ch] = pos.toCol;
 }
 
 static void emit_field(HalUCP *h, const char *fieldText, bool isChar) {
     int ch = h->channel;
     flush_positioning(h, ch);
+    int lineWidth = effective_line_width(h, ch);
 
     bool needSep = (!h->firstField[ch]) && (!h->suppressNextSep[ch]);
     h->suppressNextSep[ch] = false;
@@ -413,34 +515,30 @@ static void emit_field(HalUCP *h, const char *fieldText, bool isChar) {
     int fieldLen = (int)strlen(fieldText);
 
     if (!isChar) {
-        if (h->column[ch] + sepLen + fieldLen - 1 > h->lineWidth) {
+        if (h->column[ch] + sepLen + fieldLen - 1 > lineWidth) {
             hal_newline(h, ch);
-            emit_text_n(h, ch, fieldText, fieldLen);
+            buf_write_at(h, ch, h->column[ch], fieldText, fieldLen);
             h->column[ch] += fieldLen;
         } else {
-            if (sepLen > 0) {
-                emit_spaces(h, ch, sepLen);
-                h->column[ch] += sepLen;
-            }
-            emit_text_n(h, ch, fieldText, fieldLen);
-            h->column[ch] += fieldLen;
+            int col = h->column[ch] + sepLen;
+            buf_write_at(h, ch, col, fieldText, fieldLen);
+            h->column[ch] = col + fieldLen;
         }
     } else {
         if (sepLen > 0) {
-            if (h->column[ch] + sepLen > h->lineWidth + 1) {
+            if (h->column[ch] + sepLen > lineWidth + 1) {
                 hal_newline(h, ch);
             } else {
-                emit_spaces(h, ch, sepLen);
                 h->column[ch] += sepLen;
             }
         }
         int pos = 0;
         while (pos < fieldLen) {
-            if (h->column[ch] > h->lineWidth) hal_newline(h, ch);
-            int remaining = h->lineWidth - h->column[ch] + 1;
+            if (h->column[ch] > lineWidth) hal_newline(h, ch);
+            int remaining = lineWidth - h->column[ch] + 1;
             int take = remaining < (fieldLen - pos) ? remaining : (fieldLen - pos);
             if (take <= 0) take = fieldLen - pos; /* defensive: avoid infinite loop */
-            emit_text_n(h, ch, fieldText + pos, take);
+            buf_write_at(h, ch, h->column[ch], fieldText + pos, take);
             h->column[ch] += take;
             pos += take;
         }
@@ -554,20 +652,54 @@ static void handle_control(HalUCP *h) {
             h->channel = ch;
             if (iocode <= 1) {
                 h->readTerminated = false;
-                h->inputBufferLen = 0;
-                h->inputBuffer[0] = '\0';
+                h->inReadIOInit = true;
+                h->readSkipPending = -1;
+                h->readColumnPending = -1;
+                h->readPositioningApplied = false;
+                /* inputBuffer is deliberately NOT wiped here anymore --
+                 * see apply_read_positioning(), which defers that
+                 * decision until this statement's SKIP/COLUMN control
+                 * specifiers (processed next, before any XXAR) are
+                 * known. */
             } else {
+                h->inReadIOInit = false;
                 if (h->deferred[ch].present) flush_positioning(h, ch);
                 if (!h->hasWrittenBefore[ch]) {
                     h->hasWrittenBefore[ch] = true;
+                    /* Must clear here too, not just in the sibling
+                     * suppressNextAdvance branch below -- otherwise a
+                     * flag set by halucp_notify_interactive_input() and
+                     * left dangling (because THIS write happened to be
+                     * the channel's first-ever, taking this branch
+                     * instead) would incorrectly suppress the *next*
+                     * WRITE's newline advance too, merging two unrelated
+                     * WRITE statements onto one line (found via
+                     * 254-TEST2.hal: a READ followed by two independent
+                     * IF-THEN-WRITE statements printed with no newline
+                     * between them). */
+                    h->suppressNextAdvance[ch] = false;
                     h->deferred[ch].present = true;
                     h->deferred[ch].downLines = 0;
-                    h->deferred[ch].toCol = 1;
+                    /* No real line movement — column[ch] is already 1
+                     * (halucp_init's default), so this just carries it
+                     * forward rather than hardcoding 1. Matters because
+                     * a compiled WRITE statement issues a fresh IOINIT
+                     * per field, not just once at the statement's start
+                     * (confirmed via tracing test_read_eof_onerror.hal's
+                     * "RESULTS OF TESTING..." line) — hardcoding toCol=1
+                     * here would clobber the running column of every
+                     * field after the first, undoing problems.md 2.5's
+                     * fix (the old "only apply toCol if greater than
+                     * column[ch]" guard papered over this by accident;
+                     * the real fix is to only ever *reset* to column 1
+                     * when downLines>0 actually moves to a fresh line,
+                     * below). */
+                    h->deferred[ch].toCol = h->column[ch];
                 } else if (h->suppressNextAdvance[ch]) {
                     h->suppressNextAdvance[ch] = false;
                     h->deferred[ch].present = true;
                     h->deferred[ch].downLines = 0;
-                    h->deferred[ch].toCol = 1;
+                    h->deferred[ch].toCol = h->column[ch]; /* see comment above */
                 } else {
                     h->deferred[ch].present = true;
                     h->deferred[ch].downLines = 1;
@@ -575,6 +707,9 @@ static void handle_control(HalUCP *h) {
                 }
                 h->firstField[ch] = true;
                 h->suppressNextSep[ch] = false;
+                /* Nothing has positioned the mechanism within this new
+                 * WRITE statement yet — see the TAB case's comment. */
+                h->positioned[ch] = false;
             }
             break;
         }
@@ -599,33 +734,50 @@ static void handle_control(HalUCP *h) {
             } else {
                 for (int i = 0; i < delta; i++) hal_newline(h, ch);
             }
+            h->positioned[ch] = true;
             break;
         }
-        case 5: { /* COLUMN */
+        case 5: { /* COLUMN: absolute — USA003087 Sec. 12.4 rule 3. Any
+                   * target column (forward or backward relative to
+                   * wherever the mechanism currently is) is valid; the
+                   * actual byte placement is handled lazily by
+                   * buf_write_at when the next field is emitted, which
+                   * pads or overstrikes correctly either direction
+                   * (fixes problems.md 2.5's "backwards, unimplemented"
+                   * gap). */
             int ch = h->channel;
             if (param < 1) {
                 char msg[64];
                 snprintf(msg, sizeof msg, "HalUCP: COLUMN(%d) below column 1\n", param);
                 hal_log(h, msg);
+            } else if (h->inReadIOInit) {
+                h->readColumnPending = (int)param;
             } else if (h->deferred[ch].present) {
                 h->deferred[ch].toCol = (int)param;
             } else {
-                if (param > h->column[ch]) {
-                    emit_spaces(h, ch, (int)param - h->column[ch]);
-                    h->column[ch] = (int)param;
-                } else {
-                    char msg[96];
-                    snprintf(msg, sizeof msg, "HalUCP: COLUMN(%d); CUR=%d backwards, umimplemented.\n", param, h->column[ch]);
-                    hal_log(h, msg);
-                }
+                h->column[ch] = (int)param;
             }
-            h->suppressNextSep[ch] = true;
+            if (!h->inReadIOInit) {
+                h->positioned[ch] = true;
+                h->suppressNextSep[ch] = true;
+            }
             break;
         }
-        case 6: { /* TAB */
+        case 6: { /* TAB: relative — USA003087 Sec. 12.4 rule 2/Fig.
+                   * 12-5. A *leading* TAB (nothing has positioned this
+                   * WRITE statement's mechanism yet) is relative to the
+                   * column the mechanism was already at *before* this
+                   * statement's default line advance reset it — which
+                   * is exactly what `column[ch]` still holds, since
+                   * nothing else touches it between the previous
+                   * statement's last field and here. Once something has
+                   * positioned the mechanism this statement, subsequent
+                   * TABs are relative to that instead (ordinary
+                   * sequential application). Fixes problems.md 2.5. */
             int ch = h->channel;
             if (h->deferred[ch].present) {
-                int newCol = h->deferred[ch].toCol + (int)param;
+                int base = h->positioned[ch] ? h->deferred[ch].toCol : h->column[ch];
+                int newCol = base + (int)param;
                 if (newCol < 1) {
                     char msg[64];
                     snprintf(msg, sizeof msg, "HalUCP: TAB(%d) cannot move left of column 1\n", param);
@@ -641,15 +793,9 @@ static void handle_control(HalUCP *h) {
                     hal_log(h, msg);
                     target = 1;
                 }
-                if (target > h->column[ch]) {
-                    emit_spaces(h, ch, target - h->column[ch]);
-                    h->column[ch] = target;
-                } else {
-                    char msg[64];
-                    snprintf(msg, sizeof msg, "HalUCP: TAB(%d); negative tab, umimplemented.\n", param);
-                    hal_log(h, msg);
-                }
+                h->column[ch] = target;
             }
+            h->positioned[ch] = true;
             h->suppressNextSep[ch] = true;
             break;
         }
@@ -662,6 +808,7 @@ static void handle_control(HalUCP *h) {
                 } else {
                     for (int i = 0; i < downLines; i++) hal_newline(h, ch);
                 }
+                h->positioned[ch] = true;
             }
             break;
         }
@@ -671,11 +818,49 @@ static void handle_control(HalUCP *h) {
                 char msg[64];
                 snprintf(msg, sizeof msg, "HalUCP: SKIP(%d) negative count not allowed\n", param);
                 hal_log(h, msg);
+            } else if (h->inReadIOInit) {
+                h->readSkipPending = (int)param;
             } else if (h->deferred[ch].present) {
-                h->deferred[ch].downLines = (int)param;
+                /* USA003087 Sec. 12.2: a device's TRUE first-ever WRITE
+                 * performs only "initial positioning" -- zero downward
+                 * movement -- regardless of any SKIP/LINE/PAGE request.
+                 * IOINIT (case 2/3 above) already encodes this correctly
+                 * (downLines=0 when !hasWrittenBefore), but MMWSNP.asm's
+                 * VECTOR/MATRIX output routine unconditionally issues its
+                 * own "ACALL SKIP" before every row -- including row 1 --
+                 * with no way (at this SVC-trap level, mirroring the real
+                 * hardware's own shared trap handler) to tell an RTL-
+                 * internal row-separator SKIP apart from a genuine
+                 * user-authored SKIP() pseudo-function.
+                 *
+                 * Gated on everEmittedField (has *any* field ever been
+                 * flushed on this channel, whole-program lifetime), NOT
+                 * on the device's current column. An earlier version of
+                 * this fix gated on column[ch]!=1 instead, reasoning by
+                 * analogy with yaHALMAT2's own WITHIN-a-statement
+                 * "`WRITE(6) 'SUM=',V;` still forces V's own fresh line
+                 * since column has already advanced past 1" case -- but
+                 * that conflates two different things (caught in review):
+                 * "this is genuinely the device's first-ever WRITE
+                 * statement" (a one-time, whole-program condition, where
+                 * discarding the redundant leading advance is correct)
+                 * vs. "the device currently happens to sit at column 1"
+                 * (which can ALSO be true anywhere later in the program,
+                 * e.g. right after some earlier, unrelated statement's
+                 * output happened to end exactly at a line boundary) --
+                 * in that second case a MATRIX's forced-fresh-line
+                 * separator is a real, intentional effect, not
+                 * redundant, and suppressing it on column==1 alone
+                 * silently discarded a *later*, unrelated explicit
+                 * SKIP(n>1)'s own requested value too whenever it
+                 * happened to follow a coincidental column-1 start. */
+                if (h->everEmittedField[ch]) {
+                    h->deferred[ch].downLines = (int)param;
+                }
             } else {
                 for (int i = 0; i < (int)param; i++) hal_newline(h, ch);
             }
+            if (!h->inReadIOInit) h->positioned[ch] = true;
             break;
         }
         default: {
@@ -709,6 +894,7 @@ bool halucp_check_trap(HalUCP *h, uint32_t nia) {
 static void ib_reset(HalUCP *h) {
     h->inputBufferLen = 0;
     h->inputBuffer[0] = '\0';
+    h->inputColumn = 1;
 }
 
 static void ib_ensure_cap(HalUCP *h, size_t need) {
@@ -730,6 +916,19 @@ static void ib_append(HalUCP *h, const char *s) {
 /* Removes the first n bytes (mirrors `@inputBuffer = buf.substring(n)`). */
 static void ib_consume_prefix(HalUCP *h, size_t n) {
     if (n > h->inputBufferLen) n = h->inputBufferLen;
+    /* Track inputColumn (1-indexed column, since the last newline, of the
+     * next unconsumed byte) as bytes are discarded -- READ's COLUMN(n)
+     * control specifier needs this to reposition within the current
+     * still-buffered line (see apply_read_positioning()). */
+    size_t lastNl = (size_t)-1;
+    for (size_t i = 0; i < n; i++) {
+        if (h->inputBuffer[i] == '\n') lastNl = i;
+    }
+    if (lastNl != (size_t)-1) {
+        h->inputColumn = n - lastNl;
+    } else {
+        h->inputColumn += n;
+    }
     memmove(h->inputBuffer, h->inputBuffer + n, h->inputBufferLen - n + 1);
     h->inputBufferLen -= n;
 }
@@ -979,11 +1178,49 @@ static void write_input_value(HalUCP *h, const char *text) {
  * handleInput / provideInput / provideEof
  * ------------------------------------------------------------------- */
 
+/* Applies this READ statement's SKIP(n)/COLUMN(n) control specifiers
+ * (collected into readSkipPending/readColumnPending by handle_control,
+ * which runs — per compiled HALMAT order XXST->IOINIT->specifiers->XXAR —
+ * after IOINIT but before any argument is actually read) to inputBuffer,
+ * exactly once per statement, right before its first argument's field
+ * extraction. Default (readSkipPending == -1, i.e. no explicit SKIP, or
+ * an explicit SKIP(n>=1)): advance to a fresh line, discarding whatever
+ * of the old line is still buffered — the traditional/pre-existing
+ * behavior. Explicit SKIP(0): stay on the current still-buffered line
+ * instead, then let COLUMN(n) reposition forward within it. */
+static void apply_read_positioning(HalUCP *h) {
+    if (h->readPositioningApplied) return;
+    h->readPositioningApplied = true;
+
+    if (h->readSkipPending == 0) {
+        /* Stay on the current line -- leave inputBuffer/inputColumn as-is. */
+    } else {
+        ib_reset(h);
+    }
+
+    if (h->readColumnPending >= 1) {
+        size_t target = (size_t)h->readColumnPending;
+        if (target > h->inputColumn) {
+            size_t advance = target - h->inputColumn;
+            if (advance > h->inputBufferLen) advance = h->inputBufferLen;
+            ib_consume_prefix(h, advance);
+        } else if (target < h->inputColumn) {
+            char msg[96];
+            snprintf(msg, sizeof msg,
+                     "HalUCP: COLUMN(%d) requests rewind before already-consumed column %zu (not supported)\n",
+                     h->readColumnPending, h->inputColumn);
+            hal_log(h, msg);
+        }
+    }
+}
+
 static bool handle_input(HalUCP *h) {
     int iocode = (int)mcm_get16(&h->cpu->mainStorage, h->iocodeAddr);
 
     /* channels used for input default to UNPAGED */
     if (h->channelMode[h->channel] == 0) h->channelMode[h->channel] = 2;
+
+    apply_read_positioning(h);
 
     if (h->readTerminated) {
         char msg[96];
@@ -1083,6 +1320,19 @@ void halucp_provide_eof(HalUCP *h) {
     char logmsg[96];
     snprintf(logmsg, sizeof logmsg, "HalUCP: EOF on input channel %d, no ON ERROR handler — halting\n", h->channel);
     hal_log(h, logmsg);
+    /* Same reasoning as the SVC 0x0015 (explicit HALT) path: this halts
+     * the program too, and any channel's current line may still be
+     * sitting unflushed in lineBuf[ch] (never terminated by an explicit
+     * SKIP/LINE/PAGE) -- found via the "Programming in HAL/S" sweep,
+     * where several simple `WRITE(6) '...'; READ(5) ...;` programs (no
+     * ON ERROR installed, /dev/null stdin) silently lost their very
+     * first WRITE'd line here before this fix. Gated on lineBufLen (not
+     * just hasWrittenBefore) so a channel run.c's own interactive-prompt
+     * logic already flushed (see prompt_and_provide_input) doesn't get a
+     * second, spurious blank line. */
+    for (int ch = 0; ch < HALUCP_MAX_CHANNEL; ch++) {
+        if (h->lineBufLen[ch] > 0 && h->outputCallback) hal_newline(h, ch);
+    }
     char msg[160];
     snprintf(msg, sizeof msg, "HalUCP: READ exhausted input on channel %d with no ON ERROR handler installed", h->channel);
     hal_report_error(h, msg);
@@ -1110,8 +1360,205 @@ static bool match_error_handler(uint32_t fixv, int errGroup, int errNum) {
     return groupOk && numOk;
 }
 
+/* ON ERROR$(...) IGNORE AND SIGNAL/SET/RESET <event> — a disposition
+ * that doesn't divert control flow at all, just flips an EVENT variable
+ * as a side effect before letting the erroring statement's own SEND
+ * ERROR SVC return control normally ("for standard fixup", same as an
+ * unhandled/uncaught error already does). Confirmed via three isolated
+ * single-statement compiles (one each for SIGNAL/SET/RESET, with an
+ * LSTALL listing) that this uses the *same* FIXV layout as the TAG=0
+ * GO TO case (group/num in the low 12 bits) but with one of these three
+ * TAG values instead of 0 — and, critically, the paired "handler" slot
+ * holds the EVENT variable's own address directly (`LA R4,EVn / STH R4,
+ * slot+1`), not a jump target, so it must never be run through
+ * dispatch_to_handler(). No bit relationship was found between the
+ * three tag values (0xF/0x7/0xB) that would generalize to other
+ * actions, so they're matched by direct enumeration rather than a
+ * decoded sub-field. (IgnoreEventAction itself is declared up near this
+ * file's other forward decls, since halucp_handle_svc's own plain
+ * SIGNAL/SET/RESET handling, earlier in the file, needs it too.) */
+
+static IgnoreEventAction ignore_event_action_for_tag(uint32_t tag) {
+    switch (tag) {
+        case 0xF: return IGNORE_EVENT_SIGNAL;
+        case 0x7: return IGNORE_EVENT_SET;
+        case 0xB: return IGNORE_EVENT_RESET;
+        default: return IGNORE_EVENT_NONE;
+    }
+}
+
+static bool match_ignore_event_handler(uint32_t fixv, int errGroup, int errNum, IgnoreEventAction *outAction) {
+    if (fixv == 0) return false;
+    IgnoreEventAction action = ignore_event_action_for_tag((fixv >> 12) & 0x0F);
+    if (action == IGNORE_EVENT_NONE) return false;
+    uint32_t numField = (fixv >> 6) & 0x3F;
+    uint32_t grpField = fixv & 0x3F;
+    bool groupOk = (grpField == 0x3F) || ((int)grpField == errGroup);
+    bool numOk = (numField == 0x3F) || ((int)numField == errNum);
+    if (!groupOk || !numOk) return false;
+    *outAction = action;
+    return true;
+}
+
+/* EVENT representation confirmed via a minimal compiled SIGNAL/SET/RESET
+ * test (RUNMAC-free — these compile directly to SVC 0x000C/0x000D/0x000E
+ * with the event's address as the SVC's second operand halfword, not to
+ * an RTL call) and its matching `IF EVn THEN` check (`TB 0(Rn),1`): an
+ * EVENT's "is it currently set" state is bit 0 (mask 1) of the halfword
+ * at its own address. SIGNAL and SET both set it; RESET clears it —
+ * this only models that one bit, not the fuller LATCHED-vs-unlatched
+ * event/scheduling semantics real FCOS task management would add on
+ * top, which yaGPC2 has no other support for anyway (problems.md 2.7). */
+static void apply_ignore_event_action(HalUCP *h, uint32_t eventAddr, IgnoreEventAction action) {
+    uint32_t word = mcm_get16(&h->cpu->mainStorage, eventAddr);
+    uint32_t newWord = (action == IGNORE_EVENT_RESET) ? (word & ~1u) : (word | 1u);
+    mcm_set16(&h->cpu->mainStorage, eventAddr, newWord, false);
+}
+
+static void dispatch_to_handler(HalUCP *h, uint32_t handlerAddr16, int errGroup, int errNum) {
+    uint32_t handler19;
+    if (handlerAddr16 & 0x8000) {
+        handler19 = (psw_get_bsr(&h->cpu->psw) << 15) | (handlerAddr16 & 0x7FFF);
+    } else {
+        handler19 = handlerAddr16;
+    }
+    psw_set_nia(&h->cpu->psw, handler19);
+    char msg[128];
+    snprintf(msg, sizeof msg, "HalUCP: dispatched (group=%d,num=%d) to ON ERROR handler at 0x%x\n", errGroup, errNum, handler19);
+    hal_log(h, msg);
+}
+
+/* How many (FIXV, handler) slot pairs to probe in the direct-case scan
+ * below. Each distinct ON ERROR statement in a routine gets its own
+ * dedicated 2-halfword slot, allocated sequentially by the compiler's
+ * SET_ERRLOC (HALINCL/GENCLAS0.xpl: DISP(OP) = SHL(slot_index,1) +
+ * ERRSEG(nesting_level)) — ERRSEG (the per-routine starting offset) and
+ * the number of distinct ON ERROR statements both vary per compiled
+ * routine and aren't recoverable at runtime without deeper compiler-
+ * symbol support, so this scans a generous range from the first offset
+ * confirmed against a real compiled program (test_eron_goto_appc.hal,
+ * 4 sequential ON ERROR blocks at offsets 18/20/22/24) rather than
+ * checking a single fixed slot. match_error_handler()'s specificity
+ * (requiring TAG=0 and a real group/num match) makes a false-positive
+ * match against unrelated frame data very unlikely. */
+#define ON_ERROR_DIRECT_SLOT_BASE 18
+#define ON_ERROR_DIRECT_SLOT_COUNT 16
+
 static bool try_on_error_dispatch(HalUCP *h, int errGroup, int errNum) {
+    /* group=4/num=27 (singular-matrix inverse, raised by MM14S3's 3x3
+     * cofactor-expansion path): confirmed via confidential FCOS source
+     * (FPMSDERR.asm, the real SEND ERROR SVC handler -- "DELETE ON ERROR
+     * SUPPORT" since 1978) that no OS/SVC-level mechanism dispatches to a
+     * user's ON ERROR handler at all, ever, for any error. Real GOTO-style
+     * dispatch (confirmed working for SQRT/UNIT/MDIV/ZEROPOW in
+     * test_eron_goto_appc.hal) instead happens because the COMPILER emits
+     * its own redundant, statically-known re-check of the error condition
+     * (e.g. "is the SQRT argument negative") directly in the calling code,
+     * immediately after the call, and branches on it -- confirmed by
+     * disassembling $0TESTER's own compiled code, which has exactly such a
+     * check after its SQRT call. $0P's own compiled code (197-P.hal),
+     * traced the same way immediately after its call to MM14S3, has NO
+     * such check at all -- it falls straight through, unconditionally, to
+     * the next statement (WRITE(6) M). This matches real yaGPC's actual
+     * output (the identity matrix MM14S3's own fallback produces via
+     * MM15SN, not the user's registered GO TO L1 handler) even when that
+     * handler is present. Matrix inversion's singularity condition can't
+     * be cheaply re-verified at the call site the way SQRT's can (it would
+     * require redoing the whole cofactor expansion), which is presumably
+     * why the compiler doesn't bother emitting a check here at all -- so,
+     * unlike every other error this function handles, this one must never
+     * dispatch, regardless of what ON ERROR disposition is registered. */
+    if (errGroup == 4 && errNum == 27) return false;
+
     uint32_t sa = (register_get32(cpu_r(h->cpu, 0)) >> 16) & 0xffff;
+
+    /* Direct case, walked up the call-frame chain as needed: the erroring
+     * code was reached via a plain BAL@# call (e.g. RTL intrinsics like
+     * SQRT/#MDIV's zero-divide check), which never reassigns R0 — the ON
+     * ERROR statement's own FIXV/handler slots are still exactly where R0
+     * already points, no unwind needed, found at level 0 below.
+     *
+     * But some RTL routines (e.g. UNIT's VV10S3, which normalizes a vector
+     * and internally calls SQRT) bump R0 forward to claim their own scratch
+     * frame even though they're entered via a plain BAL, not SCAL (see
+     * RUNMAC/AMAIN.asm's "IAL 0,STACKEND-STACK SET STACK SIZE", emitted
+     * for any routine declared ACALL=YES). Such a routine has no ON ERROR
+     * statement of its own, so its frame's direct slots (18+) are unused;
+     * confirmed via compiled test_eron_goto_appc.hal + --verbose tracing
+     * that the caller's original R0 is recoverable as the halfword at
+     * SA+2 (the same "old R0, saved as hi/lo halfwords" convention AEXIT
+     * and the SCAL case below both rely on) — walking up through it and
+     * re-running the same direct-slot scan at each level finds the FIXV
+     * the user's ON ERROR statement actually installed in the enclosing
+     * PROGRAM/procedure's own frame. Bounded to a handful of levels; a
+     * caller of 0 (top of chain) or a self-loop stops the walk. */
+    uint32_t walkSa = sa;
+    uint32_t walkR0 = register_get32(cpu_r(h->cpu, 0));
+    for (int level = 0; level < 8; level++) {
+        for (int slot = 0; slot < ON_ERROR_DIRECT_SLOT_COUNT; slot++) {
+            uint32_t off = (uint32_t)(ON_ERROR_DIRECT_SLOT_BASE + slot * 2);
+            uint32_t directFixv = mcm_get16(&h->cpu->mainStorage, walkSa + off);
+
+            IgnoreEventAction ignoreAction;
+            if (match_ignore_event_handler(directFixv, errGroup, errNum, &ignoreAction)) {
+                /* No jump, no R0/R1/R3 fixup — the erroring routine's own
+                 * epilogue runs completely normally afterward, exactly as
+                 * if this SEND ERROR had gone unhandled; only the event's
+                 * bit changes. */
+                uint32_t eventAddr = mcm_get16(&h->cpu->mainStorage, walkSa + off + 1);
+                apply_ignore_event_action(h, eventAddr, ignoreAction);
+                char msg[128];
+                snprintf(msg, sizeof msg,
+                         "HalUCP: ON ERROR IGNORE (group=%d,num=%d) -> event action %d on 0x%x\n",
+                         errGroup, errNum, (int)ignoreAction, eventAddr);
+                hal_log(h, msg);
+                return true;
+            }
+
+            if (!match_error_handler(directFixv, errGroup, errNum)) continue;
+
+            /* Jumping away here bypasses the erroring RTL routine's own
+             * AEXIT epilogue (RUNMAC/AEXIT.asm's default intrinsic-return
+             * path: `LH 1,5(0)` / `LH 3,9(0)`, "RESTORE PROGRAM DATA
+             * BASE"/"RESTORE LOCAL DATA BASE") — R1/R3 are conventionally
+             * used as data-area base registers throughout the *caller's*
+             * compiled code, and intrinsics like SQRT are documented to use
+             * R1 as their own scratch ("WORK R1,..." in SQRT.asm) without
+             * restoring it themselves before erroring out. Without this,
+             * the handler code's own R1/R3-relative addressing (e.g. string
+             * literals) reads from the wrong location. Must replicate
+             * exactly what AEXIT would have done, using the matched
+             * frame's own save slots (walkSa, not the original sa — when
+             * the walk went up a level, the original frame never had its
+             * own R1/R3 restore values populated at all).
+             *
+             * If the walk went up at least one level, R0 itself must also
+             * be restored to what it was in the matched ancestor frame
+             * (walkR0, reconstructed while walking below) — otherwise it's
+             * left pointing at the abandoned child frame, and the *next*
+             * error dispatched from the resumed ancestor code would
+             * wrongly start its own walk from stale, reused stack memory
+             * instead of the ancestor's real frame. */
+            if (level > 0) register_set32(cpu_r(h->cpu, 0), walkR0);
+            register_set32(cpu_r(h->cpu, 1), mcm_get16(&h->cpu->mainStorage, walkSa + 5) << 16);
+            register_set32(cpu_r(h->cpu, 3), mcm_get16(&h->cpu->mainStorage, walkSa + 9) << 16);
+            dispatch_to_handler(h, mcm_get16(&h->cpu->mainStorage, walkSa + off + 1), errGroup, errNum);
+            return true;
+        }
+        uint32_t callerHi = mcm_get16(&h->cpu->mainStorage, walkSa + 2);
+        uint32_t callerLo = mcm_get16(&h->cpu->mainStorage, walkSa + 3);
+        if (callerHi == 0 || callerHi == walkSa) break;
+        walkR0 = (callerHi << 16) | callerLo;
+        walkSa = callerHi;
+    }
+
+    /* SCAL-frame-unwind case: the erroring code was reached via a
+     * SCAL@#-called routine (e.g. I/O RTL routines), which reassigns R0
+     * to its own local save area — SA..SA+1 = saved PSW1, then R0..R7
+     * each as two halfwords at SA+2+2i/SA+2+2i+1 (see halUCP.coffee's
+     * _tryOnErrorDispatch doc comment) — so the caller's original R0
+     * (saved at SA+2/SA+3) must be recovered first to find its FIXV/
+     * handler slots. */
     uint32_t callerR0Hi = mcm_get16(&h->cpu->mainStorage, sa + 2);
     uint32_t callerR0Lo = mcm_get16(&h->cpu->mainStorage, sa + 3);
     uint32_t stackEnd = (callerR0Hi + callerR0Lo) & 0xffff;
@@ -1136,16 +1583,7 @@ static bool try_on_error_dispatch(HalUCP *h, int errGroup, int errNum) {
     }
     register_set32(&h->cpu->psw.psw1, newPsw1);
 
-    uint32_t handler19;
-    if (handlerAddr16 & 0x8000) {
-        handler19 = (psw_get_bsr(&h->cpu->psw) << 15) | (handlerAddr16 & 0x7FFF);
-    } else {
-        handler19 = handlerAddr16;
-    }
-    psw_set_nia(&h->cpu->psw, handler19);
-    char msg[128];
-    snprintf(msg, sizeof msg, "HalUCP: dispatched (group=%d,num=%d) to ON ERROR handler at 0x%x\n", errGroup, errNum, handler19);
-    hal_log(h, msg);
+    dispatch_to_handler(h, handlerAddr16, errGroup, errNum);
     return true;
 }
 
