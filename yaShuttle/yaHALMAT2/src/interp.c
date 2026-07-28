@@ -2781,12 +2781,14 @@ static void precompute_for_loops(halmat_state_t *state) {
     state->efor_dfor_pos = malloc(n * sizeof(size_t));
     state->dfor_efor_pos = malloc(n * sizeof(size_t));
     state->cfor_exit_target = malloc(n * sizeof(size_t));
+    state->dfor_body_start = malloc(n * sizeof(size_t));
     for (size_t i = 0; i < n; i++) {
         state->afor_body_target[i] = NO_TARGET;
         state->afor_return_target[i] = NO_TARGET;
         state->efor_dfor_pos[i] = NO_TARGET;
         state->dfor_efor_pos[i] = NO_TARGET;
         state->cfor_exit_target[i] = NO_TARGET;
+        state->dfor_body_start[i] = NO_TARGET;
     }
 
     struct {
@@ -2838,6 +2840,14 @@ static void precompute_for_loops(halmat_state_t *state) {
                     for (size_t k = 0; k < stack[sp].cfor_count; k++) {
                         state->cfor_exit_target[stack[sp].cfor_positions[k]] = i + 1;
                     }
+                    /* DB id 35 fix: the body starts one past the *last*
+                     * CFOR owned by this DFOR (there can be more than one
+                     * for a compound WHILE/UNTIL clause), or right after
+                     * DFOR itself when there's no CFOR at all -- see
+                     * dfor_body_start's own comment in state.h. */
+                    state->dfor_body_start[stack[sp].dfor_pos] =
+                        (stack[sp].cfor_count > 0) ? stack[sp].cfor_positions[stack[sp].cfor_count - 1] + 1
+                                                    : stack[sp].dfor_pos + 1;
                 }
             }
         }
@@ -3138,6 +3148,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->efor_dfor_pos);
     free(state->dfor_efor_pos);
     free(state->cfor_exit_target);
+    free(state->dfor_body_start);
     free(state->dcas_case_target);
     free(state->dcas_case_count);
     free(state->clbl_ecas_target);
@@ -3163,6 +3174,7 @@ void interp_cleanup(halmat_state_t *state) {
     state->efor_dfor_pos = NULL;
     state->dfor_efor_pos = NULL;
     state->cfor_exit_target = NULL;
+    state->dfor_body_start = NULL;
     state->dcas_case_target = NULL;
     state->dcas_case_count = NULL;
     state->clbl_ecas_target = NULL;
@@ -5040,8 +5052,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (efor_pos == NO_TARGET) { fail(state, "DFOR has no matching EFOR"); break; }
                     state->pc = efor_pos + 1;
                     branched = true;
+                } else {
+                    /* DB id 35 fix (examplen130_cfor_pretest_hardware_
+                     * divergence): jump past any CFOR (the UNTIL/WHILE
+                     * clause) straight into the body -- DO FOR ... UNTIL
+                     * is documented as post-tested (always runs at least
+                     * once; the UNTIL expression, and hence any function
+                     * calls inside it, is only evaluated starting from
+                     * the *second* cycle onward, per USA003087's DO ...
+                     * UNTIL rule and confirmed against real compiled
+                     * AP-101S output -- see dfor_body_start's own comment
+                     * in state.h). Previously this just fell through,
+                     * landing on CFOR every cycle including the first. */
+                    size_t body_pos = state->dfor_body_start[state->pc];
+                    if (body_pos == NO_TARGET) { fail(state, "DFOR has no precomputed body start"); break; }
+                    state->pc = body_pos;
+                    branched = true;
                 }
-                /* else: fall through into CFOR (if any)/the body, unchanged. */
                 break;
             }
 

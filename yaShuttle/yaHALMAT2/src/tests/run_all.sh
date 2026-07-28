@@ -2189,7 +2189,28 @@ run ./run_local_fixture.sh examplen184 "BEST=               0"
 # runtime effect on this file's specific control flow was not traced
 # further. This fixture locks in the current (improved but unconfirmed)
 # behavior as a regression baseline, not a claim of gpc parity.
-run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
+# DB id 35: expected value corrected. DO FOR ... UNTIL is post-tested
+# (USA003087's DO...UNTIL rule: always runs at least once; the UNTIL
+# expression -- ALMOST_EQUAL(1,MASS(1,V)) here, unconditionally TRUE --
+# is only evaluated starting from the *second* cycle, using the
+# already-stepped V). The old expected value (2.5000000E+05) locked in
+# yaHALMAT2's previous, now-confirmed-wrong pre-test-on-every-cycle
+# behavior (CFOR checked before the body on cycle 1 too, so the loop
+# exited with zero iterations). Real V=249900, confirmed against real
+# gpc via compileLinkRun -- see state.h's dfor_body_start comment for
+# the fix (OP_DFOR now jumps past CFOR straight into the body on the
+# very first cycle, only reaching CFOR from cycle 2 onward via EFOR's
+# existing back-branch).
+run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.4990000E+05"
+
+# Dedicated minimal isolation of the same DB id 35 fix, with no MASS/
+# ALMOST_EQUAL involved at all: `DO FOR V=250000 TO 0 BY -100 UNTIL
+# TRUE;`, a compile-time-constant, unconditionally-true UNTIL. If CFOR
+# ran before the body on cycle 1 (the old, wrong behavior), this would
+# exit with zero iterations (V=250000); post-tested per spec, it runs
+# one full cycle and exits with V=249900. Cross-checked against real
+# gpc via compileLinkRun.
+run ./run_local_fixture.sh dfor_until_posttest " 2.4990000E+05"
 
 # Task #68 (yahalmat2_nested_structure_vector_field_assign) -- PARTIALLY
 # resolved, DB status left "deferred": 177-P.hal,

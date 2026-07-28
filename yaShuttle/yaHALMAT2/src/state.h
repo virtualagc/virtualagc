@@ -1267,8 +1267,44 @@ struct halmat_state {
      * alongside efor_dfor_pos since it needs the same DFOR/EFOR nesting
      * walk. NO_TARGET for a CFOR not inside a range-form DO FOR (list-
      * form DO FOR's own supplementary-condition case isn't handled
-     * here, no fixture exercises it). */
+     * here, no fixture exercises it). Only actually consulted starting
+     * from the *second* cycle onward -- see dfor_body_start below for
+     * why the first cycle never reaches it at all. */
     size_t *cfor_exit_target;
+
+    /* DB id 36's own sibling investigation (yagpc2-yahalmat2-issues.db
+     * id 35, examplen130_cfor_pretest_hardware_divergence): DO FOR ...
+     * UNTIL is documented (USA003087, DO ... UNTIL generally) as
+     * post-tested -- "the group is always executed at least once. After
+     * the first cycle, the...expression is evaluated at the beginning
+     * of each cycle...until the result...becomes TRUE." Confirmed
+     * independently against real compiled AP-101S output two ways: (1)
+     * `DO FOR V=250000 TO 0 BY -100 UNTIL TRUE;` (a compile-time-
+     * constant, unconditionally-true UNTIL) still runs one full cycle,
+     * finishing with V=249900 rather than 250000 -- if CFOR's UNTIL
+     * check ran before cycle 1 the way it naturally does for every
+     * later cycle (immediately after DFOR, before the body), the loop
+     * would exit with zero iterations instead; (2) 130-EXAMPLE_N.hal's
+     * `DO FOR V=250000 TO 0 BY -100 UNTIL ALMOST_EQUAL(1,MASS(1,V));`
+     * (ALMOST_EQUAL unconditionally TRUE) likewise runs its body once,
+     * meaning MASS/ALMOST_EQUAL are called for the *post-step* value
+     * (V=249900), never for the untouched initial value. Real hardware
+     * evidently reaches the body directly on cycle 1 via a dedicated
+     * first-pass flag, bypassing the FCAL/BTRU/CFOR sequence entirely
+     * (it only applies starting cycle 2, using the already-stepped
+     * value) -- confirmed structurally via unHALMAT.py --disasm showing
+     * the compiled HALMAT's own linear FCAL/FCAL/BTRU/CFOR/body layout,
+     * which on its own would produce a pre-test on every cycle including
+     * the first (the bug this field fixes). per-DFOR: where OP_DFOR
+     * should jump on its first, unconditional entry once its own TO-
+     * bound in-range check (a separate, already-correct rule -- see
+     * OP_DFOR's own comment) passes -- one past the *last* CFOR
+     * belonging to this DFOR (dfor_pos + 1 when there is none), so the
+     * body runs without ever consulting CFOR's boolean operand at all
+     * on cycle 1. EFOR's own back-branch (dfor_pos + 1, unchanged) still
+     * lands squarely on CFOR for cycle 2 onward, matching the "at the
+     * beginning of each [subsequent] cycle" rule directly. */
+    size_t *dfor_body_start;
 
     /* DO CASE (DCAS/CLBL/ECAS): per class-0/ECAS.md, "every case body
      * ends with an unconditional branch" to ECAS's join point -- but
