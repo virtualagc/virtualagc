@@ -3698,7 +3698,7 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
             int rows = state->io_pending.items[i].container_rows;
             int cols = state->io_pending.items[i].container_cols;
             const halmat_scalar_t *elems = state->io_pending.items[i].container;
-            if (rows > 0) {
+            if (rows > 0 && state->io_pending.items[i].container_is_vecmat) {
                 /* MATRIX: laid out row by row, each row written as if it
                  * were its own n-vector. "The first element of the
                  * second and subsequent rows begin a new line, vertically
@@ -3707,7 +3707,25 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
                  * boundary (distinct from, and taking priority over, the
                  * generic "only when it doesn't fit" wrap rule used
                  * everywhere else), with the new line's starting column
-                 * fixed to wherever row 0's own first field began. */
+                 * fixed to wherever row 0's own first field began.
+                 *
+                 * Gated on container_is_vecmat (yagpc2-yahalmat2-
+                 * issues.db id 44, 106-EXAMPLE_2.hal's `ATT_RATE`, a
+                 * plain `ARRAY(4,3) SCALAR`): a genuinely 2-dimensional
+                 * plain ARRAY also gets container_rows>0 (the same
+                 * rows/cols encoding a real MATRIX uses, per
+                 * ensure_container's own 2D-ARRAY comment, so DSUB's
+                 * indexing logic can apply to it for free) but is NOT a
+                 * VECTOR/MATRIX for WRITE-formatting purposes -- real
+                 * hardware's MMWSNP.asm per-row forced-newline behavior
+                 * is specific to the true VECTOR/MATRIX runtime WRITE
+                 * path (this same function's own dm->col!=1 check just
+                 * above already correctly distinguishes the two via
+                 * this exact flag; only this row-vs-flat layout check
+                 * hadn't been extended to match, so a plain 2-D SCALAR/
+                 * INTEGER ARRAY incorrectly split onto one line per row
+                 * instead of the flat single-line layout real gpc uses,
+                 * confirmed via direct compileLinkRun comparison). */
                 int align_col = 1;
                 for (int r = 0; r < rows; r++) {
                     if (r > 0) {

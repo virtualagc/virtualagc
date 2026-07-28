@@ -2751,6 +2751,24 @@ run ./run_local_fixture.sh demo_users_manual "$(printf ' 0.0                0.0 
 # follow-up entry.
 run ./run_local_fixture.sh matrix_field_wildcard "$(printf ' 5.1100000E+02      5.1200000E+02      5.1300000E+02      5.1400000E+02      5.1500000E+02      5.1600000E+02      5.1700000E+02\n 5.1800000E+02      5.1900000E+02      5.2000000E+02      5.2100000E+02      5.2200000E+02\n 2.1000000E+01      2.2000000E+01      2.3000000E+01      2.4000000E+01\n 2.5000000E+01      2.6000000E+01      2.7000000E+01      2.8000000E+01\n 2.9000000E+01      3.0000000E+01      3.1000000E+01      3.2000000E+01')"
 
+# DB id 44 (plain_2d_array_scalar_forced_newline_regression,
+# 106-EXAMPLE_2.hal's ATT_RATE, a plain ARRAY(4,3) SCALAR): the flush_
+# write MATRIX-row-per-line layout (mmwsnp_vector_forces_newline, id
+# 14) was gated only on container_rows>0, which a genuinely 2-D plain
+# ARRAY also has (ensure_container's own 2D-ARRAY comment: same rows/
+# cols encoding a real MATRIX uses, so DSUB's indexing applies for
+# free) -- incorrectly forcing a newline every 3rd element as if it
+# were a true MATRIX. Real hardware's MMWSNP.asm forced-newline
+# behavior only applies to the genuine VECTOR/MATRIX runtime WRITE
+# path; a plain numeric ARRAY, however many declared dimensions, wraps
+# flat/generically like any other field. Gated on the pre-existing
+# container_is_vecmat flag instead (already correctly computed from
+# the XXAR operand's own TAG1, and already used by this same
+# function's "force a fresh line first" check just above -- only the
+# row-vs-flat layout choice itself hadn't been extended to match).
+# Confirmed against real gpc.
+run ./run_local_fixture.sh array2d_scalar_write "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00      5.0000000E+00      6.0000000E+00      7.0000000E+00\n 8.0000000E+00      9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
