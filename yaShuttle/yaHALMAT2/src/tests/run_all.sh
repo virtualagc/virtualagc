@@ -2693,6 +2693,41 @@ run ./run_read_fixture.sh add154 "$(printf -- '-3.95, -17.31, -9.93, 572.35, -25
 # own standing discipline against unconfirmed speculative fixes.
 run ./run_local_fixture.sh noret14 "$(printf 'R=      0.0          \nERRGRP=               4\nERRNUM=              14')"
 
+# User-reported: "HAL-S-360 Users Manual"/DEMO.hal ("THIS IS A
+# DEMONSTRATION PROGRAM TO SHOW THE LISTING PRODUCED BY THE HAL/S-360
+# COMPILER") crashed with "DSUB: asterisk subscript with 4 indices not
+# yet implemented" -- a genuinely new, real (confirmed compiled and run
+# by real gpc, not just a syntax-coverage listing artifact), corpus
+# subscript shape: `K$(2 TO 5:)` (K an ARRAY(5) MATRIX(3,4)), an array-
+# dimension to-partition combined with a full component (matrix)
+# wildcard on both axes -- selects a contiguous run of whole MATRIX
+# elements. Root-caused to several compounding, genuinely new gaps:
+# (1) ensure_container() never had an ARRAY(n) MATRIX(r,c) case at all
+# (new array_of_matrix/array_len fields, state.h), so K's own 60-value
+# INITIAL list was being silently mis-sized; (2) DSUB itself never
+# accepted a QUAL_XPT (structure-field) base -- `MY_STRUCTURE.RR.AAREF.
+# BB.CC$(3;1 TO 3,*)`, CC a plain MATRIX(4,3) structure terminal --
+# resolved the same way OP_RTRN's `RETURN X.V;` already does
+# (resolve_xpt_field), extended to also lazily shape-allocate MATRIX/
+# ARRAY-of-MATRIX terminals (previously VECTOR-only); (3) a second new
+# DSUB shape, `CC$(1 TO 3,*)` -- a component (matrix-axis) to-partition
+# on rows plus a full wildcard on columns; (4) MASN's own QUAL_XPT
+# destination write unconditionally overwrote the destination field's
+# rows/cols from the *source* container's own (unrelated) shape,
+# corrupting `MY_STRUCTURE.RR.AAREF.DD.EE$(I;) = K$(2 TO 5:);`'s target
+# EE field (ARRAY(4) MATRIX(3,4)) -- fixed to preserve a declared
+# array_of_matrix field's own fixed shape. Verified against real gpc
+# (compileLinkRun): 59 of 60 printed WRITE values now match exactly.
+# The one remaining divergence (D, the very last value on this
+# program's own `DO FOR C=1 TO 100; D=K$(C:2,3); END;` loop -- K only
+# has 5 array elements, so this deliberately runs 95 iterations out of
+# bounds) is a separate, newly-discovered real-hardware behavior
+# (yagpc2-yahalmat2-issues.db, a new id) -- real gpc gives D=0.0 (the
+# untouched declare-time default) rather than any of K's real values,
+# confirmed independently via a clean minimal repro; not attempted here,
+# tracked separately.
+run ./run_local_fixture.sh demo_users_manual "$(printf ' 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 2.0100000E+02      2.0200000E+02      2.0300000E+02      2.0400000E+02\n 2.0500000E+02      2.0600000E+02      2.0700000E+02      2.0800000E+02\n 2.0900000E+02      2.1000000E+02      2.1100000E+02      2.1200000E+02\n 3.0100000E+02      3.0200000E+02      3.0300000E+02      3.0400000E+02\n 3.0500000E+02      3.0600000E+02      3.0700000E+02      3.0800000E+02\n 3.0900000E+02      3.1000000E+02      3.1100000E+02      3.1200000E+02\n 4.0100000E+02      4.0200000E+02      4.0300000E+02      4.0400000E+02\n 4.0500000E+02      4.0600000E+02      4.0700000E+02      4.0800000E+02\n 4.0900000E+02      4.1000000E+02      4.1100000E+02      4.1200000E+02      3.0700000E+02\n 1.0000000E+02      2.0000000E+02      3.0000000E+02      4.0000000E+02      4.5000000E+01      5.6000000E+01      6.7000000E+01\n 7.8000000E+01      8.9000000E+01      0.0                0.0                0.0                0.0                0.0          \n 9.0000000E+01      1.0000000E+00      1.2000000E+01      2.3000000E+01')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

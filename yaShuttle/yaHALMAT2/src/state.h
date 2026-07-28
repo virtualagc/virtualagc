@@ -193,6 +193,25 @@ typedef struct {
                             * container op instead, elementwise math not caring about the VECTOR
                             * grouping, but the mixed-shape ABVAL/UNIT/VDOT cases in this same file
                             * prove that coincidence can't be relied on generally). */
+    bool array_of_matrix; /* true only for the ARRAY(n) MATRIX(r,c) case (DEMO.hal's own `K
+                            * ARRAY(5) MATRIX(3,4)`, yaGPC2-yaHALMAT2-issues.db-style user-
+                            * reported via "HAL-S-360 Users Manual"/DEMO.hal) -- the array_of_
+                            * vector case above only has ONE per-element dimension (cols), so its
+                            * own rows/cols pair can double as (outer array length, per-element
+                            * length); MATRIX's own per-element shape is already 2-dimensional
+                            * (rows,cols), leaving nowhere to also store the outer ARRAY(n)'s own
+                            * length -- array_len (below) holds it separately. rows/cols keep
+                            * their ordinary per-element MATRIX(r,c) meaning; ensure_container()
+                            * allocates element_count = array_len*rows*cols, each n-th block of
+                            * rows*cols elements being one whole MATRIX, row-major within the
+                            * block exactly like a genuine MATRIX(r,c) SYT -- so concatenating M
+                            * consecutive blocks (DSUB's own array-to-partition + full-component-
+                            * wildcard case, e.g. `K$(2 TO 5:)`) is just a flat memcpy of
+                            * M*rows*cols consecutive elements, presentable to WRITE/store_
+                            * container_result as an ordinary (M*rows) x cols MATRIX-shaped
+                            * container with no further reshaping needed. */
+    int array_len; /* array_of_matrix only: the outer ARRAY(n)'s own length (n above); 0 when
+                     * array_of_matrix is false. Set by ensure_container(). */
     char *char_value; /* SYT_TYPE_CHARACTER; owned, malloc'd, NUL-terminated. No
                         * fixed-length/VARYING-vs-fixed truncation-or-padding
                         * behavior is implemented yet (class-2/CASN.md's

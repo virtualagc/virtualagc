@@ -723,6 +723,34 @@ static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat
             e->element_count = (size_t)fsym->cols;
             e->cols = fsym->cols;
             e->rows = 0;
+        } else if (fsym && fsym->hal_class == 3 && fsym->shape == HALMAT_SHAPE_MATRIX &&
+                   fsym->rows > 0 && fsym->cols > 0) {
+            /* Plain MATRIX structure terminal (yagpc2-yahalmat2-issues.db,
+             * "HAL-S-360 Users Manual"/DEMO.hal's `AA.CC MATRIX(4,3)`,
+             * read via `MY_STRUCTURE.RR.AAREF.BB.CC$(3;1 TO 3,*)` before
+             * ever being written -- the "no confirmed real-corpus MATRIX
+             * structure terminal exists yet" case this function's own
+             * comment above anticipated). Mirrors the VECTOR branch
+             * exactly, just 2-dimensional. */
+            e->elements = calloc((size_t)fsym->rows * (size_t)fsym->cols, sizeof(halmat_scalar_t));
+            e->element_count = (size_t)fsym->rows * (size_t)fsym->cols;
+            e->rows = fsym->rows;
+            e->cols = fsym->cols;
+        } else if (fsym && fsym->hal_class == 3 && fsym->shape == HALMAT_SHAPE_ARRAY &&
+                   fsym->array_dim_count == 1 && fsym->rows > 0 && fsym->cols > 0 &&
+                   fsym->array_dims[0] > 0) {
+            /* ARRAY-of-MATRIX structure terminal (same DEMO.hal repro,
+             * `AA.EE ARRAY(4) MATRIX(3,4)`, read via `MY_STRUCTURE.RR.
+             * AAREF.DD.EE$(2;2 TO 4:)`) -- same array_of_matrix shape
+             * ensure_container() now allocates for a plain (non-
+             * structure-field) SYT, mirrored here for the struct-field
+             * shadow-entry case. */
+            e->array_len = fsym->array_dims[0];
+            e->rows = fsym->rows;
+            e->cols = fsym->cols;
+            e->element_count = (size_t)e->array_len * (size_t)e->rows * (size_t)e->cols;
+            e->elements = calloc(e->element_count, sizeof(halmat_scalar_t));
+            e->array_of_matrix = true;
         }
     }
     return e;
@@ -1447,6 +1475,8 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     size_t count = 0;
     int elem_kind = 0; /* 0=numeric, 1=BIT, 2=CHARACTER */
     bool array_of_vector = false;
+    bool array_of_matrix = false;
+    int array_len = 0;
     if (state->symtab) {
         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, syt_index);
         if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->cols > 0) {
@@ -1487,6 +1517,34 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
             cols = sym->cols;
             count = (size_t)rows * (size_t)cols;
             array_of_vector = true;
+        } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count == 1 &&
+                   sym->hal_class == 3 && sym->rows > 0 && sym->cols > 0 && sym->array_dims[0] > 0) {
+            /* ARRAY(n) MATRIX(r,c) -- an ARRAY-of-MATRIX, the sibling gap
+             * ensure_container's own array_of_vector comment (just above)
+             * flagged as "not handled here (no confirmed real-corpus case
+             * yet)" -- now found, user-reported ("HAL-S-360 Users
+             * Manual"/DEMO.hal's `K ARRAY(5) MATRIX(3,4) INITIAL(...)`).
+             * symtab.c already decodes both the per-element MATRIX shape
+             * (sym->rows/cols, same SYM_LENGTH packing as a plain MATRIX)
+             * and the outer array length (sym->array_dims[0]) for this
+             * exact shape -- rows/cols here keep their ordinary per-
+             * element MATRIX(r,c) meaning (state.h's array_of_matrix
+             * comment), array_len holds the outer length separately,
+             * since (unlike array_of_vector's single per-element
+             * dimension) there's nowhere left in the 2-field rows/cols
+             * pair to also fit a 3rd, outer dimension. Each of the n
+             * array elements occupies its own contiguous rows*cols block
+             * (row-major within the block, exactly like a genuine
+             * MATRIX(r,c) SYT), so n consecutive blocks are already laid
+             * out exactly like one big (n*rows) x cols MATRIX -- letting
+             * DSUB's own array-to-partition-plus-full-component-wildcard
+             * case (`K$(2 TO 5:)`) implement as a flat memcpy with no
+             * further reshaping. */
+            rows = sym->rows;
+            cols = sym->cols;
+            array_len = sym->array_dims[0];
+            count = (size_t)array_len * (size_t)rows * (size_t)cols;
+            array_of_matrix = true;
         } else if (sym && sym->shape == HALMAT_SHAPE_ARRAY && sym->array_dim_count == 2 &&
                    sym->array_dims[0] > 0 && sym->array_dims[1] > 0) {
             /* Genuinely 2-dimensional ARRAY(r,c) -- HAL/S allows
@@ -1561,6 +1619,8 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
     e->rows = rows;
     e->cols = cols;
     e->array_of_vector = array_of_vector;
+    e->array_of_matrix = array_of_matrix;
+    e->array_len = array_len;
 }
 
 /* Matrix inverse (MINV, class-3/MINV.md; BFNC's INVERSE selector), via
@@ -5478,11 +5538,41 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].string = sub;
                     break;
                 }
-                if (ins->operands[0].qual != QUAL_SYT) { fail(state, "DSUB: reference must be SYT"); break; }
-                uint16_t base_syt = ins->operands[0].data;
-                if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
-                ensure_container(state, base_syt);
-                halmat_syt_entry_t *base = &state->syt[base_syt];
+                /* DEMO.hal ("HAL-S-360 Users Manual", yagpc2-yahalmat2-
+                 * issues.db): `MY_STRUCTURE.RR.AAREF.BB.CC$(3;1 TO 3,*)`
+                 * subscripts a MATRIX *structure terminal* -- the TSUB/
+                 * EXTN chain resolving MY_STRUCTURE(copy 3).AAREF.BB.CC
+                 * leaves this DSUB's own base operand QUAL_XPT, not
+                 * QUAL_SYT, previously rejected unconditionally. Resolved
+                 * the same way OP_RTRN's own whole-field read (`RETURN
+                 * X.V;`) and resolve_container()'s QUAL_XPT case already
+                 * do -- resolve_xpt_field() returns the field's own
+                 * shadow entry directly (lazily shape-allocated on first
+                 * read, extended above to also cover MATRIX/ARRAY-of-
+                 * MATRIX terminals, not just VECTOR). No real numeric SYT
+                 * index exists for a struct-field shadow entry (it lives
+                 * in its own per-copy shadow table, not state->syt[]) --
+                 * base_syt/ensure_container only apply to the QUAL_SYT
+                 * case, so writable_ref/container_ref_syt tracking below
+                 * is simply skipped for an XPT base (base_syt stays
+                 * HALMAT_SYT_MAX, an obviously-invalid sentinel) -- every
+                 * confirmed real-corpus XPT-base DSUB use so far is
+                 * read-only (WRITE-statement arguments), so this is not a
+                 * gap yet. */
+                uint16_t base_syt = HALMAT_SYT_MAX;
+                halmat_syt_entry_t *base;
+                if (ins->operands[0].qual == QUAL_XPT) {
+                    base = resolve_xpt_field(state, &ins->operands[0]);
+                    if (!base) break;
+                } else if (ins->operands[0].qual == QUAL_SYT) {
+                    base_syt = ins->operands[0].data;
+                    if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
+                    ensure_container(state, base_syt);
+                    base = &state->syt[base_syt];
+                } else {
+                    fail(state, "DSUB: reference must be SYT or XPT");
+                    break;
+                }
 
                 uint8_t num_indices = ins->operand_count - 1;
 
@@ -5626,6 +5716,94 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->vac[ins->index].bitpart_position = position;
                         state->vac[ins->index].bitpart_width = width;
                         state->vac[ins->index].bitpart_array_offset = elem_idx;
+                        break;
+                    } else if (num_indices == 4 && base->array_of_matrix &&
+                               ins->operands[1].tag1 == 6 && ins->operands[2].tag1 == 6 &&
+                               ins->operands[3].qual == QUAL_AST && ins->operands[4].qual == QUAL_AST) {
+                        /* `K$(2 TO 5:)` (yagpc2-yahalmat2-issues.db,
+                         * user-reported "HAL-S-360 Users Manual"/
+                         * DEMO.hal, K an ARRAY(5) MATRIX(3,4)): an array-
+                         * dimension to-partition (alpha=6/6 per DSUB.md's
+                         * own confirmed table) combined with a *full*
+                         * component (matrix) wildcard on both axes
+                         * (alpha=0/0, the bare trailing colon after the
+                         * range expanding to explicit row+col asterisks)
+                         * -- selects a contiguous run of whole MATRIX
+                         * elements. array_of_matrix's own storage layout
+                         * (state.h/ensure_container's own comment: n
+                         * consecutive rows*cols row-major blocks) makes
+                         * this a single flat memcpy, presented to the
+                         * caller as an ordinary ((range_len*rows) x cols)
+                         * MATRIX-shaped container -- concatenating
+                         * whole-matrix row-major blocks vertically is
+                         * already exactly what an (range_len*rows) x cols
+                         * MATRIX's own row-major layout looks like, no
+                         * reshaping needed. Confirmed against real gpc
+                         * (compileLinkRun) this session. */
+                        resolved_value_t bv1, bv2;
+                        if (!resolve_operand(state, &ins->operands[1], &bv1)) break;
+                        if (!resolve_operand(state, &ins->operands[2], &bv2)) break;
+                        int32_t array_start = rv_to_integer(&bv1) - 1;
+                        int32_t array_end = rv_to_integer(&bv2) - 1;
+                        if (array_start < 0) array_start = 0;
+                        if (array_end >= base->array_len) array_end = base->array_len - 1;
+                        if (array_end < array_start) { fail(state, "DSUB: array to-partition range is empty/reversed"); break; }
+                        int32_t sel_len = array_end - array_start + 1;
+                        size_t per_elem = (size_t)base->rows * (size_t)base->cols;
+                        count = (size_t)sel_len * per_elem;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                        memcpy(buf, base->elements + (size_t)array_start * per_elem, count * sizeof(halmat_scalar_t));
+                        writable_ref = true;
+                        ref_offset = (size_t)array_start * per_elem;
+                        int result_rows = sel_len * base->rows;
+                        int result_cols = base->cols;
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (!store_container_result(state, ins->index, buf, count, result_rows, result_cols)) break;
+                        if (writable_ref && base_syt < HALMAT_SYT_MAX) {
+                            state->vac[ins->index].is_container_ref = true;
+                            state->vac[ins->index].container_ref_syt = base_syt;
+                            state->vac[ins->index].container_ref_offset = ref_offset;
+                            state->vac[ins->index].container_ref_stride = ref_stride;
+                        }
+                        break;
+                    } else if (num_indices == 3 && ast_axis == 2 && base->rows > 0 && !base->array_of_matrix &&
+                               ins->operands[1].tag1 == 2 && ins->operands[2].tag1 == 2) {
+                        /* `CC$(1 TO 3,*)` (same DEMO.hal repro, CC a plain
+                         * MATRIX(4,3)): a component (matrix-axis) to-
+                         * partition on rows (alpha=2/2 per DSUB.md's own
+                         * confirmed table -- distinct from the alpha=6/6
+                         * *array*-dimension to-partition just above) plus
+                         * a full wildcard on columns. Row-major storage
+                         * makes a row range genuinely contiguous (same
+                         * "M$(i,*)" writable-view mechanism just above,
+                         * generalized from one row to a run of rows) --
+                         * unlike the mirror case (a column range with
+                         * rows wildcarded), which would need a genuine
+                         * 2-D sub-block extraction (not a single offset+
+                         * stride run) and has no confirmed real-HAL/S
+                         * trigger, so it's not implemented here. */
+                        resolved_value_t bv1, bv2;
+                        if (!resolve_operand(state, &ins->operands[1], &bv1)) break;
+                        if (!resolve_operand(state, &ins->operands[2], &bv2)) break;
+                        int32_t row_start = rv_to_integer(&bv1) - 1;
+                        int32_t row_end = rv_to_integer(&bv2) - 1;
+                        if (row_start < 0) row_start = 0;
+                        if (row_end >= base->rows) row_end = base->rows - 1;
+                        if (row_end < row_start) { fail(state, "DSUB: component to-partition range is empty/reversed"); break; }
+                        int32_t sel_rows = row_end - row_start + 1;
+                        count = (size_t)sel_rows * (size_t)base->cols;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                        memcpy(buf, base->elements + (size_t)row_start * (size_t)base->cols, count * sizeof(halmat_scalar_t));
+                        writable_ref = true;
+                        ref_offset = (size_t)row_start * (size_t)base->cols;
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (!store_container_result(state, ins->index, buf, count, sel_rows, base->cols)) break;
+                        if (writable_ref && base_syt < HALMAT_SYT_MAX) {
+                            state->vac[ins->index].is_container_ref = true;
+                            state->vac[ins->index].container_ref_syt = base_syt;
+                            state->vac[ins->index].container_ref_offset = ref_offset;
+                            state->vac[ins->index].container_ref_stride = ref_stride;
+                        }
                         break;
                     } else if (base->bit_elements || base->char_elements) {
                         /* A BIT/BOOLEAN or CHARACTER ARRAY subscript
@@ -6249,8 +6427,34 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         field->element_count = src_count;
                     }
                     memcpy(field->elements, src, src_count * sizeof(halmat_scalar_t));
-                    field->rows = src_rows;
-                    field->cols = src_cols;
+                    if (!field->array_of_matrix) {
+                        /* DEMO.hal ("HAL-S-360 Users Manual"): an
+                         * ARRAY(n) MATRIX(r,c) structure terminal (`AA.EE
+                         * ARRAY(4) MATRIX(3,4)`) has a fixed declared
+                         * shape (rows=r, cols=c, array_len=n) that a
+                         * whole-container assignment must never change,
+                         * even when the RHS's own container happens to
+                         * carry different rows/cols metadata for its own
+                         * unrelated purposes -- `EE$(I;) = K$(2 TO 5:);`
+                         * assigns a flat 48-element run whose *source*
+                         * container (K's own DSUB result) is shaped
+                         * (12 x 4) for its own row-major-concatenation
+                         * convenience (DSUB's own array-to-partition-
+                         * plus-full-wildcard comment), not EE's real
+                         * (3 x 4, n=4) shape -- blindly copying src_rows/
+                         * src_cols here previously clobbered EE's own
+                         * already-correct lazily-allocated shape
+                         * (resolve_xpt_field's own array_of_matrix
+                         * branch), corrupting every later read of EE
+                         * (e.g. the WRITE statement's own EE$(2;2 TO
+                         * 4:)). Every other destination shape (plain
+                         * VECTOR/MATRIX field) has no such fixed-shape
+                         * concern -- src_rows/src_cols are exactly what
+                         * should land there, unchanged from before this
+                         * fix. */
+                        field->rows = src_rows;
+                        field->cols = src_cols;
+                    }
                     break;
                 }
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "MASN/VASN: receiver must be SYT"); break; }

@@ -1,0 +1,66 @@
+ DEMO: PROGRAM;
+C
+C       THIS IS A DEMONSTRATION PROGRAM TO SHOW THE LISTING PRODUCED BY
+C       THE HAL/S-360 COMPILER
+C
+    REPLACE PRINTER BY "6";
+    DECLARE INTEGER INITIAL(1), A, B, C;
+    DECLARE D, F INITIAL(45), G INITIAL(56);
+    DECLARE E VECTOR(4) INITIAL(100, 200, 300, 400);
+    DECLARE H INITIAL(67), I INITIAL(78), J INITIAL(89),
+       K ARRAY(5) MATRIX(3,4) INITIAL(  1,   2,   3,   4,
+                                        5,   6,   7,   8,
+                                        9,  10,  11,  12,
+
+                                      101, 102, 103, 104,
+                                      105, 106, 107, 108,
+                                      109, 110, 111, 112,
+
+                                      201, 202, 203, 204,
+                                      205, 206, 207, 208,
+                                      209, 210, 211, 212,
+
+                                      301, 302, 303, 304,
+                                      305, 306, 307, 308,
+                                      309, 310, 311, 312,
+
+                                      401, 402, 403, 404,
+                                      405, 406, 407, 408,
+                                      409, 410, 411, 412),
+       L INITIAL(90), M INITIAL(01),
+       N INITIAL(12), O SCALAR INITIAL(23);
+    STRUCTURE AA:
+       1 BB, 2 CC MATRIX(4,3),
+       1 DD, 2 EE ARRAY(4) MATRIX(3,4);
+    STRUCTURE QQ:
+       1 RR, 2 AAREF AA-STRUCTURE, 2 SS CHARACTER(5);
+    DECLARE MY_STRUCTURE QQ-STRUCTURE(5);
+
+    PROC1: PROCEDURE;
+       DECLARE A INTEGER;
+       DO FOR TEMPORARY I = 1 TO 5;
+          MY_STRUCTURE.RR.AAREF.DD.EE$(I;) = K$(2 TO 5:);
+       END;
+       IF A=B THEN
+          DO;
+    LABEL1:  B = C;
+             MY_STRUCTURE.RR.AAREF.DD.EE$(*;3:2,*) =
+             MY_STRUCTURE.RR.AAREF.BB.CC$(*;*,2);
+          END;
+       ELSE
+          A=C;
+    CLOSE PROC1;
+
+    CALL PROC1;
+    DO FOR C = 1 TO 100;
+       D=K$(C:2,3);
+    END;
+    DO CASE A;
+       A=B;
+       E=K$(B:A,*);
+    END;
+    K=0;
+    WRITE(PRINTER) MY_STRUCTURE.RR.AAREF.BB.CC$(3;1 TO 3,*),
+                   MY_STRUCTURE.RR.AAREF.DD.EE$(2;2 TO 4:),
+                   D, E, F, G, H, I, J, K, L, M, N, O;
+ CLOSE DEMO;
