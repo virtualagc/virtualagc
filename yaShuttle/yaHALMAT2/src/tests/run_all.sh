@@ -2266,6 +2266,41 @@ run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,
 run ./run_local_fixture.sh better222 "B=      0.0               C=      6.0000000E+00"
 run ./run_local_fixture.sh gncpool224 "$(printf 'VEL2=      0.0                0.0                0.0               POSN2=      0.0                0.0                0.0          ')"
 
+# Task #72 (bit_partition_extraction_mismatch): 253-TEST0.hal's
+# `RETURN INFO(WORD+1:BITNUM+1);` (DSUB.md's DSUB, one array-element
+# index PLUS one bit-sub-index in a single instruction -- INFO an
+# ARRAY(63) BIT(16), the function extracting a single bit out of one
+# specific 16-bit array element) previously always returned FALSE for
+# every I, confirmed via unHALMAT.py/--disasm to compile to a DSUB
+# shape (tag=1, 2 operands, base->rows==0, second operand's own tag1=1)
+# never before seen -- distinct from task #64's own `base->rows==0 &&
+# num_indices==2` to-partition branch, which the new, more specific
+# bit-sub-index branch had to be ordered ahead of since both match the
+# same coarse shape. Two compounding, genuinely separate bugs found:
+# (1) this DSUB shape's array-element-plus-bit-subindex extraction
+# itself was entirely unimplemented, falling through to a generic
+# fallback that discarded the bit sub-index -- fixed via a new
+# bitpart_array_offset field (state.h's halmat_vac_slot_t) generalizing
+# the existing bitpart_ref deferred-BIT-reference mechanism (previously
+# scalar-target-only) to also address one element of an ARRAY's own
+# bit_elements[], consumed by both resolve_operand's QUAL_VAC read path
+# and write_destination's QUAL_VAC write path; (2) once bit-sub-index
+# extraction was reading the right array element, that element's own
+# INITIAL(BIN'...') value turned out to be all-zero regardless --
+# traced to OP_BINT's plain-symbol-write fallback (BIT ARRAY's own
+# uniform-INITIAL()-value case, compiled as one BINT wrapped in an
+# IDLP/DLPE replay pair, one execution per array element) writing
+# directly into the destination's scalar bit_value union member on
+# every replay pass instead of routing through write_destination's
+# already-correct array-element/arrayed_index-aware logic, exactly
+# mirroring the fix OP_SINT's own comment already documents for the
+# analogous SCALAR-array case -- INFO's bit_elements[] was therefore
+# never populated by INITIAL() at all, for any I. Fixing both in
+# combination now correctly returns TEST(0)=FALSE, TEST(1)=FALSE,
+# TEST(2)=FALSE, TEST(5)=TRUE, confirmed against real gpc (exact
+# match).
+run ./run_local_fixture.sh test0_253 "$(printf 'TEST(0)=     0\nTEST(1)=     0\nTEST(2)=     0\nTEST(5)=     1')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

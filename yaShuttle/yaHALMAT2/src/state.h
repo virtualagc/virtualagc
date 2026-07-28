@@ -369,13 +369,26 @@ typedef struct {
                                * a subscript reference" fallback (is_ref false, is_subbit_ref
                                * false, nothing else recognized). */
     uint16_t bitpart_target_syt; /* is_bitpart_ref: the plain SYT variable whose raw bit
-                               * pattern is read from/written into. */
+                               * pattern is read from/written into (or, when bitpart_
+                               * array_offset >= 0, the ARRAY(n) BIT(w) variable one of
+                               * whose own elements is read/written instead). */
     int bitpart_position;   /* is_bitpart_ref: the 1-indexed HAL/S bit position (MSB-first
                                * within the target's own declared width -- same convention
                                * as OP_DSUB's read-side extraction, format_bit_field, etc). */
     int bitpart_width;      /* is_bitpart_ref: the field width in bits (1 for the
                                * single-index `B$(n)` form, the explicit "width" operand
                                * for the at-partition `B$(width AT position)` form). */
+    int32_t bitpart_array_offset; /* is_bitpart_ref: -1 (default) for a plain scalar
+                               * bitpart_target_syt, as originally established (250-
+                               * BITS.hal's `B$(1) = ON;`); >= 0 selects element
+                               * bitpart_target_syt's own bit_elements[this] instead --
+                               * `INFO(WORD+1):BITNUM+1` (INFO an ARRAY(n) BIT(16)),
+                               * user-reported (bit_partition_extraction_mismatch;
+                               * 253-TEST0.hal): a *combined* array-index-plus-bit-
+                               * sub-index DSUB shape, distinct from both the plain-
+                               * scalar at-partition/single-index forms above and the
+                               * numeric-ARRAY to-partition range form (task #64's own
+                               * DSUB branch) -- see OP_DSUB's own comment. */
 } halmat_vac_slot_t;
 
 /* Structure-field "shadow slot" storage: HAL/S structure fields (class-0/

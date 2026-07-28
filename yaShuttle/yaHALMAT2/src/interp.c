@@ -776,11 +776,23 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 }
                 const halmat_syt_entry_t *tsyt = &state->syt[slot->bitpart_target_syt];
                 uint32_t raw;
-                switch (tsyt->type) {
-                    case SYT_TYPE_BIT: raw = tsyt->bit_value; break;
-                    case SYT_TYPE_INTEGER: raw = (uint32_t)tsyt->value; break;
-                    case SYT_TYPE_SCALAR: raw = tsyt->scalar.msw; break;
-                    default: raw = 0; break;
+                if (slot->bitpart_array_offset >= 0) {
+                    /* ARRAY(n) BIT(w) element target (state.h's
+                     * bitpart_array_offset comment) -- read the one
+                     * selected element's own raw bit pattern instead of
+                     * a lone scalar bit_value. */
+                    if (!tsyt->bit_elements || (size_t)slot->bitpart_array_offset >= tsyt->element_count) {
+                        fail(state, "VAC bitpart reference: array element out of range");
+                        return false;
+                    }
+                    raw = tsyt->bit_elements[slot->bitpart_array_offset];
+                } else {
+                    switch (tsyt->type) {
+                        case SYT_TYPE_BIT: raw = tsyt->bit_value; break;
+                        case SYT_TYPE_INTEGER: raw = (uint32_t)tsyt->value; break;
+                        case SYT_TYPE_SCALAR: raw = tsyt->scalar.msw; break;
+                        default: raw = 0; break;
+                    }
                 }
                 int decl_width = 32;
                 if (state->symtab) {
@@ -1157,13 +1169,6 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
                 return false;
             }
             halmat_syt_entry_t *e = &state->syt[slot->bitpart_target_syt];
-            uint32_t raw;
-            switch (e->type) {
-                case SYT_TYPE_BIT: raw = e->bit_value; break;
-                case SYT_TYPE_INTEGER: raw = (uint32_t)e->value; break;
-                case SYT_TYPE_SCALAR: raw = e->scalar.msw; break;
-                default: raw = 0; break;
-            }
             int decl_width = 32;
             if (state->symtab) {
                 const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, slot->bitpart_target_syt);
@@ -1171,8 +1176,33 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             }
             int width = slot->bitpart_width;
             int shift = decl_width - slot->bitpart_position - width + 1;
+            uint32_t mask = (width == 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
+            if (slot->bitpart_array_offset >= 0) {
+                /* ARRAY(n) BIT(w) element target (state.h's bitpart_
+                 * array_offset comment) -- merge into the one selected
+                 * element's own raw pattern instead of a lone scalar
+                 * bit_value. No confirmed real-corpus trigger for this
+                 * as an assignment target yet (253-TEST0.hal's own use
+                 * is read-only, `RETURN INFO(WORD+1):BITNUM+1;`) --
+                 * implemented anyway on general principle, symmetric
+                 * with the plain-scalar case just below. */
+                if (!e->bit_elements || (size_t)slot->bitpart_array_offset >= e->element_count) {
+                    fail(state, "BIT at-partition assignment: array element out of range");
+                    return false;
+                }
+                uint32_t raw = e->bit_elements[slot->bitpart_array_offset];
+                if (shift >= 0) raw = (raw & ~(mask << shift)) | ((val->bits & mask) << shift);
+                e->bit_elements[slot->bitpart_array_offset] = raw;
+                return true;
+            }
+            uint32_t raw;
+            switch (e->type) {
+                case SYT_TYPE_BIT: raw = e->bit_value; break;
+                case SYT_TYPE_INTEGER: raw = (uint32_t)e->value; break;
+                case SYT_TYPE_SCALAR: raw = e->scalar.msw; break;
+                default: raw = 0; break;
+            }
             if (shift >= 0) {
-                uint32_t mask = (width == 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
                 raw = (raw & ~(mask << shift)) | ((val->bits & mask) << shift);
             }
             switch (e->type) {
@@ -5463,6 +5493,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].bitpart_target_syt = base_syt;
                     state->vac[ins->index].bitpart_position = position;
                     state->vac[ins->index].bitpart_width = width;
+                    state->vac[ins->index].bitpart_array_offset = -1;
                     break;
                 }
 
@@ -5509,6 +5540,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].bitpart_target_syt = base_syt;
                     state->vac[ins->index].bitpart_position = position;
                     state->vac[ins->index].bitpart_width = 1;
+                    state->vac[ins->index].bitpart_array_offset = -1;
                     break;
                 }
 
@@ -5597,6 +5629,70 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_string = true;
                     state->vac[ins->index].string = sub;
+                    break;
+                }
+
+                /* ARRAY(n) BIT(w) element-index-plus-bit-sub-index
+                 * extraction (`INFO(WORD+1):BITNUM+1`, INFO an ARRAY(n)
+                 * BIT(16)) -- user-reported
+                 * (bit_partition_extraction_mismatch; 253-TEST0.hal's
+                 * `RETURN INFO(WORD+1):BITNUM+1;` inside a BOOLEAN
+                 * FUNCTION). A genuinely distinct DSUB shape from every
+                 * other 2-operand case above: confirmed via real
+                 * compiled HALMAT that this is ONE DSUB (not an array-
+                 * select DSUB feeding a separate bit-select DSUB), with
+                 * `ins->tag==1` (BIT-class result) and its SECOND operand
+                 * specifically TAG1==1 ("bit sub-index" marker, the same
+                 * TAG1 the plain single-index `B$(n)` form above uses) --
+                 * the FIRST operand (TAG1 observed as 5 in this trace,
+                 * not matching any of DSUB.md's established 1/2/3
+                 * "kind" markers for a plain scalar base, presumably
+                 * because this shape's own first operand plays a
+                 * different structural role, "array element index," not
+                 * "subscript kind") selects the element, the second
+                 * selects a single bit (1-indexed, MSB-first) *within*
+                 * that specific element's own declared width -- distinct
+                 * from task #64's own numeric-ARRAY to-partition branch
+                 * just below, which this shape would otherwise also
+                 * match (base->rows==0, num_indices==2) were it not
+                 * gated out by requiring ins->tag==1 && operands[2].
+                 * tag1==1 first. Deferred via the same bitpart_ref
+                 * mechanism the plain-scalar BIT at-partition/single-
+                 * index cases already use, generalized with a new
+                 * bitpart_array_offset (state.h) selecting one specific
+                 * element of the target ARRAY's own bit_elements[]
+                 * instead of always reading/writing a lone scalar
+                 * bit_value. Confirmed against real gpc: TEST(0..2)
+                 * correctly FALSE, TEST(5) correctly TRUE -- previously
+                 * ALL FALSE (fell through to the generic multi-dimension
+                 * fallback or, after task #64's own fix, this session's
+                 * new to-partition branch, either way discarding the
+                 * bit sub-index entirely and returning/misreading the
+                 * whole element). */
+                if (ins->tag == 1 && num_indices == 2 && base->rows == 0 && ins->operands[2].tag1 == 1) {
+                    resolved_value_t idxv, posv;
+                    if (!resolve_operand(state, &ins->operands[1], &idxv)) break;
+                    if (!resolve_operand(state, &ins->operands[2], &posv)) break;
+                    int32_t elem_idx = rv_to_integer(&idxv) - 1;
+                    int position = rv_to_integer(&posv);
+                    if (elem_idx < 0) elem_idx = 0;
+                    elem_idx = (int32_t)((size_t)elem_idx % (base->element_count ? base->element_count : 1));
+                    int decl_width = 32;
+                    if (state->symtab) {
+                        const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, base_syt);
+                        if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+                    }
+                    if (position < 1 || position > decl_width) {
+                        fail(state, "DSUB: BIT array element sub-index out of range");
+                        break;
+                    }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_bitpart_ref = true;
+                    state->vac[ins->index].bitpart_target_syt = base_syt;
+                    state->vac[ins->index].bitpart_position = position;
+                    state->vac[ins->index].bitpart_width = 1;
+                    state->vac[ins->index].bitpart_array_offset = elem_idx;
                     break;
                 }
 
@@ -6340,7 +6436,22 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * as SINT/IINT/CINT. The OFFSET-addressed form (BIT
                  * ARRAY INITIAL(v1,v2,...)) shares SINT's
                  * xint_offset_run helper -- see OP_SINT's comment for
-                 * the general mechanism. */
+                 * the general mechanism.
+                 *
+                 * Routed through write_destination (not a raw
+                 * state->syt[...].bit_value write) for the same reason
+                 * OP_SINT is: `INFO ARRAY(63) BIT(16)
+                 * INITIAL(BIN'...')` (the uniform-INITIAL()-value case)
+                 * compiles to exactly one BINT wrapped in an
+                 * IDLP/DLPE replay pair, one execution per array
+                 * element with state->arrayed_index advancing each
+                 * pass. The old direct write here always landed on the
+                 * destination's own scalar bit_value union member
+                 * regardless of arrayed_index, so bit_elements[] was
+                 * never populated at all -- confirmed via
+                 * bit_partition_extraction_mismatch/253-TEST0.hal,
+                 * where every element of a BIT ARRAY's uniform
+                 * INITIAL() literal read back as zero. */
                 if (ins->operand_count != 2) { fail(state, "BINT: expected 2 operands"); break; }
                 if (ins->operands[0].qual == QUAL_OFF && ins->operands[1].qual == QUAL_LIT) {
                     xint_offset_run(state, ins);
@@ -6349,8 +6460,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "BINT: unsupported destination qualifier"); break; }
                 if (a.kind != RV_BITS) { fail(state, "BINT: initializer is not BIT"); break; }
-                state->syt[ins->operands[0].data].type = SYT_TYPE_BIT;
-                state->syt[ins->operands[0].data].bit_value = a.bits;
+                if (!write_destination(state, &ins->operands[0], &a)) break;
                 break;
 
             case OP_NINT:
