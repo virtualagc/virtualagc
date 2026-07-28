@@ -2728,6 +2728,29 @@ run ./run_local_fixture.sh noret14 "$(printf 'R=      0.0          \nERRGRP=    
 # tracked separately.
 run ./run_local_fixture.sh demo_users_manual "$(printf ' 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 2.0100000E+02      2.0200000E+02      2.0300000E+02      2.0400000E+02\n 2.0500000E+02      2.0600000E+02      2.0700000E+02      2.0800000E+02\n 2.0900000E+02      2.1000000E+02      2.1100000E+02      2.1200000E+02\n 3.0100000E+02      3.0200000E+02      3.0300000E+02      3.0400000E+02\n 3.0500000E+02      3.0600000E+02      3.0700000E+02      3.0800000E+02\n 3.0900000E+02      3.1000000E+02      3.1100000E+02      3.1200000E+02\n 4.0100000E+02      4.0200000E+02      4.0300000E+02      4.0400000E+02\n 4.0500000E+02      4.0600000E+02      4.0700000E+02      4.0800000E+02\n 4.0900000E+02      4.1000000E+02      4.1100000E+02      4.1200000E+02      3.0700000E+02\n 1.0000000E+02      2.0000000E+02      3.0000000E+02      4.0000000E+02      4.5000000E+01      5.6000000E+01      6.7000000E+01\n 7.8000000E+01      8.9000000E+01      0.0                0.0                0.0                0.0                0.0          \n 9.0000000E+01      1.0000000E+00      1.2000000E+01      2.3000000E+01')"
 
+# DB id 49 (demo_hal_matrix_shaping_wildcard_dsub_crash): the live
+# "HAL-S-360 Users Manual"/DEMO.hal has since been substantially
+# rewritten upstream (it now exercises even more subscript shapes than
+# the snapshot demo_users_manual locks in above) and its own new
+# leading statement crashed with "operand qualifier AST not yet
+# implemented" -- `MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+# MATRIX$(4,3)(...);`, a full-wildcard $(*,*) MATRIX structure-field
+# assignment (both matrix axes wildcarded at once, distinct from the
+# already-implemented M$(i,*)/M$(*,j) single-axis-wildcard cases).
+# Fixed alongside a second, closely related new shape found pushing
+# further into the same rewritten file: `EE$(J:)`/`K$(J+1:)`, a
+# single *computed* (non-literal, non-range) array index combined
+# with a full component wildcard on an ARRAY-of-MATRIX. Both required
+# extending the writable-container-reference mechanism (MASN/state.h)
+# to support a receiver resolved through a QUAL_XPT (structure-field)
+# DSUB base, not just a plain SYT one. Confirmed against real gpc via
+# compileLinkRun. The live DEMO.hal still doesn't run to completion --
+# a third, deeper gap (TSUB accepting an asterisk copy-index to
+# broadcast an assignment across every copy of a multi-copy structure)
+# remains and needs its own dedicated investigation; see the DB's own
+# follow-up entry.
+run ./run_local_fixture.sh matrix_field_wildcard "$(printf ' 5.1100000E+02      5.1200000E+02      5.1300000E+02      5.1400000E+02      5.1500000E+02      5.1600000E+02      5.1700000E+02\n 5.1800000E+02      5.1900000E+02      5.2000000E+02      5.2100000E+02      5.2200000E+02\n 2.1000000E+01      2.2000000E+01      2.3000000E+01      2.4000000E+01\n 2.5000000E+01      2.6000000E+01      2.7000000E+01      2.8000000E+01\n 2.9000000E+01      3.0000000E+01      3.1000000E+01      3.2000000E+01')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

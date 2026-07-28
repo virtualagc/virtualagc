@@ -1,0 +1,23 @@
+C DB id 49: full-wildcard $(*,*) MATRIX structure-field assignment,
+C and single-computed-index+full-wildcard ARRAY-of-MATRIX subscripting.
+ T:
+ PROGRAM;
+    DECLARE K ARRAY(2) MATRIX(3,4) INITIAL(  1,   2,   3,   4,
+                                              5,   6,   7,   8,
+                                              9,  10,  11,  12,
+                                             21,  22,  23,  24,
+                                             25,  26,  27,  28,
+                                             29,  30,  31,  32);
+    STRUCTURE AA:
+       1 BB, 2 CC MATRIX(4,3),
+       1 DD, 2 EE ARRAY(4) MATRIX(3,4);
+    STRUCTURE QQ:
+       1 RR, 2 AAREF AA-STRUCTURE, 2 SS CHARACTER(5);
+    DECLARE MYSTR QQ-STRUCTURE(2);
+
+    MYSTR.RR.AAREF.BB.CC$(1;*,*) =
+       MATRIX$(4,3)(511,512,513,514,515,516,517,518,519,520,521,522);
+    MYSTR.RR.AAREF.DD.EE$(2;1:) = K$(2:);
+    WRITE(6) MYSTR.RR.AAREF.BB.CC$(1;*,*);
+    WRITE(6) MYSTR.RR.AAREF.DD.EE$(2;1:);
+ CLOSE T;

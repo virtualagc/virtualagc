@@ -328,6 +328,33 @@ typedef struct {
                                    * elements` units; 1 for every case except
                                    * column-select, where it's the MATRIX's
                                    * column count. */
+    bool container_ref_is_field; /* is_container_ref: true when the DSUB this
+                                   * container came from had a QUAL_XPT
+                                   * (structure-field) base rather than a
+                                   * plain SYT one (DEMO.hal, yagpc2-
+                                   * yahalmat2-issues.db id 49, `MY_STRUCTURE.
+                                   * RR.AAREF.BB.CC$(1;*,*) = MATRIX$(4,3)
+                                   * (...);`, CC a MATRIX structure terminal)
+                                   * -- container_ref_syt has no real SYT
+                                   * index to hold in this case (a struct-
+                                   * field shadow entry isn't in state->syt[]
+                                   * at all), so the field_* identity below
+                                   * is used instead, re-resolved via
+                                   * find_or_create_struct_field_path() (the
+                                   * same call resolve_xpt_field() itself
+                                   * makes) at write-back time -- copied
+                                   * straight from the original EXTN result's
+                                   * own is_struct_ref identity (the DSUB's
+                                   * own base operand), not this slot's own
+                                   * struct_* fields (which describe *this*
+                                   * container read, not a structure
+                                   * reference, and would collide in meaning
+                                   * with is_struct_ref's own documented
+                                   * usage above). */
+    uint16_t field_base_syt, field_field_syt;
+    uint16_t field_mid_path[HALMAT_STRUCT_PATH_MAX];
+    uint8_t field_mid_path_len;
+    int32_t field_copy_index;
     bool is_struct_ref;      /* is_ref=false, !is_string, !is_bits, !is_container: true if this slot
                                * holds an EXTN-resolved structure reference (class-0/EXTN.md) --
                                * (struct_base_syt, struct_field_syt), consumed by a following TASN/

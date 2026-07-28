@@ -5619,6 +5619,31 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         memcpy(buf, base->elements, count * sizeof(halmat_scalar_t));
                         writable_ref = true;
                         ref_offset = 0;
+                    } else if (num_indices == 2 && base->rows > 0 &&
+                               ins->operands[1].qual == QUAL_AST && ins->operands[2].qual == QUAL_AST) {
+                        /* `M$(*,*)` (DEMO.hal, yagpc2-yahalmat2-issues.db
+                         * id 49, "HAL-S-360 Users Manual"'s
+                         * `MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+                         * MATRIX$(4,3)(511,...,522);`, CC a MATRIX(4,3)
+                         * structure terminal): both axes wildcarded --
+                         * the whole matrix, distinct from M$(i,*)/
+                         * M$(*,j) just below (which need exactly one
+                         * plain index alongside the other axis'
+                         * asterisk; both-AST previously fell through to
+                         * that branch anyway since it only checks
+                         * `num_indices==2 && base->rows>0`, then tried
+                         * to resolve_operand() the *second* AST operand
+                         * as if it were a plain index, failing with
+                         * "operand qualifier AST not yet implemented").
+                         * Same contiguous whole-container mechanism as
+                         * `V$(*)` above, just for MATRIX's own two
+                         * dimensions -- confirmed against real gpc
+                         * (compileLinkRun). */
+                        count = (size_t)base->rows * (size_t)base->cols;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                        memcpy(buf, base->elements, count * sizeof(halmat_scalar_t));
+                        writable_ref = true;
+                        ref_offset = 0;
                     } else if (num_indices == 2 && base->rows > 0) {
                         resolved_value_t idx;
                         uint8_t other = 1 - (uint8_t)ast_axis;
@@ -5759,11 +5784,81 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         int result_cols = base->cols;
                         if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, result_rows, result_cols)) break;
-                        if (writable_ref && base_syt < HALMAT_SYT_MAX) {
+                        if (writable_ref) {
                             state->vac[ins->index].is_container_ref = true;
-                            state->vac[ins->index].container_ref_syt = base_syt;
                             state->vac[ins->index].container_ref_offset = ref_offset;
                             state->vac[ins->index].container_ref_stride = ref_stride;
+                            if (base_syt < HALMAT_SYT_MAX) {
+                                state->vac[ins->index].container_ref_is_field = false;
+                                state->vac[ins->index].container_ref_syt = base_syt;
+                            } else if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                       state->vac[ins->operands[0].data].is_struct_ref) {
+                                const halmat_vac_slot_t *xref = &state->vac[ins->operands[0].data];
+                                state->vac[ins->index].container_ref_is_field = true;
+                                state->vac[ins->index].field_base_syt = xref->struct_base_syt;
+                                state->vac[ins->index].field_field_syt = xref->struct_field_syt;
+                                state->vac[ins->index].field_mid_path_len = xref->struct_mid_path_len;
+                                memcpy(state->vac[ins->index].field_mid_path, xref->struct_mid_path,
+                                       sizeof(xref->struct_mid_path));
+                                state->vac[ins->index].field_copy_index =
+                                    xref->struct_copy_index >= 0 ? xref->struct_copy_index : current_copy_index(state);
+                            } else {
+                                state->vac[ins->index].is_container_ref = false;
+                            }
+                        }
+                        break;
+                    } else if (num_indices == 3 && base->array_of_matrix &&
+                               ins->operands[1].tag1 == 5 &&
+                               ins->operands[2].qual == QUAL_AST && ins->operands[3].qual == QUAL_AST) {
+                        /* `EE$(J:)` / `K$(J+1:)` (same DEMO.hal repro,
+                         * inside PROC1's rewritten body: `MY_STRUCTURE.
+                         * RR.AAREF.DD.EE$(I;J:) = 10**I K$(J+1:);`) --
+                         * a single, genuinely *computed* array index
+                         * (alpha=5, DSUB.md's own "index" row -- J or
+                         * J+1, neither a literal) combined with a full
+                         * component (matrix) wildcard, distinct from
+                         * the array-to-*partition* (range) case just
+                         * above (which needs two alpha=6 operands, not
+                         * one alpha=5). Selects exactly one whole
+                         * MATRIX element -- a genuine (rows x cols)
+                         * container, not a concatenation. Writable the
+                         * same way (contiguous, stride=1) -- needed
+                         * here since EE$(I;J:) is itself an assignment
+                         * target. */
+                        resolved_value_t idxv;
+                        if (!resolve_operand(state, &ins->operands[1], &idxv)) break;
+                        int32_t idx = rv_to_integer(&idxv) - 1;
+                        if (idx < 0) idx = 0;
+                        if (idx >= base->array_len) idx = base->array_len - 1;
+                        size_t per_elem = (size_t)base->rows * (size_t)base->cols;
+                        count = per_elem;
+                        if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                        memcpy(buf, base->elements + (size_t)idx * per_elem, count * sizeof(halmat_scalar_t));
+                        writable_ref = true;
+                        ref_offset = (size_t)idx * per_elem;
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (!store_container_result(state, ins->index, buf, count, base->rows, base->cols)) break;
+                        if (writable_ref) {
+                            state->vac[ins->index].is_container_ref = true;
+                            state->vac[ins->index].container_ref_offset = ref_offset;
+                            state->vac[ins->index].container_ref_stride = ref_stride;
+                            if (base_syt < HALMAT_SYT_MAX) {
+                                state->vac[ins->index].container_ref_is_field = false;
+                                state->vac[ins->index].container_ref_syt = base_syt;
+                            } else if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                       state->vac[ins->operands[0].data].is_struct_ref) {
+                                const halmat_vac_slot_t *xref = &state->vac[ins->operands[0].data];
+                                state->vac[ins->index].container_ref_is_field = true;
+                                state->vac[ins->index].field_base_syt = xref->struct_base_syt;
+                                state->vac[ins->index].field_field_syt = xref->struct_field_syt;
+                                state->vac[ins->index].field_mid_path_len = xref->struct_mid_path_len;
+                                memcpy(state->vac[ins->index].field_mid_path, xref->struct_mid_path,
+                                       sizeof(xref->struct_mid_path));
+                                state->vac[ins->index].field_copy_index =
+                                    xref->struct_copy_index >= 0 ? xref->struct_copy_index : current_copy_index(state);
+                            } else {
+                                state->vac[ins->index].is_container_ref = false;
+                            }
                         }
                         break;
                     } else if (num_indices == 3 && ast_axis == 2 && base->rows > 0 && !base->array_of_matrix &&
@@ -5890,10 +5985,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * unconditionally for every asterisk-select shape. */
                     state->vac[ins->index].container_is_integer = (ins->tag == 6);
                     if (writable_ref) {
+                        /* base_syt stays the HALMAT_SYT_MAX sentinel for
+                         * an XPT (structure-field) base -- no real
+                         * numeric SYT index exists to reference back to
+                         * a struct-field shadow entry. DEMO.hal's own
+                         * `CC$(1;*,*) = MATRIX$(...);` (yagpc2-yahalmat2-
+                         * issues.db id 49) is the first confirmed real-
+                         * corpus case reaching this shared tail with an
+                         * XPT base -- the MASN instruction that consumes
+                         * this container's result receives it as a plain
+                         * QUAL_VAC operand (referencing *this* DSUB's own
+                         * result, not the original XPT directly), so
+                         * MASN's QUAL_XPT destination branch is never
+                         * actually reached for this shape -- it's this
+                         * container_ref mechanism or nothing. Copies the
+                         * original EXTN result's own is_struct_ref
+                         * identity (ins->operands[0] is the XPT operand
+                         * referencing that VAC slot) into container_ref_
+                         * is_field's own field_* copies (state.h's own
+                         * comment) rather than reusing this slot's own
+                         * struct_* fields, which describe something else
+                         * (is_struct_ref, mutually exclusive in meaning). */
                         state->vac[ins->index].is_container_ref = true;
-                        state->vac[ins->index].container_ref_syt = base_syt;
                         state->vac[ins->index].container_ref_offset = ref_offset;
                         state->vac[ins->index].container_ref_stride = ref_stride;
+                        if (base_syt < HALMAT_SYT_MAX) {
+                            state->vac[ins->index].container_ref_is_field = false;
+                            state->vac[ins->index].container_ref_syt = base_syt;
+                        } else if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                   state->vac[ins->operands[0].data].is_struct_ref) {
+                            const halmat_vac_slot_t *xref = &state->vac[ins->operands[0].data];
+                            state->vac[ins->index].container_ref_is_field = true;
+                            state->vac[ins->index].field_base_syt = xref->struct_base_syt;
+                            state->vac[ins->index].field_field_syt = xref->struct_field_syt;
+                            state->vac[ins->index].field_mid_path_len = xref->struct_mid_path_len;
+                            memcpy(state->vac[ins->index].field_mid_path, xref->struct_mid_path,
+                                   sizeof(xref->struct_mid_path));
+                            state->vac[ins->index].field_copy_index =
+                                xref->struct_copy_index >= 0 ? xref->struct_copy_index : current_copy_index(state);
+                        } else {
+                            state->vac[ins->index].is_container_ref = false;
+                        }
                     }
                     break;
                 }
@@ -6387,8 +6519,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (ins->operands[1].data >= HALMAT_VAC_MAX) { fail(state, "MASN/VASN: VAC index out of range"); break; }
                     halmat_vac_slot_t *slot = &state->vac[ins->operands[1].data];
                     if (!slot->is_container_ref) { fail(state, "MASN/VASN: receiver must be SYT"); break; }
-                    if (slot->container_ref_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: receiver SYT index out of range"); break; }
-                    halmat_syt_entry_t *rbase = &state->syt[slot->container_ref_syt];
+                    halmat_syt_entry_t *rbase;
+                    if (slot->container_ref_is_field) {
+                        /* DEMO.hal (yagpc2-yahalmat2-issues.db id 49):
+                         * `MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+                         * MATRIX$(4,3)(...);` -- the receiver container
+                         * came from a DSUB with a QUAL_XPT (structure-
+                         * field) base, so there's no real SYT index to
+                         * look up (state.h's own container_ref_is_field
+                         * comment); re-resolve the struct-field shadow
+                         * entry the same way resolve_xpt_field() itself
+                         * would, from the field_* identity DSUB's own
+                         * shared tail copied off the original EXTN
+                         * result. */
+                        int32_t copy_idx = slot->field_copy_index >= 0 ? slot->field_copy_index : current_copy_index(state);
+                        rbase = find_or_create_struct_field_path(state, slot->field_base_syt, slot->field_mid_path,
+                                slot->field_mid_path_len, slot->field_field_syt, copy_idx);
+                        if (!rbase) { fail(state, "MASN/VASN: could not resolve structure-field receiver"); break; }
+                    } else {
+                        if (slot->container_ref_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: receiver SYT index out of range"); break; }
+                        rbase = &state->syt[slot->container_ref_syt];
+                    }
                     if (src_count != slot->container_count ||
                         (src_count > 0 &&
                          slot->container_ref_offset + (src_count - 1) * slot->container_ref_stride >= rbase->element_count)) {
