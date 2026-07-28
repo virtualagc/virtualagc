@@ -1,0 +1,23 @@
+C/ DB id 34 (no_return_function_undefined_behavior_diverges): a
+C/ FUNCTION with no RETURN statement, once called, must be detected as
+C/ USA003090 Appendix C error #14 (NO RETURN STATEMENT IN FUNCTION)
+C/ and given a deterministic, type-appropriate default per the
+C/ manual's own documented "Continue" fixup -- confirmed against real
+C/ gpc that the error IS genuinely detected/logged (its own fallback
+C/ value is real hardware register leftovers, not a spec-defined
+C/ target, so not reproduced here).
+
+  T:
+  PROGRAM;
+     DECLARE R SCALAR;
+  NORET:
+  FUNCTION SCALAR;
+     DECLARE S SCALAR;
+     S = 5;
+  CLOSE NORET;
+     R = NORET;
+     WRITE(6) 'R=', R;
+     WRITE(6) 'ERRGRP=', ERRGRP;
+     WRITE(6) 'ERRNUM=', ERRNUM;
+Y %SVCI(0);
+  CLOSE T;

@@ -266,6 +266,7 @@
 #define HAL_S_ERROR_ARCCOSH_DOMAIN 59
 #define HAL_S_ERROR_ARCTANH_DOMAIN 60
 #define HAL_S_ERROR_ARCTAN2_ZERO 62
+#define HAL_S_ERROR_NO_RETURN_STATEMENT 14
 
 /* Group 10, member 5: "the end of file error" -- confirmed directly
  * against the primary source, not the group-4 Appendix C arithmetic
@@ -10742,12 +10743,105 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (csym && csym->hal_class == 0x42) break;
                 }
                 if (state->call_return_sp > 0) {
-                    /* Implicit return (procedure with no explicit RETURN,
-                     * or a fallthrough past the last statement) -- no
-                     * return value is available here. */
-                    size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
-                    state->pc = fcal_pos + 1;
-                    branched = true;
+                    /* Implicit return (fallthrough past the last
+                     * statement with no explicit RETURN) -- for a
+                     * PROCEDURE (OP_PCAL) this is entirely ordinary, no
+                     * return value is ever expected. For a FUNCTION
+                     * (OP_FCAL), though, this is USA003090 Appendix C
+                     * error #14 ("NO RETURN STATEMENT IN FUNCTION"),
+                     * genuinely detected by the real HAL/S-FC runtime
+                     * (no_return_function_undefined_behavior_diverges;
+                     * 130-EXAMPLE_N.hal's own MASS: FUNCTION(...) SCALAR;
+                     * body, deliberately left as "..." with no RETURN by
+                     * the textbook's own incomplete illustration):
+                     * confirmed via real gpc logging "*** HAL/S SEND
+                     * ERROR: RUNTIME: #14 NO RETURN STATEMENT IN
+                     * FUNCTION" and then continuing with whatever raw
+                     * value already happened to occupy the return
+                     * register -- genuine hardware nondeterminism (per
+                     * the manual's own documented fixup, literally
+                     * "Continue": leave the result register untouched),
+                     * not a spec-defined target value, so it's neither
+                     * useful nor stable to try to reproduce gpc's own
+                     * garbage bit-for-bit. Routed through the same
+                     * arithmetic_error_should_apply_fixup/
+                     * find_error_handler dispatch every other Appendix C
+                     * error already uses (ERRGRP/ERRNUM now correctly
+                     * report group 4/member 14 too, and a registered `ON
+                     * ERROR$(4:14) GO TO ...;` handler is honored) --
+                     * when no handler intercepts it (the overwhelmingly
+                     * common case), applies a deterministic, type-
+                     * appropriate zero/empty default (0 for SCALAR/
+                     * INTEGER, OFF/0 for BIT/BOOLEAN, empty string for
+                     * CHARACTER, a zero-filled container for VECTOR/
+                     * MATRIX) instead -- a more faithful realization of
+                     * "Continue" than either reproducing gpc's own
+                     * nondeterministic register leftovers (not a real
+                     * target) or this interpreter's own prior accidental
+                     * 32767 (which traced to an unrelated DO-FOR-loop
+                     * SCALAR/INTEGER bug, since fixed, not a real design
+                     * choice at all). The callee's own declared return
+                     * type/shape is read directly off its FUNCTION LABEL
+                     * symbol -- confirmed via symtab.c that hal_class is
+                     * always the raw SYM_TYPE field verbatim, so a
+                     * `FUNCTION(...) SCALAR;`'s own label symbol carries
+                     * hal_class==5 exactly like an ordinary SCALAR
+                     * variable would (the same convention the existing
+                     * BOOLEAN-FUNCTION-result bit_width fix just above
+                     * already relies on). VECTOR/MATRIX has no confirmed
+                     * real-corpus trigger, so its own container is best-
+                     * effort (zero-filled at the declared shape when
+                     * available, otherwise left untouched rather than
+                     * guessing at a shape). */
+                    size_t fcal_pos = state->call_return_stack[state->call_return_sp - 1];
+                    bool is_fcal = state->prog->instrs[fcal_pos].opcode == OP_FCAL;
+                    bool apply_fixup = true;
+                    if (is_fcal) {
+                        apply_fixup = arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_NO_RETURN_STATEMENT, &state->pc, &branched);
+                    }
+                    state->call_return_sp--;
+                    if (is_fcal && apply_fixup) {
+                        size_t vac_index = state->prog->instrs[fcal_pos].index;
+                        if (vac_index < HALMAT_VAC_MAX) {
+                            uint16_t callee_op = state->prog->instrs[fcal_pos].operands[0].data;
+                            uint16_t callee = resolve_call_target(state, callee_op);
+                            const halmat_symtab_entry_t *csym = state->symtab ? halmat_symtab_find_by_index(state->symtab, callee) : NULL;
+                            halmat_vac_slot_t *slot = &state->vac[vac_index];
+                            memset(slot, 0, sizeof(*slot));
+                            if (csym && csym->hal_class == 2) {
+                                slot->is_string = true;
+                                slot->string = dup_string("");
+                            } else if (csym && csym->hal_class == 1) {
+                                slot->is_bits = true;
+                                slot->bits = 0;
+                                if (csym->bit_width > 0) slot->bit_width = csym->bit_width;
+                            } else if (csym && (csym->hal_class == 3 || csym->hal_class == 4) && csym->cols > 0) {
+                                size_t n = (csym->hal_class == 3) ? (size_t)csym->rows * (size_t)csym->cols : (size_t)csym->cols;
+                                if (n > 0 && n <= HALMAT_CONTAINER_CAPACITY) {
+                                    halmat_scalar_t zeros[HALMAT_CONTAINER_CAPACITY];
+                                    memset(zeros, 0, n * sizeof(halmat_scalar_t));
+                                    store_container_result(state, vac_index, zeros, n, csym->hal_class == 3 ? csym->rows : 0, csym->cols);
+                                }
+                            } else if (csym && csym->hal_class == 6) {
+                                slot->is_scalar = false;
+                                slot->integer = 0;
+                            } else {
+                                /* SCALAR (5), or unknown/no symtab -- SCALAR is
+                                 * this language's own default numeric type
+                                 * (matching every other "declared type
+                                 * unconfirmed" fallback in this file), and a
+                                 * plain zero SCALAR is also the correct
+                                 * default for MASS's own 130-EXAMPLE_N.hal
+                                 * repro specifically. */
+                                slot->is_scalar = true;
+                                slot->scalar = halmat_scalar_zero(false);
+                            }
+                        }
+                    }
+                    if (!branched) {
+                        state->pc = fcal_pos + 1;
+                        branched = true;
+                    }
                 } else {
                     close_current_process(state, &branched);
                 }

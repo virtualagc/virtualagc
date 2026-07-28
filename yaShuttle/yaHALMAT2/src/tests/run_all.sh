@@ -2540,6 +2540,70 @@ run ./run_local_fixture.sh mmwsnp_sum "$(printf 'SUM=\n 1.0000000E+00      2.000
 # real runtime routine that doesn't share this specific bug.
 run ./run_read_fixture.sh add154 "$(printf -- '-3.95, -17.31, -9.93, 572.35, -250, +1.10, -.45, +7.50;\n')" "TOTAL IS       9.8930933E+02"
 
+# DB id 34 (no_return_function_undefined_behavior_diverges), follow-up
+# piece: yaHALMAT2 previously never detected/reported USA003090
+# Appendix C error #14 ("NO RETURN STATEMENT IN FUNCTION") at all -- a
+# FUNCTION falling through its own CLOSE with no RETURN silently
+# returned whatever the FCAL-result VAC slot happened to already
+# contain (uninitialized/leftover from an unrelated prior VAC use),
+# with no error logged and ERRGRP()/ERRNUM() left stale. Confirmed via
+# real gpc (a minimal `NORET: FUNCTION SCALAR; ... CLOSE NORET;`, no
+# RETURN, then `R = NORET;`) that real hardware genuinely detects and
+# logs this condition ("*** HAL/S SEND ERROR: RUNTIME: #14 NO RETURN
+# STATEMENT IN FUNCTION") before continuing with whatever raw value
+# already occupied the real return register -- confirmed to be
+# genuine, non-reproducible hardware nondeterminism (real gpc gave
+# R=5.0, exactly NORET's own last-assigned local variable S=5, an
+# artifact of register reuse, not a spec-defined value) rather than
+# something worth chasing bit-for-bit. Per USA003090 Appendix C's own
+# documented fixup for error #14 (literally "Continue," distinct from
+# the adjacent, unrelated error #15's own 32767/-32768 SCALAR-to-
+# INTEGER-overflow clamp) and the user's own 2026-07-27 recommendation
+# (informed by prior experience solving the identical problem in an
+# XPL compiler): implemented via OP_CLOS's own implicit-return path
+# (interp.c) -- when the closing unit is a FUNCTION (OP_FCAL, not
+# OP_PCAL, distinguished via the pushed call_return_stack entry's own
+# opcode), routes through the same arithmetic_error_should_apply_
+# fixup/find_error_handler dispatch every other Appendix C error
+# already uses (so ERRGRP()/ERRNUM() now correctly report 4/14, and a
+# registered `ON ERROR$(4:14) GO TO ...;` handler is honored -- unlike
+# real gpc's own ON ERROR/SEND ERROR dispatch, independently confirmed
+# elsewhere in this project to not reliably work, "gpc is not
+# authoritative"), then applies a deterministic, type-appropriate
+# zero/empty default read directly off the callee's own declared
+# return type (its FUNCTION LABEL symbol's own hal_class, confirmed
+# via symtab.c to be the raw SYM_TYPE field verbatim -- 0 for SCALAR/
+# INTEGER, OFF/0 for BIT/BOOLEAN, empty string for CHARACTER, a zero-
+# filled container for VECTOR/MATRIX when the declared shape is known)
+# instead of leaving whatever was previously sitting in the VAC slot.
+# Confirmed against real gpc for the error-detection/ERRGRP/ERRNUM
+# mechanism itself, the GOTO-handler-honoring behavior, and BIT/
+# BOOLEAN/CHARACTER-returning cases; the SCALAR default (0) doesn't
+# match gpc's own 5.0 by design, per the "don't reproduce hardware
+# garbage" reasoning above.
+#
+# Does NOT resolve 130-EXAMPLE_N.hal's own remaining discrepancy
+# (yaHALMAT2 gives "THE ANSWER IS 2.5000000E+05", real gpc gives
+# "2.4990000E+05") -- re-investigated this session via a direct
+# unHALMAT.py --disasm trace of the real compiled HALMAT: confirmed
+# CFOR (the DO-FOR loop's own UNTIL-clause check) is compiled directly
+# after DFOR, before the very first body pass, exactly the same
+# "always check, even on the first pass" pattern DFOR's own TO-range
+# bounds check already uses (independently confirmed correct via a
+# real AP-101S run) -- i.e. yaHALMAT2's own CFOR-before-first-body-pass
+# sequencing is a faithful match to the real compiled instruction
+# order, not a bug. Since ALMOST_EQUAL unconditionally `RETURN TRUE;`
+# regardless of its own arguments, this ordering means BOTH tools
+# should evaluate the UNTIL condition as true on the very first check,
+# before any body iteration -- yet real gpc's own final answer implies
+# ONE iteration actually ran. This remains a genuinely open, deeper
+# question about a real-hardware behavior not evident from the
+# compiled instruction stream alone (possibly some AP-101S-specific
+# error-#14-trap/control-flow interaction not documented anywhere
+# accessible) -- left open rather than guessed at, per this project's
+# own standing discipline against unconfirmed speculative fixes.
+run ./run_local_fixture.sh noret14 "$(printf 'R=      0.0          \nERRGRP=               4\nERRNUM=              14')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
