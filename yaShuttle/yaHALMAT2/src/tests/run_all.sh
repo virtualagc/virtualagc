@@ -2197,23 +2197,20 @@ run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
 # --line-width than this fixture's default): POSITION.V=(1,2,3),
 # VELOCITY.V=(4,5,6).
 #
-# NOT resolved: 177-P.hal's own third field, `MYSTATE.STATE.ACCEL.V`
-# (ACCEL a *named* `SUPER_VECTOR-STRUCTURE` sub-template nested inside
-# STATE, not a level-number field of S2's own single template) still
-# fails ("EXTN: expected 2 operands") -- this compiles as a 3-operand
-# EXTN chain (base, intermediate field, final field) that OP_EXTN
-# doesn't handle at all. Correctly supporting it needs a genuine data-
-# model extension: the shadow struct-field storage is keyed by a flat
-# (base_syt, field_syt, copy_index) triple, which has no way to
-# represent "the ACCEL sub-object nested inside a specific MYSTATE
-# instance" as a distinct identity from ACCEL's own template-level
-# field_syt (which is shared across every S2 instance that has an
-# ACCEL field) -- a naive "use the intermediate field_syt as the new
-# base_syt" approach would silently alias two different outer
-# instances' own ACCEL sub-objects together. This fixture is isolated
-# from 177-P.hal with the ACCEL.V line/WRITE removed rather than
-# guessing at a fix for this deeper, separate gap.
-run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+# DB id 27 (yahalmat2_nested_structure_vector_field_assign): the
+# remaining piece above -- `MYSTATE.STATE.ACCEL.V` (ACCEL a *named*
+# SUPER_VECTOR-STRUCTURE sub-template nested inside STATE, a level-
+# number field) -- is now ALSO resolved, as a byproduct of DB id 21's
+# own EXTN multi-hop generalization (struct_mid_path, find_or_create_
+# struct_field_path): that fix threads an arbitrary-length chain of
+# intermediate hops through the shadow-storage key regardless of
+# whether each hop is a level-number field or a named sub-template
+# field -- exactly the "genuine data-model extension" this fixture's
+# own comment above once called out as still missing. This fixture now
+# uses 177-P.hal's full, original content (the ACCEL.V line restored),
+# confirmed against real gpc: exact match (POSITION.V=(1,2,3),
+# VELOCITY.V=(4,5,6), ACCEL.V=(7,8,9)).
+run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\nACCEL.V=\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
 
 # Task #69 (yahalmat2_read_vector_unimplemented): 164-OUTER.hal,
 # `READ(INFILE) SKIP(0), COLUMN(9), INITIAL_POSN;` (INITIAL_POSN a

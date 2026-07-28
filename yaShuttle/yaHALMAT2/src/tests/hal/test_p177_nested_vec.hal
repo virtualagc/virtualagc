@@ -1,13 +1,15 @@
-C/ Isolated from 177-P.hal (PDF p.177 of "Programming in HAL/S") --
-C/ ACCEL (a named SUPER_VECTOR-STRUCTURE sub-template nested inside a
-C/ level-number STRUCTURE) intentionally omitted; see run_all.sh's own
-C/ comment on this fixture for why (yahalmat2_nested_structure_vector_
-C/ field_assign is only partially resolved -- level-number nesting
-C/ works, named-sub-template nesting via a 3-operand EXTN still
-C/ doesn't).
+C/ From PDF p. 177 of "Programming in HAL/S". Full file (DB id 27's
+C/ own ACCEL.V line, a named SUPER_VECTOR-STRUCTURE sub-template
+C/ nested inside the level-number STATE sub-structure, previously
+C/ omitted here pending the EXTN multi-hop generalization DB id 21
+C/ needed -- see run_all.sh's own comment on this fixture).
 
   P:
   PROGRAM;
+     STRUCTURE SUPER_VECTOR:
+        1 V VECTOR,
+        1 STATUS BOOLEAN,
+        1 TIMETAG SCALAR;
      STRUCTURE S2:
         1 STATE,
            2 POSITION,
@@ -18,13 +20,16 @@ C/ doesn't).
               3 V VECTOR,
               3 STATUS BOOLEAN,
               3 TIMETAG SCALAR,
+           2 ACCEL SUPER_VECTOR-STRUCTURE,
         1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;
      DECLARE MYSTATE S2-STRUCTURE;
      MYSTATE.STATE.POSITION.V = VECTOR(1, 2, 3);
      MYSTATE.STATE.POSITION.STATUS = ON;
      MYSTATE.STATE.POSITION.TIMETAG = 10;
      MYSTATE.STATE.VELOCITY.V = VECTOR(4, 5, 6);
+     MYSTATE.STATE.ACCEL.V = VECTOR(7, 8, 9);
      WRITE(6) 'POSITION.V=', MYSTATE.STATE.POSITION.V;
      WRITE(6) 'VELOCITY.V=', MYSTATE.STATE.VELOCITY.V;
+     WRITE(6) 'ACCEL.V=', MYSTATE.STATE.ACCEL.V;
 Y %SVCI(0);
   CLOSE P;
