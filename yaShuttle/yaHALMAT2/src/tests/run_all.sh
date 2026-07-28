@@ -1966,6 +1966,42 @@ run ./run_local_fixture.sh reformat_csz "$(printf '     3.314\n   -42.425\n     
 # become 5.0.
 run ./run_local_fixture.sh vector_to_partition_write "$(printf ' 0.0                0.0                0.0                5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 0.0                0.0                0.0          ')"
 
+# Task #63 (function_result_scalar_integer_confusion): 127-LIMIT.hal /
+# 211-LIMIT.hal, `LIMIT(VALUE, BOUND) SCALAR; ... RETURN BOUND;`/
+# `RETURN VALUE;`/`RETURN -BOUND;` -- a SCALAR-returning same-unit
+# FUNCTION called with whole-number-valued arguments (`LIMIT(52, 100)`,
+# `LIMIT(5.0, 10.0)`) printed 3 of its 4 results INTEGER-style ("52",
+# "100") instead of SCALAR-style (" 5.2000000E+01") -- oddly, only the
+# `RETURN -BOUND;` branch (a *computed* SCALAR-negation expression, not
+# a bare parameter) came out correctly. Root cause: bind_call_argument
+# (interp.c) bound each parameter purely from the caller-side XXAR
+# item's own already-classified kind (is_scalar/is_string/is_bits/else-
+# INTEGER), which for a whole-number-valued argument had already been
+# reclassified INTEGER by OP_XXAR's own `integer_class_scalar` check
+# (`ins->operands[0].tag1 == 6`) -- correct for a WRITE argument's own
+# TAG1 (which genuinely describes how to *format* the printed
+# expression), but the wrong signal for a CALL argument: confirmed
+# empirically that `LIMIT(5.0, 10.0)` (whole-number-valued) compiles its
+# XXAR operands TAG1=6/INTEGER while the otherwise-identical `LIMIT(5.5,
+# 10.25)` (fractional) compiles TAG1=5/SCALAR for the exact same
+# SCALAR-declared VALUE/BOUND parameters -- i.e. TAG1 here tracks the
+# *literal's own value*, not VALUE/BOUND's declared type. So VALUE/
+# BOUND ended up `SYT_TYPE_INTEGER` despite their own `DECLARE SCALAR`,
+# and a bare-parameter `RETURN BOUND;`/`RETURN VALUE;` read that back
+# directly; `RETURN -BOUND;` worked only because SCALAR negation always
+# produces an `RV_SCALAR` VAC result regardless of its operand's stored
+# kind. Fixed by consulting the callee's own declared parameter type
+# (dest_state->symtab, mirroring the container-argument branch's
+# existing `psym`-driven precision coercion a few lines above) and
+# cross-coercing SCALAR<->INTEGER by that declared type instead of the
+# caller-side classification. Confirmed against real gpc for both files
+# (fast, non-interactive -- no READ/stdin involved): 127-LIMIT.hal gives
+# " 5.2000000E+01 / -5.2000000E+01 / 1.0000000E+02 / -1.0000000E+02",
+# 211-LIMIT.hal gives "LIMIT(5,10)=      5.0000000E+00" etc., both
+# matching yaHALMAT2's own fixed output exactly.
+run ./run_local_fixture.sh limit127 "$(printf ' 5.2000000E+01\n-5.2000000E+01\n 1.0000000E+02\n-1.0000000E+02')"
+run ./run_local_fixture.sh limit211 "$(printf 'LIMIT(5,10)=      5.0000000E+00\nLIMIT(15,10)=      1.0000000E+01\nLIMIT(-15,10)=     -1.0000000E+01\nLIMIT(0,1)=      0.0          ')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

@@ -1986,6 +1986,50 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
      * program to hit this exact combination" pattern as several other
      * fixes this session. Mirrors `store_resolved_to_vac`'s own already-
      * established kind-preserving convention. */
+    /* SCALAR<->INTEGER cross-coercion by the callee's own DECLARED
+     * parameter type -- user-reported (function_result_scalar_integer_
+     * confusion; 127-LIMIT.hal/211-LIMIT.hal's `LIMIT(VALUE, BOUND)
+     * SCALAR;`, `RETURN BOUND;`/`RETURN VALUE;` printing INTEGER-style
+     * instead of SCALAR-style). Root cause: XXAR's own `integer_class_
+     * scalar` reclassification (this function's caller, OP_XXAR) is
+     * correct for a WRITE argument's TAG1 (which genuinely describes
+     * how to *format* the expression being printed) but is the wrong
+     * signal here -- for a CALL argument, TAG1 instead reflects the
+     * *caller's own literal's* natural HALMAT class, independent of the
+     * callee's declared parameter type: confirmed empirically that
+     * `LIMIT(5.0, 10.0)` (both whole-number-valued) compiles its XXAR
+     * operands with TAG1=6/INTEGER, while the otherwise-identical
+     * `LIMIT(5.5, 10.25)` (fractional) compiles TAG1=5/SCALAR for the
+     * same SCALAR-declared VALUE/BOUND parameters -- i.e. TAG1 here
+     * tracks the *literal's own value*, not the target's type. VALUE/
+     * BOUND ended up `SYT_TYPE_INTEGER` despite their own `DECLARE
+     * SCALAR`, so a bare-parameter `RETURN` read back an INTEGER-kind
+     * value; `RETURN`'s computed-expression cousins (e.g. `RETURN
+     * -BOUND;`) worked correctly since SCALAR arithmetic always yields
+     * an `RV_SCALAR` result regardless of its operand's stored kind --
+     * masking this as "3 of 4 values wrong, oddly inconsistent" rather
+     * than a total failure. Consulting the parameter's own declared
+     * type here (mirroring the container-argument branch's existing
+     * `psym`-driven `scale_precision` coercion above) fixes this
+     * generally: any INTEGER-kind argument bound to a declared-SCALAR
+     * parameter is coerced to SCALAR, and vice versa -- correct
+     * regardless of *why* the argument came in INTEGER-kind (a
+     * genuinely INTEGER-typed caller expression is just as legal a
+     * SCALAR-parameter argument in HAL/S as a reclassified literal). */
+    const halmat_symtab_entry_t *psym = dest_state->symtab
+        ? halmat_symtab_find_by_index(dest_state->symtab, param_syt) : NULL;
+    if (psym && psym->hal_class == 5 /* SCALAR */ &&
+        !state->io_pending.items[item_index].is_scalar && !state->io_pending.items[item_index].is_string &&
+        !state->io_pending.items[item_index].is_bits) {
+        dest_state->syt[param_syt].type = SYT_TYPE_SCALAR;
+        dest_state->syt[param_syt].scalar = halmat_scalar_from_integer(state->io_pending.items[item_index].integer, false);
+        return true;
+    }
+    if (psym && psym->hal_class == 6 /* INTEGER */ && state->io_pending.items[item_index].is_scalar) {
+        dest_state->syt[param_syt].type = SYT_TYPE_INTEGER;
+        dest_state->syt[param_syt].value = halmat_scalar_to_integer(state->io_pending.items[item_index].scalar);
+        return true;
+    }
     if (state->io_pending.items[item_index].is_scalar) {
         dest_state->syt[param_syt].type = SYT_TYPE_SCALAR;
         dest_state->syt[param_syt].scalar = state->io_pending.items[item_index].scalar;
