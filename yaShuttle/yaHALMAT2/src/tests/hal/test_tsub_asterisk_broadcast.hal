@@ -1,0 +1,40 @@
+C DB id 50: TSUB must accept an asterisk copy-index ($(*;...)),
+C broadcasting a structure-field assignment across every copy of a
+C multi-copy structure. Needs precompute_arrayed_paragraphs' own
+C backward dependency-chase to also follow QUAL_XPT operands (not
+C just QUAL_VAC), pulling TSUB/EXTN into the same replayed paragraph
+C as the DSUB/VASN that (transitively) depends on them -- otherwise
+C TSUB executes once, before any replay, and every copy sees the
+C same fixed value. Also exercises a new array-of-matrix DSUB shape:
+C a single index plus a row-or-column select on that one element
+C (`EE$(3:2,*)`), distinct from the already-implemented "index plus
+C full wildcard" (whole element) and "index plus range" shapes.
+ T:
+ PROGRAM;
+    STRUCTURE AA:
+       1 BB, 2 CC MATRIX(4,3),
+       1 DD, 2 EE ARRAY(4) MATRIX(3,4);
+    STRUCTURE QQ:
+       1 RR, 2 AAREF AA-STRUCTURE, 2 SS CHARACTER(5);
+    DECLARE MY_STRUCTURE QQ-STRUCTURE(5);
+
+    MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+       MATRIX$(4,3)(511,512,513,514,515,516,517,518,519,520,521,522);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(2;*,*) =
+       MATRIX$(4,3)(611,612,613,614,615,616,617,618,619,620,621,622);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(3;*,*) =
+       MATRIX$(4,3)(711,712,713,714,715,716,717,718,719,720,721,722);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(4;*,*) =
+       MATRIX$(4,3)(811,812,813,814,815,816,817,818,819,820,821,822);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(5;*,*) =
+       MATRIX$(4,3)(911,912,913,914,915,916,917,918,919,920,921,922);
+
+    MY_STRUCTURE.RR.AAREF.DD.EE$(*;3:2,*) =
+       MY_STRUCTURE.RR.AAREF.BB.CC$(*;*,2);
+
+    WRITE(6) MY_STRUCTURE.RR.AAREF.DD.EE$(1;3:2,*);
+    WRITE(6) MY_STRUCTURE.RR.AAREF.DD.EE$(2;3:2,*);
+    WRITE(6) MY_STRUCTURE.RR.AAREF.DD.EE$(3;3:2,*);
+    WRITE(6) MY_STRUCTURE.RR.AAREF.DD.EE$(4;3:2,*);
+    WRITE(6) MY_STRUCTURE.RR.AAREF.DD.EE$(5;3:2,*);
+ CLOSE T;

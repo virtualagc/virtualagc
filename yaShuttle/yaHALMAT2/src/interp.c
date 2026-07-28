@@ -2623,6 +2623,33 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                  * confirmed single-dependency cases (e.g. `A3 = A1 +
                  * A2;`'s SASN<-SADD chain) are unaffected, since a chain
                  * of length 1 behaves identically either way. */
+                /* DB id 50 (tsub_asterisk_copy_broadcast_unimplemented,
+                 * DEMO.hal's `EE$(*;3:2,*) = CC$(*;*,2);`, a TSUB
+                 * asterisk copy-index broadcasting an assignment across
+                 * every copy of MY_STRUCTURE): also chases QUAL_XPT
+                 * operands, not just QUAL_VAC ones -- resolve_xpt_field's
+                 * own comment confirms QUAL_XPT uses the IDENTICAL
+                 * addressing convention (`.data` = the raw HALMAT stream
+                 * position of the resolving EXTN instruction, indexing
+                 * `state->vac[]` the same way QUAL_VAC does), it's just a
+                 * different qualifier tag marking "this is a structure-
+                 * field reference" rather than "a plain computed
+                 * arithmetic intermediate." Before this, a receiver/
+                 * source DSUB whose own base was QUAL_XPT (any structure-
+                 * field terminal subscript, e.g. this statement's own
+                 * `EE$(...)`/`CC$(...)`) had that base's own producing
+                 * EXTN -- and in turn EXTN's own QUAL_VAC operand
+                 * referencing the TSUB that computed which copy to use --
+                 * invisible to this walk, silently left outside the
+                 * replayed paragraph. That's exactly what made a bare
+                 * TSUB-asterisk fix insufficient on its own (interp.c's
+                 * OP_TSUB comment): TSUB would execute once, before any
+                 * replay, and EXTN would then resolve to that one fixed
+                 * copy on every one of the DSUB/VASN replay's 5 passes,
+                 * never actually varying per copy. Pulling TSUB/EXTN
+                 * into the SAME replayed paragraph as the DSUB/VASN that
+                 * consumes them fixes that: confirmed via demo_users_
+                 * manual's own fixture. */
                 size_t start = i - 1;
                 size_t scan_end = i - 1;
                 bool progress = true;
@@ -2631,7 +2658,7 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                     for (size_t p = start; p <= scan_end; p++) {
                         const halmat_instr_t *cur = &state->prog->instrs[p];
                         for (uint8_t k = 0; k < cur->operand_count; k++) {
-                            if (cur->operands[k].qual != QUAL_VAC) continue;
+                            if (cur->operands[k].qual != QUAL_VAC && cur->operands[k].qual != QUAL_XPT) continue;
                             size_t target_word = cur->operands[k].data;
                             size_t candidate = start;
                             while (candidate > boundary && state->prog->instrs[candidate - 1].index >= target_word) candidate--;
@@ -4568,8 +4595,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * form only (class-0/TSUB.md) -- range-select (3
                  * operands) fails loudly, untested. Two operands: the
                  * multi-copy structure's own SYT, then the copy number,
-                 * either a literal (QUAL_IMD) or an expression (per
-                 * USA003087 Sec 19.6, which documents both as legal) --
+                 * either a literal (QUAL_IMD), an expression (per
+                 * USA003087 Sec 19.6, which documents both as legal), or
+                 * an asterisk (QUAL_AST, broadcasting across every copy,
+                 * also Sec 19.6 -- DB id 50) --
                  * the expression case's own shape confirmed empirically
                  * against real compiled HALMAT, user-reported
                  * (180/184-EXAMPLE_N.hal's `V.STATUS$(N)`/`V.TIMETAG$(N)`,
@@ -4596,8 +4625,31 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         resolved_value_t cv;
                         if (!resolve_operand(state, &ins->operands[1], &cv)) break;
                         copy_number = rv_to_integer(&cv);
+                    } else if (ins->operands[1].qual == QUAL_AST) {
+                        /* Asterisk copy-index (DB id 50, DEMO.hal's
+                         * `EE$(*;3:2,*) = CC$(*;*,2);`): broadcasts the
+                         * statement across every one of the structure's
+                         * copies (USA003087 Sec 19.6's documented
+                         * asterisk form). Only meaningful wrapped in an
+                         * arrayed-paragraph replay (state->arrayed_index
+                         * >= 0) -- precompute_arrayed_paragraphs' own
+                         * backward dependency-chase now also follows
+                         * QUAL_XPT operands (not just QUAL_VAC), which is
+                         * what actually pulls a QUAL_AST TSUB like this
+                         * one into the SAME replayed paragraph as the
+                         * DSUB/VASN that (transitively, via EXTN) depends
+                         * on it -- without that, this TSUB would run once
+                         * before any replay began and every pass would
+                         * see the same fixed copy, never varying (see
+                         * that function's own comment). Falls back to
+                         * copy 1 outside a replay, matching this
+                         * opcode's own established "fail loudly only for
+                         * genuinely unhandled shapes" convention rather
+                         * than crashing on a state that should never
+                         * arise once the paragraph boundary is correct. */
+                        copy_number = state->arrayed_index >= 0 ? state->arrayed_index + 1 : 1;
                     } else {
-                        fail(state, "TSUB: only a literal or plain-SYT copy index is implemented");
+                        fail(state, "TSUB: only a literal, plain-SYT, or asterisk copy index is implemented");
                         break;
                     }
                     state->vac[ins->index].is_ref = false;
@@ -5955,6 +6007,81 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         ref_offset = (size_t)idx * per_elem;
                         if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, base->rows, base->cols)) break;
+                        if (writable_ref) {
+                            state->vac[ins->index].is_container_ref = true;
+                            state->vac[ins->index].container_ref_offset = ref_offset;
+                            state->vac[ins->index].container_ref_stride = ref_stride;
+                            if (base_syt < HALMAT_SYT_MAX) {
+                                state->vac[ins->index].container_ref_is_field = false;
+                                state->vac[ins->index].container_ref_syt = base_syt;
+                            } else if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                       state->vac[ins->operands[0].data].is_struct_ref) {
+                                const halmat_vac_slot_t *xref = &state->vac[ins->operands[0].data];
+                                state->vac[ins->index].container_ref_is_field = true;
+                                state->vac[ins->index].field_base_syt = xref->struct_base_syt;
+                                state->vac[ins->index].field_field_syt = xref->struct_field_syt;
+                                state->vac[ins->index].field_mid_path_len = xref->struct_mid_path_len;
+                                memcpy(state->vac[ins->index].field_mid_path, xref->struct_mid_path,
+                                       sizeof(xref->struct_mid_path));
+                                state->vac[ins->index].field_copy_index =
+                                    xref->struct_copy_index >= 0 ? xref->struct_copy_index : current_copy_index(state);
+                            } else {
+                                state->vac[ins->index].is_container_ref = false;
+                            }
+                        }
+                        break;
+                    } else if (num_indices == 3 && base->array_of_matrix && ins->operands[1].tag1 == 5 &&
+                               ((ins->operands[2].qual == QUAL_AST) != (ins->operands[3].qual == QUAL_AST))) {
+                        /* `EE$(3:2,*)` (DEMO.hal, DB id 50's
+                         * `MY_STRUCTURE.RR.AAREF.DD.EE$(*;3:2,*) =
+                         * MY_STRUCTURE.RR.AAREF.BB.CC$(*;*,2);`, EE an
+                         * ARRAY(4) MATRIX(3,4) structure terminal): a
+                         * single computed/literal array index (alpha=5,
+                         * same marker the whole-element `EE$(J:)` branch
+                         * just above uses) combined with a row OR column
+                         * select on that ONE array element's own matrix
+                         * (exactly one of the two matrix-axis operands is
+                         * AST, distinguishing this from that branch's own
+                         * both-AST whole-element case) -- selects a
+                         * VECTOR-shaped run (base->cols row-select
+                         * elements, or base->rows column-select ones),
+                         * writable the same contiguous offset+stride way
+                         * M$(i,*)/M$(*,j) are (this project's own
+                         * established row-major convention, generalized
+                         * one array-of-matrix element deep). */
+                        resolved_value_t idxv;
+                        if (!resolve_operand(state, &ins->operands[1], &idxv)) break;
+                        int32_t idx = rv_to_integer(&idxv) - 1;
+                        if (idx < 0) idx = 0;
+                        if (idx >= base->array_len) idx = base->array_len - 1;
+                        size_t per_elem = (size_t)base->rows * (size_t)base->cols;
+                        size_t elem_offset = (size_t)idx * per_elem;
+                        if (ins->operands[3].qual == QUAL_AST) {
+                            resolved_value_t rv;
+                            if (!resolve_operand(state, &ins->operands[2], &rv)) break;
+                            int32_t r = rv_to_integer(&rv) - 1;
+                            if (r < 0) r = 0;
+                            r = r % base->rows;
+                            count = (size_t)base->cols;
+                            if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                            for (int c = 0; c < base->cols; c++) buf[c] = base->elements[elem_offset + (size_t)r * base->cols + c];
+                            writable_ref = true;
+                            ref_offset = elem_offset + (size_t)r * (size_t)base->cols;
+                        } else {
+                            resolved_value_t cv;
+                            if (!resolve_operand(state, &ins->operands[3], &cv)) break;
+                            int32_t c = rv_to_integer(&cv) - 1;
+                            if (c < 0) c = 0;
+                            c = c % base->cols;
+                            count = (size_t)base->rows;
+                            if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
+                            for (int r = 0; r < base->rows; r++) buf[r] = base->elements[elem_offset + (size_t)r * base->cols + c];
+                            writable_ref = true;
+                            ref_offset = elem_offset + (size_t)c;
+                            ref_stride = (size_t)base->cols;
+                        }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
                         if (writable_ref) {
                             state->vac[ins->index].is_container_ref = true;
                             state->vac[ins->index].container_ref_offset = ref_offset;

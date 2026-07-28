@@ -2855,6 +2855,28 @@ run ./run_local_fixture.sh matrix_wildcard_write_rows "$(printf ' 1.0000000E+00 
 run ./run_read_fixture.sh ctoi_invalid_digit "1234567890" "       7890"
 run ./run_read_fixture.sh ctoi_invalid_digit "1234567AAA" "          0"
 
+# DB id 50 (tsub_asterisk_copy_broadcast_unimplemented): TSUB's asterisk
+# copy-index (`$(*;...)`, broadcasting an assignment across every copy
+# of a multi-copy structure -- USA003087 Sec 19.6) previously failed
+# loudly. A bare TSUB fix alone wasn't enough (DEMO.hal's own repro:
+# `EE$(*;3:2,*) = CC$(*;*,2);` compiles to TWO separate TSUB/EXTN/DSUB
+# chains feeding one VASN): TSUB would run once, before any replay, and
+# every one of the ADLP(5)/DLPE replay's 5 passes would see the same
+# fixed copy. Fixed by widening precompute_arrayed_paragraphs' own
+# backward dependency-chase to also follow QUAL_XPT operands, not just
+# QUAL_VAC ones -- resolve_xpt_field's own comment confirms QUAL_XPT
+# uses the identical stream-position addressing convention, it's just a
+# different qualifier tag; this alone pulls TSUB/EXTN transitively into
+# the SAME replayed paragraph as the DSUB/VASN that depends on them
+# (via DSUB's own QUAL_XPT base operand -> EXTN -> EXTN's own QUAL_VAC
+# operand -> TSUB), no new paragraph-boundary rule needed. Also added a
+# new array-of-matrix DSUB shape hit along the way (`EE$(3:2,*)`: a
+# single index plus a row-or-column select on that one element, distinct
+# from the already-implemented "index + full wildcard" and "index +
+# range" shapes). Confirmed against real gpc via a minimal isolated
+# repro (byte-identical for all 5 copies).
+run ./run_local_fixture.sh tsub_asterisk_broadcast "$(printf ' 5.1200000E+02      5.1500000E+02      5.1800000E+02      5.2100000E+02\n 6.1200000E+02      6.1500000E+02      6.1800000E+02      6.2100000E+02\n 7.1200000E+02      7.1500000E+02      7.1800000E+02      7.2100000E+02\n 8.1200000E+02      8.1500000E+02      8.1800000E+02      8.2100000E+02\n 9.1200000E+02      9.1500000E+02      9.1800000E+02      9.2100000E+02')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
