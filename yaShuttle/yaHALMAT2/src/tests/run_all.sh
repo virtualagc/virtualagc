@@ -188,6 +188,27 @@ run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_do
 # capability.)
 run ./run_ext_func_fixture.sh "$(printf 'ONE\nOTHER')" ext_charfunc_prog ext_charfunc
 
+# DB id 38 (yahalmat2_rtrn_inline_extern_matrix_vector_return): the
+# "MATRIX/VECTOR half... still blocked" gap the comment right above
+# describes is now implemented, for both remaining OP_RTRN forms.
+# Cross-unit (EXTERNAL FUNCTION) case: VECFUNC (a separate unit,
+# --parms=TEMPLATE) returns a whole VECTOR; interp_copy_external_call_
+# result()'s own is_container deep-copy branch already existed and was
+# ready for this (added alongside the CHARACTER fix above) but nothing
+# on the OP_RTRN external-call path ever set is_container until now.
+# Confirmed against real gpc via a manual multi-object HALSFC+lnk101
+# link+run (compileLinkRun only supports single-file programs).
+run ./run_ext_func_fixture.sh " 4.0000000E+00      5.0000000E+00      6.0000000E+00" ext_vecprog ext_vecfunc
+
+# Inline-FUNCTION (class-0/IDEF.md) case: `RESULT = FUNCTION VECTOR;
+# DECLARE V VECTOR INITIAL(1,2,3); RETURN V; CLOSE; ;` -- same
+# ret_whole_syt/ret_whole_vac/ret_whole_xpt detection reused directly in
+# OP_RTRN's inline-FUNCTION branch, routing through resolve_container()/
+# store_container_result() into the IDEF's own VAC slot instead of
+# store_resolved_to_vac() (which has no container case). Confirmed
+# against real gpc via compileLinkRun.
+run ./run_local_fixture.sh inline_vector_return "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00')"
+
 # --link-only / linked-archive-container round trips (self-contained
 # compressed file built from an @list, run positionally with no @list
 # directory tree needed -- see reengineered-documentation/MULTI-FILE-
@@ -2280,6 +2301,29 @@ run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=\n 1.0000000E+0
 # own confirmed encodings. Confirmed against real gpc: exact match
 # (PHI=45, ALPHA=30, INITIAL_POSN=(1,1,1), MODE=2).
 run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,1,1\nMODE    2\nPRINT   1\nEND\n')" "$(printf ' 4.5000000E+01      3.0000000E+01\n 1.0000000E+00      1.0000000E+00      1.0000000E+00               2')"
+
+# DB id 39 (yahalmat2_read_tab_line_page_unimplemented): READ-context
+# TAB, implemented and verified this session. Direct HALSFC compile
+# probes confirmed TAB(alpha)/LINE(gamma)/PAGE(beta) all compile as
+# real, legal HAL/S (no pre-existing corpus file happened to use any of
+# them). TAB is now implemented, reusing COLUMN's own has_column/
+# column_n mechanism with alpha+1 (a leading TAB is relative to the
+# column-1 baseline, matching the already-implemented WRITE-side TAB
+# and USA003087 Sec.12.4's own "independent of READ or WRITE" rule) --
+# below, TAB(8) and COLUMN(9) target the identical column and must
+# produce identical results. A second, unexpected finding drove a new
+# has_skip gate on COLUMN/TAB application (OP_READ's own comment):
+# repeated real-gpc probes of a *bare* COLUMN/TAB with no SKIP clause
+# (relying on the ordinary implicit single-line advance) showed no
+# observable positioning effect whatsoever on real hardware -- every
+# existing corpus use of COLUMN already pairs it with an explicit SKIP,
+# so this was never caught before; this fixture (like every existing
+# COLUMN fixture) always pairs TAB/COLUMN with SKIP(0), so it isn't
+# itself affected by the gate, but the gate is what makes yaHALMAT2
+# match real hardware for the previously-unexercised bare-COLUMN/TAB
+# shape too. LINE/PAGE remain unimplemented -- no confirmed behavioral
+# model exists for either yet (see interp.c's OP_XXAR comment).
+run ./run_read_fixture.sh read_tab "$(printf 'PHI     45\nALPHA   30\nEND\n')" "$(printf ' 4.5000000E+01      3.0000000E+01')"
 
 # Task #71 (yahalmat2_update_block_no_output): 222-BETTER.hal's
 # `UPDATE; IF A NOT=0 THEN DO; B=C/A; END; CLOSE; WRITE(6) 'B=',B,

@@ -8960,16 +8960,68 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * own right, not a real destination, so captured
                          * into io_pending's dedicated has_skip/skip_n /
                          * has_column/column_n fields (state.h) instead of
-                         * items[]/item_count. Only SKIP/COLUMN are
+                         * items[]/item_count. SKIP/COLUMN/TAB are
                          * implemented, applied by OP_READ/OP_RDAL before
                          * processing the ordinary destination items --
-                         * user-reported (164-OUTER.hal's `READ(INFILE)
-                         * SKIP(0), COLUMN(9), PHI;` idiom). TAB/LINE/PAGE
-                         * have no confirmed READ-context meaning tested
-                         * against any fixture or corpus program, so they
-                         * still fail loudly rather than guessing. */
-                        if (ins->operands[0].tag2 != 2 && ins->operands[0].tag2 != 3) {
-                            fail(state, "READ: TAB/LINE/PAGE control specifiers are not yet implemented");
+                         * COLUMN user-reported (164-OUTER.hal's
+                         * `READ(INFILE) SKIP(0), COLUMN(9), PHI;` idiom).
+                         *
+                         * DB id 39 (yagpc2-yahalmat2-issues.db): TAB
+                         * confirmed compilable via direct HALSFC probes
+                         * (no pre-existing corpus file uses it) and its
+                         * runtime effect investigated directly against
+                         * real gpc (--infile5, multiple hand-written
+                         * probes). TAB(alpha) reuses the exact same
+                         * has_column/column_n mechanism as COLUMN,
+                         * converted at capture time to alpha+1 -- per
+                         * USA003087 Sec.12.4's own worked example
+                         * (Fig.12-5, WRITE-context but the same general
+                         * "TAB moves relative to wherever the mechanism
+                         * currently is" rule Sec.12.4 states applies
+                         * identically to READ), a *leading* TAB (this
+                         * READ-context implementation's only supported
+                         * position, same restriction COLUMN already has)
+                         * is relative to the column-1 baseline the
+                         * spec's own "overrides the default positioning
+                         * at column 1" rule establishes -- i.e.
+                         * numerically identical to COLUMN(alpha+1) at
+                         * this fixed leading position, confirmed
+                         * empirically: TAB(9) and COLUMN(9) produced
+                         * bit-identical results in every real-gpc probe
+                         * run this session.
+                         *
+                         * A second, unexpected finding from those same
+                         * probes drove OP_READ's own new has_skip gate
+                         * (below) on COLUMN/TAB application: repeated,
+                         * hang-free real-gpc runs of `READ(5) COLUMN(9),
+                         * Y;` / `READ(5) TAB(9), Y;` with NO SKIP clause
+                         * present -- both as the very first read on a
+                         * device and after an ordinary prior read -- gave
+                         * Y = the *unpositioned* column-1 read every
+                         * single time (confirmed >5 independent runs,
+                         * never once landing on the requested column).
+                         * Every existing corpus/fixture use of COLUMN
+                         * (164-OUTER.hal, test_read_skip_column.hal)
+                         * already pairs it with an explicit SKIP clause
+                         * (always SKIP(0) in practice), so this was never
+                         * exercised or caught before. LINE/PAGE remain
+                         * unimplemented: LINE(gamma) also compiles
+                         * (confirmed via HALSFC) but its one real-gpc
+                         * probe this session (a bare, unpaired
+                         * `READ(5) LINE(3), X;`) also showed no
+                         * observable line movement, and -- unlike TAB/
+                         * COLUMN's clean SKIP-pairing story -- there is
+                         * no confirmed model yet for what LINE actually
+                         * needs (no per-device line-*number* state exists
+                         * at all today, only device_line_start's byte
+                         * offset), so it is left failing loudly rather
+                         * than guessed at; PAGE has no paging concept
+                         * anywhere in this interpreter's READ-device
+                         * model to generalize from (READ devices are
+                         * always plain files) and was not pursued
+                         * further this session. */
+                        if (ins->operands[0].tag2 != 1 && ins->operands[0].tag2 != 2 && ins->operands[0].tag2 != 3) {
+                            fail(state, "READ: LINE/PAGE control specifiers are not yet implemented");
                             break;
                         }
                         if (!resolve_operand(state, &ins->operands[0], &a)) break;
@@ -8977,6 +9029,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (ins->operands[0].tag2 == 3) {
                             state->io_pending.has_skip = true;
                             state->io_pending.skip_n = n;
+                        } else if (ins->operands[0].tag2 == 1) {
+                            state->io_pending.has_column = true;
+                            state->io_pending.column_n = n + 1;
                         } else {
                             state->io_pending.has_column = true;
                             state->io_pending.column_n = n;
@@ -9755,13 +9810,40 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->device_read_started[device] = true;
                     state->device_line_start[device] = ftell(in);
                 }
-                if (state->io_pending.has_column) {
+                if (state->io_pending.has_column && state->io_pending.has_skip) {
                     /* COLUMN(n) (state.h's has_column/column_n comment):
                      * 1-indexed absolute column within the *current*
                      * line, per [USA003087] Sec. 12.3 -- reposition
                      * relative to this device's own tracked line-start
                      * offset rather than wherever the previous field's
-                     * own fscanf happened to leave the cursor. */
+                     * own fscanf happened to leave the cursor. TAB(alpha)
+                     * (OP_XXAR's own comment) is captured as the
+                     * equivalent COLUMN(alpha+1) at this point, so shares
+                     * this exact application logic.
+                     *
+                     * DB id 39's own gate, added this session: only
+                     * applies when an explicit SKIP clause is *also*
+                     * present in the same READ statement (has_skip --
+                     * true for any SKIP(n), not just SKIP(0)). Multiple
+                     * hand-written real-gpc probes this session
+                     * confirmed, repeatedly and without exception, that a
+                     * bare COLUMN/TAB with no SKIP clause at all (relying
+                     * on the ordinary implicit single-line advance) has
+                     * *no observable effect* on real hardware -- the read
+                     * lands on column 1 regardless, as if no positioning
+                     * specifier were present. Every existing corpus/
+                     * fixture use of COLUMN (164-OUTER.hal,
+                     * test_read_skip_column.hal) already pairs it with an
+                     * explicit SKIP (always SKIP(0)), so this gate
+                     * changes nothing for them -- it only newly suppresses
+                     * the previously-unconditional fseek() for the
+                     * bare-COLUMN/TAB shape no existing fixture ever
+                     * exercised. The SKIP(n>=1)-paired case (as opposed
+                     * to specifically SKIP(0)) was not independently
+                     * verified against real gpc -- gating on has_skip
+                     * generally, not has_skip-with-skip_n==0 specifically,
+                     * is a symmetry extrapolation from the confirmed
+                     * SKIP(0) case, not a direct observation. */
                     fseek(in, state->device_line_start[device] + (state->io_pending.column_n - 1), SEEK_SET);
                 }
                 /* Tracks "has any data field of this whole READ statement
@@ -10490,10 +10572,40 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (state->call_return_sp <= 0) {
                     if (state->inline_func_sp > 0) {
                         if (ins->operand_count != 1) { fail(state, "RTRN: inline FUNCTION requires a return value"); break; }
-                        if (!resolve_operand(state, &ins->operands[0], &a)) break;
                         size_t idef_pos = state->inline_func_stack[state->inline_func_sp - 1];
                         size_t vac_index = state->prog->instrs[idef_pos].index;
                         if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        /* DB id 38 (yagpc2-yahalmat2-issues.db): whole
+                         * VECTOR/MATRIX RETURN from an inline FUNCTION
+                         * (class-0/IDEF.md), e.g. `X = FUNCTION VECTOR;
+                         * DECLARE V VECTOR INITIAL(1,2,3); RETURN V;
+                         * CLOSE; ... ;`. Same ret_whole_syt/ret_whole_vac/
+                         * ret_whole_xpt detection as the ordinary
+                         * same-unit call-frame branch further below (this
+                         * opcode's own long comment there explains why a
+                         * bare whole-container reference can't go through
+                         * resolve_operand()) -- this session's own
+                         * hand-written test_inline_vector_return.hal
+                         * confirmed this exact shape is real, compilable
+                         * HAL/S (previously left unimplemented for lack
+                         * of any known trigger). */
+                        bool ret_whole_syt = ins->operands[0].qual == QUAL_SYT &&
+                                              syt_is_vector_or_matrix_shaped(state, ins->operands[0].data);
+                        bool ret_whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                              state->vac[ins->operands[0].data].is_container;
+                        bool ret_whole_xpt = false;
+                        if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                            state->vac[ins->operands[0].data].is_struct_ref && state->symtab) {
+                            const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, state->vac[ins->operands[0].data].struct_field_syt);
+                            ret_whole_xpt = fsym && fsym->hal_class == 4 && fsym->cols > 0;
+                        }
+                        if (ret_whole_syt || ret_whole_vac || ret_whole_xpt) {
+                            halmat_scalar_t *elems; size_t count; int rows, cols;
+                            if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
+                            if (!store_container_result(state, vac_index, elems, count, rows, cols)) break;
+                            break;
+                        }
+                        if (!resolve_operand(state, &ins->operands[0], &a)) break;
                         store_resolved_to_vac(&state->vac[vac_index], &a);
                         break;
                     }
@@ -10532,8 +10644,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                              * across calls (never freed/reset between
                              * them, MULTI-FILE-LINKING.md's own comment),
                              * so they're still there when it runs. */
+                            bool ret_whole_syt = ins->operands[0].qual == QUAL_SYT &&
+                                                  syt_is_vector_or_matrix_shaped(state, ins->operands[0].data);
+                            bool ret_whole_vac = ins->operands[0].qual == QUAL_VAC && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                                  state->vac[ins->operands[0].data].is_container;
+                            bool ret_whole_xpt_vecmat = false;
                             if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
-                                state->vac[ins->operands[0].data].is_struct_ref) {
+                                state->vac[ins->operands[0].data].is_struct_ref && state->symtab) {
+                                const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, state->vac[ins->operands[0].data].struct_field_syt);
+                                ret_whole_xpt_vecmat = fsym && fsym->hal_class == 4 && fsym->cols > 0;
+                            }
+                            if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                state->vac[ins->operands[0].data].is_struct_ref && !ret_whole_xpt_vecmat) {
                                 const halmat_vac_slot_t *ref = &state->vac[ins->operands[0].data];
                                 memset(&state->external_call_result, 0, sizeof(state->external_call_result));
                                 state->external_call_result.is_struct_ref = true;
@@ -10544,6 +10666,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                        sizeof(ref->struct_mid_path));
                                 state->external_call_result.struct_copy_index =
                                     ref->struct_copy_index >= 0 ? ref->struct_copy_index : current_copy_index(state);
+                            } else if (ret_whole_syt || ret_whole_vac || ret_whole_xpt_vecmat) {
+                                /* DB id 38: whole VECTOR/MATRIX RETURN
+                                 * across a unit boundary (EXTERNAL
+                                 * FUNCTION), e.g.
+                                 * test_extn_vector_return.hal's
+                                 * `EXTV: EXTERNAL FUNCTION VECTOR; ...`
+                                 * implemented in a separate unit,
+                                 * `RETURN V;`. Deep-copies directly into
+                                 * external_call_result (own storage,
+                                 * distinct from a plain state->vac[]
+                                 * slot -- store_container_result() only
+                                 * targets the latter) so interp_copy_
+                                 * external_call_result's existing
+                                 * is_container branch (which already
+                                 * deep-copies external_call_result.
+                                 * container into the *caller*'s own VAC
+                                 * slot once this call returns) picks it
+                                 * up unchanged -- previously nothing on
+                                 * this path ever set is_container, so
+                                 * that branch was dead code until now. */
+                                halmat_scalar_t *elems; size_t count; int rows, cols;
+                                if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
+                                memset(&state->external_call_result, 0, sizeof(state->external_call_result));
+                                state->external_call_result.is_ref = false;
+                                state->external_call_result.is_container = true;
+                                state->external_call_result.container = malloc(count * sizeof(halmat_scalar_t));
+                                if (!state->external_call_result.container) { fail(state, "out of memory"); break; }
+                                memcpy(state->external_call_result.container, elems, count * sizeof(halmat_scalar_t));
+                                state->external_call_result.container_count = count;
+                                state->external_call_result.container_rows = rows;
+                                state->external_call_result.container_cols = cols;
                             } else {
                                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                                 store_resolved_to_vac(&state->external_call_result, &a);
