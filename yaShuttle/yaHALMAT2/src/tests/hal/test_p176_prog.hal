@@ -1,0 +1,62 @@
+C/ Adapted from PDF p. 176 of "Programming in HAL/S".
+C/
+C/ The SUPER_VECTOR template and READ_ACC function are supplied
+C/ externally (176.0-SUPER_VECTOR.hal and 176.1-READ_ACC.hal).
+C/ The template is loaded from the template library; READ_ACC is
+C/ linked in from its separately compiled object file.
+D INCLUDE TEMPLATE DUMMY_COMPOOL
+  READ_ACC: EXTERNAL FUNCTION(N) SUPER_VECTOR-STRUCTURE;
+     DECLARE N INTEGER;
+  CLOSE READ_ACC;
+
+  P:
+  PROGRAM;
+     STRUCTURE STATEVEC:
+        1 POSITION SUPER_VECTOR-STRUCTURE,
+        1 VELOCITY SUPER_VECTOR-STRUCTURE,
+        1 ACCEL SUPER_VECTOR-STRUCTURE;
+     DECLARE STATE STATEVEC-STRUCTURE;
+     STRUCTURE S2:
+        1 STATE STATEVEC-STRUCTURE,
+        1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;
+     DECLARE STATE2 S2-STRUCTURE;
+     REPLACE TEST_DATA BY "1";
+     DECLARE CYCLE INTEGER INITIAL(0);
+     DECLARE DELTA_T CONSTANT(1 / 10);  /*TIME BETWEEN SAMPLES*/
+          
+     STATE2.STATE.ACCEL = READ_ACC(17);
+
+C  ASSUME THAT 17 SELECTS THE CORRECT ACCELEROMETER
+
+     CALL INTEGRATE(STATE2.STATE.ACCEL) ASSIGN(STATE2.STATE.VELOCITY);
+     CALL INTEGRATE(STATE2.STATE.VELOCITY) 
+                                        ASSIGN(STATE2.STATE.POSITION);
+     CYCLE = CYCLE + 1;
+C  USA-003090/p.80 sect.6.4 File I/O:
+C     File I/O is not supported by the HAL/S-FC runtime library. If a FILE I/O 
+C     statement is compiled, unresolved external references will occur at link 
+C     edit time.
+C    FILE(TEST_DATA, CYCLE) = STATE2.STATE; /*SAVE FOR POST PROCESSING*/
+     WRITE(6) 'ACCEL=', STATE2.STATE.ACCEL.V;
+     WRITE(6) 'VEL=', STATE2.STATE.VELOCITY.V;
+     WRITE(6) 'POS=', STATE2.STATE.POSITION.V;
+     WRITE(6) 'CYCLE=', CYCLE;
+  INTEGRATE:
+  PROCEDURE(INPUT) ASSIGN(OUTPUT);
+     DECLARE SUPER_VECTOR-STRUCTURE,
+                INPUT, OUTPUT;
+E               .
+M    IF INPUT.STATUS = FALSE THEN
+        DO;
+E                   .
+M         OUTPUT.STATUS = FALSE;
+           RETURN;
+        END;
+     OUTPUT.TIMETAG = INPUT.TIMETAG;
+E           -          -         -
+M    OUTPUT.V = OUTPUT.V + INPUT.V DELTA_T;
+  CLOSE INTEGRATE;
+Y %SVCI(0);
+  CLOSE P;
+  
+  

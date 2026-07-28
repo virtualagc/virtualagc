@@ -525,6 +525,49 @@ static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, ui
     return find_or_create_struct_field_path(state, base_syt, NULL, 0, field_syt, copy_index);
 }
 
+/* Removes every shadow struct_fields[] entry keyed under base_syt
+ * (regardless of mid_path/field_syt/copy_index), freeing each one's own
+ * owned storage (elements/bit_elements/char_elements/char_value) first.
+ * AUTOMATIC-storage call-start reset for a whole-STRUCTURE ASSIGN-only
+ * parameter (yahalmat2_extn_multifile_template, 176-P.hal's PROCEDURE
+ * INTEGRATE, called twice in a row with a STRUCTURE OUTPUT parameter):
+ * an ASSIGN-only parameter's own bind is deliberately SKIPPED at call
+ * time (OP_PCAL/OP_FCAL's own is_assign comment) so a plain scalar
+ * destination starts genuinely fresh (SYT_TYPE_UNKNOWN) each call --
+ * but a STRUCTURE parameter's own struct_fields[] entries aren't reset
+ * by anything at all once created, so a field never touched on a LATER
+ * call (e.g. this file's own early-RETURN branch, `IF INPUT.STATUS =
+ * FALSE THEN DO; OUTPUT.STATUS = FALSE; RETURN; END;`, which returns
+ * before OUTPUT.V is ever written) silently keeps whatever value an
+ * EARLIER call happened to leave there -- confirmed against real gpc
+ * (176-P.hal's second `CALL INTEGRATE(...) ASSIGN(STATE2.STATE.
+ * POSITION);`, whose own OUTPUT.V never gets written this call, giving
+ * POSITION.V=0.0 in real gpc vs. yaHALMAT2's own previous STATE2.STATE.
+ * VELOCITY.V's stale leftover value from the *first* call to the same
+ * PROCEDURE). Called once per ASSIGN-form structure parameter, right
+ * before its bind is skipped, so the following ASSIGN write-back
+ * (OP_XXND) lazily re-creates each field zeroed instead of reusing a
+ * previous call's own value. */
+static void reset_struct_param_fields(halmat_state_t *dest_state, uint16_t param_syt) {
+    size_t w = 0;
+    for (size_t r = 0; r < dest_state->struct_field_count; r++) {
+        halmat_struct_field_t *e = &dest_state->struct_fields[r];
+        if (e->base_syt == param_syt) {
+            free(e->value.elements);
+            free(e->value.bit_elements);
+            if (e->value.char_elements) {
+                for (size_t k = 0; k < e->value.element_count; k++) free(e->value.char_elements[k]);
+                free(e->value.char_elements);
+            }
+            free(e->value.char_value);
+            continue;
+        }
+        if (w != r) dest_state->struct_fields[w] = *e;
+        w++;
+    }
+    dest_state->struct_field_count = w;
+}
+
 /* Maps a TINT run's flattened OFFSET "slot" index (class-8/TINT.md) back
  * to the structure terminal it belongs to, plus the element offset
  * within that terminal -- needed because a VECTOR terminal consumes
@@ -650,8 +693,38 @@ static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat
         return NULL;
     }
     int32_t copy_idx = slot->struct_copy_index >= 0 ? slot->struct_copy_index : current_copy_index(state);
-    return find_or_create_struct_field_path(state, slot->struct_base_syt, slot->struct_mid_path,
+    halmat_syt_entry_t *e = find_or_create_struct_field_path(state, slot->struct_base_syt, slot->struct_mid_path,
             slot->struct_mid_path_len, slot->struct_field_syt, copy_idx);
+    /* Lazy VECTOR/MATRIX shape allocation for a structure-terminal field
+     * that's never been touched before (find_or_create_struct_field_
+     * path's own memset(0) leaves elements=NULL/element_count=0 on
+     * first creation, same as any other shadow field slot) -- needed
+     * when this field is *read* (via resolve_container, e.g. an
+     * arithmetic operand) before ever being *written* (yahalmat2_extn_
+     * multifile_template, 176-P.hal's `OUTPUT.V = OUTPUT.V + INPUT.V
+     * DELTA_T;` inside PROCEDURE INTEGRATE, OUTPUT an ASSIGN-form
+     * parameter never itself initialized by the caller): without this,
+     * OUTPUT.V's own count (0) mismatches INPUT.V*DELTA_T's own VSPR
+     * result (3), failing MADD/MSUB/VADD/VSUB's own shape check. Every
+     * OTHER structure-field write path already lazily allocates this
+     * same way at *write* time (bind_call_argument/OP_XXND's ASSIGN
+     * write-back/TASN's own per-field copy, all sharing this exact
+     * `fsym->cols`-driven calloc pattern) -- this is the read-side
+     * counterpart, needed because a field can legitimately be read
+     * before any of those write paths ever touch it. Scoped to VECTOR
+     * (hal_class==4) only, matching every existing structure-terminal
+     * shape-allocation site in this file -- no confirmed real-corpus
+     * MATRIX structure terminal exists yet. */
+    if (e && !e->elements && !e->bit_elements && !e->char_elements && state->symtab) {
+        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, slot->struct_field_syt);
+        if (fsym && fsym->hal_class == 4 && fsym->cols > 0) {
+            e->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));
+            e->element_count = (size_t)fsym->cols;
+            e->cols = fsym->cols;
+            e->rows = 0;
+        }
+    }
+    return e;
 }
 
 /* True if the symbol table (state->symtab, unavailable e.g. for --py
@@ -3944,6 +4017,98 @@ bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *tar
         memcpy(state->vac[ins->index].container, target->external_call_result.container, n * sizeof(halmat_scalar_t));
         return true;
     }
+    if (target->external_call_result.is_struct_ref) {
+        /* Whole-STRUCTURE external-call return (yahalmat2_extn_
+         * multifile_template, OP_RTRN's own comment on why this can't
+         * just deep-copy a value the way is_string/is_container do
+         * above): the field *values* live in `target`'s own
+         * struct_fields[] table, keyed by SYT indices from `target`'s
+         * own, independently-0-based symbol table (MULTI-FILE-LINKING.md)
+         * -- copying them verbatim under those same field_syt numbers
+         * into `state`'s (the caller's) own struct_fields[] would be
+         * silently wrong, since `state`'s own subsequent lookups for
+         * this same template's fields (a following qualified read/TASN
+         * receiver-copy) use `state`'s own, numerically unrelated
+         * field_syt values for the identically-named fields. Bridges
+         * the two symbol tables by field *name* (halmat_symtab_find,
+         * an exact-string lookup) rather than by number: walks
+         * `target`'s own template field chain (struct_first_field/
+         * struct_next_field) to visit each field in its own declared
+         * order, resolves the *same-named* symbol in `state`'s own
+         * symtab (found once via the template's own name, then walking
+         * `state`'s own matching template's field chain in lockstep --
+         * guaranteed the same field order on both sides, since both
+         * units compiled the byte-identical `D INCLUDE TEMPLATE`
+         * source), and deep-copies each field's own value from
+         * `target`'s struct_fields[] entry into a *new* shadow slot in
+         * `state`'s own struct_fields[] table, keyed under a synthetic
+         * base_syt reserved for exactly this purpose (HALMAT_SYT_MAX +
+         * this FCAL's own VAC index -- always >= HALMAT_SYT_MAX, so it
+         * can never collide with a real SYT index, which this project's
+         * own established convention already uses this same "reserved
+         * range past every real index" pattern for -- see resolve_xpt_
+         * field's own HALMAT_SYT_MAX sentinel use). Once copied, the
+         * caller's own FCAL-result VAC slot is marked is_struct_ref
+         * pointing at that synthetic identity with *state*'s own
+         * (correctly-numbered) field_syt values already baked in, so
+         * TASN's own pre-existing same-state struct_fields[] scan
+         * (`A = B;`) needs no changes at all to consume it -- from this
+         * point on it's just an ordinary structure reference. */
+        if (!target->symtab || !state->symtab) {
+            fail(state, "external function returned a whole STRUCTURE, but no symbol table is available to bridge it");
+            return false;
+        }
+        const halmat_symtab_entry_t *callee_tsym = halmat_symtab_find_by_index(target->symtab, target->external_call_result.struct_field_syt);
+        if (!callee_tsym || !callee_tsym->name) {
+            fail(state, "external function's returned STRUCTURE template has no name to bridge by");
+            return false;
+        }
+        const halmat_symtab_entry_t *caller_tsym = halmat_symtab_find(state->symtab, callee_tsym->name);
+        if (!caller_tsym) {
+            fail(state, "external function returned a STRUCTURE ('%s') this unit has no matching template for", callee_tsym->name);
+            return false;
+        }
+        uint16_t synthetic_base = (uint16_t)(HALMAT_SYT_MAX + ins->index);
+        uint16_t src_base = target->external_call_result.struct_base_syt;
+        const uint16_t *src_mid_path = target->external_call_result.struct_mid_path;
+        uint8_t src_mid_path_len = target->external_call_result.struct_mid_path_len;
+        int32_t src_copy = target->external_call_result.struct_copy_index;
+        int callee_field = callee_tsym->struct_first_field;
+        int caller_field = caller_tsym->struct_first_field;
+        while (callee_field >= 0 && caller_field >= 0) {
+            const halmat_symtab_entry_t *csym = halmat_symtab_find_by_index(target->symtab, (size_t)callee_field);
+            const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, (size_t)caller_field);
+            if (!csym || !psym) break;
+            const halmat_syt_entry_t *src_fe = find_or_create_struct_field_path(target, src_base, src_mid_path,
+                    src_mid_path_len, (uint16_t)callee_field, src_copy);
+            halmat_syt_entry_t *dst_fe = find_or_create_struct_field(state, synthetic_base, (uint16_t)caller_field, 0);
+            if (csym->hal_class == 4 && csym->cols > 0) {
+                free(dst_fe->elements);
+                dst_fe->elements = calloc((size_t)csym->cols, sizeof(halmat_scalar_t));
+                dst_fe->element_count = (size_t)csym->cols;
+                dst_fe->cols = csym->cols;
+                dst_fe->rows = 0;
+                if (src_fe->elements) memcpy(dst_fe->elements, src_fe->elements, (size_t)csym->cols * sizeof(halmat_scalar_t));
+            } else if (csym->hal_class == 6) {
+                dst_fe->type = SYT_TYPE_INTEGER;
+                dst_fe->value = src_fe->value;
+            } else if (csym->hal_class == 1) {
+                dst_fe->type = SYT_TYPE_BIT;
+                dst_fe->bit_value = src_fe->bit_value;
+            } else if (csym->hal_class == 5) {
+                dst_fe->type = SYT_TYPE_SCALAR;
+                dst_fe->scalar = src_fe->scalar;
+            }
+            callee_field = csym->struct_next_field;
+            caller_field = psym->struct_next_field;
+        }
+        memset(&state->vac[ins->index], 0, sizeof(state->vac[ins->index]));
+        state->vac[ins->index].is_struct_ref = true;
+        state->vac[ins->index].struct_base_syt = synthetic_base;
+        state->vac[ins->index].struct_field_syt = (uint16_t)caller_tsym->index;
+        state->vac[ins->index].struct_copy_index = 0;
+        return true;
+    }
     state->vac[ins->index] = target->external_call_result;
     return true;
 }
@@ -4574,10 +4739,28 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * field has been touched individually at least once, but
                  * won't reproduce a field the source never had assigned
                  * (stays at the receiver's own prior/zero value instead
-                 * of copying source's zero-initialized default). */
+                 * of copying source's zero-initialized default).
+                 *
+                 * The source operand may also be QUAL_VAC instead of
+                 * QUAL_XPT (yahalmat2_extn_multifile_template,
+                 * 176-P.hal's `STATE2.STATE.ACCEL = READ_ACC(17);`):
+                 * an EXTERNAL FUNCTION call *returning* a whole
+                 * STRUCTURE flows back through the ordinary FCAL-result
+                 * VAC slot (QUAL_VAC, "result of this FCAL"), not an
+                 * EXTN (there's no EXTN in the caller's own HALMAT for
+                 * a call result at all) -- interp_copy_external_call_
+                 * result's own is_struct_ref case marks that same VAC
+                 * slot exactly the way a genuine EXTN result would be,
+                 * so the check below (which keys on is_struct_ref, the
+                 * true semantic signal) already handles it correctly
+                 * once QUAL_VAC is allowed through here too; QUAL_XPT
+                 * and QUAL_VAC both just index state->vac[] the same
+                 * way, differing only in which opcode produced the
+                 * result. */
                 if (ins->operand_count != 2) { fail(state, "TASN: expected 2 operands"); break; }
-                if (ins->operands[0].qual != QUAL_XPT || ins->operands[1].qual != QUAL_XPT) {
-                    fail(state, "TASN: both operands must be XPT");
+                if ((ins->operands[0].qual != QUAL_XPT && ins->operands[0].qual != QUAL_VAC) ||
+                    (ins->operands[1].qual != QUAL_XPT && ins->operands[1].qual != QUAL_VAC)) {
+                    fail(state, "TASN: both operands must be XPT or VAC");
                     break;
                 }
                 if (ins->operands[0].data >= HALMAT_VAC_MAX || ins->operands[1].data >= HALMAT_VAC_MAX) {
@@ -4602,12 +4785,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 bool ok = true;
                 for (size_t i = 0; ok && i < count; i++) {
                     if (state->struct_fields[i].base_syt != src_base || state->struct_fields[i].copy_index != src_copy_idx) continue;
+                    if (state->struct_fields[i].mid_path_len != src_ref->struct_mid_path_len ||
+                        (src_ref->struct_mid_path_len > 0 &&
+                         memcmp(state->struct_fields[i].mid_path, src_ref->struct_mid_path,
+                                (size_t)src_ref->struct_mid_path_len * sizeof(uint16_t)) != 0)) continue;
                     uint16_t field = state->struct_fields[i].field_syt;
                     /* Snapshot the source's scalar fields by value before
-                     * find_or_create_struct_field's possible realloc (which
-                     * would invalidate a pointer into struct_fields[i]). */
+                     * find_or_create_struct_field_path's possible realloc
+                     * (which would invalidate a pointer into
+                     * struct_fields[i]). dst_ref's own struct_mid_path
+                     * (state.h) must be threaded through here too --
+                     * yahalmat2_extn_multifile_template's own named-
+                     * sub-template nesting generalization (task #74)
+                     * only reached resolve_xpt_field/bind_call_argument/
+                     * the ASSIGN write-back at the time; this whole-
+                     * structure TASN copy still used the plain (mid_path-
+                     * less) 3-arg wrapper, which would silently alias
+                     * e.g. STATE2.STATE.ACCEL's own fields with STATE2.
+                     * STATE.POSITION's/.VELOCITY's (same base_syt=STATE2,
+                     * field_syt=V, differing only by mid_path) the first
+                     * time a whole-structure `=` assignment targeted one
+                     * of them. */
                     halmat_syt_entry_t src_snapshot = state->struct_fields[i].value;
-                    halmat_syt_entry_t *dst_field = find_or_create_struct_field(state, dst_base, field, dst_copy_idx);
+                    halmat_syt_entry_t *dst_field = find_or_create_struct_field_path(state, dst_base,
+                            dst_ref->struct_mid_path, dst_ref->struct_mid_path_len, field, dst_copy_idx);
                     if (src_snapshot.elements || src_snapshot.bit_elements || src_snapshot.char_elements) {
                         /* ARRAY/MATRIX/VECTOR structure terminal -- deep
                          * copy, same three-way numeric/BIT/CHARACTER
@@ -10138,7 +10339,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * other never-yet-written procedure-local
                          * variable, letting that first real assignment
                          * establish its type correctly on its own. */
-                        if (state->io_pending.items[i].is_assign) continue;
+                        if (state->io_pending.items[i].is_assign) {
+                            /* AUTOMATIC-storage call-start reset for a
+                             * whole-STRUCTURE ASSIGN-only parameter --
+                             * see reset_struct_param_fields's own
+                             * comment. Scalar/array parameters need no
+                             * equivalent here (already handled by this
+                             * skip itself, per this case's existing
+                             * comment). */
+                            if (state->symtab) {
+                                const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, param_syt);
+                                if (psym && psym->hal_class == 0x0A) reset_struct_param_fields(state, param_syt);
+                            }
+                            continue;
+                        }
                         bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
                     if (!bind_ok) break;
@@ -10192,7 +10406,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * identical comment above -- same reasoning
                          * applies unchanged to a FUNCTION with its own
                          * ASSIGN/output parameter(s). */
-                        if (state->io_pending.items[i].is_assign) continue;
+                        if (state->io_pending.items[i].is_assign) {
+                            /* AUTOMATIC-storage call-start reset for a
+                             * whole-STRUCTURE ASSIGN-only parameter --
+                             * see reset_struct_param_fields's own
+                             * comment. Scalar/array parameters need no
+                             * equivalent here (already handled by this
+                             * skip itself, per this case's existing
+                             * comment). */
+                            if (state->symtab) {
+                                const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, param_syt);
+                                if (psym && psym->hal_class == 0x0A) reset_struct_param_fields(state, param_syt);
+                            }
+                            continue;
+                        }
                         bind_ok = bind_call_argument(state, state, param_syt, i);
                     }
                     if (!bind_ok) break;
@@ -10258,8 +10485,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (state->in_external_call) {
                         if (ins->operand_count == 1) {
-                            if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                            store_resolved_to_vac(&state->external_call_result, &a);
+                            /* Whole-STRUCTURE external-call return
+                             * (yahalmat2_extn_multifile_template,
+                             * 176.1-READ_ACC.hal's `RETURN RESULT;`,
+                             * RESULT a SUPER_VECTOR-STRUCTURE): a bare/
+                             * unqualified QUAL_XPT structure reference
+                             * (EXTN.md's own "operand 2 = the TEMPLATE's
+                             * own symbol" convention, confirmed via
+                             * --disasm), NOT a scalar/integer/bit/
+                             * character value resolve_operand's generic
+                             * QUAL_XPT case can meaningfully produce (it
+                             * would instead resolve the TEMPLATE symbol
+                             * itself as a bogus "field," per resolve_xpt_
+                             * field's own comment on that exact failure
+                             * mode). The actual field *values* can't be
+                             * deep-copied yet -- they live in this
+                             * (callee) state's own struct_fields[] table,
+                             * keyed by this EXTN's own struct_base_syt/
+                             * struct_mid_path/copy_index, and the real
+                             * copy needs both this state and the caller's
+                             * (interp_copy_external_call_result, which
+                             * runs after this call returns, once both are
+                             * available) -- so external_call_result is
+                             * just marked as a structure reference here,
+                             * recording exactly enough identity
+                             * (struct_base_syt/struct_mid_path/
+                             * struct_field_syt/an explicitly *resolved*
+                             * copy_index, since the ambient one won't
+                             * survive past this call) for that later step
+                             * to find the right entries in *this* state's
+                             * own struct_fields[] -- this state persists
+                             * across calls (never freed/reset between
+                             * them, MULTI-FILE-LINKING.md's own comment),
+                             * so they're still there when it runs. */
+                            if (ins->operands[0].qual == QUAL_XPT && ins->operands[0].data < HALMAT_VAC_MAX &&
+                                state->vac[ins->operands[0].data].is_struct_ref) {
+                                const halmat_vac_slot_t *ref = &state->vac[ins->operands[0].data];
+                                memset(&state->external_call_result, 0, sizeof(state->external_call_result));
+                                state->external_call_result.is_struct_ref = true;
+                                state->external_call_result.struct_base_syt = ref->struct_base_syt;
+                                state->external_call_result.struct_field_syt = ref->struct_field_syt;
+                                state->external_call_result.struct_mid_path_len = ref->struct_mid_path_len;
+                                memcpy(state->external_call_result.struct_mid_path, ref->struct_mid_path,
+                                       sizeof(ref->struct_mid_path));
+                                state->external_call_result.struct_copy_index =
+                                    ref->struct_copy_index >= 0 ? ref->struct_copy_index : current_copy_index(state);
+                            } else {
+                                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                                store_resolved_to_vac(&state->external_call_result, &a);
+                            }
                             state->external_call_has_result = true;
                         }
                         state->halted = true;

@@ -2373,23 +2373,66 @@ run ./run_local_fixture.sh bitconcat257 "AVERAGE=     0000 0000 0000 0000"
 # literal-plus-VECTOR argument -- a pre-existing, unrelated formatting
 # difference, not a value mismatch).
 #
-# 176-P.hal ITSELF still doesn't run end-to-end: past the EXTN fix, it
-# next hits "TASN: both operands must be XPT" on the same statement,
-# because `READ_ACC(17)`'s own FCAL result (not a structure XPT
-# reference) is TASN's *source* operand here -- READ_ACC is an
-# EXTERNAL FUNCTION *returning a whole STRUCTURE* across the unit
-# boundary, and this turns out to be a substantially separate,
-# unimplemented feature, not a decode-error bug: OP_RTRN's own
-# external-call branch (source-documentation/MULTI-FILE-LINKING.md's
-# "CHARACTER return values implemented; MATRIX/VECTOR still not") has
-# no whole-STRUCTURE case at all, and halmat_vac_slot_t/interp_copy_
-# external_call_result have no representation for a bulk multi-field
-# result to carry back across the two independent interpreter states
-# involved. Left open for a future session -- would need a new cross-
-# state struct_fields[] deep-copy mechanism plus a new TASN branch,
-# comparable in size to the original external-FUNCTION-linking work
-# itself, not a small follow-on to this fixture's own fix.
+# 176-P.hal ITSELF now runs end-to-end (DB id 21, follow-up session):
+# past the EXTN fix, it hit "TASN: both operands must be XPT" on
+# `STATE2.STATE.ACCEL = READ_ACC(17);`, because READ_ACC's own FCAL
+# result (not a structure XPT reference) is TASN's *source* operand
+# here -- READ_ACC is an EXTERNAL FUNCTION *returning a whole
+# STRUCTURE* across the unit boundary (MULTI-FILE-LINKING.md's
+# "CHARACTER return values implemented; MATRIX/VECTOR still not" --
+# STRUCTURE turned out to be in the same unimplemented boat). Fixed:
+# OP_RTRN's own external-call branch now detects a bare/whole
+# QUAL_XPT structure return and records its identity (base_syt/
+# mid_path/copy_index) on external_call_result rather than trying to
+# resolve it as a scalar; interp_copy_external_call_result's own new
+# is_struct_ref case bridges the callee's and caller's independently-
+# numbered symbol tables by field *name* (the two units share the
+# byte-identical `D INCLUDE TEMPLATE` source, so both templates'
+# struct_first_field/struct_next_field chains visit fields in the same
+# order), deep-copying each field's value into the caller's own
+# struct_fields[] under a synthetic base_syt (HALMAT_SYT_MAX + this
+# FCAL's own VAC index, a reserved range no real SYT index can ever
+# occupy) with the caller's own field_syt numbering already baked in --
+# from that point on it's just an ordinary same-state structure
+# reference. TASN itself was relaxed to accept a QUAL_VAC source (an
+# FCAL result) alongside the original QUAL_XPT (an EXTN result), since
+# both just index state->vac[] the same way and is_struct_ref (the
+# true semantic signal) already gates correctly either way -- and its
+# own per-field copy scan/destination-side field creation was threaded
+# through struct_mid_path too (a gap task #74 itself left: TASN's
+# whole-structure `=` copy only ever reached resolve_xpt_field/bind_
+# call_argument/the ASSIGN write-back at the time, not this path).
+# Two more compounding gaps surfaced getting 176-P.hal's own output to
+# match real gpc exactly (not just avoid crashing): (1) resolve_xpt_
+# field lazily allocates a VECTOR-shaped structure-terminal field's own
+# elements[] the first time it's *read* (not just written) -- needed
+# because PROCEDURE INTEGRATE reads OUTPUT.V (`OUTPUT.V = OUTPUT.V +
+# INPUT.V DELTA_T;`) before ever writing it on its very first call
+# (OUTPUT.V starts implicitly zero), and every OTHER structure-field
+# write path already lazily shapes a never-touched field this same way
+# at *write* time, but nothing did at *read* time; (2) an ASSIGN-only
+# STRUCTURE parameter's own struct_fields[] entries were never reset
+# between calls to the SAME same-unit PROCEDURE (`CALL INTEGRATE(...)
+# ASSIGN(...);` called twice in a row) -- confirmed against real gpc
+# that HAL/S's own AUTOMATIC storage class re-initializes a local
+# fresh each call, but this project's own struct_fields[] shadow-slot
+# mechanism has no equivalent reset at all once a field exists; the
+# second INTEGRATE call's own early-RETURN path (`IF INPUT.STATUS =
+# FALSE THEN DO; OUTPUT.STATUS = FALSE; RETURN; END;`, correctly taken
+# since STATE2.STATE.VELOCITY.STATUS really is FALSE) never touches
+# OUTPUT.V at all, so without a reset the ASSIGN write-back silently
+# copied the *first* call's own leftover OUTPUT.V value into
+# STATE2.STATE.POSITION.V instead of real gpc's own 0.0/0.0/0.0 --
+# fixed via a new reset_struct_param_fields, called for every ASSIGN-
+# form structure parameter right before its (deliberately skipped, see
+# OP_PCAL/OP_FCAL's own is_assign comment) bind. named_nest176 (below)
+# stays as an isolated, single-unit regression lock for the EXTN
+# generalization on its own; this new fixture locks in the full 3-way
+# multi-file chain, confirmed against real gpc (exact match) via a
+# manual lnk101 3-object link + direct gpc run (compileLinkRun itself
+# only supports a single source file).
 run ./run_local_fixture.sh named_nest176 "$(printf 'POS=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nVEL=\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+run ./run_ext_struct_fixture.sh "$(printf 'ACCEL=\n 9.9999964E-02     -1.9999999E-01      9.7999992E+00\nVEL=\n 9.9999905E-03     -1.9999988E-02      9.7999954E-01\nPOS=\n 0.0                0.0                0.0          \nCYCLE=               1')" p176_compool p176_readacc p176_prog
 
 # DB id 17 (integer_exponentiation_overflow_needs_fcos) -- CORRECTED
 # 2026-07-28 from its own original framing (a --fcos-needs-extending
