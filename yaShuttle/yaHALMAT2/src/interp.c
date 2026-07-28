@@ -2305,8 +2305,11 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                 }
                 j++;
             }
+            bool prev_is_whole_array_sfar = i > 0 && state->prog->instrs[i - 1].opcode == OP_SFAR &&
+                state->prog->instrs[i - 1].operand_count == 1 &&
+                state->prog->instrs[i - 1].operands[0].qual == QUAL_SYT;
             if (j < n && state->prog->instrs[j].opcode == OP_DLPE && count > 0 && i > 0 &&
-                state->prog->instrs[i - 1].opcode != OP_SFAR) {
+                !prev_is_whole_array_sfar) {
                 /* The paragraph ADLP/IDLP trails and replays *starts* at
                  * the single instruction immediately before this chain
                  * (i-1) -- confirmed by every "one XXAR/SINT/VINT/BASN,
@@ -2331,22 +2334,35 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                  * was caught and reverted back to the simpler, correct
                  * i-1 rule below.)
                  *
-                 * `!= OP_SFAR`: the one confirmed exception to "i-1
-                 * always starts the paragraph" -- a shaping-function
-                 * whole-array argument's own SFAR (`MAX(SA1)`/`SUM(SA1)`/
-                 * etc., class-0/LFNC.md) also trails an ADLP/DLPE pair,
-                 * but SFAR's own handler always appends exactly one
-                 * entry to shape_pending.items[] no matter how many
-                 * times it fires (correct as-is for other shaping
-                 * functions' genuinely-repeated, *separate* SFAR calls,
-                 * e.g. `SCALAR(S1, S2)`'s two real SFAR instructions --
-                 * one call each, not a replay of one) and LFNC's own
-                 * handler expects to see it exactly once, resolving the
-                 * whole array itself via resolve_container rather than
-                 * accumulating per-element replay results -- so
-                 * excluded here entirely (no arrayed_paragraph_end entry
-                 * at all, i.e. genuinely not replayed, confirmed
-                 * regressing test_lfnc_array otherwise).
+                 * `prev_is_whole_array_sfar`: the one confirmed exception
+                 * to "i-1 always starts the paragraph" -- a shaping-
+                 * function whole-*array-symbol* argument's own SFAR
+                 * (`MAX(SA1)`/`SUM(SA1)`/etc., class-0/LFNC.md) also
+                 * trails an ADLP/DLPE pair, but SFAR's own handler always
+                 * appends exactly one entry to shape_pending.items[] no
+                 * matter how many times it fires (correct as-is for
+                 * other shaping functions' genuinely-repeated, *separate*
+                 * SFAR calls, e.g. `SCALAR(S1, S2)`'s two real SFAR
+                 * instructions -- one call each, not a replay of one) and
+                 * LFNC's own handler expects to see it exactly once,
+                 * resolving the whole array itself via resolve_container
+                 * rather than accumulating per-element replay results --
+                 * so excluded here entirely (no arrayed_paragraph_end
+                 * entry at all, i.e. genuinely not replayed, confirmed
+                 * regressing test_lfnc_array otherwise). Scoped narrowly
+                 * to a QUAL_SYT SFAR operand (a bare array-symbol
+                 * reference, never itself dependent on arrayed_index):
+                 * `SUM(INTEGER(DATA$(*:1 TO 5)))`'s own SFAR
+                 * (bit_concat_sum_expression, 257-TEST4.hal) instead
+                 * carries a QUAL_VAC operand -- a per-element sub-
+                 * expression that must genuinely replay once per array
+                 * element, each pass eagerly resolved into shape_pending.
+                 * resolved[]/has_resolved[] (OP_SFAR's own comment) since
+                 * a replayed VAC slot doesn't survive to be read back
+                 * after DLPE -- so that shape is deliberately *not*
+                 * excluded here, and falls through to the ordinary
+                 * backward-walk below like any other computed-expression
+                 * paragraph.
                  *
                  * Beyond i-1: a genuine computed *expression* assigned to
                  * a whole ARRAY (`A3 = A1 + A2;`: SADD computing each
@@ -5220,6 +5236,82 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             ref_offset = (size_t)c;
                             ref_stride = (size_t)base->cols;
                         }
+                    } else if (num_indices == 3 && ast_axis == 0 && base->bit_elements &&
+                               ((ins->operands[2].tag1 == 2 && ins->operands[3].tag1 == 2) ||
+                                (ins->operands[2].tag1 == 3 && ins->operands[3].tag1 == 3))) {
+                        /* `DATA$(*:1 TO 5)`/`DATA$(*:5 AT 6)`
+                         * (bit_concat_sum_expression, 257-TEST4.hal's
+                         * `SUM(INTEGER(DATA$(*:1 TO 5))) / 3` and
+                         * `SUM(INTEGER(DATA$(*:5 AT 6))) / 3`, DATA an
+                         * ARRAY(...) BIT(16)): asterisk *array-element*
+                         * select (confirmed distinct from this same DSUB
+                         * shape's other asterisk uses -- V$(*)/M$(i,*)/
+                         * M$(*,j)/single-index BIT ARRAY subscript -- by
+                         * its own operand count, 3 here vs. 1 or 2 for
+                         * those) combined with a BIT range applied to
+                         * whichever element the asterisk currently
+                         * selects, in either of the two range spellings
+                         * this file's own source uses for its three SUM()
+                         * arguments: to-partition ("1 TO 5", TAG1=2 on
+                         * both bound operands -- the same marker VECTOR/
+                         * CHARACTER to-partition subscripts use elsewhere
+                         * in this opcode, `start`/`end` directly) or at-
+                         * partition ("5 AT 6", TAG1=3 on both -- the same
+                         * marker the plain-scalar-BIT at-partition branch
+                         * above uses, `width`/`position` directly,
+                         * confirmed via this same file's second and third
+                         * SUM() arguments). Real HAL/S only ever compiles
+                         * this shape inside a shaping-function argument
+                         * (LFNC.md's SFAR, itself inside an SFST...SFND/
+                         * ADLP...DLPE bracket -- see
+                         * precompute_arrayed_paragraphs' own comment on
+                         * why this exact SFAR shape genuinely replays,
+                         * unlike a plain whole-array `SUM(SA1)`), so
+                         * "which element" is simply whichever the
+                         * *replay* is currently on -- state->arrayed_index,
+                         * 0-based, same convention task #72's
+                         * bitpart_array_offset already established for the
+                         * sibling array-index-plus-bit-subindex DSUB
+                         * shape. Deferred (bitpart_ref) rather than
+                         * resolved to a value here, matching every other
+                         * BIT-partition DSUB branch in this same case --
+                         * read via resolve_operand's QUAL_VAC/
+                         * is_bitpart_ref case, whose own
+                         * bitpart_array_offset >= 0 handling (task #72)
+                         * already does exactly the "one element of
+                         * bit_elements[]" indexing this needs, no further
+                         * changes needed there. */
+                        resolved_value_t boundv1, boundv2;
+                        if (!resolve_operand(state, &ins->operands[2], &boundv1)) break;
+                        if (!resolve_operand(state, &ins->operands[3], &boundv2)) break;
+                        int position, width;
+                        if (ins->operands[2].tag1 == 3) {
+                            width = rv_to_integer(&boundv1);
+                            position = rv_to_integer(&boundv2);
+                        } else {
+                            position = rv_to_integer(&boundv1);
+                            int end = rv_to_integer(&boundv2);
+                            width = end - position + 1;
+                        }
+                        int decl_width = 32;
+                        if (state->symtab) {
+                            const halmat_symtab_entry_t *bsym = halmat_symtab_find_by_index(state->symtab, base_syt);
+                            if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
+                        }
+                        if (width < 0 || width > 32 || position < 1 || position + width - 1 > decl_width) {
+                            fail(state, "DSUB: BIT array element to-partition subscript out of range");
+                            break;
+                        }
+                        int32_t elem_idx = state->arrayed_index >= 0 ? state->arrayed_index : 0;
+                        elem_idx = (int32_t)((size_t)elem_idx % (base->element_count ? base->element_count : 1));
+                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_bitpart_ref = true;
+                        state->vac[ins->index].bitpart_target_syt = base_syt;
+                        state->vac[ins->index].bitpart_position = position;
+                        state->vac[ins->index].bitpart_width = width;
+                        state->vac[ins->index].bitpart_array_offset = elem_idx;
+                        break;
                     } else if (base->bit_elements || base->char_elements) {
                         /* A BIT/BOOLEAN or CHARACTER ARRAY subscript
                          * compiles through this same "index + trailing
@@ -6968,29 +7060,49 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_BCAT:
                 /* Bit-string catenate (class-1/BCAT.md): B1 || B2, B1
                  * occupying the more-significant bits. Neither operand
-                 * carries its own width (confirmed empirically: both are
-                 * plain SYT references, tag1=0) -- the declared BIT(n)
+                 * carries its own width inline -- the declared BIT(n)
                  * width is the only source of truth for how far to shift
-                 * B1 left, so this requires a symtab (state->symtab) and
-                 * both operands to be QUAL_SYT; any other shape fails
-                 * loudly rather than guessing a width. */
+                 * B1 left, so operand[1]'s width must be found some other
+                 * way: originally confirmed only for a plain QUAL_SYT
+                 * operand (symtab lookup) -- generalized here
+                 * (bit_concat_sum_expression, 257-TEST4.hal's `BIT$(5 AT
+                 * #-4)(...) || BIT$(5 AT #-4)(...) || ... || DATA$(1:16)
+                 * AND ...`, chaining several BCATs of computed, not
+                 * plain-variable, BIT results) the same multi-source way
+                 * OP_BNOT's own declared-width lookup above already
+                 * does: QUAL_VAC's own is_bits/bit_width (an explicit-
+                 * width STOB(3) conversion, this file's own new case
+                 * just above) or is_bitpart_ref/bitpart_width (a BIT-
+                 * partition DSUB extraction, task #72/#73's bitpart_ref
+                 * mechanism -- always exactly the extracted width, e.g.
+                 * 1 for `DATA$(i:j)`'s single-bit form), and QUAL_LIT's
+                 * own literal-table width. Any operand[1] shape whose
+                 * width still can't be determined fails loudly rather
+                 * than guessing, same as before. */
                 if (ins->operand_count != 2) { fail(state, "BCAT: expected 2 operands"); break; }
-                if (ins->operands[0].qual != QUAL_SYT || ins->operands[1].qual != QUAL_SYT) {
-                    fail(state, "BCAT: only plain SYT operands are implemented (need declared BIT width)");
-                    break;
-                }
-                if (!state->symtab) { fail(state, "BCAT: needs a symbol table (auto-discovered COMMON*.out) for declared BIT widths"); break; }
+                if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                if (!resolve_operand(state, &ins->operands[1], &b)) break;
+                if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BCAT: both operands must be BIT"); break; }
                 {
-                    const halmat_symtab_entry_t *sym2 = halmat_symtab_find_by_index(state->symtab, ins->operands[1].data);
-                    if (!sym2 || sym2->bit_width <= 0) { fail(state, "BCAT: second operand's declared BIT width is unknown"); break; }
-                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                    if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                    if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BCAT: both operands must be BIT"); break; }
+                    int width2 = -1;
+                    if (ins->operands[1].qual == QUAL_SYT && state->symtab) {
+                        const halmat_symtab_entry_t *sym2 = halmat_symtab_find_by_index(state->symtab, ins->operands[1].data);
+                        if (sym2 && sym2->bit_width > 0) width2 = sym2->bit_width;
+                    } else if (ins->operands[1].qual == QUAL_VAC && ins->operands[1].data < HALMAT_VAC_MAX) {
+                        const halmat_vac_slot_t *slot2 = &state->vac[ins->operands[1].data];
+                        if (slot2->is_bitpart_ref) width2 = slot2->bitpart_width;
+                        else if (slot2->is_bits && slot2->bit_width > 0) width2 = slot2->bit_width;
+                    } else if (ins->operands[1].qual == QUAL_LIT && state->literals &&
+                               ins->operands[1].data < state->literals->count) {
+                        const halmat_literal_t *lit2 = &state->literals->entries[ins->operands[1].data];
+                        if (lit2->type == LIT_BIT && lit2->bit_width > 0) width2 = lit2->bit_width;
+                    }
+                    if (width2 <= 0) { fail(state, "BCAT: second operand's declared BIT width is unknown"); break; }
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                    uint32_t mask2 = (sym2->bit_width >= 32) ? 0xFFFFFFFFu : ((1u << sym2->bit_width) - 1u);
+                    uint32_t mask2 = (width2 >= 32) ? 0xFFFFFFFFu : ((1u << width2) - 1u);
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bits = true;
-                    state->vac[ins->index].bits = (a.bits << sym2->bit_width) | (b.bits & mask2);
+                    state->vac[ins->index].bits = (a.bits << width2) | (b.bits & mask2);
                 }
                 break;
 
@@ -7231,7 +7343,41 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * implementation exists to cross-check -- implemented as
                  * BTOS's inverse: round to the nearest integer (STOI's
                  * rule, halmat_scalar_to_integer) then reinterpret as an
-                 * unsigned bit pattern. */
+                 * unsigned bit pattern.
+                 *
+                 * 3-operand form (bit_concat_sum_expression,
+                 * 257-TEST4.hal's `BIT$(5 AT #-4)(SUM(...) / 3)`, the
+                 * explicit-width-conversion spelling of BIT(...)):
+                 * operands[1]/[2] are a width/position pair (TAG1=3 on
+                 * both, the same "at-partition" marker DSUB's own BIT
+                 * at-partition subscript branch already uses). Only
+                 * `width` affects this conversion's own result --
+                 * `position` describes where the caller's own source
+                 * text says the result will conceptually sit once
+                 * embedded in a wider BIT-string (informational for a
+                 * human reader; this HALMAT stream never threads it
+                 * anywhere else at runtime -- the actual embedding is
+                 * whatever BCAT concatenation follows in source order,
+                 * confirmed via this file's own trace: three BIT$(5 AT
+                 * #-4)(...) results feed two plain BCATs with no operand
+                 * referencing position). Truncated to the low `width`
+                 * bits after the same round-to-nearest-integer/
+                 * reinterpret-as-bits conversion the 1-operand form
+                 * uses. */
+                if (ins->operand_count == 3 && ins->operands[1].tag1 == 3 && ins->operands[2].tag1 == 3) {
+                    resolved_value_t widthv;
+                    if (!resolve_operand(state, &ins->operands[0], &a)) break;
+                    if (!resolve_operand(state, &ins->operands[1], &widthv)) break;
+                    int width = rv_to_integer(&widthv);
+                    if (width < 0 || width > 32) { fail(state, "STOB: width out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    uint32_t mask = (width == 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_bits = true;
+                    state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a) & mask;
+                    state->vac[ins->index].bit_width = width;
+                    break;
+                }
                 if (ins->operand_count != 1) { fail(state, "STOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
@@ -7483,14 +7629,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* One per shaping-function argument (class-0/SFAR.md).
                  * Stored raw -- see state.h's shape_pending comment for
                  * why resolution is deferred to the shaping-result
-                 * opcode (VSHP/MSHP/etc) rather than done here. */
+                 * opcode (VSHP/MSHP/etc) rather than done here.
+                 *
+                 * Exception: a QUAL_VAC operand captured mid-replay
+                 * (arrayed_index >= 0 -- the LFNC.md per-element-
+                 * expression shape, see state.h's shape_pending.
+                 * has_resolved comment) is additionally resolved right
+                 * now, since its VAC slot won't still hold this pass's
+                 * own value by the time the shaping-result opcode reads
+                 * it after DLPE. Harmless to attempt for every other
+                 * already-confirmed shape too: outside a replay
+                 * (arrayed_index < 0, every VSHP/MSHP/SSHP/ISHP case
+                 * confirmed so far), this simply never fires. */
                 if (!state->shape_pending.active) { fail(state, "SFAR outside of an SFST...SFND block"); break; }
                 if (ins->operand_count != 1) { fail(state, "SFAR: expected 1 operand"); break; }
                 if (state->shape_pending.item_count >= HALMAT_MAX_OPERANDS) {
                     fail(state, "shaping-function argument list too long");
                     break;
                 }
-                state->shape_pending.items[state->shape_pending.item_count++] = ins->operands[0];
+                {
+                    uint8_t idx = state->shape_pending.item_count;
+                    state->shape_pending.items[idx] = ins->operands[0];
+                    state->shape_pending.has_resolved[idx] = false;
+                    if (ins->operands[0].qual == QUAL_VAC && state->arrayed_index >= 0) {
+                        resolved_value_t rv;
+                        if (resolve_operand(state, &ins->operands[0], &rv)) {
+                            state->shape_pending.resolved[idx] = rv_to_scalar(&rv);
+                            state->shape_pending.has_resolved[idx] = true;
+                        }
+                    }
+                    state->shape_pending.item_count = idx + 1;
+                }
                 break;
 
             case OP_SFND:
@@ -7639,17 +7808,52 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * see interp_step's arrayed-paragraph replay comment;
                  * SFAR's own operand capture doesn't call resolve_operand
                  * so it's unaffected by the arrayed-whole-array guard
-                 * either way), so it's read here via resolve_container. */
-                if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_IMD) {
-                    fail(state, "LFNC: expected 1 IMD operand");
-                    break;
-                }
-                if (!state->shape_pending.active || state->shape_pending.item_count != 1) {
-                    fail(state, "LFNC: expected exactly one SFAR-captured array argument");
-                    break;
-                }
+                 * either way), so it's read here via resolve_container.
+                 *
+                 * Second shape (bit_concat_sum_expression, 257-TEST4.hal's
+                 * `SUM(INTEGER(DATA$(*:1 TO 5)))`): the argument isn't a
+                 * plain whole-array symbol but a per-element sub-
+                 * expression (here, a DSUB asterisk-plus-bit-range
+                 * extraction feeding a BTOI conversion) that must be
+                 * evaluated once per array element -- so, unlike the
+                 * SUM(SA1) shape above, its ADLP/DLPE bracket genuinely
+                 * replays (precompute_arrayed_paragraphs' own SFAR
+                 * exclusion is scoped to a QUAL_SYT operand specifically,
+                 * for exactly this reason) and SFAR fires once per
+                 * element, each time eagerly resolving into shape_pending.
+                 * resolved[]/has_resolved[] (state.h's own comment) since
+                 * a replayed VAC slot can't otherwise be read back after
+                 * the fact. Recognized here by item_count > 1 (multiple
+                 * SFAR firings) with every item eagerly resolved -- built
+                 * directly into a synthetic buffer rather than going
+                 * through resolve_container, which only knows how to read
+                 * an already-existing container/array, not assemble one
+                 * from N independent scalar VAC results. */
+                halmat_scalar_t replayed_buf[HALMAT_MAX_OPERANDS];
                 halmat_scalar_t *ca; size_t count; int rows, cols;
-                if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
+                bool all_resolved = state->shape_pending.item_count > 1;
+                for (uint8_t k = 0; all_resolved && k < state->shape_pending.item_count; k++) {
+                    if (!state->shape_pending.has_resolved[k]) all_resolved = false;
+                }
+                if (all_resolved) {
+                    for (uint8_t k = 0; k < state->shape_pending.item_count; k++) {
+                        replayed_buf[k] = state->shape_pending.resolved[k];
+                    }
+                    ca = replayed_buf;
+                    count = state->shape_pending.item_count;
+                    rows = 0;
+                    cols = 0;
+                } else {
+                    if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_IMD) {
+                        fail(state, "LFNC: expected 1 IMD operand");
+                        break;
+                    }
+                    if (!state->shape_pending.active || state->shape_pending.item_count != 1) {
+                        fail(state, "LFNC: expected exactly one SFAR-captured array argument");
+                        break;
+                    }
+                    if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
+                }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                 uint16_t selector = ins->operands[0].data;
                 if (selector == 23) { /* SIZE: "length of array," no reduction loop needed -- INTEGER.

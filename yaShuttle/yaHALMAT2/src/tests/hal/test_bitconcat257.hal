@@ -1,0 +1,21 @@
+C/ Adapted from PDF p. 257 of "Programming in HAL/S".  Enclosing
+C/ brackets have been removed from array variables, even though they
+C/ are legal syntax.  As originally divided up in the book, the lines
+C/ are in fact too long for the original HAL/S compiler.  Rather than
+C/ worrying about how to split up multiline (E/M/S) code into shorter
+C/ lines, I've flattened the code into the single-line format.
+C/ (Unintentionally making it far easier to comprehend. Oops!  My bad!)
+
+ T257: PROGRAM;
+
+     DECLARE DATA ARRAY(3) BIT(16) INITIAL(HEX'3BE2');
+     DECLARE AVERAGE BIT(16);
+
+     AVERAGE = BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:1 TO 5))) / 3) ||
+               BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:5 AT 6))) / 3) ||
+               BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:5 AT 11))) / 3) ||
+               DATA$(1:16) AND DATA$(2:16) & DATA$(3:16);
+
+     WRITE(6) 'AVERAGE=', AVERAGE;
+Y %SVCI(0);
+ CLOSE T257;

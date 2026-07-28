@@ -1049,6 +1049,25 @@ struct halmat_state {
         bool active;
         halmat_operand_t items[HALMAT_MAX_OPERANDS];
         uint8_t item_count;
+        /* Eager per-item scalar capture, populated only when an SFAR
+         * operand is QUAL_VAC *and* we're inside an arrayed-paragraph
+         * replay (arrayed_index >= 0) -- i.e. LFNC.md's `SUM(INTEGER(
+         * DATA$(*:1 TO 5)))` shape (bit_concat_sum_expression,
+         * 257-TEST4.hal), where the SFAR-preceded ADLP/DLPE bracket
+         * genuinely replays a per-element sub-expression N times (one
+         * SFAR firing per array element) rather than the plain "capture
+         * one whole-array SYT reference, ADLP/DLPE is a no-op" shape
+         * (`SUM(SA1)`) this struct's items[] alone already handles.
+         * Deferred (raw operand) resolution can't work for the replayed
+         * case: each pass re-executes the *same* instruction, so its VAC
+         * slot (state->vac[]) only ever holds the *last* pass's value by
+         * the time LFNC finally reads it after DLPE -- resolving eagerly,
+         * once per SFAR firing, is the only way to keep each pass's own
+         * value. has_resolved[i] false means resolved[i] is unset (the
+         * ordinary raw-operand path, resolved later by whichever shaping-
+         * result opcode consumes items[i]). */
+        halmat_scalar_t resolved[HALMAT_MAX_OPERANDS];
+        bool has_resolved[HALMAT_MAX_OPERANDS];
     } shape_pending;
 
     /* Structure-field shadow-slot table, see halmat_struct_field_t above.

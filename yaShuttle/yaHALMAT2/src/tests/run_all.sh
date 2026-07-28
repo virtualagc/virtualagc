@@ -2301,6 +2301,40 @@ run ./run_local_fixture.sh gncpool224 "$(printf 'VEL2=      0.0                0
 # match).
 run ./run_local_fixture.sh test0_253 "$(printf 'TEST(0)=     0\nTEST(1)=     0\nTEST(2)=     0\nTEST(5)=     1')"
 
+# Task #73 (yahalmat2_bit_concat_sum_expression): 257-TEST4.hal's
+# `AVERAGE = BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:1 TO 5))) / 3) || ...`
+# (DATA an ARRAY(3) BIT(16)) previously aborted with "operand is not a
+# MATRIX/VECTOR intermediate result" before producing any output at
+# all. Four compounding, genuinely separate gaps found and fixed: (1)
+# `SUM(INTEGER(DATA$(*:...)))`'s own SFAR-preceded ADLP/DLPE bracket
+# was unconditionally excluded from replay by precompute_arrayed_
+# paragraphs (a rule tuned for the *other*, already-working
+# `SUM(SA1)` whole-array-symbol shape) -- narrowed to exclude only a
+# QUAL_SYT SFAR operand, letting a QUAL_VAC (computed sub-expression)
+# SFAR genuinely replay once per array element instead; (2) each
+# replay pass re-executes the same instructions, so a plain VAC-slot
+# capture would lose every pass but the last -- OP_SFAR now eagerly
+# resolves a QUAL_VAC operand into new shape_pending.resolved[]/
+# has_resolved[] fields (state.h) whenever captured mid-replay, and
+# OP_LFNC builds its reduction buffer directly from those when present
+# instead of resolve_container (which only knows how to read an
+# already-existing array, not assemble one from N independent per-
+# pass scalars); (3) DSUB's own asterisk-plus-bit-range shape
+# (`DATA$(*:1 TO 5)`/`DATA$(*:5 AT 6)`, both to-partition and at-
+# partition range spellings) was entirely unhandled -- extended via
+# the same bitpart_ref/bitpart_array_offset mechanism task #72 already
+# established, selecting the array element via state->arrayed_index
+# during the now-genuine replay; (4) the outer `BIT$(5 AT #-4)(...)`
+# explicit-width conversion compiles to a 3-operand STOB (width/
+# position, TAG1=3) this project's own STOB previously rejected
+# outright, and the chain of BCATs concatenating three such computed
+# (not plain-SYT) BIT results needed BCAT's declared-width lookup
+# generalized to also read a QUAL_VAC's own bit_width/bitpart_width
+# rather than only ever a QUAL_SYT's symtab entry. Confirmed against
+# real gpc via compileLinkRun: exact match (AVERAGE=0000 0000 0000
+# 0000).
+run ./run_local_fixture.sh bitconcat257 "AVERAGE=     0000 0000 0000 0000"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
