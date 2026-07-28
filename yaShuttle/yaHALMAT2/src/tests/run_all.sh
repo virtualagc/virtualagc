@@ -2167,6 +2167,54 @@ run ./run_local_fixture.sh examplen184 "BEST=               0"
 # behavior as a regression baseline, not a claim of gpc parity.
 run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
 
+# Task #68 (yahalmat2_nested_structure_vector_field_assign) -- PARTIALLY
+# resolved, DB status left "deferred": 177-P.hal,
+# `MYSTATE.STATE.POSITION.V = VECTOR(1,2,3);` (POSITION a level-number
+# sub-structure of STATE, not a separately-named sub-template) -- two
+# compounding bugs found and fixed, both in interp.c:
+#  (1) OP_MASN/OP_VASN's receiver-resolution only ever handled QUAL_VAC
+#      (a container_ref, e.g. `M$(I,*) = ...;`) and QUAL_SYT (a plain
+#      whole-array variable) -- a qualified structure-field receiver
+#      (QUAL_XPT, `X.FIELD = ...;`) fell through to "receiver must be
+#      SYT" regardless of nesting depth. Fixed via a new QUAL_XPT
+#      branch using the already-established resolve_xpt_field() (task
+#      #62), allocating the target field's own elements[] on first
+#      touch, the same convention every other structure-field VECTOR
+#      write already uses.
+#  (2) Even with the ASSIGN itself fixed, WRITE/CALL-argument capture
+#      (OP_XXAR) had no case at all for a *qualified* VECTOR/MATRIX
+#      field reference -- only a *whole* (bare/unqualified) structure
+#      reference (TAG1=10) was handled; a single qualified field
+#      (TAG1=4/VECTOR or 3/MATRIX) fell through to the generic scalar
+#      resolve_operand()/read_syt_entry() path, which has no VECTOR/
+#      MATRIX-aware branch at all and silently read the field's unused
+#      `.value` union member (0) -- confirmed via direct testing,
+#      printed "0" instead of the real VECTOR. Fixed by routing a
+#      QUAL_XPT operand with TAG1 in {3,4} through the same resolve_
+#      container() path already used for whole_syt/whole_vac.
+# Confirmed against real gpc (values match exactly; line-wrapping
+# differs only because compileLinkRun's own gpc invocation uses a wider
+# --line-width than this fixture's default): POSITION.V=(1,2,3),
+# VELOCITY.V=(4,5,6).
+#
+# NOT resolved: 177-P.hal's own third field, `MYSTATE.STATE.ACCEL.V`
+# (ACCEL a *named* `SUPER_VECTOR-STRUCTURE` sub-template nested inside
+# STATE, not a level-number field of S2's own single template) still
+# fails ("EXTN: expected 2 operands") -- this compiles as a 3-operand
+# EXTN chain (base, intermediate field, final field) that OP_EXTN
+# doesn't handle at all. Correctly supporting it needs a genuine data-
+# model extension: the shadow struct-field storage is keyed by a flat
+# (base_syt, field_syt, copy_index) triple, which has no way to
+# represent "the ACCEL sub-object nested inside a specific MYSTATE
+# instance" as a distinct identity from ACCEL's own template-level
+# field_syt (which is shared across every S2 instance that has an
+# ACCEL field) -- a naive "use the intermediate field_syt as the new
+# base_syt" approach would silently alias two different outer
+# instances' own ACCEL sub-objects together. This fixture is isolated
+# from 177-P.hal with the ACCEL.V line/WRITE removed rather than
+# guessing at a fix for this deeper, separate gap.
+run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

@@ -1,0 +1,30 @@
+C/ Isolated from 177-P.hal (PDF p.177 of "Programming in HAL/S") --
+C/ ACCEL (a named SUPER_VECTOR-STRUCTURE sub-template nested inside a
+C/ level-number STRUCTURE) intentionally omitted; see run_all.sh's own
+C/ comment on this fixture for why (yahalmat2_nested_structure_vector_
+C/ field_assign is only partially resolved -- level-number nesting
+C/ works, named-sub-template nesting via a 3-operand EXTN still
+C/ doesn't).
+
+  P:
+  PROGRAM;
+     STRUCTURE S2:
+        1 STATE,
+           2 POSITION,
+              3 V VECTOR,
+              3 STATUS BOOLEAN,
+              3 TIMETAG SCALAR,
+           2 VELOCITY,
+              3 V VECTOR,
+              3 STATUS BOOLEAN,
+              3 TIMETAG SCALAR,
+        1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;
+     DECLARE MYSTATE S2-STRUCTURE;
+     MYSTATE.STATE.POSITION.V = VECTOR(1, 2, 3);
+     MYSTATE.STATE.POSITION.STATUS = ON;
+     MYSTATE.STATE.POSITION.TIMETAG = 10;
+     MYSTATE.STATE.VELOCITY.V = VECTOR(4, 5, 6);
+     WRITE(6) 'POSITION.V=', MYSTATE.STATE.POSITION.V;
+     WRITE(6) 'VELOCITY.V=', MYSTATE.STATE.VELOCITY.V;
+Y %SVCI(0);
+  CLOSE P;

@@ -5719,6 +5719,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     break;
                 }
+                if (ins->operands[1].qual == QUAL_XPT) {
+                    /* A qualified VECTOR/MATRIX structure-field receiver,
+                     * nested to any depth (`MYSTATE.STATE.POSITION.V =
+                     * VECTOR(1,2,3);`, POSITION itself a level-number
+                     * sub-structure of STATE, not a named sub-template)
+                     * -- user-reported (yahalmat2_nested_structure_
+                     * vector_field_assign; 177-P.hal). resolve_xpt_field
+                     * already resolves a QUAL_XPT operand to the ONE
+                     * target field's own shadow storage regardless of
+                     * nesting depth (the EXTN chain that produced this
+                     * XPT reference is opaque here -- however many
+                     * level-number layers it walked through, the result
+                     * is still just one field's own halmat_syt_entry_t*)
+                     * -- this simply allocates that field's own
+                     * elements[] on first touch (same convention as
+                     * every other structure-field VECTOR write this
+                     * project already uses, e.g. task #62's whole-
+                     * structure READ) and copies the source container
+                     * straight in. */
+                    halmat_syt_entry_t *field = resolve_xpt_field(state, &ins->operands[1]);
+                    if (!field) break;
+                    if (!field->elements || field->element_count != src_count) {
+                        free(field->elements);
+                        field->elements = calloc(src_count ? src_count : 1, sizeof(halmat_scalar_t));
+                        field->element_count = src_count;
+                    }
+                    memcpy(field->elements, src, src_count * sizeof(halmat_scalar_t));
+                    field->rows = src_rows;
+                    field->cols = src_cols;
+                    break;
+                }
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "MASN/VASN: receiver must be SYT"); break; }
                 uint16_t dest_syt = ins->operands[1].data;
                 if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: SYT index out of range"); break; }
@@ -8629,7 +8660,26 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                       ins->operands[0].qual == QUAL_SYT &&
                                       syt_is_array_shaped(state, ins->operands[0].data);
                     bool whole_vac = whole_vac_container;
-                    if (whole_syt || whole_vac) {
+                    /* A qualified VECTOR/MATRIX structure-field reference
+                     * (`WRITE(6) MYSTATE.STATE.POSITION.V;`, V a VECTOR
+                     * terminal nested inside a level-number sub-
+                     * structure) -- user-reported
+                     * (yahalmat2_nested_structure_vector_field_assign;
+                     * 177-P.hal). Previously fell through to the plain
+                     * resolve_operand()/read_syt_entry() path below,
+                     * which is scalar-only (SCALAR/CHARACTER/BIT, else
+                     * INTEGER) and has no VECTOR/MATRIX-aware branch at
+                     * all -- silently reading the field's unused
+                     * `.value` union member (0) instead of its real
+                     * `.elements`. resolve_container's own QUAL_XPT case
+                     * (confirmed correct already via 172-OUTER.hal's
+                     * `RETURN X.V;`) handles this directly; gated on
+                     * TAG1 == 4 (VECTOR) or 3 (MATRIX), the same class-
+                     * number convention this file's own XXAR.md
+                     * documents. */
+                    bool whole_xpt = ins->operands[0].qual == QUAL_XPT &&
+                                      (ins->operands[0].tag1 == 4 || ins->operands[0].tag1 == 3);
+                    if (whole_syt || whole_vac || whole_xpt) {
                         if (whole_syt && (ins->operands[0].tag1 == 1 || ins->operands[0].tag1 == 2)) {
                             /* Whole BIT/CHARACTER ARRAY argument
                              * (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
