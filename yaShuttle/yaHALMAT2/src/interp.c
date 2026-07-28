@@ -510,6 +510,44 @@ static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, ui
     return &slot->value;
 }
 
+/* Maps a TINT run's flattened OFFSET "slot" index (class-8/TINT.md) back
+ * to the structure terminal it belongs to, plus the element offset
+ * within that terminal -- needed because a VECTOR terminal consumes
+ * `cols` consecutive slots (one per component) instead of the single
+ * slot a plain scalar/integer/bit terminal occupies, so slot index and
+ * terminal-chain position diverge once a VECTOR terminal precedes the
+ * target slot (170-OUTER.hal's `1 V VECTOR, 1 S1 SCALAR, ...`: slot 3
+ * is S1, not the field 3 positions after the template, since V alone
+ * consumes slots 0-2). Walks struct_first_field/struct_next_field
+ * (symtab.h) summing each terminal's own slot width. Same conservative
+ * hal_class==4 (VECTOR)-only scoping as the whole-structure READ/WRITE
+ * terminal walk (task #62) -- MATRIX/ARRAY terminals aren't handled,
+ * no confirmed real-corpus trigger yet. */
+static bool tint_locate_slot(halmat_state_t *state, uint16_t template_syt, int slot, uint16_t *out_field_syt, int *out_elem, int *out_width) {
+    if (!state->symtab) return false;
+    int field_syt = -1;
+    {
+        const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, template_syt);
+        if (!tsym) return false;
+        field_syt = tsym->struct_first_field;
+    }
+    int cursor = 0;
+    while (field_syt >= 0) {
+        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, (size_t)field_syt);
+        if (!fsym) return false;
+        int width = (fsym->hal_class == 4 && fsym->cols > 0) ? fsym->cols : 1;
+        if (slot < cursor + width) {
+            *out_field_syt = (uint16_t)field_syt;
+            *out_elem = slot - cursor;
+            *out_width = width;
+            return true;
+        }
+        cursor += width;
+        field_syt = fsym->struct_next_field;
+    }
+    return false;
+}
+
 /* Finds the active ON ERROR-registered handler for (group, member), or
  * NULL if none is registered (the default/SYSTEM "standard fixup"
  * applies -- USA003090 Appendix C). USA003087 Sec. 25.2's confirmed
@@ -5823,11 +5861,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * symbols at consecutive SYT indices immediately
                  * following the template's own (confirmed empirically),
                  * matching FCAL's "callee+1+i" argument convention.
-                 * ARRAY/MATRIX/VECTOR terminals (which occupy more than
-                 * one terminal-slot each, per TINT.md's own worked
-                 * multi-terminal trace) aren't handled -- this only
-                 * covers the plain scalar/integer-terminal case, no
-                 * fixture needs more yet.
+                 * VECTOR terminals (which occupy `cols` consecutive
+                 * terminal-slots each, per TINT.md's own worked
+                 * multi-terminal trace) are handled via tint_locate_slot's
+                 * slot-to-terminal walk, confirmed against real-corpus
+                 * 170-OUTER.hal (`1 V VECTOR, 1 S1 SCALAR, 1 C INTEGER,
+                 * 1 S2 SCALAR, 1 E BOOLEAN` with `INITIAL(0,1,0, 0,83,0,
+                 * OFF)` -- 7 coalesced slots for V's 3 components + 4
+                 * scalar terminals in one TINT, previously mis-mapped by
+                 * the plain template_syt+1+offset+k formula below since
+                 * that assumes one slot advances one terminal, silently
+                 * shifting every terminal after V onto the wrong field).
+                 * MATRIX/ARRAY terminals aren't handled -- no confirmed
+                 * real-corpus trigger yet.
                  *
                  * "Copiness" (`Q-STRUCTURE(n)`, an array of structure
                  * copies): confirmed this session that a coalesced run
@@ -5897,9 +5943,55 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     lit_op.data = (uint16_t)(ins->operands[1].data + k);
                     resolved_value_t rv;
                     if (!resolve_operand(state, &lit_op, &rv)) { ok = false; break; }
-                    uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data + (spans_copies ? 0 : (uint32_t)k);
-                    int32_t this_copy_idx = spans_copies ? (copy_idx + k) : copy_idx;
-                    if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); ok = false; break; }
+
+                    if (spans_copies) {
+                        /* Copiness case (TINT.md's "Copiness" section):
+                         * one fixed terminal, k advances the copy index
+                         * instead -- never seen combined with a VECTOR
+                         * terminal, so the plain template_syt+1+offset
+                         * formula (no slot-width walk needed) still
+                         * applies here unchanged. */
+                        uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data;
+                        int32_t this_copy_idx = copy_idx + k;
+                        if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); ok = false; break; }
+                        if (state->symtab && rv.kind == RV_SCALAR) {
+                            const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, field_syt32);
+                            if (fsym && fsym->hal_class == 6) { /* INTEGER */
+                                int32_t iv = rv_to_integer(&rv);
+                                rv.kind = RV_INTEGER;
+                                rv.integer = iv;
+                            }
+                        }
+                        halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, this_copy_idx);
+                        if (!write_syt_entry(state, HALMAT_SYT_MAX, field, &rv)) { ok = false; break; }
+                        continue;
+                    }
+
+                    uint16_t field_syt16;
+                    int elem_idx, width;
+                    if (!tint_locate_slot(state, template_syt, (int)ins->operands[0].data + k, &field_syt16, &elem_idx, &width)) {
+                        fail(state, "TINT: OFFSET slot does not map to a structure terminal");
+                        ok = false;
+                        break;
+                    }
+                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, field_syt16, copy_idx);
+                    if (width > 1) {
+                        /* VECTOR terminal: allocate this shadow slot's own
+                         * elements[] the first time it's touched (same
+                         * ensure_container()-style convention the READ-side
+                         * whole-structure destination uses, task #62) --
+                         * literal-table FIXED/DOUBLE entries always resolve
+                         * RV_SCALAR (TINT.md), and VECTOR components are
+                         * never anything else. */
+                        if (!field->elements) {
+                            field->elements = calloc((size_t)width, sizeof(halmat_scalar_t));
+                            field->element_count = (size_t)width;
+                            field->cols = width;
+                            field->rows = 0;
+                        }
+                        field->elements[elem_idx] = rv.scalar;
+                        continue;
+                    }
                     /* Litfile numeric entries carry no INTEGER-vs-SCALAR
                      * distinction of their own (resolve_operand's QUAL_LIT
                      * case always resolves FIXED/DOUBLE as RV_SCALAR) --
@@ -5908,14 +6000,13 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * type, so the declared type has to come from the
                      * symbol table instead, per-terminal. */
                     if (state->symtab && rv.kind == RV_SCALAR) {
-                        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, field_syt32);
+                        const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, field_syt16);
                         if (fsym && fsym->hal_class == 6) { /* INTEGER */
                             int32_t iv = rv_to_integer(&rv);
                             rv.kind = RV_INTEGER;
                             rv.integer = iv;
                         }
                     }
-                    halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, this_copy_idx);
                     if (!write_syt_entry(state, HALMAT_SYT_MAX, field, &rv)) { ok = false; break; }
                 }
                 if (!ok) break;

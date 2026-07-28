@@ -1863,6 +1863,40 @@ run ./run_read_fixture.sh read_structure "$(printf '1 2 3 10.5 7 20.5 1\n')" " 1
 # already confirmed against real gpc (USA003087 Sec. 12.3).
 run ./run_read_fixture.sh outer_struct "$(printf '1 2 3 10.5 7 20.5 1\n2 3 4 11.5 8 21.5 1\n3 4 5 12.5 9 22.5 1\n4 5 6 13.5 10 23.5 1\n5 6 7 14.5 11 24.5 1\n6 7 8 15.5 12 25.5 1\n7 8 9 16.5 13 26.5 1\n8 9 10 17.5 14 27.5 1\n9 10 11 18.5 15 28.5 1\n10 11 12 19.5 16 29.5 1\n')" "$(printf 'UTIL OF      1.0000000E+00      2.0000000E+00      3.0000000E+00      1.0500000E+01               7      2.0500000E+01     1     =\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nUTIL OF      2.0000000E+00      3.0000000E+00      4.0000000E+00      1.1500000E+01               8      2.1500000E+01     1     =\n 2.0000000E+00      3.0000000E+00      4.0000000E+00\nUTIL OF      3.0000000E+00      4.0000000E+00      5.0000000E+00      1.2500000E+01               9      2.2500000E+01     1     =\n 3.0000000E+00      4.0000000E+00      5.0000000E+00\nUTIL OF      4.0000000E+00      5.0000000E+00      6.0000000E+00      1.3500000E+01              10      2.3500000E+01     1     =\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\nUTIL OF      5.0000000E+00      6.0000000E+00      7.0000000E+00      1.4500000E+01              11      2.4500000E+01     1     =\n 5.0000000E+00      6.0000000E+00      7.0000000E+00\nUTIL OF      6.0000000E+00      7.0000000E+00      8.0000000E+00      1.5500000E+01              12      2.5500000E+01     1     =\n 6.0000000E+00      7.0000000E+00      8.0000000E+00\nUTIL OF      7.0000000E+00      8.0000000E+00      9.0000000E+00      1.6500000E+01              13      2.6500000E+01     1     =\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\nUTIL OF      8.0000000E+00      9.0000000E+00      1.0000000E+01      1.7500000E+01              14      2.7500000E+01     1     =\n 8.0000000E+00      9.0000000E+00      1.0000000E+01\nUTIL OF      9.0000000E+00      1.0000000E+01      1.1000000E+01      1.8500000E+01              15      2.8500000E+01     1     =\n 9.0000000E+00      1.0000000E+01      1.1000000E+01\nUTIL OF      1.0000000E+01      1.1000000E+01      1.2000000E+01      1.9500000E+01              16      2.9500000E+01     1     =\n 1.0000000E+01      1.1000000E+01      1.2000000E+01')"
 
+# Task #70 (yahalmat2_structure_param_vector_return): 170-OUTER.hal,
+# `DECLARE LOCAL UTIL_PARM-STRUCTURE INITIAL(0, 1, 0, 0, 83, 0, OFF);`
+# (V's 3 VECTOR components + S1, C, S2, E) followed by `RESULT =
+# UTIL(LOCAL);` (UTIL(X) VECTOR; ... RETURN X.V;). Previously aborted
+# ("operand is not a MATRIX/VECTOR intermediate result") before task
+# #62's RETURN/CALL-argument fix landed; once that crash was fixed, a
+# second, distinct bug surfaced: RESULT printed as all-zero instead of
+# LOCAL's own INITIAL value (0,1,0). Root cause: OP_TINT (class-8/
+# TINT.md's whole-structure INITIAL() mechanism) mapped each coalesced
+# literal to a structure terminal via a flat `template_syt + 1 + offset
+# + k` formula -- one literal always advanced exactly one terminal. That
+# formula silently breaks the moment a VECTOR terminal appears earlier
+# in the template: V alone consumes 3 of the run's 7 coalesced literals
+# (per real HALMAT, one TINT with OFFSET=0, run-count=7 -- V's 3 slots
+# plus S1/C/S2/E), but the old formula treated all 7 as one-terminal-
+# each, writing V's own single scalar union member 3 times (each
+# overwriting the last, ending at 0.0 since V is otherwise never
+# assigned in this file) and shifting every later value onto the wrong
+# terminal entirely (S1 would receive V's 2nd component, etc.) -- masked
+# in task #62's own read_structure/outer_struct fixtures since those
+# populate every field explicitly via READ, never relying on TINT's
+# INITIAL() path. Fixed via a new tint_locate_slot() helper (interp.c)
+# that walks struct_first_field/struct_next_field summing each
+# terminal's own slot width (`cols` for a VECTOR terminal, 1 otherwise)
+# to map a flattened OFFSET slot index back to (terminal, element
+# index), allocating the VECTOR terminal's own elements[] on first touch
+# exactly like the READ-side whole-structure destination does. The
+# "copiness" (`Q-STRUCTURE(n)`) coalesced-run case is unaffected (kept
+# on its original single-terminal formula -- never observed combined
+# with a VECTOR terminal). Confirmed against real gpc: RESULT= 0.0 1.0
+# 0.0 (this fixture's own hand-computed value, matching the DB issue's
+# recorded gpc ground truth for this exact file).
+run ./run_local_fixture.sh outer170_vecinit "RESULT=      0.0                1.0000000E+00      0.0          "
+
 # Task #23: TASN (whole-structure assign, `DST = SRC;`) copying an
 # ARRAY/MATRIX/VECTOR structure terminal -- previously failed loudly as
 # unreachable ("no HALSFC-compilable program can get non-zero
