@@ -1,0 +1,28 @@
+C/ From PDF p. 222 of "Programming in HAL/S".
+
+  BETTER:
+  PROGRAM;
+     DECLARE A SCALAR LOCK(1);
+     DECLARE SCALAR,
+                B, C CONSTANT(6);
+                
+C       .
+C       .
+C       .
+
+  UPDATE;
+     IF A NOT = 0 THEN
+        DO;
+           B = C / A;
+        END;
+  CLOSE;
+     WRITE(6) 'B=', B, 'C=', C;
+  T:
+  TASK;
+  UPDATE;
+     A = 0;
+  CLOSE;
+  CLOSE T;
+Y %SVCI(0);
+  CLOSE BETTER;
+  

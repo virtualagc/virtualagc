@@ -2239,6 +2239,33 @@ run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=      1.0000000
 # (PHI=45, ALPHA=30, INITIAL_POSN=(1,1,1), MODE=2).
 run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,1,1\nMODE    2\nPRINT   1\nEND\n')" " 4.5000000E+01      3.0000000E+01      1.0000000E+00      1.0000000E+00      1.0000000E+00               2"
 
+# Task #71 (yahalmat2_update_block_no_output): 222-BETTER.hal's
+# `UPDATE; IF A NOT=0 THEN DO; B=C/A; END; CLOSE; WRITE(6) 'B=',B,
+# 'C=',C;` -- an `UPDATE;...CLOSE;` critical-section block (USA003087
+# Sec. 15, here guarding a SCALAR LOCK(1) variable) produced completely
+# empty output (exit 0). Root cause: `UPDATE;...CLOSE;`'s own closing
+# `CLOSE;` reuses the SAME CLOS opcode a PROGRAM/PROCEDURE/FUNCTION/
+# TASK's own final CLOSE uses, but its operand is a compiler-synthesized
+# internal statement label (`$UPDATE1`, confirmed via COMMON0.out:
+# SYM_TYPE=0x42="STATEMENT LABEL") matching the opening UDEF's own
+# operand, never the enclosing unit's own label (SYM_TYPE 0x47/0x48/
+# 0x49). OP_CLOS had no way to tell the two shapes apart, so this CLOS
+# fell into the "primal process closing" branch exactly as if it were
+# BETTER's own final CLOSE, halting the whole program before it ever
+# reached the WRITE that follows. Fixed by checking the CLOS operand's
+# own symtab hal_class: 0x42 (an UPDATE block's own synthesized label)
+# is now a no-op, matching UDEF's own already-established "just a
+# marker, no real effect to model" role (this interpreter has no
+# concurrent-access hazard for UPDATE to actually guard against).
+# Confirmed against real gpc for both this file and 224-GNC_POOL.hal
+# (a LABELED `COPY_INPUTS: UPDATE; ...; CLOSE COPY_INPUTS;` block copying
+# LOCK'd COMPOOL VECTOR variables) -- both exact matches (gpc's own
+# "SVC trapped" messages for the LOCK-related SVC codes it doesn't
+# model are a separate, harmless log line this project doesn't
+# replicate, not a value mismatch).
+run ./run_local_fixture.sh better222 "B=      0.0               C=      6.0000000E+00"
+run ./run_local_fixture.sh gncpool224 "$(printf 'VEL2=      0.0                0.0                0.0               POSN2=      0.0                0.0                0.0          ')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

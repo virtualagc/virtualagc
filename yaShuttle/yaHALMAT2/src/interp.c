@@ -9884,6 +9884,38 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_CLOS:
+                /* `UPDATE; ...; CLOSE;` (HAL/S's critical-section
+                 * construct, USA003087 Sec. 15) reuses this SAME CLOS
+                 * opcode for the block's own closing `CLOSE;` -- but its
+                 * operand is a *synthesized* internal statement label
+                 * (e.g. `$UPDATE1`, SYM_TYPE=0x42="STATEMENT LABEL" in
+                 * unHALMAT.py's own dataTypes table) matching the
+                 * opening UDEF's own operand (class-0/UDEF.md), never
+                 * the enclosing PROGRAM/PROCEDURE/FUNCTION/TASK's own
+                 * label (SYM_TYPE 0x47/0x48/0x49) a genuine unit-closing
+                 * CLOS always carries. User-reported
+                 * (yahalmat2_update_block_no_output; 222-BETTER.hal's
+                 * `UPDATE; IF A NOT=0 THEN DO; B=C/A; END; CLOSE;
+                 * WRITE(6) 'B=',B,'C=',C;`): without this check, this
+                 * CLOS fell into the `call_return_sp <= 0` "primal
+                 * process closing" branch below exactly as if it were
+                 * BETTER's own final CLOSE, halting the whole program
+                 * before it ever reached the WRITE that follows --
+                 * confirmed via direct COMMON0.out inspection that this
+                 * CLOS's own operand (symbol #5) is `$UPDATE1`,
+                 * SYM_TYPE=0x42, not BETTER's own SYM_TYPE=0x49 PROGRAM
+                 * LABEL. UDEF/lock acquisition and this CLOS/lock
+                 * release have no real effect to model here (this
+                 * interpreter has no concurrent-access hazard for
+                 * UPDATE to guard against in the first place -- matching
+                 * UDEF's own already-established "just a marker" no-op
+                 * role), so this is simply skipped, falling through to
+                 * whatever follows exactly like UDEF's own bracketing
+                 * marker already does. */
+                if (ins->operand_count == 1 && ins->operands[0].qual == QUAL_SYT && state->symtab) {
+                    const halmat_symtab_entry_t *csym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                    if (csym && csym->hal_class == 0x42) break;
+                }
                 if (state->call_return_sp > 0) {
                     /* Implicit return (procedure with no explicit RETURN,
                      * or a fallthrough past the last statement) -- no
