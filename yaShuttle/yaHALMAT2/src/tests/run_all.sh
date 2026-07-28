@@ -2002,6 +2002,52 @@ run ./run_local_fixture.sh vector_to_partition_write "$(printf ' 0.0            
 run ./run_local_fixture.sh limit127 "$(printf ' 5.2000000E+01\n-5.2000000E+01\n 1.0000000E+02\n-1.0000000E+02')"
 run ./run_local_fixture.sh limit211 "$(printf 'LIMIT(5,10)=      5.0000000E+00\nLIMIT(15,10)=      1.0000000E+01\nLIMIT(-15,10)=     -1.0000000E+01\nLIMIT(0,1)=      0.0          ')"
 
+# Task #64 (partition_array_shift_wrong): 138-FILTER.hal, a 4-element
+# sliding-window shift register (`[BUFF] 1 TO 3 = [BUFF] 2 TO 4; BUFF(4)
+# = INPUT;`, BUFF an ARRAY(4) SCALAR) run over inputs 10,20,30,40,50,60
+# -- correct for the first two averages (2.5, 7.5) then wrong from the
+# third onward (12.5 instead of 15, etc.). Two independent, compounding
+# bugs found investigating this, both in interp.c:
+#  (1) precompute_arrayed_paragraphs's backward dependency walk (the
+#      ADLP/DLPE "trailing metadata" case) only ever examined the
+#      operands of the instruction *currently at* its own `start`
+#      candidate, re-pointing `cur` to whichever single QUAL_VAC
+#      producer it found first and abandoning the rest of that scan via
+#      `break` -- correct for a linear one-dependency chain (`A3 = A1 +
+#      A2;`'s SASN<-SADD case, already covered by an existing fixture),
+#      but this SASN has TWO independent QUAL_VAC operands (the
+#      to-partition DSUB results for both its receiver `[BUFF] 1 TO 3`
+#      and its source `[BUFF] 2 TO 4`, neither depending on the other):
+#      once `start` moved to chase the source DSUB (this project's own
+#      "source-first" SASN operand convention), the receiver DSUB's own
+#      dependency was never revisited, leaving it entirely OUTSIDE the
+#      replayed paragraph -- confirmed via direct instrumentation, it
+#      resolved exactly once with arrayed_index still -1 while the
+#      source DSUB correctly replayed 3 times. Fixed by re-scanning
+#      every instruction currently within [start, i-1] each pass (a
+#      proper fixed-point walk) instead of only the instruction at
+#      `start` itself.
+#  (2) Even with (1) fixed, DSUB itself (OP_DSUB) had no case at all for
+#      a numeric ARRAY's to-partition "start TO end" bounds resolved
+#      per-element via an enclosing ADLP replay -- confirmed empirically
+#      that (unlike the VECTOR to-partition case, gated on TAG1==2) a
+#      numeric ARRAY to-partition compiles as an ordinary 2-operand DSUB
+#      with no special TAG1 marking, relying entirely on the surrounding
+#      ADLP(count)/DLPE wrapping to signal "one element per iteration."
+#      A 1-D ARRAY (base->rows==0) has no second dimension for 2
+#      operands to legitimately index, so this shape fell through to
+#      the generic multi-dimension "placeholder stride" fallback, which
+#      misread (start,end) as (dim0_index,dim1_index) and computed one
+#      FIXED offset (base-16 placeholder stride) identical on every
+#      replay iteration -- e.g. always resolving to BUFF(3)=BUFF(4),
+#      three times over, instead of the 3 different element pairs the
+#      shift needs. Fixed by adding a dedicated branch resolving to
+#      element `start + arrayed_index`, the same writable single-element
+#      `is_ref` mechanism the ordinary single-index case already uses.
+# Confirmed against real gpc: exact match, all 6 averages correct
+# (2.5, 7.5, 15, 25, 35, 45). Fixture: test_filter138.hal.
+run ./run_local_fixture.sh filter138 "$(printf 'IN=      1.0000000E+01     AVG=      2.5000000E+00\nIN=      2.0000000E+01     AVG=      7.5000000E+00\nIN=      3.0000000E+01     AVG=      1.5000000E+01\nIN=      4.0000000E+01     AVG=      2.5000000E+01\nIN=      5.0000000E+01     AVG=      3.5000000E+01\nIN=      6.0000000E+01     AVG=      4.5000000E+01')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

@@ -2251,20 +2251,57 @@ static void precompute_arrayed_paragraphs(halmat_state_t *state) {
                  * candidate entry's own `.index` (monotonically
                  * increasing with logical position, so a plain linear
                  * walk suffices). */
+                /* User-reported (partition_array_shift_wrong;
+                 * 138-FILTER.hal's `[BUFF] 1 TO 3 = [BUFF] 2 TO 4;`, a
+                 * SASN with TWO independent QUAL_VAC operands -- the
+                 * to-partition DSUB results for both its receiver AND
+                 * its source, neither depending on the other): the
+                 * original version below only ever examined the
+                 * operands of the instruction *currently at* `start`,
+                 * re-pointed to the single newly-found candidate each
+                 * time it moved `start` back -- so after finding SASN's
+                 * *first* QUAL_VAC operand (its source, this project's
+                 * own "source-first" SASN convention) and moving `start`
+                 * to that producer (the source DSUB, which itself has no
+                 * further QUAL_VAC operands), the loop's own `cur`
+                 * pointer permanently lost access to SASN's *second*
+                 * QUAL_VAC operand (its receiver, the dest DSUB) --
+                 * `break` abandoning the rest of that `for k` scan the
+                 * moment one candidate was found, and the next pass only
+                 * ever re-examining the instruction at the *new* `start`,
+                 * never revisiting SASN's own remaining operand. The dest
+                 * DSUB was left entirely outside the replayed paragraph,
+                 * executing exactly once with arrayed_index still -1
+                 * (confirmed via direct instrumentation: dest resolved
+                 * once to a fixed offset while the src DSUB correctly
+                 * replayed 3 times) instead of once per ADLP iteration --
+                 * so `[BUFF] 1 TO 3` never advanced across the shift
+                 * register's 3 elements at all. Fixed by re-scanning
+                 * *every* instruction currently within `[start, i-1]`
+                 * each pass (not just the instruction at `start` itself)
+                 * for a QUAL_VAC operand pointing earlier than `start`,
+                 * a proper fixed-point walk that keeps chasing every
+                 * independent dependency an instruction in the paragraph
+                 * has, not just a single linear chain -- the already-
+                 * confirmed single-dependency cases (e.g. `A3 = A1 +
+                 * A2;`'s SASN<-SADD chain) are unaffected, since a chain
+                 * of length 1 behaves identically either way. */
                 size_t start = i - 1;
+                size_t scan_end = i - 1;
                 bool progress = true;
                 while (progress && start > boundary) {
                     progress = false;
-                    const halmat_instr_t *cur = &state->prog->instrs[start];
-                    for (uint8_t k = 0; k < cur->operand_count; k++) {
-                        if (cur->operands[k].qual != QUAL_VAC) continue;
-                        size_t target_word = cur->operands[k].data;
-                        size_t candidate = start;
-                        while (candidate > boundary && state->prog->instrs[candidate - 1].index >= target_word) candidate--;
-                        if (candidate < start && candidate >= boundary && state->prog->instrs[candidate].index == target_word) {
-                            start = candidate;
-                            progress = true;
-                            break;
+                    for (size_t p = start; p <= scan_end; p++) {
+                        const halmat_instr_t *cur = &state->prog->instrs[p];
+                        for (uint8_t k = 0; k < cur->operand_count; k++) {
+                            if (cur->operands[k].qual != QUAL_VAC) continue;
+                            size_t target_word = cur->operands[k].data;
+                            size_t candidate = start;
+                            while (candidate > boundary && state->prog->instrs[candidate - 1].index >= target_word) candidate--;
+                            if (candidate < start && candidate >= boundary && state->prog->instrs[candidate].index == target_word) {
+                                start = candidate;
+                                progress = true;
+                            }
                         }
                     }
                 }
@@ -5398,6 +5435,54 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_string = true;
                     state->vac[ins->index].string = sub;
+                    break;
+                }
+
+                /* Numeric ARRAY to-partition range ("start TO end") on a
+                 * 1-D array, resolved per-element via an enclosing ADLP/
+                 * DLPE arrayed replay -- user-reported
+                 * (partition_array_shift_wrong; 138-FILTER.hal's sliding-
+                 * window shift, `[BUFF] 1 TO 3 = [BUFF] 2 TO 4;`, BUFF an
+                 * ARRAY(4) SCALAR). Confirmed empirically that a numeric
+                 * ARRAY to-partition compiles as an ordinary 2-operand
+                 * DSUB with no special TAG1 marking (unlike the VECTOR
+                 * to-partition branch above, gated on TAG1==2) -- the
+                 * compiler instead signals "one element per iteration,
+                 * not one bulk range-to-range copy" purely by wrapping
+                 * the whole SASN in an ADLP(count)/DLPE replay, count ==
+                 * end-start+1. A 1-D ARRAY (base->rows == 0, i.e. no
+                 * symtab-confirmed second dimension) has no second
+                 * dimension for 2 operands to legitimately index, so
+                 * num_indices==2 here can only be a to-partition range,
+                 * never two genuine per-dimension indices -- the generic
+                 * multi-dimension "placeholder stride" fallback below
+                 * (designed for an unknown real dimension count) instead
+                 * misread (start,end) as (dim0_index,dim1_index) and
+                 * computed one FIXED offset via its base-16 placeholder
+                 * stride, identical on every one of the ADLP replay's
+                 * iterations since arrayed_index was never consulted --
+                 * so the same one element got read/written 3 times over
+                 * (e.g. always BUFF(3)=BUFF(4)) instead of the 3
+                 * different element pairs the shift actually needs.
+                 * Resolves to element `start + arrayed_index` (0 when
+                 * reached outside any active replay, matching this
+                 * shape's only confirmed real trigger, which is always
+                 * ADLP-wrapped) -- a plain writable single-element
+                 * reference (`is_ref`), the same mechanism the ordinary
+                 * single-index case below already uses, so both the
+                 * receiver (dest, `[BUFF] 1 TO 3 = ...`) and source
+                 * (`... = [BUFF] 2 TO 4`) sides work identically through
+                 * the existing read/write-through machinery. */
+                if (base->rows == 0 && num_indices == 2) {
+                    resolved_value_t startv;
+                    if (!resolve_operand(state, &ins->operands[1], &startv)) break;
+                    int32_t start = rv_to_integer(&startv);
+                    int32_t idx = start - 1 + (state->arrayed_index >= 0 ? state->arrayed_index : 0);
+                    if (idx < 0) idx = 0;
+                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    state->vac[ins->index].is_ref = true;
+                    state->vac[ins->index].ref_syt = base_syt;
+                    state->vac[ins->index].ref_offset = (size_t)idx % (base->element_count ? base->element_count : 1);
                     break;
                 }
 
