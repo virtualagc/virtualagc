@@ -2134,6 +2134,39 @@ run ./run_local_fixture.sh test3_255 "$(printf '19\n025\n031\n00011001\n0001 100
 run ./run_local_fixture.sh examplen180 "BEST=               1"
 run ./run_local_fixture.sh examplen184 "BEST=               0"
 
+# Task #75 (no_return_function_undefined_behavior_diverges, DB status
+# still "deferred", NOT fully resolved -- see below): 130-EXAMPLE_N.hal,
+# `DO FOR V = 250000 TO 0 BY -100 UNTIL ALMOST_EQUAL(1, MASS(1, V));`
+# (V declared plain SCALAR). Previously printed "THE ANSWER IS
+# 32767" -- bare-INTEGER-formatted garbage, no error, exit 0. Root
+# cause (a real, concrete, now-fixed bug): OP_DFOR/OP_EFOR
+# unconditionally typed the loop control variable INTEGER and forced
+# its initial/incremented value through rv_to_integer() regardless of
+# its own DECLARE'd type -- silently clamping 250000 to the SCALAR->
+# INTEGER overflow fixup's own 32767 ceiling (this project's confirmed
+# error-15 clamp) even though HAL/S's DO FOR control variable can be
+# declared SCALAR, not just INTEGER (USA003087 Sec. 10.2). Fixed by
+# consulting the variable's own declared type (symtab) and keeping a
+# genuinely SCALAR-declared loop running in double-precision space
+# instead. Output now correctly SCALAR-formatted: "THE ANSWER IS
+# 2.5000000E+05" -- NOT independently confirmed against real gpc,
+# which gives "2.4990000E+05" (249900, i.e. one iteration ran before
+# the loop's UNTIL condition took effect) instead of ours (250000, no
+# iterations ran, exiting on the very first pre-body UNTIL check since
+# ALMOST_EQUAL always unconditionally returns TRUE). That remaining
+# discrepancy traces to two separate, genuinely open questions not
+# resolved here: (1) whether CFOR's own UNTIL pre-body check
+# (class-0/CFOR.md) should be skipped on the loop's very first entry,
+# mirroring DFOR's own already-confirmed "skip only the increment, not
+# the bounds check, on the first pass" precedent for the TO-clause
+# range test; (2) MASS's own missing RETURN statement (USA003090
+# error #14, documented fixup "Continue" -- leave the result register
+# untouched) is still never detected/reported at all, and its exact
+# runtime effect on this file's specific control flow was not traced
+# further. This fixture locks in the current (improved but unconfirmed)
+# behavior as a regression baseline, not a claim of gpc parity.
+run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

@@ -4640,9 +4640,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count < 4) { fail(state, "DFOR: expected 2 (list) or 4-5 (range) operands"); break; }
                 if (!resolve_operand(state, &ins->operands[2], &a)) break; /* initial value */
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "DFOR: control variable must be SYT"); break; }
-                state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
-                int32_t initial = rv_to_integer(&a);
-                state->syt[ins->operands[1].data].value = initial;
+                /* User-reported (no_return_function_undefined_behavior_
+                 * diverges; 130-EXAMPLE_N.hal's `DO FOR V = 250000 TO 0
+                 * BY -100 UNTIL ...;`, V declared plain `SCALAR`): the
+                 * control variable was unconditionally typed INTEGER and
+                 * its initial value forced through rv_to_integer() --
+                 * silently clamping 250000 to the SCALAR->INTEGER
+                 * overflow fixup's own 32767 ceiling (this project's own
+                 * confirmed error-15 clamp, cvfx_overflow_truncation_
+                 * rule) even though HAL/S's own DO FOR loop control
+                 * variable can be declared SCALAR, not just INTEGER
+                 * (USA003087 Sec. 10.2) -- V then stayed permanently
+                 * pinned at 32767 for the loop's entire duration.
+                 * Consulting the variable's own declared type (symtab)
+                 * and keeping a genuine SCALAR loop running in
+                 * double-precision space (via halmat_scalar_t) instead
+                 * of coercing through INTEGER fixes this; the pre-
+                 * existing INTEGER path is unchanged for a genuinely
+                 * INTEGER-declared control variable. */
+                bool is_scalar_var = false;
+                if (state->symtab) {
+                    const halmat_symtab_entry_t *vsym = halmat_symtab_find_by_index(state->symtab, ins->operands[1].data);
+                    is_scalar_var = vsym && vsym->hal_class == 5;
+                }
+                double initial_d = (a.kind == RV_SCALAR) ? halmat_scalar_to_double(a.scalar) : (double)rv_to_integer(&a);
+                if (is_scalar_var) {
+                    state->syt[ins->operands[1].data].type = SYT_TYPE_SCALAR;
+                    state->syt[ins->operands[1].data].scalar = halmat_scalar_from_double(initial_d, false);
+                } else {
+                    state->syt[ins->operands[1].data].type = SYT_TYPE_INTEGER;
+                    state->syt[ins->operands[1].data].value = rv_to_integer(&a);
+                }
                 /* Range form's initial in-range check (user-reported,
                  * 113-EXAMPLE_7.hal's `DO FOR J = I+1 TO 4;`, silently
                  * running one bogus body pass with J=5 when I=4, since
@@ -4670,9 +4698,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     incr_val.kind = RV_INTEGER;
                     incr_val.integer = 1; /* implicit default increment (class-0/DFOR.md) */
                 }
-                int32_t incr = rv_to_integer(&incr_val);
-                int32_t final = rv_to_integer(&final_val);
-                bool in_range = (incr >= 0) ? (initial <= final) : (initial >= final);
+                double incr_d = (incr_val.kind == RV_SCALAR) ? halmat_scalar_to_double(incr_val.scalar) : (double)rv_to_integer(&incr_val);
+                double final_d = (final_val.kind == RV_SCALAR) ? halmat_scalar_to_double(final_val.scalar) : (double)rv_to_integer(&final_val);
+                bool in_range = (incr_d >= 0) ? (initial_d <= final_d) : (initial_d >= final_d);
                 if (!in_range) {
                     size_t efor_pos = state->dfor_efor_pos[state->pc];
                     if (efor_pos == NO_TARGET) { fail(state, "DFOR has no matching EFOR"); break; }
@@ -4911,12 +4939,24 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     incr_val.kind = RV_INTEGER;
                     incr_val.integer = 1; /* implicit default increment (class-0/DFOR.md) */
                 }
-                int32_t incr = rv_to_integer(&incr_val);
-                int32_t final = rv_to_integer(&final_val);
                 uint16_t control_var = dfor->operands[1].data;
-                int32_t new_value = state->syt[control_var].value + incr;
-                state->syt[control_var].value = new_value;
-                bool in_range = (incr >= 0) ? (new_value <= final) : (new_value >= final);
+                double incr_d = (incr_val.kind == RV_SCALAR) ? halmat_scalar_to_double(incr_val.scalar) : (double)rv_to_integer(&incr_val);
+                double final_d = (final_val.kind == RV_SCALAR) ? halmat_scalar_to_double(final_val.scalar) : (double)rv_to_integer(&final_val);
+                bool in_range;
+                if (state->syt[control_var].type == SYT_TYPE_SCALAR) {
+                    /* See OP_DFOR's own comment (no_return_function_
+                     * undefined_behavior_diverges) -- a SCALAR-declared
+                     * DO FOR control variable stays in double-precision
+                     * space for its increment too, not coerced through
+                     * INTEGER. */
+                    double new_value_d = halmat_scalar_to_double(state->syt[control_var].scalar) + incr_d;
+                    state->syt[control_var].scalar = halmat_scalar_from_double(new_value_d, false);
+                    in_range = (incr_d >= 0) ? (new_value_d <= final_d) : (new_value_d >= final_d);
+                } else {
+                    int32_t new_value = state->syt[control_var].value + rv_to_integer(&incr_val);
+                    state->syt[control_var].value = new_value;
+                    in_range = (incr_d >= 0) ? ((double)new_value <= final_d) : ((double)new_value >= final_d);
+                }
                 if (in_range) {
                     state->pc = dfor_pos + 1;
                     branched = true;
