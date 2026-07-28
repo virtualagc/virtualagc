@@ -8412,8 +8412,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->io_pending.item_count++;
                         break;
                     }
-                    if (cls != 2 && cls != 5 && cls != 6) {
-                        fail(state, "READ: only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
+                    if (cls != 1 && cls != 2 && cls != 5 && cls != 6) {
+                        fail(state, "READ: only BIT/CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT class %u)", cls);
                         break;
                     }
                     state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
@@ -9285,6 +9285,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         }
                         rv.kind = RV_INTEGER;
                         rv.integer = (int32_t)v;
+                    } else if (state->io_pending.items[i].dest_class == 1) {
+                        /* BIT/BOOLEAN destination (`READ(INFILE) ...,
+                         * PRINT;`, PRINT declared BOOLEAN) -- user-
+                         * reported (yahalmat2_read_vector_unimplemented;
+                         * 164-OUTER.hal's own READ(INFILE) SKIP(0),
+                         * COLUMN(9), PRINT;, reached once VNAME='PRINT'
+                         * -- a genuinely different gap from this DB
+                         * item's own original VECTOR trigger, which
+                         * already works via the whole-container dest_
+                         * is_container path above). No confirmed
+                         * primary-source or real-gpc example of a raw
+                         * BIT-string external READ format was found
+                         * (unlike HEX'...'/OCT'.../BIN'...' literals'
+                         * own confirmed encodings) -- treated as a
+                         * plain decimal integer token reinterpreted as
+                         * the raw bit pattern (matching STOB's own
+                         * "round to nearest integer, reinterpret as
+                         * bits" convention, value.c), the natural
+                         * reading for a card punched with a bare 0/1
+                         * like this file's own `PRINT   1` line. */
+                        long v;
+                        if (fscanf(in, "%ld", &v) != 1) {
+                            if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                fail(state, "READ(%d): end of input or malformed BIT", device);
+                            }
+                            break;
+                        }
+                        rv.kind = RV_BITS;
+                        rv.bits = (uint32_t)v;
                     } else if (state->io_pending.items[i].dest_class == 2) {
                         /* Whitespace-delimited token, same convention as
                          * the numeric cases -- HAL/S's real fixed-column

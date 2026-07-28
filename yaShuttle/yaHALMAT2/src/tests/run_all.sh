@@ -2215,6 +2215,30 @@ run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
 # guessing at a fix for this deeper, separate gap.
 run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
 
+# Task #69 (yahalmat2_read_vector_unimplemented): 164-OUTER.hal,
+# `READ(INFILE) SKIP(0), COLUMN(9), INITIAL_POSN;` (INITIAL_POSN a
+# VECTOR DOUBLE) -- the DB item's own original trigger. Investigating
+# turned up that the whole-VECTOR READ destination case itself was
+# ALREADY fixed by an earlier session (044-ORTHONORMAL.hal's plain
+# `READ(5) X;`, dest_is_container path, interp.c) -- reproducing this
+# exact file with only PHI/ALPHA/I_POSN/MODE/END input cards (no PRINT
+# card) already completed successfully with no crash. The REAL
+# remaining trigger, found once a PRINT card was added to actually
+# reach every READ branch in this file's own DO WHILE loop, is
+# `READ(INFILE) SKIP(0), COLUMN(9), PRINT;` (PRINT declared BOOLEAN)
+# -- a completely different, genuinely still-unimplemented gap: READ
+# into a plain BIT/BOOLEAN destination (HALMAT class 1), which this
+# same "only CHARACTER/SCALAR/INTEGER" allow-list also rejected.
+# Fixed by adding a BIT case alongside the existing INTEGER/CHARACTER/
+# SCALAR ones, parsed as a plain decimal token reinterpreted as the
+# raw bit pattern (matching STOB's own established "round to nearest
+# integer, reinterpret as bits" convention) -- no confirmed primary-
+# source or real-gpc example of a distinct raw BIT-string external
+# READ format was found, unlike HEX'...'/OCT'...'/BIN'...' literals'
+# own confirmed encodings. Confirmed against real gpc: exact match
+# (PHI=45, ALPHA=30, INITIAL_POSN=(1,1,1), MODE=2).
+run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,1,1\nMODE    2\nPRINT   1\nEND\n')" " 4.5000000E+01      3.0000000E+01      1.0000000E+00      1.0000000E+00      1.0000000E+00               2"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
