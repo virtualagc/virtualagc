@@ -188,6 +188,7 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
         if (st->entries[i].struct_next_field < 0) st->entries[i].struct_next_field = -1;
         if (st->raw[i].sym_type == 0x0A) { /* MAJ_STRUC: SYM_ARRAY is a direct copy count, not an EXTuARRAY index -- see symtab.h */
             st->entries[i].struct_copies = (int)st->raw[i].sym_array;
+            st->entries[i].struct_template_syt = st->raw[i].sym_length != 0 ? (int)st->raw[i].sym_length : -1;
         } else if (st->raw[i].sym_array != 0) {
             st->entries[i].shape = HALMAT_SHAPE_ARRAY;
             uint32_t base = st->raw[i].sym_array;

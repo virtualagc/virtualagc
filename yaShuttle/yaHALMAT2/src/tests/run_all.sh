@@ -2069,6 +2069,71 @@ run ./run_local_fixture.sh filter138 "$(printf 'IN=      1.0000000E+01     AVG= 
 # exact match, "19"/"025"/"031"/"00011001".
 run ./run_local_fixture.sh test3_255 "$(printf '19\n025\n031\n00011001\n0001 1001')"
 
+# Task #67 (yahalmat2_assign_array_struct_element): 180-EXAMPLE_N.hal/
+# 184-EXAMPLE_N.hal, `CALL READ_IMU(I) ASSIGN(VEL(I));` (VEL a
+# SUPER_VECTOR-STRUCTURE(3) array-of-structure) inside a `DO FOR
+# TEMPORARY I=1 TO 3;` loop -- previously aborted immediately with
+# "ASSIGN: whole-ARRAY receiver must be a plain SYT variable" (VEL(I)
+# compiles to a TSUB(copy index)+EXTN qualified structure reference,
+# not a plain SYT). Four separate, compounding bugs found chasing this
+# to a complete, gpc-matching run (interp.c unless noted):
+#  (1) OP_XXND's ASSIGN write-back had no case at all for a whole-
+#      STRUCTURE ASSIGN parameter -- added, deep-copying each of the
+#      callee's own terminals into the caller's own copy-I shadow
+#      storage (mirroring bind_call_argument's own is_structure case
+#      for the opposite/call-argument-in direction). Needed a NEW
+#      symtab.h field, struct_template_syt (symtab.c), since a
+#      structure INSTANCE symbol's own SYM_LINK1 is NOT populated the
+#      way struct_first_field's doc comment assumes -- only the
+#      TEMPLATE symbol itself has a real SYM_LINK1; an instance's own
+#      template is instead found via its SYM_LENGTH field (confirmed
+#      empirically: VEL/STRUC's own SYM_LENGTH both equal SUPER_VECTOR's
+#      real SYT index).
+#  (2) resolve_param_syt() (new helper): the "callee+1+i" positional
+#      parameter convention (FCAL.md/PCAL.md) only holds when nothing
+#      else was allocated a symbol-table slot between the callee's own
+#      symbol and its first parameter -- false for a genuinely forward-
+#      referenced PROCEDURE (READ_IMU is called before its own textual
+#      definition, which appears last in the file); every OTHER
+#      procedure forward-referenced earlier (SELECT_BEST, GUIDANCE,
+#      OTHER_SW) sits in the gap instead. Fixed by consulting a real
+#      PROCEDURE/FUNCTION LABEL symbol's own SYM_PTR field directly (a
+#      second, distinct meaning from the unrelated IND-CALL-LABEL-alias
+#      case already handled by resolve_call_target -- SYM_PTR here is
+#      the procedure's own first parameter's real SYT index).
+#  (3) `REPEAT;` inside a `DO FOR` loop (as opposed to `DO WHILE`/`DO
+#      UNTIL`, the already-working DTST/ETST case) had no label-target
+#      registration at all -- added to precompute_labels' own OP_EFOR
+#      case, landing REPEAT's BRA exactly on EFOR itself (the loop's own
+#      per-cycle increment/retest/branch-back entry point), not EFOR+1
+#      (EXIT's own, different target, which would skip the loop
+#      entirely).
+#  (4) A whole `Q-STRUCTURE(n)` ARRAY passed by value with no index
+#      (`CALL SELECT_BEST(VEL);`) compiles as ONE XXAR wrapped in an
+#      ADLP(3)/DLPE replay, not 3 separate XXARs -- each replay pass
+#      appends its own io_pending item, so one logical argument becomes
+#      3 items[] entries. A bare EXTN reference's own struct_copy_index
+#      is always -1 ("ambient," deferred resolution) by design, but an
+#      io_pending item is a captured snapshot consumed later -- by PCAL/
+#      FCAL/XXND time the replay is long over and arrayed_index has
+#      reverted, so resolving copy index at *bind* time always gave 0
+#      regardless of which pass captured it. Fixed by resolving eagerly
+#      at *capture* time instead (OP_XXAR), while arrayed_index still
+#      reflects the right copy. A new item_is_struct_replay_continuation()
+#      helper then lets OP_PCAL/OP_FCAL/OP_XXND recognize consecutive
+#      replay-generated items as copies of the SAME logical parameter
+#      (not 3 distinct ones), and bind_call_argument's own destination
+#      copy index now tracks the source's (previously hardcoded to 0).
+# Confirmed against real gpc for both files: 180-EXAMPLE_N.hal gives
+# "BEST=               1" (SELECT_BEST's complete logic, all VEL copies
+# default OFF/0 per READ_IMU's own elided body -> falls to "ALL EQUALLY
+# BAD" -> SELECTED=1); 184-EXAMPLE_N.hal (deliberately-incomplete-per-
+# the-book SELECT_BEST body, and an assumed-size `V SUPER_VECTOR-
+# STRUCTURE(*)` parameter) gives "BEST=               0" -- both exact
+# matches.
+run ./run_local_fixture.sh examplen180 "BEST=               1"
+run ./run_local_fixture.sh examplen184 "BEST=               0"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

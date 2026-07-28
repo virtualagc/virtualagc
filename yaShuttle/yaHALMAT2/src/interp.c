@@ -1886,8 +1886,35 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
          * never itself part of a Q-STRUCTURE(n) array). User-reported,
          * 172-OUTER.hal's `UTIL(ARG)`. */
         uint16_t src_base = state->io_pending.items[item_index].struct_base_syt;
+        /* Whole `Q-STRUCTURE(n)` ARRAY passed by value with no index at
+         * all (`CALL SELECT_BEST(VEL);`, VEL declared `SUPER_VECTOR-
+         * STRUCTURE(3)`, matched by SELECT_BEST's own `V SUPER_VECTOR-
+         * STRUCTURE(3)` parameter) -- user-reported
+         * (yahalmat2_assign_array_struct_element; 180-EXAMPLE_N.hal/
+         * 184-EXAMPLE_N.hal). Confirmed via real compiled HALMAT that
+         * this compiles as ONE XXAR (not one per copy), wrapped in an
+         * ADLP(3)/DLPE trailing-metadata pair -- interp_step's own
+         * arrayed-paragraph replay (precompute_arrayed_paragraphs)
+         * re-executes that single XXAR 3 times, once per arrayed_index,
+         * each pass appending its OWN io_pending item with its own
+         * correctly-resolved struct_copy_index (0, 1, 2) -- i.e. one
+         * *logical* argument becomes 3 *separate* items[] entries, each
+         * already carrying the right source copy. The destination copy
+         * must track the SAME index (source copy k -> parameter's own
+         * copy k), not always land on copy 0 the way a genuine single-
+         * copy structure argument (172-OUTER.hal's `UTIL(ARG)`, whose
+         * own struct_copy_index is likewise a concrete value -- current_
+         * copy_index()'s ambient default of 0 outside any replay, not a
+         * literal -1 -- so this formula reduces to the previous
+         * hardcoded-0 behavior for that case unchanged). The *caller*
+         * (OP_PCAL/OP_FCAL's own binding loop) is responsible for
+         * recognizing these 3 items as copies of one logical parameter
+         * and passing the SAME `param_syt` for all of them, not 3
+         * sequentially-increasing ones -- see resolve_param_syt's own
+         * call sites. */
         int32_t src_copy = state->io_pending.items[item_index].struct_copy_index >= 0
             ? state->io_pending.items[item_index].struct_copy_index : current_copy_index(state);
+        int32_t dst_copy = src_copy;
         int field_syt = -1;
         if (state->symtab) {
             const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, state->io_pending.items[item_index].struct_template_syt);
@@ -1897,7 +1924,7 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
             const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
             if (!fsym) break;
             halmat_syt_entry_t *src_fe = find_or_create_struct_field(state, src_base, (uint16_t)field_syt, src_copy);
-            halmat_syt_entry_t *dst_fe = find_or_create_struct_field(dest_state, param_syt, (uint16_t)field_syt, 0);
+            halmat_syt_entry_t *dst_fe = find_or_create_struct_field(dest_state, param_syt, (uint16_t)field_syt, dst_copy);
             if (fsym->hal_class == 4 && fsym->cols > 0) {
                 if (!dst_fe->elements) {
                     dst_fe->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));
@@ -2074,6 +2101,79 @@ static uint16_t resolve_call_target(const halmat_state_t *state, uint16_t sym) {
         return (uint16_t)e->sym_ptr;
     }
     return sym;
+}
+
+/* Returns the SYT index a callee's argument `i` (0-indexed) binds to.
+ * FCAL.md's own confirmed "callee+1+i" positional convention (parameters
+ * occupy the SYT slots immediately following the callee's own symbol,
+ * contiguously) only holds when nothing else was allocated a symbol-
+ * table slot between the callee's own symbol and its first declared
+ * parameter -- true whenever the callee happens to be fully DEFINED
+ * before this call site is compiled, but user-reported FALSE for a
+ * genuinely forward-referenced PROCEDURE/FUNCTION (called before its own
+ * textual `PROCEDURE(...)`/`FUNCTION(...)` definition appears later in
+ * the source, 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal's `CALL READ_IMU(I)
+ * ASSIGN(VEL(I));`, READ_IMU's own body defined last in the file): every
+ * OTHER procedure/task/label symbol forward-referenced earlier in the
+ * same enclosing block (SELECT_BEST, GUIDANCE, OTHER_SW, in this file --
+ * each gets its own symbol-table slot the moment it's first *referenced*,
+ * not when its body is compiled) sits in the gap instead, so
+ * "callee+1+i" silently binds arguments to the wrong, unrelated symbols
+ * (confirmed via direct instrumentation: READ_IMU's own STRUC parameter,
+ * real SYT 20, was computed as SYT 11 -- landing on GUIDANCE's own
+ * PROCEDURE LABEL symbol instead). Confirmed via direct COMMON0.out
+ * inspection that a real PROCEDURE/FUNCTION LABEL symbol's own SYM_PTR
+ * field (already parsed into halmat_symtab_entry_t.sym_ptr for the
+ * unrelated IND-CALL-LABEL-alias case above) carries a SECOND, different
+ * meaning for this symbol type: the SYT index of the procedure/
+ * function's own FIRST formal parameter directly (READ_IMU's SYM_PTR=19
+ * =UNIT_NUM's real index; SELECT_BEST's SYM_PTR=13=V's real index --
+ * both confirmed against this exact file's own COMMON0.out symbol
+ * dump), regardless of how many other symbols were forward-declared in
+ * between. Falls back to the "+1+i" approximation when no symbol table
+ * is available or `sym_ptr` looks unpopulated (0) -- the same graceful-
+ * degradation convention every other symtab-dependent feature in this
+ * interpreter already follows; every previously-confirmed fixture
+ * (FCAL.md/PCAL.md's own traces) has the callee defined before its call
+ * site, where sym_ptr and "+1" necessarily agree, so this is a strict
+ * generalization, not a behavior change, for those cases. */
+static uint16_t resolve_param_syt(const halmat_state_t *state, uint16_t callee_syt, uint8_t i) {
+    if (state->symtab) {
+        const halmat_symtab_entry_t *e = halmat_symtab_find_by_index(state->symtab, callee_syt);
+        if (e && e->sym_ptr > 0 && (size_t)e->sym_ptr < HALMAT_SYT_MAX) {
+            return (uint16_t)((size_t)e->sym_ptr + i);
+        }
+    }
+    return (uint16_t)(callee_syt + 1 + i);
+}
+
+/* True if io_pending item `i` is a *replay continuation* of item `i-1`
+ * -- one more copy of the SAME logical whole-`Q-STRUCTURE(n)` ARRAY
+ * call argument, not a genuinely new positional argument. User-reported
+ * (yahalmat2_assign_array_struct_element; 180-EXAMPLE_N.hal's
+ * `CALL SELECT_BEST(VEL) ASSIGN(BEST);`, VEL a `SUPER_VECTOR-
+ * STRUCTURE(3)`): confirmed via real compiled HALMAT that a whole
+ * multi-copy structure argument with no index (`SELECT_BEST(VEL)`)
+ * compiles as a SINGLE XXAR wrapped in an ADLP(3)/DLPE trailing-
+ * metadata pair, not 3 separate XXARs -- interp_step's own arrayed-
+ * paragraph replay mechanism (already used for numeric whole-ARRAY
+ * WRITE/CALL arguments) re-executes that one XXAR 3 times, appending
+ * a SEPARATE io_pending item each pass (struct_copy_index 0, 1, 2).
+ * Without this check, OP_PCAL/OP_FCAL's own positional binding loop
+ * (which advances one parameter slot per items[] entry) treated those
+ * 3 replay-generated items as 3 DISTINCT arguments, silently binding
+ * copies 1 and 2 (and every subsequent real argument/ASSIGN parameter)
+ * to the wrong, unrelated parameter slots -- confirmed via direct
+ * instrumentation: `ASSIGN(BEST)`'s own parameter resolved to
+ * `SELECTED`'s neighbor `MOST_RECENT` instead, two slots off. */
+static bool item_is_struct_replay_continuation(const halmat_io_item_t *items, uint8_t i) {
+    if (i == 0) return false;
+    const halmat_io_item_t *cur = &items[i], *prev = &items[i - 1];
+    return cur->is_structure && prev->is_structure &&
+           cur->struct_base_syt == prev->struct_base_syt &&
+           cur->struct_template_syt == prev->struct_template_syt &&
+           cur->struct_copy_index >= 0 && prev->struct_copy_index >= 0 &&
+           cur->struct_copy_index == prev->struct_copy_index + 1;
 }
 
 /* DTST/ETST bracket a DO WHILE/UNTIL loop, matched by the "bookkeeping
@@ -2510,6 +2610,28 @@ static void precompute_labels(halmat_state_t *state) {
              * separate DFOR-to-EFOR position lookup. */
             uint16_t label = ins->operands[0].data;
             if (label < HALMAT_LABEL_MAX) state->label_pos[label] = i + 1;
+            /* REPEAT inside a `DO FOR` loop (as opposed to a `DO WHILE`/
+             * `DO UNTIL`, the DTST/ETST case above) -- user-reported
+             * (yahalmat2_assign_array_struct_element;
+             * 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal's `DO FOR N = 1 TO 3;
+             * IF V.STATUS = OFF THEN REPEAT; ...`): the same "REPEAT's
+             * BRA targets DO_LOC(TEMP)+1" convention as the DTST/ETST
+             * case (confirmed by this exact file's own compiled HALMAT:
+             * DFOR/EFOR's shared construct-id label is 6, REPEAT's own
+             * BRA targets label 7=6+1), but landing at a different
+             * position than ETST's own case needs: a DTST/ETST loop's
+             * `etst_back_target` skips past DTST's one-time setup logic,
+             * which range-form DFOR has no equivalent of -- EFOR's own
+             * instruction position *is* already the loop's per-cycle
+             * increment/retest/branch-back entry point (its own body
+             * unconditionally re-evaluates the loop control variable and
+             * either branches back into the body or falls through past
+             * the loop), so REPEAT should land exactly *on* EFOR itself
+             * (`i`, not `i+1` -- landing at `i+1`, EXIT's own target,
+             * would incorrectly skip the loop entirely instead of
+             * continuing it). Without this, every `REPEAT;` inside a
+             * `DO FOR` loop failed with "branch to undefined label N". */
+            if (label < HALMAT_LABEL_MAX - 1) state->label_pos[label + 1] = i;
         }
     }
 }
@@ -3670,7 +3792,7 @@ bool interp_prepare_external_call(halmat_state_t *state, halmat_state_t *target,
         return false;
     }
     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
-        uint16_t param_syt = entry_syt + 1 + i;
+        uint16_t param_syt = resolve_param_syt(target, entry_syt, i);
         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); return false; }
         if (!bind_call_argument(state, target, param_syt, i)) return false;
     }
@@ -8305,7 +8427,34 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->io_pending.items[state->io_pending.item_count].is_structure = true;
                     state->io_pending.items[state->io_pending.item_count].struct_base_syt = sref->struct_base_syt;
                     state->io_pending.items[state->io_pending.item_count].struct_template_syt = sref->struct_field_syt;
-                    state->io_pending.items[state->io_pending.item_count].struct_copy_index = sref->struct_copy_index;
+                    /* Eagerly resolved here (not left as sref's own -1
+                     * "ambient" marker) -- user-reported
+                     * (yahalmat2_assign_array_struct_element;
+                     * 180-EXAMPLE_N.hal's `CALL SELECT_BEST(VEL);`, VEL a
+                     * `SUPER_VECTOR-STRUCTURE(3)` replayed via ADLP/DLPE,
+                     * one XXAR capture per copy): a bare EXTN reference's
+                     * own struct_copy_index is always -1 by design
+                     * (state.h's own comment -- deferred resolution is
+                     * the right default for an ordinary field *read*,
+                     * re-evaluated fresh each time it's consulted), but
+                     * this io_pending item is a *captured snapshot* meant
+                     * to be consumed later, once this call's own PCAL/
+                     * FCAL/XXND finally runs -- by which point the ADLP
+                     * replay that resolved this XXAR is long over and
+                     * state->arrayed_index has already reverted to -1,
+                     * so current_copy_index() at bind time always came
+                     * back 0 regardless of which replay pass captured
+                     * this particular item (confirmed via direct
+                     * instrumentation: all 3 replay-captured items showed
+                     * src_copy=0). Resolving now, while arrayed_index
+                     * still reflects the copy actually being captured,
+                     * fixes this permanently; reduces to the previous
+                     * value (0) for a genuinely non-replayed single-copy
+                     * structure argument like 172-OUTER.hal's
+                     * `UTIL(ARG)`, since current_copy_index() is 0
+                     * outside any replay too. */
+                    state->io_pending.items[state->io_pending.item_count].struct_copy_index =
+                        sref->struct_copy_index >= 0 ? sref->struct_copy_index : current_copy_index(state);
                     state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
                     state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                     state->io_pending.item_count++;
@@ -9103,10 +9252,80 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * bookkeeping of *which* parameter was tracked at call
                  * time -- just the item's own position in this list. */
                 if (state->io_pending.active && state->io_pending.is_call) {
+                    uint16_t resolved_call_target = resolve_call_target(state, state->io_pending.call_target);
+                    uint8_t param_pos = 0;
+                    uint32_t param_syt = 0;
                     for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                        if (!item_is_struct_replay_continuation(state->io_pending.items, i)) {
+                            param_syt = resolve_param_syt(state, resolved_call_target, param_pos++);
+                        }
                         if (!state->io_pending.items[i].is_assign) continue;
-                        uint32_t param_syt = (uint32_t)state->io_pending.call_target + 1 + i;
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: parameter SYT out of range"); break; }
+                        /* Whole STRUCTURE ASSIGN parameter targeting one
+                         * copy of a Q-STRUCTURE(n) array
+                         * (`CALL READ_IMU(I) ASSIGN(VEL(I));`, VEL a
+                         * SUPER_VECTOR-STRUCTURE(3), READ_IMU's own STRUC
+                         * parameter a plain single-copy SUPER_VECTOR-
+                         * STRUCTURE) -- user-reported,
+                         * yahalmat2_assign_array_struct_element;
+                         * 180-EXAMPLE_N.hal/184-EXAMPLE_N.hal. `VEL(I)`
+                         * compiles to a TSUB(copy index)+EXTN pair
+                         * resolving to a QUAL_XPT struct_ref (task #39's
+                         * own TSUB copy-index mechanism), not a plain SYT
+                         * reference -- deep-copies each of the callee's
+                         * STRUC terminals into the caller's own copy-I
+                         * shadow storage, the same per-terminal walk/
+                         * storage-kind dispatch bind_call_argument's own
+                         * is_structure case already uses for the opposite
+                         * (call-argument-in) direction. */
+                        if (state->symtab) {
+                            const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, param_syt);
+                            if (psym && psym->hal_class == 0x0A) {
+                                if (state->io_pending.items[i].dest_operand.qual != QUAL_XPT) {
+                                    fail(state, "ASSIGN: whole-STRUCTURE receiver must be a qualified structure reference");
+                                    break;
+                                }
+                                uint16_t dest_vac = state->io_pending.items[i].dest_operand.data;
+                                if (dest_vac >= HALMAT_VAC_MAX || !state->vac[dest_vac].is_struct_ref) {
+                                    fail(state, "ASSIGN: whole-STRUCTURE receiver is not a structure reference");
+                                    break;
+                                }
+                                uint16_t dest_base = state->vac[dest_vac].struct_base_syt;
+                                int32_t dest_copy = state->vac[dest_vac].struct_copy_index >= 0
+                                    ? state->vac[dest_vac].struct_copy_index : current_copy_index(state);
+                                int field_syt = -1;
+                                if (psym->struct_template_syt >= 0) {
+                                    const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, (size_t)psym->struct_template_syt);
+                                    field_syt = tsym ? tsym->struct_first_field : -1;
+                                }
+                                while (field_syt >= 0) {
+                                    const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, (size_t)field_syt);
+                                    if (!fsym) break;
+                                    halmat_syt_entry_t *src_fe = find_or_create_struct_field(state, (uint16_t)param_syt, (uint16_t)field_syt, 0);
+                                    halmat_syt_entry_t *dst_fe = find_or_create_struct_field(state, dest_base, (uint16_t)field_syt, dest_copy);
+                                    if (fsym->hal_class == 4 && fsym->cols > 0) {
+                                        if (!dst_fe->elements) {
+                                            dst_fe->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));
+                                            dst_fe->element_count = (size_t)fsym->cols;
+                                            dst_fe->cols = fsym->cols;
+                                            dst_fe->rows = 0;
+                                        }
+                                        if (src_fe->elements) memcpy(dst_fe->elements, src_fe->elements, (size_t)fsym->cols * sizeof(halmat_scalar_t));
+                                    } else if (fsym->hal_class == 6) {
+                                        dst_fe->type = SYT_TYPE_INTEGER;
+                                        dst_fe->value = src_fe->value;
+                                    } else if (fsym->hal_class == 1) {
+                                        dst_fe->type = SYT_TYPE_BIT;
+                                        dst_fe->bit_value = src_fe->bit_value;
+                                    } else if (fsym->hal_class == 5) {
+                                        dst_fe->type = SYT_TYPE_SCALAR;
+                                        dst_fe->scalar = src_fe->scalar;
+                                    }
+                                    field_syt = fsym->struct_next_field;
+                                }
+                                continue;
+                            }
+                        }
                         if (syt_is_array_shaped(state, (uint16_t)param_syt)) {
                             /* Whole ARRAY/VECTOR/MATRIX ASSIGN parameter
                              * (`PROCEDURE(...) ASSIGN(WHOLE_ARRAY);`) --
@@ -9219,8 +9438,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 {
                     bool bind_ok = true;
+                    uint8_t param_pos = 0;
+                    uint16_t param_syt = 0;
                     for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
-                        uint16_t param_syt = proc + 1 + i;
+                        if (!item_is_struct_replay_continuation(state->io_pending.items, i)) {
+                            param_syt = resolve_param_syt(state, proc, param_pos++);
+                        }
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
                         /* ASSIGN-only parameter (state.h's is_assign
                          * comment): no real input value exists for it
@@ -9283,11 +9506,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 /* Positional argument binding: SYT callee+1+i, per
-                 * class-0/FCAL.md's confirmed convention. */
+                 * class-0/FCAL.md's confirmed convention (generalized via
+                 * resolve_param_syt for a forward-referenced callee --
+                 * see that function's own comment). */
                 {
                     bool bind_ok = true;
+                    uint8_t param_pos = 0;
+                    uint16_t param_syt = 0;
                     for (uint8_t i = 0; i < state->io_pending.item_count && bind_ok; i++) {
-                        uint16_t param_syt = callee + 1 + i;
+                        if (!item_is_struct_replay_continuation(state->io_pending.items, i)) {
+                            param_syt = resolve_param_syt(state, callee, param_pos++);
+                        }
                         if (param_syt >= HALMAT_SYT_MAX) { fail(state, "too many call arguments"); bind_ok = false; break; }
                         /* ASSIGN-only parameter: see OP_PCAL's own,
                          * identical comment above -- same reasoning

@@ -82,6 +82,21 @@ typedef struct {
                      * (symtab.c's symtab_finalize) */
     int struct_copies; /* hal_class==0x0A (MAJ_STRUC) only: declared copy count for `Q-STRUCTURE(n)`,
                          * 0 for a plain single-instance `Q-STRUCTURE` (no `(n)`) -- see above */
+    int struct_template_syt; /* hal_class==0x0A (MAJ_STRUC) instance symbols only (e.g. `DECLARE VEL
+                         * SUPER_VECTOR-STRUCTURE(3);`): SYT index of the TEMPLATE symbol (hal_class==
+                         * 0x3E) this instance was declared from, from the raw SYM_LENGTH field -- an
+                         * instance's own SYM_LINK1 is NOT populated the way struct_first_field's own
+                         * comment assumes (confirmed empirically, yahalmat2_assign_array_struct_element:
+                         * 180-EXAMPLE_N.hal's VEL and STRUC both have SYM_LINK1=0000; only the TEMPLATE
+                         * symbol SUPER_VECTOR itself, SYT 2, has a real SYM_LINK1=0003 pointing at V, its
+                         * first field) -- every existing whole-structure code path in interp.c instead
+                         * already gets the template syt from an explicit EXTN instruction's own second
+                         * operand, never from an instance's own struct_first_field, which is why this
+                         * gap went unnoticed until a code path (OP_XXND's ASSIGN write-back) needed a
+                         * structure instance's own template with no accompanying EXTN to consult. SYM_
+                         * LENGTH=2 confirmed to equal SUPER_VECTOR's own SYT index for both VEL and
+                         * STRUC in this file's COMMON0.out; -1 if SYM_LENGTH is 0 (not populated, or
+                         * genuinely unknown) or this isn't a MAJ_STRUC instance. */
     int struct_first_field; /* hal_class==0x0A (MAJ_STRUC) only: SYT index of the template's own
                          * first field, from the raw SYM_LINK1 field -- -1 if none (shouldn't
                          * happen for a real template with at least one field). Each field's own
