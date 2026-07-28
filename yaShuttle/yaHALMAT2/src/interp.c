@@ -9559,6 +9559,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * belong to outer item index 0. */
                 bool any_field_read = false;
                 int32_t saved_arrayed_index_outer = state->arrayed_index;
+                /* read_array_early_termination_stale_iobuf: the last
+                 * successfully-read scalar/integer/BIT value in this
+                 * READ statement, propagated into every remaining
+                 * array-element item when a semicolon terminates the
+                 * list early -- see the HALMAT_READ_FIELD_TERMINATE
+                 * branch's own comment below for the real-hardware
+                 * rationale (RUNASM/HIN.asm's unconditional IOBUF
+                 * re-store). CHARACTER destinations are deliberately not
+                 * tracked here -- the DB item's own confirmed RTL
+                 * routines (EIN/HIN/IIN/DIN/BIN) are all numeric/BIT;
+                 * CHARACTER READ uses a different real routine this
+                 * report doesn't cover. */
+                bool have_last = false;
+                resolved_value_t last_rv = {0};
                 for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
                     resolved_value_t rv;
                     /* A plain (non-container) destination captured via an
@@ -9602,7 +9616,24 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * rest of *this* container AND every later item
                          * unchanged, matching a semicolon between two
                          * ordinary items. User-reported (044-ORTHONORMAL.
-                         * hal's `READ(5) X;`, X a VECTOR(3)). */
+                         * hal's `READ(5) X;`, X a VECTOR(3)).
+                         *
+                         * NOT the same real-hardware "stale IOBUF re-
+                         * store" quirk a plain numeric ARRAY exhibits on
+                         * early termination (read_array_early_
+                         * termination_stale_iobuf, this same opcode's
+                         * ordinary-item loop further below, RUNASM/
+                         * HIN.asm) -- confirmed via real gpc
+                         * (read_vecmat_edge, `READ(5) A, V, B;` fed
+                         * "1,2,3;", V a VECTOR(3)) that a VECTOR/MATRIX's
+                         * own remaining elements (and any later item)
+                         * stay at their prior/INITIAL value, not the last
+                         * value read -- VECTOR/MATRIX READ apparently
+                         * goes through a different real runtime routine
+                         * than the plain-ARRAY fixed-iteration loop, one
+                         * that doesn't share that specific bug. Tried
+                         * applying the same stale-refill logic here first
+                         * and it broke this exact fixture. */
                         uint16_t syt_index = state->io_pending.items[i].dest_operand.data;
                         ensure_container(state, syt_index);
                         halmat_syt_entry_t *e = &state->syt[syt_index];
@@ -9745,10 +9776,51 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * after it stay untouched) -- user-reported,
                      * previously a hard parse error rather than the
                      * documented "process a variable number of input
-                     * values" idiom. */
+                     * values" idiom.
+                     *
+                     * EXCEPT: when the terminating item is itself one
+                     * element of a whole ARRAY being read via this
+                     * per-element replay (read_array_early_termination_
+                     * stale_iobuf) -- real AP-101S RTL hardware fidelity,
+                     * not idealized language semantics: RUNASM/HIN.asm's
+                     * EIN/HIN/IIN/DIN/BIN routines unconditionally re-
+                     * store whatever raw value is still sitting in the
+                     * shared IOBUF register into every remaining pass of
+                     * the compiled fixed-size READ loop, with no check
+                     * for whether INTRAP actually supplied a fresh value
+                     * that pass -- so every array element from the
+                     * terminating semicolon onward silently becomes a
+                     * *copy of the last value actually read this
+                     * statement*, not its own DECLARE...INITIAL default.
+                     * Confirmed against real gpc (154-ADD.hal, PDF p.154:
+                     * 8 comma values into a DECLARE A ARRAY(100) SCALAR
+                     * INITIAL(0), semicolon-terminated -- A(9..100) all
+                     * become 7.50, the last value read, not 0). Scoped to
+                     * a run of consecutive items still naming the *same*
+                     * array SYT (stops at the first item that doesn't,
+                     * e.g. a later unrelated variable in `READ(5) A, B;`)
+                     * and only when at least one value was genuinely read
+                     * this statement (have_last) -- IOBUF's own cross-
+                     * *statement* persistence (a semicolon on the very
+                     * first field, nothing read yet at all) isn't
+                     * modeled; no confirmed real-corpus trigger needs it.
+                     * A non-numeric (CHARACTER) array isn't covered --
+                     * see this loop's own have_last/last_rv comment. */
                     halmat_read_field_t field = read_skip_separator(in, any_field_read);
                     any_field_read = true;
-                    if (field == HALMAT_READ_FIELD_TERMINATE) break;
+                    if (field == HALMAT_READ_FIELD_TERMINATE) {
+                        if (have_last && state->io_pending.items[i].dest_operand.qual == QUAL_SYT &&
+                            syt_is_array_shaped(state, state->io_pending.items[i].dest_operand.data)) {
+                            uint16_t arr_syt = state->io_pending.items[i].dest_operand.data;
+                            for (uint8_t j = i; j < state->io_pending.item_count &&
+                                 state->io_pending.items[j].dest_operand.qual == QUAL_SYT &&
+                                 state->io_pending.items[j].dest_operand.data == arr_syt; j++) {
+                                state->arrayed_index = (int32_t)j;
+                                write_destination(state, &state->io_pending.items[j].dest_operand, &last_rv);
+                            }
+                        }
+                        break;
+                    }
                     if (field == HALMAT_READ_FIELD_NULL) continue;
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
@@ -9817,6 +9889,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         rv.kind = RV_SCALAR;
                         rv.scalar = halmat_scalar_from_double(v, false);
                     }
+                    have_last = true;
+                    last_rv = rv;
                     if (!write_destination(state, &state->io_pending.items[i].dest_operand, &rv)) break;
                 }
                 state->arrayed_index = saved_arrayed_index_outer;

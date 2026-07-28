@@ -2470,6 +2470,36 @@ run ./run_local_fixture.sh table052 "$(printf '          8             128      
 # reference emulator available for READ fixtures).
 run ./run_local_fixture.sh mmwsnp_sum "$(printf 'SUM=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00')"
 
+# DB id 22 (read_array_early_termination_stale_iobuf): READ(5) A; (A a
+# DECLARE ARRAY(100) SCALAR INITIAL(0)) fed only 8 comma-separated
+# values, semicolon-terminated, previously left A(9..100) at their own
+# DECLARE INITIAL value (0) -- idealized textbook semantics, but not
+# what real AP-101S hardware does. RUNASM/HIN.asm's EIN/HIN/IIN/DIN/BIN
+# routines unconditionally re-store whatever raw value is still sitting
+# in the shared IOBUF register into every remaining pass of the
+# compiled fixed-size (always 100-iteration here) READ loop, with no
+# check for whether a fresh value was actually supplied that pass -- so
+# A(9..100) all silently become 7.50 (the last value actually read),
+# confirmed against real gpc. Fixed in OP_READ's own per-element replay
+# loop (a plain ARRAY destination is captured as N separate io_pending
+# items at XXAR-capture time, unlike a genuine VECTOR/MATRIX -- see
+# below): tracks the last successfully-read value across the loop, and
+# when a semicolon terminates a still-in-progress run of items all
+# naming the same array SYT, writes that stale value into every
+# remaining element of that same array instead of leaving the loop
+# (stopping the propagation, and the whole READ statement, at the first
+# item that isn't part of the same array -- an unrelated later variable
+# in the same READ list stays at its own prior value, matching the
+# ordinary null-field/terminate rules). Deliberately does NOT apply to
+# a genuine VECTOR/MATRIX destination (dest_is_container, a single XXAR
+# naming the whole container rather than N replayed items) -- tried
+# first, and confirmed via real gpc (read_vecmat_edge fixture, `READ(5)
+# A, V, B;` fed "1,2,3;", V a VECTOR(3)) that a VECTOR/MATRIX's own
+# unread elements (and any later item) stay at their prior/INITIAL
+# value instead, meaning VECTOR/MATRIX READ goes through a different
+# real runtime routine that doesn't share this specific bug.
+run ./run_read_fixture.sh add154 "$(printf -- '-3.95, -17.31, -9.93, 572.35, -250, +1.10, -.45, +7.50;\n')" "TOTAL IS       9.8930933E+02"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
