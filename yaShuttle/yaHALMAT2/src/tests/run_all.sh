@@ -2813,6 +2813,25 @@ run ./run_local_fixture.sh vector_precision_write " 4.3794729E-02      2.6276231
 # it can never distinguish a missing vs. present final blank line.
 run ./run_read_fixture_bytes.sh read_eof_no_trailing_blank "" $'A\nB\n'
 
+# DB id 56 (wildcard_subscript_matrix_write_loses_row_forcing): OP_DSUB's
+# asterisk-select handling (`M$(...)` -- V$(*), M$(i,*), M$(*,j), M$(*,*))
+# shares one store_container_result() tail for the four simplest shapes,
+# hardcoded to rows=0 -- correct for the three genuinely VECTOR-shaped
+# results (V$(*), M$(i,*), M$(*,j)), but wrong for M$(*,*) (both axes
+# wildcarded), which is a real 2-D MATRIX result. That meant a WRITE of a
+# MATRIX referenced via an explicit `X$(*,*)` subscript, rather than a
+# bare `X`, silently lost flush_write's rows>0-gated per-row forced-
+# newline layout (mmwsnp_vector_forces_newline, id 14) -- both forms are
+# semantically identical per USA003087 (the wildcard subscript means "the
+# whole dimension"). Confirmed via a minimal repro (`WRITE(6) X$(*,*);`,
+# X a MATRIX(3,3)) and against real gpc, which keeps the 3-rows-per-
+# matrix layout for both forms. Fixed by threading a `result_rows`
+# variable through the shared tail instead of a hardcoded 0, set to
+# `base->rows` only in the M$(*,*) branch. Directly relevant to DEMO.hal
+# (Section 4 of problems.md), which uses `$(*,*)`/`$(n;*,*)`-subscripted
+# MATRIX WRITE arguments extensively.
+run ./run_local_fixture.sh matrix_wildcard_write_rows "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

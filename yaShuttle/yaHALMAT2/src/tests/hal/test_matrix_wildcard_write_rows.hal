@@ -1,0 +1,12 @@
+C DB id 56: a MATRIX WRITE argument referenced via an explicit
+C full-wildcard subscript ($(*,*)) must keep the same row-per-line
+C forced-newline layout as a bare-name reference (mmwsnp_vector_
+C forces_newline, id 14) -- both are semantically identical per
+C USA003087, but only the bare form was recognized as a genuine
+C MATRIX result (the DSUB asterisk-select shared tail defaulted
+C every result to VECTOR-shaped, rows=0).
+ T:
+ PROGRAM;
+    DECLARE X MATRIX(3,3) INITIAL(1,2,3,4,5,6,7,8,9);
+    WRITE(6) X$(*,*);
+ CLOSE T;

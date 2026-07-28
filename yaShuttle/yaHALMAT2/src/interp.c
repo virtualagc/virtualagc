@@ -5627,6 +5627,20 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ast_axis >= 0) {
                     halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
                     size_t count;
+                    /* Stays 0 (this block's shared store_container_result
+                     * tail's own long-standing default, correct for every
+                     * VECTOR-shaped result below: V$(*), M$(i,*), M$(*,j))
+                     * unless the M$(*,*) branch just below overrides it --
+                     * that's the one case here producing a genuine 2-D
+                     * MATRIX result (DB id 56: this was hardcoded to 0
+                     * unconditionally, so a WRITE of a MATRIX referenced
+                     * via $(*,*) instead of a bare name lost flush_write's
+                     * row>0-gated per-row forced-newline layout, silently
+                     * collapsing onto one flat line -- confirmed against
+                     * real gpc, which keeps the row layout for both
+                     * reference forms since they're semantically
+                     * identical per USA003087). */
+                    int result_rows = 0;
                     /* Set for every case below, since all of them select a
                      * regularly-strided run of `base`'s own row-major
                      * storage (offset, offset+stride, offset+2*stride, ...)
@@ -5668,12 +5682,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * Same contiguous whole-container mechanism as
                          * `V$(*)` above, just for MATRIX's own two
                          * dimensions -- confirmed against real gpc
-                         * (compileLinkRun). */
+                         * (compileLinkRun).
+                         *
+                         * result_rows (DB id 56) is set here ONLY for a
+                         * genuine plain-SYT base (base_syt <
+                         * HALMAT_SYT_MAX), giving this a real row>0 shape
+                         * so flush_write's row-per-line forced-newline
+                         * layout (id 14) fires -- confirmed against real
+                         * gpc for a bare `X$(*,*)` (X a plain declared
+                         * MATRIX). Left at the shared tail's own rows=0
+                         * default for an XPT (structure-field) base --
+                         * this exact statement shape, just with a
+                         * structure terminal instead of a plain variable
+                         * (DEMO.hal's `CC$(1;*,*)`, id 49's own fixture),
+                         * is ALSO real-gpc-confirmed, and shows the flat/
+                         * non-row-forced layout instead. A genuine
+                         * real-hardware distinction, not a modeling
+                         * choice: MMWSNP's row-forcing dispatch is
+                         * apparently keyed off the compiled WRITE
+                         * argument's own *reference shape* (a plain SYT
+                         * MATRIX vs. a computed structure-field
+                         * subscript expression), not the abstract "is
+                         * this logically a whole matrix" question --
+                         * both fixtures are independently confirmed via
+                         * real gpc and must not be collapsed into one
+                         * rule. */
                         count = (size_t)base->rows * (size_t)base->cols;
                         if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "DSUB: container too large"); break; }
                         memcpy(buf, base->elements, count * sizeof(halmat_scalar_t));
                         writable_ref = true;
                         ref_offset = 0;
+                        if (base_syt < HALMAT_SYT_MAX) result_rows = base->rows;
                     } else if (num_indices == 2 && base->rows > 0) {
                         resolved_value_t idx;
                         uint8_t other = 1 - (uint8_t)ast_axis;
@@ -5999,7 +6038,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         fail(state, "DSUB: asterisk subscript with %u indices not yet implemented", num_indices);
                         break;
                     }
-                    if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
+                    int result_cols = result_rows > 0 ? base->cols : (int)count;
+                    if (!store_container_result(state, ins->index, buf, count, result_rows, result_cols)) break;
                     /* User-reported (113-EXAMPLE_7.hal's `MISMATCH$(J,*)`,
                      * MISMATCH a confirmed-2D `ARRAY(4,4) INTEGER`):
                      * DSUB's own operator-word TAG is the subscripted
