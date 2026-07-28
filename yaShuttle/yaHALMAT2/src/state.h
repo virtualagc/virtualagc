@@ -731,6 +731,18 @@ typedef struct {
     size_t container_count;
     int container_rows, container_cols;
     bool container_is_integer;
+    bool container_is_vecmat; /* is_container: true for a genuine VECTOR/MATRIX argument (the
+                       * capturing XXAR's own TAG1 == 3 or 4), false for a plain numeric
+                       * ARRAY (TAG1 == 5/6, sharing this same is_container/rows==0 flat-
+                       * layout path for VECTOR -- container_rows>0 alone already
+                       * distinguishes MATRIX from ARRAY, but a flat VECTOR and a flat
+                       * ARRAY are otherwise indistinguishable at this struct's own level).
+                       * Needed because real hardware's WRITE runtime routes VECTOR/MATRIX
+                       * output through a dedicated interface (RUNASM/MMWSNP.asm, "SINGLE
+                       * PRECISION VECTOR/MATRIX OUTPUT INTERFACE") that unconditionally
+                       * forces a fresh line before writing -- a plain numeric ARRAY has no
+                       * such forced-newline behavior (mmwsnp_vector_forces_newline;
+                       * flush_write's own use, interp.c). */
     /* WRITE only (kind == 2): a whole BIT or CHARACTER ARRAY
      * argument (`WRITE(6) DATA_VALID;`, `DATA_VALID` an
      * `ARRAY(4) BOOLEAN`) -- the same unreplayed QUAL=SYT/TAG1=

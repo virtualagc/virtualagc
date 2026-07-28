@@ -3520,7 +3520,44 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
         if (state->io_pending.items[i].is_container) {
             /* Whole VECTOR/MATRIX/ARRAY WRITE argument (OP_XXAR above):
              * expand every element into its own data field, per
-             * USA003087 Sec. 12.2's "DATA FORMATS". */
+             * USA003087 Sec. 12.2's "DATA FORMATS".
+             *
+             * A genuine VECTOR/MATRIX (container_is_vecmat, not a plain
+             * numeric ARRAY sharing this same flat-layout path) starts a
+             * fresh line at column 1 before writing anything, WHEN the
+             * device mechanism isn't already sitting at column 1 --
+             * confirmed against the real compiled object code
+             * (mmwsnp_vector_forces_newline): a VECTOR/MATRIX WRITE
+             * argument calls into RUNASM/MMWSNP.asm ("SINGLE PRECISION
+             * VECTOR/MATRIX OUTPUT INTERFACE"), whose own OLOOP does
+             * ACALL SKIP then ACALL COLUMN(1) before writing each row --
+             * including the FIRST row, not just subsequent ones (the
+             * MATRIX row-loop below already forces a newline for r>0;
+             * this is what makes r==0 behave the same way, and gives
+             * VECTOR -- which has no row loop of its own at all -- the
+             * identical forced-newline treatment).
+             *
+             * `dm->col != 1` gates it: unconditionally forcing this
+             * (tried first) broke every already-gpc-confirmed fixture
+             * where the VECTOR/MATRIX is the WRITE statement's own only/
+             * first item (`WRITE(6) X;`, X a VECTOR) -- the ordinary
+             * per-statement default vertical movement (this function's
+             * own top-of-function comment) already lands column 1 before
+             * any item runs, so an *unconditional* second SKIP there
+             * added a genuinely wrong extra blank line, confirmed
+             * against real gpc's own single-line output for that exact
+             * shape. The distinguishing real-hardware behavior is: SKIP
+             * only becomes a *visible* extra line when something has
+             * already been written on the current line (`WRITE(6) 'SUM=',
+             * V;` -- V isn't the statement's first item, dm->col has
+             * already advanced past 1 from 'SUM=' -- vs. `WRITE(6) V;`
+             * alone, where dm->col is still 1 and this is a no-op).
+             * Confirmed against real gpc for both shapes. */
+            if (state->io_pending.items[i].container_is_vecmat && dm->col != 1) {
+                dm_advance_lines(state, dm, out, 1, unpaged);
+                dm->col = 1;
+                need_sep = false;
+            }
             int rows = state->io_pending.items[i].container_rows;
             int cols = state->io_pending.items[i].container_cols;
             const halmat_scalar_t *elems = state->io_pending.items[i].container;
@@ -9135,6 +9172,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * that case. See state.h's own comment. */
                         state->io_pending.items[state->io_pending.item_count].container_is_integer =
                             ins->operands[0].tag1 == 6;
+                        state->io_pending.items[state->io_pending.item_count].container_is_vecmat =
+                            ins->operands[0].tag1 == 3 || ins->operands[0].tag1 == 4;
                         state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
                         state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                         state->io_pending.item_count++;

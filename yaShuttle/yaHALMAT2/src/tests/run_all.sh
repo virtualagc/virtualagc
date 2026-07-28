@@ -506,7 +506,7 @@ run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0  
 # showed as part of ERON's *own* object code ("BC 7,L#1 <- unconditional
 # branch skipping the handler code in normal flow"), not a separate
 # HALMAT instruction as an earlier session's comment here assumed.
-run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP      1.0000000E+00      0.0          \n                 0.0                1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE      1.0000000E+00      0.0          \n                   0.0                1.0000000E+00')"
+run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00')"
 # Per direct instruction, every App. C fixup site implemented this
 # session now consults the ON ERROR table (not just INVERSE's error 27,
 # the one a bug report happened to exercise) -- spot-checks a GOTO
@@ -1371,7 +1371,7 @@ run ./run_local_fixture.sh many_call_args " 2.1000000E+02"
 # constant, filled with I across all 10 columns). Expected string updated
 # for the PAGED-default line-length fix below (132, was 80) -- each row's
 # first physical line now fits 6 fields before wrapping, was 3.
-run ./run_local_fixture.sh dots "$(printf 'DOTS:      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n           2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n           3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n           4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n           5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n           6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n           7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n           8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n           9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n           1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01')"
+run ./run_local_fixture.sh dots "$(printf 'DOTS:\n 1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00      1.0000000E+00\n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00      2.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00      3.0000000E+00\n 3.0000000E+00      3.0000000E+00      3.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00      4.0000000E+00\n 4.0000000E+00      4.0000000E+00      4.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00      5.0000000E+00\n 5.0000000E+00      5.0000000E+00      5.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00      6.0000000E+00\n 6.0000000E+00      6.0000000E+00      6.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00      7.0000000E+00\n 7.0000000E+00      7.0000000E+00      7.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00      8.0000000E+00\n 8.0000000E+00      8.0000000E+00      8.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00      9.0000000E+00\n 9.0000000E+00      9.0000000E+00      9.0000000E+00\n 1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01      1.0000000E+01\n 1.0000000E+01      1.0000000E+01      1.0000000E+01')"
 # User-reported: WRITE-context SKIP/COLUMN/TAB/LINE/PAGE (USA003087 Sec.
 # 12.4's five device-mechanism-positioning pseudo-functions) printed their
 # own numeric argument as an ordinary data field instead of repositioning
@@ -1480,7 +1480,7 @@ run ./run_local_fixture.sh statistics "$(printf 'LO=      1.0000000E+01     HI= 
 # its "array length." Fixture: test_vsum.hal (141-VSUM.hal copied
 # verbatim; output hand-derived from V's own INITIAL(1,0,0, 0,2,0,
 # 0,0,3): elementwise sum = (1,2,3)).
-run ./run_local_fixture.sh vsum "$(printf 'SUM=      1.0000000E+00      2.0000000E+00      3.0000000E+00')"
+run ./run_local_fixture.sh vsum "$(printf 'SUM=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00')"
 # User-instructed corpus sweep ("test all such files which have not
 # already been reported to you as problematic"), 254-TEST1.hal: `OUTPUT =
 # 10*OUTPUT + INTEGER(INPUT$(4 AT I));` (INPUT a plain BIT(24), unpacking
@@ -1895,7 +1895,7 @@ run ./run_read_fixture.sh outer_struct "$(printf '1 2 3 10.5 7 20.5 1\n2 3 4 11.
 # with a VECTOR terminal). Confirmed against real gpc: RESULT= 0.0 1.0
 # 0.0 (this fixture's own hand-computed value, matching the DB issue's
 # recorded gpc ground truth for this exact file).
-run ./run_local_fixture.sh outer170_vecinit "RESULT=      0.0                1.0000000E+00      0.0          "
+run ./run_local_fixture.sh outer170_vecinit "$(printf 'RESULT=\n 0.0                1.0000000E+00      0.0          ')"
 
 # Task #23: TASN (whole-structure assign, `DST = SRC;`) copying an
 # ARRAY/MATRIX/VECTOR structure terminal -- previously failed loudly as
@@ -2213,7 +2213,7 @@ run ./run_local_fixture.sh examplen130 "THE ANSWER IS      2.5000000E+05"
 # instances' own ACCEL sub-objects together. This fixture is isolated
 # from 177-P.hal with the ACCEL.V line/WRITE removed rather than
 # guessing at a fix for this deeper, separate gap.
-run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nVELOCITY.V=\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
 
 # Task #69 (yahalmat2_read_vector_unimplemented): 164-OUTER.hal,
 # `READ(INFILE) SKIP(0), COLUMN(9), INITIAL_POSN;` (INITIAL_POSN a
@@ -2237,7 +2237,7 @@ run ./run_local_fixture.sh p177_nested_vec "$(printf 'POSITION.V=      1.0000000
 # READ format was found, unlike HEX'...'/OCT'...'/BIN'...' literals'
 # own confirmed encodings. Confirmed against real gpc: exact match
 # (PHI=45, ALPHA=30, INITIAL_POSN=(1,1,1), MODE=2).
-run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,1,1\nMODE    2\nPRINT   1\nEND\n')" " 4.5000000E+01      3.0000000E+01      1.0000000E+00      1.0000000E+00      1.0000000E+00               2"
+run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,1,1\nMODE    2\nPRINT   1\nEND\n')" "$(printf ' 4.5000000E+01      3.0000000E+01\n 1.0000000E+00      1.0000000E+00      1.0000000E+00               2')"
 
 # Task #71 (yahalmat2_update_block_no_output): 222-BETTER.hal's
 # `UPDATE; IF A NOT=0 THEN DO; B=C/A; END; CLOSE; WRITE(6) 'B=',B,
@@ -2264,7 +2264,7 @@ run ./run_read_fixture.sh outer164 "$(printf 'PHI     45\nALPHA   30\nI_POSN  1,
 # model are a separate, harmless log line this project doesn't
 # replicate, not a value mismatch).
 run ./run_local_fixture.sh better222 "B=      0.0               C=      6.0000000E+00"
-run ./run_local_fixture.sh gncpool224 "$(printf 'VEL2=      0.0                0.0                0.0               POSN2=      0.0                0.0                0.0          ')"
+run ./run_local_fixture.sh gncpool224 "$(printf 'VEL2=\n 0.0                0.0                0.0               POSN2=\n 0.0                0.0                0.0          ')"
 
 # Task #72 (bit_partition_extraction_mismatch): 253-TEST0.hal's
 # `RETURN INFO(WORD+1:BITNUM+1);` (DSUB.md's DSUB, one array-element
@@ -2389,7 +2389,7 @@ run ./run_local_fixture.sh bitconcat257 "AVERAGE=     0000 0000 0000 0000"
 # state struct_fields[] deep-copy mechanism plus a new TASN branch,
 # comparable in size to the original external-FUNCTION-linking work
 # itself, not a small follow-on to this fixture's own fix.
-run ./run_local_fixture.sh named_nest176 "$(printf 'POS=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVEL=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+run ./run_local_fixture.sh named_nest176 "$(printf 'POS=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\nVEL=\n 4.0000000E+00      5.0000000E+00      6.0000000E+00')"
 
 # DB id 17 (integer_exponentiation_overflow_needs_fcos) -- CORRECTED
 # 2026-07-28 from its own original framing (a --fcos-needs-extending
@@ -2426,6 +2426,49 @@ run ./run_local_fixture.sh named_nest176 "$(printf 'POS=      1.0000000E+00     
 # completely untouched. Confirmed against real gpc via compileLinkRun:
 # exact match.
 run ./run_local_fixture.sh table052 "$(printf '          8             128      2.4082394E+00\n         12            2048      3.6123590E+00\n         16           32768      4.8164797E+00\n         18          131072      5.4185390E+00\n         24         8388608      7.2247190E+00\n         30       536870912      9.0308990E+00\n         31      1073741824      9.3319292E+00\n 2147483647')"
+
+# DB id 14 (mmwsnp_vector_forces_newline): a VECTOR/MATRIX WRITE
+# argument (not a plain numeric ARRAY, which has no equivalent forced-
+# newline behavior) always starts a fresh line at column 1 before
+# writing, confirmed against the real compiled object code: it calls
+# into RUNASM/MMWSNP.asm ("SINGLE PRECISION VECTOR/MATRIX OUTPUT
+# INTERFACE"), whose own OLOOP unconditionally does ACALL SKIP then
+# ACALL COLUMN(1) before writing each row -- including the first row,
+# not just subsequent ones. yaHALMAT2 previously kept a VECTOR/MATRIX
+# argument on the same line as whatever preceded it in the same WRITE
+# statement (`WRITE(6) 'SUM=', V;` printed "SUM=" and V's values on one
+# line). Fixed via a new container_is_vecmat flag (state.h, set from the
+# capturing XXAR's own TAG1==3/4, distinguishing a genuine VECTOR/MATRIX
+# from a plain numeric ARRAY sharing the same flat-layout WRITE-argument
+# path) consulted in flush_write: when the device mechanism isn't
+# already at column 1 (i.e. something's already been written on the
+# current line, matching MMWSNP's own real-hardware forced-skip
+# behavior), force a fresh line before the VECTOR's flat element list or
+# the MATRIX's own first row (the MATRIX row-loop already forced a
+# newline for every row after the first; this is what makes the first
+# row behave the same way). Gated on dm->col != 1 specifically because
+# an *unconditional* skip (tried first) broke every already-gpc-
+# confirmed fixture where the VECTOR/MATRIX is the WRITE statement's own
+# only/first item (`WRITE(6) X;` alone) -- the ordinary per-statement
+# default vertical movement already lands column 1 before any item
+# runs, so forcing a second skip there added a genuinely wrong extra
+# blank line. Confirmed against real gpc for both shapes (`WRITE(6)
+# 'SUM=', V;` forces the newline; `WRITE(6) X;` alone does not), and
+# re-confirmed against real gpc for every existing VECTOR/MATRIX WRITE
+# fixture this fix touched (vsum, dots, outer170_vecinit,
+# p177_nested_vec, gncpool224, named_nest176) -- their own previously-
+# recorded expected strings turned out to have never actually been
+# verified against real gpc for this specific newline-placement detail,
+# and were updated to match the newly-confirmed-correct behavior (a
+# fixture correction, not a regression). eron_goto's own expected
+# string was similarly updated (same values, newline placement only) --
+# not independently re-verified against real gpc for this one file
+# since it exercises MATRIX INVERSE of a singular matrix, an area
+# already documented (DET/INVERSE's own Gaussian-elimination
+# approximation) as not a reliable real-gpc comparison point; outer164
+# likewise (its own EXPECTED_OUTPUT was always hand-derived, no
+# reference emulator available for READ fixtures).
+run ./run_local_fixture.sh mmwsnp_sum "$(printf 'SUM=\n 1.0000000E+00      2.0000000E+00      3.0000000E+00')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

@@ -1,0 +1,13 @@
+C/ DB id 14 (mmwsnp_vector_forces_newline): a VECTOR/MATRIX WRITE
+C/ argument always starts a fresh line, even when a preceding item on
+C/ the same WRITE statement would otherwise leave room on the current
+C/ line -- confirmed against RUNASM/MMWSNP.asm ("SINGLE PRECISION
+C/ VECTOR/MATRIX OUTPUT INTERFACE"), whose own OLOOP unconditionally
+C/ does ACALL SKIP then ACALL COLUMN(1) before writing each row.
+
+  T:
+  PROGRAM;
+     DECLARE V VECTOR(3) INITIAL(1.0, 2.0, 3.0);
+     WRITE(6) 'SUM=', V;
+Y %SVCI(0);
+  CLOSE T;
