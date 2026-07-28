@@ -30,7 +30,10 @@ RUN make
 
 # Copiar script de arranque
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+# The following changed per issue #1341
+#RUN chmod +x /start.sh
+RUN sed -i 's/\r$//' /start.sh \
+    && chmod +x /start.sh
 
 EXPOSE 6080
 
