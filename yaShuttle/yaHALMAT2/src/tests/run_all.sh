@@ -2335,6 +2335,62 @@ run ./run_local_fixture.sh test0_253 "$(printf 'TEST(0)=     0\nTEST(1)=     0\n
 # 0000).
 run ./run_local_fixture.sh bitconcat257 "AVERAGE=     0000 0000 0000 0000"
 
+# Task #74 (yahalmat2_extn_multifile_template) -- PARTIALLY resolved,
+# DB status left "deferred": 176-P.hal (COMPOOL-templated SUPER_VECTOR
+# + EXTERNAL FUNCTION READ_ACC + main PROGRAM P, 3-way @list link)
+# aborted immediately with "EXTN: expected 2 operands" on
+# `STATE2.STATE.ACCEL = READ_ACC(17);` (STATE2 a plain STRUCTURE, but
+# STATE2.STATE and STATE.ACCEL each a *named*-sub-template field --
+# `1 STATE STATEVEC-STRUCTURE`/`1 ACCEL SUPER_VECTOR-STRUCTURE` --
+# rather than a level-number sub-structure, the one previously-
+# confirmed nested shape, task #68). Root cause confirmed via
+# --disasm: a named-sub-template nested reference compiles EXTN with
+# MORE than 2 operands -- one per dot-qualified hop, base first, final
+# field/template last (`STATE2.STATE.ACCEL.V` -> EXTN(4) = [STATE2,
+# STATE, ACCEL, V]; the bare whole-substructure form `STATE2.STATE.
+# ACCEL` -> EXTN(4) = [STATE2, STATE, ACCEL, SUPER_VECTOR]) -- a shape
+# this opcode's previously-confirmed-only 2-operand form couldn't
+# parse at all. Fixed: EXTN now accepts any operand_count>=2, threading
+# every intermediate hop through a new struct_mid_path (state.h's
+# halmat_vac_slot_t) that becomes part of the structure-field shadow-
+# slot storage key (find_or_create_struct_field_path, interp.c) --
+# needed since a field symbol alone (e.g. V) is shared across every
+# sibling instance of its declaring TEMPLATE (POSITION/VELOCITY/ACCEL
+# all reach the SAME V symbol), so without the intermediate hops in
+# the key, STATE2.STATE.POSITION.V/.VELOCITY.V/.ACCEL.V would alias
+# the same storage cell. Threaded through every structure-field call
+# site 176-P.hal's own *qualified*-field reads/writes need (resolve_
+# xpt_field) and its whole-substructure CALL/ASSIGN-argument passing
+# needs (bind_call_argument, the ASSIGN-parameter write-back in OP_
+# XXND, TASN's own per-field copy scan) -- confirmed zero regressions
+# across the full existing structure-fixture suite (mid_path_len=0,
+# identical key, for every pre-existing single-level caller). This
+# fixture (isolated, single-unit, no external-function linking at all)
+# locks in that generalization: `ST.POSITION.V`/`ST.VELOCITY.V`
+# (STATEVEC-STRUCTURE's own two named SUPER_VECTOR-STRUCTURE fields)
+# read back correctly disambiguated, confirmed against real gpc (exact
+# match, modulo gpc's own two-line WRITE wrapping for a CHARACTER-
+# literal-plus-VECTOR argument -- a pre-existing, unrelated formatting
+# difference, not a value mismatch).
+#
+# 176-P.hal ITSELF still doesn't run end-to-end: past the EXTN fix, it
+# next hits "TASN: both operands must be XPT" on the same statement,
+# because `READ_ACC(17)`'s own FCAL result (not a structure XPT
+# reference) is TASN's *source* operand here -- READ_ACC is an
+# EXTERNAL FUNCTION *returning a whole STRUCTURE* across the unit
+# boundary, and this turns out to be a substantially separate,
+# unimplemented feature, not a decode-error bug: OP_RTRN's own
+# external-call branch (source-documentation/MULTI-FILE-LINKING.md's
+# "CHARACTER return values implemented; MATRIX/VECTOR still not") has
+# no whole-STRUCTURE case at all, and halmat_vac_slot_t/interp_copy_
+# external_call_result have no representation for a bulk multi-field
+# result to carry back across the two independent interpreter states
+# involved. Left open for a future session -- would need a new cross-
+# state struct_fields[] deep-copy mechanism plus a new TASN branch,
+# comparable in size to the original external-FUNCTION-linking work
+# itself, not a small follow-on to this fixture's own fix.
+run ./run_local_fixture.sh named_nest176 "$(printf 'POS=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVEL=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

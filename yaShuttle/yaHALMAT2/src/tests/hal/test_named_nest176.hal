@@ -1,0 +1,24 @@
+C/ Isolated from 176-P.hal's own nested-named-substructure shape
+C/ (`STATE2.STATE.ACCEL`/`.VELOCITY`/`.POSITION`, each a *named*
+C/ sub-template field rather than a level-number sub-structure) --
+C/ see run_all.sh's own comment on this fixture for what it locks in
+C/ (yahalmat2_extn_multifile_template is only partially resolved; the
+C/ deeper external-FUNCTION-returning-a-whole-STRUCTURE gap 176-P.hal
+C/ itself also needs is still open).
+
+  T:
+  PROGRAM;
+     STRUCTURE SUPER_VECTOR:
+        1 V VECTOR,
+        1 STATUS BOOLEAN,
+        1 TIMETAG SCALAR;
+     STRUCTURE STATEVEC:
+        1 POSITION SUPER_VECTOR-STRUCTURE,
+        1 VELOCITY SUPER_VECTOR-STRUCTURE;
+     DECLARE ST STATEVEC-STRUCTURE;
+     ST.POSITION.V = VECTOR(1, 2, 3);
+     ST.VELOCITY.V = VECTOR(4, 5, 6);
+     WRITE(6) 'POS=', ST.POSITION.V;
+     WRITE(6) 'VEL=', ST.VELOCITY.V;
+Y %SVCI(0);
+  CLOSE T;

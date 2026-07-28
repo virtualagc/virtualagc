@@ -485,17 +485,26 @@ static int32_t current_copy_index(halmat_state_t *state) {
 }
 
 /* Finds (or lazily creates) the shadow storage slot for a structure
- * field reference, keyed by (base_syt, field_syt, copy_index) -- see
- * state.h's halmat_struct_field_t comment for why this indirection
- * exists (field symbols are shared across every instance of a STRUCTURE
- * TEMPLATE, so field_syt alone can't be used as a direct storage key;
- * copy_index further distinguishes copies of a multiple-copy structure). */
-static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, uint16_t base_syt, uint16_t field_syt, int32_t copy_index) {
+ * field reference, keyed by (base_syt, mid_path[0..mid_path_len),
+ * field_syt, copy_index) -- see state.h's halmat_struct_field_t comment
+ * for why this indirection exists (field symbols are shared across
+ * every instance of a STRUCTURE TEMPLATE, so field_syt alone can't be
+ * used as a direct storage key; copy_index further distinguishes copies
+ * of a multiple-copy structure; mid_path further distinguishes a
+ * *named*-sub-template nested reference's own intermediate hops, e.g.
+ * `STATE2.STATE.ACCEL.V` vs `STATE2.STATE.POSITION.V` -- both share
+ * base_syt=STATE2 and field_syt=V, since V is declared once in
+ * SUPER_VECTOR-STRUCTURE and reached via three different sibling
+ * instances of it, but their own mid_path ([STATE,ACCEL] vs
+ * [STATE,POSITION]) differ, giving each its own storage cell). */
+static halmat_syt_entry_t *find_or_create_struct_field_path(halmat_state_t *state, uint16_t base_syt,
+        const uint16_t *mid_path, uint8_t mid_path_len, uint16_t field_syt, int32_t copy_index) {
     for (size_t i = 0; i < state->struct_field_count; i++) {
-        if (state->struct_fields[i].base_syt == base_syt && state->struct_fields[i].field_syt == field_syt &&
-            state->struct_fields[i].copy_index == copy_index) {
-            return &state->struct_fields[i].value;
-        }
+        const halmat_struct_field_t *e = &state->struct_fields[i];
+        if (e->base_syt != base_syt || e->field_syt != field_syt || e->copy_index != copy_index) continue;
+        if (e->mid_path_len != mid_path_len) continue;
+        if (mid_path_len > 0 && memcmp(e->mid_path, mid_path, (size_t)mid_path_len * sizeof(uint16_t)) != 0) continue;
+        return &state->struct_fields[i].value;
     }
     if (state->struct_field_count >= state->struct_field_capacity) {
         size_t new_cap = state->struct_field_capacity ? state->struct_field_capacity * 2 : 32;
@@ -507,7 +516,13 @@ static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, ui
     slot->base_syt = base_syt;
     slot->field_syt = field_syt;
     slot->copy_index = copy_index;
+    if (mid_path_len > 0) memcpy(slot->mid_path, mid_path, (size_t)mid_path_len * sizeof(uint16_t));
+    slot->mid_path_len = mid_path_len;
     return &slot->value;
+}
+
+static halmat_syt_entry_t *find_or_create_struct_field(halmat_state_t *state, uint16_t base_syt, uint16_t field_syt, int32_t copy_index) {
+    return find_or_create_struct_field_path(state, base_syt, NULL, 0, field_syt, copy_index);
 }
 
 /* Maps a TINT run's flattened OFFSET "slot" index (class-8/TINT.md) back
@@ -635,7 +650,8 @@ static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat
         return NULL;
     }
     int32_t copy_idx = slot->struct_copy_index >= 0 ? slot->struct_copy_index : current_copy_index(state);
-    return find_or_create_struct_field(state, slot->struct_base_syt, slot->struct_field_syt, copy_idx);
+    return find_or_create_struct_field_path(state, slot->struct_base_syt, slot->struct_mid_path,
+            slot->struct_mid_path_len, slot->struct_field_syt, copy_idx);
 }
 
 /* True if the symbol table (state->symtab, unavailable e.g. for --py
@@ -1916,6 +1932,8 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
          * never itself part of a Q-STRUCTURE(n) array). User-reported,
          * 172-OUTER.hal's `UTIL(ARG)`. */
         uint16_t src_base = state->io_pending.items[item_index].struct_base_syt;
+        const uint16_t *src_mid_path = state->io_pending.items[item_index].struct_mid_path;
+        uint8_t src_mid_path_len = state->io_pending.items[item_index].struct_mid_path_len;
         /* Whole `Q-STRUCTURE(n)` ARRAY passed by value with no index at
          * all (`CALL SELECT_BEST(VEL);`, VEL declared `SUPER_VECTOR-
          * STRUCTURE(3)`, matched by SELECT_BEST's own `V SUPER_VECTOR-
@@ -1953,7 +1971,7 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
         while (field_syt >= 0) {
             const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
             if (!fsym) break;
-            halmat_syt_entry_t *src_fe = find_or_create_struct_field(state, src_base, (uint16_t)field_syt, src_copy);
+            halmat_syt_entry_t *src_fe = find_or_create_struct_field_path(state, src_base, src_mid_path, src_mid_path_len, (uint16_t)field_syt, src_copy);
             halmat_syt_entry_t *dst_fe = find_or_create_struct_field(dest_state, param_syt, (uint16_t)field_syt, dst_copy);
             if (fsym->hal_class == 4 && fsym->cols > 0) {
                 if (!dst_fe->elements) {
@@ -4113,18 +4131,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
         bool branched = false;
 
         switch (ins->opcode) {
-            case OP_EXTN:
+            case OP_EXTN: {
                 /* "Extended pointer" -- resolves a structure-variable
                  * reference for a following TASN/TEQU/TNEQ or ordinary
                  * xASN-family opcode to consume via a QUAL_XPT operand
                  * referencing this instruction's own stream position
-                 * (class-0/EXTN.md). Two operands always: base structure
-                 * symbol, then either a specific field's symbol
-                 * (qualified reference, e.g. ZQ1.QI) or the structure's
-                 * own TEMPLATE symbol (bare/unqualified reference, e.g.
-                 * plain ZQ1) -- EXTN.md's confirmed shape. No runtime
-                 * effect of its own beyond recording this for later
-                 * lookup (find_or_create_struct_field/resolve_xpt_field).
+                 * (class-0/EXTN.md). At least two operands: base
+                 * structure symbol, then either a specific field's
+                 * symbol (qualified reference, e.g. ZQ1.QI) or the
+                 * structure's own TEMPLATE symbol (bare/unqualified
+                 * reference, e.g. plain ZQ1) -- EXTN.md's originally-
+                 * confirmed 2-operand shape. No runtime effect of its
+                 * own beyond recording this for later lookup
+                 * (find_or_create_struct_field/resolve_xpt_field).
+                 *
+                 * More than 2 operands (yahalmat2_extn_multifile_
+                 * template, 176-P.hal's `STATE2.STATE.ACCEL`/`STATE2.
+                 * STATE.ACCEL.V`, STATE2.STATE and STATE.ACCEL each a
+                 * *named*-sub-template field, i.e. `1 STATE STATEVEC-
+                 * STRUCTURE`/`1 ACCEL SUPER_VECTOR-STRUCTURE`, rather
+                 * than a level-number sub-structure): one operand per
+                 * dot-qualified hop of the reference, base first, final
+                 * field/template last -- confirmed via --disasm that
+                 * `STATE2.STATE.ACCEL.V` (4 dot-parts) compiles to
+                 * EXTN(4) = [STATE2, STATE, ACCEL, V], and the bare
+                 * whole-substructure form `STATE2.STATE.ACCEL` (3 dot-
+                 * parts) *also* compiles to EXTN(4) = [STATE2, STATE,
+                 * ACCEL, SUPER_VECTOR] -- the trailing TEMPLATE symbol
+                 * appended the same way the original 2-operand bare-
+                 * reference case already appends one, just after every
+                 * intermediate hop instead of none. Every operand
+                 * strictly between the base and the final field/
+                 * template is recorded in struct_mid_path (state.h) --
+                 * needed as part of the shadow-storage key alongside
+                 * base_syt/field_syt (find_or_create_struct_field_path's
+                 * own comment: field_syt alone can't disambiguate
+                 * `STATE2.STATE.ACCEL.V` from `STATE2.STATE.VELOCITY.V`,
+                 * since V is one shared symbol declared once in
+                 * SUPER_VECTOR-STRUCTURE, reached via three different
+                 * sibling instances). Zero mid_path hops (the ordinary
+                 * 2-operand case) is unaffected -- struct_mid_path_len=0,
+                 * identical key/behavior to before this generalization.
                  *
                  * The base operand is ordinarily QUAL_SYT (the plain
                  * structure symbol; struct_copy_index=-1, meaning "use
@@ -4134,17 +4181,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * the base is instead QUAL_VAC referencing a preceding
                  * TSUB's own stream position -- an *explicit* copy index
                  * that overrides the ambient one. */
-                if (ins->operand_count != 2) { fail(state, "EXTN: expected 2 operands"); break; }
-                if (ins->operands[1].qual != QUAL_SYT) {
-                    fail(state, "EXTN: expected a SYT field operand");
-                    break;
+                if (ins->operand_count < 2) { fail(state, "EXTN: expected at least 2 operands"); break; }
+                uint8_t mid_len = (uint8_t)(ins->operand_count - 2);
+                if (mid_len > HALMAT_STRUCT_PATH_MAX) { fail(state, "EXTN: reference nested too deep"); break; }
+                {
+                    bool all_syt = true;
+                    for (uint8_t i = 1; i < ins->operand_count; i++) {
+                        if (ins->operands[i].qual != QUAL_SYT) { all_syt = false; break; }
+                    }
+                    if (!all_syt) { fail(state, "EXTN: expected a SYT field operand"); break; }
                 }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                uint16_t final_field = ins->operands[ins->operand_count - 1].data;
                 if (ins->operands[0].qual == QUAL_SYT) {
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_struct_ref = true;
                     state->vac[ins->index].struct_base_syt = ins->operands[0].data;
-                    state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                    state->vac[ins->index].struct_field_syt = final_field;
                     state->vac[ins->index].struct_copy_index = -1;
                 } else if (ins->operands[0].qual == QUAL_VAC) {
                     if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "EXTN: VAC index out of range"); break; }
@@ -4153,13 +4206,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_struct_ref = true;
                     state->vac[ins->index].struct_base_syt = copy_slot->copy_ref_base_syt;
-                    state->vac[ins->index].struct_field_syt = ins->operands[1].data;
+                    state->vac[ins->index].struct_field_syt = final_field;
                     state->vac[ins->index].struct_copy_index = copy_slot->copy_ref_copy_index;
                 } else {
                     fail(state, "EXTN: unsupported base operand qualifier %s", halmat_qual_name(ins->operands[0].qual));
                     break;
                 }
+                for (uint8_t i = 0; i < mid_len; i++) {
+                    state->vac[ins->index].struct_mid_path[i] = ins->operands[1 + i].data;
+                }
+                state->vac[ins->index].struct_mid_path_len = mid_len;
                 break;
+            }
 
             case OP_TSUB:
                 /* Structure-copy subscript specifier, single-copy-select
@@ -8723,6 +8781,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->io_pending.items[state->io_pending.item_count].struct_base_syt = sref->struct_base_syt;
                         state->io_pending.items[state->io_pending.item_count].struct_template_syt = sref->struct_field_syt;
                         state->io_pending.items[state->io_pending.item_count].struct_copy_index = sref->struct_copy_index;
+                        memcpy(state->io_pending.items[state->io_pending.item_count].struct_mid_path, sref->struct_mid_path,
+                               sizeof(sref->struct_mid_path));
+                        state->io_pending.items[state->io_pending.item_count].struct_mid_path_len = sref->struct_mid_path_len;
                         state->io_pending.item_count++;
                         break;
                     }
@@ -8840,6 +8901,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * outside any replay too. */
                     state->io_pending.items[state->io_pending.item_count].struct_copy_index =
                         sref->struct_copy_index >= 0 ? sref->struct_copy_index : current_copy_index(state);
+                    memcpy(state->io_pending.items[state->io_pending.item_count].struct_mid_path, sref->struct_mid_path,
+                           sizeof(sref->struct_mid_path));
+                    state->io_pending.items[state->io_pending.item_count].struct_mid_path_len = sref->struct_mid_path_len;
                     state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
                     state->io_pending.items[state->io_pending.item_count].dest_operand = ins->operands[0];
                     state->io_pending.item_count++;
@@ -9724,6 +9788,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     break;
                                 }
                                 uint16_t dest_base = state->vac[dest_vac].struct_base_syt;
+                                const uint16_t *dest_mid_path = state->vac[dest_vac].struct_mid_path;
+                                uint8_t dest_mid_path_len = state->vac[dest_vac].struct_mid_path_len;
                                 int32_t dest_copy = state->vac[dest_vac].struct_copy_index >= 0
                                     ? state->vac[dest_vac].struct_copy_index : current_copy_index(state);
                                 int field_syt = -1;
@@ -9735,7 +9801,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, (size_t)field_syt);
                                     if (!fsym) break;
                                     halmat_syt_entry_t *src_fe = find_or_create_struct_field(state, (uint16_t)param_syt, (uint16_t)field_syt, 0);
-                                    halmat_syt_entry_t *dst_fe = find_or_create_struct_field(state, dest_base, (uint16_t)field_syt, dest_copy);
+                                    halmat_syt_entry_t *dst_fe = find_or_create_struct_field_path(state, dest_base, dest_mid_path, dest_mid_path_len, (uint16_t)field_syt, dest_copy);
                                     if (fsym->hal_class == 4 && fsym->cols > 0) {
                                         if (!dst_fe->elements) {
                                             dst_fe->elements = calloc((size_t)fsym->cols, sizeof(halmat_scalar_t));

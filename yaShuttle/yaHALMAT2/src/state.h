@@ -110,6 +110,14 @@ typedef enum { HALMAT_PACING_BURST, HALMAT_PACING_SIGNAL } halmat_pacing_mode_t;
  * ensure_container/DSUB/MASN-family handling. */
 #define HALMAT_CONTAINER_CAPACITY 64
 
+/* Maximum number of "hop" symbols an EXTN (class-0/EXTN.md) nested-
+ * named-substructure reference can record between its base and its
+ * final field/template operand (halmat_vac_slot_t's own
+ * struct_mid_path comment) -- generous headroom over the deepest
+ * confirmed real-corpus depth (176-P.hal's `STATE2.STATE.ACCEL.V`,
+ * 2 hops: STATE, ACCEL). */
+#define HALMAT_STRUCT_PATH_MAX 6
+
 /* Row-major MATRIX(r,c) storage, per row: HAL/S itself is the actual
  * unresolved-primary-source question here (no MSC-01847/USA003087
  * page confirming row-major vs. column-major was found), but row-major
@@ -310,6 +318,21 @@ typedef struct {
                                * own TEMPLATE symbol for a bare/unqualified reference (EXTN.md's
                                * confirmed "operand 2 = the TEMPLATE's own symbol" case) rather than a
                                * real field -- interp.c's TASN/TEQU/TNEQ treat that case specially. */
+    uint16_t struct_mid_path[HALMAT_STRUCT_PATH_MAX]; /* is_struct_ref; every operand strictly between
+                               * EXTN's base (struct_base_syt) and its final field/template symbol
+                               * (struct_field_syt), in source order -- populated only for a *named*
+                               * multi-level nested-substructure reference (yahalmat2_extn_multifile_
+                               * template, 176-P.hal's `STATE2.STATE.ACCEL`/`STATE2.STATE.ACCEL.V`,
+                               * STATE2 a plain STRUCTURE but STATE2.STATE and .ACCEL each themselves a
+                               * *named*-sub-template field, i.e. `1 STATE STATEVEC-STRUCTURE`/`1 ACCEL
+                               * SUPER_VECTOR-STRUCTURE` rather than a level-number sub-structure --
+                               * confirmed empirically to compile to one EXTN with operand_count = 2 +
+                               * however many named-sub-template hops the reference crosses, base first,
+                               * final field/template last, every hop in between recorded here). Empty
+                               * (struct_mid_path_len=0) for the ordinary, single-level EXTN(2) case
+                               * (base + field/template only) that was this opcode's only previously-
+                               * confirmed shape -- every existing call site/consumer is unaffected. */
+    uint8_t struct_mid_path_len; /* is_struct_ref; see struct_mid_path. */
     int32_t struct_copy_index; /* is_struct_ref; -1 = "use the ambient current_copy_index() (interp.c)",
                                * the ordinary case for a ADLP/DLPE-driven multi-copy replay or a plain
                                * single-instance structure. >=0 = an *explicit* copy, set when this
@@ -420,6 +443,20 @@ typedef struct {
 typedef struct {
     uint16_t base_syt, field_syt;
     int32_t copy_index;
+    uint16_t mid_path[HALMAT_STRUCT_PATH_MAX]; /* every hop strictly between base_syt and
+                               * field_syt for a *named*-sub-template nested reference
+                               * (halmat_vac_slot_t's own struct_mid_path comment) -- part
+                               * of this slot's own key, alongside base_syt/field_syt/
+                               * copy_index, since field_syt alone is shared across every
+                               * same-named field of a given TEMPLATE (e.g. `V`, declared
+                               * once in SUPER_VECTOR-STRUCTURE but reachable via three
+                               * different sibling instances, POSITION/VELOCITY/ACCEL, of
+                               * a shared STATEVEC-STRUCTURE) -- without mid_path in the
+                               * key, `STATE2.STATE.POSITION.V`/`.VELOCITY.V`/`.ACCEL.V`
+                               * would all alias the exact same storage cell. Zero-length
+                               * (mid_path_len=0) for the ordinary single-level EXTN(2)
+                               * case, identical to this struct's pre-existing behavior. */
+    uint8_t mid_path_len;
     halmat_syt_entry_t value;
 } halmat_struct_field_t;
 
@@ -774,6 +811,13 @@ typedef struct {
     int32_t struct_copy_index;   /* valid iff dest_is_structure or is_structure: -1 means "use the ambient
                                     * current_copy_index()" (an explicit TSUB-selected copy
                                     * overrides this the same way EXTN's own struct_copy_index does) */
+    uint16_t struct_mid_path[HALMAT_STRUCT_PATH_MAX]; /* valid iff dest_is_structure or is_structure:
+                                    * copied straight from the capturing EXTN's own is_struct_ref VAC slot
+                                    * (halmat_vac_slot_t's own struct_mid_path comment) for a *named*-sub-
+                                    * template nested whole-structure argument (yahalmat2_extn_multifile_
+                                    * template, 176-P.hal's `CALL INTEGRATE(STATE2.STATE.ACCEL) ASSIGN(
+                                    * STATE2.STATE.VELOCITY);`) -- empty for the ordinary single-level case. */
+    uint8_t struct_mid_path_len;
     /* Call-only (is_call == true, so never set alongside the
      * READ/READALL dest_* fields above -- they share dest_operand,
      * the two contexts are mutually exclusive): true when this
