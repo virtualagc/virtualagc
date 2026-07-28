@@ -2769,6 +2769,21 @@ run ./run_local_fixture.sh matrix_field_wildcard "$(printf ' 5.1100000E+02      
 # Confirmed against real gpc.
 run ./run_local_fixture.sh array2d_scalar_write "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00      5.0000000E+00      6.0000000E+00      7.0000000E+00\n 8.0000000E+00      9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01')"
 
+# DB id 45 (vector_write_precision_format_mismatch, 119-EXAMPLE_9.hal's
+# `V$(I:) = VECTOR(RANDOM, RANDOM, RANDOM);`, V a plain -- not DOUBLE
+# -- VECTOR(3)): VASN/MASN's own plain-SYT destination write (interp.c)
+# was a raw memcpy with zero precision scaling, copying each source
+# element's own double_precision flag straight through regardless of
+# the destination's declared precision -- harmless before RANDOM was
+# fixed to genuinely return DOUBLE (id 36; the old placeholder always
+# produced SINGLE, masking this), now a real WRITE-formatting bug
+# (halmat_scalar_format keys directly off that per-element flag: 7 vs
+# 16 fractional digits). Fixed with the same symtab-driven
+# scale_precision() convention already used for plain-SCALAR
+# destinations elsewhere in this file, applied per element. Confirmed
+# against real gpc.
+run ./run_local_fixture.sh vector_precision_write " 4.3794729E-02      2.6276231E-01      1.8242157E-01"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

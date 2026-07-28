@@ -1,0 +1,8 @@
+C DB id 45: VASN/MASN must scale a source's precision down to the
+C destination's own declared SINGLE precision, not copy it verbatim.
+ T:
+ PROGRAM;
+    DECLARE V VECTOR(3);
+    V = VECTOR(RANDOM, RANDOM, RANDOM);
+    WRITE(6) V;
+ CLOSE T;

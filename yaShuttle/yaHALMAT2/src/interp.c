@@ -6655,7 +6655,39 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "MASN/VASN: shape mismatch (%zu vs %zu elements)", src_count, dest->element_count);
                     break;
                 }
-                memcpy(dest->elements, src, src_count * sizeof(halmat_scalar_t));
+                /* Cross-precision (SINGLE<->DOUBLE) conversion during
+                 * transmission (yagpc2-yahalmat2-issues.db id 45,
+                 * 119-EXAMPLE_9.hal's `V$(I:) = VECTOR(RANDOM, RANDOM,
+                 * RANDOM);`, V a plain -- not DOUBLE -- VECTOR(3)):
+                 * this was a plain memcpy with no precision scaling at
+                 * all, copying each source element's own double_
+                 * precision flag straight through regardless of the
+                 * destination's own declared precision -- harmless
+                 * before RANDOM was fixed to genuinely return DOUBLE
+                 * (id 36; the old placeholder implementation always
+                 * produced SINGLE, masking this gap), now a real, user-
+                 * visible WRITE-formatting bug (halmat_scalar_format
+                 * keys directly off this same flag). Same symtab-driven
+                 * scale_precision() convention already used for plain-
+                 * SCALAR destinations elsewhere in this file (state->
+                 * syt-driven, HALMAT_SYM_FLAG_SINGLE/DOUBLE) -- applied
+                 * per element here since MATRIX/VECTOR has no single
+                 * flag to check once. */
+                bool have_prec_flag = false, want_double = false;
+                if (dest_syt < HALMAT_SYT_MAX && state->symtab) {
+                    const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dest_syt);
+                    if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+                        have_prec_flag = true;
+                        want_double = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                    }
+                }
+                if (have_prec_flag) {
+                    for (size_t k = 0; k < src_count; k++) {
+                        dest->elements[k] = src[k].double_precision == want_double ? src[k] : scale_precision(src[k], want_double);
+                    }
+                } else {
+                    memcpy(dest->elements, src, src_count * sizeof(halmat_scalar_t));
+                }
                 dest->rows = src_rows;
                 dest->cols = src_cols;
                 break;
