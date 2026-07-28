@@ -2048,6 +2048,27 @@ run ./run_local_fixture.sh limit211 "$(printf 'LIMIT(5,10)=      5.0000000E+00\n
 # (2.5, 7.5, 15, 25, 35, 45). Fixture: test_filter138.hal.
 run ./run_local_fixture.sh filter138 "$(printf 'IN=      1.0000000E+01     AVG=      2.5000000E+00\nIN=      2.0000000E+01     AVG=      7.5000000E+00\nIN=      3.0000000E+01     AVG=      1.5000000E+01\nIN=      4.0000000E+01     AVG=      2.5000000E+01\nIN=      5.0000000E+01     AVG=      3.5000000E+01\nIN=      6.0000000E+01     AVG=      4.5000000E+01')"
 
+# Task #65 (radix_qualified_character_bit_ignored): 255-TEST3.hal,
+# `WRITE(6) CHARACTER(B) @HEX/@DEC/@OCT/@BIN;` (B a BIT(8) holding
+# decimal 25, 00011001) -- all four radix-qualified conversions
+# previously gave the IDENTICAL plain bit-string "00011001", since
+# OP_BTOC (interp.c) never consulted its own operator-word TAG at all,
+# always falling back to the same unqualified-simple-form behavior
+# (already correctly fixed separately, class-2/BTOC.md's own confirmed
+# TAG=0 trace, `C1 = CHARACTER(B0);`, no radix qualifier). Confirmed
+# empirically against this exact file's real compiled HALMAT that TAG
+# carries the radix qualifier (source order @HEX/@DEC/@OCT/@BIN):
+# TAG=4=@HEX, TAG=2=@DEC, TAG=3=@OCT, TAG=1=@BIN (@BIN identical to the
+# TAG=0 unqualified form -- both just the raw bit string). Field width
+# for each radix is the minimum digit count needed to represent every
+# value the source BIT's own declared width can hold, zero-padded (no
+# primary source decodes #QBTOC's exact formatting -- BTOC.md's own
+# "Unresolved Questions" -- so this generalizes from the one confirmed
+# real trace: HEX ceil(8/4)=2 digits "19", OCT ceil(8/3)=3 digits "031",
+# DEC digit-count-of-255=3 digits "025"). Confirmed against real gpc:
+# exact match, "19"/"025"/"031"/"00011001".
+run ./run_local_fixture.sh test3_255 "$(printf '19\n025\n031\n00011001\n0001 1001')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

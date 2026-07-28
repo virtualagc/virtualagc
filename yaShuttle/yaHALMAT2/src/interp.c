@@ -6833,6 +6833,53 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     const halmat_literal_t *lit = &state->literals->entries[ins->operands[0].data];
                     if (lit->type == LIT_BIT && lit->bit_width > 0) width = lit->bit_width;
                 }
+                /* Radix-qualified form (`CHARACTER(B) @HEX/@DEC/@OCT/
+                 * @BIN;`) -- user-reported (radix_qualified_character_
+                 * bit_ignored; 255-TEST3.hal's four WRITE(6) CHARACTER(B)
+                 * calls, B a BIT(8) holding decimal 25): this instruction's
+                 * own operator-word TAG carries the radix qualifier,
+                 * confirmed empirically against this exact file's real
+                 * compiled HALMAT (source order @HEX/@DEC/@OCT/@BIN):
+                 * TAG=4 is @HEX ("19"), TAG=2 is @DEC ("025"), TAG=3 is
+                 * @OCT ("031"), TAG=1 is @BIN ("00011001" -- identical to
+                 * the plain/unqualified simple form below, TAG=0, which
+                 * this project's own established BTOC.md trace
+                 * (`C1 = CHARACTER(B0);`, no qualifier) already confirms
+                 * compiles as TAG=0). Field width for each radix is the
+                 * minimum number of digits needed to represent every
+                 * value the source BIT's own declared width can hold,
+                 * zero-padded -- confirmed against the width=8 case above
+                 * (HEX: ceil(8/4)=2 digits, "19"; OCT: ceil(8/3)=3 digits,
+                 * "031"; DEC: digit count of 2^8-1=255, i.e. 3 digits,
+                 * "025"); no primary source decodes the general rule
+                 * (BTOC.md's own "Unresolved Questions" -- #QBTOC's exact
+                 * formatting was never decoded), so this generalizes from
+                 * the one confirmed real trace rather than guessing at a
+                 * different rule. Hex digit case (upper vs. lower) is
+                 * unconfirmed -- this file's own "19"/"025"/"031" never
+                 * exercise a letter digit -- upper chosen as this
+                 * project's own general convention (matching HEX literal
+                 * formatting elsewhere in this file). */
+                if (ins->tag == 2 || ins->tag == 3 || ins->tag == 4) {
+                    uint32_t maxval = (width >= 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
+                    uint32_t v = (width >= 32) ? a.bits : (a.bits & maxval);
+                    char buf[33];
+                    if (ins->tag == 4) {
+                        int digits = (width + 3) / 4;
+                        snprintf(buf, sizeof buf, "%0*X", digits, v);
+                    } else if (ins->tag == 3) {
+                        int digits = (width + 2) / 3;
+                        snprintf(buf, sizeof buf, "%0*o", digits, v);
+                    } else {
+                        int digits = 1;
+                        for (uint32_t t = maxval; t >= 10; t /= 10) digits++;
+                        snprintf(buf, sizeof buf, "%0*u", digits, v);
+                    }
+                    state->vac[ins->index].is_ref = false;
+                    state->vac[ins->index].is_string = true;
+                    state->vac[ins->index].string = dup_string(buf);
+                    break;
+                }
                 char buf[33];
                 for (int i = 0; i < width; i++) {
                     buf[i] = ((a.bits >> (width - 1 - i)) & 1u) ? '1' : '0';
