@@ -1023,10 +1023,10 @@ run ./run_py_fixture.sh simple_do "$py_exp"
 # errors 9/10/59/60/62 -- alongside the already-implemented group's
 # errors 5-8/11-12/24/25/27/28), FLOOR/CEILING/TRUNCATE/SIGNUM/MIDVAL,
 # DIV/MOD/REMAINDER (errors 16/19/33)/ODD/SHL/SHR/XOR, INDEX/LJUST/RJUST
-# (error 18), TRANSPOSE/TRACE, RANDOM/RANDOMG (state.h's rng_state
-# comment: a from-scratch deterministic Park-Miller generator, no
-# primary-source algorithm mandated, same compromise as MINV/DET's
-# Gaussian elimination), RUNTIME (the existing virtual-clock model), and
+# (error 18), TRANSPOSE/TRACE, RANDOM/RANDOMG (originally a from-scratch
+# deterministic Park-Miller generator + Box-Muller transform, documented
+# at the time as "no primary source... a compromise" -- superseded, see
+# DB id 36 comment below), RUNTIME (the existing virtual-clock model), and
 # ERRGRP/ERRNUM (new last_error_group/last_error_member state, updated at
 # arithmetic_error_should_apply_fixup's single existing choke point).
 # Deliberately NOT implemented, documented instead of guessed at:
@@ -1053,7 +1053,31 @@ run ./run_local_fixture.sh bfnc_intops "$(printf '          3\n          2\n 2.0
 run ./run_local_fixture.sh bfnc_char "$(printf '          6\n          0\nAB   \n   AB')"
 run ./run_local_fixture.sh bfnc_matrix2 "$(printf ' 1.0000000E+00      4.0000000E+00\n 2.0000000E+00      5.0000000E+00\n 3.0000000E+00      6.0000000E+00\n 1.5000000E+01')"
 run ./run_local_fixture.sh lfnc_array "$(printf ' 7.0000000E+00\n 1.0000000E+00\n 1.5000000E+01\n 8.4000000E+01\n          4')"
-run ./run_local_fixture.sh random "$(printf ' 7.8263693E-06\n 1.3153774E-01\n-7.2352159E-01')"
+# DB id 36: the Park-Miller/Box-Muller placeholder above was confirmed
+# wrong -- RANDOM/RANDOMG's real algorithm (RUNASM/RANDOM.asm,
+# USA003088.txt Sec. 9397/9399) is a classic IBM-SSP "RANDU"-family LCG
+# (seed = (65539*seed) mod 2^32, with a two's-complement wraparound fixup)
+# shared by both built-ins: RANDOM converts one draw to IBM hex float and
+# rounded-multiplies it by 2^-15 (NOT 2^-31 as the asm's own comment
+# misleadingly claims -- verified via yaGPC2's floatIBM.c, not by hand-
+# decoding); RANDOMG (Irwin-Hall) sums 12 RANU draws and subtracts 6.0.
+# Ported bit-exact into hal_random.c/.h, operating directly on
+# halmat_scalar_t (confirmed identical bit layout to yaGPC2's FloatIBM).
+# Verified three ways for a fixed 28-draw sequence: yaGPC2's own reference
+# hal_random.c/floatIBM.c standalone harness, yaHALMAT2 itself, and real
+# gpc via compileLinkRun -- all three matched bit-for-bit. Expected values
+# below re-derived the same way (yaHALMAT2 and gpc agree).
+run ./run_local_fixture.sh random "$(printf ' 4.3794729E-02\n 2.6276231E-01\n 3.9709830E-01')"
+
+# Dedicated bit-exact lock-in for DB id 36: a 28-draw mixed RANDOM/RANDOMG
+# sequence (matching the one used against the standalone reference C
+# harness and real gpc during this fix's verification) into a SCALAR
+# DOUBLE variable, so the full extended-precision (F0:F1) hex-float path
+# is exercised end-to-end, not just the single-precision-truncated values
+# the "random" fixture above happens to produce. Expected values below
+# are yaHALMAT2's own output, cross-checked bit-for-bit against real gpc
+# (compileLinkRun) for the identical program before being locked in here.
+run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-02\n 2.6276230812072754E-01\n 1.8242156505584717E-01\n 7.2966837882995605E-01\n 7.3621582984924316E-01\n 1.5062534809112549E-01\n 1.1224867850542068E+00\n-2.6469413563609123E-01\n-1.3050046935677528E-01\n 8.9225000888109207E-01\n 1.7391182482242584E-01\n-1.5725612472742796E+00\n 5.2557062916457653E-01\n 3.6610984429717064E-01\n 8.8674899935722351E-01\n 2.3147720098495483E-01\n 7.8192532062530518E-01\n 5.1727104187011719E-01\n 5.4636526107788086E-01\n 2.3366975784301758E-01\n-3.0304364114999771E-01\n 6.4744396507740021E-01\n 8.3109536767005920E-01\n-1.4940198436379433E+00\n 1.3369635958224535E-01\n 3.2427629269659519E-01\n 1.4605471119284630E-01\n 8.9314310997724533E-01')"
 run ./run_local_fixture.sh runtime "$(printf ' 1.8115941E-05\n 5.0000534E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME

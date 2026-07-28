@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "hal_random.h"
 #include "halmat.h"
 #include "literal.h"
 #include "opcode_table.h" /* for the halmat_state_t typedef */
@@ -1427,17 +1428,18 @@ struct halmat_state {
                          * time_scale, which either implementation still honors identically. */
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
 
-    /* BFNC selector 42/51 (RANDOM/RANDOMG, class-0/BFNC.md): a Park-Miller
-     * "minimal standard" Lehmer generator (state = state*16807 mod
-     * 2^31-1; result = state/(2^31-1)), a simple, fully-specified,
-     * deterministic PRNG chosen for exact reproducibility across runs and
-     * platforms -- no primary source documents the real AP-101S runtime
-     * library's actual RANDOM algorithm (same "no bit-exact algorithm
-     * mandated" situation as MINV/DET's Gaussian elimination), so this is
-     * a documented compromise, not a confirmed match. Seeded to a fixed
-     * non-zero value (interp_init) rather than a real entropy source, so
-     * every run/regression fixture is byte-for-byte repeatable. */
-    uint32_t rng_state;
+    /* BFNC selector 42/51 (RANDOM/RANDOMG, class-0/BFNC.md): a bit-exact
+     * replication of the real AP-101S runtime library's own RUNASM/
+     * RANDOM.asm generator (hal_random.h/.c -- yahalmat2_random_not_
+     * deterministic, yagpc2-yahalmat2-issues.db id 36), superseding an
+     * earlier Park-Miller Lehmer generator that was merely "some
+     * deterministic PRNG," not a real hardware match (that placeholder
+     * predated an independently-verified reference implementation of the
+     * genuine algorithm becoming available). hal_random_init()
+     * (interp_init) resets this to a fresh process's own initial state
+     * (SEED=1435, chained_f1=0), matching RANDOM.asm's own object-code-
+     * baked initial constant and a genuinely cold register file. */
+    hal_random_state_t random_rng;
 
     /* BFNC selectors 38/39 (ERRGRP/ERRNUM, class-0/BFNC.md): "returns
      * group/number of last error detected, or zero" [USA003087] Appendix

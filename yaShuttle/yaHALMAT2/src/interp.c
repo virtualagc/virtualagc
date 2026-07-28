@@ -1794,15 +1794,6 @@ static halmat_scalar_t matrix_determinant(const halmat_scalar_t *in, int n, bool
     return halmat_scalar_from_double(det, dbl);
 }
 
-/* Advances state->rng_state's Park-Miller "minimal standard" Lehmer
- * generator (state.h's own comment on the algorithm/reproducibility
- * rationale) and returns the next draw in [0,1). Shared by BFNC's
- * RANDOM/RANDOMG cases below. */
-static double next_random_uniform(halmat_state_t *state) {
-    state->rng_state = (uint32_t)(((uint64_t)state->rng_state * 16807u) % 2147483647u);
-    return (double)state->rng_state / 2147483647.0;
-}
-
 /* Reads a whole MATRIX/VECTOR operand (SYT variable or a VAC-carried
  * intermediate result, e.g. a prior MADD/VADD -- class-3/MADD.md's "no
  * destination operand, consumed by a following MASN via a VAC-qualified
@@ -2985,11 +2976,11 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     state->devices[5] = stdin;
     state->devices[6] = stdout;
 
-    /* RANDOM/RANDOMG's Park-Miller generator (state.h's rng_state
-     * comment): seeded to a fixed non-zero value, not real entropy, so
-     * every run is exactly reproducible -- the generator is degenerate
-     * (stays at zero forever) if ever seeded with 0. */
-    state->rng_state = 1;
+    /* RANDOM/RANDOMG's own real-hardware-replicating generator (state.h's
+     * random_rng comment) -- resets to a fresh process's own initial
+     * state (SEED=1435, chained_f1=0), matching RANDOM.asm's own object-
+     * code-baked constant and a genuinely cold register file. */
+    hal_random_init(&state->random_rng);
 }
 
 void interp_set_device(halmat_state_t *state, int device, FILE *f) {
@@ -8275,28 +8266,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * failing "BFNC: expected 1 operand (selector 42)",
                      * the same "no-argument built-in rejected by the
                      * generic 1-operand check" shape PRIO already had to
-                     * be special-cased for above). RANDOM: state.h's
-                     * rng_state comment -- Park-Miller minimal-standard
-                     * Lehmer generator, [0,1) rectangular distribution
-                     * per Appendix B. RANDOMG: Box-Muller transform over
-                     * two RANDOM draws for a mean-0/variance-1 Gaussian
-                     * (Appendix B) -- an extra source of imprecision
-                     * beyond RANDOM's own already-undocumented algorithm,
-                     * same "no primary-source algorithm mandated"
-                     * compromise. */
+                     * be special-cased for above). Bit-exact replication
+                     * of the real AP-101S RUNASM/RANDOM.asm generator
+                     * (hal_random.h/.c, state.h's random_rng comment --
+                     * yahalmat2_random_not_deterministic, yagpc2-
+                     * yahalmat2-issues.db id 36), superseding an earlier
+                     * Park-Miller/Box-Muller placeholder that was merely
+                     * "some deterministic PRNG," not a real hardware
+                     * match. Both selectors are double-precision SCALAR
+                     * (USA003088.txt's own "OUTPUT F0 SCALAR DP"
+                     * declaration for both). */
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                    double u1 = next_random_uniform(state);
-                    double r;
-                    if (ins->tag == 42) {
-                        r = u1;
-                    } else {
-                        double u2 = next_random_uniform(state);
-                        if (u1 < 1e-300) u1 = 1e-300; /* guard log(0) */
-                        r = sqrt(-2.0 * log(u1)) * cos(2.0 * HAL_S_PI * u2);
-                    }
+                    halmat_scalar_t r = (ins->tag == 42)
+                        ? hal_random_next(&state->random_rng)
+                        : hal_randomg_next(&state->random_rng);
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = true;
-                    state->vac[ins->index].scalar = halmat_scalar_from_double(r, false);
+                    state->vac[ins->index].scalar = r;
                     break;
                 }
                 if (ins->tag == 52) {

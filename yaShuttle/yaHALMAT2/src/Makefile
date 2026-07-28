@@ -46,7 +46,7 @@ endif
 
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
         literal.c ebcdic.c interp.c value.c symtab.c debug.c srcmap.c \
-        container.c
+        container.c hal_random.c
 OBJS := $(SRCS:.c=.o)
 DEPS := $(SRCS:.c=.d)
 TARGET := yaHALMAT2
