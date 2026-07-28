@@ -37,6 +37,34 @@ halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision)
  * yet since no fixture exercises the failure path. */
 int32_t halmat_scalar_to_integer(halmat_scalar_t s);
 
+/* Same rounding/tie-breaking rule as halmat_scalar_to_integer, but
+ * WITHOUT its CVFX-interrupt 32767/-32767 clamp -- clamps only at true
+ * int32_t bounds (to keep the cast defined), the full range a genuine
+ * 32-bit register value can hold. For WRITE-argument INTEGER-format
+ * display of a value the *compiler itself* already routed through a
+ * wide (32-bit #QIOUT-equivalent `L`) load rather than a real runtime
+ * CVFX conversion -- confirmed via a real HALSFC Pass 2 listing
+ * (integer_exponentiation_overflow_needs_fcos; 052-TABLE.hal's
+ * `WRITE(6) N, 2**(N-1), ...`, N a compile-time constant so `2**(N-1)`
+ * is entirely constant-folded): every literal that doesn't fit 16 bits
+ * loads via a full-word `L` into #QIOUT, never a CVFX at all, so there
+ * is no real interrupt for halmat_scalar_to_integer's own clamp to be
+ * modeling here -- applying it anyway silently truncated every such
+ * WRITE argument to 32767 regardless of the compiler's own intent. */
+int32_t halmat_scalar_to_integer_wide(halmat_scalar_t s);
+
+/* Same rounding/clamping as halmat_scalar_to_integer_wide, but for an
+ * already-decoded double rather than a halmat_scalar_t -- needed for a
+ * QUAL_LIT literal's own full-precision value (halmat_literal_t's own
+ * `numeric` field, decoded from msw+lsw unconditionally regardless of
+ * LIT_FIXED/LIT_DOUBLE), which is NOT the same value as resolve_
+ * operand's own a.scalar for that same literal (halmat_scalar_from_
+ * ibm_words zeroes lsw whenever the litfile's type byte isn't literally
+ * LIT_DOUBLE -- correct for ordinary SCALAR-context resolution, but not
+ * a reliable single-vs-double signal for INTEGER-context display; see
+ * OP_XXAR's own `integer_class_scalar` comment). */
+int32_t halmat_double_to_integer_wide(double raw);
+
 double halmat_scalar_to_double(halmat_scalar_t s);
 
 /* Inverse of halmat_scalar_to_double: repeatedly rescales by 16 until the

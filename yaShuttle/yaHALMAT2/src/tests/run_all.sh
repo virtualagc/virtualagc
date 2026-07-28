@@ -2391,6 +2391,42 @@ run ./run_local_fixture.sh bitconcat257 "AVERAGE=     0000 0000 0000 0000"
 # itself, not a small follow-on to this fixture's own fix.
 run ./run_local_fixture.sh named_nest176 "$(printf 'POS=      1.0000000E+00      2.0000000E+00      3.0000000E+00\nVEL=      4.0000000E+00      5.0000000E+00      6.0000000E+00')"
 
+# DB id 17 (integer_exponentiation_overflow_needs_fcos) -- CORRECTED
+# 2026-07-28 from its own original framing (a --fcos-needs-extending
+# yaGPC2 question): 052-TABLE.hal's `WRITE(6) N, 2**(N-1), N/LOG2(10)`
+# with N a compile-time-constant (8,12,16,18,24,30,31, then a final
+# `WRITE(6) 2**30 + (2**30-1);`) has HALSFC constant-fold the whole
+# `2**(N-1)` expression at compile time -- confirmed via a real Pass 2
+# listing: N=16 onward, the folded literal (32768 upward, to
+# 2147483647) loads via a full-word `L` into #QIOUT, never a genuine
+# CVFX conversion or a 16-bit `LHI`/#QHOUT at all. Two compounding
+# yaHALMAT2 bugs found: (1) WRITE's own INTEGER-format argument capture
+# reused halmat_scalar_to_integer, the CVFX-interrupt-modeling
+# 32767/-32767 clamp -- correct for a genuine runtime SCALAR->INTEGER
+# conversion, but wrong here (no real interrupt is ever involved for a
+# value the compiler already committed to a wide load for) -- fixed via
+# a new halmat_scalar_to_integer_wide/halmat_double_to_integer_wide
+# (value.c), full int32_t range, no CVFX clamp; (2) a SEPARATE,
+# already-existing 16-bit-register reinterpret truncation further down
+# the same WRITE-argument-capture code (modeling a genuine single-
+# precision INTEGER's real hardware width, confirmed correct for
+# BTOI/SUBBIT-sourced values) was ALSO firing unconditionally on a bare
+# QUAL_LIT literal -- exempted QUAL_LIT specifically, since a literal's
+# own compiled load-instruction width is dictated by its own value, not
+# a genuine runtime register op; (3) resolve_operand's own QUAL_LIT
+# scalar resolution (used for the SCALAR-formatted N/LOG2(10) argument,
+# unrelated to the INTEGER fix) turned out to already correctly zero a
+# literal's own lsw for single-precision display -- confirmed this is
+# NOT a reliable single-vs-double signal in general (every literal in
+# this file, including the ones needing full lsw precision for exact
+# INTEGER display, is tagged LIT_FIXED, never LIT_DOUBLE), so the
+# INTEGER-display fix reads literal.c's own already-full-precision
+# `lit->numeric` directly instead of routing through that same
+# scalar-resolution path, leaving SCALAR-context resolution/formatting
+# completely untouched. Confirmed against real gpc via compileLinkRun:
+# exact match.
+run ./run_local_fixture.sh table052 "$(printf '          8             128      2.4082394E+00\n         12            2048      3.6123590E+00\n         16           32768      4.8164797E+00\n         18          131072      5.4185390E+00\n         24         8388608      7.2247190E+00\n         30       536870912      9.0308990E+00\n         31      1073741824      9.3319292E+00\n 2147483647')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

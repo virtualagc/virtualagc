@@ -49,6 +49,20 @@ halmat_scalar_t halmat_scalar_from_integer(int32_t value, bool double_precision)
     return s;
 }
 
+/* Shared rounding core for halmat_scalar_to_integer/halmat_scalar_to_
+ * integer_wide/halmat_double_to_integer_wide: round to nearest, ties
+ * toward zero (truncate), same tie-breaking rule every caller needs --
+ * see halmat_scalar_to_integer's own comment for the real-gpc probe
+ * this is confirmed against. No clamping here; each caller applies its
+ * own range limit (the CVFX-interrupt 32767/-32767 clamp, or the full
+ * int32_t range). */
+static double round_to_integer(double raw) {
+    double d = trunc(raw);
+    double frac = raw - d; /* signed remainder, |frac| < 1, same sign as raw (or zero) */
+    if (fabs(frac) > 0.5) d += (raw >= 0.0) ? 1.0 : -1.0;
+    return d;
+}
+
 int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
     /* Rounds to nearest, but exact-.5 ties round TOWARD zero (i.e.
      * truncate), not away from it -- confirmed against real `gpc` output
@@ -111,12 +125,20 @@ int32_t halmat_scalar_to_integer(halmat_scalar_t s) {
      * session). Without some clamp, the plain `(int32_t)round(...)` cast
      * below is undefined behavior in C for any double outside int32_t's
      * range regardless. */
-    double raw = halmat_scalar_to_double(s);
-    double d = trunc(raw);
-    double frac = raw - d; /* signed remainder, |frac| < 1, same sign as raw (or zero) */
-    if (fabs(frac) > 0.5) d += (raw >= 0.0) ? 1.0 : -1.0;
+    double d = round_to_integer(halmat_scalar_to_double(s));
     if (d > 32767.0) return 32767;
     if (d < -32768.0) return -32767; /* FPMCVFX's real X'8001', not the manual's -32768 */
+    return (int32_t)d;
+}
+
+int32_t halmat_scalar_to_integer_wide(halmat_scalar_t s) {
+    return halmat_double_to_integer_wide(halmat_scalar_to_double(s));
+}
+
+int32_t halmat_double_to_integer_wide(double raw) {
+    double d = round_to_integer(raw);
+    if (d > 2147483647.0) return INT32_MAX;
+    if (d < -2147483648.0) return INT32_MIN;
     return (int32_t)d;
 }
 

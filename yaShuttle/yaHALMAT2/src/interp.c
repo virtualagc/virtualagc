@@ -9174,7 +9174,47 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * own tag1 is never 6, so this can't misfire. */
                 bool integer_class_scalar = (a.kind == RV_SCALAR) && ins->operands[0].tag1 == 6;
                 if (integer_class_scalar) {
-                    a.integer = halmat_scalar_to_integer(a.scalar);
+                    /* halmat_scalar_to_integer_wide, not plain
+                     * halmat_scalar_to_integer -- a WRITE argument's own
+                     * INTEGER-format display is never itself a genuine
+                     * runtime CVFX conversion (integer_exponentiation_
+                     * overflow_needs_fcos; halmat_scalar_to_integer_
+                     * wide's own value.h comment) even when the literal
+                     * value is too wide for 16 bits; a real INTEGER
+                     * variable/ARRAY element's own value is already
+                     * clamped to CVFX range at whatever point it was
+                     * *stored*, so using the full-width conversion here
+                     * changes nothing for that case while fixing this
+                     * one.
+                     *
+                     * QUAL_LIT reads straight from lit->numeric, not
+                     * a.scalar -- a.scalar (resolve_operand's QUAL_LIT
+                     * case) went through halmat_scalar_from_ibm_words'
+                     * own single-vs-double gate, which (correctly, for
+                     * ordinary SCALAR-context use) zeroes the literal's
+                     * own lsw whenever the litfile's type byte isn't
+                     * literally LIT_DOUBLE -- but that type byte is NOT
+                     * a reliable single-vs-double signal for a literal's
+                     * own INTEGER-context value (confirmed empirically:
+                     * every literal in 052-TABLE.hal, including ones
+                     * that need the full lsw for exact integer
+                     * representation, is tagged LIT_FIXED, never
+                     * LIT_DOUBLE -- reusing that same gate for INTEGER
+                     * display, tried first, wrongly widened *every*
+                     * SCALAR-formatted literal's own display precision
+                     * too, since the same tag ambiguity cuts both ways).
+                     * literal.c's own lit->numeric is decoded from
+                     * msw+lsw together unconditionally regardless of
+                     * type (its own ibm_hex_float_to_double call), so
+                     * it's already the exact value with no precision
+                     * lost -- the correct source specifically for this
+                     * INTEGER-reclassification path, without touching
+                     * SCALAR-context resolution at all. */
+                    double raw = (ins->operands[0].qual == QUAL_LIT && state->literals &&
+                                  ins->operands[0].data < state->literals->count)
+                        ? state->literals->entries[ins->operands[0].data].numeric
+                        : halmat_scalar_to_double(a.scalar);
+                    a.integer = halmat_double_to_integer_wide(raw);
                     a.kind = RV_INTEGER;
                 }
                 state->io_pending.items[state->io_pending.item_count].is_container = false; /* items[] slots
@@ -9273,7 +9313,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
                         if (sym && (sym->flags & HALMAT_SYM_FLAG_DOUBLE)) is_double_integer = true;
                     }
-                    if (!is_double_integer) ival = (int32_t)(int16_t)(ival & 0xFFFF);
+                    /* QUAL_LIT exempted (integer_exponentiation_overflow_
+                     * needs_fcos, 052-TABLE.hal's compile-time-constant-
+                     * folded `2**(N-1)`): unlike a QUAL_SYT/QUAL_VAC
+                     * result, whose "no symtab entry to check" ambiguity
+                     * genuinely defaults to the language's single-
+                     * precision 16-bit-register convention, a bare
+                     * literal's own compiled *load instruction* is
+                     * dictated directly by its own value -- LHI's 16-bit
+                     * signed-halfword immediate operand is physically
+                     * incapable of encoding a value outside +-32767 in
+                     * the first place, confirmed via a real HALSFC Pass 2
+                     * listing (see halmat_scalar_to_integer_wide's own
+                     * value.h comment): every literal too wide for LHI
+                     * compiles to a full-word `L` into #QIOUT instead,
+                     * never a genuine 16-bit register at all. Harmless
+                     * for a literal that DOES already fit 16 bits -- the
+                     * truncation below is a no-op round-trip for any
+                     * value already in [-32768,32767]. */
+                    if (!is_double_integer && ins->operands[0].qual != QUAL_LIT) ival = (int32_t)(int16_t)(ival & 0xFFFF);
                     state->io_pending.items[state->io_pending.item_count].integer = ival;
                 }
                 state->io_pending.items[state->io_pending.item_count].is_assign = is_assign_arg;
