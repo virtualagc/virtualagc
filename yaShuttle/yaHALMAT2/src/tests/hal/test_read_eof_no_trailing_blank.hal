@@ -1,0 +1,13 @@
+C DB id 47: an unhandled READ/READALL EOF must not emit a spurious extra
+C trailing blank line just because the last WRITE before it was a
+C positioning-only WRITE(6) COLUMN(1); (no data expressions -- Sec. 12.2:
+C "the device merely performs its initial positioning", no line written).
+ T:
+ PROGRAM;
+    DECLARE C CHARACTER(1);
+    WRITE(6) 'A';
+    WRITE(6) 'B';
+    WRITE(6) COLUMN(1);
+    READALL(5) C;
+    WRITE(6) 'UNREACHABLE';
+ CLOSE T;

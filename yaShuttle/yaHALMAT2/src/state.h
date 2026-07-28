@@ -932,6 +932,19 @@ typedef struct {
     size_t line_buf_len;    /* high-water content length (bytes actually
                               * written or space-padded so far) */
     size_t line_buf_cap;
+    bool line_has_data;    /* has a genuine data field (dm_emit_field) been
+                             * written into the current open line yet? False
+                             * for a line that's only ever been touched by
+                             * TAB/COLUMN/SKIP/LINE/PAGE positioning (Sec.
+                             * 12.2: "[i]f no expressions are supplied in
+                             * the WRITE statement, the device merely
+                             * performs its initial positioning" -- no line
+                             * is actually written). Distinct from
+                             * line_buf_len>0: a WRITE of a genuine
+                             * zero-length CHARACTER field still counts as
+                             * data (line_has_data=true, line_buf_len can
+                             * stay 0), so program-end cleanup knows whether
+                             * the still-open line needs flushing at all. */
 } halmat_device_mech_t;
 
 struct halmat_state {

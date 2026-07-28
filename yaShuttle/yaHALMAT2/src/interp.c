@@ -3273,10 +3273,19 @@ void interp_cleanup(halmat_state_t *state) {
      * *last* WRITE issued to a device in the whole run, nothing ever does,
      * so it must be flushed here or it's silently lost. Called before
      * main.c's own fclose() of these files (interp_cleanup doesn't own
-     * them either way, same as devices[] itself). */
+     * them either way, same as devices[] itself).
+     *
+     * Gated on line_has_data (DB id 47): a device that's `started` but
+     * whose still-open line was only ever touched by TAB/COLUMN/SKIP/LINE/
+     * PAGE positioning -- e.g. a trailing `WRITE(6) COLUMN(1);` right
+     * before an unhandled READ EOF halts the program -- must NOT be
+     * flushed here. Sec. 12.2: "[i]f no expressions are supplied in the
+     * WRITE statement, the device merely performs its initial
+     * positioning" -- no line is actually written in that case, confirmed
+     * against real gpc's own stdout for this exact repro (159-AGE.hal). */
     for (int d = 0; d < HALMAT_DEVICE_MAX; d++) {
         halmat_device_mech_t *dm = &state->device_mech[d];
-        if (dm->started && state->devices[d]) {
+        if (dm->started && state->devices[d] && dm->line_has_data) {
             if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, state->devices[d]);
             fputc('\n', state->devices[d]);
         }
@@ -3330,6 +3339,7 @@ static void dm_finalize_line(halmat_device_mech_t *dm, FILE *out) {
     if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, out);
     fputc('\n', out);
     dm->line_buf_len = 0;
+    dm->line_has_data = false;
     dm->col = 1;
 }
 
@@ -3501,6 +3511,7 @@ static void dm_emit_field(halmat_state_t *state, halmat_device_mech_t *dm, FILE 
         *need_sep = false;
     }
     dm_write_at(dm, col, text);
+    dm->line_has_data = true;
     *need_sep = true;
 }
 
@@ -3599,6 +3610,7 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
         dm->line = 1;
         dm->col = 1;
         dm->line_buf_len = 0;
+        dm->line_has_data = false;
     } else {
         bool leads_with_vertical = state->io_pending.item_count > 0 &&
             state->io_pending.items[0].is_ioctl &&

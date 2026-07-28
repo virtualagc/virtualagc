@@ -2784,6 +2784,35 @@ run ./run_local_fixture.sh array2d_scalar_write "$(printf ' 1.0000000E+00      2
 # against real gpc.
 run ./run_local_fixture.sh vector_precision_write " 4.3794729E-02      2.6276231E-01      1.8242157E-01"
 
+# DB id 47 (read_eof_spurious_trailing_blank_line, 159-AGE.hal run with
+# stdin=/dev/null so its READALL(5) immediately hits EOF with no ON
+# ERROR handler installed): interp_cleanup's own final per-device
+# flush -- needed to commit the very *last* WRITE's still-open line,
+# which nothing else ever finalizes (device_mech's own state.h
+# comment) -- unconditionally emitted a trailing '\n' for any
+# `started` device, even when that still-open "line" was never
+# actually written to: a leading `WRITE(6) COLUMN(1);` (an
+# io-control-only WRITE, no data expressions) merely repositions the
+# device mechanism per USA003087 Sec. 12.2's own rule ("[i]f no
+# expressions are supplied in the WRITE statement, the device merely
+# performs its initial positioning") -- confirmed against real gpc,
+# which correctly emits no extra line here. Fixed by tracking whether
+# a genuine data field (dm_emit_field, the sole path into a line's
+# buffer) has actually been written to the device's current open line
+# (new line_has_data flag, state.h/interp.c) and gating cleanup's
+# trailing-newline flush on it -- distinct from line_buf_len>0, since
+# a WRITE of a genuine zero-length CHARACTER field must still flush
+# (it supplied a real, if empty, data expression) while a positioning-
+# only WRITE must not. Verified the ordinary non-EOF completion path
+# (real stdin input) still matches real gpc byte-for-byte, including
+# the *embedded* blank line the same COLUMN(1) statement legitimately
+# produces there (finalized by the next WRITE's own default vertical
+# movement, not orphaned the way it is at EOF). Needs a byte-exact
+# harness (run_read_fixture_bytes.sh): the ordinary run_read_fixture.sh
+# `actual=$(...)` capture silently strips every trailing newline, so
+# it can never distinguish a missing vs. present final blank line.
+run ./run_read_fixture_bytes.sh read_eof_no_trailing_blank "" $'A\nB\n'
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"
