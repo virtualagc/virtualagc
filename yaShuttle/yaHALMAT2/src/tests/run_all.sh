@@ -2910,6 +2910,37 @@ run ./run_local_fixture.sh tsub_asterisk_broadcast "$(printf ' 5.1200000E+02    
 # own separate, unrelated multi-item-WRITE gap -- see id 59).
 run ./run_local_fixture.sh write_whole_structure_recursive "$(printf ' 5.1100000E+02      5.1200000E+02      5.1300000E+02\n 5.1400000E+02      5.1500000E+02      5.1600000E+02\n 5.1700000E+02      5.1800000E+02      5.1900000E+02\n 5.2000000E+02      5.2100000E+02      5.2200000E+02\n 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00\n 9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM1\n 6.1100000E+02      6.1200000E+02      6.1300000E+02\n 6.1400000E+02      6.1500000E+02      6.1600000E+02\n 6.1700000E+02      6.1800000E+02      6.1900000E+02\n 6.2000000E+02      6.2100000E+02      6.2200000E+02\n 2.1000000E+01      2.2000000E+01      2.3000000E+01      2.4000000E+01\n 2.5000000E+01      2.6000000E+01      2.7000000E+01      2.8000000E+01\n 2.9000000E+01      3.0000000E+01      3.1000000E+01      3.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM2')"
 
+# DB id 51 (yahalmat2_uses_ieee_double_not_ibm_hex_float, re-investigated
+# 2026-07-29 per direct user clarification: the real fidelity target is
+# the original AP-101S hardware/software via yaGPC2, not real gpc, which
+# only achieves partial hex-float authenticity itself): found and fixed a
+# genuine, foundational literal-precision bug while cross-checking SQRT
+# against yaGPC2. resolve_operand's own QUAL_LIT case defaulted every
+# numeric literal to SINGLE precision (halmat_scalar_from_ibm_words'
+# own `double_precision ? lsw : 0`, zeroing lsw) unless the litfile's own
+# type tag was literally LIT_DOUBLE -- but confirmed via a real litfile
+# dump (literals1.txt) that EVERY literal is tagged LIT_FIXED regardless
+# of its actual value's precision needs, the exact same tag-ambiguity
+# already documented elsewhere in this file (OP_XXAR's own
+# integer_class_scalar comment, for the analogous INTEGER-context case) --
+# so a genuine DOUBLE-precision literal like `X = 1.4142135623730951;`
+# (X SCALAR DOUBLE) permanently lost its own low word before OP_SASN's
+# later widening pass ever ran (widening only flips the double_precision
+# flag, it can't recover already-zeroed bits). Confirmed as a real,
+# previously-undetected bug (not expected precision loss) via a real
+# litfile dump showing the full msw/lsw pair genuinely present
+# (4116A09E/667F3BCC), and via real gpc/yaGPC2 both displaying the
+# correct value for this exact literal while yaHALMAT2 alone showed a
+# drastically wrong one. Fixed narrowly at OP_SASN's own precision-
+# widening site (not resolve_operand itself -- a first attempt broadening
+# resolve_operand's own default broke several already-correct SINGLE-
+# precision consumers, VASN/MASN MATRIX/VECTOR constructor literals
+# among them, that have no narrowing step of their own): when widening a
+# literal source to double, re-derive the value directly from the
+# literal table's own msw/lsw instead of merely flipping the flag on the
+# already-truncated resolved scalar.
+run ./run_local_fixture.sh double_literal_precision " 1.4142135623730949E+00"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

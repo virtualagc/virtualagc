@@ -1,0 +1,17 @@
+C A DOUBLE-precision decimal literal assigned to a SCALAR DOUBLE
+C destination must preserve its full 56-bit hex-float fraction, not
+C silently truncate to single precision. resolve_operand's own
+C QUAL_LIT case defaults every literal to single precision (zeroing
+C lsw) since the litfile's own type tag can't reliably distinguish
+C single vs double (every literal is tagged LIT_FIXED regardless --
+C confirmed via a real litfile dump) -- SASN's own widening step must
+C re-derive the value from the literal table directly rather than
+C merely flipping the double_precision flag on the already-truncated
+C resolved scalar, or the low word is lost permanently. Expected
+C value confirmed against both real gpc and yaGPC2.
+ T:
+ PROGRAM;
+    DECLARE X DOUBLE;
+    X = 1.4142135623730951;
+    WRITE(6) X;
+ CLOSE T;

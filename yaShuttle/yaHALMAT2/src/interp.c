@@ -8093,7 +8093,46 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         halmat_scalar_t sv = rv_to_scalar(&coerced);
                         if (dest_sym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE)) {
                             bool want_double = (dest_sym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
-                            if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
+                            /* Widening (single -> double) via plain
+                             * scale_precision() only flips the flag -- it
+                             * can't recover fraction bits resolve_operand's
+                             * own QUAL_LIT case already discarded (that
+                             * case zeroes a literal's lsw by default, since
+                             * the litfile's own type tag can't reliably
+                             * signal single-vs-double -- see its own
+                             * comment). For a literal SOURCE specifically,
+                             * re-derive the full-precision value directly
+                             * from the litfile's own msw/lsw instead of
+                             * widening the already-corrupted resolved
+                             * scalar -- the same "read straight from the
+                             * literal table, not the already-resolved
+                             * value" pattern OP_XXAR's own integer_class_
+                             * scalar already uses for the analogous
+                             * INTEGER-context case. Confirmed via a real
+                             * litfile dump: a genuine DOUBLE-precision
+                             * literal (`X = 1.4142135623730951;`, X
+                             * SCALAR DOUBLE) is tagged LIT_FIXED like any
+                             * other and DOES carry the full msw/lsw pair
+                             * in the litfile -- only resolve_operand's own
+                             * default discards it. Scoped narrowly to this
+                             * one widening case (not resolve_operand
+                             * itself) since a blanket "always resolve
+                             * literals as double" change was tried first
+                             * and broke several already-correct SINGLE-
+                             * precision consumers (VASN/MASN MATRIX/VECTOR
+                             * constructor literals, TINT, CASN's own
+                             * literal-to-CHARACTER formatting, etc.) that
+                             * have no narrowing step of their own and
+                             * never needed one before. */
+                            if (sv.double_precision != want_double) {
+                                if (want_double && ins->operands[0].qual == QUAL_LIT &&
+                                    state->literals && ins->operands[0].data < state->literals->count) {
+                                    const halmat_literal_t *src_lit = &state->literals->entries[ins->operands[0].data];
+                                    sv = halmat_scalar_from_ibm_words(src_lit->msw, src_lit->lsw, true);
+                                } else {
+                                    sv = scale_precision(sv, want_double);
+                                }
+                            }
                         }
                         coerced.kind = RV_SCALAR;
                         coerced.scalar = sv;
