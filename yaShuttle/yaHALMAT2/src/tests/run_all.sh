@@ -2877,6 +2877,39 @@ run ./run_read_fixture.sh ctoi_invalid_digit "1234567AAA" "          0"
 # repro (byte-identical for all 5 copies).
 run ./run_local_fixture.sh tsub_asterisk_broadcast "$(printf ' 5.1200000E+02      5.1500000E+02      5.1800000E+02      5.2100000E+02\n 6.1200000E+02      6.1500000E+02      6.1800000E+02      6.2100000E+02\n 7.1200000E+02      7.1500000E+02      7.1800000E+02      7.2100000E+02\n 8.1200000E+02      8.1500000E+02      8.1800000E+02      8.2100000E+02\n 9.1200000E+02      9.1500000E+02      9.1800000E+02      9.2100000E+02')"
 
+# DB id 58 (whole_structure_write_no_recursion_or_matrix_char_fields):
+# flush_write's own is_structure WRITE-argument walk (struct_first_field/
+# struct_next_field) only handled 4 terminal hal_class values directly
+# (VECTOR/INTEGER/BIT/SCALAR) -- a nested-STRUCTURE terminal (hal_class
+# 0x0A), a MATRIX terminal (0x03), or a CHARACTER terminal (0x02) all
+# failed loudly. DEMO.hal's own `WRITE(PRINTER) MY_STRUCTURE;` (MY_
+# STRUCTURE QQ-STRUCTURE(5), QQ = `1 RR, 2 AAREF AA-STRUCTURE, 2 SS
+# CHARACTER(5)`) hits all three: RR is a bare anonymous grouping
+# terminal (itself hal_class 0x0A) wrapping AAREF/SS. Extracted into a
+# new recursive write_structure_fields() helper. Two real bugs found
+# along the way, both confirmed via a real COMMON0.out symtab dump and
+# fixed: (1) an anonymous nested grouping like RR has NO struct_
+# template_syt of its own (a zero-cost compile-time label the real
+# EXTN instruction chain skips entirely -- confirmed empirically:
+# `MY_STRUCTURE.RR.AAREF.BB.CC` compiles to an EXTN with mid_path=
+# [AAREF's own syt] ONLY, RR and BB entirely absent) -- naively adding
+# every hal_class 0x0A field to mid_path during recursion produced a
+# mid_path that didn't match what the corresponding assignment
+# statement actually stored under, reading back all-zero; (2) an
+# ARRAY-of-MATRIX terminal's fsym->rows/cols hold only the PER-ELEMENT
+# matrix shape, not the outer array length (which lives in
+# array_dims[0], HALMAT_SHAPE_ARRAY) -- row-forcing needs total_rows =
+# rows * array_dims[0]. MATRIX/ARRAY-of-MATRIX terminals ARE row-
+# forced within a whole-structure WRITE (confirmed against real gpc's
+# own output for this exact statement) -- a genuinely different real-
+# hardware behavior than a single subscripted structure-field WRITE
+# argument (id 56's own comment), since gpc's whole-structure output
+# routine reuses the same MMWSNP-style row-forcing internally. Verified
+# byte-identical against real gpc via an isolated minimal probe (no
+# preceding WRITE statements to entangle the comparison with DEMO.hal's
+# own separate, unrelated multi-item-WRITE gap -- see id 59).
+run ./run_local_fixture.sh write_whole_structure_recursive "$(printf ' 5.1100000E+02      5.1200000E+02      5.1300000E+02\n 5.1400000E+02      5.1500000E+02      5.1600000E+02\n 5.1700000E+02      5.1800000E+02      5.1900000E+02\n 5.2000000E+02      5.2100000E+02      5.2200000E+02\n 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00\n 9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM1\n 6.1100000E+02      6.1200000E+02      6.1300000E+02\n 6.1400000E+02      6.1500000E+02      6.1600000E+02\n 6.1700000E+02      6.1800000E+02      6.1900000E+02\n 6.2000000E+02      6.2100000E+02      6.2200000E+02\n 2.1000000E+01      2.2000000E+01      2.3000000E+01      2.4000000E+01\n 2.5000000E+01      2.6000000E+01      2.7000000E+01      2.8000000E+01\n 2.9000000E+01      3.0000000E+01      3.1000000E+01      3.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM2')"
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

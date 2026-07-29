@@ -1,0 +1,31 @@
+C DB id 58: WRITE of a whole STRUCTURE must recurse into a nested-
+C STRUCTURE terminal (RR, a bare anonymous grouping) instead of
+C failing on it, and must format MATRIX/ARRAY-of-MATRIX terminals
+C (CC/EE) row-per-line-aware and CHARACTER terminals (SS) as a plain
+C string field. RR itself has no struct_template_syt (a zero-cost
+C compile-time label the real EXTN chain skips entirely -- confirmed
+C via a real COMMON0.out symtab dump); AAREF (a genuine named
+C AA-STRUCTURE instance) does, and is the only real addressing hop
+C between MY_STRUCTURE and CC/EE.
+ T:
+ PROGRAM;
+    STRUCTURE AA:
+       1 BB, 2 CC MATRIX(4,3),
+       1 DD, 2 EE ARRAY(4) MATRIX(3,4);
+    STRUCTURE QQ:
+       1 RR, 2 AAREF AA-STRUCTURE, 2 SS CHARACTER(5);
+    DECLARE MY_STRUCTURE QQ-STRUCTURE(2);
+
+    MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+       MATRIX$(4,3)(511,512,513,514,515,516,517,518,519,520,521,522);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(2;*,*) =
+       MATRIX$(4,3)(611,612,613,614,615,616,617,618,619,620,621,622);
+    MY_STRUCTURE.RR.AAREF.DD.EE$(1;1:) =
+       MATRIX$(3,4)(1,2,3,4,5,6,7,8,9,10,11,12);
+    MY_STRUCTURE.RR.AAREF.DD.EE$(2;1:) =
+       MATRIX$(3,4)(21,22,23,24,25,26,27,28,29,30,31,32);
+    MY_STRUCTURE.RR.SS$(1;) = 'ELEM1';
+    MY_STRUCTURE.RR.SS$(2;) = 'ELEM2';
+
+    WRITE(6) MY_STRUCTURE;
+ CLOSE T;

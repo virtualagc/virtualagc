@@ -3636,6 +3636,177 @@ static void format_bit_field(uint32_t bits, int width, char *buf) {
     buf[o] = '\0';
 }
 
+/* Recursively walks one structure template's own field chain
+ * (struct_first_field/struct_next_field), writing one data field per
+ * terminal (DB id 58, DEMO.hal's own `WRITE(PRINTER) MY_STRUCTURE;`):
+ * VECTOR expands to one field per component; MATRIX is row-per-line-
+ * aware the SAME way a standalone MATRIX WRITE argument is -- real
+ * gpc's own whole-structure output routine reuses the identical
+ * MMWSNP-style row-forcing (confirmed against real gpc's own output
+ * for this exact statement: each of MY_STRUCTURE's 5 copies' CC/EE
+ * terminals correctly wrap row-per-line, a *different* real-hardware
+ * behavior than a single subscripted structure-field WRITE argument
+ * like `WRITE(6) CC$(1;*,*);`, which does NOT row-force -- id 56's own
+ * comment); CHARACTER is a single string field; everything else
+ * (SCALAR/INTEGER/BIT) is a single ordinary field, matching what each
+ * already uses standalone. Recurses into a nested-STRUCTURE terminal
+ * (hal_class 0x0A/MAJ_STRUC) instead of failing on it -- MY_STRUCTURE's
+ * own RR is exactly this shape, a bare grouping terminal wrapping
+ * AAREF (itself AA-STRUCTURE) and SS (CHARACTER(5)). A nested field's
+ * own template to recurse into is its struct_template_syt when set (a
+ * genuine named sub-STRUCTURE type, e.g. AAREF's own AA-STRUCTURE) or
+ * the field's own SYT otherwise (an anonymous/unnamed nested grouping
+ * like RR, whose own struct_first_field is populated directly on
+ * itself -- confirmed via a real COMMON0.out symtab dump: RR's own
+ * SYM_LENGTH, struct_template_syt, is unset/0, but its own SYM_LINK1,
+ * struct_first_field, points directly at AAREF). mid_path accumulates
+ * the chain of nested-structure field syts strictly between base_syt
+ * and the eventual terminal, for find_or_create_struct_field_path's
+ * own addressing -- mirrors is_struct_ref's identical mid_path
+ * convention elsewhere in this file, and starts from the io_pending
+ * item's own struct_mid_path (state.h's comment: populated for a
+ * *named*-sub-template starting argument like `WRITE(6) X.RR;`, empty
+ * for the ordinary whole-structure case) rather than always starting
+ * empty. */
+static void write_structure_fields(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out,
+                                    uint16_t base_syt, int template_syt, int32_t copy_idx,
+                                    const uint16_t *mid_path, uint8_t mid_path_len,
+                                    bool *need_sep, int wrap_col, bool unpaged) {
+    int field_syt = -1;
+    if (state->symtab) {
+        const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, (size_t)template_syt);
+        field_syt = tsym ? tsym->struct_first_field : -1;
+    }
+    while (field_syt >= 0) {
+        const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
+        if (!fsym) break;
+        if (fsym->hal_class == 0x0A) {
+            /* Two shapes, distinguished by struct_template_syt (symtab.h's
+             * own comment): a genuine named sub-STRUCTURE instance (e.g.
+             * AAREF, an "AA-STRUCTURE") has a valid struct_template_syt
+             * and is a REAL addressing hop (EXTN's own compiled operand
+             * chain includes it -- confirmed via a real HALSFC compile:
+             * `MY_STRUCTURE.RR.AAREF.BB.CC` compiles to an EXTN with
+             * mid_path=[AAREF's own syt] only, RR and BB entirely absent
+             * from the instruction stream). An anonymous/unnamed nested
+             * grouping (e.g. RR or BB, a bare `1 RR, 2 ...;` level with no
+             * -STRUCTURE type of its own) has struct_template_syt unset
+             * (confirmed via the same compile's own COMMON0.out: RR's own
+             * SYM_LENGTH is 0) -- it's a zero-cost compile-time label the
+             * real EXTN chain skips right past, so it must NOT get its
+             * own mid_path hop either, or find_or_create_struct_field_
+             * path's lookup key won't match what the corresponding
+             * assignment statement actually stored under. */
+            bool named_substructure = fsym->struct_template_syt >= 0;
+            if (named_substructure && mid_path_len >= HALMAT_STRUCT_PATH_MAX) {
+                fail(state, "WRITE: structure nesting too deep for '%s'", fsym->name ? fsym->name : "?");
+                break;
+            }
+            uint16_t new_mid_path[HALMAT_STRUCT_PATH_MAX];
+            const uint16_t *next_mid_path = mid_path;
+            uint8_t next_mid_path_len = mid_path_len;
+            int nested_template = field_syt;
+            if (named_substructure) {
+                memcpy(new_mid_path, mid_path, (size_t)mid_path_len * sizeof(uint16_t));
+                new_mid_path[mid_path_len] = (uint16_t)field_syt;
+                next_mid_path = new_mid_path;
+                next_mid_path_len = (uint8_t)(mid_path_len + 1);
+                nested_template = fsym->struct_template_syt;
+            }
+            write_structure_fields(state, dm, out, base_syt, nested_template, copy_idx,
+                                    next_mid_path, next_mid_path_len, need_sep, wrap_col, unpaged);
+            field_syt = fsym->struct_next_field;
+            continue;
+        }
+        halmat_syt_entry_t *fe = find_or_create_struct_field_path(state, base_syt, mid_path, mid_path_len,
+                                                                    (uint16_t)field_syt, copy_idx);
+        if (fsym->hal_class == 4 && fsym->cols > 0) {
+            for (int k = 0; k < fsym->cols; k++) {
+                char buf[32];
+                halmat_scalar_t v = fe->elements ? fe->elements[k] : halmat_scalar_zero(false);
+                halmat_scalar_format(v, buf, sizeof(buf));
+                dm_emit_field(state, dm, out, buf, need_sep, wrap_col, unpaged);
+            }
+        } else if (fsym->hal_class == 3 && fsym->rows > 0) {
+            /* MATRIX terminal: same row-forcing mechanism as flush_write's
+             * own is_container MATRIX branch (mmwsnp_vector_forces_
+             * newline) -- see this function's own header comment.
+             *
+             * ARRAY-of-MATRIX (fsym->shape==HALMAT_SHAPE_ARRAY, e.g. EE
+             * ARRAY(4) MATRIX(3,4)): fsym->rows/cols hold only the PER-
+             * ELEMENT matrix shape (symtab.h's own rows/cols comment --
+             * the outer array length lives separately, in array_dims[0]).
+             * ensure_container()/resolve_xpt_field's own lazy-allocation
+             * (this same shape this project already established for a
+             * plain array_of_matrix SYT and, separately, this exact
+             * structure-field case) stores all array_len*rows*cols
+             * elements as array_len consecutive row-major rows*cols
+             * blocks -- concatenating them vertically into one flat
+             * (array_len*rows) x cols run is already exactly what that
+             * layout looks like, the same "no reshaping needed" property
+             * DSUB's own array-to-partition-plus-wildcard case relies on
+             * -- so this multiplies total_rows by array_dims[0] and
+             * otherwise reuses the identical row-forcing loop unchanged. */
+            int total_rows = fsym->rows;
+            if (fsym->shape == HALMAT_SHAPE_ARRAY && fsym->array_dim_count == 1 && fsym->array_dims[0] > 0) {
+                total_rows = fsym->rows * fsym->array_dims[0];
+            }
+            if (dm->col != 1) {
+                dm_advance_lines(state, dm, out, 1, unpaged);
+                dm->col = 1;
+                *need_sep = false;
+            }
+            int align_col = 1;
+            for (int r = 0; r < total_rows; r++) {
+                if (r > 0) {
+                    dm_advance_lines(state, dm, out, 1, unpaged);
+                    dm->col = align_col;
+                    *need_sep = false;
+                }
+                for (int c = 0; c < fsym->cols; c++) {
+                    char buf[32];
+                    halmat_scalar_t v = fe->elements ? fe->elements[(size_t)r * fsym->cols + c] : halmat_scalar_zero(false);
+                    halmat_scalar_format(v, buf, sizeof(buf));
+                    dm_emit_field(state, dm, out, buf, need_sep, wrap_col, unpaged);
+                    if (r == 0 && c == 0) align_col = dm->col - (int)strlen(buf);
+                }
+            }
+        } else if (fsym->hal_class == 6) {
+            char buf[16];
+            snprintf(buf, sizeof(buf), "%11d", fe->value);
+            dm_emit_field(state, dm, out, buf, need_sep, wrap_col, unpaged);
+        } else if (fsym->hal_class == 1) {
+            char buf[48];
+            int width = fsym->bit_width > 0 ? fsym->bit_width : 32;
+            format_bit_field(fe->bit_value, width, buf);
+            if (unpaged) {
+                char *quoted = quote_character_for_unpaged(buf);
+                dm_emit_field(state, dm, out, quoted ? quoted : buf, need_sep, wrap_col, unpaged);
+                free(quoted);
+            } else {
+                dm_emit_field(state, dm, out, buf, need_sep, wrap_col, unpaged);
+            }
+        } else if (fsym->hal_class == 5) {
+            char buf[32];
+            halmat_scalar_format(fe->scalar, buf, sizeof(buf));
+            dm_emit_field(state, dm, out, buf, need_sep, wrap_col, unpaged);
+        } else if (fsym->hal_class == 2) {
+            const char *s = fe->char_value ? fe->char_value : "";
+            if (unpaged) {
+                char *quoted = quote_character_for_unpaged(s);
+                dm_emit_field(state, dm, out, quoted ? quoted : s, need_sep, wrap_col, unpaged);
+                free(quoted);
+            } else {
+                dm_emit_field(state, dm, out, s, need_sep, wrap_col, unpaged);
+            }
+        } else {
+            fail(state, "WRITE: structure terminal '%s' has an unsupported type for whole-structure WRITE", fsym->name ? fsym->name : "?");
+            break;
+        }
+        field_syt = fsym->struct_next_field;
+    }
+}
+
 static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpaged) {
     halmat_device_mech_t *dm = &state->device_mech[device];
     /* state->line_length < 0 means --line-length wasn't explicitly given
@@ -3882,59 +4053,15 @@ static void flush_write(halmat_state_t *state, int device, FILE *out, bool unpag
             }
         } else if (state->io_pending.items[i].is_structure) {
             /* Whole STRUCTURE WRITE argument (OP_XXAR above, state.h's
-             * is_structure comment): one data field per terminal, in
-             * declaration order, same "walk struct_first_field/
-             * struct_next_field" technique OP_READ's own
-             * dest_is_structure handling uses -- a VECTOR terminal
-             * expands to one field per component (matching a lone
-             * whole-VECTOR WRITE argument, is_container's own flat-
-             * VECTOR branch above), everything else (SCALAR/INTEGER/
-             * BIT) is a single ordinary field, same formatting each
-             * already uses standalone. */
+             * is_structure comment) -- see write_structure_fields' own
+             * header comment for the full field-walk/recursion/row-
+             * forcing rules (DB id 58). */
             uint16_t base_syt = state->io_pending.items[i].struct_base_syt;
             int32_t copy_idx = state->io_pending.items[i].struct_copy_index >= 0
                 ? state->io_pending.items[i].struct_copy_index : current_copy_index(state);
-            int field_syt = -1;
-            if (state->symtab) {
-                const halmat_symtab_entry_t *tsym = halmat_symtab_find_by_index(state->symtab, state->io_pending.items[i].struct_template_syt);
-                field_syt = tsym ? tsym->struct_first_field : -1;
-            }
-            while (field_syt >= 0) {
-                const halmat_symtab_entry_t *fsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, (size_t)field_syt) : NULL;
-                if (!fsym) break;
-                halmat_syt_entry_t *fe = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt, copy_idx);
-                if (fsym->hal_class == 4 && fsym->cols > 0) {
-                    for (int k = 0; k < fsym->cols; k++) {
-                        char buf[32];
-                        halmat_scalar_t v = fe->elements ? fe->elements[k] : halmat_scalar_zero(false);
-                        halmat_scalar_format(v, buf, sizeof(buf));
-                        dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
-                    }
-                } else if (fsym->hal_class == 6) {
-                    char buf[16];
-                    snprintf(buf, sizeof(buf), "%11d", fe->value);
-                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
-                } else if (fsym->hal_class == 1) {
-                    char buf[48];
-                    int width = fsym->bit_width > 0 ? fsym->bit_width : 32;
-                    format_bit_field(fe->bit_value, width, buf);
-                    if (unpaged) {
-                        char *quoted = quote_character_for_unpaged(buf);
-                        dm_emit_field(state, dm, out, quoted ? quoted : buf, &need_sep, wrap_col, unpaged);
-                        free(quoted);
-                    } else {
-                        dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
-                    }
-                } else if (fsym->hal_class == 5) {
-                    char buf[32];
-                    halmat_scalar_format(fe->scalar, buf, sizeof(buf));
-                    dm_emit_field(state, dm, out, buf, &need_sep, wrap_col, unpaged);
-                } else {
-                    fail(state, "WRITE: structure terminal '%s' has an unsupported type for whole-structure WRITE", fsym->name ? fsym->name : "?");
-                    break;
-                }
-                field_syt = fsym->struct_next_field;
-            }
+            write_structure_fields(state, dm, out, base_syt, (int)state->io_pending.items[i].struct_template_syt,
+                                    copy_idx, state->io_pending.items[i].struct_mid_path,
+                                    state->io_pending.items[i].struct_mid_path_len, &need_sep, wrap_col, unpaged);
         } else if (state->io_pending.items[i].is_string) {
             if (unpaged) {
                 char *quoted = quote_character_for_unpaged(state->io_pending.items[i].string);
