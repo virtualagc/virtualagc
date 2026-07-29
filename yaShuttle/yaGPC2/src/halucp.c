@@ -91,7 +91,14 @@ void halucp_init(HalUCP *h, CPU *cpu) {
     h->lineWidth = -1; /* sentinel: no explicit override, use per-channel
                          * PAGED(132)/UNPAGED(80) default -- see
                          * effective_line_width() */
-    h->linesPerPage = 60;
+    h->linesPerPage = 66; /* IBM 1403 line printer's own documented
+                           * lines-per-page (this project's own
+                           * historical target hardware) -- matches
+                           * yaHALMAT2's independently-researched same
+                           * default (state.h). Only meaningful for
+                           * PAGED devices (see hal_newline's automatic
+                           * page-turn and handle_control's LINE/PAGE
+                           * cases). */
     h->inputBufferCap = 64;
     h->inputBuffer = malloc(h->inputBufferCap);
     h->inputBuffer[0] = '\0';
@@ -450,6 +457,30 @@ static void hal_newline(HalUCP *h, int ch) {
     h->lineBufLen[ch] = 0;
     h->lineNumber[ch] += 1;
     h->column[ch] = 1;
+    /* Automatic page turn: USA003087 Sec. 12.4 rule 2 documents that an
+     * explicit SKIP(alpha) may cross page boundaries ("SKIPs over page
+     * boundaries are allowed"), and gives no reason the device mechanism
+     * would behave any differently for the *default* one-line advance
+     * every WRITE/READ gets absent an overriding SKIP/LINE/PAGE -- it's
+     * the same "device mechanism" either way, just moved by a different
+     * trigger. The manual never spells out "and when a PAGED device's
+     * line count would exceed its page length, turn the page" explicitly
+     * because that's simply how a physical line printer behaves --
+     * obvious enough not to need stating, unlike the deliberately-
+     * documented SKIP/LINE/PAGE pseudo-functions themselves. This is
+     * every ordinary line advance's single shared choke point (the
+     * implicit per-WRITE default, an explicit SKIP(n) via the loop
+     * below, and LINE(gamma)/PAGE(beta)'s own delta-based loops in
+     * handle_control) -- one check here covers all of them uniformly,
+     * without needing a separate explicit page-break emission at each
+     * call site, and (for PAGE(beta) specifically) naturally reproduces
+     * Fig. 12-7's "relative line number unchanged" behavior as a side
+     * effect of always wrapping at exactly linesPerPage regardless of
+     * the starting line. */
+    if (halucp_is_paged(h, ch) && h->lineNumber[ch] > h->linesPerPage) {
+        if (h->outputCallback) h->outputCallback(h->cbCtx, "\f", ch);
+        h->lineNumber[ch] = 1;
+    }
 }
 
 void halucp_flush_channel(HalUCP *h, int ch) {
